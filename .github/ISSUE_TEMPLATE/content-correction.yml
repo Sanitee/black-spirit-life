@@ -1,0 +1,51 @@
+name: Content correction or takedown
+description: Report inaccurate content, attribution, provenance, or a rights concern.
+title: "[Content review] "
+labels:
+  - content-review
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you for helping correct Black Spirit Life. Do not post private personal information or confidential rights evidence in this public form.
+  - type: input
+    id: affected_material
+    attributes:
+      label: Affected material
+      description: Identify the file, dataset record, source URL, or application screen.
+      placeholder: packages/.../file.json, item/NPC name, or screen name
+    validations:
+      required: true
+  - type: dropdown
+    id: request_type
+    attributes:
+      label: Request type
+      options:
+        - Factual correction
+        - Attribution or source correction
+        - Copyright or other rights concern
+        - Takedown request
+        - Privacy or personal-data concern
+    validations:
+      required: true
+  - type: textarea
+    id: basis
+    attributes:
+      label: What should be reviewed?
+      description: Explain the issue and link non-confidential supporting material where possible.
+    validations:
+      required: true
+  - type: textarea
+    id: requested_outcome
+    attributes:
+      label: Requested correction or outcome
+      description: State the change, replacement, attribution, or removal requested.
+    validations:
+      required: true
+  - type: checkboxes
+    id: public_acknowledgement
+    attributes:
+      label: Public issue acknowledgement
+      options:
+        - label: I have not included private personal information or confidential proof in this public issue.
+          required: true

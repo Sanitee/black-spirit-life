@@ -1,0 +1,14 @@
+# Keep deterministic generated map data byte-stable across Windows and Unix
+# checkouts.
+/packages/bdo_map_core/assets/data/*.json text eol=lf
+
+# The main production catalog is integrity-pinned too. CRLF conversion changes
+# its approved SHA-256 and makes the application fail closed at startup.
+/assets/data/app-data.json text eol=lf
+
+# The synthetic migration checkpoint has an integrity assertion in the test
+# suite, so keep its working-tree bytes identical on every platform.
+/test/fixtures/migration/avalonia-planner-state-synthetic.json text eol=lf
+
+# Windows release builds verify these vendored Velopack bytes by SHA-256.
+/windows/third_party/velopack/1.2.0/** -text

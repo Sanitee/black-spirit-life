@@ -1,0 +1,24 @@
+Black Spirit Life map-core source-code license status
+=====================================================
+
+The repository root `LICENSE` controls the original Black Spirit Life source
+code in this package. No permission is granted by this package notice beyond
+that root source-code license.
+
+Third-party and fan-content material is not relicensed by this notice:
+
+- The transformed SomethingLovely source is provided under its upstream MIT
+  license. The complete notice is included at
+  `assets/licenses/SOMETHINGLOVELY-MIT.txt`.
+- Black Desert names, facts, imagery, and other game content remain Pearl
+  Abyss material and are used under the project's recorded unofficial,
+  noncommercial fan-content basis.
+- Workerman/Shrddr tiles, node icons, lodging inputs, and economics inputs are
+  retained with attribution under the project owner's recorded community-use
+  decision. No separate written license from Shrddr is claimed.
+- BDO Codex and BDOLytics are credited research and retrieval references for
+  Pearl Abyss-origin facts and game assets; no site-authored prose, page design,
+  guide commentary, or annotations are retained.
+
+See the repository root `THIRD_PARTY_NOTICES.md` and `ASSET_SOURCES.md` for the
+complete credits, source links, notices, and correction/removal route.

@@ -1,0 +1,4041 @@
+{
+  "schemaVersion": 1,
+  "status": "publicNoncommercialFanContent",
+  "reviewedAt": "2026-08-16",
+  "owner": "Pearl Abyss Corp.",
+  "usage": "Pearl Abyss NPC game artwork used by the free, noncommercial, unofficial Black Spirit Life fan project under the published Fan Content Guidelines.",
+  "sourceBoundary": "BDO Codex supplied the reviewed mirror paths only; the application bundles pinned local copies and never hotlinks these files at runtime.",
+  "disclaimer": "This is unofficial content which contains copyrighted materials and IP from Pearl Abyss, and is not official/endorsed content.",
+  "portraits": [
+    {
+      "assetName": "ic_00002.webp",
+      "sourceUrl": "https://bdocodex.com/items/ui_artwork/ic_00002.webp",
+      "mediaType": "image/webp",
+      "bytes": 32702,
+      "sha256": "e73c41e5130859a6b90bd45ecd46040e0a5e750b0ea0ce2b29addde2b1cae980",
+      "sourceVendorIds": [
+        "npc:40002:1"
+      ],
+      "npcNames": [
+        "Zaaira"
+      ]
+    },
+    {
+      "assetName": "ic_00004.webp",
+      "sourceUrl": "https://bdocodex.com/items/ui_artwork/ic_00004.webp",
+      "mediaType": "image/webp",
+      "bytes": 34244,
+      "sha256": "c86008e787cb7637f931f68177c6cff272fbb5771fddfa53dfa0dc5b52bb28e6",
+      "sourceVendorIds": [
+        "npc:40004:1"
+      ],
+      "npcNames": [
+        "Clorince"
+      ]
+    },
+    {
+      "assetName": "ic_00005.webp",
+      "sourceUrl": "https://bdocodex.com/items/ui_artwork/ic_00005.webp",
+      "mediaType": "image/webp",
+      "bytes": 33076,
+      "sha256": "588a5618032125f74ff83694cad24607a6aeff50c80cc5d46e93c39e48039bba",
+      "sourceVendorIds": [
+        "npc:40005:1"
+      ],
+      "npcNames": [
+        "Sealus"
+      ]
+    },
+    {
+      "assetName": "ic_00014.webp",
+      "sourceUrl": "https://bdocodex.com/items/ui_artwork/ic_00014.webp",
+      "mediaType": "image/webp",
+      "bytes": 30558,
+      "sha256": "60fdd1b32c27f4908aaa3267ade4ba3c6690d4d797a99d5f6e8f55636e556a2a",
+      "sourceVendorIds": [
+        "npc:40013:1"
+      ],
+      "npcNames": [
+        "David Finto"
+      ]
+    },
+    {
+      "assetName": "ic_00034.webp",
+      "sourceUrl": "https://bdocodex.com/items/ui_artwork/ic_00034.webp",
+      "mediaType": "image/webp",
+      "bytes": 33920,
+      "sha256": "c687d85ede98438961b0333ad58b70c30de588a2185797c48bb351f980303f37",
+      "sourceVendorIds": [
+        "npc:40032:1"
+      ],
+      "npcNames": [
+        "Hessenvale"
+      ]
+    },
+    {
+      "assetName": "ic_00040.webp",
+      "sourceUrl": "https://bdocodex.com/items/ui_artwork/ic_00040.webp",
+      "mediaType": "image/webp",
+      "bytes": 30382,
+      "sha256": "3b14443dc18792b496a8d222511c8e3e1c6f1ca482a8162c738d2e209c0fc82b",
+      "sourceVendorIds": [
+        "npc:40040:1"
+      ],
+      "npcNames": [
+        "Feinia"
+      ]
+    },
+    {
+      "assetName": "ic_00045.webp",
+      "sourceUrl": "https://bdocodex.com/items/ui_artwork/ic_00045.webp",
+      "mediaType": "image/webp",
+      "bytes": 41734,
+      "sha256": "c405224316dc2a41ad99ff2bb8796909a9cebdb9ea6c7a919cb931f218e84523",
+      "sourceVendorIds": [
+        "npc:40063:1"
+      ],
+      "npcNames": [
+        "Eileen"
+      ]
+    },
+    {
+      "assetName": "ic_00047.webp",
+      "sourceUrl": "https://bdocodex.com/items/ui_artwork/ic_00047.webp",
+      "mediaType": "image/webp",
+      "bytes": 37160,
+      "sha256": "5970ce27e4f9a4d0ff390bc3d7914d53f9f45ed0be61ddbc823e4cbeb7c2feb7",
+      "sourceVendorIds": [
+        "npc:40065:1"
+      ],
+      "npcNames": [
+        "Paola Toscani"
+      ]
+    },
+    {
+      "assetName": "ic_00103.webp",
+      "sourceUrl": "https://bdocodex.com/items/ui_artwork/ic_00103.webp",
+      "mediaType": "image/webp",
+      "bytes": 35154,
+      "sha256": "7b9994f82e88a4edd36157582937cd4aae9f225749a56c87b1c1d66f3bb838d9",
+      "sourceVendorIds": [
+        "npc:41003:1"
+      ],
+      "npcNames": [
+        "Caresto Fonti"
+      ]
+    },
+    {
+      "assetName": "ic_00104.webp",
+      "sourceUrl": "https://bdocodex.com/items/ui_artwork/ic_00104.webp",
+      "mediaType": "image/webp",
+      "bytes": 33668,
+      "sha256": "520b1f2d4b64c6120b5c71d7d31d011f80806ca730cf063733498b9378ebd1cc",
+      "sourceVendorIds": [
+        "npc:41004:1"
+      ],
+      "npcNames": [
+        "Lara"
+      ]
+    },
+    {
+      "assetName": "ic_00106.webp",
+      "sourceUrl": "https://bdocodex.com/items/ui_artwork/ic_00106.webp",
+      "mediaType": "image/webp",
+      "bytes": 35566,
+      "sha256": "421b38ceb3b2e425f0722f9e7d3bc5abeb9823fee38edd7b05826b2a8e96e35d",
+      "sourceVendorIds": [
+        "npc:41006:1"
+      ],
+      "npcNames": [
+        "Vangelas"
+      ]
+    },
+    {
+      "assetName": "ic_00124.webp",
+      "sourceUrl": "https://bdocodex.com/items/ui_artwork/ic_00124.webp",
+      "mediaType": "image/webp",
+      "bytes": 41324,
+      "sha256": "fb82e4b393d7c0215856a0576ffaf695ce3a356465049950174a19b3a727d29a",
+      "sourceVendorIds": [
+        "npc:41024:1"
+      ],
+      "npcNames": [
+        "Lebyos"
+      ]
+    },
+    {
+      "assetName": "ic_00125.webp",
+      "sourceUrl": "https://bdocodex.com/items/ui_artwork/ic_00125.webp",
+      "mediaType": "image/webp",
+      "bytes": 31960,
+      "sha256": "c55061b7ebaba0b1bd40bc8ea32154008c19abae0610808b582ea05d25b08c81",
+      "sourceVendorIds": [
+        "npc:41025:1"
+      ],
+      "npcNames": [
+        "Flaviano"
+      ]
+    },
+    {
+      "assetName": "ic_00139.webp",
+      "sourceUrl": "https://bdocodex.com/items/ui_artwork/ic_00139.webp",
+      "mediaType": "image/webp",
+      "bytes": 30212,
+      "sha256": "265517324420e25f3de13cad4bb11dec0eed7eaaf70ad89e196bb3135d9dbe97",
+      "sourceVendorIds": [
+        "npc:41039:1"
+      ],
+      "npcNames": [
+        "Moniku"
+      ]
+    },
+    {
+      "assetName": "ic_00142.webp",
+      "sourceUrl": "https://bdocodex.com/items/ui_artwork/ic_00142.webp",
+      "mediaType": "image/webp",
+      "bytes": 33182,
+      "sha256": "3ddafa33d489536f280a56c28055add70965758e7ab89f0f6bbf391ee8df518e",
+      "sourceVendorIds": [
+        "npc:41042:1"
+      ],
+      "npcNames": [
+        "Deborah"
+      ]
+    },
+    {
+      "assetName": "ic_00143.webp",
+      "sourceUrl": "https://bdocodex.com/items/ui_artwork/ic_00143.webp",
+      "mediaType": "image/webp",
+      "bytes": 35674,
+      "sha256": "af8e5c03493ad91b581aff7f6b9fb64ff7a1b970e0172279aa5796b83ec277e3",
+      "sourceVendorIds": [
+        "npc:41043:1"
+      ],
+      "npcNames": [
+        "Fatoos"
+      ]
+    },
+    {
+      "assetName": "ic_00144.webp",
+      "sourceUrl": "https://bdocodex.com/items/ui_artwork/ic_00144.webp",
+      "mediaType": "image/webp",
+      "bytes": 34320,
+      "sha256": "6c8c506d5ed14f6765c116fb48a194ced3e27ac20bd203940db5932ff659c836",
+      "sourceVendorIds": [
+        "npc:41044:1"
+      ],
+      "npcNames": [
+        "Maul"
+      ]
+    },
+    {
+      "assetName": "ic_00150.webp",
+      "sourceUrl": "https://bdocodex.com/items/ui_artwork/ic_00150.webp",
+      "mediaType": "image/webp",
+      "bytes": 38396,
+      "sha256": "764e7d1c681e947b0cd327e0bb50efccdac270c5004223938f6738375940cc62",
+      "sourceVendorIds": [
+        "npc:41074:1"
+      ],
+      "npcNames": [
+        "Seilane"
+      ]
+    },
+    {
+      "assetName": "ic_00152.webp",
+      "sourceUrl": "https://bdocodex.com/items/ui_artwork/ic_00152.webp",
+      "mediaType": "image/webp",
+      "bytes": 36724,
+      "sha256": "72bfbd0c492c63d7bc34ebaae50605e7c72adee8d4cfbc30f347f9c48551229b",
+      "sourceVendorIds": [
+        "npc:41076:1"
+      ],
+      "npcNames": [
+        "Kanna"
+      ]
+    },
+    {
+      "assetName": "ic_00173.webp",
+      "sourceUrl": "https://bdocodex.com/items/ui_artwork/ic_00173.webp",
+      "mediaType": "image/webp",
+      "bytes": 27718,
+      "sha256": "7521eaf9e72f34d784d99d32e476925c159c13ca03bf6fb16f5bf7e49d3294dc",
+      "sourceVendorIds": [
+        "npc:41098:1"
+      ],
+      "npcNames": [
+        "Hannes"
+      ]
+    },
+    {
+      "assetName": "ic_00188.webp",
+      "sourceUrl": "https://bdocodex.com/items/ui_artwork/ic_00188.webp",
+      "mediaType": "image/webp",
+      "bytes": 31176,
+      "sha256": "a06e1117f0186f2d0ea51a0b125c2961de364837de2cb82d7345cec4cf53d5e3",
+      "sourceVendorIds": [
+        "npc:41010:1"
+      ],
+      "npcNames": [
+        "Constante"
+      ]
+    },
+    {
+      "assetName": "ic_00193.webp",
+      "sourceUrl": "https://bdocodex.com/items/ui_artwork/ic_00193.webp",
+      "mediaType": "image/webp",
+      "bytes": 31114,
+      "sha256": "5ec4a79bf169d23e39f14d6dd2b8748a30c1426e9c32d2c6f06d3219785f88bd",
+      "sourceVendorIds": [
+        "npc:50203:1"
+      ],
+      "npcNames": [
+        "Ruben"
+      ]
+    },
+    {
+      "assetName": "ic_00195.webp",
+      "sourceUrl": "https://bdocodex.com/items/ui_artwork/ic_00195.webp",
+      "mediaType": "image/webp",
+      "bytes": 31618,
+      "sha256": "481d102cadb536174ba895dbe80ac3860fe70745efa33389cf719455d4dcc281",
+      "sourceVendorIds": [
+        "npc:50205:1"
+      ],
+      "npcNames": [
+        "Annalynn"
+      ]
+    },
+    {
+      "assetName": "ic_00196.webp",
+      "sourceUrl": "https://bdocodex.com/items/ui_artwork/ic_00196.webp",
+      "mediaType": "image/webp",
+      "bytes": 28978,
+      "sha256": "27ba55a5a94f0e5bc34f10dc4ce752e12c219d413cd0fa382d79733a55ab26c5",
+      "sourceVendorIds": [
+        "npc:50206:1"
+      ],
+      "npcNames": [
+        "Laodum"
+      ]
+    },
+    {
+      "assetName": "ic_00197.webp",
+      "sourceUrl": "https://bdocodex.com/items/ui_artwork/ic_00197.webp",
+      "mediaType": "image/webp",
+      "bytes": 36544,
+      "sha256": "1008bb1f695ca4f63bbbbe559f34f63d0ade1ca59d684849b8115f18fdf397ea",
+      "sourceVendorIds": [
+        "npc:50207:1"
+      ],
+      "npcNames": [
+        "Etunar"
+      ]
+    },
+    {
+      "assetName": "ic_00198.webp",
+      "sourceUrl": "https://bdocodex.com/items/ui_artwork/ic_00198.webp",
+      "mediaType": "image/webp",
+      "bytes": 34032,
+      "sha256": "22255c182ed5c9673731ddd8e574c290e4080ab0627f379c79cc3c56b7f4bb30",
+      "sourceVendorIds": [
+        "npc:50208:1"
+      ],
+      "npcNames": [
+        "Delfinio"
+      ]
+    },
+    {
+      "assetName": "ic_00223.webp",
+      "sourceUrl": "https://bdocodex.com/items/ui_artwork/ic_00223.webp",
+      "mediaType": "image/webp",
+      "bytes": 35402,
+      "sha256": "669319bf54d74804de47c4f2129a5c72d29084b943bffecea39aaa6db874669a",
+      "sourceVendorIds": [
+        "npc:50212:1"
+      ],
+      "npcNames": [
+        "Orc Hunter Brodie"
+      ]
+    },
+    {
+      "assetName": "ic_00224.webp",
+      "sourceUrl": "https://bdocodex.com/items/ui_artwork/ic_00224.webp",
+      "mediaType": "image/webp",
+      "bytes": 36914,
+      "sha256": "d6fc2d6cc3e95ad886f201d4125760f837ed2484b433ebfd3c9e49d22b88f064",
+      "sourceVendorIds": [
+        "npc:50213:1"
+      ],
+      "npcNames": [
+        "Meldor"
+      ]
+    },
+    {
+      "assetName": "ic_00305.webp",
+      "sourceUrl": "https://bdocodex.com/items/ui_artwork/ic_00305.webp",
+      "mediaType": "image/webp",
+      "bytes": 36922,
+      "sha256": "2ec36121cd57a085064db4066ecf6176bded97c6cbbc9f0f21b10ba1c3808770",
+      "sourceVendorIds": [
+        "npc:43434:1"
+      ],
+      "npcNames": [
+        "Jeron"
+      ]
+    },
+    {
+      "assetName": "ic_00314.webp",
+      "sourceUrl": "https://bdocodex.com/items/ui_artwork/ic_00314.webp",
+      "mediaType": "image/webp",
+      "bytes": 39432,
+      "sha256": "5b5d5708dbc8e740ab412feba749e1634bfd8aeefbcd3eef42e5cd26f1c499a0",
+      "sourceVendorIds": [
+        "npc:43443:1"
+      ],
+      "npcNames": [
+        "Malik"
+      ]
+    },
+    {
+      "assetName": "ic_00325.webp",
+      "sourceUrl": "https://bdocodex.com/items/ui_artwork/ic_00325.webp",
+      "mediaType": "image/webp",
+      "bytes": 30108,
+      "sha256": "a655c0fee1ecaceb1c30a85fd5bf27ded46d524b501213402bd5c0e5b6c5c0c0",
+      "sourceVendorIds": [
+        "npc:43504:1"
+      ],
+      "npcNames": [
+        "Bruno"
+      ]
+    },
+    {
+      "assetName": "ic_00327.webp",
+      "sourceUrl": "https://bdocodex.com/items/ui_artwork/ic_00327.webp",
+      "mediaType": "image/webp",
+      "bytes": 42356,
+      "sha256": "3293cdad983a3c226cbe46e0a40af022d5da16d2bd69aece8fc0fa97406a0fc4",
+      "sourceVendorIds": [
+        "npc:43506:1"
+      ],
+      "npcNames": [
+        "Rouibo"
+      ]
+    },
+    {
+      "assetName": "ic_00331.webp",
+      "sourceUrl": "https://bdocodex.com/items/ui_artwork/ic_00331.webp",
+      "mediaType": "image/webp",
+      "bytes": 32610,
+      "sha256": "36ddeb635e4404b3bade4492c61562bf12eb13695d11883f65eeb0d4627ca4bc",
+      "sourceVendorIds": [
+        "npc:42215:1"
+      ],
+      "npcNames": [
+        "Valentine"
+      ]
+    },
+    {
+      "assetName": "ic_00334.webp",
+      "sourceUrl": "https://bdocodex.com/items/ui_artwork/ic_00334.webp",
+      "mediaType": "image/webp",
+      "bytes": 28926,
+      "sha256": "f03c3c35d0d52f40c48d14f608046e8e69ce028de0d37953c703f600ce43c88b",
+      "sourceVendorIds": [
+        "npc:42201:1"
+      ],
+      "npcNames": [
+        "Izella"
+      ]
+    },
+    {
+      "assetName": "ic_00337.webp",
+      "sourceUrl": "https://bdocodex.com/items/ui_artwork/ic_00337.webp",
+      "mediaType": "image/webp",
+      "bytes": 33222,
+      "sha256": "f39551412a76a2442660381fbc89305363f6cea3fb508ce7095f817e8d76706d",
+      "sourceVendorIds": [
+        "npc:42204:1"
+      ],
+      "npcNames": [
+        "Stella"
+      ]
+    },
+    {
+      "assetName": "ic_00341.webp",
+      "sourceUrl": "https://bdocodex.com/items/ui_artwork/ic_00341.webp",
+      "mediaType": "image/webp",
+      "bytes": 38222,
+      "sha256": "5f03f34896a6f1763a6d4f062f41738e90be41e83288bfb354e592648d8432b4",
+      "sourceVendorIds": [
+        "npc:42001:1"
+      ],
+      "npcNames": [
+        "Fredelles Herba"
+      ]
+    },
+    {
+      "assetName": "ic_00344.webp",
+      "sourceUrl": "https://bdocodex.com/items/ui_artwork/ic_00344.webp",
+      "mediaType": "image/webp",
+      "bytes": 43888,
+      "sha256": "1dc0ec2c0b13e7259dff8efed8f9085b553f42b2f9c34231aeed4eb1cc0324b2",
+      "sourceVendorIds": [
+        "npc:42004:1"
+      ],
+      "npcNames": [
+        "Alchem"
+      ]
+    },
+    {
+      "assetName": "ic_00346.webp",
+      "sourceUrl": "https://bdocodex.com/items/ui_artwork/ic_00346.webp",
+      "mediaType": "image/webp",
+      "bytes": 39414,
+      "sha256": "01a6ba6d55c54d7a368f21582c5572c487eadb7c76d5fdba5b65d734a94bd6a0",
+      "sourceVendorIds": [
+        "npc:42006:1"
+      ],
+      "npcNames": [
+        "Geranoa"
+      ]
+    },
+    {
+      "assetName": "ic_00347.webp",
+      "sourceUrl": "https://bdocodex.com/items/ui_artwork/ic_00347.webp",
+      "mediaType": "image/webp",
+      "bytes": 32370,
+      "sha256": "adcde02cd66c3a11af19eb67bb5849a823ac9b8e4faaa2e06c9f53d4f3d0a54e",
+      "sourceVendorIds": [
+        "npc:42007:1"
+      ],
+      "npcNames": [
+        "Brandio"
+      ]
+    },
+    {
+      "assetName": "ic_00352.webp",
+      "sourceUrl": "https://bdocodex.com/items/ui_artwork/ic_00352.webp",
+      "mediaType": "image/webp",
+      "bytes": 32676,
+      "sha256": "74b71c5181b3b734d0f8c0ac1eefe2f555452328fc45f40504073ca5ba9ae4d6",
+      "sourceVendorIds": [
+        "npc:42012:1"
+      ],
+      "npcNames": [
+        "Lylina"
+      ]
+    },
+    {
+      "assetName": "ic_00360.webp",
+      "sourceUrl": "https://bdocodex.com/items/ui_artwork/ic_00360.webp",
+      "mediaType": "image/webp",
+      "bytes": 28296,
+      "sha256": "a0a7326d382d85bf175e1481f7bdb9f0490d733390310d01c4ace47a79a920e6",
+      "sourceVendorIds": [
+        "npc:42020:1"
+      ],
+      "npcNames": [
+        "Nieves"
+      ]
+    },
+    {
+      "assetName": "ic_00376.webp",
+      "sourceUrl": "https://bdocodex.com/items/ui_artwork/ic_00376.webp",
+      "mediaType": "image/webp",
+      "bytes": 31032,
+      "sha256": "9f1b083e6799de766709e71243c654ac84abaf288943242d2c71ac9e6d9e8235",
+      "sourceVendorIds": [
+        "npc:42118:1"
+      ],
+      "npcNames": [
+        "Kaia Feresio"
+      ]
+    },
+    {
+      "assetName": "ic_00383.webp",
+      "sourceUrl": "https://bdocodex.com/items/ui_artwork/ic_00383.webp",
+      "mediaType": "image/webp",
+      "bytes": 32980,
+      "sha256": "2a05291df4391ce54a1e70d2e067488381a792869c18995870cd2a11f707c993",
+      "sourceVendorIds": [
+        "npc:42151:1"
+      ],
+      "npcNames": [
+        "Milano Belucci"
+      ]
+    },
+    {
+      "assetName": "ic_00388.webp",
+      "sourceUrl": "https://bdocodex.com/items/ui_artwork/ic_00388.webp",
+      "mediaType": "image/webp",
+      "bytes": 32994,
+      "sha256": "6fd62485946bf2d3d16555e29e467ef6c5328b361c72eb01ec7861bf4924b31f",
+      "sourceVendorIds": [
+        "npc:40604:1"
+      ],
+      "npcNames": [
+        "Lillia"
+      ]
+    },
+    {
+      "assetName": "ic_00389.webp",
+      "sourceUrl": "https://bdocodex.com/items/ui_artwork/ic_00389.webp",
+      "mediaType": "image/webp",
+      "bytes": 35198,
+      "sha256": "96caf9e72db1f01ee27c7bc9199301ab7e0f7c004668ac561dc3a0e88c05d013",
+      "sourceVendorIds": [
+        "npc:40605:1"
+      ],
+      "npcNames": [
+        "Wale"
+      ]
+    },
+    {
+      "assetName": "ic_00411.webp",
+      "sourceUrl": "https://bdocodex.com/items/ui_artwork/ic_00411.webp",
+      "mediaType": "image/webp",
+      "bytes": 34614,
+      "sha256": "fb3951af0e81807d90ff390c83ef3e7dd9e8caf2a2a6847afa81215d39ee4ead",
+      "sourceVendorIds": [
+        "npc:43001:1"
+      ],
+      "npcNames": [
+        "Ivana DeRose"
+      ]
+    },
+    {
+      "assetName": "ic_00414.webp",
+      "sourceUrl": "https://bdocodex.com/items/ui_artwork/ic_00414.webp",
+      "mediaType": "image/webp",
+      "bytes": 35274,
+      "sha256": "373d2cc1098343ed05a1445e79a72063d08a83909ceedac47273fcb01587133c",
+      "sourceVendorIds": [
+        "npc:43004:1"
+      ],
+      "npcNames": [
+        "Kant"
+      ]
+    },
+    {
+      "assetName": "ic_00416.webp",
+      "sourceUrl": "https://bdocodex.com/items/ui_artwork/ic_00416.webp",
+      "mediaType": "image/webp",
+      "bytes": 33624,
+      "sha256": "e765c06deba0f8f9bab3a88a41e702b39fe6bbfc0bcb6a29ff838d2b79825bbf",
+      "sourceVendorIds": [
+        "npc:43006:1"
+      ],
+      "npcNames": [
+        "Laniero Lucci"
+      ]
+    },
+    {
+      "assetName": "ic_00433.webp",
+      "sourceUrl": "https://bdocodex.com/items/ui_artwork/ic_00433.webp",
+      "mediaType": "image/webp",
+      "bytes": 33640,
+      "sha256": "2bdee9b0cd4beed90ba80749447c3331419a9cc3499e4361282945c31182ede3",
+      "sourceVendorIds": [
+        "npc:43204:1"
+      ],
+      "npcNames": [
+        "Becky"
+      ]
+    },
+    {
+      "assetName": "ic_00441.webp",
+      "sourceUrl": "https://bdocodex.com/items/ui_artwork/ic_00441.webp",
+      "mediaType": "image/webp",
+      "bytes": 46244,
+      "sha256": "fe49969bcd002efa43ada456cccde382516f7281a374db30198bd50ed2829bad",
+      "sourceVendorIds": [
+        "npc:43301:1"
+      ],
+      "npcNames": [
+        "Augusta"
+      ]
+    },
+    {
+      "assetName": "ic_00444.webp",
+      "sourceUrl": "https://bdocodex.com/items/ui_artwork/ic_00444.webp",
+      "mediaType": "image/webp",
+      "bytes": 43090,
+      "sha256": "779d8ffc753523a42b1a89c5e9b0c397be771fa2909e118c27cee77f113252a8",
+      "sourceVendorIds": [
+        "npc:43304:1"
+      ],
+      "npcNames": [
+        "Gofrant"
+      ]
+    },
+    {
+      "assetName": "ic_00452.webp",
+      "sourceUrl": "https://bdocodex.com/items/ui_artwork/ic_00452.webp",
+      "mediaType": "image/webp",
+      "bytes": 43208,
+      "sha256": "62bf1d2f1998ee8c4b3de36e7d50ed7b0f251bc8fe0e2294b8454a32b952b9e3",
+      "sourceVendorIds": [
+        "npc:43401:1"
+      ],
+      "npcNames": [
+        "Indri"
+      ]
+    },
+    {
+      "assetName": "ic_00454.webp",
+      "sourceUrl": "https://bdocodex.com/items/ui_artwork/ic_00454.webp",
+      "mediaType": "image/webp",
+      "bytes": 34600,
+      "sha256": "e0c49bf402821f988d28302e3b60382a89dea01f658b066342e66a6f79da9671",
+      "sourceVendorIds": [
+        "npc:43404:1"
+      ],
+      "npcNames": [
+        "Jensen"
+      ]
+    },
+    {
+      "assetName": "ic_00458.webp",
+      "sourceUrl": "https://bdocodex.com/items/ui_artwork/ic_00458.webp",
+      "mediaType": "image/webp",
+      "bytes": 29368,
+      "sha256": "489c127a22908ad91b8bc8773a20b957651675a92ada620a873e68dd81ef2395",
+      "sourceVendorIds": [
+        "npc:43405:1"
+      ],
+      "npcNames": [
+        "Crie"
+      ]
+    },
+    {
+      "assetName": "ic_00465.webp",
+      "sourceUrl": "https://bdocodex.com/items/ui_artwork/ic_00465.webp",
+      "mediaType": "image/webp",
+      "bytes": 32628,
+      "sha256": "57ee3d1c2639bd389d364d8f2375976808478f702b77fb6d8523a9b9cdfa10e7",
+      "sourceVendorIds": [
+        "npc:42304:1"
+      ],
+      "npcNames": [
+        "Phyria"
+      ]
+    },
+    {
+      "assetName": "ic_00489.webp",
+      "sourceUrl": "https://bdocodex.com/items/ui_artwork/ic_00489.webp",
+      "mediaType": "image/webp",
+      "bytes": 31112,
+      "sha256": "985f169dee0cdb5d67a849326a618522835f4c43b32b7516fe3d27f3e07f9a0b",
+      "sourceVendorIds": [
+        "npc:43511:1"
+      ],
+      "npcNames": [
+        "Pasenia"
+      ]
+    },
+    {
+      "assetName": "ic_00490.webp",
+      "sourceUrl": "https://bdocodex.com/items/ui_artwork/ic_00490.webp",
+      "mediaType": "image/webp",
+      "bytes": 28834,
+      "sha256": "78fb405b59c75cbe44c2c7013a1ec12d49393a401e04b1ccf1bc3719a4315730",
+      "sourceVendorIds": [
+        "npc:43512:1"
+      ],
+      "npcNames": [
+        "Galutboar"
+      ]
+    },
+    {
+      "assetName": "ic_00491.webp",
+      "sourceUrl": "https://bdocodex.com/items/ui_artwork/ic_00491.webp",
+      "mediaType": "image/webp",
+      "bytes": 28498,
+      "sha256": "6c414c875e9cecd0b5dad2923be4e720ff1e77b25b88b8444dc3c6a53faeebe9",
+      "sourceVendorIds": [
+        "npc:43513:1"
+      ],
+      "npcNames": [
+        "Adin"
+      ]
+    },
+    {
+      "assetName": "ic_00492.webp",
+      "sourceUrl": "https://bdocodex.com/items/ui_artwork/ic_00492.webp",
+      "mediaType": "image/webp",
+      "bytes": 29872,
+      "sha256": "efded853a97091747dd4ae078adf6b2732d2fe2e2fb6fbb00c5bd98032b1925e",
+      "sourceVendorIds": [
+        "npc:43514:1"
+      ],
+      "npcNames": [
+        "Dyleoyen"
+      ]
+    },
+    {
+      "assetName": "ic_00495.webp",
+      "sourceUrl": "https://bdocodex.com/items/ui_artwork/ic_00495.webp",
+      "mediaType": "image/webp",
+      "bytes": 27650,
+      "sha256": "cd928d72f626492d7d6c91c4f7e3ec56c81c83c4aafe44dd20e04dd093a450d3",
+      "sourceVendorIds": [
+        "npc:42140:1"
+      ],
+      "npcNames": [
+        "Becker"
+      ]
+    },
+    {
+      "assetName": "ic_00559.webp",
+      "sourceUrl": "https://bdocodex.com/items/ui_artwork/ic_00559.webp",
+      "mediaType": "image/webp",
+      "bytes": 57516,
+      "sha256": "aa738a44c669aaa4cccff3cff4a2df1dec47ac1272f0563d173d592befced3ab",
+      "sourceVendorIds": [
+        "npc:41052:1",
+        "npc:41054:1",
+        "npc:41055:1",
+        "npc:59627:1"
+      ],
+      "npcNames": [
+        "Verda",
+        "Wandering Merchant"
+      ]
+    },
+    {
+      "assetName": "ic_00580.webp",
+      "sourceUrl": "https://bdocodex.com/items/ui_artwork/ic_00580.webp",
+      "mediaType": "image/webp",
+      "bytes": 31538,
+      "sha256": "28b4ed07c21fea4fdfef594ed70ec13b0f47b5204e7236e011cffee9285a58bb",
+      "sourceVendorIds": [
+        "npc:44002:1"
+      ],
+      "npcNames": [
+        "Lashir"
+      ]
+    },
+    {
+      "assetName": "ic_00582.webp",
+      "sourceUrl": "https://bdocodex.com/items/ui_artwork/ic_00582.webp",
+      "mediaType": "image/webp",
+      "bytes": 31510,
+      "sha256": "267fa0ee598cf3c140382d649b02aa280e902f906c5a373f476aeb8282b14916",
+      "sourceVendorIds": [
+        "npc:44004:1"
+      ],
+      "npcNames": [
+        "Nelople"
+      ]
+    },
+    {
+      "assetName": "ic_00583.webp",
+      "sourceUrl": "https://bdocodex.com/items/ui_artwork/ic_00583.webp",
+      "mediaType": "image/webp",
+      "bytes": 34368,
+      "sha256": "506c88333aebfd6cbed687fd80d9aa83aac3930bc425d4d2b527da7284e7a6cf",
+      "sourceVendorIds": [
+        "npc:44005:1"
+      ],
+      "npcNames": [
+        "Verosi"
+      ]
+    },
+    {
+      "assetName": "ic_00591.webp",
+      "sourceUrl": "https://bdocodex.com/items/ui_artwork/ic_00591.webp",
+      "mediaType": "image/webp",
+      "bytes": 43950,
+      "sha256": "422d368f0baeb48d0d088deaf355a55e58a1fb86b8c946cd0f3d91e56329b835",
+      "sourceVendorIds": [
+        "npc:44013:1"
+      ],
+      "npcNames": [
+        "Edman"
+      ]
+    },
+    {
+      "assetName": "ic_00614.webp",
+      "sourceUrl": "https://bdocodex.com/items/ui_artwork/ic_00614.webp",
+      "mediaType": "image/webp",
+      "bytes": 33052,
+      "sha256": "1536548ef621d0e70c6608499794dbcb453897605b34a7bf6d6d89f129abb683",
+      "sourceVendorIds": [
+        "npc:44101:1"
+      ],
+      "npcNames": [
+        "Ekta"
+      ]
+    },
+    {
+      "assetName": "ic_00615.webp",
+      "sourceUrl": "https://bdocodex.com/items/ui_artwork/ic_00615.webp",
+      "mediaType": "image/webp",
+      "bytes": 32992,
+      "sha256": "ec8ecbfacae36986c880c735493a7e0748c7061cbb48a020b2b88e44582bfe06",
+      "sourceVendorIds": [
+        "npc:44102:1"
+      ],
+      "npcNames": [
+        "Finlin"
+      ]
+    },
+    {
+      "assetName": "ic_00616.webp",
+      "sourceUrl": "https://bdocodex.com/items/ui_artwork/ic_00616.webp",
+      "mediaType": "image/webp",
+      "bytes": 30642,
+      "sha256": "fd1624e82349e3c288bf1ee19f132a262a1490774e2b1bf8a8a94a0008cd5a1d",
+      "sourceVendorIds": [
+        "npc:44038:1"
+      ],
+      "npcNames": [
+        "Broman"
+      ]
+    },
+    {
+      "assetName": "ic_00617.webp",
+      "sourceUrl": "https://bdocodex.com/items/ui_artwork/ic_00617.webp",
+      "mediaType": "image/webp",
+      "bytes": 33834,
+      "sha256": "dd8ba4a96e8e9e2e525d2c330794f328d02d3228a124396327f1ead252f1ebee",
+      "sourceVendorIds": [
+        "npc:44104:1"
+      ],
+      "npcNames": [
+        "Sareh"
+      ]
+    },
+    {
+      "assetName": "ic_00639.webp",
+      "sourceUrl": "https://bdocodex.com/items/ui_artwork/ic_00639.webp",
+      "mediaType": "image/webp",
+      "bytes": 31828,
+      "sha256": "9a416869eb1da9182580f887801ee5c00ae0e2f77d67b44a1bbc3517c74dd963",
+      "sourceVendorIds": [
+        "npc:44612:1"
+      ],
+      "npcNames": [
+        "Sui"
+      ]
+    },
+    {
+      "assetName": "ic_00649.webp",
+      "sourceUrl": "https://bdocodex.com/items/ui_artwork/ic_00649.webp",
+      "mediaType": "image/webp",
+      "bytes": 27324,
+      "sha256": "554129c08445470981fc45b8363cfe8167c85fd9d384ad13b0de390ac6201d44",
+      "sourceVendorIds": [
+        "npc:44202:1"
+      ],
+      "npcNames": [
+        "Difry Hussey"
+      ]
+    },
+    {
+      "assetName": "ic_00651.webp",
+      "sourceUrl": "https://bdocodex.com/items/ui_artwork/ic_00651.webp",
+      "mediaType": "image/webp",
+      "bytes": 30082,
+      "sha256": "057853032be3cf6448893cece479f9fe982b8618382fea59b7bc7c1402425fc0",
+      "sourceVendorIds": [
+        "npc:44204:1"
+      ],
+      "npcNames": [
+        "Ramlo"
+      ]
+    },
+    {
+      "assetName": "ic_00661.webp",
+      "sourceUrl": "https://bdocodex.com/items/ui_artwork/ic_00661.webp",
+      "mediaType": "image/webp",
+      "bytes": 30148,
+      "sha256": "cfca81d5e532dd284bdb346e540e261905041a26b20106d0ee5c72b8477f0ca5",
+      "sourceVendorIds": [
+        "npc:44301:1"
+      ],
+      "npcNames": [
+        "Binnapsi"
+      ]
+    },
+    {
+      "assetName": "ic_00662.webp",
+      "sourceUrl": "https://bdocodex.com/items/ui_artwork/ic_00662.webp",
+      "mediaType": "image/webp",
+      "bytes": 32450,
+      "sha256": "f338a4dd64dce5648a8197aa7b5b4e18d20d5e6ac58c1b449cd56810e32fd0c4",
+      "sourceVendorIds": [
+        "npc:44302:1"
+      ],
+      "npcNames": [
+        "Wapra"
+      ]
+    },
+    {
+      "assetName": "ic_00693.webp",
+      "sourceUrl": "https://bdocodex.com/items/ui_artwork/ic_00693.webp",
+      "mediaType": "image/webp",
+      "bytes": 28930,
+      "sha256": "3e5910a1fb0d5051a6f4c489487e45ab50eb95c87c116eeabfc3a50ba1149111",
+      "sourceVendorIds": [
+        "npc:44602:1"
+      ],
+      "npcNames": [
+        "Illen Raige"
+      ]
+    },
+    {
+      "assetName": "ic_00695.webp",
+      "sourceUrl": "https://bdocodex.com/items/ui_artwork/ic_00695.webp",
+      "mediaType": "image/webp",
+      "bytes": 27684,
+      "sha256": "9f01e69d51a86d7c802ef34da3939186a8b77edf6c0977dc5ecaba4d04955fb2",
+      "sourceVendorIds": [
+        "npc:44604:1"
+      ],
+      "npcNames": [
+        "Itak Talom"
+      ]
+    },
+    {
+      "assetName": "ic_00696.webp",
+      "sourceUrl": "https://bdocodex.com/items/ui_artwork/ic_00696.webp",
+      "mediaType": "image/webp",
+      "bytes": 39172,
+      "sha256": "b08d7bf1d3c112e40a3f92f2d335c07a4ec6cb22e9f139b0a53bbd299fc058e6",
+      "sourceVendorIds": [
+        "npc:44605:1"
+      ],
+      "npcNames": [
+        "Weikid Taha"
+      ]
+    },
+    {
+      "assetName": "ic_00739.webp",
+      "sourceUrl": "https://bdocodex.com/items/ui_artwork/ic_00739.webp",
+      "mediaType": "image/webp",
+      "bytes": 34422,
+      "sha256": "e4e4f8eb72b1a33c3377761da7b71056c8446896f8f0f5f259322dbeed1e120e",
+      "sourceVendorIds": [
+        "npc:40712:1"
+      ],
+      "npcNames": [
+        "Julietta"
+      ]
+    },
+    {
+      "assetName": "ic_00741.webp",
+      "sourceUrl": "https://bdocodex.com/items/ui_artwork/ic_00741.webp",
+      "mediaType": "image/webp",
+      "bytes": 31140,
+      "sha256": "bb48225af0057238de8b50ad4dcf2210d53eba73a5f654db63edb169e28ffdad",
+      "sourceVendorIds": [
+        "npc:40714:1"
+      ],
+      "npcNames": [
+        "Sady"
+      ]
+    },
+    {
+      "assetName": "ic_00743.webp",
+      "sourceUrl": "https://bdocodex.com/items/ui_artwork/ic_00743.webp",
+      "mediaType": "image/webp",
+      "bytes": 32426,
+      "sha256": "58dc414a8a9a3b748a1497b66ca30e5c7f4396f7b9a474616e75c74cc8dc5797",
+      "sourceVendorIds": [
+        "npc:40716:1"
+      ],
+      "npcNames": [
+        "Nadia Rowen"
+      ]
+    },
+    {
+      "assetName": "ic_00747.webp",
+      "sourceUrl": "https://bdocodex.com/items/ui_artwork/ic_00747.webp",
+      "mediaType": "image/webp",
+      "bytes": 35538,
+      "sha256": "303d44f87644c0780808d349d8e85a55acdd37cf0fe417c19efde1496535e94a",
+      "sourceVendorIds": [
+        "npc:40720:1"
+      ],
+      "npcNames": [
+        "Akan"
+      ]
+    },
+    {
+      "assetName": "ic_00748.webp",
+      "sourceUrl": "https://bdocodex.com/items/ui_artwork/ic_00748.webp",
+      "mediaType": "image/webp",
+      "bytes": 38890,
+      "sha256": "4ad22b7cee90cc323d9e3aa2129e596d30207c148425c0cbecfca0ac73376403",
+      "sourceVendorIds": [
+        "npc:40721:1"
+      ],
+      "npcNames": [
+        "Bionier"
+      ]
+    },
+    {
+      "assetName": "ic_00804.webp",
+      "sourceUrl": "https://bdocodex.com/items/ui_artwork/ic_00804.webp",
+      "mediaType": "image/webp",
+      "bytes": 34420,
+      "sha256": "d48bc0cc19f7bc7ef0e4d37023cdc8827cb68756d385b3db5f63339f178951ad",
+      "sourceVendorIds": [
+        "npc:50563:1"
+      ],
+      "npcNames": [
+        "Hush"
+      ]
+    },
+    {
+      "assetName": "ic_00814.webp",
+      "sourceUrl": "https://bdocodex.com/items/ui_artwork/ic_00814.webp",
+      "mediaType": "image/webp",
+      "bytes": 45092,
+      "sha256": "78d09b2bdaf6d74069d7f6f456fa25306db3e2e96c2db0e04d91e4b7a0a9ba8f",
+      "sourceVendorIds": [
+        "npc:41026:1"
+      ],
+      "npcNames": [
+        "Sara"
+      ]
+    },
+    {
+      "assetName": "ic_00826.webp",
+      "sourceUrl": "https://bdocodex.com/items/ui_artwork/ic_00826.webp",
+      "mediaType": "image/webp",
+      "bytes": 34500,
+      "sha256": "262e0efb66ce65621a7b1b13350b9261d0fc775290a2e9d3d72bdb5ec702c44e",
+      "sourceVendorIds": [
+        "npc:44128:1"
+      ],
+      "npcNames": [
+        "Moadi"
+      ]
+    },
+    {
+      "assetName": "ic_00846.webp",
+      "sourceUrl": "https://bdocodex.com/items/ui_artwork/ic_00846.webp",
+      "mediaType": "image/webp",
+      "bytes": 35026,
+      "sha256": "db1f5327577837b36787f3e05d352cae1c778ffc6e1b4dbaaf463411551d057a",
+      "sourceVendorIds": [
+        "npc:40612:1"
+      ],
+      "npcNames": [
+        "Francis"
+      ]
+    },
+    {
+      "assetName": "ic_00850.webp",
+      "sourceUrl": "https://bdocodex.com/items/ui_artwork/ic_00850.webp",
+      "mediaType": "image/webp",
+      "bytes": 37342,
+      "sha256": "070b3a22b49d84a0514d11948512d9322f9b29acd617a191a1f4218f2a578d37",
+      "sourceVendorIds": [
+        "npc:45001:1"
+      ],
+      "npcNames": [
+        "Nerasabi Alom"
+      ]
+    },
+    {
+      "assetName": "ic_00852.webp",
+      "sourceUrl": "https://bdocodex.com/items/ui_artwork/ic_00852.webp",
+      "mediaType": "image/webp",
+      "bytes": 36356,
+      "sha256": "219ea1213c632850906dc98a2c8e496721660eb801d202d5cb25c3401a4ef779",
+      "sourceVendorIds": [
+        "npc:45003:1"
+      ],
+      "npcNames": [
+        "Purajin"
+      ]
+    },
+    {
+      "assetName": "ic_00854.webp",
+      "sourceUrl": "https://bdocodex.com/items/ui_artwork/ic_00854.webp",
+      "mediaType": "image/webp",
+      "bytes": 32664,
+      "sha256": "3bebd02661ba6cff61d2bc69eec046caa3fb3dd4ff08789ea6245c7bd8332586",
+      "sourceVendorIds": [
+        "npc:45005:1"
+      ],
+      "npcNames": [
+        "Jursin"
+      ]
+    },
+    {
+      "assetName": "ic_00863.webp",
+      "sourceUrl": "https://bdocodex.com/items/ui_artwork/ic_00863.webp",
+      "mediaType": "image/webp",
+      "bytes": 31206,
+      "sha256": "b592d607091196525b75ce6be7424e84e2ccab65644547b3c056e3c1077b2fee",
+      "sourceVendorIds": [
+        "npc:45015:1"
+      ],
+      "npcNames": [
+        "Walagala"
+      ]
+    },
+    {
+      "assetName": "ic_00875.webp",
+      "sourceUrl": "https://bdocodex.com/items/ui_artwork/ic_00875.webp",
+      "mediaType": "image/webp",
+      "bytes": 32912,
+      "sha256": "d0ddfc82c74b93fa1f6e3e99ef328d44de72ab5cd10e546151419d0094fb277a",
+      "sourceVendorIds": [
+        "npc:45027:1"
+      ],
+      "npcNames": [
+        "Geniefa"
+      ]
+    },
+    {
+      "assetName": "ic_00882.webp",
+      "sourceUrl": "https://bdocodex.com/items/ui_artwork/ic_00882.webp",
+      "mediaType": "image/webp",
+      "bytes": 39002,
+      "sha256": "2b0dc214b76131c9094b58ec0f18eae4f7d5aaabf9388823b0ac8bfc3f3c4372",
+      "sourceVendorIds": [
+        "npc:45038:1"
+      ],
+      "npcNames": [
+        "Vatputa"
+      ]
+    },
+    {
+      "assetName": "ic_00885.webp",
+      "sourceUrl": "https://bdocodex.com/items/ui_artwork/ic_00885.webp",
+      "mediaType": "image/webp",
+      "bytes": 39840,
+      "sha256": "c49baa22c81789d71f2fe4f336f03d08dfcc852f769d346e017a328015c90197",
+      "sourceVendorIds": [
+        "npc:45105:1"
+      ],
+      "npcNames": [
+        "Waida"
+      ]
+    },
+    {
+      "assetName": "ic_00886.webp",
+      "sourceUrl": "https://bdocodex.com/items/ui_artwork/ic_00886.webp",
+      "mediaType": "image/webp",
+      "bytes": 35158,
+      "sha256": "59b1e62b86a83cfa711765045bdc03a227ad9261ca8df9321c9432f56adfa826",
+      "sourceVendorIds": [
+        "npc:45106:1"
+      ],
+      "npcNames": [
+        "Kulahuth"
+      ]
+    },
+    {
+      "assetName": "ic_00893.webp",
+      "sourceUrl": "https://bdocodex.com/items/ui_artwork/ic_00893.webp",
+      "mediaType": "image/webp",
+      "bytes": 33920,
+      "sha256": "0a6a8e48f49a49cb2858b8f7fdc5e92f59b9431d226c832c64fb15e217a71080",
+      "sourceVendorIds": [
+        "npc:45115:1"
+      ],
+      "npcNames": [
+        "Shilla"
+      ]
+    },
+    {
+      "assetName": "ic_00896.webp",
+      "sourceUrl": "https://bdocodex.com/items/ui_artwork/ic_00896.webp",
+      "mediaType": "image/webp",
+      "bytes": 43608,
+      "sha256": "db108055899227b219ab7d46bfa46ca87810713cdb4a835f2b95325417c0a84e",
+      "sourceVendorIds": [
+        "npc:45123:1"
+      ],
+      "npcNames": [
+        "Javi"
+      ]
+    },
+    {
+      "assetName": "ic_00897.webp",
+      "sourceUrl": "https://bdocodex.com/items/ui_artwork/ic_00897.webp",
+      "mediaType": "image/webp",
+      "bytes": 37532,
+      "sha256": "0057386b4cc77083840cd98edbb6ba436723f4c8e06e941c3ff78d282f98be21",
+      "sourceVendorIds": [
+        "npc:45124:1"
+      ],
+      "npcNames": [
+        "Arenda"
+      ]
+    },
+    {
+      "assetName": "ic_00954.webp",
+      "sourceUrl": "https://bdocodex.com/items/ui_artwork/ic_00954.webp",
+      "mediaType": "image/webp",
+      "bytes": 30164,
+      "sha256": "3637c607ec8218d6f311ba98a3fc62b1c5cf14f3de70ee270f06a3680ed2df39",
+      "sourceVendorIds": [
+        "npc:41242:1"
+      ],
+      "npcNames": [
+        "Hazelnut"
+      ]
+    },
+    {
+      "assetName": "ic_00961.webp",
+      "sourceUrl": "https://bdocodex.com/items/ui_artwork/ic_00961.webp",
+      "mediaType": "image/webp",
+      "bytes": 35498,
+      "sha256": "e08c2a8b02a8593099887ff44c144de51d2f83ac59969c516f67b469affbab28",
+      "sourceVendorIds": [
+        "npc:45136:1"
+      ],
+      "npcNames": [
+        "Gavid"
+      ]
+    },
+    {
+      "assetName": "ic_00966.webp",
+      "sourceUrl": "https://bdocodex.com/items/ui_artwork/ic_00966.webp",
+      "mediaType": "image/webp",
+      "bytes": 38776,
+      "sha256": "128936e01eb56cf0021251db3960e586ed4a31b68e83cbe465602261f63b8641",
+      "sourceVendorIds": [
+        "npc:45203:1"
+      ],
+      "npcNames": [
+        "Berhie"
+      ]
+    },
+    {
+      "assetName": "ic_00972.webp",
+      "sourceUrl": "https://bdocodex.com/items/ui_artwork/ic_00972.webp",
+      "mediaType": "image/webp",
+      "bytes": 37468,
+      "sha256": "7a0bef7ccd976d11bcfc3c98fb68e6efec83d7f2320fab2a4b4a030289b11519",
+      "sourceVendorIds": [
+        "npc:45210:1"
+      ],
+      "npcNames": [
+        "Ashim"
+      ]
+    },
+    {
+      "assetName": "ic_00974.webp",
+      "sourceUrl": "https://bdocodex.com/items/ui_artwork/ic_00974.webp",
+      "mediaType": "image/webp",
+      "bytes": 39816,
+      "sha256": "e23ebf5996c9784de968cf253c0689c504d9d6e543b54b4c5421db369240fe12",
+      "sourceVendorIds": [
+        "npc:45212:1"
+      ],
+      "npcNames": [
+        "Nasrin"
+      ]
+    },
+    {
+      "assetName": "ic_00975.webp",
+      "sourceUrl": "https://bdocodex.com/items/ui_artwork/ic_00975.webp",
+      "mediaType": "image/webp",
+      "bytes": 33352,
+      "sha256": "9900629740f2d14f4f87a7be758fca48cb2f22fd30636f7dadf26605b8bedcb7",
+      "sourceVendorIds": [
+        "npc:45213:1"
+      ],
+      "npcNames": [
+        "Farisa"
+      ]
+    },
+    {
+      "assetName": "ic_00998.webp",
+      "sourceUrl": "https://bdocodex.com/items/ui_artwork/ic_00998.webp",
+      "mediaType": "image/webp",
+      "bytes": 33874,
+      "sha256": "c7a8cb006e3dc782d5fb4f72e621076d042da868c4ef75719ac071798b2f2e51",
+      "sourceVendorIds": [
+        "npc:45303:1"
+      ],
+      "npcNames": [
+        "Talia"
+      ]
+    },
+    {
+      "assetName": "ic_00999.webp",
+      "sourceUrl": "https://bdocodex.com/items/ui_artwork/ic_00999.webp",
+      "mediaType": "image/webp",
+      "bytes": 30940,
+      "sha256": "4016e5ebce8348d5de4eddc8b746f05993f88ff0fe453cf48912873dbea3e689",
+      "sourceVendorIds": [
+        "npc:45304:1"
+      ],
+      "npcNames": [
+        "Ceras"
+      ]
+    },
+    {
+      "assetName": "ic_01029_person.webp",
+      "sourceUrl": "https://bdocodex.com/items/ui_artwork/ic_01029_person.webp",
+      "mediaType": "image/webp",
+      "bytes": 30642,
+      "sha256": "3c62f518471b6d3c88d1dd8bddec7a1426b4b960423828402de12983620764c4",
+      "sourceVendorIds": [
+        "npc:41238:1"
+      ],
+      "npcNames": [
+        "Mernuah"
+      ]
+    },
+    {
+      "assetName": "ic_01046.webp",
+      "sourceUrl": "https://bdocodex.com/items/ui_artwork/ic_01046.webp",
+      "mediaType": "image/webp",
+      "bytes": 27622,
+      "sha256": "605896ad56e468d81058d9df8d7ba7d72ce0d04dde5aaffa92e0b898ca0195e2",
+      "sourceVendorIds": [
+        "npc:45333:1"
+      ],
+      "npcNames": [
+        "Ami"
+      ]
+    },
+    {
+      "assetName": "ic_01047.webp",
+      "sourceUrl": "https://bdocodex.com/items/ui_artwork/ic_01047.webp",
+      "mediaType": "image/webp",
+      "bytes": 26892,
+      "sha256": "baf0f4be3159101b78cb065e3f68667d789a359a5912f0c49a93b66704849902",
+      "sourceVendorIds": [
+        "npc:45334:1"
+      ],
+      "npcNames": [
+        "Yasum"
+      ]
+    },
+    {
+      "assetName": "ic_01057.webp",
+      "sourceUrl": "https://bdocodex.com/items/ui_artwork/ic_01057.webp",
+      "mediaType": "image/webp",
+      "bytes": 32238,
+      "sha256": "cb909667c89c547acbf73ecaf664e01041165dae563d2500cb2ff1f2f27b9506",
+      "sourceVendorIds": [
+        "npc:45341:1"
+      ],
+      "npcNames": [
+        "Roroju"
+      ]
+    },
+    {
+      "assetName": "ic_01062.webp",
+      "sourceUrl": "https://bdocodex.com/items/ui_artwork/ic_01062.webp",
+      "mediaType": "image/webp",
+      "bytes": 32436,
+      "sha256": "8d3c949a7a0648a97b7d83bff8327020d9341c5c80caaf0af915647be8dcff61",
+      "sourceVendorIds": [
+        "npc:45221:1"
+      ],
+      "npcNames": [
+        "Bertod"
+      ]
+    },
+    {
+      "assetName": "ic_01065.webp",
+      "sourceUrl": "https://bdocodex.com/items/ui_artwork/ic_01065.webp",
+      "mediaType": "image/webp",
+      "bytes": 28526,
+      "sha256": "7211140cbc9563c55ab4bbc5a44a3d80b1d5ac3c181f9d235ca5537f86535c93",
+      "sourceVendorIds": [
+        "npc:45218:1"
+      ],
+      "npcNames": [
+        "Noura"
+      ]
+    },
+    {
+      "assetName": "ic_01074.webp",
+      "sourceUrl": "https://bdocodex.com/items/ui_artwork/ic_01074.webp",
+      "mediaType": "image/webp",
+      "bytes": 28084,
+      "sha256": "aa92400411425e80ad0c3f8c0db3ce763d3557e13b41b2e0c900183a9c794f63",
+      "sourceVendorIds": [
+        "npc:45343:1"
+      ],
+      "npcNames": [
+        "Karin"
+      ]
+    },
+    {
+      "assetName": "ic_01075.webp",
+      "sourceUrl": "https://bdocodex.com/items/ui_artwork/ic_01075.webp",
+      "mediaType": "image/webp",
+      "bytes": 31206,
+      "sha256": "86b5006b8975f81e5ee74d88c5eb0788e098d8a8aae6d8af61d539367d39bc23",
+      "sourceVendorIds": [
+        "npc:45344:1",
+        "npc:45344:10",
+        "npc:45344:11",
+        "npc:45344:12",
+        "npc:45344:13",
+        "npc:45344:14",
+        "npc:45344:15",
+        "npc:45344:16",
+        "npc:45344:17",
+        "npc:45344:2",
+        "npc:45344:3",
+        "npc:45344:4",
+        "npc:45344:5",
+        "npc:45344:6",
+        "npc:45344:7",
+        "npc:45344:8",
+        "npc:45344:9"
+      ],
+      "npcNames": [
+        "Liam"
+      ]
+    },
+    {
+      "assetName": "ic_01079.webp",
+      "sourceUrl": "https://bdocodex.com/items/ui_artwork/ic_01079.webp",
+      "mediaType": "image/webp",
+      "bytes": 29062,
+      "sha256": "74c0012724cbfe87a5dfb135cab172090a48a7ad5fd626d2ab1e265075d63090",
+      "sourceVendorIds": [
+        "npc:45349:1"
+      ],
+      "npcNames": [
+        "Lonely Palieva"
+      ]
+    },
+    {
+      "assetName": "ic_01080.webp",
+      "sourceUrl": "https://bdocodex.com/items/ui_artwork/ic_01080.webp",
+      "mediaType": "image/webp",
+      "bytes": 33146,
+      "sha256": "5c1277446ec28963ebf5e786a15f965a1d7d890a4e56a2ff728e34ba0f5f2955",
+      "sourceVendorIds": [
+        "npc:45350:1"
+      ],
+      "npcNames": [
+        "Bert"
+      ]
+    },
+    {
+      "assetName": "ic_010839.webp",
+      "sourceUrl": "https://bdocodex.com/items/ui_artwork/ic_010839.webp",
+      "mediaType": "image/webp",
+      "bytes": 31692,
+      "sha256": "ca5a2f492f1bb2d72773008040be58de95b6a91adeb701203900b88a56f0dcab",
+      "sourceVendorIds": [
+        "npc:59606:1"
+      ],
+      "npcNames": [
+        "Waruo"
+      ]
+    },
+    {
+      "assetName": "ic_01090.webp",
+      "sourceUrl": "https://bdocodex.com/items/ui_artwork/ic_01090.webp",
+      "mediaType": "image/webp",
+      "bytes": 33982,
+      "sha256": "3a6ff6ea5277fd488cedcdb08239f4e865d8fa65d0720a7ad194183d38d4b9ac",
+      "sourceVendorIds": [
+        "npc:44153:1"
+      ],
+      "npcNames": [
+        "Si Yunchae"
+      ]
+    },
+    {
+      "assetName": "ic_01093.webp",
+      "sourceUrl": "https://bdocodex.com/items/ui_artwork/ic_01093.webp",
+      "mediaType": "image/webp",
+      "bytes": 32560,
+      "sha256": "4a0463ba3a9779d5362738127c6e502602f91e654a0825849ef0b35f8a48a045",
+      "sourceVendorIds": [
+        "npc:44156:1"
+      ],
+      "npcNames": [
+        "Haeran"
+      ]
+    },
+    {
+      "assetName": "ic_011018.webp",
+      "sourceUrl": "https://bdocodex.com/items/ui_artwork/ic_011018.webp",
+      "mediaType": "image/webp",
+      "bytes": 37872,
+      "sha256": "455d534f74a95b0c7d8d3608018da74e063ffe8604b97995f7baa6b7a76191ef",
+      "sourceVendorIds": [
+        "npc:59716:1"
+      ],
+      "npcNames": [
+        "Ploux"
+      ]
+    },
+    {
+      "assetName": "ic_01106.webp",
+      "sourceUrl": "https://bdocodex.com/items/ui_artwork/ic_01106.webp",
+      "mediaType": "image/webp",
+      "bytes": 31256,
+      "sha256": "fcecefd383d33f937a2c7eeec1808a52eb0185625dd2161f510eb7ef4b4d5162",
+      "sourceVendorIds": [
+        "npc:45509:1"
+      ],
+      "npcNames": [
+        "Haardeleer"
+      ]
+    },
+    {
+      "assetName": "ic_01111.webp",
+      "sourceUrl": "https://bdocodex.com/items/ui_artwork/ic_01111.webp",
+      "mediaType": "image/webp",
+      "bytes": 30916,
+      "sha256": "4e6486e3a6da738c02249ec90fda9b17314b4a781e53df10f55dcd6586d24251",
+      "sourceVendorIds": [
+        "npc:50710:1"
+      ],
+      "npcNames": [
+        "Viv Foretta"
+      ]
+    },
+    {
+      "assetName": "ic_01142.webp",
+      "sourceUrl": "https://bdocodex.com/items/ui_artwork/ic_01142.webp",
+      "mediaType": "image/webp",
+      "bytes": 28262,
+      "sha256": "8adda1656308775224c1bb5977b5039943b5aace5a362784768563f468f7cf2d",
+      "sourceVendorIds": [
+        "npc:45541:1"
+      ],
+      "npcNames": [
+        "Kara"
+      ]
+    },
+    {
+      "assetName": "ic_01144.webp",
+      "sourceUrl": "https://bdocodex.com/items/ui_artwork/ic_01144.webp",
+      "mediaType": "image/webp",
+      "bytes": 30380,
+      "sha256": "2666d555241f2555eb4be050d3bf80883578b7ce91c9a8bafb57a8c93804157a",
+      "sourceVendorIds": [
+        "npc:45540:1"
+      ],
+      "npcNames": [
+        "Talishia"
+      ]
+    },
+    {
+      "assetName": "ic_01150.webp",
+      "sourceUrl": "https://bdocodex.com/items/ui_artwork/ic_01150.webp",
+      "mediaType": "image/webp",
+      "bytes": 27870,
+      "sha256": "e721e864a3dac7e2d8b01a3eaa6ce57945a820af859c4e1e74b13a3f3e012764",
+      "sourceVendorIds": [
+        "npc:45549:1"
+      ],
+      "npcNames": [
+        "Heidi"
+      ]
+    },
+    {
+      "assetName": "ic_01155.webp",
+      "sourceUrl": "https://bdocodex.com/items/ui_artwork/ic_01155.webp",
+      "mediaType": "image/webp",
+      "bytes": 26286,
+      "sha256": "0231adb51b56de8b1ff996f6e864f4a7a72b548217d5e74eb62c5669daeba5d4",
+      "sourceVendorIds": [
+        "npc:45554:1"
+      ],
+      "npcNames": [
+        "Luansei"
+      ]
+    },
+    {
+      "assetName": "ic_01166.webp",
+      "sourceUrl": "https://bdocodex.com/items/ui_artwork/ic_01166.webp",
+      "mediaType": "image/webp",
+      "bytes": 28094,
+      "sha256": "a24886642093ea6ea7dc3e4e8b48d29e0b03aad31352dc72688c1016a7946f6c",
+      "sourceVendorIds": [
+        "npc:45571:1"
+      ],
+      "npcNames": [
+        "Mokassa"
+      ]
+    },
+    {
+      "assetName": "ic_01172.webp",
+      "sourceUrl": "https://bdocodex.com/items/ui_artwork/ic_01172.webp",
+      "mediaType": "image/webp",
+      "bytes": 27596,
+      "sha256": "926b09cfb03d29d6f2ce1f4027e083679f6d3d0915875b8a217dcd19e83f9d82",
+      "sourceVendorIds": [
+        "npc:45577:1"
+      ],
+      "npcNames": [
+        "Miloberry"
+      ]
+    },
+    {
+      "assetName": "ic_01231.webp",
+      "sourceUrl": "https://bdocodex.com/items/ui_artwork/ic_01231.webp",
+      "mediaType": "image/webp",
+      "bytes": 34796,
+      "sha256": "ba109436e8024bb0992b1f5b7d9a7c11828a2998fb17d94318319fa04720848b",
+      "sourceVendorIds": [
+        "npc:46005:1"
+      ],
+      "npcNames": [
+        "Seiri"
+      ]
+    },
+    {
+      "assetName": "ic_01239.webp",
+      "sourceUrl": "https://bdocodex.com/items/ui_artwork/ic_01239.webp",
+      "mediaType": "image/webp",
+      "bytes": 36258,
+      "sha256": "9c5055bbe1fcda779da24a3898b5a2184970d1fbeb79682c420e0353fc763fce",
+      "sourceVendorIds": [
+        "npc:46013:1"
+      ],
+      "npcNames": [
+        "Derjeen"
+      ]
+    },
+    {
+      "assetName": "ic_01245.webp",
+      "sourceUrl": "https://bdocodex.com/items/ui_artwork/ic_01245.webp",
+      "mediaType": "image/webp",
+      "bytes": 31492,
+      "sha256": "fc583116be30c45c2dd04454a0f84472053d557104b5253f3bb27c204fe020d9",
+      "sourceVendorIds": [
+        "npc:46019:1"
+      ],
+      "npcNames": [
+        "Maopan"
+      ]
+    },
+    {
+      "assetName": "ic_01248.webp",
+      "sourceUrl": "https://bdocodex.com/items/ui_artwork/ic_01248.webp",
+      "mediaType": "image/webp",
+      "bytes": 32754,
+      "sha256": "56c82d4463c7078797d83dcdec1beba46a12f46910164c5257b49119d9acc526",
+      "sourceVendorIds": [
+        "npc:46022:1"
+      ],
+      "npcNames": [
+        "Siemo"
+      ]
+    },
+    {
+      "assetName": "ic_01255.webp",
+      "sourceUrl": "https://bdocodex.com/items/ui_artwork/ic_01255.webp",
+      "mediaType": "image/webp",
+      "bytes": 37266,
+      "sha256": "0b4755434b108f164f1b608ca865a81bfdf3d743daa7039c49ba179a3dbad71e",
+      "sourceVendorIds": [
+        "npc:46029:1"
+      ],
+      "npcNames": [
+        "Arodia"
+      ]
+    },
+    {
+      "assetName": "ic_01258.webp",
+      "sourceUrl": "https://bdocodex.com/items/ui_artwork/ic_01258.webp",
+      "mediaType": "image/webp",
+      "bytes": 29692,
+      "sha256": "641cb0316e2023968095708e6de38ffe5e765de09efcb159ac98c069c641ecfd",
+      "sourceVendorIds": [
+        "npc:46032:1"
+      ],
+      "npcNames": [
+        "Elina"
+      ]
+    },
+    {
+      "assetName": "ic_01259.webp",
+      "sourceUrl": "https://bdocodex.com/items/ui_artwork/ic_01259.webp",
+      "mediaType": "image/webp",
+      "bytes": 30084,
+      "sha256": "308a516d016d9e8dd0bb905e8cd1faaee2e621100a72263252675323b430dec4",
+      "sourceVendorIds": [
+        "npc:46033:1"
+      ],
+      "npcNames": [
+        "Emora"
+      ]
+    },
+    {
+      "assetName": "ic_01287.webp",
+      "sourceUrl": "https://bdocodex.com/items/ui_artwork/ic_01287.webp",
+      "mediaType": "image/webp",
+      "bytes": 26118,
+      "sha256": "2a35844b32cb57b86c3318bd542571e65905b30379b21cb8ddee48f86beaa7ed",
+      "sourceVendorIds": [
+        "npc:46049:1"
+      ],
+      "npcNames": [
+        "Demihar"
+      ]
+    },
+    {
+      "assetName": "ic_01289.webp",
+      "sourceUrl": "https://bdocodex.com/items/ui_artwork/ic_01289.webp",
+      "mediaType": "image/webp",
+      "bytes": 31594,
+      "sha256": "1d124b9c276e404ba4e9f2057db989d47846da8598e1a77bc4c4457ce602ca75",
+      "sourceVendorIds": [
+        "npc:50748:1"
+      ],
+      "npcNames": [
+        "Taya"
+      ]
+    },
+    {
+      "assetName": "ic_01290.webp",
+      "sourceUrl": "https://bdocodex.com/items/ui_artwork/ic_01290.webp",
+      "mediaType": "image/webp",
+      "bytes": 36286,
+      "sha256": "9ca205b2e65ac3f17646a13b27e5d1d63f84f9e052acfa356de7d6d660a809d2",
+      "sourceVendorIds": [
+        "npc:50749:1"
+      ],
+      "npcNames": [
+        "Tammy"
+      ]
+    },
+    {
+      "assetName": "ic_01304.webp",
+      "sourceUrl": "https://bdocodex.com/items/ui_artwork/ic_01304.webp",
+      "mediaType": "image/webp",
+      "bytes": 28176,
+      "sha256": "b6ac2be0028cca12dce95bf5b1664220e560aa9d125957db94c1cfa09c801c52",
+      "sourceVendorIds": [
+        "npc:45058:1"
+      ],
+      "npcNames": [
+        "Mano"
+      ]
+    },
+    {
+      "assetName": "ic_01306.webp",
+      "sourceUrl": "https://bdocodex.com/items/ui_artwork/ic_01306.webp",
+      "mediaType": "image/webp",
+      "bytes": 25528,
+      "sha256": "f90614bcd1ccb2843a516704c3ce92a3c346fe730d1189517864047aa988684d",
+      "sourceVendorIds": [
+        "npc:41248:1"
+      ],
+      "npcNames": [
+        "Etimund"
+      ]
+    },
+    {
+      "assetName": "ic_01309.webp",
+      "sourceUrl": "https://bdocodex.com/items/ui_artwork/ic_01309.webp",
+      "mediaType": "image/webp",
+      "bytes": 32150,
+      "sha256": "3d3efd4525a62db10b2a67ebdb80a71997d870996e65bd4ab48a08f9dfae8d16",
+      "sourceVendorIds": [
+        "npc:41251:1"
+      ],
+      "npcNames": [
+        "Lawrenee"
+      ]
+    },
+    {
+      "assetName": "ic_01311.webp",
+      "sourceUrl": "https://bdocodex.com/items/ui_artwork/ic_01311.webp",
+      "mediaType": "image/webp",
+      "bytes": 40050,
+      "sha256": "d72dd73284d73ea49a2e8b337000af43c778f89492354f74212a32818b238fe7",
+      "sourceVendorIds": [
+        "npc:41254:1"
+      ],
+      "npcNames": [
+        "Gormin"
+      ]
+    },
+    {
+      "assetName": "ic_01333.webp",
+      "sourceUrl": "https://bdocodex.com/items/ui_artwork/ic_01333.webp",
+      "mediaType": "image/webp",
+      "bytes": 33954,
+      "sha256": "47656df359406ca6a31e795db98042e90dc4da6bbc9bc5ef5626dad199083cbb",
+      "sourceVendorIds": [
+        "npc:47031:1"
+      ],
+      "npcNames": [
+        "Jorjua"
+      ]
+    },
+    {
+      "assetName": "ic_01336.webp",
+      "sourceUrl": "https://bdocodex.com/items/ui_artwork/ic_01336.webp",
+      "mediaType": "image/webp",
+      "bytes": 33284,
+      "sha256": "8ab8e28d911d856c4631740ae41fc59f4d62d3837827097a93fdce4a24e3690a",
+      "sourceVendorIds": [
+        "npc:47002:1"
+      ],
+      "npcNames": [
+        "Kesharu"
+      ]
+    },
+    {
+      "assetName": "ic_01340.webp",
+      "sourceUrl": "https://bdocodex.com/items/ui_artwork/ic_01340.webp",
+      "mediaType": "image/webp",
+      "bytes": 29376,
+      "sha256": "09ad65412f5ddb06d392b177eccf3d74186a046c671536ce00738b087ba40728",
+      "sourceVendorIds": [
+        "npc:47006:1"
+      ],
+      "npcNames": [
+        "Elena Kanin"
+      ]
+    },
+    {
+      "assetName": "ic_01357.webp",
+      "sourceUrl": "https://bdocodex.com/items/ui_artwork/ic_01357.webp",
+      "mediaType": "image/webp",
+      "bytes": 23824,
+      "sha256": "2eb689ecd70cca11d88c7ae3ebb9768696586bfea92dc52ebe2f02611e3dd307",
+      "sourceVendorIds": [
+        "npc:49555:1"
+      ],
+      "npcNames": [
+        "Fenstel"
+      ]
+    },
+    {
+      "assetName": "ic_014452.webp",
+      "sourceUrl": "https://bdocodex.com/items/ui_artwork/ic_014452.webp",
+      "mediaType": "image/webp",
+      "bytes": 37690,
+      "sha256": "e22fc231d037fa0ec4252f7ae5b8d3c80fa5179237dcf5ca750d8839bb9f9e22",
+      "sourceVendorIds": [
+        "npc:47649:1"
+      ],
+      "npcNames": [
+        "Eileen"
+      ]
+    },
+    {
+      "assetName": "ic_01457.webp",
+      "sourceUrl": "https://bdocodex.com/items/ui_artwork/ic_01457.webp",
+      "mediaType": "image/webp",
+      "bytes": 39084,
+      "sha256": "df171030d1a9907e1db9cbe979c84bafa0be62daeeaf310817b98d7266aa69d8",
+      "sourceVendorIds": [
+        "npc:49581:1"
+      ],
+      "npcNames": [
+        "Bave Ricksa"
+      ]
+    },
+    {
+      "assetName": "ic_014727.webp",
+      "sourceUrl": "https://bdocodex.com/items/ui_artwork/ic_014727.webp",
+      "mediaType": "image/webp",
+      "bytes": 35842,
+      "sha256": "be3fb3f3e5106b38d064ce2bddc4902cfa51a2634d78341a85c64b253981af5d",
+      "sourceVendorIds": [
+        "npc:47710:1"
+      ],
+      "npcNames": [
+        "Marian"
+      ]
+    },
+    {
+      "assetName": "ic_014728.webp",
+      "sourceUrl": "https://bdocodex.com/items/ui_artwork/ic_014728.webp",
+      "mediaType": "image/webp",
+      "bytes": 24762,
+      "sha256": "5db043f047edcc9dae9a674c1ec4963cfbe63416936a6a1f7bbc1ec733776507",
+      "sourceVendorIds": [
+        "npc:47711:1"
+      ],
+      "npcNames": [
+        "Edmund"
+      ]
+    },
+    {
+      "assetName": "ic_014729.webp",
+      "sourceUrl": "https://bdocodex.com/items/ui_artwork/ic_014729.webp",
+      "mediaType": "image/webp",
+      "bytes": 34322,
+      "sha256": "fd6110f2c4062450d1bfc5678ad298d3387beb88758c900b122c994fdaec9562",
+      "sourceVendorIds": [
+        "npc:47712:1"
+      ],
+      "npcNames": [
+        "Jabar"
+      ]
+    },
+    {
+      "assetName": "ic_014730.webp",
+      "sourceUrl": "https://bdocodex.com/items/ui_artwork/ic_014730.webp",
+      "mediaType": "image/webp",
+      "bytes": 21120,
+      "sha256": "bf091a55bf18472f3ea3f264860a623083f13c4eeae55cd4ec612ed742d79758",
+      "sourceVendorIds": [
+        "npc:47713:1"
+      ],
+      "npcNames": [
+        "Eshilin"
+      ]
+    },
+    {
+      "assetName": "ic_014732.webp",
+      "sourceUrl": "https://bdocodex.com/items/ui_artwork/ic_014732.webp",
+      "mediaType": "image/webp",
+      "bytes": 23930,
+      "sha256": "ad967bf939ffa71dfe487e2b7abf2419ffb3b01407d332fdef8fc51ef70b9553",
+      "sourceVendorIds": [
+        "npc:47715:1"
+      ],
+      "npcNames": [
+        "Gongchil"
+      ]
+    },
+    {
+      "assetName": "ic_014733.webp",
+      "sourceUrl": "https://bdocodex.com/items/ui_artwork/ic_014733.webp",
+      "mediaType": "image/webp",
+      "bytes": 24068,
+      "sha256": "2a88bb4a7c3afdd83fb90a99cbcd2e4b0254d2874a9ce7a0cea38e7f5d94fd29",
+      "sourceVendorIds": [
+        "npc:47716:1"
+      ],
+      "npcNames": [
+        "Hyewon"
+      ]
+    },
+    {
+      "assetName": "ic_014734.webp",
+      "sourceUrl": "https://bdocodex.com/items/ui_artwork/ic_014734.webp",
+      "mediaType": "image/webp",
+      "bytes": 19334,
+      "sha256": "02cd2c397541246fbc5463f277daf10b4e19c4c9c2f494a93a733466562185d1",
+      "sourceVendorIds": [
+        "npc:47717:1"
+      ],
+      "npcNames": [
+        "Bashar"
+      ]
+    },
+    {
+      "assetName": "ic_014735.webp",
+      "sourceUrl": "https://bdocodex.com/items/ui_artwork/ic_014735.webp",
+      "mediaType": "image/webp",
+      "bytes": 24914,
+      "sha256": "b407515ec8579da321ffa67be90d389b3a9d9a08d52547c780973930f893186c",
+      "sourceVendorIds": [
+        "npc:47718:1"
+      ],
+      "npcNames": [
+        "Kael"
+      ]
+    },
+    {
+      "assetName": "ic_014736.webp",
+      "sourceUrl": "https://bdocodex.com/items/ui_artwork/ic_014736.webp",
+      "mediaType": "image/webp",
+      "bytes": 24612,
+      "sha256": "986439e4d3ac5b1c7e5f5be4bd9b36ed5358f6f15307880627070f868d4bf094",
+      "sourceVendorIds": [
+        "npc:47719:1"
+      ],
+      "npcNames": [
+        "Bella"
+      ]
+    },
+    {
+      "assetName": "ic_014737.webp",
+      "sourceUrl": "https://bdocodex.com/items/ui_artwork/ic_014737.webp",
+      "mediaType": "image/webp",
+      "bytes": 35612,
+      "sha256": "07aebf39041d3c73cf30f813712c572e00d870f0f2c06830c6149d8fe4ca8419",
+      "sourceVendorIds": [
+        "npc:47720:1"
+      ],
+      "npcNames": [
+        "Pierre"
+      ]
+    },
+    {
+      "assetName": "ic_014738.webp",
+      "sourceUrl": "https://bdocodex.com/items/ui_artwork/ic_014738.webp",
+      "mediaType": "image/webp",
+      "bytes": 29796,
+      "sha256": "c12871f743210769668ba4883e929620b3c33a3ef4e959b4e1902cddb79bf43d",
+      "sourceVendorIds": [
+        "npc:47721:1"
+      ],
+      "npcNames": [
+        "Hamid"
+      ]
+    },
+    {
+      "assetName": "ic_014739.webp",
+      "sourceUrl": "https://bdocodex.com/items/ui_artwork/ic_014739.webp",
+      "mediaType": "image/webp",
+      "bytes": 34066,
+      "sha256": "3b5a7d5d8d78cd163145d98e0137ccbfe16f89c7242e3c50a945e54c324a96f3",
+      "sourceVendorIds": [
+        "npc:47722:1"
+      ],
+      "npcNames": [
+        "Shari"
+      ]
+    },
+    {
+      "assetName": "ic_014740.webp",
+      "sourceUrl": "https://bdocodex.com/items/ui_artwork/ic_014740.webp",
+      "mediaType": "image/webp",
+      "bytes": 25832,
+      "sha256": "ecf59e4f91ea24b46dba21a9dfa7115f554a7a5eb2aa466133788b30df239efc",
+      "sourceVendorIds": [
+        "npc:47723:1"
+      ],
+      "npcNames": [
+        "Linchen"
+      ]
+    },
+    {
+      "assetName": "ic_014743.webp",
+      "sourceUrl": "https://bdocodex.com/items/ui_artwork/ic_014743.webp",
+      "mediaType": "image/webp",
+      "bytes": 33688,
+      "sha256": "c7ca1eae8ff9455b6f0d194299294582e038497dd114feabc35a0d10aa9a2887",
+      "sourceVendorIds": [
+        "npc:47726:1"
+      ],
+      "npcNames": [
+        "Kiyat"
+      ]
+    },
+    {
+      "assetName": "ic_014744.webp",
+      "sourceUrl": "https://bdocodex.com/items/ui_artwork/ic_014744.webp",
+      "mediaType": "image/webp",
+      "bytes": 28300,
+      "sha256": "6f1fd791530d2f99807df6e91e293c021886becaf779393d03777227cb0cd435",
+      "sourceVendorIds": [
+        "npc:47727:1"
+      ],
+      "npcNames": [
+        "Jackson"
+      ]
+    },
+    {
+      "assetName": "ic_014745.webp",
+      "sourceUrl": "https://bdocodex.com/items/ui_artwork/ic_014745.webp",
+      "mediaType": "image/webp",
+      "bytes": 29716,
+      "sha256": "12bc4ce09acc5397bf8cbf6af7e6edf83b9f5c583b707ba042420ecc9a08e664",
+      "sourceVendorIds": [
+        "npc:47728:1"
+      ],
+      "npcNames": [
+        "Lulu"
+      ]
+    },
+    {
+      "assetName": "ic_014746.webp",
+      "sourceUrl": "https://bdocodex.com/items/ui_artwork/ic_014746.webp",
+      "mediaType": "image/webp",
+      "bytes": 31864,
+      "sha256": "39ed0d184d31c3fc056b1f560b23db9634affc6432fd88821b2e2893fdddddaa",
+      "sourceVendorIds": [
+        "npc:47729:1"
+      ],
+      "npcNames": [
+        "Timmy"
+      ]
+    },
+    {
+      "assetName": "ic_014747.webp",
+      "sourceUrl": "https://bdocodex.com/items/ui_artwork/ic_014747.webp",
+      "mediaType": "image/webp",
+      "bytes": 34920,
+      "sha256": "69e8be5859363f8b6a08ce313214ac841a9e8af68734687c6cae33845b22e49b",
+      "sourceVendorIds": [
+        "npc:47730:1"
+      ],
+      "npcNames": [
+        "Karkas"
+      ]
+    },
+    {
+      "assetName": "ic_014748.webp",
+      "sourceUrl": "https://bdocodex.com/items/ui_artwork/ic_014748.webp",
+      "mediaType": "image/webp",
+      "bytes": 45632,
+      "sha256": "99618595bfe2ae7ec099a4e449ef7df015814e8da81c5b2650310653f265e837",
+      "sourceVendorIds": [
+        "npc:47731:1"
+      ],
+      "npcNames": [
+        "Tarkun"
+      ]
+    },
+    {
+      "assetName": "ic_014749.webp",
+      "sourceUrl": "https://bdocodex.com/items/ui_artwork/ic_014749.webp",
+      "mediaType": "image/webp",
+      "bytes": 31420,
+      "sha256": "5ae525716415b36679c0cf2faa908e59c37f69bf0d2216ccf6d54f88ffb8ae3c",
+      "sourceVendorIds": [
+        "npc:47732:1"
+      ],
+      "npcNames": [
+        "Pupunini"
+      ]
+    },
+    {
+      "assetName": "ic_014750.webp",
+      "sourceUrl": "https://bdocodex.com/items/ui_artwork/ic_014750.webp",
+      "mediaType": "image/webp",
+      "bytes": 20368,
+      "sha256": "83748ed67efc9ad97b83a3b8db910789a69eb0a71dc85d48a1e1fd1a1de1c1c7",
+      "sourceVendorIds": [
+        "npc:47733:1"
+      ],
+      "npcNames": [
+        "Dorma"
+      ]
+    },
+    {
+      "assetName": "ic_014751.webp",
+      "sourceUrl": "https://bdocodex.com/items/ui_artwork/ic_014751.webp",
+      "mediaType": "image/webp",
+      "bytes": 31852,
+      "sha256": "991db5b873293029121c5d6fda4adf26bc02e93426a098aaa1650cb9863b26c1",
+      "sourceVendorIds": [
+        "npc:47734:1"
+      ],
+      "npcNames": [
+        "Valere"
+      ]
+    },
+    {
+      "assetName": "ic_014752.webp",
+      "sourceUrl": "https://bdocodex.com/items/ui_artwork/ic_014752.webp",
+      "mediaType": "image/webp",
+      "bytes": 29906,
+      "sha256": "e29c98c5e03fae642ac8c928df572f946c0a072b21e0c1c28a864eab730989ca",
+      "sourceVendorIds": [
+        "npc:47735:1"
+      ],
+      "npcNames": [
+        "Sasha"
+      ]
+    },
+    {
+      "assetName": "ic_014753.webp",
+      "sourceUrl": "https://bdocodex.com/items/ui_artwork/ic_014753.webp",
+      "mediaType": "image/webp",
+      "bytes": 24610,
+      "sha256": "a57431469166cbd32838154c439b7183b31d0864d300d320352e7951dfd37ded",
+      "sourceVendorIds": [
+        "npc:47736:1"
+      ],
+      "npcNames": [
+        "Dallae"
+      ]
+    },
+    {
+      "assetName": "ic_014755.webp",
+      "sourceUrl": "https://bdocodex.com/items/ui_artwork/ic_014755.webp",
+      "mediaType": "image/webp",
+      "bytes": 31636,
+      "sha256": "9a475fdcc05ebdd2a31c0807385be81b687d761f0ce96e189b507dba96755ab3",
+      "sourceVendorIds": [
+        "npc:47738:1"
+      ],
+      "npcNames": [
+        "Brum"
+      ]
+    },
+    {
+      "assetName": "ic_014756.webp",
+      "sourceUrl": "https://bdocodex.com/items/ui_artwork/ic_014756.webp",
+      "mediaType": "image/webp",
+      "bytes": 23836,
+      "sha256": "a9762a9569a2a2504cc40f5d926d4abb7e930d8c1a884c7694cb7eefe754b5e3",
+      "sourceVendorIds": [
+        "npc:47739:1"
+      ],
+      "npcNames": [
+        "Marcus"
+      ]
+    },
+    {
+      "assetName": "ic_014757.webp",
+      "sourceUrl": "https://bdocodex.com/items/ui_artwork/ic_014757.webp",
+      "mediaType": "image/webp",
+      "bytes": 21618,
+      "sha256": "2bf687dca3f64507fca2f69de46bb2c416dec65b780407015542e89f6aff3ff2",
+      "sourceVendorIds": [
+        "npc:47740:1"
+      ],
+      "npcNames": [
+        "Vargas"
+      ]
+    },
+    {
+      "assetName": "ic_01498.webp",
+      "sourceUrl": "https://bdocodex.com/items/ui_artwork/ic_01498.webp",
+      "mediaType": "image/webp",
+      "bytes": 32018,
+      "sha256": "3f086ba08a671a6bd5b6d7db8915c0c8a6022e8dac78836516ffa4e8b38e89bd",
+      "sourceVendorIds": [
+        "npc:47041:1"
+      ],
+      "npcNames": [
+        "Ada"
+      ]
+    },
+    {
+      "assetName": "ic_01500.webp",
+      "sourceUrl": "https://bdocodex.com/items/ui_artwork/ic_01500.webp",
+      "mediaType": "image/webp",
+      "bytes": 39562,
+      "sha256": "9b999810d3d742f26c8712b645601a29ebbb469849453b0d8273be3ffc4a8832",
+      "sourceVendorIds": [
+        "npc:47045:1"
+      ],
+      "npcNames": [
+        "Azelin"
+      ]
+    },
+    {
+      "assetName": "ic_01544.webp",
+      "sourceUrl": "https://bdocodex.com/items/ui_artwork/ic_01544.webp",
+      "mediaType": "image/webp",
+      "bytes": 35136,
+      "sha256": "4fbc503518b3be820af462778e5f22fba3e22b714da9712f52ea1f0dbc0ced24",
+      "sourceVendorIds": [
+        "npc:47096:1",
+        "npc:47096:2"
+      ],
+      "npcNames": [
+        "Benns Moanna"
+      ]
+    },
+    {
+      "assetName": "ic_015547.webp",
+      "sourceUrl": "https://bdocodex.com/items/ui_artwork/ic_015547.webp",
+      "mediaType": "image/webp",
+      "bytes": 41620,
+      "sha256": "89a1b8a468177ab44feaf36ef220205946624fbd58434ca464ec30ca66d16961",
+      "sourceVendorIds": [
+        "npc:47760:23"
+      ],
+      "npcNames": [
+        "Eileen"
+      ]
+    },
+    {
+      "assetName": "ic_015550.webp",
+      "sourceUrl": "https://bdocodex.com/items/ui_artwork/ic_015550.webp",
+      "mediaType": "image/png",
+      "bytes": 1891,
+      "sha256": "17e787bf26c33e45813d82c103aaf42ddf48315a893a1b4be72d12ed26423c2a",
+      "sourceVendorIds": [
+        "npc:47763:26"
+      ],
+      "npcNames": [
+        "Emma Bartali"
+      ]
+    },
+    {
+      "assetName": "ic_015551.webp",
+      "sourceUrl": "https://bdocodex.com/items/ui_artwork/ic_015551.webp",
+      "mediaType": "image/webp",
+      "bytes": 39812,
+      "sha256": "33812aeb1aa7372c323356d1d3da3f4de5b4dd57151d4a815a8f813f89297f8e",
+      "sourceVendorIds": [
+        "npc:47764:27"
+      ],
+      "npcNames": [
+        "Resh"
+      ]
+    },
+    {
+      "assetName": "ic_015554.webp",
+      "sourceUrl": "https://bdocodex.com/items/ui_artwork/ic_015554.webp",
+      "mediaType": "image/webp",
+      "bytes": 40614,
+      "sha256": "cef83f38df62572506a65c8bc7bfba7da4ae90cd363f14fbd1df14aae3636af6",
+      "sourceVendorIds": [
+        "npc:47767:30"
+      ],
+      "npcNames": [
+        "Bakuchi"
+      ]
+    },
+    {
+      "assetName": "ic_015555.webp",
+      "sourceUrl": "https://bdocodex.com/items/ui_artwork/ic_015555.webp",
+      "mediaType": "image/webp",
+      "bytes": 41554,
+      "sha256": "4896111aca35c369fef0c313239fde0ac99662f1a2b9c9f3f93e297c09bc527d",
+      "sourceVendorIds": [
+        "npc:47768:31"
+      ],
+      "npcNames": [
+        "Quatz"
+      ]
+    },
+    {
+      "assetName": "ic_015556.webp",
+      "sourceUrl": "https://bdocodex.com/items/ui_artwork/ic_015556.webp",
+      "mediaType": "image/webp",
+      "bytes": 35574,
+      "sha256": "874687e309125d6e224377c6002b09490c09c488a552d53b01964ffcffb242a8",
+      "sourceVendorIds": [
+        "npc:47769:32"
+      ],
+      "npcNames": [
+        "Janika"
+      ]
+    },
+    {
+      "assetName": "ic_01587.webp",
+      "sourceUrl": "https://bdocodex.com/items/ui_artwork/ic_01587.webp",
+      "mediaType": "image/webp",
+      "bytes": 26132,
+      "sha256": "f14ec4f3b0ce082b528b911794d40dae04a986f8c9475a849abd29e880b3e3bf",
+      "sourceVendorIds": [
+        "npc:47125:1"
+      ],
+      "npcNames": [
+        "Lenia Aru"
+      ]
+    },
+    {
+      "assetName": "ic_01623.webp",
+      "sourceUrl": "https://bdocodex.com/items/ui_artwork/ic_01623.webp",
+      "mediaType": "image/webp",
+      "bytes": 40412,
+      "sha256": "beca90a53ae3f48a09902b1a92e726f6cb22153e407328f3179fea7dcae7ade5",
+      "sourceVendorIds": [
+        "npc:45600:1"
+      ],
+      "npcNames": [
+        "Mene"
+      ]
+    },
+    {
+      "assetName": "ic_01668.webp",
+      "sourceUrl": "https://bdocodex.com/items/ui_artwork/ic_01668.webp",
+      "mediaType": "image/webp",
+      "bytes": 29096,
+      "sha256": "fe512246ad5c50d35685dbec42c180e7a83bde42e294760be5412ff13c4f1bab",
+      "sourceVendorIds": [
+        "npc:50847:1"
+      ],
+      "npcNames": [
+        "Vatu"
+      ]
+    },
+    {
+      "assetName": "ic_01669.webp",
+      "sourceUrl": "https://bdocodex.com/items/ui_artwork/ic_01669.webp",
+      "mediaType": "image/webp",
+      "bytes": 26896,
+      "sha256": "5a656371d653896dbde1c62091c54113943110a6330d8dc1e3158201da471aa4",
+      "sourceVendorIds": [
+        "npc:50848:1"
+      ],
+      "npcNames": [
+        "Tsetseg"
+      ]
+    },
+    {
+      "assetName": "ic_01677.webp",
+      "sourceUrl": "https://bdocodex.com/items/ui_artwork/ic_01677.webp",
+      "mediaType": "image/webp",
+      "bytes": 30994,
+      "sha256": "0993d4dd23a64233ab9775ad5dc4aad8f081d5b92fe845259c1c009f738f9ebb",
+      "sourceVendorIds": [
+        "npc:50856:1"
+      ],
+      "npcNames": [
+        "Ornoa"
+      ]
+    },
+    {
+      "assetName": "ic_01678.webp",
+      "sourceUrl": "https://bdocodex.com/items/ui_artwork/ic_01678.webp",
+      "mediaType": "image/webp",
+      "bytes": 27896,
+      "sha256": "7a61309747dc9758a96bbdba3c6f0fb0dd051465ca4e5e5a237c53e9b6d95fe2",
+      "sourceVendorIds": [
+        "npc:50857:1"
+      ],
+      "npcNames": [
+        "Narangerel"
+      ]
+    },
+    {
+      "assetName": "ic_01691.webp",
+      "sourceUrl": "https://bdocodex.com/items/ui_artwork/ic_01691.webp",
+      "mediaType": "image/webp",
+      "bytes": 29382,
+      "sha256": "a2ba085df006f1f344a20cff216db280a01b612ba5910bf710ee530a4b81c134",
+      "sourceVendorIds": [
+        "npc:50870:1"
+      ],
+      "npcNames": [
+        "Tulga"
+      ]
+    },
+    {
+      "assetName": "ic_01692.webp",
+      "sourceUrl": "https://bdocodex.com/items/ui_artwork/ic_01692.webp",
+      "mediaType": "image/webp",
+      "bytes": 28218,
+      "sha256": "a99c2d314d23827d31b85481313336c965e444e743c6e64cb407f95f0b3d6421",
+      "sourceVendorIds": [
+        "npc:50871:1"
+      ],
+      "npcNames": [
+        "Biyamba"
+      ]
+    },
+    {
+      "assetName": "ic_01697.webp",
+      "sourceUrl": "https://bdocodex.com/items/ui_artwork/ic_01697.webp",
+      "mediaType": "image/webp",
+      "bytes": 27418,
+      "sha256": "f371d3f66d8b5ef63b913d222e4897d60b16a445f919252ed8bfaf7134a8bc33",
+      "sourceVendorIds": [
+        "npc:50876:1"
+      ],
+      "npcNames": [
+        "Zibaya"
+      ]
+    },
+    {
+      "assetName": "ic_01705.webp",
+      "sourceUrl": "https://bdocodex.com/items/ui_artwork/ic_01705.webp",
+      "mediaType": "image/webp",
+      "bytes": 33642,
+      "sha256": "48ca72ad48c07e789b98adb5dfac3b40123395dd4cba23b11f6262edd297cdab",
+      "sourceVendorIds": [
+        "npc:50884:1"
+      ],
+      "npcNames": [
+        "Rodrigo"
+      ]
+    },
+    {
+      "assetName": "ic_01708.webp",
+      "sourceUrl": "https://bdocodex.com/items/ui_artwork/ic_01708.webp",
+      "mediaType": "image/webp",
+      "bytes": 33262,
+      "sha256": "ad2000c0956c18609d5a2f87a42bc6d18d1ad1ffa13419c764c443fb92aa4b92",
+      "sourceVendorIds": [
+        "npc:50887:1"
+      ],
+      "npcNames": [
+        "Santos"
+      ]
+    },
+    {
+      "assetName": "ic_01720.webp",
+      "sourceUrl": "https://bdocodex.com/items/ui_artwork/ic_01720.webp",
+      "mediaType": "image/webp",
+      "bytes": 32820,
+      "sha256": "4ed40ee23378f02d070060995dab6ea42e153b163dd448ee65490b6cd155735e",
+      "sourceVendorIds": [
+        "npc:50903:1"
+      ],
+      "npcNames": [
+        "Soya"
+      ]
+    },
+    {
+      "assetName": "ic_01723.webp",
+      "sourceUrl": "https://bdocodex.com/items/ui_artwork/ic_01723.webp",
+      "mediaType": "image/webp",
+      "bytes": 26218,
+      "sha256": "7841511f8eb6e5e7afb135c6a4635829fd0cd1fd0a96e01bc1c7ca409dc32bcb",
+      "sourceVendorIds": [
+        "npc:50906:1"
+      ],
+      "npcNames": [
+        "Bayan"
+      ]
+    },
+    {
+      "assetName": "ic_01724.webp",
+      "sourceUrl": "https://bdocodex.com/items/ui_artwork/ic_01724.webp",
+      "mediaType": "image/webp",
+      "bytes": 28516,
+      "sha256": "a2f162629a77805486c781ddb6de8ae51df56dd254793655b319e2013ca91cfd",
+      "sourceVendorIds": [
+        "npc:50907:1"
+      ],
+      "npcNames": [
+        "Sharin"
+      ]
+    },
+    {
+      "assetName": "ic_01732.webp",
+      "sourceUrl": "https://bdocodex.com/items/ui_artwork/ic_01732.webp",
+      "mediaType": "image/webp",
+      "bytes": 30038,
+      "sha256": "585bfd46b3c564bbe405ed24f86765ba834ad5a60c35a83e3d61264f388534d5",
+      "sourceVendorIds": [
+        "npc:50915:1"
+      ],
+      "npcNames": [
+        "Griffith"
+      ]
+    },
+    {
+      "assetName": "ic_01738.webp",
+      "sourceUrl": "https://bdocodex.com/items/ui_artwork/ic_01738.webp",
+      "mediaType": "image/webp",
+      "bytes": 26352,
+      "sha256": "7a4e6cdc1befc5d39abd547fce0797884150e48ec24d8c4cf98fe1fb3cc5bc11",
+      "sourceVendorIds": [
+        "npc:50921:1"
+      ],
+      "npcNames": [
+        "Vivich"
+      ]
+    },
+    {
+      "assetName": "ic_01747.webp",
+      "sourceUrl": "https://bdocodex.com/items/ui_artwork/ic_01747.webp",
+      "mediaType": "image/webp",
+      "bytes": 31176,
+      "sha256": "f245da1539951877c856162f1f24b3855baecf971ecc9072d2da5dc73efbbfdf",
+      "sourceVendorIds": [
+        "npc:50930:1"
+      ],
+      "npcNames": [
+        "Princilla"
+      ]
+    },
+    {
+      "assetName": "ic_01753.webp",
+      "sourceUrl": "https://bdocodex.com/items/ui_artwork/ic_01753.webp",
+      "mediaType": "image/webp",
+      "bytes": 28072,
+      "sha256": "fb436d4e8e0f6c91fda60f7fca58677117eb09d5313a4441926b037e97ef03d7",
+      "sourceVendorIds": [
+        "npc:50936:1"
+      ],
+      "npcNames": [
+        "Maslan"
+      ]
+    },
+    {
+      "assetName": "ic_01759.webp",
+      "sourceUrl": "https://bdocodex.com/items/ui_artwork/ic_01759.webp",
+      "mediaType": "image/webp",
+      "bytes": 29920,
+      "sha256": "791de386a398aa36905460d118081b7d163295c25c152c2b51b7f4428bdea187",
+      "sourceVendorIds": [
+        "npc:50943:1"
+      ],
+      "npcNames": [
+        "Pin"
+      ]
+    },
+    {
+      "assetName": "ic_01767.webp",
+      "sourceUrl": "https://bdocodex.com/items/ui_artwork/ic_01767.webp",
+      "mediaType": "image/webp",
+      "bytes": 31868,
+      "sha256": "53d1aa9cb674eead810a545a74339f36ba0aa894416326418f995ecd377525e0",
+      "sourceVendorIds": [
+        "npc:50951:1"
+      ],
+      "npcNames": [
+        "Trevor"
+      ]
+    },
+    {
+      "assetName": "ic_01774.webp",
+      "sourceUrl": "https://bdocodex.com/items/ui_artwork/ic_01774.webp",
+      "mediaType": "image/webp",
+      "bytes": 32648,
+      "sha256": "9bf8c1879a31387ef7602e60947d63e4dd5bf1fb1e07d7506d309e916893ac79",
+      "sourceVendorIds": [
+        "npc:50960:1"
+      ],
+      "npcNames": [
+        "Ulagan"
+      ]
+    },
+    {
+      "assetName": "ic_01779.webp",
+      "sourceUrl": "https://bdocodex.com/items/ui_artwork/ic_01779.webp",
+      "mediaType": "image/webp",
+      "bytes": 32166,
+      "sha256": "a35d2c791e44054e40344ee71e7066dca85fa04ba864166c3105c9e6e6022292",
+      "sourceVendorIds": [
+        "npc:50965:1"
+      ],
+      "npcNames": [
+        "Elva"
+      ]
+    },
+    {
+      "assetName": "ic_01783.webp",
+      "sourceUrl": "https://bdocodex.com/items/ui_artwork/ic_01783.webp",
+      "mediaType": "image/webp",
+      "bytes": 33386,
+      "sha256": "b8aa2d79e7e29de659b4171c2391c7dac417a75abd5ed6f00ba09ff358b7c955",
+      "sourceVendorIds": [
+        "npc:50969:1"
+      ],
+      "npcNames": [
+        "Ishur"
+      ]
+    },
+    {
+      "assetName": "ic_01970.webp",
+      "sourceUrl": "https://bdocodex.com/items/ui_artwork/ic_01970.webp",
+      "mediaType": "image/webp",
+      "bytes": 32898,
+      "sha256": "538974b9b2cd5931f62fd2207d843f744245db854d96b5a97b34a6d44fab537c",
+      "sourceVendorIds": [
+        "npc:47207:1"
+      ],
+      "npcNames": [
+        "Wolim"
+      ]
+    },
+    {
+      "assetName": "ic_01994.webp",
+      "sourceUrl": "https://bdocodex.com/items/ui_artwork/ic_01994.webp",
+      "mediaType": "image/webp",
+      "bytes": 36216,
+      "sha256": "def10f2824625275a936061ec9a4f4ebb06abb4234a9b2cc33e444f7b9c2fe93",
+      "sourceVendorIds": [
+        "npc:47231:1"
+      ],
+      "npcNames": [
+        "Shinhee"
+      ]
+    },
+    {
+      "assetName": "ic_02006.webp",
+      "sourceUrl": "https://bdocodex.com/items/ui_artwork/ic_02006.webp",
+      "mediaType": "image/webp",
+      "bytes": 33738,
+      "sha256": "33526cac28ed00ff476fbfcad1d5c63027cf9ab8ee8f4c136fa022bfdf7929be",
+      "sourceVendorIds": [
+        "npc:47243:1"
+      ],
+      "npcNames": [
+        "Maksoon"
+      ]
+    },
+    {
+      "assetName": "ic_02028.webp",
+      "sourceUrl": "https://bdocodex.com/items/ui_artwork/ic_02028.webp",
+      "mediaType": "image/webp",
+      "bytes": 35534,
+      "sha256": "900a3a379f3530e4cf92655e8c420c1aadc2ded04322293e95c82f06f3c1b2ef",
+      "sourceVendorIds": [
+        "npc:47265:1"
+      ],
+      "npcNames": [
+        "Deokpal"
+      ]
+    },
+    {
+      "assetName": "ic_02039.webp",
+      "sourceUrl": "https://bdocodex.com/items/ui_artwork/ic_02039.webp",
+      "mediaType": "image/webp",
+      "bytes": 27444,
+      "sha256": "d008acbbee628d36d9f4786dbbae4a4580be33d6e896b6a65960f824c2eefcd3",
+      "sourceVendorIds": [
+        "npc:47276:1"
+      ],
+      "npcNames": [
+        "Ahryung"
+      ]
+    },
+    {
+      "assetName": "ic_02143.webp",
+      "sourceUrl": "https://bdocodex.com/items/ui_artwork/ic_02143.webp",
+      "mediaType": "image/webp",
+      "bytes": 21534,
+      "sha256": "b568a803a27ba884ecdbb6bc1138777c0f41e0325bc3e061eddce1de598cce73",
+      "sourceVendorIds": [
+        "npc:50821:1"
+      ],
+      "npcNames": [
+        "Ravinia"
+      ]
+    },
+    {
+      "assetName": "ic_02144.webp",
+      "sourceUrl": "https://bdocodex.com/items/ui_artwork/ic_02144.webp",
+      "mediaType": "image/webp",
+      "bytes": 34120,
+      "sha256": "e898883a4185f513d0f32021718638d6e78ac58bd531e7846b1b6283384d3a61",
+      "sourceVendorIds": [
+        "npc:50839:1"
+      ],
+      "npcNames": [
+        "Livenia"
+      ]
+    },
+    {
+      "assetName": "ic_02148.webp",
+      "sourceUrl": "https://bdocodex.com/items/ui_artwork/ic_02148.webp",
+      "mediaType": "image/webp",
+      "bytes": 35322,
+      "sha256": "f879544efa51a2f5785e44a09042b8f6616176d546c70815a3ee32cb58602394",
+      "sourceVendorIds": [
+        "npc:47383:1"
+      ],
+      "npcNames": [
+        "Hisala"
+      ]
+    },
+    {
+      "assetName": "ic_02153.webp",
+      "sourceUrl": "https://bdocodex.com/items/ui_artwork/ic_02153.webp",
+      "mediaType": "image/webp",
+      "bytes": 27470,
+      "sha256": "530b2b8f89df3ebda23a839cbb422664ab87ee361b76ef3d2360cce622dfbe0c",
+      "sourceVendorIds": [
+        "npc:47388:1"
+      ],
+      "npcNames": [
+        "Sha Hira"
+      ]
+    },
+    {
+      "assetName": "ic_02159.webp",
+      "sourceUrl": "https://bdocodex.com/items/ui_artwork/ic_02159.webp",
+      "mediaType": "image/webp",
+      "bytes": 35124,
+      "sha256": "3b1bc8487131caf8dac17e557ce56e0b921abe248dbe8a55e0e00437d40f5c35",
+      "sourceVendorIds": [
+        "npc:47391:1"
+      ],
+      "npcNames": [
+        "Tamiri"
+      ]
+    },
+    {
+      "assetName": "ic_02178.webp",
+      "sourceUrl": "https://bdocodex.com/items/ui_artwork/ic_02178.webp",
+      "mediaType": "image/webp",
+      "bytes": 32258,
+      "sha256": "890c9948f0a196fe60f0bf76334c0630d0a6e77494c023291b03772d015564df",
+      "sourceVendorIds": [
+        "npc:47459:1"
+      ],
+      "npcNames": [
+        "Benyamin"
+      ]
+    },
+    {
+      "assetName": "ic_02192.webp",
+      "sourceUrl": "https://bdocodex.com/items/ui_artwork/ic_02192.webp",
+      "mediaType": "image/webp",
+      "bytes": 30428,
+      "sha256": "c2602be4b9a20f57cc5d441d8a582ba5bc10fc853ab25741d864281d9d9f41c5",
+      "sourceVendorIds": [
+        "npc:47376:1"
+      ],
+      "npcNames": [
+        "Neto"
+      ]
+    },
+    {
+      "assetName": "ic_02193.webp",
+      "sourceUrl": "https://bdocodex.com/items/ui_artwork/ic_02193.webp",
+      "mediaType": "image/webp",
+      "bytes": 27622,
+      "sha256": "176e7c3920afc462a06cceca519ff642ed34c8f645e957312cef7b8b1b61ff31",
+      "sourceVendorIds": [
+        "npc:47377:1"
+      ],
+      "npcNames": [
+        "Kiros"
+      ]
+    },
+    {
+      "assetName": "ic_02204.webp",
+      "sourceUrl": "https://bdocodex.com/items/ui_artwork/ic_02204.webp",
+      "mediaType": "image/webp",
+      "bytes": 32118,
+      "sha256": "2766eda201eca5d7410fe5dc17dc14ec545606d77756831460c629327007885c",
+      "sourceVendorIds": [
+        "npc:47427:1"
+      ],
+      "npcNames": [
+        "Vahik"
+      ]
+    },
+    {
+      "assetName": "ic_02216.webp",
+      "sourceUrl": "https://bdocodex.com/items/ui_artwork/ic_02216.webp",
+      "mediaType": "image/webp",
+      "bytes": 25870,
+      "sha256": "09ef1453d9986f48096205f38f9d393838404050d575f3dc9bbc8d7c1a0541ee",
+      "sourceVendorIds": [
+        "npc:47471:1"
+      ],
+      "npcNames": [
+        "Ruveyda"
+      ]
+    },
+    {
+      "assetName": "ic_02219.webp",
+      "sourceUrl": "https://bdocodex.com/items/ui_artwork/ic_02219.webp",
+      "mediaType": "image/webp",
+      "bytes": 28494,
+      "sha256": "457762729a32c5a0ec218caded0ffeaacc7458d45fc957813477653197aeb132",
+      "sourceVendorIds": [
+        "npc:47403:1"
+      ],
+      "npcNames": [
+        "Ismail"
+      ]
+    },
+    {
+      "assetName": "ic_02222.webp",
+      "sourceUrl": "https://bdocodex.com/items/ui_artwork/ic_02222.webp",
+      "mediaType": "image/webp",
+      "bytes": 19922,
+      "sha256": "27c78781921345fa229ac66e222871bc1a2ce32af6d324eddb4c060251429588",
+      "sourceVendorIds": [
+        "npc:47401:1"
+      ],
+      "npcNames": [
+        "Meryal"
+      ]
+    },
+    {
+      "assetName": "ic_02240.webp",
+      "sourceUrl": "https://bdocodex.com/items/ui_artwork/ic_02240.webp",
+      "mediaType": "image/webp",
+      "bytes": 35016,
+      "sha256": "251a4392b6ee3e8206478c2d1477feb8b5e987b13bad4936fea3cdbbe30449b1",
+      "sourceVendorIds": [
+        "npc:47418:1"
+      ],
+      "npcNames": [
+        "Bedirhan"
+      ]
+    },
+    {
+      "assetName": "ic_02245.webp",
+      "sourceUrl": "https://bdocodex.com/items/ui_artwork/ic_02245.webp",
+      "mediaType": "image/webp",
+      "bytes": 34256,
+      "sha256": "64f66c82b8dee735891ab961ae1a7ddf313a3cc09e70a16a5e85953175d7565c",
+      "sourceVendorIds": [
+        "npc:47410:1"
+      ],
+      "npcNames": [
+        "Hagun"
+      ]
+    },
+    {
+      "assetName": "ic_02248.webp",
+      "sourceUrl": "https://bdocodex.com/items/ui_artwork/ic_02248.webp",
+      "mediaType": "image/webp",
+      "bytes": 26856,
+      "sha256": "b35048d3ab32fc098c56079b7bf4b85f21ac9ae1fd7f59853f7325c38acd35f3",
+      "sourceVendorIds": [
+        "npc:47415:1"
+      ],
+      "npcNames": [
+        "Elmas"
+      ]
+    },
+    {
+      "assetName": "ic_02306.webp",
+      "sourceUrl": "https://bdocodex.com/items/ui_artwork/ic_02306.webp",
+      "mediaType": "image/webp",
+      "bytes": 27534,
+      "sha256": "09b1a275fb25beea0bc66ac7255f223ef46131bc637178d39018c9a95bf89d7c",
+      "sourceVendorIds": [
+        "npc:47550:1"
+      ],
+      "npcNames": [
+        "Gyehyang"
+      ]
+    },
+    {
+      "assetName": "ic_02324.webp",
+      "sourceUrl": "https://bdocodex.com/items/ui_artwork/ic_02324.webp",
+      "mediaType": "image/webp",
+      "bytes": 25208,
+      "sha256": "e794dadab16488ae96ba24abb1e127cec03c1534163f29ea4f21d12623edc3ad",
+      "sourceVendorIds": [
+        "npc:47568:1"
+      ],
+      "npcNames": [
+        "Seonga"
+      ]
+    },
+    {
+      "assetName": "ic_02325.webp",
+      "sourceUrl": "https://bdocodex.com/items/ui_artwork/ic_02325.webp",
+      "mediaType": "image/webp",
+      "bytes": 25014,
+      "sha256": "bf40f824b5fcb622e7a404a29b57c260722d21aa45407066a40586e5a38efd58",
+      "sourceVendorIds": [
+        "npc:47569:1"
+      ],
+      "npcNames": [
+        "Mihyang"
+      ]
+    },
+    {
+      "assetName": "ic_02339.webp",
+      "sourceUrl": "https://bdocodex.com/items/ui_artwork/ic_02339.webp",
+      "mediaType": "image/webp",
+      "bytes": 26232,
+      "sha256": "ef744275d8685cb92274323440cf9032bbb79fe6a8fd9e378952cdc1e323c7f3",
+      "sourceVendorIds": [
+        "npc:47595:1"
+      ],
+      "npcNames": [
+        "Yeongsim"
+      ]
+    },
+    {
+      "assetName": "ic_10848.webp",
+      "sourceUrl": "https://bdocodex.com/items/ui_artwork/ic_10848.webp",
+      "mediaType": "image/webp",
+      "bytes": 23648,
+      "sha256": "b1ad0848ac6e375e0010588823be8e4a36277503887cadaf83b1592ce52a8ec0",
+      "sourceVendorIds": [
+        "npc:59663:1"
+      ],
+      "npcNames": [
+        "Laderr"
+      ]
+    }
+  ],
+  "vendorMappings": [
+    {
+      "sourceVendorId": "npc:40002:1",
+      "assetName": "ic_00002.webp"
+    },
+    {
+      "sourceVendorId": "npc:40004:1",
+      "assetName": "ic_00004.webp"
+    },
+    {
+      "sourceVendorId": "npc:40005:1",
+      "assetName": "ic_00005.webp"
+    },
+    {
+      "sourceVendorId": "npc:40013:1",
+      "assetName": "ic_00014.webp"
+    },
+    {
+      "sourceVendorId": "npc:40032:1",
+      "assetName": "ic_00034.webp"
+    },
+    {
+      "sourceVendorId": "npc:40040:1",
+      "assetName": "ic_00040.webp"
+    },
+    {
+      "sourceVendorId": "npc:40063:1",
+      "assetName": "ic_00045.webp"
+    },
+    {
+      "sourceVendorId": "npc:40065:1",
+      "assetName": "ic_00047.webp"
+    },
+    {
+      "sourceVendorId": "npc:40604:1",
+      "assetName": "ic_00388.webp"
+    },
+    {
+      "sourceVendorId": "npc:40605:1",
+      "assetName": "ic_00389.webp"
+    },
+    {
+      "sourceVendorId": "npc:40612:1",
+      "assetName": "ic_00846.webp"
+    },
+    {
+      "sourceVendorId": "npc:40712:1",
+      "assetName": "ic_00739.webp"
+    },
+    {
+      "sourceVendorId": "npc:40714:1",
+      "assetName": "ic_00741.webp"
+    },
+    {
+      "sourceVendorId": "npc:40716:1",
+      "assetName": "ic_00743.webp"
+    },
+    {
+      "sourceVendorId": "npc:40720:1",
+      "assetName": "ic_00747.webp"
+    },
+    {
+      "sourceVendorId": "npc:40721:1",
+      "assetName": "ic_00748.webp"
+    },
+    {
+      "sourceVendorId": "npc:41003:1",
+      "assetName": "ic_00103.webp"
+    },
+    {
+      "sourceVendorId": "npc:41004:1",
+      "assetName": "ic_00104.webp"
+    },
+    {
+      "sourceVendorId": "npc:41006:1",
+      "assetName": "ic_00106.webp"
+    },
+    {
+      "sourceVendorId": "npc:41010:1",
+      "assetName": "ic_00188.webp"
+    },
+    {
+      "sourceVendorId": "npc:41024:1",
+      "assetName": "ic_00124.webp"
+    },
+    {
+      "sourceVendorId": "npc:41025:1",
+      "assetName": "ic_00125.webp"
+    },
+    {
+      "sourceVendorId": "npc:41026:1",
+      "assetName": "ic_00814.webp"
+    },
+    {
+      "sourceVendorId": "npc:41039:1",
+      "assetName": "ic_00139.webp"
+    },
+    {
+      "sourceVendorId": "npc:41042:1",
+      "assetName": "ic_00142.webp"
+    },
+    {
+      "sourceVendorId": "npc:41043:1",
+      "assetName": "ic_00143.webp"
+    },
+    {
+      "sourceVendorId": "npc:41044:1",
+      "assetName": "ic_00144.webp"
+    },
+    {
+      "sourceVendorId": "npc:41052:1",
+      "assetName": "ic_00559.webp"
+    },
+    {
+      "sourceVendorId": "npc:41054:1",
+      "assetName": "ic_00559.webp"
+    },
+    {
+      "sourceVendorId": "npc:41055:1",
+      "assetName": "ic_00559.webp"
+    },
+    {
+      "sourceVendorId": "npc:41074:1",
+      "assetName": "ic_00150.webp"
+    },
+    {
+      "sourceVendorId": "npc:41076:1",
+      "assetName": "ic_00152.webp"
+    },
+    {
+      "sourceVendorId": "npc:41098:1",
+      "assetName": "ic_00173.webp"
+    },
+    {
+      "sourceVendorId": "npc:41238:1",
+      "assetName": "ic_01029_person.webp"
+    },
+    {
+      "sourceVendorId": "npc:41242:1",
+      "assetName": "ic_00954.webp"
+    },
+    {
+      "sourceVendorId": "npc:41248:1",
+      "assetName": "ic_01306.webp"
+    },
+    {
+      "sourceVendorId": "npc:41251:1",
+      "assetName": "ic_01309.webp"
+    },
+    {
+      "sourceVendorId": "npc:41254:1",
+      "assetName": "ic_01311.webp"
+    },
+    {
+      "sourceVendorId": "npc:42001:1",
+      "assetName": "ic_00341.webp"
+    },
+    {
+      "sourceVendorId": "npc:42004:1",
+      "assetName": "ic_00344.webp"
+    },
+    {
+      "sourceVendorId": "npc:42006:1",
+      "assetName": "ic_00346.webp"
+    },
+    {
+      "sourceVendorId": "npc:42007:1",
+      "assetName": "ic_00347.webp"
+    },
+    {
+      "sourceVendorId": "npc:42012:1",
+      "assetName": "ic_00352.webp"
+    },
+    {
+      "sourceVendorId": "npc:42020:1",
+      "assetName": "ic_00360.webp"
+    },
+    {
+      "sourceVendorId": "npc:42118:1",
+      "assetName": "ic_00376.webp"
+    },
+    {
+      "sourceVendorId": "npc:42140:1",
+      "assetName": "ic_00495.webp"
+    },
+    {
+      "sourceVendorId": "npc:42151:1",
+      "assetName": "ic_00383.webp"
+    },
+    {
+      "sourceVendorId": "npc:42201:1",
+      "assetName": "ic_00334.webp"
+    },
+    {
+      "sourceVendorId": "npc:42204:1",
+      "assetName": "ic_00337.webp"
+    },
+    {
+      "sourceVendorId": "npc:42215:1",
+      "assetName": "ic_00331.webp"
+    },
+    {
+      "sourceVendorId": "npc:42304:1",
+      "assetName": "ic_00465.webp"
+    },
+    {
+      "sourceVendorId": "npc:43001:1",
+      "assetName": "ic_00411.webp"
+    },
+    {
+      "sourceVendorId": "npc:43004:1",
+      "assetName": "ic_00414.webp"
+    },
+    {
+      "sourceVendorId": "npc:43006:1",
+      "assetName": "ic_00416.webp"
+    },
+    {
+      "sourceVendorId": "npc:43204:1",
+      "assetName": "ic_00433.webp"
+    },
+    {
+      "sourceVendorId": "npc:43301:1",
+      "assetName": "ic_00441.webp"
+    },
+    {
+      "sourceVendorId": "npc:43304:1",
+      "assetName": "ic_00444.webp"
+    },
+    {
+      "sourceVendorId": "npc:43401:1",
+      "assetName": "ic_00452.webp"
+    },
+    {
+      "sourceVendorId": "npc:43404:1",
+      "assetName": "ic_00454.webp"
+    },
+    {
+      "sourceVendorId": "npc:43405:1",
+      "assetName": "ic_00458.webp"
+    },
+    {
+      "sourceVendorId": "npc:43434:1",
+      "assetName": "ic_00305.webp"
+    },
+    {
+      "sourceVendorId": "npc:43443:1",
+      "assetName": "ic_00314.webp"
+    },
+    {
+      "sourceVendorId": "npc:43504:1",
+      "assetName": "ic_00325.webp"
+    },
+    {
+      "sourceVendorId": "npc:43506:1",
+      "assetName": "ic_00327.webp"
+    },
+    {
+      "sourceVendorId": "npc:43511:1",
+      "assetName": "ic_00489.webp"
+    },
+    {
+      "sourceVendorId": "npc:43512:1",
+      "assetName": "ic_00490.webp"
+    },
+    {
+      "sourceVendorId": "npc:43513:1",
+      "assetName": "ic_00491.webp"
+    },
+    {
+      "sourceVendorId": "npc:43514:1",
+      "assetName": "ic_00492.webp"
+    },
+    {
+      "sourceVendorId": "npc:44002:1",
+      "assetName": "ic_00580.webp"
+    },
+    {
+      "sourceVendorId": "npc:44004:1",
+      "assetName": "ic_00582.webp"
+    },
+    {
+      "sourceVendorId": "npc:44005:1",
+      "assetName": "ic_00583.webp"
+    },
+    {
+      "sourceVendorId": "npc:44013:1",
+      "assetName": "ic_00591.webp"
+    },
+    {
+      "sourceVendorId": "npc:44038:1",
+      "assetName": "ic_00616.webp"
+    },
+    {
+      "sourceVendorId": "npc:44101:1",
+      "assetName": "ic_00614.webp"
+    },
+    {
+      "sourceVendorId": "npc:44102:1",
+      "assetName": "ic_00615.webp"
+    },
+    {
+      "sourceVendorId": "npc:44104:1",
+      "assetName": "ic_00617.webp"
+    },
+    {
+      "sourceVendorId": "npc:44128:1",
+      "assetName": "ic_00826.webp"
+    },
+    {
+      "sourceVendorId": "npc:44153:1",
+      "assetName": "ic_01090.webp"
+    },
+    {
+      "sourceVendorId": "npc:44156:1",
+      "assetName": "ic_01093.webp"
+    },
+    {
+      "sourceVendorId": "npc:44202:1",
+      "assetName": "ic_00649.webp"
+    },
+    {
+      "sourceVendorId": "npc:44204:1",
+      "assetName": "ic_00651.webp"
+    },
+    {
+      "sourceVendorId": "npc:44301:1",
+      "assetName": "ic_00661.webp"
+    },
+    {
+      "sourceVendorId": "npc:44302:1",
+      "assetName": "ic_00662.webp"
+    },
+    {
+      "sourceVendorId": "npc:44602:1",
+      "assetName": "ic_00693.webp"
+    },
+    {
+      "sourceVendorId": "npc:44604:1",
+      "assetName": "ic_00695.webp"
+    },
+    {
+      "sourceVendorId": "npc:44605:1",
+      "assetName": "ic_00696.webp"
+    },
+    {
+      "sourceVendorId": "npc:44612:1",
+      "assetName": "ic_00639.webp"
+    },
+    {
+      "sourceVendorId": "npc:45001:1",
+      "assetName": "ic_00850.webp"
+    },
+    {
+      "sourceVendorId": "npc:45003:1",
+      "assetName": "ic_00852.webp"
+    },
+    {
+      "sourceVendorId": "npc:45005:1",
+      "assetName": "ic_00854.webp"
+    },
+    {
+      "sourceVendorId": "npc:45015:1",
+      "assetName": "ic_00863.webp"
+    },
+    {
+      "sourceVendorId": "npc:45027:1",
+      "assetName": "ic_00875.webp"
+    },
+    {
+      "sourceVendorId": "npc:45038:1",
+      "assetName": "ic_00882.webp"
+    },
+    {
+      "sourceVendorId": "npc:45058:1",
+      "assetName": "ic_01304.webp"
+    },
+    {
+      "sourceVendorId": "npc:45105:1",
+      "assetName": "ic_00885.webp"
+    },
+    {
+      "sourceVendorId": "npc:45106:1",
+      "assetName": "ic_00886.webp"
+    },
+    {
+      "sourceVendorId": "npc:45115:1",
+      "assetName": "ic_00893.webp"
+    },
+    {
+      "sourceVendorId": "npc:45123:1",
+      "assetName": "ic_00896.webp"
+    },
+    {
+      "sourceVendorId": "npc:45124:1",
+      "assetName": "ic_00897.webp"
+    },
+    {
+      "sourceVendorId": "npc:45136:1",
+      "assetName": "ic_00961.webp"
+    },
+    {
+      "sourceVendorId": "npc:45203:1",
+      "assetName": "ic_00966.webp"
+    },
+    {
+      "sourceVendorId": "npc:45210:1",
+      "assetName": "ic_00972.webp"
+    },
+    {
+      "sourceVendorId": "npc:45212:1",
+      "assetName": "ic_00974.webp"
+    },
+    {
+      "sourceVendorId": "npc:45213:1",
+      "assetName": "ic_00975.webp"
+    },
+    {
+      "sourceVendorId": "npc:45218:1",
+      "assetName": "ic_01065.webp"
+    },
+    {
+      "sourceVendorId": "npc:45221:1",
+      "assetName": "ic_01062.webp"
+    },
+    {
+      "sourceVendorId": "npc:45303:1",
+      "assetName": "ic_00998.webp"
+    },
+    {
+      "sourceVendorId": "npc:45304:1",
+      "assetName": "ic_00999.webp"
+    },
+    {
+      "sourceVendorId": "npc:45333:1",
+      "assetName": "ic_01046.webp"
+    },
+    {
+      "sourceVendorId": "npc:45334:1",
+      "assetName": "ic_01047.webp"
+    },
+    {
+      "sourceVendorId": "npc:45341:1",
+      "assetName": "ic_01057.webp"
+    },
+    {
+      "sourceVendorId": "npc:45343:1",
+      "assetName": "ic_01074.webp"
+    },
+    {
+      "sourceVendorId": "npc:45344:1",
+      "assetName": "ic_01075.webp"
+    },
+    {
+      "sourceVendorId": "npc:45344:10",
+      "assetName": "ic_01075.webp"
+    },
+    {
+      "sourceVendorId": "npc:45344:11",
+      "assetName": "ic_01075.webp"
+    },
+    {
+      "sourceVendorId": "npc:45344:12",
+      "assetName": "ic_01075.webp"
+    },
+    {
+      "sourceVendorId": "npc:45344:13",
+      "assetName": "ic_01075.webp"
+    },
+    {
+      "sourceVendorId": "npc:45344:14",
+      "assetName": "ic_01075.webp"
+    },
+    {
+      "sourceVendorId": "npc:45344:15",
+      "assetName": "ic_01075.webp"
+    },
+    {
+      "sourceVendorId": "npc:45344:16",
+      "assetName": "ic_01075.webp"
+    },
+    {
+      "sourceVendorId": "npc:45344:17",
+      "assetName": "ic_01075.webp"
+    },
+    {
+      "sourceVendorId": "npc:45344:2",
+      "assetName": "ic_01075.webp"
+    },
+    {
+      "sourceVendorId": "npc:45344:3",
+      "assetName": "ic_01075.webp"
+    },
+    {
+      "sourceVendorId": "npc:45344:4",
+      "assetName": "ic_01075.webp"
+    },
+    {
+      "sourceVendorId": "npc:45344:5",
+      "assetName": "ic_01075.webp"
+    },
+    {
+      "sourceVendorId": "npc:45344:6",
+      "assetName": "ic_01075.webp"
+    },
+    {
+      "sourceVendorId": "npc:45344:7",
+      "assetName": "ic_01075.webp"
+    },
+    {
+      "sourceVendorId": "npc:45344:8",
+      "assetName": "ic_01075.webp"
+    },
+    {
+      "sourceVendorId": "npc:45344:9",
+      "assetName": "ic_01075.webp"
+    },
+    {
+      "sourceVendorId": "npc:45349:1",
+      "assetName": "ic_01079.webp"
+    },
+    {
+      "sourceVendorId": "npc:45350:1",
+      "assetName": "ic_01080.webp"
+    },
+    {
+      "sourceVendorId": "npc:45509:1",
+      "assetName": "ic_01106.webp"
+    },
+    {
+      "sourceVendorId": "npc:45540:1",
+      "assetName": "ic_01144.webp"
+    },
+    {
+      "sourceVendorId": "npc:45541:1",
+      "assetName": "ic_01142.webp"
+    },
+    {
+      "sourceVendorId": "npc:45549:1",
+      "assetName": "ic_01150.webp"
+    },
+    {
+      "sourceVendorId": "npc:45554:1",
+      "assetName": "ic_01155.webp"
+    },
+    {
+      "sourceVendorId": "npc:45571:1",
+      "assetName": "ic_01166.webp"
+    },
+    {
+      "sourceVendorId": "npc:45577:1",
+      "assetName": "ic_01172.webp"
+    },
+    {
+      "sourceVendorId": "npc:45600:1",
+      "assetName": "ic_01623.webp"
+    },
+    {
+      "sourceVendorId": "npc:46005:1",
+      "assetName": "ic_01231.webp"
+    },
+    {
+      "sourceVendorId": "npc:46013:1",
+      "assetName": "ic_01239.webp"
+    },
+    {
+      "sourceVendorId": "npc:46019:1",
+      "assetName": "ic_01245.webp"
+    },
+    {
+      "sourceVendorId": "npc:46022:1",
+      "assetName": "ic_01248.webp"
+    },
+    {
+      "sourceVendorId": "npc:46029:1",
+      "assetName": "ic_01255.webp"
+    },
+    {
+      "sourceVendorId": "npc:46032:1",
+      "assetName": "ic_01258.webp"
+    },
+    {
+      "sourceVendorId": "npc:46033:1",
+      "assetName": "ic_01259.webp"
+    },
+    {
+      "sourceVendorId": "npc:46049:1",
+      "assetName": "ic_01287.webp"
+    },
+    {
+      "sourceVendorId": "npc:47002:1",
+      "assetName": "ic_01336.webp"
+    },
+    {
+      "sourceVendorId": "npc:47006:1",
+      "assetName": "ic_01340.webp"
+    },
+    {
+      "sourceVendorId": "npc:47031:1",
+      "assetName": "ic_01333.webp"
+    },
+    {
+      "sourceVendorId": "npc:47041:1",
+      "assetName": "ic_01498.webp"
+    },
+    {
+      "sourceVendorId": "npc:47045:1",
+      "assetName": "ic_01500.webp"
+    },
+    {
+      "sourceVendorId": "npc:47096:1",
+      "assetName": "ic_01544.webp"
+    },
+    {
+      "sourceVendorId": "npc:47096:2",
+      "assetName": "ic_01544.webp"
+    },
+    {
+      "sourceVendorId": "npc:47125:1",
+      "assetName": "ic_01587.webp"
+    },
+    {
+      "sourceVendorId": "npc:47207:1",
+      "assetName": "ic_01970.webp"
+    },
+    {
+      "sourceVendorId": "npc:47231:1",
+      "assetName": "ic_01994.webp"
+    },
+    {
+      "sourceVendorId": "npc:47243:1",
+      "assetName": "ic_02006.webp"
+    },
+    {
+      "sourceVendorId": "npc:47265:1",
+      "assetName": "ic_02028.webp"
+    },
+    {
+      "sourceVendorId": "npc:47276:1",
+      "assetName": "ic_02039.webp"
+    },
+    {
+      "sourceVendorId": "npc:47376:1",
+      "assetName": "ic_02192.webp"
+    },
+    {
+      "sourceVendorId": "npc:47377:1",
+      "assetName": "ic_02193.webp"
+    },
+    {
+      "sourceVendorId": "npc:47383:1",
+      "assetName": "ic_02148.webp"
+    },
+    {
+      "sourceVendorId": "npc:47388:1",
+      "assetName": "ic_02153.webp"
+    },
+    {
+      "sourceVendorId": "npc:47391:1",
+      "assetName": "ic_02159.webp"
+    },
+    {
+      "sourceVendorId": "npc:47401:1",
+      "assetName": "ic_02222.webp"
+    },
+    {
+      "sourceVendorId": "npc:47403:1",
+      "assetName": "ic_02219.webp"
+    },
+    {
+      "sourceVendorId": "npc:47410:1",
+      "assetName": "ic_02245.webp"
+    },
+    {
+      "sourceVendorId": "npc:47415:1",
+      "assetName": "ic_02248.webp"
+    },
+    {
+      "sourceVendorId": "npc:47418:1",
+      "assetName": "ic_02240.webp"
+    },
+    {
+      "sourceVendorId": "npc:47427:1",
+      "assetName": "ic_02204.webp"
+    },
+    {
+      "sourceVendorId": "npc:47459:1",
+      "assetName": "ic_02178.webp"
+    },
+    {
+      "sourceVendorId": "npc:47471:1",
+      "assetName": "ic_02216.webp"
+    },
+    {
+      "sourceVendorId": "npc:47550:1",
+      "assetName": "ic_02306.webp"
+    },
+    {
+      "sourceVendorId": "npc:47568:1",
+      "assetName": "ic_02324.webp"
+    },
+    {
+      "sourceVendorId": "npc:47569:1",
+      "assetName": "ic_02325.webp"
+    },
+    {
+      "sourceVendorId": "npc:47595:1",
+      "assetName": "ic_02339.webp"
+    },
+    {
+      "sourceVendorId": "npc:47649:1",
+      "assetName": "ic_014452.webp"
+    },
+    {
+      "sourceVendorId": "npc:47710:1",
+      "assetName": "ic_014727.webp"
+    },
+    {
+      "sourceVendorId": "npc:47711:1",
+      "assetName": "ic_014728.webp"
+    },
+    {
+      "sourceVendorId": "npc:47712:1",
+      "assetName": "ic_014729.webp"
+    },
+    {
+      "sourceVendorId": "npc:47713:1",
+      "assetName": "ic_014730.webp"
+    },
+    {
+      "sourceVendorId": "npc:47715:1",
+      "assetName": "ic_014732.webp"
+    },
+    {
+      "sourceVendorId": "npc:47716:1",
+      "assetName": "ic_014733.webp"
+    },
+    {
+      "sourceVendorId": "npc:47717:1",
+      "assetName": "ic_014734.webp"
+    },
+    {
+      "sourceVendorId": "npc:47718:1",
+      "assetName": "ic_014735.webp"
+    },
+    {
+      "sourceVendorId": "npc:47719:1",
+      "assetName": "ic_014736.webp"
+    },
+    {
+      "sourceVendorId": "npc:47720:1",
+      "assetName": "ic_014737.webp"
+    },
+    {
+      "sourceVendorId": "npc:47721:1",
+      "assetName": "ic_014738.webp"
+    },
+    {
+      "sourceVendorId": "npc:47722:1",
+      "assetName": "ic_014739.webp"
+    },
+    {
+      "sourceVendorId": "npc:47723:1",
+      "assetName": "ic_014740.webp"
+    },
+    {
+      "sourceVendorId": "npc:47726:1",
+      "assetName": "ic_014743.webp"
+    },
+    {
+      "sourceVendorId": "npc:47727:1",
+      "assetName": "ic_014744.webp"
+    },
+    {
+      "sourceVendorId": "npc:47728:1",
+      "assetName": "ic_014745.webp"
+    },
+    {
+      "sourceVendorId": "npc:47729:1",
+      "assetName": "ic_014746.webp"
+    },
+    {
+      "sourceVendorId": "npc:47730:1",
+      "assetName": "ic_014747.webp"
+    },
+    {
+      "sourceVendorId": "npc:47731:1",
+      "assetName": "ic_014748.webp"
+    },
+    {
+      "sourceVendorId": "npc:47732:1",
+      "assetName": "ic_014749.webp"
+    },
+    {
+      "sourceVendorId": "npc:47733:1",
+      "assetName": "ic_014750.webp"
+    },
+    {
+      "sourceVendorId": "npc:47734:1",
+      "assetName": "ic_014751.webp"
+    },
+    {
+      "sourceVendorId": "npc:47735:1",
+      "assetName": "ic_014752.webp"
+    },
+    {
+      "sourceVendorId": "npc:47736:1",
+      "assetName": "ic_014753.webp"
+    },
+    {
+      "sourceVendorId": "npc:47738:1",
+      "assetName": "ic_014755.webp"
+    },
+    {
+      "sourceVendorId": "npc:47739:1",
+      "assetName": "ic_014756.webp"
+    },
+    {
+      "sourceVendorId": "npc:47740:1",
+      "assetName": "ic_014757.webp"
+    },
+    {
+      "sourceVendorId": "npc:47760:23",
+      "assetName": "ic_015547.webp"
+    },
+    {
+      "sourceVendorId": "npc:47763:26",
+      "assetName": "ic_015550.webp"
+    },
+    {
+      "sourceVendorId": "npc:47764:27",
+      "assetName": "ic_015551.webp"
+    },
+    {
+      "sourceVendorId": "npc:47767:30",
+      "assetName": "ic_015554.webp"
+    },
+    {
+      "sourceVendorId": "npc:47768:31",
+      "assetName": "ic_015555.webp"
+    },
+    {
+      "sourceVendorId": "npc:47769:32",
+      "assetName": "ic_015556.webp"
+    },
+    {
+      "sourceVendorId": "npc:49555:1",
+      "assetName": "ic_01357.webp"
+    },
+    {
+      "sourceVendorId": "npc:49581:1",
+      "assetName": "ic_01457.webp"
+    },
+    {
+      "sourceVendorId": "npc:50203:1",
+      "assetName": "ic_00193.webp"
+    },
+    {
+      "sourceVendorId": "npc:50205:1",
+      "assetName": "ic_00195.webp"
+    },
+    {
+      "sourceVendorId": "npc:50206:1",
+      "assetName": "ic_00196.webp"
+    },
+    {
+      "sourceVendorId": "npc:50207:1",
+      "assetName": "ic_00197.webp"
+    },
+    {
+      "sourceVendorId": "npc:50208:1",
+      "assetName": "ic_00198.webp"
+    },
+    {
+      "sourceVendorId": "npc:50212:1",
+      "assetName": "ic_00223.webp"
+    },
+    {
+      "sourceVendorId": "npc:50213:1",
+      "assetName": "ic_00224.webp"
+    },
+    {
+      "sourceVendorId": "npc:50563:1",
+      "assetName": "ic_00804.webp"
+    },
+    {
+      "sourceVendorId": "npc:50710:1",
+      "assetName": "ic_01111.webp"
+    },
+    {
+      "sourceVendorId": "npc:50748:1",
+      "assetName": "ic_01289.webp"
+    },
+    {
+      "sourceVendorId": "npc:50749:1",
+      "assetName": "ic_01290.webp"
+    },
+    {
+      "sourceVendorId": "npc:50821:1",
+      "assetName": "ic_02143.webp"
+    },
+    {
+      "sourceVendorId": "npc:50839:1",
+      "assetName": "ic_02144.webp"
+    },
+    {
+      "sourceVendorId": "npc:50847:1",
+      "assetName": "ic_01668.webp"
+    },
+    {
+      "sourceVendorId": "npc:50848:1",
+      "assetName": "ic_01669.webp"
+    },
+    {
+      "sourceVendorId": "npc:50856:1",
+      "assetName": "ic_01677.webp"
+    },
+    {
+      "sourceVendorId": "npc:50857:1",
+      "assetName": "ic_01678.webp"
+    },
+    {
+      "sourceVendorId": "npc:50870:1",
+      "assetName": "ic_01691.webp"
+    },
+    {
+      "sourceVendorId": "npc:50871:1",
+      "assetName": "ic_01692.webp"
+    },
+    {
+      "sourceVendorId": "npc:50876:1",
+      "assetName": "ic_01697.webp"
+    },
+    {
+      "sourceVendorId": "npc:50884:1",
+      "assetName": "ic_01705.webp"
+    },
+    {
+      "sourceVendorId": "npc:50887:1",
+      "assetName": "ic_01708.webp"
+    },
+    {
+      "sourceVendorId": "npc:50903:1",
+      "assetName": "ic_01720.webp"
+    },
+    {
+      "sourceVendorId": "npc:50906:1",
+      "assetName": "ic_01723.webp"
+    },
+    {
+      "sourceVendorId": "npc:50907:1",
+      "assetName": "ic_01724.webp"
+    },
+    {
+      "sourceVendorId": "npc:50915:1",
+      "assetName": "ic_01732.webp"
+    },
+    {
+      "sourceVendorId": "npc:50921:1",
+      "assetName": "ic_01738.webp"
+    },
+    {
+      "sourceVendorId": "npc:50930:1",
+      "assetName": "ic_01747.webp"
+    },
+    {
+      "sourceVendorId": "npc:50936:1",
+      "assetName": "ic_01753.webp"
+    },
+    {
+      "sourceVendorId": "npc:50943:1",
+      "assetName": "ic_01759.webp"
+    },
+    {
+      "sourceVendorId": "npc:50951:1",
+      "assetName": "ic_01767.webp"
+    },
+    {
+      "sourceVendorId": "npc:50960:1",
+      "assetName": "ic_01774.webp"
+    },
+    {
+      "sourceVendorId": "npc:50965:1",
+      "assetName": "ic_01779.webp"
+    },
+    {
+      "sourceVendorId": "npc:50969:1",
+      "assetName": "ic_01783.webp"
+    },
+    {
+      "sourceVendorId": "npc:59606:1",
+      "assetName": "ic_010839.webp"
+    },
+    {
+      "sourceVendorId": "npc:59627:1",
+      "assetName": "ic_00559.webp"
+    },
+    {
+      "sourceVendorId": "npc:59663:1",
+      "assetName": "ic_10848.webp"
+    },
+    {
+      "sourceVendorId": "npc:59716:1",
+      "assetName": "ic_011018.webp"
+    }
+  ]
+}

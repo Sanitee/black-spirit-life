@@ -1,0 +1,30 @@
+Black Spirit Life source-code license status
+============================================
+
+Copyright (c) 2026 Black Spirit Life contributors. All rights reserved.
+
+No permission is granted to copy, modify, publish, distribute, sublicense,
+sell, or otherwise use the original Black Spirit Life source code except with
+the copyright holder's prior written permission.
+
+This source-code notice does not grant any rights in third-party material.
+In particular, it does not license or relicense:
+
+- Pearl Abyss artwork, names, trademarks, game data, text, or other Black
+  Desert intellectual property;
+- any site-authored prose, presentation, annotations, or database structure
+  from BDO Codex, BDOLytics, or another credited research reference;
+- Workerman / Shrddr map tiles, icons, housing data, or other material;
+- Caphras Archives, Black Desert Foundry, or other third-party datasets or
+  presentation work; or
+- any material identified in THIRD_PARTY_NOTICES.md or ASSET_SOURCES.md.
+
+Pearl Abyss-origin game facts and artwork remain Pearl Abyss material even
+when a credited community site was used as a research or retrieval reference.
+Third-party notices, upstream licenses, the Pearl Abyss fan-content basis, and
+the recorded project-owner community-use decision apply only to the material
+they identify. Nothing in this source-code license expands or replaces those
+separate bases.
+
+This conservative all-rights-reserved status remains in effect unless the
+copyright holder later selects a different source-code license in writing.

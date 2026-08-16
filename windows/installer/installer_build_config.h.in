@@ -1,0 +1,14 @@
+#pragma once
+
+#include <string_view>
+
+namespace bsl::installer::build_config {
+
+inline constexpr std::wstring_view kVersion = L"@BSL_INSTALLER_VERSION@";
+inline constexpr std::wstring_view kBuildNumber = L"@BSL_INSTALLER_BUILD_NUMBER@";
+inline constexpr std::wstring_view kPackageId = L"@BSL_INSTALLER_PACKAGE_ID@";
+inline constexpr std::wstring_view kChannel = L"@BSL_INSTALLER_CHANNEL@";
+inline constexpr std::string_view kPayloadSha256 = "@BSL_INSTALLER_ENGINE_SHA256@";
+inline constexpr bool kHasEmbeddedEngine = @BSL_HAS_EMBEDDED_ENGINE@ != 0;
+
+}  // namespace bsl::installer::build_config

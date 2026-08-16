@@ -1,0 +1,226 @@
+{
+  "fixture": "synthetic-migration-coverage-only",
+  "version": 1,
+  "activeMode": "cooking",
+  "alchemy": {
+    "version": 1,
+    "target": "Clear Liquid Reagent",
+    "want": 3,
+    "bonusTarget": "Pure Powder Reagent",
+    "bonusWant": 2,
+    "inv": {
+      "Weeds": 7,
+      "Purified Water": 2
+    },
+    "done": {},
+    "view": "inventory",
+    "planSearch": "synthetic fixture",
+    "recipeEdits": {},
+    "iconAliases": {},
+    "customIcons": {},
+    "ingredientMeta": {
+      "Weeds": {
+        "category": "Synthetic test group",
+        "sourceNote": "Synthetic fixture only"
+      }
+    },
+    "customCategories": [
+      "Synthetic test group"
+    ],
+    "substituteChoices": {},
+    "ingredientGrades": {
+      "recipe:Clear Liquid Reagent:Weeds": "normal"
+    },
+    "favoriteRecipes": [
+      "Clear Liquid Reagent",
+      "Pure Powder Reagent"
+    ],
+    "hiddenItems": [],
+    "bookFavoritesOnly": false,
+    "bookSearchIngredients": true,
+    "bookSearchRelatedItems": false,
+    "market": {
+      "prices": {
+        "Weeds": 123,
+        "Purified Water": 456
+      },
+      "stock": {
+        "Weeds": 12,
+        "Purified Water": 34
+      },
+      "search": "synthetic",
+      "sort": "price",
+      "amount": 3,
+      "selected": "Clear Liquid Reagent",
+      "fetchedAt": 0,
+      "region": "eu"
+    },
+    "appearance": {
+      "background": "illuminated-ledger",
+      "liveBackdrop": true,
+      "motionIntensity": 0.25,
+      "motionSpeed": 0.25,
+      "particleStyle": "petals",
+      "particleDensity": 0.25,
+      "particleOpacity": 0.5,
+      "particleMinSize": 0.75,
+      "particleMaxSize": 1.25,
+      "particleSize": 1,
+      "particleBlur": 0.1,
+      "particleCustomColor": false,
+      "particleHue": 40,
+      "particleRainbow": false,
+      "particleNeon": false,
+      "buttonEffect": "glow",
+      "buttonEffectIntensity": 0.5,
+      "buttonEffectSpeed": 0.5,
+      "buttonEffectBlur": 0.1,
+      "buttonEffectActiveOnly": false,
+      "buttonEffectCustomColor": false,
+      "buttonEffectHue": 40,
+      "buttonEffectRainbow": false,
+      "buttonEffectNeon": false,
+      "accentHue": 40,
+      "rainbow": false,
+      "neon": false,
+      "backdropBlur": 0,
+      "tabFade": true,
+      "tabTransition": "slide",
+      "presets": [
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    },
+    "ignoreTargetInventory": true,
+    "ignoreIngredientInventory": true,
+    "alchemyYield": 3.2,
+    "alchemyMastery": 0,
+    "cookingMastery": 0,
+    "processingMastery": 0,
+    "useMassProcessing": false,
+    "completedSteps": []
+  },
+  "cooking": {
+    "version": 1,
+    "target": "Beer",
+    "want": 4,
+    "bonusTarget": "Beer",
+    "bonusWant": 2,
+    "inv": {
+      "Wheat": 5
+    },
+    "done": {},
+    "view": "plan",
+    "planSearch": "",
+    "recipeEdits": {},
+    "iconAliases": {},
+    "customIcons": {},
+    "ingredientMeta": {},
+    "customCategories": [],
+    "substituteChoices": {
+      "recipe:Beer:Grain": "Wheat"
+    },
+    "ingredientGrades": {},
+    "favoriteRecipes": [
+      "Beer"
+    ],
+    "hiddenItems": [],
+    "bookFavoritesOnly": false,
+    "bookSearchIngredients": false,
+    "bookSearchRelatedItems": false,
+    "market": {
+      "prices": {
+        "Wheat": 321
+      },
+      "stock": {
+        "Wheat": 9
+      },
+      "search": "",
+      "sort": "name",
+      "amount": 4,
+      "selected": "Beer",
+      "fetchedAt": 0,
+      "region": "eu"
+    },
+    "appearance": {
+      "background": "illuminated-ledger",
+      "tabTransition": "slide"
+    },
+    "ignoreTargetInventory": true,
+    "ignoreIngredientInventory": true,
+    "alchemyYield": 3.2,
+    "alchemyMastery": 0,
+    "cookingMastery": 0,
+    "processingMastery": 0,
+    "useMassProcessing": false,
+    "completedSteps": []
+  },
+  "processing": {
+    "version": 1,
+    "target": "Wheat Flour",
+    "want": 2,
+    "bonusTarget": "Wheat Flour",
+    "bonusWant": 2,
+    "inv": {
+      "Wheat": 6
+    },
+    "done": {},
+    "view": "appearance",
+    "planSearch": "",
+    "recipeEdits": {},
+    "iconAliases": {},
+    "customIcons": {},
+    "ingredientMeta": {},
+    "customCategories": [],
+    "substituteChoices": {},
+    "ingredientGrades": {},
+    "favoriteRecipes": [
+      "Wheat Flour"
+    ],
+    "hiddenItems": [],
+    "bookFavoritesOnly": false,
+    "bookSearchIngredients": false,
+    "bookSearchRelatedItems": false,
+    "market": {
+      "prices": {
+        "Wheat": 222
+      },
+      "stock": {
+        "Wheat": 8
+      },
+      "search": "",
+      "sort": "name",
+      "amount": 2,
+      "selected": "Wheat Flour",
+      "fetchedAt": 0,
+      "region": "eu"
+    },
+    "appearance": {
+      "background": "illuminated-ledger",
+      "tabTransition": "slide"
+    },
+    "ignoreTargetInventory": true,
+    "ignoreIngredientInventory": true,
+    "alchemyYield": 3.2,
+    "alchemyMastery": 0,
+    "cookingMastery": 0,
+    "processingMastery": 2,
+    "useMassProcessing": true,
+    "completedSteps": []
+  },
+  "processingYields": {
+    "defaultYield": 2.5,
+    "Grinding": 3
+  },
+  "marketTax": {
+    "enabled": true,
+    "valuePack": false,
+    "merchantRing": false,
+    "familyFameBonus": 0
+  },
+  "showDeleteTools": false
+}

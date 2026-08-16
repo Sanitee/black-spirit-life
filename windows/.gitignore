@@ -1,0 +1,22 @@
+flutter/ephemeral/
+
+# Visual Studio user-specific files.
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# Visual Studio build-related files.
+x64/
+x86/
+
+# Keep the checksum-pinned Velopack x64 runtime and import library vendored for
+# reproducible Windows release builds; only generated Visual Studio x64
+# folders remain ignored.
+!third_party/velopack/1.2.0/lib/x64/
+
+# Visual Studio cache files
+# files ending in .cache can be ignored
+*.[Cc]ache
+# but keep track of directories ending in .cache
+!*.[Cc]ache/

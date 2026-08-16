@@ -1,0 +1,33 @@
+name: bdo_map_core
+description: Native, reusable Black Desert resource-map engine and interface.
+version: 0.1.0
+publish_to: none
+
+environment:
+  sdk: ^3.12.2
+  flutter: ">=3.44.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  http: ^1.6.0
+
+dev_dependencies:
+  crypto: ^3.0.7
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+
+flutter:
+  assets:
+    - assets/data/lodging_houses.json
+    - assets/data/resource_map.json
+    - assets/data/royal_workshop_goods.json
+    - assets/data/worker_economics.json
+    - assets/images/gathering_tools/
+    - assets/images/node_icons/
+    - assets/images/node_icons/gray/
+    - assets/images/node_icons/highlighted/
+    - assets/images/node_icons/highlighted/gray/
+    - assets/images/vendor_portraits/
+    - assets/licenses/

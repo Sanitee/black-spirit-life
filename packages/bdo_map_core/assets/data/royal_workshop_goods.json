@@ -1,0 +1,1002 @@
+{
+    "schemaVersion":  1,
+    "source":  {
+                   "title":  "Black Desert client item metadata (private research extract)",
+                   "snapshot":  "2026-07-30",
+                   "note":  "Reference prices are metadata only. No Royal Workshop RNG rate or profit is inferred."
+               },
+    "goods":  [
+                  {
+                      "id":  821034,
+                      "name":  "Hwamunseok",
+                      "kind":  "processing",
+                      "referencePrice":  247240,
+                      "durationAt150WorkerSpeedHours":  null,
+                      "rareRoll":  false
+                  },
+                  {
+                      "id":  821035,
+                      "name":  "Jukbuin Body Pillow",
+                      "kind":  "processing",
+                      "referencePrice":  195660,
+                      "durationAt150WorkerSpeedHours":  null,
+                      "rareRoll":  false
+                  },
+                  {
+                      "id":  821036,
+                      "name":  "Jegi",
+                      "kind":  "processing",
+                      "referencePrice":  217700,
+                      "durationAt150WorkerSpeedHours":  null,
+                      "rareRoll":  false
+                  },
+                  {
+                      "id":  821037,
+                      "name":  "Yut Dice",
+                      "kind":  "processing",
+                      "referencePrice":  192190,
+                      "durationAt150WorkerSpeedHours":  null,
+                      "rareRoll":  false
+                  },
+                  {
+                      "id":  821038,
+                      "name":  "Chilseong Bells",
+                      "kind":  "processing",
+                      "referencePrice":  219380,
+                      "durationAt150WorkerSpeedHours":  null,
+                      "rareRoll":  false
+                  },
+                  {
+                      "id":  821039,
+                      "name":  "Juryeonggu Die",
+                      "kind":  "processing",
+                      "referencePrice":  197500,
+                      "durationAt150WorkerSpeedHours":  null,
+                      "rareRoll":  false
+                  },
+                  {
+                      "id":  821040,
+                      "name":  "Top",
+                      "kind":  "processing",
+                      "referencePrice":  196820,
+                      "durationAt150WorkerSpeedHours":  null,
+                      "rareRoll":  false
+                  },
+                  {
+                      "id":  821041,
+                      "name":  "Brass Bowl",
+                      "kind":  "processing",
+                      "referencePrice":  227350,
+                      "durationAt150WorkerSpeedHours":  null,
+                      "rareRoll":  false
+                  },
+                  {
+                      "id":  821042,
+                      "name":  "Tuho",
+                      "kind":  "processing",
+                      "referencePrice":  231150,
+                      "durationAt150WorkerSpeedHours":  null,
+                      "rareRoll":  false
+                  },
+                  {
+                      "id":  821043,
+                      "name":  "Shield Kite",
+                      "kind":  "processing",
+                      "referencePrice":  220260,
+                      "durationAt150WorkerSpeedHours":  null,
+                      "rareRoll":  false
+                  },
+                  {
+                      "id":  821044,
+                      "name":  "Hyojason",
+                      "kind":  "processing",
+                      "referencePrice":  114750,
+                      "durationAt150WorkerSpeedHours":  null,
+                      "rareRoll":  false
+                  },
+                  {
+                      "id":  821045,
+                      "name":  "Safflower Blade",
+                      "kind":  "processing",
+                      "referencePrice":  222980,
+                      "durationAt150WorkerSpeedHours":  null,
+                      "rareRoll":  false
+                  },
+                  {
+                      "id":  821046,
+                      "name":  "Ramie Clothing",
+                      "kind":  "processing",
+                      "referencePrice":  188970,
+                      "durationAt150WorkerSpeedHours":  null,
+                      "rareRoll":  false
+                  },
+                  {
+                      "id":  821047,
+                      "name":  "Silk",
+                      "kind":  "processing",
+                      "referencePrice":  188780,
+                      "durationAt150WorkerSpeedHours":  null,
+                      "rareRoll":  false
+                  },
+                  {
+                      "id":  821048,
+                      "name":  "Chamber Pot",
+                      "kind":  "processing",
+                      "referencePrice":  209880,
+                      "durationAt150WorkerSpeedHours":  null,
+                      "rareRoll":  false
+                  },
+                  {
+                      "id":  821049,
+                      "name":  "Well-prepared Top-quality Sticky Rice",
+                      "kind":  "processing",
+                      "referencePrice":  198420,
+                      "durationAt150WorkerSpeedHours":  null,
+                      "rareRoll":  false
+                  },
+                  {
+                      "id":  821050,
+                      "name":  "Ball of Shimmering Silk Thread",
+                      "kind":  "processing",
+                      "referencePrice":  152090,
+                      "durationAt150WorkerSpeedHours":  null,
+                      "rareRoll":  false
+                  },
+                  {
+                      "id":  821051,
+                      "name":  "Light Pink Bundle",
+                      "kind":  "processing",
+                      "referencePrice":  205580,
+                      "durationAt150WorkerSpeedHours":  null,
+                      "rareRoll":  false
+                  },
+                  {
+                      "id":  821052,
+                      "name":  "Ornamented Red Bundle",
+                      "kind":  "processing",
+                      "referencePrice":  219340,
+                      "durationAt150WorkerSpeedHours":  null,
+                      "rareRoll":  false
+                  },
+                  {
+                      "id":  821053,
+                      "name":  "Ornamented Purple Bundle",
+                      "kind":  "processing",
+                      "referencePrice":  209910,
+                      "durationAt150WorkerSpeedHours":  null,
+                      "rareRoll":  false
+                  },
+                  {
+                      "id":  821054,
+                      "name":  "Celadon Bottle",
+                      "kind":  "processing",
+                      "referencePrice":  298200,
+                      "durationAt150WorkerSpeedHours":  null,
+                      "rareRoll":  false
+                  },
+                  {
+                      "id":  821055,
+                      "name":  "Blue Underglaze Porcelain Bottle",
+                      "kind":  "processing",
+                      "referencePrice":  227590,
+                      "durationAt150WorkerSpeedHours":  null,
+                      "rareRoll":  false
+                  },
+                  {
+                      "id":  821056,
+                      "name":  "Buncheong Bottle",
+                      "kind":  "processing",
+                      "referencePrice":  252900,
+                      "durationAt150WorkerSpeedHours":  null,
+                      "rareRoll":  false
+                  },
+                  {
+                      "id":  821057,
+                      "name":  "Sojutgori",
+                      "kind":  "processing",
+                      "referencePrice":  231620,
+                      "durationAt150WorkerSpeedHours":  null,
+                      "rareRoll":  false
+                  },
+                  {
+                      "id":  821058,
+                      "name":  "Lotus Leaf Bottle",
+                      "kind":  "processing",
+                      "referencePrice":  230300,
+                      "durationAt150WorkerSpeedHours":  null,
+                      "rareRoll":  false
+                  },
+                  {
+                      "id":  821059,
+                      "name":  "Iron Underglaze White Porcelain",
+                      "kind":  "processing",
+                      "referencePrice":  228220,
+                      "durationAt150WorkerSpeedHours":  null,
+                      "rareRoll":  false
+                  },
+                  {
+                      "id":  821060,
+                      "name":  "Buncheong Ware",
+                      "kind":  "processing",
+                      "referencePrice":  301220,
+                      "durationAt150WorkerSpeedHours":  null,
+                      "rareRoll":  false
+                  },
+                  {
+                      "id":  821061,
+                      "name":  "Chrysanthemum Pattern Bottle",
+                      "kind":  "processing",
+                      "referencePrice":  255810,
+                      "durationAt150WorkerSpeedHours":  null,
+                      "rareRoll":  false
+                  },
+                  {
+                      "id":  821062,
+                      "name":  "Gilded Lacquer Chest",
+                      "kind":  "processing",
+                      "referencePrice":  210610,
+                      "durationAt150WorkerSpeedHours":  null,
+                      "rareRoll":  false
+                  },
+                  {
+                      "id":  821063,
+                      "name":  "Gyeongdae",
+                      "kind":  "processing",
+                      "referencePrice":  164970,
+                      "durationAt150WorkerSpeedHours":  null,
+                      "rareRoll":  false
+                  },
+                  {
+                      "id":  821064,
+                      "name":  "Identification Card",
+                      "kind":  "processing",
+                      "referencePrice":  205580,
+                      "durationAt150WorkerSpeedHours":  null,
+                      "rareRoll":  false
+                  },
+                  {
+                      "id":  821065,
+                      "name":  "Siru",
+                      "kind":  "processing",
+                      "referencePrice":  156900,
+                      "durationAt150WorkerSpeedHours":  null,
+                      "rareRoll":  false
+                  },
+                  {
+                      "id":  821066,
+                      "name":  "Ink-scented Box",
+                      "kind":  "processing",
+                      "referencePrice":  167610,
+                      "durationAt150WorkerSpeedHours":  null,
+                      "rareRoll":  false
+                  },
+                  {
+                      "id":  821067,
+                      "name":  "Round Basket",
+                      "kind":  "processing",
+                      "referencePrice":  194530,
+                      "durationAt150WorkerSpeedHours":  null,
+                      "rareRoll":  false
+                  },
+                  {
+                      "id":  821068,
+                      "name":  "Subtle Fragrance Box",
+                      "kind":  "processing",
+                      "referencePrice":  226750,
+                      "durationAt150WorkerSpeedHours":  null,
+                      "rareRoll":  false
+                  },
+                  {
+                      "id":  821069,
+                      "name":  "Straw Sheaf Box",
+                      "kind":  "processing",
+                      "referencePrice":  205690,
+                      "durationAt150WorkerSpeedHours":  null,
+                      "rareRoll":  false
+                  },
+                  {
+                      "id":  821070,
+                      "name":  "Bamboo Sap",
+                      "kind":  "processing",
+                      "referencePrice":  147800,
+                      "durationAt150WorkerSpeedHours":  null,
+                      "rareRoll":  false
+                  },
+                  {
+                      "id":  821071,
+                      "name":  "Pickled Green Plum",
+                      "kind":  "processing",
+                      "referencePrice":  125520,
+                      "durationAt150WorkerSpeedHours":  null,
+                      "rareRoll":  false
+                  },
+                  {
+                      "id":  821072,
+                      "name":  "Gamtu",
+                      "kind":  "processing",
+                      "referencePrice":  154700,
+                      "durationAt150WorkerSpeedHours":  null,
+                      "rareRoll":  false
+                  },
+                  {
+                      "id":  821073,
+                      "name":  "Pruned Bamboo Shoot",
+                      "kind":  "processing",
+                      "referencePrice":  191510,
+                      "durationAt150WorkerSpeedHours":  null,
+                      "rareRoll":  false
+                  },
+                  {
+                      "id":  821074,
+                      "name":  "Brass Jewelry Box",
+                      "kind":  "processing",
+                      "referencePrice":  191060,
+                      "durationAt150WorkerSpeedHours":  null,
+                      "rareRoll":  false
+                  },
+                  {
+                      "id":  821075,
+                      "name":  "Straw Sheaf Doll",
+                      "kind":  "processing",
+                      "referencePrice":  187920,
+                      "durationAt150WorkerSpeedHours":  null,
+                      "rareRoll":  false
+                  },
+                  {
+                      "id":  821076,
+                      "name":  "Empty Luxurious Perfume Bottle",
+                      "kind":  "processing",
+                      "referencePrice":  223200,
+                      "durationAt150WorkerSpeedHours":  null,
+                      "rareRoll":  false
+                  },
+                  {
+                      "id":  821077,
+                      "name":  "Resilient Hwanghae Cord",
+                      "kind":  "processing",
+                      "referencePrice":  216880,
+                      "durationAt150WorkerSpeedHours":  null,
+                      "rareRoll":  false
+                  },
+                  {
+                      "id":  821078,
+                      "name":  "Sturdy Hwanghae Steel Scissors",
+                      "kind":  "processing",
+                      "referencePrice":  156980,
+                      "durationAt150WorkerSpeedHours":  null,
+                      "rareRoll":  false
+                  },
+                  {
+                      "id":  821079,
+                      "name":  "Common Yellow Ceramic",
+                      "kind":  "processing",
+                      "referencePrice":  177380,
+                      "durationAt150WorkerSpeedHours":  null,
+                      "rareRoll":  false
+                  },
+                  {
+                      "id":  821080,
+                      "name":  "White Hwanghae Porcelain Bottle",
+                      "kind":  "processing",
+                      "referencePrice":  258190,
+                      "durationAt150WorkerSpeedHours":  null,
+                      "rareRoll":  false
+                  },
+                  {
+                      "id":  821081,
+                      "name":  "Luck-bringing Rice Sieve",
+                      "kind":  "processing",
+                      "referencePrice":  162440,
+                      "durationAt150WorkerSpeedHours":  null,
+                      "rareRoll":  false
+                  },
+                  {
+                      "id":  821082,
+                      "name":  "Well-brewed Hwanghae Decoction",
+                      "kind":  "processing",
+                      "referencePrice":  184210,
+                      "durationAt150WorkerSpeedHours":  null,
+                      "rareRoll":  false
+                  },
+                  {
+                      "id":  821083,
+                      "name":  "Gift Bundle",
+                      "kind":  "processing",
+                      "referencePrice":  180230,
+                      "durationAt150WorkerSpeedHours":  null,
+                      "rareRoll":  false
+                  },
+                  {
+                      "id":  821084,
+                      "name":  "Broom Made with Straw Sheaves",
+                      "kind":  "processing",
+                      "referencePrice":  192130,
+                      "durationAt150WorkerSpeedHours":  null,
+                      "rareRoll":  false
+                  },
+                  {
+                      "id":  821085,
+                      "name":  "Top-Quality Flower Shoes",
+                      "kind":  "processing",
+                      "referencePrice":  191490,
+                      "durationAt150WorkerSpeedHours":  null,
+                      "rareRoll":  false
+                  },
+                  {
+                      "id":  821086,
+                      "name":  "White Porcelain-contained Makgeolli",
+                      "kind":  "processing",
+                      "referencePrice":  159430,
+                      "durationAt150WorkerSpeedHours":  null,
+                      "rareRoll":  false
+                  },
+                  {
+                      "id":  821087,
+                      "name":  "Jar-contained Makgeolli",
+                      "kind":  "processing",
+                      "referencePrice":  198360,
+                      "durationAt150WorkerSpeedHours":  null,
+                      "rareRoll":  false
+                  },
+                  {
+                      "id":  821088,
+                      "name":  "Ceramic-bottled Makgeolli",
+                      "kind":  "processing",
+                      "referencePrice":  159480,
+                      "durationAt150WorkerSpeedHours":  null,
+                      "rareRoll":  false
+                  },
+                  {
+                      "id":  821089,
+                      "name":  "Hwanghae Poetry",
+                      "kind":  "processing",
+                      "referencePrice":  234650,
+                      "durationAt150WorkerSpeedHours":  null,
+                      "rareRoll":  false
+                  },
+                  {
+                      "id":  821090,
+                      "name":  "Glamorous Patterned Blue Underglaze Porcelain",
+                      "kind":  "processing",
+                      "referencePrice":  190310,
+                      "durationAt150WorkerSpeedHours":  null,
+                      "rareRoll":  false
+                  },
+                  {
+                      "id":  821091,
+                      "name":  "Medicinal Brewer",
+                      "kind":  "processing",
+                      "referencePrice":  209180,
+                      "durationAt150WorkerSpeedHours":  null,
+                      "rareRoll":  false
+                  },
+                  {
+                      "id":  821092,
+                      "name":  "Mud Brick",
+                      "kind":  "processing",
+                      "referencePrice":  140740,
+                      "durationAt150WorkerSpeedHours":  null,
+                      "rareRoll":  false
+                  },
+                  {
+                      "id":  821093,
+                      "name":  "Sturdy Sack",
+                      "kind":  "processing",
+                      "referencePrice":  183850,
+                      "durationAt150WorkerSpeedHours":  null,
+                      "rareRoll":  false
+                  },
+                  {
+                      "id":  821094,
+                      "name":  "Hwanghae Supply Package",
+                      "kind":  "processing",
+                      "referencePrice":  164420,
+                      "durationAt150WorkerSpeedHours":  null,
+                      "rareRoll":  false
+                  },
+                  {
+                      "id":  821095,
+                      "name":  "Green Manure Fertilizer",
+                      "kind":  "processing",
+                      "referencePrice":  240970,
+                      "durationAt150WorkerSpeedHours":  null,
+                      "rareRoll":  false
+                  },
+                  {
+                      "id":  821096,
+                      "name":  "Hwanghae Cannonball Cache",
+                      "kind":  "processing",
+                      "referencePrice":  215060,
+                      "durationAt150WorkerSpeedHours":  null,
+                      "rareRoll":  false
+                  },
+                  {
+                      "id":  821097,
+                      "name":  "Hwanghae Soldier\u0027s Spear",
+                      "kind":  "processing",
+                      "referencePrice":  149620,
+                      "durationAt150WorkerSpeedHours":  null,
+                      "rareRoll":  false
+                  },
+                  {
+                      "id":  821098,
+                      "name":  "Rounded Coal Bag",
+                      "kind":  "processing",
+                      "referencePrice":  215110,
+                      "durationAt150WorkerSpeedHours":  null,
+                      "rareRoll":  false
+                  },
+                  {
+                      "id":  821099,
+                      "name":  "Brush Container",
+                      "kind":  "processing",
+                      "referencePrice":  226990,
+                      "durationAt150WorkerSpeedHours":  null,
+                      "rareRoll":  false
+                  },
+                  {
+                      "id":  821100,
+                      "name":  "Morninglander\u0027s Versatile Pouch",
+                      "kind":  "processing",
+                      "referencePrice":  195300,
+                      "durationAt150WorkerSpeedHours":  null,
+                      "rareRoll":  false
+                  },
+                  {
+                      "id":  821101,
+                      "name":  "White Porcelain Tea Caddy",
+                      "kind":  "processing",
+                      "referencePrice":  151550,
+                      "durationAt150WorkerSpeedHours":  null,
+                      "rareRoll":  false
+                  },
+                  {
+                      "id":  821102,
+                      "name":  "Hapjukseon",
+                      "kind":  "processing",
+                      "referencePrice":  188050,
+                      "durationAt150WorkerSpeedHours":  null,
+                      "rareRoll":  false
+                  },
+                  {
+                      "id":  821103,
+                      "name":  "Coal Dust Pouch",
+                      "kind":  "processing",
+                      "referencePrice":  238110,
+                      "durationAt150WorkerSpeedHours":  null,
+                      "rareRoll":  false
+                  },
+                  {
+                      "id":  821104,
+                      "name":  "Bronze Arrowhead",
+                      "kind":  "processing",
+                      "referencePrice":  117110,
+                      "durationAt150WorkerSpeedHours":  null,
+                      "rareRoll":  false
+                  },
+                  {
+                      "id":  821105,
+                      "name":  "Refined Dried Mud",
+                      "kind":  "processing",
+                      "referencePrice":  238100,
+                      "durationAt150WorkerSpeedHours":  null,
+                      "rareRoll":  false
+                  },
+                  {
+                      "id":  821106,
+                      "name":  "Clay",
+                      "kind":  "production",
+                      "referencePrice":  10000,
+                      "durationAt150WorkerSpeedHours":  null,
+                      "rareRoll":  false
+                  },
+                  {
+                      "id":  821107,
+                      "name":  "Mud",
+                      "kind":  "production",
+                      "referencePrice":  11000,
+                      "durationAt150WorkerSpeedHours":  null,
+                      "rareRoll":  false
+                  },
+                  {
+                      "id":  821108,
+                      "name":  "Quartz Sand",
+                      "kind":  "production",
+                      "referencePrice":  11000,
+                      "durationAt150WorkerSpeedHours":  null,
+                      "rareRoll":  false
+                  },
+                  {
+                      "id":  821109,
+                      "name":  "Bamboo",
+                      "kind":  "production",
+                      "referencePrice":  12000,
+                      "durationAt150WorkerSpeedHours":  null,
+                      "rareRoll":  false
+                  },
+                  {
+                      "id":  821110,
+                      "name":  "Straw Sheaf",
+                      "kind":  "production",
+                      "referencePrice":  12000,
+                      "durationAt150WorkerSpeedHours":  null,
+                      "rareRoll":  false
+                  },
+                  {
+                      "id":  821111,
+                      "name":  "Hanji",
+                      "kind":  "production",
+                      "referencePrice":  18000,
+                      "durationAt150WorkerSpeedHours":  null,
+                      "rareRoll":  false
+                  },
+                  {
+                      "id":  821112,
+                      "name":  "Alloy Ingot",
+                      "kind":  "production",
+                      "referencePrice":  10000,
+                      "durationAt150WorkerSpeedHours":  null,
+                      "rareRoll":  false
+                  },
+                  {
+                      "id":  821113,
+                      "name":  "Nacre",
+                      "kind":  "production",
+                      "referencePrice":  18000,
+                      "durationAt150WorkerSpeedHours":  null,
+                      "rareRoll":  false
+                  },
+                  {
+                      "id":  821114,
+                      "name":  "Ink Stick",
+                      "kind":  "production",
+                      "referencePrice":  24000,
+                      "durationAt150WorkerSpeedHours":  null,
+                      "rareRoll":  false
+                  },
+                  {
+                      "id":  821115,
+                      "name":  "Ramie",
+                      "kind":  "production",
+                      "referencePrice":  18000,
+                      "durationAt150WorkerSpeedHours":  null,
+                      "rareRoll":  false
+                  },
+                  {
+                      "id":  821116,
+                      "name":  "Thunderstruck Jujube Wood",
+                      "kind":  "production",
+                      "referencePrice":  12000,
+                      "durationAt150WorkerSpeedHours":  null,
+                      "rareRoll":  false
+                  },
+                  {
+                      "id":  821117,
+                      "name":  "Charred Timber",
+                      "kind":  "production",
+                      "referencePrice":  11000,
+                      "durationAt150WorkerSpeedHours":  null,
+                      "rareRoll":  false
+                  },
+                  {
+                      "id":  821118,
+                      "name":  "Well-tanned Top-quality Deer Fur",
+                      "kind":  "production",
+                      "referencePrice":  35000,
+                      "durationAt150WorkerSpeedHours":  null,
+                      "rareRoll":  false
+                  },
+                  {
+                      "id":  821119,
+                      "name":  "Dew-kissed Sweet Rice",
+                      "kind":  "production",
+                      "referencePrice":  35000,
+                      "durationAt150WorkerSpeedHours":  null,
+                      "rareRoll":  false
+                  },
+                  {
+                      "id":  821120,
+                      "name":  "Dew-kissed Green Plum",
+                      "kind":  "production",
+                      "referencePrice":  35000,
+                      "durationAt150WorkerSpeedHours":  null,
+                      "rareRoll":  false
+                  },
+                  {
+                      "id":  821121,
+                      "name":  "Wanggol",
+                      "kind":  "production",
+                      "referencePrice":  35000,
+                      "durationAt150WorkerSpeedHours":  null,
+                      "rareRoll":  false
+                  },
+                  {
+                      "id":  821122,
+                      "name":  "Dew-kissed Ginseng",
+                      "kind":  "production",
+                      "referencePrice":  36000,
+                      "durationAt150WorkerSpeedHours":  null,
+                      "rareRoll":  false
+                  },
+                  {
+                      "id":  821123,
+                      "name":  "Well-tanned Top-quality Cow Hide",
+                      "kind":  "production",
+                      "referencePrice":  36000,
+                      "durationAt150WorkerSpeedHours":  null,
+                      "rareRoll":  false
+                  },
+                  {
+                      "id":  821124,
+                      "name":  "Najeonheukchil Chest",
+                      "kind":  "processing",
+                      "referencePrice":  10000000,
+                      "durationAt150WorkerSpeedHours":  null,
+                      "rareRoll":  false
+                  },
+                  {
+                      "id":  821125,
+                      "name":  "Pipe",
+                      "kind":  "processing",
+                      "referencePrice":  10000000,
+                      "durationAt150WorkerSpeedHours":  null,
+                      "rareRoll":  false
+                  },
+                  {
+                      "id":  821126,
+                      "name":  "Deer Fur Brush",
+                      "kind":  "processing",
+                      "referencePrice":  10000000,
+                      "durationAt150WorkerSpeedHours":  null,
+                      "rareRoll":  false
+                  },
+                  {
+                      "id":  821127,
+                      "name":  "Gyeongguk Daejeon (Replica)",
+                      "kind":  "processing",
+                      "referencePrice":  10000000,
+                      "durationAt150WorkerSpeedHours":  null,
+                      "rareRoll":  false
+                  },
+                  {
+                      "id":  821128,
+                      "name":  "White Porcelain",
+                      "kind":  "processing",
+                      "referencePrice":  10000000,
+                      "durationAt150WorkerSpeedHours":  null,
+                      "rareRoll":  false
+                  },
+                  {
+                      "id":  821129,
+                      "name":  "Bronze Movable Type",
+                      "kind":  "processing",
+                      "referencePrice":  10000000,
+                      "durationAt150WorkerSpeedHours":  null,
+                      "rareRoll":  false
+                  },
+                  {
+                      "id":  821130,
+                      "name":  "Najeonpalgak Chest",
+                      "kind":  "processing",
+                      "referencePrice":  10000000,
+                      "durationAt150WorkerSpeedHours":  null,
+                      "rareRoll":  false
+                  },
+                  {
+                      "id":  821131,
+                      "name":  "Baekseju",
+                      "kind":  "processing",
+                      "referencePrice":  10000000,
+                      "durationAt150WorkerSpeedHours":  null,
+                      "rareRoll":  false
+                  },
+                  {
+                      "id":  821132,
+                      "name":  "Blue Underglaze Porcelain",
+                      "kind":  "processing",
+                      "referencePrice":  10000000,
+                      "durationAt150WorkerSpeedHours":  null,
+                      "rareRoll":  false
+                  },
+                  {
+                      "id":  821133,
+                      "name":  "Cloudcaller Janggu",
+                      "kind":  "processing",
+                      "referencePrice":  10000000,
+                      "durationAt150WorkerSpeedHours":  null,
+                      "rareRoll":  false
+                  },
+                  {
+                      "id":  821134,
+                      "name":  "Ebongild Chest",
+                      "kind":  "processing",
+                      "referencePrice":  10000000,
+                      "durationAt150WorkerSpeedHours":  null,
+                      "rareRoll":  false
+                  },
+                  {
+                      "id":  821135,
+                      "name":  "Royal Edict",
+                      "kind":  "processing",
+                      "referencePrice":  10000000,
+                      "durationAt150WorkerSpeedHours":  null,
+                      "rareRoll":  false
+                  },
+                  {
+                      "id":  821136,
+                      "name":  "Bountiful Feast",
+                      "kind":  "production",
+                      "referencePrice":  1500000000,
+                      "durationAt150WorkerSpeedHours":  29,
+                      "rareRoll":  true
+                  },
+                  {
+                      "id":  821137,
+                      "name":  "Refined Feast",
+                      "kind":  "production",
+                      "referencePrice":  0,
+                      "durationAt150WorkerSpeedHours":  29,
+                      "rareRoll":  true
+                  },
+                  {
+                      "id":  821138,
+                      "name":  "Traditional Tea \u0026 Snacks",
+                      "kind":  "production",
+                      "referencePrice":  300000000,
+                      "durationAt150WorkerSpeedHours":  29,
+                      "rareRoll":  true
+                  },
+                  {
+                      "id":  821139,
+                      "name":  "Assorted Tteok",
+                      "kind":  "production",
+                      "referencePrice":  0,
+                      "durationAt150WorkerSpeedHours":  29,
+                      "rareRoll":  true
+                  },
+                  {
+                      "id":  821140,
+                      "name":  "Assorted Kimchi",
+                      "kind":  "production",
+                      "referencePrice":  1500000000,
+                      "durationAt150WorkerSpeedHours":  29,
+                      "rareRoll":  true
+                  },
+                  {
+                      "id":  821141,
+                      "name":  "Tricolor Namul",
+                      "kind":  "production",
+                      "referencePrice":  0,
+                      "durationAt150WorkerSpeedHours":  29,
+                      "rareRoll":  true
+                  },
+                  {
+                      "id":  821142,
+                      "name":  "Yeolgujatang",
+                      "kind":  "production",
+                      "referencePrice":  2000000000,
+                      "durationAt150WorkerSpeedHours":  29,
+                      "rareRoll":  true
+                  },
+                  {
+                      "id":  821143,
+                      "name":  "Gujeolpan",
+                      "kind":  "production",
+                      "referencePrice":  0,
+                      "durationAt150WorkerSpeedHours":  29,
+                      "rareRoll":  true
+                  },
+                  {
+                      "id":  821144,
+                      "name":  "Mystical Herbal Medicine",
+                      "kind":  "production",
+                      "referencePrice":  0,
+                      "durationAt150WorkerSpeedHours":  29,
+                      "rareRoll":  true
+                  },
+                  {
+                      "id":  821145,
+                      "name":  "Mellow Herbal Medicine",
+                      "kind":  "production",
+                      "referencePrice":  0,
+                      "durationAt150WorkerSpeedHours":  29,
+                      "rareRoll":  true
+                  },
+                  {
+                      "id":  821146,
+                      "name":  "Artisinal Nacre",
+                      "kind":  "production",
+                      "referencePrice":  10480000,
+                      "durationAt150WorkerSpeedHours":  29,
+                      "rareRoll":  true
+                  },
+                  {
+                      "id":  821147,
+                      "name":  "Artisinal Bamboo",
+                      "kind":  "production",
+                      "referencePrice":  10050000,
+                      "durationAt150WorkerSpeedHours":  29,
+                      "rareRoll":  true
+                  },
+                  {
+                      "id":  821148,
+                      "name":  "Artisinal Deer Fur",
+                      "kind":  "production",
+                      "referencePrice":  10280000,
+                      "durationAt150WorkerSpeedHours":  29,
+                      "rareRoll":  true
+                  },
+                  {
+                      "id":  821149,
+                      "name":  "Artisinal Hanji",
+                      "kind":  "production",
+                      "referencePrice":  10340000,
+                      "durationAt150WorkerSpeedHours":  29,
+                      "rareRoll":  true
+                  },
+                  {
+                      "id":  821150,
+                      "name":  "Artisinal Mud",
+                      "kind":  "production",
+                      "referencePrice":  10010000,
+                      "durationAt150WorkerSpeedHours":  29,
+                      "rareRoll":  true
+                  },
+                  {
+                      "id":  821151,
+                      "name":  "Artisinal Alloy Ingot",
+                      "kind":  "production",
+                      "referencePrice":  10360000,
+                      "durationAt150WorkerSpeedHours":  29,
+                      "rareRoll":  true
+                  },
+                  {
+                      "id":  821152,
+                      "name":  "Artisinal Thunderstruck Jujube Wood",
+                      "kind":  "production",
+                      "referencePrice":  10130000,
+                      "durationAt150WorkerSpeedHours":  29,
+                      "rareRoll":  true
+                  },
+                  {
+                      "id":  821153,
+                      "name":  "Artisinal Sweet Rice",
+                      "kind":  "production",
+                      "referencePrice":  10020000,
+                      "durationAt150WorkerSpeedHours":  29,
+                      "rareRoll":  true
+                  },
+                  {
+                      "id":  821154,
+                      "name":  "Artisinal Clay",
+                      "kind":  "production",
+                      "referencePrice":  10015000,
+                      "durationAt150WorkerSpeedHours":  29,
+                      "rareRoll":  true
+                  },
+                  {
+                      "id":  821155,
+                      "name":  "Artisinal Cow Hide",
+                      "kind":  "production",
+                      "referencePrice":  10340000,
+                      "durationAt150WorkerSpeedHours":  29,
+                      "rareRoll":  true
+                  },
+                  {
+                      "id":  821156,
+                      "name":  "Artisinal Charred Timber",
+                      "kind":  "production",
+                      "referencePrice":  10020000,
+                      "durationAt150WorkerSpeedHours":  29,
+                      "rareRoll":  true
+                  },
+                  {
+                      "id":  821157,
+                      "name":  "Artisinal Ink Stick",
+                      "kind":  "production",
+                      "referencePrice":  10210000,
+                      "durationAt150WorkerSpeedHours":  29,
+                      "rareRoll":  true
+                  }
+              ]
+}

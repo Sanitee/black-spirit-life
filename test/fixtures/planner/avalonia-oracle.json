@@ -1,0 +1,589 @@
+{
+  "oracle": "protected Avalonia PlannerEngine.cs \u002B PlannerModels.cs",
+  "scenarios": [
+    {
+      "name": "nested_inventory",
+      "mode": "alchemy",
+      "result": {
+        "target": "Final Elixir",
+        "want": 10,
+        "steps": [
+          {
+            "name": "Reagent",
+            "index": 0,
+            "count": 20,
+            "batchCount": 20,
+            "batchSize": 1,
+            "produced": 20,
+            "demand": 20,
+            "net": 20,
+            "depth": 1,
+            "ingredients": [
+              {
+                "key": "Rough Stone",
+                "name": "Rough Stone",
+                "original": "Rough Stone",
+                "substituteGroup": "Rough Stone",
+                "baseName": "Rough Stone",
+                "grade": "normal",
+                "options": [],
+                "parentName": "Reagent",
+                "need": 80,
+                "have": 5,
+                "missing": 75,
+                "craftable": false
+              }
+            ]
+          },
+          {
+            "name": "Final Elixir",
+            "index": 1,
+            "count": 10,
+            "batchCount": 10,
+            "batchSize": 1,
+            "produced": 10,
+            "demand": 10,
+            "net": 10,
+            "depth": 0,
+            "ingredients": [
+              {
+                "key": "Reagent",
+                "name": "Reagent",
+                "original": "Reagent",
+                "substituteGroup": "Reagent",
+                "baseName": "Reagent",
+                "grade": "normal",
+                "options": [],
+                "parentName": "Final Elixir",
+                "need": 20,
+                "have": 0,
+                "missing": 20,
+                "craftable": true
+              },
+              {
+                "key": "Silver Azalea",
+                "name": "Silver Azalea",
+                "original": "Silver Azalea",
+                "substituteGroup": "Silver Azalea",
+                "baseName": "Silver Azalea",
+                "grade": "normal",
+                "options": [],
+                "parentName": "Final Elixir",
+                "need": 30,
+                "have": 10,
+                "missing": 20,
+                "craftable": false
+              }
+            ]
+          }
+        ],
+        "missing": [
+          {
+            "name": "Rough Stone",
+            "key": "Rough Stone",
+            "category": "Base Items",
+            "need": 80,
+            "have": 5,
+            "missing": 75,
+            "choice": null,
+            "market": {
+              "marketable": false,
+              "stock": 0,
+              "price": 0,
+              "buyable": 0,
+              "unavailable": 0,
+              "total": 0,
+              "status": "none",
+              "hasSourceInfo": false,
+              "stockKnown": true
+            }
+          },
+          {
+            "name": "Silver Azalea",
+            "key": "Silver Azalea",
+            "category": "Base Items",
+            "need": 30,
+            "have": 10,
+            "missing": 20,
+            "choice": null,
+            "market": {
+              "marketable": false,
+              "stock": 0,
+              "price": 0,
+              "buyable": 0,
+              "unavailable": 0,
+              "total": 0,
+              "status": "none",
+              "hasSourceInfo": false,
+              "stockKnown": true
+            }
+          }
+        ],
+        "empty": false
+      }
+    },
+    {
+      "name": "substitute_ratio",
+      "mode": "alchemy",
+      "result": {
+        "target": "Choice Tonic",
+        "want": 4,
+        "steps": [
+          {
+            "name": "Choice Tonic",
+            "index": 0,
+            "count": 4,
+            "batchCount": 4,
+            "batchSize": 1,
+            "produced": 4,
+            "demand": 4,
+            "net": 4,
+            "depth": 0,
+            "ingredients": [
+              {
+                "key": "Sunrise Herb",
+                "name": "Sunrise Herb",
+                "original": "Wild Plant",
+                "substituteGroup": "Herb group",
+                "baseName": "Sunrise Herb",
+                "grade": "normal",
+                "options": [
+                  "Wild Plant",
+                  "Sunrise Herb"
+                ],
+                "parentName": "Choice Tonic",
+                "need": 40,
+                "have": 0,
+                "missing": 40,
+                "craftable": false
+              }
+            ]
+          }
+        ],
+        "missing": [
+          {
+            "name": "Sunrise Herb",
+            "key": "Sunrise Herb",
+            "category": "Base Items",
+            "need": 40,
+            "have": 0,
+            "missing": 40,
+            "choice": {
+              "parentName": "Choice Tonic",
+              "original": "Wild Plant",
+              "substituteGroup": "Herb group",
+              "options": [
+                "Wild Plant",
+                "Sunrise Herb"
+              ],
+              "baseName": "Sunrise Herb"
+            },
+            "market": {
+              "marketable": false,
+              "stock": 0,
+              "price": 0,
+              "buyable": 0,
+              "unavailable": 0,
+              "total": 0,
+              "status": "none",
+              "hasSourceInfo": false,
+              "stockKnown": true
+            }
+          }
+        ],
+        "empty": false
+      }
+    },
+    {
+      "name": "quality_high",
+      "mode": "cooking",
+      "result": {
+        "target": "Meal",
+        "want": 8,
+        "steps": [
+          {
+            "name": "Meal",
+            "index": 0,
+            "count": 8,
+            "batchCount": 8,
+            "batchSize": 1,
+            "produced": 8,
+            "demand": 8,
+            "net": 8,
+            "depth": 0,
+            "ingredients": [
+              {
+                "key": "High-Quality Wheat",
+                "name": "High-Quality Wheat",
+                "original": "Wheat",
+                "substituteGroup": "Wheat",
+                "baseName": "Wheat",
+                "grade": "high",
+                "options": [],
+                "parentName": "Meal",
+                "need": 16,
+                "have": 0,
+                "missing": 16,
+                "craftable": false
+              }
+            ]
+          }
+        ],
+        "missing": [
+          {
+            "name": "High-Quality Wheat",
+            "key": "High-Quality Wheat",
+            "category": "Base Items",
+            "need": 16,
+            "have": 0,
+            "missing": 16,
+            "choice": null,
+            "market": {
+              "marketable": false,
+              "stock": 0,
+              "price": 0,
+              "buyable": 0,
+              "unavailable": 0,
+              "total": 0,
+              "status": "none",
+              "hasSourceInfo": false,
+              "stockKnown": true
+            }
+          }
+        ],
+        "empty": false
+      }
+    },
+    {
+      "name": "processing_mass",
+      "mode": "processing",
+      "result": {
+        "target": "Wheat Flour",
+        "want": 1000,
+        "steps": [
+          {
+            "name": "Wheat Flour",
+            "index": 0,
+            "count": 400,
+            "batchCount": 9,
+            "batchSize": 45,
+            "produced": 1000,
+            "demand": 1000,
+            "net": 1000,
+            "depth": 0,
+            "ingredients": [
+              {
+                "key": "Wheat",
+                "name": "Wheat",
+                "original": "Wheat",
+                "substituteGroup": "Wheat",
+                "baseName": "Wheat",
+                "grade": "normal",
+                "options": [],
+                "parentName": "Wheat Flour",
+                "need": 400,
+                "have": 0,
+                "missing": 400,
+                "craftable": false
+              }
+            ]
+          }
+        ],
+        "missing": [
+          {
+            "name": "Wheat",
+            "key": "Wheat",
+            "category": "Base Items",
+            "need": 400,
+            "have": 0,
+            "missing": 400,
+            "choice": null,
+            "market": {
+              "marketable": false,
+              "stock": 0,
+              "price": 0,
+              "buyable": 0,
+              "unavailable": 0,
+              "total": 0,
+              "status": "none",
+              "hasSourceInfo": false,
+              "stockKnown": true
+            }
+          }
+        ],
+        "empty": false
+      }
+    },
+    {
+      "name": "completed_dependency",
+      "mode": "alchemy",
+      "result": {
+        "target": "Final Elixir",
+        "want": 10,
+        "steps": [
+          {
+            "name": "Final Elixir",
+            "index": 0,
+            "count": 10,
+            "batchCount": 10,
+            "batchSize": 1,
+            "produced": 10,
+            "demand": 10,
+            "net": 10,
+            "depth": 0,
+            "ingredients": [
+              {
+                "key": "Reagent",
+                "name": "Reagent",
+                "original": "Reagent",
+                "substituteGroup": "Reagent",
+                "baseName": "Reagent",
+                "grade": "normal",
+                "options": [],
+                "parentName": "Final Elixir",
+                "need": 20,
+                "have": 0,
+                "missing": 20,
+                "craftable": true
+              },
+              {
+                "key": "Silver Azalea",
+                "name": "Silver Azalea",
+                "original": "Silver Azalea",
+                "substituteGroup": "Silver Azalea",
+                "baseName": "Silver Azalea",
+                "grade": "normal",
+                "options": [],
+                "parentName": "Final Elixir",
+                "need": 30,
+                "have": 0,
+                "missing": 30,
+                "craftable": false
+              }
+            ]
+          }
+        ],
+        "missing": [
+          {
+            "name": "Silver Azalea",
+            "key": "Silver Azalea",
+            "category": "Base Items",
+            "need": 30,
+            "have": 0,
+            "missing": 30,
+            "choice": null,
+            "market": {
+              "marketable": false,
+              "stock": 0,
+              "price": 0,
+              "buyable": 0,
+              "unavailable": 0,
+              "total": 0,
+              "status": "none",
+              "hasSourceInfo": false,
+              "stockKnown": true
+            }
+          }
+        ],
+        "empty": false
+      }
+    },
+    {
+      "name": "cycle_guard",
+      "mode": "alchemy",
+      "result": {
+        "target": "A",
+        "want": 1,
+        "steps": [
+          {
+            "name": "A",
+            "index": 0,
+            "count": 2,
+            "batchCount": 2,
+            "batchSize": 1,
+            "produced": 2,
+            "demand": 2,
+            "net": 2,
+            "depth": 2,
+            "ingredients": [
+              {
+                "key": "B",
+                "name": "B",
+                "original": "B",
+                "substituteGroup": "B",
+                "baseName": "B",
+                "grade": "normal",
+                "options": [],
+                "parentName": "A",
+                "need": 2,
+                "have": 0,
+                "missing": 2,
+                "craftable": true
+              }
+            ]
+          },
+          {
+            "name": "B",
+            "index": 1,
+            "count": 1,
+            "batchCount": 1,
+            "batchSize": 1,
+            "produced": 1,
+            "demand": 1,
+            "net": 1,
+            "depth": 1,
+            "ingredients": [
+              {
+                "key": "A",
+                "name": "A",
+                "original": "A",
+                "substituteGroup": "A",
+                "baseName": "A",
+                "grade": "normal",
+                "options": [],
+                "parentName": "B",
+                "need": 1,
+                "have": 0,
+                "missing": 1,
+                "craftable": true
+              }
+            ]
+          }
+        ],
+        "missing": [],
+        "empty": false
+      }
+    },
+    {
+      "name": "market_materials",
+      "mode": "alchemy",
+      "result": {
+        "target": "Final Elixir",
+        "want": 3,
+        "steps": [
+          {
+            "name": "Reagent",
+            "index": 0,
+            "count": 6,
+            "batchCount": 6,
+            "batchSize": 1,
+            "produced": 6,
+            "demand": 6,
+            "net": 6,
+            "depth": 1,
+            "ingredients": [
+              {
+                "key": "Rough Stone",
+                "name": "Rough Stone",
+                "original": "Rough Stone",
+                "substituteGroup": "Rough Stone",
+                "baseName": "Rough Stone",
+                "grade": "normal",
+                "options": [],
+                "parentName": "Reagent",
+                "need": 24,
+                "have": 0,
+                "missing": 24,
+                "craftable": false
+              }
+            ]
+          },
+          {
+            "name": "Final Elixir",
+            "index": 1,
+            "count": 3,
+            "batchCount": 3,
+            "batchSize": 1,
+            "produced": 3,
+            "demand": 3,
+            "net": 3,
+            "depth": 0,
+            "ingredients": [
+              {
+                "key": "Reagent",
+                "name": "Reagent",
+                "original": "Reagent",
+                "substituteGroup": "Reagent",
+                "baseName": "Reagent",
+                "grade": "normal",
+                "options": [],
+                "parentName": "Final Elixir",
+                "need": 6,
+                "have": 0,
+                "missing": 6,
+                "craftable": true
+              },
+              {
+                "key": "Silver Azalea",
+                "name": "Silver Azalea",
+                "original": "Silver Azalea",
+                "substituteGroup": "Silver Azalea",
+                "baseName": "Silver Azalea",
+                "grade": "normal",
+                "options": [],
+                "parentName": "Final Elixir",
+                "need": 9,
+                "have": 0,
+                "missing": 9,
+                "craftable": false
+              }
+            ]
+          }
+        ],
+        "missing": [
+          {
+            "name": "Rough Stone",
+            "key": "Rough Stone",
+            "category": "Base Items",
+            "need": 24,
+            "have": 0,
+            "missing": 24,
+            "choice": null,
+            "market": {
+              "marketable": false,
+              "stock": 0,
+              "price": 0,
+              "buyable": 0,
+              "unavailable": 0,
+              "total": 0,
+              "status": "none",
+              "hasSourceInfo": false,
+              "stockKnown": true
+            }
+          },
+          {
+            "name": "Silver Azalea",
+            "key": "Silver Azalea",
+            "category": "Base Items",
+            "need": 9,
+            "have": 0,
+            "missing": 9,
+            "choice": null,
+            "market": {
+              "marketable": true,
+              "stock": 5,
+              "price": 1200,
+              "buyable": 5,
+              "unavailable": 4,
+              "total": 6000,
+              "status": "partial",
+              "hasSourceInfo": false,
+              "stockKnown": true
+            }
+          }
+        ],
+        "empty": false
+      }
+    }
+  ],
+  "scalarChecks": {
+    "massProcessing": {
+      "0": 1,
+      "2": 10,
+      "679": 43,
+      "680": 45,
+      "3000": 315,
+      "9000": 315
+    }
+  }
+}
