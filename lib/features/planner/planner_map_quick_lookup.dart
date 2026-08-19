@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 
 import '../../shared/overlays/anchored_popover.dart';
 import '../../visual/visual.dart';
@@ -39,17 +38,6 @@ class PlannerMapQuickLookupRegion extends StatefulWidget {
 
 class _PlannerMapQuickLookupRegionState
     extends State<PlannerMapQuickLookupRegion> {
-  final GlobalKey _regionKey = GlobalKey();
-  late final FocusNode _focusNode = FocusNode(
-    debugLabel: 'Planner map actions for ${widget.materialName}',
-  );
-
-  @override
-  void dispose() {
-    _focusNode.dispose();
-    super.dispose();
-  }
-
   @override
   Widget build(BuildContext context) {
     final actions = widget.externalActions;
@@ -59,47 +47,17 @@ class _PlannerMapQuickLookupRegionState
             actions.addToPlannedNetwork == null)) {
       return widget.child;
     }
-    return CallbackShortcuts(
-      bindings: <ShortcutActivator, VoidCallback>{
-        const SingleActivator(LogicalKeyboardKey.contextMenu):
-            _showMenuFromKeyboard,
-        const SingleActivator(LogicalKeyboardKey.f10, shift: true):
-            _showMenuFromKeyboard,
-      },
-      child: Focus(
-        focusNode: _focusNode,
-        child: Tooltip(
-          message:
-              'Right-click or press Shift+F10 for NPC vendors, gathering, checklist, and worker planning',
-          waitDuration: const Duration(milliseconds: 650),
-          child: MouseRegion(
-            cursor: SystemMouseCursors.contextMenu,
-            child: GestureDetector(
-              key: _regionKey,
-              behavior: HitTestBehavior.translucent,
-              onTapDown: (_) => _focusNode.requestFocus(),
-              onSecondaryTapDown: (details) {
-                _focusNode.requestFocus();
-                _showMenu(globalPosition: details.globalPosition);
-              },
-              onLongPressStart: (details) {
-                _focusNode.requestFocus();
-                _showMenu(globalPosition: details.globalPosition);
-              },
-              child: widget.child,
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  void _showMenuFromKeyboard() {
-    final renderObject = _regionKey.currentContext?.findRenderObject();
-    if (renderObject is! RenderBox || !renderObject.hasSize) return;
-    _showMenu(
-      globalPosition: renderObject.localToGlobal(
-        renderObject.size.center(Offset.zero),
+    return MouseRegion(
+      cursor: SystemMouseCursors.contextMenu,
+      child: GestureDetector(
+        behavior: HitTestBehavior.translucent,
+        onSecondaryTapDown: (details) {
+          _showMenu(globalPosition: details.globalPosition);
+        },
+        onLongPressStart: (details) {
+          _showMenu(globalPosition: details.globalPosition);
+        },
+        child: widget.child,
       ),
     );
   }

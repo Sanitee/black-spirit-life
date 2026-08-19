@@ -42,7 +42,7 @@ void main() {
             _fold(entry.key),
       };
 
-      expect(expected, hasLength(275));
+      expect(expected, hasLength(278));
       expect(
         exactFoodInfoByName.keys.toSet().difference(expected),
         isEmpty,
@@ -180,6 +180,44 @@ void main() {
       ]);
     },
   );
+
+  test('Cron Meals keep their current effects and short cooldown', () {
+    final seafood = exactFoodInfoByName['seafood cron meal'];
+    expect(
+      seafood?.effects,
+      containsAll(<String>[
+        'Alchemy/Cooking Time -0.6 sec',
+        'Life EXP +10%',
+        'Life Skill Mastery +25',
+      ]),
+    );
+    expect(seafood?.duration, '120 min');
+    expect(seafood?.cooldown, '10 sec');
+
+    final simple = exactFoodInfoByName['simple cron meal'];
+    expect(
+      simple?.effects,
+      containsAll(<String>[
+        'Extra AP Against Monsters +30',
+        'Combat EXP +20%',
+        'Monster Damage Reduction Rate +6%',
+      ]),
+    );
+    expect(simple?.duration, '120 min');
+    expect(simple?.cooldown, '10 sec');
+
+    final exquisite = exactFoodInfoByName['exquisite cron meal'];
+    expect(
+      exquisite?.effects,
+      containsAll(<String>[
+        'All AP +8',
+        'Max HP +525',
+        'Critical Hit Extra Damage +5%',
+      ]),
+    );
+    expect(exquisite?.duration, '120 min');
+    expect(exquisite?.cooldown, '10 sec');
+  });
 
   test('timed food and meal records have duration and cooldown values', () {
     final failures = <String>[];

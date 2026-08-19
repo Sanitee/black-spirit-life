@@ -29,7 +29,7 @@ struct InstallerModel {
   InstallerIntent intent = InstallerIntent::maintain;
   std::wstring product_name = L"Black Spirit Life";
   std::wstring package_id = L"BlackSpiritLife.App";
-  std::wstring version = L"0.1.3";
+  std::wstring version = L"0.1.4";
   std::wstring installed_version;
   std::wstring channel = L"win-x64-stable";
   std::wstring install_path;

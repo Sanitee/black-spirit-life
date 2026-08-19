@@ -4,10 +4,10 @@ Review result: **proportionate source review complete; project-owner
 Workerman community-use decision and accepted residual risk recorded; six
 source-only private research inputs excluded from the public tree**
 
-Release identity: Black Spirit Life `0.1.3+22`, tag `v0.1.3`, package
+Release identity: Black Spirit Life `0.1.4+23`, tag `v0.1.4`, package
 `BlackSpiritLife.App`, channel `win-x64-stable`. The exact source commit and
 artifact hashes are recorded by the release-candidate manifest generated from
-the sanitized one-commit public tree.
+the sanitized public history, which contains no internal Beta history.
 
 Review date: 2026-08-16
 

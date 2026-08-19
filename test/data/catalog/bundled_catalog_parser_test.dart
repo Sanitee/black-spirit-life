@@ -20,14 +20,14 @@ void main() {
 
     expect(catalog.sourceByteCount, productionCatalogByteCount);
     expect(catalog.sourceSha256, productionCatalogSha256);
-    expect(catalog.totalItemCount, 1622);
-    expect(catalog.totalCraftableCount, 928);
-    expect(catalog.totalIngredientRowCount, 2791);
+    expect(catalog.totalItemCount, 1627);
+    expect(catalog.totalCraftableCount, 931);
+    expect(catalog.totalIngredientRowCount, 2803);
     expect(catalog.collisions, hasLength(20));
     expect(catalog.alchemy.iconDataUris, hasLength(438));
     expect(catalog.cooking.iconDataUris, hasLength(612));
     expect(catalog.processing.iconDataUris, hasLength(3436));
-    expect(catalog.processing.searchAliases, hasLength(157));
+    expect(catalog.processing.searchAliases, hasLength(160));
     expect(catalog.alchemy.defaults['target'], 'Harmony Draught');
     expect(catalog.cooking.defaults['target'], 'Beer');
     expect(
@@ -47,8 +47,8 @@ void main() {
         catalog.supportingData['itemWeightIds'] as Map<String, Object?>;
     final itemWeightsLtById =
         catalog.supportingData['itemWeightsLtById'] as Map<String, Object?>;
-    expect(itemWeightIds, hasLength(1674));
-    expect(itemWeightsLtById, hasLength(1673));
+    expect(itemWeightIds, hasLength(1686));
+    expect(itemWeightsLtById, hasLength(1685));
     expect(itemWeightIds['Beer'], '9213');
     expect(itemWeightsLtById['9213'], 0.1);
     expect(itemWeightIds['Acacia Plank'], '4680');
@@ -67,7 +67,7 @@ void main() {
     );
     expect(catalog.cooking.auditedCraftableCount, 172);
     expect(catalog.cooking.plannerCraftableCount, 171);
-    expect(catalog.processing.plannerCraftableCount, 606);
+    expect(catalog.processing.plannerCraftableCount, 609);
     final endtimes =
         catalog.processing.items['Crystallized Energy of Endtimes'];
     expect(endtimes?.marketId, '821252');
@@ -153,6 +153,162 @@ void main() {
           .every((collision) => collision.valuesEqual),
       isTrue,
     );
+  });
+
+  test('bundles the three current Cron Meals and every processing route', () {
+    final catalog = const BundledCatalogParser().parse(source);
+    final recipes = catalog.processing.items;
+
+    expect(recipes, isNot(contains('Savory Cron Meal')));
+    expect(recipes, isNot(contains('Energizing Cron Meal')));
+    expect(
+      catalog.processing.searchAliases['Seafood Cron Meal'],
+      contains('savory cron meal'),
+    );
+    expect(
+      catalog.processing.searchAliases['Simple Cron Meal'],
+      contains('energizing cron meal'),
+    );
+
+    for (final entry in const <String, String>{
+      'Ancient Cron Spice': '9019',
+      "Nadia Rowen's Special Sauce": '820015',
+    }.entries) {
+      final material = recipes[entry.key]!;
+      expect(material.marketId, entry.value, reason: entry.key);
+      expect(material.isCraftable, isFalse, reason: entry.key);
+      expect(material.ingredients, isEmpty, reason: entry.key);
+    }
+
+    const expectedMarketIds = <String, String>{
+      'Seafood Cron Meal': '9691',
+      'Simple Cron Meal': '9692',
+      'Exquisite Cron Meal': '9693',
+    };
+    const expectedDefaults = <String, String>{
+      'Seafood Cron Meal': 'calpheon-margoria-1x',
+      'Simple Cron Meal': 'combat-rations-1x',
+      'Exquisite Cron Meal': 'standard-1x',
+    };
+    const expectedVariants = <String, Map<String, List<String>>>{
+      'Seafood Cron Meal': <String, List<String>>{
+        'calpheon-margoria-1x': <String>[
+          'Balenos Meal:3.0',
+          'Calpheon Meal:3.0',
+          'Margoria Seafood Meal:1.0',
+          'Ancient Cron Spice:1.0',
+        ],
+        'calpheon-margoria-10x': <String>[
+          'Balenos Meal:30.0',
+          'Calpheon Meal:30.0',
+          'Margoria Seafood Meal:10.0',
+          'Ancient Cron Spice:10.0',
+          "Nadia Rowen's Special Sauce:1.0",
+        ],
+        'sute-savory-1x': <String>[
+          'Balenos Meal:3.0',
+          'Sute Tea:3.0',
+          'Savory Steak:1.0',
+          'Ancient Cron Spice:1.0',
+        ],
+        'sute-savory-10x': <String>[
+          'Balenos Meal:30.0',
+          'Sute Tea:30.0',
+          'Savory Steak:10.0',
+          'Ancient Cron Spice:10.0',
+          "Nadia Rowen's Special Sauce:1.0",
+        ],
+      },
+      'Simple Cron Meal': <String, List<String>>{
+        'combat-rations-1x': <String>[
+          'Knight Combat Rations:1.0',
+          'Mediah Meal:3.0',
+          'Valencia Meal:3.0',
+          'Ancient Cron Spice:1.0',
+        ],
+        'combat-rations-10x': <String>[
+          'Knight Combat Rations:10.0',
+          'Mediah Meal:30.0',
+          'Valencia Meal:30.0',
+          'Ancient Cron Spice:10.0',
+          "Nadia Rowen's Special Sauce:1.0",
+        ],
+        'drieghanese-1x': <String>[
+          'Special Drieghanese Meal:1.0',
+          'Serendia Meal:3.0',
+          'Mediah Meal:3.0',
+          'Ancient Cron Spice:1.0',
+        ],
+        'drieghanese-10x': <String>[
+          'Special Drieghanese Meal:10.0',
+          'Serendia Meal:30.0',
+          'Mediah Meal:30.0',
+          'Ancient Cron Spice:10.0',
+          "Nadia Rowen's Special Sauce:1.0",
+        ],
+      },
+      'Exquisite Cron Meal': <String, List<String>>{
+        'standard-1x': <String>[
+          'Serendia Meal:3.0',
+          'Special Arehaza Meal:1.0',
+          'Kamasylvia Meal:3.0',
+          'Ancient Cron Spice:1.0',
+        ],
+        'standard-10x': <String>[
+          'Serendia Meal:30.0',
+          'Special Arehaza Meal:10.0',
+          'Kamasylvia Meal:30.0',
+          'Ancient Cron Spice:10.0',
+          "Nadia Rowen's Special Sauce:1.0",
+        ],
+      },
+    };
+    const higherGradeOptions = <String, String>{
+      'Balenos Meal': 'Special Balenos Meal',
+      'Calpheon Meal': 'Special Calpheon Meal',
+      'Sute Tea': 'Healthy Sute Tea',
+      'Mediah Meal': 'Special Mediah Meal',
+      'Valencia Meal': 'Special Valencia Meal',
+      'Serendia Meal': 'Special Serendia Meal',
+      'Kamasylvia Meal': 'Special Kamasylvia Meal',
+    };
+
+    for (final recipeEntry in expectedVariants.entries) {
+      final recipe = recipes[recipeEntry.key]!;
+      expect(recipe.marketId, expectedMarketIds[recipeEntry.key]);
+      expect(recipe.defaultVariantId, expectedDefaults[recipeEntry.key]);
+      expect(recipe.method, 'Simple Cooking');
+      expect(recipe.variantBatchMultipliers, <int>[1, 10]);
+      expect(
+        recipe.variants.map((variant) => variant.id).toSet(),
+        recipeEntry.value.keys.toSet(),
+      );
+
+      for (final variantEntry in recipeEntry.value.entries) {
+        final variant = recipe.variants.singleWhere(
+          (candidate) => candidate.id == variantEntry.key,
+        );
+        final expectedBatch = variant.id.endsWith('-10x') ? 10 : 1;
+        expect(variant.batchMultiplier, expectedBatch);
+        expect(variant.baseOutput, expectedBatch.toDouble());
+        expect(variant.outputMinimum, expectedBatch.toDouble());
+        expect(variant.outputMaximum, expectedBatch.toDouble());
+        expect(_ingredientRowsForVariant(variant), variantEntry.value);
+
+        for (final ingredient in variant.ingredients) {
+          final higherGrade = higherGradeOptions[ingredient.name];
+          if (higherGrade == null) {
+            continue;
+          }
+          expect(ingredient.options, <String>[ingredient.name, higherGrade]);
+          expect(ingredient.substituteRatios[ingredient.name], 1);
+          expect(
+            ingredient.substituteRatios[higherGrade],
+            closeTo(1 / 3, 1e-12),
+          );
+        }
+      }
+    }
   });
 
   test('every resource-map material has bundled in-game artwork', () {
@@ -790,7 +946,7 @@ void main() {
           .map((entry) => entry.key)
           .toSet();
 
-      expect(actualBatchOutputs, hasLength(113));
+      expect(actualBatchOutputs, hasLength(116));
       expect(actualBatchOutputs, _supportedBatchOutputNames);
 
       final rawRoot = jsonDecode(source) as Map<String, dynamic>;
@@ -1036,6 +1192,9 @@ const _supportedBatchOutputNames = <String>{
   'Elixir of Rough Labor',
   'Frenzy Draught',
   'Savage Draught',
+  'Seafood Cron Meal',
+  'Simple Cron Meal',
+  'Exquisite Cron Meal',
   'Celerity Draught',
   'Armor Draught',
   "Immortal: Beast's Draught",

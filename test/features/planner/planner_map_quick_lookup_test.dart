@@ -64,7 +64,11 @@ void main() {
         find.byKey(PlannerActionKeys.row('P20', 'Sunrise Herb')),
       );
       await tester.pump();
-      expect(harness.copied, <String>['Sunrise Herb']);
+      expect(
+        find.bySemanticsLabel('Substitute choices for Sunrise Herb'),
+        findsOneWidget,
+      );
+      expect(harness.copied, isEmpty);
     },
   );
 
@@ -88,10 +92,9 @@ void main() {
 
     await tester.tap(
       find.byKey(PlannerActionKeys.mapLookupRegion('need:Sunrise Herb')),
+      buttons: kSecondaryMouseButton,
+      kind: PointerDeviceKind.mouse,
     );
-    await tester.sendKeyDownEvent(LogicalKeyboardKey.shiftLeft);
-    await tester.sendKeyEvent(LogicalKeyboardKey.f10);
-    await tester.sendKeyUpEvent(LogicalKeyboardKey.shiftLeft);
     await tester.pumpAndSettle();
 
     await tester.tap(
@@ -120,6 +123,51 @@ void main() {
             PlannerMapLookupSource.manualGathering,
           ),
     );
+  });
+
+  testWidgets('quick-map regions have no hover hint and ignore Shift+F10', (
+    tester,
+  ) async {
+    await setPlannerTestSize(tester, const Size(1500, 940));
+    final resolvedNames = <String>[];
+    final harness = PlannerTestHarness(
+      resolveMapLookup: (materialName) async {
+        resolvedNames.add(materialName);
+        return PlannerMapLookupAvailability(
+          materialName: materialName,
+          hasManualGathering: true,
+          manualResourceId: 'sunrise-herb',
+          manualLocationCount: 1,
+        );
+      },
+    );
+    addTearDown(harness.controller.dispose);
+    await tester.pumpWidget(harness.plannerHost());
+    await tester.pump();
+
+    final region = find.byKey(
+      PlannerActionKeys.mapLookupRegion('need:Sunrise Herb'),
+    );
+    expect(region, findsOneWidget);
+    const removedHoverHint =
+        'Right-click or press Shift+F10 for NPC vendors, gathering, checklist, and worker planning';
+    expect(find.byTooltip(removedHoverHint), findsNothing);
+
+    final mouse = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    await mouse.addPointer(location: tester.getCenter(region));
+    await mouse.moveTo(tester.getCenter(region));
+    await tester.pump(const Duration(seconds: 1));
+    expect(find.text(removedHoverHint), findsNothing);
+
+    await tester.tap(region);
+    await tester.sendKeyDownEvent(LogicalKeyboardKey.shiftLeft);
+    await tester.sendKeyEvent(LogicalKeyboardKey.f10);
+    await tester.sendKeyUpEvent(LogicalKeyboardKey.shiftLeft);
+    await tester.pumpAndSettle();
+
+    expect(find.text('Show gathering locations'), findsNothing);
+    expect(resolvedNames, isEmpty);
+    await mouse.removePointer();
   });
 
   testWidgets('NPC vendor action opens every mapped seller for the material', (

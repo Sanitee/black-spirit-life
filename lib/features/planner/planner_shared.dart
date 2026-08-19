@@ -1127,6 +1127,10 @@ class _QueuePanel extends StatelessWidget {
             child: _QueueStepCard(
               controller: controller,
               step: step,
+              titleSubstituteSources: _incomingSubstituteSources(
+                plan,
+                step.name,
+              ),
               index: index,
               completed: completed,
               expanded: isExpanded(step, index),
@@ -1179,6 +1183,7 @@ class _QueueStepCard extends StatelessWidget {
   const _QueueStepCard({
     required this.controller,
     required this.step,
+    required this.titleSubstituteSources,
     required this.index,
     required this.completed,
     required this.expanded,
@@ -1195,6 +1200,7 @@ class _QueueStepCard extends StatelessWidget {
 
   final ModeFeatureController controller;
   final PlanStep step;
+  final List<PlanStepIngredient> titleSubstituteSources;
   final int index;
   final bool completed;
   final bool expanded;
@@ -1214,6 +1220,23 @@ class _QueueStepCard extends StatelessWidget {
     final spec = context.visualTheme;
     final denseLayout = spec.usesDenseSplitLayout;
     final recipe = _resolveRecipe(controller, step.name);
+    final titleChoices = <({PlanStepIngredient source, Ingredient ingredient})>[
+      for (final source in titleSubstituteSources)
+        if (_resolveIngredient(
+              controller,
+              source.parentName,
+              source.original,
+              source.substituteGroup,
+            )
+            case final ingredient?)
+          (source: source, ingredient: ingredient),
+    ];
+    final primaryTitleChoice = titleChoices.isEmpty ? null : titleChoices.first;
+    final titleAnchor = titleChoices.isEmpty
+        ? null
+        : 'queue-title:${step.name}';
+    final titleChooserOpen =
+        titleAnchor != null && openChoiceAnchor == titleAnchor;
     final hasVariants = recipe?.hasRecipeVariants ?? false;
     final summary = step.batchSize > 1
         ? 'Craft ${formatQuantity(step.count)} | '
@@ -1256,13 +1279,38 @@ class _QueueStepCard extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: <Widget>[
-                      _CopyNameButton(
-                        key: PlannerActionKeys.row('P10', step.name),
-                        name: step.name,
-                        fontSize: denseLayout ? 18 : 19,
-                        semanticPrefix: 'Copy queue item',
-                        onCopy: externalActions.copyName,
-                      ),
+                      if (primaryTitleChoice != null)
+                        _SubstituteNameAnchor(
+                          key: PlannerActionKeys.row('P12', titleAnchor!),
+                          nameKey: PlannerActionKeys.row('P10', step.name),
+                          name: step.name,
+                          currentName: primaryTitleChoice.source.baseName,
+                          ingredient: primaryTitleChoice.ingredient,
+                          fontSize: denseLayout ? 18 : 19,
+                          isShowing: titleChooserOpen,
+                          semanticLabel: titleChoices.length > 1
+                              ? 'Choose recipe substitutions affecting '
+                                    '${step.name}; ${titleChoices.length} '
+                                    'choices; '
+                                    '${titleChooserOpen ? 'open' : 'closed'}'
+                              : null,
+                          tooltip: titleChoices.length > 1
+                              ? 'More than one recipe choice contributes to '
+                                    '${step.name}. Click to choose which one '
+                                    'to change.'
+                              : null,
+                          onToggle: () => onChoiceAnchorChanged(
+                            titleChooserOpen ? null : titleAnchor,
+                          ),
+                        )
+                      else
+                        _CopyNameButton(
+                          key: PlannerActionKeys.row('P10', step.name),
+                          name: step.name,
+                          fontSize: denseLayout ? 18 : 19,
+                          semanticPrefix: 'Copy queue item',
+                          onCopy: externalActions.copyName,
+                        ),
                       SizedBox(height: denseLayout ? 8 : 10),
                       _MethodPill(recipe: recipe),
                       if (hasVariants) ...<Widget>[
@@ -1314,6 +1362,19 @@ class _QueueStepCard extends StatelessWidget {
               ],
             ),
           ),
+          if (titleChooserOpen && titleChoices.isNotEmpty) ...<Widget>[
+            SizedBox(height: denseLayout ? 5 : 7),
+            Padding(
+              padding: EdgeInsets.only(left: denseLayout ? 61 : 70),
+              child: _QueueTitleSubstituteChooser(
+                controller: controller,
+                stepName: step.name,
+                choices: titleChoices,
+                onSubstituteSelected: onSubstituteSelected,
+                onClose: () => onChoiceAnchorChanged(null),
+              ),
+            ),
+          ],
           SizedBox(height: denseLayout ? 13 : 16),
           LayoutBuilder(
             builder: (context, constraints) {
@@ -2519,17 +2580,6 @@ class _PlannerMapQuickLookupRegion extends StatefulWidget {
 
 class _PlannerMapQuickLookupRegionState
     extends State<_PlannerMapQuickLookupRegion> {
-  final GlobalKey _regionKey = GlobalKey();
-  late final FocusNode _focusNode = FocusNode(
-    debugLabel: 'Planner map actions for ${widget.materialName}',
-  );
-
-  @override
-  void dispose() {
-    _focusNode.dispose();
-    super.dispose();
-  }
-
   @override
   Widget build(BuildContext context) {
     final actions = widget.externalActions;
@@ -2539,47 +2589,17 @@ class _PlannerMapQuickLookupRegionState
             actions.addToPlannedNetwork == null)) {
       return widget.child;
     }
-    return CallbackShortcuts(
-      bindings: <ShortcutActivator, VoidCallback>{
-        const SingleActivator(LogicalKeyboardKey.contextMenu):
-            _showMenuFromKeyboard,
-        const SingleActivator(LogicalKeyboardKey.f10, shift: true):
-            _showMenuFromKeyboard,
-      },
-      child: Focus(
-        focusNode: _focusNode,
-        child: Tooltip(
-          message:
-              'Right-click or press Shift+F10 for NPC vendors, gathering, checklist, and worker planning',
-          waitDuration: const Duration(milliseconds: 650),
-          child: MouseRegion(
-            cursor: SystemMouseCursors.contextMenu,
-            child: GestureDetector(
-              key: _regionKey,
-              behavior: HitTestBehavior.translucent,
-              onTapDown: (_) => _focusNode.requestFocus(),
-              onSecondaryTapDown: (details) {
-                _focusNode.requestFocus();
-                _showMenu(globalPosition: details.globalPosition);
-              },
-              onLongPressStart: (details) {
-                _focusNode.requestFocus();
-                _showMenu(globalPosition: details.globalPosition);
-              },
-              child: widget.child,
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  void _showMenuFromKeyboard() {
-    final renderObject = _regionKey.currentContext?.findRenderObject();
-    if (renderObject is! RenderBox || !renderObject.hasSize) return;
-    _showMenu(
-      globalPosition: renderObject.localToGlobal(
-        renderObject.size.center(Offset.zero),
+    return MouseRegion(
+      cursor: SystemMouseCursors.contextMenu,
+      child: GestureDetector(
+        behavior: HitTestBehavior.translucent,
+        onSecondaryTapDown: (details) {
+          _showMenu(globalPosition: details.globalPosition);
+        },
+        onLongPressStart: (details) {
+          _showMenu(globalPosition: details.globalPosition);
+        },
+        child: widget.child,
       ),
     );
   }
@@ -2938,6 +2958,8 @@ class _IngredientRow extends StatelessWidget {
       ingredient.original,
       ingredient.substituteGroup,
     );
+    final hasSubstitutes =
+        domainIngredient != null && ingredient.options.length > 1;
     final perAttemptQuantity = domainIngredient == null
         ? null
         : controller
@@ -2979,35 +3001,43 @@ class _IngredientRow extends StatelessWidget {
                   child: Row(
                     children: <Widget>[
                       Flexible(
-                        child: _CopyNameButton(
-                          key: PlannerActionKeys.row(
-                            'P11',
-                            '${ingredient.parentName}:${ingredient.key}',
-                          ),
-                          name: ingredient.name,
-                          fontSize: 17,
-                          color: !spec.isStandard
-                              ? null
-                              : ingredient.missing > 0
-                              ? const Color(0xFFFFE6C8)
-                              : const Color(0xFFD8FFE2),
-                          semanticPrefix: 'Copy ingredient',
-                          onCopy: externalActions.copyName,
-                        ),
+                        child: hasSubstitutes
+                            ? _SubstituteNameAnchor(
+                                key: PlannerActionKeys.row('P12', anchor),
+                                nameKey: PlannerActionKeys.row(
+                                  'P11',
+                                  '${ingredient.parentName}:${ingredient.key}',
+                                ),
+                                name: ingredient.name,
+                                currentName: ingredient.baseName,
+                                ingredient: domainIngredient,
+                                fontSize: 17,
+                                color: !spec.isStandard
+                                    ? null
+                                    : ingredient.missing > 0
+                                    ? const Color(0xFFFFE6C8)
+                                    : const Color(0xFFD8FFE2),
+                                isShowing: chooserOpen,
+                                onToggle: () => onChoiceAnchorChanged(
+                                  chooserOpen ? null : anchor,
+                                ),
+                              )
+                            : _CopyNameButton(
+                                key: PlannerActionKeys.row(
+                                  'P11',
+                                  '${ingredient.parentName}:${ingredient.key}',
+                                ),
+                                name: ingredient.name,
+                                fontSize: 17,
+                                color: !spec.isStandard
+                                    ? null
+                                    : ingredient.missing > 0
+                                    ? const Color(0xFFFFE6C8)
+                                    : const Color(0xFFD8FFE2),
+                                semanticPrefix: 'Copy ingredient',
+                                onCopy: externalActions.copyName,
+                              ),
                       ),
-                      if (domainIngredient != null &&
-                          ingredient.options.length > 1) ...<Widget>[
-                        const SizedBox(width: 6),
-                        _SubstituteChooserButton(
-                          key: PlannerActionKeys.row('P12', anchor),
-                          currentName: ingredient.baseName,
-                          ingredient: domainIngredient,
-                          isShowing: chooserOpen,
-                          onToggle: () => onChoiceAnchorChanged(
-                            chooserOpen ? null : anchor,
-                          ),
-                        ),
-                      ],
                       if (_qualityGrades(
                         controller,
                         ingredient.parentName,
@@ -3686,6 +3716,8 @@ class _NeedRow extends StatelessWidget {
             choice.original,
             choice.substituteGroup,
           );
+    final hasSubstitutes =
+        domainIngredient != null && choice != null && choice.options.length > 1;
     final source = _sourceInfo(controller, row);
     final confirmedMarketUnlisted =
         controller.state.value.market.isItemUnlisted(row.name) ||
@@ -3732,28 +3764,32 @@ class _NeedRow extends StatelessWidget {
                       Row(
                         children: <Widget>[
                           Flexible(
-                            child: _CopyNameButton(
-                              key: PlannerActionKeys.row('P20', row.name),
-                              name: row.name,
-                              fontSize: denseLayout ? 16.5 : 17.5,
-                              semanticPrefix: 'Copy Need First item',
-                              onCopy: externalActions.copyName,
-                            ),
+                            child: hasSubstitutes
+                                ? _SubstituteNameAnchor(
+                                    key: PlannerActionKeys.row('P12', anchor),
+                                    nameKey: PlannerActionKeys.row(
+                                      'P20',
+                                      row.name,
+                                    ),
+                                    name: row.name,
+                                    currentName: choice.baseName,
+                                    ingredient: domainIngredient,
+                                    fontSize: denseLayout ? 16.5 : 17.5,
+                                    isShowing: openChoiceAnchor == anchor,
+                                    onToggle: () => onChoiceAnchorChanged(
+                                      openChoiceAnchor == anchor
+                                          ? null
+                                          : anchor,
+                                    ),
+                                  )
+                                : _CopyNameButton(
+                                    key: PlannerActionKeys.row('P20', row.name),
+                                    name: row.name,
+                                    fontSize: denseLayout ? 16.5 : 17.5,
+                                    semanticPrefix: 'Copy Need First item',
+                                    onCopy: externalActions.copyName,
+                                  ),
                           ),
-                          if (domainIngredient != null &&
-                              choice != null &&
-                              choice.options.length > 1) ...<Widget>[
-                            const SizedBox(width: 5),
-                            _SubstituteChooserButton(
-                              key: PlannerActionKeys.row('P12', anchor),
-                              currentName: choice.baseName,
-                              ingredient: domainIngredient,
-                              isShowing: openChoiceAnchor == anchor,
-                              onToggle: () => onChoiceAnchorChanged(
-                                openChoiceAnchor == anchor ? null : anchor,
-                              ),
-                            ),
-                          ],
                           if (source.hasDetails) ...<Widget>[
                             const SizedBox(width: 5),
                             _AnchoredSourceInfoButton(
@@ -4306,52 +4342,37 @@ class _SourceInfoCloseButtonState extends State<_SourceInfoCloseButton> {
   }
 }
 
-class _SubstituteChooserButton extends StatelessWidget {
-  const _SubstituteChooserButton({
+class _SubstituteNameAnchor extends StatefulWidget {
+  const _SubstituteNameAnchor({
+    required this.name,
+    required this.nameKey,
     required this.currentName,
     required this.ingredient,
+    required this.fontSize,
     required this.isShowing,
     required this.onToggle,
+    this.color,
+    this.semanticLabel,
+    this.tooltip,
     super.key,
   });
 
+  final String name;
+  final Key nameKey;
   final String currentName;
   final Ingredient ingredient;
+  final double fontSize;
+  final Color? color;
+  final String? semanticLabel;
+  final String? tooltip;
   final bool isShowing;
   final VoidCallback onToggle;
 
   @override
-  Widget build(BuildContext context) {
-    final options = _distinctFolded(ingredient.options);
-    return _SubstituteToggleButton(
-      semanticLabel:
-          'Choose substitute for ${ingredient.name}; current $currentName; ${isShowing ? 'open' : 'closed'}',
-      tooltip:
-          'Substitutes: ${options.join(', ')}\n'
-          'Current: $currentName\n'
-          'Click to choose.',
-      onPressed: onToggle,
-    );
-  }
+  State<_SubstituteNameAnchor> createState() => _SubstituteNameAnchorState();
 }
 
-class _SubstituteToggleButton extends StatefulWidget {
-  const _SubstituteToggleButton({
-    required this.semanticLabel,
-    required this.tooltip,
-    required this.onPressed,
-  });
-
-  final String semanticLabel;
-  final String tooltip;
-  final VoidCallback onPressed;
-
-  @override
-  State<_SubstituteToggleButton> createState() =>
-      _SubstituteToggleButtonState();
-}
-
-class _SubstituteToggleButtonState extends State<_SubstituteToggleButton> {
+class _SubstituteNameAnchorState extends State<_SubstituteNameAnchor> {
   late final FocusNode _focus = FocusNode();
   bool _hovered = false;
   bool _pressed = false;
@@ -4365,7 +4386,7 @@ class _SubstituteToggleButtonState extends State<_SubstituteToggleButton> {
 
   void _activate() {
     if (mounted) setState(() => _pressed = false);
-    widget.onPressed();
+    widget.onToggle();
   }
 
   @override
@@ -4374,46 +4395,40 @@ class _SubstituteToggleButtonState extends State<_SubstituteToggleButton> {
     final ledger = spec.isIlluminatedLedger;
     final sakura = spec.isSakuraNightGarden;
     final standard = context.standardVisual;
-    final border = _focused
-        ? ledger
-              ? spec.palette.primaryBright
-              : sakura
-              ? spec.palette.primaryBright
-              : StandardSpec.accentBrush(
-                  standard.accentHue,
-                  neon: standard.neon,
-                )
-        : ledger
-        ? const Color(0xFFB9903E)
+    final highlighted = _hovered || _focused || widget.isShowing;
+    final focusColor = ledger
+        ? const Color(0xFFD6B45A)
         : sakura
-        ? spec.palette.trim
+        ? spec.palette.primaryBright
+        : StandardSpec.accentBrush(standard.accentHue, neon: standard.neon);
+    final indicatorColor = highlighted
+        ? focusColor
+        : ledger
+        ? const Color(0xFF9B7832)
+        : sakura
+        ? spec.palette.textMuted
         : StandardSpec.accentBrush(
             standard.accentHue,
-            alpha: .28,
+            alpha: .5,
             neon: standard.neon,
           );
+    final outlineColor = _focused
+        ? ledger
+              ? const Color(0xFFB9903E)
+              : focusColor
+        : Colors.transparent;
     final interactionOverlay = _pressed
         ? const Color(0x28000000)
         : _hovered
-        ? const Color(0x1EFFFFFF)
+        ? const Color(0x16FFFFFF)
         : Colors.transparent;
-    final swapGlyph = ColoredBox(
-      color: interactionOverlay,
-      child: Center(
-        child: AppVectorGlyph(
-          'swap',
-          size: 14,
-          color: ledger
-              ? const Color(0xFFF7EAC7)
-              : sakura
-              ? spec.palette.text
-              : const Color(0xFFEAF4E6),
-        ),
-      ),
-    );
+    final options = _distinctFolded(widget.ingredient.options);
     Widget control = Semantics(
       button: true,
-      label: widget.semanticLabel,
+      toggled: widget.isShowing,
+      label:
+          widget.semanticLabel ??
+          'Choose substitute for ${widget.ingredient.name}; current ${widget.currentName}; ${widget.isShowing ? 'open' : 'closed'}',
       child: FocusableActionDetector(
         focusNode: _focus,
         mouseCursor: SystemMouseCursors.click,
@@ -4442,34 +4457,133 @@ class _SubstituteToggleButtonState extends State<_SubstituteToggleButton> {
           onTap: _activate,
           child: AnimatedContainer(
             duration: spec.motion.interactionDuration,
-            width: spec.usesDenseSplitLayout ? 28 : 26,
-            height: spec.usesDenseSplitLayout ? 28 : 24,
-            clipBehavior: Clip.antiAlias,
+            padding: const EdgeInsets.symmetric(horizontal: 2, vertical: 1),
             decoration: BoxDecoration(
-              gradient: ledger
-                  ? spec.materials.primary
-                  : sakura
-                  ? SakuraNightGardenSpec.raisedSurfaceGradient
-                  : StandardSpec.glassGradient(topAlpha: 34, bottomAlpha: 10),
-              borderRadius: BorderRadius.circular(
-                ledger
-                    ? 2
-                    : sakura
-                    ? spec.geometry.buttonRadius
-                    : 999,
-              ),
-              border: Border.all(color: border),
-              boxShadow: spec.usesDenseSplitLayout
-                  ? spec.materials.lowShadow
-                  : null,
+              color: interactionOverlay,
+              borderRadius: BorderRadius.circular(4),
+              border: Border.all(color: outlineColor),
             ),
-            child: swapGlyph,
+            child: ExcludeSemantics(
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: <Widget>[
+                  Flexible(
+                    child: Text(
+                      widget.name,
+                      key: widget.nameKey,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: spec.typography.body.copyWith(
+                        color: ledger ? const Color(0xFF6B2E29) : widget.color,
+                        fontSize: widget.fontSize,
+                        fontWeight: FontWeight.w700,
+                        height: spec.usesDenseSplitLayout ? 1.15 : null,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 4),
+                  IgnorePointer(
+                    child: ExcludeSemantics(
+                      child: AppVectorGlyph(
+                        'swap',
+                        size: 11,
+                        color: indicatorColor,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
           ),
         ),
       ),
     );
-    control = Tooltip(message: widget.tooltip, child: control);
+    control = Tooltip(
+      message:
+          widget.tooltip ??
+          'Other ingredients can be used.\n'
+              'Current: ${widget.currentName}\n'
+              '${options.join(', ')}',
+      child: control,
+    );
     return control;
+  }
+}
+
+class _QueueTitleSubstituteChooser extends StatelessWidget {
+  const _QueueTitleSubstituteChooser({
+    required this.controller,
+    required this.stepName,
+    required this.choices,
+    required this.onSubstituteSelected,
+    required this.onClose,
+  });
+
+  final ModeFeatureController controller;
+  final String stepName;
+  final List<({PlanStepIngredient source, Ingredient ingredient})> choices;
+  final void Function(PlanStepIngredient source, String selection)
+  onSubstituteSelected;
+  final VoidCallback onClose;
+
+  @override
+  Widget build(BuildContext context) {
+    if (choices.length == 1) {
+      final choice = choices.single;
+      return _InlineSubstituteChooser(
+        controller: controller,
+        parentName: choice.source.parentName,
+        currentName: choice.source.baseName,
+        ingredient: choice.ingredient,
+        onBeforeSelection: (selection) =>
+            onSubstituteSelected(choice.source, selection),
+        onClose: onClose,
+      );
+    }
+
+    final spec = context.visualTheme;
+    return Semantics(
+      container: true,
+      explicitChildNodes: true,
+      label: 'Recipe choices affecting $stepName',
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: <Widget>[
+          Text(
+            'Choose which recipe choice to change',
+            style: spec.typography.meta.copyWith(
+              color: spec.palette.textMuted,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+          const SizedBox(height: 6),
+          for (var index = 0; index < choices.length; index += 1) ...<Widget>[
+            if (index > 0) const SizedBox(height: 10),
+            Text(
+              '${choices[index].source.parentName} · '
+              'currently ${choices[index].source.baseName}',
+              style: spec.typography.body.copyWith(
+                color: spec.palette.text,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+            const SizedBox(height: 4),
+            _InlineSubstituteChooser(
+              controller: controller,
+              parentName: choices[index].source.parentName,
+              currentName: choices[index].source.baseName,
+              ingredient: choices[index].ingredient,
+              optionKeyScope:
+                  '${choices[index].source.parentName}:'
+                  '${choices[index].source.substituteGroup}',
+              onBeforeSelection: (selection) =>
+                  onSubstituteSelected(choices[index].source, selection),
+              onClose: onClose,
+            ),
+          ],
+        ],
+      ),
+    );
   }
 }
 
@@ -4481,6 +4595,7 @@ class _InlineSubstituteChooser extends StatefulWidget {
     required this.ingredient,
     required this.onClose,
     this.onBeforeSelection,
+    this.optionKeyScope,
   });
 
   final ModeFeatureController controller;
@@ -4489,6 +4604,7 @@ class _InlineSubstituteChooser extends StatefulWidget {
   final Ingredient ingredient;
   final VoidCallback onClose;
   final ValueChanged<String>? onBeforeSelection;
+  final String? optionKeyScope;
 
   @override
   State<_InlineSubstituteChooser> createState() =>
@@ -4582,7 +4698,12 @@ class _InlineSubstituteChooserState extends State<_InlineSubstituteChooser> {
                       width: itemWidth,
                       height: spec.usesDenseSplitLayout ? 52 : 44,
                       child: _SubstituteOption(
-                        key: PlannerActionKeys.row('P13', option),
+                        key: PlannerActionKeys.row(
+                          'P13',
+                          widget.optionKeyScope == null
+                              ? option
+                              : '${widget.optionKeyScope}:$option',
+                        ),
                         controller: widget.controller,
                         option: option,
                         ratio: _ratioFor(widget.ingredient, option),
@@ -5410,6 +5531,57 @@ Ingredient? _resolveIngredient(
     }
   }
   return null;
+}
+
+List<PlanStepIngredient> _incomingSubstituteSources(
+  PlanResult plan,
+  String stepName,
+) {
+  final incoming = <String, List<PlanStepIngredient>>{};
+  for (final parentStep in plan.steps) {
+    for (final ingredient in parentStep.ingredients) {
+      if (!ingredient.craftable) continue;
+      incoming
+          .putIfAbsent(
+            ingredient.name.trim().toLowerCase(),
+            () => <PlanStepIngredient>[],
+          )
+          .add(ingredient);
+    }
+  }
+
+  final matches = <String, PlanStepIngredient>{};
+  final pending = <String>[stepName.trim().toLowerCase()];
+  final visited = <String>{};
+  while (pending.isNotEmpty) {
+    final childName = pending.removeLast();
+    if (!visited.add(childName)) continue;
+    final sources = incoming[childName];
+    if (sources == null) continue;
+    for (final ingredient in sources) {
+      if (ingredient.options.length < 2) {
+        pending.add(ingredient.parentName.trim().toLowerCase());
+        continue;
+      }
+      final identity = <String>[
+        ingredient.parentName,
+        ingredient.substituteGroup,
+        ingredient.original,
+      ].map((value) => value.trim().toLowerCase()).join('\u0000');
+      matches[identity] = ingredient;
+    }
+  }
+  final result = matches.values.toList(growable: false);
+  result.sort((left, right) {
+    final parent = left.parentName.toLowerCase().compareTo(
+      right.parentName.toLowerCase(),
+    );
+    if (parent != 0) return parent;
+    return left.substituteGroup.toLowerCase().compareTo(
+      right.substituteGroup.toLowerCase(),
+    );
+  });
+  return result;
 }
 
 PlannerSourceInfoRequest _sourceInfo(

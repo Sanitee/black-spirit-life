@@ -8,7 +8,7 @@ abstract final class AppIdentity {
   static const productName = 'Black Spirit Life';
   static const displayName = productName;
   static const releaseChannel = 'win-x64-stable';
-  static const applicationVersion = '0.1.3';
+  static const applicationVersion = '0.1.4';
 
   /// About remains implemented and verified, but its navigation entry stays
   /// hidden until a later product update explicitly enables it.

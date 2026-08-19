@@ -2,9 +2,9 @@ cmake_minimum_required(VERSION 3.25)
 
 project(BlackSpiritLifeInstaller LANGUAGES CXX RC)
 
-set(BSL_INSTALLER_VERSION "0.1.3" CACHE STRING
+set(BSL_INSTALLER_VERSION "0.1.4" CACHE STRING
     "Semantic version shown by the themed installer")
-set(BSL_INSTALLER_BUILD_NUMBER "22" CACHE STRING
+set(BSL_INSTALLER_BUILD_NUMBER "23" CACHE STRING
     "Flutter build number included in Windows version metadata")
 set(BSL_INSTALLER_PACKAGE_ID "BlackSpiritLife.App" CACHE STRING
     "Permanent Velopack package identity")

@@ -20,14 +20,18 @@ if ($PublicGitHubRepository -cnotmatch
     '^https://github\.com/[A-Za-z0-9](?:[A-Za-z0-9-]{0,38})/[A-Za-z0-9._-]{1,100}$') {
     throw 'The public update source must be the permanent canonical repository base URL: https://github.com/OWNER/REPOSITORY'
 }
-$Version = '0.1.3'
-$BuildNumber = '22'
+$Version = '0.1.4'
+$BuildNumber = '23'
+$PreviousStableVersion = '0.1.3'
+$PreviousPublicMainCommit =
+    'e0f241bf1a697caf8398e7da81a34aae426c8d64'
 $UpdateSource = $PublicGitHubRepository
-$ReleaseNotesRelativePath = 'docs\releases\0.1.3.md'
+$ReleaseNotesRelativePath = 'docs\releases\0.1.4.md'
 $OutputDirectoryName = 'public-stable-candidate'
 $ManifestName = 'public-candidate-manifest.json'
 $RemainingBlockers = @(
-    'complete themed-installer lifecycle verification',
+    'verify an installed 0.1.3 updates to 0.1.4 through the in-app update bar with its personal data intact',
+    'complete fresh install, repair, and uninstall lifecycle verification',
     'fresh-clone privacy and release-artifact scan',
     'explicit final approval immediately before public GitHub publication'
 )
@@ -38,6 +42,7 @@ $DisplayName = 'Black Spirit Life'
 $InstallerProductName = 'Black Spirit Life Installer'
 $ExecutableName = 'BlackSpiritLife.exe'
 $UpdaterHelperName = 'BlackSpiritLifeUpdater.exe'
+$BuiltInstallerName = 'BlackSpiritLifeInstaller.exe'
 $InstallerName = 'BlackSpiritLifeInstaller.exe'
 $UpdateSourceEnvironmentKey = 'BLACK_SPIRIT_LIFE_UPDATE_SOURCE'
 $VelopackVersion = '1.2.0'
@@ -47,6 +52,12 @@ $VelopackRuntimeSha256 =
     'C36D8B984639A8AF9D3397088D3FFB8213FE1BD0917F555CF0C6E33F014403EC'
 $VelopackPackageUrl =
     'https://github.com/velopack/velopack/releases/download/1.2.0/vpk.1.2.0.nupkg'
+$PreviousFeedBytes = 4867L
+$PreviousFeedSha256 =
+    '5601CF70C6165863843B59F7836517C0700FE5DA39B7270D3F9146E4F0EF10E2'
+$PreviousFullPackageBytes = 75111193L
+$PreviousFullPackageSha256 =
+    '36AB8CDB27E885F677CAF3B1D5CD20A332A0C203DD17EE83B9D7B55900577110'
 
 function Assert-LastExitCode {
     param([Parameter(Mandatory = $true)][string]$Operation)
@@ -200,10 +211,17 @@ $CandidateRoot = Join-Path $ProjectRoot "build\$OutputDirectoryName"
 $RunId = [DateTime]::UtcNow.ToString('yyyyMMddTHHmmssfffZ') +
     "-$PID-$([Guid]::NewGuid().ToString('N').Substring(0, 12))"
 $RunRoot = Join-Path (Join-Path $CandidateRoot 'runs') $RunId
+$InputPath = Join-Path $RunRoot 'published-inputs'
 $FeedPath = Join-Path $RunRoot 'feed'
 $ToolExpanded = Join-Path $RunRoot 'vpk'
 $InstallerBuildDirectory = Join-Path $RunRoot 'installer-build'
 $ManifestPath = Join-Path $RunRoot $ManifestName
+$fullPackageName = "$PackageId-$Version-$UpdateChannel-full.nupkg"
+$deltaPackageName = "$PackageId-$Version-$UpdateChannel-delta.nupkg"
+$previousFullPackageName =
+    "$PackageId-$PreviousStableVersion-$UpdateChannel-full.nupkg"
+$setupName = "$PackageId-$UpdateChannel-Setup.exe"
+$feedIndexName = "releases.$UpdateChannel.json"
 
 $sourceCommit = (& git -C $ProjectRoot rev-parse HEAD).Trim()
 Assert-LastExitCode -Operation 'Git source identity check'
@@ -216,10 +234,23 @@ Assert-LastExitCode -Operation 'Git source tag check'
 if ($sourceTags.Count -ne 1 -or $sourceTags[0] -cne $expectedSourceTag) {
     throw "The public candidate must be built from the one exact source tag $expectedSourceTag."
 }
+$previousSourceTag = "v$PreviousStableVersion"
+$previousTaggedCommit = (& git -C $ProjectRoot rev-parse "$previousSourceTag^{commit}").Trim()
+Assert-LastExitCode -Operation 'Previous public source tag check'
+$previousPublicMainCommit = (& git -C $ProjectRoot rev-parse 'HEAD^').Trim()
+Assert-LastExitCode -Operation 'Public source parent check'
+if ($previousPublicMainCommit -cne $PreviousPublicMainCommit) {
+    throw 'The public candidate must be one release commit on top of the reviewed public main commit.'
+}
+$previousPublicMainParent = (& git -C $ProjectRoot rev-parse "$PreviousPublicMainCommit^").Trim()
+Assert-LastExitCode -Operation 'Previous public main ancestry check'
+if ($previousPublicMainParent -cne $previousTaggedCommit) {
+    throw "The reviewed public main commit must be directly based on $previousSourceTag."
+}
 $sourceCommitCount = (& git -C $ProjectRoot rev-list --count HEAD).Trim()
 Assert-LastExitCode -Operation 'Git public history count check'
-if ($sourceCommitCount -cne '1') {
-    throw 'The public candidate must be built from a sanitized one-commit source history.'
+if ($sourceCommitCount -cne '3') {
+    throw 'The public candidate must contain only the sanitized 0.1.3 root, reviewed public README commit, and sanitized 0.1.4 release commit.'
 }
 $sourceTag = $expectedSourceTag
 Assert-CleanSource -ProjectRoot $ProjectRoot -ExpectedCommit $sourceCommit
@@ -252,8 +283,68 @@ foreach ($required in @($ReleaseNotesPath, $RunnerIcon)) {
 if (Test-Path -LiteralPath $RunRoot) {
     throw "The unique release-candidate output already exists: $RunRoot"
 }
+New-Item -ItemType Directory -Path $InputPath | Out-Null
 New-Item -ItemType Directory -Path $FeedPath | Out-Null
 New-Item -ItemType Directory -Path $ToolExpanded | Out-Null
+
+$previousFeedUrl =
+    "$UpdateSource/releases/download/v$PreviousStableVersion/$feedIndexName"
+$previousPackageUrl =
+    "$UpdateSource/releases/download/v$PreviousStableVersion/$previousFullPackageName"
+$publishedPreviousFeed = Join-Path $InputPath $feedIndexName
+$publishedPreviousPackage = Join-Path $InputPath $previousFullPackageName
+$previousFullPackage = Join-Path $FeedPath $previousFullPackageName
+Invoke-WebRequest -Uri $previousFeedUrl -OutFile $publishedPreviousFeed -UseBasicParsing
+$publishedPreviousFeedItem = Assert-OrdinaryFile -Path $publishedPreviousFeed
+$publishedPreviousFeedHash =
+    (Get-FileHash -Algorithm SHA256 -LiteralPath $publishedPreviousFeed).Hash
+if ($publishedPreviousFeedItem.Length -ne $PreviousFeedBytes -or
+    $publishedPreviousFeedHash -cne $PreviousFeedSha256) {
+    throw 'The published 0.1.3 feed changed from the reviewed release input.'
+}
+$publishedPreviousFeedJson =
+    Get-Content -Raw -LiteralPath $publishedPreviousFeed | ConvertFrom-Json
+$publishedPreviousAssets = @($publishedPreviousFeedJson.Assets | Where-Object {
+    $_.PackageId -ceq $PackageId -and
+    $_.Version -ceq $PreviousStableVersion -and
+    $_.Type -ceq 'Full' -and
+    $_.FileName -ceq $previousFullPackageName
+})
+if ($publishedPreviousAssets.Count -ne 1 -or
+    @($publishedPreviousFeedJson.Assets).Count -ne 1) {
+    throw 'The published 0.1.3 feed does not contain exactly the expected full package.'
+}
+Invoke-WebRequest `
+    -Uri $previousPackageUrl `
+    -OutFile $publishedPreviousPackage `
+    -UseBasicParsing
+$publishedPreviousPackageItem =
+    Assert-OrdinaryFile -Path $publishedPreviousPackage
+$publishedPreviousPackageHash =
+    (Get-FileHash -Algorithm SHA256 -LiteralPath $publishedPreviousPackage).Hash
+if ($publishedPreviousPackageItem.Length -ne $PreviousFullPackageBytes -or
+    $publishedPreviousPackageHash -cne $PreviousFullPackageSha256) {
+    throw 'The published 0.1.3 full package changed from the reviewed release input.'
+}
+if ([long]$publishedPreviousAssets[0].Size -ne $publishedPreviousPackageItem.Length -or
+    -not $publishedPreviousPackageHash.Equals(
+        [string]$publishedPreviousAssets[0].SHA256,
+        [System.StringComparison]::OrdinalIgnoreCase
+    )) {
+    throw 'The published 0.1.3 full package does not match its published feed.'
+}
+Assert-VelopackPackage `
+    -PackagePath $publishedPreviousPackage `
+    -ExpectedPackageId $PackageId `
+    -ExpectedVersion $PreviousStableVersion `
+    -ExpectedChannel $UpdateChannel `
+    -ExpectedTitle $DisplayName `
+    -ExpectedExecutable $ExecutableName `
+    -ExpectedUpdater $UpdaterHelperName
+Copy-Item -LiteralPath $publishedPreviousPackage -Destination $previousFullPackage
+$previousFullItem = Assert-OrdinaryFile -Path $previousFullPackage
+$previousFullHash =
+    (Get-FileHash -Algorithm SHA256 -LiteralPath $previousFullPackage).Hash
 
 $toolRoot = Join-Path $ProjectRoot "build\release-tools\vpk-$VelopackVersion"
 $toolPackage = Join-Path $toolRoot "vpk.$VelopackVersion.nupkg"
@@ -383,13 +474,17 @@ finally {
     $env:DOTNET_PROCESSOR_COUNT = $previousProcessorCount
 }
 
-$fullPackageName = "$PackageId-$Version-$UpdateChannel-full.nupkg"
-$setupName = "$PackageId-$UpdateChannel-Setup.exe"
-$feedIndexName = "releases.$UpdateChannel.json"
 $fullPackage = Join-Path $FeedPath $fullPackageName
+$deltaPackage = Join-Path $FeedPath $deltaPackageName
 $generatedSetup = Join-Path $FeedPath $setupName
 $feedIndex = Join-Path $FeedPath $feedIndexName
-foreach ($required in @($fullPackage, $generatedSetup, $feedIndex)) {
+foreach ($required in @(
+    $previousFullPackage,
+    $fullPackage,
+    $deltaPackage,
+    $generatedSetup,
+    $feedIndex
+)) {
     $null = Assert-OrdinaryFile -Path $required
 }
 Assert-VelopackPackage `
@@ -402,23 +497,68 @@ Assert-VelopackPackage `
     -ExpectedUpdater $UpdaterHelperName
 
 $feed = Get-Content -Raw -LiteralPath $feedIndex | ConvertFrom-Json
-$matchingAssets = @($feed.Assets | Where-Object {
+$previousFullItem = Assert-OrdinaryFile -Path $previousFullPackage
+$previousFullHash =
+    (Get-FileHash -Algorithm SHA256 -LiteralPath $previousFullPackage).Hash
+if ($previousFullItem.Length -ne $PreviousFullPackageBytes -or
+    $previousFullHash -cne $PreviousFullPackageSha256) {
+    throw 'Velopack changed the pinned published 0.1.3 full package.'
+}
+$feedAssets = @($feed.Assets)
+if ($feedAssets.Count -ne 3) {
+    throw 'The update feed must contain exactly the previous full package, current full package, and current delta package.'
+}
+$matchingFullAssets = @($feedAssets | Where-Object {
     $_.PackageId -ceq $PackageId -and
     $_.Version -ceq $Version -and
     $_.Type -ceq 'Full' -and
     $_.FileName -ceq $fullPackageName
 })
-if ($matchingAssets.Count -ne 1) {
+$matchingDeltaAssets = @($feedAssets | Where-Object {
+    $_.PackageId -ceq $PackageId -and
+    $_.Version -ceq $Version -and
+    $_.Type -ceq 'Delta' -and
+    $_.FileName -ceq $deltaPackageName
+})
+$matchingPreviousAssets = @($feedAssets | Where-Object {
+    $_.PackageId -ceq $PackageId -and
+    $_.Version -ceq $PreviousStableVersion -and
+    $_.Type -ceq 'Full' -and
+    $_.FileName -ceq $previousFullPackageName
+})
+if ($matchingFullAssets.Count -ne 1) {
     throw 'The update feed does not contain exactly one expected full package.'
+}
+if ($matchingDeltaAssets.Count -ne 1) {
+    throw 'The update feed does not contain exactly one 0.1.3 to 0.1.4 delta package.'
+}
+if ($matchingPreviousAssets.Count -ne 1) {
+    throw 'The update feed does not retain exactly one published 0.1.3 full package.'
 }
 $fullItem = Get-Item -LiteralPath $fullPackage
 $fullHash = (Get-FileHash -Algorithm SHA256 -LiteralPath $fullPackage).Hash
-if ([long]$matchingAssets[0].Size -ne $fullItem.Length -or
+if ([long]$matchingFullAssets[0].Size -ne $fullItem.Length -or
     -not $fullHash.Equals(
-        [string]$matchingAssets[0].SHA256,
+        [string]$matchingFullAssets[0].SHA256,
         [System.StringComparison]::OrdinalIgnoreCase
     )) {
     throw 'The update feed checksum does not match the full package.'
+}
+$deltaItem = Get-Item -LiteralPath $deltaPackage
+$deltaHash = (Get-FileHash -Algorithm SHA256 -LiteralPath $deltaPackage).Hash
+if ([long]$matchingDeltaAssets[0].Size -ne $deltaItem.Length -or
+    -not $deltaHash.Equals(
+        [string]$matchingDeltaAssets[0].SHA256,
+        [System.StringComparison]::OrdinalIgnoreCase
+    )) {
+    throw 'The update feed checksum does not match the delta package.'
+}
+if ([long]$matchingPreviousAssets[0].Size -ne $previousFullItem.Length -or
+    -not $previousFullHash.Equals(
+        [string]$matchingPreviousAssets[0].SHA256,
+        [System.StringComparison]::OrdinalIgnoreCase
+    )) {
+    throw 'The updated feed changed the published 0.1.3 full-package identity.'
 }
 
 $setupHash = (Get-FileHash -Algorithm SHA256 -LiteralPath $generatedSetup).Hash
@@ -439,7 +579,7 @@ Assert-LastExitCode -Operation 'Themed installer configuration'
 & $CMakePath --build $InstallerBuildDirectory --config Release --parallel 4
 Assert-LastExitCode -Operation 'Themed installer build'
 
-$builtInstaller = Join-Path $InstallerBuildDirectory "Release\$InstallerName"
+$builtInstaller = Join-Path $InstallerBuildDirectory "Release\$BuiltInstallerName"
 $null = Assert-OrdinaryFile -Path $builtInstaller
 $payloadCheck = Start-Process `
     -FilePath $builtInstaller `
@@ -464,14 +604,37 @@ if ($installerInfo.ProductName -cne $InstallerProductName -or
 Assert-NoTextMarker -Path $candidateInstaller -Markers $privateMarkers
 Assert-CleanSource -ProjectRoot $ProjectRoot -ExpectedCommit $sourceCommit
 
+$installerRecord = Get-ArtifactRecord `
+    -Role 'themed-installer' -Path $candidateInstaller -RelativeTo $RunRoot
+$setupRecord = Get-ArtifactRecord `
+    -Role 'velopack-setup' -Path $generatedSetup -RelativeTo $RunRoot
+$fullPackageRecord = Get-ArtifactRecord `
+    -Role 'full-package' -Path $fullPackage -RelativeTo $RunRoot
+$deltaPackageRecord = Get-ArtifactRecord `
+    -Role 'delta-package' -Path $deltaPackage -RelativeTo $RunRoot
+$feedRecord = Get-ArtifactRecord `
+    -Role 'update-feed' -Path $feedIndex -RelativeTo $RunRoot
+$publishedPreviousFeedRecord = Get-ArtifactRecord `
+    -Role 'published-previous-feed' `
+    -Path $publishedPreviousFeed `
+    -RelativeTo $RunRoot
+$previousFullPackageRecord = Get-ArtifactRecord `
+    -Role 'published-previous-full-package' `
+    -Path $publishedPreviousPackage `
+    -RelativeTo $RunRoot
+$publishedPreviousFeedRecord['releaseTag'] = $previousSourceTag
+$publishedPreviousFeedRecord['sourceUrl'] = $previousFeedUrl
+$previousFullPackageRecord['releaseTag'] = $previousSourceTag
+$previousFullPackageRecord['sourceUrl'] = $previousPackageUrl
 $artifacts = @(
-    (Get-ArtifactRecord -Role 'themed-installer' -Path $candidateInstaller -RelativeTo $RunRoot),
-    (Get-ArtifactRecord -Role 'velopack-setup' -Path $generatedSetup -RelativeTo $RunRoot),
-    (Get-ArtifactRecord -Role 'full-package' -Path $fullPackage -RelativeTo $RunRoot),
-    (Get-ArtifactRecord -Role 'update-feed' -Path $feedIndex -RelativeTo $RunRoot)
+    $installerRecord,
+    $setupRecord,
+    $fullPackageRecord,
+    $deltaPackageRecord,
+    $feedRecord
 )
 $manifest = [ordered]@{
-    schemaVersion = 1
+    schemaVersion = 2
     localOnly = $false
     publicCandidate = $true
     published = $false
@@ -484,6 +647,14 @@ $manifest = [ordered]@{
     packageId = $PackageId
     channel = $UpdateChannel
     updateSource = $UpdateSource
+    publicSourceHistory = [ordered]@{
+        previousTag = $previousSourceTag
+        previousCommit = $previousTaggedCommit
+        previousPublicMainCommit = $previousPublicMainCommit
+        currentTag = $sourceTag
+        currentCommit = $sourceCommit
+        reachableCommitCount = [int]$sourceCommitCount
+    }
     cleanProfile = [ordered]@{
         stateDirectory = '%APPDATA%\Black Spirit Life'
         autoImportsFormerProfiles = $false
@@ -491,12 +662,22 @@ $manifest = [ordered]@{
         initialInventoryEntries = 0
     }
     artifacts = $artifacts
+    publicUploadArtifacts = @(
+        $installerRecord,
+        $fullPackageRecord,
+        $deltaPackageRecord,
+        $feedRecord
+    )
     delta = [ordered]@{
-        previousStableVersion = $null
-        expectedForFirstVersion = $false
-        artifacts = @()
-        firstDeltaRequiredFor = 'the next Stable release after 0.1.3'
-        verificationRequiredBeforePublication = $false
+        previousStableVersion = $PreviousStableVersion
+        expected = $true
+        generated = $true
+        publishedInputs = @(
+            $publishedPreviousFeedRecord,
+            $previousFullPackageRecord
+        )
+        artifacts = @($deltaPackageRecord)
+        verificationRequiredBeforePublication = $true
     }
     remainingBlockers = $RemainingBlockers
 }
@@ -515,4 +696,5 @@ Write-Host "Source commit: $sourceCommit"
 Write-Host "Package ID: $PackageId"
 Write-Host "Channel: $UpdateChannel"
 Write-Host "Installer: $candidateInstaller"
+Write-Host "Delta: $deltaPackage"
 Write-Host "Manifest: $ManifestPath"

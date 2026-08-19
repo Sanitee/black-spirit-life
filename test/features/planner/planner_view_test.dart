@@ -908,6 +908,156 @@ void main() {
   );
 
   testWidgets(
+    'queue title changes its unique incoming substitute and refreshes the plan',
+    (tester) async {
+      await setPlannerTestSize(tester, const Size(1500, 940));
+      final harness = PlannerTestHarness(includeQueueTitleSubstitutes: true);
+
+      await tester.pumpWidget(harness.plannerHost());
+      await tester.pump(const Duration(milliseconds: 200));
+
+      final targetStep = harness.controller.active.plan.value.steps.firstWhere(
+        (step) => step.name == 'Clear Liquid Reagent',
+      );
+      expect(
+        targetStep.ingredients
+            .where((ingredient) => ingredient.options.length > 1)
+            .length,
+        1,
+      );
+
+      final queueTitleChoice = find.byKey(
+        PlannerActionKeys.row('P12', 'queue-title:Intermediate Powder'),
+      );
+      expect(queueTitleChoice, findsOneWidget);
+      expect(
+        find.descendant(
+          of: queueTitleChoice,
+          matching: find.byWidgetPredicate(
+            (widget) =>
+                widget is AppVectorGlyph &&
+                widget.name == 'swap' &&
+                widget.size == 11,
+          ),
+        ),
+        findsOneWidget,
+      );
+      expect(
+        find.byKey(PlannerActionKeys.row('P10', 'Intermediate Powder')),
+        findsOneWidget,
+      );
+
+      await tester.tap(queueTitleChoice);
+      await tester.pump(const Duration(milliseconds: 200));
+      expect(
+        find.bySemanticsLabel('Substitute choices for Intermediate Reagent'),
+        findsOneWidget,
+      );
+
+      await tester.tap(
+        find.byKey(PlannerActionKeys.row('P13', 'Alternate Reagent')),
+      );
+      await tester.pump(const Duration(milliseconds: 200));
+
+      expect(
+        harness
+            .controller
+            .active
+            .state
+            .value
+            .substituteChoices['recipe:Clear Liquid Reagent:Reagent Base'],
+        'Alternate Reagent',
+      );
+      expect(
+        find.byKey(PlannerActionKeys.row('P10', 'Intermediate Powder')),
+        findsNothing,
+      );
+      expect(
+        find.byKey(PlannerActionKeys.row('P10', 'Alternate Reagent')),
+        findsOneWidget,
+      );
+      expect(find.text('Ash Sap'), findsWidgets);
+      expect(find.text('Sunrise Herb'), findsNothing);
+      expect(tester.takeException(), isNull);
+      await harness.controller.dispose();
+    },
+  );
+
+  testWidgets(
+    'queue title keeps its chooser when two recipe choices converge',
+    (tester) async {
+      await setPlannerTestSize(tester, const Size(1500, 940));
+      final harness = PlannerTestHarness(
+        includeQueueTitleSubstitutes: true,
+        includeConvergingQueueTitleSubstitutes: true,
+      );
+
+      await tester.pumpWidget(harness.plannerHost());
+      await tester.pump(const Duration(milliseconds: 200));
+
+      final targetStep = harness.controller.active.plan.value.steps.firstWhere(
+        (step) => step.name == 'Clear Liquid Reagent',
+      );
+      expect(
+        targetStep.ingredients
+            .where((ingredient) => ingredient.options.length > 1)
+            .length,
+        2,
+      );
+
+      final queueTitleChoice = find.byKey(
+        PlannerActionKeys.row('P12', 'queue-title:Intermediate Powder'),
+      );
+      expect(queueTitleChoice, findsOneWidget);
+      expect(
+        find.bySemanticsLabel(
+          'Choose recipe substitutions affecting Intermediate Powder; '
+          '2 choices; closed',
+        ),
+        findsOneWidget,
+      );
+      await tester.tap(queueTitleChoice);
+      await tester.pump(const Duration(milliseconds: 200));
+      expect(
+        find.bySemanticsLabel('Recipe choices affecting Intermediate Powder'),
+        findsOneWidget,
+      );
+
+      await tester.tap(
+        find.byKey(
+          PlannerActionKeys.row(
+            'P13',
+            'Clear Liquid Reagent:Reagent Base:Alternate Reagent',
+          ),
+        ),
+      );
+      await tester.pump(const Duration(milliseconds: 200));
+
+      expect(
+        harness
+            .controller
+            .active
+            .state
+            .value
+            .substituteChoices['recipe:Clear Liquid Reagent:Reagent Base'],
+        'Alternate Reagent',
+      );
+      expect(
+        find.byKey(
+          PlannerActionKeys.row('P12', 'queue-title:Intermediate Powder'),
+        ),
+        findsOneWidget,
+      );
+      expect(
+        find.byKey(PlannerActionKeys.row('P10', 'Alternate Reagent')),
+        findsOneWidget,
+      );
+      expect(tester.takeException(), isNull);
+      await harness.controller.dispose();
+    },
+  );
+
+  testWidgets(
     'queue expansion, substitute, quality, market and owned actions mutate real state',
     (tester) async {
       await setPlannerTestSize(tester, const Size(1500, 940));
@@ -944,21 +1094,22 @@ void main() {
       await tester.tap(firstExpansion);
       await tester.pump();
       await tester.pumpAndSettle();
-      await tester.tap(
+      final substituteName = find.byKey(
+        PlannerActionKeys.row('P12', 'step:Intermediate Reagent:Wild Herbs'),
+      );
+      expect(
         find.byKey(
           PlannerActionKeys.row('P11', 'Intermediate Reagent:Sunrise Herb'),
         ),
+        findsOneWidget,
       );
-      await tester.pump();
-      expect(harness.copied, contains('Sunrise Herb'));
-
-      final swap = _glyph('swap').first;
-      await tester.tap(swap);
+      await tester.tap(substituteName);
       await tester.pump(const Duration(milliseconds: 200));
       expect(
         find.bySemanticsLabel('Substitute choices for Sunrise Herb'),
         findsOneWidget,
       );
+      expect(harness.copied, isNot(contains('Sunrise Herb')));
       expect(find.textContaining('Ratio '), findsNothing);
       expect(find.textContaining('Owned '), findsNothing);
       await tester.tap(
@@ -1034,7 +1185,11 @@ void main() {
         find.byKey(PlannerActionKeys.row('P20', 'Special Silver Azalea')),
       );
       await tester.pump();
-      expect(harness.copied, contains('Special Silver Azalea'));
+      expect(
+        find.bySemanticsLabel('Substitute choices for Sunrise Herb'),
+        findsOneWidget,
+      );
+      expect(harness.copied, isNot(contains('Special Silver Azalea')));
       expect(tester.takeException(), isNull);
       await harness.controller.dispose();
     },
@@ -1243,10 +1398,13 @@ void main() {
     await tester.pumpWidget(harness.plannerHost());
     await tester.pump(const Duration(milliseconds: 200));
 
-    expect(
-      find.byKey(PlannerActionKeys.row('P11', 'Wheat Flour:Wheat')),
-      findsOneWidget,
+    final fixedIngredientName = find.byKey(
+      PlannerActionKeys.row('P11', 'Wheat Flour:Wheat'),
     );
+    expect(fixedIngredientName, findsOneWidget);
+    await tester.tap(fixedIngredientName);
+    await tester.pump();
+    expect(harness.copied, contains('Wheat'));
     expect(
       find.byKey(PlannerActionKeys.row('P14', 'Wheat Flour:Wheat')),
       findsNothing,
@@ -2217,7 +2375,8 @@ void main() {
         PlannerActionKeys.row('P14', 'Intermediate Reagent:Sunrise Herb'),
       ),
     );
-    expect(queueSubstitute.left - queueIngredientName.right, 6);
+    expect(queueIngredientName.left - queueSubstitute.left, 3);
+    expect(queueSubstitute.right - queueIngredientName.right, 18);
     expect(queueQuality.left - queueSubstitute.right, 6);
     expect(
       queueSubstitute.center.dy,
@@ -2270,8 +2429,9 @@ void main() {
     expect(ownedField.size, const Size(82, 38));
     expect(add.left - ownedField.right, 15);
     expect(needIcon.size, const Size.square(50));
-    expect(needName.left - needIcon.right, 12);
-    expect(needSubstitute.left - needName.right, 5);
+    expect(needName.left - needIcon.right, 15);
+    expect(needName.left - needSubstitute.left, 3);
+    expect(needSubstitute.right - needName.right, 18);
     expect(needSource.left - needSubstitute.right, 5);
     expect(needSubstitute.center.dy, closeTo(needName.center.dy, .01));
     expect(needSource.center.dy, closeTo(needName.center.dy, .01));
@@ -2479,7 +2639,10 @@ void main() {
       await tester.pump(const Duration(milliseconds: 200));
       final before = harness.controller.active.state.value.toJson();
 
-      await tester.tap(_glyph('swap').first);
+      final substituteName = find.byKey(
+        PlannerActionKeys.row('P12', 'step:Intermediate Reagent:Wild Herbs'),
+      );
+      await tester.tap(substituteName);
       await tester.pump();
       final substitute = find.bySemanticsLabel(
         'Substitute choices for Sunrise Herb',
@@ -2530,7 +2693,7 @@ void main() {
       expect(source, findsNothing);
       expect(substitute, findsOneWidget);
 
-      await tester.tap(_glyph('swap').first);
+      await tester.tap(substituteName);
       await tester.pump();
       expect(substitute, findsNothing);
 
@@ -2680,7 +2843,25 @@ void main() {
         PlannerActionKeys.row('P12', 'missing:Sunrise Herb:Wild Herbs'),
       );
       expect(toggle, findsOneWidget);
-      expect(tester.getSize(toggle), const Size(28, 28));
+      expect(tester.getSize(toggle).width, greaterThan(100));
+      expect(tester.getSize(toggle).height, 23);
+      final indicator = find.descendant(
+        of: toggle,
+        matching: find.byWidgetPredicate(
+          (widget) =>
+              widget is AppVectorGlyph &&
+              widget.name == 'swap' &&
+              widget.size == 11,
+        ),
+      );
+      expect(indicator, findsOneWidget);
+      expect(
+        find.descendant(
+          of: indicator,
+          matching: find.byType(FocusableActionDetector),
+        ),
+        findsNothing,
+      );
       final queueName = find.byKey(
         PlannerActionKeys.row('P10', 'Intermediate Reagent'),
       );
@@ -2730,6 +2911,13 @@ void main() {
       expect(find.text('Choose Substitute'), findsNothing);
       expect(find.textContaining('Ratio '), findsNothing);
       expect(find.textContaining('Owned '), findsNothing);
+
+      await tester.sendKeyEvent(LogicalKeyboardKey.enter);
+      await tester.pump();
+      expect(chooser, findsNothing);
+      await tester.sendKeyEvent(LogicalKeyboardKey.space);
+      await tester.pump();
+      expect(chooser, findsOneWidget);
 
       await tester.sendKeyEvent(LogicalKeyboardKey.escape);
       await tester.pump();
@@ -3004,10 +3192,6 @@ void _expectInsideViewport(Rect rect, Size viewport) {
   expect(rect.right, lessThanOrEqualTo(viewport.width - 12));
   expect(rect.bottom, lessThanOrEqualTo(viewport.height - 12));
 }
-
-Finder _glyph(String name) => find.byWidgetPredicate(
-  (widget) => widget is AppVectorGlyph && widget.name == name,
-);
 
 Rect _inputContainerRect(WidgetTester tester, Finder fieldAncestor) {
   final editable = find.descendant(

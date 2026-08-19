@@ -714,19 +714,19 @@ final List<ActionEvidence> actionEvidenceManifest = <ActionEvidence>[
   ),
   _e(
     'P10',
-    'Queue-name copy sends the exact item name and named feedback.',
+    'Fixed queue names copy exactly; an upstream-selected queue name uses the P12 choice anchor.',
     _plannerRows,
     ActionStateContract.clipboard,
   ),
   _e(
     'P11',
-    'Ingredient-name copy sends the exact selected ingredient and feedback.',
+    'Fixed ingredient names copy exactly; interchangeable names use the P12 choice anchor.',
     _plannerRows,
     ActionStateContract.clipboard,
   ),
   _e(
     'P12',
-    'Substitute opens one anchored chooser with current ratios and prices.',
+    'An interchangeable ingredient name with a decorative swap indicator opens one inline chooser.',
     _plannerSubstituteOverlay,
     ActionStateContract.session,
   ),
@@ -778,7 +778,7 @@ final List<ActionEvidence> actionEvidenceManifest = <ActionEvidence>[
   ),
   _e(
     'P20',
-    'Need First copy sends the exact item name and named feedback.',
+    'Fixed Need First names copy exactly; interchangeable names use the P12 choice anchor.',
     _plannerRows,
     ActionStateContract.clipboard,
   ),

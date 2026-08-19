@@ -35,18 +35,52 @@ void main() {
     expect(builder, contains('https://github.com/OWNER/REPOSITORY'));
     expect(builder, isNot(contains('Sanitee')));
     expect(wrapper, isNot(contains('Sanitee')));
-    expect(builder, contains("\$Version = '0.1.3'"));
-    expect(builder, contains("\$BuildNumber = '22'"));
+    expect(builder, contains("\$Version = '0.1.4'"));
+    expect(builder, contains("\$BuildNumber = '23'"));
+    expect(builder, contains("\$PreviousStableVersion = '0.1.3'"));
+    expect(builder, contains('e0f241bf1a697caf8398e7da81a34aae426c8d64'));
     expect(builder, contains("\$UpdateChannel = 'win-x64-stable'"));
-    expect(builder, contains("docs\\releases\\0.1.3.md"));
+    expect(builder, contains("docs\\releases\\0.1.4.md"));
     expect(builder, contains('tag --points-at HEAD'));
     expect(builder, contains('rev-list --count HEAD'));
+    expect(builder, contains('previousSourceTag'));
+    expect(builder, contains("rev-parse 'HEAD^'"));
+    expect(builder, contains('previousPublicMainCommit'));
+    expect(builder, contains('previousPublicMainParent'));
     expect(builder, contains('sourceTag = \$sourceTag'));
     expect(builder, contains('publicCandidate = \$true'));
     expect(builder, contains('localOnly = \$false'));
     expect(builder, contains('\$installerInfo.FileVersion'));
-    expect(builder, contains('previousStableVersion = \$null'));
-    expect(builder, contains('expectedForFirstVersion = \$false'));
+    expect(
+      builder,
+      contains('previousStableVersion = \$PreviousStableVersion'),
+    );
+    expect(builder, contains('publishedPreviousFeed'));
+    expect(builder, contains('publishedPreviousAssets'));
+    expect(
+      builder,
+      contains(
+        '5601CF70C6165863843B59F7836517C0700FE5DA39B7270D3F9146E4F0EF10E2',
+      ),
+    );
+    expect(
+      builder,
+      contains(
+        '36AB8CDB27E885F677CAF3B1D5CD20A332A0C203DD17EE83B9D7B55900577110',
+      ),
+    );
+    expect(builder, contains('deltaPackageName'));
+    expect(builder, contains("\$feedAssets.Count -ne 3"));
+    expect(builder, contains("\$_.Type -ceq 'Delta'"));
+    expect(builder, contains('delta-package'));
+    expect(builder, contains('publicUploadArtifacts'));
+    expect(builder, contains('expected = \$true'));
+    expect(builder, contains('generated = \$true'));
+    expect(builder, contains('verificationRequiredBeforePublication = \$true'));
+    expect(
+      builder,
+      contains("\$InstallerName = 'BlackSpiritLifeInstaller.exe'"),
+    );
     expect(builder, contains('fresh-clone privacy and release-artifact scan'));
   });
 

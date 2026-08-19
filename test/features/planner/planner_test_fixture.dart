@@ -28,6 +28,8 @@ final class PlannerTestHarness {
     MarketState? alchemyMarket,
     double sunriseNpcPrice = 500,
     bool includeRecipeVariants = false,
+    bool includeQueueTitleSubstitutes = false,
+    bool includeConvergingQueueTitleSubstitutes = false,
     bool showAdvancedEditor = false,
   }) : copied = <String>[],
        copiedAfkLoads = <String>[],
@@ -40,6 +42,9 @@ final class PlannerTestHarness {
            alchemyIconDataUris: alchemyIconDataUris,
            supportingDataOverrides: supportingDataOverrides,
            includeRecipeVariants: includeRecipeVariants,
+           includeQueueTitleSubstitutes: includeQueueTitleSubstitutes,
+           includeConvergingQueueTitleSubstitutes:
+               includeConvergingQueueTitleSubstitutes,
          ),
          initialState: _document(
            activeMode,
@@ -210,6 +215,8 @@ CatalogSnapshot _catalog({
   required Map<String, String> alchemyIconDataUris,
   required Map<String, Object?> supportingDataOverrides,
   required bool includeRecipeVariants,
+  required bool includeQueueTitleSubstitutes,
+  required bool includeConvergingQueueTitleSubstitutes,
 }) => CatalogSnapshot(
   sourceSha256: 'planner-widget-fixture',
   sourceByteCount: 1,
@@ -220,7 +227,32 @@ CatalogSnapshot _catalog({
         'Clear Liquid Reagent': _recipe(
           'Clear Liquid Reagent',
           'alchemy',
-          <Ingredient>[_ingredient('Intermediate Reagent', 1)],
+          <Ingredient>[
+            if (includeQueueTitleSubstitutes)
+              Ingredient(
+                name: 'Intermediate Reagent',
+                quantity: 1,
+                options: const <String>[
+                  'Intermediate Reagent',
+                  'Alternate Reagent',
+                ],
+                substituteGroup: 'Reagent Base',
+                substituteRatios: const <String, double>{},
+              )
+            else
+              _ingredient('Intermediate Reagent', 1),
+            if (includeConvergingQueueTitleSubstitutes)
+              Ingredient(
+                name: 'Intermediate Reagent',
+                quantity: 1,
+                options: const <String>[
+                  'Intermediate Reagent',
+                  'Alternate Reagent',
+                ],
+                substituteGroup: 'Second Reagent Base',
+                substituteRatios: const <String, double>{},
+              ),
+          ],
           variants: includeRecipeVariants
               ? <RecipeVariant>[
                   RecipeVariant(
@@ -287,24 +319,39 @@ CatalogSnapshot _catalog({
       'Intermediate Reagent': _recipe(
         'Intermediate Reagent',
         'alchemy',
-        <Ingredient>[
-          Ingredient(
-            name: 'Sunrise Herb',
-            quantity: 2,
-            options: const <String>['Sunrise Herb', 'Silver Azalea'],
-            substituteGroup: 'Wild Herbs',
-            substituteRatios: const <String, double>{
-              'Sunrise Herb': 1,
-              'Silver Azalea': 2,
-            },
-          ),
-        ],
+        includeQueueTitleSubstitutes
+            ? <Ingredient>[_ingredient('Intermediate Powder', 1)]
+            : <Ingredient>[
+                Ingredient(
+                  name: 'Sunrise Herb',
+                  quantity: 2,
+                  options: const <String>['Sunrise Herb', 'Silver Azalea'],
+                  substituteGroup: 'Wild Herbs',
+                  substituteRatios: const <String, double>{
+                    'Sunrise Herb': 1,
+                    'Silver Azalea': 2,
+                  },
+                ),
+              ],
       ),
+      if (includeQueueTitleSubstitutes)
+        'Intermediate Powder': _recipe(
+          'Intermediate Powder',
+          'alchemy',
+          <Ingredient>[_ingredient('Sunrise Herb', 2)],
+        ),
+      if (includeQueueTitleSubstitutes)
+        'Alternate Reagent': _recipe(
+          'Alternate Reagent',
+          'alchemy',
+          <Ingredient>[_ingredient('Ash Sap', 3)],
+        ),
       'Sunrise Herb': _leaf(
         'Sunrise Herb',
         sourceNote: 'Gathered from wild herb nodes.',
       ),
       'Silver Azalea': _leaf('Silver Azalea'),
+      if (includeQueueTitleSubstitutes) 'Ash Sap': _leaf('Ash Sap'),
     },
     iconDataUris: alchemyIconDataUris,
     defaults: const <String, Object?>{},
