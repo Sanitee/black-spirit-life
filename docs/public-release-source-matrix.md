@@ -4,12 +4,12 @@ Review result: **proportionate source review complete; project-owner
 Workerman community-use decision and accepted residual risk recorded; six
 source-only private research inputs excluded from the public tree**
 
-Release identity: Black Spirit Life `0.1.4+23`, tag `v0.1.4`, package
+Release identity: Black Spirit Life `0.1.5+24`, tag `v0.1.5`, package
 `BlackSpiritLife.App`, channel `win-x64-stable`. The exact source commit and
 artifact hashes are recorded by the release-candidate manifest generated from
 the sanitized public history, which contains no internal Beta history.
 
-Review date: 2026-08-16
+Review date: 2026-08-26
 
 Permanent public/update destination approved by the project owner:
 `https://github.com/Sanitee/black-spirit-life`
@@ -98,6 +98,9 @@ mandatory.
 | API-01 | Official/community market APIs | Runtime services; no response corpus bundled | **No redistribution blocker** | Respect live service limits and keep failures non-blocking/offline-safe |
 | CODE-01 | Original Black Spirit Life source code | Project-owned code | **Cleared** | Root `LICENSE` remains separate and expressly grants no rights in PA artwork, game data or other third-party material |
 | VPK-01 | Velopack 1.2.0 | Licensed dependency | **Cleared** | Preserve the bundled licence and pinned checksums |
+| OCR-01 | Black Spirit Hub v0.9.52 storage-grid recognition source and sealed Recipe Book snapshot, commit `6ccbad52d25b54d8b67065ce8a9eb1bcece87d9f` | Shared implementation with project-owner reuse authorization | **Cleared for Black Spirit Life reuse** | Preserve `SOURCE-NOTICE.txt`; do not describe the authorization as a general licence grant to third parties |
+| OCR-02 | PaddleOCR PP-OCRv5 model and ONNX Runtime 1.29.0 | Licensed dependencies | **Cleared** | Preserve the PaddleOCR, model, ONNX Runtime, and complete third-party notices beside the helper payload |
+| OCR-03 | 3,897 sealed Recipe Book item icons and two generated recognition atlases | Pearl Abyss-origin game artwork used by the isolated OCR helper | **Satisfied** | Retain PA attribution and the helper asset notice; private contributor screenshot fixtures remain excluded from public source and packages |
 
 ## Exact owner-approved Workerman/Shrddr groups
 

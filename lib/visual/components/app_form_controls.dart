@@ -201,6 +201,8 @@ class AppTextField extends StatelessWidget {
     this.textAlign = TextAlign.start,
     this.textStyle,
     this.hintStyle,
+    this.contentPadding,
+    this.textAlignVertical,
     this.enabled = true,
     this.obscureText = false,
     this.maxLines = 1,
@@ -226,6 +228,8 @@ class AppTextField extends StatelessWidget {
   final TextAlign textAlign;
   final TextStyle? textStyle;
   final TextStyle? hintStyle;
+  final EdgeInsetsGeometry? contentPadding;
+  final TextAlignVertical? textAlignVertical;
   final bool enabled;
   final bool obscureText;
   final int? maxLines;
@@ -287,9 +291,9 @@ class AppTextField extends StatelessWidget {
       keyboardType: keyboardType,
       inputFormatters: inputFormatters,
       textAlign: textAlign,
-      textAlignVertical: maxLines == 1
-          ? TextAlignVertical.center
-          : TextAlignVertical.top,
+      textAlignVertical:
+          textAlignVertical ??
+          (maxLines == 1 ? TextAlignVertical.center : TextAlignVertical.top),
       enabled: enabled,
       obscureText: obscureText,
       maxLines: maxLines,
@@ -339,13 +343,20 @@ class AppTextField extends StatelessWidget {
         // Dense workstation fields and the subdued Standard source-note
         // variant use zero vertical inset. Generic Standard fields retain the
         // denser template used by the other workspace controls.
-        contentPadding: maxLines == 1
-            ? denseSingleLine
-                  ? const EdgeInsets.symmetric(horizontal: 12)
-                  : subduedStandard
-                  ? const EdgeInsets.symmetric(horizontal: 9)
-                  : const EdgeInsets.symmetric(horizontal: 12, vertical: 9)
-            : EdgeInsets.fromLTRB(12, spec.usesDenseSplitLayout ? 9 : 8, 12, 8),
+        contentPadding:
+            contentPadding ??
+            (maxLines == 1
+                ? denseSingleLine
+                      ? const EdgeInsets.symmetric(horizontal: 12)
+                      : subduedStandard
+                      ? const EdgeInsets.symmetric(horizontal: 9)
+                      : const EdgeInsets.symmetric(horizontal: 12, vertical: 9)
+                : EdgeInsets.fromLTRB(
+                    12,
+                    spec.usesDenseSplitLayout ? 9 : 8,
+                    12,
+                    8,
+                  )),
         border: border,
         enabledBorder: border,
         disabledBorder: border.copyWith(
@@ -448,24 +459,36 @@ class AppSearchSelect<T extends Object> extends StatefulWidget {
     required this.items,
     required this.labelFor,
     required this.onSelected,
+    this.searchItems,
     this.value,
     this.onQueryChanged,
     this.hintText,
+    this.hintStyle,
     this.semanticLabel,
     this.focusNode,
+    this.anchorMaxLines = 1,
     this.enabled = true,
     super.key,
   });
 
   final TextEditingController controller;
+
+  /// The compact suggestions shown before the user starts typing.
+  ///
+  /// When supplied, [searchItems] may contain a wider catalogue. This keeps a
+  /// visually ambiguous OCR row useful with the mouse without opening a huge,
+  /// unrelated menu, while still allowing an explicit typed correction.
   final List<T> items;
+  final List<T>? searchItems;
   final String Function(T value) labelFor;
   final ValueChanged<T>? onSelected;
   final T? value;
   final ValueChanged<String>? onQueryChanged;
   final String? hintText;
+  final TextStyle? hintStyle;
   final String? semanticLabel;
   final FocusNode? focusNode;
+  final int anchorMaxLines;
   final bool enabled;
 
   @override
@@ -480,34 +503,27 @@ class _AppSearchSelectState<T extends Object>
   int _highlighted = 0;
 
   bool get _enabled =>
-      widget.enabled && widget.onSelected != null && widget.items.isNotEmpty;
+      widget.enabled &&
+      widget.onSelected != null &&
+      (widget.items.isNotEmpty || widget.searchItems?.isNotEmpty == true);
   FocusNode get _focusNode => widget.focusNode ?? _ownedFocusNode;
+  List<T> get _searchItems => widget.searchItems ?? widget.items;
 
   @override
   void initState() {
     super.initState();
-    _focusNode.addListener(_focusChanged);
   }
 
   @override
   void didUpdateWidget(AppSearchSelect<T> oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (!identical(oldWidget.focusNode, widget.focusNode)) {
-      (oldWidget.focusNode ?? _ownedFocusNode).removeListener(_focusChanged);
-      _focusNode.addListener(_focusChanged);
-    }
     if (!_enabled) _menuController.close();
   }
 
   @override
   void dispose() {
-    _focusNode.removeListener(_focusChanged);
     _ownedFocusNode.dispose();
     super.dispose();
-  }
-
-  void _focusChanged() {
-    if (!_focusNode.hasFocus) _menuController.close();
   }
 
   List<T> _matchingItems() {
@@ -518,7 +534,7 @@ class _AppSearchSelectState<T extends Object>
         widget.labelFor(selected).trim().toLowerCase() == query) {
       return widget.items;
     }
-    return widget.items
+    return _searchItems
         .where((item) => widget.labelFor(item).toLowerCase().contains(query))
         .toList(growable: false);
   }
@@ -540,7 +556,7 @@ class _AppSearchSelectState<T extends Object>
   void _submit(String value) {
     final normalized = value.trim().toLowerCase();
     if (normalized.isEmpty) return;
-    for (final item in widget.items) {
+    for (final item in _searchItems) {
       if (widget.labelFor(item).trim().toLowerCase() == normalized) {
         _select(item);
         return;
@@ -558,7 +574,8 @@ class _AppSearchSelectState<T extends Object>
     );
     widget.onQueryChanged?.call(label);
     widget.onSelected?.call(item);
-    _highlighted = widget.items.indexOf(item).clamp(0, widget.items.length - 1);
+    final selectedIndex = _searchItems.indexOf(item);
+    _highlighted = selectedIndex < 0 ? 0 : selectedIndex;
     _menuController.close();
     _focusNode.requestFocus();
   }
@@ -629,16 +646,17 @@ class _AppSearchSelectState<T extends Object>
         : (matches.length * optionExtent).clamp(optionExtent, 280.0);
     return LayoutBuilder(
       builder: (context, constraints) {
-        final preferredControlWidth = AppSelect.readableWidthFor<T>(
-          context,
-          items: widget.items,
-          labelFor: widget.labelFor,
-        );
+        // Search selects normally live in a deliberately bounded row. Filling
+        // that row avoids laying out every label merely to rediscover the
+        // parent's width (the Inventory review catalog can exceed 1,300
+        // choices). Unbounded uses retain the intrinsic-width fallback.
         final controlWidth = constraints.hasBoundedWidth
-            ? preferredControlWidth
-                  .clamp(constraints.minWidth, constraints.maxWidth)
-                  .toDouble()
-            : preferredControlWidth;
+            ? constraints.maxWidth
+            : AppSelect.readableWidthFor<T>(
+                context,
+                items: widget.items,
+                labelFor: widget.labelFor,
+              );
         final menuWidth = _readableSearchMenuWidth(
           context,
           spec,
@@ -770,21 +788,37 @@ class _AppSearchSelectState<T extends Object>
               controller: widget.controller,
               focusNode: _focusNode,
               hintText: widget.hintText,
+              hintStyle: widget.hintStyle,
               semanticLabel: widget.semanticLabel,
               enabled: _enabled,
               onTap: _open,
               onChanged: _queryChanged,
               onSubmitted: _submit,
               onKeyEvent: _handleKey,
+              maxLines: widget.anchorMaxLines,
+              minLines: 1,
+              textAlignVertical: TextAlignVertical.center,
+              textStyle: widget.anchorMaxLines > 1
+                  ? spec.typography.body.copyWith(
+                      height: 1.05,
+                      leadingDistribution: TextLeadingDistribution.even,
+                    )
+                  : null,
+              contentPadding: widget.anchorMaxLines > 1
+                  ? const EdgeInsetsDirectional.fromSTEB(12, 4, 8, 4)
+                  : null,
               suffixIcon: IgnorePointer(
-                child: Center(
-                  child: AnimatedRotation(
-                    turns: _expanded ? .5 : 0,
-                    duration: spec.motion.interactionDuration,
-                    child: AppVectorGlyph(
-                      'chevron-down',
-                      size: 15,
-                      color: spec.palette.textMuted,
+                child: SizedBox(
+                  width: 40,
+                  child: Center(
+                    child: AnimatedRotation(
+                      turns: _expanded ? .5 : 0,
+                      duration: spec.motion.interactionDuration,
+                      child: AppVectorGlyph(
+                        'chevron-down',
+                        size: 15,
+                        color: spec.palette.textMuted,
+                      ),
                     ),
                   ),
                 ),
@@ -807,10 +841,19 @@ class _AppSearchSelectState<T extends Object>
       fontFamily: ledger ? 'Georgia' : spec.typography.body.fontFamily,
       fontWeight: FontWeight.w700,
     );
+    // Measuring thousands of TextPainters synchronously makes a large search
+    // chooser feel frozen. Rank labels cheaply, then precisely measure the
+    // handful most likely to be widest. The extra allowance protects against
+    // unusual glyph widths while menu labels remain capable of wrapping.
+    final labels = items.map(widget.labelFor).toList(growable: false)
+      ..sort(
+        (left, right) =>
+            _labelWidthEstimate(right).compareTo(_labelWidthEstimate(left)),
+      );
     var longestLabelWidth = 0.0;
-    for (final item in items) {
+    for (final label in labels.take(24)) {
       final painter = TextPainter(
-        text: TextSpan(text: widget.labelFor(item), style: measurementStyle),
+        text: TextSpan(text: label, style: measurementStyle),
         textDirection: Directionality.of(context),
         textScaler: MediaQuery.textScalerOf(context),
         maxLines: 1,
@@ -823,7 +866,25 @@ class _AppSearchSelectState<T extends Object>
         .clamp(0.0, double.infinity)
         .toDouble();
     final floor = minimumWidth.clamp(0.0, viewportLimit).toDouble();
-    return (longestLabelWidth + 62).clamp(floor, viewportLimit).toDouble();
+    return (longestLabelWidth + 70).clamp(floor, viewportLimit).toDouble();
+  }
+
+  double _labelWidthEstimate(String label) {
+    var width = 0.0;
+    for (final rune in label.runes) {
+      if (rune == 0x20) {
+        width += .42;
+      } else if ('MW@%&'.runes.contains(rune)) {
+        width += 1.28;
+      } else if ('ilI1|!'.runes.contains(rune)) {
+        width += .38;
+      } else if (rune >= 0x41 && rune <= 0x5A) {
+        width += .92;
+      } else {
+        width += .74;
+      }
+    }
+    return width;
   }
 
   ButtonStyle _searchMenuItemStyle({

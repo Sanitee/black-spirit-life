@@ -70,6 +70,7 @@ typedef OfferInventoryUndo = void Function(InventoryUndoOffer offer);
 typedef ReportInventoryUndo = void Function(InventoryUndoResult result);
 typedef AcquireInventoryScreenshot =
     Future<InventoryScreenshotAnalysis?> Function();
+typedef PrewarmInventoryScreenshotRecognition = Future<void> Function();
 
 /// Effects owned by the application host: themed confirmations, native
 /// clipboard and semantic toast reporting.
@@ -83,6 +84,7 @@ final class InventoryExternalActions {
     required this.reportUndo,
     this.pasteScreenshot,
     this.chooseScreenshot,
+    this.prewarmScreenshotRecognition,
   });
 
   final ConfirmInventoryClear confirmClear;
@@ -93,4 +95,5 @@ final class InventoryExternalActions {
   final ReportInventoryUndo reportUndo;
   final AcquireInventoryScreenshot? pasteScreenshot;
   final AcquireInventoryScreenshot? chooseScreenshot;
+  final PrewarmInventoryScreenshotRecognition? prewarmScreenshotRecognition;
 }

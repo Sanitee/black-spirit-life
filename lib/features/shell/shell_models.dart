@@ -47,9 +47,7 @@ enum ShellDestination {
   final String semanticLabel;
   final String actionId;
 
-  bool get isAdvanced =>
-      this == ShellDestination.inventory ||
-      this == ShellDestination.recipeEditor;
+  bool get isAdvanced => this == ShellDestination.recipeEditor;
 
   bool isAvailableFor(CraftMode mode) =>
       this != ShellDestination.bonusRecipes || mode != CraftMode.processing;

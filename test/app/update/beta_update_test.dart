@@ -353,7 +353,7 @@ void main() {
   });
 
   group('NativeBetaUpdateService', () {
-    const channel = MethodChannel('com.blackspiritlife/updates');
+    const channel = MethodChannel('com.blackspiritlife.livebeta/updates');
     final calls = <MethodCall>[];
 
     setUp(() {

@@ -26,14 +26,17 @@
         "Weasel Blood",
         "Raccoon Blood",
         "Scorpion Blood",
-        "Marmot Blood"
+        "Marmot Blood",
+        "Monkey Blood"
       ],
       "Group 4": [
         "Bear Blood",
         "Troll Blood",
         "Ogre Blood",
         "Lion Blood",
-        "Yak Blood"
+        "Tiger Blood",
+        "Yak Blood",
+        "Dinosaur Blood"
       ],
       "Group 5": [
         "Lizard Blood",
@@ -43,6 +46,72 @@
         "Cobra Blood"
       ]
     },
+    "substituteWorthGroups": {
+      "Blood Group 1": {
+        "Wolf Blood": 1,
+        "Flamingo Blood": 2,
+        "Rhino Blood": 1,
+        "Cheetah Dragon Blood": 2
+      },
+      "Blood Group 2": {
+        "Pig Blood": 1,
+        "Deer Blood": 2,
+        "Sheep Blood": 2,
+        "Ox Blood": 2,
+        "Waragon Blood": 2,
+        "Llama Blood": 2,
+        "Goat Blood": 2
+      },
+      "Blood Group 3": {
+        "Fox Blood": 1,
+        "Weasel Blood": 2,
+        "Raccoon Blood": 2,
+        "Scorpion Blood": 1,
+        "Marmot Blood": 2,
+        "Monkey Blood": 2
+      },
+      "Blood Group 4": {
+        "Bear Blood": 1,
+        "Troll Blood": 2,
+        "Ogre Blood": 2,
+        "Lion Blood": 1,
+        "Tiger Blood": 1,
+        "Yak Blood": 1,
+        "Dinosaur Blood": 2
+      },
+      "Blood Group 5": {
+        "Lizard Blood": 1,
+        "Worm Blood": 2,
+        "Bat Blood": 2,
+        "Kuku Bird Blood": 2,
+        "Cobra Blood": 2
+      },
+      "Fruit Group 6007": {
+        "Apple": 1,
+        "Strawberry": 2,
+        "Grape": 2,
+        "Cherry": 2,
+        "Pear": 2,
+        "Banana": 2,
+        "Pineapple": 2
+      },
+      "Sunrise Herb Group 3001": {
+        "Sunrise Herb": 1,
+        "High-Quality Sunrise Herb": 6,
+        "Pile of Sunrise Herbs": 6,
+        "Special Sunrise Herb": 36
+      }
+    },
+    "substituteWorthSources": {
+      "Blood Group 1": "https://bdocodex.com/us/materialgroup/805/",
+      "Blood Group 2": "https://bdocodex.com/us/materialgroup/801/",
+      "Blood Group 3": "https://bdocodex.com/us/materialgroup/803/",
+      "Blood Group 4": "https://bdocodex.com/us/materialgroup/802/",
+      "Blood Group 5": "https://bdocodex.com/us/materialgroup/804/",
+      "Fruit Group 6007": "https://bdocodex.com/us/materialgroup/6007/",
+      "Sunrise Herb Group 3001": "https://bdocodex.com/us/materialgroup/3001/"
+    },
+    "substituteWorthReviewedAt": "2026-08-22",
     "bloodGroupsPreferred": {
       "Group 1": [
         "Wolf Blood"
@@ -1371,7 +1440,9 @@
     "Monkey Blood": {
       "type": "gathered",
       "baseOutput": 1,
-      "ingredients": []
+      "ingredients": [],
+      "marketId": "6211",
+      "group": "Bloods"
     },
     "Weasel Blood": {
       "type": "gathered",
@@ -1914,6 +1985,204 @@
       "qualityGrade": "special",
       "ingredients": []
     },
+    "Pile of Sunrise Herbs": {
+      "type": "gathered",
+      "baseOutput": 1,
+      "group": "Gatherables",
+      "ingredients": [],
+      "marketId": "5421",
+      "sourceNote": "Exact member of BDO material group 3001 with Worth 6."
+    },
+    "Tenacious Origin of Life": {
+      "type": "alchemy",
+      "baseOutput": 1,
+      "group": "Alchemy Materials",
+      "method": "Alchemy Tool (Skilled 1+)",
+      "marketId": "5303",
+      "outputMin": 1,
+      "outputMax": 3,
+      "ingredients": [
+        {
+          "name": "Sunrise Herb",
+          "qty": 50
+        },
+        {
+          "name": "Silver Azalea",
+          "qty": 50
+        },
+        {
+          "name": "Fire Flake Flower",
+          "qty": 50
+        },
+        {
+          "name": "Dry Mane Grass",
+          "qty": 50
+        },
+        {
+          "name": "Silk Honey Grass",
+          "qty": 50
+        }
+      ],
+      "defaultVariantId": "normal-herbs",
+      "variants": [
+        {
+          "id": "normal-herbs",
+          "label": "Normal herbs",
+          "routeId": "normal-herbs",
+          "batchMultiplier": 1,
+          "type": "alchemy",
+          "method": "Alchemy Tool (Skilled 1+)",
+          "baseOutput": 1,
+          "outputMin": 1,
+          "outputMax": 3,
+          "ingredients": [
+            {
+              "name": "Sunrise Herb",
+              "qty": 50
+            },
+            {
+              "name": "Silver Azalea",
+              "qty": 50
+            },
+            {
+              "name": "Fire Flake Flower",
+              "qty": 50
+            },
+            {
+              "name": "Dry Mane Grass",
+              "qty": 50
+            },
+            {
+              "name": "Silk Honey Grass",
+              "qty": 50
+            }
+          ]
+        },
+        {
+          "id": "high-quality-herbs",
+          "label": "High-quality herbs",
+          "routeId": "high-quality-herbs",
+          "batchMultiplier": 1,
+          "type": "alchemy",
+          "method": "Alchemy Tool (Skilled 1+)",
+          "baseOutput": 1,
+          "outputMin": 1,
+          "outputMax": 3,
+          "ingredients": [
+            {
+              "name": "High-Quality Sunrise Herb",
+              "qty": 17
+            },
+            {
+              "name": "High-Quality Silver Azalea",
+              "qty": 17
+            },
+            {
+              "name": "High-Quality Fire Flake Flower",
+              "qty": 17
+            },
+            {
+              "name": "High-Quality Dry Mane Grass",
+              "qty": 17
+            },
+            {
+              "name": "High-Quality Silk Honey Grass",
+              "qty": 17
+            }
+          ]
+        },
+        {
+          "id": "special-herbs",
+          "label": "Special herbs",
+          "routeId": "special-herbs",
+          "batchMultiplier": 1,
+          "type": "alchemy",
+          "method": "Alchemy Tool (Skilled 1+)",
+          "baseOutput": 1,
+          "outputMin": 1,
+          "outputMax": 3,
+          "ingredients": [
+            {
+              "name": "Special Sunrise Herb",
+              "qty": 8
+            },
+            {
+              "name": "Special Silver Azalea",
+              "qty": 8
+            },
+            {
+              "name": "Special Fire Flake Flower",
+              "qty": 8
+            },
+            {
+              "name": "Special Dry Mane Grass",
+              "qty": 8
+            },
+            {
+              "name": "Special Silk Honey Grass",
+              "qty": 8
+            }
+          ]
+        }
+      ],
+      "sourceNote": "Use an Alchemy Tool at Skilled 1 or higher with the normal, high-quality, or special herb formula to produce 1-3."
+    },
+    "Rough Opulent Crystal": {
+      "type": "alchemy",
+      "baseOutput": 1,
+      "group": "Alchemy Materials",
+      "method": "Alchemy Tool (Skilled 1+)",
+      "marketId": "5304",
+      "outputMin": 1,
+      "outputMax": 3,
+      "ingredients": [
+        {
+          "name": "Translucent Crystal",
+          "qty": 50
+        },
+        {
+          "name": "Mud Crystal",
+          "qty": 50
+        },
+        {
+          "name": "Black Crystal",
+          "qty": 50
+        },
+        {
+          "name": "Blue Crystal",
+          "qty": 50
+        },
+        {
+          "name": "Violet Crystal",
+          "qty": 50
+        }
+      ],
+      "sourceNote": "Use an Alchemy Tool at Skilled 1 or higher with 50 each of Translucent, Mud, Black, Blue, and Violet Crystal to produce 1-3."
+    },
+    "Flawless Spirit Stone": {
+      "type": "alchemy",
+      "baseOutput": 1,
+      "group": "Alchemy Materials",
+      "method": "Alchemy Tool (Skilled 1+)",
+      "marketId": "5305",
+      "outputMin": 1,
+      "outputMax": 3,
+      "ingredients": [
+        {
+          "name": "Oil of Tranquility",
+          "qty": 10
+        },
+        {
+          "name": "Tenacious Origin of Life",
+          "qty": 4
+        },
+        {
+          "name": "Rough Opulent Crystal",
+          "qty": 4
+        }
+      ],
+      "sourceNote": "Use an Alchemy Tool at Skilled 1 or higher with 10 Oil of Tranquility, 4 Tenacious Origin of Life, and 4 Rough Opulent Crystal to produce 1-3."
+    },
     "High-Quality Dwarf Mushroom": {
       "type": "gathered",
       "baseOutput": 1,
@@ -2253,13 +2522,37 @@
       "marketId": "697"
     },
     "Elixir of Sharp Detection": {
-      "type": "gathered",
+      "type": "alchemy",
       "baseOutput": 1,
       "group": "Elixirs",
       "qualityBase": "Elixir of Detection",
       "qualityGrade": "blue",
-      "ingredients": [],
-      "marketId": "699"
+      "ingredients": [
+        {
+          "name": "Oil of Storms",
+          "qty": 1
+        },
+        {
+          "name": "Pure Powder Reagent",
+          "qty": 6
+        },
+        {
+          "name": "White Truffle Mushroom",
+          "qty": 3
+        },
+        {
+          "name": "Trace of Nature",
+          "qty": 3
+        },
+        {
+          "name": "Old Tree Bark",
+          "qty": 2
+        }
+      ],
+      "marketId": "699",
+      "outputMin": 25,
+      "outputMax": 35,
+      "sourceNote": "Use an Alchemy Tool with 1 Oil of Storms, 6 Pure Powder Reagent, 3 White Truffle Mushroom, 3 Trace of Nature, and 2 Old Tree Bark to produce 25-35. A generic Truffle Mushroom cannot replace White Truffle Mushroom here."
     },
     "Elixir of Brutal Carnage": {
       "type": "gathered",
@@ -2633,13 +2926,13 @@
           "qty": 1
         },
         {
-          "name": "Strawberry",
+          "name": "Apple",
           "qty": 2,
           "substituteGroup": "BDO group 3",
           "options": [
+            "Apple",
             "Strawberry",
             "Grape",
-            "Apple",
             "Cherry",
             "Pear",
             "Banana",
@@ -2651,8 +2944,7 @@
           "qty": 2
         }
       ],
-      "marketId": "728",
-      "sourceNote": "Imported from BDOLytics recipe 728; icons and item IDs checked through BDO Codex."
+      "marketId": "728"
     },
     "Antidote Elixir": {
       "type": "alchemy",
@@ -3964,6 +4256,14 @@
       "ingredients": [],
       "marketId": "6207"
     },
+    "Tiger Blood": {
+      "type": "gathered",
+      "baseOutput": 1,
+      "group": "Bloods",
+      "ingredients": [],
+      "marketId": "6356",
+      "sourceNote": "Current BDO item 6356; Blood Group 4 member with Worth 1."
+    },
     "Soaring Wings Elixir": {
       "type": "gathered",
       "baseOutput": 1,
@@ -4811,6 +5111,10 @@
     }
   },
   "itemIcons": {
+    "Tenacious Origin of Life": "data:image/webp;base64,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",
+    "Rough Opulent Crystal": "data:image/webp;base64,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",
+    "Flawless Spirit Stone": "data:image/webp;base64,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",
+    "Tiger Blood": "data:image/webp;base64,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",
     "Abun Wooden Doll": "data:image/webp;base64,UklGRkwDAABXRUJQVlA4WAoAAAAQAAAAKwAAKwAAQUxQSIYBAAABkHNb27G5Y7qfNUalt4ttPTNxZ9tmZ/e2k9Jml/frUg6f+WK7myrON+vjFT33yvWtRMQEyP/UrrfZs/C2c4dtltidAJxbVZENnY88A5CJPZ2bDauf4e9P+/JWPYP3Jm+Vg//pXFbP+3FFo+WYnlc0jeuEaspnxuO+dKOlmPIF9+NxeD8eFq5t/AHl08kcuw4ZzYm2pEZon04V7mHdnb6cHlehXiykh6rTVSRzVbWYNvOhL366StgdQ1/NAuHm5MjYV56arWWUnJzu3ceGAPDmTU1NV6HmdN92puYVANwdMaLrZOEO297cjGQG6cdzRHINad5j/DWDwUKf9wD+ObR5D6DcOpjUKwJlfIUxlNYnXigytIkRKFO1AzitT0AbOzVAKFOjqhfzK4TZNdqiay/UqVFoX2yo4FxsUUV6CbX0NLRNG4SsO1pNKtXEmqqFa0b50rHXG4QcrHeeD2HYyhhKznCHv4fhYikQbs7yw8652m+1tfsKpVC4OTmBtVaCIAgKCwvl3wNWUDggoAEAAPAJAJ0BKiwALAA+bS6SRyQiIaEuNAmYgA2JQBg5NdfgXoB/ADqJMC30ZjoAop+uHLxo1jz0QPa6MP0d3KShH7vvGrDV3eECdO7VxWCu7t9Qmdj9r4qdeYAA/v2LEdc3jcRiiCvWm4leSXDTFugMV3rBm/NZi/Z10iuHVqp+fZ6LVQkHsi/QJDAsBTmRyr3bpz+H+cyzWQ9T7kX/+bi5DZUx4Ws3XTRT97Jz7N+F/5LA64YGwSiinILEkk/GO85PwoKz0MOoiy4caeBtFazNJp2xhQgH3KNJiOdbya5BVwzRlkiwhy8Pz6nIsyl0GNZdRQxpoEeOfNfAmN7CJvzLF+Cx3QXKxKtyKRiKOzsDTedm4uARgBn6VrVgm5HlK+uYQSt103qAk0GMa/Z6NzpH1nb4HF6zRxc1OaGtRUcndkunXBkZ7fUwZXST+nu8I2Cjp9WOnArxMSVlmoSAQdJuJf2BEj/j/LRPlbyMEgpuAtmBI5RCNeNzp/bnzY/Vu4LlfO4ATjR+Cm8GoMCC1RRD+O97BtzXwsCrfJcaR+uAAAAA",
     "Adaptation Draught": "data:image/png;base64,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",
     "Agile Seal Elixir": "data:image/webp;base64,UklGRmYDAABXRUJQVlA4WAoAAAAQAAAAKwAAKwAAQUxQSDEBAAABkLNt2/k37xZnsu1Mtm1/AtueMGbKllFtV7cfInbm2nb7+/2fe/jped9ijogJEP/UyPn5SGUadEBvUCOjD0Ya9vBQAOZE9JfJAEAAqeFvQgT88lfEBYVcMKpCyvjBptvfRWxbDalx8sFMyA/7/fvo0GRXgW0cza4AzzUNG9Ly8fto9h6AXU1DpqzD30ew3NUeSLqGt7D55v2ElF48hO2jowkJvXD8/qiVbRCM749qmGYBcqb90NM5smbBS8BGr7PZB0zQWfy7uKCnC8ZGIqbjYo5IPl+WU65NFnGDgQxjgrX72ScnOoz1POK6mYsAMpBhXzBXXF0ZnNZzieGrT86WBf/SrqM1IbPjo4MWITft1M6PJCE7eHb22rOvP7/uT0+HCvlRUavXb96+vR4XJ/5PAQBWUDggDgIAAPAJAJ0BKiwALAA+bTCTR6QioaEqtVlYgA2JagDClRAuyveT1+CAAlQPas9m/Y5gcVBM5jC9Voo0cgTQnQWd04TsMhwvNOL9LGe9HgA4OxGIWSTGWsoD3oAA/v2LE6amuxe6jUxCvo+wE3gx4UrV8zfZmZce1nOIir1aACJEvf7gmhMiu3y06LDh7E0w3GHiqcwV/qzG9eWZ1V6fmRdIR6b5RVdnBtJX/+GmR/tWyx/mhqVC6knf/A4Smfbc0f4ZTr4YP6qjcs+Nyf+bN//69///XRH//riQP+dnpbf/xrS/IABnVapijtHtPnqe8i/IBPCvozt/T1M6WoW2+GHw0f2iqdt5GP1cGVm7axVxV3/JyKQT+Y8It45qfm2KVeerrs4rpa/3jfuT+fN57VvxyLfSUGgCvFe0M6fk/Pr+prSUKdkA6IkjM8B+Ja3aGIpduRLlw8bUIIWvnXc/rkrCS9H6/EoLa8Jk8samZpxKHTcsdhz/rxnx+P1wG2GV1HYPmNp7Y5qt9BdKz8LnFRuLazGkmX8Jzja9irYLTY3x7Ats58thB1Bszlr5KOqy8NDlUvwNXwyP/Q/70n//GWs8AAU0rW5lc8vZs8dosyQt+XdGPp4CWKyuLLZtZBqOQWQzwdftlrKTUcWWZXdlVTFwLMjseu8ElHrinHkDr//QhH/7/+dwf/jY//FzP5TuAAA=",
@@ -5444,7 +5748,14 @@
         "ingredients": [
           {
             "name": "Chicken Meat",
-            "qty": 2
+            "qty": 2,
+            "substituteGroup": "Bird Meat",
+            "options": [
+              "Bird Meat",
+              "Chicken Meat",
+              "Flamingo Meat",
+              "Kuku Bird Meat"
+            ]
           },
           {
             "name": "Deep Frying Oil",
@@ -5525,9 +5836,10 @@
             "qty": 4,
             "substituteGroup": "Bird Meat",
             "options": [
+              "Bird Meat",
               "Chicken Meat",
-              "Kuku Bird Meat",
-              "Flamingo Meat"
+              "Flamingo Meat",
+              "Kuku Bird Meat"
             ]
           }
         ],
@@ -6413,6 +6725,13 @@
         "group": "Meat",
         "ingredients": []
       },
+      "Bird Meat": {
+        "type": "gathered",
+        "baseOutput": 1,
+        "group": "Meat",
+        "ingredients": [],
+        "marketId": "7953"
+      },
       "Flamingo Meat": {
         "type": "gathered",
         "baseOutput": 1,
@@ -7163,7 +7482,14 @@
         "ingredients": [
           {
             "name": "Chicken Meat",
-            "qty": 1
+            "qty": 3,
+            "substituteGroup": "Bird Meat",
+            "options": [
+              "Bird Meat",
+              "Chicken Meat",
+              "Flamingo Meat",
+              "Kuku Bird Meat"
+            ]
           }
         ],
         "marketId": "7958",
@@ -8980,7 +9306,14 @@
         "ingredients": [
           {
             "name": "Chicken Meat",
-            "qty": 5
+            "qty": 5,
+            "substituteGroup": "Bird Meat",
+            "options": [
+              "Bird Meat",
+              "Chicken Meat",
+              "Flamingo Meat",
+              "Kuku Bird Meat"
+            ]
           },
           {
             "name": "Wheat",
@@ -9062,7 +9395,14 @@
         "ingredients": [
           {
             "name": "Chicken Meat",
-            "qty": 5
+            "qty": 5,
+            "substituteGroup": "Bird Meat",
+            "options": [
+              "Bird Meat",
+              "Chicken Meat",
+              "Flamingo Meat",
+              "Kuku Bird Meat"
+            ]
           },
           {
             "name": "Strawberry",
@@ -9643,7 +9983,14 @@
           },
           {
             "name": "Chicken Meat",
-            "qty": 1
+            "qty": 1,
+            "substituteGroup": "Bird Meat",
+            "options": [
+              "Bird Meat",
+              "Chicken Meat",
+              "Flamingo Meat",
+              "Kuku Bird Meat"
+            ]
           },
           {
             "name": "Garlic",
@@ -9796,7 +10143,14 @@
         "ingredients": [
           {
             "name": "Chicken Meat",
-            "qty": 7
+            "qty": 7,
+            "substituteGroup": "Bird Meat",
+            "options": [
+              "Bird Meat",
+              "Chicken Meat",
+              "Flamingo Meat",
+              "Kuku Bird Meat"
+            ]
           },
           {
             "name": "Wheat Flour",
@@ -9884,7 +10238,14 @@
         "ingredients": [
           {
             "name": "Chicken Meat",
-            "qty": 5
+            "qty": 5,
+            "substituteGroup": "Bird Meat",
+            "options": [
+              "Bird Meat",
+              "Chicken Meat",
+              "Flamingo Meat",
+              "Kuku Bird Meat"
+            ]
           },
           {
             "name": "Vinegar",
@@ -11286,7 +11647,14 @@
           },
           {
             "name": "Chicken Meat",
-            "qty": 5
+            "qty": 5,
+            "substituteGroup": "Bird Meat",
+            "options": [
+              "Bird Meat",
+              "Chicken Meat",
+              "Flamingo Meat",
+              "Kuku Bird Meat"
+            ]
           },
           {
             "name": "Pickled Vegetables",
@@ -14898,7 +15266,10 @@
         "baseOutput": 1,
         "group": "Cooking",
         "ingredients": [],
-        "marketId": "9493"
+        "marketId": "9493",
+        "qualityBase": "Grilled Bird Meat",
+        "qualityGrade": "blue",
+        "sourceNote": "Special Cooking result from making Grilled Bird Meat."
       },
       "Thick Five-Grain Chicken Porridge": {
         "type": "gathered",
@@ -15990,6 +16361,10 @@
     "Elixir of Sky": "Merciless Sky Elixir"
   },
   "cookingSpecialMap": {
+    "Grilled Bird Meat": {
+      "name": "Steaming Hot Grilled Bird Meat",
+      "ratio": 6
+    },
     "Fruit and Vegetable Salad": {
       "name": "Fresh Fruit and Vegetable Salad",
       "ratio": 2
@@ -17686,6 +18061,38 @@
               "url": "https://www.naeu.playblackdesert.com/DE-DE/Wiki?wikiNo=34",
               "supports": [
                 "method"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "Bird Meat": {
+      "canonicalName": "Bird Meat",
+      "itemId": 7953,
+      "status": "reviewed",
+      "reviewedAt": "2026-08-26",
+      "routes": [
+        {
+          "kind": "hunting",
+          "summary": "Hunt a bird and butcher it; Chicken Meat, Flamingo Meat, and Kuku Bird Meat are valid Bird Meat alternatives in supported recipes.",
+          "availability": "permanent",
+          "confidence": "high",
+          "sources": [
+            {
+              "title": "BDO Codex item: Bird Meat",
+              "url": "https://bdocodex.com/us/item/7953/",
+              "supports": [
+                "identity",
+                "item-route",
+                "substitutes"
+              ]
+            },
+            {
+              "title": "Official Gathering guide",
+              "url": "https://www.naeu.playblackdesert.com/DE-DE/Wiki?wikiNo=34",
+              "supports": [
+                "butchering-method"
               ]
             }
           ]
@@ -40321,6 +40728,38 @@
         }
       ]
     },
+    "Monkey Blood": {
+      "canonicalName": "Monkey Blood",
+      "itemId": 6211,
+      "status": "reviewed",
+      "reviewedAt": "2026-08-22",
+      "routes": [
+        {
+          "kind": "hunting",
+          "summary": "Hunt Monkey, then collect its blood with a Fluid Collector.",
+          "availability": "permanent",
+          "confidence": "high",
+          "sources": [
+            {
+              "title": "BDO Codex item: Monkey Blood",
+              "url": "https://bdocodex.com/us/item/6211/",
+              "supports": [
+                "identity",
+                "item-route"
+              ]
+            },
+            {
+              "title": "Official Advanced Alchemy guide",
+              "url": "https://blackdesert.pearlabyss.com/Asia/en-US/Game/Wiki?_masterWikiNo=60",
+              "supports": [
+                "method",
+                "substitution"
+              ]
+            }
+          ]
+        }
+      ]
+    },
     "Monkey Hide": {
       "canonicalName": "Monkey Hide",
       "itemId": 6011,
@@ -40539,6 +40978,70 @@
               "url": "https://www.naeu.playblackdesert.com/de-DE/Wiki?wikiNo=44",
               "supports": [
                 "current-mechanic"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "SP Potion (Small)": {
+      "canonicalName": "SP Potion (Small)",
+      "itemId": 595,
+      "status": "reviewed",
+      "reviewedAt": "2026-08-26",
+      "routes": [
+        {
+          "kind": "npc_purchase",
+          "summary": "Purchase the class-specific small SP recovery potion from a General Goods Vendor.",
+          "availability": "permanent",
+          "confidence": "high",
+          "sources": [
+            {
+              "title": "BDO Codex item: SP Potion (Small)",
+              "url": "https://bdocodex.com/us/item/595/",
+              "supports": [
+                "identity",
+                "item-route"
+              ]
+            },
+            {
+              "title": "Official General Information guide",
+              "url": "https://www.sa.playblackdesert.com/pt-br/Wiki?wikiNo=8",
+              "supports": [
+                "general-goods-vendor",
+                "class-resource-potions"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "WP Potion (Small)": {
+      "canonicalName": "WP Potion (Small)",
+      "itemId": 591,
+      "status": "reviewed",
+      "reviewedAt": "2026-08-26",
+      "routes": [
+        {
+          "kind": "npc_purchase",
+          "summary": "Purchase the class-specific small WP recovery potion from a General Goods Vendor.",
+          "availability": "permanent",
+          "confidence": "high",
+          "sources": [
+            {
+              "title": "BDO Codex item: WP Potion (Small)",
+              "url": "https://bdocodex.com/us/item/591/",
+              "supports": [
+                "identity",
+                "item-route"
+              ]
+            },
+            {
+              "title": "Official General Information guide",
+              "url": "https://www.sa.playblackdesert.com/pt-br/Wiki?wikiNo=8",
+              "supports": [
+                "general-goods-vendor",
+                "class-resource-potions"
               ]
             }
           ]
@@ -48500,6 +49003,37 @@
         }
       ]
     },
+    "White Truffle Mushroom": {
+      "canonicalName": "White Truffle Mushroom",
+      "itemId": 820909,
+      "status": "reviewed",
+      "reviewedAt": "2026-08-26",
+      "routes": [
+        {
+          "kind": "farming",
+          "summary": "Farm Truffle Mushroom Hypha and harvest White Truffle Mushroom when the rare result occurs.",
+          "availability": "permanent",
+          "confidence": "high",
+          "sources": [
+            {
+              "title": "BDO Codex item: White Truffle Mushroom",
+              "url": "https://bdocodex.com/us/item/820909/",
+              "supports": [
+                "identity",
+                "item-route"
+              ]
+            },
+            {
+              "title": "Official Farming quick guide",
+              "url": "https://www.naeu.playblackdesert.com/en-us/Forum/ForumTopic/Detail?_topicNo=69516",
+              "supports": [
+                "farming-method"
+              ]
+            }
+          ]
+        }
+      ]
+    },
     "Tulip": {
       "canonicalName": "Tulip",
       "itemId": 7320,
@@ -53520,6 +54054,7 @@
     }
   },
   "iconAliases": {
+    "Bird Meat": "Chicken Meat",
     "Elixir of Shock": "Elixir of Strong Shock",
     "Cream": "Milk",
     "Refined Oatmeal": "Oatmeal",
@@ -53632,6 +54167,10 @@
     "Sugar": 9002,
     "Silver Azalea": 5402,
     "Sunrise Herb": 5401,
+    "Pile of Sunrise Herbs": 5421,
+    "Tenacious Origin of Life": 5303,
+    "Rough Opulent Crystal": 5304,
+    "Flawless Spirit Stone": 5305,
     "Weeds": 5600,
     "Purified Water": 6656,
     "Ash Sap": 5001,
@@ -53645,6 +54184,7 @@
     "Cloud Mushroom": 5410,
     "Fortune Teller Mushroom": 5407,
     "Tiger Mushroom": 5412,
+    "Tiger Blood": 6356,
     "Arrow Mushroom": 5408,
     "Bluffer Mushroom": 5417,
     "Ancient Mushroom": 5418,
@@ -59385,6 +59925,7 @@
     "cloud mushroom": 5410,
     "sky mushroom": 5411,
     "tiger mushroom": 5412,
+    "tiger blood": 6356,
     "emperor mushroom": 5413,
     "ghost mushroom": 5414,
     "fog mushroom": 5415,
@@ -99055,6 +99596,198 @@
   },
   "processing": {
     "items": {
+      "HP Potion (Medium)": {
+        "type": "processing",
+        "baseOutput": 1,
+        "group": "Processing - Simple Alchemy",
+        "method": "Simple Alchemy",
+        "marketId": "518",
+        "sourceNote": "Use Simple Alchemy on 3 HP Potion (Small) to produce 1 HP Potion (Medium).",
+        "outputMin": 1,
+        "outputMax": 1,
+        "ingredients": [
+          {
+            "name": "HP Potion (Small)",
+            "qty": 3
+          }
+        ]
+      },
+      "HP Potion (Large)": {
+        "type": "processing",
+        "baseOutput": 1,
+        "group": "Processing - Simple Alchemy",
+        "method": "Simple Alchemy",
+        "marketId": "519",
+        "sourceNote": "Use Simple Alchemy on 3 HP Potion (Medium) to produce 1 HP Potion (Large).",
+        "outputMin": 1,
+        "outputMax": 1,
+        "ingredients": [
+          {
+            "name": "HP Potion (Medium)",
+            "qty": 3
+          }
+        ]
+      },
+      "HP Potion (Extra Large)": {
+        "type": "processing",
+        "baseOutput": 1,
+        "group": "Processing - Simple Alchemy",
+        "method": "Simple Alchemy",
+        "marketId": "524",
+        "sourceNote": "Use Simple Alchemy on 3 HP Potion (Large) to produce 1 HP Potion (Extra Large).",
+        "outputMin": 1,
+        "outputMax": 1,
+        "ingredients": [
+          {
+            "name": "HP Potion (Large)",
+            "qty": 3
+          }
+        ]
+      },
+      "MP Potion (Medium)": {
+        "type": "processing",
+        "baseOutput": 1,
+        "group": "Processing - Simple Alchemy",
+        "method": "Simple Alchemy",
+        "marketId": "521",
+        "sourceNote": "Use Simple Alchemy on 3 MP Potion (Small) to produce 1 MP Potion (Medium).",
+        "outputMin": 1,
+        "outputMax": 1,
+        "ingredients": [
+          {
+            "name": "MP Potion (Small)",
+            "qty": 3
+          }
+        ]
+      },
+      "MP Potion (Large)": {
+        "type": "processing",
+        "baseOutput": 1,
+        "group": "Processing - Simple Alchemy",
+        "method": "Simple Alchemy",
+        "marketId": "522",
+        "sourceNote": "Use Simple Alchemy on 3 MP Potion (Medium) to produce 1 MP Potion (Large).",
+        "outputMin": 1,
+        "outputMax": 1,
+        "ingredients": [
+          {
+            "name": "MP Potion (Medium)",
+            "qty": 3
+          }
+        ]
+      },
+      "MP Potion (Extra Large)": {
+        "type": "processing",
+        "baseOutput": 1,
+        "group": "Processing - Simple Alchemy",
+        "method": "Simple Alchemy",
+        "marketId": "526",
+        "sourceNote": "Use Simple Alchemy on 3 MP Potion (Large) to produce 1 MP Potion (Extra Large).",
+        "outputMin": 1,
+        "outputMax": 1,
+        "ingredients": [
+          {
+            "name": "MP Potion (Large)",
+            "qty": 3
+          }
+        ]
+      },
+      "SP Potion (Medium)": {
+        "type": "processing",
+        "baseOutput": 1,
+        "group": "Processing - Simple Alchemy",
+        "method": "Simple Alchemy",
+        "marketId": "596",
+        "sourceNote": "Use Simple Alchemy on 3 SP Potion (Small) to produce 1 SP Potion (Medium).",
+        "outputMin": 1,
+        "outputMax": 1,
+        "ingredients": [
+          {
+            "name": "SP Potion (Small)",
+            "qty": 3
+          }
+        ]
+      },
+      "SP Potion (Large)": {
+        "type": "processing",
+        "baseOutput": 1,
+        "group": "Processing - Simple Alchemy",
+        "method": "Simple Alchemy",
+        "marketId": "597",
+        "sourceNote": "Use Simple Alchemy on 3 SP Potion (Medium) to produce 1 SP Potion (Large).",
+        "outputMin": 1,
+        "outputMax": 1,
+        "ingredients": [
+          {
+            "name": "SP Potion (Medium)",
+            "qty": 3
+          }
+        ]
+      },
+      "SP Potion (Extra Large)": {
+        "type": "processing",
+        "baseOutput": 1,
+        "group": "Processing - Simple Alchemy",
+        "method": "Simple Alchemy",
+        "marketId": "598",
+        "sourceNote": "Use Simple Alchemy on 3 SP Potion (Large) to produce 1 SP Potion (Extra Large).",
+        "outputMin": 1,
+        "outputMax": 1,
+        "ingredients": [
+          {
+            "name": "SP Potion (Large)",
+            "qty": 3
+          }
+        ]
+      },
+      "WP Potion (Medium)": {
+        "type": "processing",
+        "baseOutput": 1,
+        "group": "Processing - Simple Alchemy",
+        "method": "Simple Alchemy",
+        "marketId": "592",
+        "sourceNote": "Use Simple Alchemy on 3 WP Potion (Small) to produce 1 WP Potion (Medium).",
+        "outputMin": 1,
+        "outputMax": 1,
+        "ingredients": [
+          {
+            "name": "WP Potion (Small)",
+            "qty": 3
+          }
+        ]
+      },
+      "WP Potion (Large)": {
+        "type": "processing",
+        "baseOutput": 1,
+        "group": "Processing - Simple Alchemy",
+        "method": "Simple Alchemy",
+        "marketId": "593",
+        "sourceNote": "Use Simple Alchemy on 3 WP Potion (Medium) to produce 1 WP Potion (Large).",
+        "outputMin": 1,
+        "outputMax": 1,
+        "ingredients": [
+          {
+            "name": "WP Potion (Medium)",
+            "qty": 3
+          }
+        ]
+      },
+      "WP Potion (Extra Large)": {
+        "type": "processing",
+        "baseOutput": 1,
+        "group": "Processing - Simple Alchemy",
+        "method": "Simple Alchemy",
+        "marketId": "594",
+        "sourceNote": "Use Simple Alchemy on 3 WP Potion (Large) to produce 1 WP Potion (Extra Large).",
+        "outputMin": 1,
+        "outputMax": 1,
+        "ingredients": [
+          {
+            "name": "WP Potion (Large)",
+            "qty": 3
+          }
+        ]
+      },
       "Acacia Plank": {
         "type": "processing",
         "baseOutput": 1,
@@ -107628,6 +108361,29 @@
                 "name": "Ibellab's Essence",
                 "qty": 1
               }
+            ]
+          }
+        ]
+      },
+      "Ground Bird Meat": {
+        "type": "processing",
+        "baseOutput": 1,
+        "group": "Processing - Grinding",
+        "method": "Grinding",
+        "marketId": "7958",
+        "sourceNote": "Reviewed against the four current Grinding routes: Bird Meat, Chicken Meat, Flamingo Meat, or Kuku Bird Meat x3.",
+        "outputMin": 1,
+        "outputMax": 4,
+        "ingredients": [
+          {
+            "name": "Chicken Meat",
+            "qty": 3,
+            "substituteGroup": "Bird Meat",
+            "options": [
+              "Bird Meat",
+              "Chicken Meat",
+              "Flamingo Meat",
+              "Kuku Bird Meat"
             ]
           }
         ]
@@ -125953,6 +126709,7 @@
     "Beast's Draught": "792",
     "Beef": "7906",
     "Beer": "9213",
+    "Bird Meat": "7953",
     "Berserk Draught": "1397",
     "Birch Plank": "4660",
     "Birch Plywood": "4661",
@@ -127273,6 +128030,7 @@
     "Steamed Prawn": "9473",
     "Steamed Seafood": "9411",
     "Steamed Whale Meat": "9455",
+    "Steaming Hot Grilled Bird Meat": "9493",
     "Steel": "4077",
     "Sticky Liquid": "44084",
     "Stir-Fried Bird": "9331",
@@ -127552,7 +128310,26 @@
     "Embers of Ynix - Gloves": "821463",
     "Edana - Godslayer's Justice Box": "620399",
     "Embers of Ynix - Shoes": "821464",
-    "Edana - Godslayer's Wisdom Box": "620400"
+    "Edana - Godslayer's Wisdom Box": "620400",
+    "Flawless Spirit Stone": "5305",
+    "HP Potion (Extra Large)": "524",
+    "HP Potion (Large)": "519",
+    "MP Potion (Extra Large)": "526",
+    "MP Potion (Large)": "522",
+    "Rough Opulent Crystal": "5304",
+    "SP Potion (Extra Large)": "598",
+    "SP Potion (Large)": "597",
+    "SP Potion (Medium)": "596",
+    "SP Potion (Small)": "595",
+    "Silk Honey Grass": "5405",
+    "Tenacious Origin of Life": "5303",
+    "Translucent Crystal": "4466",
+    "Violet Crystal": "4485",
+    "WP Potion (Extra Large)": "594",
+    "WP Potion (Large)": "593",
+    "WP Potion (Medium)": "592",
+    "WP Potion (Small)": "591",
+    "White Truffle Mushroom": "820909"
   },
   "itemWeightsLtById": {
     "517": 0.2,
@@ -128243,6 +129020,7 @@
     "7922": 0.03,
     "7923": 0.03,
     "7924": 0.03,
+    "7953": 0.03,
     "7954": 0.03,
     "7955": 0.03,
     "7956": 0.03,
@@ -128672,6 +129450,7 @@
     "9488": 0.1,
     "9490": 0.1,
     "9492": 0.1,
+    "9493": 0.1,
     "9494": 0.1,
     "9496": 0.1,
     "9601": 0.1,
@@ -129239,7 +130018,26 @@
     "821463": 0.1,
     "821464": 0.1,
     "821471": 0.1,
-    "933501": 1
+    "933501": 1,
+    "519": 0.625,
+    "524": 1.25,
+    "522": 0.625,
+    "526": 1.25,
+    "5304": 0.1,
+    "598": 1.25,
+    "597": 0.625,
+    "596": 0.375,
+    "595": 0.2,
+    "5405": 0.1,
+    "5303": 0.1,
+    "5305": 0.1,
+    "4466": 0.3,
+    "4485": 0.3,
+    "594": 1.25,
+    "593": 0.625,
+    "592": 0.375,
+    "591": 0.2,
+    "820909": 0.1
   },
   "edaniaPartIiReview": {
     "reviewedAt": "2026-08-15",

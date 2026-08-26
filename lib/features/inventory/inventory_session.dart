@@ -35,7 +35,9 @@ final class InventoryModeSession {
   String search = '';
   String selectedCategory = '';
   String selectedSmartGroup = 'All materials';
-  InventoryDisplayFilter displayFilter = InventoryDisplayFilter.materials;
+  Set<InventoryDisplayFilter> displayFilters = <InventoryDisplayFilter>{
+    InventoryDisplayFilter.all,
+  };
   String? selectedItem;
   String groupItemQuery = '';
   String? groupItemSelection;
@@ -51,9 +53,10 @@ final class InventoryModeSession {
 }
 
 enum InventoryDisplayFilter {
-  materials('Materials'),
   owned('Owned'),
-  currentPlan('Current plan'),
+  alchemyPlan('Alchemy plan'),
+  cookingPlan('Cooking plan'),
+  processingPlan('Processing plan'),
   all('All items');
 
   const InventoryDisplayFilter(this.label);
@@ -72,7 +75,7 @@ final class InventoryUndoSnapshot {
 
   final String operation;
   final String message;
-  final ModeState before;
-  final ModeState after;
+  final PlannerState before;
+  final PlannerState after;
   final String selectedCategory;
 }

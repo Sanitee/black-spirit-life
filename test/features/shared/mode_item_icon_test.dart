@@ -156,20 +156,57 @@ void main() {
       File('assets/data/app-data.json').readAsStringSync(),
     );
 
+    final repository = CatalogRepository(productionCatalog);
+    for (final name in <String>['Vedelona', 'Tears of the Falling Moon']) {
+      await tester.pumpWidget(
+        _host(
+          harness: harness,
+          store: stored.store,
+          name: name,
+          searchAcrossModes: true,
+          fallbackIcon: Icons.local_florist_rounded,
+          catalogRepository: repository,
+        ),
+      );
+
+      expect(find.byKey(ModeItemIconKeys.image(name)), findsOneWidget);
+      expect(find.byKey(ModeItemIconKeys.failure(name)), findsNothing);
+    }
+
+    await tester.pumpWidget(const SizedBox.shrink());
+    await harness.controller.dispose();
+    stored.store.dispose();
+  });
+
+  testWidgets('synthetic quality item uses its reviewed base artwork', (
+    tester,
+  ) async {
+    final stored = (await tester.runAsync(StoredIconTestFixture.create))!;
+    addTearDown(() => tester.runAsync(stored.dispose));
+    final harness = PlannerTestHarness();
+    final productionCatalog = const BundledCatalogParser().parse(
+      File('assets/data/app-data.json').readAsStringSync(),
+    );
+
     await tester.pumpWidget(
       _host(
         harness: harness,
         store: stored.store,
-        name: 'Vedelona',
+        name: 'Special Rainbow Button Mushroom',
+        aliases: const <String>['Rainbow Button Mushroom'],
         searchAcrossModes: true,
-        fallbackIcon: Icons.local_florist_rounded,
         catalogRepository: CatalogRepository(productionCatalog),
       ),
     );
 
-    expect(find.byKey(ModeItemIconKeys.image('Vedelona')), findsOneWidget);
-    expect(find.byKey(ModeItemIconKeys.failure('Vedelona')), findsNothing);
-
+    expect(
+      find.byKey(ModeItemIconKeys.image('Special Rainbow Button Mushroom')),
+      findsOneWidget,
+    );
+    expect(
+      find.byKey(ModeItemIconKeys.failure('Special Rainbow Button Mushroom')),
+      findsNothing,
+    );
     await tester.pumpWidget(const SizedBox.shrink());
     await harness.controller.dispose();
     stored.store.dispose();
@@ -180,6 +217,7 @@ Widget _host({
   required PlannerTestHarness harness,
   required CustomIconStore store,
   required String name,
+  List<String> aliases = const <String>[],
   CustomIconBytesLoader? loader,
   bool searchAcrossModes = false,
   IconData? fallbackIcon,
@@ -196,6 +234,7 @@ Widget _host({
             controller: harness.controller.active,
             name: name,
             size: 48,
+            aliases: aliases,
             searchAcrossModes: searchAcrossModes,
             fallbackIcon: fallbackIcon,
             catalogRepository: catalogRepository,

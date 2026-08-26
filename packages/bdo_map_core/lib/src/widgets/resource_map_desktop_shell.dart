@@ -103,6 +103,9 @@ class ResourceMapDesktopCommandBar extends StatelessWidget {
     required this.onWorkersPressed,
     required this.gatherSelected,
     required this.workersSelected,
+    this.gatherIcon,
+    this.workersIcon,
+    this.searchIcon,
     super.key,
   });
 
@@ -116,34 +119,24 @@ class ResourceMapDesktopCommandBar extends StatelessWidget {
   final VoidCallback onWorkersPressed;
   final bool gatherSelected;
   final bool workersSelected;
+  final Widget? gatherIcon;
+  final Widget? workersIcon;
+  final Widget? searchIcon;
 
   @override
   Widget build(BuildContext context) {
     final reduceMotion = MediaQuery.disableAnimationsOf(context);
-    final scaledLabel = MediaQuery.textScalerOf(context).scale(12.5);
     return Semantics(
       container: true,
       label: 'Resource map tools',
       child: LayoutBuilder(
-        builder: (context, constraints) {
-          final compactModes = constraints.maxWidth < 600 || scaledLabel > 17.5;
+        builder: (context, _) {
           return SizedBox(
             key: const ValueKey<String>('resource-map-command-dock'),
             height: 50,
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: <Widget>[
-                Expanded(
-                  child: _MapSearchControl(
-                    controller: searchController,
-                    focusNode: searchFocusNode,
-                    onChanged: onSearchChanged,
-                    onSubmitted: onSearchSubmitted,
-                    onTap: onSearchTapped,
-                    onClear: onClearSearch,
-                  ),
-                ),
-                const SizedBox(width: 10),
                 Material(
                   key: const ValueKey<String>(
                     'resource-map-command-action-rail',
@@ -157,12 +150,17 @@ class ResourceMapDesktopCommandBar extends StatelessWidget {
                         key: const ValueKey<String>(
                           'resource-map-command-gather',
                         ),
-                        icon: Icons.location_on_outlined,
+                        icon:
+                            gatherIcon ??
+                            const Icon(Icons.location_on_outlined),
                         label: 'Gather',
                         selected: gatherSelected,
                         onPressed: onGatherPressed,
                         reduceMotion: reduceMotion,
-                        showLabel: !compactModes,
+                        // The physical-object icon supports the action name;
+                        // it never replaces it. Gather and Workers must stay
+                        // understandable at every supported desktop width.
+                        showLabel: true,
                         labeledMinWidth: 112,
                       ),
                       const SizedBox(width: 6),
@@ -170,15 +168,29 @@ class ResourceMapDesktopCommandBar extends StatelessWidget {
                         key: const ValueKey<String>(
                           'resource-map-command-workers',
                         ),
-                        icon: Icons.account_tree_outlined,
+                        icon:
+                            workersIcon ??
+                            const Icon(Icons.account_tree_outlined),
                         label: 'Workers',
                         selected: workersSelected,
                         onPressed: onWorkersPressed,
                         reduceMotion: reduceMotion,
-                        showLabel: !compactModes,
+                        showLabel: true,
                         labeledMinWidth: 112,
                       ),
                     ],
+                  ),
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: _MapSearchControl(
+                    controller: searchController,
+                    focusNode: searchFocusNode,
+                    onChanged: onSearchChanged,
+                    onSubmitted: onSearchSubmitted,
+                    onTap: onSearchTapped,
+                    onClear: onClearSearch,
+                    icon: searchIcon,
                   ),
                 ),
               ],
@@ -1372,20 +1384,34 @@ class ResourceMapDesktopEdgeSurface extends StatelessWidget {
   const ResourceMapDesktopEdgeSurface({
     required this.child,
     this.contentWidth = 318,
+    this.rightAligned = false,
     super.key,
   });
 
   final Widget child;
   final double contentWidth;
+  final bool rightAligned;
 
   @override
   Widget build(BuildContext context) {
     final chrome = ResourceMapChromeTheme.of(context);
+    final edgeGradient = rightAligned
+        ? LinearGradient(
+            begin: Alignment.centerRight,
+            end: Alignment.centerLeft,
+            colors: chrome.edgeFadeGradient.colors,
+            stops: chrome.edgeFadeGradient.stops,
+            tileMode: chrome.edgeFadeGradient.tileMode,
+            transform: chrome.edgeFadeGradient.transform,
+          )
+        : chrome.edgeFadeGradient;
     return DecoratedBox(
-      decoration: BoxDecoration(gradient: chrome.edgeFadeGradient),
+      decoration: BoxDecoration(gradient: edgeGradient),
       child: Padding(
         key: const ValueKey<String>('resource-map-desktop-edge-surface'),
-        padding: const EdgeInsets.only(left: 14, right: 46),
+        padding: rightAligned
+            ? const EdgeInsets.only(left: 46, right: 14)
+            : const EdgeInsets.only(left: 14, right: 46),
         child: SizedBox(
           width: contentWidth,
           child: DefaultTextStyle.merge(
@@ -1531,6 +1557,7 @@ class _MapSearchControl extends StatelessWidget {
     required this.onSubmitted,
     required this.onTap,
     required this.onClear,
+    this.icon,
   });
 
   final TextEditingController controller;
@@ -1539,6 +1566,7 @@ class _MapSearchControl extends StatelessWidget {
   final ValueChanged<String> onSubmitted;
   final VoidCallback onTap;
   final VoidCallback onClear;
+  final Widget? icon;
 
   @override
   Widget build(BuildContext context) {
@@ -1598,10 +1626,12 @@ class _MapSearchControl extends StatelessWidget {
                     fontSize: 13.5,
                     fontWeight: FontWeight.w500,
                   ),
-                  prefixIcon: Icon(
-                    Icons.search_rounded,
-                    size: 20,
-                    color: focused ? chrome.primary : chrome.accent,
+                  prefixIcon: IconTheme(
+                    data: IconThemeData(
+                      size: 22,
+                      color: focused ? chrome.primary : chrome.accent,
+                    ),
+                    child: icon ?? const Icon(Icons.search_rounded),
                   ),
                   prefixIconConstraints: const BoxConstraints(
                     minWidth: 42,
@@ -1682,7 +1712,7 @@ class _MapModeControl extends StatelessWidget {
     super.key,
   });
 
-  final IconData icon;
+  final Widget icon;
   final String label;
   final bool selected;
   final VoidCallback onPressed;
@@ -1739,7 +1769,10 @@ class _MapModeControl extends StatelessWidget {
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: <Widget>[
-                Icon(icon, size: 17, color: foreground),
+                IconTheme(
+                  data: IconThemeData(size: 26, color: foreground),
+                  child: SizedBox.square(dimension: 28, child: icon),
+                ),
                 if (showLabel) ...<Widget>[
                   const SizedBox(width: 7),
                   Text(

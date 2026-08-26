@@ -1,8 +1,7 @@
 # Asset and dataset sources
 
-Review snapshot: 2026-08-16
-Technical baseline: Black Spirit Life `0.1.3+22`, commit
-`8ab34ffbb7013cffbc340868646f56bfa83299cf`
+Review snapshot: 2026-08-26
+Release candidate: Black Spirit Life `0.1.5+24` sanitized public-source review
 
 This inventory separates ownership of underlying material from the websites
 used to find or verify it. The controlling release decision is
@@ -34,6 +33,7 @@ references; Pearl Abyss is credited as owner of the underlying game content.
 | Shipped material | Research / retrieval references | Black Spirit Life treatment | Status |
 |---|---|---|---|
 | Embedded item artwork in `assets/data/app-data.json`: 438 base, 612 cooking and 3,436 processing name entries | PA item artwork retrieved through BDO Codex mirror records; BDOLytics cross-checks; official PA sources for Edania | Converted to local data URLs and keyed through the app's own catalog | **PA fan content**; no separate mirror-site permission blocker |
+| `windows/storage_ocr/BlackSpiritStorageOcr/Assets/RecipeBook/icons/items/**`: 3,897 sealed OCR reference icons plus two generated atlases | PA item artwork in the shared Black Spirit Hub Recipe Book snapshot | Local, hash-verified recognition references used only by the isolated Windows OCR helper | **PA fan content**; provenance and redistribution notices stay beside the helper |
 | `packages/bdo_map_core/assets/images/gathering_tools/*.webp`: eight tool icons | BDO Codex item pages and URLs recorded in `BDO-CODEX-GATHERING-TOOL-ICON-NOTICE.md` | Eight local 44 x 44 PA game icons | **PA fan content** |
 | `packages/bdo_map_core/assets/images/vendor_portraits/*.webp`: 231 portrait files for 251 mappings | PA NPC artwork retrieved through BDO Codex mirror paths; exact hashes/URLs in the project provenance manifest | Pinned local 360 x 360 files; no runtime hotlink; app silhouette used when artwork is unavailable | **PA fan content** |
 | Cooking/alchemy recipes | BDO Codex, BDOLytics, user lists and game verification | 178 added alchemy and 461 added cooking records normalized into the planner's ingredient/yield/variant schema | **PA facts in project-authored compilation**; no raw site export shipped |
@@ -90,6 +90,8 @@ directed that the full current map and presentation remain intact.
 | App icons, Ledger art and eight scene backdrops | Project-held accepted application checkpoint; no community-site source identified | **Project-held**; complete older creation notes when available, but general provenance uncertainty is not an unrelated release blocker |
 | Original Black Spirit Life code | Project contributor ownership; root `LICENSE` | **Project-owned**; licence grants no rights in PA or other third-party material |
 | Velopack 1.2.0 | Bundled upstream licence | **Licensed** |
+| PaddleOCR PP-OCRv5 recognition model and ONNX Runtime 1.29.0 | Upstream licences and complete notices under `windows/storage_ocr/BlackSpiritStorageOcr/Assets/RecipeBook/ocr` | **Licensed**; notices remain in the helper payload |
+| Shared Black Spirit Hub v0.9.52 OCR implementation | Black Spirit Hub commit `6ccbad52d25b54d8b67065ce8a9eb1bcece87d9f`; the owner shared it with the Black Spirit Life owner for reuse | **Owner-authorized reuse** recorded in `SOURCE-NOTICE.txt`; not represented as a general third-party licence |
 
 Exact application-art hashes are recorded in
 `docs/public-release-asset-manifest.sha256`.

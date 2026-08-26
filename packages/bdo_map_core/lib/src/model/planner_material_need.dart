@@ -16,6 +16,7 @@ class BdoPlannerMaterialNeed {
     this.gameItemId,
     this.vendorPurchaseAvailable = false,
     this.reviewedWorkerRoute = false,
+    this.substituteFamily,
   });
 
   final int? gameItemId;
@@ -38,4 +39,37 @@ class BdoPlannerMaterialNeed {
   /// route. The map also checks its own concrete worker links, which can be
   /// newer or more complete than the prose acquisition catalog.
   final bool reviewedWorkerRoute;
+
+  /// The planner's interchangeable ingredient context, when this shortage was
+  /// resolved from a substitute group.
+  ///
+  /// The selected shortage remains [name]. This metadata lets map interfaces
+  /// explain the complete family without depending on planner-domain classes
+  /// or changing the planner's chosen ingredient.
+  final BdoPlannerSubstituteFamily? substituteFamily;
+}
+
+/// An immutable planner-owned snapshot of one interchangeable ingredient
+/// family.
+///
+/// [ratios] stores the amount multiplier used by the planner for every member;
+/// a ratio of `1` means that member substitutes one-for-one. The collection
+/// inputs are defensively copied so map consumers cannot mutate planner state.
+class BdoPlannerSubstituteFamily {
+  BdoPlannerSubstituteFamily({
+    required this.parentName,
+    required this.originalName,
+    required this.familyName,
+    required this.selectedName,
+    required Iterable<String> members,
+    required Map<String, double> ratios,
+  }) : members = List<String>.unmodifiable(members),
+       ratios = Map<String, double>.unmodifiable(ratios);
+
+  final String parentName;
+  final String originalName;
+  final String familyName;
+  final String selectedName;
+  final List<String> members;
+  final Map<String, double> ratios;
 }

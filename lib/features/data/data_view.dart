@@ -45,7 +45,7 @@ final class DataSessionController extends ChangeNotifier {
     notifyListeners();
   }
 
-  /// Reveals the shared AFK Load profile when another workspace links here.
+  /// Reveals the shared AFK Weight profile when another workspace links here.
   void showAfkWeightSettings() {
     if (_afkWeightExpanded) return;
     _update(() => _afkWeightExpanded = true);
@@ -542,38 +542,47 @@ class _DataViewState extends State<DataView> {
                 children: <Widget>[
                   SizedBox(
                     width: fieldWidth,
-                    child: _CommitNumberField(
-                      key: const ValueKey<String>('D01'),
-                      label: 'Alchemy mastery',
-                      value: formatQuantity(
-                        document.alchemy.alchemyMastery.toDouble(),
+                    child: FocusTraversalOrder(
+                      order: const NumericFocusOrder(1),
+                      child: _CommitNumberField(
+                        key: const ValueKey<String>('D01'),
+                        label: 'Alchemy mastery',
+                        value: formatQuantity(
+                          document.alchemy.alchemyMastery.toDouble(),
+                        ),
+                        onCommit: (value) =>
+                            _commitMastery(CraftMode.alchemy, value),
                       ),
-                      onCommit: (value) =>
-                          _commitMastery(CraftMode.alchemy, value),
                     ),
                   ),
                   SizedBox(
                     width: fieldWidth,
-                    child: _CommitNumberField(
-                      key: const ValueKey<String>('D02'),
-                      label: 'Cooking mastery',
-                      value: formatQuantity(
-                        document.cooking.cookingMastery.toDouble(),
+                    child: FocusTraversalOrder(
+                      order: const NumericFocusOrder(2),
+                      child: _CommitNumberField(
+                        key: const ValueKey<String>('D02'),
+                        label: 'Cooking mastery',
+                        value: formatQuantity(
+                          document.cooking.cookingMastery.toDouble(),
+                        ),
+                        onCommit: (value) =>
+                            _commitMastery(CraftMode.cooking, value),
                       ),
-                      onCommit: (value) =>
-                          _commitMastery(CraftMode.cooking, value),
                     ),
                   ),
                   SizedBox(
                     width: fieldWidth,
-                    child: _CommitNumberField(
-                      key: const ValueKey<String>('D03'),
-                      label: 'Processing mastery',
-                      value: formatQuantity(
-                        processing.processingMastery.toDouble(),
+                    child: FocusTraversalOrder(
+                      order: const NumericFocusOrder(3),
+                      child: _CommitNumberField(
+                        key: const ValueKey<String>('D03'),
+                        label: 'Processing mastery',
+                        value: formatQuantity(
+                          processing.processingMastery.toDouble(),
+                        ),
+                        onCommit: (value) =>
+                            _commitMastery(CraftMode.processing, value),
                       ),
-                      onCommit: (value) =>
-                          _commitMastery(CraftMode.processing, value),
                     ),
                   ),
                 ],
@@ -584,15 +593,20 @@ class _DataViewState extends State<DataView> {
           Align(
             alignment: Alignment.centerLeft,
             child: IntrinsicWidth(
-              child: _DataOptionPill(
-                key: const ValueKey<String>('D05'),
-                label: 'Mass processing stone',
-                value: processing.useMassProcessing,
-                onChanged: (value) =>
-                    widget.controller.modes[CraftMode.processing]!.updateState(
-                      (state) => state.copyWith(useMassProcessing: value),
-                      immediate: true,
-                    ),
+              child: FocusTraversalOrder(
+                order: const NumericFocusOrder(4),
+                child: _DataOptionPill(
+                  key: const ValueKey<String>('D05'),
+                  label: 'Mass processing stone',
+                  value: processing.useMassProcessing,
+                  onChanged: (value) => widget
+                      .controller
+                      .modes[CraftMode.processing]!
+                      .updateState(
+                        (state) => state.copyWith(useMassProcessing: value),
+                        immediate: true,
+                      ),
+                ),
               ),
             ),
           ),
@@ -640,7 +654,7 @@ class _DataViewState extends State<DataView> {
     final afkWeight = widget.controller.documentSnapshot.afkWeightProfile;
     return _DataEditorCard(
       key: const ValueKey<String>('data-afk-load-card'),
-      title: 'AFK Load',
+      title: 'AFK Weight',
       child: _AfkWeightProfileEditor(
         profile: afkWeight,
         expanded: _session._afkWeightExpanded,
@@ -1117,7 +1131,7 @@ class _AfkWeightProfileEditor extends StatelessWidget {
   Widget build(BuildContext context) {
     final spec = context.visualTheme;
     final summary = profile.isConfigured
-        ? '${formatQuantity(profile.safeLimitLt)} LT available'
+        ? '${formatQuantity(profile.safeLimitLt)} LT for ingredients'
         : 'Set your character weight once';
     final safeStop = (profile.penaltyThresholdLt - profile.safetyBufferLt)
         .clamp(0, double.infinity)
@@ -1182,7 +1196,7 @@ class _AfkWeightProfileEditor extends StatelessWidget {
               minimumSize: const Size(74, 38),
               padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
               semanticLabel:
-                  'AFK Load character weight settings, '
+                  'AFK Weight character settings, '
                   '${expanded ? 'expanded' : 'collapsed'}',
             ),
           ],
@@ -1212,7 +1226,7 @@ class _AfkWeightProfileEditor extends StatelessWidget {
                                   key: const ValueKey<String>(
                                     'data-afk-maximum-weight',
                                   ),
-                                  label: 'Character Max LT',
+                                  label: 'Maximum weight',
                                   value: formatQuantity(
                                     profile.maximumWeightLt,
                                   ),
@@ -1226,7 +1240,7 @@ class _AfkWeightProfileEditor extends StatelessWidget {
                                   key: const ValueKey<String>(
                                     'data-afk-current-weight',
                                   ),
-                                  label: 'Weight already carried',
+                                  label: 'Current weight',
                                   value: formatQuantity(
                                     profile.currentCarriedWeightLt,
                                   ),
@@ -1240,7 +1254,7 @@ class _AfkWeightProfileEditor extends StatelessWidget {
                                   key: const ValueKey<String>(
                                     'data-afk-safety-buffer',
                                   ),
-                                  label: 'LT to keep free',
+                                  label: 'Keep free',
                                   value: formatQuantity(profile.safetyBufferLt),
                                   onCommit: onSafetyBufferCommitted,
                                   suffixText: 'LT',
@@ -1249,7 +1263,7 @@ class _AfkWeightProfileEditor extends StatelessWidget {
                               SizedBox(
                                 width: fieldWidth,
                                 child: _DataField(
-                                  label: 'Fairy · Feathery Steps',
+                                  label: 'Feathery Steps',
                                   stretchChild: true,
                                   child: SizedBox(
                                     height: 42,
@@ -1289,14 +1303,14 @@ class _AfkWeightProfileEditor extends StatelessWidget {
                               alignment: WrapAlignment.spaceBetween,
                               children: <Widget>[
                                 _AfkWeightMetric(
-                                  label: 'AVAILABLE FOR MATERIALS',
+                                  label: 'ROOM FOR INGREDIENTS',
                                   value: profile.isConfigured
                                       ? '${formatQuantity(profile.safeLimitLt)} LT'
                                       : 'Enter Max LT',
                                   emphasized: profile.isConfigured,
                                 ),
                                 _AfkWeightMetric(
-                                  label: 'SAFE STOP',
+                                  label: 'MAXIMUM YOU CAN CARRY',
                                   value: profile.isConfigured
                                       ? '${formatQuantity(safeStop)} LT'
                                       : 'Not calculated',
@@ -1371,25 +1385,28 @@ class _DataEditorCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final spec = context.visualTheme;
     final denseLayout = spec.usesDenseSplitLayout;
-    return AppSurface(
-      role: AppSurfaceRole.row,
-      padding: EdgeInsets.all(denseLayout ? 12 : 14),
-      semanticLabel: title,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: <Widget>[
-          Text(
-            title,
-            style: spec.typography.body.copyWith(
-              color: _dataTitleColor(spec),
-              fontSize: 17,
-              fontWeight: FontWeight.w700,
-              height: 1.2,
+    return FocusTraversalGroup(
+      policy: OrderedTraversalPolicy(secondary: WidgetOrderTraversalPolicy()),
+      child: AppSurface(
+        role: AppSurfaceRole.row,
+        padding: EdgeInsets.all(denseLayout ? 12 : 14),
+        semanticLabel: title,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: <Widget>[
+            Text(
+              title,
+              style: spec.typography.body.copyWith(
+                color: _dataTitleColor(spec),
+                fontSize: 17,
+                fontWeight: FontWeight.w700,
+                height: 1.2,
+              ),
             ),
-          ),
-          const SizedBox(height: 10),
-          child,
-        ],
+            const SizedBox(height: 10),
+            child,
+          ],
+        ),
       ),
     );
   }

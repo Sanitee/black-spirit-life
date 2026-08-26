@@ -380,6 +380,37 @@ class BdoGatheringWaypoint {
   }
 }
 
+/// A licensed, bundled reference image that helps a player recognize an exact
+/// gathering location in the game world.
+///
+/// The provenance record carries the author, source URL, license, and required
+/// attribution. Keeping that relationship mandatory prevents an unattributed
+/// community screenshot from being added as ordinary UI artwork.
+class BdoLocationGuideImage {
+  const BdoLocationGuideImage({
+    required this.assetPath,
+    required this.caption,
+    required this.provenanceId,
+    this.verifiedAt,
+  });
+
+  final String assetPath;
+  final String caption;
+  final String provenanceId;
+  final DateTime? verifiedAt;
+
+  factory BdoLocationGuideImage.fromJson(Map<String, Object?> json) {
+    return BdoLocationGuideImage(
+      assetPath: json['assetPath']! as String,
+      caption: json['caption'] as String? ?? '',
+      provenanceId: json['provenanceId']! as String,
+      verifiedAt: json['verifiedAt'] == null
+          ? null
+          : DateTime.parse(json['verifiedAt']! as String),
+    );
+  }
+}
+
 class BdoGatheringSpot {
   const BdoGatheringSpot({
     required this.id,
@@ -394,6 +425,7 @@ class BdoGatheringSpot {
     required this.verification,
     required this.provenanceId,
     this.fieldSourceIds = const <String>[],
+    this.guideImages = const <BdoLocationGuideImage>[],
     this.radiusWorld,
     this.verifiedAt,
   }) : assert(radiusWorld == null || radiusWorld > 0);
@@ -410,6 +442,7 @@ class BdoGatheringSpot {
   final BdoGatheringVerification verification;
   final String provenanceId;
   final List<String> fieldSourceIds;
+  final List<BdoLocationGuideImage> guideImages;
   final double? radiusWorld;
   final DateTime? verifiedAt;
 
@@ -446,6 +479,9 @@ class BdoGatheringSpot {
       verification: _verificationFromJson(json['verification']! as String),
       provenanceId: json['provenanceId']! as String,
       fieldSourceIds: _stringList(json['fieldSourceIds']),
+      guideImages: _jsonList(
+        json['guideImages'],
+      ).map(BdoLocationGuideImage.fromJson).toList(growable: false),
       verifiedAt: json['verifiedAt'] == null
           ? null
           : DateTime.parse(json['verifiedAt']! as String),
@@ -465,6 +501,7 @@ class BdoGatheringPoint {
     required this.verification,
     required this.provenanceId,
     this.fieldSourceIds = const <String>[],
+    this.guideImages = const <BdoLocationGuideImage>[],
     this.areaId,
     this.verifiedAt,
   });
@@ -478,6 +515,7 @@ class BdoGatheringPoint {
   final BdoGatheringVerification verification;
   final String provenanceId;
   final List<String> fieldSourceIds;
+  final List<BdoLocationGuideImage> guideImages;
   final String? areaId;
   final DateTime? verifiedAt;
 
@@ -495,6 +533,9 @@ class BdoGatheringPoint {
       verification: _verificationFromJson(json['verification']! as String),
       provenanceId: json['provenanceId']! as String,
       fieldSourceIds: _stringList(json['fieldSourceIds']),
+      guideImages: _jsonList(
+        json['guideImages'],
+      ).map(BdoLocationGuideImage.fromJson).toList(growable: false),
       areaId: json['areaId'] as String?,
       verifiedAt: json['verifiedAt'] == null
           ? null
@@ -834,6 +875,43 @@ class BdoResourceMapDataset {
           '${listing.vendorId}.',
         );
       }
+    }
+    final provenanceById = <String, BdoProvenanceRecord>{
+      for (final record in manifest.provenance) record.id: record,
+    };
+    void validateGuideImages(String owner, List<BdoLocationGuideImage> images) {
+      for (final image in images) {
+        if (image.assetPath.trim().isEmpty) {
+          throw FormatException('$owner has a location photo without a path.');
+        }
+        if (image.caption.trim().isEmpty) {
+          throw FormatException(
+            '$owner has a location photo without a useful caption.',
+          );
+        }
+        final provenance = provenanceById[image.provenanceId];
+        if (provenance == null) {
+          throw FormatException(
+            '$owner location photo ${image.assetPath} references missing '
+            'provenance ${image.provenanceId}.',
+          );
+        }
+        if (provenance.attribution.trim().isEmpty ||
+            provenance.license.trim().isEmpty ||
+            !provenance.url.hasScheme) {
+          throw FormatException(
+            '$owner location photo ${image.assetPath} does not have complete '
+            'attribution, license, and source details.',
+          );
+        }
+      }
+    }
+
+    for (final spot in gatheringSpots) {
+      validateGuideImages('Gathering spot ${spot.id}', spot.guideImages);
+    }
+    for (final point in gatheringPoints) {
+      validateGuideImages('Gathering point ${point.id}', point.guideImages);
     }
     _searchIndex = _buildSearchIndex();
   }

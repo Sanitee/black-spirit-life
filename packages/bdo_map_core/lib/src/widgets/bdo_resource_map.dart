@@ -18,9 +18,11 @@ import '../engine/tile_cache.dart';
 import '../engine/tile_manager.dart';
 import '../import/screenshot_map_import.dart';
 import '../lodging/lodging_data.dart';
+import '../lodging/house_use_investment_planner.dart';
 import '../lodging/lodging_network_planner.dart';
 import '../lodging/lodging_optimizer.dart';
 import '../lodging/shop_lodging_catalog.dart';
+import '../lodging/storage_house_planner.dart';
 import '../model/map_geometry.dart';
 import '../model/map_visual_style.dart';
 import '../model/planner_material_need.dart';
@@ -48,6 +50,7 @@ import 'map_canvas.dart';
 import 'readable_select_controls.dart';
 import 'resource_map_chrome_theme.dart';
 import 'resource_map_desktop_shell.dart';
+import 'resource_map_steward_menu.dart';
 import 'resource_map_controller.dart';
 import 'resource_map_node_quick_panel.dart';
 import 'resource_map_zoom_dock.dart';
@@ -57,9 +60,9 @@ import 'setup_screenshot_import_dialog.dart';
 import 'worker_activity_style.dart';
 
 const double _resourceMapCompactBreakpoint = 700;
-const double _desktopContextAvoidanceWidth = 360;
-const double _desktopWorkbenchSideInset = 20;
-const double _desktopWorkbenchBottomInset = 18;
+const double _desktopContextAvoidanceWidth = 340;
+const double _desktopNetworkWorkbenchMaximumWidth = 520;
+const double _desktopNetworkWorkbenchMinimumWidth = 400;
 const double _compactDetailsBottom = 46;
 const double _compactDetailsMaximumHeight = 310;
 const double _minimumCompactFitBand = 112;
@@ -86,6 +89,66 @@ const Map<int, int> _featuredExactResourcePriority = <int, int>{
   5517: 6, // Volcanic Umbrella Mushroom
   7922: 7, // Snake Meat
 };
+
+const List<_BloodFamilyDefinition> _bloodFamilyDefinitions =
+    <_BloodFamilyDefinition>[
+      _BloodFamilyDefinition(
+        id: 'blood-group-1',
+        label: 'Blood Group 1',
+        members: <_BloodFamilyMember>[
+          _BloodFamilyMember(name: 'Wolf Blood', gameItemId: 6214),
+          _BloodFamilyMember(name: 'Flamingo Blood', gameItemId: 6218),
+          _BloodFamilyMember(name: 'Rhino Blood', gameItemId: 6204),
+          _BloodFamilyMember(name: 'Cheetah Dragon Blood', gameItemId: 6216),
+        ],
+      ),
+      _BloodFamilyDefinition(
+        id: 'blood-group-2',
+        label: 'Blood Group 2',
+        members: <_BloodFamilyMember>[
+          _BloodFamilyMember(name: 'Pig Blood', gameItemId: 6205),
+          _BloodFamilyMember(name: 'Deer Blood', gameItemId: 6201),
+          _BloodFamilyMember(name: 'Sheep Blood', gameItemId: 6202),
+          _BloodFamilyMember(name: 'Ox Blood', gameItemId: 6206),
+          _BloodFamilyMember(name: 'Waragon Blood', gameItemId: 6215),
+          _BloodFamilyMember(name: 'Llama Blood', gameItemId: 6227),
+          _BloodFamilyMember(name: 'Goat Blood', gameItemId: 6228),
+        ],
+      ),
+      _BloodFamilyDefinition(
+        id: 'blood-group-3',
+        label: 'Blood Group 3',
+        members: <_BloodFamilyMember>[
+          _BloodFamilyMember(name: 'Fox Blood', gameItemId: 6203),
+          _BloodFamilyMember(name: 'Weasel Blood', gameItemId: 6212),
+          _BloodFamilyMember(name: 'Raccoon Blood', gameItemId: 6210),
+          _BloodFamilyMember(name: 'Scorpion Blood', gameItemId: 6224),
+          _BloodFamilyMember(name: 'Marmot Blood', gameItemId: 6226),
+        ],
+      ),
+      _BloodFamilyDefinition(
+        id: 'blood-group-4',
+        label: 'Blood Group 4',
+        members: <_BloodFamilyMember>[
+          _BloodFamilyMember(name: 'Bear Blood', gameItemId: 6213),
+          _BloodFamilyMember(name: 'Troll Blood', gameItemId: 6220),
+          _BloodFamilyMember(name: 'Ogre Blood', gameItemId: 6221),
+          _BloodFamilyMember(name: 'Lion Blood', gameItemId: 6223),
+          _BloodFamilyMember(name: 'Yak Blood', gameItemId: 6225),
+        ],
+      ),
+      _BloodFamilyDefinition(
+        id: 'blood-group-5',
+        label: 'Blood Group 5',
+        members: <_BloodFamilyMember>[
+          _BloodFamilyMember(name: 'Lizard Blood', gameItemId: 6208),
+          _BloodFamilyMember(name: 'Worm Blood', gameItemId: 6209),
+          _BloodFamilyMember(name: 'Bat Blood', gameItemId: 6219),
+          _BloodFamilyMember(name: 'Kuku Bird Blood', gameItemId: 6217),
+          _BloodFamilyMember(name: 'Cobra Blood', gameItemId: 6222),
+        ],
+      ),
+    ];
 
 enum _MaterialSourceFilter { all, manual, worker }
 
@@ -125,6 +188,12 @@ typedef BdoItemIconBuilder =
     Widget Function(BuildContext context, String itemName, double size);
 typedef BdoVendorPortraitBuilder =
     Widget Function(BuildContext context, BdoVendorNpc vendor, double size);
+typedef BdoLocationGuideImageBuilder =
+    Widget Function(
+      BuildContext context,
+      BdoLocationGuideImage image,
+      BoxFit fit,
+    );
 typedef BdoMarketEvidenceRefresh =
     Future<String> Function(Set<String> outputNames);
 
@@ -145,6 +214,7 @@ class BdoResourceMap extends StatefulWidget {
     this.workerOutputIconBuilder,
     this.vendorItemIconBuilder,
     this.vendorPortraitBuilder,
+    this.locationGuideImageBuilder,
     this.favoriteResourceIds = const <String>{},
     this.onFavoriteResourceIdsChanged,
     this.gatherChecklist,
@@ -184,6 +254,7 @@ class BdoResourceMap extends StatefulWidget {
   final BdoResourceIconBuilder? workerOutputIconBuilder;
   final BdoItemIconBuilder? vendorItemIconBuilder;
   final BdoVendorPortraitBuilder? vendorPortraitBuilder;
+  final BdoLocationGuideImageBuilder? locationGuideImageBuilder;
   final Set<String> favoriteResourceIds;
   final ValueChanged<Set<String>>? onFavoriteResourceIdsChanged;
   final BdoGatherChecklist? gatherChecklist;
@@ -236,6 +307,8 @@ class _BdoResourceMapState extends State<BdoResourceMap> {
   bool _searchResultsVisible = false;
   bool _desktopSheetExpanded = false;
   bool _desktopTaskSurfaceCollapsed = false;
+  ResourceMapWorkerMenuSection? _workerMenuSection;
+  ResourceMapWorkerMenuSection? _gatherMenuSection;
   bool _showWorkerNodes = true;
   bool _showGathering = true;
   bool _showRoutes = true;
@@ -244,9 +317,11 @@ class _BdoResourceMapState extends State<BdoResourceMap> {
   bool _desktopDetailsExpanded = false;
   bool _browseAllWorkerNodes = false;
   bool _housingDirectoryOpen = false;
+  bool _investNodeMode = false;
   bool _royalWorkshopOpen = false;
   bool _gatherChecklistOpen = false;
   bool _gatherPlanShortlistOpen = false;
+  String? _expandedGatherBloodFamilyId;
   bool _nodeNetworkPlannerOpen = false;
   _NodeNetworkPlannerPage _nodeNetworkPlannerPage =
       _NodeNetworkPlannerPage.home;
@@ -334,6 +409,13 @@ class _BdoResourceMapState extends State<BdoResourceMap> {
   int _lastHandledFocusRevision = 0;
   _HouseUsageFilter _houseUsageFilter = _HouseUsageFilter.all;
   final Map<String, int> _lodgingWorkerTargetsByTownNodeId = <String, int>{};
+  final Map<String, int> _storageSlotTargetsByTownNodeId = <String, int>{};
+  final Map<String, int> _housePlannerUsageTypeByTownNodeId = <String, int>{};
+  final Map<String, int> _housePlannerMinimumLevelByTownNodeId =
+      <String, int>{};
+  final Map<String, int> _housePlannerFacilityCountByTownNodeId =
+      <String, int>{};
+  String? _storagePlannerTownNodeId;
   String? _dismissedPlannedLodgingSummaryTownNodeId;
   List<BdoRoyalWorkshopGood> _royalWorkshopGoods =
       const <BdoRoyalWorkshopGood>[];
@@ -409,10 +491,47 @@ class _BdoResourceMapState extends State<BdoResourceMap> {
     return null;
   }
 
+  bool get _desktopWorkerMenuVisible =>
+      !_compactLayout &&
+      !_desktopTaskSurfaceCollapsed &&
+      _desktopSheetExpanded &&
+      _desktopMapMode == _DesktopMapMode.workers &&
+      !_investNodeMode &&
+      !_searchResultsVisible &&
+      !_hasDetailSelection &&
+      !_nodeNetworkPlannerOpen &&
+      !_gatherChecklistOpen &&
+      !_gatherPlanShortlistOpen &&
+      !_housingDirectoryOpen &&
+      !_royalWorkshopVisible &&
+      !_browseAllWorkerNodes &&
+      _selectedResourceSection == null &&
+      !_browseFavorites;
+
+  bool get _desktopGatherMenuVisible =>
+      !_compactLayout &&
+      !_desktopTaskSurfaceCollapsed &&
+      _desktopSheetExpanded &&
+      _desktopMapMode == _DesktopMapMode.gather &&
+      !_searchResultsVisible &&
+      !_hasDetailSelection &&
+      !_gatherChecklistOpen &&
+      !_gatherPlanShortlistOpen &&
+      !_housingDirectoryOpen &&
+      !_royalWorkshopVisible &&
+      !_browseAllWorkerNodes &&
+      _selectedResourceSection == null &&
+      !_browseFavorites;
+
+  bool get _desktopStewardMenuVisible =>
+      _desktopWorkerMenuVisible || _desktopGatherMenuVisible;
+
   bool get _desktopContextVisible =>
+      !_desktopStewardMenuVisible &&
       !_desktopNetworkWorkbenchVisible &&
       _desktopSheetExpanded &&
-      (_searchResultsVisible ||
+      (_desktopMapMode != null ||
+          _searchResultsVisible ||
           _hasDetailSelection ||
           _nodeNetworkPlannerOpen ||
           _gatherChecklistOpen ||
@@ -422,14 +541,6 @@ class _BdoResourceMapState extends State<BdoResourceMap> {
           _browseAllWorkerNodes ||
           _selectedResourceSection != null ||
           _browseFavorites);
-
-  bool get _desktopModeActionStripVisible =>
-      !_compactLayout &&
-      _desktopMapMode != null &&
-      !_desktopContextVisible &&
-      !_desktopNetworkWorkbenchVisible &&
-      !_royalWorkshopVisible &&
-      !_searchResultsVisible;
 
   bool get _desktopNetworkWorkbenchVisible =>
       !_compactLayout &&
@@ -443,25 +554,57 @@ class _BdoResourceMapState extends State<BdoResourceMap> {
       _nodeNetworkPlannerPage == _NodeNetworkPlannerPage.targets &&
       !(_searchResultsVisible && _searchController.text.trim().isNotEmpty);
 
+  bool get _gatheringLayerOwnsMapTaps {
+    final editingCurrentNetwork =
+        _nodeNetworkPlannerOpen &&
+        _nodeNetworkPlannerPage == _NodeNetworkPlannerPage.editCurrent;
+    final gatheringContextActive =
+        _materialSourceFilter == _MaterialSourceFilter.manual ||
+        _selectedFieldSourceId != null ||
+        _selectedSpotId != null ||
+        _selectedPointId != null ||
+        _selectedRouteId != null;
+    return _showGathering &&
+        gatheringContextActive &&
+        !_investNodeMode &&
+        !editingCurrentNetwork;
+  }
+
   double get _activeDesktopContextAvoidanceWidth =>
       _desktopPlannedNetworkTargetsVisible
       ? 500
       : _desktopContextAvoidanceWidth;
 
-  double _desktopNetworkWorkbenchHeight(double viewportHeight) {
-    if (!viewportHeight.isFinite || viewportHeight <= 0) {
-      return 260;
+  double get _activeDesktopLeftAvoidanceWidth {
+    if (_desktopTaskSurfaceCollapsed) {
+      return 0;
     }
-    final mediaQuery = MediaQuery.maybeOf(context);
-    final largeText = (mediaQuery?.textScaler.scale(14) ?? 14) > 19;
-    if (largeText) {
-      final maximumHeight = math.max(1.0, math.min(560.0, viewportHeight - 24));
-      return math.min(maximumHeight, math.max(360.0, viewportHeight * .75));
+    if (_desktopStewardMenuVisible) {
+      return MediaQuery.textScalerOf(context).scale(14) > 20 ? 400 : 340;
     }
-    if (viewportHeight < 600) {
-      return math.max(200, viewportHeight * .40).toDouble();
+    if (_desktopContextVisible) {
+      return _activeDesktopContextAvoidanceWidth;
     }
-    return (viewportHeight * .30).clamp(300.0, 320.0).toDouble();
+    return 0;
+  }
+
+  double get _activeDesktopRightAvoidanceWidth {
+    if (_desktopTaskSurfaceCollapsed || !_desktopNetworkWorkbenchVisible) {
+      return 0;
+    }
+    return _desktopNetworkWorkbenchWidthFor(_viewport.width) + 14;
+  }
+
+  double _desktopNetworkWorkbenchWidthFor(double viewportWidth) {
+    if (!viewportWidth.isFinite || viewportWidth <= 0) {
+      return _desktopNetworkWorkbenchMaximumWidth;
+    }
+    return math
+        .min(
+          _desktopNetworkWorkbenchMaximumWidth,
+          math.max(_desktopNetworkWorkbenchMinimumWidth, viewportWidth * .42),
+        )
+        .toDouble();
   }
 
   @override
@@ -1976,12 +2119,20 @@ class _BdoResourceMapState extends State<BdoResourceMap> {
 
   int _maximumWorkerCapacityForTown(LodgingTown town) {
     final bonus = _bonusLodgingCountForTown(town);
-    return town.baseWorkerSlots +
-        town.lodgingHouses.fold<int>(
-          0,
-          (total, house) => total + house.lodgingSpaces,
-        ) +
+    final owned = _nodeNetworkPreferences.currentOwnedHouseIds;
+    final savedUses = _nodeNetworkPreferences.currentHouseUsageTypeIds;
+    final mappedMaximum =
+        town.baseWorkerSlots +
+        town.lodgingHouses.fold<int>(0, (total, house) {
+          if (owned.contains(house.id) && savedUses[house.id] != 1) {
+            return total;
+          }
+          return total + house.lodgingSpaces;
+        }) +
         bonus;
+    // Legacy profiles can contain authoritative lodging that predates the
+    // mapped house/use breakdown. Never make their current capacity invalid.
+    return math.max(mappedMaximum, _currentWorkerCapacityForTown(town));
   }
 
   int? _hiredWorkerCountForTown(LodgingTown town) {
@@ -2012,34 +2163,303 @@ class _BdoResourceMapState extends State<BdoResourceMap> {
         .toInt();
   }
 
-  LodgingPlan? _nextLodgingPlanForTown(LodgingTown town) {
-    final current = _housingTargetFloorForTown(town);
-    final maximum = _maximumWorkerCapacityForTown(town);
-    if (current >= maximum) {
-      return null;
-    }
-    return LodgingOptimizer.solve(
-      town: town,
-      requiredCapacity: current + 1,
-      existingCapacity: current,
-      currentOwnedHouseIds: _nodeNetworkPreferences.currentOwnedHouseIds,
-    );
-  }
-
-  String _housingCeilingLabel(LodgingTown town) {
-    final maximum = _maximumWorkerCapacityForTown(town);
-    final bonus = _bonusLodgingCountForTown(town);
-    return bonus > 0
-        ? 'Housing limit including $bonus bonus: $maximum'
-        : 'CP lodging ceiling: $maximum';
-  }
-
   LodgingPlan _lodgingPlanForTown(LodgingTown town) {
     return LodgingOptimizer.solve(
       town: town,
       requiredCapacity: _workerTargetForTown(town),
       existingCapacity: _currentWorkerCapacityForTown(town),
       currentOwnedHouseIds: _nodeNetworkPreferences.currentOwnedHouseIds,
+    );
+  }
+
+  bool _storagePlannerOpenForTown(LodgingTown town) =>
+      _storagePlannerTownNodeId == town.townNodeId &&
+      _selectedNodeId == town.townNodeId;
+
+  List<HouseUsage> _housePlannerUsagesForTown(LodgingTown town) {
+    final byTypeId = <int, HouseUsage>{};
+    for (final house in town.houses) {
+      for (final usage in house.usages) {
+        final current = byTypeId[usage.typeId];
+        if (current == null || usage.level > current.level) {
+          byTypeId[usage.typeId] = usage;
+        }
+      }
+    }
+    final usages = byTypeId.values.toList(growable: false);
+    usages.sort((left, right) {
+      const preferred = <int, int>{2: 0, 1: 1, 3: 2, 0: 3};
+      final leftPriority = preferred[left.typeId] ?? 4;
+      final rightPriority = preferred[right.typeId] ?? 4;
+      final byPriority = leftPriority.compareTo(rightPriority);
+      if (byPriority != 0) return byPriority;
+      final byLabel = _displayHouseUsageLabel(
+        left,
+      ).compareTo(_displayHouseUsageLabel(right));
+      return byLabel != 0 ? byLabel : left.typeId.compareTo(right.typeId);
+    });
+    return usages;
+  }
+
+  int _housePlannerUsageTypeForTown(LodgingTown town) {
+    final usages = _housePlannerUsagesForTown(town);
+    final requested = _housePlannerUsageTypeByTownNodeId[town.townNodeId];
+    if (requested != null && usages.any((usage) => usage.typeId == requested)) {
+      return requested;
+    }
+    return usages
+        .firstWhere((usage) => usage.typeId == 2, orElse: () => usages.first)
+        .typeId;
+  }
+
+  int _housePlannerMaximumLevel(LodgingTown town, int usageTypeId) => town
+      .houses
+      .map((house) => house.usagesByTypeId[usageTypeId]?.level ?? 0)
+      .fold<int>(0, (maximum, level) => level > maximum ? level : maximum);
+
+  int _housePlannerMinimumLevelForTown(LodgingTown town) {
+    final usageTypeId = _housePlannerUsageTypeForTown(town);
+    final maximum = _housePlannerMaximumLevel(town, usageTypeId);
+    return (_housePlannerMinimumLevelByTownNodeId[town.townNodeId] ?? 1)
+        .clamp(1, math.max(1, maximum))
+        .toInt();
+  }
+
+  int _maximumAdditionalFacilitiesForTown(LodgingTown town) {
+    final usageTypeId = _housePlannerUsageTypeForTown(town);
+    final minimumLevel = _housePlannerMinimumLevelForTown(town);
+    return town.houses.where((house) {
+      final usage = house.usagesByTypeId[usageTypeId];
+      return usage != null &&
+          usage.level >= minimumLevel &&
+          !_nodeNetworkPreferences.currentOwnedHouseIds.contains(house.id);
+    }).length;
+  }
+
+  int _housePlannerFacilityCountForTown(LodgingTown town) {
+    final maximum = _maximumAdditionalFacilitiesForTown(town);
+    if (maximum == 0) return 0;
+    return (_housePlannerFacilityCountByTownNodeId[town.townNodeId] ?? 1)
+        .clamp(1, maximum)
+        .toInt();
+  }
+
+  bool _storagePlanActiveForTown(LodgingTown town) =>
+      _storagePlannerOpenForTown(town) &&
+      _housePlannerUsageTypeForTown(town) == 2;
+
+  bool _lodgingPlanActiveForTown(LodgingTown town) =>
+      _storagePlannerOpenForTown(town) &&
+      _housePlannerUsageTypeForTown(town) == 1;
+
+  HouseUseInvestmentPlan? _houseUsePlanForTown(LodgingTown town) {
+    if (!_storagePlannerOpenForTown(town) ||
+        const <int>{1, 2}.contains(_housePlannerUsageTypeForTown(town))) {
+      return null;
+    }
+    return HouseUseInvestmentPlanner.solve(
+      town: town,
+      usageTypeId: _housePlannerUsageTypeForTown(town),
+      minimumLevel: _housePlannerMinimumLevelForTown(town),
+      requestedAdditionalFacilityCount: _housePlannerFacilityCountForTown(town),
+      currentOwnedHouseIds: _nodeNetworkPreferences.currentOwnedHouseIds,
+      currentHouseUsageTypeIds:
+          _nodeNetworkPreferences.currentHouseUsageTypeIds,
+    );
+  }
+
+  int _maximumAdditionalStorageSlotsForTown(LodgingTown town) => town.houses
+      .where(
+        (house) =>
+            !_nodeNetworkPreferences.currentOwnedHouseIds.contains(house.id),
+      )
+      .fold<int>(0, (total, house) => total + storageSlotsForHouse(house));
+
+  int _storageSlotTargetForTown(LodgingTown town) {
+    final maximum = _maximumAdditionalStorageSlotsForTown(town);
+    if (maximum == 0) return 0;
+    return (_storageSlotTargetsByTownNodeId[town.townNodeId] ?? 3)
+        .clamp(1, maximum)
+        .toInt();
+  }
+
+  StorageHousePlan _storagePlanForTown(LodgingTown town) =>
+      StorageHouseOptimizer.solve(
+        town: town,
+        requestedAdditionalSlots: _storageSlotTargetForTown(town),
+        currentOwnedHouseIds: _nodeNetworkPreferences.currentOwnedHouseIds,
+        currentHouseUsageTypeIds:
+            _nodeNetworkPreferences.currentHouseUsageTypeIds,
+      );
+
+  void _openStoragePlanner(LodgingTown town) {
+    final target = _storageSlotTargetForTown(town);
+    final usageTypeId = _housePlannerUsageTypeForTown(town);
+    setState(() {
+      _storagePlannerTownNodeId = town.townNodeId;
+      _storageSlotTargetsByTownNodeId[town.townNodeId] = target;
+      _housePlannerUsageTypeByTownNodeId[town.townNodeId] = usageTypeId;
+      _housePlannerMinimumLevelByTownNodeId.putIfAbsent(
+        town.townNodeId,
+        () => 1,
+      );
+      _housePlannerFacilityCountByTownNodeId.putIfAbsent(
+        town.townNodeId,
+        () => 1,
+      );
+      if (usageTypeId == 1) {
+        _lodgingWorkerTargetsByTownNodeId.putIfAbsent(
+          town.townNodeId,
+          () => math.min(
+            _currentWorkerCapacityForTown(town) + 1,
+            _maximumWorkerCapacityForTown(town),
+          ),
+        );
+      }
+      _selectedHouseId = null;
+      _houseUsageFilter = _HouseUsageFilter.all;
+    });
+    _fitActiveHousePlan(town);
+  }
+
+  void _closeStoragePlanner() {
+    if (_storagePlannerTownNodeId == null) return;
+    setState(() => _storagePlannerTownNodeId = null);
+  }
+
+  void _setStorageSlotTargetForTown(LodgingTown town, int value) {
+    final maximum = _maximumAdditionalStorageSlotsForTown(town);
+    final target = maximum == 0 ? 0 : value.clamp(1, maximum).toInt();
+    setState(() {
+      _storageSlotTargetsByTownNodeId[town.townNodeId] = target;
+      _selectedHouseId = null;
+    });
+    _fitStoragePlan(town, _storagePlanForTown(town));
+  }
+
+  void _setHousePlannerUsageType(LodgingTown town, int usageTypeId) {
+    setState(() {
+      _housePlannerUsageTypeByTownNodeId[town.townNodeId] = usageTypeId;
+      _housePlannerMinimumLevelByTownNodeId[town.townNodeId] = 1;
+      _housePlannerFacilityCountByTownNodeId[town.townNodeId] = 1;
+      if (usageTypeId == 1) {
+        final current = _currentWorkerCapacityForTown(town);
+        final maximum = _maximumWorkerCapacityForTown(town);
+        _lodgingWorkerTargetsByTownNodeId[town.townNodeId] = math.min(
+          current + 1,
+          maximum,
+        );
+      }
+      _selectedHouseId = null;
+    });
+    _fitActiveHousePlan(town);
+  }
+
+  void _setLodgingAdditionalBedsForTown(LodgingTown town, int additionalBeds) {
+    final current = _currentWorkerCapacityForTown(town);
+    final maximum = _maximumWorkerCapacityForTown(town);
+    final maximumAdditional = math.max(0, maximum - current);
+    final safeAdditional = maximumAdditional == 0
+        ? 0
+        : additionalBeds.clamp(1, maximumAdditional).toInt();
+    setState(() {
+      _lodgingWorkerTargetsByTownNodeId[town.townNodeId] =
+          current + safeAdditional;
+      _selectedHouseId = null;
+    });
+    if (_lodgingPlanActiveForTown(town)) {
+      _fitLodgingPlan(town, _lodgingPlanForTown(town));
+    }
+  }
+
+  void _setHousePlannerMinimumLevel(LodgingTown town, int level) {
+    final usageTypeId = _housePlannerUsageTypeForTown(town);
+    final maximum = _housePlannerMaximumLevel(town, usageTypeId);
+    setState(() {
+      _housePlannerMinimumLevelByTownNodeId[town.townNodeId] = level
+          .clamp(1, maximum)
+          .toInt();
+      final facilityMaximum = _maximumAdditionalFacilitiesForTown(town);
+      _housePlannerFacilityCountByTownNodeId[town.townNodeId] =
+          facilityMaximum == 0
+          ? 0
+          : _housePlannerFacilityCountForTown(
+              town,
+            ).clamp(1, facilityMaximum).toInt();
+      _selectedHouseId = null;
+    });
+    _fitActiveHousePlan(town);
+  }
+
+  void _setHousePlannerFacilityCount(LodgingTown town, int count) {
+    final maximum = _maximumAdditionalFacilitiesForTown(town);
+    setState(() {
+      _housePlannerFacilityCountByTownNodeId[town.townNodeId] = maximum == 0
+          ? 0
+          : count.clamp(1, maximum).toInt();
+      _selectedHouseId = null;
+    });
+    _fitActiveHousePlan(town);
+  }
+
+  void _fitActiveHousePlan(LodgingTown town) {
+    if (_storagePlanActiveForTown(town)) {
+      _fitStoragePlan(town, _storagePlanForTown(town));
+      return;
+    }
+    if (_lodgingPlanActiveForTown(town)) {
+      _fitLodgingPlan(town, _lodgingPlanForTown(town));
+      return;
+    }
+    final plan = _houseUsePlanForTown(town);
+    if (plan == null) return;
+    final houses = plan.fullHouseClosureIds
+        .map((id) => town.housesById[id])
+        .whereType<LodgingHouse>()
+        .toList(growable: false);
+    if (_viewport.isEmpty || houses.isEmpty) return;
+    final bounds = _boundsForPoints(
+      houses.map(_houseMapPoint).toList(growable: false),
+    );
+    if (bounds == null) return;
+    _fitBoundsAvoidingDetails(
+      bounds.inflate(320),
+      padding: 46,
+      maximumZoom: 7.35,
+    );
+  }
+
+  void _fitLodgingPlan(LodgingTown town, LodgingPlan plan) {
+    final houses = plan.fullHouseClosureIds
+        .map((id) => town.housesById[id])
+        .whereType<LodgingHouse>()
+        .toList(growable: false);
+    if (_viewport.isEmpty || houses.isEmpty) return;
+    final bounds = _boundsForPoints(
+      houses.map(_houseMapPoint).toList(growable: false),
+    );
+    if (bounds == null) return;
+    _fitBoundsAvoidingDetails(
+      bounds.inflate(320),
+      padding: 46,
+      maximumZoom: 7.35,
+    );
+  }
+
+  void _fitStoragePlan(LodgingTown town, StorageHousePlan plan) {
+    final houses = plan.fullHouseClosureIds
+        .map((id) => town.housesById[id])
+        .whereType<LodgingHouse>()
+        .toList(growable: false);
+    if (_viewport.isEmpty || houses.isEmpty) return;
+    final bounds = _boundsForPoints(
+      houses.map(_houseMapPoint).toList(growable: false),
+    );
+    if (bounds == null) return;
+    _fitBoundsAvoidingDetails(
+      bounds.inflate(320),
+      padding: 46,
+      maximumZoom: 7.35,
     );
   }
 
@@ -2074,7 +2494,7 @@ class _BdoResourceMapState extends State<BdoResourceMap> {
     }
     if (_nodeNetworkPlannerOpen) {
       return switch (_nodeNetworkPlannerPage) {
-        _NodeNetworkPlannerPage.home => 'Planned network',
+        _NodeNetworkPlannerPage.home => 'Worker planner',
         _NodeNetworkPlannerPage.editCurrent => 'In-game worker network',
         _NodeNetworkPlannerPage.targets => 'Node network targets',
         _NodeNetworkPlannerPage.review => 'Review node changes',
@@ -2085,7 +2505,7 @@ class _BdoResourceMapState extends State<BdoResourceMap> {
       };
     }
     if (_housingDirectoryOpen) {
-      return 'Your nodes';
+      return 'Houses';
     }
     if (_royalWorkshopVisible) {
       return 'Royal Workshop';
@@ -2203,6 +2623,7 @@ class _BdoResourceMapState extends State<BdoResourceMap> {
       _selectedResourceId = entry.selectedResourceId;
       _selectedNodeId = entry.selectedNodeId;
       _selectedHouseId = entry.selectedHouseId;
+      _storagePlannerTownNodeId = null;
       _selectedSpotId = entry.selectedSpotId;
       _selectedPointId = entry.selectedPointId;
       _selectedRouteId = entry.selectedRouteId;
@@ -2436,6 +2857,10 @@ class _BdoResourceMapState extends State<BdoResourceMap> {
         !_housingDirectoryOpen &&
         _selectedResourceSection == null &&
         !_browseFavorites) {
+      if (_gatherMenuSection != null) {
+        setState(() => _gatherMenuSection = null);
+        return;
+      }
       _openMapHome();
       return;
     }
@@ -2443,6 +2868,9 @@ class _BdoResourceMapState extends State<BdoResourceMap> {
     _searchFocus.unfocus();
     _mapKeyboardFocus.requestFocus();
     setState(() {
+      _workerMenuSection = null;
+      _gatherMenuSection = null;
+      _investNodeMode = false;
       _cancelMarketValueCalculation();
       _desktopTaskSurfaceCollapsed = false;
       _desktopSheetExpanded = true;
@@ -2455,6 +2883,7 @@ class _BdoResourceMapState extends State<BdoResourceMap> {
       _selectedResourceId = null;
       _selectedNodeId = null;
       _selectedHouseId = null;
+      _storagePlannerTownNodeId = null;
       _selectedSpotId = null;
       _selectedPointId = null;
       _selectedRouteId = null;
@@ -2476,47 +2905,6 @@ class _BdoResourceMapState extends State<BdoResourceMap> {
     });
   }
 
-  void _openGatherPlanShortlist() {
-    if (_manualPlannerTargets().isEmpty) {
-      return;
-    }
-    if (!_gatherPlanShortlistOpen) {
-      _pushNavigationEntry();
-    }
-    _searchFocus.unfocus();
-    _mapKeyboardFocus.requestFocus();
-    setState(() {
-      _desktopTaskSurfaceCollapsed = false;
-      _desktopSheetExpanded = true;
-      _desktopDetailsExpanded = false;
-      _layersMenuOpen = false;
-      _searchController.clear();
-      _searchResults = const <BdoSearchResult>[];
-      _searchResultsVisible = false;
-      _selectedFieldSourceId = null;
-      _selectedResourceId = null;
-      _selectedNodeId = null;
-      _selectedHouseId = null;
-      _selectedSpotId = null;
-      _selectedPointId = null;
-      _selectedRouteId = null;
-      _gatherChecklistOpen = false;
-      _gatherPlanShortlistOpen = true;
-      _housingDirectoryOpen = false;
-      _royalWorkshopOpen = false;
-      _nodeNetworkPlannerOpen = false;
-      _browseAllWorkerNodes = false;
-      _workerOverviewSelectionMade = false;
-      _selectedResourceSection = null;
-      _browseFavorites = false;
-      _materialSourceFilter = _MaterialSourceFilter.manual;
-      _showWorkerNodes = false;
-      _showGathering = true;
-      _showRoutes = true;
-      _showConnections = false;
-    });
-  }
-
   void _openWorkerHub() {
     if (_desktopSheetExpanded &&
         _desktopMapMode == _DesktopMapMode.workers &&
@@ -2526,13 +2914,23 @@ class _BdoResourceMapState extends State<BdoResourceMap> {
         !_housingDirectoryOpen &&
         _selectedResourceSection == null &&
         !_browseFavorites) {
+      if (_workerMenuSection != null) {
+        setState(() => _workerMenuSection = null);
+        return;
+      }
       _openMapHome();
       return;
     }
     _pushNavigationEntry();
+    _showWorkerHub();
+  }
+
+  void _showWorkerHub() {
     _searchFocus.unfocus();
     _mapKeyboardFocus.requestFocus();
     setState(() {
+      _workerMenuSection = null;
+      _gatherMenuSection = null;
       _cancelMarketValueCalculation();
       _desktopTaskSurfaceCollapsed = false;
       _desktopSheetExpanded = true;
@@ -2566,6 +2964,30 @@ class _BdoResourceMapState extends State<BdoResourceMap> {
     });
   }
 
+  void _returnFromHousingDirectory() {
+    if (_navigationHistory.isNotEmpty &&
+        _navigationHistory.last.royalWorkshopOpen) {
+      _navigateBack();
+      return;
+    }
+    if (_navigationHistory.isNotEmpty) {
+      _navigationHistory.removeLast();
+    }
+    _showWorkerHub();
+  }
+
+  void _navigateBackFromHousing() {
+    if (_selectedHouseId != null) {
+      setState(() => _selectedHouseId = null);
+      return;
+    }
+    if (_selectedNodeId != null) {
+      _navigateBack();
+      return;
+    }
+    _returnFromHousingDirectory();
+  }
+
   void _openWorkerOverview() {
     _pushNavigationEntry();
     _setWorkerOverview(true);
@@ -2581,6 +3003,8 @@ class _BdoResourceMapState extends State<BdoResourceMap> {
     _searchFocus.unfocus();
     _mapKeyboardFocus.requestFocus();
     setState(() {
+      _investNodeMode = false;
+      _nodeNetworkSaveMessage = null;
       _cancelMarketValueCalculation();
       _desktopSheetExpanded = true;
       _desktopDetailsExpanded = false;
@@ -2592,6 +3016,7 @@ class _BdoResourceMapState extends State<BdoResourceMap> {
       _selectedResourceId = null;
       _selectedNodeId = null;
       _selectedHouseId = null;
+      _storagePlannerTownNodeId = null;
       _selectedSpotId = null;
       _selectedPointId = null;
       _selectedRouteId = null;
@@ -2941,6 +3366,43 @@ class _BdoResourceMapState extends State<BdoResourceMap> {
     });
   }
 
+  void _openGatherPlanShortlist() {
+    if (!_gatherPlanShortlistOpen) {
+      _pushNavigationEntry();
+    }
+    _searchFocus.unfocus();
+    _mapKeyboardFocus.requestFocus();
+    setState(() {
+      _desktopTaskSurfaceCollapsed = false;
+      _desktopSheetExpanded = true;
+      _desktopDetailsExpanded = false;
+      _layersMenuOpen = false;
+      _searchResults = const <BdoSearchResult>[];
+      _searchResultsVisible = false;
+      _selectedFieldSourceId = null;
+      _selectedResourceId = null;
+      _selectedNodeId = null;
+      _selectedHouseId = null;
+      _selectedSpotId = null;
+      _selectedPointId = null;
+      _selectedRouteId = null;
+      _gatherChecklistOpen = false;
+      _gatherPlanShortlistOpen = true;
+      _royalWorkshopOpen = false;
+      _housingDirectoryOpen = false;
+      _nodeNetworkPlannerOpen = false;
+      _browseAllWorkerNodes = false;
+      _workerOverviewSelectionMade = false;
+      _materialSourceFilter = _MaterialSourceFilter.manual;
+      _selectedResourceSection = null;
+      _browseFavorites = false;
+      _showWorkerNodes = false;
+      _showGathering = true;
+      _showRoutes = true;
+      _showConnections = false;
+    });
+  }
+
   void _openNodeNetworkPlanner() {
     if (!_nodeNetworkPlannerOpen) {
       _pushNavigationEntry();
@@ -3034,29 +3496,14 @@ class _BdoResourceMapState extends State<BdoResourceMap> {
     _scheduleNodeTargetPreview();
   }
 
-  void _beginCurrentNodeEditing() {
-    setState(() {
-      _cancelMarketValueCalculation();
-      _currentNodeDraftIds = <String>{
-        for (final id in _nodeNetworkPreferences.currentNodeIds)
-          if (widget.dataset.workerNodesById[id] case final node?
-              when !_isNaturalWorkerRoot(node))
-            id,
-      };
-      _nodeNetworkPlannerPage = _NodeNetworkPlannerPage.editCurrent;
-      _selectedNodeId = null;
-      _selectedHouseId = null;
-      _selectedMarketValuePath = null;
-      _showWorkerNodes = true;
-      _showConnections = true;
-      _nodeNetworkInputError = null;
-      _nodeNetworkSaveMessage = null;
-    });
-  }
-
   bool _isNaturalWorkerRoot(BdoWorkerNode node) =>
       node.contributionPoints == 0 &&
       (node.nodeType == 'City' || node.nodeType == 'Town');
+
+  bool _showsAsNeutralOrientationNode(BdoWorkerNode node) =>
+      node.contributionPoints > 0 ||
+      node.isResourceNode ||
+      _isNaturalWorkerRoot(node);
 
   bool _nodeIconIsActive(BdoWorkerNode node) {
     final plannedKind = _visibleNodeNetworkChangeKinds[node.id];
@@ -3213,6 +3660,10 @@ class _BdoResourceMapState extends State<BdoResourceMap> {
   }
 
   void _handleWorkerNodeTap(BdoWorkerNode node, {bool focus = false}) {
+    if (_investNodeMode) {
+      _toggleNodeInCurrentSetup(node);
+      return;
+    }
     if (_nodeNetworkPlannerOpen &&
         _nodeNetworkPlannerPage == _NodeNetworkPlannerPage.editCurrent) {
       _addCurrentWorkerDestination(node, focus: focus);
@@ -3275,6 +3726,9 @@ class _BdoResourceMapState extends State<BdoResourceMap> {
     _mapKeyboardFocus.requestFocus();
     _navigationHistory.clear();
     setState(() {
+      _workerMenuSection = null;
+      _gatherMenuSection = null;
+      _investNodeMode = false;
       _cancelMarketValueCalculation();
       _vendorLookupItemName = null;
       _selectedVendorId = null;
@@ -3289,6 +3743,7 @@ class _BdoResourceMapState extends State<BdoResourceMap> {
       _selectedResourceId = null;
       _selectedNodeId = null;
       _selectedHouseId = null;
+      _storagePlannerTownNodeId = null;
       _nodeQuickPanelOpen = false;
       _selectedQuickNodePath = null;
       _selectedSpotId = null;
@@ -3435,6 +3890,16 @@ class _BdoResourceMapState extends State<BdoResourceMap> {
     }
     setState(() => _nodeNetworkPreferences = preferences);
     widget.onNodeNetworkPreferencesChanged?.call(preferences);
+  }
+
+  void _toggleWorkerConnections() {
+    final enabling = !_showAllNetworkConnections;
+    _setMapDisplayPreferences(
+      _nodeNetworkPreferences.copyWith(
+        showAllMapNodes: enabling ? true : _showAllNodes,
+        showAllNodeConnections: enabling,
+      ),
+    );
   }
 
   void _setWorkerTargetForTown(LodgingTown town, int value) {
@@ -3717,6 +4182,9 @@ class _BdoResourceMapState extends State<BdoResourceMap> {
     setState(() {
       _selectedNodeId = node.id;
       _selectedHouseId = null;
+      if (_storagePlannerTownNodeId != node.id) {
+        _storagePlannerTownNodeId = null;
+      }
       _showConnections = true;
     });
     _fitHousingTown(town);
@@ -5886,6 +6354,10 @@ class _BdoResourceMapState extends State<BdoResourceMap> {
 
   void _toggleNodeInCurrentSetup(BdoWorkerNode node) {
     if (_isNaturalWorkerRoot(node)) {
+      setState(() {
+        _nodeNetworkSaveMessage =
+            '${node.siteName} is a free town node and does not need investment.';
+      });
       return;
     }
     final nextIds = <String>{
@@ -5894,7 +6366,8 @@ class _BdoResourceMapState extends State<BdoResourceMap> {
             when !_isNaturalWorkerRoot(current))
           id,
     };
-    if (!nextIds.add(node.id)) {
+    final invested = nextIds.add(node.id);
+    if (!invested) {
       nextIds.remove(node.id);
     }
     final preferences = _nodeNetworkPreferences.copyWith(
@@ -5906,6 +6379,28 @@ class _BdoResourceMapState extends State<BdoResourceMap> {
       _selectedQuickNodePath = _desktopNetworkWorkbenchVisible
           ? null
           : _quickPathForNodeId(node.id);
+      _nodeNetworkSaveMessage = invested
+          ? '${node.siteName} saved as invested.'
+          : '${node.siteName} removed from invested nodes.';
+    });
+  }
+
+  void _toggleInvestNodeMode() {
+    _searchFocus.unfocus();
+    _mapKeyboardFocus.requestFocus();
+    final enabling = !_investNodeMode;
+    if (enabling) {
+      _clearSelection();
+    }
+    setState(() {
+      _investNodeMode = enabling;
+      _desktopTaskSurfaceCollapsed = enabling;
+      _desktopSheetExpanded = true;
+      _showWorkerNodes = true;
+      _showConnections = true;
+      _nodeNetworkSaveMessage = _investNodeMode
+          ? 'Invest mode is on. Click nodes to save or remove them.'
+          : null;
     });
   }
 
@@ -5969,6 +6464,9 @@ class _BdoResourceMapState extends State<BdoResourceMap> {
       _showWorkerNodes = true;
       _selectedNodeId = node.id;
       _selectedHouseId = null;
+      if (_storagePlannerTownNodeId != node.id) {
+        _storagePlannerTownNodeId = null;
+      }
       _nodeQuickPanelOpen = useQuickPanel;
       _selectedQuickNodePath = quickPath;
       _selectedSpotId = null;
@@ -6395,16 +6893,13 @@ class _BdoResourceMapState extends State<BdoResourceMap> {
       if (_desktopNetworkWorkbenchVisible) {
         return (
           left: 0,
-          top: 64,
-          right: 0,
-          bottom:
-              _desktopNetworkWorkbenchHeight(_viewport.height) +
-              _desktopWorkbenchBottomInset +
-              12,
+          top: 0,
+          right: _activeDesktopRightAvoidanceWidth,
+          bottom: 0,
         );
       }
       return (
-        left: _desktopContextVisible ? _activeDesktopContextAvoidanceWidth : 0,
+        left: _activeDesktopLeftAvoidanceWidth,
         top: 0,
         right: 0,
         bottom: 0,
@@ -6489,6 +6984,22 @@ class _BdoResourceMapState extends State<BdoResourceMap> {
   void _dismissTransientMapUi() {
     _searchFocus.unfocus();
     _mapKeyboardFocus.requestFocus();
+    if (_desktopWorkerMenuVisible && _workerMenuSection != null) {
+      setState(() => _workerMenuSection = null);
+      return;
+    }
+    if (_desktopGatherMenuVisible && _gatherMenuSection != null) {
+      setState(() => _gatherMenuSection = null);
+      return;
+    }
+    if (_investNodeMode) {
+      setState(() {
+        _investNodeMode = false;
+        _desktopTaskSurfaceCollapsed = false;
+        _nodeNetworkSaveMessage = null;
+      });
+      return;
+    }
     if (_layersMenuOpen) {
       setState(() => _layersMenuOpen = false);
       return;
@@ -6618,109 +7129,6 @@ class _BdoResourceMapState extends State<BdoResourceMap> {
     );
   }
 
-  Widget _buildDesktopModeActionStrip(BuildContext context) {
-    final mode = _desktopMapMode;
-    if (mode == _DesktopMapMode.gather) {
-      final plannerTargets = _manualPlannerTargets();
-      final actions = <ResourceMapDesktopModeAction>[
-        if (plannerTargets.isNotEmpty)
-          ResourceMapDesktopModeAction(
-            controlKey: const ValueKey<String>(
-              'resource-map-gather-plan-shortlist',
-            ),
-            icon: const Icon(Icons.playlist_add_check_circle_outlined),
-            label: 'Needed for your plan',
-            badge: '${plannerTargets.length}',
-            onPressed: _openGatherPlanShortlist,
-          ),
-        for (final section in BdoResourceSection.values)
-          if (_browserEntryCountForSection(section) > 0)
-            ResourceMapDesktopModeAction(
-              controlKey: ValueKey<String>(
-                'resource-map-section-${section.name}',
-              ),
-              icon: Icon(_iconForResourceSection(section)),
-              label: _resourceSectionLabel(section),
-              onPressed: () => _openResourceSection(section),
-            ),
-      ];
-      return KeyedSubtree(
-        key: const ValueKey<String>('resource-map-gather-hub'),
-        child: ResourceMapDesktopModeActionStrip(
-          semanticLabel: 'Gathering source categories',
-          actions: actions,
-        ),
-      );
-    }
-
-    final hasRecipeNeeds =
-        widget.plannerNeedGroups.any(
-          (group) => group.materials.any(
-            (material) =>
-                material.need.missingQuantity.isFinite &&
-                material.need.missingQuantity > 0,
-          ),
-        ) ||
-        widget.plannerNeeds.any(
-          (need) => need.missingQuantity.isFinite && need.missingQuantity > 0,
-        );
-    return KeyedSubtree(
-      key: const ValueKey<String>('resource-map-worker-hub'),
-      child: ResourceMapDesktopModeActionStrip(
-        semanticLabel: 'Worker network goals',
-        actions: <ResourceMapDesktopModeAction>[
-          if (hasRecipeNeeds)
-            ResourceMapDesktopModeAction(
-              controlKey: const ValueKey<String>(
-                'resource-map-recommend-current-recipe',
-              ),
-              icon: const Icon(Icons.receipt_long_outlined),
-              label: 'Cooking & Alchemy',
-              onPressed: _openWorkerRecipePlanner,
-            ),
-          ResourceMapDesktopModeAction(
-            controlKey: const ValueKey<String>(
-              'resource-map-node-mode-materials',
-            ),
-            icon: const Icon(Icons.tune_rounded),
-            label: 'Planned network',
-            badge: _nodeNetworkPreferences.desiredResourceNodeCounts.isEmpty
-                ? null
-                : '${_nodeNetworkPreferences.desiredResourceNodeCounts.length}',
-            onPressed: _openWorkerMaterialPlanner,
-          ),
-          ResourceMapDesktopModeAction(
-            controlKey: const ValueKey<String>(
-              'resource-map-open-market-value-recommendations',
-            ),
-            icon: const Icon(Icons.trending_up_rounded),
-            label: 'Best income',
-            onPressed: _openWorkerIncomePlanner,
-          ),
-          ResourceMapDesktopModeAction(
-            controlKey: const ValueKey<String>(
-              'resource-map-worker-browse-action',
-            ),
-            icon: const Icon(Icons.travel_explore_rounded),
-            label: 'Find nodes',
-            onPressed: _openWorkerOverview,
-          ),
-        ],
-      ),
-    );
-  }
-
-  IconData _iconForResourceSection(BdoResourceSection section) =>
-      switch (section) {
-        BdoResourceSection.plantsWood => Icons.park_outlined,
-        BdoResourceSection.oresMinerals => Icons.diamond_outlined,
-        BdoResourceSection.meat => Icons.pets_outlined,
-        BdoResourceSection.bloodHides => Icons.water_drop_outlined,
-        BdoResourceSection.mushrooms => Icons.eco_outlined,
-        BdoResourceSection.seafoodMarine => Icons.beach_access_outlined,
-        BdoResourceSection.other => Icons.category_outlined,
-      };
-
   String _resourceSectionLabel(BdoResourceSection section) {
     if (_materialSourceFilter == _MaterialSourceFilter.manual &&
         section == BdoResourceSection.seafoodMarine) {
@@ -6735,42 +7143,20 @@ class _BdoResourceMapState extends State<BdoResourceMap> {
     final resultsOpen = queryActive && _searchResultsVisible;
     final workbenchOpen = _desktopNetworkWorkbenchVisible;
     final workbenchVisible = workbenchOpen && !_desktopTaskSurfaceCollapsed;
-    final workbenchHeight = _desktopNetworkWorkbenchHeight(
-      constraints.maxHeight,
-    );
     final commandWidth = math
-        .min(940.0, math.max(0.0, constraints.maxWidth - 96))
+        .min(620.0, math.max(0.0, constraints.maxWidth - 96))
         .toDouble();
     final plannedTargetPaletteVisible =
         !resultsOpen && _desktopPlannedNetworkTargetsVisible;
-    final contextContentWidth = plannedTargetPaletteVisible ? 440.0 : 318.0;
+    final contextContentWidth = plannedTargetPaletteVisible ? 440.0 : 280.0;
     final contextWidth = contextContentWidth + 60;
-    final availableWorkbenchWidth = math.max(
-      0.0,
-      constraints.maxWidth - (_desktopWorkbenchSideInset * 2),
+    final workbenchWidth = _desktopNetworkWorkbenchWidthFor(
+      constraints.maxWidth,
     );
-    final workbenchMaximumWidth = switch (_nodeNetworkPlannerPage) {
-      _NodeNetworkPlannerPage.marketValue => 640.0,
-      _NodeNetworkPlannerPage.review => 1180.0,
-      _ => availableWorkbenchWidth,
-    };
-    final workbenchWidth = math.min(
-      availableWorkbenchWidth,
-      workbenchMaximumWidth,
-    );
-    final workbenchLeft =
-        _nodeNetworkPlannerPage == _NodeNetworkPlannerPage.marketValue
-        ? _desktopWorkbenchSideInset
-        : math.max(
-            _desktopWorkbenchSideInset,
-            (constraints.maxWidth - workbenchWidth) / 2,
-          );
     final contextTop = 64.0;
     final contextOpen =
         !_royalWorkshopVisible && (resultsOpen || _desktopContextVisible);
     final contextVisible = contextOpen && !_desktopTaskSurfaceCollapsed;
-    final shortcutRailVisible =
-        !contextOpen && !workbenchOpen && !_royalWorkshopVisible;
     return ClipRect(
       child: Stack(
         children: <Widget>[
@@ -6794,73 +7180,75 @@ class _BdoResourceMapState extends State<BdoResourceMap> {
               onWorkersPressed: _openWorkerHub,
               gatherSelected: _desktopMapMode == _DesktopMapMode.gather,
               workersSelected: _desktopMapMode == _DesktopMapMode.workers,
-            ),
-          ),
-          if (_desktopModeActionStripVisible)
-            Positioned(
-              left: 76,
-              top: 70,
-              right: 84,
-              child: _buildDesktopModeActionStrip(context),
-            ),
-          if (shortcutRailVisible)
-            Positioned(
-              left: 14,
-              top: 70,
-              child: ResourceMapDesktopToolRail(
-                actions: <ResourceMapDesktopToolRailAction>[
-                  if (_desktopMapMode != _DesktopMapMode.workers) ...<
-                    ResourceMapDesktopToolRailAction
-                  >[
-                    ResourceMapDesktopToolRailAction(
-                      controlKey: const ValueKey<String>(
-                        'resource-map-shortcut-checklist',
-                      ),
-                      icon: const Icon(Icons.checklist_rounded),
-                      label: 'Gather checklist',
-                      onPressed: _openGatherChecklist,
-                    ),
-                    ResourceMapDesktopToolRailAction(
-                      controlKey: const ValueKey<String>(
-                        'resource-map-shortcut-favorites',
-                      ),
-                      icon: const Icon(Icons.star_outline_rounded),
-                      label: 'Favorites',
-                      onPressed: _openFavorites,
-                    ),
-                  ] else ...<ResourceMapDesktopToolRailAction>[
-                    if (widget.showSetupScreenshotImport &&
-                        widget.setupScreenshotPicker != null)
-                      ResourceMapDesktopToolRailAction(
-                        controlKey: const ValueKey<String>(
-                          'resource-map-worker-import-screenshot-shortcut',
-                        ),
-                        icon: const Icon(Icons.document_scanner_outlined),
-                        label: 'Scan screenshots',
-                        onPressed: () =>
-                            unawaited(_openSetupScreenshotImport()),
-                      ),
-                    ResourceMapDesktopToolRailAction(
-                      controlKey: const ValueKey<String>(
-                        'resource-map-worker-current-action',
-                      ),
-                      icon: const Icon(Icons.bookmark_added_outlined),
-                      label: 'Copy my setup',
-                      onPressed: _openCurrentNodeEditor,
-                    ),
-                    if (widget.lodgingDataset != null)
-                      ResourceMapDesktopToolRailAction(
-                        controlKey: const ValueKey<String>(
-                          'resource-map-worker-houses-action',
-                        ),
-                        icon: const Icon(Icons.home_work_outlined),
-                        label: 'Your nodes',
-                        onPressed: _openHousingDirectory,
-                      ),
-                  ],
-                ],
+              gatherIcon: const ResourceMapStewardIcon(
+                kind: ResourceMapStewardIconKind.gatherMode,
+                size: 28,
+              ),
+              workersIcon: const ResourceMapStewardIcon(
+                kind: ResourceMapStewardIconKind.workersMode,
+                size: 28,
+              ),
+              searchIcon: const ResourceMapStewardIcon(
+                kind: ResourceMapStewardIconKind.search,
+                size: 25,
               ),
             ),
+          ),
+          AnimatedPositioned(
+            duration: reduceMotion
+                ? Duration.zero
+                : ResourceMapDesktopMotion.settle,
+            curve: ResourceMapDesktopMotion.curve,
+            left: _desktopStewardMenuVisible ? 14 : -420,
+            top: 70,
+            child: ExcludeFocus(
+              excluding: !_desktopStewardMenuVisible,
+              child: ExcludeSemantics(
+                excluding: !_desktopStewardMenuVisible,
+                child: IgnorePointer(
+                  ignoring: !_desktopStewardMenuVisible,
+                  child: AnimatedOpacity(
+                    opacity: _desktopStewardMenuVisible ? 1 : 0,
+                    duration: reduceMotion
+                        ? Duration.zero
+                        : ResourceMapDesktopMotion.enter,
+                    curve: ResourceMapDesktopMotion.curve,
+                    child: ConstrainedBox(
+                      constraints: BoxConstraints(
+                        maxHeight: math.max(160, constraints.maxHeight - 84),
+                      ),
+                      child: SingleChildScrollView(
+                        key: const ValueKey<String>(
+                          'resource-map-steward-menu-scroll',
+                        ),
+                        primary: false,
+                        child: AnimatedSwitcher(
+                          duration: reduceMotion
+                              ? Duration.zero
+                              : ResourceMapDesktopMotion.enter,
+                          switchInCurve: ResourceMapDesktopMotion.curve,
+                          switchOutCurve: Curves.easeInCubic,
+                          child: _desktopGatherMenuVisible
+                              ? KeyedSubtree(
+                                  key: const ValueKey<String>(
+                                    'resource-map-active-gather-menu',
+                                  ),
+                                  child: _buildGatherStewardMenu(context),
+                                )
+                              : KeyedSubtree(
+                                  key: const ValueKey<String>(
+                                    'resource-map-active-worker-menu',
+                                  ),
+                                  child: _buildWorkerStewardMenu(context),
+                                ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
           AnimatedPositioned(
             duration: reduceMotion
                 ? Duration.zero
@@ -6952,14 +7340,10 @@ class _BdoResourceMapState extends State<BdoResourceMap> {
                 ? Duration.zero
                 : const Duration(milliseconds: 220),
             curve: Curves.easeOutCubic,
-            left: workbenchOpen && _desktopTaskSurfaceCollapsed
-                ? -workbenchWidth - 24
-                : workbenchLeft,
+            right: workbenchVisible ? 14 : -workbenchWidth - 24,
             width: workbenchWidth,
-            bottom: workbenchOpen
-                ? _desktopWorkbenchBottomInset
-                : -workbenchHeight - 28,
-            height: workbenchHeight,
+            top: 70,
+            bottom: 14,
             child: ExcludeFocus(
               key: const ValueKey<String>(
                 'resource-map-network-workbench-focus',
@@ -6986,7 +7370,8 @@ class _BdoResourceMapState extends State<BdoResourceMap> {
               (contextOpen || workbenchOpen) &&
               !_royalWorkshopVisible)
             Positioned(
-              left: 14,
+              left: workbenchOpen ? null : 14,
+              right: workbenchOpen ? 84 : null,
               top: 70,
               child: Semantics(
                 button: true,
@@ -7006,8 +7391,13 @@ class _BdoResourceMapState extends State<BdoResourceMap> {
                     ),
                   ),
                   onPressed: _restoreDesktopTaskSurface,
-                  icon: const Icon(Icons.chevron_right_rounded, size: 19),
-                  label: const Text('Show panel'),
+                  icon: Icon(
+                    workbenchOpen
+                        ? Icons.chevron_left_rounded
+                        : Icons.chevron_right_rounded,
+                    size: 19,
+                  ),
+                  label: Text(workbenchOpen ? 'Show plan' : 'Show panel'),
                 ),
               ),
             ),
@@ -7031,41 +7421,26 @@ class _BdoResourceMapState extends State<BdoResourceMap> {
 
   Widget _buildDesktopNetworkWorkbench(BuildContext context) {
     final page = _nodeNetworkPlannerPage;
-    final plan = _nodeNetworkResult?.plan;
-    final largeText = MediaQuery.textScalerOf(context).scale(14) > 19;
-    final useReviewPanes =
-        page == _NodeNetworkPlannerPage.review && plan != null && !largeText;
-    final selectedReviewNode = _selectedNodeId == null
-        ? null
-        : widget.dataset.workerNodesById[_selectedNodeId!];
-    final showReviewContext = useReviewPanes && selectedReviewNode != null;
     Widget workbench = KeyedSubtree(
       key: ValueKey<String>('resource-map-network-workbench-mode-${page.name}'),
-      child: ResourceMapDesktopWorkbench(
-        height: _desktopNetworkWorkbenchHeight(
-          MediaQuery.sizeOf(context).height,
+      child: ResourceMapDesktopEdgeSurface(
+        contentWidth:
+            _desktopNetworkWorkbenchWidthFor(MediaQuery.sizeOf(context).width) -
+            60,
+        rightAligned: true,
+        child: LayoutBuilder(
+          builder: (context, constraints) => Padding(
+            padding: const EdgeInsets.fromLTRB(0, 6, 0, 50),
+            child: ResourceMapDesktopWorkbench(
+              height: math.max(1, constraints.maxHeight - 56),
+              wideBreakpoint: double.infinity,
+              semanticLabel: 'Worker network plan, ${page.name}',
+              header: _buildNetworkWorkbenchHeader(context),
+              bodyScrolls: false,
+              body: _buildNetworkWorkbenchBody(context),
+            ),
+          ),
         ),
-        leadingWidth: 280,
-        summaryWidth: 250,
-        wideBreakpoint: 1000,
-        semanticLabel: 'Worker network workbench, ${page.name}',
-        header: _buildNetworkWorkbenchHeader(context),
-        leading: showReviewContext
-            ? Padding(
-                padding: const EdgeInsets.fromLTRB(2, 2, 2, 10),
-                child: _buildNetworkWorkbenchNodeDetails(
-                  selectedReviewNode,
-                  compact: false,
-                ),
-              )
-            : null,
-        summary: useReviewPanes
-            ? _buildWideNodeReviewSummary(context, plan)
-            : null,
-        bodyScrolls: useReviewPanes,
-        body: useReviewPanes
-            ? _buildWideNodeReviewMaterials(context, plan)
-            : _buildNetworkWorkbenchBody(context),
       ),
     );
     if (page == _NodeNetworkPlannerPage.marketValue &&
@@ -7078,298 +7453,11 @@ class _BdoResourceMapState extends State<BdoResourceMap> {
     return workbench;
   }
 
-  Widget _buildWideNodeReviewMaterials(
-    BuildContext context,
-    BdoNodeNetworkPlan plan,
-  ) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(2, 2, 2, 12),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: <Widget>[
-          _buildNodePlanTargets(context, plan),
-          const SizedBox(height: 10),
-          _buildNodeChangeSection(
-            title: 'Connect',
-            icon: Icons.add_circle_outline_rounded,
-            color: context.mapChrome.positive,
-            nodeIds: plan.changeSet.connectNodeIds,
-            emptyLabel: 'Nothing new to connect',
-          ),
-          const SizedBox(height: 7),
-          _buildNodeChangeSection(
-            title: 'Keep',
-            icon: Icons.check_circle_outline_rounded,
-            color: context.mapChrome.warning,
-            nodeIds: plan.changeSet.retainedNodeIds,
-            emptyLabel: 'No saved nodes are shared yet',
-          ),
-          const SizedBox(height: 7),
-          _buildNodeChangeSection(
-            title: 'Remove',
-            icon: Icons.remove_circle_outline_rounded,
-            color: context.mapChrome.error,
-            nodeIds: plan.changeSet.disconnectNodeIds,
-            emptyLabel: 'Nothing needs disconnecting',
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildWideNodeReviewSummary(
-    BuildContext context,
-    BdoNodeNetworkPlan plan,
-  ) {
-    final workerCapacity = _nodeNetworkWorkerCapacity?.assessment;
-    final lodgingPlan = _nodeNetworkLodgingPlan?.plan;
-    final combinedContributionPoints = _nodePlanCombinedContributionPoints(
-      plan,
-    );
-    final remainingContributionPoints = _nodePlanRemainingContributionPoints(
-      plan,
-    );
-    final withinCombinedBudget = remainingContributionPoints >= 0;
-    final capacityConfigured =
-        _nodeNetworkPreferences.townWorkerCapacitiesByNodeId.isNotEmpty;
-    Widget metric(String label, String value, Color color) => Expanded(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: <Widget>[
-          Text(
-            label,
-            style: TextStyle(
-              color: context.mapChrome.muted,
-              fontSize: 9.5,
-              fontWeight: FontWeight.w800,
-            ),
-          ),
-          Text(
-            value,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: TextStyle(
-              color: color,
-              fontSize: 11.5,
-              fontWeight: FontWeight.w800,
-            ),
-          ),
-        ],
-      ),
-    );
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(2, 2, 2, 6),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: <Widget>[
-          Text(
-            'ROUTE TOTAL',
-            style: TextStyle(
-              color: context.mapChrome.accent,
-              fontSize: 10,
-              fontWeight: FontWeight.w900,
-              letterSpacing: .75,
-            ),
-          ),
-          const SizedBox(height: 4),
-          Row(
-            children: <Widget>[
-              Expanded(
-                child: Text(
-                  '$combinedContributionPoints / '
-                  '${plan.contributionPointBudget} CP',
-                  style: TextStyle(
-                    color: context.mapChrome.ink,
-                    fontSize: 20,
-                    height: 1.05,
-                    fontWeight: FontWeight.w900,
-                    letterSpacing: -.3,
-                  ),
-                ),
-              ),
-              Icon(
-                withinCombinedBudget
-                    ? Icons.check_circle_rounded
-                    : Icons.warning_amber_rounded,
-                size: 19,
-                color: withinCombinedBudget
-                    ? context.mapChrome.positive
-                    : context.mapChrome.error,
-              ),
-            ],
-          ),
-          Text(
-            withinCombinedBudget
-                ? '$remainingContributionPoints CP remains'
-                : '${-remainingContributionPoints} CP over your limit',
-            style: TextStyle(
-              color: withinCombinedBudget
-                  ? context.mapChrome.positive
-                  : context.mapChrome.error,
-              fontSize: 10.5,
-              fontWeight: FontWeight.w700,
-            ),
-          ),
-          const SizedBox(height: 7),
-          Row(
-            children: <Widget>[
-              metric(
-                'CONNECT',
-                '${plan.changeSet.connectNodeIds.length}',
-                context.mapChrome.positive,
-              ),
-              metric(
-                'KEEP',
-                '${plan.changeSet.retainedNodeIds.length}',
-                context.mapChrome.warning,
-              ),
-              metric(
-                'REMOVE',
-                '${plan.changeSet.disconnectNodeIds.length}',
-                context.mapChrome.error,
-              ),
-            ],
-          ),
-          const SizedBox(height: 7),
-          KeyedSubtree(
-            key: const ValueKey<String>(
-              'resource-map-node-route-visible-status',
-            ),
-            child: Row(
-              children: <Widget>[
-                Icon(
-                  Icons.route_rounded,
-                  size: 14,
-                  color: context.mapChrome.primary,
-                ),
-                const SizedBox(width: 5),
-                Expanded(
-                  child: Text(
-                    '${plan.changeSet.edges.length} route lines shown on map',
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                      color: context.mapChrome.text,
-                      fontSize: 10.5,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-          if (workerCapacity != null) ...<Widget>[
-            const SizedBox(height: 3),
-            Text(
-              'Workers: ${workerCapacity.assignedWorkerCount}/'
-              '${workerCapacity.workerDemandCount} covered',
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: TextStyle(
-                color: workerCapacity.isCoveredByCurrentCapacity
-                    ? context.mapChrome.positive
-                    : context.mapChrome.warning,
-                fontSize: 10.5,
-                fontWeight: FontWeight.w700,
-              ),
-            ),
-          ],
-          if (widget.workerEconomics != null &&
-              widget.lodgingDataset != null) ...<Widget>[
-            const SizedBox(height: 2),
-            TextButton.icon(
-              key: const ValueKey<String>(
-                'resource-map-node-review-worker-capacity',
-              ),
-              onPressed: _openWorkerCapacitySettings,
-              style: TextButton.styleFrom(
-                alignment: Alignment.centerLeft,
-                minimumSize: const Size(0, 34),
-                padding: const EdgeInsets.symmetric(horizontal: 5),
-              ),
-              icon: Icon(
-                !capacityConfigured
-                    ? Icons.person_add_alt_1_rounded
-                    : workerCapacity?.isCoveredByCurrentCapacity == true
-                    ? Icons.groups_2_outlined
-                    : Icons.bed_outlined,
-                size: 15,
-              ),
-              label: Text(
-                !capacityConfigured
-                    ? 'Personalize workers and bonus lodging'
-                    : workerCapacity == null
-                    ? 'Check workers and lodging'
-                    : '${workerCapacity.assignedWorkerCount}/'
-                          '${workerCapacity.workerDemandCount} workers covered',
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-              ),
-            ),
-          ],
-          if (lodgingPlan != null &&
-              lodgingPlan.requiredWorkerSlots > 0) ...<Widget>[
-            const SizedBox(height: 3),
-            Text(
-              'Lodging: ${lodgingPlan.newlyRequiredHouseIds.length} houses '
-              '\u00b7 +${lodgingPlan.totalIncrementalContributionPoints} CP',
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: TextStyle(
-                color: context.mapChrome.warning,
-                fontSize: 10.5,
-                fontWeight: FontWeight.w700,
-              ),
-            ),
-          ],
-          if (_nodeNetworkSaveMessage case final message?) ...<Widget>[
-            const SizedBox(height: 3),
-            Text(
-              message,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: TextStyle(
-                color: context.mapChrome.positive,
-                fontSize: 10.5,
-                fontWeight: FontWeight.w700,
-              ),
-            ),
-          ],
-          const SizedBox(height: 7),
-          Row(
-            children: <Widget>[
-              IconButton.outlined(
-                tooltip: 'Fit full route on map',
-                onPressed: () => _fitNodeNetworkPlan(plan),
-                icon: const Icon(Icons.map_outlined, size: 17),
-              ),
-              const SizedBox(width: 7),
-              Expanded(
-                child: FilledButton.icon(
-                  key: const ValueKey<String>(
-                    'resource-map-save-current-node-network',
-                  ),
-                  onPressed: withinCombinedBudget
-                      ? _saveProposedNodeNetwork
-                      : null,
-                  icon: const Icon(Icons.bookmark_added_outlined, size: 17),
-                  label: Text(
-                    withinCombinedBudget ? 'Use setup' : 'Add CP first',
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-
   Widget _buildNetworkWorkbenchHeader(BuildContext context) {
     final page = _nodeNetworkPlannerPage;
     final title = switch (page) {
-      _NodeNetworkPlannerPage.home => 'Planned network',
-      _NodeNetworkPlannerPage.editCurrent => 'Copy my in-game setup',
+      _NodeNetworkPlannerPage.home => 'Worker planner',
+      _NodeNetworkPlannerPage.editCurrent => 'Saved node setup',
       _NodeNetworkPlannerPage.targets => 'Planned materials',
       _NodeNetworkPlannerPage.review =>
         _nodeNetworkCalculating
@@ -7499,20 +7587,7 @@ class _BdoResourceMapState extends State<BdoResourceMap> {
               borderRadius: BorderRadius.circular(6),
             ),
           ),
-          icon: const Icon(Icons.keyboard_double_arrow_left_rounded, size: 19),
-        ),
-        IconButton(
-          key: const ValueKey<String>('resource-map-network-workbench-close'),
-          tooltip: 'Close worker network',
-          onPressed: _openMapHome,
-          style: IconButton.styleFrom(
-            foregroundColor: context.mapChrome.muted,
-            hoverColor: context.mapChrome.brassWash,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(6),
-            ),
-          ),
-          icon: const Icon(Icons.close_rounded, size: 19),
+          icon: const Icon(Icons.keyboard_double_arrow_right_rounded, size: 19),
         ),
       ],
     );
@@ -7784,7 +7859,6 @@ class _BdoResourceMapState extends State<BdoResourceMap> {
     BdoWorkerNode node, {
     required bool compact,
   }) {
-    final invested = _nodeNetworkPreferences.currentNodeIds.contains(node.id);
     final nodeColor = _colorForWorkerNode(context, node);
     final nodeIcon = _iconForWorkerNode(node);
     final availableWorkerNodeCount = node.isResourceNode
@@ -7964,24 +8038,6 @@ class _BdoResourceMapState extends State<BdoResourceMap> {
                 ),
               ),
           ],
-          if (!_isNaturalWorkerRoot(node)) ...<Widget>[
-            const SizedBox(height: 10),
-            OutlinedButton.icon(
-              key: const ValueKey<String>(
-                'resource-map-network-workbench-toggle-invested',
-              ),
-              onPressed: () => _toggleNodeInCurrentSetup(node),
-              icon: Icon(
-                invested
-                    ? Icons.bookmark_remove_outlined
-                    : Icons.bookmark_add_outlined,
-                size: 17,
-              ),
-              label: Text(
-                invested ? 'Remove from my setup' : 'Mark as already invested',
-              ),
-            ),
-          ],
         ],
       ),
     );
@@ -8132,8 +8188,8 @@ class _BdoResourceMapState extends State<BdoResourceMap> {
         ? _disconnectedCurrentNodeDraftIds.length
         : 0;
     final title = switch (page) {
-      _NodeNetworkPlannerPage.home => 'Planned network',
-      _NodeNetworkPlannerPage.editCurrent => 'Copy in-game setup',
+      _NodeNetworkPlannerPage.home => 'Worker planner',
+      _NodeNetworkPlannerPage.editCurrent => 'Save node setup',
       _NodeNetworkPlannerPage.targets => 'Planned materials',
       _NodeNetworkPlannerPage.review =>
         _nodeNetworkCalculating
@@ -8726,6 +8782,12 @@ class _BdoResourceMapState extends State<BdoResourceMap> {
       builder: (context, constraints) {
         final shortCompactPlanner =
             compact && _nodeNetworkPlannerOpen && constraints.maxHeight < 420;
+        final desktopRightPanelInset =
+            !compact &&
+                _desktopNetworkWorkbenchVisible &&
+                !_desktopTaskSurfaceCollapsed
+            ? _desktopNetworkWorkbenchWidthFor(constraints.maxWidth) + 28
+            : 16.0;
         return Listener(
           behavior: HitTestBehavior.translucent,
           onPointerSignal: _handleMapSurfacePointerSignal,
@@ -8809,12 +8871,6 @@ class _BdoResourceMapState extends State<BdoResourceMap> {
                   Size(constraints.maxWidth, constraints.maxHeight),
                 ),
               ),
-              if (!_compactLayout && !_desktopTaskSurfaceCollapsed)
-                Positioned.fill(
-                  child: _buildSelectedHouseOverlay(
-                    Size(constraints.maxWidth, constraints.maxHeight),
-                  ),
-                ),
               if (!_compactLayout)
                 Positioned.fill(
                   child: _buildPlannedLodgingSummaryOverlay(
@@ -8827,8 +8883,14 @@ class _BdoResourceMapState extends State<BdoResourceMap> {
                     Size(constraints.maxWidth, constraints.maxHeight),
                   ),
                 ),
+              if (!_compactLayout && !_desktopTaskSurfaceCollapsed)
+                Positioned.fill(
+                  child: _buildSelectedHouseOverlay(
+                    Size(constraints.maxWidth, constraints.maxHeight),
+                  ),
+                ),
               Positioned(
-                right: shortCompactPlanner ? 72 : 16,
+                right: shortCompactPlanner ? 72 : desktopRightPanelInset,
                 top: shortCompactPlanner
                     ? 12
                     : compact
@@ -8837,7 +8899,7 @@ class _BdoResourceMapState extends State<BdoResourceMap> {
                 child: _buildZoomControls(context, compact: false),
               ),
               Positioned(
-                right: 16,
+                right: desktopRightPanelInset,
                 top: shortCompactPlanner
                     ? 12
                     : compact
@@ -8847,19 +8909,6 @@ class _BdoResourceMapState extends State<BdoResourceMap> {
                   context,
                   maximumMenuHeight: shortCompactPlanner
                       ? math.max(100.0, constraints.maxHeight - 63).toDouble()
-                      : !compact &&
-                            _desktopNetworkWorkbenchVisible &&
-                            !_desktopTaskSurfaceCollapsed
-                      ? math
-                            .max(
-                              100.0,
-                              constraints.maxHeight -
-                                  _desktopNetworkWorkbenchHeight(
-                                    constraints.maxHeight,
-                                  ) -
-                                  190,
-                            )
-                            .toDouble()
                       : null,
                 ),
               ),
@@ -8883,10 +8932,66 @@ class _BdoResourceMapState extends State<BdoResourceMap> {
                   width: math.min(430, math.max(0, constraints.maxWidth - 96)),
                   child: _buildVendorLookupBanner(context),
                 ),
+              if (_investNodeMode)
+                Positioned(
+                  left: !compact && _activeDesktopLeftAvoidanceWidth > 0
+                      ? _activeDesktopLeftAvoidanceWidth + 12
+                      : 12,
+                  top: compact ? null : 126,
+                  bottom: compact ? 54 : null,
+                  child: _buildInvestModeBanner(context),
+                ),
             ],
           ),
         );
       },
+    );
+  }
+
+  Widget _buildInvestModeBanner(BuildContext context) {
+    return Material(
+      key: const ValueKey<String>('resource-map-invest-mode-banner'),
+      elevation: 8,
+      color: context.mapChrome.paperRaised,
+      surfaceTintColor: Colors.transparent,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+        side: BorderSide(color: context.mapChrome.primary),
+      ),
+      clipBehavior: Clip.antiAlias,
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(11, 7, 6, 7),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: <Widget>[
+            Icon(
+              Icons.bookmark_added_rounded,
+              size: 18,
+              color: context.mapChrome.primary,
+            ),
+            const SizedBox(width: 7),
+            Text(
+              'Click nodes to add or remove',
+              style: TextStyle(
+                color: context.mapChrome.ink,
+                fontSize: 13,
+                fontWeight: FontWeight.w800,
+              ),
+            ),
+            const SizedBox(width: 8),
+            TextButton(
+              key: const ValueKey<String>('resource-map-invest-mode-done'),
+              onPressed: _toggleInvestNodeMode,
+              style: TextButton.styleFrom(
+                visualDensity: VisualDensity.compact,
+                minimumSize: const Size(48, 34),
+                padding: const EdgeInsets.symmetric(horizontal: 10),
+              ),
+              child: const Text('Done'),
+            ),
+          ],
+        ),
+      ),
     );
   }
 
@@ -8944,13 +9049,13 @@ class _BdoResourceMapState extends State<BdoResourceMap> {
         final markers = <Widget>[];
         for (final candidate in candidates) {
           final labelWidth = math
-              .min(136.0, 31 + candidate.node.siteName.length * 5.7)
+              .min(154.0, 39 + candidate.node.siteName.length * 6.2)
               .toDouble();
           final bounds = Rect.fromLTWH(
-            candidate.position.dx - 9,
-            candidate.position.dy - 13,
+            candidate.position.dx - 13,
+            candidate.position.dy - 17,
             labelWidth,
-            26,
+            34,
           );
           if (occupied.any((other) => other.inflate(4).overlaps(bounds))) {
             continue;
@@ -8969,10 +9074,12 @@ class _BdoResourceMapState extends State<BdoResourceMap> {
                   label: candidate.node.siteName,
                   kind: candidate.kind,
                   active: _nodeIconIsActive(candidate.node),
-                  semanticLabel:
-                      _nodeNetworkPlannerOpen &&
-                          _nodeNetworkPlannerPage ==
-                              _NodeNetworkPlannerPage.editCurrent
+                  semanticLabel: _investNodeMode
+                      ? '${_nodeNetworkPreferences.currentNodeIds.contains(candidate.node.id) ? 'Remove' : 'Save'} '
+                            '${candidate.node.siteName} as an invested node'
+                      : _nodeNetworkPlannerOpen &&
+                            _nodeNetworkPlannerPage ==
+                                _NodeNetworkPlannerPage.editCurrent
                       ? '${_currentNodeDraftIds.contains(candidate.node.id) ? 'Unmark' : 'Mark'} '
                             '${candidate.node.siteName} as an in-game node'
                       : null,
@@ -8985,7 +9092,10 @@ class _BdoResourceMapState extends State<BdoResourceMap> {
             break;
           }
         }
-        return Stack(children: markers);
+        return IgnorePointer(
+          ignoring: _gatheringLayerOwnsMapTaps,
+          child: Stack(children: markers),
+        );
       },
     );
   }
@@ -9018,6 +9128,37 @@ class _BdoResourceMapState extends State<BdoResourceMap> {
       builder: (context, geometry) {
         final snapshotViewport = geometry.snapshotSize;
         final zoom = _cameraController.camera.zoom;
+        final housePlannerOpen = _storagePlannerOpenForTown(town);
+        final storagePlan = _storagePlanActiveForTown(town)
+            ? _storagePlanForTown(town)
+            : null;
+        final lodgingPlan = _lodgingPlanActiveForTown(town)
+            ? _lodgingPlanForTown(town)
+            : null;
+        final houseUsePlan = _houseUsePlanForTown(town);
+        final recommendedStorage =
+            storagePlan?.selectedStorageHouseIds.toSet() ?? <String>{};
+        final recommendedHouseUse =
+            houseUsePlan?.selectedUseHouseIds.toSet() ?? <String>{};
+        final recommendedLodging = lodgingPlan != null
+            ? lodgingPlan.selectedLodgingHouseIds.toSet()
+            : !housePlannerOpen
+            ? _displayedLodgingPlanForTown(town).selectedLodgingHouseIds.toSet()
+            : <String>{};
+        final storageClosure =
+            storagePlan?.fullHouseClosureIds.toSet() ?? <String>{};
+        final storagePrerequisites = <String>{...storageClosure}
+          ..removeAll(recommendedStorage);
+        final houseUseClosure =
+            houseUsePlan?.fullHouseClosureIds.toSet() ?? <String>{};
+        final houseUsePrerequisites =
+            houseUsePlan?.newPrerequisiteHouseIds.toSet() ?? <String>{};
+        final lodgingClosure =
+            lodgingPlan?.fullHouseClosureIds.toSet() ?? <String>{};
+        final lodgingPrerequisites = lodgingPlan == null
+            ? <String>{}
+            : (<String>{...lodgingPlan.newlyRequiredHouseIds}
+                ..removeAll(recommendedLodging));
         final visibleHouseIds = _visibleHousingHouseIds(town);
         final positions = <String, Offset>{
           for (final house in town.houses)
@@ -9071,8 +9212,23 @@ class _BdoResourceMapState extends State<BdoResourceMap> {
                     child: _HouseClusterMarker(
                       count: town.houses.length,
                       label: 'Open ${town.houses.first.name}',
-                      kind: BdoMapSymbolKind.residence,
+                      kind: recommendedStorage.isNotEmpty
+                          ? BdoMapSymbolKind.storage
+                          : recommendedLodging.isNotEmpty
+                          ? BdoMapSymbolKind.lodging
+                          : recommendedHouseUse.isNotEmpty
+                          ? _houseSymbolKindForUsage(
+                              _housePlannerUsagesForTown(town).singleWhere(
+                                (usage) =>
+                                    usage.typeId ==
+                                    _housePlannerUsageTypeForTown(town),
+                              ),
+                            )
+                          : BdoMapSymbolKind.residence,
                       states: bdoMapSymbolStates(
+                        recommendedStorage: recommendedStorage.isNotEmpty,
+                        recommendedLodging: recommendedLodging.isNotEmpty,
+                        recommendedHouseUse: recommendedHouseUse.isNotEmpty,
                         selected: _selectedHouseId != null,
                       ),
                       onTap: () => _selectHouse(
@@ -9091,18 +9247,42 @@ class _BdoResourceMapState extends State<BdoResourceMap> {
 
         final plan = _displayedLodgingPlanForTown(town);
         final owned = _ownedHouseIdsForTown(town);
-        final recommendedLodging = plan.selectedLodgingHouseIds.toSet();
-        final recommendedNew = plan.newlyRequiredHouseIds.toSet();
-        final recommendedPrerequisites = plan.prerequisiteHouseIds.toSet();
+        final recommendedNew = storagePlan != null
+            ? storageClosure
+            : lodgingPlan != null
+            ? lodgingClosure
+            : houseUsePlan != null
+            ? houseUseClosure
+            : plan.newlyRequiredHouseIds.toSet();
+        final recommendedPrerequisites = storagePlan != null
+            ? storagePrerequisites
+            : lodgingPlan != null
+            ? lodgingPrerequisites
+            : houseUsePlan != null
+            ? houseUsePrerequisites
+            : plan.prerequisiteHouseIds.toSet();
         int housePriority(LodgingHouse house) {
           if (house.id == _selectedHouseId) return 0;
-          if (owned.contains(house.id)) return 1;
-          if (recommendedLodging.contains(house.id)) return 2;
-          if (recommendedNew.contains(house.id)) return 3;
-          return 4;
+          if (recommendedStorage.contains(house.id)) return 1;
+          if (recommendedHouseUse.contains(house.id)) return 2;
+          if (recommendedPrerequisites.contains(house.id)) return 3;
+          if (owned.contains(house.id)) return 4;
+          if (recommendedLodging.contains(house.id)) return 5;
+          if (recommendedNew.contains(house.id)) return 6;
+          return 7;
         }
 
         _HouseMarkerStatus houseStatus(LodgingHouse house) {
+          if (recommendedStorage.contains(house.id)) {
+            return _HouseMarkerStatus.recommendedStorage;
+          }
+          if (recommendedHouseUse.contains(house.id)) {
+            return _HouseMarkerStatus.recommendedHouseUse;
+          }
+          if (recommendedPrerequisites.contains(house.id) &&
+              !owned.contains(house.id)) {
+            return _HouseMarkerStatus.recommendedPrerequisite;
+          }
           if (owned.contains(house.id)) {
             return _HouseMarkerStatus.owned;
           }
@@ -9176,6 +9356,9 @@ class _BdoResourceMapState extends State<BdoResourceMap> {
           final states = bdoMapSymbolStates(
             owned: status == _HouseMarkerStatus.owned,
             recommendedLodging: status == _HouseMarkerStatus.recommendedLodging,
+            recommendedStorage: status == _HouseMarkerStatus.recommendedStorage,
+            recommendedHouseUse:
+                status == _HouseMarkerStatus.recommendedHouseUse,
             recommendedPrerequisite:
                 status == _HouseMarkerStatus.recommendedPrerequisite,
             selected: lead.id == _selectedHouseId,
@@ -9249,7 +9432,8 @@ class _BdoResourceMapState extends State<BdoResourceMap> {
                     anchorPositions: anchorPositions,
                     ownedHouseIds: owned,
                     recommendedNewHouseIds: recommendedNew,
-                    selectedHouseId: _selectedHouseId,
+                    selectedHouseId:
+                        recommendedStorage.firstOrNull ?? _selectedHouseId,
                     visibleHouseIds: visibleHouseIds,
                   ),
                 ),
@@ -9354,8 +9538,8 @@ class _BdoResourceMapState extends State<BdoResourceMap> {
           14.0,
           math.min(
             viewport.width - width - 78,
-            _desktopContextVisible && !_desktopTaskSurfaceCollapsed
-                ? _activeDesktopContextAvoidanceWidth + 16
+            _activeDesktopLeftAvoidanceWidth > 0
+                ? _activeDesktopLeftAvoidanceWidth + 16
                 : 20,
           ),
         )
@@ -9407,10 +9591,10 @@ class _BdoResourceMapState extends State<BdoResourceMap> {
       return const SizedBox.shrink();
     }
     final popupWidth = math.min(304.0, viewport.width - 24).toDouble();
-    final minimumLeft = _desktopContextVisible && !_desktopTaskSurfaceCollapsed
+    final minimumLeft = _activeDesktopLeftAvoidanceWidth > 0
         ? math
               .min(
-                _activeDesktopContextAvoidanceWidth + 10,
+                _activeDesktopLeftAvoidanceWidth + 10,
                 math.max(12, viewport.width - popupWidth - 12),
               )
               .toDouble()
@@ -9420,10 +9604,31 @@ class _BdoResourceMapState extends State<BdoResourceMap> {
     );
     widget.debugOnSelectedHouseSnapshotBuilt?.call();
     final plan = _displayedLodgingPlanForTown(town);
-    final recommendedLodging = plan.selectedLodgingHouseIds.contains(house.id);
-    final recommendedPrerequisite =
-        plan.prerequisiteHouseIds.contains(house.id) ||
-        (plan.newlyRequiredHouseIds.contains(house.id) && !recommendedLodging);
+    final housePlannerOpen = _storagePlannerOpenForTown(town);
+    final storagePlan = _storagePlanActiveForTown(town)
+        ? _storagePlanForTown(town)
+        : null;
+    final lodgingPlan = _lodgingPlanActiveForTown(town)
+        ? _lodgingPlanForTown(town)
+        : null;
+    final houseUsePlan = _houseUsePlanForTown(town);
+    final recommendedStorage =
+        storagePlan?.selectedStorageHouseIds.contains(house.id) ?? false;
+    final recommendedHouseUse =
+        houseUsePlan?.selectedUseHouseIds.contains(house.id) ?? false;
+    final recommendedLodging = lodgingPlan != null
+        ? lodgingPlan.selectedLodgingHouseIds.contains(house.id)
+        : !housePlannerOpen && plan.selectedLodgingHouseIds.contains(house.id);
+    final recommendedPrerequisite = storagePlan != null
+        ? storagePlan.prerequisiteHouseIds.contains(house.id)
+        : lodgingPlan != null
+        ? lodgingPlan.prerequisiteHouseIds.contains(house.id) &&
+              !recommendedLodging
+        : houseUsePlan != null
+        ? houseUsePlan.newPrerequisiteHouseIds.contains(house.id)
+        : plan.prerequisiteHouseIds.contains(house.id) ||
+              (plan.newlyRequiredHouseIds.contains(house.id) &&
+                  !recommendedLodging);
     final retainedDetails = RepaintBoundary(
       child: SingleChildScrollView(
         child: _buildSelectedHouseDetails(
@@ -9431,6 +9636,8 @@ class _BdoResourceMapState extends State<BdoResourceMap> {
           house,
           owned: owned,
           recommendedLodging: recommendedLodging,
+          recommendedStorage: recommendedStorage,
+          recommendedHouseUse: recommendedHouseUse,
           recommendedPrerequisite: recommendedPrerequisite,
           onClose: () => setState(() => _selectedHouseId = null),
         ),
@@ -9944,11 +10151,10 @@ class _BdoResourceMapState extends State<BdoResourceMap> {
         final popupWidth = math
             .min(ResourceMapNodeQuickPanel.maxWidth, viewport.width - 24)
             .toDouble();
-        final minimumLeft =
-            _desktopContextVisible && !_desktopTaskSurfaceCollapsed
+        final minimumLeft = _activeDesktopLeftAvoidanceWidth > 0
             ? math
                   .min(
-                    _activeDesktopContextAvoidanceWidth + 10,
+                    _activeDesktopLeftAvoidanceWidth + 10,
                     math.max(12, viewport.width - popupWidth - 12),
                   )
                   .toDouble()
@@ -10116,10 +10322,7 @@ class _BdoResourceMapState extends State<BdoResourceMap> {
                                 }
                               });
                             },
-                      provenance: node.provenanceId == null
-                          ? null
-                          : 'Coordinates and node data: '
-                                '${_provenanceTitle(node.provenanceId)}',
+                      provenance: null,
                       unlockNotice: unlockGuide == null
                           ? null
                           : ResourceMapNodeUnlockNotice(
@@ -10146,7 +10349,7 @@ class _BdoResourceMapState extends State<BdoResourceMap> {
                       invested: _nodeNetworkPreferences.currentNodeIds.contains(
                         node.id,
                       ),
-                      onToggleInvested: () => _toggleNodeInCurrentSetup(node),
+                      onToggleInvested: null,
                       onAddCompleteRoute:
                           quickPath != null &&
                               quickPath.connectNodeIds.isNotEmpty
@@ -10171,7 +10374,7 @@ class _BdoResourceMapState extends State<BdoResourceMap> {
   }
 
   Widget _buildAllNodeOverlay(Size viewport) {
-    if (!_showAllNodes || viewport.isEmpty) {
+    if ((!_showAllNodes && !_investNodeMode) || viewport.isEmpty) {
       return const SizedBox.shrink();
     }
     final interactiveNodeIds = _visibleWorkerNodes
@@ -10189,6 +10392,7 @@ class _BdoResourceMapState extends State<BdoResourceMap> {
         final nodes = widget.dataset.workerNodes
             .where(
               (node) =>
+                  _showsAsNeutralOrientationNode(node) &&
                   !interactiveNodeIds.contains(node.id) &&
                   _visibleLandmarkKind(node, zoom) == null,
             )
@@ -10200,37 +10404,44 @@ class _BdoResourceMapState extends State<BdoResourceMap> {
           zoom: zoom,
           visibleViewport: geometry.visibleViewport,
           labelBudgetScale: geometry.areaScale,
+          retainAllNodes: _investNodeMode,
         );
-        return Stack(
-          children: <Widget>[
-            for (final placement in initialPlacements)
-              Positioned(
-                key: ValueKey<String>(
-                  'resource-map-orientation-node-${placement.node.id}',
-                ),
-                left: placement.position.dx - 4,
-                top: placement.position.dy - 4,
-                child: RepaintBoundary(
-                  child: _MapOrientationNodeMarker(
-                    node: placement.node,
-                    label: placement.node.siteName,
-                    showLabel: placement.showLabel,
-                    active: _nodeIconIsActive(placement.node),
-                    largeHitTarget: editCurrentNetwork,
-                    semanticLabel: editCurrentNetwork
-                        ? placement.node.isProductionNode
-                              ? 'Add ${placement.node.siteName} and its complete '
-                                    'route, ${placement.node.contributionPoints} CP '
-                                    'at the production node'
-                              : '${_currentNodeDraftIds.contains(placement.node.id) ? 'Unmark' : 'Mark'} '
-                                    '${placement.node.siteName} as an in-game node, '
-                                    '${placement.node.contributionPoints} CP'
-                        : null,
-                    onTap: () => _handleWorkerNodeTap(placement.node),
+        return IgnorePointer(
+          ignoring: _gatheringLayerOwnsMapTaps,
+          child: Stack(
+            children: <Widget>[
+              for (final placement in initialPlacements)
+                Positioned(
+                  key: ValueKey<String>(
+                    'resource-map-orientation-node-${placement.node.id}',
+                  ),
+                  left: placement.position.dx - 12,
+                  top: placement.position.dy - 20,
+                  child: RepaintBoundary(
+                    child: _MapOrientationNodeMarker(
+                      node: placement.node,
+                      label: placement.node.siteName,
+                      showLabel: placement.showLabel,
+                      active: _nodeIconIsActive(placement.node),
+                      largeHitTarget: editCurrentNetwork || _investNodeMode,
+                      semanticLabel: _investNodeMode
+                          ? '${_nodeNetworkPreferences.currentNodeIds.contains(placement.node.id) ? 'Remove' : 'Save'} '
+                                '${placement.node.siteName} as an invested node'
+                          : editCurrentNetwork
+                          ? placement.node.isProductionNode
+                                ? 'Add ${placement.node.siteName} and its complete '
+                                      'route, ${placement.node.contributionPoints} CP '
+                                      'at the production node'
+                                : '${_currentNodeDraftIds.contains(placement.node.id) ? 'Unmark' : 'Mark'} '
+                                      '${placement.node.siteName} as an in-game node, '
+                                      '${placement.node.contributionPoints} CP'
+                          : null,
+                      onTap: () => _handleWorkerNodeTap(placement.node),
+                    ),
                   ),
                 ),
-              ),
-          ],
+            ],
+          ),
         );
       },
     );
@@ -10859,13 +11070,220 @@ class _BdoResourceMapState extends State<BdoResourceMap> {
     _openNodeTargets();
   }
 
-  void _openCurrentNodeEditor() {
-    _openNodeNetworkPlanner();
-    _beginCurrentNodeEditing();
+  void _setWorkerMenuSection(ResourceMapWorkerMenuSection? section) {
+    if (_workerMenuSection == section) {
+      return;
+    }
+    _searchFocus.unfocus();
+    _mapKeyboardFocus.requestFocus();
+    setState(() => _workerMenuSection = section);
+  }
+
+  void _setGatherMenuSection(ResourceMapWorkerMenuSection? section) {
+    if (_gatherMenuSection == section) {
+      return;
+    }
+    _searchFocus.unfocus();
+    _mapKeyboardFocus.requestFocus();
+    setState(() => _gatherMenuSection = section);
+  }
+
+  ResourceMapStewardIconKind _stewardIconForResourceSection(
+    BdoResourceSection section,
+  ) => switch (section) {
+    BdoResourceSection.plantsWood => ResourceMapStewardIconKind.plantsWood,
+    BdoResourceSection.oresMinerals => ResourceMapStewardIconKind.oresMinerals,
+    BdoResourceSection.meat => ResourceMapStewardIconKind.meat,
+    BdoResourceSection.bloodHides => ResourceMapStewardIconKind.bloodHides,
+    BdoResourceSection.mushrooms => ResourceMapStewardIconKind.mushrooms,
+    BdoResourceSection.seafoodMarine => ResourceMapStewardIconKind.coastal,
+    BdoResourceSection.other => ResourceMapStewardIconKind.other,
+  };
+
+  Widget _buildGatherStewardMenu(BuildContext context) {
+    final plannerTargets = _manualPlannerTargets();
+    final categoryActions = <ResourceMapStewardMenuAction>[
+      for (final section in BdoResourceSection.values)
+        if (_browserEntryCountForSection(section) > 0)
+          ResourceMapStewardMenuAction(
+            key: ValueKey<String>('resource-map-section-${section.name}'),
+            icon: _stewardIconForResourceSection(section),
+            label: _resourceSectionLabel(section),
+            badge: '${_browserEntryCountForSection(section)}',
+            semanticHint:
+                'Open ${_browserEntryCountForSection(section)} mapped '
+                '${_resourceSectionLabel(section)} materials.',
+            onPressed: () => _openResourceSection(section),
+          ),
+    ];
+    return ResourceMapStewardWorkerMenu(
+      key: const ValueKey<String>('resource-map-gather-steward-widget'),
+      selectedSection: _gatherMenuSection,
+      onSectionChanged: _setGatherMenuSection,
+      semanticLabel: 'Gather map tools',
+      menuContentKey: const ValueKey<String>(
+        'resource-map-gather-steward-menu',
+      ),
+      controlKeyPrefix: 'resource-map-gather-menu',
+      planLabel: 'Plan',
+      exploreLabel: 'Browse',
+      planIcon: ResourceMapStewardIconKind.plan,
+      exploreIcon: ResourceMapStewardIconKind.browse,
+      visibleSections: const <ResourceMapWorkerMenuSection>[
+        ResourceMapWorkerMenuSection.plan,
+        ResourceMapWorkerMenuSection.explore,
+      ],
+      planActions: <ResourceMapStewardMenuAction>[
+        if (plannerTargets.isNotEmpty)
+          ResourceMapStewardMenuAction(
+            key: const ValueKey<String>('resource-map-gather-plan-shortlist'),
+            icon: ResourceMapStewardIconKind.needed,
+            label: 'Needed for your plan',
+            badge: '${plannerTargets.length}',
+            semanticHint:
+                'Show planner shortages with exact hand-gathering locations.',
+            onPressed: _openGatherPlanShortlist,
+          ),
+        ResourceMapStewardMenuAction(
+          key: const ValueKey<String>('resource-map-command-checklist'),
+          icon: ResourceMapStewardIconKind.checklist,
+          label: 'Checklist',
+          badge: _gatherChecklist.entries.isEmpty
+              ? null
+              : '${_gatherChecklist.remainingCount} left',
+          semanticHint: 'Open your gathering checklist.',
+          onPressed: _openGatherChecklist,
+        ),
+        ResourceMapStewardMenuAction(
+          key: const ValueKey<String>('resource-map-command-favorites'),
+          icon: ResourceMapStewardIconKind.favorites,
+          label: 'Favorites',
+          badge: _favoriteResourceIds.isEmpty
+              ? null
+              : '${_favoriteResourceIds.length}',
+          semanticHint: 'Open your favorite gathering materials.',
+          onPressed: _openFavorites,
+        ),
+      ],
+      exploreActions: categoryActions,
+      manageActions: const <ResourceMapStewardMenuAction>[],
+    );
+  }
+
+  Widget _buildWorkerStewardMenu(BuildContext context) {
+    final ownedHouseCount = _nodeNetworkPreferences.currentOwnedHouseIds.length;
+    final hasGroupedRecipeNeeds = widget.plannerNeedGroups.any(
+      (group) => group.materials.any(
+        (material) =>
+            material.need.missingQuantity.isFinite &&
+            material.need.missingQuantity > 0,
+      ),
+    );
+    final hasRecipeNeeds =
+        hasGroupedRecipeNeeds ||
+        widget.plannerNeeds.any(
+          (need) => need.missingQuantity.isFinite && need.missingQuantity > 0,
+        );
+    return ResourceMapStewardWorkerMenu(
+      selectedSection: _workerMenuSection,
+      onSectionChanged: _setWorkerMenuSection,
+      planActions: <ResourceMapStewardMenuAction>[
+        if (hasRecipeNeeds)
+          ResourceMapStewardMenuAction(
+            key: const ValueKey<String>(
+              'resource-map-recommend-current-recipe',
+            ),
+            icon: ResourceMapStewardIconKind.needed,
+            label: 'Needed for your plan',
+            semanticHint: hasGroupedRecipeNeeds
+                ? 'Choose shortages and combine them into one efficient route.'
+                : 'Build a worker route for the ingredients you still need.',
+            onPressed: _openWorkerRecipePlanner,
+          ),
+        ResourceMapStewardMenuAction(
+          key: const ValueKey<String>('resource-map-node-mode-materials'),
+          icon: ResourceMapStewardIconKind.specificItems,
+          label: 'Specific items',
+          semanticHint: 'Pick each material and how many nodes you want.',
+          onPressed: _openWorkerMaterialPlanner,
+        ),
+        ResourceMapStewardMenuAction(
+          key: const ValueKey<String>(
+            'resource-map-open-market-value-recommendations',
+          ),
+          icon: ResourceMapStewardIconKind.bestIncome,
+          label: 'Best income',
+          semanticHint:
+              'Build a network from your CP, online time, prices and sales.',
+          onPressed: _openWorkerIncomePlanner,
+        ),
+      ],
+      exploreActions: <ResourceMapStewardMenuAction>[
+        ResourceMapStewardMenuAction(
+          key: const ValueKey<String>('resource-map-worker-browse-action'),
+          icon: ResourceMapStewardIconKind.findNodes,
+          label: 'Find nodes',
+          semanticHint: 'Browse nodes by the material or work they provide.',
+          onPressed: _openWorkerOverview,
+        ),
+        ResourceMapStewardMenuAction(
+          key: const ValueKey<String>('resource-map-worker-connections-action'),
+          icon: ResourceMapStewardIconKind.connections,
+          label: 'View connections',
+          semanticHint: 'Show or hide every worker-node connection on the map.',
+          selected: _showAllNetworkConnections,
+          badge: _showAllNetworkConnections ? 'On' : null,
+          onPressed: _toggleWorkerConnections,
+        ),
+      ],
+      manageActions: <ResourceMapStewardMenuAction>[
+        ResourceMapStewardMenuAction(
+          key: const ValueKey<String>('resource-map-invest-node-mode'),
+          icon: ResourceMapStewardIconKind.invest,
+          label: 'Invest nodes',
+          semanticHint:
+              'Click map nodes once to add them and again to remove them.',
+          selected: _investNodeMode,
+          badge: _investNodeMode ? 'On' : null,
+          onPressed: _toggleInvestNodeMode,
+        ),
+        if (widget.lodgingDataset != null)
+          ResourceMapStewardMenuAction(
+            key: const ValueKey<String>('resource-map-worker-houses-action'),
+            icon: ResourceMapStewardIconKind.houses,
+            label: 'Houses',
+            semanticHint:
+                'Mark owned houses and plan connected worker lodging.',
+            badge: ownedHouseCount == 0 ? null : '$ownedHouseCount saved',
+            onPressed: _openHousingDirectory,
+          ),
+      ],
+    );
   }
 
   Widget _buildGatherPlanShortlistPage(BuildContext context) {
     final targets = _manualPlannerTargets();
+    final targetsByName = <String, _MappedPlannerNeed>{
+      for (final target in targets) target.resource.name.toLowerCase(): target,
+    };
+    final visibleRows = <Widget>[];
+    final addedBloodFamilies = <String>{};
+    for (final target in targets) {
+      final family = _bloodFamilyForTarget(target);
+      if (family == null) {
+        visibleRows.add(_buildPlannerNeedRow(context, target));
+        continue;
+      }
+      if (addedBloodFamilies.add(family.id)) {
+        visibleRows.add(
+          _buildPlannerBloodFamily(
+            context,
+            family,
+            targetsByName: targetsByName,
+          ),
+        );
+      }
+    }
     return ListView(
       key: const ValueKey<String>('resource-map-gather-hub'),
       primary: false,
@@ -10902,9 +11320,389 @@ class _BdoResourceMapState extends State<BdoResourceMap> {
               ),
           ],
         ),
-        const SizedBox(height: 6),
-        for (final item in targets) _buildPlannerNeedRow(context, item),
+        const SizedBox(height: 4),
+        Text(
+          'Exact gathering locations only · worker and vendor materials are '
+          'shown in their own tools.',
+          style: TextStyle(
+            color: context.mapChrome.muted,
+            fontSize: 11,
+            height: 1.3,
+          ),
+        ),
+        const SizedBox(height: 8),
+        ...visibleRows,
       ],
+    );
+  }
+
+  _BloodFamilyDefinition? _bloodFamilyForTarget(_MappedPlannerNeed target) {
+    final projected = target.need.substituteFamily;
+    final projectedMembers = projected?.members
+        .map((name) => name.trim())
+        .where((name) => name.isNotEmpty)
+        .toList(growable: false);
+    final isProjectedBloodFamily =
+        projected != null &&
+        projectedMembers != null &&
+        projectedMembers.length > 1 &&
+        projectedMembers.every((name) => name.toLowerCase().endsWith(' blood'));
+    if (isProjectedBloodFamily) {
+      final projectedNames = <String>{
+        for (final name in projectedMembers) name.toLowerCase(),
+      };
+      _BloodFamilyDefinition? fallback;
+      var bestOverlap = 0;
+      for (final family in _bloodFamilyDefinitions) {
+        final exactLabel =
+            family.label.toLowerCase() == projected.familyName.toLowerCase();
+        final overlap = family.members
+            .where(
+              (member) => projectedNames.contains(member.name.toLowerCase()),
+            )
+            .length;
+        if (exactLabel || overlap > bestOverlap) {
+          fallback = family;
+          bestOverlap = overlap;
+          if (exactLabel) break;
+        }
+      }
+      final members = <_BloodFamilyMember>[
+        for (final name in projectedMembers)
+          _BloodFamilyMember(
+            name: name,
+            gameItemId:
+                widget.dataset.resources
+                    .where(
+                      (resource) =>
+                          resource.name.toLowerCase() == name.toLowerCase(),
+                    )
+                    .firstOrNull
+                    ?.gameItemId ??
+                fallback?.members
+                    .where(
+                      (member) =>
+                          member.name.toLowerCase() == name.toLowerCase(),
+                    )
+                    .firstOrNull
+                    ?.gameItemId,
+          ),
+      ];
+      if (members.isNotEmpty) {
+        final id = projected.familyName
+            .trim()
+            .toLowerCase()
+            .replaceAll(RegExp(r'[^a-z0-9]+'), '-')
+            .replaceAll(RegExp(r'^-+|-+$'), '');
+        return _BloodFamilyDefinition(
+          id: id,
+          label: projected.familyName.toLowerCase().contains('blood group')
+              ? projected.familyName
+              : fallback?.label ?? 'Blood alternatives',
+          members: members,
+          ratios: projected.ratios,
+        );
+      }
+    }
+    return _bloodFamilyForName(target.resource.name);
+  }
+
+  _BloodFamilyDefinition? _bloodFamilyForName(String name) {
+    final folded = name.trim().toLowerCase();
+    for (final family in _bloodFamilyDefinitions) {
+      if (family.members.any((member) => member.name.toLowerCase() == folded)) {
+        return family;
+      }
+    }
+    return null;
+  }
+
+  BdoResourceDefinition? _resourceForBloodMember(_BloodFamilyMember member) {
+    for (final resource in widget.dataset.resources) {
+      if ((member.gameItemId != null &&
+              resource.gameItemId == member.gameItemId) ||
+          resource.name.toLowerCase() == member.name.toLowerCase()) {
+        return resource;
+      }
+    }
+    return null;
+  }
+
+  BdoResourceDefinition _artworkResourceForBloodMember(
+    _BloodFamilyMember member,
+  ) =>
+      _resourceForBloodMember(member) ??
+      BdoResourceDefinition(
+        id: member.gameItemId == null
+            ? 'planner-family:${member.name.toLowerCase()}'
+            : 'item:${member.gameItemId}',
+        gameItemId: member.gameItemId,
+        name: member.name,
+        category: 'Gathering blood',
+        section: BdoResourceSection.bloodHides,
+        aliases: const <String>[],
+        acquisitionModes: const <BdoAcquisitionMode>{
+          BdoAcquisitionMode.fieldGathering,
+        },
+      );
+
+  Widget _buildPlannerBloodFamily(
+    BuildContext context,
+    _BloodFamilyDefinition family, {
+    required Map<String, _MappedPlannerNeed> targetsByName,
+  }) {
+    final expanded = _expandedGatherBloodFamilyId == family.id;
+    final neededQuantity = family.members.fold<double>(0, (sum, member) {
+      final target = targetsByName[member.name.toLowerCase()];
+      return sum + (target?.need.missingQuantity ?? 0);
+    });
+    final mappedMembers = family.members.where((member) {
+      final resource = _resourceForBloodMember(member);
+      return resource != null &&
+          widget.dataset.hasMappedManualSource(resource.id);
+    }).length;
+    final reduceMotion = MediaQuery.disableAnimationsOf(context);
+    final memberList = expanded
+        ? Padding(
+            padding: const EdgeInsetsDirectional.only(start: 18),
+            child: Column(
+              children: <Widget>[
+                for (var index = 0; index < family.members.length; index++)
+                  _buildBloodFamilyMemberRow(
+                    context,
+                    family,
+                    family.members[index],
+                    targetsByName[family.members[index].name.toLowerCase()],
+                    index: index,
+                  ),
+              ],
+            ),
+          )
+        : const SizedBox.shrink();
+    return Column(
+      key: ValueKey<String>('resource-map-plan-blood-family-${family.id}'),
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: <Widget>[
+        _buildSidebarRowIsland(
+          child: Material(
+            color: Colors.transparent,
+            child: Semantics(
+              button: true,
+              expanded: expanded,
+              label: '${family.label}, ${family.members.length} choices',
+              child: InkWell(
+                key: ValueKey<String>(
+                  'resource-map-plan-blood-family-toggle-${family.id}',
+                ),
+                onTap: () => setState(() {
+                  _expandedGatherBloodFamilyId = expanded ? null : family.id;
+                }),
+                child: Padding(
+                  padding: const EdgeInsetsDirectional.fromSTEB(10, 8, 16, 8),
+                  child: Row(
+                    children: <Widget>[
+                      const ResourceMapStewardIcon(
+                        kind: ResourceMapStewardIconKind.bloodHides,
+                        size: 40,
+                      ),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: <Widget>[
+                            Text(
+                              family.label,
+                              style: TextStyle(
+                                color: context.mapChrome.ink,
+                                fontSize: 13.5,
+                                fontWeight: FontWeight.w800,
+                              ),
+                            ),
+                            const SizedBox(height: 3),
+                            Text(
+                              'Need ${_formatMapQuantity(neededQuantity)} · '
+                              '${family.members.length} interchangeable bloods'
+                              '${mappedMembers == family.members.length ? '' : ' · $mappedMembers mapped'}',
+                              maxLines: 2,
+                              style: TextStyle(
+                                color: context.mapChrome.muted,
+                                fontSize: 11.5,
+                                height: 1.2,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      AnimatedRotation(
+                        turns: expanded ? .25 : 0,
+                        duration: reduceMotion
+                            ? Duration.zero
+                            : ResourceMapDesktopMotion.quick,
+                        curve: ResourceMapDesktopMotion.curve,
+                        child: Icon(
+                          Icons.chevron_right_rounded,
+                          size: 20,
+                          color: expanded
+                              ? context.mapChrome.accent
+                              : context.mapChrome.muted,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+        if (reduceMotion)
+          memberList
+        else
+          AnimatedSize(
+            duration: ResourceMapDesktopMotion.settle,
+            curve: ResourceMapDesktopMotion.curve,
+            alignment: Alignment.topCenter,
+            child: memberList,
+          ),
+      ],
+    );
+  }
+
+  Widget _buildBloodFamilyMemberRow(
+    BuildContext context,
+    _BloodFamilyDefinition family,
+    _BloodFamilyMember member,
+    _MappedPlannerNeed? plannerNeed, {
+    required int index,
+  }) {
+    final resource = _resourceForBloodMember(member);
+    final artworkResource = _artworkResourceForBloodMember(member);
+    final exactCount = resource == null
+        ? 0
+        : widget.dataset.gatheringPointsForResource(resource.id).length;
+    final hasMappedLocations =
+        resource != null && widget.dataset.hasMappedManualSource(resource.id);
+    final ratio = family.ratios[member.name] ?? 1;
+    final ratioLabel = (ratio - 1).abs() <= .0001
+        ? ''
+        : '${_formatMapQuantity(ratio)}× substitute · ';
+    final reduceMotion = MediaQuery.disableAnimationsOf(context);
+    final memberKey =
+        member.gameItemId?.toString() ??
+        member.name
+            .toLowerCase()
+            .replaceAll(RegExp(r'[^a-z0-9]+'), '-')
+            .replaceAll(RegExp(r'^-+|-+$'), '');
+    return TweenAnimationBuilder<double>(
+      key: ValueKey<String>(
+        'resource-map-plan-blood-family-${family.id}-member-$memberKey',
+      ),
+      tween: Tween<double>(begin: 0, end: 1),
+      duration: reduceMotion
+          ? Duration.zero
+          : Duration(milliseconds: 130 + math.min(index, 5) * 24),
+      curve: ResourceMapDesktopMotion.curve,
+      builder: (context, value, child) => Opacity(
+        opacity: value,
+        child: Transform.translate(
+          offset: Offset(10 * (1 - value), 0),
+          child: child,
+        ),
+      ),
+      child: _buildSidebarRowIsland(
+        child: Material(
+          color: Colors.transparent,
+          child: InkWell(
+            onTap: resource == null || !hasMappedLocations
+                ? null
+                : () => _runSuggestedSearch(resource.name),
+            child: Padding(
+              padding: const EdgeInsetsDirectional.fromSTEB(10, 7, 14, 7),
+              child: Row(
+                children: <Widget>[
+                  _buildResourceArtwork(
+                    context,
+                    artworkResource,
+                    size: 34,
+                    fallbackIcon: Icons.water_drop_rounded,
+                  ),
+                  const SizedBox(width: 9),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: <Widget>[
+                        Text(
+                          member.name,
+                          style: TextStyle(
+                            color: hasMappedLocations
+                                ? context.mapChrome.ink
+                                : context.mapChrome.muted,
+                            fontSize: 12.5,
+                            fontWeight: FontWeight.w800,
+                          ),
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          plannerNeed == null
+                              ? hasMappedLocations
+                                    ? '$ratioLabel$exactCount exact ${exactCount == 1 ? 'dot' : 'dots'}'
+                                    : 'Locations not mapped yet'
+                              : 'Need ${_formatMapQuantity(plannerNeed.need.missingQuantity)} · $ratioLabel'
+                                    '$exactCount exact ${exactCount == 1 ? 'dot' : 'dots'}',
+                          maxLines: 2,
+                          style: TextStyle(
+                            color: plannerNeed == null
+                                ? context.mapChrome.muted
+                                : context.mapChrome.accent,
+                            fontSize: 11,
+                            height: 1.2,
+                            fontWeight: plannerNeed == null
+                                ? FontWeight.w500
+                                : FontWeight.w700,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  if (plannerNeed != null)
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 6,
+                        vertical: 3,
+                      ),
+                      decoration: BoxDecoration(
+                        color: context.mapChrome.accent.withValues(alpha: .11),
+                        borderRadius: BorderRadius.circular(999),
+                        border: Border.all(
+                          color: context.mapChrome.accent.withValues(
+                            alpha: .35,
+                          ),
+                        ),
+                      ),
+                      child: Text(
+                        'NEEDED',
+                        style: TextStyle(
+                          color: context.mapChrome.accent,
+                          fontSize: 9.5,
+                          fontWeight: FontWeight.w900,
+                          letterSpacing: .35,
+                        ),
+                      ),
+                    ),
+                  if (hasMappedLocations) ...<Widget>[
+                    const SizedBox(width: 5),
+                    Icon(
+                      Icons.chevron_right_rounded,
+                      size: 19,
+                      color: context.mapChrome.muted,
+                    ),
+                  ],
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
     );
   }
 
@@ -10920,125 +11718,61 @@ class _BdoResourceMapState extends State<BdoResourceMap> {
       key: const ValueKey<String>('resource-map-gather-hub'),
       shrinkWrap: true,
       primary: false,
-      padding: const EdgeInsets.fromLTRB(5, 6, 5, 18),
+      padding: const EdgeInsets.fromLTRB(7, 7, 7, 22),
       children: <Widget>[
-        Text(
-          'Find what you need',
-          style: TextStyle(
-            color: context.mapChrome.ink,
-            fontSize: 18,
-            fontWeight: FontWeight.w800,
-            letterSpacing: -.2,
-          ),
-        ),
-        const SizedBox(height: 4),
-        Text(
-          'Choose a source type, then pick a material to show its locations.',
-          style: TextStyle(
-            color: context.mapChrome.muted,
-            fontSize: 12,
-            height: 1.35,
-          ),
-        ),
-        const SizedBox(height: 12),
-        Row(
+        _buildMapDashboardSectionHeading(context, 'QUICK TOOLS'),
+        const SizedBox(height: 7),
+        _buildMapDashboardGrid(
+          context,
           children: <Widget>[
-            Expanded(
-              child: ResourceMapInlineAction(
-                key: const ValueKey<String>('resource-map-command-checklist'),
-                icon: Icons.checklist_rounded,
-                label: 'Checklist',
-                badge: _gatherChecklist.entries.isEmpty
-                    ? null
-                    : '${_gatherChecklist.remainingCount}',
-                onPressed: _openGatherChecklist,
-              ),
+            _buildMapDashboardCard(
+              key: const ValueKey<String>('resource-map-command-checklist'),
+              icon: Icons.task_alt_rounded,
+              title: 'Checklist',
+              badge: _gatherChecklist.entries.isEmpty
+                  ? null
+                  : '${_gatherChecklist.remainingCount} left',
+              semanticHint: 'Open your gathering checklist.',
+              accentColor: context.mapChrome.positive,
+              onPressed: _openGatherChecklist,
             ),
-            const SizedBox(width: 7),
-            Expanded(
-              child: ResourceMapInlineAction(
-                key: const ValueKey<String>('resource-map-command-favorites'),
-                icon: Icons.star_outline_rounded,
-                label: 'Favorites',
-                badge: _favoriteResourceIds.isEmpty
-                    ? null
-                    : '${_favoriteResourceIds.length}',
-                onPressed: _openFavorites,
-              ),
+            _buildMapDashboardCard(
+              key: const ValueKey<String>('resource-map-command-favorites'),
+              icon: Icons.bookmark_rounded,
+              title: 'Favorites',
+              badge: _favoriteResourceIds.isEmpty
+                  ? null
+                  : '${_favoriteResourceIds.length}',
+              semanticHint: 'Open your favorite gathering materials.',
+              accentColor: context.mapChrome.accent,
+              onPressed: _openFavorites,
             ),
           ],
         ),
         if (visiblePlannerTargets.isNotEmpty) ...<Widget>[
-          const SizedBox(height: 22),
-          Row(
-            children: <Widget>[
-              Expanded(
-                child: Text(
-                  'NEEDED FOR YOUR PLAN',
-                  style: TextStyle(
-                    color: context.mapChrome.muted,
-                    fontSize: 10.5,
-                    fontWeight: FontWeight.w800,
-                    letterSpacing: .9,
-                  ),
-                ),
-              ),
-              if (widget.plannerContextLabel case final label?
-                  when label.trim().isNotEmpty)
-                ConstrainedBox(
-                  constraints: const BoxConstraints(maxWidth: 152),
-                  child: Text(
-                    label,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    textAlign: TextAlign.end,
-                    style: TextStyle(
-                      color: context.mapChrome.accent,
-                      fontSize: 11,
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                ),
-            ],
+          const SizedBox(height: 20),
+          _buildMapDashboardSectionHeading(
+            context,
+            'NEEDED FOR YOUR PLAN',
+            trailing: widget.plannerContextLabel,
           ),
-          const SizedBox(height: 4),
+          const SizedBox(height: 6),
           for (final item in visiblePlannerTargets)
             _buildPlannerNeedRow(context, item),
         ],
-        const SizedBox(height: 16),
-        Row(
-          children: <Widget>[
-            Expanded(
-              child: Text(
-                'Browse sources',
-                style: TextStyle(
-                  color: context.mapChrome.ink,
-                  fontSize: 16,
-                  fontWeight: FontWeight.w800,
-                ),
-              ),
-            ),
-            Text(
-              '${widget.dataset.fieldSources.length} sources',
-              style: TextStyle(
-                color: context.mapChrome.muted,
-                fontSize: 11,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-          ],
+        const SizedBox(height: 20),
+        _buildMapDashboardSectionHeading(
+          context,
+          'BROWSE BY TYPE',
+          trailing: '${widget.dataset.fieldSources.length} sources',
         ),
-        const SizedBox(height: 7),
-        _buildResourceSectionGrid(context),
+        const SizedBox(height: 8),
+        _buildResourceSectionGrid(context, includeFavorites: false),
       ],
     );
   }
 
   Widget _buildWorkerTaskHub(BuildContext context) {
-    final currentNodeCount = _nodeNetworkPreferences.currentNodeIds.length;
-    final currentCp = _contributionPointsForNodeIds(
-      _nodeNetworkPreferences.currentNodeIds,
-    );
     final ownedHouseCount = _nodeNetworkPreferences.currentOwnedHouseIds.length;
     final hasGroupedRecipeNeeds = widget.plannerNeedGroups.any(
       (group) => group.materials.any(
@@ -11059,27 +11793,8 @@ class _BdoResourceMapState extends State<BdoResourceMap> {
       key: const ValueKey<String>('resource-map-worker-hub'),
       shrinkWrap: true,
       primary: false,
-      padding: const EdgeInsets.fromLTRB(5, 6, 5, 18),
+      padding: const EdgeInsets.fromLTRB(6, 5, 6, 18),
       children: <Widget>[
-        Text(
-          'Plan your workers',
-          style: TextStyle(
-            color: context.mapChrome.ink,
-            fontSize: 18,
-            fontWeight: FontWeight.w800,
-            letterSpacing: -.2,
-          ),
-        ),
-        const SizedBox(height: 4),
-        Text(
-          'Choose a goal. Every plan shows the nodes and connections to use.',
-          style: TextStyle(
-            color: context.mapChrome.muted,
-            fontSize: 12,
-            height: 1.35,
-          ),
-        ),
-        const SizedBox(height: 11),
         // The desktop worker hub remains mounted just off-screen while the
         // hybrid workbench is open so its slide transition stays smooth. The
         // active workbench owns planner feedback in that state; rendering it
@@ -11092,42 +11807,123 @@ class _BdoResourceMapState extends State<BdoResourceMap> {
           ),
           const SizedBox(height: 8),
         ],
-        if (hasRecipeNeeds)
-          _buildWorkerHubNavigationRow(
-            key: const ValueKey<String>(
-              'resource-map-recommend-current-recipe',
+        _buildMapDashboardSectionHeading(context, 'WORKER TOOLS'),
+        const SizedBox(height: 8),
+        _buildMapDashboardGrid(
+          context,
+          children: <Widget>[
+            if (hasRecipeNeeds)
+              _buildMapDashboardCard(
+                key: const ValueKey<String>(
+                  'resource-map-recommend-current-recipe',
+                ),
+                icon: Icons.alt_route_rounded,
+                title: 'Needed for your plan',
+                semanticHint: hasGroupedRecipeNeeds
+                    ? 'Choose shortages and combine them into one efficient route.'
+                    : 'Build a worker route for the ingredients you still need.',
+                accentColor: context.mapChrome.accent,
+                onPressed: _openWorkerRecipePlanner,
+              ),
+            _buildMapDashboardCard(
+              key: const ValueKey<String>('resource-map-node-mode-materials'),
+              icon: Icons.tune_rounded,
+              title: 'Specific items',
+              semanticHint: 'Pick each material and how many nodes you want.',
+              accentColor: context.mapChrome.primary,
+              onPressed: _openWorkerMaterialPlanner,
             ),
-            icon: Icons.receipt_long_outlined,
-            title: hasGroupedRecipeNeeds
-                ? 'Ingredients for Cooking & Alchemy'
-                : 'Ingredients for my recipe',
-            semanticHint: hasGroupedRecipeNeeds
-                ? 'Choose shortages and combine them into one efficient route.'
-                : 'Build a worker route for the ingredients you still need.',
-            onPressed: _openWorkerRecipePlanner,
-          ),
-        _buildWorkerHubNavigationRow(
-          key: const ValueKey<String>('resource-map-node-mode-materials'),
-          icon: Icons.tune_rounded,
-          title: 'Planned network',
-          semanticHint: 'Pick each material and how many nodes you want.',
-          onPressed: _openWorkerMaterialPlanner,
+            _buildMapDashboardCard(
+              key: const ValueKey<String>(
+                'resource-map-open-market-value-recommendations',
+              ),
+              icon: Icons.paid_rounded,
+              title: 'Best income',
+              semanticHint:
+                  'Build a network from your CP, online time, prices and sales.',
+              accentColor: context.mapChrome.positive,
+              onPressed: _openWorkerIncomePlanner,
+            ),
+            _buildMapDashboardCard(
+              key: const ValueKey<String>('resource-map-worker-browse-action'),
+              icon: Icons.hub_rounded,
+              title: 'Find nodes',
+              semanticHint:
+                  'Browse nodes by the material or work they provide.',
+              accentColor: const Color(0xFF8FC9AE),
+              onPressed: _openWorkerOverview,
+            ),
+            _buildMapDashboardCard(
+              key: const ValueKey<String>('resource-map-invest-node-mode'),
+              icon: _investNodeMode
+                  ? Icons.where_to_vote_rounded
+                  : Icons.add_location_alt_rounded,
+              title: 'Invest nodes',
+              badge: _investNodeMode ? 'On' : null,
+              selected: _investNodeMode,
+              semanticHint:
+                  'Click map nodes once to add them and again to remove them.',
+              accentColor: context.mapChrome.accent,
+              onPressed: _toggleInvestNodeMode,
+            ),
+            if (widget.lodgingDataset != null)
+              _buildMapDashboardCard(
+                key: const ValueKey<String>(
+                  'resource-map-worker-houses-action',
+                ),
+                icon: Icons.apartment_rounded,
+                title: 'Houses',
+                badge: ownedHouseCount == 0 ? null : '$ownedHouseCount saved',
+                semanticHint:
+                    'Mark owned houses and plan connected worker lodging.',
+                accentColor: context.mapChrome.primary,
+                onPressed: _openHousingDirectory,
+              ),
+            if (_royalWorkshopEnabled)
+              _buildMapDashboardCard(
+                key: const ValueKey<String>(
+                  'resource-map-worker-royal-workshop-action',
+                ),
+                icon: Icons.castle_rounded,
+                title: 'Royal Workshop',
+                badge: _nodeNetworkPreferences.royalWorkshopPlan.accessInvested
+                    ? '${_nodeNetworkPreferences.royalWorkshopPlan.runningTaskCount} running'
+                    : '5 CP',
+                semanticHint:
+                    'Manage the eight palace areas, current rolls and Yukjo workers.',
+                accentColor: const Color(0xFFD7B8E8),
+                onPressed: _openRoyalWorkshop,
+              ),
+            if (widget.showSetupScreenshotImport &&
+                widget.setupScreenshotPicker != null)
+              _buildMapDashboardCard(
+                key: const ValueKey<String>(
+                  'resource-map-worker-import-screenshot-action',
+                ),
+                icon: Icons.center_focus_strong_rounded,
+                title: 'Scan setup',
+                semanticHint:
+                    'Add invested worker nodes or owned town houses from reviewed screenshots.',
+                accentColor: context.mapChrome.muted,
+                onPressed: () => unawaited(_openSetupScreenshotImport()),
+              ),
+          ],
         ),
-        _buildWorkerHubNavigationRow(
-          key: const ValueKey<String>(
-            'resource-map-open-market-value-recommendations',
-          ),
-          icon: Icons.trending_up_rounded,
-          title: 'Best worker income',
-          semanticHint:
-              'Build a network from your CP, online time, prices and sales.',
-          onPressed: _openWorkerIncomePlanner,
-        ),
-        const SizedBox(height: 18),
-        Padding(
-          padding: EdgeInsets.fromLTRB(7, 0, 7, 5),
+      ],
+    );
+  }
+
+  Widget _buildMapDashboardSectionHeading(
+    BuildContext context,
+    String label, {
+    String? trailing,
+  }) {
+    final cleanTrailing = trailing?.trim();
+    return Row(
+      children: <Widget>[
+        Expanded(
           child: Text(
-            'EXPLORE & MANAGE',
+            label,
             style: TextStyle(
               color: context.mapChrome.muted,
               fontSize: 10.5,
@@ -11136,177 +11932,91 @@ class _BdoResourceMapState extends State<BdoResourceMap> {
             ),
           ),
         ),
-        _buildWorkerHubNavigationRow(
-          key: const ValueKey<String>('resource-map-worker-browse-action'),
-          icon: Icons.travel_explore_rounded,
-          title: 'Find worker nodes',
-          semanticHint: 'Browse nodes by the material or work they provide.',
-          onPressed: _openWorkerOverview,
-        ),
-        if (_royalWorkshopEnabled)
-          _buildWorkerHubNavigationRow(
-            key: const ValueKey<String>(
-              'resource-map-worker-royal-workshop-action',
+        if (cleanTrailing != null && cleanTrailing.isNotEmpty)
+          Flexible(
+            child: Text(
+              cleanTrailing,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              textAlign: TextAlign.end,
+              style: TextStyle(
+                color: context.mapChrome.accent,
+                fontSize: 11,
+                fontWeight: FontWeight.w700,
+              ),
             ),
-            icon: Icons.account_balance_rounded,
-            title: 'Seoul Royal Workshop',
-            trailing: _nodeNetworkPreferences.royalWorkshopPlan.accessInvested
-                ? '${_nodeNetworkPreferences.royalWorkshopPlan.runningTaskCount} running'
-                : '5 CP',
-            semanticHint:
-                'Manage the eight palace areas, current rolls and Yukjo workers.',
-            onPressed: _openRoyalWorkshop,
-          ),
-        const SizedBox(height: 22),
-        Padding(
-          padding: EdgeInsets.fromLTRB(7, 0, 7, 5),
-          child: Text(
-            'YOUR GAME SETUP',
-            style: TextStyle(
-              color: context.mapChrome.muted,
-              fontSize: 10.5,
-              fontWeight: FontWeight.w800,
-              letterSpacing: .9,
-            ),
-          ),
-        ),
-        _buildWorkerHubNavigationRow(
-          key: const ValueKey<String>('resource-map-worker-current-action'),
-          icon: Icons.bookmark_added_outlined,
-          title: 'Copy my in-game setup',
-          trailing: currentNodeCount == 0
-              ? 'Not set'
-              : '$currentNodeCount / $currentCp CP',
-          semanticHint:
-              'Add staffed production destinations and infer their complete paths.',
-          onPressed: _openCurrentNodeEditor,
-        ),
-        if (widget.showSetupScreenshotImport &&
-            widget.setupScreenshotPicker != null)
-          _buildWorkerHubNavigationRow(
-            key: const ValueKey<String>(
-              'resource-map-worker-import-screenshot-action',
-            ),
-            icon: Icons.document_scanner_outlined,
-            title: 'Scan screenshots',
-            trailing: 'Nodes + houses',
-            semanticHint:
-                'Add invested worker nodes or owned town houses from reviewed screenshots.',
-            onPressed: () => unawaited(_openSetupScreenshotImport()),
-          ),
-        if (widget.lodgingDataset != null)
-          _buildWorkerHubNavigationRow(
-            key: const ValueKey<String>('resource-map-worker-houses-action'),
-            icon: Icons.home_work_rounded,
-            title: 'Houses & lodging',
-            trailing: ownedHouseCount == 0
-                ? 'Not set'
-                : '$ownedHouseCount saved',
-            semanticHint:
-                'Mark owned houses and plan connected worker lodging.',
-            onPressed: _openHousingDirectory,
           ),
       ],
     );
   }
 
-  Widget _buildWorkerHubNavigationRow({
+  Widget _buildMapDashboardGrid(
+    BuildContext context, {
+    required List<Widget> children,
+  }) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final scaledTitle = MediaQuery.textScalerOf(context).scale(13.5);
+        final oneColumn = constraints.maxWidth < 248 || scaledTitle > 19;
+        if (oneColumn) {
+          return Column(
+            children: <Widget>[
+              for (var index = 0; index < children.length; index += 1) ...[
+                children[index],
+                if (index != children.length - 1) const SizedBox(height: 9),
+              ],
+            ],
+          );
+        }
+        return Column(
+          children: <Widget>[
+            for (var index = 0; index < children.length; index += 2) ...[
+              SizedBox(
+                height: 86,
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: <Widget>[
+                    Expanded(child: children[index]),
+                    const SizedBox(width: 9),
+                    Expanded(
+                      child: index + 1 < children.length
+                          ? children[index + 1]
+                          : const SizedBox.shrink(),
+                    ),
+                  ],
+                ),
+              ),
+              if (index + 2 < children.length) const SizedBox(height: 9),
+            ],
+          ],
+        );
+      },
+    );
+  }
+
+  Widget _buildMapDashboardCard({
     required Key key,
     required IconData icon,
     required String title,
     required String semanticHint,
     required VoidCallback onPressed,
-    String? trailing,
-  }) {
-    final textScaler = MediaQuery.textScalerOf(context);
-    final showTrailing = trailing != null && textScaler.scale(12) <= 17;
-    final semanticLabel = trailing == null
-        ? '$title. $semanticHint'
-        : '$title, $trailing. $semanticHint';
-    return Tooltip(
-      message: semanticHint,
-      waitDuration: const Duration(milliseconds: 450),
-      child: Semantics(
-        button: true,
-        label: semanticLabel,
-        child: ExcludeSemantics(
-          child: Material(
-            key: key,
-            color: Colors.transparent,
-            borderRadius: BorderRadius.circular(9),
-            clipBehavior: Clip.antiAlias,
-            child: InkWell(
-              onTap: onPressed,
-              overlayColor: const WidgetStatePropertyAll(Color(0x2956A89A)),
-              child: Container(
-                constraints: const BoxConstraints(minHeight: 50),
-                padding: const EdgeInsets.fromLTRB(7, 8, 5, 8),
-                decoration: BoxDecoration(
-                  border: Border(
-                    bottom: BorderSide(color: context.mapChrome.divider),
-                  ),
-                ),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: <Widget>[
-                    SizedBox.square(
-                      dimension: 30,
-                      child: DecoratedBox(
-                        decoration: BoxDecoration(
-                          color: context.mapChrome.paperRaised,
-                          shape: BoxShape.circle,
-                        ),
-                        child: Icon(
-                          icon,
-                          size: 17,
-                          color: context.mapChrome.primary,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 10),
-                    Expanded(
-                      child: Text(
-                        title,
-                        style: TextStyle(
-                          color: context.mapChrome.ink,
-                          fontSize: 13.5,
-                          height: 1.2,
-                          fontWeight: FontWeight.w800,
-                          letterSpacing: -.05,
-                        ),
-                      ),
-                    ),
-                    if (showTrailing) ...<Widget>[
-                      const SizedBox(width: 8),
-                      Flexible(
-                        child: Text(
-                          trailing,
-                          maxLines: 1,
-                          overflow: TextOverflow.fade,
-                          softWrap: false,
-                          style: TextStyle(
-                            color: context.mapChrome.accent,
-                            fontSize: 11,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ),
-                    ],
-                    const SizedBox(width: 5),
-                    Icon(
-                      Icons.chevron_right_rounded,
-                      size: 18,
-                      color: context.mapChrome.primary,
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
+    String? subtitle,
+    String? badge,
+    bool selected = false,
+    bool featured = false,
+    Color? accentColor,
+  }) => _MapDashboardTile(
+    key: key,
+    icon: icon,
+    title: title,
+    subtitle: subtitle,
+    badge: badge,
+    semanticHint: semanticHint,
+    selected: selected,
+    featured: featured,
+    accentColor: accentColor,
+    onPressed: onPressed,
+  );
 
   Widget _buildWorkerHubAction({
     required Key key,
@@ -11315,11 +12025,13 @@ class _BdoResourceMapState extends State<BdoResourceMap> {
     required String subtitle,
     required VoidCallback onPressed,
   }) {
-    return _buildWorkerHubNavigationRow(
+    return _buildMapDashboardCard(
       key: key,
       icon: icon,
       title: title,
+      subtitle: subtitle,
       semanticHint: subtitle,
+      featured: true,
       onPressed: onPressed,
     );
   }
@@ -11335,16 +12047,17 @@ class _BdoResourceMapState extends State<BdoResourceMap> {
     final selectedResource = _selectedResourceId == null
         ? null
         : widget.dataset.resourcesById[_selectedResourceId!];
+    final selectedHousingTown = _selectedHousingTown;
     final sheetTitle = plannedNetworkTargets
-        ? 'Planned network'
+        ? 'Plan specific items'
+        : _housingDirectoryOpen
+        ? selectedHousingTown?.name ?? 'Houses'
         : _hasDetailSelection
         ? selectedFieldSource?.name ?? selectedResource?.name ?? 'Map details'
         : _gatherChecklistOpen
         ? 'Gather checklist'
         : _gatherPlanShortlistOpen
         ? 'Needed for your plan'
-        : _housingDirectoryOpen
-        ? 'Houses & lodging'
         : _royalWorkshopVisible
         ? 'Royal Workshop'
         : _browseAllWorkerNodes
@@ -11413,10 +12126,12 @@ class _BdoResourceMapState extends State<BdoResourceMap> {
                 title: sheetTitle,
                 onBack: canGoBack
                     ? (plannedNetworkTargets
-                          ? _showNodePlannerHome
+                          ? _leaveNodePlannerGoal
+                          : _housingDirectoryOpen
+                          ? _navigateBackFromHousing
                           : _navigateBack)
                     : null,
-                onClose: _openMapHome,
+                onClose: _housingDirectoryOpen ? null : _openMapHome,
                 actions: <Widget>[
                   IconButton(
                     key: const ValueKey<String>(
@@ -11430,7 +12145,7 @@ class _BdoResourceMapState extends State<BdoResourceMap> {
                       size: 18,
                     ),
                   ),
-                  if (_hasDetailSelection)
+                  if (_hasDetailSelection && !_housingDirectoryOpen)
                     IconButton(
                       key: const ValueKey<String>(
                         'resource-map-sidebar-detail-size',
@@ -11575,9 +12290,6 @@ class _BdoResourceMapState extends State<BdoResourceMap> {
     final savedHouseCount = _nodeNetworkPreferences.currentOwnedHouseIds
         .where(dataset.housesById.containsKey)
         .length;
-    final townsWithSavedHouses = towns
-        .where((town) => _ownedHouseIdsForTown(town).isNotEmpty)
-        .length;
     return _buildSidebarPage(
       key: const ValueKey<String>('resource-map-sidebar-housing-directory'),
       child: CustomScrollView(
@@ -11587,60 +12299,19 @@ class _BdoResourceMapState extends State<BdoResourceMap> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: <Widget>[
-                Row(
-                  children: <Widget>[
-                    Icon(
-                      Icons.holiday_village_rounded,
-                      size: 22,
-                      color: context.mapChrome.primary,
-                    ),
-                    SizedBox(width: 9),
-                    Expanded(
-                      child: Text(
-                        'Your house network',
-                        style: TextStyle(
-                          color: context.mapChrome.ink,
-                          fontSize: 18,
-                          fontWeight: FontWeight.w800,
-                          letterSpacing: -.25,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 6),
                 Text(
-                  'Choose a town to mark the houses you already own or plan '
-                  'the cheapest connected path to more lodging.',
+                  '${dataset.housesById.length} houses · '
+                  '$savedHouseCount saved',
                   style: TextStyle(
-                    color: context.mapChrome.muted,
-                    fontSize: 12,
-                    height: 1.38,
+                    color: context.mapChrome.text,
+                    fontSize: 12.5,
+                    height: 1.35,
+                    fontWeight: FontWeight.w700,
                   ),
-                ),
-                const SizedBox(height: 13),
-                Wrap(
-                  spacing: 8,
-                  runSpacing: 8,
-                  children: <Widget>[
-                    _HousingSummaryChip(
-                      icon: Icons.bookmark_added_rounded,
-                      label: '$savedHouseCount saved',
-                      emphasized: savedHouseCount > 0,
-                    ),
-                    _HousingSummaryChip(
-                      icon: Icons.location_city_rounded,
-                      label: '$townsWithSavedHouses towns',
-                    ),
-                    _HousingSummaryChip(
-                      icon: Icons.home_work_rounded,
-                      label: '${dataset.housesById.length} mapped',
-                    ),
-                  ],
                 ),
                 if (widget.showSetupScreenshotImport &&
                     widget.setupScreenshotPicker != null) ...<Widget>[
-                  const SizedBox(height: 11),
+                  const SizedBox(height: 8),
                   ResourceMapInlineAction(
                     key: const ValueKey<String>(
                       'resource-map-housing-import-screenshot',
@@ -11654,17 +12325,9 @@ class _BdoResourceMapState extends State<BdoResourceMap> {
                     ),
                   ),
                 ],
-                if (_nodeNetworkSaveMessage case final message?) ...<Widget>[
-                  const SizedBox(height: 9),
-                  _NodePlannerInlineStatus(
-                    icon: Icons.check_circle_outline_rounded,
-                    message: message,
-                    color: context.mapChrome.positive,
-                  ),
-                ],
-                const SizedBox(height: 14),
+                const SizedBox(height: 10),
                 Divider(height: 1, color: context.mapChrome.divider),
-                const SizedBox(height: 7),
+                const SizedBox(height: 5),
               ],
             ),
           ),
@@ -11673,8 +12336,6 @@ class _BdoResourceMapState extends State<BdoResourceMap> {
             itemBuilder: (context, index) {
               final town = towns[index];
               final ownedCount = _ownedHouseIdsForTown(town).length;
-              final currentCapacity = _currentWorkerCapacityForTown(town);
-              final maximumCapacity = _maximumWorkerCapacityForTown(town);
               final node = widget.dataset.workerNodesById[town.townNodeId];
               return _HousingTownDirectoryRow(
                 key: ValueKey<String>(
@@ -11682,8 +12343,6 @@ class _BdoResourceMapState extends State<BdoResourceMap> {
                 ),
                 town: town,
                 ownedCount: ownedCount,
-                currentWorkerCapacity: currentCapacity,
-                maximumWorkerCapacity: maximumCapacity,
                 onTap: node == null
                     ? null
                     : () => _selectNode(
@@ -12271,9 +12930,13 @@ class _BdoResourceMapState extends State<BdoResourceMap> {
     });
   }
 
-  Widget _buildResourceSectionGrid(BuildContext context) {
+  Widget _buildResourceSectionGrid(
+    BuildContext context, {
+    bool includeFavorites = true,
+  }) {
     final entries = <({BdoResourceSection? section, int count})>[
-      (section: null, count: _browserEntryCountForSection(null)),
+      if (includeFavorites)
+        (section: null, count: _browserEntryCountForSection(null)),
       for (final section in BdoResourceSection.values)
         (section: section, count: _browserEntryCountForSection(section)),
     ].where((entry) => entry.section == null || entry.count > 0);
@@ -12286,7 +12949,7 @@ class _BdoResourceMapState extends State<BdoResourceMap> {
             : math.max(120.0, (constraints.maxWidth - 9) / 2);
         return Wrap(
           spacing: 9,
-          runSpacing: 3,
+          runSpacing: 9,
           children: <Widget>[
             for (final entry in entries)
               SizedBox(
@@ -12308,60 +12971,45 @@ class _BdoResourceMapState extends State<BdoResourceMap> {
   }) {
     final favorites = section == null;
     final label = favorites ? 'Favorites' : _resourceSectionLabel(section);
-    return Semantics(
-      button: true,
-      label: '$label, $count mapped materials',
-      child: Material(
-        key: ValueKey<String>(
-          favorites
-              ? 'resource-map-section-favorites'
-              : 'resource-map-section-${section.name}',
-        ),
-        color: Colors.transparent,
-        borderRadius: BorderRadius.circular(8),
-        clipBehavior: Clip.antiAlias,
-        child: InkWell(
-          onTap: favorites
-              ? _openFavorites
-              : () => _openResourceSection(section),
-          child: DecoratedBox(
-            decoration: BoxDecoration(
-              border: Border(
-                bottom: BorderSide(color: context.mapChrome.divider, width: 1),
-              ),
-            ),
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 11),
-              child: Row(
-                children: <Widget>[
-                  Expanded(
-                    child: Text(
-                      label,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
-                        color: context.mapChrome.ink,
-                        fontSize: 12.5,
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                  ),
-                  Text(
-                    '$count',
-                    style: TextStyle(
-                      color: context.mapChrome.primary,
-                      fontSize: 11.5,
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ),
+    return _buildMapDashboardCard(
+      key: ValueKey<String>(
+        favorites
+            ? 'resource-map-section-favorites'
+            : 'resource-map-section-${section.name}',
       ),
+      icon: _resourceSectionIcon(section),
+      title: label,
+      badge: '$count',
+      semanticHint: 'Open $count mapped $label entries.',
+      accentColor: _resourceSectionColor(section),
+      onPressed: favorites
+          ? _openFavorites
+          : () => _openResourceSection(section),
     );
   }
+
+  IconData _resourceSectionIcon(BdoResourceSection? section) =>
+      switch (section) {
+        null => Icons.bookmark_rounded,
+        BdoResourceSection.plantsWood => Icons.eco_rounded,
+        BdoResourceSection.oresMinerals => Icons.diamond_rounded,
+        BdoResourceSection.meat => Icons.kebab_dining_rounded,
+        BdoResourceSection.bloodHides => Icons.water_drop_rounded,
+        BdoResourceSection.mushrooms => Icons.forest_rounded,
+        BdoResourceSection.seafoodMarine => Icons.waves_rounded,
+        BdoResourceSection.other => Icons.widgets_rounded,
+      };
+
+  Color _resourceSectionColor(BdoResourceSection? section) => switch (section) {
+    null => context.mapChrome.accent,
+    BdoResourceSection.plantsWood => context.mapChrome.positive,
+    BdoResourceSection.oresMinerals => const Color(0xFFAFC1D7),
+    BdoResourceSection.meat => context.mapChrome.primary,
+    BdoResourceSection.bloodHides => const Color(0xFFE98D98),
+    BdoResourceSection.mushrooms => const Color(0xFFC4A2D6),
+    BdoResourceSection.seafoodMarine => const Color(0xFF83C8C7),
+    BdoResourceSection.other => context.mapChrome.muted,
+  };
 
   Widget _buildResourceBrowserPage(BuildContext context) {
     final fieldSources = _fieldSourcesForCurrentBrowser();
@@ -12565,22 +13213,20 @@ class _BdoResourceMapState extends State<BdoResourceMap> {
                         ),
                       ],
                       const SizedBox(height: 3),
-                      Row(
+                      Wrap(
+                        spacing: 8,
+                        runSpacing: 2,
+                        crossAxisAlignment: WrapCrossAlignment.center,
                         children: <Widget>[
-                          Flexible(
-                            child: Text(
-                              source.category,
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              style: TextStyle(
-                                color: context.mapChrome.primary,
-                                fontSize: 10.5,
-                                fontWeight: FontWeight.w700,
-                              ),
+                          Text(
+                            source.category,
+                            style: TextStyle(
+                              color: context.mapChrome.primary,
+                              fontSize: 10.5,
+                              fontWeight: FontWeight.w700,
                             ),
                           ),
                           if (pointCount > 0) ...<Widget>[
-                            const SizedBox(width: 8),
                             Icon(
                               Icons.location_on_outlined,
                               size: 12,
@@ -12595,7 +13241,6 @@ class _BdoResourceMapState extends State<BdoResourceMap> {
                             ),
                           ],
                           if (pointCount == 0 && focusCount > 0) ...<Widget>[
-                            const SizedBox(width: 8),
                             Icon(
                               Icons.center_focus_strong_outlined,
                               size: 12,
@@ -12610,7 +13255,6 @@ class _BdoResourceMapState extends State<BdoResourceMap> {
                             ),
                           ],
                           if (workerCount > 0) ...<Widget>[
-                            const SizedBox(width: 8),
                             Icon(
                               Icons.account_tree_outlined,
                               size: 12,
@@ -12773,12 +13417,7 @@ class _BdoResourceMapState extends State<BdoResourceMap> {
   Widget _buildSidebarRowIsland({required Widget child}) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 5),
-      child: ResourceMapSurfaceIsland(
-        subtle: true,
-        padding: EdgeInsets.zero,
-        radius: 10,
-        child: child,
-      ),
+      child: ResourceMapStewardSurface(child: child),
     );
   }
 
@@ -12916,19 +13555,12 @@ class _BdoResourceMapState extends State<BdoResourceMap> {
   }
 
   Widget _buildPlannerNeedRow(BuildContext context, _MappedPlannerNeed item) {
-    return Material(
-      key: ValueKey<String>('resource-map-plan-need-${item.resource.id}'),
-      color: Colors.transparent,
-      borderRadius: BorderRadius.circular(6),
-      clipBehavior: Clip.antiAlias,
-      child: InkWell(
-        onTap: () => _runSuggestedSearch(item.resource.name),
-        child: DecoratedBox(
-          decoration: BoxDecoration(
-            border: Border(
-              bottom: BorderSide(color: context.mapChrome.divider, width: 1),
-            ),
-          ),
+    return _buildSidebarRowIsland(
+      child: Material(
+        key: ValueKey<String>('resource-map-plan-need-${item.resource.id}'),
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: () => _runSuggestedSearch(item.resource.name),
           child: Padding(
             padding: const EdgeInsets.fromLTRB(4, 7, 3, 7),
             child: Row(
@@ -13112,10 +13744,6 @@ class _BdoResourceMapState extends State<BdoResourceMap> {
   }
 
   Widget _buildNodePlannerHomePage(BuildContext context) {
-    final currentNodeCount = _nodeNetworkPreferences.currentNodeIds.length;
-    final currentCp = _contributionPointsForNodeIds(
-      _nodeNetworkPreferences.currentNodeIds,
-    );
     final hasGroupedRecipeNeeds = widget.plannerNeedGroups.any(
       (group) => group.materials.any(
         (material) =>
@@ -13162,9 +13790,7 @@ class _BdoResourceMapState extends State<BdoResourceMap> {
               'resource-map-recommend-current-recipe',
             ),
             icon: Icons.receipt_long_outlined,
-            title: hasGroupedRecipeNeeds
-                ? 'Ingredients for Cooking & Alchemy'
-                : 'Ingredients for my recipe',
+            title: 'Needed for your plan',
             subtitle: hasGroupedRecipeNeeds
                 ? 'Choose shortages and combine them into one efficient route.'
                 : 'Find worker nodes for the ingredients you still need.',
@@ -13175,7 +13801,7 @@ class _BdoResourceMapState extends State<BdoResourceMap> {
         _buildWorkerHubAction(
           key: const ValueKey<String>('resource-map-node-mode-materials'),
           icon: Icons.tune_rounded,
-          title: 'Planned network',
+          title: 'Plan specific items',
           subtitle: 'Choose each material and how many nodes you want.',
           onPressed: _openNodeTargets,
         ),
@@ -13192,45 +13818,39 @@ class _BdoResourceMapState extends State<BdoResourceMap> {
               : 'Use your CP, online time, prices and actual sales.',
           onPressed: _openMarketValueRecommendations,
         ),
-        const SizedBox(height: 22),
-        Text(
-          'YOUR IN-GAME SETUP',
-          style: TextStyle(
-            color: context.mapChrome.muted,
-            fontSize: 10.5,
-            fontWeight: FontWeight.w800,
-            letterSpacing: .9,
-          ),
-        ),
-        const SizedBox(height: 5),
-        ResourceMapInlineAction(
-          key: const ValueKey<String>('resource-map-edit-current-node-network'),
-          icon: Icons.bookmark_added_outlined,
-          label: currentNodeCount == 0
-              ? 'Copy my in-game setup'
-              : 'Invested nodes: $currentNodeCount · $currentCp CP',
-          onPressed: _beginCurrentNodeEditing,
-        ),
-        if (widget.showSetupScreenshotImport &&
-            widget.setupScreenshotPicker != null)
-          ResourceMapInlineAction(
-            key: const ValueKey<String>('resource-map-node-import-screenshot'),
-            icon: Icons.document_scanner_outlined,
-            label: 'Scan screenshots',
-            onPressed: () => unawaited(
-              _openSetupScreenshotImport(
-                initialMode: BdoSetupScreenshotImportMode.workerNodes,
-              ),
+        const SizedBox(height: 14),
+        _buildMapDashboardGrid(
+          context,
+          children: <Widget>[
+            _buildMapDashboardCard(
+              key: const ValueKey<String>('resource-map-node-starting-towns'),
+              icon: Icons.location_city_outlined,
+              title: 'Worker towns',
+              subtitle: rootCount == null
+                  ? 'Using all towns'
+                  : '$rootCount chosen',
+              semanticHint:
+                  'Choose which towns your worker routes can start from.',
+              onPressed: _openNodeRootPicker,
             ),
-          ),
-        const SizedBox(height: 2),
-        ResourceMapInlineAction(
-          key: const ValueKey<String>('resource-map-node-starting-towns'),
-          icon: Icons.location_city_outlined,
-          label: rootCount == null
-              ? 'Worker towns: use all'
-              : 'Worker towns: $rootCount chosen',
-          onPressed: _openNodeRootPicker,
+            if (widget.showSetupScreenshotImport &&
+                widget.setupScreenshotPicker != null)
+              _buildMapDashboardCard(
+                key: const ValueKey<String>(
+                  'resource-map-node-import-screenshot',
+                ),
+                icon: Icons.document_scanner_outlined,
+                title: 'Scan setup',
+                subtitle: 'Nodes and houses',
+                semanticHint:
+                    'Import invested nodes from reviewed screenshots.',
+                onPressed: () => unawaited(
+                  _openSetupScreenshotImport(
+                    initialMode: BdoSetupScreenshotImportMode.workerNodes,
+                  ),
+                ),
+              ),
+          ],
         ),
         if (_nodeNetworkSaveMessage case final message?) ...<Widget>[
           const SizedBox(height: 8),
@@ -15058,7 +15678,7 @@ class _BdoResourceMapState extends State<BdoResourceMap> {
               overflow: TextOverflow.ellipsis,
               style: TextStyle(
                 color: Color(0xFFD9BE68),
-                fontSize: 10,
+                fontSize: 11.5,
                 height: 1.3,
                 fontWeight: FontWeight.w700,
               ),
@@ -16524,6 +17144,13 @@ class _BdoResourceMapState extends State<BdoResourceMap> {
           label: const Text('Add to planned network'),
           style: style,
         ),
+        FilledButton.tonalIcon(
+          key: const ValueKey<String>('resource-map-compact-invest-nodes'),
+          onPressed: _toggleInvestNodeMode,
+          icon: const Icon(Icons.bookmark_add_outlined, size: 17),
+          label: const Text('Invest nodes'),
+          style: style,
+        ),
       ],
     );
   }
@@ -17347,12 +17974,19 @@ class _BdoResourceMapState extends State<BdoResourceMap> {
           ],
         ),
         const SizedBox(height: 8),
-        for (final product in source.products)
+        for (
+          var productIndex = 0;
+          productIndex < source.products.length;
+          productIndex++
+        )
           _buildFieldProductCard(
             context,
             source,
-            product,
-            selected: product.resourceId == selectedResource?.id,
+            source.products[productIndex],
+            occurrence: productIndex,
+            selected:
+                source.products[productIndex].resourceId ==
+                selectedResource?.id,
           ),
       ],
     );
@@ -17362,6 +17996,7 @@ class _BdoResourceMapState extends State<BdoResourceMap> {
     BuildContext context,
     BdoFieldSource source,
     BdoFieldProduct product, {
+    required int occurrence,
     required bool selected,
   }) {
     final resource = widget.dataset.resourcesById[product.resourceId];
@@ -17376,52 +18011,80 @@ class _BdoResourceMapState extends State<BdoResourceMap> {
         source.products.firstOrNull?.resourceId == product.resourceId
         ? _fieldSourceGameplayNote(source.note)
         : '';
-    return AnimatedContainer(
-      duration: MediaQuery.disableAnimationsOf(context)
-          ? Duration.zero
-          : const Duration(milliseconds: 180),
-      curve: Curves.easeOutCubic,
-      margin: const EdgeInsets.only(top: 7),
-      padding: const EdgeInsets.fromLTRB(10, 9, 5, 9),
-      decoration: BoxDecoration(
-        color: selected
-            ? context.mapChrome.primary.withValues(alpha: .09)
-            : context.mapChrome.paperRaised,
-        borderRadius: BorderRadius.circular(10),
-        border: Border.all(
-          color: selected
-              ? context.mapChrome.primary.withValues(alpha: .38)
-              : context.mapChrome.divider,
-        ),
+    return Padding(
+      key: ValueKey<String>(
+        'resource-map-source-product-${source.id}-${resource.id}-$occurrence',
       ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: <Widget>[
-          _buildResourceArtwork(
-            context,
-            resource,
-            size: 46,
-            fallbackIcon: _iconForFieldSource(source),
-          ),
-          const SizedBox(width: 10),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: <Widget>[
-                Text(
-                  resource.name,
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
-                    color: context.mapChrome.ink,
-                    fontSize: 14,
-                    fontWeight: FontWeight.w800,
-                    height: 1.15,
+      padding: const EdgeInsets.only(top: 7),
+      child: ResourceMapStewardSurface(
+        highlighted: selected,
+        child: Padding(
+          padding: const EdgeInsetsDirectional.fromSTEB(12, 9, 7, 9),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: <Widget>[
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: <Widget>[
+                  _buildResourceArtwork(
+                    context,
+                    resource,
+                    size: 46,
+                    fallbackIcon: _iconForFieldSource(source),
                   ),
-                ),
-                if (gameplayNote.isNotEmpty || workerCount > 0) ...<Widget>[
-                  const SizedBox(height: 3),
-                  Wrap(
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Text(
+                      resource.name,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        color: context.mapChrome.ink,
+                        fontSize: 14,
+                        fontWeight: FontWeight.w800,
+                        height: 1.15,
+                      ),
+                    ),
+                  ),
+                  if (product.tool.trim().isNotEmpty) ...<Widget>[
+                    const SizedBox(width: 7),
+                    BdoGatheringToolIcon(
+                      tool: product.tool,
+                      size: 32,
+                      color: context.mapChrome.accent,
+                    ),
+                  ],
+                  const SizedBox(width: 4),
+                  IconButton(
+                    key: ValueKey<String>(
+                      'resource-map-source-product-favorite-${resource.id}',
+                    ),
+                    constraints: const BoxConstraints.tightFor(
+                      width: 32,
+                      height: 32,
+                    ),
+                    padding: EdgeInsets.zero,
+                    tooltip: favorite
+                        ? 'Remove ${resource.name} from favorites'
+                        : 'Add ${resource.name} to favorites',
+                    onPressed: () => _toggleFavorite(resource),
+                    icon: Icon(
+                      favorite
+                          ? Icons.star_rounded
+                          : Icons.star_outline_rounded,
+                      size: 20,
+                      color: favorite
+                          ? context.mapChrome.accent
+                          : context.mapChrome.muted,
+                    ),
+                  ),
+                ],
+              ),
+              if (gameplayNote.isNotEmpty || workerCount > 0) ...<Widget>[
+                const SizedBox(height: 3),
+                Padding(
+                  padding: const EdgeInsetsDirectional.only(start: 56),
+                  child: Wrap(
                     spacing: 7,
                     runSpacing: 4,
                     crossAxisAlignment: WrapCrossAlignment.center,
@@ -17433,7 +18096,7 @@ class _BdoResourceMapState extends State<BdoResourceMap> {
                           ),
                           message: gameplayNote,
                           child: Padding(
-                            padding: EdgeInsets.all(4),
+                            padding: const EdgeInsets.all(4),
                             child: Icon(
                               Icons.info_outline_rounded,
                               size: 16,
@@ -17462,38 +18125,11 @@ class _BdoResourceMapState extends State<BdoResourceMap> {
                         ),
                     ],
                   ),
-                ],
+                ),
               ],
-            ),
+            ],
           ),
-          if (product.tool.trim().isNotEmpty) ...<Widget>[
-            const SizedBox(width: 7),
-            BdoGatheringToolIcon(
-              tool: product.tool,
-              size: 32,
-              color: context.mapChrome.accent,
-            ),
-          ],
-          const SizedBox(width: 4),
-          IconButton(
-            key: ValueKey<String>(
-              'resource-map-source-product-favorite-${resource.id}',
-            ),
-            constraints: const BoxConstraints.tightFor(width: 32, height: 32),
-            padding: EdgeInsets.zero,
-            tooltip: favorite
-                ? 'Remove ${resource.name} from favorites'
-                : 'Add ${resource.name} to favorites',
-            onPressed: () => _toggleFavorite(resource),
-            icon: Icon(
-              favorite ? Icons.star_rounded : Icons.star_outline_rounded,
-              size: 20,
-              color: favorite
-                  ? context.mapChrome.accent
-                  : context.mapChrome.muted,
-            ),
-          ),
-        ],
+        ),
       ),
     );
   }
@@ -17933,13 +18569,710 @@ class _BdoResourceMapState extends State<BdoResourceMap> {
             onTap: () => _selectNode(parent, focus: true),
           ),
         ],
-        const SizedBox(height: 17),
-        _ProvenanceNote(
-          text:
-              'Coordinates and node data: '
-              '${_provenanceTitle(node.provenanceId)}',
+      ],
+    );
+  }
+
+  Widget _buildHousePlannerUsageSelector(
+    LodgingTown town, {
+    required List<HouseUsage> usages,
+    required int selectedTypeId,
+  }) {
+    String optionLabel(HouseUsage usage) {
+      final label = _displayHouseUsageLabel(usage);
+      final sharesLabel =
+          usages
+              .where(
+                (candidate) =>
+                    _displayHouseUsageLabel(candidate).toLowerCase() ==
+                    label.toLowerCase(),
+              )
+              .length >
+          1;
+      return <String>[
+        label,
+        if (sharesLabel) 'type ${usage.typeId}',
+        'up to Lv. ${usage.level}',
+      ].join(' · ');
+    }
+
+    return Container(
+      key: ValueKey<String>(
+        'resource-map-house-planner-use-${town.townNodeId}',
+      ),
+      padding: const EdgeInsets.symmetric(horizontal: 10),
+      decoration: BoxDecoration(
+        color: context.mapChrome.paper,
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(color: context.mapChrome.divider),
+      ),
+      child: DropdownButtonHideUnderline(
+        child: DropdownButton<int>(
+          value: selectedTypeId,
+          isExpanded: true,
+          borderRadius: BorderRadius.circular(12),
+          icon: const Icon(Icons.expand_more_rounded, size: 20),
+          items: <DropdownMenuItem<int>>[
+            for (final usage in usages)
+              DropdownMenuItem<int>(
+                value: usage.typeId,
+                child: Row(
+                  children: <Widget>[
+                    Icon(
+                      bdoMapSymbolSpec(_houseSymbolKindForUsage(usage)).icon,
+                      size: 17,
+                      color: context.mapChrome.primary,
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        optionLabel(usage),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          color: context.mapChrome.ink,
+                          fontSize: 12.5,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+          ],
+          onChanged: (value) {
+            if (value != null && value != selectedTypeId) {
+              _setHousePlannerUsageType(town, value);
+            }
+          },
+        ),
+      ),
+    );
+  }
+
+  Widget _buildLodgingHousePlannerBody(LodgingTown town) {
+    final currentCapacity = _currentWorkerCapacityForTown(town);
+    final maximumCapacity = _maximumWorkerCapacityForTown(town);
+    final maximumAdditional = math.max(0, maximumCapacity - currentCapacity);
+    final plan = _lodgingPlanForTown(town);
+    final additionalBeds = math.max(0, plan.requiredCapacity - currentCapacity);
+    final lodgingIds = plan.selectedLodgingHouseIds.toSet();
+    final lodgingHouses = plan.selectedLodgingHouseIds
+        .map((id) => town.housesById[id])
+        .whereType<LodgingHouse>()
+        .toList(growable: false);
+    final prerequisites = plan.newlyRequiredHouseIds
+        .where((id) => !lodgingIds.contains(id))
+        .map((id) => town.housesById[id])
+        .whereType<LodgingHouse>()
+        .toList(growable: false);
+
+    Widget section(
+      String label,
+      List<LodgingHouse> houses, {
+      required bool addsLodging,
+    }) {
+      if (houses.isEmpty) return const SizedBox.shrink();
+      return Padding(
+        padding: const EdgeInsets.only(top: 8),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: <Widget>[
+            Text(
+              '$label (${houses.length})',
+              style: TextStyle(
+                color: addsLodging
+                    ? context.mapChrome.positive
+                    : context.mapChrome.warning,
+                fontSize: 11.5,
+                fontWeight: FontWeight.w800,
+              ),
+            ),
+            const SizedBox(height: 2),
+            for (final house in houses)
+              _HousingPlanHouseRow(
+                key: ValueKey<String>(
+                  'resource-map-lodging-plan-house-${house.id}',
+                ),
+                house: house,
+                addsLodging: addsLodging,
+                onTap: () => _selectHouse(house),
+              ),
+          ],
+        ),
+      );
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: <Widget>[
+        Container(
+          padding: const EdgeInsets.fromLTRB(9, 7, 7, 7),
+          decoration: BoxDecoration(
+            color: context.mapChrome.paper,
+            borderRadius: BorderRadius.circular(10),
+            border: Border.all(color: context.mapChrome.divider),
+          ),
+          child: Row(
+            children: <Widget>[
+              Expanded(
+                child: Text(
+                  'Extra beds',
+                  style: TextStyle(
+                    color: context.mapChrome.ink,
+                    fontSize: 12.5,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+              ),
+              _HousingStepperButton(
+                key: ValueKey<String>(
+                  'resource-map-lodging-planner-minus-${town.townNodeId}',
+                ),
+                tooltip: 'One fewer bed',
+                icon: Icons.remove_rounded,
+                onPressed: additionalBeds > 1
+                    ? () => _setLodgingAdditionalBedsForTown(
+                        town,
+                        additionalBeds - 1,
+                      )
+                    : null,
+              ),
+              SizedBox(
+                width: 42,
+                child: Text(
+                  '$additionalBeds',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    color: context.mapChrome.ink,
+                    fontSize: 15,
+                    fontWeight: FontWeight.w900,
+                  ),
+                ),
+              ),
+              _HousingStepperButton(
+                key: ValueKey<String>(
+                  'resource-map-lodging-planner-plus-${town.townNodeId}',
+                ),
+                tooltip: 'One more bed',
+                icon: Icons.add_rounded,
+                onPressed: additionalBeds < maximumAdditional
+                    ? () => _setLodgingAdditionalBedsForTown(
+                        town,
+                        additionalBeds + 1,
+                      )
+                    : null,
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 8),
+        Text(
+          maximumAdditional == 0
+              ? 'No unowned Lodging remains.'
+              : plan.isFeasible
+              ? '+${plan.addedCapacity} beds · '
+                    '${plan.incrementalContributionPoints} CP · '
+                    '${plan.newlyRequiredHouseIds.length} new '
+                    '${plan.newlyRequiredHouseIds.length == 1 ? 'house' : 'houses'}'
+              : '+${plan.addedCapacity} beds · '
+                    '${plan.capacityShortfall} short',
+          key: ValueKey<String>(
+            'resource-map-lodging-house-plan-summary-${town.townNodeId}',
+          ),
+          style: TextStyle(
+            color: plan.isFeasible
+                ? context.mapChrome.positive
+                : context.mapChrome.error,
+            fontSize: 12.5,
+            fontWeight: FontWeight.w800,
+          ),
+        ),
+        section('Best Lodging', lodgingHouses, addsLodging: true),
+        section('Buy first', prerequisites, addsLodging: false),
+      ],
+    );
+  }
+
+  Widget _buildHouseUsePlannerBody(LodgingTown town, HouseUsage usage) {
+    final plan = _houseUsePlanForTown(town)!;
+    final minimumLevel = _housePlannerMinimumLevelForTown(town);
+    final maximumLevel = _housePlannerMaximumLevel(town, usage.typeId);
+    final facilityCount = _housePlannerFacilityCountForTown(town);
+    final maximumFacilities = _maximumAdditionalFacilitiesForTown(town);
+    final targetIds = plan.selectedUseHouseIds.toSet();
+    final targets = plan.selectedUseHouseIds
+        .map((id) => town.housesById[id])
+        .whereType<LodgingHouse>()
+        .toList(growable: false);
+    final prerequisites = plan.newPrerequisiteHouseIds
+        .map((id) => town.housesById[id])
+        .whereType<LodgingHouse>()
+        .toList(growable: false);
+
+    Widget control({
+      required String label,
+      required int value,
+      required bool canDecrease,
+      required bool canIncrease,
+      required VoidCallback onDecrease,
+      required VoidCallback onIncrease,
+      required String keyPrefix,
+    }) {
+      return Expanded(
+        child: Container(
+          padding: const EdgeInsets.fromLTRB(9, 7, 7, 7),
+          decoration: BoxDecoration(
+            color: context.mapChrome.paper,
+            borderRadius: BorderRadius.circular(10),
+            border: Border.all(color: context.mapChrome.divider),
+          ),
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              final decreaseButton = _HousingStepperButton(
+                key: ValueKey<String>(
+                  'resource-map-$keyPrefix-minus-${town.townNodeId}',
+                ),
+                tooltip: 'Decrease $label',
+                icon: Icons.remove_rounded,
+                onPressed: canDecrease ? onDecrease : null,
+              );
+              final valueWidget = SizedBox(
+                width: 28,
+                child: Text(
+                  '$value',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    color: context.mapChrome.ink,
+                    fontSize: 14,
+                    fontWeight: FontWeight.w900,
+                  ),
+                ),
+              );
+              final increaseButton = _HousingStepperButton(
+                key: ValueKey<String>(
+                  'resource-map-$keyPrefix-plus-${town.townNodeId}',
+                ),
+                tooltip: 'Increase $label',
+                icon: Icons.add_rounded,
+                onPressed: canIncrease ? onIncrease : null,
+              );
+              final labelWidget = Text(
+                label,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  color: context.mapChrome.ink,
+                  fontSize: 11.5,
+                  fontWeight: FontWeight.w800,
+                ),
+              );
+              if (constraints.maxWidth < 148) {
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: <Widget>[
+                    labelWidget,
+                    const SizedBox(height: 4),
+                    valueWidget,
+                    const SizedBox(height: 4),
+                    Align(
+                      alignment: Alignment.center,
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: <Widget>[
+                          decreaseButton,
+                          const SizedBox(width: 6),
+                          increaseButton,
+                        ],
+                      ),
+                    ),
+                  ],
+                );
+              }
+              return Row(
+                children: <Widget>[
+                  Expanded(child: labelWidget),
+                  decreaseButton,
+                  valueWidget,
+                  increaseButton,
+                ],
+              );
+            },
+          ),
+        ),
+      );
+    }
+
+    Widget section(
+      String label,
+      List<LodgingHouse> houses, {
+      bool target = false,
+    }) {
+      if (houses.isEmpty) return const SizedBox.shrink();
+      return Padding(
+        padding: const EdgeInsets.only(top: 8),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: <Widget>[
+            Text(
+              '$label (${houses.length})',
+              style: TextStyle(
+                color: target
+                    ? const Color(0xFFD6A4FF)
+                    : context.mapChrome.warning,
+                fontSize: 11.5,
+                fontWeight: FontWeight.w800,
+              ),
+            ),
+            const SizedBox(height: 2),
+            for (final house in houses)
+              _HouseUsePlanHouseRow(
+                key: ValueKey<String>(
+                  'resource-map-house-use-plan-house-${house.id}',
+                ),
+                house: house,
+                usage: target ? house.usagesByTypeId[usage.typeId] : null,
+                target: target,
+                onTap: () => _selectHouse(house),
+              ),
+          ],
+        ),
+      );
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: <Widget>[
+        Row(
+          children: <Widget>[
+            if (maximumLevel > 1) ...<Widget>[
+              control(
+                label: 'Min. level',
+                value: minimumLevel,
+                canDecrease: minimumLevel > 1,
+                canIncrease: minimumLevel < maximumLevel,
+                onDecrease: () =>
+                    _setHousePlannerMinimumLevel(town, minimumLevel - 1),
+                onIncrease: () =>
+                    _setHousePlannerMinimumLevel(town, minimumLevel + 1),
+                keyPrefix: 'house-level',
+              ),
+              const SizedBox(width: 7),
+            ],
+            control(
+              label: 'New houses',
+              value: facilityCount,
+              canDecrease: facilityCount > 1,
+              canIncrease: facilityCount < maximumFacilities,
+              onDecrease: () =>
+                  _setHousePlannerFacilityCount(town, facilityCount - 1),
+              onIncrease: () =>
+                  _setHousePlannerFacilityCount(town, facilityCount + 1),
+              keyPrefix: 'house-count',
+            ),
+          ],
+        ),
+        const SizedBox(height: 8),
+        Text(
+          maximumFacilities == 0
+              ? 'No matching unowned houses remain.'
+              : plan.isFeasible
+              ? '${plan.selectedFacilityCount} selected · '
+                    '${plan.incrementalContributionPoints} CP · '
+                    '${plan.newlyRequiredHouseIds.length} new '
+                    '${plan.newlyRequiredHouseIds.length == 1 ? 'house' : 'houses'}'
+              : '${plan.selectedFacilityCount} selected · '
+                    '${plan.facilityShortfall} short',
+          key: ValueKey<String>(
+            'resource-map-house-use-plan-summary-${town.townNodeId}',
+          ),
+          style: TextStyle(
+            color: plan.isFeasible
+                ? context.mapChrome.positive
+                : context.mapChrome.error,
+            fontSize: 12.5,
+            fontWeight: FontWeight.w800,
+          ),
+        ),
+        section(
+          'Best ${_displayHouseUsageLabel(usage)}',
+          targets,
+          target: true,
+        ),
+        section(
+          'Buy first',
+          prerequisites
+              .where((house) => !targetIds.contains(house.id))
+              .toList(growable: false),
         ),
       ],
+    );
+  }
+
+  Widget _buildStoragePlanner(LodgingTown town) {
+    final plannerUsages = _housePlannerUsagesForTown(town);
+    final plannerUsageTypeId = _housePlannerUsageTypeForTown(town);
+    final plannerUsage = plannerUsages.singleWhere(
+      (usage) => usage.typeId == plannerUsageTypeId,
+    );
+    final lodgingMode = plannerUsageTypeId == 1;
+    final storageMode = plannerUsageTypeId == 2;
+    final maximum = _maximumAdditionalStorageSlotsForTown(town);
+    final target = _storageSlotTargetForTown(town);
+    final plan = _storagePlanForTown(town);
+    final selectedStorageIds = plan.selectedStorageHouseIds.toSet();
+    final ownedPrerequisites = plan.ownedHouseIdsUsed
+        .map((id) => town.housesById[id])
+        .whereType<LodgingHouse>()
+        .toList(growable: false);
+    final storageToBuy = plan.newlyRequiredHouseIds
+        .where(selectedStorageIds.contains)
+        .map((id) => town.housesById[id])
+        .whereType<LodgingHouse>()
+        .toList(growable: false);
+    final prerequisitesToBuy = plan.newlyRequiredHouseIds
+        .where((id) => !selectedStorageIds.contains(id))
+        .map((id) => town.housesById[id])
+        .whereType<LodgingHouse>()
+        .toList(growable: false);
+    final protectedCount = plan.protectedOwnedHouseIds.length;
+    final unknownCount = plan.unknownUseOwnedHouseIds.length;
+
+    Widget section({
+      required String label,
+      required List<LodgingHouse> houses,
+      required _StoragePlanHouseRole role,
+    }) {
+      if (houses.isEmpty) return const SizedBox.shrink();
+      return Padding(
+        padding: const EdgeInsets.only(top: 9),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: <Widget>[
+            Text(
+              '$label (${houses.length})',
+              style: TextStyle(
+                color: role.color(context),
+                fontSize: 11.5,
+                fontWeight: FontWeight.w800,
+              ),
+            ),
+            const SizedBox(height: 3),
+            for (final house in houses)
+              _StoragePlanHouseRow(
+                key: ValueKey<String>(
+                  'resource-map-storage-plan-house-${house.id}',
+                ),
+                house: house,
+                role: role,
+              ),
+          ],
+        ),
+      );
+    }
+
+    return Material(
+      key: ValueKey<String>('resource-map-house-planner-${town.townNodeId}'),
+      color: context.mapChrome.paperRaised,
+      surfaceTintColor: Colors.transparent,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(14),
+        side: BorderSide(color: context.mapChrome.divider),
+      ),
+      clipBehavior: Clip.antiAlias,
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(12, 10, 10, 11),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: <Widget>[
+            Row(
+              children: <Widget>[
+                Icon(
+                  bdoMapSymbolSpec(_houseSymbolKindForUsage(plannerUsage)).icon,
+                  size: 20,
+                  color: context.mapChrome.primary,
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    'House planner',
+                    style: TextStyle(
+                      color: context.mapChrome.ink,
+                      fontSize: 15,
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
+                ),
+                if (storageMode)
+                  Tooltip(
+                    message:
+                        'Saved Storage uses the mapped maximum level: '
+                        '3/5/8/12/16 slots for levels 1–5.',
+                    child: Icon(
+                      Icons.info_outline_rounded,
+                      size: 17,
+                      color: context.mapChrome.muted,
+                    ),
+                  ),
+                IconButton(
+                  key: ValueKey<String>(
+                    'resource-map-close-house-planner-${town.townNodeId}',
+                  ),
+                  tooltip: 'Close house planner',
+                  visualDensity: VisualDensity.compact,
+                  onPressed: _closeStoragePlanner,
+                  icon: const Icon(Icons.close_rounded, size: 18),
+                ),
+              ],
+            ),
+            const SizedBox(height: 5),
+            _buildHousePlannerUsageSelector(
+              town,
+              usages: plannerUsages,
+              selectedTypeId: plannerUsageTypeId,
+            ),
+            if (lodgingMode) ...<Widget>[
+              const SizedBox(height: 9),
+              _buildLodgingHousePlannerBody(town),
+            ] else if (!storageMode) ...<Widget>[
+              const SizedBox(height: 9),
+              _buildHouseUsePlannerBody(town, plannerUsage),
+            ] else ...<Widget>[
+              const SizedBox(height: 7),
+              Row(
+                children: <Widget>[
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: <Widget>[
+                        Text(
+                          'Extra slots',
+                          style: TextStyle(
+                            color: context.mapChrome.ink,
+                            fontSize: 12.5,
+                            fontWeight: FontWeight.w800,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  _HousingStepperButton(
+                    key: ValueKey<String>(
+                      'resource-map-storage-target-minus-${town.townNodeId}',
+                    ),
+                    tooltip: 'One fewer storage slot',
+                    icon: Icons.remove_rounded,
+                    onPressed: target > 1
+                        ? () => _setStorageSlotTargetForTown(town, target - 1)
+                        : null,
+                  ),
+                  SizedBox(
+                    width: 42,
+                    child: Text(
+                      '$target',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        color: context.mapChrome.ink,
+                        fontSize: 15,
+                        fontWeight: FontWeight.w900,
+                      ),
+                    ),
+                  ),
+                  _HousingStepperButton(
+                    key: ValueKey<String>(
+                      'resource-map-storage-target-plus-${town.townNodeId}',
+                    ),
+                    tooltip: 'One more storage slot',
+                    icon: Icons.add_rounded,
+                    onPressed: target < maximum
+                        ? () => _setStorageSlotTargetForTown(town, target + 1)
+                        : null,
+                  ),
+                ],
+              ),
+              const SizedBox(height: 9),
+              Text(
+                maximum == 0
+                    ? 'No unowned Storage houses remain.'
+                    : plan.isFeasible
+                    ? '+${plan.addedStorageSlots} slots · '
+                          '${plan.incrementalContributionPoints} CP · '
+                          '${plan.newlyRequiredHouseIds.length} new '
+                          '${plan.newlyRequiredHouseIds.length == 1 ? 'house' : 'houses'}'
+                    : '+${plan.addedStorageSlots} slots · '
+                          '${plan.slotShortfall} short',
+                key: ValueKey<String>(
+                  'resource-map-storage-plan-summary-${town.townNodeId}',
+                ),
+                style: TextStyle(
+                  color: plan.isFeasible
+                      ? context.mapChrome.positive
+                      : context.mapChrome.error,
+                  fontSize: 12.5,
+                  height: 1.35,
+                  fontWeight: FontWeight.w800,
+                ),
+              ),
+              if (plan.slotOversupply > 0) ...<Widget>[
+                const SizedBox(height: 3),
+                Text(
+                  'The cheapest available levels include '
+                  '${plan.slotOversupply} '
+                  '${plan.slotOversupply == 1 ? 'slot' : 'slots'} of oversupply.',
+                  style: TextStyle(
+                    color: context.mapChrome.muted,
+                    fontSize: 11.5,
+                  ),
+                ),
+              ],
+              const SizedBox(height: 7),
+              Wrap(
+                spacing: 6,
+                runSpacing: 6,
+                children: <Widget>[
+                  _HousingSummaryChip(
+                    icon: Icons.inventory_outlined,
+                    label: '${plan.existingStorageSlots} active slots',
+                  ),
+                  _HousingSummaryChip(
+                    icon: Icons.stars_rounded,
+                    label: '+${plan.incrementalContributionPoints} CP',
+                    emphasized: true,
+                  ),
+                ],
+              ),
+              if (protectedCount > 0 || unknownCount > 0) ...<Widget>[
+                const SizedBox(height: 7),
+                _NodePlannerInlineStatus(
+                  icon: Icons.shield_outlined,
+                  message: <String>[
+                    if (protectedCount > 0)
+                      '$protectedCount saved to another use',
+                    if (unknownCount > 0) '$unknownCount with unknown use',
+                  ].join(' · '),
+                  color: context.mapChrome.warning,
+                ),
+              ],
+              section(
+                label: 'Already owned prerequisites',
+                houses: ownedPrerequisites,
+                role: _StoragePlanHouseRole.ownedPrerequisite,
+              ),
+              section(
+                label: 'Buy for Storage',
+                houses: storageToBuy,
+                role: _StoragePlanHouseRole.storage,
+              ),
+              section(
+                label: 'Buy first',
+                houses: prerequisitesToBuy,
+                role: _StoragePlanHouseRole.prerequisite,
+              ),
+            ],
+          ],
+        ),
+      ),
     );
   }
 
@@ -17953,13 +19286,42 @@ class _BdoResourceMapState extends State<BdoResourceMap> {
     final target = _workerTargetForTown(town);
     final networkPlan = _activeNetworkLodgingPlanForTown(town);
     final plan = networkPlan ?? _lodgingPlanForTown(town);
-    final nextLodgingPlan = _nextLodgingPlanForTown(town);
     final selectedHouse = _selectedHouseId == null
         ? null
         : town.housesById[_selectedHouseId!];
-    final recommendedLodging = plan.selectedLodgingHouseIds.toSet();
-    final recommendedNew = plan.newlyRequiredHouseIds.toSet();
-    final recommendedPrerequisites = plan.prerequisiteHouseIds.toSet();
+    final housePlannerOpen = _storagePlannerOpenForTown(town);
+    final storagePlan = _storagePlanActiveForTown(town)
+        ? _storagePlanForTown(town)
+        : null;
+    final lodgingPlan = _lodgingPlanActiveForTown(town)
+        ? _lodgingPlanForTown(town)
+        : null;
+    final houseUsePlan = _houseUsePlanForTown(town);
+    final recommendedStorage =
+        storagePlan?.selectedStorageHouseIds.toSet() ?? <String>{};
+    final recommendedHouseUse =
+        houseUsePlan?.selectedUseHouseIds.toSet() ?? <String>{};
+    final recommendedLodging = lodgingPlan != null
+        ? lodgingPlan.selectedLodgingHouseIds.toSet()
+        : !housePlannerOpen
+        ? plan.selectedLodgingHouseIds.toSet()
+        : <String>{};
+    final recommendedNew = storagePlan != null
+        ? storagePlan.fullHouseClosureIds.toSet()
+        : lodgingPlan != null
+        ? lodgingPlan.fullHouseClosureIds.toSet()
+        : houseUsePlan != null
+        ? houseUsePlan.fullHouseClosureIds.toSet()
+        : plan.newlyRequiredHouseIds.toSet();
+    final recommendedPrerequisites = storagePlan != null
+        ? (<String>{...storagePlan.fullHouseClosureIds}
+            ..removeAll(recommendedStorage))
+        : lodgingPlan != null
+        ? (<String>{...lodgingPlan.newlyRequiredHouseIds}
+            ..removeAll(recommendedLodging))
+        : houseUsePlan != null
+        ? houseUsePlan.newPrerequisiteHouseIds.toSet()
+        : plan.prerequisiteHouseIds.toSet();
     final filteredHouses =
         town.houses.where(_houseMatchesUsageFilter).toList(growable: false)
           ..sort((left, right) {
@@ -18015,10 +19377,10 @@ class _BdoResourceMapState extends State<BdoResourceMap> {
                     ),
                   ),
                   Text(
-                    '${town.houses.length} houses in one connected network',
+                    '${town.houses.length} mapped · ${ownedHouseIds.length} saved',
                     style: TextStyle(
                       color: context.mapChrome.muted,
-                      fontSize: 11,
+                      fontSize: 11.5,
                     ),
                   ),
                 ],
@@ -18039,30 +19401,14 @@ class _BdoResourceMapState extends State<BdoResourceMap> {
         Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: <Widget>[
-            _HousingFactRow(
-              icon: Icons.home_work_outlined,
-              text: '${ownedHouseIds.length} invested',
-            ),
             if (town.isWorkerTown)
               _HousingFactRow(
                 icon: Icons.groups_2_outlined,
                 text: hiredWorkerCount == null
-                    ? 'Hired: not entered / Beds ready: $currentCapacity'
-                    : 'Hired: $hiredWorkerCount / Beds ready: $currentCapacity',
+                    ? '$currentCapacity ${currentCapacity == 1 ? 'bed' : 'beds'} ready'
+                    : '$hiredWorkerCount ${hiredWorkerCount == 1 ? 'worker' : 'workers'} · '
+                          '$currentCapacity ${currentCapacity == 1 ? 'bed' : 'beds'}',
               ),
-            if (town.isWorkerTown &&
-                networkPlan == null &&
-                nextLodgingPlan != null)
-              _HousingFactRow(
-                icon: Icons.add_home_work_outlined,
-                text:
-                    'Cheapest next lodging: '
-                    '${nextLodgingPlan.newlyRequiredHouseIds.length} '
-                    '${nextLodgingPlan.newlyRequiredHouseIds.length == 1 ? 'house' : 'houses'} '
-                    'for ${nextLodgingPlan.incrementalContributionPoints} CP',
-              ),
-            if (town.isWorkerTown)
-              _HousingLimitNote(text: _housingCeilingLabel(town)),
             if (town.isWorkerTown)
               Align(
                 alignment: Alignment.centerLeft,
@@ -18121,53 +19467,41 @@ class _BdoResourceMapState extends State<BdoResourceMap> {
             color: context.mapChrome.positive,
           ),
         ],
-        const SizedBox(height: 12),
-        Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: <Widget>[
-            Padding(
-              padding: EdgeInsets.only(top: 1),
-              child: Icon(
-                Icons.touch_app_rounded,
-                size: 16,
-                color: context.mapChrome.accent,
-              ),
-            ),
-            SizedBox(width: 7),
-            Expanded(
-              child: Text(
-                'Select a house on the map to see what it offers and every '
-                'prerequisite you must invest in first.',
-                style: TextStyle(
-                  color: context.mapChrome.text,
-                  fontSize: 11.5,
-                  height: 1.38,
-                ),
-              ),
-            ),
-          ],
-        ),
         const SizedBox(height: 10),
-        SingleChildScrollView(
-          scrollDirection: Axis.horizontal,
-          child: Row(
+        if (_storagePlannerOpenForTown(town))
+          _buildStoragePlanner(town)
+        else
+          FilledButton.icon(
             key: ValueKey<String>(
-              'resource-map-house-filter-${town.townNodeId}',
+              'resource-map-open-house-planner-${town.townNodeId}',
             ),
-            children: <Widget>[
-              for (final value in _HouseUsageFilter.values)
-                Padding(
-                  padding: const EdgeInsets.only(right: 4),
-                  child: _HouseFilterButton(
-                    label: _houseUsageFilterLabel(value),
-                    icon: _houseUsageFilterIcon(value),
-                    selected: _houseUsageFilter == value,
-                    onPressed: () => setState(() => _houseUsageFilter = value),
-                  ),
-                ),
-            ],
+            onPressed: () => _openStoragePlanner(town),
+            icon: const Icon(Icons.route_rounded, size: 18),
+            label: const Text('Find best houses'),
           ),
-        ),
+        const SizedBox(height: 9),
+        if (!housePlannerOpen)
+          SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: Row(
+              key: ValueKey<String>(
+                'resource-map-house-filter-${town.townNodeId}',
+              ),
+              children: <Widget>[
+                for (final value in _HouseUsageFilter.values)
+                  Padding(
+                    padding: const EdgeInsets.only(right: 4),
+                    child: _HouseFilterButton(
+                      label: _houseUsageFilterLabel(value),
+                      icon: _houseUsageFilterIcon(value),
+                      selected: _houseUsageFilter == value,
+                      onPressed: () =>
+                          setState(() => _houseUsageFilter = value),
+                    ),
+                  ),
+              ],
+            ),
+          ),
         if (_compactLayout && selectedHouse != null) ...<Widget>[
           const SizedBox(height: 10),
           _buildSelectedHouseDetails(
@@ -18175,13 +19509,19 @@ class _BdoResourceMapState extends State<BdoResourceMap> {
             selectedHouse,
             owned: ownedHouseIds.contains(selectedHouse.id),
             recommendedLodging: recommendedLodging.contains(selectedHouse.id),
+            recommendedStorage: recommendedStorage.contains(selectedHouse.id),
+            recommendedHouseUse: recommendedHouseUse.contains(selectedHouse.id),
             recommendedPrerequisite:
                 recommendedPrerequisites.contains(selectedHouse.id) ||
                 (recommendedNew.contains(selectedHouse.id) &&
-                    !recommendedLodging.contains(selectedHouse.id)),
+                    !recommendedLodging.contains(selectedHouse.id) &&
+                    !recommendedStorage.contains(selectedHouse.id) &&
+                    !recommendedHouseUse.contains(selectedHouse.id)),
           ),
         ],
-        if (town.isWorkerTown && networkPlan == null) ...<Widget>[
+        if (town.isWorkerTown &&
+            networkPlan == null &&
+            !housePlannerOpen) ...<Widget>[
           const SizedBox(height: 13),
           Container(
             key: ValueKey<String>(
@@ -18219,7 +19559,7 @@ class _BdoResourceMapState extends State<BdoResourceMap> {
                         overflow: TextOverflow.ellipsis,
                         style: TextStyle(
                           color: context.mapChrome.muted,
-                          fontSize: 10,
+                          fontSize: 11.5,
                         ),
                       ),
                     ],
@@ -18293,7 +19633,7 @@ class _BdoResourceMapState extends State<BdoResourceMap> {
                 ),
             ],
           ],
-        ] else if (networkPlan != null) ...<Widget>[
+        ] else if (networkPlan != null && !housePlannerOpen) ...<Widget>[
           const SizedBox(height: 13),
           _NodePlannerInlineStatus(
             key: ValueKey<String>(
@@ -18310,13 +19650,33 @@ class _BdoResourceMapState extends State<BdoResourceMap> {
           ),
         ],
         const SizedBox(height: 12),
-        const Wrap(
+        Wrap(
           spacing: 11,
           runSpacing: 5,
           children: <Widget>[
-            _HouseLegendItem(color: Color(0xFF5BD7E8), label: 'Already owned'),
-            _HouseLegendItem(color: Color(0xFF70DEA2), label: 'Adds lodging'),
-            _HouseLegendItem(color: Color(0xFFE8BE60), label: 'Path required'),
+            const _HouseLegendItem(
+              color: Color(0xFF5BD7E8),
+              label: 'Already owned',
+            ),
+            if (storagePlan != null)
+              const _HouseLegendItem(
+                color: Color(0xFF8FB5FF),
+                label: 'Adds Storage',
+              )
+            else if (houseUsePlan != null)
+              const _HouseLegendItem(
+                color: Color(0xFFD6A4FF),
+                label: 'Best house',
+              )
+            else
+              const _HouseLegendItem(
+                color: Color(0xFF70DEA2),
+                label: 'Adds lodging',
+              ),
+            const _HouseLegendItem(
+              color: Color(0xFFE8BE60),
+              label: 'Path required',
+            ),
           ],
         ),
         const SizedBox(height: 3),
@@ -18341,20 +19701,20 @@ class _BdoResourceMapState extends State<BdoResourceMap> {
                 fontWeight: FontWeight.w800,
               ),
             ),
-            subtitle: Text(
-              'Useful when map icons overlap',
-              style: TextStyle(color: context.mapChrome.muted, fontSize: 10),
-            ),
             children: <Widget>[
               for (final house in filteredHouses)
                 _buildTownHouseRow(
                   house,
                   owned: ownedHouseIds.contains(house.id),
                   recommendedLodging: recommendedLodging.contains(house.id),
+                  recommendedStorage: recommendedStorage.contains(house.id),
+                  recommendedHouseUse: recommendedHouseUse.contains(house.id),
                   recommendedPrerequisite:
                       recommendedPrerequisites.contains(house.id) ||
                       (recommendedNew.contains(house.id) &&
-                          !recommendedLodging.contains(house.id)),
+                          !recommendedLodging.contains(house.id) &&
+                          !recommendedStorage.contains(house.id) &&
+                          !recommendedHouseUse.contains(house.id)),
                 ),
               if (filteredHouses.isEmpty)
                 Padding(
@@ -18363,7 +19723,7 @@ class _BdoResourceMapState extends State<BdoResourceMap> {
                     'No houses match this use.',
                     style: TextStyle(
                       color: context.mapChrome.muted,
-                      fontSize: 11,
+                      fontSize: 12.5,
                     ),
                   ),
                 ),
@@ -18379,6 +19739,8 @@ class _BdoResourceMapState extends State<BdoResourceMap> {
     LodgingHouse house, {
     required bool owned,
     required bool recommendedLodging,
+    required bool recommendedStorage,
+    required bool recommendedHouseUse,
     required bool recommendedPrerequisite,
     VoidCallback? onClose,
   }) {
@@ -18405,6 +19767,8 @@ class _BdoResourceMapState extends State<BdoResourceMap> {
     final states = bdoMapSymbolStates(
       owned: owned,
       recommendedLodging: recommendedLodging,
+      recommendedStorage: recommendedStorage,
+      recommendedHouseUse: recommendedHouseUse,
       recommendedPrerequisite: recommendedPrerequisite,
       selected: true,
     );
@@ -18458,13 +19822,13 @@ class _BdoResourceMapState extends State<BdoResourceMap> {
                                 <String>[
                                   '${house.contributionPoints} CP',
                                   if (prerequisite != null)
-                                    'connected after ${prerequisite.name}'
+                                    'after ${prerequisite.name}'
                                   else
-                                    'start of path',
+                                    'path start',
                                 ].join(' · '),
                                 style: TextStyle(
                                   color: context.mapChrome.muted,
-                                  fontSize: 10.5,
+                                  fontSize: 11.5,
                                 ),
                               ),
                             ],
@@ -18501,15 +19865,15 @@ class _BdoResourceMapState extends State<BdoResourceMap> {
                 Expanded(
                   child: Text(
                     owned
-                        ? 'Saved as one of your in-game houses'
+                        ? 'Saved'
                         : missingPath.length <= 1
-                        ? 'This house costs $pathCp CP'
-                        : 'Full path: ${missingPath.length} houses for $pathCp CP',
+                        ? '$pathCp CP to add'
+                        : '$pathCp CP · ${missingPath.length} houses in this path',
                     style: TextStyle(
                       color: owned
                           ? context.mapChrome.positive
                           : context.mapChrome.text,
-                      fontSize: 11,
+                      fontSize: 12.5,
                       height: 1.3,
                       fontWeight: FontWeight.w700,
                     ),
@@ -18542,14 +19906,10 @@ class _BdoResourceMapState extends State<BdoResourceMap> {
             Divider(height: 1, color: context.mapChrome.divider),
             const SizedBox(height: 9),
             Text(
-              owned
-                  ? selectedUsageTypeId == null
-                        ? 'Choose its current use'
-                        : 'Current use'
-                  : 'Choose a use to invest',
+              'USE',
               style: TextStyle(
                 color: context.mapChrome.muted,
-                fontSize: 10,
+                fontSize: 11.5,
                 fontWeight: FontWeight.w800,
                 letterSpacing: .5,
               ),
@@ -18566,31 +19926,52 @@ class _BdoResourceMapState extends State<BdoResourceMap> {
                 level: usage.level,
                 onPressed: () => _setOwnedHouseUsage(house, usage.typeId),
               ),
-            if (recommendedLodging || recommendedPrerequisite) ...<Widget>[
+            if (recommendedLodging ||
+                recommendedStorage ||
+                recommendedHouseUse ||
+                recommendedPrerequisite) ...<Widget>[
               const SizedBox(height: 9),
               Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
                   Icon(
-                    recommendedLodging
+                    recommendedStorage
+                        ? Icons.inventory_2_rounded
+                        : recommendedHouseUse
+                        ? Icons.home_work_rounded
+                        : recommendedLodging
                         ? Icons.bed_rounded
                         : Icons.call_split_rounded,
                     size: 16,
-                    color: recommendedLodging
+                    color: recommendedStorage
+                        ? context.mapChrome.primary
+                        : recommendedHouseUse
+                        ? const Color(0xFFD6A4FF)
+                        : recommendedLodging
                         ? context.mapChrome.positive
                         : context.mapChrome.warning,
                   ),
                   const SizedBox(width: 7),
                   Expanded(
                     child: Text(
-                      recommendedLodging
-                          ? 'Recommended for the worker target you set'
-                          : 'Required before a recommended lodging house',
+                      recommendedStorage
+                          ? 'Storage plan'
+                          : recommendedHouseUse
+                          ? 'Best CP path'
+                          : recommendedLodging
+                          ? 'Worker plan'
+                          : _storagePlannerOpenForTown(town)
+                          ? 'Buy first'
+                          : 'Required path',
                       style: TextStyle(
-                        color: recommendedLodging
+                        color: recommendedStorage
+                            ? context.mapChrome.primary
+                            : recommendedHouseUse
+                            ? const Color(0xFFD6A4FF)
+                            : recommendedLodging
                             ? context.mapChrome.positive
                             : context.mapChrome.warning,
-                        fontSize: 10.5,
+                        fontSize: 11.5,
                         height: 1.3,
                         fontWeight: FontWeight.w700,
                       ),
@@ -18609,6 +19990,8 @@ class _BdoResourceMapState extends State<BdoResourceMap> {
     LodgingHouse house, {
     required bool owned,
     required bool recommendedLodging,
+    required bool recommendedStorage,
+    required bool recommendedHouseUse,
     required bool recommendedPrerequisite,
   }) {
     final usageTypeId =
@@ -18616,13 +19999,15 @@ class _BdoResourceMapState extends State<BdoResourceMap> {
     final states = bdoMapSymbolStates(
       owned: owned,
       recommendedLodging: recommendedLodging,
+      recommendedStorage: recommendedStorage,
+      recommendedHouseUse: recommendedHouseUse,
       recommendedPrerequisite: recommendedPrerequisite,
       selected: house.id == _selectedHouseId,
     );
     final selectedUsage = house.usagesByTypeId[usageTypeId];
     final usageSummary = selectedUsage == null
-        ? 'Offers ${house.usages.map(_displayHouseUsageLabel).join(', ')}'
-        : 'Set to ${_displayHouseUsageLabel(selectedUsage)}';
+        ? '${house.usages.length} ${house.usages.length == 1 ? 'use' : 'uses'} available'
+        : '${_displayHouseUsageLabel(selectedUsage)} · Lv. ${selectedUsage.level}';
     return Material(
       key: ValueKey<String>('resource-map-house-row-${house.id}'),
       color: house.id == _selectedHouseId
@@ -18652,7 +20037,7 @@ class _BdoResourceMapState extends State<BdoResourceMap> {
                       overflow: TextOverflow.ellipsis,
                       style: TextStyle(
                         color: context.mapChrome.ink,
-                        fontSize: 11.5,
+                        fontSize: 12.5,
                         fontWeight: FontWeight.w800,
                       ),
                     ),
@@ -18662,7 +20047,7 @@ class _BdoResourceMapState extends State<BdoResourceMap> {
                       overflow: TextOverflow.ellipsis,
                       style: TextStyle(
                         color: context.mapChrome.muted,
-                        fontSize: 11,
+                        fontSize: 11.5,
                       ),
                     ),
                   ],
@@ -18687,6 +20072,165 @@ class _BdoResourceMapState extends State<BdoResourceMap> {
           ),
         ),
       ),
+    );
+  }
+
+  Widget _buildLocationGuideImage(
+    BuildContext context,
+    BdoLocationGuideImage image, {
+    required BoxFit fit,
+  }) {
+    final builder = widget.locationGuideImageBuilder;
+    if (builder != null) {
+      return builder(context, image, fit);
+    }
+    return Image.asset(
+      image.assetPath,
+      package: 'bdo_map_core',
+      fit: fit,
+      errorBuilder: (context, error, stackTrace) => ColoredBox(
+        color: context.mapChrome.paper,
+        child: Center(
+          child: Semantics(
+            label: 'Location photo could not be loaded',
+            child: ExcludeSemantics(
+              child: Icon(
+                Icons.image_not_supported_outlined,
+                color: context.mapChrome.muted,
+                size: 28,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _openLocationGuideGallery(
+    List<BdoLocationGuideImage> images,
+    int initialIndex,
+  ) {
+    if (images.isEmpty) return;
+    final reduceMotion = MediaQuery.disableAnimationsOf(context);
+    showGeneralDialog<void>(
+      context: context,
+      barrierDismissible: true,
+      barrierLabel: 'Close location photos',
+      barrierColor: Colors.black.withValues(alpha: .82),
+      transitionDuration: reduceMotion
+          ? Duration.zero
+          : ResourceMapDesktopMotion.settle,
+      pageBuilder: (dialogContext, animation, secondaryAnimation) =>
+          _LocationGuideLightbox(
+            images: images,
+            initialIndex: initialIndex,
+            imageBuilder: (context, image, fit) =>
+                _buildLocationGuideImage(context, image, fit: fit),
+            provenanceRecord: _provenanceRecord,
+          ),
+      transitionBuilder: (context, animation, secondaryAnimation, child) {
+        final curved = CurvedAnimation(
+          parent: animation,
+          curve: ResourceMapDesktopMotion.curve,
+        );
+        return FadeTransition(
+          opacity: curved,
+          child: ScaleTransition(
+            scale: Tween<double>(begin: .965, end: 1).animate(curved),
+            child: child,
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildLocationGuideGallery(
+    BuildContext context,
+    List<BdoLocationGuideImage> images,
+  ) {
+    if (images.isEmpty) return const SizedBox.shrink();
+    return Column(
+      key: const ValueKey<String>('resource-map-location-guide-gallery'),
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: <Widget>[
+        const SizedBox(height: 17),
+        _SectionHeading(title: 'Location photos', count: images.length),
+        const SizedBox(height: 8),
+        SizedBox(
+          height: 104,
+          child: ListView.separated(
+            scrollDirection: Axis.horizontal,
+            itemCount: images.length,
+            separatorBuilder: (context, index) => const SizedBox(width: 8),
+            itemBuilder: (context, index) {
+              final image = images[index];
+              return SizedBox(
+                width: 152,
+                child: ResourceMapStewardSurface(
+                  child: Material(
+                    type: MaterialType.transparency,
+                    child: Semantics(
+                      button: true,
+                      label: image.caption.isEmpty
+                          ? 'Open location photo ${index + 1}'
+                          : 'Open location photo ${index + 1}: ${image.caption}',
+                      child: ExcludeSemantics(
+                        child: InkWell(
+                          key: ValueKey<String>(
+                            'resource-map-location-guide-thumbnail-$index',
+                          ),
+                          onTap: () => _openLocationGuideGallery(images, index),
+                          child: Stack(
+                            fit: StackFit.expand,
+                            children: <Widget>[
+                              _buildLocationGuideImage(
+                                context,
+                                image,
+                                fit: BoxFit.cover,
+                              ),
+                              const DecoratedBox(
+                                decoration: BoxDecoration(
+                                  gradient: LinearGradient(
+                                    begin: Alignment.topCenter,
+                                    end: Alignment.bottomCenter,
+                                    colors: <Color>[
+                                      Colors.transparent,
+                                      Color(0xD90A0B0E),
+                                    ],
+                                    stops: <double>[.42, 1],
+                                  ),
+                                ),
+                              ),
+                              PositionedDirectional(
+                                start: 8,
+                                end: 8,
+                                bottom: 7,
+                                child: Text(
+                                  image.caption.isEmpty
+                                      ? 'Open photo ${index + 1}'
+                                      : image.caption,
+                                  maxLines: 2,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 11,
+                                    height: 1.15,
+                                    fontWeight: FontWeight.w700,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+      ],
     );
   }
 
@@ -18759,6 +20303,7 @@ class _BdoResourceMapState extends State<BdoResourceMap> {
             style: TextStyle(color: context.mapChrome.muted, fontSize: 11.5),
           ),
         ],
+        _buildLocationGuideGallery(context, spot.guideImages),
         const SizedBox(height: 15),
         _ProvenanceNote(
           text: 'Location status: ${_provenanceTitle(spot.provenanceId)}',
@@ -18825,6 +20370,7 @@ class _BdoResourceMapState extends State<BdoResourceMap> {
             onTap: () => _selectSpot(area, focus: true),
           ),
         ],
+        _buildLocationGuideGallery(context, point.guideImages),
         const SizedBox(height: 17),
         _ProvenanceNote(
           text: 'Point data: ${_provenanceTitle(point.provenanceId)}',
@@ -18929,6 +20475,15 @@ class _BdoResourceMapState extends State<BdoResourceMap> {
       }
     }
     return provenanceId;
+  }
+
+  BdoProvenanceRecord? _provenanceRecord(String provenanceId) {
+    for (final provenance in widget.dataset.manifest.provenance) {
+      if (provenance.id == provenanceId) {
+        return provenance;
+      }
+    }
+    return null;
   }
 
   Widget _buildStatusBar(BuildContext context, {required bool compact}) {
@@ -19568,6 +21123,305 @@ String _formatMapQuantity(double value) {
       .toStringAsFixed(2)
       .replaceFirst(RegExp(r'0+$'), '')
       .replaceFirst(RegExp(r'\.$'), '');
+}
+
+class _MapDashboardTile extends StatefulWidget {
+  const _MapDashboardTile({
+    super.key,
+    required this.icon,
+    required this.title,
+    required this.semanticHint,
+    required this.onPressed,
+    this.subtitle,
+    this.badge,
+    this.selected = false,
+    this.featured = false,
+    this.accentColor,
+  });
+
+  final IconData icon;
+  final String title;
+  final String semanticHint;
+  final VoidCallback onPressed;
+  final String? subtitle;
+  final String? badge;
+  final bool selected;
+  final bool featured;
+  final Color? accentColor;
+
+  @override
+  State<_MapDashboardTile> createState() => _MapDashboardTileState();
+}
+
+class _MapDashboardTileState extends State<_MapDashboardTile> {
+  bool _hovered = false;
+  bool _focused = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final chrome = context.mapChrome;
+    final accent = widget.accentColor ?? chrome.primary;
+    final highlighted = widget.selected || _hovered || _focused;
+    final reduceMotion = MediaQuery.disableAnimationsOf(context);
+    final duration = reduceMotion
+        ? Duration.zero
+        : const Duration(milliseconds: 180);
+    final semanticLabel = widget.badge == null
+        ? '${widget.title}. ${widget.semanticHint}'
+        : '${widget.title}, ${widget.badge}. ${widget.semanticHint}';
+    return Tooltip(
+      message: widget.semanticHint,
+      waitDuration: const Duration(milliseconds: 420),
+      child: Semantics(
+        button: true,
+        selected: widget.selected,
+        label: semanticLabel,
+        child: ExcludeSemantics(
+          child: AnimatedScale(
+            scale: _hovered && !reduceMotion ? 1.018 : 1,
+            alignment: Alignment.center,
+            duration: duration,
+            curve: Curves.easeOutCubic,
+            child: AnimatedContainer(
+              duration: duration,
+              curve: Curves.easeOutCubic,
+              transform: Matrix4.translationValues(
+                0,
+                _hovered && !reduceMotion ? -2 : 0,
+                0,
+              ),
+              constraints: BoxConstraints(minHeight: widget.featured ? 82 : 74),
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: <Color>[
+                    highlighted
+                        ? accent.withValues(alpha: .18)
+                        : chrome.paperRaised.withValues(alpha: .92),
+                    chrome.graphiteRaised.withValues(alpha: .96),
+                  ],
+                ),
+                borderRadius: BorderRadius.circular(14),
+                border: Border.all(
+                  color: highlighted
+                      ? accent.withValues(alpha: .72)
+                      : chrome.divider.withValues(alpha: .92),
+                  width: widget.selected ? 1.5 : 1,
+                ),
+                boxShadow: <BoxShadow>[
+                  BoxShadow(
+                    color: highlighted
+                        ? accent.withValues(alpha: .12)
+                        : const Color(0x26000000),
+                    blurRadius: highlighted ? 14 : 8,
+                    offset: Offset(0, highlighted ? 5 : 3),
+                  ),
+                ],
+              ),
+              child: Material(
+                color: Colors.transparent,
+                borderRadius: BorderRadius.circular(14),
+                clipBehavior: Clip.antiAlias,
+                child: InkWell(
+                  onTap: widget.onPressed,
+                  onHover: (value) => setState(() => _hovered = value),
+                  onFocusChange: (value) => setState(() => _focused = value),
+                  focusColor: accent.withValues(alpha: .12),
+                  hoverColor: accent.withValues(alpha: .07),
+                  highlightColor: accent.withValues(alpha: .12),
+                  splashColor: accent.withValues(alpha: .12),
+                  child: LayoutBuilder(
+                    builder: (context, constraints) {
+                      final scaledTitle = MediaQuery.textScalerOf(
+                        context,
+                      ).scale(widget.featured ? 14.5 : 13.5);
+                      final stacked =
+                          !widget.featured &&
+                          (constraints.maxWidth < 155 || scaledTitle > 19);
+                      return Padding(
+                        padding: stacked
+                            ? const EdgeInsets.symmetric(
+                                horizontal: 8,
+                                vertical: 6,
+                              )
+                            : const EdgeInsets.symmetric(
+                                horizontal: 10,
+                                vertical: 9,
+                              ),
+                        child: stacked
+                            ? _buildStackedContent(
+                                context,
+                                accent: accent,
+                                largeText: scaledTitle > 19,
+                              )
+                            : _buildWideContent(context, accent: accent),
+                      );
+                    },
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildStackedContent(
+    BuildContext context, {
+    required Color accent,
+    required bool largeText,
+  }) {
+    final badge = _buildBadge(accent);
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: <Widget>[
+        Row(
+          mainAxisSize: MainAxisSize.min,
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            _buildTileIcon(accent, compact: true),
+            if (badge != null) ...<Widget>[const SizedBox(width: 5), badge],
+          ],
+        ),
+        const SizedBox(height: 5),
+        Text(
+          widget.title,
+          maxLines: largeText ? 3 : 2,
+          overflow: TextOverflow.ellipsis,
+          textAlign: TextAlign.center,
+          style: TextStyle(
+            color: context.mapChrome.ink,
+            fontSize: 13.5,
+            height: 1.12,
+            fontWeight: FontWeight.w800,
+            letterSpacing: -.08,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildWideContent(BuildContext context, {required Color accent}) {
+    final chrome = context.mapChrome;
+    final badge = _buildBadge(accent);
+    return Row(
+      children: <Widget>[
+        _buildTileIcon(accent),
+        const SizedBox(width: 9),
+        Expanded(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: <Widget>[
+              Text(
+                widget.title,
+                maxLines: 3,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  color: chrome.ink,
+                  fontSize: widget.featured ? 14.5 : 13.5,
+                  height: 1.14,
+                  fontWeight: FontWeight.w800,
+                  letterSpacing: -.08,
+                ),
+              ),
+              if (widget.subtitle case final subtitle?
+                  when subtitle.trim().isNotEmpty) ...<Widget>[
+                const SizedBox(height: 3),
+                Text(
+                  subtitle,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    color: chrome.text,
+                    fontSize: 11.5,
+                    height: 1.18,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ],
+            ],
+          ),
+        ),
+        if (badge != null) ...<Widget>[const SizedBox(width: 5), badge],
+      ],
+    );
+  }
+
+  Widget _buildTileIcon(Color accent, {bool compact = false}) {
+    final size = compact ? 34.0 : (widget.featured ? 44.0 : 38.0);
+    return Container(
+      width: size,
+      height: size,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: <Color>[
+            accent.withValues(alpha: .28),
+            accent.withValues(alpha: .1),
+          ],
+        ),
+        border: Border.all(color: accent.withValues(alpha: .48)),
+      ),
+      child: Icon(
+        widget.icon,
+        size: compact ? 19 : (widget.featured ? 24 : 21),
+        color: accent,
+      ),
+    );
+  }
+
+  Widget? _buildBadge(Color accent) {
+    final badge = widget.badge?.trim();
+    if (badge == null || badge.isEmpty) return null;
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: accent.withValues(alpha: .15),
+        borderRadius: BorderRadius.circular(99),
+        border: Border.all(color: accent.withValues(alpha: .35)),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
+        child: Text(
+          badge,
+          maxLines: 1,
+          overflow: TextOverflow.fade,
+          softWrap: false,
+          style: TextStyle(
+            color: accent,
+            fontSize: 10,
+            fontWeight: FontWeight.w800,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _BloodFamilyDefinition {
+  const _BloodFamilyDefinition({
+    required this.id,
+    required this.label,
+    required this.members,
+    this.ratios = const <String, double>{},
+  });
+
+  final String id;
+  final String label;
+  final List<_BloodFamilyMember> members;
+  final Map<String, double> ratios;
+}
+
+class _BloodFamilyMember {
+  const _BloodFamilyMember({required this.name, required this.gameItemId});
+
+  final String name;
+  final int? gameItemId;
 }
 
 class _MappedPlannerNeed {
@@ -20350,7 +22204,7 @@ class _NodeTargetViewButton extends StatelessWidget {
                           color: selected
                               ? context.mapChrome.ink
                               : context.mapChrome.text,
-                          fontSize: 11,
+                          fontSize: 12.5,
                           fontWeight: FontWeight.w700,
                         ),
                       ),
@@ -22899,6 +24753,8 @@ enum _HouseMarkerStatus {
   available,
   owned,
   recommendedLodging,
+  recommendedStorage,
+  recommendedHouseUse,
   recommendedPrerequisite,
 }
 
@@ -22913,7 +24769,7 @@ String _houseUsageFilterLabel(_HouseUsageFilter value) => switch (value) {
 IconData _houseUsageFilterIcon(_HouseUsageFilter value) => switch (value) {
   _HouseUsageFilter.all => Icons.apps_rounded,
   _HouseUsageFilter.lodging => Icons.bed_rounded,
-  _HouseUsageFilter.storage => Icons.inventory_2_rounded,
+  _HouseUsageFilter.storage => Icons.inventory_2_outlined,
   _HouseUsageFilter.stable => Icons.pets_rounded,
   _HouseUsageFilter.workshops => Icons.handyman_rounded,
 };
@@ -22992,7 +24848,7 @@ class _HousingSummaryChip extends StatelessWidget {
               label,
               style: TextStyle(
                 color: foreground,
-                fontSize: 10.5,
+                fontSize: 11.5,
                 fontWeight: FontWeight.w700,
               ),
             ),
@@ -23114,7 +24970,7 @@ class _PlannedLodgingSummary extends StatelessWidget {
               '$label (${houses.length})',
               style: TextStyle(
                 color: color,
-                fontSize: 10,
+                fontSize: 11.5,
                 fontWeight: FontWeight.w900,
                 letterSpacing: .45,
               ),
@@ -23145,7 +25001,7 @@ class _PlannedLodgingSummary extends StatelessWidget {
                             overflow: TextOverflow.ellipsis,
                             style: TextStyle(
                               color: context.mapChrome.text,
-                              fontSize: 10.8,
+                              fontSize: 12,
                               fontWeight: FontWeight.w700,
                             ),
                           ),
@@ -23154,7 +25010,7 @@ class _PlannedLodgingSummary extends StatelessWidget {
                           '${house.contributionPoints} CP',
                           style: TextStyle(
                             color: context.mapChrome.muted,
-                            fontSize: 9.5,
+                            fontSize: 11.5,
                           ),
                         ),
                       ],
@@ -23219,7 +25075,7 @@ class _PlannedLodgingSummary extends StatelessWidget {
                                 'assigned here',
                                 style: TextStyle(
                                   color: context.mapChrome.muted,
-                                  fontSize: 9.8,
+                                  fontSize: 11.5,
                                 ),
                               ),
                             ],
@@ -23300,108 +25156,28 @@ class _HousingTownDirectoryRow extends StatelessWidget {
   const _HousingTownDirectoryRow({
     required this.town,
     required this.ownedCount,
-    required this.currentWorkerCapacity,
-    required this.maximumWorkerCapacity,
     required this.onTap,
     super.key,
   });
 
   final LodgingTown town;
   final int ownedCount;
-  final int currentWorkerCapacity;
-  final int maximumWorkerCapacity;
   final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
-    final subtitle = town.isWorkerTown
-        ? '$currentWorkerCapacity of $maximumWorkerCapacity worker slots'
-        : '${town.houses.length} mapped houses';
-    return Semantics(
-      button: onTap != null,
-      label:
+    final subtitle =
+        '${town.houses.length} '
+        '${town.houses.length == 1 ? 'house' : 'houses'}';
+    return ResourceMapStewardListRow(
+      icon: ResourceMapStewardIconKind.houses,
+      title: town.name,
+      subtitle: subtitle,
+      badge: ownedCount > 0 ? '$ownedCount saved' : null,
+      semanticLabel:
           '${town.name}. $ownedCount saved houses. $subtitle. '
           'Open connected house network.',
-      child: Material(
-        color: Colors.transparent,
-        borderRadius: BorderRadius.circular(12),
-        clipBehavior: Clip.antiAlias,
-        child: InkWell(
-          onTap: onTap,
-          hoverColor: context.mapChrome.primary.withValues(alpha: .07),
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(7, 7, 5, 7),
-            child: Row(
-              children: <Widget>[
-                BdoMapSymbol(
-                  kind: town.isWorkerTown
-                      ? BdoMapSymbolKind.city
-                      : BdoMapSymbolKind.town,
-                  states: bdoMapSymbolStates(owned: ownedCount > 0),
-                  size: 34,
-                  semanticLabel: '${town.name} house network',
-                ),
-                const SizedBox(width: 9),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: <Widget>[
-                      Text(
-                        town.name,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: TextStyle(
-                          color: context.mapChrome.ink,
-                          fontSize: 12.5,
-                          fontWeight: FontWeight.w800,
-                        ),
-                      ),
-                      const SizedBox(height: 2),
-                      Text(
-                        subtitle,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: TextStyle(
-                          color: context.mapChrome.muted,
-                          fontSize: 10.2,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(width: 7),
-                if (ownedCount > 0)
-                  DecoratedBox(
-                    decoration: BoxDecoration(
-                      color: context.mapChrome.primary.withValues(alpha: .1),
-                      borderRadius: BorderRadius.circular(999),
-                    ),
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 7,
-                        vertical: 4,
-                      ),
-                      child: Text(
-                        '$ownedCount saved',
-                        style: TextStyle(
-                          color: context.mapChrome.primary,
-                          fontSize: 9.5,
-                          fontWeight: FontWeight.w800,
-                        ),
-                      ),
-                    ),
-                  ),
-                const SizedBox(width: 4),
-                Icon(
-                  Icons.chevron_right_rounded,
-                  size: 20,
-                  color: context.mapChrome.muted,
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
+      onPressed: onTap,
     );
   }
 }
@@ -23429,53 +25205,13 @@ class _HousingFactRow extends StatelessWidget {
               text,
               style: TextStyle(
                 color: context.mapChrome.text,
-                fontSize: 11.5,
+                fontSize: 12.5,
                 height: 1.3,
                 fontWeight: FontWeight.w700,
               ),
             ),
           ),
         ],
-      ),
-    );
-  }
-}
-
-class _HousingLimitNote extends StatelessWidget {
-  const _HousingLimitNote({required this.text});
-
-  final String text;
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(left: 23, top: 1),
-      child: Tooltip(
-        message:
-            'This is the hard limit from the town base slot, every mapped '
-            'CP lodging property, and bonus lodging you entered.',
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: <Widget>[
-            Icon(
-              Icons.info_outline_rounded,
-              size: 12,
-              color: context.mapChrome.muted,
-            ),
-            const SizedBox(width: 5),
-            Flexible(
-              child: Text(
-                text,
-                style: TextStyle(
-                  color: context.mapChrome.muted,
-                  fontSize: 10,
-                  height: 1.25,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-            ),
-          ],
-        ),
       ),
     );
   }
@@ -23562,7 +25298,7 @@ class _HousingPlanHouseRow extends StatelessWidget {
                       overflow: TextOverflow.ellipsis,
                       style: TextStyle(
                         color: context.mapChrome.ink,
-                        fontSize: 11,
+                        fontSize: 12.5,
                         fontWeight: FontWeight.w800,
                       ),
                     ),
@@ -23574,7 +25310,7 @@ class _HousingPlanHouseRow extends StatelessWidget {
                       overflow: TextOverflow.ellipsis,
                       style: TextStyle(
                         color: context.mapChrome.muted,
-                        fontSize: 9.6,
+                        fontSize: 11.5,
                       ),
                     ),
                   ],
@@ -23587,6 +25323,176 @@ class _HousingPlanHouseRow extends StatelessWidget {
               ),
             ],
           ),
+        ),
+      ),
+    );
+  }
+}
+
+class _HouseUsePlanHouseRow extends StatelessWidget {
+  const _HouseUsePlanHouseRow({
+    required this.house,
+    required this.usage,
+    required this.target,
+    required this.onTap,
+    super.key,
+  });
+
+  final LodgingHouse house;
+  final HouseUsage? usage;
+  final bool target;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final subtitle = target
+        ? 'Lv. ${usage!.level} · ${house.contributionPoints} CP'
+        : '${house.contributionPoints} CP · buy first';
+    return Semantics(
+      button: true,
+      label: '${house.name}. $subtitle.',
+      child: Material(
+        color: Colors.transparent,
+        borderRadius: BorderRadius.circular(10),
+        clipBehavior: Clip.antiAlias,
+        child: InkWell(
+          onTap: onTap,
+          hoverColor: context.mapChrome.primary.withValues(alpha: .07),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 6),
+            child: Row(
+              children: <Widget>[
+                BdoMapSymbol(
+                  kind: target
+                      ? _houseSymbolKindForUsage(usage!)
+                      : BdoMapSymbolKind.residence,
+                  states: bdoMapSymbolStates(
+                    recommendedHouseUse: target,
+                    recommendedPrerequisite: !target,
+                  ),
+                  size: 28,
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: <Widget>[
+                      Text(
+                        house.name,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          color: context.mapChrome.ink,
+                          fontSize: 12.5,
+                          fontWeight: FontWeight.w800,
+                        ),
+                      ),
+                      Text(
+                        subtitle,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          color: context.mapChrome.muted,
+                          fontSize: 11.5,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                Icon(
+                  Icons.chevron_right_rounded,
+                  size: 18,
+                  color: context.mapChrome.muted,
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+enum _StoragePlanHouseRole {
+  ownedPrerequisite,
+  storage,
+  prerequisite;
+
+  Color color(BuildContext context) => switch (this) {
+    _StoragePlanHouseRole.ownedPrerequisite => context.mapChrome.primary,
+    _StoragePlanHouseRole.storage => const Color(0xFF709EF0),
+    _StoragePlanHouseRole.prerequisite => context.mapChrome.warning,
+  };
+}
+
+class _StoragePlanHouseRow extends StatelessWidget {
+  const _StoragePlanHouseRow({
+    required this.house,
+    required this.role,
+    super.key,
+  });
+
+  final LodgingHouse house;
+  final _StoragePlanHouseRole role;
+
+  @override
+  Widget build(BuildContext context) {
+    final storageUsage = house.usagesByTypeId[2];
+    final subtitle = switch (role) {
+      _StoragePlanHouseRole.ownedPrerequisite =>
+        'Owned prerequisite · current use kept',
+      _StoragePlanHouseRole.storage =>
+        '+${storageSlotsForHouse(house)} slots · Storage Lv. '
+            '${storageUsage!.level} · ${house.contributionPoints} CP',
+      _StoragePlanHouseRole.prerequisite =>
+        '${house.contributionPoints} CP · required first',
+    };
+    final states = bdoMapSymbolStates(
+      owned: role == _StoragePlanHouseRole.ownedPrerequisite,
+      recommendedStorage: role == _StoragePlanHouseRole.storage,
+      recommendedPrerequisite: role == _StoragePlanHouseRole.prerequisite,
+    );
+    return Semantics(
+      label: '${house.name}. $subtitle.',
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 3, vertical: 5),
+        child: Row(
+          children: <Widget>[
+            BdoMapSymbol(
+              kind: role == _StoragePlanHouseRole.storage
+                  ? BdoMapSymbolKind.storage
+                  : BdoMapSymbolKind.residence,
+              states: states,
+              size: 28,
+            ),
+            const SizedBox(width: 8),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  Text(
+                    house.name,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      color: context.mapChrome.ink,
+                      fontSize: 12.5,
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
+                  Text(
+                    subtitle,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      color: context.mapChrome.muted,
+                      fontSize: 11.5,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
         ),
       ),
     );
@@ -23715,6 +25621,8 @@ class _HouseMapMarker extends StatelessWidget {
     final states = bdoMapSymbolStates(
       owned: status == _HouseMarkerStatus.owned,
       recommendedLodging: status == _HouseMarkerStatus.recommendedLodging,
+      recommendedStorage: status == _HouseMarkerStatus.recommendedStorage,
+      recommendedHouseUse: status == _HouseMarkerStatus.recommendedHouseUse,
       recommendedPrerequisite:
           status == _HouseMarkerStatus.recommendedPrerequisite,
       selected: selected,
@@ -23850,12 +25758,16 @@ class _HouseLegendItem extends StatelessWidget {
           decoration: BoxDecoration(color: color, shape: BoxShape.circle),
         ),
         const SizedBox(width: 4),
-        Text(
-          label,
-          style: TextStyle(
-            color: context.mapChrome.muted,
-            fontSize: 10.2,
-            fontWeight: FontWeight.w600,
+        Flexible(
+          child: Text(
+            label,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+            style: TextStyle(
+              color: context.mapChrome.muted,
+              fontSize: 11.5,
+              fontWeight: FontWeight.w600,
+            ),
           ),
         ),
       ],
@@ -23911,7 +25823,7 @@ class _HouseFilterButton extends StatelessWidget {
                   label,
                   style: TextStyle(
                     color: foreground,
-                    fontSize: 10.5,
+                    fontSize: 11.5,
                     fontWeight: selected ? FontWeight.w800 : FontWeight.w600,
                   ),
                 ),
@@ -23997,7 +25909,7 @@ class _HouseUsageButton extends StatelessWidget {
                     overflow: TextOverflow.ellipsis,
                     style: TextStyle(
                       color: foreground,
-                      fontSize: 11,
+                      fontSize: 12,
                       fontWeight: FontWeight.w800,
                     ),
                   ),
@@ -24008,7 +25920,7 @@ class _HouseUsageButton extends StatelessWidget {
                     color: selected
                         ? context.mapChrome.primary
                         : context.mapChrome.muted,
-                    fontSize: 11,
+                    fontSize: 11.5,
                     fontWeight: FontWeight.w700,
                   ),
                 ),
@@ -24489,16 +26401,18 @@ List<_AllNodePlacement> _resolveAllNodePlacements({
   required double zoom,
   Rect? visibleViewport,
   double labelBudgetScale = 1,
+  bool retainAllNodes = false,
 }) {
   final cellSize = zoom < 3
-      ? 19.0
+      ? 28.0
       : zoom < 4.5
-      ? 13.0
-      : 8.0;
+      ? 21.0
+      : 14.0;
   final center = viewport.center(Offset.zero);
   final controlViewport = visibleViewport ?? (Offset.zero & viewport);
   final candidatesByCell =
       <(int, int), ({BdoWorkerNode node, Offset position})>{};
+  final allCandidates = <({BdoWorkerNode node, Offset position})>[];
   for (final node in nodes) {
     final position = cameraController.worldToScreen(
       node.location.mapPoint,
@@ -24508,6 +26422,10 @@ List<_AllNodePlacement> _resolveAllNodePlacements({
         position.dy < -24 ||
         position.dx > viewport.width + 24 ||
         position.dy > viewport.height + 24) {
+      continue;
+    }
+    if (retainAllNodes) {
+      allCandidates.add((node: node, position: position));
       continue;
     }
     final cell = (
@@ -24528,7 +26446,9 @@ List<_AllNodePlacement> _resolveAllNodePlacements({
       candidatesByCell[cell] = (node: node, position: position);
     }
   }
-  final candidates = candidatesByCell.values.toList(growable: false);
+  final candidates = retainAllNodes
+      ? allCandidates
+      : candidatesByCell.values.toList(growable: false);
   candidates.sort((left, right) {
     final byImportance = _mapOrientationNodePriority(
       left.node,
@@ -24549,19 +26469,43 @@ List<_AllNodePlacement> _resolveAllNodePlacements({
     ),
   ];
   final placements = <_AllNodePlacement>[];
+  final collisionCounts = <(int, int), int>{};
   var labelCount = 0;
   final labelBudget = math.max(54, (54 * labelBudgetScale).ceil());
   for (final candidate in candidates) {
+    var markerPosition = candidate.position;
+    if (retainAllNodes) {
+      final collisionCell = (
+        candidate.position.dx.round(),
+        candidate.position.dy.round(),
+      );
+      final collisionIndex = collisionCounts.update(
+        collisionCell,
+        (value) => value + 1,
+        ifAbsent: () => 0,
+      );
+      if (collisionIndex > 0) {
+        const spacing = 34.0;
+        final ring = ((collisionIndex - 1) ~/ 4) + 1;
+        final distance = spacing * ring;
+        markerPosition += switch ((collisionIndex - 1) % 4) {
+          0 => Offset(distance, 0),
+          1 => Offset(0, distance),
+          2 => Offset(-distance, 0),
+          _ => Offset(0, -distance),
+        };
+      }
+    }
     var showLabel =
         zoom >= _allNodeLabelMinimumZoom && labelCount < labelBudget;
     final labelWidth = math
-        .min(128.0, 24 + candidate.node.siteName.length * 5.4)
+        .min(146.0, 34 + candidate.node.siteName.length * 6.1)
         .toDouble();
     final labelBounds = Rect.fromLTWH(
-      candidate.position.dx - 4,
-      candidate.position.dy - 10,
-      showLabel ? labelWidth : 9,
-      20,
+      markerPosition.dx - 12,
+      markerPosition.dy - 16,
+      showLabel ? labelWidth : 24,
+      32,
     );
     if (showLabel &&
         occupiedLabels.any((other) => other.inflate(3).overlaps(labelBounds))) {
@@ -24574,7 +26518,7 @@ List<_AllNodePlacement> _resolveAllNodePlacements({
     placements.add(
       _AllNodePlacement(
         node: candidate.node,
-        position: candidate.position,
+        position: markerPosition,
         showLabel: showLabel,
       ),
     );
@@ -24659,27 +26603,27 @@ class _MapLandmarkMarker extends StatelessWidget {
               ],
             ),
             child: Padding(
-              padding: const EdgeInsets.fromLTRB(5, 3, 7, 3),
+              padding: const EdgeInsets.fromLTRB(6, 4, 9, 4),
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: <Widget>[
                   _BdoNodeIconImage(
                     node: node,
                     active: active,
-                    size: 22,
+                    size: 26,
                     fallbackIcon: presentation.$1,
                     fallbackColor: presentation.$2,
                   ),
-                  const SizedBox(width: 4),
+                  const SizedBox(width: 5),
                   ConstrainedBox(
-                    constraints: const BoxConstraints(maxWidth: 112),
+                    constraints: const BoxConstraints(maxWidth: 126),
                     child: Text(
                       label,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: TextStyle(
                         color: context.mapChrome.ink,
-                        fontSize: 9.5,
+                        fontSize: 11,
                         fontWeight: FontWeight.w600,
                       ),
                     ),
@@ -24773,8 +26717,12 @@ class _MapOrientationNodeMarker extends StatelessWidget {
             onTap: onTap,
             child: ConstrainedBox(
               constraints: BoxConstraints(
-                minWidth: largeHitTarget ? 32 : 0,
-                minHeight: largeHitTarget ? 32 : 0,
+                minWidth: showLabel
+                    ? 0
+                    : largeHitTarget
+                    ? 44
+                    : 40,
+                minHeight: largeHitTarget ? 44 : 40,
               ),
               child: Align(
                 alignment: Alignment.centerLeft,
@@ -24784,12 +26732,12 @@ class _MapOrientationNodeMarker extends StatelessWidget {
                     _BdoNodeIconImage(
                       node: node,
                       active: active,
-                      size: showLabel ? 18 : 15,
+                      size: 24,
                       fallbackIcon: _iconForWorkerNode(node),
                       fallbackColor: color,
                     ),
                     if (showLabel) ...<Widget>[
-                      const SizedBox(width: 3),
+                      const SizedBox(width: 4),
                       DecoratedBox(
                         decoration: BoxDecoration(
                           color: context.mapChrome.graphiteRaised,
@@ -24801,20 +26749,20 @@ class _MapOrientationNodeMarker extends StatelessWidget {
                               context.mapChrome.graphiteRaised,
                             ],
                           ),
-                          borderRadius: BorderRadius.circular(5),
+                          borderRadius: BorderRadius.circular(6),
                           border: Border.all(color: color.withAlpha(72)),
                         ),
                         child: Padding(
-                          padding: const EdgeInsets.fromLTRB(6, 2, 7, 2),
+                          padding: const EdgeInsets.fromLTRB(7, 3, 8, 3),
                           child: ConstrainedBox(
-                            constraints: const BoxConstraints(maxWidth: 112),
+                            constraints: const BoxConstraints(maxWidth: 126),
                             child: Text(
                               label,
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                               style: TextStyle(
                                 color: context.mapChrome.text,
-                                fontSize: 8.8,
+                                fontSize: 10.5,
                                 fontWeight: FontWeight.w600,
                               ),
                             ),
@@ -25166,6 +27114,274 @@ class _SectionHeading extends StatelessWidget {
             ),
           ),
       ],
+    );
+  }
+}
+
+class _LocationGuideLightbox extends StatefulWidget {
+  const _LocationGuideLightbox({
+    required this.images,
+    required this.initialIndex,
+    required this.imageBuilder,
+    required this.provenanceRecord,
+  });
+
+  final List<BdoLocationGuideImage> images;
+  final int initialIndex;
+  final BdoLocationGuideImageBuilder imageBuilder;
+  final BdoProvenanceRecord? Function(String provenanceId) provenanceRecord;
+
+  @override
+  State<_LocationGuideLightbox> createState() => _LocationGuideLightboxState();
+}
+
+class _LocationGuideLightboxState extends State<_LocationGuideLightbox> {
+  late int _index;
+
+  @override
+  void initState() {
+    super.initState();
+    _index = widget.initialIndex.clamp(0, widget.images.length - 1).toInt();
+  }
+
+  void _showPrevious() {
+    setState(() {
+      _index = (_index - 1 + widget.images.length) % widget.images.length;
+    });
+  }
+
+  void _showNext() {
+    setState(() {
+      _index = (_index + 1) % widget.images.length;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final image = widget.images[_index];
+    final provenance = widget.provenanceRecord(image.provenanceId);
+    final reduceMotion = MediaQuery.disableAnimationsOf(context);
+    final chrome = context.mapChrome;
+    return CallbackShortcuts(
+      bindings: <ShortcutActivator, VoidCallback>{
+        const SingleActivator(LogicalKeyboardKey.arrowLeft): _showPrevious,
+        const SingleActivator(LogicalKeyboardKey.arrowRight): _showNext,
+        const SingleActivator(LogicalKeyboardKey.escape): () =>
+            Navigator.of(context).pop(),
+      },
+      child: Focus(
+        autofocus: true,
+        child: SafeArea(
+          child: Center(
+            child: Padding(
+              padding: const EdgeInsets.all(20),
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(
+                  minWidth: 360,
+                  maxWidth: 980,
+                  minHeight: 300,
+                  maxHeight: 760,
+                ),
+                child: Semantics(
+                  scopesRoute: true,
+                  namesRoute: true,
+                  label: 'Location photos',
+                  explicitChildNodes: true,
+                  child: FractionallySizedBox(
+                    widthFactor: .9,
+                    heightFactor: .88,
+                    child: Material(
+                      key: const ValueKey<String>(
+                        'resource-map-location-guide-lightbox',
+                      ),
+                      elevation: 24,
+                      shadowColor: Colors.black,
+                      color: chrome.chromeRaised,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(14),
+                        side: BorderSide(
+                          color: chrome.accent.withValues(alpha: .52),
+                        ),
+                      ),
+                      clipBehavior: Clip.antiAlias,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: <Widget>[
+                          Padding(
+                            padding: const EdgeInsetsDirectional.fromSTEB(
+                              18,
+                              10,
+                              8,
+                              10,
+                            ),
+                            child: Row(
+                              children: <Widget>[
+                                Expanded(
+                                  child: Text(
+                                    image.caption.isEmpty
+                                        ? 'Location photo'
+                                        : image.caption,
+                                    maxLines: 2,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: TextStyle(
+                                      color: chrome.ink,
+                                      fontSize: 16,
+                                      height: 1.15,
+                                      fontWeight: FontWeight.w800,
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(width: 12),
+                                Text(
+                                  '${_index + 1} / ${widget.images.length}',
+                                  style: TextStyle(
+                                    color: chrome.muted,
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w700,
+                                  ),
+                                ),
+                                IconButton(
+                                  key: const ValueKey<String>(
+                                    'resource-map-location-guide-close',
+                                  ),
+                                  tooltip: 'Close photos',
+                                  onPressed: () => Navigator.of(context).pop(),
+                                  icon: const Icon(
+                                    Icons.close_rounded,
+                                    size: 22,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          Divider(height: 1, color: chrome.divider),
+                          Expanded(
+                            child: Stack(
+                              fit: StackFit.expand,
+                              children: <Widget>[
+                                AnimatedSwitcher(
+                                  duration: reduceMotion
+                                      ? Duration.zero
+                                      : ResourceMapDesktopMotion.enter,
+                                  switchInCurve: ResourceMapDesktopMotion.curve,
+                                  switchOutCurve: Curves.easeInCubic,
+                                  transitionBuilder: (child, animation) =>
+                                      FadeTransition(
+                                        opacity: animation,
+                                        child: ScaleTransition(
+                                          scale: Tween<double>(
+                                            begin: .985,
+                                            end: 1,
+                                          ).animate(animation),
+                                          child: child,
+                                        ),
+                                      ),
+                                  child: InteractiveViewer(
+                                    key: ValueKey<String>(
+                                      '${image.assetPath}-$_index',
+                                    ),
+                                    minScale: 1,
+                                    maxScale: 4,
+                                    child: SizedBox.expand(
+                                      child: widget.imageBuilder(
+                                        context,
+                                        image,
+                                        BoxFit.contain,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                                if (widget.images.length > 1) ...<Widget>[
+                                  Align(
+                                    alignment: Alignment.centerLeft,
+                                    child: Padding(
+                                      padding: const EdgeInsets.all(10),
+                                      child: _LocationGuideArrowButton(
+                                        key: const ValueKey<String>(
+                                          'resource-map-location-guide-previous',
+                                        ),
+                                        tooltip: 'Previous photo',
+                                        icon: Icons.chevron_left_rounded,
+                                        onPressed: _showPrevious,
+                                      ),
+                                    ),
+                                  ),
+                                  Align(
+                                    alignment: Alignment.centerRight,
+                                    child: Padding(
+                                      padding: const EdgeInsets.all(10),
+                                      child: _LocationGuideArrowButton(
+                                        key: const ValueKey<String>(
+                                          'resource-map-location-guide-next',
+                                        ),
+                                        tooltip: 'Next photo',
+                                        icon: Icons.chevron_right_rounded,
+                                        onPressed: _showNext,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ],
+                            ),
+                          ),
+                          Padding(
+                            padding: const EdgeInsets.fromLTRB(18, 9, 18, 12),
+                            child: Text(
+                              provenance == null
+                                  ? 'Source details unavailable'
+                                  : <String>[
+                                      provenance.title,
+                                      '${provenance.attribution} · ${provenance.license}',
+                                      provenance.url.toString(),
+                                      if (image.verifiedAt != null)
+                                        'Photo checked ${image.verifiedAt!.toIso8601String().split('T').first}',
+                                    ].join('\n'),
+                              maxLines: 4,
+                              overflow: TextOverflow.ellipsis,
+                              style: TextStyle(
+                                color: chrome.muted,
+                                fontSize: 11,
+                                height: 1.25,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _LocationGuideArrowButton extends StatelessWidget {
+  const _LocationGuideArrowButton({
+    required this.tooltip,
+    required this.icon,
+    required this.onPressed,
+    super.key,
+  });
+
+  final String tooltip;
+  final IconData icon;
+  final VoidCallback onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    return IconButton.filled(
+      tooltip: tooltip,
+      onPressed: onPressed,
+      style: IconButton.styleFrom(
+        minimumSize: const Size.square(48),
+        backgroundColor: Colors.black.withValues(alpha: .62),
+        foregroundColor: Colors.white,
+      ),
+      icon: Icon(icon, size: 30),
     );
   }
 }

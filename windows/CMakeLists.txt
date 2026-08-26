@@ -84,6 +84,33 @@ add_subdirectory(${FLUTTER_MANAGED_DIR})
 # Application build; see runner/CMakeLists.txt.
 add_subdirectory("runner")
 
+# Build the shared storage recognizer as a self-contained, isolated payload.
+# It intentionally remains outside the Flutter process and ships with the
+# exact frozen item atlas it was calibrated against.
+set(STORAGE_OCR_SOURCE_DIR
+  "${CMAKE_CURRENT_SOURCE_DIR}/storage_ocr/BlackSpiritStorageOcr")
+set(STORAGE_OCR_PUBLISH_DIR "${CMAKE_BINARY_DIR}/storage_ocr")
+set(STORAGE_OCR_EXECUTABLE
+  "${STORAGE_OCR_PUBLISH_DIR}/BlackSpiritStorageOcr.exe")
+file(GLOB_RECURSE STORAGE_OCR_INPUTS CONFIGURE_DEPENDS
+  "${STORAGE_OCR_SOURCE_DIR}/*.cs"
+  "${STORAGE_OCR_SOURCE_DIR}/*.csproj"
+  "${STORAGE_OCR_SOURCE_DIR}/Assets/*"
+  "${STORAGE_OCR_SOURCE_DIR}/SOURCE-NOTICE.txt"
+  "${STORAGE_OCR_SOURCE_DIR}/*.ps1")
+add_custom_command(
+  OUTPUT "${STORAGE_OCR_EXECUTABLE}"
+  COMMAND powershell.exe -NoProfile -ExecutionPolicy Bypass
+    -File "${STORAGE_OCR_SOURCE_DIR}/build-publish.ps1"
+    -Configuration Release
+    -OutputPath "${STORAGE_OCR_PUBLISH_DIR}"
+  DEPENDS ${STORAGE_OCR_INPUTS}
+  COMMENT "Publishing the isolated storage OCR helper"
+  VERBATIM)
+add_custom_target(BlackSpiritStorageOcrPayload
+  DEPENDS "${STORAGE_OCR_EXECUTABLE}")
+add_dependencies(${BINARY_NAME} BlackSpiritStorageOcrPayload)
+
 
 # Generated plugin build rules, which manage building the plugins and adding
 # them to the application.
@@ -110,6 +137,13 @@ install(TARGETS BDOActiveNodeScanner RUNTIME DESTINATION "${CMAKE_INSTALL_PREFIX
   COMPONENT Runtime)
 install(TARGETS BlackSpiritLifeUpdater
   RUNTIME DESTINATION "${CMAKE_INSTALL_PREFIX}"
+  COMPONENT Runtime)
+
+install(CODE "
+  file(REMOVE_RECURSE \"${CMAKE_INSTALL_PREFIX}/storage_ocr\")
+  " COMPONENT Runtime)
+install(DIRECTORY "${STORAGE_OCR_PUBLISH_DIR}/"
+  DESTINATION "${CMAKE_INSTALL_PREFIX}/storage_ocr"
   COMPONENT Runtime)
 
 install(FILES "${VELOPACK_DLL}" DESTINATION "${INSTALL_BUNDLE_LIB_DIR}"

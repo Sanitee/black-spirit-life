@@ -283,6 +283,58 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
+  testWidgets(
+    'searchable select keeps compact suggestions until the user types',
+    (tester) async {
+      final query = TextEditingController(text: 'Dried Grouper');
+      addTearDown(query.dispose);
+      String? selected = 'Dried Grouper';
+      await tester.pumpWidget(
+        _standardControlHost(
+          child: StatefulBuilder(
+            builder: (context, setState) => SizedBox(
+              width: 220,
+              height: 44,
+              child: AppSearchSelect<String>(
+                controller: query,
+                value: selected,
+                items: const <String>['Dried Grouper', 'Dried Maomao'],
+                searchItems: const <String>[
+                  'Dried Grouper',
+                  'Dried Maomao',
+                  'Dried Bluefish',
+                ],
+                labelFor: _stringLabel,
+                semanticLabel: 'Dried fish search',
+                onSelected: (value) => setState(() => selected = value),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      await tester.tap(find.bySemanticsLabel('Dried fish search'));
+      await tester.pumpAndSettle();
+      expect(find.widgetWithText(MenuItemButton, 'Dried Maomao'), findsOne);
+      expect(
+        find.widgetWithText(MenuItemButton, 'Dried Bluefish'),
+        findsNothing,
+      );
+
+      final editable = find.descendant(
+        of: find.byType(AppSearchSelect<String>),
+        matching: find.byType(EditableText),
+      );
+      await tester.enterText(editable, 'blue');
+      await tester.pumpAndSettle();
+      expect(find.widgetWithText(MenuItemButton, 'Dried Bluefish'), findsOne);
+      await tester.tap(find.widgetWithText(MenuItemButton, 'Dried Bluefish'));
+      await tester.pumpAndSettle();
+      expect(selected, 'Dried Bluefish');
+      expect(query.text, 'Dried Bluefish');
+    },
+  );
+
   testWidgets('Tab enters selects and arrow keys change their value', (
     tester,
   ) async {
@@ -502,6 +554,41 @@ void main() {
       expect(tester.takeException(), isNull);
     },
   );
+
+  testWidgets('large bounded searchable catalog opens without layout flood', (
+    tester,
+  ) async {
+    final items = List<String>.generate(
+      1500,
+      (index) =>
+          'Planner material ${index.toString().padLeft(4, '0')} with readable name',
+    );
+    final query = TextEditingController();
+    addTearDown(query.dispose);
+
+    await tester.pumpWidget(
+      _standardControlHost(
+        child: SizedBox(
+          width: 480,
+          child: AppSearchSelect<String>(
+            controller: query,
+            items: items,
+            labelFor: _stringLabel,
+            semanticLabel: 'Large planner material search',
+            onSelected: (_) {},
+          ),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(AppSearchSelect<String>)).width, 480);
+
+    await tester.tap(find.bySemanticsLabel('Large planner material search'));
+    await tester.pumpAndSettle();
+    expect(find.byType(MenuItemButton), findsWidgets);
+    expect(find.text(items.first), findsOneWidget);
+    expect(find.text(items.last), findsNothing);
+    expect(tester.takeException(), isNull);
+  });
 
   testWidgets('disabled app-owned controls expose no activation', (
     tester,

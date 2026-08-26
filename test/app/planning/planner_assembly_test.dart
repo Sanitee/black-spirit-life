@@ -362,6 +362,19 @@ void main() {
     expect(() => rules.itemWeightsLtById['9213'] = 1, throwsUnsupportedError);
   });
 
+  test('production rules preserve the current grilled bird special value', () {
+    final catalog = const BundledCatalogParser().parse(
+      File('assets/data/app-data.json').readAsStringSync(),
+    );
+
+    final special = assembly
+        .plannerRules(catalog.supportingData)
+        .cookingSpecialMap['Grilled Bird Meat'];
+
+    expect(special?.name, 'Steaming Hot Grilled Bird Meat');
+    expect(special?.ratio, 6);
+  });
+
   test('production Harmony closure hydrates blood groups like Avalonia', () {
     final catalog = const BundledCatalogParser().parse(
       File('assets/data/app-data.json').readAsStringSync(),
@@ -398,6 +411,144 @@ void main() {
       'Rhino Blood',
       'Cheetah Dragon Blood',
     ]);
+    expect(clownBlood.substituteRatios, <String, double>{
+      'Wolf Blood': 1,
+      'Flamingo Blood': 0.5,
+      'Rhino Blood': 1,
+      'Cheetah Dragon Blood': 0.5,
+    });
+
+    Ingredient ingredient(String recipeName, String ingredientName) =>
+        recipes[recipeName]!.ingredients.firstWhere(
+          (ingredient) => ingredient.name == ingredientName,
+        );
+
+    final resistance = ingredient('Elixir of Resistance', 'Wolf Blood');
+    expect(
+      resistance.substituteRatios['Flamingo Blood'],
+      closeTo(4 / 7, 0.0000001),
+    );
+    final antidote = ingredient('Antidote Elixir', 'Deer Blood');
+    expect(antidote.substituteRatios['Pig Blood'], 2);
+
+    final energy = ingredient('Elixir of Energy', 'Fox Blood');
+    expect(energy.options, contains('Monkey Blood'));
+    expect(energy.substituteRatios['Weasel Blood'], 0.5);
+    expect(energy.substituteRatios['Scorpion Blood'], 1);
+
+    final wings = ingredient('Elixir of Wings', 'Troll Blood');
+    expect(wings.options, contains('Dinosaur Blood'));
+    expect(wings.options, contains('Tiger Blood'));
+    expect(wings.substituteRatios['Bear Blood'], 2);
+    expect(wings.substituteRatios['Tiger Blood'], 2);
+    expect(wings.substituteRatios['Dinosaur Blood'], 1);
+
+    final burnRemoval = ingredient('Elixir of Burn Removal', 'Apple');
+    expect(burnRemoval.quantity, 2);
+    expect(burnRemoval.substituteRatios['Apple'], 1);
+    expect(burnRemoval.substituteRatios['Strawberry'], 0.5);
+
+    final selectedResistance = assembly.engine.previewIngredientSelection(
+      recipes: recipes,
+      state: assembly.plannerState(
+        ModeState(
+          target: 'Elixir of Resistance',
+          bonusTarget: '',
+          substituteChoices: const <String, String>{
+            'recipe:Elixir of Resistance:BDO group 16': 'Flamingo Blood',
+          },
+          market: MarketState(),
+          appearance: AppearanceSettings.defaultsFor(CraftMode.alchemy),
+        ),
+      ),
+      parentName: 'Elixir of Resistance',
+      ingredient: resistance,
+      rules: assembly.plannerRules(catalog.supportingData),
+    );
+    expect(selectedResistance.name, 'Flamingo Blood');
+    expect(selectedResistance.need, 4);
+  });
+
+  test('production catalog keeps the exact newer alchemy formulas', () {
+    final catalog = const BundledCatalogParser().parse(
+      File('assets/data/app-data.json').readAsStringSync(),
+    );
+    final recipes = catalog.alchemy.items;
+
+    final sharpDetection = recipes['Elixir of Sharp Detection']!;
+    expect(sharpDetection.marketId, '699');
+    expect(sharpDetection.outputMinimum, 25);
+    expect(sharpDetection.outputMaximum, 35);
+    expect(
+      <String, double>{
+        for (final ingredient in sharpDetection.ingredients)
+          ingredient.name: ingredient.quantity,
+      },
+      <String, double>{
+        'Oil of Storms': 1,
+        'Pure Powder Reagent': 6,
+        'White Truffle Mushroom': 3,
+        'Trace of Nature': 3,
+        'Old Tree Bark': 2,
+      },
+    );
+
+    final tenacious = recipes['Tenacious Origin of Life']!;
+    expect(tenacious.marketId, '5303');
+    expect(tenacious.outputMinimum, 1);
+    expect(tenacious.outputMaximum, 3);
+    expect(tenacious.defaultVariantId, 'normal-herbs');
+    expect(tenacious.variants.map((variant) => variant.id), <String>[
+      'normal-herbs',
+      'high-quality-herbs',
+      'special-herbs',
+    ]);
+    expect(
+      tenacious.variants
+          .map((variant) => variant.ingredients.first.quantity)
+          .toList(growable: false),
+      <double>[50, 17, 8],
+    );
+
+    final flawless = recipes['Flawless Spirit Stone']!;
+    expect(flawless.marketId, '5305');
+    expect(
+      <String, double>{
+        for (final ingredient in flawless.ingredients)
+          ingredient.name: ingredient.quantity,
+      },
+      <String, double>{
+        'Oil of Tranquility': 10,
+        'Tenacious Origin of Life': 4,
+        'Rough Opulent Crystal': 4,
+      },
+    );
+
+    expect(recipes['Pile of Sunrise Herbs']?.marketId, '5421');
+    expect(catalog.alchemy.metadata['substituteWorthGroups'], isNotNull);
+
+    final assembled = assembly.assembleRecipes(
+      catalog: catalog.alchemy,
+      state: _modeState(target: 'Tenacious Origin of Life'),
+      supportingData: catalog.supportingData,
+      sharedMetadata: catalog.alchemy.metadata,
+      mode: CraftMode.alchemy,
+    );
+    final assembledTenacious = assembled['Tenacious Origin of Life']!;
+    for (final variant in assembledTenacious.variants) {
+      for (final ingredient in variant.ingredients) {
+        expect(
+          ingredient.options,
+          isEmpty,
+          reason: '${variant.id} must remain an exact all-one-quality recipe',
+        );
+        expect(
+          ingredient.substituteRatios,
+          isEmpty,
+          reason: '${variant.id} must not gain mixed-quality Worth ratios',
+        );
+      }
+    }
   });
 
   test('production processing variant choice reaches the assembled plan', () {

@@ -228,7 +228,7 @@ class _FirstRunSetupViewState extends State<FirstRunSetupView> {
     children: <Widget>[
       Semantics(
         header: true,
-        child: Text('AFK Load', style: _groupHeadingStyle(context)),
+        child: Text('AFK Weight', style: _groupHeadingStyle(context)),
       ),
       const SizedBox(height: 12),
       LayoutBuilder(
@@ -245,7 +245,7 @@ class _FirstRunSetupViewState extends State<FirstRunSetupView> {
                 child: _weightField(
                   key: const ValueKey<String>('setup-maximum-weight-lt'),
                   controller: _maximumWeightLt,
-                  label: 'Character Max LT',
+                  label: 'Maximum weight',
                 ),
               ),
               SizedBox(
@@ -255,7 +255,7 @@ class _FirstRunSetupViewState extends State<FirstRunSetupView> {
                     'setup-current-carried-weight-lt',
                   ),
                   controller: _currentCarriedWeightLt,
-                  label: 'Weight already carried',
+                  label: 'Current weight',
                 ),
               ),
               SizedBox(
@@ -263,7 +263,7 @@ class _FirstRunSetupViewState extends State<FirstRunSetupView> {
                 child: _weightField(
                   key: const ValueKey<String>('setup-safety-buffer-lt'),
                   controller: _safetyBufferLt,
-                  label: 'LT to keep free',
+                  label: 'Keep free',
                 ),
               ),
               SizedBox(
@@ -272,7 +272,7 @@ class _FirstRunSetupViewState extends State<FirstRunSetupView> {
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: <Widget>[
                     Text(
-                      'Fairy · Feathery Steps',
+                      'Feathery Steps',
                       style: context.visualTheme.typography.label,
                     ),
                     const SizedBox(height: 6),

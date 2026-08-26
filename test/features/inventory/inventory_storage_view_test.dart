@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'dart:typed_data';
 
-import 'package:bdo_craft_planner_flutter/domain/state/inventory_storage.dart';
+import 'package:bdo_craft_planner_flutter/domain/models/craft_mode.dart';
 import 'package:bdo_craft_planner_flutter/features/inventory/inventory.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -9,60 +9,59 @@ import 'package:flutter_test/flutter_test.dart';
 import 'inventory_test_fixture.dart';
 
 void main() {
-  testWidgets(
-    'shows storage navigation, smart filters, and editor disclosure',
-    (tester) async {
-      final harness = InventoryTestHarness();
-      await pumpInventory(tester, harness, size: const Size(1500, 940));
-
-      expect(
-        find.byKey(InventoryActionKeys.storage('unassigned')),
-        findsOneWidget,
-      );
-      expect(
-        find.byKey(InventoryActionKeys.smartGroup('All materials')),
-        findsOneWidget,
-      );
-      expect(
-        find.byKey(InventoryActionKeys.filter('materials')),
-        findsOneWidget,
-      );
-      expect(find.byKey(InventoryActionKeys.i04), findsOneWidget);
-      expect(find.text('Selected Group'), findsNothing);
-
-      await tester.tap(find.byKey(InventoryActionKeys.i04));
-      await tester.pumpAndSettle();
-      expect(find.text('Selected Group'), findsOneWidget);
-      expect(find.byKey(InventoryActionKeys.i03), findsOneWidget);
-    },
-  );
-
-  testWidgets('edits one named storage while retaining the combined total', (
+  testWidgets('shows compact shared controls and grouped planner materials', (
     tester,
   ) async {
     final harness = InventoryTestHarness();
-    harness.controller.active.ensureInventoryStorageLocation(
-      'Calpheon City Storage',
-    );
     await pumpInventory(tester, harness, size: const Size(1500, 940));
 
-    await tester.tap(
-      find.byKey(InventoryActionKeys.storage('calpheon-city-storage')),
+    expect(find.byKey(InventoryActionKeys.storageSelector), findsNothing);
+    expect(find.byKey(InventoryActionKeys.addStorage), findsNothing);
+    expect(find.byKey(InventoryActionKeys.renameStorage), findsNothing);
+    expect(find.text('Inventory'), findsWidgets);
+    expect(find.byKey(InventoryActionKeys.filter('owned')), findsOneWidget);
+    expect(
+      find.byKey(InventoryActionKeys.filter('alchemyPlan')),
+      findsOneWidget,
     );
-    await tester.pump();
+    expect(
+      find.byKey(InventoryActionKeys.filter('cookingPlan')),
+      findsOneWidget,
+    );
+    expect(
+      find.byKey(InventoryActionKeys.filter('processingPlan')),
+      findsOneWidget,
+    );
+    expect(find.byKey(InventoryActionKeys.filter('all')), findsOneWidget);
+    expect(find.byKey(InventoryActionKeys.i04), findsNothing);
+    expect(find.text('Plants & farming'), findsOneWidget);
+    expect(
+      find.byKey(
+        const ValueKey<String>(
+          'inventory-subsection:Plants & farming:Herbs & flowers',
+        ),
+      ),
+      findsOneWidget,
+    );
+    expect(find.text('Selected Group'), findsNothing);
+    expect(find.byKey(InventoryActionKeys.emptyStorage), findsNothing);
+  });
+
+  testWidgets('edits one shared amount for every planner mode', (tester) async {
+    final harness = InventoryTestHarness();
+    await pumpInventory(tester, harness, size: const Size(1500, 940));
+
     final amount = find.byKey(InventoryActionKeys.row('I10', 'Sunrise Herb'));
     await tester.enterText(amount, '10.000');
     await tester.testTextInput.receiveAction(TextInputAction.done);
     await tester.pump();
 
-    final storage = harness.controller.active.inventoryStorage;
-    expect(storage.quantityAt('calpheon-city-storage', 'Sunrise Herb'), 10000);
-    expect(storage.quantityAt('unassigned', 'Sunrise Herb'), 3);
-    expect(storage.totalFor('Sunrise Herb'), 10003);
-    expect(
-      harness.controller.active.state.value.inventory['Sunrise Herb'],
-      10003,
-    );
+    for (final mode in CraftMode.values) {
+      expect(
+        harness.controller.modes[mode]!.state.value.inventory['Sunrise Herb'],
+        10000,
+      );
+    }
   });
 
   testWidgets('screenshot review does not mutate until save and can undo', (
@@ -71,39 +70,45 @@ void main() {
     final analysis = _analysis();
     final harness = InventoryTestHarness(pasteScreenshot: () async => analysis);
     await pumpInventory(tester, harness, size: const Size(1500, 940));
-    final before = harness.controller.active.state.value;
+    final before = harness.controller.documentSnapshot;
 
     await tester.tap(find.byKey(InventoryActionKeys.pasteScreenshot));
     await tester.pumpAndSettle();
-    expect(find.text('Review storage screenshot'), findsOneWidget);
-    expect(harness.controller.active.state.value, same(before));
+    expect(find.text('Review items'), findsOneWidget);
+    expect(harness.controller.documentSnapshot, same(before));
 
-    await tester.tap(find.text('Cancel'));
+    await tester.tap(
+      find.byKey(const ValueKey<String>('inventory-import-close')),
+    );
     await tester.pumpAndSettle();
-    expect(harness.controller.active.state.value, same(before));
+    expect(harness.controller.documentSnapshot, same(before));
 
     await tester.tap(find.byKey(InventoryActionKeys.pasteScreenshot));
     await tester.pumpAndSettle();
+    await tester.tap(find.text('Replace current inventory'));
+    await tester.pump();
     await tester.tap(
       find.byKey(const ValueKey<String>('inventory-import-save')),
     );
     await tester.pumpAndSettle();
 
-    final saved = harness.controller.active.inventoryStorage;
-    expect(saved.selectedLocation.name, 'Calpheon City Storage');
-    expect(saved.quantityAt('calpheon-city-storage', 'Sunrise Herb'), 1000);
-    expect(saved.quantityAt('unassigned', 'Sunrise Herb'), 0);
+    for (final mode in CraftMode.values) {
+      expect(
+        harness.controller.modes[mode]!.state.value.inventory['Sunrise Herb'],
+        1000,
+      );
+      expect(
+        harness.controller.modes[mode]!.state.value.inventory['Silver Azalea'],
+        isNull,
+        reason:
+            'Replace current inventory must remove items not in the review.',
+      );
+    }
     expect(harness.undoOffers, hasLength(1));
 
     await tester.runAsync(harness.undoOffers.single.undo);
     await tester.pumpAndSettle();
-    expect(harness.controller.active.state.value.inventory, before.inventory);
-    expect(
-      InventoryStorageState.fromModeState(
-        harness.controller.active.state.value,
-      ).locations,
-      hasLength(1),
-    );
+    expect(harness.controller.documentSnapshot, same(before));
   });
 
   testWidgets('failed screenshot save restores every prior amount', (
@@ -114,7 +119,7 @@ void main() {
       saveState: (_) async => throw StateError('disk unavailable'),
     );
     await pumpInventory(tester, harness, size: const Size(1500, 940));
-    final before = harness.controller.active.state.value;
+    final before = harness.controller.documentSnapshot;
 
     await tester.tap(find.byKey(InventoryActionKeys.pasteScreenshot));
     await tester.pumpAndSettle();
@@ -123,8 +128,7 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    expect(harness.controller.active.state.value, same(before));
-    expect(harness.controller.active.state.value.inventory, before.inventory);
+    expect(harness.controller.documentSnapshot, same(before));
     expect(harness.undoOffers, isEmpty);
     expect(
       find.textContaining('Your previous amounts are unchanged'),
@@ -132,44 +136,146 @@ void main() {
     );
   });
 
-  testWidgets('a cropped grid uses the currently selected storage', (
+  testWidgets('recognition failure restores the screenshot controls', (
     tester,
   ) async {
-    late InventoryTestHarness harness;
-    harness = InventoryTestHarness(
-      pasteScreenshot: () async => _analysis(suggestedLocationName: null),
-    );
-    harness.controller.active.ensureInventoryStorageLocation(
-      'Calpheon City Storage',
+    final harness = InventoryTestHarness(
+      pasteScreenshot: () async => throw StateError('recognizer unavailable'),
     );
     await pumpInventory(tester, harness, size: const Size(1500, 940));
 
     await tester.tap(find.byKey(InventoryActionKeys.pasteScreenshot));
     await tester.pumpAndSettle();
-    final locationField = tester.widget<EditableText>(
-      find.descendant(
-        of: find.byKey(const ValueKey<String>('inventory-import-location')),
-        matching: find.byType(EditableText),
+
+    expect(find.textContaining('recognizer unavailable'), findsOneWidget);
+    expect(
+      find.byKey(InventoryActionKeys.pasteScreenshot).hitTestable(),
+      findsOneWidget,
+    );
+  });
+
+  testWidgets('review removal is reversible before saving', (tester) async {
+    final harness = InventoryTestHarness(
+      pasteScreenshot: () async => _analysis(includeSecondRow: true),
+    );
+    await pumpInventory(tester, harness, size: const Size(1500, 940));
+
+    await tester.tap(find.byKey(InventoryActionKeys.pasteScreenshot));
+    await tester.pumpAndSettle();
+
+    final firstRow = find.byKey(
+      const ValueKey<String>('inventory-import-row-storage-r0c0'),
+    );
+    expect(firstRow, findsOneWidget);
+
+    await tester.tap(
+      find.byKey(
+        const ValueKey<String>('inventory-import-remove-storage-r0c0'),
       ),
     );
-    expect(locationField.controller.text, 'Calpheon City Storage');
+    await tester.pumpAndSettle();
+    expect(firstRow, findsNothing);
+    expect(find.text('Undo removal'), findsOneWidget);
+
+    await tester.tap(find.text('Undo removal'));
+    await tester.pumpAndSettle();
+    expect(firstRow, findsOneWidget);
+  });
+
+  testWidgets('a cropped grid saves into the shared Inventory', (tester) async {
+    late InventoryTestHarness harness;
+    harness = InventoryTestHarness(pasteScreenshot: () async => _analysis());
+    await pumpInventory(tester, harness, size: const Size(1500, 940));
+
+    await tester.tap(find.byKey(InventoryActionKeys.pasteScreenshot));
+    await tester.pumpAndSettle();
+    expect(find.textContaining('Saving to'), findsNothing);
+    expect(
+      find.byKey(const ValueKey<String>('inventory-import-location')),
+      findsNothing,
+    );
 
     await tester.tap(
       find.byKey(const ValueKey<String>('inventory-import-save')),
     );
     await tester.pumpAndSettle();
-    expect(
-      harness.controller.active.inventoryStorage.quantityAt(
-        'calpheon-city-storage',
-        'Sunrise Herb',
-      ),
-      1000,
-    );
+    for (final mode in CraftMode.values) {
+      expect(
+        harness.controller.modes[mode]!.state.value.inventory['Sunrise Herb'],
+        1003,
+        reason: 'The recognized 1,000 must be added to the saved 3.',
+      );
+      expect(
+        harness.controller.modes[mode]!.state.value.inventory['Silver Azalea'],
+        7,
+        reason: 'A new screenshot must not erase unrelated owned items.',
+      );
+    }
   });
+
+  testWidgets(
+    'separate screenshot reviews accumulate by default and Replace stays explicit',
+    (tester) async {
+      var review = 0;
+      final analyses = <InventoryScreenshotAnalysis>[
+        _analysis(quantity: 1000, fingerprintCharacter: '1'),
+        _analysis(quantity: 250, fingerprintCharacter: '2'),
+        _analysis(quantity: 5, fingerprintCharacter: '3'),
+      ];
+      final harness = InventoryTestHarness(
+        pasteScreenshot: () async => analyses[review++],
+      );
+      await pumpInventory(tester, harness, size: const Size(1500, 940));
+
+      Future<void> openAndSave({bool replace = false}) async {
+        await tester.tap(find.byKey(InventoryActionKeys.pasteScreenshot));
+        await tester.pumpAndSettle();
+        if (replace) {
+          await tester.tap(find.text('Replace current inventory'));
+          await tester.pump();
+        }
+        await tester.tap(
+          find.byKey(const ValueKey<String>('inventory-import-save')),
+        );
+        await tester.pumpAndSettle();
+      }
+
+      await openAndSave();
+      await openAndSave();
+
+      for (final mode in CraftMode.values) {
+        final inventory = harness.controller.modes[mode]!.state.value.inventory;
+        expect(
+          inventory['Sunrise Herb'],
+          1253,
+          reason:
+              'Independent review sessions must add 1,000 and 250 to the '
+              'previously owned 3 instead of silently replacing it.',
+        );
+        expect(inventory['Silver Azalea'], 7);
+      }
+
+      await openAndSave(replace: true);
+
+      for (final mode in CraftMode.values) {
+        final inventory = harness.controller.modes[mode]!.state.value.inventory;
+        expect(inventory['Sunrise Herb'], 5);
+        expect(
+          inventory['Silver Azalea'],
+          isNull,
+          reason:
+              'The destructive behavior remains available only after the '
+              'reviewer explicitly chooses Replace current inventory.',
+        );
+      }
+    },
+  );
 }
 
 InventoryScreenshotAnalysis _analysis({
-  String? suggestedLocationName = 'Calpheon City Storage',
+  bool includeSecondRow = false,
+  int quantity = 1000,
+  String fingerprintCharacter = 'a',
 }) {
   final png = Uint8List.fromList(
     base64Decode(
@@ -177,32 +283,85 @@ InventoryScreenshotAnalysis _analysis({
     ),
   );
   return InventoryScreenshotAnalysis(
-    screenshotPng: png,
+    fileName: 'storage.png',
+    mimeType: 'image/png',
+    sourceByteCount: png.length,
+    screenshotBytes: png,
+    plannerItemNames: const <String>['Sunrise Herb', 'Silver Azalea'],
     draft: InventoryScreenshotDraft(
-      suggestedLocationName: suggestedLocationName,
+      imageFingerprint: List<String>.filled(64, fingerprintCharacter).join(),
       sourceWidth: 1,
       sourceHeight: 1,
+      gridColumns: includeSecondRow ? 2 : 1,
+      gridRows: 1,
+      gridConfidence: 1,
       rows: <InventoryScreenshotRow>[
         InventoryScreenshotRow(
-          slot: 1,
+          id: 'storage-r0c0',
+          slotId: 'r0c0',
+          row: 0,
+          column: 0,
           crop: const InventoryScreenshotRect(
             left: 0,
             top: 0,
             width: 1,
             height: 1,
           ),
-          quantityText: '1K',
-          quantity: 1000,
+          quantityText: quantity.toString(),
+          quantity: quantity,
+          quantitySuggested: null,
+          quantityApproximate: false,
+          quantityAssumedOne: false,
+          quantityConfidence: 1,
           matches: const <InventoryItemMatch>[
             InventoryItemMatch(
               name: 'Sunrise Herb',
               confidence: 1,
               sharedArtwork: false,
+              grade: null,
             ),
           ],
+          selectedName: 'Sunrise Herb',
+          relevance: InventoryOcrMaterialRelevance.relevant,
+          reviewRequired: false,
+          reviewReasons: const <String>[],
           previewPng: png,
         ),
+        if (includeSecondRow)
+          InventoryScreenshotRow(
+            id: 'storage-r0c1',
+            slotId: 'r0c1',
+            row: 0,
+            column: 1,
+            crop: const InventoryScreenshotRect(
+              left: 0,
+              top: 0,
+              width: 1,
+              height: 1,
+            ),
+            quantityText: '2K',
+            quantity: 2000,
+            quantitySuggested: null,
+            quantityApproximate: false,
+            quantityAssumedOne: false,
+            quantityConfidence: 1,
+            matches: const <InventoryItemMatch>[
+              InventoryItemMatch(
+                name: 'Silver Azalea',
+                confidence: .9,
+                sharedArtwork: false,
+                grade: null,
+              ),
+            ],
+            selectedName: null,
+            relevance: InventoryOcrMaterialRelevance.relevant,
+            reviewRequired: true,
+            reviewReasons: const <String>['Confirm the suggested item.'],
+            previewPng: png,
+          ),
       ],
+      hiddenRows: const <InventoryScreenshotRow>[],
+      warnings: const <String>[],
     ),
   );
 }

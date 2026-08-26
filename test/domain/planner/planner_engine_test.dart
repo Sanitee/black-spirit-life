@@ -248,6 +248,49 @@ void main() {
     expect(result.missing.single.need, 10);
   });
 
+  test(
+    'Tenacious exact routes ignore stale per-ingredient quality choices',
+    () {
+      final result = engine.buildPlan(
+        mode: CraftMode.alchemy,
+        recipes: <String, Recipe>{
+          'Tenacious Origin of Life': _recipe(
+            'Tenacious Origin of Life',
+            <Ingredient>[_ingredient('Sunrise Herb', 50)],
+          ),
+          'Sunrise Herb': _leaf('Sunrise Herb'),
+          'High-Quality Sunrise Herb': _leaf('High-Quality Sunrise Herb'),
+          'Special Sunrise Herb': _leaf('Special Sunrise Herb'),
+        },
+        state: PlannerState(
+          target: 'Tenacious Origin of Life',
+          want: 1,
+          ingredientGrades: const <String, String>{
+            'recipe:Tenacious Origin of Life:Sunrise Herb': 'special',
+          },
+        ),
+        rules: PlannerRules(
+          qualityConversions: const <String, QualityConversionRule>{
+            'Sunrise Herb': QualityConversionRule(
+              high: QualityTierRule(
+                name: 'High-Quality Sunrise Herb',
+                ratio: 3,
+              ),
+              special: QualityTierRule(name: 'Special Sunrise Herb', ratio: 5),
+            ),
+          },
+        ),
+      );
+
+      final ingredient = result.steps.single.ingredients.single;
+      expect(ingredient.name, 'Sunrise Herb');
+      expect(ingredient.grade, 'normal');
+      expect(ingredient.need, 50);
+      expect(result.missing.single.name, 'Sunrise Herb');
+      expect(result.missing.single.need, 50);
+    },
+  );
+
   test('substitute pricing prefers an option that covers the full demand', () {
     final result = engine.buildPlan(
       mode: CraftMode.processing,
@@ -483,6 +526,105 @@ void main() {
       result.firstWhereStep('Target').ingredients.single.name,
       'Saved choice',
     );
+  });
+
+  test('substitute pricing uses rounded per-craft Worth quantities', () {
+    Map<String, Recipe> recipes() => <String, Recipe>{
+      'Target': _recipe(
+        'Target',
+        <Ingredient>[
+          _substituteIngredient(
+            'Worth one',
+            7,
+            const <String>['Worth one', 'Worth two'],
+            ratios: const <String, double>{'Worth one': 1, 'Worth two': 4 / 7},
+          ),
+        ],
+        type: 'processing',
+        outputMinimum: 1,
+        outputMaximum: 1,
+      ),
+      'Worth one': _leaf('Worth one'),
+      'Worth two': _leaf('Worth two'),
+    };
+
+    final cheaperWorthTwo = engine.buildPlan(
+      mode: CraftMode.processing,
+      recipes: recipes(),
+      state: PlannerState(
+        target: 'Target',
+        want: 10,
+        marketPrices: const <String, double>{'Worth one': 8, 'Worth two': 13},
+        marketStock: const <String, double>{'Worth one': 70, 'Worth two': 40},
+      ),
+      rules: PlannerRules(
+        marketIds: const <String, String>{'Worth one': '1', 'Worth two': '2'},
+      ),
+    );
+    final chosenWorthTwo = cheaperWorthTwo
+        .firstWhereStep('Target')
+        .ingredients
+        .single;
+    expect(chosenWorthTwo.name, 'Worth two');
+    expect(chosenWorthTwo.need, 40);
+
+    final understockedWorthTwo = engine.buildPlan(
+      mode: CraftMode.processing,
+      recipes: recipes(),
+      state: PlannerState(
+        target: 'Target',
+        want: 10,
+        marketPrices: const <String, double>{'Worth one': 8, 'Worth two': 13},
+        marketStock: const <String, double>{'Worth one': 70, 'Worth two': 35},
+      ),
+      rules: PlannerRules(
+        marketIds: const <String, String>{'Worth one': '1', 'Worth two': '2'},
+      ),
+    );
+    final chosenWorthOne = understockedWorthTwo
+        .firstWhereStep('Target')
+        .ingredients
+        .single;
+    expect(chosenWorthOne.name, 'Worth one');
+    expect(chosenWorthOne.need, 70);
+  });
+
+  test('owned substitute fallback compares useful coverage, not raw units', () {
+    final result = engine.buildPlan(
+      mode: CraftMode.processing,
+      recipes: <String, Recipe>{
+        'Target': _recipe(
+          'Target',
+          <Ingredient>[
+            _substituteIngredient(
+              'Worth one',
+              7,
+              const <String>['Worth one', 'Worth two'],
+              ratios: const <String, double>{
+                'Worth one': 1,
+                'Worth two': 4 / 7,
+              },
+            ),
+          ],
+          type: 'processing',
+          outputMinimum: 1,
+          outputMaximum: 1,
+        ),
+        'Worth one': _leaf('Worth one'),
+        'Worth two': _leaf('Worth two'),
+      },
+      state: PlannerState(
+        target: 'Target',
+        want: 1,
+        ignoreIngredientInventory: false,
+        inventory: const <String, double>{'Worth one': 3, 'Worth two': 2},
+      ),
+    );
+
+    final ingredient = result.firstWhereStep('Target').ingredients.single;
+    expect(ingredient.name, 'Worth two');
+    expect(ingredient.need, 4);
+    expect(ingredient.have, 2);
   });
 
   test('saved recipe variant switches the complete correlated formula', () {
@@ -737,13 +879,15 @@ Ingredient _ingredient(String name, double quantity) => Ingredient(
 Ingredient _substituteIngredient(
   String name,
   double quantity,
-  List<String> options,
-) => Ingredient(
+  List<String> options, {
+  Map<String, double>? ratios,
+}) => Ingredient(
   name: name,
   quantity: quantity,
   options: options,
   substituteGroup: 'test:$name',
-  substituteRatios: <String, double>{for (final option in options) option: 1},
+  substituteRatios:
+      ratios ?? <String, double>{for (final option in options) option: 1},
 );
 
 Recipe _leaf(String name) => _recipe(name, const <Ingredient>[]);

@@ -840,4 +840,84 @@ void main() {
       const Color(0xFF03120E),
     );
   });
+
+  testWidgets('brand titles stay inside the sidebar in every theme', (
+    tester,
+  ) async {
+    const hostKey = ValueKey<String>('brand-title-bounds-host');
+    final cases = <(String, ThemeSpec, Key)>[
+      ('Standard', StandardSpec.theme, AppBrandLockup.standardTitleKey),
+      (
+        'Illuminated Ledger',
+        IlluminatedLedgerSpec.theme,
+        AppBrandLockup.ledgerTitleKey,
+      ),
+      (
+        'Sakura Night Garden',
+        SakuraNightGardenSpec.theme,
+        AppBrandLockup.sakuraTitleKey,
+      ),
+    ];
+
+    for (final (label, spec, titleKey) in cases) {
+      await tester.pumpWidget(
+        _host(
+          spec,
+          MediaQuery(
+            data: const MediaQueryData(textScaler: TextScaler.linear(1.5)),
+            child: const SizedBox(
+              key: hostKey,
+              width: 202,
+              child: AppBrandLockup(),
+            ),
+          ),
+        ),
+      );
+
+      final title = find.byKey(titleKey);
+      final fitted = find.ancestor(of: title, matching: find.byType(FittedBox));
+      expect(title, findsOneWidget, reason: label);
+      expect(fitted, findsOneWidget, reason: label);
+      final fittedWidget = tester.widget<FittedBox>(fitted);
+      expect(fittedWidget.fit, BoxFit.scaleDown);
+      expect(fittedWidget.alignment, Alignment.centerLeft);
+
+      final titleBox = tester.renderObject<RenderBox>(title);
+      final fittedBox = tester.renderObject<RenderBox>(fitted);
+      final titleTopLeft = titleBox.localToGlobal(
+        Offset.zero,
+        ancestor: fittedBox,
+      );
+      final titleBottomRight = titleBox.localToGlobal(
+        titleBox.size.bottomRight(Offset.zero),
+        ancestor: fittedBox,
+      );
+      expect(titleTopLeft.dx, greaterThanOrEqualTo(-.01), reason: label);
+      expect(titleTopLeft.dy, greaterThanOrEqualTo(-.01), reason: label);
+      expect(
+        titleBottomRight.dx,
+        lessThanOrEqualTo(fittedBox.size.width + .01),
+        reason: label,
+      );
+      expect(
+        titleBottomRight.dy,
+        lessThanOrEqualTo(fittedBox.size.height + .01),
+        reason: label,
+      );
+
+      final hostRect = tester.getRect(find.byKey(hostKey));
+      final fittedRect = tester.getRect(fitted);
+      expect(
+        fittedRect.left,
+        greaterThanOrEqualTo(hostRect.left - .01),
+        reason: '$label title fit starts outside the sidebar',
+      );
+      expect(
+        fittedRect.right,
+        lessThanOrEqualTo(hostRect.right + .01),
+        reason: '$label title fit ends outside the sidebar',
+      );
+      expect(tester.takeException(), isNull, reason: label);
+    }
+  });
 }

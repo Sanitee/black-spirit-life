@@ -14,46 +14,47 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   group('WorkspaceShell navigation', () {
-    testWidgets('Processing hides advanced destinations and Bonus Recipes', (
-      tester,
-    ) async {
-      final semantics = tester.ensureSemantics();
-      await _setWindowSize(tester, const Size(1500, 940));
-      await tester.pumpWidget(
-        _host(
-          mode: CraftMode.processing,
-          destination: ShellDestination.planner,
-        ),
-      );
+    testWidgets(
+      'Processing keeps Inventory and hides editor and Bonus Recipes',
+      (tester) async {
+        final semantics = tester.ensureSemantics();
+        await _setWindowSize(tester, const Size(1500, 940));
+        await tester.pumpWidget(
+          _host(
+            mode: CraftMode.processing,
+            destination: ShellDestination.planner,
+          ),
+        );
 
-      expect(find.byKey(const ValueKey<String>('S07')), findsOneWidget);
-      expect(find.byKey(const ValueKey<String>('S08')), findsNothing);
-      expect(find.byKey(const ValueKey<String>('S09')), findsNothing);
-      expect(find.byKey(const ValueKey<String>('S10')), findsNothing);
-      expect(find.byKey(const ValueKey<String>('S11')), findsOneWidget);
-      expect(find.byKey(const ValueKey<String>('S12')), findsOneWidget);
-      expect(find.byKey(const ValueKey<String>('S16')), findsNothing);
-      expect(find.bySemanticsLabel('Open Bonus Recipes'), findsNothing);
-      expect(
-        find.bySemanticsLabel('Open About Black Spirit Life'),
-        findsNothing,
-      );
-      expect(find.bySemanticsLabel('Open Planner'), findsOneWidget);
-      expect(find.byKey(ShellActionKeys.modeSelector), findsOneWidget);
-      expect(
-        find.byKey(ShellActionKeys.mode(CraftMode.alchemy)),
-        findsOneWidget,
-      );
-      expect(
-        find.byKey(ShellActionKeys.mode(CraftMode.cooking)),
-        findsOneWidget,
-      );
-      expect(
-        find.byKey(ShellActionKeys.mode(CraftMode.processing)),
-        findsOneWidget,
-      );
-      semantics.dispose();
-    });
+        expect(find.byKey(const ValueKey<String>('S07')), findsOneWidget);
+        expect(find.byKey(const ValueKey<String>('S08')), findsNothing);
+        expect(find.byKey(const ValueKey<String>('S09')), findsOneWidget);
+        expect(find.byKey(const ValueKey<String>('S10')), findsNothing);
+        expect(find.byKey(const ValueKey<String>('S11')), findsOneWidget);
+        expect(find.byKey(const ValueKey<String>('S12')), findsOneWidget);
+        expect(find.byKey(const ValueKey<String>('S16')), findsNothing);
+        expect(find.bySemanticsLabel('Open Bonus Recipes'), findsNothing);
+        expect(
+          find.bySemanticsLabel('Open About Black Spirit Life'),
+          findsNothing,
+        );
+        expect(find.bySemanticsLabel('Open Planner'), findsOneWidget);
+        expect(find.byKey(ShellActionKeys.modeSelector), findsOneWidget);
+        expect(
+          find.byKey(ShellActionKeys.mode(CraftMode.alchemy)),
+          findsOneWidget,
+        );
+        expect(
+          find.byKey(ShellActionKeys.mode(CraftMode.cooking)),
+          findsOneWidget,
+        );
+        expect(
+          find.byKey(ShellActionKeys.mode(CraftMode.processing)),
+          findsOneWidget,
+        );
+        semantics.dispose();
+      },
+    );
 
     testWidgets('About remains gated until a later product update', (
       tester,
@@ -423,6 +424,61 @@ void main() {
     },
   );
 
+  testWidgets('Atelier navigation no longer sits below Ledger and Sakura', (
+    tester,
+  ) async {
+    for (final viewport in const <Size>[Size(1500, 940), Size(1200, 712)]) {
+      await _setWindowSize(tester, viewport);
+      final centers = <double>[];
+
+      for (final spec in <ThemeSpec>[
+        StandardSpec.theme,
+        IlluminatedLedgerSpec.theme,
+        SakuraNightGardenSpec.theme,
+      ]) {
+        Future<Rect> capture(bool showAdvanced) async {
+          await tester.pumpWidget(
+            _host(
+              mode: CraftMode.alchemy,
+              destination: ShellDestination.planner,
+              spec: spec,
+              showAdvancedDestinations: showAdvanced,
+            ),
+          );
+          await tester.pump();
+          return tester.getRect(find.byKey(WorkspaceShellKeys.navigation));
+        }
+
+        final visible = await capture(false);
+        final advanced = await capture(true);
+        centers.add(visible.center.dy);
+        if (spec.id == StandardSpec.theme.id) {
+          expect(
+            (visible.center.dy - advanced.center.dy).abs(),
+            lessThanOrEqualTo(viewport.width <= 1200 ? 28 : 12),
+            reason: 'Atelier should rebalance when tabs are revealed',
+          );
+        }
+      }
+
+      final atelierCenter = centers[0];
+      final alignmentTolerance = viewport.width <= 1200 ? 9.0 : 2.0;
+      expect(atelierCenter, lessThanOrEqualTo(centers[1] + alignmentTolerance));
+      expect(atelierCenter, lessThanOrEqualTo(centers[2] + alignmentTolerance));
+      final top = centers.reduce((a, b) => a < b ? a : b);
+      final bottom = centers.reduce((a, b) => a > b ? a : b);
+      expect(
+        bottom - top,
+        lessThanOrEqualTo(viewport.width <= 1200 ? 72 : 26),
+        reason:
+            '${viewport.width.toInt()}x${viewport.height.toInt()} '
+            'should keep the taller Ledger brand within one compact '
+            'navigation row of the other themes',
+      );
+      expect(tester.takeException(), isNull);
+    }
+  });
+
   testWidgets(
     'Standard selected and inactive navigation keep one aligned surface',
     (tester) async {
@@ -735,9 +791,10 @@ void main() {
     );
     final modeRect = tester.getRect(find.byKey(ShellActionKeys.modeSelector));
 
-    // Hiding About leaves one additional 59 px navigation cadence for the
-    // retained marginalia at the minimum application height.
-    expect(hostRect.height, closeTo(190, .001));
+    // Inventory now occupies the 59 px navigation cadence that used to be
+    // available to the ornament. The remaining host still preserves the full
+    // artwork aspect ratio without overlapping the mode controls.
+    expect(hostRect.height, closeTo(131, .001));
     expect(imageRect.height, closeTo(hostRect.height, .001));
     expect(imageRect.width / imageRect.height, closeTo(2 / 3, .001));
     expect(imageRect.center.dx, closeTo(hostRect.center.dx, .001));

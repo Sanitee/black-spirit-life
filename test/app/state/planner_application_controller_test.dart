@@ -20,7 +20,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   test(
-    'planner actions update only the selected mode and flush once',
+    'planner actions keep planner state scoped and Inventory shared',
     () async {
       final saves = <PlannerState>[];
       final controller = PlannerApplicationController(
@@ -48,10 +48,9 @@ void main() {
       expect(alchemy.state.value.completedSteps, contains('Potion'));
       expect(alchemy.expandedSteps.value, contains('Potion'));
       expect(alchemy.state.value.inventory['Base'], 4);
-      expect(
-        controller.modes[CraftMode.cooking]!.state.value.inventory,
-        isEmpty,
-      );
+      for (final mode in CraftMode.values) {
+        expect(controller.modes[mode]!.state.value.inventory['Base'], 4);
+      }
 
       await controller.flush();
       expect(saves, isNotEmpty);
@@ -73,13 +72,40 @@ void main() {
   });
 
   test(
-    'advanced navigation stays hidden until Editor Settings enables it',
+    'completing a queue step consumes inputs and adds output once',
+    () async {
+      final controller = _controller();
+      final mode = controller.active;
+      expect(mode.commitInventory('Base', '250'), isTrue);
+      final step = mode.plan.value.steps.single;
+      final consumedBase = step.ingredients
+          .where((ingredient) => ingredient.name == 'Base')
+          .fold<double>(0, (total, ingredient) => total + ingredient.need);
+
+      expect(mode.completeStep(step), isTrue);
+      final expectedBase = (250 - consumedBase).clamp(0, double.infinity);
+      for (final craftMode in CraftMode.values) {
+        final inventory = controller.modes[craftMode]!.state.value.inventory;
+        expect(inventory['Base'] ?? 0, expectedBase);
+        expect(inventory['Potion'], step.produced);
+      }
+      expect(mode.state.value.completedSteps, contains('Potion'));
+
+      final afterFirst = Map<String, double>.of(mode.state.value.inventory);
+      expect(mode.completeStep(step), isFalse);
+      expect(mode.state.value.inventory, afterFirst);
+      await controller.dispose();
+    },
+  );
+
+  test(
+    'Inventory stays available while Recipe Editor remains advanced',
     () async {
       final controller = _controller();
       final mode = controller.active;
 
       mode.navigate('inventory');
-      expect(mode.state.value.view, 'plan');
+      expect(mode.state.value.view, 'inventory');
       mode.navigate('editor');
       expect(mode.state.value.view, 'plan');
 
@@ -97,7 +123,7 @@ void main() {
         immediate: true,
       );
       mode.navigate('inventory');
-      expect(mode.state.value.view, 'plan');
+      expect(mode.state.value.view, 'inventory');
       await controller.dispose();
     },
   );

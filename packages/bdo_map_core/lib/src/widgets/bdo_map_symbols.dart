@@ -32,6 +32,8 @@ enum BdoMapSymbolState {
   unowned,
   owned,
   recommendedLodging,
+  recommendedStorage,
+  recommendedHouseUse,
   recommendedPrerequisite,
   selected,
   unavailable,
@@ -197,6 +199,8 @@ String bdoMapSymbolStateLabel(BdoMapSymbolState state) {
     BdoMapSymbolState.unowned => 'Not owned',
     BdoMapSymbolState.owned => 'Owned',
     BdoMapSymbolState.recommendedLodging => 'Recommended lodging',
+    BdoMapSymbolState.recommendedStorage => 'Recommended storage',
+    BdoMapSymbolState.recommendedHouseUse => 'Recommended house',
     BdoMapSymbolState.recommendedPrerequisite => 'Recommended prerequisite',
     BdoMapSymbolState.selected => 'Selected',
     BdoMapSymbolState.unavailable => 'Unavailable',
@@ -210,6 +214,8 @@ String bdoMapSymbolStateLabel(BdoMapSymbolState state) {
 Set<BdoMapSymbolState> bdoMapSymbolStates({
   bool owned = false,
   bool recommendedLodging = false,
+  bool recommendedStorage = false,
+  bool recommendedHouseUse = false,
   bool recommendedPrerequisite = false,
   bool selected = false,
   bool unavailable = false,
@@ -217,6 +223,8 @@ Set<BdoMapSymbolState> bdoMapSymbolStates({
   final states = <BdoMapSymbolState>{
     if (owned) BdoMapSymbolState.owned else BdoMapSymbolState.unowned,
     if (recommendedLodging) BdoMapSymbolState.recommendedLodging,
+    if (recommendedStorage) BdoMapSymbolState.recommendedStorage,
+    if (recommendedHouseUse) BdoMapSymbolState.recommendedHouseUse,
     if (recommendedPrerequisite) BdoMapSymbolState.recommendedPrerequisite,
     if (selected) BdoMapSymbolState.selected,
     if (unavailable) BdoMapSymbolState.unavailable,
@@ -228,8 +236,8 @@ Set<BdoMapSymbolState> bdoMapSymbolStates({
 ///
 /// Availability/recommendation colors remain visible when selected; selection
 /// adds the bright outer edge and halo. If conflicting base states are passed,
-/// unavailable wins, followed by lodging recommendation, prerequisite
-/// recommendation, owned, and unowned.
+/// unavailable wins, followed by Storage recommendation, lodging
+/// recommendation, prerequisite recommendation, owned, and unowned.
 BdoMapSymbolStyle bdoMapSymbolStyle(
   Iterable<BdoMapSymbolState> states, {
   ResourceMapChromeThemeData chromeTheme =
@@ -244,6 +252,10 @@ BdoMapSymbolStyle bdoMapSymbolStyle(
   final baseState = switch (normalized) {
     _ when normalized.contains(BdoMapSymbolState.unavailable) =>
       BdoMapSymbolState.unavailable,
+    _ when normalized.contains(BdoMapSymbolState.recommendedStorage) =>
+      BdoMapSymbolState.recommendedStorage,
+    _ when normalized.contains(BdoMapSymbolState.recommendedHouseUse) =>
+      BdoMapSymbolState.recommendedHouseUse,
     _ when normalized.contains(BdoMapSymbolState.recommendedLodging) =>
       BdoMapSymbolState.recommendedLodging,
     _ when normalized.contains(BdoMapSymbolState.recommendedPrerequisite) =>
@@ -283,6 +295,26 @@ BdoMapSymbolStyle bdoMapSymbolStyle(
       borderWidth: 1.5,
       haloScale: 1.18,
       semanticStateLabel: 'Recommended lodging',
+    ),
+    BdoMapSymbolState.recommendedStorage => const BdoMapSymbolStyle(
+      foreground: Color(0xFF10203B),
+      background: Color(0xFF8FB5FF),
+      border: Color(0xFFD9E6FF),
+      halo: Color(0x558FB5FF),
+      opacity: 1,
+      borderWidth: 1.5,
+      haloScale: 1.18,
+      semanticStateLabel: 'Recommended storage',
+    ),
+    BdoMapSymbolState.recommendedHouseUse => const BdoMapSymbolStyle(
+      foreground: Color(0xFF281638),
+      background: Color(0xFFD6A4FF),
+      border: Color(0xFFF0DDFF),
+      halo: Color(0x55D6A4FF),
+      opacity: 1,
+      borderWidth: 1.5,
+      haloScale: 1.18,
+      semanticStateLabel: 'Recommended house',
     ),
     BdoMapSymbolState.recommendedPrerequisite => const BdoMapSymbolStyle(
       foreground: Color(0xFF2B220B),

@@ -8,20 +8,15 @@ import '../../domain/formatting/planner_formatters.dart';
 import '../../visual/visual.dart';
 import '../shared/mode_item_icon.dart';
 import 'inventory_action_keys.dart';
+import 'inventory_amount_input_formatter.dart';
 import 'inventory_projection.dart';
 
-/// Compact editable row for one item in one named storage.
-///
-/// The field edits only [locationAmount]. [totalAmount] is deliberately
-/// read-only because lowering an aggregate cannot be assigned safely across
-/// several storages.
+/// Compact editable row for one item in the shared Inventory.
 class InventoryStorageItemRow extends StatefulWidget {
   const InventoryStorageItemRow({
     required this.controller,
     required this.item,
-    required this.locationName,
-    required this.locationAmount,
-    required this.totalAmount,
+    required this.amount,
     required this.index,
     required this.selected,
     required this.onSelected,
@@ -30,15 +25,14 @@ class InventoryStorageItemRow extends StatefulWidget {
     required this.onUnregisterFocus,
     required this.onCopy,
     required this.onCommitAmount,
+    required this.onRemove,
     this.onEdit,
     super.key,
   });
 
   final ModeFeatureController controller;
   final InventoryItemRecord item;
-  final String locationName;
-  final double locationAmount;
-  final double totalAmount;
+  final double amount;
   final int index;
   final bool selected;
   final ValueChanged<String> onSelected;
@@ -47,6 +41,7 @@ class InventoryStorageItemRow extends StatefulWidget {
   final void Function(String name, FocusNode node) onUnregisterFocus;
   final Future<void> Function(String exactName) onCopy;
   final bool Function(String text) onCommitAmount;
+  final VoidCallback? onRemove;
   final VoidCallback? onEdit;
 
   @override
@@ -58,7 +53,7 @@ class _InventoryStorageItemRowState extends State<InventoryStorageItemRow> {
   late final FocusNode _rowFocus = FocusNode(debugLabel: 'Inventory item row');
   late final FocusNode _amountFocus = FocusNode()..addListener(_focusChanged);
   late final TextEditingController _amount = TextEditingController(
-    text: formatGroupedEditableQuantity(widget.locationAmount),
+    text: formatGroupedEditableQuantity(widget.amount),
   );
   late String _lastCommitted = _amount.text;
   String? _error;
@@ -76,9 +71,8 @@ class _InventoryStorageItemRowState extends State<InventoryStorageItemRow> {
       oldWidget.onUnregisterFocus(oldWidget.item.name, _rowFocus);
       widget.onRegisterFocus(widget.item.name, _rowFocus);
     }
-    if (!_amountFocus.hasFocus &&
-        oldWidget.locationAmount != widget.locationAmount) {
-      final text = formatGroupedEditableQuantity(widget.locationAmount);
+    if (!_amountFocus.hasFocus && oldWidget.amount != widget.amount) {
+      final text = formatGroupedEditableQuantity(widget.amount);
       _amount.value = TextEditingValue(
         text: text,
         selection: TextSelection.collapsed(offset: text.length),
@@ -141,10 +135,7 @@ class _InventoryStorageItemRowState extends State<InventoryStorageItemRow> {
   @override
   Widget build(BuildContext context) {
     final spec = context.visualTheme;
-    final hasOtherLocations =
-        (widget.totalAmount - widget.locationAmount).abs() > 0.0000001;
-    final locationText = formatQuantity(widget.locationAmount);
-    final totalText = formatQuantity(widget.totalAmount);
+    final amountText = formatQuantity(widget.amount);
     return FocusTraversalOrder(
       order: NumericFocusOrder(widget.index.toDouble()),
       child: Focus(
@@ -158,129 +149,174 @@ class _InventoryStorageItemRowState extends State<InventoryStorageItemRow> {
           container: true,
           explicitChildNodes: true,
           selected: widget.selected,
-          label:
-              '${widget.item.name}, $locationText in ${widget.locationName}, '
-              '$totalText total',
+          label: '${widget.item.name}, $amountText owned',
           child: GestureDetector(
             behavior: HitTestBehavior.translucent,
             onTap: () => widget.onSelected(widget.item.name),
             child: AppSurface(
               role: AppSurfaceRole.row,
-              tone: widget.locationAmount > 0
+              tone: widget.amount > 0
                   ? AppSurfaceTone.success
                   : AppSurfaceTone.neutral,
               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-              child: Row(
-                children: <Widget>[
-                  ModeItemIcon(
-                    controller: widget.controller,
-                    name: widget.item.name,
-                    size: 40,
-                  ),
-                  const SizedBox(width: 11),
-                  Expanded(
-                    child: TextButton(
-                      key: InventoryActionKeys.row('I09', widget.item.name),
-                      onPressed: () => widget.onCopy(widget.item.name),
-                      style: ButtonStyle(
-                        alignment: Alignment.centerLeft,
-                        padding: const WidgetStatePropertyAll(EdgeInsets.zero),
-                        minimumSize: const WidgetStatePropertyAll(Size.zero),
-                        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                        backgroundColor: const WidgetStatePropertyAll(
-                          Colors.transparent,
-                        ),
-                        overlayColor: const WidgetStatePropertyAll(
-                          Colors.transparent,
-                        ),
-                      ),
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: <Widget>[
-                          Text(
-                            widget.item.name,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: spec.typography.body.copyWith(
-                              fontSize: 14,
-                              fontWeight: FontWeight.w700,
-                            ),
-                          ),
-                          const SizedBox(height: 2),
-                          Text(
-                            widget.item.savedOnly
-                                ? '${widget.item.smartGroup} · saved item'
-                                : widget.item.smartGroup,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: spec.typography.meta.copyWith(
-                              fontStyle: FontStyle.normal,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  if (hasOtherLocations) ...<Widget>[
-                    SizedBox(
-                      width: 112,
-                      child: Text(
-                        'Total $totalText',
-                        textAlign: TextAlign.right,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: spec.typography.meta.copyWith(
-                          fontStyle: FontStyle.normal,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 10),
-                  ],
-                  SizedBox(
-                    width: 132,
-                    child: AppTextField(
-                      key: InventoryActionKeys.row('I10', widget.item.name),
-                      controller: _amount,
-                      focusNode: _amountFocus,
-                      semanticLabel:
-                          'Amount of ${widget.item.name} in ${widget.locationName}',
-                      keyboardType: const TextInputType.numberWithOptions(
-                        decimal: true,
-                      ),
-                      textAlign: TextAlign.right,
-                      onSubmitted: _commit,
-                      suffixIcon: _error == null
-                          ? null
-                          : Tooltip(
-                              message: _error!,
-                              child: const Icon(Icons.error_outline, size: 17),
-                            ),
-                    ),
-                  ),
-                  if (widget.onEdit != null) ...<Widget>[
-                    const SizedBox(width: 8),
-                    SizedBox.square(
-                      dimension: 38,
-                      child: AppButton(
-                        key: InventoryActionKeys.row('I11', widget.item.name),
-                        role: AppButtonRole.icon,
-                        minimumSize: const Size.square(38),
-                        padding: const EdgeInsets.all(8),
-                        semanticLabel: 'Edit ${widget.item.name}',
-                        tooltip: 'Edit item settings',
-                        onPressed: widget.onEdit,
-                        child: const AppVectorGlyph('edit', size: 17),
-                      ),
-                    ),
-                  ],
-                ],
+              child: LayoutBuilder(
+                builder: (context, constraints) => _buildContents(
+                  context: context,
+                  spec: spec,
+                  availableWidth: constraints.maxWidth,
+                ),
               ),
             ),
           ),
         ),
       ),
+    );
+  }
+
+  Widget _buildContents({
+    required BuildContext context,
+    required ThemeSpec spec,
+    required double availableWidth,
+  }) {
+    final icon = ModeItemIcon(
+      controller: widget.controller,
+      name: widget.item.name,
+      size: 44,
+      searchAcrossModes: true,
+      aliases: <String>[?widget.item.recipe?.qualityBase],
+    );
+    final nameStyle = spec.typography.body.copyWith(
+      fontSize: 15,
+      height: 1.12,
+      fontWeight: FontWeight.w700,
+    );
+    final name = Tooltip(
+      message: widget.item.name,
+      child: TextButton(
+        key: InventoryActionKeys.row('I09', widget.item.name),
+        onPressed: () => widget.onCopy(widget.item.name),
+        style: ButtonStyle(
+          alignment: Alignment.centerLeft,
+          padding: const WidgetStatePropertyAll(EdgeInsets.zero),
+          minimumSize: const WidgetStatePropertyAll(Size.zero),
+          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+          backgroundColor: const WidgetStatePropertyAll(Colors.transparent),
+          overlayColor: const WidgetStatePropertyAll(Colors.transparent),
+        ),
+        child: Text(
+          widget.item.name,
+          maxLines: 2,
+          overflow: TextOverflow.ellipsis,
+          style: nameStyle,
+        ),
+      ),
+    );
+    final amount = SizedBox(
+      width: 100,
+      child: AppTextField(
+        key: InventoryActionKeys.row('I10', widget.item.name),
+        controller: _amount,
+        focusNode: _amountFocus,
+        semanticLabel: 'Owned amount for ${widget.item.name}',
+        keyboardType: const TextInputType.numberWithOptions(decimal: true),
+        inputFormatters: const <TextInputFormatter>[
+          InventoryAmountInputFormatter(),
+        ],
+        textAlign: TextAlign.right,
+        onSubmitted: _commit,
+        suffixIcon: _error == null
+            ? null
+            : Tooltip(
+                message: _error!,
+                child: const Icon(Icons.error_outline, size: 17),
+              ),
+      ),
+    );
+    final edit = widget.onEdit == null
+        ? null
+        : SizedBox.square(
+            dimension: 38,
+            child: AppButton(
+              key: InventoryActionKeys.row('I11', widget.item.name),
+              role: AppButtonRole.icon,
+              minimumSize: const Size.square(38),
+              padding: const EdgeInsets.all(8),
+              semanticLabel: 'Edit ${widget.item.name}',
+              tooltip: 'Edit item settings',
+              onPressed: widget.onEdit,
+              child: const AppVectorGlyph('edit', size: 17),
+            ),
+          );
+    final remove = SizedBox.square(
+      dimension: 38,
+      child: AppButton(
+        key: InventoryActionKeys.row('I15', widget.item.name),
+        role: AppButtonRole.icon,
+        minimumSize: const Size.square(38),
+        padding: const EdgeInsets.all(8),
+        semanticLabel: 'Remove ${widget.item.name} from Inventory',
+        tooltip: widget.onRemove == null
+            ? 'No saved amount'
+            : 'Remove from Inventory',
+        onPressed: widget.onRemove,
+        child: const AppVectorGlyph('trash', size: 17),
+      ),
+    );
+
+    final inlineNameWidth =
+        availableWidth - 44 - 10 - 14 - 100 - (edit == null ? 0 : 48) - 10 - 38;
+    var stackControls = availableWidth < 350 || inlineNameWidth <= 0;
+    if (!stackControls) {
+      final inlineName = TextPainter(
+        text: TextSpan(text: widget.item.name, style: nameStyle),
+        textDirection: Directionality.of(context),
+        textScaler: MediaQuery.textScalerOf(context),
+        maxLines: 2,
+      )..layout(maxWidth: inlineNameWidth);
+      stackControls = inlineName.didExceedMaxLines;
+      inlineName.dispose();
+    }
+
+    if (!stackControls) {
+      return Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: <Widget>[
+          icon,
+          const SizedBox(width: 10),
+          Expanded(child: name),
+          const SizedBox(width: 14),
+          amount,
+          if (edit != null) ...<Widget>[const SizedBox(width: 10), edit],
+          const SizedBox(width: 10),
+          remove,
+        ],
+      );
+    }
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: <Widget>[
+        icon,
+        const SizedBox(width: 9),
+        Expanded(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: <Widget>[
+              name,
+              const SizedBox(height: 8),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: <Widget>[
+                  amount,
+                  if (edit != null) ...<Widget>[const SizedBox(width: 8), edit],
+                  const SizedBox(width: 10),
+                  remove,
+                ],
+              ),
+            ],
+          ),
+        ),
+      ],
     );
   }
 }

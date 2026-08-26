@@ -2392,7 +2392,7 @@ class BdoMapPainter extends CustomPainter {
     if (image == null) {
       return false;
     }
-    final side = extent ?? (selected ? 47.0 : 36.0);
+    final side = extent ?? (selected ? 50.0 : 42.0);
     final destination = Rect.fromCenter(
       center: center,
       width: side,
@@ -2457,8 +2457,8 @@ class BdoMapPainter extends CustomPainter {
           : bdoWorkerActivityColor(activity);
       final radius = _plannedNetworkFocus
           ? activity == null
-                ? 10.5
-                : 9.5
+                ? 13.0
+                : 12.0
           : activity == null
           ? 15.0
           : 14.0;
@@ -2472,7 +2472,7 @@ class BdoMapPainter extends CustomPainter {
         dimmed: dimmed,
         extent: _plannedNetworkFocus
             ? _plannedNodeMarkerExtent(clustered: true)
-            : 38,
+            : 44,
       );
       if (!paintedSourceIcon) {
         canvas.drawCircle(
@@ -2514,10 +2514,10 @@ class BdoMapPainter extends CustomPainter {
     final dimmed = selectedNodeId != null && !selected && !emphasized;
     final markerColor = _workerNodeColor(node);
     final radius = selected
-        ? 13.0
+        ? 14.5
         : _plannedNetworkFocus
-        ? 8.5
-        : 10.5;
+        ? 12.5
+        : 13.0;
     if (selected) {
       canvas.drawCircle(
         position,
@@ -2567,7 +2567,7 @@ class BdoMapPainter extends CustomPainter {
         glyphPainters,
         icon: _workerNodeIcon(node),
         center: position,
-        size: selected ? 15.5 : 13,
+        size: selected ? 17 : 16,
         color: markerColor.withAlpha(dimmed ? 115 : 255),
       );
     }
@@ -2676,7 +2676,7 @@ class BdoMapPainter extends CustomPainter {
             position +
             Offset(
               0,
-              selected && outputArtworkOwnsUnselectedLabels ? 31.0 : -23.0,
+              selected && outputArtworkOwnsUnselectedLabels ? 34.0 : -27.0,
             ),
       );
       if (selected) {
@@ -2773,12 +2773,12 @@ class BdoMapPainter extends CustomPainter {
     }
     final zoom = cameraController.camera.zoom;
     if (zoom < 2.75) {
-      return clustered ? 27 : 23;
+      return clustered ? 34 : 30;
     }
     if (zoom < 4.25) {
-      return clustered ? 31 : 27;
+      return clustered ? 38 : 34;
     }
-    return clustered ? 35 : 32;
+    return clustered ? 42 : 38;
   }
 
   void _paintGatheringSpots(Canvas canvas, Size size) {

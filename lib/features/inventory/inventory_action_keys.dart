@@ -17,13 +17,24 @@ abstract final class InventoryActionKeys {
   static const i12 = ValueKey<String>('I12');
   static const i13 = ValueKey<String>('I13');
   static const i14 = ValueKey<String>('I14');
-  static const pasteScreenshot = ValueKey<String>(
-    'inventory-paste-screenshot',
-  );
+  static const i15 = ValueKey<String>('I15');
+  static const pasteScreenshot = ValueKey<String>('inventory-paste-screenshot');
   static const chooseScreenshot = ValueKey<String>(
     'inventory-choose-screenshot',
   );
   static const addStorage = ValueKey<String>('inventory-add-storage');
+  static const storageSelector = ValueKey<String>('inventory-storage-selector');
+  static const renameStorage = ValueKey<String>('inventory-rename-storage');
+  static const addItem = ValueKey<String>('inventory-add-item');
+  static const emptyInventory = ValueKey<String>('inventory-empty-inventory');
+  static const confirmEmptyInventory = ValueKey<String>(
+    'inventory-confirm-empty-inventory',
+  );
+
+  // Legacy aliases keep older automation finders source-compatible while the
+  // named-storage UI is retired.
+  static const emptyStorage = emptyInventory;
+  static const confirmEmptyStorage = confirmEmptyInventory;
 
   static Key row(String actionId, String stableName) =>
       ValueKey<String>('$actionId:$stableName');

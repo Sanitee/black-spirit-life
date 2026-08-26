@@ -103,7 +103,7 @@ const _aboutView = ActionAssertion(
 );
 const _processingNavigation = ActionAssertion(
   testPath: 'test/features/shell/workspace_shell_test.dart',
-  testName: 'Processing hides advanced destinations and Bonus Recipes',
+  testName: 'Processing keeps Inventory and hides editor and Bonus Recipes',
   proves:
       'Processing omits Bonus and keeps Inventory and Recipe Editor behind advanced settings.',
 );
@@ -175,7 +175,7 @@ const _plannerAcquisition = ActionAssertion(
 );
 const _plannerDone = ActionAssertion(
   testPath: 'test/features/planner/planner_view_test.dart',
-  testName: 'P08 uses Ledger wax without changing its domain command',
+  testName: 'P08 uses Ledger wax and records the crafted output',
   proves:
       'Done invokes the domain command and records the exact completed step.',
 );
@@ -266,57 +266,51 @@ const _bookDeleteRestart = ActionAssertion(
 );
 const _inventoryFilter = ActionAssertion(
   testPath: 'test/features/inventory/inventory_view_test.dart',
-  testName: 'searches real metadata and filters by smart material family',
+  testName: 'searches real metadata inside human material sections',
   proves:
-      'Metadata search and smart material-family selection change the visible rows.',
+      'Inventory search resolves item names, material sections, vendor metadata, empty results, and clear-search recovery.',
 );
 const _inventoryClear = ActionAssertion(
   testPath: 'test/features/inventory/inventory_view_test.dart',
-  testName: 'clear is editor-only and clears all locations without a prompt',
+  testName: 'empty inventory confirms, mirrors, and offers whole-state undo',
   proves:
-      'The editor-only clear action empties every named location without a confirmation or undo surface.',
+      'Empty Inventory requires confirmation, clears the shared inventory across every mode, and offers one whole-state undo.',
 );
 const _inventoryGroups = ActionAssertion(
   testPath: 'test/features/inventory/inventory_view_test.dart',
-  testName: 'editor group tools add, regroup, rename, and reset metadata',
+  testName: 'Alchemy, Cooking, and Processing plans combine independently',
   proves:
-      'Editor settings gate normalized group creation and move an existing item through the searchable selector.',
+      'Owned and per-mode plan filters remain compact and combine or toggle independently as planner targets change.',
 );
 const _inventoryRename = ActionAssertion(
   testPath: 'test/features/inventory/inventory_view_test.dart',
-  testName: 'editor group tools add, regroup, rename, and reset metadata',
+  testName: 'manually adds and removes one shared item',
   proves:
-      'Rename migrates metadata and reset removes empty overrides transactionally.',
+      'Manual item entry saves one catalog item and amount to every mode, while removal clears it and records undo offers.',
 );
 const _inventoryRows = ActionAssertion(
   testPath: 'test/features/inventory/inventory_view_test.dart',
-  testName: 'edits one storage amount with grouped formatting and validation',
+  testName: 'amount edits are shared by every planner mode',
   proves:
-      'Copy and per-storage zero/positive amounts update the planner aggregate with grouped display formatting.',
+      'Committed positive amounts are shared across every planner mode, displayed with grouped formatting, and invalid negatives are rejected.',
 );
 const _inventoryItemSettings = ActionAssertion(
   testPath: 'test/features/inventory/inventory_view_test.dart',
-  testName: 'item settings dialog saves category and source together',
+  testName: 'pending amount commits on focus loss before reconstruction',
   proves:
-      'The editor-only item dialog saves group and source metadata together.',
+      'A pending amount commits on focus loss, persists through reconstruction, and restores its grouped display value.',
 );
 const _inventoryDisplayFilters = ActionAssertion(
   testPath: 'test/features/inventory/inventory_view_test.dart',
-  testName: 'Materials hides equipment-like clutter until All items',
+  testName: 'planner Inventory excludes equipment-like clutter',
   proves:
-      'The default Materials view omits equipment clutter and All items reveals it without deleting data.',
+      'Planner Inventory excludes equipment-like recipe edits from both its material and all-item views without mutating data.',
 );
 const _inventoryKeyboard = ActionAssertion(
   testPath: 'test/features/inventory/inventory_view_test.dart',
-  testName: 'lazy list keeps scroll, arrow focus, and useful semantics',
+  testName: 'lazy grid keeps scroll, arrow focus, and useful semantics',
   proves:
       'Lazy construction, offset, arrow focus, selection, and semantics remain stable.',
-);
-const _categoryTransaction = ActionAssertion(
-  testPath: 'test/domain/state/state_transactions_test.dart',
-  testName: 'rename migrates metadata and reset removes empty overrides',
-  proves:
-      'Category changes preserve noncategory metadata and remove empty entries.',
 );
 const _deleteTransaction = ActionAssertion(
   testPath: 'test/domain/state/state_transactions_test.dart',
@@ -979,81 +973,78 @@ final List<ActionEvidence> actionEvidenceManifest = <ActionEvidence>[
   ),
   _e(
     'I02',
-    'Smart material-family selection shows the matching items and count.',
-    _inventoryFilter,
+    'Owned and plan filters remain compact and expose the current shared material subsets.',
+    _inventoryGroups,
     ActionStateContract.session,
   ),
   _e(
     'I03',
-    'Clear all amounts is editor-only and empties every named storage without confirmation or undo.',
-    _inventoryClear,
-    ActionStateContract.persistedTransaction,
-    state: _stateRoundTrip,
+    'Alchemy plan filtering adds only the materials required by the current Alchemy target.',
+    _inventoryGroups,
+    ActionStateContract.session,
   ),
   _e(
     'I04',
-    'Editor settings toggles group and item-management controls without document mutation.',
+    'Cooking plan filtering combines its material requirements with other selected planner modes.',
     _inventoryGroups,
     ActionStateContract.session,
   ),
   _e(
     'I05',
-    'Add Group normalizes a distinct category and selects it.',
+    'Processing plan filtering contributes its own live target requirements independently.',
     _inventoryGroups,
+    ActionStateContract.session,
+  ),
+  _e(
+    'I06',
+    'Selecting a plan filter again toggles that mode without disturbing the other selected filters.',
+    _inventoryGroups,
+    ActionStateContract.session,
+  ),
+  _e(
+    'I07',
+    'Manual Add Item saves a selected catalog item and amount into the shared inventory.',
+    _inventoryRename,
     ActionStateContract.persisted,
     state: _stateRoundTrip,
   ),
   _e(
-    'I06',
-    'Rename Group migrates matching metadata in one transaction.',
-    _inventoryRename,
-    ActionStateContract.persistedTransaction,
-    state: _categoryTransaction,
-  ),
-  _e(
-    'I07',
-    'Reset Overrides removes category overrides and empty metadata.',
-    _inventoryRename,
-    ActionStateContract.persistedTransaction,
-    state: _categoryTransaction,
-  ),
-  _e(
     'I08',
-    'Add Item moves the selected existing recipe/item into the current group.',
-    _inventoryGroups,
-    ActionStateContract.persisted,
+    'Removing one manually tracked item clears it from every planner mode and offers undo.',
+    _inventoryRename,
+    ActionStateContract.persistedTransaction,
     state: _stateRoundTrip,
   ),
   _e(
     'I09',
-    'Selecting the item name copies the exact inventory name.',
+    'Owned amounts render with grouped numeric formatting and useful item semantics.',
     _inventoryRows,
-    ActionStateContract.clipboard,
+    ActionStateContract.session,
   ),
   _e(
     'I10',
-    'A storage amount accepts grouped positive values and zero while preserving the all-storage total.',
+    'A committed positive amount updates the shared inventory used by every planner mode.',
     _inventoryRows,
     ActionStateContract.persisted,
     state: _stateRoundTrip,
   ),
   _e(
     'I11',
-    'The editor-only item dialog persists a normalized group.',
-    _inventoryItemSettings,
-    ActionStateContract.persisted,
-    state: _categoryTransaction,
-  ),
-  _e(
-    'I12',
-    'The editor-only item dialog persists an optional source note.',
+    'Pending amount input commits on focus loss before the Inventory view reconstructs.',
     _inventoryItemSettings,
     ActionStateContract.persisted,
     state: _stateRoundTrip,
   ),
   _e(
+    'I12',
+    'Empty Inventory requires confirmation, clears all modes, and offers whole-state undo.',
+    _inventoryClear,
+    ActionStateContract.persistedTransaction,
+    state: _stateRoundTrip,
+  ),
+  _e(
     'I13',
-    'Materials hides equipment-like clutter while All items reveals it without deleting anything.',
+    'Planner Inventory excludes equipment-like recipe edits without deleting their stored data.',
     _inventoryDisplayFilters,
     ActionStateContract.session,
   ),

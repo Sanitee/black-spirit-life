@@ -3,6 +3,7 @@ import 'state_copy.dart';
 
 const inventoryStorageExtensionKey = 'inventoryStorageV1';
 const inventoryUnassignedLocationId = 'unassigned';
+const inventoryStorageArchiveExtensionKey = 'inventoryStorageArchiveV1';
 
 /// One named BDO storage or character inventory.
 ///
@@ -365,6 +366,16 @@ final class InventoryStorageState {
     return next;
   }
 
+  /// Removes every saved quantity from one storage without changing any other
+  /// location or the selected storage.
+  InventoryStorageState clearLocation(String locationId) {
+    final location = locationById(locationId);
+    if (location == null || location.quantities.isEmpty) return this;
+    return _replaceLocation(
+      location.copyWith(quantities: const <String, double>{}),
+    );
+  }
+
   InventoryStorageState clearQuantities() => InventoryStorageState._(
     locations: <InventoryStorageLocation>[
       for (final location in locations)
@@ -399,6 +410,143 @@ final class InventoryStorageState {
     recoveredFromMismatch: false,
   );
 }
+
+/// Converts the retired named-storage ledger into one shared Inventory.
+///
+/// Each mode already stored the aggregate of its locations in
+/// [ModeState.inventory]. Location totals are therefore reconstructed exactly
+/// once, then the largest value for a case-insensitive item name is retained
+/// across work modes. Using the maximum avoids double-counting inventories
+/// that were copied between Alchemy and Cooking while still preserving items
+/// that existed in only one mode. The complete pre-migration values and named
+/// ledgers are archived once in the root extension bucket for rollback.
+PlannerState migrateToSharedInventory(PlannerState source) {
+  final alchemyStorage = InventoryStorageState.fromModeState(source.alchemy);
+  final cookingStorage = InventoryStorageState.fromModeState(source.cooking);
+  final processingStorage = InventoryStorageState.fromModeState(
+    source.processing,
+  );
+  final combined = <String, double>{};
+  for (final inventory in <Map<String, double>>[
+    alchemyStorage.aggregate,
+    cookingStorage.aggregate,
+    processingStorage.aggregate,
+  ]) {
+    for (final entry in inventory.entries) {
+      final existing = _matchingEntry(combined, entry.key);
+      if (existing == null) {
+        combined[entry.key] = entry.value;
+      } else if (entry.value > existing.value) {
+        combined[existing.key] = entry.value;
+      }
+    }
+  }
+
+  final hasNamedStorage = <ModeState>[
+    source.alchemy,
+    source.cooking,
+    source.processing,
+  ].any((mode) => mode.extensions.containsKey(inventoryStorageExtensionKey));
+  final alreadyShared =
+      !hasNamedStorage &&
+      _sameQuantities(source.alchemy.inventory, combined) &&
+      _sameQuantities(source.cooking.inventory, combined) &&
+      _sameQuantities(source.processing.inventory, combined);
+  if (alreadyShared) return source;
+
+  final extensions = Map<String, Object?>.of(source.extensions);
+  if (!extensions.containsKey(inventoryStorageArchiveExtensionKey)) {
+    extensions[inventoryStorageArchiveExtensionKey] = <String, Object?>{
+      'schemaVersion': 1,
+      'alchemy': _inventoryArchive(source.alchemy),
+      'cooking': _inventoryArchive(source.cooking),
+      'processing': _inventoryArchive(source.processing),
+    };
+  }
+  return source.copyWith(
+    alchemy: _withSharedInventory(source.alchemy, combined),
+    cooking: _withSharedInventory(source.cooking, combined),
+    processing: _withSharedInventory(source.processing, combined),
+    extensions: extensions,
+  );
+}
+
+/// Sets or adds reviewed amounts in the one shared Inventory and mirrors the
+/// result into every planner mode so all plans use the same owned quantities.
+PlannerState setSharedInventoryAmounts(
+  PlannerState source,
+  Map<String, double> quantities, {
+  bool add = false,
+}) {
+  final migrated = migrateToSharedInventory(source);
+  final inventory = Map<String, double>.of(migrated.alchemy.inventory);
+  for (final entry in quantities.entries) {
+    final name = _normalizeName(entry.key);
+    final value = entry.value;
+    if (name.isEmpty || !value.isFinite || value < 0) {
+      throw const FormatException('Inventory quantity is invalid.');
+    }
+    final existing = _matchingEntry(inventory, name);
+    if (existing != null) inventory.remove(existing.key);
+    final next = add ? (existing?.value ?? 0) + value : value;
+    if (next > 0) inventory[existing?.key ?? name] = next;
+  }
+  return _withSharedInventoryForEveryMode(migrated, inventory);
+}
+
+PlannerState clearSharedInventory(PlannerState source) =>
+    _withSharedInventoryForEveryMode(
+      migrateToSharedInventory(source),
+      const <String, double>{},
+    );
+
+/// Applies one atomic set of gains and consumptions to the shared Inventory.
+/// Negative deltas consume owned items and clamp at zero; positive deltas add
+/// crafted output. Item names are matched case-insensitively.
+PlannerState applySharedInventoryDeltas(
+  PlannerState source,
+  Map<String, double> deltas,
+) {
+  final migrated = migrateToSharedInventory(source);
+  final inventory = Map<String, double>.of(migrated.alchemy.inventory);
+  for (final entry in deltas.entries) {
+    final name = _normalizeName(entry.key);
+    final delta = entry.value;
+    if (name.isEmpty || !delta.isFinite) {
+      throw const FormatException('Inventory quantity change is invalid.');
+    }
+    if (delta == 0) continue;
+    final existing = _matchingEntry(inventory, name);
+    if (existing != null) inventory.remove(existing.key);
+    final next = ((existing?.value ?? 0) + delta)
+        .clamp(0, double.infinity)
+        .toDouble();
+    if (next > 0) inventory[existing?.key ?? name] = next;
+  }
+  return _withSharedInventoryForEveryMode(migrated, inventory);
+}
+
+Map<String, Object?> _inventoryArchive(ModeState mode) {
+  final result = <String, Object?>{'inventory': mode.inventory};
+  final ledger = mode.extensions[inventoryStorageExtensionKey];
+  if (ledger != null) result['namedStorage'] = ledger;
+  return result;
+}
+
+ModeState _withSharedInventory(ModeState mode, Map<String, double> inventory) {
+  final extensions = Map<String, Object?>.of(mode.extensions)
+    ..remove(inventoryStorageExtensionKey);
+  return mode.copyWith(inventory: inventory, extensions: extensions);
+}
+
+PlannerState _withSharedInventoryForEveryMode(
+  PlannerState source,
+  Map<String, double> inventory,
+) => source.copyWith(
+  alchemy: _withSharedInventory(source.alchemy, inventory),
+  cooking: _withSharedInventory(source.cooking, inventory),
+  processing: _withSharedInventory(source.processing, inventory),
+);
 
 Map<String, double> _validatedQuantities(Map<String, Object?> source) {
   final result = <String, double>{};

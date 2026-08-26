@@ -13,13 +13,17 @@ final class InventoryTestHarness {
   InventoryTestHarness({
     bool showDeleteTools = false,
     int additionalHerbs = 0,
+    bool includeLongItems = false,
     SavePlannerState? saveState,
     PlannerState? initialState,
     AcquireInventoryScreenshot? pasteScreenshot,
     AcquireInventoryScreenshot? chooseScreenshot,
   }) : session = InventorySessionController(),
        controller = PlannerApplicationController(
-         catalog: inventoryCatalog(additionalHerbs: additionalHerbs),
+         catalog: inventoryCatalog(
+           additionalHerbs: additionalHerbs,
+           includeLongItems: includeLongItems,
+         ),
          initialState:
              initialState ??
              inventoryDocument(showDeleteTools: showDeleteTools),
@@ -160,7 +164,10 @@ ModeState _emptyMode(CraftMode mode, {required String target}) => ModeState(
   appearance: AppearanceSettings.defaultsFor(mode),
 );
 
-CatalogSnapshot inventoryCatalog({int additionalHerbs = 0}) => CatalogSnapshot(
+CatalogSnapshot inventoryCatalog({
+  int additionalHerbs = 0,
+  bool includeLongItems = false,
+}) => CatalogSnapshot(
   sourceSha256: 'inventory-real-domain-fixture',
   sourceByteCount: 1,
   alchemy: ModeCatalog(
@@ -204,6 +211,20 @@ CatalogSnapshot inventoryCatalog({int additionalHerbs = 0}) => CatalogSnapshot(
           group: 'Wild Herbs',
           location: 'Balenos herb route',
         ),
+      if (includeLongItems) ...<String, Recipe>{
+        'Special Blue Umbrella Mushroom': _leaf(
+          'Special Blue Umbrella Mushroom',
+          group: 'Mushrooms',
+        ),
+        'Special Rainbow Button Mushroom': _leaf(
+          'Special Rainbow Button Mushroom',
+          group: 'Mushrooms',
+        ),
+        'Special Volcanic Umbrella Mushroom': _leaf(
+          'Special Volcanic Umbrella Mushroom',
+          group: 'Mushrooms',
+        ),
+      },
     },
     iconDataUris: const <String, String>{
       'Clear Liquid Reagent': _onePixelPng,

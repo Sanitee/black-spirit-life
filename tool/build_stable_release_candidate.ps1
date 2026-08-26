@@ -20,17 +20,17 @@ if ($PublicGitHubRepository -cnotmatch
     '^https://github\.com/[A-Za-z0-9](?:[A-Za-z0-9-]{0,38})/[A-Za-z0-9._-]{1,100}$') {
     throw 'The public update source must be the permanent canonical repository base URL: https://github.com/OWNER/REPOSITORY'
 }
-$Version = '0.1.4'
-$BuildNumber = '23'
-$PreviousStableVersion = '0.1.3'
-$PreviousPublicMainCommit =
-    'e0f241bf1a697caf8398e7da81a34aae426c8d64'
+$Version = '0.1.5'
+$BuildNumber = '24'
+$PreviousStableVersion = '0.1.4'
+$PreviousStableCommit =
+    '91660bc84312a9fa4897078e0082976e869c9c83'
 $UpdateSource = $PublicGitHubRepository
-$ReleaseNotesRelativePath = 'docs\releases\0.1.4.md'
+$ReleaseNotesRelativePath = 'docs\releases\0.1.5.md'
 $OutputDirectoryName = 'public-stable-candidate'
 $ManifestName = 'public-candidate-manifest.json'
 $RemainingBlockers = @(
-    'verify an installed 0.1.3 updates to 0.1.4 through the in-app update bar with its personal data intact',
+    'verify an installed 0.1.4 updates to 0.1.5 through the in-app update bar with its personal data intact',
     'complete fresh install, repair, and uninstall lifecycle verification',
     'fresh-clone privacy and release-artifact scan',
     'explicit final approval immediately before public GitHub publication'
@@ -52,12 +52,12 @@ $VelopackRuntimeSha256 =
     'C36D8B984639A8AF9D3397088D3FFB8213FE1BD0917F555CF0C6E33F014403EC'
 $VelopackPackageUrl =
     'https://github.com/velopack/velopack/releases/download/1.2.0/vpk.1.2.0.nupkg'
-$PreviousFeedBytes = 4867L
+$PreviousFeedBytes = 10596L
 $PreviousFeedSha256 =
-    '5601CF70C6165863843B59F7836517C0700FE5DA39B7270D3F9146E4F0EF10E2'
-$PreviousFullPackageBytes = 75111193L
+    '91E60BA0C52D0B61500602696F20D137C3BF91E42963073AD64751C8EC6B68B5'
+$PreviousFullPackageBytes = 75114791L
 $PreviousFullPackageSha256 =
-    '36AB8CDB27E885F677CAF3B1D5CD20A332A0C203DD17EE83B9D7B55900577110'
+    '873D0F1BBBE132FA72FD3CC61F0693D25DB562E6E3BB54361E5275BA9858CC7A'
 
 function Assert-LastExitCode {
     param([Parameter(Mandatory = $true)][string]$Operation)
@@ -214,7 +214,9 @@ $RunRoot = Join-Path (Join-Path $CandidateRoot 'runs') $RunId
 $InputPath = Join-Path $RunRoot 'published-inputs'
 $FeedPath = Join-Path $RunRoot 'feed'
 $ToolExpanded = Join-Path $RunRoot 'vpk'
-$InstallerBuildDirectory = Join-Path $RunRoot 'installer-build'
+$InstallerBuildDirectory = Join-Path (
+    Join-Path $ProjectRoot 'build\rc-i'
+) "$PID-$([Guid]::NewGuid().ToString('N').Substring(0, 8))"
 $ManifestPath = Join-Path $RunRoot $ManifestName
 $fullPackageName = "$PackageId-$Version-$UpdateChannel-full.nupkg"
 $deltaPackageName = "$PackageId-$Version-$UpdateChannel-delta.nupkg"
@@ -237,20 +239,16 @@ if ($sourceTags.Count -ne 1 -or $sourceTags[0] -cne $expectedSourceTag) {
 $previousSourceTag = "v$PreviousStableVersion"
 $previousTaggedCommit = (& git -C $ProjectRoot rev-parse "$previousSourceTag^{commit}").Trim()
 Assert-LastExitCode -Operation 'Previous public source tag check'
-$previousPublicMainCommit = (& git -C $ProjectRoot rev-parse 'HEAD^').Trim()
+$sourceParentCommit = (& git -C $ProjectRoot rev-parse 'HEAD^').Trim()
 Assert-LastExitCode -Operation 'Public source parent check'
-if ($previousPublicMainCommit -cne $PreviousPublicMainCommit) {
-    throw 'The public candidate must be one release commit on top of the reviewed public main commit.'
-}
-$previousPublicMainParent = (& git -C $ProjectRoot rev-parse "$PreviousPublicMainCommit^").Trim()
-Assert-LastExitCode -Operation 'Previous public main ancestry check'
-if ($previousPublicMainParent -cne $previousTaggedCommit) {
-    throw "The reviewed public main commit must be directly based on $previousSourceTag."
+if ($sourceParentCommit -cne $PreviousStableCommit -or
+    $sourceParentCommit -cne $previousTaggedCommit) {
+    throw "The public candidate must be one sanitized source commit on top of $previousSourceTag."
 }
 $sourceCommitCount = (& git -C $ProjectRoot rev-list --count HEAD).Trim()
 Assert-LastExitCode -Operation 'Git public history count check'
-if ($sourceCommitCount -cne '3') {
-    throw 'The public candidate must contain only the sanitized 0.1.3 root, reviewed public README commit, and sanitized 0.1.4 release commit.'
+if ($sourceCommitCount -cne '4') {
+    throw 'The public candidate must contain only the reviewed four-commit public history through sanitized 0.1.5.'
 }
 $sourceTag = $expectedSourceTag
 Assert-CleanSource -ProjectRoot $ProjectRoot -ExpectedCommit $sourceCommit
@@ -300,7 +298,7 @@ $publishedPreviousFeedHash =
     (Get-FileHash -Algorithm SHA256 -LiteralPath $publishedPreviousFeed).Hash
 if ($publishedPreviousFeedItem.Length -ne $PreviousFeedBytes -or
     $publishedPreviousFeedHash -cne $PreviousFeedSha256) {
-    throw 'The published 0.1.3 feed changed from the reviewed release input.'
+    throw 'The published 0.1.4 feed changed from the reviewed release input.'
 }
 $publishedPreviousFeedJson =
     Get-Content -Raw -LiteralPath $publishedPreviousFeed | ConvertFrom-Json
@@ -311,8 +309,8 @@ $publishedPreviousAssets = @($publishedPreviousFeedJson.Assets | Where-Object {
     $_.FileName -ceq $previousFullPackageName
 })
 if ($publishedPreviousAssets.Count -ne 1 -or
-    @($publishedPreviousFeedJson.Assets).Count -ne 1) {
-    throw 'The published 0.1.3 feed does not contain exactly the expected full package.'
+    @($publishedPreviousFeedJson.Assets).Count -ne 3) {
+    throw 'The published 0.1.4 feed does not contain exactly the expected full package and reviewed asset set.'
 }
 Invoke-WebRequest `
     -Uri $previousPackageUrl `
@@ -324,14 +322,14 @@ $publishedPreviousPackageHash =
     (Get-FileHash -Algorithm SHA256 -LiteralPath $publishedPreviousPackage).Hash
 if ($publishedPreviousPackageItem.Length -ne $PreviousFullPackageBytes -or
     $publishedPreviousPackageHash -cne $PreviousFullPackageSha256) {
-    throw 'The published 0.1.3 full package changed from the reviewed release input.'
+    throw 'The published 0.1.4 full package changed from the reviewed release input.'
 }
 if ([long]$publishedPreviousAssets[0].Size -ne $publishedPreviousPackageItem.Length -or
     -not $publishedPreviousPackageHash.Equals(
         [string]$publishedPreviousAssets[0].SHA256,
         [System.StringComparison]::OrdinalIgnoreCase
     )) {
-    throw 'The published 0.1.3 full package does not match its published feed.'
+    throw 'The published 0.1.4 full package does not match its published feed.'
 }
 Assert-VelopackPackage `
     -PackagePath $publishedPreviousPackage `
@@ -502,7 +500,7 @@ $previousFullHash =
     (Get-FileHash -Algorithm SHA256 -LiteralPath $previousFullPackage).Hash
 if ($previousFullItem.Length -ne $PreviousFullPackageBytes -or
     $previousFullHash -cne $PreviousFullPackageSha256) {
-    throw 'Velopack changed the pinned published 0.1.3 full package.'
+    throw 'Velopack changed the pinned published 0.1.4 full package.'
 }
 $feedAssets = @($feed.Assets)
 if ($feedAssets.Count -ne 3) {
@@ -530,10 +528,10 @@ if ($matchingFullAssets.Count -ne 1) {
     throw 'The update feed does not contain exactly one expected full package.'
 }
 if ($matchingDeltaAssets.Count -ne 1) {
-    throw 'The update feed does not contain exactly one 0.1.3 to 0.1.4 delta package.'
+    throw 'The update feed does not contain exactly one 0.1.4 to 0.1.5 delta package.'
 }
 if ($matchingPreviousAssets.Count -ne 1) {
-    throw 'The update feed does not retain exactly one published 0.1.3 full package.'
+    throw 'The update feed does not retain exactly one published 0.1.4 full package.'
 }
 $fullItem = Get-Item -LiteralPath $fullPackage
 $fullHash = (Get-FileHash -Algorithm SHA256 -LiteralPath $fullPackage).Hash
@@ -558,7 +556,7 @@ if ([long]$matchingPreviousAssets[0].Size -ne $previousFullItem.Length -or
         [string]$matchingPreviousAssets[0].SHA256,
         [System.StringComparison]::OrdinalIgnoreCase
     )) {
-    throw 'The updated feed changed the published 0.1.3 full-package identity.'
+    throw 'The updated feed changed the published 0.1.4 full-package identity.'
 }
 
 $setupHash = (Get-FileHash -Algorithm SHA256 -LiteralPath $generatedSetup).Hash
@@ -650,7 +648,7 @@ $manifest = [ordered]@{
     publicSourceHistory = [ordered]@{
         previousTag = $previousSourceTag
         previousCommit = $previousTaggedCommit
-        previousPublicMainCommit = $previousPublicMainCommit
+        previousReleaseCommit = $sourceParentCommit
         currentTag = $sourceTag
         currentCommit = $sourceCommit
         reachableCommitCount = [int]$sourceCommitCount

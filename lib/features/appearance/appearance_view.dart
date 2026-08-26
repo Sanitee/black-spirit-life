@@ -6,11 +6,18 @@ import 'package:flutter/services.dart';
 
 import '../../app/appearance/appearance_actions.dart';
 import '../../app/state/planner_application_controller.dart';
+import '../../app/window/app_title_bar.dart';
+import '../../app/window/window_host_service.dart';
+import '../../domain/models/craft_mode.dart';
 import '../../domain/state/planner_state.dart';
 import '../../domain/state/state_copy.dart';
 import '../../shared/overlays/anchored_popover.dart';
 import '../../visual/illuminated_ledger/ledger_ornament_painters.dart';
 import '../../visual/visual.dart';
+import '../planner/planner_contracts.dart';
+import '../planner/planner_view.dart';
+import '../shell/shell_models.dart';
+import '../shell/workspace_shell.dart';
 
 class AppearanceView extends StatefulWidget {
   const AppearanceView({
@@ -29,6 +36,36 @@ class AppearanceView extends StatefulWidget {
 class _AppearanceViewState extends State<AppearanceView> {
   static const double _themeGridBreakpoint = 720;
   static const double _headerStackBreakpoint = 620;
+  static const Size _themePreviewViewport = Size(1200, 752);
+
+  static final PlannerExternalActions _themePreviewActions =
+      PlannerExternalActions(
+        openRecipeBook: _rejectPreviewRecipeBook,
+        copyName: _rejectPreviewCopy,
+        checkPrices: _rejectPreviewPriceCheck,
+      );
+
+  static Never _rejectPreviewRecipeBook(RecipeBookRequest _) =>
+      throw StateError('Theme previews cannot open the Recipe Book.');
+
+  static Never _rejectPreviewCopy(String _) =>
+      throw StateError('Theme previews cannot copy item names.');
+
+  static Never _rejectPreviewPriceCheck(PlannerMarketRequest _) =>
+      throw StateError('Theme previews cannot check prices.');
+
+  static Never _rejectPreviewModeChange(CraftMode _) => throw StateError(
+    'Theme previews are non-interactive and cannot change craft mode.',
+  );
+
+  static Never _rejectPreviewDestinationChange(ShellDestination _) =>
+      throw StateError(
+        'Theme previews are non-interactive and cannot navigate.',
+      );
+
+  static Never _rejectPreviewTabPress() => throw StateError(
+    'Theme previews are non-interactive and cannot switch tabs.',
+  );
 
   final ScrollController _leftScroll = ScrollController();
 
@@ -151,7 +188,12 @@ class _AppearanceViewState extends State<AppearanceView> {
         onPressed: () => _selectShared(SakuraNightGardenSpec.backgroundId),
         selectedBorder: SakuraNightGardenSpec.paleBlossom,
         restingBorder: SakuraNightGardenSpec.rosewood.withAlpha(190),
-        child: _sakuraThemePreview(),
+        child: _liveThemePreview(
+          previewKey: const ValueKey<String>('sakura-theme-preview'),
+          spec: SakuraNightGardenSpec.theme,
+          backgroundId: SakuraNightGardenSpec.backgroundId,
+          accentHue: 341,
+        ),
       ),
       _themePreviewCard(
         id: 'A02',
@@ -160,7 +202,12 @@ class _AppearanceViewState extends State<AppearanceView> {
         onPressed: () => _selectShared(IlluminatedLedgerSpec.backgroundId),
         selectedBorder: IlluminatedLedgerSpec.palette.primary,
         restingBorder: IlluminatedLedgerSpec.palette.trim.withAlpha(150),
-        child: _ledgerThemePreview(),
+        child: _liveThemePreview(
+          previewKey: const ValueKey<String>('ledger-theme-preview'),
+          spec: IlluminatedLedgerSpec.theme,
+          backgroundId: IlluminatedLedgerSpec.backgroundId,
+          accentHue: 30,
+        ),
       ),
       _themePreviewCard(
         id: 'A02:standard',
@@ -169,7 +216,12 @@ class _AppearanceViewState extends State<AppearanceView> {
         onPressed: () => _selectShared(StandardSpec.defaultBackgroundId),
         selectedBorder: StandardSpec.palette.primaryBright,
         restingBorder: StandardSpec.palette.trim.withAlpha(170),
-        child: _standardThemePreview(),
+        child: _liveThemePreview(
+          previewKey: const ValueKey<String>('standard-theme-preview'),
+          spec: StandardSpec.theme,
+          backgroundId: StandardSpec.defaultBackgroundId,
+          accentHue: 158,
+        ),
       ),
     ];
     return LayoutBuilder(
@@ -270,6 +322,120 @@ class _AppearanceViewState extends State<AppearanceView> {
     ),
   );
 
+  Widget _liveThemePreview({
+    required Key previewKey,
+    required ThemeSpec spec,
+    required String backgroundId,
+    required double accentHue,
+  }) {
+    final workspace = WorkspaceShell(
+      mode: _mode.mode,
+      destination: ShellDestination.planner,
+      onModeChanged: _rejectPreviewModeChange,
+      onDestinationChanged: _rejectPreviewDestinationChange,
+      showAdvancedDestinations: false,
+      transition: ShellContentTransition.off,
+      reduceMotion: true,
+      child: PlannerView(
+        controller: _mode,
+        externalActions: _themePreviewActions,
+      ),
+    );
+    final backdrop = Stack(
+      fit: StackFit.expand,
+      children: <Widget>[
+        Positioned.fill(
+          child: switch (spec.family) {
+            RetainedVisualFamily.illuminatedLedger => const LedgerBackdrop(
+              showCenterFold: true,
+              showMarginalia: false,
+              centerFoldRatio: .575,
+              centerFoldWidth: 18,
+            ),
+            RetainedVisualFamily.sakuraNightGarden =>
+              const SakuraNightGardenBackdrop(),
+            RetainedVisualFamily.standard => StandardBackdrop(
+              backgroundId: backgroundId,
+            ),
+          },
+        ),
+        Positioned.fill(child: workspace),
+      ],
+    );
+    final preview = Column(
+      children: <Widget>[
+        AppTitleBar(
+          windowHost: const _ThemePreviewWindowHost(),
+          workspaceNavigation: AppTitleTabStrip(
+            tabs: <AppTitleTab>[
+              AppTitleTab(
+                tabKey: const ValueKey<String>(
+                  'theme-preview-tab-craft-planner',
+                ),
+                artworkAssetPath: 'assets/app/bdo_tool_icon.png',
+                label: 'Craft Planner',
+                selected: true,
+                onPressed: _rejectPreviewTabPress,
+              ),
+              AppTitleTab(
+                tabKey: const ValueKey<String>(
+                  'theme-preview-tab-resource-map',
+                ),
+                artworkAssetPath: 'assets/app/bdo_resource_map_icon.png',
+                label: 'Resource Map',
+                selected: false,
+                onPressed: _rejectPreviewTabPress,
+              ),
+            ],
+          ),
+        ),
+        Expanded(child: backdrop),
+      ],
+    );
+    final media = MediaQuery.of(context).copyWith(
+      size: _themePreviewViewport,
+      textScaler: TextScaler.noScaling,
+      disableAnimations: true,
+    );
+    return RepaintBoundary(
+      key: previewKey,
+      child: TickerMode(
+        enabled: false,
+        child: ExcludeFocus(
+          excluding: true,
+          child: ExcludeSemantics(
+            child: IgnorePointer(
+              child: FittedBox(
+                fit: BoxFit.contain,
+                alignment: Alignment.topLeft,
+                child: SizedBox.fromSize(
+                  size: _themePreviewViewport,
+                  child: MediaQuery(
+                    data: media,
+                    child: ThemeSpecScope(
+                      spec: spec,
+                      child: StandardVisualScope(
+                        settings: StandardVisualSettings(
+                          backgroundId: backgroundId,
+                          accentHue: accentHue,
+                        ),
+                        child: Theme(
+                          data: spec.materialTheme(),
+                          child: preview,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  // ignore: unused_element
   Widget _standardThemePreview() => Stack(
     key: const ValueKey<String>('standard-theme-preview'),
     fit: StackFit.expand,
@@ -559,6 +725,7 @@ class _AppearanceViewState extends State<AppearanceView> {
     ),
   );
 
+  // ignore: unused_element
   Widget _ledgerThemePreview() => Stack(
     key: const ValueKey<String>('ledger-theme-preview'),
     fit: StackFit.expand,
@@ -1017,6 +1184,7 @@ class _AppearanceViewState extends State<AppearanceView> {
     ),
   );
 
+  // ignore: unused_element
   Widget _sakuraThemePreview() => Stack(
     key: const ValueKey<String>('sakura-theme-preview'),
     fit: StackFit.expand,
@@ -2706,6 +2874,25 @@ String _title(String value) => value
     .where((part) => part.isNotEmpty)
     .map((part) => '${part[0].toUpperCase()}${part.substring(1)}')
     .join(' ');
+
+final class _ThemePreviewWindowHost extends WindowHostService {
+  const _ThemePreviewWindowHost();
+
+  @override
+  Future<void> beginDrag() async {}
+
+  @override
+  Future<void> minimize() async {}
+
+  @override
+  Future<void> close() async {}
+
+  @override
+  Future<bool> toggleMaximize() async => false;
+
+  @override
+  Future<bool> isMaximized() async => false;
+}
 
 final Map<String, Uint8List?> _ledgerPreviewDecodedIconCache =
     <String, Uint8List?>{};

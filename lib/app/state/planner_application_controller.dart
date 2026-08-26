@@ -35,7 +35,7 @@ final class PlannerApplicationController {
     required this.saveState,
     this.saveDebounce = const Duration(milliseconds: 240),
     this.assembly = const PlannerAssembly(),
-  }) : _document = initialState,
+  }) : _document = migrateToSharedInventory(initialState),
        activeMode = ValueNotifier(initialState.activeMode),
        deleteToolsEnabled = ValueNotifier(initialState.showDeleteTools),
        marketTax = ValueNotifier(initialState.marketTax),
@@ -54,7 +54,7 @@ final class PlannerApplicationController {
         mode: ModeFeatureController._(
           owner: this,
           mode: mode,
-          initialState: initialState.forMode(mode),
+          initialState: _document.forMode(mode),
         ),
     };
   }
@@ -574,8 +574,7 @@ final class ModeFeatureController {
       'data',
     };
     var destination = valid.contains(view) ? view : 'plan';
-    if (!advancedEditorEnabled &&
-        (destination == 'inventory' || destination == 'editor')) {
+    if (!advancedEditorEnabled && destination == 'editor') {
       destination = 'plan';
     }
     if (mode == CraftMode.processing && destination == 'bonus') return;
@@ -652,7 +651,9 @@ final class ModeFeatureController {
         substitutes[substituteKey] = selectedName;
       }
 
-      final normalizedGrade = normalizeIngredientQualityGrade(requested.grade);
+      final normalizedGrade = recipeHasAuthoritativeQualityVariants(match)
+          ? 'normal'
+          : normalizeIngredientQualityGrade(requested.grade);
       final quality = ingredientQualityProfile(
         rules: owner.plannerRules,
         parentIsProcessing:
@@ -728,6 +729,38 @@ final class ModeFeatureController {
     _commit(state.value.copyWith(completedSteps: completed), immediate: true);
   }
 
+  /// Finishes a queue step once, consumes its selected direct ingredients,
+  /// adds the produced item, and mirrors the result into shared Inventory.
+  bool completeStep(planning.PlanStep step) {
+    if (_foldedIn(state.value.completedSteps, step.name) != null) return false;
+
+    final deltas = <String, double>{};
+    void addDelta(String name, double delta) {
+      if (name.trim().isEmpty || !delta.isFinite || delta == 0) return;
+      final existingKey = _exactOrFolded(deltas, name);
+      final key = existingKey ?? name.trim();
+      deltas[key] = (deltas[key] ?? 0) + delta;
+    }
+
+    for (final ingredient in step.ingredients) {
+      if (ingredient.need > 0) addDelta(ingredient.name, -ingredient.need);
+    }
+    if (step.produced > 0) addDelta(step.name, step.produced);
+
+    owner.updateDocument((document) {
+      final adjusted = applySharedInventoryDeltas(document, deltas);
+      final modeState = adjusted.forMode(mode);
+      final completed = Set<String>.of(modeState.completedSteps)
+        ..add(step.name);
+      return _withMode(
+        adjusted,
+        mode,
+        modeState.copyWith(completedSteps: completed),
+      );
+    }, immediate: true);
+    return true;
+  }
+
   void toggleIngredients(String recipeName) {
     final next = Set<String>.of(expandedSteps.value);
     final existing = _foldedIn(next, recipeName);
@@ -785,6 +818,7 @@ final class ModeFeatureController {
     required String ingredientName,
     required String grade,
   }) {
+    if (recipeHasAuthoritativeQualityVariants(parentName)) return;
     const allowed = {'normal', 'high', 'special', 'blue'};
     final normalized = grade.trim().toLowerCase();
     if (!allowed.contains(normalized)) return;
@@ -797,6 +831,9 @@ final class ModeFeatureController {
     required String parentName,
     required String selectedName,
   }) {
+    if (recipeHasAuthoritativeQualityVariants(parentName)) {
+      return IngredientQualityProfile.none;
+    }
     final parent = selectedRecipe(parentName);
     return ingredientQualityProfile(
       rules: owner.plannerRules,
@@ -816,6 +853,7 @@ final class ModeFeatureController {
     required String ingredientName,
     required String selectedName,
   }) {
+    if (recipeHasAuthoritativeQualityVariants(parentName)) return 'normal';
     final parent = selectedRecipe(parentName);
     return selectedIngredientQualityGrade(
       rules: owner.plannerRules,
@@ -830,25 +868,21 @@ final class ModeFeatureController {
   bool commitInventory(String name, String text) {
     final value = parsePlannerNumber(text);
     if (value == null || value < 0) return false;
-    final storage = InventoryStorageState.fromModeState(state.value)
-        .setQuantity(
-          locationId: inventoryUnassignedLocationId,
-          itemName: name,
-          quantity: value,
-        );
-    _commit(storage.applyTo(state.value));
+    owner.updateDocument(
+      (document) =>
+          setSharedInventoryAmounts(document, <String, double>{name: value}),
+    );
     return true;
   }
 
   void addMissingAmount(String name, double amount) {
     if (!amount.isFinite || amount <= 0) return;
-    final storage = InventoryStorageState.fromModeState(state.value)
-        .addQuantity(
-          locationId: inventoryUnassignedLocationId,
-          itemName: name,
-          quantity: amount,
-        );
-    _commit(storage.applyTo(state.value), immediate: true);
+    owner.updateDocument(
+      (document) => setSharedInventoryAmounts(document, <String, double>{
+        name: amount,
+      }, add: true),
+      immediate: true,
+    );
   }
 
   InventoryStorageState get inventoryStorage =>
@@ -943,6 +977,11 @@ final class ModeFeatureController {
 
   void clearInventoryStorage() {
     final next = inventoryStorage.clearQuantities();
+    _commit(next.applyTo(state.value), immediate: true);
+  }
+
+  void clearInventoryStorageLocation(String locationId) {
+    final next = inventoryStorage.clearLocation(locationId);
     _commit(next.applyTo(state.value), immediate: true);
   }
 

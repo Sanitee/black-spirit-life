@@ -88,7 +88,7 @@ class _PlannerCommandBand extends StatelessWidget {
     final state = controller.state.value;
     final targetChooser = PlannerTargetChooser(
       controller: controller,
-      semanticLabel: 'Craft target',
+      semanticLabel: 'Choose recipe',
       actionKey: PlannerActionKeys.p01,
       controlHeight: denseLayout ? null : plannerStandardCommandControlHeight,
       target: PlannerCommandTarget(
@@ -171,279 +171,281 @@ class _PlannerCommandBand extends StatelessWidget {
       children: <Widget>[fullTarget, ignoreOwned],
     );
 
-    return AppSurface(
-      // Dense full themes place authored controls directly on their workspace
-      // material. Standard deliberately keeps its surrounding glass band.
-      role: denseLayout ? AppSurfaceRole.layout : AppSurfaceRole.commandBand,
-      padding: denseLayout
-          ? const EdgeInsets.all(12)
-          : const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-      semanticLabel: 'Planner commands',
-      child: LayoutBuilder(
-        builder: (context, constraints) {
-          if (denseLayout && constraints.maxWidth >= 820 && textScale <= 1.25) {
-            return Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: <Widget>[
-                Expanded(
-                  flex: 96,
-                  child: SizedBox(
-                    height: 72,
-                    child: LayoutBuilder(
-                      builder: (context, leftConstraints) => Stack(
-                        children: <Widget>[
-                          const Positioned(
-                            left: 64,
-                            top: 0,
-                            child: _CommandLabel('Craft Target'),
-                          ),
-                          Positioned(
-                            left: 0,
-                            top: 18,
-                            width: 54,
-                            height: 54,
-                            child: Align(
-                              alignment: Alignment.centerLeft,
-                              child: PlannerItemIcon(
-                                controller: controller,
-                                name: state.target,
-                                size: 54,
-                              ),
-                            ),
-                          ),
-                          Positioned(
-                            left: 64,
-                            right: 122,
-                            top: 18,
-                            height: 48,
-                            child: targetField,
-                          ),
-                          Positioned(
-                            right: 0,
-                            top: 18,
-                            width: 112,
-                            height: 48,
-                            child: recipes,
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 24),
-                Expanded(
-                  flex: 104,
-                  child: Padding(
-                    padding: const EdgeInsets.only(left: 20),
+    return FocusTraversalGroup(
+      policy: WidgetOrderTraversalPolicy(),
+      child: AppSurface(
+        // Dense full themes place authored controls directly on their workspace
+        // material. Standard deliberately keeps its surrounding glass band.
+        role: denseLayout ? AppSurfaceRole.layout : AppSurfaceRole.commandBand,
+        padding: denseLayout
+            ? const EdgeInsets.all(12)
+            : const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+        semanticLabel: 'Planner commands',
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            if (denseLayout &&
+                constraints.maxWidth >= 820 &&
+                textScale <= 1.25) {
+              return Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  Expanded(
+                    flex: 96,
                     child: SizedBox(
                       height: 72,
-                      child: Stack(
-                        clipBehavior: Clip.none,
-                        children: <Widget>[
-                          const Positioned(
-                            left: 0,
-                            top: 0,
-                            width: 78,
-                            child: _CommandLabel('Amount'),
-                          ),
-                          Positioned(
-                            left: 0,
-                            top: 18,
-                            width: 86,
-                            height: 54,
-                            child: Align(
-                              alignment: Alignment.centerLeft,
-                              child: SizedBox(
-                                width: 78,
-                                height: 38,
-                                child: amount,
+                      child: LayoutBuilder(
+                        builder: (context, leftConstraints) => Stack(
+                          children: <Widget>[
+                            const Positioned(
+                              left: 64,
+                              top: 0,
+                              child: _CommandLabel('Recipe'),
+                            ),
+                            Positioned(
+                              left: 0,
+                              top: 18,
+                              width: 54,
+                              height: 54,
+                              child: Align(
+                                alignment: Alignment.centerLeft,
+                                child: PlannerItemIcon(
+                                  controller: controller,
+                                  name: state.target,
+                                  size: 54,
+                                ),
                               ),
                             ),
-                          ),
-                          Positioned(
-                            left: 98,
-                            top: 18,
-                            width: 68,
-                            height: 54,
-                            child: Center(
-                              child: SizedBox(
-                                width: 68,
-                                height: 48,
-                                child: rebuild,
-                              ),
+                            Positioned(
+                              left: 64,
+                              right: 122,
+                              top: 18,
+                              height: 48,
+                              child: targetField,
                             ),
-                          ),
-                          Positioned(
-                            left: 178,
-                            right: 4,
-                            top: 4,
-                            child: Column(
-                              mainAxisSize: MainAxisSize.min,
-                              crossAxisAlignment: CrossAxisAlignment.end,
-                              children: <Widget>[
-                                fullTarget,
-                                const SizedBox(height: 8),
-                                ignoreOwned,
-                              ],
+                            Positioned(
+                              right: 0,
+                              top: 18,
+                              width: 112,
+                              height: 48,
+                              child: recipes,
                             ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
                     ),
                   ),
-                ),
-              ],
-            );
-          }
-          if (!denseLayout &&
-              constraints.maxWidth >= 1110 &&
-              textScale <= 1.25) {
-            return SizedBox(
-              // Labels and the compact controls consume the whole band. The
-              // fields also pass this height into InputDecorator, preventing
-              // an unpainted lower strip from reading as a drop shadow.
-              height: 70,
-              child: Stack(
-                clipBehavior: Clip.none,
-                children: <Widget>[
-                  const Positioned(
-                    left: 70,
-                    top: 1,
-                    child: _CommandLabel('Craft Target'),
-                  ),
-                  const Positioned(
-                    left: 608,
-                    top: 1,
-                    child: _CommandLabel('Amount'),
-                  ),
-                  Positioned(
-                    left: 0,
-                    top: 23,
-                    width: 58,
-                    height: plannerStandardCommandControlHeight,
-                    child: Align(
-                      alignment: Alignment.centerLeft,
-                      child: PlannerItemIcon(
-                        controller: controller,
-                        name: state.target,
-                        size: plannerStandardCommandControlHeight,
-                      ),
-                    ),
-                  ),
-                  Positioned(
-                    left: 70,
-                    top: 23,
-                    width: 390,
-                    height: plannerStandardCommandControlHeight,
-                    child: targetField,
-                  ),
-                  Positioned(
-                    left: 472,
-                    top: 23,
-                    width: 102,
-                    height: plannerStandardCommandControlHeight,
-                    child: recipes,
-                  ),
-                  Positioned(
-                    left: 608,
-                    top: 23,
-                    width: 86,
-                    height: plannerStandardCommandControlHeight,
-                    child: amount,
-                  ),
-                  Positioned(
-                    left: 706,
-                    top: 23,
-                    width: 48,
-                    height: plannerStandardCommandControlHeight,
-                    child: rebuild,
-                  ),
-                  Positioned(
-                    left: 786,
-                    right: 0,
-                    top: 0,
-                    child: Align(
-                      alignment: Alignment.centerLeft,
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: <Widget>[
-                          fullTarget,
-                          const SizedBox(height: 6),
-                          ignoreOwned,
-                        ],
+                  const SizedBox(width: 24),
+                  Expanded(
+                    flex: 104,
+                    child: Padding(
+                      padding: const EdgeInsets.only(left: 20),
+                      child: SizedBox(
+                        height: 72,
+                        child: Stack(
+                          clipBehavior: Clip.none,
+                          children: <Widget>[
+                            const Positioned(
+                              left: 0,
+                              top: 0,
+                              width: 78,
+                              child: _CommandLabel('Amount'),
+                            ),
+                            Positioned(
+                              left: 0,
+                              top: 18,
+                              width: 86,
+                              height: 54,
+                              child: Align(
+                                alignment: Alignment.centerLeft,
+                                child: SizedBox(
+                                  width: 78,
+                                  height: 38,
+                                  child: amount,
+                                ),
+                              ),
+                            ),
+                            Positioned(
+                              left: 98,
+                              top: 18,
+                              width: 68,
+                              height: 54,
+                              child: Center(
+                                child: SizedBox(
+                                  width: 68,
+                                  height: 48,
+                                  child: rebuild,
+                                ),
+                              ),
+                            ),
+                            Positioned(
+                              left: 178,
+                              right: 4,
+                              top: 4,
+                              child: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                crossAxisAlignment: CrossAxisAlignment.end,
+                                children: <Widget>[
+                                  fullTarget,
+                                  const SizedBox(height: 8),
+                                  ignoreOwned,
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                     ),
                   ),
                 ],
-              ),
-            );
-          }
-          if (constraints.maxWidth >= 1100) {
-            return Row(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: <Widget>[
-                PlannerItemIcon(
-                  controller: controller,
-                  name: state.target,
-                  size: 54,
+              );
+            }
+            if (!denseLayout &&
+                constraints.maxWidth >= 1110 &&
+                textScale <= 1.25) {
+              return SizedBox(
+                // Labels and the compact controls consume the whole band. The
+                // fields also pass this height into InputDecorator, preventing
+                // an unpainted lower strip from reading as a drop shadow.
+                height: 70,
+                child: Stack(
+                  clipBehavior: Clip.none,
+                  children: <Widget>[
+                    const Positioned(
+                      left: 70,
+                      top: 1,
+                      child: _CommandLabel('Recipe'),
+                    ),
+                    const Positioned(
+                      left: 608,
+                      top: 1,
+                      child: _CommandLabel('Amount'),
+                    ),
+                    Positioned(
+                      left: 0,
+                      top: 23,
+                      width: 58,
+                      height: plannerStandardCommandControlHeight,
+                      child: Align(
+                        alignment: Alignment.centerLeft,
+                        child: PlannerItemIcon(
+                          controller: controller,
+                          name: state.target,
+                          size: plannerStandardCommandControlHeight,
+                        ),
+                      ),
+                    ),
+                    Positioned(
+                      left: 70,
+                      top: 23,
+                      width: 390,
+                      height: plannerStandardCommandControlHeight,
+                      child: targetField,
+                    ),
+                    Positioned(
+                      left: 472,
+                      top: 23,
+                      width: 102,
+                      height: plannerStandardCommandControlHeight,
+                      child: recipes,
+                    ),
+                    Positioned(
+                      left: 608,
+                      top: 23,
+                      width: 86,
+                      height: plannerStandardCommandControlHeight,
+                      child: amount,
+                    ),
+                    Positioned(
+                      left: 706,
+                      top: 23,
+                      width: 48,
+                      height: plannerStandardCommandControlHeight,
+                      child: rebuild,
+                    ),
+                    Positioned(
+                      left: 786,
+                      right: 0,
+                      top: 0,
+                      child: Align(
+                        alignment: Alignment.centerLeft,
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: <Widget>[
+                            fullTarget,
+                            const SizedBox(height: 6),
+                            ignoreOwned,
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
-                const SizedBox(width: 10),
-                SizedBox(
-                  width: 390,
-                  child: _LabeledControl(
-                    label: 'Craft Target',
-                    child: targetField,
-                  ),
-                ),
-                const SizedBox(width: 12),
-                recipes,
-                const SizedBox(width: 12),
-                _LabeledControl(label: 'Amount', child: amount),
-                const SizedBox(width: 10),
-                SizedBox(width: 48, height: 48, child: rebuild),
-                const SizedBox(width: 12),
-                ConstrainedBox(
-                  constraints: const BoxConstraints(maxWidth: 252),
-                  child: toggles,
-                ),
-              ],
-            );
-          }
-          return Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: <Widget>[
-              Row(
+              );
+            }
+            if (constraints.maxWidth >= 1100) {
+              return Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
                 children: <Widget>[
                   PlannerItemIcon(
                     controller: controller,
                     name: state.target,
                     size: 54,
                   ),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: _LabeledControl(
-                      label: 'Craft Target',
-                      child: targetField,
-                    ),
+                  const SizedBox(width: 10),
+                  SizedBox(
+                    width: 390,
+                    child: _LabeledControl(label: 'Recipe', child: targetField),
                   ),
-                  const SizedBox(width: 8),
+                  const SizedBox(width: 12),
                   recipes,
-                ],
-              ),
-              const SizedBox(height: 8),
-              Row(
-                children: <Widget>[
+                  const SizedBox(width: 12),
                   _LabeledControl(label: 'Amount', child: amount),
-                  const SizedBox(width: 7),
-                  rebuild,
-                  const SizedBox(width: 9),
-                  Expanded(child: toggles),
+                  const SizedBox(width: 10),
+                  SizedBox(width: 48, height: 48, child: rebuild),
+                  const SizedBox(width: 12),
+                  ConstrainedBox(
+                    constraints: const BoxConstraints(maxWidth: 252),
+                    child: toggles,
+                  ),
                 ],
-              ),
-            ],
-          );
-        },
+              );
+            }
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: <Widget>[
+                Row(
+                  children: <Widget>[
+                    PlannerItemIcon(
+                      controller: controller,
+                      name: state.target,
+                      size: 54,
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: _LabeledControl(
+                        label: 'Recipe',
+                        child: targetField,
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    recipes,
+                  ],
+                ),
+                const SizedBox(height: 8),
+                Row(
+                  children: <Widget>[
+                    _LabeledControl(label: 'Amount', child: amount),
+                    const SizedBox(width: 7),
+                    rebuild,
+                    const SizedBox(width: 9),
+                    Expanded(child: toggles),
+                  ],
+                ),
+              ],
+            );
+          },
+        ),
       ),
     );
   }

@@ -42,6 +42,7 @@ class ModeItemIcon extends StatefulWidget {
     required this.size,
     this.catalogRepository,
     this.searchAcrossModes = false,
+    this.aliases = const <String>[],
     this.fallbackIcon,
     this.showFrame = true,
     this.customIconLoader = _loadCustomIconBytes,
@@ -53,6 +54,7 @@ class ModeItemIcon extends StatefulWidget {
   final double size;
   final CatalogRepository? catalogRepository;
   final bool searchAcrossModes;
+  final List<String> aliases;
   final IconData? fallbackIcon;
   final bool showFrame;
   final CustomIconBytesLoader customIconLoader;
@@ -111,6 +113,7 @@ class _ModeItemIconState extends State<ModeItemIcon> {
       customIconLoader: widget.customIconLoader,
       name: widget.name,
       searchAcrossModes: widget.searchAcrossModes,
+      fallbackAliases: widget.aliases,
     );
     final sameRequest = _request?.matches(next) ?? false;
     if (sameRequest && !(revalidateCustom && next is _CustomIconRequest)) {
@@ -369,6 +372,7 @@ _IconRequest _resolveRequest({
   required CustomIconBytesLoader customIconLoader,
   required String name,
   required bool searchAcrossModes,
+  required List<String> fallbackAliases,
 }) {
   final state = controller.state.value;
   final custom = _foldedEntry(state.customIcons, name);
@@ -390,10 +394,15 @@ _IconRequest _resolveRequest({
     );
   }
 
-  final alias = _foldedEntry(state.iconAliases, name)?.value.trim();
-  final aliases = alias == null || alias.isEmpty
-      ? const <String>[]
-      : <String>[alias];
+  final savedAlias = _foldedEntry(state.iconAliases, name)?.value.trim();
+  final aliases = <String>[];
+  final seenAliases = <String>{};
+  for (final candidate in <String>[?savedAlias, ...fallbackAliases]) {
+    final trimmed = candidate.trim();
+    if (trimmed.isNotEmpty && seenAliases.add(trimmed.toLowerCase())) {
+      aliases.add(trimmed);
+    }
+  }
   final uri = searchAcrossModes
       ? catalogRepository.iconDataUriAcrossModes(
           controller.mode,
@@ -403,16 +412,16 @@ _IconRequest _resolveRequest({
       : catalogRepository.iconDataUri(controller.mode, name, aliases: aliases);
   final signature =
       '${controller.mode.key}\u0000${searchAcrossModes ? 'all' : 'mode'}'
-      '\u0000${name.toLowerCase()}\u0000${alias ?? ''}';
+      '\u0000${name.toLowerCase()}\u0000${aliases.join('|').toLowerCase()}';
   if (uri == null) {
     return _ImmediateIconRequest(
       owner: catalogRepository,
       signature: signature,
       resolution: _IconResolutionFailure(
-        alias == null || alias.isEmpty
+        aliases.isEmpty
             ? 'No icon artwork is available for $name.'
             : 'The saved icon alias for $name does not resolve to available '
-                  'artwork ($alias).',
+                  'artwork (${aliases.join(', ')}).',
       ),
     );
   }

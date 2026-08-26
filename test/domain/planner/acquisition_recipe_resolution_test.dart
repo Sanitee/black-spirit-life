@@ -52,7 +52,7 @@ void main() {
       }
     }
 
-    expect(maskedContexts, hasLength(143));
+    expect(maskedContexts, hasLength(145));
     expect(maskedContexts, contains('processing:Elixir of Seal'));
     expect(maskedContexts, contains('alchemy:Magical Olivine Powder'));
     expect(

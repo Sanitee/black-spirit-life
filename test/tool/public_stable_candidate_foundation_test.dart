@@ -35,18 +35,18 @@ void main() {
     expect(builder, contains('https://github.com/OWNER/REPOSITORY'));
     expect(builder, isNot(contains('Sanitee')));
     expect(wrapper, isNot(contains('Sanitee')));
-    expect(builder, contains("\$Version = '0.1.4'"));
-    expect(builder, contains("\$BuildNumber = '23'"));
-    expect(builder, contains("\$PreviousStableVersion = '0.1.3'"));
-    expect(builder, contains('e0f241bf1a697caf8398e7da81a34aae426c8d64'));
+    expect(builder, contains("\$Version = '0.1.5'"));
+    expect(builder, contains("\$BuildNumber = '24'"));
+    expect(builder, contains("\$PreviousStableVersion = '0.1.4'"));
+    expect(builder, contains('91660bc84312a9fa4897078e0082976e869c9c83'));
     expect(builder, contains("\$UpdateChannel = 'win-x64-stable'"));
-    expect(builder, contains("docs\\releases\\0.1.4.md"));
+    expect(builder, contains("docs\\releases\\0.1.5.md"));
     expect(builder, contains('tag --points-at HEAD'));
     expect(builder, contains('rev-list --count HEAD'));
     expect(builder, contains('previousSourceTag'));
     expect(builder, contains("rev-parse 'HEAD^'"));
-    expect(builder, contains('previousPublicMainCommit'));
-    expect(builder, contains('previousPublicMainParent'));
+    expect(builder, contains('sourceParentCommit'));
+    expect(builder, contains('PreviousStableCommit'));
     expect(builder, contains('sourceTag = \$sourceTag'));
     expect(builder, contains('publicCandidate = \$true'));
     expect(builder, contains('localOnly = \$false'));
@@ -60,13 +60,13 @@ void main() {
     expect(
       builder,
       contains(
-        '5601CF70C6165863843B59F7836517C0700FE5DA39B7270D3F9146E4F0EF10E2',
+        '91E60BA0C52D0B61500602696F20D137C3BF91E42963073AD64751C8EC6B68B5',
       ),
     );
     expect(
       builder,
       contains(
-        '36AB8CDB27E885F677CAF3B1D5CD20A332A0C203DD17EE83B9D7B55900577110',
+        '873D0F1BBBE132FA72FD3CC61F0693D25DB562E6E3BB54361E5275BA9858CC7A',
       ),
     );
     expect(builder, contains('deltaPackageName'));

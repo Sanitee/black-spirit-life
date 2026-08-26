@@ -90,6 +90,35 @@ void main() {
     expect(removed.quantityAt(inventoryUnassignedLocationId, 'Salt'), 5000);
   });
 
+  test('clearing one location preserves every other storage', () {
+    final mode = _mode(inventory: const <String, double>{'Wolf Blood': 200});
+    final ensured = InventoryStorageState.fromModeState(
+      mode,
+    ).ensureLocation('Velia Storage');
+    final withStock = ensured.state
+        .setQuantity(
+          locationId: ensured.location.id,
+          itemName: 'Salt',
+          quantity: 5000,
+        )
+        .setQuantity(
+          locationId: ensured.location.id,
+          itemName: 'Wolf Blood',
+          quantity: 800,
+        );
+
+    final cleared = withStock.clearLocation(ensured.location.id);
+
+    expect(cleared.selectedLocationId, ensured.location.id);
+    expect(cleared.locationById(ensured.location.id)!.quantities, isEmpty);
+    expect(
+      cleared.quantityAt(inventoryUnassignedLocationId, 'Wolf Blood'),
+      200,
+    );
+    expect(cleared.totalFor('Wolf Blood'), 200);
+    expect(cleared.totalFor('Salt'), 0);
+  });
+
   test(
     'an invalid or drifting ledger fails back to the flat planner total',
     () {
@@ -128,6 +157,110 @@ void main() {
     expect(repeated.state.locations, hasLength(2));
     expect(repeated.location.id, first.location.id);
   });
+
+  test('named storages migrate once into one shared inventory', () {
+    final alchemyBase = _mode(
+      inventory: const <String, double>{'Wolf Blood': 200, 'Fir Timber': 25},
+    );
+    final calpheon = InventoryStorageState.fromModeState(
+      alchemyBase,
+    ).ensureLocation('Calpheon City Storage');
+    final alchemy = calpheon.state
+        .setQuantity(
+          locationId: calpheon.location.id,
+          itemName: 'Wolf Blood',
+          quantity: 800,
+        )
+        .applyTo(alchemyBase);
+    final source = _document(
+      alchemy: alchemy,
+      cooking: _mode(
+        inventory: const <String, double>{'wolf blood': 900, 'Salt': 40},
+      ),
+      processing: _mode(inventory: const <String, double>{'Copper Ore': 55}),
+    );
+
+    final migrated = migrateToSharedInventory(source);
+
+    const expected = <String, double>{
+      'Wolf Blood': 1000,
+      'Fir Timber': 25,
+      'Salt': 40,
+      'Copper Ore': 55,
+    };
+    expect(migrated.alchemy.inventory, expected);
+    expect(migrated.cooking.inventory, expected);
+    expect(migrated.processing.inventory, expected);
+    expect(
+      migrated.alchemy.extensions,
+      isNot(contains(inventoryStorageExtensionKey)),
+    );
+    expect(
+      migrated.cooking.extensions,
+      isNot(contains(inventoryStorageExtensionKey)),
+    );
+    expect(
+      migrated.processing.extensions,
+      isNot(contains(inventoryStorageExtensionKey)),
+    );
+    final archive = migrated.extensions[inventoryStorageArchiveExtensionKey];
+    expect(archive, isA<Map>());
+    expect(
+      (archive! as Map)['alchemy'],
+      isA<Map>().having(
+        (value) => value['namedStorage'],
+        'named storage ledger',
+        isNotNull,
+      ),
+    );
+    expect(migrateToSharedInventory(migrated), same(migrated));
+  });
+
+  test('shared set, add, and clear mirror every planner mode', () {
+    final source = _document(
+      alchemy: _mode(inventory: const <String, double>{'Salt': 10}),
+      cooking: _mode(),
+      processing: _mode(),
+    );
+
+    final set = setSharedInventoryAmounts(source, const <String, double>{
+      'Salt': 25,
+      'Wheat': 8,
+    });
+    final added = setSharedInventoryAmounts(set, const <String, double>{
+      'salt': 5,
+    }, add: true);
+
+    for (final mode in CraftMode.values) {
+      expect(added.forMode(mode).inventory['Salt'], 30);
+      expect(added.forMode(mode).inventory['Wheat'], 8);
+    }
+    final cleared = clearSharedInventory(added);
+    for (final mode in CraftMode.values) {
+      expect(cleared.forMode(mode).inventory, isEmpty);
+    }
+  });
+
+  test('shared deltas add output, consume inputs, and clamp at zero', () {
+    final source = _document(
+      alchemy: _mode(inventory: const <String, double>{'Base': 12, 'Salt': 2}),
+      cooking: _mode(),
+      processing: _mode(),
+    );
+
+    final adjusted = applySharedInventoryDeltas(source, const <String, double>{
+      'base': -5,
+      'Salt': -20,
+      'Finished Meal': 3,
+    });
+
+    for (final mode in CraftMode.values) {
+      expect(adjusted.forMode(mode).inventory, <String, double>{
+        'Base': 7,
+        'Finished Meal': 3,
+      });
+    }
+  });
 }
 
 ModeState _mode({
@@ -140,4 +273,19 @@ ModeState _mode({
   market: MarketState(),
   appearance: AppearanceSettings.defaultsFor(CraftMode.alchemy),
   extensions: extensions,
+);
+
+PlannerState _document({
+  required ModeState alchemy,
+  required ModeState cooking,
+  required ModeState processing,
+}) => PlannerState(
+  applicationVersion: 'inventory-migration-test',
+  lastSuccessfulWriteUtc: DateTime.utc(2026, 8, 23),
+  activeMode: CraftMode.alchemy,
+  alchemy: alchemy,
+  cooking: cooking,
+  processing: processing,
+  processingYields: const <String, double>{'defaultYield': 2.5},
+  marketTax: MarketTax(),
 );

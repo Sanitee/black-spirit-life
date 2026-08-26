@@ -1,12 +1,14 @@
 import 'dart:ui' as ui;
 
 import 'package:bdo_craft_planner_flutter/app/state/planner_application_controller.dart';
+import 'package:bdo_craft_planner_flutter/app/window/app_title_bar.dart';
 import 'package:bdo_craft_planner_flutter/domain/models/catalog_models.dart';
 import 'package:bdo_craft_planner_flutter/domain/models/craft_mode.dart';
 import 'package:bdo_craft_planner_flutter/domain/state/planner_state.dart';
 import 'package:bdo_craft_planner_flutter/features/appearance/appearance_view.dart';
+import 'package:bdo_craft_planner_flutter/features/planner/planner_view.dart';
+import 'package:bdo_craft_planner_flutter/features/shell/workspace_shell.dart';
 import 'package:bdo_craft_planner_flutter/shared/overlays/anchored_popover.dart';
-import 'package:bdo_craft_planner_flutter/visual/illuminated_ledger/ledger_ornament_painters.dart';
 import 'package:bdo_craft_planner_flutter/visual/visual.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -25,8 +27,6 @@ void main() {
       find.byKey(const ValueKey<String>('appearance-motion-controls')),
       findsOneWidget,
     );
-    expect(find.text('Appearance'), findsNothing);
-    expect(find.byType(AppSurface), findsNothing);
     expect(find.byKey(const ValueKey<String>('A02:standard')), findsOneWidget);
     expect(find.byKey(const ValueKey<String>('A02')), findsOneWidget);
     expect(
@@ -157,241 +157,127 @@ void main() {
     await controller.dispose();
   });
 
-  testWidgets('Ledger selector miniature preserves authored visual details', (
+  testWidgets('theme cards render scaled production app previews', (
     tester,
   ) async {
     final controller = _controller();
-    await _pump(
-      tester,
-      controller,
-      const Size(1200, 752),
-      spec: RetainedThemeRegistry.illuminatedLedger,
-    );
+    await _pump(tester, controller, const Size(1200, 752));
 
-    final preview = find.byKey(const ValueKey<String>('ledger-theme-preview'));
-    expect(preview, findsOneWidget);
-    for (final entry in const <(String, String)>[
-      ('planner', 'compass'),
-      ('bonus', 'spark'),
-      ('inventory', 'vault'),
-      ('editor', 'quill'),
-    ]) {
-      final nav = find.byKey(
-        ValueKey<String>('ledger-preview-nav:${entry.$1}'),
-      );
-      expect(tester.getSize(nav).height, 19);
+    final cases = <({Key previewKey, Key brandTitleKey, Type backdropType})>[
+      (
+        previewKey: const ValueKey<String>('sakura-theme-preview'),
+        brandTitleKey: AppBrandLockup.sakuraTitleKey,
+        backdropType: SakuraNightGardenBackdrop,
+      ),
+      (
+        previewKey: const ValueKey<String>('ledger-theme-preview'),
+        brandTitleKey: AppBrandLockup.ledgerTitleKey,
+        backdropType: LedgerBackdrop,
+      ),
+      (
+        previewKey: const ValueKey<String>('standard-theme-preview'),
+        brandTitleKey: AppBrandLockup.standardTitleKey,
+        backdropType: StandardBackdrop,
+      ),
+    ];
+
+    for (final testCase in cases) {
+      final preview = find.byKey(testCase.previewKey);
+      expect(preview, findsOneWidget);
       expect(
-        find.descendant(of: nav, matching: _glyph(entry.$2)),
+        find.descendant(of: preview, matching: find.byType(AppTitleBar)),
         findsOneWidget,
       );
-    }
-
-    for (final metadata in const <String>[
-      'CRAFT 1,221',
-      'RESIDENCE ALCHEMY',
-      'CRAFT 941',
-      'CRAFT 107',
-      'MISSING 3,152',
-      'MISSING 2,676',
-      'MISSING 1,359',
-      'MISSING 1,316',
-    ]) {
       expect(
-        find.descendant(of: preview, matching: find.text(metadata)),
+        find.descendant(of: preview, matching: find.byType(AppTitleTabStrip)),
         findsOneWidget,
       );
+      expect(
+        find.descendant(of: preview, matching: find.byType(WorkspaceShell)),
+        findsOneWidget,
+      );
+      expect(
+        find.descendant(of: preview, matching: find.byType(PlannerView)),
+        findsOneWidget,
+      );
+      expect(
+        find.descendant(of: preview, matching: find.byType(AppBrandLockup)),
+        findsOneWidget,
+      );
+      expect(
+        find.descendant(
+          of: preview,
+          matching: find.byKey(testCase.brandTitleKey),
+        ),
+        findsOneWidget,
+      );
+      expect(
+        find.descendant(
+          of: preview,
+          matching: find.byWidgetPredicate(
+            (widget) => widget.runtimeType == testCase.backdropType,
+          ),
+        ),
+        findsOneWidget,
+      );
+      expect(
+        find.descendant(
+          of: preview,
+          matching: find.byWidgetPredicate(
+            (widget) =>
+                widget is FittedBox &&
+                widget.fit == BoxFit.contain &&
+                widget.alignment == Alignment.topLeft,
+          ),
+        ),
+        findsOneWidget,
+      );
+      expect(
+        tester.getSize(
+          find.descendant(of: preview, matching: find.byType(AppTitleBar)),
+        ),
+        const Size(1200, 40),
+      );
+      expect(
+        tester.getSize(
+          find.descendant(of: preview, matching: find.byType(WorkspaceShell)),
+        ),
+        const Size(1200, 712),
+      );
+
+      for (final label in const <String>[
+        'Planner',
+        'Bonus Recipes',
+        'Inventory',
+        'Appearance',
+        'Craft Profile',
+      ]) {
+        expect(
+          find.descendant(of: preview, matching: find.text(label)),
+          findsOneWidget,
+        );
+      }
+      expect(
+        find.descendant(of: preview, matching: find.text('Recipe Editor')),
+        findsNothing,
+      );
+      expect(
+        find.descendant(of: preview, matching: find.text('BDO CRAFT')),
+        findsNothing,
+      );
+      expect(
+        find.descendant(of: preview, matching: find.text('LIVE THEME PREVIEW')),
+        findsNothing,
+      );
+      expect(
+        find.descendant(of: preview, matching: find.byType(ExcludeFocus)),
+        findsWidgets,
+      );
     }
-    expect(
-      tester.getSize(
-        find.byKey(
-          const ValueKey<String>('ledger-preview-icon:Purified Water'),
-        ),
-      ),
-      const Size(20, 20),
-    );
-    expect(
-      find.byKey(const ValueKey<String>('ledger-preview-art:Purified Water')),
-      findsOneWidget,
-    );
-    expect(
-      find.byKey(const ValueKey<String>('ledger-preview-initials:Weeds')),
-      findsOneWidget,
-    );
-    expect(
-      tester.getSize(
-        find.byKey(
-          const ValueKey<String>('ledger-preview-seal:Purified Water'),
-        ),
-      ),
-      const Size(17, 17),
-    );
-    expect(
-      tester.getSize(
-        find.byKey(
-          const ValueKey<String>('ledger-preview-add:Trace of Nature'),
-        ),
-      ),
-      const Size(27, 17),
-    );
-    expect(
-      tester
-          .getSize(
-            find.byKey(const ValueKey<String>('ledger-preview-center-fold')),
-          )
-          .width,
-      10,
-    );
-    final frame = tester.widget<CustomPaint>(
-      find.byKey(const ValueKey<String>('ledger-theme-preview-ornament-frame')),
-    );
-    expect(frame.painter, isA<LedgerOrnamentFramePainter>());
-    expect(
-      find.descendant(of: preview, matching: find.byType(Icon)),
-      findsNothing,
-    );
     expect(tester.takeException(), isNull);
 
     await controller.dispose();
   });
-
-  testWidgets(
-    'Sakura selector auto-expands with real item art and retained botanicals',
-    (tester) async {
-      final controller = _controller();
-      await _pump(
-        tester,
-        controller,
-        const Size(1200, 752),
-        spec: RetainedThemeRegistry.sakuraNightGarden,
-      );
-
-      final selector = find.byKey(
-        const ValueKey<String>('A02:sakura-night-garden'),
-      );
-      final preview = find.byKey(
-        const ValueKey<String>('sakura-theme-preview'),
-      );
-      expect(selector, findsOneWidget);
-      expect(preview, findsOneWidget);
-      expect(
-        find.descendant(
-          of: preview,
-          matching: find.text('SAKURA NIGHT GARDEN'),
-        ),
-        findsOneWidget,
-      );
-      expect(find.textContaining('A complete interface theme:'), findsNothing);
-      expect(
-        find.textContaining('A complete night-garden workstation:'),
-        findsNothing,
-      );
-      expect(find.byKey(const ValueKey<String>('A01')), findsNothing);
-
-      final grain = tester.widget<CustomPaint>(
-        find.byKey(const ValueKey<String>('sakura-theme-preview-cedar-grain')),
-      );
-      expect(grain.painter, isA<SakuraCedarGrainPainter>());
-      final titleSprigHost = find.byKey(
-        const ValueKey<String>('sakura-theme-preview-title-sprig'),
-      );
-      final titleSprig = find.descendant(
-        of: titleSprigHost,
-        matching: find.byType(SakuraTitleSprigAsset),
-      );
-      expect(titleSprig, findsOneWidget);
-      expect(tester.getSize(titleSprig), SakuraTitleSprigAsset.authoredSize);
-      expect(
-        find.descendant(
-          of: titleSprig,
-          matching: find.byKey(SakuraTitleSprigAsset.imageKey),
-        ),
-        findsOneWidget,
-      );
-
-      final sidebarBranchHost = find.byKey(
-        const ValueKey<String>('sakura-theme-preview-sidebar-branch'),
-      );
-      final sidebarBranch = find.descendant(
-        of: sidebarBranchHost,
-        matching: find.byType(SakuraSidebarBotanicalAsset),
-      );
-      expect(sidebarBranch, findsOneWidget);
-      expect(
-        tester.getSize(sidebarBranch),
-        SakuraSidebarBotanicalAsset.authoredSize,
-      );
-      expect(
-        find.descendant(
-          of: sidebarBranch,
-          matching: find.byKey(SakuraSidebarBotanicalAsset.imageKey),
-        ),
-        findsOneWidget,
-      );
-
-      expect(
-        find.byKey(const ValueKey<String>('sakura-preview-art:Purified Water')),
-        findsWidgets,
-        reason: 'the preview must use catalog item art when it exists',
-      );
-      expect(
-        find.byKey(const ValueKey<String>('sakura-preview-initials:Weeds')),
-        findsOneWidget,
-        reason: 'initials remain only the missing-art fallback',
-      );
-      expect(
-        tester.getSize(
-          find
-              .descendant(
-                of: preview,
-                matching: find.byKey(
-                  const ValueKey<String>('sakura-preview-icon:Purified Water'),
-                ),
-              )
-              .last,
-        ),
-        const Size(20, 20),
-      );
-
-      final queueRow = find.byKey(
-        const ValueKey<String>('sakura-preview-row:Purified Water'),
-      );
-      final queueAsset = find.descendant(
-        of: queueRow,
-        matching: find.byType(SakuraQueueCornerAsset),
-      );
-      expect(queueAsset, findsOneWidget);
-      expect(tester.getSize(queueAsset), SakuraQueueCornerAsset.authoredSize);
-      expect(
-        tester.widget<SakuraQueueCornerAsset>(queueAsset).variant,
-        SakuraQueueCornerAssetVariant.risingBloom,
-      );
-      expect(
-        find.descendant(of: preview, matching: find.byType(Icon)),
-        findsNothing,
-      );
-      expect(
-        find.ancestor(
-          of: find.byKey(
-            const ValueKey<String>('sakura-theme-preview-sidebar-branch'),
-          ),
-          matching: find.byType(IgnorePointer),
-        ),
-        findsWidgets,
-      );
-
-      await tester.tap(selector);
-      await tester.pumpAndSettle();
-      for (final mode in CraftMode.values) {
-        expect(
-          controller.modes[mode]!.state.value.appearance.background,
-          'sakura-night-garden',
-        );
-      }
-      expect(tester.takeException(), isNull);
-
-      await controller.dispose();
-    },
-  );
 
   testWidgets('theme selection and transition controls persist', (
     tester,
@@ -649,10 +535,6 @@ bool _containsPixel(
   }
   return false;
 }
-
-Finder _glyph(String name) => find.byWidgetPredicate(
-  (widget) => widget is AppVectorGlyph && widget.name == name,
-);
 
 const _tinyIconDataUri =
     'data:image/png;base64,'

@@ -41,10 +41,10 @@ void main() {
   ).readAsStringSync();
 
   test('themed installer version surfaces stay synchronized', () {
-    expect(cmake, contains('BSL_INSTALLER_VERSION "0.1.4"'));
-    expect(cmake, contains('BSL_INSTALLER_BUILD_NUMBER "23"'));
+    expect(cmake, contains('BSL_INSTALLER_VERSION "0.1.5"'));
+    expect(cmake, contains('BSL_INSTALLER_BUILD_NUMBER "24"'));
     expect(cmake, contains('BSL_INSTALLER_VERSION_MAJOR'));
-    expect(model, contains('version = L"0.1.4"'));
+    expect(model, contains('version = L"0.1.5"'));
     expect(
       resources,
       contains(
@@ -129,6 +129,7 @@ void main() {
     expect(pathPolicy, contains('InspectDirectoryContents'));
     expect(pathPolicy, contains('DirectoryContents::unreadable'));
     expect(pathPolicy, contains('ERROR_NO_MORE_FILES'));
+    expect(pathPolicy, contains('Black Spirit Life Live Beta'));
     expect(pathPolicy, contains('Black Spirit Life Beta'));
     expect(pathPolicy, contains('BDO Craft Planner Map Candidate'));
     expect(pathPolicy, contains('ProgramFiles'));

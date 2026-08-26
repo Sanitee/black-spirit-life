@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:bdo_craft_planner_flutter/app/app.dart';
 import 'package:bdo_craft_planner_flutter/app/first_run_setup.dart';
 import 'package:bdo_craft_planner_flutter/app/first_run_setup_view.dart';
+import 'package:bdo_craft_planner_flutter/app_identity.dart';
 import 'package:bdo_craft_planner_flutter/domain/state/state_copy.dart';
 import 'package:bdo_craft_planner_flutter/features/planner/planner.dart';
 import 'package:bdo_craft_planner_flutter/visual/components/app_button.dart';
@@ -107,14 +108,14 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    expect(find.text('AFK Load'), findsOneWidget);
-    _expectSmallerThanSetupHeading(tester, 'AFK Load');
+    expect(find.text('AFK Weight'), findsOneWidget);
+    _expectSmallerThanSetupHeading(tester, 'AFK Weight');
     _expectFieldValue(tester, 'setup-maximum-weight-lt', '0');
     _expectFieldValue(tester, 'setup-current-carried-weight-lt', '0');
     _expectFieldValue(tester, 'setup-safety-buffer-lt', '0');
-    expect(find.text('LT to keep free'), findsOneWidget);
+    expect(find.text('Keep free'), findsOneWidget);
     expect(find.text('Leave unused'), findsNothing);
-    expect(find.text('Fairy · Feathery Steps'), findsOneWidget);
+    expect(find.text('Feathery Steps'), findsOneWidget);
     expect(find.text('None · 100%'), findsOneWidget);
     await _enterField(tester, 'setup-current-carried-weight-lt', '-10');
     _expectFieldValue(tester, 'setup-current-carried-weight-lt', '0');
@@ -311,7 +312,7 @@ void main() {
           firstRunSetupCompletedKey: true,
           firstRunSetupSchemaVersionKey: FirstRunSetupSchema.currentVersion,
           firstRunSetupCompletedBetaVersionsKey: <String, Object?>{
-            '0.1.0-beta.5': FirstRunSetupSchema.currentVersion,
+            AppIdentity.applicationVersion: FirstRunSetupSchema.currentVersion,
           },
         };
         return document.copyWith(
@@ -347,102 +348,103 @@ void main() {
     await tester.runAsync(harness.dispose);
   });
 
-  testWidgets('schema one profiles see only AFK Load and keep prior settings', (
-    tester,
-  ) async {
-    configureApplicationTestSurface(tester, const Size(1200, 800));
-    var harness = (await tester.runAsync(() async {
-      final value = await ApplicationTestHarness.create(setupCompleted: true);
-      await value.bundle.controller.updateDocumentDurably((document) {
-        final extensions = Map<String, Object?>.of(document.extensions)
-          ..[firstRunSetupExtensionKey] = <String, Object?>{
-            firstRunSetupCompletedKey: true,
-            firstRunSetupSchemaVersionKey: 1,
-            'futureSetupField': 'kept',
-          };
-        return document.copyWith(
-          alchemy: document.alchemy.copyWith(
-            alchemyMastery: 1937,
-            compatibility: document.alchemy.compatibility.copyWith(
-              alchemyYield: 3.14159,
+  testWidgets(
+    'schema one profiles see only AFK Weight and keep prior settings',
+    (tester) async {
+      configureApplicationTestSurface(tester, const Size(1200, 800));
+      var harness = (await tester.runAsync(() async {
+        final value = await ApplicationTestHarness.create(setupCompleted: true);
+        await value.bundle.controller.updateDocumentDurably((document) {
+          final extensions = Map<String, Object?>.of(document.extensions)
+            ..[firstRunSetupExtensionKey] = <String, Object?>{
+              firstRunSetupCompletedKey: true,
+              firstRunSetupSchemaVersionKey: 1,
+              'futureSetupField': 'kept',
+            };
+          return document.copyWith(
+            alchemy: document.alchemy.copyWith(
+              alchemyMastery: 1937,
+              compatibility: document.alchemy.compatibility.copyWith(
+                alchemyYield: 3.14159,
+              ),
             ),
-          ),
-          cooking: document.cooking.copyWith(cookingMastery: 842),
-          processing: document.processing.copyWith(
-            processingMastery: 1264,
-            useMassProcessing: true,
-          ),
-          marketTax: document.marketTax.copyWith(
-            enabled: false,
-            valuePack: false,
-            merchantRing: true,
-            familyFameBonus: .0125,
-          ),
-          afkWeightProfile: document.afkWeightProfile.copyWith(
-            maximumWeightLt: 1750,
-            currentCarriedWeightLt: 80,
-            safetyBufferLt: 25,
-            featheryStepsLevel: 2,
-            extensions: const <String, Object?>{'futureAfkField': 'kept'},
-          ),
-          extensions: extensions,
-        );
-      });
-      await value.disposeControllerOnly();
-      return value;
-    }))!;
-    harness = harness.rebindControllerInCurrentZone();
+            cooking: document.cooking.copyWith(cookingMastery: 842),
+            processing: document.processing.copyWith(
+              processingMastery: 1264,
+              useMassProcessing: true,
+            ),
+            marketTax: document.marketTax.copyWith(
+              enabled: false,
+              valuePack: false,
+              merchantRing: true,
+              familyFameBonus: .0125,
+            ),
+            afkWeightProfile: document.afkWeightProfile.copyWith(
+              maximumWeightLt: 1750,
+              currentCarriedWeightLt: 80,
+              safetyBufferLt: 25,
+              featheryStepsLevel: 2,
+              extensions: const <String, Object?>{'futureAfkField': 'kept'},
+            ),
+            extensions: extensions,
+          );
+        });
+        await value.disposeControllerOnly();
+        return value;
+      }))!;
+      harness = harness.rebindControllerInCurrentZone();
 
-    await tester.pumpWidget(
-      BdoCraftPlannerApp(
-        applicationFuture: Future.value(harness.bundle),
-        repeatFullSetupEveryApplicationVersion: false,
-      ),
-    );
-    await tester.pumpAndSettle();
+      await tester.pumpWidget(
+        BdoCraftPlannerApp(
+          applicationFuture: Future.value(harness.bundle),
+          repeatFullSetupEveryApplicationVersion: false,
+        ),
+      );
+      await tester.pumpAndSettle();
 
-    expect(find.byType(FirstRunSetupView), findsOneWidget);
-    expect(find.text('Step 1 of 1'), findsOneWidget);
-    expect(find.text('AFK Load'), findsOneWidget);
-    expect(find.text('Mastery'), findsNothing);
-    expect(find.text('Market sales'), findsNothing);
-    _expectFieldValue(tester, 'setup-maximum-weight-lt', '1750');
-    _expectFieldValue(tester, 'setup-current-carried-weight-lt', '80');
-    _expectFieldValue(tester, 'setup-safety-buffer-lt', '25');
-    expect(find.text('II · 110%'), findsOneWidget);
+      expect(find.byType(FirstRunSetupView), findsOneWidget);
+      expect(find.text('Step 1 of 1'), findsOneWidget);
+      expect(find.text('AFK Weight'), findsOneWidget);
+      expect(find.text('Mastery'), findsNothing);
+      expect(find.text('Market sales'), findsNothing);
+      _expectFieldValue(tester, 'setup-maximum-weight-lt', '1750');
+      _expectFieldValue(tester, 'setup-current-carried-weight-lt', '80');
+      _expectFieldValue(tester, 'setup-safety-buffer-lt', '25');
+      expect(find.text('II · 110%'), findsOneWidget);
 
-    await _enterField(tester, 'setup-maximum-weight-lt', '2100.5');
-    await tester.tap(
-      find.byKey(const ValueKey<String>('first-run-setup-finish')),
-    );
-    await tester.pumpAndSettle();
+      await _enterField(tester, 'setup-maximum-weight-lt', '2100.5');
+      await tester.tap(
+        find.byKey(const ValueKey<String>('first-run-setup-finish')),
+      );
+      await tester.pumpAndSettle();
 
-    final document = harness.bundle.controller.documentSnapshot;
-    expect(document.alchemy.alchemyMastery, 1937);
-    expect(document.alchemy.compatibility.alchemyYield, 3.14159);
-    expect(document.cooking.cookingMastery, 842);
-    expect(document.processing.processingMastery, 1264);
-    expect(document.processing.useMassProcessing, isTrue);
-    expect(document.marketTax.enabled, isFalse);
-    expect(document.marketTax.valuePack, isFalse);
-    expect(document.marketTax.merchantRing, isTrue);
-    expect(document.marketTax.familyFameBonus, .0125);
-    expect(document.afkWeightProfile.maximumWeightLt, 2100.5);
-    expect(document.afkWeightProfile.currentCarriedWeightLt, 80);
-    expect(document.afkWeightProfile.safetyBufferLt, 25);
-    expect(document.afkWeightProfile.featheryStepsLevel, 2);
-    expect(document.afkWeightProfile.extensions['futureAfkField'], 'kept');
-    final metadata = document.extensions[firstRunSetupExtensionKey] as Map;
-    expect(metadata[firstRunSetupSchemaVersionKey], 2);
-    expect(metadata['futureSetupField'], 'kept');
+      final document = harness.bundle.controller.documentSnapshot;
+      expect(document.alchemy.alchemyMastery, 1937);
+      expect(document.alchemy.compatibility.alchemyYield, 3.14159);
+      expect(document.cooking.cookingMastery, 842);
+      expect(document.processing.processingMastery, 1264);
+      expect(document.processing.useMassProcessing, isTrue);
+      expect(document.marketTax.enabled, isFalse);
+      expect(document.marketTax.valuePack, isFalse);
+      expect(document.marketTax.merchantRing, isTrue);
+      expect(document.marketTax.familyFameBonus, .0125);
+      expect(document.afkWeightProfile.maximumWeightLt, 2100.5);
+      expect(document.afkWeightProfile.currentCarriedWeightLt, 80);
+      expect(document.afkWeightProfile.safetyBufferLt, 25);
+      expect(document.afkWeightProfile.featheryStepsLevel, 2);
+      expect(document.afkWeightProfile.extensions['futureAfkField'], 'kept');
+      final metadata = document.extensions[firstRunSetupExtensionKey] as Map;
+      expect(metadata[firstRunSetupSchemaVersionKey], 2);
+      expect(metadata['futureSetupField'], 'kept');
 
-    await tester.tap(
-      find.byKey(const ValueKey<String>('first-run-setup-location-okay')),
-    );
-    await tester.pumpAndSettle();
-    await tester.pumpWidget(const SizedBox.shrink());
-    await tester.runAsync(harness.dispose);
-  });
+      await tester.tap(
+        find.byKey(const ValueKey<String>('first-run-setup-location-okay')),
+      );
+      await tester.pumpAndSettle();
+      await tester.pumpWidget(const SizedBox.shrink());
+      await tester.runAsync(harness.dispose);
+    },
+  );
 
   testWidgets('location notice waits for the durable setup save', (
     tester,

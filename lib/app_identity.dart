@@ -8,7 +8,7 @@ abstract final class AppIdentity {
   static const productName = 'Black Spirit Life';
   static const displayName = productName;
   static const releaseChannel = 'win-x64-stable';
-  static const applicationVersion = '0.1.4';
+  static const applicationVersion = '0.1.5';
 
   /// About remains implemented and verified, but its navigation entry stays
   /// hidden until a later product update explicitly enables it.
@@ -39,11 +39,18 @@ abstract final class AppIdentity {
   /// Permanent Velopack ownership identity for the public application.
   /// This must remain distinct from every settings and cache directory name.
   static const installerPackageId = 'BlackSpiritLife.App';
+  static const stableInstallerPackageId = installerPackageId;
+  static const liveBetaInstallerPackageId = 'BlackSpiritLife.App.LiveBeta';
+  static const formerInstallerPackageId = 'BlackSpiritLife.App.Beta';
 
   /// Writable identities remain explicit so prior test builds can coexist.
   static const stateDirectoryName = 'Black Spirit Life';
   static const stableStateDirectoryName = 'Black Spirit Life';
+  static const liveBetaStateDirectoryName = 'Black Spirit Life Live Beta';
   static const localCacheDirectoryName = 'Black Spirit Life';
+  static const stableLocalCacheDirectoryName = 'Black Spirit Life';
+  static const liveBetaLocalCacheDirectoryName = 'Black Spirit Life Live Beta';
+  static const formerLocalCacheDirectoryName = 'Black Spirit Life Beta';
 
   /// Non-personal marker left after an explicitly requested uninstall wipe.
   /// It prevents an untouched legacy profile from silently repopulating the

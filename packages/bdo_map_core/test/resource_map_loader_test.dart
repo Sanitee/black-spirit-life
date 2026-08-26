@@ -1004,6 +1004,14 @@ void main() {
       'provenanceId': 'test-survey',
       'areaId': 'gathering:test-area',
       'verifiedAt': '2026-07-28T12:00:00Z',
+      'guideImages': <Map<String, Object?>>[
+        <String, Object?>{
+          'assetPath': 'assets/images/location_guides/survey-entrance.webp',
+          'caption': 'Face the broken arch, then turn right',
+          'provenanceId': 'test-photo-license',
+          'verifiedAt': '2026-08-20T09:30:00Z',
+        },
+      ],
     });
 
     expect(point.id, 'gathering-point:survey:1');
@@ -1016,6 +1024,69 @@ void main() {
     expect(point.provenanceId, 'test-survey');
     expect(point.areaId, 'gathering:test-area');
     expect(point.verifiedAt, DateTime.utc(2026, 7, 28, 12));
+    expect(point.guideImages, hasLength(1));
+    expect(
+      point.guideImages.single.assetPath,
+      'assets/images/location_guides/survey-entrance.webp',
+    );
+    expect(
+      point.guideImages.single.caption,
+      'Face the broken arch, then turn right',
+    );
+    expect(point.guideImages.single.provenanceId, 'test-photo-license');
+    expect(
+      point.guideImages.single.verifiedAt,
+      DateTime.utc(2026, 8, 20, 9, 30),
+    );
+  });
+
+  test('rejects location photos without complete licensed provenance', () {
+    BdoResourceMapDataset buildDataset({
+      required String caption,
+      required String provenanceId,
+    }) {
+      return BdoResourceMapDataset(
+        manifest: dataset.manifest,
+        resources: const <BdoResourceDefinition>[],
+        workerNodes: const <BdoWorkerNode>[],
+        gatheringSpots: const <BdoGatheringSpot>[],
+        gatheringRoutes: const <BdoGatheringRoute>[],
+        gatheringPoints: <BdoGatheringPoint>[
+          BdoGatheringPoint(
+            id: 'gathering-point:test-photo',
+            location: const BdoWorldPoint(0, 0),
+            resourceIds: const <String>[],
+            target: 'Test target',
+            kind: 'gathering',
+            label: 'Test point',
+            verification: BdoGatheringVerification.communityReported,
+            provenanceId: 'somethinglovely-mit-gathering-points',
+            guideImages: <BdoLocationGuideImage>[
+              BdoLocationGuideImage(
+                assetPath: 'assets/images/location_guides/test.webp',
+                caption: caption,
+                provenanceId: provenanceId,
+              ),
+            ],
+          ),
+        ],
+      );
+    }
+
+    expect(
+      () => buildDataset(
+        caption: 'Turn right at the broken arch',
+        provenanceId: 'missing-photo-source',
+      ),
+      throwsFormatException,
+    );
+    expect(
+      () => buildDataset(
+        caption: '',
+        provenanceId: 'somethinglovely-mit-gathering-points',
+      ),
+      throwsFormatException,
+    );
   });
 
   test('deduplicates and merges pinned animal-family coordinates', () {

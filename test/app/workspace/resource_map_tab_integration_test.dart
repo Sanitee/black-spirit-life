@@ -377,13 +377,19 @@ void main() {
       await tester.tap(
         find.byKey(const ValueKey<String>('resource-map-command-gather')),
       );
-      await tester.pump(const Duration(milliseconds: 260));
+      await tester.pumpAndSettle();
       await tester.tap(
-        find.byKey(
-          const ValueKey<String>('resource-map-gather-plan-shortlist'),
-        ),
+        find
+            .byKey(const ValueKey<String>('resource-map-gather-menu-plan'))
+            .hitTestable(),
       );
-      await tester.pump(const Duration(milliseconds: 260));
+      await tester.pumpAndSettle();
+      await tester.tap(
+        find
+            .byKey(const ValueKey<String>('resource-map-gather-plan-shortlist'))
+            .hitTestable(),
+      );
+      await tester.pumpAndSettle();
 
       final rusalkaRow = find.byKey(
         const ValueKey<String>('resource-map-plan-need-item:821255'),
@@ -831,6 +837,74 @@ void main() {
   );
 
   testWidgets(
+    'map receives the planner substitute family and effective member ratios',
+    (tester) async {
+      configureApplicationTestSurface(tester, const Size(1500, 940));
+      final harness = await _createHarness(tester);
+      final alchemy = harness.bundle.controller.modes[CraftMode.alchemy]!;
+      expect(alchemy.selectTarget("Clown's Blood"), isTrue);
+      expect(alchemy.commitAmount('2'), isTrue);
+
+      final plannerMaterial = alchemy.plan.value.missing.singleWhere(
+        (material) => material.choice?.substituteGroup == 'Blood Group 1',
+      );
+      final plannerChoice = plannerMaterial.choice!;
+
+      final tileClient = _localFailureTileClient();
+      addTearDown(tileClient.close);
+      await tester.pumpWidget(
+        BdoCraftPlannerApp(
+          applicationFuture: Future.value(harness.bundle),
+          marketGateway: const EmptyMarketGateway(),
+          resourceMapConfiguration: _testMapConfiguration(harness, tileClient),
+        ),
+      );
+      await _pumpWorkspace(tester);
+      await tester.tap(_workspaceTab('Resource Map'));
+      await _pumpUntilMapIsReady(tester);
+      await tester.pump();
+
+      final map = tester.widget<BdoResourceMap>(find.byType(BdoResourceMap));
+      final projectedNeed = map.plannerNeeds.singleWhere(
+        (need) => need.name == plannerMaterial.name,
+      );
+      final family = projectedNeed.substituteFamily!;
+
+      expect(family.parentName, plannerChoice.parentName);
+      expect(family.originalName, plannerChoice.original);
+      expect(family.familyName, plannerChoice.substituteGroup);
+      expect(family.selectedName, plannerChoice.baseName);
+      expect(family.members, plannerChoice.options);
+      expect(
+        family.members,
+        containsAll(<String>[
+          'Wolf Blood',
+          'Flamingo Blood',
+          'Rhino Blood',
+          'Cheetah Dragon Blood',
+        ]),
+      );
+      expect(family.ratios, <String, double>{
+        'Wolf Blood': 1,
+        'Flamingo Blood': 0.5,
+        'Rhino Blood': 1,
+        'Cheetah Dragon Blood': 0.5,
+      });
+
+      final groupedNeed = map.plannerNeedGroups
+          .singleWhere((group) => group.id == 'alchemy')
+          .materials
+          .singleWhere((material) => material.need.name == plannerMaterial.name)
+          .need;
+      expect(groupedNeed.substituteFamily, isNotNull);
+      expect(groupedNeed.substituteFamily!.members, family.members);
+      expect(tester.takeException(), isNull);
+
+      await _disposeWidgetHarness(tester, harness);
+    },
+  );
+
+  testWidgets(
     'vendor-direct plan materials stay searchable without entering the shortlist',
     (tester) async {
       configureApplicationTestSurface(tester, const Size(1500, 940));
@@ -1164,7 +1238,7 @@ void main() {
       expect(_isSelected(tester, _workspaceTab('Craft Planner')), isFalse);
       expect(_isSelected(tester, _workspaceTab('Resource Map')), isTrue);
       expect(find.byType(BdoResourceMap), findsOneWidget);
-      expect(find.text('Planned network'), findsOneWidget);
+      expect(find.text('Plan specific items'), findsOneWidget);
       expect(
         find.byKey(
           const ValueKey<String>('resource-map-node-target-item:5402'),
@@ -1242,7 +1316,7 @@ void main() {
         findsOneWidget,
       );
       expect(_isSelected(tester, _workspaceTab('Resource Map')), isTrue);
-      expect(find.text('Planned network'), findsOneWidget);
+      expect(find.text('Plan specific items'), findsOneWidget);
       expect(tester.takeException(), isNull);
 
       await _disposeWidgetHarness(tester, harness);
@@ -1363,14 +1437,18 @@ void main() {
       await tester.tap(gatherCommand);
       await tester.pump(const Duration(milliseconds: 260));
       expect(
-        find.byKey(const ValueKey<String>('resource-map-gather-hub')),
+        find
+            .byKey(const ValueKey<String>('resource-map-gather-menu-plan'))
+            .hitTestable(),
         findsOneWidget,
       );
       expectPersistentTabs(mapSelected: true);
       await tester.tap(gatherCommand);
       await tester.pump(const Duration(milliseconds: 260));
       expect(
-        find.byKey(const ValueKey<String>('resource-map-gather-hub')),
+        find
+            .byKey(const ValueKey<String>('resource-map-gather-menu-plan'))
+            .hitTestable(),
         findsNothing,
       );
       expectPersistentTabs(mapSelected: true);
@@ -1387,7 +1465,9 @@ void main() {
         expectPersistentTabs(mapSelected: true);
       }
       expect(
-        find.byKey(const ValueKey<String>('resource-map-gather-hub')),
+        find
+            .byKey(const ValueKey<String>('resource-map-gather-menu-plan'))
+            .hitTestable(),
         findsNothing,
         reason: 'The retained map session should stay on its clean map home.',
       );

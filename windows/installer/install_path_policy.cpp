@@ -789,6 +789,9 @@ ValidateInstallRootPersonalDataSafety(const std::wstring &install_root) {
   std::vector<std::wstring> protected_roots;
   if (!appdata.empty()) {
     protected_roots.push_back(
+        (std::filesystem::path(appdata) / L"Black Spirit Life Live Beta")
+            .wstring());
+    protected_roots.push_back(
         (std::filesystem::path(appdata) / L"Black Spirit Life Beta").wstring());
     protected_roots.push_back(
         (std::filesystem::path(appdata) / L"Black Spirit Life").wstring());
@@ -797,6 +800,9 @@ ValidateInstallRootPersonalDataSafety(const std::wstring &install_root) {
             .wstring());
   }
   if (!local.empty()) {
+    protected_roots.push_back(
+        (std::filesystem::path(local) / L"Black Spirit Life Live Beta")
+            .wstring());
     protected_roots.push_back(
         (std::filesystem::path(local) / L"Black Spirit Life Beta").wstring());
     protected_roots.push_back(

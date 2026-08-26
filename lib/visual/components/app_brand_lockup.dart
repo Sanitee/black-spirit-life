@@ -23,6 +23,7 @@ class AppBrandLockup extends StatelessWidget {
   );
   static const Key ledgerTitleKey = ValueKey<String>('ledger-brand-title');
   static const Key ledgerDividerKey = ValueKey<String>('ledger-brand-divider');
+  static const Key standardTitleKey = ValueKey<String>('standard-brand-title');
   static const Key sakuraTitleKey = ValueKey<String>('sakura-brand-title');
   static const Key sakuraRuleKey = ValueKey<String>('sakura-brand-rule');
 
@@ -65,15 +66,24 @@ class _StandardBrand extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 4),
-        const Text(
-          'Black Spirit\nLife',
-          maxLines: 2,
-          style: TextStyle(
-            color: Color(0xFFFFF8D4),
-            fontFamily: 'Georgia',
-            fontSize: 34,
-            fontWeight: FontWeight.w700,
-            height: 31 / 34,
+        const SizedBox(
+          width: double.infinity,
+          child: FittedBox(
+            fit: BoxFit.scaleDown,
+            alignment: Alignment.centerLeft,
+            child: Text(
+              'Black Spirit\nLife',
+              key: AppBrandLockup.standardTitleKey,
+              maxLines: 2,
+              softWrap: false,
+              style: TextStyle(
+                color: Color(0xFFFFF8D4),
+                fontFamily: 'Georgia',
+                fontSize: 34,
+                fontWeight: FontWeight.w700,
+                height: 31 / 34,
+              ),
+            ),
           ),
         ),
         const SizedBox(height: 4),
@@ -131,17 +141,24 @@ class _LedgerBrand extends StatelessWidget {
                         fontWeight: FontWeight.w700,
                       ),
                     ),
-                    const Text(
-                      'BLACK SPIRIT\nLIFE',
-                      key: AppBrandLockup.ledgerTitleKey,
-                      maxLines: 2,
-                      softWrap: false,
-                      style: TextStyle(
-                        color: Color(0xFF352516),
-                        fontFamily: 'Georgia',
-                        fontSize: 17,
-                        fontWeight: FontWeight.w700,
-                        height: 19 / 17,
+                    const SizedBox(
+                      width: double.infinity,
+                      child: FittedBox(
+                        fit: BoxFit.scaleDown,
+                        alignment: Alignment.centerLeft,
+                        child: Text(
+                          'BLACK SPIRIT\nLIFE',
+                          key: AppBrandLockup.ledgerTitleKey,
+                          maxLines: 2,
+                          softWrap: false,
+                          style: TextStyle(
+                            color: Color(0xFF352516),
+                            fontFamily: 'Georgia',
+                            fontSize: 17,
+                            fontWeight: FontWeight.w700,
+                            height: 19 / 17,
+                          ),
+                        ),
                       ),
                     ),
                   ],
@@ -182,18 +199,25 @@ class _SakuraBrand extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 3),
-        Text(
-          'Black Spirit\nLife',
-          key: AppBrandLockup.sakuraTitleKey,
-          maxLines: 2,
-          softWrap: false,
-          style: spec.typography.display.copyWith(
-            color: SakuraNightGardenSpec.warmIvory,
-            fontFamily: 'Georgia',
-            fontSize: 34,
-            fontWeight: FontWeight.w700,
-            letterSpacing: -.35,
-            height: 31 / 34,
+        SizedBox(
+          width: double.infinity,
+          child: FittedBox(
+            fit: BoxFit.scaleDown,
+            alignment: Alignment.centerLeft,
+            child: Text(
+              'Black Spirit\nLife',
+              key: AppBrandLockup.sakuraTitleKey,
+              maxLines: 2,
+              softWrap: false,
+              style: spec.typography.display.copyWith(
+                color: SakuraNightGardenSpec.warmIvory,
+                fontFamily: 'Georgia',
+                fontSize: 34,
+                fontWeight: FontWeight.w700,
+                letterSpacing: -.35,
+                height: 31 / 34,
+              ),
+            ),
           ),
         ),
         const SizedBox(height: 4),

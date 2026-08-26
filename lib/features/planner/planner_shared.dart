@@ -30,7 +30,7 @@ typedef SelectPlannerTarget = bool Function(String name);
 const double plannerStandardCommandControlHeight = 46;
 
 /// Balanced selected-target label size for the taller Standard command field.
-const double plannerStandardTargetFontSize = 15;
+const double plannerStandardTargetFontSize = 16;
 
 final class PlannerCommandTarget {
   const PlannerCommandTarget({
@@ -72,6 +72,7 @@ class _PlannerTargetChooserState extends State<PlannerTargetChooser> {
   );
   late final FocusNode _focus = FocusNode()..addListener(_focusChanged);
   int _highlighted = 0;
+  bool _suppressAutomaticShow = false;
 
   List<String> get _matches {
     final query = _text.text.trim().toLowerCase();
@@ -100,29 +101,50 @@ class _PlannerTargetChooserState extends State<PlannerTargetChooser> {
 
   void _focusChanged() {
     if (_focus.hasFocus) {
+      if (_suppressAutomaticShow) return;
       _show();
       return;
     }
+    // Menu buttons take focus on mouse-down. Keep the overlay and query intact
+    // until the option receives mouse-up and completes its selection.
+    if (_portal.isShowing) return;
+    _suppressAutomaticShow = false;
+    _commitOrRestore();
+  }
+
+  void _commitOrRestore() {
     final selected = widget.target.onSelected(_text.text);
     if (!selected) _text.text = widget.target.value;
-    _portal.hide();
   }
 
   void _show() {
     if (!_portal.isShowing) _portal.show();
   }
 
+  void _showFromUser() {
+    _suppressAutomaticShow = false;
+    _show();
+  }
+
   void _filterChanged(String _) {
+    _suppressAutomaticShow = false;
     setState(() => _highlighted = 0);
     _show();
   }
 
   void _select(String name) {
-    if (!widget.target.onSelected(name)) return;
+    // The target commit rebuilds the planner synchronously. Suppress focus-
+    // driven reopening before that commit starts; otherwise Windows can return
+    // focus to the field during the rebuild and leave a one-item menu behind.
+    _suppressAutomaticShow = true;
+    if (!widget.target.onSelected(name)) {
+      _suppressAutomaticShow = false;
+      return;
+    }
     _text.text = name;
     _text.selection = TextSelection.collapsed(offset: name.length);
     _portal.hide();
-    _focus.requestFocus();
+    if (!_focus.hasFocus) _focus.requestFocus();
   }
 
   KeyEventResult _handleKey(FocusNode _, KeyEvent event) {
@@ -130,6 +152,7 @@ class _PlannerTargetChooserState extends State<PlannerTargetChooser> {
     final matches = _matches;
     if (event.logicalKey == LogicalKeyboardKey.arrowDown) {
       if (matches.isNotEmpty) {
+        _suppressAutomaticShow = false;
         setState(() => _highlighted = (_highlighted + 1) % matches.length);
         _show();
       }
@@ -137,6 +160,7 @@ class _PlannerTargetChooserState extends State<PlannerTargetChooser> {
     }
     if (event.logicalKey == LogicalKeyboardKey.arrowUp) {
       if (matches.isNotEmpty) {
+        _suppressAutomaticShow = false;
         setState(
           () => _highlighted =
               (_highlighted - 1 + matches.length) % matches.length,
@@ -148,6 +172,11 @@ class _PlannerTargetChooserState extends State<PlannerTargetChooser> {
     if (event.logicalKey == LogicalKeyboardKey.escape) {
       _portal.hide();
       return KeyEventResult.handled;
+    }
+    if (event.logicalKey == LogicalKeyboardKey.tab) {
+      _submit(_text.text);
+      _portal.hide();
+      return KeyEventResult.ignored;
     }
     return KeyEventResult.ignored;
   }
@@ -187,15 +216,18 @@ class _PlannerTargetChooserState extends State<PlannerTargetChooser> {
               offset: const Offset(0, 6),
               showWhenUnlinked: false,
               child: SizedBox(
-                width: 390,
-                height: (matches.length * 44).clamp(56, 286).toDouble(),
+                width: 460,
+                height: (matches.length * 66 + 16).clamp(82, 420).toDouble(),
                 child: TapRegion(
                   groupId: this,
-                  onTapOutside: (_) => _portal.hide(),
+                  onTapOutside: (_) {
+                    _portal.hide();
+                    _commitOrRestore();
+                  },
                   child: AppSurface(
                     role: AppSurfaceRole.popup,
                     semanticLabel: '${widget.semanticLabel} choices',
-                    padding: const EdgeInsets.all(6),
+                    padding: const EdgeInsets.all(8),
                     child: matches.isEmpty
                         ? Center(
                             child: Text(
@@ -208,14 +240,14 @@ class _PlannerTargetChooserState extends State<PlannerTargetChooser> {
                             itemBuilder: (context, index) {
                               final name = matches[index];
                               return Padding(
-                                padding: const EdgeInsets.only(bottom: 4),
+                                padding: const EdgeInsets.only(bottom: 6),
                                 child: AppButton(
                                   selected: index == _highlighted,
                                   role: AppButtonRole.navigation,
-                                  minimumSize: const Size.fromHeight(40),
+                                  minimumSize: const Size.fromHeight(60),
                                   padding: const EdgeInsets.symmetric(
-                                    horizontal: 8,
-                                    vertical: 5,
+                                    horizontal: 12,
+                                    vertical: 8,
                                   ),
                                   semanticLabel: 'Select $name',
                                   onPressed: () => _select(name),
@@ -224,14 +256,19 @@ class _PlannerTargetChooserState extends State<PlannerTargetChooser> {
                                       PlannerItemIcon(
                                         controller: widget.controller,
                                         name: name,
-                                        size: 30,
+                                        size: 42,
                                       ),
-                                      const SizedBox(width: 8),
+                                      const SizedBox(width: 10),
                                       Expanded(
                                         child: Text(
                                           name,
                                           maxLines: 2,
                                           overflow: TextOverflow.ellipsis,
+                                          style: spec.typography.body.copyWith(
+                                            fontSize: 16,
+                                            fontWeight: FontWeight.w700,
+                                            height: 1.15,
+                                          ),
                                         ),
                                       ),
                                     ],
@@ -250,22 +287,27 @@ class _PlannerTargetChooserState extends State<PlannerTargetChooser> {
           groupId: this,
           child: CompositedTransformTarget(
             link: _link,
-            child: PlannerTextField(
-              controller: _text,
-              focusNode: _focus,
-              hintText: 'Search craftable recipes',
-              semanticLabel: widget.semanticLabel,
-              suffix: Icon(
-                Icons.expand_more,
-                color: spec.palette.textMuted,
-                size: 19,
+            child: Listener(
+              behavior: HitTestBehavior.translucent,
+              onPointerDown: (_) => _showFromUser(),
+              child: PlannerTextField(
+                controller: _text,
+                focusNode: _focus,
+                hintText: 'Search craftable recipes',
+                semanticLabel: widget.semanticLabel,
+                suffix: Icon(
+                  Icons.expand_more,
+                  color: spec.palette.textMuted,
+                  size: 22,
+                ),
+                onChanged: _filterChanged,
+                onTap: _showFromUser,
+                onSubmitted: _submit,
+                onKeyEvent: _handleKey,
+                fontSize: denseLayout ? 15 : plannerStandardTargetFontSize,
+                fontWeight: FontWeight.w700,
+                minimumHeight: widget.controlHeight,
               ),
-              onChanged: _filterChanged,
-              onSubmitted: _submit,
-              onKeyEvent: _handleKey,
-              fontSize: denseLayout ? 13 : plannerStandardTargetFontSize,
-              fontWeight: FontWeight.w700,
-              minimumHeight: widget.controlHeight,
             ),
           ),
         ),
@@ -393,6 +435,7 @@ class PlannerTextField extends StatelessWidget {
     this.minimumHeight,
     this.invalid = false,
     this.onChanged,
+    this.onTap,
     this.onSubmitted,
     this.onKeyEvent,
     super.key,
@@ -412,6 +455,7 @@ class PlannerTextField extends StatelessWidget {
   final double? minimumHeight;
   final bool invalid;
   final ValueChanged<String>? onChanged;
+  final VoidCallback? onTap;
   final ValueChanged<String>? onSubmitted;
   final FocusOnKeyEventCallback? onKeyEvent;
 
@@ -453,6 +497,7 @@ class PlannerTextField extends StatelessWidget {
       textAlign: textAlign,
       textAlignVertical: TextAlignVertical.center,
       onChanged: onChanged,
+      onTap: onTap,
       onSubmitted: onSubmitted,
       style: spec.typography.body.copyWith(
         fontSize: fontSize,
@@ -1152,28 +1197,31 @@ class _QueuePanel extends StatelessWidget {
       behavior: ScrollConfiguration.of(context).copyWith(scrollbars: false),
       child: queueList,
     );
-    return AppSurface(
-      role: AppSurfaceRole.layout,
-      semanticLabel: title,
-      padding: const EdgeInsets.all(12),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: <Widget>[
-          SectionHeader(
-            title: title,
-            meta: '${plan.steps.length} $countNoun',
-            trailing: trailing,
-          ),
-          const SizedBox(height: 12),
-          Expanded(
-            child: steps.isEmpty
-                ? const _PlannerEmpty(
-                    message:
-                        'No craft steps are needed for the current target and inventory.',
-                  )
-                : queueListWithoutPlatformScrollbar,
-          ),
-        ],
+    return FocusTraversalGroup(
+      policy: WidgetOrderTraversalPolicy(),
+      child: AppSurface(
+        role: AppSurfaceRole.layout,
+        semanticLabel: title,
+        padding: const EdgeInsets.all(12),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: <Widget>[
+            SectionHeader(
+              title: title,
+              meta: '${plan.steps.length} $countNoun',
+              trailing: trailing,
+            ),
+            const SizedBox(height: 12),
+            Expanded(
+              child: steps.isEmpty
+                  ? const _PlannerEmpty(
+                      message:
+                          'No craft steps are needed for the current target and inventory.',
+                    )
+                  : queueListWithoutPlatformScrollbar,
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -1354,9 +1402,11 @@ class _QueueStepCard extends StatelessWidget {
                     key: PlannerActionKeys.row('P08', step.name),
                     completed: completed,
                     semanticLabel: completed
-                        ? 'Undo Done for ${step.name}'
+                        ? '${step.name} is done'
                         : 'Done with ${step.name}',
-                    onPressed: () => controller.toggleCompleted(step.name),
+                    onPressed: completed
+                        ? null
+                        : () => controller.completeStep(step),
                   ),
                 ],
               ],
@@ -1527,8 +1577,8 @@ class _AfkLoadPopover extends StatelessWidget {
           final height = denseLayout ? 36.0 : 38.0;
           return AnchoredPopover(
             overlayId: 'afk-load:${controller.mode.key}:${step.name}',
-            preferredWidth: 452,
-            maximumHeight: 540,
+            preferredWidth: 736,
+            maximumHeight: 680,
             margin: 22,
             gap: 12,
             placement: AnchoredPopoverPlacement.beside,
@@ -1561,16 +1611,16 @@ class _AfkLoadPopover extends StatelessWidget {
                       )
                     : EdgeInsets.zero,
                 semanticLabel:
-                    'AFK Load for ${step.name}, '
+                    'AFK Weight for ${step.name}, '
                     '${isShowing ? 'open' : 'closed'}',
-                tooltip: 'Plan-aware AFK ingredient loads',
+                tooltip: 'Plan ingredients around your character weight',
                 onPressed: toggle,
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: <Widget>[
                     Icon(
                       Icons.scale_outlined,
-                      size: 17,
+                      size: showLabel ? 19 : 22,
                       color: profile.isConfigured
                           ? null
                           : context.visualTheme.palette.warning,
@@ -1578,18 +1628,10 @@ class _AfkLoadPopover extends StatelessWidget {
                     if (showLabel) ...<Widget>[
                       const SizedBox(width: 6),
                       const Text(
-                        'AFK Load',
+                        'AFK Weight',
                         maxLines: 1,
                         softWrap: false,
                         style: TextStyle(fontWeight: FontWeight.w700),
-                      ),
-                    ],
-                    if (!profile.isConfigured && showLabel) ...<Widget>[
-                      const SizedBox(width: 6),
-                      Icon(
-                        Icons.brightness_1,
-                        size: 6,
-                        color: context.visualTheme.palette.warning,
                       ),
                     ],
                   ],
@@ -1722,49 +1764,500 @@ class _AfkLoadCardState extends State<_AfkLoadCard> {
 
   @override
   Widget build(BuildContext context) {
-    return AppSurface(
-      role: AppSurfaceRole.popup,
-      padding: EdgeInsets.zero,
-      clipBehavior: Clip.antiAlias,
-      semanticLabel: 'AFK Load plan for ${recipe.name}',
-      child: ValueListenableBuilder<ModeState>(
-        valueListenable: controller.state,
-        builder: (context, state, _) {
-          final initialSession = _calculate(completedAttempts: 0);
-          final reconciled = _reconcile(state, initialSession);
-          final progress = reconciled.afkCraftProgressFor(
-            recipe.name,
-            progressKey: _progressKey,
-          );
-          final session = _calculate(
-            completedAttempts: progress?.completedAttempts ?? 0,
-          );
-          return SingleChildScrollView(
-            padding: const EdgeInsets.fromLTRB(16, 14, 16, 16),
-            child: Column(
+    return LayoutBuilder(
+      builder: (context, constraints) => AppSurface(
+        role: AppSurfaceRole.popup,
+        padding: EdgeInsets.zero,
+        clipBehavior: Clip.antiAlias,
+        semanticLabel: 'AFK Weight plan for ${recipe.name}',
+        child: ValueListenableBuilder<ModeState>(
+          valueListenable: controller.state,
+          builder: (context, state, _) {
+            final initialSession = _calculate(completedAttempts: 0);
+            final reconciled = _reconcile(state, initialSession);
+            final progress = reconciled.afkCraftProgressFor(
+              recipe.name,
+              progressKey: _progressKey,
+            );
+            final session = _calculate(
+              completedAttempts: progress?.completedAttempts ?? 0,
+            );
+            final showModes =
+                profile.isConfigured &&
+                session.maximumCapacity.available &&
+                session.maxAttemptsPerLoad > 0;
+            if (showModes && !session.complete && session.loadCount > 0) {
+              final availableHeight = constraints.hasBoundedHeight
+                  ? constraints.maxHeight
+                  : 680.0;
+              return _splitPlan(
+                context,
+                session,
+                progress,
+                availableHeight: availableHeight,
+              );
+            }
+
+            final body = !profile.isConfigured
+                ? _unconfigured(context)
+                : !showModes
+                ? _unavailable(context, session.maximumCapacity)
+                : _needed(context, session, progress);
+            return Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: <Widget>[
-                _header(context),
-                const SizedBox(height: 12),
-                if (!profile.isConfigured)
-                  _unconfigured(context)
-                else if (!session.maximumCapacity.available ||
-                    session.maxAttemptsPerLoad <= 0)
-                  _unavailable(context, session.maximumCapacity)
-                else ...<Widget>[
-                  _modeSelector(),
-                  const SizedBox(height: 14),
-                  if (_mode == _AfkLoadMode.needed)
-                    _needed(context, session, progress)
-                  else
-                    _recommendation(context, session.maximumCapacity),
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 14, 16, 0),
+                  child: _header(context),
+                ),
+                const SizedBox(height: 11),
+                Flexible(
+                  fit: FlexFit.loose,
+                  child: SingleChildScrollView(
+                    key: ValueKey<String>(
+                      'planner-afk-scroll:${_mode.name}:'
+                      '${session.completedAttempts}:${session.complete}',
+                    ),
+                    primary: false,
+                    padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+                    child: body,
+                  ),
+                ),
+              ],
+            );
+          },
+        ),
+      ),
+    );
+  }
+
+  Widget _splitPlan(
+    BuildContext context,
+    AfkWeightSessionPlan session,
+    AfkCraftProgress? progress, {
+    required double availableHeight,
+  }) {
+    final needed = _mode == _AfkLoadMode.needed;
+    final completed = progress?.completedAttempts ?? 0;
+    final total = session.requestedAttempts;
+    final load = session.loadAt(0);
+    final capacity = session.maximumCapacity;
+    final stacks = needed ? load.ingredientStacks : capacity.ingredientStacks;
+    final crafts = needed ? load.attempts : capacity.safeAttempts;
+    final massCycles = needed ? load.massBatches : capacity.safeMassBatches;
+    final totalBatches = session.maxAttemptsPerLoad <= 0
+        ? 0
+        : (total + session.maxAttemptsPerLoad - 1) ~/
+              session.maxAttemptsPerLoad;
+    final totalItemWeight = stacks.fold<double>(
+      0,
+      (sum, stack) => sum + stack.loadLt,
+    );
+    final perAttemptQuantities = _perAttemptQuantities();
+    final visibleRows = stacks.length.clamp(3, 6);
+    final textScale = MediaQuery.textScalerOf(context).scale(1);
+    final scalingReserve = ((textScale - 1).clamp(0.0, 0.6)) * 130.0;
+    final desiredHeight = 414.0 + (visibleRows - 3) * 66.0 + scalingReserve;
+    final maxHeight = availableHeight.isFinite && availableHeight > 0
+        ? availableHeight
+        : 680.0;
+    final height = desiredHeight.clamp(360.0, maxHeight).toDouble();
+    final spec = context.visualTheme;
+    final divider = spec.palette.trim.withAlpha(100);
+
+    return SizedBox(
+      key: const ValueKey<String>('planner-afk-split'),
+      height: height,
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: <Widget>[
+          SizedBox(
+            width: 270,
+            child: DecoratedBox(
+              key: const ValueKey<String>('planner-afk-dashboard'),
+              decoration: BoxDecoration(
+                color: spec.palette.surfaceRaised.withAlpha(188),
+                border: Border(right: BorderSide(color: divider)),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.all(18),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: <Widget>[
+                    _splitRecipeHeader(context),
+                    const SizedBox(height: 20),
+                    _modeSelector(),
+                    const SizedBox(height: 16),
+                    Expanded(
+                      child: _splitDashboardSummary(
+                        context,
+                        needed: needed,
+                        crafts: crafts,
+                        completed: completed,
+                        total: total,
+                        massCycles: massCycles,
+                      ),
+                    ),
+                    _splitTotalWeight(context, totalItemWeight),
+                  ],
+                ),
+              ),
+            ),
+          ),
+          Expanded(
+            child: DecoratedBox(
+              key: const ValueKey<String>('planner-afk-items-pane'),
+              decoration: BoxDecoration(
+                color: spec.palette.surfaceInset.withAlpha(118),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.all(18),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: <Widget>[
+                    _splitItemsHeader(
+                      context,
+                      title: needed
+                          ? 'Batch ${load.number} / $totalBatches'
+                          : 'Max Weight',
+                    ),
+                    const SizedBox(height: 8),
+                    _splitColumnLabels(
+                      context,
+                      totalHeading: needed ? 'BATCH TOTAL' : 'MAX AMOUNT',
+                    ),
+                    const SizedBox(height: 6),
+                    Expanded(
+                      child: SingleChildScrollView(
+                        key: ValueKey<String>(
+                          'planner-afk-item-list:${_mode.name}:'
+                          '${load.number}',
+                        ),
+                        primary: false,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: <Widget>[
+                            for (final stack in stacks)
+                              _afkIngredientRow(
+                                context,
+                                stack,
+                                perAttemptQuantities,
+                                totalLabel: needed
+                                    ? 'for this batch'
+                                    : 'at max weight',
+                              ),
+                          ],
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+                    _splitFooter(
+                      needed: needed,
+                      load: load,
+                      completed: completed,
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _splitRecipeHeader(BuildContext context) {
+    final spec = context.visualTheme;
+    return AnchoredPopoverDragRegion(
+      key: const ValueKey<String>('planner-afk-drag-region'),
+      child: Row(
+        children: <Widget>[
+          PlannerItemIcon(controller: controller, name: recipe.name, size: 58),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Text(
+              recipe.name,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+              style: spec.typography.section.copyWith(
+                fontSize: 20,
+                fontWeight: FontWeight.w700,
+                height: 1.12,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _splitDashboardSummary(
+    BuildContext context, {
+    required bool needed,
+    required int crafts,
+    required int completed,
+    required int total,
+    required int massCycles,
+  }) {
+    final spec = context.visualTheme;
+    final fraction = needed
+        ? total <= 0
+              ? 0.0
+              : (completed / total).clamp(0.0, 1.0)
+        : 1.0;
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: <Widget>[
+        DecoratedBox(
+          decoration: BoxDecoration(
+            border: Border(
+              bottom: BorderSide(color: spec.palette.trim.withAlpha(74)),
+            ),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.only(bottom: 12),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                Text(
+                  formatQuantity(crafts.toDouble()),
+                  key: ValueKey<String>(
+                    needed
+                        ? 'planner-afk-needed-attempts'
+                        : 'planner-afk-safe-attempts',
+                  ),
+                  style: spec.typography.display.copyWith(
+                    fontSize: 25,
+                    fontWeight: FontWeight.w700,
+                    height: 1,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  needed ? 'crafts in this batch' : 'crafts at max weight',
+                  style: spec.typography.body.copyWith(
+                    color: spec.palette.textMuted,
+                    fontSize: 13,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                if (massCycles > 0) ...<Widget>[
+                  const SizedBox(height: 3),
+                  Text(
+                    '${formatQuantity(massCycles.toDouble())} mass cycles '
+                    'at x${step.batchSize}',
+                    style: spec.typography.meta.copyWith(
+                      color: spec.palette.textMuted,
+                      fontSize: 11,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
                 ],
               ],
             ),
-          );
-        },
+          ),
+        ),
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: <Widget>[
+            Row(
+              children: <Widget>[
+                Expanded(
+                  child: Text(
+                    needed
+                        ? '${formatQuantity(completed.toDouble())} of '
+                              '${formatQuantity(total.toDouble())} complete'
+                        : 'One full load',
+                    key: const ValueKey<String>('planner-afk-progress-copy'),
+                    style: spec.typography.meta.copyWith(
+                      color: spec.palette.textMuted,
+                      fontSize: 13,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ),
+                if (needed)
+                  Text(
+                    '${(fraction * 100).round()}%',
+                    key: const ValueKey<String>('planner-afk-progress-percent'),
+                    style: spec.typography.meta.copyWith(
+                      color: spec.palette.textMuted,
+                      fontSize: 13,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+              ],
+            ),
+            const SizedBox(height: 7),
+            _AfkSessionProgress(
+              completed: needed ? completed : 1,
+              total: needed ? total : 1,
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  Widget _splitTotalWeight(BuildContext context, double totalItemWeight) {
+    final spec = context.visualTheme;
+    return Padding(
+      padding: const EdgeInsets.only(top: 14),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.end,
+        children: <Widget>[
+          Expanded(
+            child: Text(
+              'TOTAL ITEM WEIGHT',
+              style: spec.typography.label.copyWith(
+                color: spec.palette.primaryBright,
+                fontSize: 11,
+                fontWeight: FontWeight.w800,
+                letterSpacing: .45,
+              ),
+            ),
+          ),
+          const SizedBox(width: 8),
+          Text(
+            '${formatQuantity(totalItemWeight)} LT',
+            key: const ValueKey<String>('planner-afk-total-weight'),
+            textAlign: TextAlign.right,
+            style: spec.typography.section.copyWith(
+              fontSize: 20,
+              fontWeight: FontWeight.w800,
+              height: 1,
+            ),
+          ),
+        ],
       ),
+    );
+  }
+
+  Widget _splitItemsHeader(BuildContext context, {required String title}) {
+    final spec = context.visualTheme;
+    return Row(
+      children: <Widget>[
+        Expanded(
+          child: AnchoredPopoverDragRegion(
+            child: Text(
+              title,
+              key: const ValueKey<String>('planner-afk-round-label'),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: spec.typography.section.copyWith(
+                fontSize: 20,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+          ),
+        ),
+        const SizedBox(width: 8),
+        AppButton(
+          key: const ValueKey<String>('planner-afk-edit-profile'),
+          role: AppButtonRole.icon,
+          minimumSize: const Size(46, 40),
+          padding: EdgeInsets.zero,
+          tooltip: 'Edit weight settings',
+          semanticLabel: 'Edit AFK weight settings',
+          onPressed: externalActions.openAfkWeightSettings == null
+              ? null
+              : () {
+                  onClose();
+                  externalActions.openAfkWeightSettings!();
+                },
+          child: const Icon(Icons.tune_rounded, size: 18),
+        ),
+        const SizedBox(width: 6),
+        AppButton(
+          key: const ValueKey<String>('planner-afk-close'),
+          role: AppButtonRole.icon,
+          minimumSize: const Size(46, 40),
+          padding: EdgeInsets.zero,
+          tooltip: 'Close',
+          semanticLabel: 'Close AFK Weight for ${recipe.name}',
+          onPressed: onClose,
+          child: const Icon(Icons.close_rounded, size: 20),
+        ),
+      ],
+    );
+  }
+
+  Widget _splitColumnLabels(
+    BuildContext context, {
+    required String totalHeading,
+  }) {
+    final spec = context.visualTheme;
+    final style = spec.typography.label.copyWith(
+      color: spec.palette.textMuted,
+      fontSize: 11,
+      fontWeight: FontWeight.w800,
+      letterSpacing: .35,
+    );
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 9),
+      child: Row(
+        children: <Widget>[
+          Expanded(child: Text('ITEM', style: style)),
+          SizedBox(
+            width: 62,
+            child: Text('EACH', textAlign: TextAlign.right, style: style),
+          ),
+          const SizedBox(width: 10),
+          SizedBox(
+            width: 92,
+            child: Text(totalHeading, textAlign: TextAlign.right, style: style),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _splitFooter({
+    required bool needed,
+    required AfkWeightSessionLoad load,
+    required int completed,
+  }) {
+    final finalAction = !needed || load.isFinal;
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.end,
+      children: <Widget>[
+        if (needed && completed > 0) ...<Widget>[
+          AppButton.label(
+            'Undo',
+            key: const ValueKey<String>('planner-afk-undo-round'),
+            minimumSize: const Size(84, 42),
+            onPressed: _undoLoad,
+          ),
+          const SizedBox(width: 8),
+        ],
+        SizedBox(
+          width: 132,
+          child: AppButton(
+            key: const ValueKey<String>('planner-afk-complete-round'),
+            role: AppButtonRole.primary,
+            minimumSize: const Size(132, 46),
+            semanticLabel: !needed
+                ? 'Close maximum weight plan'
+                : load.isFinal
+                ? 'Finish this AFK Weight plan'
+                : 'Mark this batch complete and show the next batch',
+            onPressed: !needed ? onClose : () => _completeLoad(load),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+                Text(finalAction ? 'Done' : 'Next'),
+                const SizedBox(width: 7),
+                Icon(
+                  finalAction ? Icons.check_rounded : Icons.arrow_forward,
+                  size: 18,
+                ),
+              ],
+            ),
+          ),
+        ),
+      ],
     );
   }
 
@@ -1780,31 +2273,19 @@ class _AfkLoadCardState extends State<_AfkLoadCard> {
                 PlannerItemIcon(
                   controller: controller,
                   name: recipe.name,
-                  size: 38,
+                  size: 48,
                 ),
-                const SizedBox(width: 10),
+                const SizedBox(width: 11),
                 Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: <Widget>[
-                      Text(
-                        'AFK LOAD',
-                        style: spec.typography.meta.copyWith(
-                          color: spec.palette.primaryBright,
-                          fontWeight: FontWeight.w800,
-                          letterSpacing: .35,
-                        ),
-                      ),
-                      Text(
-                        recipe.name,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: spec.typography.body.copyWith(
-                          fontSize: 17,
-                          fontWeight: FontWeight.w800,
-                        ),
-                      ),
-                    ],
+                  child: Text(
+                    recipe.name,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: spec.typography.body.copyWith(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w800,
+                      height: 1.15,
+                    ),
                   ),
                 ),
               ],
@@ -1825,8 +2306,11 @@ class _AfkLoadCardState extends State<_AfkLoadCard> {
                 },
         ),
         const SizedBox(width: 5),
-        _SourceInfoCloseButton(
-          semanticLabel: 'Close AFK Load for ${recipe.name}',
+        AppButton.icon(
+          key: const ValueKey<String>('planner-afk-close'),
+          icon: const Icon(Icons.close_rounded, size: 20),
+          tooltip: 'Close',
+          semanticLabel: 'Close AFK Weight for ${recipe.name}',
           onPressed: onClose,
         ),
       ],
@@ -1870,68 +2354,130 @@ class _AfkLoadCardState extends State<_AfkLoadCard> {
   Widget _afkIngredientRow(
     BuildContext context,
     AfkLoadStack stack,
-    Map<String, double> quantities,
-  ) {
+    Map<String, double> quantities, {
+    required String totalLabel,
+  }) {
     final spec = context.visualTheme;
     final perAttempt = _perAttemptFor(stack, quantities);
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 5),
+    return Semantics(
+      label:
+          '${stack.itemName}, ${formatQuantity(perAttempt)} per craft, '
+          '${formatQuantity(stack.quantity.toDouble())} $totalLabel',
+      excludeSemantics: true,
+      child: Padding(
+        padding: const EdgeInsets.only(bottom: 8),
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(minHeight: 62),
+          child: AppSurface(
+            role: AppSurfaceRole.row,
+            padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 8),
+            child: Row(
+              children: <Widget>[
+                PlannerItemIcon(
+                  controller: controller,
+                  name: stack.itemName,
+                  size: 44,
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Text(
+                    stack.itemName,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: spec.typography.body.copyWith(
+                      fontSize: 15,
+                      fontWeight: FontWeight.w700,
+                      height: 1.18,
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                SizedBox(
+                  width: 62,
+                  child: Text(
+                    formatQuantity(perAttempt),
+                    key: ValueKey<String>(
+                      'planner-afk-per-craft:${stack.itemName}',
+                    ),
+                    maxLines: 1,
+                    textAlign: TextAlign.right,
+                    style: spec.typography.section.copyWith(
+                      fontSize: 17,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 10),
+                SizedBox(
+                  width: 92,
+                  child: Text(
+                    formatQuantity(stack.quantity.toDouble()),
+                    key: ValueKey<String>(
+                      'planner-afk-total:${stack.itemName}',
+                    ),
+                    maxLines: 1,
+                    textAlign: TextAlign.right,
+                    style: spec.typography.section.copyWith(
+                      fontSize: 17,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _modeSelector() => Wrap(
+    spacing: 6,
+    runSpacing: 6,
+    children: <Widget>[
+      _modeButton(
+        label: 'Needed',
+        key: const ValueKey<String>('planner-afk-mode-needed'),
+        mode: _AfkLoadMode.needed,
+        tooltip: 'Only the items still needed',
+      ),
+      _modeButton(
+        label: 'Max Weight',
+        key: const ValueKey<String>('planner-afk-mode-maximum'),
+        mode: _AfkLoadMode.maximum,
+        tooltip: 'The most weight your character can carry',
+      ),
+    ],
+  );
+
+  Widget _modeButton({
+    required String label,
+    required Key key,
+    required _AfkLoadMode mode,
+    required String tooltip,
+  }) {
+    final selected = _mode == mode;
+    return AppButton(
+      key: key,
+      selected: selected,
+      minimumSize: const Size(0, 34),
+      padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 5),
+      tooltip: tooltip,
+      semanticLabel: '$label, ${selected ? 'selected' : 'not selected'}',
+      onPressed: () => setState(() => _mode = mode),
       child: Row(
+        mainAxisSize: MainAxisSize.min,
+        mainAxisAlignment: MainAxisAlignment.center,
         children: <Widget>[
-          SizedBox(
-            width: 30,
-            child: PlannerItemIcon(
-              controller: controller,
-              name: stack.itemName,
-              size: 27,
-            ),
-          ),
-          const SizedBox(width: 7),
-          Expanded(
-            child: Text(
-              stack.itemName,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: spec.typography.body.copyWith(fontWeight: FontWeight.w700),
-            ),
-          ),
-          const SizedBox(width: 8),
-          SizedBox(
-            width: 84,
-            child: FittedBox(
-              fit: BoxFit.scaleDown,
-              alignment: Alignment.centerRight,
-              child: Text(
-                '${formatQuantity(perAttempt)} / attempt',
-                key: ValueKey<String>(
-                  'planner-afk-per-attempt:${stack.itemName}',
-                ),
-                style: spec.typography.meta.copyWith(
-                  color: spec.palette.text,
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
-            ),
-          ),
-          const SizedBox(width: 10),
+          if (selected) ...<Widget>[
+            const Icon(Icons.check_rounded, size: 15),
+            const SizedBox(width: 5),
+          ],
           Text(
-            '${formatQuantity(stack.quantity.toDouble())} x',
-            key: ValueKey<String>('planner-afk-total:${stack.itemName}'),
-            style: spec.typography.body.copyWith(
-              color: spec.palette.primaryBright,
-              fontWeight: FontWeight.w800,
-            ),
-          ),
-          const SizedBox(width: 8),
-          SizedBox(
-            width: 58,
-            child: Text(
-              '${formatQuantity(stack.loadLt)} LT',
-              textAlign: TextAlign.right,
-              style: spec.typography.meta.copyWith(
-                color: spec.palette.textMuted,
-                fontWeight: FontWeight.w700,
-              ),
+            label,
+            style: context.visualTheme.typography.body.copyWith(
+              fontSize: 13,
+              fontWeight: FontWeight.w700,
             ),
           ),
         ],
@@ -1939,40 +2485,13 @@ class _AfkLoadCardState extends State<_AfkLoadCard> {
     );
   }
 
-  Widget _modeSelector() => Row(
-    children: <Widget>[
-      Expanded(
-        child: AppButton.label(
-          'Needed',
-          key: const ValueKey<String>('planner-afk-mode-needed'),
-          selected: _mode == _AfkLoadMode.needed,
-          minimumSize: const Size(0, 36),
-          tooltip: 'Load only what the current Planner target still needs',
-          onPressed: () => setState(() => _mode = _AfkLoadMode.needed),
-        ),
-      ),
-      const SizedBox(width: 8),
-      Expanded(
-        child: AppButton.label(
-          'Maximum',
-          key: const ValueKey<String>('planner-afk-mode-maximum'),
-          selected: _mode == _AfkLoadMode.maximum,
-          minimumSize: const Size(0, 36),
-          tooltip: 'Fill safe capacity for leveling or recipe spam',
-          onPressed: () => setState(() => _mode = _AfkLoadMode.maximum),
-        ),
-      ),
-    ],
-  );
-
   Widget _unconfigured(BuildContext context) {
     final spec = context.visualTheme;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: <Widget>[
         Text(
-          'Set your character weight once in Craft Profile. Every queue recipe will '
-          'then calculate its own safe AFK load.',
+          'Add your character weight in Craft Profile to calculate each batch.',
           style: spec.typography.body.copyWith(
             color: spec.palette.textMuted,
             height: 1.35,
@@ -2006,10 +2525,10 @@ class _AfkLoadCardState extends State<_AfkLoadCard> {
       children: <Widget>[
         Text(
           capacityUnavailable
-              ? 'There is no safe capacity left after your carried weight and buffer.'
+              ? 'There is not enough free weight for this recipe.'
               : missing.isNotEmpty
-              ? 'A safe load cannot be calculated because exact weight data is missing for ${missing.join(', ')}.'
-              : 'This queue step does not contain a usable recipe amount.',
+              ? 'Missing weight data: ${missing.join(', ')}.'
+              : 'This recipe does not have a usable amount.',
           style: spec.typography.body.copyWith(
             color: spec.palette.warning,
             fontWeight: FontWeight.w700,
@@ -2040,32 +2559,46 @@ class _AfkLoadCardState extends State<_AfkLoadCard> {
     final spec = context.visualTheme;
     final completed = progress?.completedAttempts ?? 0;
     final total = session.requestedAttempts;
-    final totalRounds = session.maxAttemptsPerLoad <= 0
-        ? 0
-        : (total + session.maxAttemptsPerLoad - 1) ~/
-              session.maxAttemptsPerLoad;
-
     if (session.complete) {
       return Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: <Widget>[
-          Icon(Icons.task_alt_rounded, size: 34, color: spec.palette.success),
-          const SizedBox(height: 8),
-          Text(
-            'Plan finished',
-            textAlign: TextAlign.center,
-            style: spec.typography.section.copyWith(
-              color: spec.palette.success,
-              fontWeight: FontWeight.w800,
+          AppSurface(
+            role: AppSurfaceRole.row,
+            padding: const EdgeInsets.all(14),
+            child: Row(
+              children: <Widget>[
+                Icon(
+                  Icons.task_alt_rounded,
+                  size: 40,
+                  color: spec.palette.success,
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: <Widget>[
+                      Text(
+                        'All batches done',
+                        style: spec.typography.section.copyWith(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w800,
+                        ),
+                      ),
+                      const SizedBox(height: 3),
+                      Text(
+                        '${formatQuantity(total.toDouble())} crafts completed',
+                        style: spec.typography.meta.copyWith(
+                          color: spec.palette.textMuted,
+                          fontSize: 12,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
             ),
-          ),
-          const SizedBox(height: 3),
-          Text(
-            '$total recipe attempts checked off for '
-            '${formatQuantity(widget.sessionTargetAmount.toDouble())} '
-            '${widget.sessionTargetName}',
-            textAlign: TextAlign.center,
-            style: spec.typography.meta.copyWith(color: spec.palette.textMuted),
           ),
           const SizedBox(height: 12),
           _AfkSessionProgress(completed: total, total: total),
@@ -2074,7 +2607,7 @@ class _AfkLoadCardState extends State<_AfkLoadCard> {
             children: <Widget>[
               Expanded(
                 child: AppButton.label(
-                  'Undo last round',
+                  'Undo last batch',
                   key: const ValueKey<String>('planner-afk-undo-round'),
                   minimumSize: const Size(0, 40),
                   onPressed: completed > 0 ? _undoLoad : null,
@@ -2098,301 +2631,7 @@ class _AfkLoadCardState extends State<_AfkLoadCard> {
     if (session.loadCount == 0) {
       return _unavailable(context, session.maximumCapacity);
     }
-
-    final load = session.loadAt(0);
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: <Widget>[
-        Text(
-          'For ${formatQuantity(widget.sessionTargetAmount.toDouble())} '
-          '${widget.sessionTargetName}',
-          key: const ValueKey<String>('planner-afk-goal-label'),
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-          style: spec.typography.meta.copyWith(
-            color: spec.palette.textMuted,
-            fontWeight: FontWeight.w700,
-          ),
-        ),
-        const SizedBox(height: 5),
-        Row(
-          crossAxisAlignment: CrossAxisAlignment.end,
-          children: <Widget>[
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: <Widget>[
-                  Text(
-                    'Round ${load.number} of $totalRounds',
-                    key: const ValueKey<String>('planner-afk-round-label'),
-                    style: spec.typography.meta.copyWith(
-                      color: spec.palette.primaryBright,
-                      fontWeight: FontWeight.w800,
-                    ),
-                  ),
-                  const SizedBox(height: 3),
-                  Text(
-                    '${formatQuantity(load.attempts.toDouble())} attempts',
-                    key: const ValueKey<String>('planner-afk-needed-attempts'),
-                    style: spec.typography.display.copyWith(
-                      color: spec.palette.success,
-                      fontSize: 25,
-                      fontWeight: FontWeight.w800,
-                      height: 1.05,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            Text(
-              '${formatQuantity(completed.toDouble())} / '
-              '${formatQuantity(total.toDouble())} done',
-              style: spec.typography.meta.copyWith(
-                color: spec.palette.textMuted,
-                fontWeight: FontWeight.w700,
-              ),
-            ),
-          ],
-        ),
-        if (load.massBatches > 0) ...<Widget>[
-          const SizedBox(height: 3),
-          Text(
-            '${formatQuantity(load.massBatches.toDouble())} mass cycles '
-            'at x${step.batchSize}',
-            style: spec.typography.meta.copyWith(color: spec.palette.textMuted),
-          ),
-        ],
-        const SizedBox(height: 8),
-        _AfkSessionProgress(completed: completed, total: total),
-        const SizedBox(height: 13),
-        _ingredientList(context, load.ingredientStacks),
-        const SizedBox(height: 8),
-        _loadStats(
-          start: profile.currentCarriedWeightLt + load.startLoadLt,
-          finish: profile.currentCarriedWeightLt + load.finishLoadLt,
-          safeStop: session.maximumCapacity.stopWeightLt,
-        ),
-        if (!load.isFinal) ...<Widget>[
-          const SizedBox(height: 9),
-          Text(
-            'Unload the crafted output before starting the next round.',
-            style: spec.typography.meta.copyWith(
-              color: spec.palette.textMuted,
-              height: 1.3,
-            ),
-          ),
-        ],
-        const SizedBox(height: 13),
-        AppButton.label(
-          'Mark round done',
-          key: const ValueKey<String>('planner-afk-complete-round'),
-          role: AppButtonRole.primary,
-          minimumSize: const Size(0, 42),
-          onPressed: () => _completeLoad(load),
-        ),
-        const SizedBox(height: 8),
-        Row(
-          children: <Widget>[
-            Expanded(
-              child: AppButton.label(
-                'Copy this round',
-                key: const ValueKey<String>('planner-afk-copy-load'),
-                minimumSize: const Size(0, 38),
-                onPressed: externalActions.copyAfkLoad == null
-                    ? null
-                    : () => externalActions.copyAfkLoad!(
-                        _copyNeededText(
-                          session,
-                          load,
-                          recipe,
-                          step,
-                          totalRounds: totalRounds,
-                          targetName: widget.sessionTargetName,
-                          targetAmount: widget.sessionTargetAmount,
-                        ),
-                      ),
-              ),
-            ),
-            if (completed > 0) ...<Widget>[
-              const SizedBox(width: 8),
-              AppButton.icon(
-                key: const ValueKey<String>('planner-afk-undo-round'),
-                icon: const Icon(Icons.undo_rounded, size: 18),
-                tooltip: 'Undo last completed round',
-                semanticLabel: 'Undo last completed AFK round',
-                onPressed: _undoLoad,
-              ),
-            ],
-          ],
-        ),
-      ],
-    );
-  }
-
-  Widget _ingredientList(BuildContext context, Iterable<AfkLoadStack> stacks) {
-    final spec = context.visualTheme;
-    final perAttemptQuantities = _perAttemptQuantities();
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: <Widget>[
-        Text(
-          'LOAD THESE INGREDIENTS',
-          style: spec.typography.label.copyWith(
-            color: spec.palette.textMuted,
-            fontSize: 11,
-            fontWeight: FontWeight.w800,
-            letterSpacing: .45,
-          ),
-        ),
-        const SizedBox(height: 6),
-        for (final stack in stacks)
-          _afkIngredientRow(context, stack, perAttemptQuantities),
-      ],
-    );
-  }
-
-  Widget _loadStats({
-    required double start,
-    required double finish,
-    required double safeStop,
-  }) => Row(
-    children: <Widget>[
-      Expanded(
-        child: _AfkLoadStat(
-          label: 'Start',
-          value: '${formatQuantity(start)} LT',
-        ),
-      ),
-      const SizedBox(width: 7),
-      Expanded(
-        child: _AfkLoadStat(
-          label: 'Finish',
-          value: '${formatQuantity(finish)} LT',
-        ),
-      ),
-      const SizedBox(width: 7),
-      Expanded(
-        child: _AfkLoadStat(
-          label: 'Safe stop',
-          value: '${formatQuantity(safeStop)} LT',
-        ),
-      ),
-    ],
-  );
-
-  Widget _recommendation(BuildContext context, AfkWeightCalculation result) {
-    final spec = context.visualTheme;
-    final perAttemptQuantities = _perAttemptQuantities();
-    final massProcessing = result.safeMassBatches > 0;
-    final headline = massProcessing
-        ? '${formatQuantity(result.safeMassBatches.toDouble())} mass cycles'
-        : '${formatQuantity(result.safeAttempts.toDouble())} attempts';
-    final subline = massProcessing
-        ? '${formatQuantity(result.safeAttempts.toDouble())} recipe attempts '
-              'at x${step.batchSize}'
-        : 'maximum safe recipe attempts';
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: <Widget>[
-        Text(
-          headline,
-          key: const ValueKey<String>('planner-afk-safe-attempts'),
-          style: spec.typography.display.copyWith(
-            color: result.safeAttempts > 0
-                ? spec.palette.success
-                : spec.palette.warning,
-            fontSize: 25,
-            fontWeight: FontWeight.w800,
-            height: 1.05,
-          ),
-        ),
-        const SizedBox(height: 3),
-        Text(
-          subline,
-          style: spec.typography.meta.copyWith(
-            color: spec.palette.textMuted,
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-        const SizedBox(height: 9),
-        Text(
-          'Capacity mode ignores the current Planner target. Use it for '
-          'leveling, recipe spam, or consuming as many ingredients as possible.',
-          style: spec.typography.meta.copyWith(
-            color: spec.palette.textMuted,
-            height: 1.3,
-          ),
-        ),
-        const SizedBox(height: 13),
-        Text(
-          'LOAD THESE INGREDIENTS',
-          style: spec.typography.label.copyWith(
-            color: spec.palette.textMuted,
-            fontSize: 11,
-            fontWeight: FontWeight.w800,
-            letterSpacing: .45,
-          ),
-        ),
-        const SizedBox(height: 6),
-        for (final stack in result.ingredientStacks)
-          _afkIngredientRow(context, stack, perAttemptQuantities),
-        const SizedBox(height: 8),
-        Row(
-          children: <Widget>[
-            Expanded(
-              child: _AfkLoadStat(
-                label: 'Start',
-                value: '${formatQuantity(result.startingTotalLt)} LT',
-              ),
-            ),
-            const SizedBox(width: 7),
-            Expanded(
-              child: _AfkLoadStat(
-                label: 'Finish',
-                value: '${formatQuantity(result.finishingTotalLt)} LT',
-              ),
-            ),
-            const SizedBox(width: 7),
-            Expanded(
-              child: _AfkLoadStat(
-                label: 'Safe stop',
-                value: '${formatQuantity(result.stopWeightLt)} LT',
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 9),
-        Text(
-          _confidenceText(result),
-          style: spec.typography.meta.copyWith(
-            color: result.isIncomplete
-                ? spec.palette.warning
-                : spec.palette.textMuted,
-            height: 1.3,
-          ),
-        ),
-        const SizedBox(height: 13),
-        Row(
-          children: <Widget>[
-            Expanded(
-              child: AppButton.label(
-                'Copy maximum load',
-                key: const ValueKey<String>('planner-afk-copy-load'),
-                role: AppButtonRole.primary,
-                minimumSize: const Size(0, 40),
-                onPressed:
-                    result.safeAttempts <= 0 ||
-                        externalActions.copyAfkLoad == null
-                    ? null
-                    : () => externalActions.copyAfkLoad!(
-                        _copyMaximumText(result, recipe, step),
-                      ),
-              ),
-            ),
-          ],
-        ),
-      ],
-    );
+    return _unavailable(context, session.maximumCapacity);
   }
 }
 
@@ -2407,7 +2646,7 @@ class _AfkSessionProgress extends StatelessWidget {
     final palette = context.visualTheme.palette;
     final fraction = total <= 0 ? 0.0 : (completed / total).clamp(0.0, 1.0);
     return Semantics(
-      label: '$completed of $total recipe attempts complete',
+      label: '$completed of $total crafts complete',
       child: SizedBox(
         height: 6,
         child: ClipRRect(
@@ -2427,123 +2666,6 @@ class _AfkSessionProgress extends StatelessWidget {
       ),
     );
   }
-}
-
-class _AfkLoadStat extends StatelessWidget {
-  const _AfkLoadStat({required this.label, required this.value});
-
-  final String label;
-  final String value;
-
-  @override
-  Widget build(BuildContext context) {
-    final spec = context.visualTheme;
-    return AppSurface(
-      role: AppSurfaceRole.row,
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 7),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: <Widget>[
-          Text(
-            label,
-            maxLines: 1,
-            style: spec.typography.meta.copyWith(
-              color: spec.palette.textMuted,
-              fontSize: 10,
-              fontWeight: FontWeight.w700,
-            ),
-          ),
-          const SizedBox(height: 2),
-          Text(
-            value,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: spec.typography.body.copyWith(
-              fontSize: 12,
-              fontWeight: FontWeight.w800,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-String _confidenceText(AfkWeightCalculation result) {
-  final parts = <String>[];
-  if (result.confidence == AfkWeightConfidence.modelled) {
-    parts.add('The main output uses a conservative recorded-data fallback.');
-  } else {
-    parts.add('The main output uses its recorded maximum.');
-  }
-  if (result.warnings.contains(AfkWeightWarning.byproductsUnmodelled)) {
-    parts.add(
-      'Byproducts are not included, so keep a larger buffer for recipes that create them.',
-    );
-  }
-  return parts.join(' ');
-}
-
-String _copyNeededText(
-  AfkWeightSessionPlan session,
-  AfkWeightSessionLoad load,
-  Recipe recipe,
-  PlanStep step, {
-  required int totalRounds,
-  required String targetName,
-  required int targetAmount,
-}) {
-  final start =
-      session.maximumCapacity.currentCarriedWeightLt + load.startLoadLt;
-  final finish =
-      session.maximumCapacity.currentCarriedWeightLt + load.finishLoadLt;
-  final lines = <String>[
-    'AFK Load - ${recipe.name}',
-    'Planner goal: $targetAmount x $targetName',
-    'This recipe: ${session.requestedAttempts} attempts',
-    'Round ${load.number} of $totalRounds: ${load.attempts} attempts',
-    'Progress after this round: ${load.completedAttemptsAfter} / '
-        '${session.requestedAttempts} attempts',
-    if (load.massBatches > 0)
-      'Mass cycles: ${load.massBatches} x ${step.batchSize}',
-    '',
-    'Load:',
-    for (final stack in load.ingredientStacks)
-      '- ${stack.quantity} x ${stack.itemName} '
-          '(${formatQuantity(stack.loadLt)} LT)',
-    '',
-    'Start: ${formatQuantity(start)} LT',
-    'Finish: ${formatQuantity(finish)} LT',
-    'Safe stop: ${formatQuantity(session.maximumCapacity.stopWeightLt)} LT',
-    if (!load.isFinal) 'Unload crafted output before the next round.',
-    _confidenceText(session.maximumCapacity),
-  ];
-  return lines.join('\n');
-}
-
-String _copyMaximumText(
-  AfkWeightCalculation result,
-  Recipe recipe,
-  PlanStep step,
-) {
-  final lines = <String>[
-    'AFK Load — ${recipe.name}',
-    'Maximum safe load',
-    'Safe attempts: ${result.safeAttempts}',
-    if (result.safeMassBatches > 0)
-      'Mass cycles: ${result.safeMassBatches} × ${step.batchSize}',
-    '',
-    'Load:',
-    for (final stack in result.ingredientStacks)
-      '- ${stack.quantity} × ${stack.itemName} '
-          '(${formatQuantity(stack.loadLt)} LT)',
-    '',
-    'Start: ${formatQuantity(result.startingTotalLt)} LT',
-    'Finish: ${formatQuantity(result.finishingTotalLt)} LT',
-    'Safe stop: ${formatQuantity(result.stopWeightLt)} LT',
-    _confidenceText(result),
-  ];
-  return lines.join('\n');
 }
 
 const _ledgerIngredientToggleTextStyle = TextStyle(
@@ -3643,34 +3765,37 @@ class _NeedPanel extends StatelessWidget {
             ],
           )
         : action;
-    return AppSurface(
-      role: AppSurfaceRole.layout,
-      semanticLabel: title,
-      padding: const EdgeInsets.all(12),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: <Widget>[
-          SectionHeader(
-            title: title,
-            meta: denseLayout && action != null && !splitDenseHeaderAction
-                ? null
-                : missingMeta,
-            trailing: splitDenseHeaderAction ? null : denseHeaderTrailing,
-          ),
-          if (splitDenseHeaderAction) ...<Widget>[
-            const SizedBox(height: 6),
-            Align(alignment: Alignment.centerRight, child: action),
+    return FocusTraversalGroup(
+      policy: WidgetOrderTraversalPolicy(),
+      child: AppSurface(
+        role: AppSurfaceRole.layout,
+        semanticLabel: title,
+        padding: const EdgeInsets.all(12),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: <Widget>[
+            SectionHeader(
+              title: title,
+              meta: denseLayout && action != null && !splitDenseHeaderAction
+                  ? null
+                  : missingMeta,
+              trailing: splitDenseHeaderAction ? null : denseHeaderTrailing,
+            ),
+            if (splitDenseHeaderAction) ...<Widget>[
+              const SizedBox(height: 6),
+              Align(alignment: Alignment.centerRight, child: action),
+            ],
+            const SizedBox(height: 12),
+            Expanded(
+              child: materials.isEmpty && !showPrices
+                  ? const _PlannerEmpty(
+                      message:
+                          'All base materials are covered by inventory or craft steps.',
+                    )
+                  : needListWithoutPlatformScrollbar,
+            ),
           ],
-          const SizedBox(height: 12),
-          Expanded(
-            child: materials.isEmpty && !showPrices
-                ? const _PlannerEmpty(
-                    message:
-                        'All base materials are covered by inventory or craft steps.',
-                  )
-                : needListWithoutPlatformScrollbar,
-          ),
-        ],
+        ),
       ),
     );
   }
@@ -5508,8 +5633,12 @@ class PlannerItemIcon extends StatelessWidget {
   final double size;
 
   @override
-  Widget build(BuildContext context) =>
-      ModeItemIcon(controller: controller, name: name, size: size);
+  Widget build(BuildContext context) => ModeItemIcon(
+    controller: controller,
+    name: name,
+    size: size,
+    searchAcrossModes: true,
+  );
 }
 
 Recipe? _resolveRecipe(ModeFeatureController controller, String name) {

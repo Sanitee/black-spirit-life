@@ -9,8 +9,10 @@ import '../../app/state/planner_application_controller.dart';
 import '../../app_identity.dart';
 import '../../data/catalog/catalog_repository.dart';
 import '../../domain/market/market_calculations.dart';
+import '../../domain/models/catalog_models.dart' show Ingredient;
 import '../../domain/models/craft_mode.dart';
-import '../../domain/planner/planner_models.dart' show ItemAcquisitionRoute;
+import '../../domain/planner/planner_models.dart'
+    show ChoiceMeta, ItemAcquisitionRoute;
 import '../../domain/state/planner_state.dart' show MarketState;
 import '../shared/mode_item_icon.dart';
 import 'worker_output_market_policy.dart';
@@ -409,10 +411,77 @@ class _ResourceMapWorkspaceState extends State<ResourceMapWorkspace> {
             reviewedWorkerRoute: reviewedRoutes.any(
               (route) => route.kind.trim().toLowerCase() == 'worker_node',
             ),
+            substituteFamily: _plannerSubstituteFamilyFor(
+              modeController,
+              material.choice,
+            ),
           );
         })
         .toList(growable: false);
   }
+
+  BdoPlannerSubstituteFamily? _plannerSubstituteFamilyFor(
+    ModeFeatureController modeController,
+    ChoiceMeta? choice,
+  ) {
+    if (choice == null || choice.options.length < 2) {
+      return null;
+    }
+    final ingredient = _plannerChoiceIngredient(modeController, choice);
+    return BdoPlannerSubstituteFamily(
+      parentName: choice.parentName,
+      originalName: choice.original,
+      familyName: choice.substituteGroup,
+      selectedName: choice.baseName,
+      members: choice.options,
+      ratios: <String, double>{
+        for (final option in choice.options)
+          option: _plannerSubstituteRatio(ingredient, option),
+      },
+    );
+  }
+
+  Ingredient? _plannerChoiceIngredient(
+    ModeFeatureController modeController,
+    ChoiceMeta choice,
+  ) {
+    final recipe = modeController.selectedRecipe(choice.parentName);
+    if (recipe == null) {
+      return null;
+    }
+    Ingredient? sameGroup;
+    for (final ingredient in recipe.ingredients) {
+      final groupName = ingredient.substituteGroup ?? ingredient.name;
+      if (!_samePlannerName(groupName, choice.substituteGroup)) {
+        continue;
+      }
+      sameGroup ??= ingredient;
+      if (_samePlannerName(ingredient.name, choice.original)) {
+        return ingredient;
+      }
+    }
+    return sameGroup;
+  }
+
+  double _plannerSubstituteRatio(Ingredient? ingredient, String option) {
+    if (ingredient == null) {
+      return 1;
+    }
+    var ratio = 1.0;
+    for (final entry in ingredient.substituteRatios.entries) {
+      if (_samePlannerName(entry.key, option)) {
+        ratio = entry.value;
+        break;
+      }
+    }
+    if (!ratio.isFinite) {
+      return 1;
+    }
+    return ratio < 0.0001 ? 0.0001 : ratio;
+  }
+
+  bool _samePlannerName(String left, String right) =>
+      left.trim().toLowerCase() == right.trim().toLowerCase();
 
   List<BdoPlannerNeedGroup> _plannerNeedGroups() {
     const groupedModes = <CraftMode>[CraftMode.cooking, CraftMode.alchemy];

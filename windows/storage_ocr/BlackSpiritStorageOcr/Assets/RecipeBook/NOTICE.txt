@@ -1,0 +1,12 @@
+Black Spirit Hub Recipe Book
+
+Recipe facts, English item names and descriptions, and item icons were extracted from a legally installed Black Desert client for this non-commercial fan utility.
+Cached item artwork is stored as lossless WebP at its native client dimensions; non-square client preview artwork is replaced with the bundled fallback.
+The local screenshot scanner also bundles reduced 20x20 client icon tiles solely to distinguish usable Recipe Book materials from finished, event, equipment, box, coupon, and decorative items. Screenshot pixels never leave the device.
+Black Desert and all related game data and artwork are trademarks or copyrighted material of Pearl Abyss. Black Spirit Hub is unofficial and is not affiliated with or endorsed by Pearl Abyss.
+No BDO Codex, BDOlytics, or Black Desert Foundry editorial content or artwork is bundled.
+
+Screenshot quantity recognition uses the RapidOCR 3.9.2 English PP-OCRv5 mobile ONNX model entirely locally and offline.
+The model originates from PaddleOCR and is distributed under Apache License 2.0. Its bundled notice, source, and integrity hash are at Assets/RecipeBook/ocr/MODEL-NOTICE-PPOCRV5.txt, with the license at Assets/RecipeBook/ocr/LICENSE-PADDLEOCR.txt.
+Microsoft ONNX Runtime 1.29.0 executes the model under the MIT License at Assets/RecipeBook/ocr/LICENSE-ONNXRUNTIME.txt; its redistributed notices are at Assets/RecipeBook/ocr/THIRD-PARTY-NOTICES-ONNXRUNTIME.txt.
+Bundled PP-OCRv5 model SHA-256: C3461ADD59BB4323ECBA96A492AB75E06DDA42467C9E3D0C18DB5D1D21924BE8

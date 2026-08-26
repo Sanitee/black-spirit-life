@@ -2,6 +2,11 @@ import 'planner_models.dart';
 
 enum IngredientQualityFamily { none, material, blue }
 
+/// Recipes whose quality tiers are complete, mutually exclusive formula
+/// variants rather than per-ingredient substitutions.
+bool recipeHasAuthoritativeQualityVariants(String recipeName) =>
+    _sameName(recipeName, 'Tenacious Origin of Life');
+
 final class IngredientQualityProfile {
   const IngredientQualityProfile._(this.family, this.grades);
 

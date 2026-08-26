@@ -24,8 +24,11 @@ options are available.
   list.
 - Search the Recipe Book by recipe or ingredient and review materials,
   alternatives, effects, and item uses.
+- Add items manually or import an inventory screenshot through a local,
+  review-first recognition flow.
 - Find gathering spots, worker nodes, and NPC vendors on the built-in map.
-- Turn missing materials into a checklist or a CP-aware worker-node plan.
+- Turn missing materials into a checklist or a CP-aware worker-node plan, then
+  compare lodging and storage-house investments.
 - Keep your favorites, progress, profile settings, and appearance choices
   between sessions.
 

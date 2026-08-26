@@ -269,6 +269,9 @@ void main() {
     final workersFinder = find.byKey(
       const ValueKey<String>('resource-map-command-workers'),
     );
+    final searchFinder = find.byKey(
+      const ValueKey<String>('resource-map-search-card'),
+    );
     expect(
       find.descendant(
         of: railFinder,
@@ -291,6 +294,11 @@ void main() {
       tester.getRect(gatherFinder),
       tester.getRect(workersFinder),
     ];
+    expect(
+      controlRects.last.right,
+      lessThan(tester.getRect(searchFinder).left),
+      reason: 'The two map modes lead into the modest search field.',
+    );
     expect(controlRects.first.width, greaterThanOrEqualTo(112));
     expect(controlRects.last.width, greaterThanOrEqualTo(112));
     final controlTops = controlRects.map((rect) => rect.top);
@@ -455,7 +463,7 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets('narrow desktop rail keeps search visible and actions semantic', (
+  testWidgets('moderately narrow desktop keeps mode labels beside search', (
     tester,
   ) async {
     final controller = TextEditingController();
@@ -488,12 +496,12 @@ void main() {
             find.byKey(const ValueKey<String>('resource-map-search-card')),
           )
           .width,
-      greaterThan(300),
+      greaterThan(230),
     );
-    expect(find.byTooltip('Gather'), findsOneWidget);
-    expect(find.byTooltip('Workers'), findsOneWidget);
-    expect(find.text('Gather'), findsNothing);
-    expect(find.text('Workers'), findsNothing);
+    expect(find.byTooltip('Gather'), findsNothing);
+    expect(find.byTooltip('Workers'), findsNothing);
+    expect(find.text('Gather'), findsOneWidget);
+    expect(find.text('Workers'), findsOneWidget);
     expect(find.text('Checklist'), findsNothing);
     expect(find.text('Favorites'), findsNothing);
     final gatherSemantics = tester.widget<Semantics>(
@@ -510,7 +518,9 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets('large text keeps the atlas command bar usable', (tester) async {
+  testWidgets('200 percent text keeps Gather and Workers labels complete', (
+    tester,
+  ) async {
     final controller = TextEditingController();
     final focusNode = FocusNode();
     addTearDown(controller.dispose);
@@ -536,19 +546,28 @@ void main() {
       ),
     );
 
-    expect(find.text('Gather'), findsNothing);
-    expect(find.text('Workers'), findsNothing);
+    expect(find.text('Gather'), findsOneWidget);
+    expect(find.text('Workers'), findsOneWidget);
     expect(find.text('Checklist'), findsNothing);
     expect(find.text('Favorites'), findsNothing);
-    expect(find.byTooltip('Gather'), findsOneWidget);
-    expect(find.byTooltip('Workers'), findsOneWidget);
+    expect(find.byTooltip('Gather'), findsNothing);
+    expect(find.byTooltip('Workers'), findsNothing);
+    for (final label in const <String>['Gather', 'Workers']) {
+      final paragraph = tester.renderObject<RenderParagraph>(find.text(label));
+      expect(
+        paragraph.didExceedMaxLines,
+        isFalse,
+        reason: '$label must remain visibly complete at 200% text.',
+      );
+    }
     expect(
       tester
           .getSize(
             find.byKey(const ValueKey<String>('resource-map-search-card')),
           )
           .width,
-      greaterThan(450),
+      greaterThan(230),
+      reason: 'Visible mode labels still leave a useful search field.',
     );
     final searchRect = tester.getRect(
       find.byKey(const ValueKey<String>('resource-map-search-card')),

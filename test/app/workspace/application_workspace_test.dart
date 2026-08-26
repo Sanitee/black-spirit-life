@@ -101,28 +101,9 @@ void main() {
   });
 
   testWidgets(
-    'real AFK Load action opens Data settings and copies a configured load',
+    'real AFK Weight action opens Data settings and returns to a usable plan',
     (tester) async {
       configureApplicationTestSurface(tester, const Size(1500, 940));
-      final platformMessenger =
-          TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger;
-      String? clipboardText;
-      platformMessenger.setMockMethodCallHandler(SystemChannels.platform, (
-        call,
-      ) async {
-        if (call.method == 'Clipboard.setData') {
-          clipboardText =
-              (call.arguments as Map<Object?, Object?>)['text'] as String?;
-        }
-        return null;
-      });
-      addTearDown(
-        () => platformMessenger.setMockMethodCallHandler(
-          SystemChannels.platform,
-          null,
-        ),
-      );
-
       var harness = (await tester.runAsync(
         () => ApplicationTestHarness.create(),
       ))!;
@@ -193,27 +174,16 @@ void main() {
       await tester.tap(find.byKey(afkLoadAction));
       await tester.pumpAndSettle();
 
-      final copyLoad = find.byKey(
-        const ValueKey<String>('planner-afk-copy-load'),
-      );
-      expect(copyLoad, findsOneWidget);
-      tester.widget<AppButton>(copyLoad).onPressed!();
-      await tester.pump();
-      await tester.pump(const Duration(milliseconds: 20));
-
-      expect(clipboardText, startsWith('AFK Load'));
-      // Ten requested outputs use the catalog's 2.5 expected yield, so the
-      // goal-aware load correctly asks for four recipe attempts rather than
-      // filling the character's entire safe capacity.
       expect(
-        clipboardText,
-        contains('Planner goal: 10 x Clear Liquid Reagent'),
+        find.byKey(const ValueKey<String>('planner-afk-copy-load')),
+        findsNothing,
       );
-      expect(clipboardText, contains('This recipe: 4 attempts'));
-      expect(clipboardText, contains('Round 1 of 1: 4 attempts'));
-      expect(clipboardText, contains('Load:'));
-      expect(find.text('AFK load list copied.'), findsOneWidget);
-      expect(find.byType(SnackBar), findsOneWidget);
+      expect(
+        find.byKey(const ValueKey<String>('planner-afk-needed-attempts')),
+        findsOneWidget,
+      );
+      expect(find.text('crafts in this batch'), findsOneWidget);
+      expect(find.text('Done'), findsOneWidget);
       expect(tester.takeException(), isNull);
       await _disposeWidgetHarness(tester, harness);
     },
@@ -402,115 +372,119 @@ void main() {
     },
   );
 
-  testWidgets(
-    'inventory clear is immediate and Data session spans modes/themes',
-    (tester) async {
-      configureApplicationTestSurface(tester, const Size(1500, 940));
-      var harness = (await tester.runAsync(
-        () => ApplicationTestHarness.create(),
-      ))!;
-      await tester.runAsync(harness.disposeControllerOnly);
-      harness = harness.rebindControllerInCurrentZone();
-      harness.bundle.controller.updateDocument(
-        (document) => document.copyWith(
-          showDeleteTools: true,
-          alchemy: document.alchemy.copyWith(
-            inventory: const <String, double>{'Dialog Probe': 2},
-          ),
+  testWidgets('inventory empty confirms and Data session spans modes/themes', (
+    tester,
+  ) async {
+    configureApplicationTestSurface(tester, const Size(1500, 940));
+    var harness = (await tester.runAsync(
+      () => ApplicationTestHarness.create(),
+    ))!;
+    await tester.runAsync(harness.disposeControllerOnly);
+    harness = harness.rebindControllerInCurrentZone();
+    harness.bundle.controller.updateDocument(
+      (document) => document.copyWith(
+        showDeleteTools: true,
+        alchemy: document.alchemy.copyWith(
+          inventory: const <String, double>{'Dialog Probe': 2},
         ),
-        immediate: true,
-      );
+      ),
+      immediate: true,
+    );
 
-      await tester.pumpWidget(
-        BdoCraftPlannerApp(
-          applicationFuture: Future.value(harness.bundle),
-          marketGateway: const EmptyMarketGateway(),
-        ),
-      );
-      await _pumpWorkspace(tester);
+    await tester.pumpWidget(
+      BdoCraftPlannerApp(
+        applicationFuture: Future.value(harness.bundle),
+        marketGateway: const EmptyMarketGateway(),
+      ),
+    );
+    await _pumpWorkspace(tester);
 
-      await tester.tap(find.byKey(ShellDestination.inventory.actionKey));
-      await _pumpWorkspace(tester);
-      await tester.tap(find.byKey(InventoryActionKeys.i04));
-      await _pumpWorkspace(tester);
-      await tester.tap(find.byKey(InventoryActionKeys.i03));
-      await _pumpWorkspace(tester);
+    await tester.tap(find.byKey(ShellDestination.inventory.actionKey));
+    await _pumpWorkspace(tester);
+    await tester.tap(find.byKey(InventoryActionKeys.filter('owned')));
+    await _pumpWorkspace(tester);
+    await tester.ensureVisible(find.byKey(InventoryActionKeys.emptyInventory));
+    await tester.tap(find.byKey(InventoryActionKeys.emptyInventory));
+    await _pumpWorkspace(tester);
 
-      expect(find.text('Clear Inventory'), findsNothing);
-      expect(find.text('Cancel'), findsNothing);
-      expect(find.text('Undo'), findsNothing);
-      expect(
-        harness.bundle.controller.documentSnapshot.alchemy.inventory,
-        isEmpty,
-      );
-      expect(tester.takeException(), isNull);
+    expect(find.text('Empty inventory?'), findsOneWidget);
+    await tester.tap(find.byKey(InventoryActionKeys.confirmEmptyInventory));
+    await _pumpWorkspace(tester);
 
-      await tester.tap(find.byKey(ShellDestination.data.actionKey));
-      await _pumpWorkspace(tester);
-      await tester.tap(
-        find.byKey(const ValueKey<String>('data-afk-load-toggle')),
-      );
-      await _pumpWorkspace(tester);
-      expect(
-        find.byKey(const ValueKey<String>('data-afk-maximum-weight')),
-        findsOneWidget,
-      );
+    expect(find.text('Empty inventory?'), findsNothing);
+    expect(
+      harness.bundle.controller.documentSnapshot.alchemy.inventory,
+      isEmpty,
+    );
+    expect(tester.takeException(), isNull);
 
-      harness.bundle.controller.updateDocument(
-        (document) => AppearanceActions.selectSharedBackground(
-          document,
-          'illuminated-ledger',
-        ),
-        immediate: true,
-      );
-      await _pumpWorkspace(tester);
-      var backdrop = tester.widget<LedgerBackdrop>(find.byType(LedgerBackdrop));
-      expect(backdrop.showMarginalia, isFalse);
-      expect(backdrop.centerFoldX, 649);
-      expect(backdrop.centerFoldWidth, 24);
+    await tester.tap(find.byKey(ShellDestination.data.actionKey));
+    await _pumpWorkspace(tester);
+    await tester.tap(
+      find.byKey(const ValueKey<String>('data-afk-load-toggle')),
+    );
+    await _pumpWorkspace(tester);
+    expect(
+      find.byKey(const ValueKey<String>('data-afk-maximum-weight')),
+      findsOneWidget,
+    );
 
-      await tester.tap(find.byKey(ShellDestination.planner.actionKey));
-      await _pumpWorkspace(tester);
-      backdrop = tester.widget<LedgerBackdrop>(find.byType(LedgerBackdrop));
-      expect(backdrop.centerFoldX, isNull);
-      expect(backdrop.centerFoldRatio, .575);
-      expect(backdrop.centerFoldWidth, 18);
+    harness.bundle.controller.updateDocument(
+      (document) => AppearanceActions.selectSharedBackground(
+        document,
+        'illuminated-ledger',
+      ),
+      immediate: true,
+    );
+    await _pumpWorkspace(tester);
+    var backdrop = tester.widget<LedgerBackdrop>(
+      find.byType(LedgerBackdrop).first,
+    );
+    expect(backdrop.showMarginalia, isFalse);
+    expect(backdrop.centerFoldX, 649);
+    expect(backdrop.centerFoldWidth, 24);
 
-      await tester.tap(find.byKey(ShellDestination.data.actionKey));
-      await _pumpWorkspace(tester);
+    await tester.tap(find.byKey(ShellDestination.planner.actionKey));
+    await _pumpWorkspace(tester);
+    backdrop = tester.widget<LedgerBackdrop>(find.byType(LedgerBackdrop).first);
+    expect(backdrop.centerFoldX, isNull);
+    expect(backdrop.centerFoldRatio, .575);
+    expect(backdrop.centerFoldWidth, 18);
 
-      await tester.tap(find.byKey(ShellDestination.recipeEditor.actionKey));
-      await _pumpWorkspace(tester);
-      backdrop = tester.widget<LedgerBackdrop>(find.byType(LedgerBackdrop));
-      expect(backdrop.centerFoldX, 620);
-      expect(backdrop.centerFoldWidth, 30);
+    await tester.tap(find.byKey(ShellDestination.data.actionKey));
+    await _pumpWorkspace(tester);
 
-      await tester.tap(find.byKey(ShellDestination.appearance.actionKey));
-      await _pumpWorkspace(tester);
-      backdrop = tester.widget<LedgerBackdrop>(find.byType(LedgerBackdrop));
-      expect(backdrop.centerFoldX, isNull);
-      expect(backdrop.centerFoldRatio, .659);
-      expect(backdrop.centerFoldWidth, 18);
+    await tester.tap(find.byKey(ShellDestination.recipeEditor.actionKey));
+    await _pumpWorkspace(tester);
+    backdrop = tester.widget<LedgerBackdrop>(find.byType(LedgerBackdrop).first);
+    expect(backdrop.centerFoldX, 620);
+    expect(backdrop.centerFoldWidth, 30);
 
-      await tester.tap(find.byKey(ShellDestination.data.actionKey));
-      await _pumpWorkspace(tester);
-      expect(
-        find.byKey(const ValueKey<String>('data-afk-maximum-weight')),
-        findsOneWidget,
-      );
+    await tester.tap(find.byKey(ShellDestination.appearance.actionKey));
+    await _pumpWorkspace(tester);
+    backdrop = tester.widget<LedgerBackdrop>(find.byType(LedgerBackdrop).first);
+    expect(backdrop.centerFoldX, isNull);
+    expect(backdrop.centerFoldRatio, .659);
+    expect(backdrop.centerFoldWidth, 18);
 
-      await tester.tap(find.byKey(ShellActionKeys.mode(CraftMode.processing)));
-      await _pumpWorkspace(tester);
-      await tester.tap(find.byKey(ShellDestination.data.actionKey));
-      await _pumpWorkspace(tester);
-      expect(
-        find.byKey(const ValueKey<String>('data-afk-maximum-weight')),
-        findsOneWidget,
-      );
-      expect(tester.takeException(), isNull);
-      await _disposeWidgetHarness(tester, harness);
-    },
-  );
+    await tester.tap(find.byKey(ShellDestination.data.actionKey).first);
+    await _pumpWorkspace(tester);
+    expect(
+      find.byKey(const ValueKey<String>('data-afk-maximum-weight')),
+      findsOneWidget,
+    );
+
+    await tester.tap(find.byKey(ShellActionKeys.mode(CraftMode.processing)));
+    await _pumpWorkspace(tester);
+    await tester.tap(find.byKey(ShellDestination.data.actionKey));
+    await _pumpWorkspace(tester);
+    expect(
+      find.byKey(const ValueKey<String>('data-afk-maximum-weight')),
+      findsOneWidget,
+    );
+    expect(tester.takeException(), isNull);
+    await _disposeWidgetHarness(tester, harness);
+  });
 
   testWidgets(
     'real workspace preserves feature sessions and closes Recipe Book on navigation',

@@ -31,6 +31,42 @@ Official policy source:
 Contact named by the reviewed policy for uncertain fan-content uses:
 `fancontent@pearlabysscorp.com`.
 
+The Windows storage-screenshot OCR helper includes a sealed Recipe Book
+snapshot with 3,897 Pearl Abyss-origin item icons plus two generated
+recognition atlases. These assets are used only for local, review-first item
+recognition; screenshots remain on the user's computer. The helper-specific
+asset notice is distributed at
+`windows/storage_ocr/BlackSpiritStorageOcr/Assets/RecipeBook/NOTICE.txt`.
+
+## Black Spirit Hub shared OCR source
+
+The Windows-only `BlackSpiritStorageOcr` recognition implementation and frozen
+Recipe Book snapshot were copied from Black Spirit Hub v0.9.52 at commit
+`6ccbad52d25b54d8b67065ce8a9eb1bcece87d9f`. The project owner states that the
+Black Spirit Hub owner shared this implementation for reuse in Black Spirit
+Life. The upstream repository has no top-level software license, so that
+owner-authorized reuse is recorded as project-specific permission and is not
+represented as a general license grant to third parties.
+
+The complete provenance and permission statement is distributed at
+`windows/storage_ocr/BlackSpiritStorageOcr/SOURCE-NOTICE.txt`.
+
+## PaddleOCR and ONNX Runtime
+
+Local screenshot quantity recognition uses the RapidOCR 3.9.2 English
+PP-OCRv5 mobile ONNX model. RapidOCR and PaddleOCR identify the relevant
+components as Apache License 2.0 software. The pinned model source, version,
+integrity hash, and model notice are distributed at
+`windows/storage_ocr/BlackSpiritStorageOcr/Assets/RecipeBook/ocr/MODEL-NOTICE-PPOCRV5.txt`;
+the complete Apache License 2.0 text is beside it in
+`LICENSE-PADDLEOCR.txt`.
+
+Microsoft ONNX Runtime 1.29.0 executes the model locally under the MIT License.
+Its complete license and redistributed third-party notices are beside the
+model in `LICENSE-ONNXRUNTIME.txt` and
+`THIRD-PARTY-NOTICES-ONNXRUNTIME.txt`. Screenshot pixels are not sent to these
+projects or to any network service.
+
 ## BDO Codex and BDOLytics research references
 
 BDO Codex and BDOLytics were credited research, cross-checking and mirror

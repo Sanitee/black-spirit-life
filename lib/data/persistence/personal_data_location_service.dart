@@ -349,7 +349,12 @@ final class PersonalDataLocationService implements PersonalDataLocationManager {
     final protected = <Directory>[
       localIdentityRoot,
       Directory(_join(local, AppIdentity.installerPackageId)),
+      Directory(_join(roaming, AppIdentity.liveBetaStateDirectoryName)),
       Directory(_join(roaming, AppIdentity.formerStateDirectoryName)),
+      Directory(_join(local, AppIdentity.liveBetaLocalCacheDirectoryName)),
+      Directory(_join(local, AppIdentity.formerLocalCacheDirectoryName)),
+      Directory(_join(local, AppIdentity.liveBetaInstallerPackageId)),
+      Directory(_join(local, AppIdentity.formerInstallerPackageId)),
       ...additionalProtectedDirectories,
       executableDirectory,
       ?velopackInstallRoot,

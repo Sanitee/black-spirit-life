@@ -34,7 +34,7 @@ class AppCompletionControl extends StatelessWidget {
         minimumSize: Size.square(dimension),
         padding: EdgeInsets.zero,
         onPressed: onPressed,
-        child: ledger && completed
+        child: ledger && completed && onPressed != null
             ? const Icon(Icons.undo_rounded, size: 23)
             : AppVectorGlyph(
                 'check',

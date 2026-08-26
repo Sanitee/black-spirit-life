@@ -1,0 +1,16 @@
+INACTIVE BLACK SPIRIT LIFE PLANNER OCR CATALOG EXPERIMENT
+
+These files document an experiment that supplemented the frozen Black Spirit
+Hub v0.9.52 RecipeBook snapshot. The experiment is disabled. The active helper
+uses the byte-exact upstream Recipe Book files described in SOURCE-NOTICE.txt
+and Assets/RecipeBook/NOTICE.txt.
+
+Planner names and embedded item icons come from this repository's
+assets/data/app-data.json. The icon artwork remains Black Desert Online client
+artwork. No third-party editorial artwork or community screenshots are added.
+
+Byte-exact upstream assets remain in Tools/PlannerCatalog/Upstream for public
+audit. The generated overlay, its modified catalog/atlas copies, and its
+generated icon files remain only in the private development repository and are
+excluded from this public source snapshot. Neither set is part of the runtime
+or publish payload.

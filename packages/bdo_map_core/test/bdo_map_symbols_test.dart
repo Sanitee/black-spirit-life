@@ -58,6 +58,10 @@ void main() {
         },
       );
       expect(bdoMapSymbolStates(), {BdoMapSymbolState.unowned});
+      expect(bdoMapSymbolStates(recommendedStorage: true), {
+        BdoMapSymbolState.unowned,
+        BdoMapSymbolState.recommendedStorage,
+      });
     });
 
     test('selection accents without erasing the owned treatment', () {
@@ -115,6 +119,13 @@ void main() {
             BdoMapSymbolState.unavailable,
           }).semanticStateLabel,
           'Unavailable',
+        );
+        expect(
+          bdoMapSymbolStyle({
+            BdoMapSymbolState.recommendedLodging,
+            BdoMapSymbolState.recommendedStorage,
+          }).semanticStateLabel,
+          'Recommended storage',
         );
       },
     );

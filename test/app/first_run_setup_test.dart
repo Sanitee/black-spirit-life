@@ -115,7 +115,7 @@ void main() {
     expect(completed.processing.view, 'book');
   });
 
-  test('private Beta repeats every setup group once per app version', () {
+  test('versioned setup repeats every setup group once per app version', () {
     final document = buildStateFixture();
     final completedForBetaFive = completeFirstRunSetupDocument(
       document,
@@ -364,7 +364,7 @@ void main() {
   });
 
   test(
-    'schema one completion asks only for AFK Load and preserves old groups',
+    'schema one completion asks only for AFK Weight and preserves old groups',
     () {
       final document = buildStateFixture();
       final extensions = Map<String, Object?>.of(document.extensions)

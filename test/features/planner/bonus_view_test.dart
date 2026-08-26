@@ -190,7 +190,7 @@ void main() {
         matching: find.byType(TextField),
       ),
     );
-    expect(ledgerTarget.style!.fontSize, 13);
+    expect(ledgerTarget.style!.fontSize, 15);
 
     final recipes = tester.widget<AppButton>(find.byKey(BonusActionKeys.b03));
     final rebuild = tester.widget<AppButton>(find.byKey(BonusActionKeys.b04));

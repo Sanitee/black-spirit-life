@@ -20,14 +20,29 @@ void main() {
 
     expect(catalog.sourceByteCount, productionCatalogByteCount);
     expect(catalog.sourceSha256, productionCatalogSha256);
-    expect(catalog.totalItemCount, 1627);
-    expect(catalog.totalCraftableCount, 931);
-    expect(catalog.totalIngredientRowCount, 2803);
+    expect(catalog.totalItemCount, 1646);
+    expect(catalog.totalCraftableCount, 948);
+    expect(catalog.totalIngredientRowCount, 2834);
     expect(catalog.collisions, hasLength(20));
-    expect(catalog.alchemy.iconDataUris, hasLength(438));
+    expect(catalog.alchemy.iconDataUris, hasLength(442));
     expect(catalog.cooking.iconDataUris, hasLength(612));
     expect(catalog.processing.iconDataUris, hasLength(3436));
     expect(catalog.processing.searchAliases, hasLength(160));
+    final bloodGroups =
+        catalog.alchemy.metadata['bloodGroups'] as Map<String, Object?>;
+    expect(bloodGroups['Group 3'], contains('Monkey Blood'));
+    expect(bloodGroups['Group 4'], contains('Dinosaur Blood'));
+    expect(catalog.alchemy.items['Monkey Blood']?.marketId, '6211');
+    expect(catalog.alchemy.items['Monkey Blood']?.group, 'Bloods');
+    final worthGroups =
+        catalog.alchemy.metadata['substituteWorthGroups']
+            as Map<String, Object?>;
+    final bloodGroupOne = worthGroups['Blood Group 1'] as Map<String, Object?>;
+    expect(bloodGroupOne['Wolf Blood'], 1);
+    expect(bloodGroupOne['Flamingo Blood'], 2);
+    final fruitGroup = worthGroups['Fruit Group 6007'] as Map<String, Object?>;
+    expect(fruitGroup['Apple'], 1);
+    expect(fruitGroup['Strawberry'], 2);
     expect(catalog.alchemy.defaults['target'], 'Harmony Draught');
     expect(catalog.cooking.defaults['target'], 'Beer');
     expect(
@@ -47,8 +62,8 @@ void main() {
         catalog.supportingData['itemWeightIds'] as Map<String, Object?>;
     final itemWeightsLtById =
         catalog.supportingData['itemWeightsLtById'] as Map<String, Object?>;
-    expect(itemWeightIds, hasLength(1686));
-    expect(itemWeightsLtById, hasLength(1685));
+    expect(itemWeightIds, hasLength(1707));
+    expect(itemWeightsLtById, hasLength(1706));
     expect(itemWeightIds['Beer'], '9213');
     expect(itemWeightsLtById['9213'], 0.1);
     expect(itemWeightIds['Acacia Plank'], '4680');
@@ -67,7 +82,7 @@ void main() {
     );
     expect(catalog.cooking.auditedCraftableCount, 172);
     expect(catalog.cooking.plannerCraftableCount, 171);
-    expect(catalog.processing.plannerCraftableCount, 609);
+    expect(catalog.processing.plannerCraftableCount, 622);
     final endtimes =
         catalog.processing.items['Crystallized Energy of Endtimes'];
     expect(endtimes?.marketId, '821252');
@@ -153,6 +168,56 @@ void main() {
           .every((collision) => collision.valuesEqual),
       isTrue,
     );
+  });
+
+  test('keeps the complete current Bird Meat family and special result', () {
+    final catalog = const BundledCatalogParser().parse(source);
+    final cooking = catalog.cooking.items;
+    final processing = catalog.processing.items;
+    const family = <String>{
+      'Bird Meat',
+      'Chicken Meat',
+      'Flamingo Meat',
+      'Kuku Bird Meat',
+    };
+
+    expect(cooking['Bird Meat']?.marketId, '7953');
+    expect(cooking['Steaming Hot Grilled Bird Meat']?.marketId, '9493');
+    expect(cooking['Ground Bird Meat']?.ingredients.single.quantity, 3);
+    expect(
+      cooking['Ground Bird Meat']?.ingredients.single.options.toSet(),
+      family,
+    );
+    expect(processing['Ground Bird Meat']?.method, 'Grinding');
+    expect(processing['Ground Bird Meat']?.ingredients.single.quantity, 3);
+    expect(
+      processing['Ground Bird Meat']?.ingredients.single.options.toSet(),
+      family,
+    );
+
+    for (final entry in const <String, double>{
+      'Mesima Chicken Soup': 1,
+      'Grilled Bird Meat': 2,
+      'Organic Feed': 4,
+      'Stir-Fried Bird': 5,
+      'Chicken Breast Salad': 5,
+      'Fried Bird': 7,
+      'Steamed Bird': 5,
+      'Dark Pudding': 5,
+    }.entries) {
+      final ingredient = cooking[entry.key]!.ingredients.firstWhere(
+        (candidate) => candidate.substituteGroup == 'Bird Meat',
+      );
+      expect(ingredient.quantity, entry.value, reason: entry.key);
+      expect(ingredient.options.toSet(), family, reason: entry.key);
+    }
+
+    final specialMap =
+        catalog.supportingData['cookingSpecialMap'] as Map<String, Object?>;
+    expect(specialMap['Grilled Bird Meat'], <String, Object?>{
+      'name': 'Steaming Hot Grilled Bird Meat',
+      'ratio': 6,
+    });
   });
 
   test('bundles the three current Cron Meals and every processing route', () {
@@ -458,6 +523,21 @@ void main() {
       viridian.ingredients[1].substituteRatios['Elixir of Flowing Time'],
       closeTo(1 / 3, 0.0000001),
     );
+
+    final burnRemoval = catalog.alchemy.items['Elixir of Burn Removal']!;
+    final fruit = burnRemoval.ingredients.firstWhere(
+      (ingredient) => ingredient.name == 'Apple',
+    );
+    expect(fruit.quantity, 2);
+    expect(fruit.options, <String>[
+      'Apple',
+      'Strawberry',
+      'Grape',
+      'Cherry',
+      'Pear',
+      'Banana',
+      'Pineapple',
+    ]);
 
     for (final slot in const <String>['Necklace', 'Earring', 'Ring', 'Belt']) {
       final causality =

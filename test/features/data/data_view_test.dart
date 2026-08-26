@@ -71,7 +71,7 @@ void main() {
 
     expect(find.text('Mastery & Output'), findsOneWidget);
     expect(find.text('Market Sales'), findsOneWidget);
-    expect(find.text('AFK Load'), findsOneWidget);
+    expect(find.text('AFK Weight'), findsOneWidget);
     expect(find.text('Portable Sharing'), findsNothing);
     expect(find.text('Developer Backup'), findsNothing);
     expect(find.text('Editor Settings'), findsNothing);
@@ -109,6 +109,51 @@ void main() {
     expect(afkLoad.width, lessThanOrEqualTo(540));
     expect(afkLoad.top - craft.bottom, 14);
     expect(editor.top - afkLoad.bottom, 14);
+
+    await controller.dispose();
+  });
+
+  testWidgets('Tab finishes the Mastery card before moving to another card', (
+    tester,
+  ) async {
+    final controller = _controller();
+    await _pump(
+      tester,
+      controller,
+      size: const Size(1425, 940),
+      showDeveloperBackup: false,
+    );
+
+    TextField masteryField(String key) => tester.widget<TextField>(
+      find.descendant(
+        of: find.byKey(ValueKey<String>(key)),
+        matching: find.byType(TextField),
+      ),
+    );
+
+    await tester.tap(
+      find.descendant(
+        of: find.byKey(const ValueKey<String>('D01')),
+        matching: find.byType(TextField),
+      ),
+    );
+    await tester.pump();
+    expect(masteryField('D01').focusNode?.hasFocus, isTrue);
+
+    await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+    await tester.pump();
+    expect(masteryField('D02').focusNode?.hasFocus, isTrue);
+
+    await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+    await tester.pump();
+    expect(masteryField('D03').focusNode?.hasFocus, isTrue);
+
+    expect(controller.documentSnapshot.processing.useMassProcessing, isFalse);
+    await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+    await tester.pump();
+    await tester.sendKeyEvent(LogicalKeyboardKey.enter);
+    await tester.pump();
+    expect(controller.documentSnapshot.processing.useMassProcessing, isTrue);
 
     await controller.dispose();
   });
@@ -677,66 +722,67 @@ void main() {
     await controller.dispose();
   });
 
-  testWidgets('AFK Load profile stays compact and saves all character inputs', (
-    tester,
-  ) async {
-    final controller = _controller();
-    await _pump(tester, controller);
+  testWidgets(
+    'AFK Weight profile stays compact and saves all character inputs',
+    (tester) async {
+      final controller = _controller();
+      await _pump(tester, controller);
 
-    final toggle = find.byKey(const ValueKey<String>('data-afk-load-toggle'));
-    expect(toggle, findsOneWidget);
-    expect(find.text('Set your character weight once'), findsOneWidget);
-    expect(
-      find.byKey(const ValueKey<String>('data-afk-maximum-weight')),
-      findsNothing,
-    );
-
-    await tester.ensureVisible(toggle);
-    await tester.tap(toggle);
-    await tester.pumpAndSettle();
-    expect(find.text('LT TO KEEP FREE'), findsOneWidget);
-    expect(find.text('LEAVE UNUSED'), findsNothing);
-
-    Future<void> commit(String key, String value) async {
-      final field = find.descendant(
-        of: find.byKey(ValueKey<String>(key)),
-        matching: find.byType(TextField),
+      final toggle = find.byKey(const ValueKey<String>('data-afk-load-toggle'));
+      expect(toggle, findsOneWidget);
+      expect(find.text('Set your character weight once'), findsOneWidget);
+      expect(
+        find.byKey(const ValueKey<String>('data-afk-maximum-weight')),
+        findsNothing,
       );
-      await tester.enterText(field, value);
-      await tester.testTextInput.receiveAction(TextInputAction.done);
-      await tester.pump();
-    }
 
-    await commit('data-afk-maximum-weight', '1600');
-    await commit('data-afk-current-weight', '125');
-    await commit('data-afk-safety-buffer', '25');
-    final feathery = tester.widget<AppSelect<int>>(
-      find.byKey(const ValueKey<String>('data-afk-feathery-steps')),
-    );
-    feathery.onChanged!(5);
-    await tester.pumpAndSettle();
+      await tester.ensureVisible(toggle);
+      await tester.tap(toggle);
+      await tester.pumpAndSettle();
+      expect(find.text('KEEP FREE'), findsOneWidget);
+      expect(find.text('LEAVE UNUSED'), findsNothing);
 
-    final profile = controller.documentSnapshot.afkWeightProfile;
-    expect(profile.maximumWeightLt, 1600);
-    expect(profile.currentCarriedWeightLt, 125);
-    expect(profile.safetyBufferLt, 25);
-    expect(profile.featheryStepsLevel, 5);
-    expect(profile.penaltyThresholdLt, 2000);
-    expect(profile.safeLimitLt, 1850);
-    expect(find.text('1.850 LT'), findsOneWidget);
-    expect(find.text('1.975 LT'), findsOneWidget);
-    expect(find.text('AVAILABLE FOR MATERIALS'), findsOneWidget);
-    expect(find.text('SAFE STOP'), findsOneWidget);
+      Future<void> commit(String key, String value) async {
+        final field = find.descendant(
+          of: find.byKey(ValueKey<String>(key)),
+          matching: find.byType(TextField),
+        );
+        await tester.enterText(field, value);
+        await tester.testTextInput.receiveAction(TextInputAction.done);
+        await tester.pump();
+      }
 
-    await tester.tap(toggle);
-    await tester.pumpAndSettle();
-    expect(
-      find.byKey(const ValueKey<String>('data-afk-maximum-weight')),
-      findsNothing,
-    );
-    expect(find.textContaining('1.850 LT available'), findsOneWidget);
-    await controller.dispose();
-  });
+      await commit('data-afk-maximum-weight', '1600');
+      await commit('data-afk-current-weight', '125');
+      await commit('data-afk-safety-buffer', '25');
+      final feathery = tester.widget<AppSelect<int>>(
+        find.byKey(const ValueKey<String>('data-afk-feathery-steps')),
+      );
+      feathery.onChanged!(5);
+      await tester.pumpAndSettle();
+
+      final profile = controller.documentSnapshot.afkWeightProfile;
+      expect(profile.maximumWeightLt, 1600);
+      expect(profile.currentCarriedWeightLt, 125);
+      expect(profile.safetyBufferLt, 25);
+      expect(profile.featheryStepsLevel, 5);
+      expect(profile.penaltyThresholdLt, 2000);
+      expect(profile.safeLimitLt, 1850);
+      expect(find.text('1.850 LT'), findsOneWidget);
+      expect(find.text('1.975 LT'), findsOneWidget);
+      expect(find.text('ROOM FOR INGREDIENTS'), findsOneWidget);
+      expect(find.text('MAXIMUM YOU CAN CARRY'), findsOneWidget);
+
+      await tester.tap(toggle);
+      await tester.pumpAndSettle();
+      expect(
+        find.byKey(const ValueKey<String>('data-afk-maximum-weight')),
+        findsNothing,
+      );
+      expect(find.textContaining('1.850 LT for ingredients'), findsOneWidget);
+      await controller.dispose();
+    },
+  );
 
   testWidgets('delete-tools option rebuilds from the global notifier', (
     tester,

@@ -156,7 +156,6 @@ class ResourceMapNodeQuickPanel extends StatelessWidget {
     required this.contributionPoints,
     required this.outputs,
     required this.invested,
-    required this.onToggleInvested,
     required this.onClose,
     this.onBack,
     this.backLabel,
@@ -174,6 +173,7 @@ class ResourceMapNodeQuickPanel extends StatelessWidget {
     this.completeRouteContributionPoints,
     this.unlockNotice,
     this.townActions,
+    this.onToggleInvested,
     this.tailAlignment = ResourceMapNodeQuickPanelTailAlignment.center,
     this.sideTailOffset,
     super.key,
@@ -195,7 +195,7 @@ class ResourceMapNodeQuickPanel extends StatelessWidget {
   final VoidCallback? onToggleWorkerPath;
   final String? provenance;
   final bool invested;
-  final VoidCallback onToggleInvested;
+  final VoidCallback? onToggleInvested;
   final VoidCallback? onPreviewRoute;
   final VoidCallback? onAddCompleteRoute;
   final int? completeRouteContributionPoints;
@@ -443,7 +443,7 @@ class ResourceMapNodeQuickPanel extends StatelessWidget {
                                   ),
                                 ),
                               )
-                            else
+                            else if (onToggleInvested != null)
                               Semantics(
                                 button: true,
                                 label: invested
@@ -476,7 +476,8 @@ class ResourceMapNodeQuickPanel extends StatelessWidget {
                                 ),
                               ),
                             if (onPreviewRoute != null ||
-                                onAddCompleteRoute != null) ...<Widget>[
+                                (onAddCompleteRoute != null &&
+                                    onToggleInvested != null)) ...<Widget>[
                               const SizedBox(height: 6),
                               if (onPreviewRoute != null)
                                 _NodeActionRow(
@@ -489,7 +490,8 @@ class ResourceMapNodeQuickPanel extends StatelessWidget {
                                       'Preview complete route to $nodeName',
                                   onPressed: onPreviewRoute!,
                                 ),
-                              if (onAddCompleteRoute != null)
+                              if (onAddCompleteRoute != null &&
+                                  onToggleInvested != null)
                                 _NodeActionRow(
                                   key: const ValueKey<String>(
                                     'resource-map-node-toggle-invested',
@@ -503,7 +505,7 @@ class ResourceMapNodeQuickPanel extends StatelessWidget {
                                   semanticLabel: invested
                                       ? 'Remove $nodeName from my setup'
                                       : 'Mark $nodeName as already invested',
-                                  onPressed: onToggleInvested,
+                                  onPressed: onToggleInvested!,
                                 ),
                             ],
                           ],

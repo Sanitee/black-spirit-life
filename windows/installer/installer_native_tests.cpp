@@ -146,6 +146,8 @@ bool RunPersonalDataRemovalTests(const std::filesystem::path &test_root) {
       roaming / L"Black Spirit Life";
   const std::filesystem::path local_data =
       local / L"Black Spirit Life";
+  const std::filesystem::path live_beta =
+      roaming / L"Black Spirit Life Live Beta";
   const std::filesystem::path former_beta =
       roaming / L"Black Spirit Life Beta";
   const std::filesystem::path former =
@@ -154,6 +156,7 @@ bool RunPersonalDataRemovalTests(const std::filesystem::path &test_root) {
       WriteInstalledRemovalFixture(install, "0.1.0") &&
           WriteText(profile / L"planner-state.json", "{\"owned\":true}") &&
           WriteText(local_data / L"Map Cache" / L"tile.bin", "tile") &&
+          WriteText(live_beta / L"keep.txt", "live-beta") &&
           WriteText(former_beta / L"keep.txt", "former-beta") &&
           WriteText(former / L"keep.txt", "former"),
       "Personal-data removal fixtures could not be written.");
@@ -289,6 +292,7 @@ bool RunPersonalDataRemovalTests(const std::filesystem::path &test_root) {
           !std::filesystem::exists(profile / L"planner-state.json") &&
           std::filesystem::exists(reset_marker) &&
           !std::filesystem::exists(local_data) &&
+          std::filesystem::exists(live_beta / L"keep.txt") &&
           std::filesystem::exists(former_beta / L"keep.txt") &&
           std::filesystem::exists(former / L"keep.txt") &&
           !std::filesystem::exists(plan.journal_path) &&

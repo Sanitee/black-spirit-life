@@ -40,7 +40,7 @@ import '../window/app_title_bar.dart';
 import '../window/native_active_node_video_service.dart';
 import '../window/native_clipboard_image_reader.dart';
 import '../window/native_file_dialog_service.dart';
-import '../window/native_still_image_ocr_service.dart';
+import '../window/native_inventory_ocr_service.dart';
 import '../window/window_host_service.dart';
 import 'application_copy_toast.dart';
 
@@ -219,8 +219,8 @@ class _ApplicationWorkspaceState extends State<ApplicationWorkspace>
   static const int _maximumMapScreenshotBytes = 40 * 1024 * 1024;
   static const NativeActiveNodeVideoService _activeNodeVideoService =
       NativeActiveNodeVideoService();
-  static const NativeStillImageOcrService _stillImageOcrService =
-      NativeStillImageOcrService();
+  final NativeInventoryOcrService _inventoryOcrService =
+      NativeInventoryOcrService();
 
   final GlobalKey<ScaffoldMessengerState> _messengerKey =
       GlobalKey<ScaffoldMessengerState>();
@@ -242,7 +242,6 @@ class _ApplicationWorkspaceState extends State<ApplicationWorkspace>
   late final ResourceMapDatasetCache _resourceMapDatasetCache;
   late final PlannerExternalActions _plannerActions;
   late final InventoryExternalActions _inventoryActions;
-  InventoryScreenshotRecognizer? _inventoryScreenshotRecognizer;
   late final EditorExternalActions _editorActions;
   late final BetaUpdateService _updateService;
   late final BetaUpdateController _updateController;
@@ -312,6 +311,14 @@ class _ApplicationWorkspaceState extends State<ApplicationWorkspace>
           _showToast(result.message, error: !result.restored),
       pasteScreenshot: _pasteInventoryScreenshot,
       chooseScreenshot: _chooseInventoryScreenshot,
+      // `Process.start` installs a zero-duration timer in Flutter's
+      // controlled-clock test zone. Native OCR is covered by its process-level integration
+      // tests, so keep widget and golden tests hermetic instead of launching
+      // the packaged helper while they render Inventory.
+      prewarmScreenshotRecognition:
+          Platform.environment['FLUTTER_TEST'] == 'true'
+          ? null
+          : () => _inventoryOcrService.prewarm(catalog: widget.bundle.catalog),
     );
     _editorActions = EditorExternalActions(
       // The running Avalonia editor deletes immediately and does not surface a
@@ -429,6 +436,7 @@ class _ApplicationWorkspaceState extends State<ApplicationWorkspace>
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
     _copyToastTimer?.cancel();
+    _inventoryOcrService.dispose();
     widget.windowHost.removeCloseRequestHandler();
     _controller.activeMode.removeListener(_activeModeChanged);
     _controller.saveError.removeListener(_saveErrorChanged);
@@ -630,36 +638,16 @@ class _ApplicationWorkspaceState extends State<ApplicationWorkspace>
   Future<InventoryScreenshotAnalysis?> _pasteInventoryScreenshot() async {
     final bytes = await const NativeClipboardImageReader().readPng();
     if (bytes == null) return null;
-    final ocr = await _stillImageOcrService.scanPngBytes(bytes);
-    return _analyzeInventoryScreenshot(bytes, ocr);
+    return _inventoryOcrService.scanPngBytes(
+      bytes,
+      catalog: widget.bundle.catalog,
+    );
   }
 
   Future<InventoryScreenshotAnalysis?> _chooseInventoryScreenshot() async {
     final path = await widget.fileDialogs.pickImageToOpen();
     if (path == null) return null;
-    final file = File(path);
-    final byteLength = await file.length();
-    if (byteLength > _maximumMapScreenshotBytes) {
-      throw const FormatException(
-        'That screenshot is larger than 40 MB. Crop it to the storage or '
-        'inventory window and try again.',
-      );
-    }
-    final bytes = await file.readAsBytes();
-    final ocr = await _stillImageOcrService.scanPath(path);
-    return _analyzeInventoryScreenshot(bytes, ocr);
-  }
-
-  InventoryScreenshotAnalysis _analyzeInventoryScreenshot(
-    Uint8List bytes,
-    StillImageOcrResult ocr,
-  ) {
-    final recognizer = _inventoryScreenshotRecognizer ??=
-        InventoryScreenshotRecognizer.fromCatalog(widget.bundle.catalog);
-    return InventoryScreenshotAnalysis(
-      screenshotPng: bytes,
-      draft: recognizer.recognize(screenshotPng: bytes, ocr: ocr),
-    );
+    return _inventoryOcrService.scanPath(path, catalog: widget.bundle.catalog);
   }
 
   Future<String?> _pickActiveNodeRecording() =>

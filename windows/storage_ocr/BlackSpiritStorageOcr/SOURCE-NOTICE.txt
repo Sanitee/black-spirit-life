@@ -1,0 +1,35 @@
+BlackSpiritStorageOcr native recognition source and frozen Recipe Book snapshot
+were copied from Black Spirit Hub v0.9.52, commit
+6ccbad52d25b54d8b67065ce8a9eb1bcece87d9f.
+
+The receiving project owner states that the Black Spirit Hub owner shared this
+implementation for reuse in Black Spirit Life. The upstream repository has no
+top-level software license, so this statement records provenance and permission;
+it is not a general license grant to third parties.
+
+The PaddleOCR and ONNX Runtime licenses, model notice, complete ONNX Runtime
+third-party notices, and Recipe Book asset notice remain under
+Assets/RecipeBook and must be distributed with the helper.
+
+Black Spirit Life keeps the shared PP-OCRv5 model, Recipe Book assets, item
+artwork, and icon-scoring algorithm byte-for-byte. The host retains up to 64
+credible icon candidates so the receiving app can use its full-resolution
+artwork and reviewed recipe evidence to resolve difficult lookalikes, while
+discarding scores below the app's calibrated credibility floor before JSON
+transfer. Its native quantity layer is also locally extended with an adaptive CTC decoder
+constrained to the legal BDO amount grammar. That decoder runs only after an
+ordinary OCR read is malformed, requires agreement across calibrated views,
+and returns a review suggestion rather than silently confirming a repaired
+value. The helper reports suggestion evidence separately so the receiving UI
+can distinguish agreeing direct reads from recovery paths without changing the
+recognized value. Planner eligibility and item grouping remain in the
+receiving Flutter application.
+
+The inactive catalog-extension experiment remains only in the private
+development repository. Its byte-exact upstream inputs remain under
+Tools/PlannerCatalog/Upstream for public audit, but neither the experiment nor
+those inputs are copied to the helper's build or publish output.
+
+Contributor-provided OCR fixture screenshots are private regression inputs.
+They are excluded from this public source snapshot and every application
+package or installer.

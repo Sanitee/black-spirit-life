@@ -8,6 +8,7 @@ import '../../domain/formatting/planner_formatters.dart';
 import '../../visual/visual.dart';
 import '../shared/mode_item_icon.dart';
 import 'inventory_action_keys.dart';
+import 'inventory_amount_input_formatter.dart';
 import 'inventory_projection.dart';
 
 class InventoryItemRow extends StatefulWidget {
@@ -428,6 +429,9 @@ class _InventoryItemRowState extends State<InventoryItemRow> {
         minimumHeight: _referenceControlHeight(38),
         semanticLabel: 'I10 Owned amount for ${widget.item.name}',
         keyboardType: const TextInputType.numberWithOptions(decimal: true),
+        inputFormatters: const <TextInputFormatter>[
+          InventoryAmountInputFormatter(),
+        ],
         textAlign: TextAlign.right,
         onSubmitted: _commitOwned,
         suffixIcon: _ownedError == null

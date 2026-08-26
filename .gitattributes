@@ -12,3 +12,9 @@
 
 # Windows release builds verify these vendored Velopack bytes by SHA-256.
 /windows/third_party/velopack/1.2.0/** -text
+
+# The native OCR helper verifies sealed catalogs and approved recognition
+# source by SHA-256. Keep those text assets byte-stable on Windows checkouts.
+/windows/storage_ocr/BlackSpiritStorageOcr/**/*.json -text
+/windows/storage_ocr/BlackSpiritStorageOcr/Assets/RecipeBook/NOTICE.txt -text
+/windows/storage_ocr/BlackSpiritStorageOcr/Engine/*.cs -text

@@ -96,12 +96,10 @@ Future<void> _capture(
       ),
     );
     await _pumpWorkspace(tester);
-    if (family.background == IlluminatedLedgerSpec.backgroundId) {
-      await tester.runAsync(
-        () => Future<void>.delayed(const Duration(milliseconds: 160)),
-      );
-      await _pumpWorkspace(tester);
-    }
+    // Wait for the actual image providers rather than relying on elapsed time.
+    // A cold focused run must capture the same greenhouse, item artwork, and
+    // Sakura ornaments as a warm complete-suite run.
+    await _precacheVisibleImages(tester, find.byKey(goldenRoot));
     expect(tester.takeException(), isNull);
     await expectLater(find.byKey(goldenRoot), matchesGoldenFile(fileName));
   } finally {
@@ -115,4 +113,17 @@ Future<void> _pumpWorkspace(WidgetTester tester) async {
   for (var index = 0; index < 5; index++) {
     await tester.pump(const Duration(milliseconds: 80));
   }
+}
+
+Future<void> _precacheVisibleImages(WidgetTester tester, Finder root) async {
+  final imageElements = find
+      .descendant(of: root, matching: find.byType(Image))
+      .evaluate()
+      .toList(growable: false);
+  for (final element in imageElements) {
+    await tester.runAsync(
+      () => precacheImage((element.widget as Image).image, element),
+    );
+  }
+  await tester.pumpAndSettle();
 }

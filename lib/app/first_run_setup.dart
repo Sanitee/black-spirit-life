@@ -14,7 +14,7 @@ const String _formerNativeImportExtensionKey =
 
 enum FirstRunSetupGroup {
   masteryAndOutput(introducedInVersion: 1, title: 'Mastery'),
-  afkLoad(introducedInVersion: 2, title: 'AFK Load'),
+  afkLoad(introducedInVersion: 2, title: 'AFK Weight'),
   marketSales(introducedInVersion: 1, title: 'Market sales');
 
   const FirstRunSetupGroup({

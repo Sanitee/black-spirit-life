@@ -2,7 +2,7 @@
 
 ## Controlling source decision
 
-The source review is complete for Black Spirit Life `0.1.4+23`.
+The source review remains complete for Black Spirit Life `0.1.5+24`.
 
 - Pearl Abyss-origin icons, portraits, descriptions, recipes, NPC information,
   prices, coordinates and node facts are treated as game content and factual
@@ -101,9 +101,9 @@ content-addressed and is not described as cryptographically pinned.
 
 Before publication:
 
-1. create and scan a neutral-author public source commit on top of the
-   sanitized `v0.1.3` public history;
-2. tag that exact commit `v0.1.4`;
+1. create and scan a public source commit directly on top of the sanitized
+   `v0.1.4` release;
+2. tag that exact commit `v0.1.5`;
 3. build the Stable app and installer from that clean tagged commit with
    package `BlackSpiritLife.App`, channel `win-x64-stable`, and GitHub update
    source `https://github.com/Sanitee/black-spirit-life`;

@@ -9,8 +9,6 @@ import 'package:bdo_craft_planner_flutter/features/inventory/inventory.dart';
 import 'package:bdo_craft_planner_flutter/features/planner/planner.dart';
 import 'package:bdo_craft_planner_flutter/features/recipe_book/recipe_book.dart';
 import 'package:bdo_craft_planner_flutter/visual/components/app_button.dart';
-import 'package:bdo_craft_planner_flutter/visual/components/app_form_controls.dart';
-import 'package:bdo_craft_planner_flutter/visual/components/app_vector_glyph.dart';
 import 'package:bdo_craft_planner_flutter/visual/illuminated_ledger/ledger_spec.dart';
 import 'package:bdo_craft_planner_flutter/visual/sakura_night_garden/sakura_spec.dart';
 import 'package:flutter/gestures.dart';
@@ -30,7 +28,7 @@ void main() {
     'source_popover',
     'copy_toast',
     'data_profile',
-    'inventory_category_menu',
+    'inventory_add_item_menu',
     'titlebar_tooltip',
     'keyboard_focus',
   ];
@@ -85,13 +83,14 @@ void main() {
                 state,
                 familyName: family.name,
               );
+              await _precacheVisibleImages(tester, find.byKey(goldenRoot));
               // Named theme images always receive a decode window. The focused
-              // inventory-menu baseline needs the same treatment for the
+              // inventory add-menu baseline needs the same treatment for the
               // standard greenhouse fallback so it matches its full-suite frame.
               if (family.background == IlluminatedLedgerSpec.backgroundId ||
                   family.background == SakuraNightGardenSpec.backgroundId ||
                   (family.background == null &&
-                      (state == 'inventory_category_menu' ||
+                      (state == 'inventory_add_item_menu' ||
                           state.startsWith('data_')))) {
                 await tester.runAsync(
                   () => Future<void>.delayed(const Duration(milliseconds: 160)),
@@ -119,7 +118,7 @@ void main() {
 
 String _initialView(String state) => switch (state) {
   'data_profile' || 'data_import_preview' || 'data_validation_error' => 'data',
-  'inventory_category_menu' => 'inventory',
+  'inventory_add_item_menu' => 'inventory',
   _ => 'plan',
 };
 
@@ -146,14 +145,17 @@ Future<void> _prepareState(
       );
       expect(mode.selectTarget(candidate.key), isTrue);
       await _pumpFrames(tester);
-      final swap = find.byWidgetPredicate(
-        (widget) => widget is AppVectorGlyph && widget.name == 'swap',
-      );
-      if (swap.evaluate().isEmpty) {
+      Finder substituteAction() => find.byWidgetPredicate((widget) {
+        final key = widget.key;
+        return key is ValueKey<String> && key.value.startsWith('P12:');
+      }).hitTestable();
+      if (substituteAction().evaluate().isEmpty) {
         mode.toggleIngredients(candidate.key);
         await _pumpFrames(tester);
       }
-      await tester.tap(swap.first);
+      final action = substituteAction();
+      expect(action, findsWidgets);
+      await tester.tap(action.first);
       await tester.pump(const Duration(milliseconds: 160));
       expect(
         find.bySemanticsLabel(RegExp(r'^Substitute choices for ')),
@@ -243,7 +245,7 @@ Future<void> _prepareState(
         find.textContaining('Import failed; no state changed'),
       );
       break;
-    case 'inventory_category_menu':
+    case 'inventory_add_item_menu':
       await harness.bundle.controller.updateDocumentDurably(
         (document) => document.copyWith(
           showDeleteTools: true,
@@ -256,26 +258,19 @@ Future<void> _prepareState(
         ),
       );
       await _pumpFrames(tester);
-      await tester.tap(find.byKey(InventoryActionKeys.i04));
+      await tester.tap(find.byKey(InventoryActionKeys.addItem));
       await _pumpFrames(tester);
-      final editItems = find.byWidgetPredicate((widget) {
-        final key = widget.key;
-        return key is ValueKey<String> && key.value.startsWith('I11:');
-      });
-      expect(editItems, findsWidgets);
-      await tester.tap(editItems.first);
-      await tester.pump();
-      await tester.pump(const Duration(milliseconds: 240));
       final itemDialog = find.byType(Dialog);
       expect(itemDialog, findsOneWidget);
-      final anchor = find.descendant(
-        of: itemDialog,
-        matching: find.byKey(AppSelect.anchorMaterialKey),
+      final itemSelect = find.byKey(
+        const ValueKey<String>('inventory-manual-item-select'),
       );
-      await tester.tap(anchor);
-      // Pump once to install MenuAnchor's overlay, then advance its transition.
+      expect(itemSelect, findsOneWidget);
+      await tester.tap(
+        find.descendant(of: itemSelect, matching: find.byType(TextField)),
+      );
       await tester.pump();
-      await tester.pump(const Duration(milliseconds: 300));
+      await tester.pump(const Duration(milliseconds: 240));
       expect(find.byType(MenuItemButton).hitTestable(), findsWidgets);
       break;
     case 'titlebar_tooltip':
@@ -324,6 +319,19 @@ Future<void> _prepareState(
       expect(border.top.width, familyName == 'sakura' ? 2 : 1);
       break;
   }
+}
+
+Future<void> _precacheVisibleImages(WidgetTester tester, Finder root) async {
+  final imageElements = find
+      .descendant(of: root, matching: find.byType(Image))
+      .evaluate()
+      .toList(growable: false);
+  for (final element in imageElements) {
+    await tester.runAsync(
+      () => precacheImage((element.widget as Image).image, element),
+    );
+  }
+  await tester.pumpAndSettle();
 }
 
 Finder _jsonField() => find.descendant(

@@ -2,15 +2,19 @@ import 'dart:async';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import '../../app/state/planner_application_controller.dart';
+import '../../domain/formatting/planner_formatters.dart';
 import '../../domain/models/craft_mode.dart';
 import '../../domain/state/inventory_storage.dart';
 import '../../domain/state/planner_state.dart';
 import '../../domain/state/state_copy.dart';
 import '../../domain/state/transactions/state_transactions.dart';
 import '../../visual/visual.dart';
+import '../shared/mode_item_icon.dart';
 import 'inventory_action_keys.dart';
+import 'inventory_amount_input_formatter.dart';
 import 'inventory_contracts.dart';
 import 'inventory_item_row.dart';
 import 'inventory_projection.dart';
@@ -56,10 +60,8 @@ class _InventoryViewState extends State<InventoryView> {
   String? _status;
   bool _statusIsError = false;
   InventoryProjection? _projectionCache;
-  Object? _projectionRecipes;
-  Object? _projectionStorage;
-  Map<String, double>? _projectionInventory;
-  List<String>? _projectionCategories;
+  List<Object?>? _projectionRecipes;
+  List<Object?>? _projectionStates;
   late ModeState _renderedState;
   bool _screenshotBusy = false;
 
@@ -73,8 +75,12 @@ class _InventoryViewState extends State<InventoryView> {
     _syncModeFields();
     _renderedState = widget.controller.state.value;
     widget.controller.state.addListener(_modeStateChanged);
-    widget.controller.plan.addListener(_planChanged);
+    _listenToPlans(widget.controller.owner, add: true);
     widget.controller.owner.deleteToolsEnabled.addListener(_deleteToolsChanged);
+    final prewarm = widget.externalActions.prewarmScreenshotRecognition;
+    if (prewarm != null) {
+      unawaited(prewarm().catchError((Object _) {}));
+    }
   }
 
   @override
@@ -82,13 +88,13 @@ class _InventoryViewState extends State<InventoryView> {
     super.didUpdateWidget(oldWidget);
     if (!identical(oldWidget.controller, widget.controller)) {
       oldWidget.controller.state.removeListener(_modeStateChanged);
-      oldWidget.controller.plan.removeListener(_planChanged);
+      _listenToPlans(oldWidget.controller.owner, add: false);
       oldWidget.controller.owner.deleteToolsEnabled.removeListener(
         _deleteToolsChanged,
       );
       _renderedState = widget.controller.state.value;
       widget.controller.state.addListener(_modeStateChanged);
-      widget.controller.plan.addListener(_planChanged);
+      _listenToPlans(widget.controller.owner, add: true);
       widget.controller.owner.deleteToolsEnabled.addListener(
         _deleteToolsChanged,
       );
@@ -119,6 +125,16 @@ class _InventoryViewState extends State<InventoryView> {
     if (mounted) setState(() {});
   }
 
+  void _listenToPlans(PlannerApplicationController owner, {required bool add}) {
+    for (final modeController in owner.modes.values) {
+      if (add) {
+        modeController.plan.addListener(_planChanged);
+      } else {
+        modeController.plan.removeListener(_planChanged);
+      }
+    }
+  }
+
   void _installSessions(InventorySessionController? supplied) {
     _ownsSessions = supplied == null;
     _sessions = supplied ?? InventorySessionController();
@@ -141,24 +157,23 @@ class _InventoryViewState extends State<InventoryView> {
   }
 
   InventoryProjection _projection() {
-    final state = widget.controller.state.value;
-    final recipes = widget.controller.recipes;
+    final recipes = <Object?>[
+      for (final mode in CraftMode.values)
+        widget.controller.owner.modes[mode]!.recipes,
+    ];
+    final states = <Object?>[
+      for (final mode in CraftMode.values)
+        widget.controller.owner.modes[mode]!.state.value,
+    ];
     final cached = _projectionCache;
     if (cached != null &&
-        identical(_projectionRecipes, recipes) &&
-        identical(
-          _projectionStorage,
-          state.extensions[inventoryStorageExtensionKey],
-        ) &&
-        mapEquals(_projectionInventory, state.inventory) &&
-        listEquals(_projectionCategories, state.customCategories)) {
+        listEquals(_projectionRecipes, recipes) &&
+        listEquals(_projectionStates, states)) {
       return cached;
     }
     final projection = InventoryProjection.assemble(widget.controller);
     _projectionRecipes = recipes;
-    _projectionStorage = state.extensions[inventoryStorageExtensionKey];
-    _projectionInventory = state.inventory;
-    _projectionCategories = state.customCategories;
+    _projectionStates = states;
     return _projectionCache = projection;
   }
 
@@ -166,7 +181,7 @@ class _InventoryViewState extends State<InventoryView> {
   void dispose() {
     _searchTimer?.cancel();
     widget.controller.state.removeListener(_modeStateChanged);
-    widget.controller.plan.removeListener(_planChanged);
+    _listenToPlans(widget.controller.owner, add: false);
     widget.controller.owner.deleteToolsEnabled.removeListener(
       _deleteToolsChanged,
     );
@@ -229,35 +244,6 @@ class _InventoryViewState extends State<InventoryView> {
           selection: TextSelection.collapsed(offset: normalized.length),
         );
       }
-    });
-  }
-
-  Future<void> _clearInventory() async {
-    final modeController = widget.controller;
-    if (modeController.state.value.inventory.isEmpty) return;
-    try {
-      await modeController.owner.updateDocumentDurably((document) {
-        final before = document.forMode(modeController.mode);
-        return _replaceMode(
-          document,
-          modeController.mode,
-          InventoryStorageState.fromModeState(
-            before,
-          ).clearQuantities().applyTo(before),
-        );
-      });
-    } on Object catch (error) {
-      _setStatus(
-        'Inventory was not cleared because the change could not be saved. $error',
-        error: true,
-      );
-      return;
-    }
-    if (!mounted || !identical(modeController, widget.controller)) return;
-    setState(() {
-      _invalidateUndo();
-      _status = null;
-      _statusIsError = false;
     });
   }
 
@@ -546,7 +532,7 @@ class _InventoryViewState extends State<InventoryView> {
         message: 'No Inventory action is available to undo.',
       );
     }
-    if (!identical(widget.controller.state.value, snapshot.after)) {
+    if (!identical(widget.controller.owner.documentSnapshot, snapshot.after)) {
       _session.undo = null;
       final result = InventoryUndoResult(
         operation: snapshot.operation,
@@ -559,8 +545,7 @@ class _InventoryViewState extends State<InventoryView> {
     }
     try {
       await widget.controller.owner.updateDocumentDurably(
-        (document) =>
-            _replaceMode(document, widget.controller.mode, snapshot.before),
+        (_) => snapshot.before,
       );
     } on Object catch (error) {
       final result = InventoryUndoResult(
@@ -606,123 +591,71 @@ class _InventoryViewState extends State<InventoryView> {
     required List<InventoryItemRecord> rows,
     required int fromIndex,
     required int delta,
-    required double itemExtent,
   }) {
     final target = (fromIndex + delta).clamp(0, rows.length - 1);
     if (target == fromIndex) return;
     final name = rows[target].name;
     _session.selectedItem = name;
-    final controller = _session.itemScrollController;
-    if (controller.hasClients) {
-      final offset = (target * itemExtent).clamp(
-        controller.position.minScrollExtent,
-        controller.position.maxScrollExtent,
-      );
-      controller.jumpTo(offset);
-    }
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      _rowFocusNodes[name]?.requestFocus();
+      final node = _rowFocusNodes[name];
+      node?.requestFocus();
+      if (node?.context case final rowContext?) {
+        unawaited(
+          Scrollable.ensureVisible(
+            rowContext,
+            alignment: 0.5,
+            duration: const Duration(milliseconds: 140),
+            curve: Curves.easeOutCubic,
+          ),
+        );
+      }
       if (mounted) setState(() {});
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    final state = _renderedState;
     final projection = _projection();
     final repaired = projection.repairCategory(_session.selectedCategory);
     if (_session.selectedCategory != repaired) {
       _session.selectedCategory = repaired;
       if (!_renameFocus.hasFocus) _renameGroupText.text = repaired;
     }
-    final storage = InventoryStorageState.fromModeState(state);
-    final currentPlanNames = _currentPlanItemNames();
+    final alchemyPlanNames = _planItemNames(CraftMode.alchemy);
+    final cookingPlanNames = _planItemNames(CraftMode.cooking);
+    final processingPlanNames = _planItemNames(CraftMode.processing);
+    final filters = _session.displayFilters;
     final filtered = projection.items
         .where((item) {
           if (!item.matches(_session.search)) return false;
-          return switch (_session.displayFilter) {
-            InventoryDisplayFilter.materials =>
-              _session.search.isNotEmpty || !item.equipmentLike,
-            InventoryDisplayFilter.owned => storage.totalFor(item.name) > 0,
-            InventoryDisplayFilter.currentPlan => currentPlanNames.contains(
-              _fold(item.name),
-            ),
-            InventoryDisplayFilter.all => true,
-          };
+          if (item.equipmentLike) return false;
+          if (filters.contains(InventoryDisplayFilter.all)) return true;
+          if (filters.contains(InventoryDisplayFilter.owned)) {
+            return item.owned > 0;
+          }
+          final foldedName = _fold(item.name);
+          return (filters.contains(InventoryDisplayFilter.alchemyPlan) &&
+                  alchemyPlanNames.contains(foldedName)) ||
+              (filters.contains(InventoryDisplayFilter.cookingPlan) &&
+                  cookingPlanNames.contains(foldedName)) ||
+              (filters.contains(InventoryDisplayFilter.processingPlan) &&
+                  processingPlanNames.contains(foldedName));
         })
-        .toList(growable: false);
-    final originalCounts = <String, int>{};
-    for (final item in filtered) {
-      originalCounts[item.smartGroup] =
-          (originalCounts[item.smartGroup] ?? 0) + 1;
-    }
-    String displayGroup(InventoryItemRecord item) =>
-        (originalCounts[item.smartGroup] ?? 0) < 2
-        ? 'Miscellaneous'
-        : item.smartGroup;
-    final groupCounts = <String, int>{};
-    for (final item in filtered) {
-      final group = displayGroup(item);
-      groupCounts[group] = (groupCounts[group] ?? 0) + 1;
-    }
-    final families = groupCounts.keys.toList()..sort(_compareNames);
-    if (_session.selectedSmartGroup != 'All materials' &&
-        !families.any((family) => _same(family, _session.selectedSmartGroup))) {
-      _session.selectedSmartGroup = 'All materials';
-    }
-    final rows = filtered
-        .where(
-          (item) =>
-              _same(_session.selectedSmartGroup, 'All materials') ||
-              _same(displayGroup(item), _session.selectedSmartGroup),
-        )
         .toList(growable: false);
     return Semantics(
       container: true,
       explicitChildNodes: true,
-      label: '${widget.controller.mode.label} Inventory',
-      child: LayoutBuilder(
-        builder: (context, constraints) {
-          final compact = constraints.maxWidth < 900;
-          final storageRail = _buildStorageRail(
-            context,
-            storage: storage,
-            compact: compact,
-          );
-          final items = _buildStorageItemsPane(
-            context,
-            state: state,
-            projection: projection,
-            storage: storage,
-            families: families,
-            groupCounts: groupCounts,
-            rows: rows,
-          );
-          if (compact) {
-            return Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: <Widget>[
-                storageRail,
-                const SizedBox(height: 10),
-                Expanded(child: items),
-              ],
-            );
-          }
-          return Row(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: <Widget>[
-              SizedBox(width: 244, child: storageRail),
-              const SizedBox(width: 16),
-              Expanded(child: items),
-            ],
-          );
-        },
+      label: 'Inventory',
+      child: _buildInventoryItemsPane(
+        context,
+        projection: projection,
+        rows: filtered,
       ),
     );
   }
 
-  Set<String> _currentPlanItemNames() {
-    final plan = widget.controller.plan.value;
+  Set<String> _planItemNames(CraftMode mode) {
+    final plan = widget.controller.owner.modes[mode]!.plan.value;
     final names = <String>{};
     void add(String value) {
       final folded = _fold(value);
@@ -742,153 +675,47 @@ class _InventoryViewState extends State<InventoryView> {
     return names;
   }
 
-  Widget _buildStorageRail(
-    BuildContext context, {
-    required InventoryStorageState storage,
-    required bool compact,
-  }) {
-    Widget locationButton(InventoryStorageLocation location) {
-      final selected = location.id == storage.selectedLocation.id;
-      final itemCount = location.quantities.values
-          .where((quantity) => quantity > 0)
-          .length;
-      return AppButton(
-        key: InventoryActionKeys.storage(location.id),
-        role: AppButtonRole.navigation,
-        selected: selected,
-        showNavigationOrnament: false,
-        minimumSize: Size(compact ? 168 : 0, 50),
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-        semanticLabel:
-            '${location.name}, $itemCount saved ${itemCount == 1 ? 'item' : 'items'}',
-        onPressed: () =>
-            widget.controller.selectInventoryStorageLocation(location.id),
-        child: Row(
-          children: <Widget>[
-            const Icon(Icons.warehouse_outlined, size: 19),
-            const SizedBox(width: 9),
-            Expanded(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: <Widget>[
-                  Text(
-                    location.name,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  Text(
-                    '$itemCount ${itemCount == 1 ? 'item' : 'items'}',
-                    style: context.visualTheme.typography.meta.copyWith(
-                      fontStyle: FontStyle.normal,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            if (selected && _session.groupToolsOpen && !location.isUnassigned)
-              AppButton.icon(
-                icon: const AppVectorGlyph('edit', size: 14),
-                semanticLabel: 'Rename ${location.name}',
-                tooltip: 'Rename storage',
-                onPressed: () => unawaited(_renameStorage(location)),
-              ),
-          ],
-        ),
-      );
-    }
-
-    final locations = <Widget>[
-      for (final location in storage.locations) locationButton(location),
-    ];
-    return AppSurface(
-      role: AppSurfaceRole.layout,
-      semanticLabel: 'Inventory storage locations',
-      padding: const EdgeInsets.all(11),
-      child: compact
-          ? Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              mainAxisSize: MainAxisSize.min,
-              children: <Widget>[
-                Row(
-                  children: <Widget>[
-                    Expanded(
-                      child: Text(
-                        'Storage locations',
-                        style: context.visualTheme.typography.body.copyWith(
-                          fontWeight: FontWeight.w700,
-                        ),
-                      ),
-                    ),
-                    AppButton.label(
-                      'Add storage',
-                      key: InventoryActionKeys.addStorage,
-                      role: AppButtonRole.secondary,
-                      minimumSize: const Size(0, 36),
-                      onPressed: () => unawaited(_addStorage()),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 8),
-                SingleChildScrollView(
-                  scrollDirection: Axis.horizontal,
-                  child: Row(
-                    children: <Widget>[
-                      for (
-                        var index = 0;
-                        index < locations.length;
-                        index++
-                      ) ...[
-                        if (index > 0) const SizedBox(width: 8),
-                        locations[index],
-                      ],
-                    ],
-                  ),
-                ),
-              ],
-            )
-          : Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: <Widget>[
-                Text(
-                  'Storage locations',
-                  style: context.visualTheme.typography.body.copyWith(
-                    fontSize: 17,
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-                const SizedBox(height: 9),
-                Expanded(
-                  child: ListView.separated(
-                    controller: _session.categoryScrollController,
-                    itemCount: locations.length,
-                    separatorBuilder: (_, _) => const SizedBox(height: 7),
-                    itemBuilder: (_, index) => locations[index],
-                  ),
-                ),
-                const SizedBox(height: 9),
-                AppButton.label(
-                  'Add storage',
-                  key: InventoryActionKeys.addStorage,
-                  role: AppButtonRole.secondary,
-                  onPressed: () => unawaited(_addStorage()),
-                ),
-              ],
-            ),
-    );
+  void _toggleDisplayFilter(InventoryDisplayFilter filter) {
+    setState(() {
+      final selected = _session.displayFilters;
+      if (filter == InventoryDisplayFilter.owned ||
+          filter == InventoryDisplayFilter.all) {
+        _session.displayFilters = <InventoryDisplayFilter>{filter};
+      } else {
+        selected
+          ..remove(InventoryDisplayFilter.owned)
+          ..remove(InventoryDisplayFilter.all);
+        if (!selected.add(filter)) selected.remove(filter);
+        if (selected.isEmpty) {
+          selected.add(InventoryDisplayFilter.all);
+        }
+      }
+      _session.selectedItem = null;
+    });
   }
 
-  Widget _buildStorageItemsPane(
+  Widget _buildInventoryItemsPane(
     BuildContext context, {
-    required ModeState state,
     required InventoryProjection projection,
-    required InventoryStorageState storage,
-    required List<String> families,
-    required Map<String, int> groupCounts,
     required List<InventoryItemRecord> rows,
   }) {
-    final selectedLocation = storage.selectedLocation;
     final actionButtons = <Widget>[
+      AppButton(
+        key: InventoryActionKeys.addItem,
+        role: AppButtonRole.primary,
+        minimumSize: const Size(0, 40),
+        padding: const EdgeInsets.symmetric(horizontal: 13, vertical: 8),
+        semanticLabel: 'Add an item to Inventory',
+        onPressed: () => unawaited(_addItemManually(projection: projection)),
+        child: const Row(
+          mainAxisSize: MainAxisSize.min,
+          children: <Widget>[
+            Icon(Icons.add_rounded, size: 19),
+            SizedBox(width: 7),
+            Text('Add item'),
+          ],
+        ),
+      ),
       if (widget.externalActions.pasteScreenshot != null)
         AppButton(
           key: InventoryActionKeys.pasteScreenshot,
@@ -942,63 +769,12 @@ class _InventoryViewState extends State<InventoryView> {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: <Widget>[
           SectionHeader(title: 'Inventory'),
-          const SizedBox(height: 8),
+          const SizedBox(height: 10),
           LayoutBuilder(
             builder: (context, constraints) {
               final largeText = MediaQuery.textScalerOf(context).scale(14) > 20;
-              final heading = Row(
-                children: <Widget>[
-                  Expanded(
-                    child: Text(
-                      selectedLocation.name,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: context.visualTheme.typography.body.copyWith(
-                        fontSize: 17,
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                  ),
-                  if (_screenshotBusy)
-                    const SizedBox.square(
-                      dimension: 18,
-                      child: CircularProgressIndicator(strokeWidth: 2),
-                    ),
-                ],
-              );
-              if (largeText || constraints.maxWidth < 560) {
-                return Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: <Widget>[
-                    heading,
-                    if (actionButtons.isNotEmpty) ...<Widget>[
-                      const SizedBox(height: 8),
-                      Align(
-                        alignment: Alignment.centerRight,
-                        child: Wrap(
-                          spacing: 8,
-                          runSpacing: 8,
-                          alignment: WrapAlignment.end,
-                          children: actionButtons,
-                        ),
-                      ),
-                    ],
-                  ],
-                );
-              }
-              return Row(
-                children: <Widget>[
-                  Expanded(child: heading),
-                  if (actionButtons.isNotEmpty) const SizedBox(width: 9),
-                  Wrap(spacing: 8, runSpacing: 8, children: actionButtons),
-                ],
-              );
-            },
-          ),
-          const SizedBox(height: 10),
-          Row(
-            children: <Widget>[
-              Expanded(
+              final search = ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 360),
                 child: AppTextField(
                   key: InventoryActionKeys.i01,
                   controller: _searchText,
@@ -1022,97 +798,69 @@ class _InventoryViewState extends State<InventoryView> {
                   onChanged: _onSearchChanged,
                   onSubmitted: _commitSearch,
                 ),
-              ),
-              const SizedBox(width: 10),
-              AppButton(
-                key: InventoryActionKeys.i04,
-                role: AppButtonRole.secondary,
-                selected: _session.groupToolsOpen,
-                minimumSize: const Size(0, 38),
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 12,
-                  vertical: 8,
-                ),
-                semanticLabel:
-                    '${_session.groupToolsOpen ? 'Hide' : 'Show'} Editor settings',
-                onPressed: _toggleGroupTools,
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: <Widget>[
-                    const AppVectorGlyph('edit', size: 16),
-                    const SizedBox(width: 7),
-                    Text(
-                      _session.groupToolsOpen
-                          ? 'Hide editor settings'
-                          : 'Editor settings',
+              );
+              final actions = Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                alignment: WrapAlignment.end,
+                crossAxisAlignment: WrapCrossAlignment.center,
+                children: <Widget>[
+                  ...actionButtons,
+                  if (_screenshotBusy)
+                    Semantics(
+                      liveRegion: true,
+                      label: 'Reading screenshot',
+                      child: Container(
+                        padding: const EdgeInsets.all(8),
+                        child: const SizedBox.square(
+                          dimension: 20,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        ),
+                      ),
                     ),
+                ],
+              );
+              if (largeText || constraints.maxWidth < 760) {
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: <Widget>[
+                    SizedBox(width: double.infinity, child: search),
+                    const SizedBox(height: 9),
+                    Align(alignment: Alignment.centerRight, child: actions),
                   ],
-                ),
-              ),
-            ],
+                );
+              }
+              return Row(
+                children: <Widget>[
+                  Expanded(
+                    child: Align(
+                      alignment: Alignment.centerLeft,
+                      child: search,
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Align(alignment: Alignment.centerRight, child: actions),
+                ],
+              );
+            },
           ),
           const SizedBox(height: 9),
-          SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            child: Row(
-              children: <Widget>[
-                for (
-                  var index = 0;
-                  index < InventoryDisplayFilter.values.length;
-                  index++
-                ) ...<Widget>[
-                  if (index > 0) const SizedBox(width: 7),
-                  AppChoiceChip(
-                    key: InventoryActionKeys.filter(
-                      InventoryDisplayFilter.values[index].name,
-                    ),
-                    label: InventoryDisplayFilter.values[index].label,
-                    selected:
-                        _session.displayFilter ==
-                        InventoryDisplayFilter.values[index],
-                    onSelected: (_) {
-                      setState(() {
-                        _session.displayFilter =
-                            InventoryDisplayFilter.values[index];
-                        _session.selectedSmartGroup = 'All materials';
-                        _session.selectedItem = null;
-                      });
-                    },
-                  ),
-                ],
-              ],
-            ),
-          ),
-          const SizedBox(height: 8),
-          SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            child: Row(
-              children: <Widget>[
-                AppChoiceChip(
-                  key: InventoryActionKeys.smartGroup('All materials'),
-                  label: 'All materials',
-                  selected: _same(_session.selectedSmartGroup, 'All materials'),
-                  onSelected: (_) => setState(
-                    () => _session.selectedSmartGroup = 'All materials',
+          Wrap(
+            spacing: 7,
+            runSpacing: 7,
+            children: <Widget>[
+              for (final filter in InventoryDisplayFilter.values)
+                SizedBox(
+                  width: _displayFilterWidth(context, filter),
+                  child: AppChoiceChip(
+                    key: InventoryActionKeys.filter(filter.name),
+                    label: filter.label,
+                    selected: _session.displayFilters.contains(filter),
+                    onSelected: (_) => _toggleDisplayFilter(filter),
                   ),
                 ),
-                for (final family in families) ...<Widget>[
-                  const SizedBox(width: 7),
-                  AppChoiceChip(
-                    key: InventoryActionKeys.smartGroup(family),
-                    label: '$family (${groupCounts[family]})',
-                    selected: _same(_session.selectedSmartGroup, family),
-                    onSelected: (_) =>
-                        setState(() => _session.selectedSmartGroup = family),
-                  ),
-                ],
-              ],
-            ),
+            ],
           ),
-          if (_session.groupToolsOpen) ...<Widget>[
-            const SizedBox(height: 10),
-            _buildEditorSettings(context, state: state, projection: projection),
-          ],
           if (_status != null || _session.undo != null) ...<Widget>[
             const SizedBox(height: 8),
             _buildStatus(context),
@@ -1121,70 +869,197 @@ class _InventoryViewState extends State<InventoryView> {
           Expanded(
             child: rows.isEmpty
                 ? _InventoryEmptyState(
-                    category: _session.selectedSmartGroup,
+                    category: _activeFilterLabel(),
                     search: _session.search,
                   )
-                : FocusTraversalGroup(
-                    policy: OrderedTraversalPolicy(),
-                    child: ListView.separated(
-                      key: InventoryActionKeys.i14,
-                      controller: _session.itemScrollController,
-                      keyboardDismissBehavior:
-                          ScrollViewKeyboardDismissBehavior.onDrag,
-                      itemCount: rows.length,
-                      separatorBuilder: (_, _) => const SizedBox(height: 6),
-                      itemBuilder: (context, index) {
-                        final item = rows[index];
-                        return InventoryStorageItemRow(
-                          key: ValueKey<String>(
-                            'inventory-storage-row:${selectedLocation.id}:${item.name}',
-                          ),
-                          controller: widget.controller,
-                          item: item,
-                          locationName: selectedLocation.name,
-                          locationAmount: storage.quantityAt(
-                            selectedLocation.id,
-                            item.name,
-                          ),
-                          totalAmount: storage.totalFor(item.name),
-                          index: index,
-                          selected: _same(
-                            _session.selectedItem ?? '',
-                            item.name,
-                          ),
-                          onSelected: _selectRow,
-                          onMoveFocus: (delta) => _moveRowFocus(
-                            rows: rows,
-                            fromIndex: index,
-                            delta: delta,
-                            itemExtent: 72,
-                          ),
-                          onRegisterFocus: _registerRowFocus,
-                          onUnregisterFocus: _unregisterRowFocus,
-                          onCopy: _copyName,
-                          onCommitAmount: (text) {
-                            _invalidateUndo();
-                            return widget.controller
-                                .setInventoryStorageQuantity(
-                                  locationId: selectedLocation.id,
-                                  itemName: item.name,
-                                  text: text,
-                                );
-                          },
-                          onEdit: _session.groupToolsOpen
-                              ? () =>
-                                    unawaited(_showItemEditor(item, projection))
-                              : null,
-                        );
-                      },
-                    ),
-                  ),
+                : _buildGroupedInventoryItems(context, rows: rows),
           ),
         ],
       ),
     );
   }
 
+  double _displayFilterWidth(
+    BuildContext context,
+    InventoryDisplayFilter filter,
+  ) {
+    final textScale = (MediaQuery.textScalerOf(context).scale(13) / 13).clamp(
+      1.0,
+      2.0,
+    );
+    final baseWidth = switch (filter) {
+      InventoryDisplayFilter.owned || InventoryDisplayFilter.all => 94.0,
+      InventoryDisplayFilter.alchemyPlan ||
+      InventoryDisplayFilter.cookingPlan => 128.0,
+      InventoryDisplayFilter.processingPlan => 142.0,
+    };
+    return baseWidth * textScale;
+  }
+
+  String _activeFilterLabel() {
+    final filters = _session.displayFilters;
+    if (filters.contains(InventoryDisplayFilter.owned)) return 'Owned items';
+    if (filters.contains(InventoryDisplayFilter.all)) return 'Inventory items';
+    final plans = <String>[
+      if (filters.contains(InventoryDisplayFilter.alchemyPlan)) 'Alchemy plan',
+      if (filters.contains(InventoryDisplayFilter.cookingPlan)) 'Cooking plan',
+      if (filters.contains(InventoryDisplayFilter.processingPlan))
+        'Processing plan',
+    ];
+    return plans.join(' and ');
+  }
+
+  Widget _buildGroupedInventoryItems(
+    BuildContext context, {
+    required List<InventoryItemRecord> rows,
+  }) {
+    final sections = _inventorySections(rows);
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final largeText = MediaQuery.textScalerOf(context).scale(14) > 18;
+        final columnCount = largeText
+            ? 1
+            : constraints.maxWidth >= 1160
+            ? 3
+            : constraints.maxWidth >= 720
+            ? 2
+            : 1;
+        const columnSpacing = 8.0;
+
+        Widget buildRow(InventoryItemRecord item, int index) =>
+            InventoryStorageItemRow(
+              key: ValueKey<String>('inventory-row:${item.name}'),
+              controller: widget.controller,
+              item: item,
+              amount: item.owned,
+              index: index,
+              selected: _same(_session.selectedItem ?? '', item.name),
+              onSelected: _selectRow,
+              onMoveFocus: (delta) => _moveRowFocus(
+                rows: rows,
+                fromIndex: index,
+                delta: delta * columnCount,
+              ),
+              onRegisterFocus: _registerRowFocus,
+              onUnregisterFocus: _unregisterRowFocus,
+              onCopy: _copyName,
+              onCommitAmount: (text) {
+                _invalidateUndo();
+                return widget.controller.commitInventory(item.name, text);
+              },
+              onRemove: item.owned <= 0
+                  ? null
+                  : () => unawaited(_removeInventoryItem(itemName: item.name)),
+            );
+
+        var rowIndex = 0;
+        final slivers = <Widget>[];
+        for (final section in sections) {
+          slivers.add(
+            SliverToBoxAdapter(
+              child: _InventorySectionHeading(
+                key: ValueKey<String>('inventory-section:${section.name}'),
+                title: section.name,
+                itemCount: section.itemCount,
+              ),
+            ),
+          );
+          for (final subsection in section.subsections) {
+            slivers.add(
+              SliverToBoxAdapter(
+                child: _InventorySubsectionHeading(
+                  key: ValueKey<String>(
+                    'inventory-subsection:${section.name}:${subsection.name}',
+                  ),
+                  title: subsection.name,
+                  itemCount: subsection.items.length,
+                ),
+              ),
+            );
+            final firstIndex = rowIndex;
+            rowIndex += subsection.items.length;
+            final gridRowCount =
+                (subsection.items.length + columnCount - 1) ~/ columnCount;
+            slivers.add(
+              SliverPadding(
+                padding: const EdgeInsets.only(bottom: 10),
+                sliver: SliverList(
+                  delegate: SliverChildBuilderDelegate((context, gridRowIndex) {
+                    final rowStart = gridRowIndex * columnCount;
+                    return Padding(
+                      padding: EdgeInsets.only(
+                        bottom: gridRowIndex == gridRowCount - 1 ? 0 : 6,
+                      ),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: <Widget>[
+                          for (
+                            var columnIndex = 0;
+                            columnIndex < columnCount;
+                            columnIndex++
+                          ) ...<Widget>[
+                            if (columnIndex > 0)
+                              const SizedBox(width: columnSpacing),
+                            Expanded(
+                              child:
+                                  rowStart + columnIndex <
+                                      subsection.items.length
+                                  ? buildRow(
+                                      subsection.items[rowStart + columnIndex],
+                                      firstIndex + rowStart + columnIndex,
+                                    )
+                                  : const SizedBox.shrink(),
+                            ),
+                          ],
+                        ],
+                      ),
+                    );
+                  }, childCount: gridRowCount),
+                ),
+              ),
+            );
+          }
+        }
+        if (widget
+            .controller
+            .owner
+            .documentSnapshot
+            .alchemy
+            .inventory
+            .isNotEmpty) {
+          slivers.add(
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.only(top: 4, bottom: 2),
+                child: Align(
+                  alignment: Alignment.centerRight,
+                  child: AppButton.label(
+                    'Empty inventory',
+                    key: InventoryActionKeys.emptyInventory,
+                    role: AppButtonRole.danger,
+                    onPressed: () => unawaited(_emptyInventory()),
+                  ),
+                ),
+              ),
+            ),
+          );
+        }
+        return FocusTraversalGroup(
+          policy: OrderedTraversalPolicy(),
+          child: CustomScrollView(
+            key: InventoryActionKeys.i14,
+            controller: _session.itemScrollController,
+            keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+            slivers: slivers,
+          ),
+        );
+      },
+    );
+  }
+
+  // Retained for the dormant advanced editor flow; it is intentionally absent
+  // from the primary Inventory page.
+  // ignore: unused_element
   Widget _buildEditorSettings(
     BuildContext context, {
     required ModeState state,
@@ -1196,43 +1071,163 @@ class _InventoryViewState extends State<InventoryView> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: <Widget>[
-        Row(
-          children: <Widget>[
-            SizedBox(
-              width: 260,
-              child: AppSelect<String>(
-                value: _session.selectedCategory,
-                items: categories,
-                labelFor: (value) => value,
-                semanticLabel: 'Editor group',
-                onChanged: (value) {
-                  if (value != null) _selectCategory(value);
-                },
-              ),
+        Align(
+          alignment: Alignment.centerLeft,
+          child: SizedBox(
+            width: 260,
+            child: AppSelect<String>(
+              value: _session.selectedCategory,
+              items: categories,
+              labelFor: (value) => value,
+              semanticLabel: 'Editor group',
+              onChanged: (value) {
+                if (value != null) _selectCategory(value);
+              },
             ),
-            const Spacer(),
-            AppButton(
-              key: InventoryActionKeys.i03,
-              role: AppButtonRole.danger,
-              minimumSize: const Size(0, 38),
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-              semanticLabel: 'I03 Clear all inventory amounts',
-              onPressed: state.inventory.isEmpty ? null : _clearInventory,
-              child: const Row(
-                mainAxisSize: MainAxisSize.min,
-                children: <Widget>[
-                  AppVectorGlyph('reset', size: 16),
-                  SizedBox(width: 7),
-                  Text('Clear all amounts'),
-                ],
-              ),
-            ),
-          ],
+          ),
         ),
         const SizedBox(height: 8),
         _buildGroupTools(context, state: state, projection: projection),
       ],
     );
+  }
+
+  Future<void> _addItemManually({
+    required InventoryProjection projection,
+  }) async {
+    final availableItems = projection.items
+        .where((item) => !item.savedOnly && !item.equipmentLike)
+        .toList(growable: false);
+    if (availableItems.isEmpty) {
+      _setStatus('There are no planner items available to add.', error: true);
+      return;
+    }
+    final result = await showDialog<_ManualInventoryItemResult>(
+      context: context,
+      builder: (context) => _ManualInventoryItemDialog(
+        controller: widget.controller,
+        items: availableItems,
+        amountFor: (name) {
+          for (final item in projection.items) {
+            if (_same(item.name, name)) return item.owned;
+          }
+          return 0;
+        },
+      ),
+    );
+    if (!mounted || result == null) return;
+
+    final modeController = widget.controller;
+    final before = modeController.owner.documentSnapshot;
+    try {
+      await modeController.owner.updateDocumentDurably(
+        (document) => setSharedInventoryAmounts(document, <String, double>{
+          result.itemName: result.amount,
+        }),
+      );
+    } on Object catch (error) {
+      _setStatus(
+        '${result.itemName} was not saved because the change could not be written. $error',
+        error: true,
+      );
+      return;
+    }
+    if (!mounted || !identical(modeController, widget.controller)) return;
+    _session.selectedItem = result.itemName;
+    final message = '${result.itemName} saved in Inventory.';
+    _offerInventoryUndo(
+      operation: 'add-inventory-item',
+      message: message,
+      before: before,
+      after: modeController.owner.documentSnapshot,
+    );
+  }
+
+  Future<void> _removeInventoryItem({required String itemName}) async {
+    final modeController = widget.controller;
+    final before = modeController.owner.documentSnapshot;
+    double? current;
+    for (final entry in before.alchemy.inventory.entries) {
+      if (_same(entry.key, itemName)) {
+        current = entry.value;
+        break;
+      }
+    }
+    if (current == null || current <= 0) return;
+    try {
+      await modeController.owner.updateDocumentDurably(
+        (document) =>
+            setSharedInventoryAmounts(document, <String, double>{itemName: 0}),
+      );
+    } on Object catch (error) {
+      _setStatus(
+        '$itemName was not removed because the change could not be written. $error',
+        error: true,
+      );
+      return;
+    }
+    if (!mounted || !identical(modeController, widget.controller)) return;
+    final message = '$itemName removed from Inventory.';
+    _offerInventoryUndo(
+      operation: 'remove-inventory-item',
+      message: message,
+      before: before,
+      after: modeController.owner.documentSnapshot,
+    );
+  }
+
+  Future<void> _emptyInventory() async {
+    final modeController = widget.controller;
+    final before = modeController.owner.documentSnapshot;
+    final itemCount = before.alchemy.inventory.length;
+    if (itemCount == 0) return;
+    final approved = await showDialog<bool>(
+      context: context,
+      builder: (context) => _EmptyInventoryDialog(itemCount: itemCount),
+    );
+    if (!mounted || approved != true) return;
+
+    try {
+      await modeController.owner.updateDocumentDurably(clearSharedInventory);
+    } on Object catch (error) {
+      _setStatus(
+        'Inventory was not emptied because the change could not be written. $error',
+        error: true,
+      );
+      return;
+    }
+    if (!mounted || !identical(modeController, widget.controller)) return;
+    final message =
+        '$itemCount ${itemCount == 1 ? 'item' : 'items'} removed from Inventory.';
+    _offerInventoryUndo(
+      operation: 'empty-inventory',
+      message: message,
+      before: before,
+      after: modeController.owner.documentSnapshot,
+    );
+  }
+
+  void _offerInventoryUndo({
+    required String operation,
+    required String message,
+    required PlannerState before,
+    required PlannerState after,
+  }) {
+    _session.undo = InventoryUndoSnapshot(
+      operation: operation,
+      message: message,
+      before: before,
+      after: after,
+      selectedCategory: _session.selectedCategory,
+    );
+    widget.externalActions.offerUndo(
+      InventoryUndoOffer(
+        operation: operation,
+        message: message,
+        undo: _undoInline,
+      ),
+    );
+    _setStatus(message);
   }
 
   Future<void> _runScreenshotImport(AcquireInventoryScreenshot acquire) async {
@@ -1246,6 +1241,9 @@ class _InventoryViewState extends State<InventoryView> {
     try {
       analysis = await acquire();
     } on Object catch (error) {
+      if (mounted && _screenshotBusy) {
+        setState(() => _screenshotBusy = false);
+      }
       _setStatus('The screenshot could not be read. $error', error: true);
       return;
     }
@@ -1256,30 +1254,32 @@ class _InventoryViewState extends State<InventoryView> {
         context,
         controller: widget.controller,
         analysis: analysis,
+        pasteAnother: widget.externalActions.pasteScreenshot,
+        chooseAnother: widget.externalActions.chooseScreenshot,
       );
       if (!mounted || review == null) return;
       final modeController = widget.controller;
-      final before = modeController.state.value;
+      final before = modeController.owner.documentSnapshot;
       await modeController.owner.updateDocumentDurably((document) {
-        final modeState = document.forMode(modeController.mode);
-        final current = InventoryStorageState.fromModeState(modeState);
-        final ensured = current.ensureLocation(review.locationName);
-        final next = ensured.state.applyReviewedScreenshot(
-          locationId: ensured.location.id,
-          quantities: review.quantities,
-          replaceMatchingUnassigned: !current.hadPersistedLedger,
-        );
-        return _replaceMode(
-          document,
-          modeController.mode,
-          next.applyTo(modeState),
+        if (review.saveMode == InventoryScreenshotSaveMode.add) {
+          return setSharedInventoryAmounts(
+            document,
+            review.quantities,
+            add: true,
+          );
+        }
+        return setSharedInventoryAmounts(
+          clearSharedInventory(document),
+          review.quantities,
         );
       });
       if (!mounted || !identical(modeController, widget.controller)) return;
-      final after = modeController.state.value;
+      final after = modeController.owner.documentSnapshot;
       final count = review.quantities.length;
-      final message =
-          '$count ${count == 1 ? 'item' : 'items'} saved to ${review.locationName.trim()}.';
+      final action = review.saveMode == InventoryScreenshotSaveMode.add
+          ? 'added to Inventory'
+          : 'saved in Inventory';
+      final message = '$count ${count == 1 ? 'item' : 'items'} $action.';
       _session.undo = InventoryUndoSnapshot(
         operation: 'inventory-screenshot-import',
         message: message,
@@ -1307,46 +1307,9 @@ class _InventoryViewState extends State<InventoryView> {
     }
   }
 
-  Future<void> _addStorage() async {
-    try {
-      final name = await showDialog<String>(
-        context: context,
-        builder: (context) => const _InventoryNameDialog(
-          title: 'Add storage',
-          semanticLabel: 'Add storage location',
-          fieldSemanticLabel: 'Storage or character name',
-          hintText: 'Example: Calpheon City Storage',
-          primaryLabel: 'Add',
-        ),
-      );
-      if (!mounted || name == null || name.trim().isEmpty) return;
-      widget.controller.ensureInventoryStorageLocation(name);
-      _setStatus('${name.trim()} selected.');
-    } on Object catch (error) {
-      _setStatus('The storage was not added. $error', error: true);
-    }
-  }
-
-  Future<void> _renameStorage(InventoryStorageLocation location) async {
-    try {
-      final name = await showDialog<String>(
-        context: context,
-        builder: (context) => _InventoryNameDialog(
-          title: 'Rename storage',
-          semanticLabel: 'Rename storage location',
-          fieldSemanticLabel: 'Storage name',
-          primaryLabel: 'Save',
-          initialValue: location.name,
-        ),
-      );
-      if (!mounted || name == null || name.trim().isEmpty) return;
-      widget.controller.renameInventoryStorageLocation(location.id, name);
-      _setStatus('Storage renamed to ${name.trim()}.');
-    } on Object catch (error) {
-      _setStatus('The storage was not renamed. $error', error: true);
-    }
-  }
-
+  // Retained for the dormant advanced editor flow; the compact Inventory page
+  // uses direct amount editing instead.
+  // ignore: unused_element
   Future<void> _showItemEditor(
     InventoryItemRecord item,
     InventoryProjection projection,
@@ -1461,7 +1424,7 @@ class _InventoryViewState extends State<InventoryView> {
                     ? const Size(91, 38)
                     : const Size(0, 0),
                 semanticLabel: 'I03 Clear Inventory',
-                onPressed: _clearInventory,
+                onPressed: () => unawaited(_emptyInventory()),
                 padding: const EdgeInsets.symmetric(
                   horizontal: 10,
                   vertical: 8,
@@ -1746,7 +1709,6 @@ class _InventoryViewState extends State<InventoryView> {
                                   rows: rows,
                                   fromIndex: index,
                                   delta: delta,
-                                  itemExtent: itemExtent,
                                 ),
                                 onCopy: _copyName,
                                 onCommitOwned: (text) =>
@@ -2009,6 +1971,120 @@ class _InventoryViewState extends State<InventoryView> {
   }
 }
 
+List<_InventorySection> _inventorySections(List<InventoryItemRecord> items) {
+  final grouped = <String, Map<String, List<InventoryItemRecord>>>{};
+  for (final item in items) {
+    grouped
+        .putIfAbsent(item.section, () => <String, List<InventoryItemRecord>>{})
+        .putIfAbsent(item.subsection, () => <InventoryItemRecord>[])
+        .add(item);
+  }
+  return <_InventorySection>[
+    for (final section in grouped.entries)
+      _InventorySection(section.key, <_InventorySubsection>[
+        for (final subsection in section.value.entries)
+          _InventorySubsection(subsection.key, subsection.value),
+      ]),
+  ];
+}
+
+final class _InventorySection {
+  const _InventorySection(this.name, this.subsections);
+
+  final String name;
+  final List<_InventorySubsection> subsections;
+
+  int get itemCount => subsections.fold<int>(
+    0,
+    (total, subsection) => total + subsection.items.length,
+  );
+}
+
+final class _InventorySubsection {
+  const _InventorySubsection(this.name, this.items);
+
+  final String name;
+  final List<InventoryItemRecord> items;
+}
+
+class _InventorySectionHeading extends StatelessWidget {
+  const _InventorySectionHeading({
+    required this.title,
+    required this.itemCount,
+    super.key,
+  });
+
+  final String title;
+  final int itemCount;
+
+  @override
+  Widget build(BuildContext context) {
+    final spec = context.visualTheme;
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(2, 10, 2, 7),
+      child: Row(
+        children: <Widget>[
+          Text(
+            title,
+            style: spec.typography.section.copyWith(
+              fontSize: 20,
+              fontWeight: FontWeight.w800,
+            ),
+          ),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Divider(color: spec.palette.trim.withValues(alpha: 0.66)),
+          ),
+          const SizedBox(width: 9),
+          Text(
+            '$itemCount',
+            style: spec.typography.meta.copyWith(
+              fontSize: 12,
+              fontWeight: FontWeight.w700,
+              fontStyle: FontStyle.normal,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _InventorySubsectionHeading extends StatelessWidget {
+  const _InventorySubsectionHeading({
+    required this.title,
+    required this.itemCount,
+    super.key,
+  });
+
+  final String title;
+  final int itemCount;
+
+  @override
+  Widget build(BuildContext context) {
+    final spec = context.visualTheme;
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(3, 3, 3, 6),
+      child: Row(
+        children: <Widget>[
+          Text(
+            title,
+            style: spec.typography.body.copyWith(
+              fontSize: 15,
+              fontWeight: FontWeight.w800,
+            ),
+          ),
+          const SizedBox(width: 7),
+          Text(
+            '$itemCount ${itemCount == 1 ? 'item' : 'items'}',
+            style: spec.typography.meta.copyWith(fontStyle: FontStyle.normal),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
 class _InventoryColumnHeader extends StatelessWidget {
   const _InventoryColumnHeader({
     required this.fixedStandardColumns,
@@ -2062,14 +2138,19 @@ class _InventoryEmptyState extends StatelessWidget {
   final String search;
 
   @override
-  Widget build(BuildContext context) => Semantics(
-    container: true,
-    liveRegion: true,
-    label: search.isEmpty
-        ? '$category currently has no visible items.'
-        : 'No $category items match "$search".',
-    child: const SizedBox.expand(),
-  );
+  Widget build(BuildContext context) {
+    final scope = category.toLowerCase().endsWith('items')
+        ? category
+        : '$category items';
+    return Semantics(
+      container: true,
+      liveRegion: true,
+      label: search.isEmpty
+          ? '$scope are currently empty.'
+          : 'No $scope match "$search".',
+      child: const SizedBox.expand(),
+    );
+  }
 }
 
 PlannerState _replaceMode(
@@ -2127,74 +2208,174 @@ bool _same(String left, String right) =>
 
 String _fold(String value) => value.trim().toLowerCase();
 
+// Retained by the dormant category tools kept outside the primary page.
+// ignore: unused_element
 int _compareNames(String left, String right) {
   final folded = _fold(left).compareTo(_fold(right));
   return folded != 0 ? folded : left.compareTo(right);
 }
 
-final class _InventoryNameDialog extends StatefulWidget {
-  const _InventoryNameDialog({
-    required this.title,
-    required this.semanticLabel,
-    required this.fieldSemanticLabel,
-    required this.primaryLabel,
-    this.hintText,
-    this.initialValue = '',
+final class _ManualInventoryItemDialog extends StatefulWidget {
+  const _ManualInventoryItemDialog({
+    required this.controller,
+    required this.items,
+    required this.amountFor,
   });
 
-  final String title;
-  final String semanticLabel;
-  final String fieldSemanticLabel;
-  final String primaryLabel;
-  final String? hintText;
-  final String initialValue;
+  final ModeFeatureController controller;
+  final List<InventoryItemRecord> items;
+  final double Function(String itemName) amountFor;
 
   @override
-  State<_InventoryNameDialog> createState() => _InventoryNameDialogState();
+  State<_ManualInventoryItemDialog> createState() =>
+      _ManualInventoryItemDialogState();
 }
 
-final class _InventoryNameDialogState extends State<_InventoryNameDialog> {
-  late final TextEditingController _controller = TextEditingController(
-    text: widget.initialValue,
-  );
+final class _ManualInventoryItemDialogState
+    extends State<_ManualInventoryItemDialog> {
+  late final TextEditingController _itemQuery = TextEditingController();
+  late final TextEditingController _amount = TextEditingController(text: '1');
+  InventoryItemRecord? _selected;
+  String? _error;
 
   @override
   void dispose() {
-    _controller.dispose();
+    _itemQuery.dispose();
+    _amount.dispose();
     super.dispose();
   }
 
-  void _submit([String? value]) =>
-      Navigator.of(context).pop((value ?? _controller.text).trim());
+  void _select(InventoryItemRecord item) {
+    final saved = widget.amountFor(item.name);
+    setState(() {
+      _selected = item;
+      _itemQuery.value = TextEditingValue(
+        text: item.name,
+        selection: TextSelection.collapsed(offset: item.name.length),
+      );
+      _amount.value = TextEditingValue(
+        text: saved > 0 ? formatGroupedEditableQuantity(saved) : '1',
+        selection: TextSelection.collapsed(
+          offset: saved > 0 ? formatGroupedEditableQuantity(saved).length : 1,
+        ),
+      );
+      _error = null;
+    });
+  }
+
+  void _submit([String? _]) {
+    final selected = _selected;
+    final amount = parsePlannerNumber(_amount.text);
+    if (selected == null) {
+      setState(() => _error = 'Choose an item');
+      return;
+    }
+    if (amount == null || amount <= 0) {
+      setState(() => _error = 'Enter an amount above 0');
+      return;
+    }
+    Navigator.of(
+      context,
+    ).pop(_ManualInventoryItemResult(itemName: selected.name, amount: amount));
+  }
 
   @override
   Widget build(BuildContext context) {
-    final maximumHeight = (MediaQuery.sizeOf(context).height - 40).clamp(
-      240.0,
-      720.0,
+    final maxHeight = (MediaQuery.sizeOf(context).height - 40).clamp(
+      320.0,
+      700.0,
     );
     return Dialog(
       backgroundColor: Colors.transparent,
       child: ConstrainedBox(
-        constraints: BoxConstraints(maxWidth: 440, maxHeight: maximumHeight),
+        key: const ValueKey<String>('inventory-manual-dialog-frame'),
+        constraints: BoxConstraints(maxWidth: 500, maxHeight: maxHeight),
         child: AppSurface(
           role: AppSurfaceRole.modal,
-          semanticLabel: widget.semanticLabel,
+          semanticLabel: 'Add an inventory item',
           padding: const EdgeInsets.all(16),
           child: SingleChildScrollView(
             child: Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: <Widget>[
-                SectionHeader(title: widget.title),
+                const SectionHeader(title: 'Add item'),
                 const SizedBox(height: 12),
-                AppTextField(
-                  controller: _controller,
-                  semanticLabel: widget.fieldSemanticLabel,
-                  hintText: widget.hintText,
-                  onSubmitted: _submit,
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: <Widget>[
+                    if (_selected case final selected?) ...<Widget>[
+                      ModeItemIcon(
+                        controller: widget.controller,
+                        name: selected.name,
+                        size: 44,
+                        searchAcrossModes: true,
+                      ),
+                      const SizedBox(width: 10),
+                    ],
+                    Expanded(
+                      child: AppSearchSelect<InventoryItemRecord>(
+                        key: const ValueKey<String>(
+                          'inventory-manual-item-select',
+                        ),
+                        controller: _itemQuery,
+                        value: _selected,
+                        items: widget.items,
+                        labelFor: (item) => item.name,
+                        hintText: 'Search items',
+                        semanticLabel: 'Item to add',
+                        anchorMaxLines: 2,
+                        onSelected: _select,
+                        onQueryChanged: (_) {
+                          if (_selected != null &&
+                              !_same(_selected!.name, _itemQuery.text)) {
+                            setState(() => _selected = null);
+                          }
+                        },
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    SizedBox(
+                      width: 132,
+                      child: AppTextField(
+                        key: const ValueKey<String>(
+                          'inventory-manual-item-amount',
+                        ),
+                        controller: _amount,
+                        semanticLabel: 'Amount to save',
+                        hintText: 'Amount',
+                        keyboardType: const TextInputType.numberWithOptions(
+                          decimal: true,
+                        ),
+                        inputFormatters: const <TextInputFormatter>[
+                          InventoryAmountInputFormatter(),
+                        ],
+                        textAlign: TextAlign.right,
+                        onSubmitted: _submit,
+                        suffixIcon: _error == null
+                            ? null
+                            : Tooltip(
+                                message: _error!,
+                                child: const Icon(
+                                  Icons.error_outline,
+                                  size: 18,
+                                ),
+                              ),
+                      ),
+                    ),
+                  ],
                 ),
-                const SizedBox(height: 14),
+                if (_error != null) ...<Widget>[
+                  const SizedBox(height: 6),
+                  Text(
+                    _error!,
+                    style: context.visualTheme.typography.meta.copyWith(
+                      color: context.visualTheme.palette.danger,
+                      fontStyle: FontStyle.normal,
+                    ),
+                  ),
+                ],
+                const SizedBox(height: 16),
                 Wrap(
                   alignment: WrapAlignment.end,
                   spacing: 8,
@@ -2205,7 +2386,7 @@ final class _InventoryNameDialogState extends State<_InventoryNameDialog> {
                       onPressed: () => Navigator.of(context).pop(),
                     ),
                     AppButton.label(
-                      widget.primaryLabel,
+                      'Save item',
                       role: AppButtonRole.primary,
                       onPressed: _submit,
                     ),
@@ -2218,6 +2399,65 @@ final class _InventoryNameDialogState extends State<_InventoryNameDialog> {
       ),
     );
   }
+}
+
+final class _EmptyInventoryDialog extends StatelessWidget {
+  const _EmptyInventoryDialog({required this.itemCount});
+
+  final int itemCount;
+
+  @override
+  Widget build(BuildContext context) => Dialog(
+    backgroundColor: Colors.transparent,
+    child: ConstrainedBox(
+      constraints: const BoxConstraints(maxWidth: 460),
+      child: AppSurface(
+        role: AppSurfaceRole.modal,
+        semanticLabel: 'Confirm emptying Inventory',
+        padding: const EdgeInsets.all(18),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: <Widget>[
+            const SectionHeader(title: 'Empty inventory?'),
+            const SizedBox(height: 12),
+            Text(
+              'Remove all $itemCount saved ${itemCount == 1 ? 'item' : 'items'}?',
+              style: context.visualTheme.typography.body.copyWith(fontSize: 15),
+            ),
+            const SizedBox(height: 16),
+            Wrap(
+              alignment: WrapAlignment.end,
+              spacing: 8,
+              runSpacing: 8,
+              children: <Widget>[
+                AppButton.label(
+                  'Cancel',
+                  onPressed: () => Navigator.of(context).pop(false),
+                ),
+                AppButton.label(
+                  'Empty inventory',
+                  key: InventoryActionKeys.confirmEmptyInventory,
+                  role: AppButtonRole.danger,
+                  onPressed: () => Navigator.of(context).pop(true),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    ),
+  );
+}
+
+final class _ManualInventoryItemResult {
+  const _ManualInventoryItemResult({
+    required this.itemName,
+    required this.amount,
+  });
+
+  final String itemName;
+  final double amount;
 }
 
 final class _InventoryItemEditorDialog extends StatefulWidget {

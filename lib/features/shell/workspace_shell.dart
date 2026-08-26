@@ -154,9 +154,11 @@ class _WorkspaceSidebar extends StatelessWidget {
     final navigationExtent =
         visibleDestinations.length * navigationHeight +
         math.max(0, visibleDestinations.length - 1) * navigationGap;
-    // The authored sidebar botanicals cap at 290 px, with their existing
-    // seven-pixel top and two-pixel bottom breathing room.
-    final preferredOrnamentExtent = ledger || sakura ? 299.0 : 0.0;
+    // Balance every theme against the same lower instrument bay. Ledger and
+    // Sakura fill that space with authored botanicals; Atelier leaves it
+    // visually open. Using one target keeps the navigation at the same height
+    // instead of centring Atelier much lower in the entire sidebar.
+    const lowerInstrumentBayExtent = 299.0;
 
     return Semantics(
       container: true,
@@ -248,14 +250,20 @@ class _WorkspaceSidebar extends StatelessWidget {
                       0.0,
                       middleHeight - navigationExtent,
                     );
-                    final balancedGap =
+                    final targetCenter = math.max(
+                      170.0,
+                      (middleHeight - lowerInstrumentBayExtent) / 2,
+                    );
+                    final authoredThemeGap =
                         (middleHeight -
-                            preferredOrnamentExtent -
+                            lowerInstrumentBayExtent -
                             navigationExtent) /
                         2;
                     final leadingGap = math.min(
                       maximumGap,
-                      math.max(brandNavigationGap, balancedGap),
+                      ledger || sakura
+                          ? math.max(brandNavigationGap, authoredThemeGap)
+                          : math.max(12.0, targetCenter - navigationExtent / 2),
                     );
                     return Column(
                       crossAxisAlignment: CrossAxisAlignment.stretch,

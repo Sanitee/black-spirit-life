@@ -1,5 +1,6 @@
 import '../../domain/models/catalog_models.dart';
 import '../../domain/models/craft_mode.dart';
+import '../../domain/planner/ingredient_quality.dart';
 import '../../domain/planner/planner_engine.dart';
 import '../../domain/planner/planner_models.dart' as planner;
 import '../../domain/state/planner_state.dart' as stored;
@@ -81,10 +82,9 @@ final class PlannerAssembly {
     // block before planning. The Flutter parser deliberately keeps metadata on
     // ModeCatalog rather than flattening it into supportingData, so apply that
     // same normalization here while the immutable recipe snapshot is built.
-    _applyBloodGroupSubstitutes(
-      items,
-      (sharedMetadata ?? catalog.metadata)['bloodGroups'],
-    );
+    final metadata = sharedMetadata ?? catalog.metadata;
+    _applyBloodGroupSubstitutes(items, metadata['bloodGroups']);
+    _applySubstituteWorthRules(items, metadata['substituteWorthGroups']);
 
     final referencedNames = <String>{};
     for (final recipe in items.values) {
@@ -318,24 +318,45 @@ void _applyBloodGroupSubstitutes(
 
   (List<Ingredient>, bool) hydrate(Iterable<Ingredient> source) {
     var changed = false;
-    final ingredients = <Ingredient>[
-      for (final ingredient in source)
-        if (ingredient.options.length > 1 ||
-            !bloodToGroup.containsKey(_fold(ingredient.name)))
-          ingredient
-        else
-          () {
-            changed = true;
-            final groupName = bloodToGroup[_fold(ingredient.name)]!;
-            return Ingredient(
-              name: ingredient.name,
-              quantity: ingredient.quantity,
-              options: groupOptions[groupName]!,
-              substituteGroup: groupName,
-              substituteRatios: ingredient.substituteRatios,
-            );
-          }(),
-    ];
+    final ingredients = <Ingredient>[];
+    for (final ingredient in source) {
+      final groupName = bloodToGroup[_fold(ingredient.name)];
+      if (groupName == null) {
+        ingredients.add(ingredient);
+        continue;
+      }
+
+      final seen = <String>{};
+      final options = <String>[
+        for (final option in <String>[
+          ...groupOptions[groupName]!,
+          ...ingredient.options,
+        ])
+          if (seen.add(_fold(option))) option,
+      ];
+      final substituteGroup = _trimmed(ingredient.substituteGroup) ?? groupName;
+      final sameOptions =
+          options.length == ingredient.options.length &&
+          List.generate(
+            options.length,
+            (index) => index,
+          ).every((index) => options[index] == ingredient.options[index]);
+      if (sameOptions && substituteGroup == ingredient.substituteGroup) {
+        ingredients.add(ingredient);
+        continue;
+      }
+
+      changed = true;
+      ingredients.add(
+        Ingredient(
+          name: ingredient.name,
+          quantity: ingredient.quantity,
+          options: options,
+          substituteGroup: substituteGroup,
+          substituteRatios: ingredient.substituteRatios,
+        ),
+      );
+    }
     return (ingredients, changed);
   }
 
@@ -347,6 +368,175 @@ void _applyBloodGroupSubstitutes(
       for (final variant in recipe.variants)
         () {
           final (variantIngredients, changed) = hydrate(variant.ingredients);
+          variantsChanged = variantsChanged || changed;
+          return RecipeVariant(
+            id: variant.id,
+            label: variant.label,
+            type: variant.type,
+            baseOutput: variant.baseOutput,
+            method: variant.method,
+            ingredients: variantIngredients,
+            outputMinimum: variant.outputMinimum,
+            outputMaximum: variant.outputMaximum,
+            routeId: variant.routeId,
+            batchMultiplier: variant.batchMultiplier,
+          );
+        }(),
+    ];
+    if (!ingredientsChanged && !variantsChanged) continue;
+    recipes[entry.key] = Recipe(
+      name: recipe.name,
+      type: recipe.type,
+      baseOutput: recipe.baseOutput,
+      group: recipe.group,
+      method: recipe.method,
+      ingredients: ingredients,
+      marketId: recipe.marketId,
+      sourceNote: recipe.sourceNote,
+      vendor: recipe.vendor,
+      location: recipe.location,
+      npcPrice: recipe.npcPrice,
+      qualityBase: recipe.qualityBase,
+      qualityGrade: recipe.qualityGrade,
+      outputMinimum: recipe.outputMinimum,
+      outputMaximum: recipe.outputMaximum,
+      role: recipe.role,
+      variants: variants,
+      defaultVariantId: recipe.defaultVariantId,
+    );
+  }
+}
+
+/// Applies the game's Worth rules as exact per-craft replacement quantities.
+///
+/// A Worth value says how many units of the group's basic ingredient one unit
+/// replaces. The original ingredient can itself have Worth greater than one,
+/// so the relative amount is:
+///
+/// `ceil(recipe quantity * original Worth / selected Worth)`
+///
+/// The ceiling belongs here, before the planner multiplies by craft count. If
+/// it were applied after multiplication, ten crafts needing seven Wolf Blood
+/// could incorrectly use 35 Flamingo Blood instead of four per craft (40).
+void _applySubstituteWorthRules(
+  Map<String, Recipe> recipes,
+  Object? groupsValue,
+) {
+  final groups = _map(groupsValue);
+  if (groups.isEmpty) return;
+
+  final worthByItem = <String, Map<String, double>>{};
+  final optionsByItem = <String, List<String>>{};
+  final groupByItem = <String, String>{};
+  for (final groupEntry in groups.entries) {
+    final worths = <String, double>{};
+    final options = <String>[];
+    for (final entry in _map(groupEntry.value).entries) {
+      final worth = _number(entry.value);
+      if (worth == null || worth <= 0 || entry.key.trim().isEmpty) continue;
+      final name = entry.key.trim();
+      worths[_fold(name)] = worth;
+      options.add(name);
+    }
+    if (worths.length <= 1) continue;
+    final family = Map<String, double>.unmodifiable(worths);
+    final familyOptions = List<String>.unmodifiable(options);
+    final groupName = groupEntry.key.trim();
+    for (final foldedName in family.keys) {
+      worthByItem[foldedName] = family;
+      optionsByItem[foldedName] = familyOptions;
+      if (groupName.isNotEmpty) groupByItem[foldedName] = groupName;
+    }
+  }
+  if (worthByItem.isEmpty) return;
+
+  (List<Ingredient>, bool) apply(Iterable<Ingredient> source) {
+    var changed = false;
+    final ingredients = <Ingredient>[];
+    for (final ingredient in source) {
+      final foldedIngredient = _fold(ingredient.name);
+      final family = worthByItem[foldedIngredient];
+      final originalWorth = family?[foldedIngredient];
+      if (family == null || originalWorth == null || ingredient.quantity <= 0) {
+        ingredients.add(ingredient);
+        continue;
+      }
+
+      final seenOptions = <String>{};
+      final options = <String>[
+        for (final option in <String>[
+          ingredient.name,
+          ...?optionsByItem[foldedIngredient],
+          ...ingredient.options,
+        ])
+          if (seenOptions.add(_fold(option))) option,
+      ];
+      final substituteGroup =
+          _trimmed(ingredient.substituteGroup) ?? groupByItem[foldedIngredient];
+      final ratios = Map<String, double>.of(ingredient.substituteRatios);
+      var ingredientChanged =
+          substituteGroup != ingredient.substituteGroup ||
+          options.length != ingredient.options.length ||
+          List.generate(options.length, (index) => index).any(
+            (index) =>
+                index >= ingredient.options.length ||
+                options[index] != ingredient.options[index],
+          );
+      final seen = <String>{};
+      for (final option in options) {
+        if (!seen.add(_fold(option))) continue;
+        final selectedWorth = family[_fold(option)];
+        if (selectedWorth == null) continue;
+
+        double? explicitRatio;
+        for (final entry in ratios.entries) {
+          if (_fold(entry.key) == _fold(option) && entry.value > 0) {
+            explicitRatio = entry.value;
+            break;
+          }
+        }
+        if (explicitRatio != null) continue;
+
+        final requiredPerCraft =
+            (ingredient.quantity * originalWorth / selectedWorth)
+                .ceilToDouble();
+        ratios[option] = requiredPerCraft / ingredient.quantity;
+        ingredientChanged = true;
+      }
+      if (!ingredientChanged) {
+        ingredients.add(ingredient);
+        continue;
+      }
+
+      changed = true;
+      ingredients.add(
+        Ingredient(
+          name: ingredient.name,
+          quantity: ingredient.quantity,
+          options: options,
+          substituteGroup: substituteGroup,
+          substituteRatios: ratios,
+        ),
+      );
+    }
+    return (ingredients, changed);
+  }
+
+  for (final entry in recipes.entries.toList(growable: false)) {
+    final recipe = entry.value;
+    if (recipeHasAuthoritativeQualityVariants(recipe.name)) {
+      // Tenacious Origin has three authoritative, complete recipes: all-normal,
+      // all-high-quality, or all-special herbs. Applying each herb family's
+      // generic Worth substitutions here would invent mixed-quality formulas
+      // that the game does not declare.
+      continue;
+    }
+    final (ingredients, ingredientsChanged) = apply(recipe.ingredients);
+    var variantsChanged = false;
+    final variants = <RecipeVariant>[
+      for (final variant in recipe.variants)
+        () {
+          final (variantIngredients, changed) = apply(variant.ingredients);
           variantsChanged = variantsChanged || changed;
           return RecipeVariant(
             id: variant.id,

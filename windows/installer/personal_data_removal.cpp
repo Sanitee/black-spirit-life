@@ -1370,7 +1370,10 @@ bool ValidateLoadedPlan(const RemovalEnvironment &environment,
       *error = L"The pending personal-data removal record has unsafe paths.";
     return false;
   }
-  const std::array<std::wstring, 3> never_remove = {
+  const std::array<std::wstring, 4> never_remove = {
+      (std::filesystem::path(environment.roaming_app_data) /
+       L"Black Spirit Life Live Beta")
+          .wstring(),
       (std::filesystem::path(environment.roaming_app_data) /
        L"Black Spirit Life Beta")
           .wstring(),
@@ -1863,8 +1866,11 @@ PersonalDataRemovalResult PrepareWithEnvironment(
                    L"The planner profile and application cache overlap. Nothing was "
                    L"prepared.");
   }
-  const std::array<std::wstring, 4> physically_preserved = {
+  const std::array<std::wstring, 5> physically_preserved = {
       plan.install_root,
+      (std::filesystem::path(environment.roaming_app_data) /
+       L"Black Spirit Life Live Beta")
+          .wstring(),
       (std::filesystem::path(environment.roaming_app_data) /
        L"Black Spirit Life Beta")
           .wstring(),

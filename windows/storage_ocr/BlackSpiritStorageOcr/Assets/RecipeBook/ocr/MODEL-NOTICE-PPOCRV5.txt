@@ -1,0 +1,23 @@
+Black Spirit Hub quantity-recognition model
+
+Model: RapidOCR 3.9.2 English PP-OCRv5 mobile recognition ONNX model
+Upstream model index: https://github.com/RapidAI/RapidOCR/blob/v3.9.2/rapidocr/default_models.yaml
+Pinned model source: https://www.modelscope.cn/models/RapidAI/RapidOCR/resolve/v3.9.2/onnx/PP-OCRv5/rec/en_PP-OCRv5_rec_mobile.onnx
+Bundled model file: ppocrv5/en_PP-OCRv5_mobile_rec.onnx
+Bundled model size: 7,872,351 bytes
+Bundled model SHA-256: C3461ADD59BB4323ECBA96A492AB75E06DDA42467C9E3D0C18DB5D1D21924BE8
+
+The model contains its 436-entry recognition character dictionary as ONNX
+metadata, so no external dictionary or inference YAML is required.
+
+RapidOCR 3.9.2 identifies its distribution license as Apache-2.0. PP-OCRv5
+originates from PaddleOCR, which is also provided under Apache License 2.0.
+The complete Apache License 2.0 text is included in LICENSE-PADDLEOCR.txt and
+applies to both of these Apache-licensed components.
+
+The model is executed locally with Microsoft ONNX Runtime 1.29.0. ONNX Runtime
+is provided under the MIT License in LICENSE-ONNXRUNTIME.txt. Its redistributed
+third-party notices are included in THIRD-PARTY-NOTICES-ONNXRUNTIME.txt.
+
+Screenshot pixels are supplied directly to the local model and are not sent to
+RapidAI, PaddlePaddle, Microsoft, or any other network service.

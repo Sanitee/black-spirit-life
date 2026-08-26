@@ -1,13 +1,14 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:bdo_craft_planner_flutter/domain/models/craft_mode.dart';
-import 'package:bdo_craft_planner_flutter/domain/state/inventory_storage.dart';
 import 'package:bdo_craft_planner_flutter/domain/state/planner_state.dart';
 import 'package:bdo_craft_planner_flutter/domain/state/state_copy.dart';
 import 'package:bdo_craft_planner_flutter/features/inventory/inventory.dart';
 import 'package:bdo_craft_planner_flutter/features/shared/mode_item_icon.dart';
 import 'package:bdo_craft_planner_flutter/visual/visual.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -15,20 +16,51 @@ import '../shared/custom_icon_test_support.dart';
 import 'inventory_test_fixture.dart';
 
 void main() {
-  testWidgets('searches real metadata and filters by smart material family', (
+  testWidgets('screenshot analysis shows a clear loading state', (
+    tester,
+  ) async {
+    final pending = Completer<InventoryScreenshotAnalysis?>();
+    final harness = InventoryTestHarness(pasteScreenshot: () => pending.future);
+    await pumpInventory(tester, harness, size: const Size(1500, 940));
+
+    await tester.tap(find.byKey(InventoryActionKeys.pasteScreenshot));
+    await tester.pump();
+
+    expect(find.text('Reading screenshot…'), findsNothing);
+    expect(find.byType(CircularProgressIndicator), findsOneWidget);
+    expect(
+      find.byWidgetPredicate(
+        (widget) =>
+            widget is Semantics &&
+            widget.properties.label == 'Reading screenshot' &&
+            widget.properties.liveRegion == true,
+      ),
+      findsOneWidget,
+    );
+
+    pending.complete(null);
+    await tester.pump();
+    await tester.pump();
+    expect(find.byType(CircularProgressIndicator), findsNothing);
+  });
+
+  testWidgets('searches real metadata inside human material sections', (
     tester,
   ) async {
     final harness = InventoryTestHarness();
     await pumpInventory(tester, harness, size: const Size(1500, 940));
 
+    await tester.enterText(find.byKey(InventoryActionKeys.i01), 'reagent');
+    await tester.pump(const Duration(milliseconds: 200));
+    expect(find.text('Alchemy materials'), findsOneWidget);
     expect(
-      find.byKey(InventoryActionKeys.smartGroup('Alchemy materials')),
+      find.byKey(
+        const ValueKey<String>(
+          'inventory-subsection:Alchemy materials:Reagents & crafting additives',
+        ),
+      ),
       findsOneWidget,
     );
-    await tester.tap(
-      find.byKey(InventoryActionKeys.smartGroup('Alchemy materials')),
-    );
-    await tester.pump();
     expect(
       find.byKey(InventoryActionKeys.row('I14', 'Clear Liquid Reagent')),
       findsOneWidget,
@@ -37,12 +69,10 @@ void main() {
       find.byKey(InventoryActionKeys.row('I14', 'Pure Powder Reagent')),
       findsOneWidget,
     );
-    expect(find.byKey(InventoryActionKeys.row('I14', 'Salt')), findsNothing);
 
-    await tester.tap(
-      find.byKey(InventoryActionKeys.smartGroup('All materials')),
-    );
-    await tester.pump();
+    await tester.enterText(find.byKey(InventoryActionKeys.i01), 'salt');
+    await tester.pump(const Duration(milliseconds: 200));
+    expect(find.byKey(InventoryActionKeys.row('I14', 'Salt')), findsOneWidget);
 
     await tester.enterText(
       find.byKey(InventoryActionKeys.i01),
@@ -55,7 +85,7 @@ void main() {
     await tester.enterText(find.byKey(InventoryActionKeys.i01), 'Calpheon');
     await tester.pump(const Duration(milliseconds: 200));
     expect(
-      find.bySemanticsLabel('No All materials items match "Calpheon".'),
+      find.bySemanticsLabel('No Inventory items match "Calpheon".'),
       findsOneWidget,
     );
 
@@ -66,7 +96,7 @@ void main() {
     expect(find.text('Sunrise Herb'), findsOneWidget);
   });
 
-  testWidgets('Materials hides equipment-like clutter until All items', (
+  testWidgets('planner Inventory excludes equipment-like clutter', (
     tester,
   ) async {
     final base = inventoryDocument(showDeleteTools: false);
@@ -87,381 +117,281 @@ void main() {
     expect(find.text("Crystal of Void - Ah'krad"), findsNothing);
     await tester.tap(find.byKey(InventoryActionKeys.filter('all')));
     await tester.pump();
-    expect(find.text("Crystal of Void - Ah'krad"), findsOneWidget);
+    expect(find.text("Crystal of Void - Ah'krad"), findsNothing);
   });
 
-  testWidgets('Current plan filter follows live target changes', (
+  testWidgets('Alchemy, Cooking, and Processing plans combine independently', (
     tester,
   ) async {
     final harness = InventoryTestHarness();
     await pumpInventory(tester, harness, size: const Size(1500, 940));
 
-    await tester.tap(find.byKey(InventoryActionKeys.filter('currentPlan')));
+    expect(find.text('Owned'), findsOneWidget);
+    expect(find.text('Alchemy plan'), findsOneWidget);
+    expect(find.text('Cooking plan'), findsOneWidget);
+    expect(find.text('Processing plan'), findsOneWidget);
+    expect(find.text('All items'), findsOneWidget);
+    expect(find.byKey(InventoryActionKeys.storageSelector), findsNothing);
+    expect(find.byKey(InventoryActionKeys.addStorage), findsNothing);
+    expect(find.byKey(InventoryActionKeys.renameStorage), findsNothing);
+    final filterRects = <Rect>[
+      for (final name in <String>[
+        'owned',
+        'alchemyPlan',
+        'cookingPlan',
+        'processingPlan',
+        'all',
+      ])
+        tester.getRect(find.byKey(InventoryActionKeys.filter(name))),
+    ];
+    expect(filterRects.map((rect) => rect.top).toSet(), hasLength(1));
+    expect(
+      filterRects.every((rect) => rect.width < 160),
+      isTrue,
+      reason: 'Inventory filters should remain compact at desktop width.',
+    );
+
+    await tester.tap(find.byKey(InventoryActionKeys.filter('alchemyPlan')));
     await tester.pump();
     expect(find.text('Sunrise Herb'), findsOneWidget);
     expect(find.text('Salt'), findsOneWidget);
     expect(find.text('Silver Azalea'), findsNothing);
+    expect(find.text('Wheat'), findsNothing);
 
+    await tester.tap(find.byKey(InventoryActionKeys.filter('cookingPlan')));
+    await tester.pump();
+    expect(find.text('Sunrise Herb'), findsOneWidget);
+    expect(find.text('Wheat'), findsOneWidget);
+    expect(find.text('Wheat Flour'), findsNothing);
+
+    await tester.tap(find.byKey(InventoryActionKeys.filter('processingPlan')));
+    await tester.pump();
+    expect(find.text('Sunrise Herb'), findsOneWidget);
+    expect(find.text('Wheat'), findsOneWidget);
+    expect(find.text('Wheat Flour'), findsOneWidget);
+
+    await tester.tap(find.byKey(InventoryActionKeys.filter('alchemyPlan')));
+    await tester.pump();
+    expect(find.text('Sunrise Herb'), findsNothing);
+    expect(find.text('Wheat'), findsOneWidget);
+    expect(find.text('Wheat Flour'), findsOneWidget);
+
+    await tester.tap(find.byKey(InventoryActionKeys.filter('alchemyPlan')));
     expect(
-      harness.controller.active.selectTarget('Pure Powder Reagent'),
+      harness.controller.modes[CraftMode.alchemy]!.selectTarget(
+        'Pure Powder Reagent',
+      ),
       isTrue,
     );
     await tester.pumpAndSettle();
     expect(find.text('Silver Azalea'), findsOneWidget);
     expect(find.text('Sunrise Herb'), findsNothing);
+    expect(find.text('Wheat'), findsOneWidget);
   });
 
-  testWidgets('adds and renames a selected storage through compact dialogs', (
-    tester,
-  ) async {
+  testWidgets('amount edits are shared by every planner mode', (tester) async {
     final harness = InventoryTestHarness();
     await pumpInventory(tester, harness, size: const Size(1500, 940));
 
-    await tester.tap(find.byKey(InventoryActionKeys.addStorage));
-    await tester.pumpAndSettle();
-    await tester.enterText(
-      _editableAppTextField('Storage or character name'),
-      'Calpheon City Storage',
-    );
-    await tester.tap(find.text('Add').last);
-    await tester.pumpAndSettle();
+    await tester.enterText(find.byKey(InventoryActionKeys.i01), 'Sunrise Herb');
+    await tester.pump(const Duration(milliseconds: 200));
 
-    expect(
-      find.byKey(InventoryActionKeys.storage('calpheon-city-storage')),
-      findsOneWidget,
-    );
-    expect(
-      harness.controller.active.inventoryStorage.selectedLocation.name,
-      'Calpheon City Storage',
-    );
+    final amount = find.byKey(InventoryActionKeys.row('I10', 'Sunrise Herb'));
+    await tester.enterText(amount, '10000');
+    await tester.testTextInput.receiveAction(TextInputAction.done);
+    await tester.pump();
 
-    await tester.tap(find.byKey(InventoryActionKeys.i04));
-    await tester.pumpAndSettle();
-    await tester.tap(find.bySemanticsLabel('Rename Calpheon City Storage'));
-    await tester.pumpAndSettle();
-    await tester.enterText(
-      _editableAppTextField('Storage name'),
-      'Calpheon Workshop',
+    for (final mode in CraftMode.values) {
+      expect(
+        harness.controller.modes[mode]!.state.value.inventory['Sunrise Herb'],
+        10000,
+      );
+    }
+    final editable = tester.widget<EditableText>(
+      find.descendant(of: amount, matching: find.byType(EditableText)),
     );
-    await tester.tap(find.text('Save').last);
-    await tester.pumpAndSettle();
+    expect(editable.controller.text, '10.000');
+    final rowSemantics = tester.widget<Semantics>(
+      find.descendant(
+        of: find.byKey(InventoryActionKeys.row('I14', 'Sunrise Herb')),
+        matching: find.byWidgetPredicate(
+          (widget) =>
+              widget is Semantics &&
+              (widget.properties.label ?? '').startsWith('Sunrise Herb,'),
+        ),
+      ),
+    );
+    expect(rowSemantics.properties.label, 'Sunrise Herb, 10.000 owned');
 
+    await tester.enterText(amount, '-5');
+    await tester.testTextInput.receiveAction(TextInputAction.done);
+    await tester.pump();
     expect(
-      harness.controller.active.inventoryStorage.selectedLocation.name,
-      'Calpheon Workshop',
+      harness.controller.active.state.value.inventory['Sunrise Herb'],
+      10000,
     );
-    expect(find.text('Calpheon Workshop'), findsWidgets);
+    expect(find.byIcon(Icons.error_outline), findsOneWidget);
   });
 
-  testWidgets(
-    'edits one storage amount with grouped formatting and validation',
-    (tester) async {
-      final harness = InventoryTestHarness();
-      final locationId = harness.controller.active
-          .ensureInventoryStorageLocation('Calpheon City Storage');
-      await pumpInventory(tester, harness, size: const Size(1500, 940));
-
-      final amount = find.byKey(InventoryActionKeys.row('I10', 'Sunrise Herb'));
-      await tester.tap(
-        find.byKey(InventoryActionKeys.row('I09', 'Sunrise Herb')),
-      );
-      expect(harness.copiedNames, <String>['Sunrise Herb']);
-
-      await tester.enterText(amount, '10000');
-      await tester.testTextInput.receiveAction(TextInputAction.done);
-      await tester.pump();
-      expect(
-        harness.controller.active.inventoryStorage.quantityAt(
-          locationId,
-          'Sunrise Herb',
-        ),
-        10000,
-      );
-      expect(
-        harness.controller.active.state.value.inventory['Sunrise Herb'],
-        10003,
-        reason: 'The original Unassigned amount must remain part of the total.',
-      );
-      final editable = tester.widget<EditableText>(
-        find.descendant(of: amount, matching: find.byType(EditableText)),
-      );
-      expect(editable.controller.text, '10.000');
-      expect(find.text('Total 10.003'), findsOneWidget);
-
-      await tester.enterText(amount, '-5');
-      await tester.testTextInput.receiveAction(TextInputAction.done);
-      await tester.pump();
-      expect(
-        harness.controller.active.inventoryStorage.quantityAt(
-          locationId,
-          'Sunrise Herb',
-        ),
-        10000,
-        reason: 'Invalid drafts must not overwrite the last valid amount.',
-      );
-      expect(find.byIcon(Icons.error_outline), findsOneWidget);
-
-      await tester.enterText(amount, '0');
-      await tester.testTextInput.receiveAction(TextInputAction.done);
-      await tester.pump();
-      expect(
-        harness.controller.active.inventoryStorage.quantityAt(
-          locationId,
-          'Sunrise Herb',
-        ),
-        0,
-      );
-      expect(
-        harness.controller.active.state.value.inventory['Sunrise Herb'],
-        3,
-      );
-    },
-  );
-
-  testWidgets('same aggregate still refreshes the selected storage amount', (
-    tester,
-  ) async {
+  testWidgets('manually adds and removes one shared item', (tester) async {
     final harness = InventoryTestHarness();
-    final locationId = harness.controller.active.ensureInventoryStorageLocation(
-      'Calpheon City Storage',
-    );
-    harness.controller.active.setInventoryStorageQuantity(
-      locationId: locationId,
-      itemName: 'Sunrise Herb',
-      text: '3',
-    );
-    harness.controller.active.setInventoryStorageQuantity(
-      locationId: inventoryUnassignedLocationId,
-      itemName: 'Sunrise Herb',
-      text: '0',
-    );
     await pumpInventory(tester, harness, size: const Size(1500, 940));
 
-    Finder amountField() => find.descendant(
-      of: find.byKey(InventoryActionKeys.row('I10', 'Sunrise Herb')),
+    await tester.tap(find.byKey(InventoryActionKeys.addItem));
+    await tester.pumpAndSettle();
+    final itemSearch = find.descendant(
+      of: find.byKey(const ValueKey<String>('inventory-manual-item-select')),
       matching: find.byType(EditableText),
     );
-    expect(tester.widget<EditableText>(amountField()).controller.text, '3');
-
-    harness.controller.active.setInventoryStorageQuantity(
-      locationId: inventoryUnassignedLocationId,
-      itemName: 'Sunrise Herb',
-      text: '3',
+    await tester.enterText(itemSearch, 'Salt');
+    await tester.pumpAndSettle();
+    await tester.tap(
+      find.descendant(
+        of: find.byType(MenuItemButton),
+        matching: find.text('Salt'),
+      ),
     );
-    harness.controller.active.setInventoryStorageQuantity(
-      locationId: locationId,
-      itemName: 'Sunrise Herb',
-      text: '0',
+    await tester.pumpAndSettle();
+    final manualFrame = tester.getRect(
+      find.byKey(const ValueKey<String>('inventory-manual-dialog-frame')),
+    );
+    final manualSelect = tester.getRect(
+      find.byKey(const ValueKey<String>('inventory-manual-item-select')),
+    );
+    final manualAmount = tester.getRect(
+      find.byKey(const ValueKey<String>('inventory-manual-item-amount')),
+    );
+    expect(manualFrame.width, lessThanOrEqualTo(500));
+    expect(manualFrame.height, lessThan(230));
+    expect(manualAmount.width, 132);
+    expect(manualSelect.width, lessThan(310));
+    expect(manualSelect.right + 10, lessThan(manualAmount.left));
+    await tester.enterText(
+      find.descendant(
+        of: find.byKey(const ValueKey<String>('inventory-manual-item-amount')),
+        matching: find.byType(EditableText),
+      ),
+      '250',
+    );
+    await tester.ensureVisible(find.text('Save item'));
+    await tester.tap(find.text('Save item'));
+    await tester.pumpAndSettle();
+
+    for (final mode in CraftMode.values) {
+      expect(
+        harness.controller.modes[mode]!.state.value.inventory['Salt'],
+        250,
+      );
+    }
+    await tester.enterText(find.byKey(InventoryActionKeys.i01), 'Salt');
+    await tester.pump(const Duration(milliseconds: 200));
+    await tester.tap(find.byKey(InventoryActionKeys.row('I15', 'Salt')));
+    await tester.pumpAndSettle();
+    for (final mode in CraftMode.values) {
+      expect(
+        harness.controller.modes[mode]!.state.value.inventory['Salt'],
+        isNull,
+      );
+    }
+    expect(harness.undoOffers, hasLength(2));
+  });
+
+  testWidgets('manual add stays compact with a long item at 200 percent text', (
+    tester,
+  ) async {
+    final harness = InventoryTestHarness(includeLongItems: true);
+    await pumpInventory(
+      tester,
+      harness,
+      size: const Size(1500, 940),
+      textScaler: const TextScaler.linear(2),
+    );
+
+    await tester.tap(find.byKey(InventoryActionKeys.addItem));
+    await tester.pumpAndSettle();
+    final itemSearch = find.descendant(
+      of: find.byKey(const ValueKey<String>('inventory-manual-item-select')),
+      matching: find.byType(EditableText),
+    );
+    await tester.enterText(itemSearch, 'Special Volcanic');
+    await tester.pumpAndSettle();
+    await tester.tap(
+      find.descendant(
+        of: find.byType(MenuItemButton),
+        matching: find.text('Special Volcanic Umbrella Mushroom'),
+      ),
     );
     await tester.pumpAndSettle();
 
-    expect(harness.controller.active.state.value.inventory['Sunrise Herb'], 3);
-    expect(tester.widget<EditableText>(amountField()).controller.text, '0');
+    final frame = tester.getRect(
+      find.byKey(const ValueKey<String>('inventory-manual-dialog-frame')),
+    );
+    final selector = tester.widget<AppSearchSelect<InventoryItemRecord>>(
+      find.byKey(const ValueKey<String>('inventory-manual-item-select')),
+    );
+    final selectedText = tester.widget<EditableText>(itemSearch);
+    final amount = tester.getRect(
+      find.byKey(const ValueKey<String>('inventory-manual-item-amount')),
+    );
+    expect(frame.width, lessThanOrEqualTo(500));
+    expect(frame.height, lessThan(340));
+    expect(selector.anchorMaxLines, 2);
+    expect(selectedText.controller.text, 'Special Volcanic Umbrella Mushroom');
+    expect(amount.width, 132);
+    expect(tester.takeException(), isNull);
   });
 
   testWidgets(
-    'clear is editor-only and clears all locations without a prompt',
+    'empty inventory confirms, mirrors, and offers whole-state undo',
     (tester) async {
-      final harness = InventoryTestHarness()..clearApprovals.add(false);
-      harness.controller.active.ensureInventoryStorageLocation(
-        'Calpheon City Storage',
-      );
-      harness.controller.active.setInventoryStorageQuantity(
-        locationId: 'calpheon-city-storage',
-        itemName: 'Salt',
-        text: '25',
-      );
+      final harness = InventoryTestHarness();
       await pumpInventory(tester, harness, size: const Size(1500, 940));
 
-      expect(find.byKey(InventoryActionKeys.i03), findsNothing);
-      await tester.tap(find.byKey(InventoryActionKeys.i04));
+      await tester.tap(find.byKey(InventoryActionKeys.filter('owned')));
       await tester.pumpAndSettle();
-      await tester.tap(find.byKey(InventoryActionKeys.i03));
+      await tester.ensureVisible(
+        find.byKey(InventoryActionKeys.emptyInventory),
+      );
+      await tester.tap(find.byKey(InventoryActionKeys.emptyInventory));
+      await tester.pumpAndSettle();
+      expect(find.text('Empty inventory?'), findsOneWidget);
+      await tester.tap(find.byKey(InventoryActionKeys.confirmEmptyInventory));
       await tester.pumpAndSettle();
 
-      expect(harness.controller.active.state.value.inventory, isEmpty);
-      expect(
-        harness.controller.active.inventoryStorage.locations.every(
-          (location) => location.quantities.isEmpty,
-        ),
-        isTrue,
-      );
-      expect(harness.clearRequests, isEmpty);
-      expect(harness.transactionNotices, isEmpty);
-      expect(harness.undoOffers, isEmpty);
-      expect(find.text('Undo'), findsNothing);
+      for (final mode in CraftMode.values) {
+        expect(harness.controller.modes[mode]!.state.value.inventory, isEmpty);
+      }
+      expect(harness.undoOffers, hasLength(1));
+      final result = await harness.undoOffers.single.undo();
+      await tester.pumpAndSettle();
+      expect(result.restored, isTrue);
+      for (final mode in CraftMode.values) {
+        expect(
+          harness.controller.modes[mode]!.state.value.inventory['Sunrise Herb'],
+          3,
+        );
+      }
     },
   );
 
-  testWidgets('clear write failure rolls back every storage amount', (
-    tester,
-  ) async {
+  testWidgets('failed empty inventory keeps every amount', (tester) async {
     final harness = InventoryTestHarness(
       saveState: (_) async =>
           throw const FileSystemException('injected inventory disk failure'),
     );
     await pumpInventory(tester, harness, size: const Size(1500, 940));
 
-    await tester.tap(find.byKey(InventoryActionKeys.i04));
+    await tester.tap(find.byKey(InventoryActionKeys.filter('owned')));
     await tester.pumpAndSettle();
-    await tester.tap(find.byKey(InventoryActionKeys.i03));
+    await tester.ensureVisible(find.byKey(InventoryActionKeys.emptyInventory));
+    await tester.tap(find.byKey(InventoryActionKeys.emptyInventory));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(InventoryActionKeys.confirmEmptyInventory));
     await tester.pumpAndSettle();
 
     expect(harness.controller.active.state.value.inventory, hasLength(2));
-    expect(find.textContaining('Inventory was not cleared'), findsOneWidget);
+    expect(find.textContaining('was not emptied'), findsOneWidget);
     expect(harness.undoOffers, isEmpty);
-  });
-
-  testWidgets('editor group tools add, regroup, rename, and reset metadata', (
-    tester,
-  ) async {
-    final harness = InventoryTestHarness();
-    await pumpInventory(tester, harness, size: const Size(1500, 940));
-    await tester.tap(find.byKey(InventoryActionKeys.i04));
-    await tester.pumpAndSettle();
-
-    await tester.enterText(
-      find.bySemanticsLabel('New inventory group name'),
-      '  Daily   Alchemy  ',
-    );
-    await tester.tap(find.byKey(InventoryActionKeys.i05));
-    await tester.pumpAndSettle();
-    expect(
-      harness.controller.active.state.value.customCategories,
-      contains('Daily Alchemy'),
-    );
-    expect(
-      harness.session.forMode(CraftMode.alchemy).selectedCategory,
-      'Daily Alchemy',
-    );
-
-    final selector = find.byKey(InventoryActionKeys.i08Selector);
-    await tester.tap(selector);
-    await tester.pumpAndSettle();
-    await tester.enterText(
-      find.descendant(of: selector, matching: find.byType(EditableText)),
-      'silver',
-    );
-    await tester.pumpAndSettle();
-    await tester.tap(
-      find.widgetWithText(MenuItemButton, 'Silver Azalea'),
-    );
-    await tester.pumpAndSettle();
-    await tester.tap(find.byKey(InventoryActionKeys.i08));
-    await tester.pumpAndSettle();
-    expect(
-      harness
-          .controller
-          .active
-          .state
-          .value
-          .ingredientMeta['Silver Azalea']
-          ?.category,
-      'Daily Alchemy',
-    );
-
-    await tester.enterText(
-      find.bySemanticsLabel('Rename selected inventory group'),
-      '  Lab   Supplies ',
-    );
-    await tester.tap(find.byKey(InventoryActionKeys.i06));
-    await tester.pumpAndSettle();
-    expect(
-      harness.controller.active.state.value.customCategories,
-      contains('Lab Supplies'),
-    );
-    expect(
-      harness
-          .controller
-          .active
-          .state
-          .value
-          .ingredientMeta['Silver Azalea']
-          ?.category,
-      'Lab Supplies',
-    );
-
-    await tester.tap(find.byKey(InventoryActionKeys.i07));
-    await tester.pumpAndSettle();
-    expect(
-      harness
-          .controller
-          .active
-          .state
-          .value
-          .ingredientMeta['Silver Azalea']
-          ?.category,
-      isNull,
-    );
-  });
-
-  testWidgets('item settings dialog saves category and source together', (
-    tester,
-  ) async {
-    final harness = InventoryTestHarness();
-    await pumpInventory(tester, harness, size: const Size(1500, 940));
-    await tester.enterText(find.byKey(InventoryActionKeys.i01), 'sunrise');
-    await tester.pump(const Duration(milliseconds: 200));
-    await tester.tap(find.byKey(InventoryActionKeys.i04));
-    await tester.pumpAndSettle();
-
-    await tester.tap(
-      find.byKey(InventoryActionKeys.row('I11', 'Sunrise Herb')),
-    );
-    await tester.pumpAndSettle();
-    expect(find.text('Item settings'), findsOneWidget);
-    await tester.tap(_appSelect('Group for Sunrise Herb'));
-    await tester.pumpAndSettle();
-    await tester.tap(find.text('Field Kit').last);
-    await tester.pumpAndSettle();
-    await tester.enterText(
-      _editableAppTextField('Source note for Sunrise Herb'),
-      'Gather near Behr before dawn',
-    );
-    await tester.tap(find.text('Save').last);
-    await tester.pumpAndSettle();
-
-    final metadata =
-        harness.controller.active.state.value.ingredientMeta['Sunrise Herb'];
-    expect(metadata?.category, 'Field Kit');
-    expect(metadata?.sourceNote, 'Gather near Behr before dawn');
-    expect(find.textContaining('settings saved'), findsOneWidget);
-  });
-
-  testWidgets('item settings write failure leaves prior metadata intact', (
-    tester,
-  ) async {
-    final harness = InventoryTestHarness(
-      saveState: (_) async =>
-          throw const FileSystemException('injected item settings failure'),
-    );
-    await pumpInventory(tester, harness, size: const Size(1500, 940));
-    await tester.enterText(find.byKey(InventoryActionKeys.i01), 'sunrise');
-    await tester.pump(const Duration(milliseconds: 200));
-    await tester.tap(find.byKey(InventoryActionKeys.i04));
-    await tester.pumpAndSettle();
-    await tester.tap(
-      find.byKey(InventoryActionKeys.row('I11', 'Sunrise Herb')),
-    );
-    await tester.pumpAndSettle();
-    await tester.enterText(
-      _editableAppTextField('Source note for Sunrise Herb'),
-      'This must not persist',
-    );
-    await tester.tap(find.text('Save').last);
-    await tester.pumpAndSettle();
-
-    expect(
-      harness
-          .controller
-          .active
-          .state
-          .value
-          .ingredientMeta['Sunrise Herb']
-          ?.sourceNote,
-      'Gathered near Heidel roads.',
-    );
-    expect(find.textContaining('settings were not saved'), findsOneWidget);
   });
 
   testWidgets('pending amount commits on focus loss before reconstruction', (
@@ -476,6 +406,8 @@ void main() {
     );
     await pumpInventory(tester, harness, size: const Size(1500, 940));
 
+    await tester.enterText(find.byKey(InventoryActionKeys.i01), 'Sunrise Herb');
+    await tester.pump(const Duration(milliseconds: 200));
     await tester.enterText(
       find.byKey(InventoryActionKeys.row('I10', 'Sunrise Herb')),
       '5000',
@@ -519,7 +451,7 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets('lazy list keeps scroll, arrow focus, and useful semantics', (
+  testWidgets('lazy grid keeps scroll, arrow focus, and useful semantics', (
     tester,
   ) async {
     final harness = InventoryTestHarness(additionalHerbs: 60);
@@ -557,8 +489,7 @@ void main() {
     );
     final semantics = tester.widget<Semantics>(rowSemantics);
     expect(semantics.properties.label, contains('Silver Azalea'));
-    expect(semantics.properties.label, contains('in Unassigned'));
-    expect(semantics.properties.label, contains('total'));
+    expect(semantics.properties.label, contains('owned'));
 
     final firstFocus = tester.widget<Focus>(firstRow).focusNode!;
     firstFocus.requestFocus();
@@ -567,7 +498,7 @@ void main() {
     await tester.pump();
     expect(
       harness.session.forMode(CraftMode.alchemy).selectedItem,
-      'Silver Azalea Reserve 01',
+      'Silver Azalea Reserve 02',
     );
 
     expect(tester.takeException(), isNull);
@@ -587,16 +518,13 @@ void main() {
         size: const Size(1200, 752),
         spec: spec,
       );
-      expect(
-        find.byWidgetPredicate(
-          (widget) =>
-              widget is AppSurface &&
-              widget.semanticLabel == 'Inventory storage locations',
-        ),
-        findsOneWidget,
-      );
+      expect(find.byKey(InventoryActionKeys.storageSelector), findsNothing);
       expect(find.byKey(InventoryActionKeys.i01), findsOneWidget);
       expect(find.byKey(InventoryActionKeys.i14), findsOneWidget);
+      expect(
+        find.byKey(InventoryActionKeys.filter('cookingPlan')),
+        findsOneWidget,
+      );
       expect(tester.takeException(), isNull, reason: spec.id);
     }
 
@@ -609,6 +537,111 @@ void main() {
     );
     expect(find.byKey(InventoryActionKeys.i01), findsOneWidget);
     expect(find.byKey(InventoryActionKeys.i14), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('wide Inventory uses three readable columns', (tester) async {
+    final harness = InventoryTestHarness(
+      additionalHerbs: 3,
+      includeLongItems: true,
+    );
+    await pumpInventory(tester, harness, size: const Size(1500, 940));
+
+    await tester.enterText(
+      find.byKey(InventoryActionKeys.i01),
+      'Silver Azalea Reserve',
+    );
+    await tester.pump(const Duration(milliseconds: 200));
+
+    final first = tester.getRect(
+      find.byKey(InventoryActionKeys.row('I14', 'Silver Azalea Reserve 01')),
+    );
+    final second = tester.getRect(
+      find.byKey(InventoryActionKeys.row('I14', 'Silver Azalea Reserve 02')),
+    );
+    final third = tester.getRect(
+      find.byKey(InventoryActionKeys.row('I14', 'Silver Azalea Reserve 03')),
+    );
+    expect((first.top - second.top).abs(), lessThan(1));
+    expect((second.top - third.top).abs(), lessThan(1));
+    expect(second.left, greaterThan(first.right));
+    expect(third.left, greaterThan(second.right));
+    expect(first.width, greaterThan(360));
+    expect(first.width, lessThan(500));
+
+    await tester.enterText(
+      find.byKey(InventoryActionKeys.i01),
+      'Special Volcanic Umbrella Mushroom',
+    );
+    await tester.pump(const Duration(milliseconds: 200));
+    final longName = find.descendant(
+      of: find.byKey(
+        InventoryActionKeys.row('I14', 'Special Volcanic Umbrella Mushroom'),
+      ),
+      matching: find.text('Special Volcanic Umbrella Mushroom'),
+    );
+    expect(longName, findsOneWidget);
+    expect(
+      tester.renderObject<RenderParagraph>(longName).didExceedMaxLines,
+      isFalse,
+    );
+    final longRow = tester.getRect(
+      find.byKey(
+        InventoryActionKeys.row('I14', 'Special Volcanic Umbrella Mushroom'),
+      ),
+    );
+    final amount = tester.getRect(
+      find.byKey(
+        InventoryActionKeys.row('I10', 'Special Volcanic Umbrella Mushroom'),
+      ),
+    );
+    final remove = tester.getRect(
+      find.byKey(
+        InventoryActionKeys.row('I15', 'Special Volcanic Umbrella Mushroom'),
+      ),
+    );
+    final nameBounds = tester.getRect(longName);
+    final icon = tester.getRect(
+      find.descendant(
+        of: find.byKey(
+          InventoryActionKeys.row('I14', 'Special Volcanic Umbrella Mushroom'),
+        ),
+        matching: find.byType(ModeItemIcon),
+      ),
+    );
+    expect(longRow.height, lessThan(104));
+    expect(amount.top, greaterThanOrEqualTo(nameBounds.bottom + 6));
+    expect(remove.left - amount.right, greaterThanOrEqualTo(8));
+    expect((icon.center.dy - longRow.center.dy).abs(), lessThan(1));
+    expect((amount.center.dy - remove.center.dy).abs(), lessThan(4));
+    expect(longRow.contains(amount.center), isTrue);
+    expect(longRow.contains(remove.center), isTrue);
+
+    await tester.enterText(find.byKey(InventoryActionKeys.i01), 'Sunrise Herb');
+    await tester.pump(const Duration(milliseconds: 200));
+    final shortRowFinder = find.byKey(
+      InventoryActionKeys.row('I14', 'Sunrise Herb'),
+    );
+    final shortName = find.descendant(
+      of: shortRowFinder,
+      matching: find.text('Sunrise Herb'),
+    );
+    final shortRow = tester.getRect(shortRowFinder);
+    final shortNameBounds = tester.getRect(shortName);
+    final shortAmount = tester.getRect(
+      find.byKey(InventoryActionKeys.row('I10', 'Sunrise Herb')),
+    );
+    final shortRemove = tester.getRect(
+      find.byKey(InventoryActionKeys.row('I15', 'Sunrise Herb')),
+    );
+    final shortIcon = tester.getRect(
+      find.descendant(of: shortRowFinder, matching: find.byType(ModeItemIcon)),
+    );
+    expect(shortRow.height, lessThan(80));
+    expect(shortAmount.left - shortNameBounds.right, greaterThanOrEqualTo(12));
+    expect(shortRemove.left - shortAmount.right, greaterThanOrEqualTo(8));
+    expect((shortIcon.center.dy - shortRow.center.dy).abs(), lessThan(1));
+    expect((shortAmount.center.dy - shortRemove.center.dy).abs(), lessThan(4));
     expect(tester.takeException(), isNull);
   });
 
@@ -673,15 +706,3 @@ void main() {
     );
   });
 }
-
-Finder _editableAppTextField(String semanticLabel) => find.descendant(
-  of: find.byWidgetPredicate(
-    (widget) => widget is AppTextField && widget.semanticLabel == semanticLabel,
-  ),
-  matching: find.byType(EditableText),
-);
-
-Finder _appSelect(String semanticLabel) => find.byWidgetPredicate(
-  (widget) =>
-      widget is AppSelect<String> && widget.semanticLabel == semanticLabel,
-);

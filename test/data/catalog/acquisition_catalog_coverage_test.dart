@@ -168,6 +168,19 @@ void main() {
     expect(guidance, contains('ocean stalker'));
   });
 
+  test('Monkey Blood has a reviewed gathering route', () {
+    final acquisition = resolveItemAcquisition(
+      name: 'Monkey Blood',
+      rules: rules,
+    );
+    final guidance =
+        acquisition?.displayableSummaries.join(' ').toLowerCase() ?? '';
+
+    expect(acquisition?.status, 'reviewed');
+    expect(guidance, contains('monkey'));
+    expect(guidance, contains('fluid collector'));
+  });
+
   test('Crystallized Energy of Endtimes uses practical acquisition routes '
       'instead of HAN Dawn Crystal salvage', () {
     const name = 'Crystallized Energy of Endtimes';

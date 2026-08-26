@@ -474,10 +474,13 @@ final class _PlannerContext {
 
     _EvaluatedOption? mostOwned;
     for (final option in evaluated) {
-      if (option.have <= 0) {
+      if (option.have <= 0 || option.need <= 0) {
         continue;
       }
-      if (mostOwned == null || option.have > mostOwned.have) {
+      if (mostOwned == null ||
+          option.ownedCoverage > mostOwned.ownedCoverage ||
+          (option.ownedCoverage == mostOwned.ownedCoverage &&
+              option.missing < mostOwned.missing)) {
         mostOwned = option;
       }
     }
@@ -537,6 +540,9 @@ final class _PlannerContext {
   }
 
   String _selectedGrade(String parentName, String name, String originalName) {
+    if (recipeHasAuthoritativeQualityVariants(parentName)) {
+      return 'normal';
+    }
     final parent = items[parentName];
     return selectedIngredientQualityGrade(
       rules: rules,
@@ -760,6 +766,8 @@ final class _EvaluatedOption {
   final bool stockKnown;
   final double stock;
   final double total;
+
+  double get ownedCoverage => have / need;
 
   double get stockCoverage => stock / missing;
 }
