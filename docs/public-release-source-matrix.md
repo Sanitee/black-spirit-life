@@ -1,15 +1,16 @@
 # Public-release source matrix
 
 Review result: **proportionate source review complete; project-owner
-Workerman community-use decision and accepted residual risk recorded; six
-source-only private research inputs excluded from the public tree**
+Workerman community-use decision and accepted residual risk recorded; private
+Beta-only features, personal data, and six source-only research inputs excluded
+from the public tree**
 
-Release identity: Black Spirit Life `0.1.5+24`, tag `v0.1.5`, package
+Release identity: Black Spirit Life `0.1.6+25`, tag `v0.1.6`, package
 `BlackSpiritLife.App`, channel `win-x64-stable`. The exact source commit and
 artifact hashes are recorded by the release-candidate manifest generated from
 the sanitized public history, which contains no internal Beta history.
 
-Review date: 2026-08-26
+Review date: 2026-09-14
 
 Permanent public/update destination approved by the project owner:
 `https://github.com/Sanitee/black-spirit-life`
@@ -17,6 +18,28 @@ Permanent public/update destination approved by the project owner:
 This is the controlling source-by-source gate for the full-feature public
 route. It replaces earlier blanket treatment of every fact or game asset seen
 through a community reference as separately blocked.
+
+## 0.1.6 public-promotion boundary
+
+Version 0.1.6 promotes only the reviewed Planner, Resource Map, shared market,
+Opportunities, and update-notice work from the frozen approved Beta snapshot.
+It does not copy the Beta repository or its history.
+
+The following remain private and are absent from public source and packages:
+
+- Fish Companion code, FishyStuff cache/data, fishing journals and loadouts;
+- Gathering Companion code, guide media, Bairog-derived data and copied site
+  logos;
+- Garmoth session-import code, captured catalog/art and all saved sessions;
+- every local user profile, mastery value, inventory, plan, favorite, loadout,
+  session, cache, credential, screenshot and machine-specific path.
+
+A fresh install therefore contains no personal profile values. The app loads
+an existing Stable profile only from the locally selected personal-data
+folder. All user-authored planner and Opportunities state is stored beneath
+that folder and read back from there. The folder is shown in the title bar and
+can be changed from the in-app Data page; ordinary updates keep it outside the
+installation directory and do not replace it.
 
 ## Proportionate review standard
 
@@ -65,13 +88,12 @@ Spirit Life is free and noncommercial, gives full attribution, and will respond
 promptly to correction or removal requests. No separate written licence was
 found.
 
-The retained functionality includes the full current map presentation, worker
-nodes and gathering locations, vendors, lodging and worker-economics tools,
-planner/recipes, PA artwork, Edania data, installer and in-app updating. No
-feature removal, hiding or replacement is authorized merely to make this
-matrix more conservative. Credits, source links, correction/takedown route and
-the ability to replace an individual group after a substantiated request remain
-mandatory.
+The retained functionality includes the full current public map presentation,
+worker nodes and gathering locations, vendors, lodging and worker-economics
+tools, planner/recipes, Opportunities, PA artwork, Edania data, installer and
+in-app updating. Beta-only features listed above are deliberately excluded.
+Credits, source links, correction/takedown route and the ability to replace an
+individual group after a substantiated request remain mandatory.
 
 ## Source matrix
 
@@ -79,12 +101,16 @@ mandatory.
 |---|---|---|---|---|
 | PA-01 | Overall Black Desert fan project | Pearl Abyss fan content | **Satisfied** | Keep the project free, unofficial and noncommercial; retain the exact required notice in README and release notes; keep third-party material outside the code licence |
 | PA-02 | Black Desert item/NPC names, descriptions, recipes, prices, IDs, coordinates, node/vendor facts, 4,486 named embedded icon entries, eight gathering-tool icons and 231 NPC portraits | Pearl Abyss-origin facts and game artwork | **Satisfied** | Retain PA attribution and fan-content notice; BDO Codex/BDOLytics remain credited references or mirrors, not separate owners of these facts/assets |
+| PA-03 | 154 Opportunities item icons and the Resource Map house, material, silver and bare-hands UI textures | Pearl Abyss-origin game artwork extracted from the owner's installed client | **Satisfied** | Ship only decoded artwork plus neutral client-relative provenance, hashes and sizes; no client path, extractor payload or account data is retained |
+| PRIV-01 | Fish Companion journals, loadouts, caches, private node icons and FishyStuff-derived payload | Personal data plus unapproved third-party/private Beta material | **Excluded** | Entire Fish Companion package and integration remain private |
+| PRIV-02 | Gathering Companion guide media, Bairog-derived calculator data and copied site logos | Unapproved third-party/private Beta material | **Excluded** | Entire standalone Gathering Companion package and integration remain private; the independently reviewed Resource Map gathering checklist remains public |
+| PRIV-03 | Garmoth session-import catalog, spot art and saved sessions | Captured service material plus personal activity data | **Excluded** | Session Import and its Windows helper are absent from public source and packages |
 | REF-01 | BDO Codex and BDOLytics URLs, recipe IDs, item IDs and retrieval notes | Research/provenance references | **No blocker** | Retain citations for auditability. The generated runtime scan found no HTML/page markup; source-domain strings are provenance URLs, IDs and project-authored source notes |
 | FACT-01 | App-specific cooking/alchemy data: 178 added alchemy recipes, 461 added cooking recipes, preserved project records and normalized ingredients/yields/variants | Selected PA game facts in project schema | **No blocker** | No raw recipe-page or site database export is tracked or shipped; no site-authored prose or layout is retained |
 | FACT-02 | App-specific processing catalog: 602 planner-relevant recipes curated from 4,824 reviewed rows | Selected PA game facts in project schema | **No blocker** | The shipped file retains the curated planner schema, not the 4,824-row source export; cross-reference IDs and URLs remain provenance only |
 | FACT-03 | 501 Stone Cobra/Rock Scorpion, 34 Coral Stoneback Crab and 198 Stillcoral positions | Selected PA in-game coordinates transformed into map records | **No blocker** | Keep the app-specific layers and factual provenance; no route geometry, page design or site commentary is copied |
-| FACT-04 | Royal Workshop (124 goods/eight managers), Edania (28 nodes/37 resources plus Part II facts), Caphras cross-checks (36 identities/18 coordinates), and 982 project-authored acquisition records | Official/client-verified PA facts and project-authored summaries | **No blocker** | Retain source links and correction route; no third-party presentation is retained |
-| FACT-05 | `resource_map.json` vendor subset: 51 relevant items, 266 physical pins and 1,241 listings selected from the researched vendor rows | PA facts selected and normalized into Black Spirit Life's app-specific schema | **No blocker** | This is a purpose-limited planner subset, not a wholesale copy of either reference site's database. Keep the credited research links and current-game correction route |
+| FACT-04 | Royal Workshop (124 goods/eight managers), Edania (28 nodes/37 resources plus Part II facts), Caphras cross-checks (36 identities/18 coordinates), 982 project-authored acquisition records, and the numeric Central Market eligibility/enhancement identity tables | Official/client-verified PA facts and project-authored summaries | **No blocker** | Retain source links and correction route; no client path, account data, extractor payload or third-party presentation is retained |
+| FACT-05 | `resource_map.json` vendor subset: 51 relevant items, 266 physical pins and 1,243 listings selected from the researched vendor rows | PA facts selected and normalized into Black Spirit Life's app-specific schema | **No blocker** | This is a purpose-limited planner subset, not a wholesale copy of either reference site's database. Keep the credited research links and current-game correction route |
 | FACT-06 | `resource_map.json` `workerNodes`: 1,052 PA world-map records and 1,622 node-output relationships across 285 PA game items | PA facts selected, normalized and connected for Black Spirit Life's worker network, calculations and map UI | **No content blocker** | Credit PA as game-content owner and BDO Codex as a research/extraction reference. The numeric icon/layer fields are internal map-model metadata, not copied site presentation |
 | REF-RAW-01 | Tracked world-map seeds with 1,008 and 1,052 nodes | Source-only private normalized research inputs containing complete one-source world-map collections | **Excluded from the public repository** | Exclude the two exact files listed below from the clean public snapshot; retain internal provenance privately. Do not delete the internal copies |
 | REF-PRIVATE-02 | Rusalka, Stillcoral, vendor and portrait private research inputs | Narrower app-specific research/provenance records rather than runtime assets or wholesale site exports | **Excluded from the public repository for hygiene** | Exclude the four exact files listed below while retaining the generated runtime datasets and internal provenance |
@@ -124,8 +150,8 @@ does not claim written permission.
    Workerman-derived inputs for 352 production sites and 30 towns. The
    separately licensed calculation formulas are not blocked.
 
-The current `resource_map.json` is 7,801,681 bytes (SHA-256
-`50CFE1C7A6FAD8AA731578A67C305C9C703A619AF7EDCE5C5142EA9E826AC462`).
+The current `resource_map.json` is 7,544,577 bytes (SHA-256
+`BE62E56A6B18F14C7A6439521A9CA9CA240974219DBD1E44D85CDEC136C94C15`).
 It contains no raw response, HTML or copied website presentation. Its 1,052
 worker-node records are PA facts in the app's own schema and are not a content
 blocker. Its numeric icon/layer fields are internal map-model metadata, not
@@ -153,19 +179,19 @@ they are excluded to maintain a clean public/private research boundary.
 
 ## Authorized release treatment
 
-No application asset, dataset or feature is to be removed, disabled, hidden or
-replaced for this release. No third party is to be contacted. The release work
-must instead:
+The project owner authorized the sanitized 0.1.6 promotion on 2026-09-14. The
+release work must:
 
-1. preserve the complete full-feature application;
+1. preserve the reviewed Planner, Resource Map and Opportunities behavior;
 2. retain all credits, notices, source links and the correction/takedown route;
-3. exclude all six private research inputs listed above from the clean public
-   tree while keeping the internal copies untouched;
-4. keep the code licence separate from PA and other third-party material; and
+3. exclude the three private Beta feature groups, all personal data and all six
+   private research inputs listed above while keeping internal copies untouched;
+4. keep the code licence separate from PA and other third-party material;
 5. describe the Workerman/Shrddr position accurately as a project-owner
    community-use decision with accepted residual risk, never as separate
-   written permission; do not reopen it without new concrete evidence of
-   prohibited use.
+   written permission; and
+6. publish only after the exact clean commit, installer, full package, smaller
+   delta package and update manifest pass the release gates.
 
 ## Permission-request drafts
 
@@ -183,7 +209,7 @@ not be pushed with that ancestry. A clean public snapshot or an explicitly
 approved history rewrite is still required, followed by a fresh-clone scan of
 every public ref and tag.
 
-Publication also requires the Stable install/update/uninstall verification,
-the exact clean source commit and tag, final release notes and artifact hashes,
-and the user's immediate final approval for that exact public repository and
-release. Nothing in this matrix grants publication approval.
+Publication remains conditional on Stable install/update/uninstall
+verification, the exact clean source commit and tag, final release notes and
+artifact hashes. The project owner has authorized publication to the exact
+repository above when those technical and privacy gates pass.

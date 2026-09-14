@@ -30,6 +30,7 @@ class BdoCraftPlannerApp extends StatelessWidget {
     this.updateService,
     this.updateSource,
     this.enableBetaUpdates = AppIdentity.outOfProcessBetaUpdatesEnabled,
+    this.enableOpportunityAutoCheck = true,
     this.repeatFullSetupEveryApplicationVersion =
         AppIdentity.repeatFullSetupEveryApplicationVersion,
     this.windowHost = const WindowHostService(),
@@ -42,6 +43,7 @@ class BdoCraftPlannerApp extends StatelessWidget {
   final BetaUpdateService? updateService;
   final String? updateSource;
   final bool enableBetaUpdates;
+  final bool enableOpportunityAutoCheck;
   final bool repeatFullSetupEveryApplicationVersion;
   final WindowHostService windowHost;
 
@@ -65,6 +67,7 @@ class BdoCraftPlannerApp extends StatelessWidget {
           updateService: updateService,
           updateSource: updateSource,
           enableBetaUpdates: enableBetaUpdates,
+          enableOpportunityAutoCheck: enableOpportunityAutoCheck,
           repeatFullSetupEveryApplicationVersion:
               repeatFullSetupEveryApplicationVersion,
           windowHost: windowHost,
@@ -82,6 +85,7 @@ class _BootstrapGate extends StatefulWidget {
     required this.updateService,
     required this.updateSource,
     required this.enableBetaUpdates,
+    required this.enableOpportunityAutoCheck,
     required this.repeatFullSetupEveryApplicationVersion,
     required this.windowHost,
   });
@@ -92,6 +96,7 @@ class _BootstrapGate extends StatefulWidget {
   final BetaUpdateService? updateService;
   final String? updateSource;
   final bool enableBetaUpdates;
+  final bool enableOpportunityAutoCheck;
   final bool repeatFullSetupEveryApplicationVersion;
   final WindowHostService windowHost;
 
@@ -174,6 +179,7 @@ class _BootstrapGateState extends State<_BootstrapGate> {
         updateService: widget.updateService,
         updateSource: widget.updateSource,
         enableBetaUpdates: widget.enableBetaUpdates,
+        enableOpportunityAutoCheck: widget.enableOpportunityAutoCheck,
         windowHost: widget.windowHost,
       );
     },

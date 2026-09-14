@@ -1592,6 +1592,7 @@ class _RecipeEditorViewState extends State<RecipeEditorView> {
             index: index,
             fields: _ingredientFields[index],
             itemNames: projection.itemNames,
+            suggestedItemNames: projection.suggestedItemNames,
             onChanged: () {
               draft.ingredients[index]
                 ..name = _ingredientFields[index].nameText.text
@@ -2322,6 +2323,7 @@ class _IngredientEditorRow extends StatelessWidget {
     required this.index,
     required this.fields,
     required this.itemNames,
+    required this.suggestedItemNames,
     required this.onChanged,
     required this.onRemove,
     super.key,
@@ -2330,6 +2332,7 @@ class _IngredientEditorRow extends StatelessWidget {
   final int index;
   final _IngredientFields fields;
   final List<String> itemNames;
+  final List<String> suggestedItemNames;
   final VoidCallback onChanged;
   final VoidCallback? onRemove;
 
@@ -2365,7 +2368,7 @@ class _IngredientEditorRow extends StatelessWidget {
                     optionsBuilder: (value) {
                       final query = value.text.trim().toLowerCase();
                       final exact = foldedValue(itemNames, value.text);
-                      return itemNames
+                      return suggestedItemNames
                           .where(
                             (name) =>
                                 query.isEmpty ||

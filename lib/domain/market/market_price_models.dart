@@ -20,6 +20,7 @@ enum MarketDiagnosticCode {
   malformedResponse,
   itemMissing,
   unusablePrice,
+  temporarilyArchived,
 }
 
 final class MarketPriceRequest {
@@ -36,6 +37,7 @@ final class MarketPriceRow {
     required this.ok,
     required this.price,
     required this.stock,
+    this.aggregateStock,
     required this.source,
     required this.fetchedAt,
     required this.diagnosticCode,
@@ -46,6 +48,7 @@ final class MarketPriceRow {
   }) : assert(id != ''),
        assert(price >= 0),
        assert(stock == null || stock >= 0),
+       assert(aggregateStock == null || aggregateStock >= 0),
        assert(totalTrades == null || totalTrades >= 0),
        assert(lastSoldAtEpochSeconds == null || lastSoldAtEpochSeconds >= 0),
        assert(ok == (diagnosticCode == MarketDiagnosticCode.none));
@@ -57,6 +60,11 @@ final class MarketPriceRow {
 
   /// Null means the source did not assert stock. Zero is known out-of-stock.
   final int? stock;
+
+  /// All-enhancement Search stock, not availability for the requested variant.
+  /// A successful row with this value and null [stock] invalidates old stock
+  /// that was incorrectly saved as if it belonged to the base item.
+  final int? aggregateStock;
   final MarketPriceSource source;
   final DateTime fetchedAt;
   final MarketDiagnosticCode diagnosticCode;

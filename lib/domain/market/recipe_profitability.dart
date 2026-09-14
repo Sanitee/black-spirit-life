@@ -1,6 +1,7 @@
 import '../models/catalog_models.dart';
 import '../planner/planner_engine.dart';
 import '../planner/planner_models.dart' as planning;
+import '../planner/recipe_route_economics.dart';
 import '../planner/source_resolution.dart';
 import '../state/planner_state.dart';
 import 'market_calculations.dart';
@@ -86,6 +87,8 @@ final class RecipeProfitabilityQuote {
 /// active complete recipe variant plus the user's saved substitute and quality
 /// selections. Only prices in the current mode's market cache are accepted;
 /// bundled fallback prices are never considered current market evidence.
+/// A supplied [calculate] selectedVariantId quotes the formula displayed by the
+/// caller; otherwise equivalent routes are compared for buying one full craft.
 final class RecipeProfitabilityCalculator {
   const RecipeProfitabilityCalculator({this.engine = const PlannerEngine()});
 
@@ -97,6 +100,7 @@ final class RecipeProfitabilityCalculator {
     required ModeState state,
     required planning.PlannerRules rules,
     required MarketTax marketTax,
+    String? selectedVariantId,
   }) {
     final selection = _resolveSelection(
       engine: engine,
@@ -104,13 +108,14 @@ final class RecipeProfitabilityCalculator {
       recipes: recipes,
       state: state,
       rules: rules,
+      selectedVariantId: selectedVariantId,
     );
     final marketItemNames = _directMarketItemNames(
       outputName: recipe.name,
       ingredients: selection.ingredients,
       recipes: recipes,
       rules: rules,
-    );
+    )..addAll(selection.alternativeMarketNames);
     RecipeProfitabilityQuote unavailable(
       RecipeProfitabilityUnavailableReason reason, {
       String? itemName,
@@ -308,6 +313,7 @@ final class RecipeProfitabilityCalculator {
     required Map<String, Recipe> recipes,
     required ModeState state,
     required planning.PlannerRules rules,
+    String? selectedVariantId,
   }) {
     final selection = _resolveSelection(
       engine: engine,
@@ -315,6 +321,7 @@ final class RecipeProfitabilityCalculator {
       recipes: recipes,
       state: state,
       rules: rules,
+      selectedVariantId: selectedVariantId,
     );
     return Set<String>.unmodifiable(
       _directMarketItemNames(
@@ -322,7 +329,7 @@ final class RecipeProfitabilityCalculator {
         ingredients: selection.ingredients,
         recipes: recipes,
         rules: rules,
-      ),
+      )..addAll(selection.alternativeMarketNames),
     );
   }
 }
@@ -332,11 +339,13 @@ final class _RecipeSelection {
     required this.recipe,
     required this.selectedVariantId,
     required this.ingredients,
+    required this.alternativeMarketNames,
   });
 
   final Recipe recipe;
   final String? selectedVariantId;
   final List<_SelectedIngredient> ingredients;
+  final Set<String> alternativeMarketNames;
 }
 
 final class _SelectedIngredient {
@@ -359,11 +368,19 @@ _RecipeSelection _resolveSelection({
   required Map<String, Recipe> recipes,
   required ModeState state,
   required planning.PlannerRules rules,
+  String? selectedVariantId,
 }) {
-  final savedVariantId = _mapValue(state.recipeVariantChoices, recipe.name);
-  final selectedVariantId = recipe.resolvedVariantId(savedVariantId);
-  final resolvedRecipe = recipe.resolveVariant(savedVariantId);
   final plannerState = _plannerState(state);
+  final routeSelection = resolveRecipeRoute(
+    recipe: recipe,
+    recipes: recipes,
+    state: plannerState,
+    rules: rules,
+  );
+  final effectiveVariantId =
+      recipe.variantById(selectedVariantId)?.id ??
+      routeSelection.selectedVariantId;
+  final resolvedRecipe = recipe.resolveVariant(effectiveVariantId);
   final ingredients = <_SelectedIngredient>[];
   for (final ingredient in resolvedRecipe.ingredients) {
     final selected = engine.previewIngredientSelection(
@@ -384,8 +401,12 @@ _RecipeSelection _resolveSelection({
   }
   return _RecipeSelection(
     recipe: resolvedRecipe,
-    selectedVariantId: selectedVariantId,
+    selectedVariantId: effectiveVariantId,
     ingredients: List<_SelectedIngredient>.unmodifiable(ingredients),
+    alternativeMarketNames: <String>{
+      for (final option in routeSelection.options)
+        if (!option.npcBuyable) option.ingredientName,
+    },
   );
 }
 
@@ -421,10 +442,10 @@ Set<String> _directMarketItemNames({
 planning.PlannerState _plannerState(ModeState state) => planning.PlannerState(
   target: state.target,
   want: state.want,
-  inventory: state.inventory,
-  completedSteps: state.completedSteps,
-  ignoreTargetInventory: state.ignoreTargetInventory,
-  ignoreIngredientInventory: state.ignoreIngredientInventory,
+  // This quote buys every direct input for one attempt. Inventory can guide
+  // an explicitly supplied plan route, but must not bias an independent quote.
+  ignoreTargetInventory: true,
+  ignoreIngredientInventory: true,
   alchemyMastery: state.alchemyMastery,
   cookingMastery: state.cookingMastery,
   processingMastery: state.processingMastery,

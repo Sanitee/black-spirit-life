@@ -35,18 +35,32 @@ void main() {
     expect(builder, contains('https://github.com/OWNER/REPOSITORY'));
     expect(builder, isNot(contains('Sanitee')));
     expect(wrapper, isNot(contains('Sanitee')));
-    expect(builder, contains("\$Version = '0.1.5'"));
-    expect(builder, contains("\$BuildNumber = '24'"));
-    expect(builder, contains("\$PreviousStableVersion = '0.1.4'"));
-    expect(builder, contains('91660bc84312a9fa4897078e0082976e869c9c83'));
+    expect(builder, contains("\$Version = '0.1.6'"));
+    expect(builder, contains("\$BuildNumber = '25'"));
+    expect(builder, contains("\$PreviousStableVersion = '0.1.5'"));
+    expect(builder, contains('8f600b3b6bbece1add1077a40a5fb1c5d56797f8'));
     expect(builder, contains("\$UpdateChannel = 'win-x64-stable'"));
-    expect(builder, contains("docs\\releases\\0.1.5.md"));
+    expect(builder, contains("docs\\releases\\0.1.6.md"));
     expect(builder, contains('tag --points-at HEAD'));
     expect(builder, contains('rev-list --count HEAD'));
+    expect(builder, contains('Assert-PublicSourceBoundary'));
+    for (final forbidden in <String>[
+      r'packages\bdo_fishing_core',
+      r'packages\bdo_gathering_companion',
+      r'windows\session_import',
+      'fish-journal',
+      'garmoth_spot_catalog',
+      r'\.sqlite3?',
+      r'planner-state\.json',
+      r'personal-data-',
+    ]) {
+      expect(builder, contains(forbidden));
+    }
     expect(builder, contains('previousSourceTag'));
     expect(builder, contains("rev-parse 'HEAD^'"));
     expect(builder, contains('sourceParentCommit'));
     expect(builder, contains('PreviousStableCommit'));
+    expect(builder, contains("\$sourceCommitCount -cne '5'"));
     expect(builder, contains('sourceTag = \$sourceTag'));
     expect(builder, contains('publicCandidate = \$true'));
     expect(builder, contains('localOnly = \$false'));
@@ -57,22 +71,29 @@ void main() {
     );
     expect(builder, contains('publishedPreviousFeed'));
     expect(builder, contains('publishedPreviousAssets'));
+    expect(builder, contains('\$PreviousFeedBytes = 10230L'));
     expect(
       builder,
       contains(
-        '91E60BA0C52D0B61500602696F20D137C3BF91E42963073AD64751C8EC6B68B5',
+        '7F9F995660AA450C80EA610DB041C82BD7C51EA35593C1B1B06FFE77FFA91FF0',
       ),
     );
+    expect(builder, contains('\$PreviousFullPackageBytes = 217687337L'));
     expect(
       builder,
       contains(
-        '873D0F1BBBE132FA72FD3CC61F0693D25DB562E6E3BB54361E5275BA9858CC7A',
+        '9C3E9BEB7121B06BA7CE4D482546842866020DDA1C231601C4149B9E31302E28',
       ),
     );
     expect(builder, contains('deltaPackageName'));
     expect(builder, contains("\$feedAssets.Count -ne 3"));
     expect(builder, contains("\$_.Type -ceq 'Delta'"));
     expect(builder, contains('delta-package'));
+    expect(builder, contains('\$deltaItem.Length -ge \$fullItem.Length'));
+    expect(
+      builder,
+      contains('generated delta package must be smaller than the full package'),
+    );
     expect(builder, contains('publicUploadArtifacts'));
     expect(builder, contains('expected = \$true'));
     expect(builder, contains('generated = \$true'));
@@ -110,7 +131,7 @@ void main() {
     () {
       final mapData = jsonDecode(mapDataText) as Map<String, dynamic>;
       final manifest = mapData['manifest']! as Map<String, dynamic>;
-      expect(manifest['datasetVersion'], '2026.08.16-stable-v1');
+      expect(manifest['datasetVersion'], '2026.09.09-beta-v4');
       for (final text in <String>[mapDataText, lodgingText, economicsText]) {
         expect(text, isNot(contains('Redistribution permission unconfirmed')));
         expect(text, isNot(contains('Do not publish or redistribute')));

@@ -69,9 +69,7 @@ class _BdoActiveNodeRecordingImportDialogState
   BdoActiveNodeListImportResult? _result;
   DateTime? _recordingStartedAt;
   bool _busy = false;
-  bool _showDiagnostics = false;
   BdoActiveNodeScanProgress? _analysisProgress;
-  String? _status;
   String? _error;
 
   Iterable<BdoWorkerNode> get _productionNodes => widget.dataset.workerNodes
@@ -94,7 +92,6 @@ class _BdoActiveNodeRecordingImportDialogState
     setState(() {
       _busy = true;
       _error = null;
-      _status = null;
     });
     try {
       final started = await launcher();
@@ -105,9 +102,6 @@ class _BdoActiveNodeRecordingImportDialogState
           _recordingStartedAt = DateTime.now().subtract(
             const Duration(seconds: 2),
           );
-          _status =
-              'Record only the narrow Activated list, scroll steadily to the '
-              'bottom, then stop the recording and return here.';
         } else {
           _error =
               'Snipping Tool could not be opened. Use Choose MP4 after '
@@ -137,8 +131,7 @@ class _BdoActiveNodeRecordingImportDialogState
         setState(() {
           _busy = false;
           _error =
-              'No new Snipping Tool MP4 was found. Stop the recording first, '
-              'or choose the saved MP4 yourself.';
+              'No new recording found. Stop recording, or choose the saved MP4.';
         });
         return;
       }
@@ -201,15 +194,9 @@ class _BdoActiveNodeRecordingImportDialogState
         final result = _result;
         if (result == null || result.matches.isEmpty) {
           _error =
-              'No production-node rows were recognized. Crop the recording '
-              'to the Activated list, keep the names visible, and scroll more '
-              'slowly.';
-          _status = null;
+              'No node names found. Record only the Activated list and scroll slowly.';
         } else {
           _error = null;
-          _status =
-              '${_scans.length} ${_scans.length == 1 ? 'recording' : 'recordings'} '
-              'combined. Nothing changes until you confirm.';
         }
       });
     } on Object catch (error) {
@@ -301,9 +288,14 @@ class _BdoActiveNodeRecordingImportDialogState
   Widget build(BuildContext context) {
     final chrome = context.mapChrome;
     final media = MediaQuery.sizeOf(context);
+    final matchCount = _result?.matches.length ?? 0;
+    final baseHeight = math.min(600.0, 190.0 + matchCount * 52);
+    final textScale = MediaQuery.textScalerOf(context).scale(14) / 14;
     final estimated = Size(
-      math.min(700, math.max(520, media.width - 36)).toDouble(),
-      math.min(690, math.max(450, media.height - 36)).toDouble(),
+      math.min(520, media.width - 36).toDouble(),
+      math
+          .min(baseHeight * math.max(1.0, textScale), media.height - 36)
+          .toDouble(),
     );
     return DraggableAlertDialog(
       identity: 'active-node-recording',
@@ -316,12 +308,12 @@ class _BdoActiveNodeRecordingImportDialogState
         borderRadius: BorderRadius.circular(18),
         side: BorderSide(color: chrome.divider),
       ),
-      titlePadding: const EdgeInsets.fromLTRB(22, 18, 12, 0),
+      titlePadding: const EdgeInsets.fromLTRB(16, 12, 8, 0),
       title: Row(
         children: <Widget>[
           Container(
-            width: 38,
-            height: 38,
+            width: 28,
+            height: 28,
             decoration: BoxDecoration(
               color: chrome.primary.withValues(alpha: .13),
               borderRadius: BorderRadius.circular(11),
@@ -335,18 +327,10 @@ class _BdoActiveNodeRecordingImportDialogState
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
                 Text(
-                  'Read Activated nodes',
+                  'Import Activated nodes',
                   style: TextStyle(
                     color: chrome.ink,
-                    fontSize: 20,
-                    fontWeight: FontWeight.w800,
-                  ),
-                ),
-                Text(
-                  'Scan a short scrolling recording; review before saving',
-                  style: TextStyle(
-                    color: chrome.muted,
-                    fontSize: 11.5,
+                    fontSize: 16,
                     fontWeight: FontWeight.w600,
                   ),
                 ),
@@ -360,38 +344,45 @@ class _BdoActiveNodeRecordingImportDialogState
           ),
         ],
       ),
-      contentPadding: const EdgeInsets.fromLTRB(22, 14, 22, 6),
-      content: SizedBox(
-        width: estimated.width - 44,
-        height: math.max(300, estimated.height - 132),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: <Widget>[
-            _buildWorkflow(context),
-            if (_error case final error?) ...<Widget>[
-              const SizedBox(height: 10),
-              _RecordingMessage(message: error, error: true),
-            ] else if (_status case final status?) ...<Widget>[
-              const SizedBox(height: 10),
-              _RecordingMessage(message: status),
-            ],
-            if (_analysisProgress case final progress?) ...<Widget>[
-              const SizedBox(height: 12),
-              _RecordingAnalysisStatus(progress: progress),
-              const SizedBox(height: 6),
-              LinearProgressIndicator(
-                key: const ValueKey<String>('active-node-recording-progress'),
-                value: progress.fraction,
-                color: chrome.primary,
-                backgroundColor: chrome.primary.withValues(alpha: .12),
-              ),
-            ],
-            const SizedBox(height: 12),
-            Expanded(child: _buildResults(context)),
-          ],
+      contentPadding: const EdgeInsets.fromLTRB(16, 10, 16, 4),
+      content: ConstrainedBox(
+        constraints: BoxConstraints(
+          maxHeight: math.max(100, media.height - 180),
+        ),
+        child: SizedBox(
+          width: estimated.width - 32,
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: <Widget>[
+                _buildWorkflow(context),
+                if (_error case final error?) ...<Widget>[
+                  const SizedBox(height: 10),
+                  _RecordingMessage(message: error, error: true),
+                ],
+                if (_analysisProgress case final progress?) ...<Widget>[
+                  const SizedBox(height: 12),
+                  _RecordingAnalysisStatus(progress: progress),
+                  const SizedBox(height: 6),
+                  LinearProgressIndicator(
+                    key: const ValueKey<String>(
+                      'active-node-recording-progress',
+                    ),
+                    value: progress.fraction,
+                    color: chrome.primary,
+                    backgroundColor: chrome.primary.withValues(alpha: .12),
+                  ),
+                ],
+                if (_result?.matches.isNotEmpty == true)
+                  const SizedBox(height: 8),
+                _buildResults(context),
+              ],
+            ),
+          ),
         ),
       ),
-      actionsPadding: const EdgeInsets.fromLTRB(22, 8, 22, 18),
+      actionsPadding: const EdgeInsets.fromLTRB(16, 6, 16, 12),
       actions: <Widget>[
         TextButton(
           onPressed: _busy ? null : () => Navigator.of(context).pop(),
@@ -403,146 +394,56 @@ class _BdoActiveNodeRecordingImportDialogState
               ? null
               : () => Navigator.of(context).pop(_selectedNodeIds),
           icon: const Icon(Icons.add_rounded, size: 18),
-          label: Text(
-            _newSelectionCount == 0
-                ? 'Keep saved nodes'
-                : 'Add $_newSelectionCount ${_newSelectionCount == 1 ? 'node' : 'nodes'}',
-          ),
+          label: Text(_newSelectionCount == 0 ? 'Done' : 'Import selected'),
         ),
       ],
     );
   }
 
   Widget _buildWorkflow(BuildContext context) {
-    final chrome = context.mapChrome;
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        color: chrome.paperRaised.withValues(alpha: .72),
-        borderRadius: BorderRadius.circular(13),
-        border: Border.all(color: chrome.divider),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(12),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: <Widget>[
-            Text(
-              'BDO map  >  Production Node Status  >  Activated',
-              style: TextStyle(
-                color: chrome.ink,
-                fontSize: 12.5,
-                fontWeight: FontWeight.w800,
-              ),
-            ),
-            const SizedBox(height: 4),
-            Text(
-              'Record only that narrow list and scroll once from top to '
-              'bottom. The map itself does not need to be visible.',
-              style: TextStyle(color: chrome.muted, fontSize: 11, height: 1.3),
-            ),
-            const SizedBox(height: 10),
-            Wrap(
-              spacing: 8,
-              runSpacing: 8,
-              children: <Widget>[
-                if (widget.launchRecording != null)
-                  FilledButton.tonalIcon(
-                    key: const ValueKey<String>('active-node-recording-start'),
-                    onPressed: _busy ? null : _startRectangleRecording,
-                    icon: const Icon(Icons.crop_free_rounded, size: 18),
-                    label: const Text('Start rectangle recording'),
-                  ),
-                if (widget.findLatestRecording != null &&
-                    _recordingStartedAt != null)
-                  FilledButton.tonalIcon(
-                    key: const ValueKey<String>(
-                      'active-node-recording-find-latest',
-                    ),
-                    onPressed: _busy ? null : _findLatest,
-                    icon: const Icon(Icons.refresh_rounded, size: 18),
-                    label: const Text('Find my recording'),
-                  ),
-                OutlinedButton.icon(
-                  key: const ValueKey<String>('active-node-recording-choose'),
-                  onPressed: _busy ? null : _chooseRecording,
-                  icon: const Icon(Icons.video_file_outlined, size: 18),
-                  label: Text(
-                    _scans.isEmpty ? 'Choose MP4' : 'Add another MP4',
-                  ),
-                ),
-              ],
-            ),
-          ],
+    return Wrap(
+      spacing: 8,
+      runSpacing: 8,
+      children: <Widget>[
+        if (widget.launchRecording != null)
+          FilledButton.tonalIcon(
+            key: const ValueKey<String>('active-node-recording-start'),
+            onPressed: _busy ? null : _startRectangleRecording,
+            icon: const Icon(Icons.crop_free_rounded, size: 18),
+            label: const Text('Record list'),
+          ),
+        if (widget.findLatestRecording != null && _recordingStartedAt != null)
+          FilledButton.tonalIcon(
+            key: const ValueKey<String>('active-node-recording-find-latest'),
+            onPressed: _busy ? null : _findLatest,
+            icon: const Icon(Icons.refresh_rounded, size: 18),
+            label: const Text('Use latest recording'),
+          ),
+        OutlinedButton.icon(
+          key: const ValueKey<String>('active-node-recording-choose'),
+          onPressed: _busy ? null : _chooseRecording,
+          icon: const Icon(Icons.video_file_outlined, size: 18),
+          label: Text(_scans.isEmpty ? 'Choose MP4' : 'Add another MP4'),
         ),
-      ),
+      ],
     );
   }
 
   Widget _buildResults(BuildContext context) {
-    final chrome = context.mapChrome;
     final result = _result;
     if (result == null || result.matches.isEmpty) {
-      return Center(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 24),
-          child: Text(
-            'The readable node names will appear here. Clear unique matches '
-            'are selected automatically; uncertain ones wait for you.',
-            textAlign: TextAlign.center,
-            style: TextStyle(color: chrome.muted, fontSize: 12, height: 1.4),
-          ),
-        ),
-      );
+      return const SizedBox.shrink();
     }
-    final accepted = result.accepted.length;
-    final review = result.requiringReview.length;
     return Column(
+      key: const ValueKey<String>('active-node-recording-results'),
+      mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: <Widget>[
-        Row(
-          children: <Widget>[
-            Expanded(
-              child: Text(
-                '$accepted clear  /  $review to review  /  '
-                '${_selectedNodeIds.length} selected',
-                style: TextStyle(
-                  color: chrome.ink,
-                  fontSize: 12,
-                  fontWeight: FontWeight.w800,
-                ),
-              ),
-            ),
-            TextButton(
-              onPressed: () =>
-                  setState(() => _showDiagnostics = !_showDiagnostics),
-              child: Text(_showDiagnostics ? 'Hide details' : 'Scan details'),
-            ),
-          ],
-        ),
-        if (_showDiagnostics)
+        for (final match in result.matches)
           Padding(
-            padding: const EdgeInsets.only(bottom: 8),
-            child: Text(
-              '${result.rejected.length} unread OCR '
-              '${result.rejected.length == 1 ? 'line' : 'lines'} ignored. '
-              '${_scans.expand((scan) => scan.frames).length} sharp frames '
-              'sampled. Missing rows are never treated as disconnected.',
-              style: TextStyle(
-                color: chrome.muted,
-                fontSize: 10.5,
-                height: 1.35,
-              ),
-            ),
+            padding: const EdgeInsets.only(bottom: 6),
+            child: _buildMatch(context, match),
           ),
-        Expanded(
-          child: ListView.separated(
-            key: const ValueKey<String>('active-node-recording-results'),
-            itemCount: result.matches.length,
-            separatorBuilder: (_, _) => const SizedBox(height: 7),
-            itemBuilder: (context, index) =>
-                _buildMatch(context, result.matches[index]),
-          ),
-        ),
       ],
     );
   }
@@ -555,12 +456,11 @@ class _BdoActiveNodeRecordingImportDialogState
     final alreadySaved = match.candidateNodeIds.any(
       widget.existingNodeIds.contains,
     );
-    final confidence = (match.confidence * 100).round().clamp(0, 100);
     final warning = match.disposition == BdoActiveNodeMatchDisposition.review;
     return Material(
       color: warning
           ? chrome.warning.withValues(alpha: .075)
-          : chrome.paperRaised.withValues(alpha: .62),
+          : chrome.fillAlpha(chrome.paperRaised, .62),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
         side: BorderSide(
@@ -570,7 +470,7 @@ class _BdoActiveNodeRecordingImportDialogState
         ),
       ),
       child: Padding(
-        padding: const EdgeInsets.fromLTRB(10, 7, 10, 8),
+        padding: const EdgeInsets.fromLTRB(4, 2, 8, 2),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: <Widget>[
@@ -603,28 +503,23 @@ class _BdoActiveNodeRecordingImportDialogState
                         '${match.canonicalActivity ?? 'Unknown activity'}',
                         style: TextStyle(
                           color: chrome.ink,
-                          fontSize: 12.5,
-                          fontWeight: FontWeight.w800,
+                          fontSize: 14,
+                          fontWeight: FontWeight.w500,
                         ),
                       ),
-                      const SizedBox(height: 2),
-                      Text(
-                        alreadySaved
-                            ? 'Already in your setup'
-                            : ambiguous
-                            ? 'Same in-game label: select each matching output below'
-                            : warning
-                            ? 'OCR match needs your confirmation / $confidence%'
-                            : 'Clear match / read ${match.sightingCount} '
-                                  '${match.sightingCount == 1 ? 'time' : 'times'}',
-                        style: TextStyle(
-                          color: warning ? chrome.warning : chrome.muted,
-                          fontSize: 10.5,
-                          fontWeight: warning
-                              ? FontWeight.w700
-                              : FontWeight.w500,
+                      if (alreadySaved || ambiguous || warning)
+                        Text(
+                          alreadySaved
+                              ? 'Already saved'
+                              : ambiguous
+                              ? 'Choose output'
+                              : 'Review match',
+                          style: TextStyle(
+                            color: warning ? chrome.warning : chrome.muted,
+                            fontSize: 12.5,
+                            fontWeight: FontWeight.w400,
+                          ),
                         ),
-                      ),
                     ],
                   ),
                 ),
@@ -675,14 +570,14 @@ class _BdoActiveNodeRecordingImportDialogState
         outputs.isEmpty ? (node?.name ?? nodeId) : outputs,
         style: TextStyle(
           color: chrome.ink,
-          fontSize: 11,
-          fontWeight: FontWeight.w700,
+          fontSize: 14,
+          fontWeight: FontWeight.w500,
         ),
       ),
       subtitle: saved
           ? Text(
-              'Already in your setup',
-              style: TextStyle(color: chrome.muted, fontSize: 10),
+              'Already saved',
+              style: TextStyle(color: chrome.muted, fontSize: 14),
             )
           : null,
     );
@@ -714,9 +609,9 @@ class _RecordingAnalysisStatus extends StatelessWidget {
     final label = progress.fraction < .10
         ? 'Opening recording'
         : progress.fraction < .30
-        ? 'Sampling video frames'
+        ? 'Checking video frames'
         : progress.fraction >= .95
-        ? 'Collecting OCR result'
+        ? 'Finishing scan'
         : 'Reading node names';
     final count = progress.estimatedFrames > 0
         ? '${progress.completedFrames} of ${progress.estimatedFrames}'
@@ -729,8 +624,8 @@ class _RecordingAnalysisStatus extends StatelessWidget {
             count == null ? label : '$label  $count',
             style: TextStyle(
               color: chrome.text,
-              fontSize: 11,
-              fontWeight: FontWeight.w700,
+              fontSize: 14,
+              fontWeight: FontWeight.w500,
             ),
           ),
         ),
@@ -738,8 +633,8 @@ class _RecordingAnalysisStatus extends StatelessWidget {
           '$percent%',
           style: TextStyle(
             color: chrome.primary,
-            fontSize: 11,
-            fontWeight: FontWeight.w900,
+            fontSize: 14,
+            fontWeight: FontWeight.w600,
           ),
         ),
       ],
@@ -779,7 +674,7 @@ class _RecordingMessage extends StatelessWidget {
                 message,
                 style: TextStyle(
                   color: chrome.text,
-                  fontSize: 11,
+                  fontSize: 14,
                   height: 1.35,
                 ),
               ),

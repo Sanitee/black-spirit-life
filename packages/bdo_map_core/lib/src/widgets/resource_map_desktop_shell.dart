@@ -89,8 +89,8 @@ class _ResourceMapDesktopEnterTransition extends StatelessWidget {
 
 /// The compact command islands used over the desktop map.
 ///
-/// Search and each mode are separate content-backed surfaces. There is no
-/// enclosing slab, so the map remains visible in the space between controls.
+/// Gather and Workers share one segmented surface while search remains a
+/// separate, prominent field. The map stays visible around both islands.
 class ResourceMapDesktopCommandBar extends StatelessWidget {
   const ResourceMapDesktopCommandBar({
     required this.searchController,
@@ -106,6 +106,7 @@ class ResourceMapDesktopCommandBar extends StatelessWidget {
     this.gatherIcon,
     this.workersIcon,
     this.searchIcon,
+    this.searchHintText = 'Find an item, source, node or town',
     super.key,
   });
 
@@ -122,6 +123,7 @@ class ResourceMapDesktopCommandBar extends StatelessWidget {
   final Widget? gatherIcon;
   final Widget? workersIcon;
   final Widget? searchIcon;
+  final String searchHintText;
 
   @override
   Widget build(BuildContext context) {
@@ -141,44 +143,52 @@ class ResourceMapDesktopCommandBar extends StatelessWidget {
                   key: const ValueKey<String>(
                     'resource-map-command-action-rail',
                   ),
-                  color: Colors.transparent,
+                  color: context.mapChrome.fillAlpha(
+                    context.mapChrome.chromeBase,
+                    .94,
+                  ),
                   elevation: 0,
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: <Widget>[
-                      _MapModeControl(
-                        key: const ValueKey<String>(
-                          'resource-map-command-gather',
+                  borderRadius: BorderRadius.circular(16),
+                  clipBehavior: Clip.antiAlias,
+                  child: Padding(
+                    padding: const EdgeInsets.all(3),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: <Widget>[
+                        _MapModeControl(
+                          key: const ValueKey<String>(
+                            'resource-map-command-gather',
+                          ),
+                          icon:
+                              gatherIcon ??
+                              const Icon(Icons.location_on_outlined),
+                          label: 'Gather',
+                          selected: gatherSelected,
+                          onPressed: onGatherPressed,
+                          reduceMotion: reduceMotion,
+                          // The physical-object icon supports the action name;
+                          // it never replaces it. Gather and Workers must stay
+                          // understandable at every supported desktop width.
+                          showLabel: true,
+                          labeledMinWidth: 112,
                         ),
-                        icon:
-                            gatherIcon ??
-                            const Icon(Icons.location_on_outlined),
-                        label: 'Gather',
-                        selected: gatherSelected,
-                        onPressed: onGatherPressed,
-                        reduceMotion: reduceMotion,
-                        // The physical-object icon supports the action name;
-                        // it never replaces it. Gather and Workers must stay
-                        // understandable at every supported desktop width.
-                        showLabel: true,
-                        labeledMinWidth: 112,
-                      ),
-                      const SizedBox(width: 6),
-                      _MapModeControl(
-                        key: const ValueKey<String>(
-                          'resource-map-command-workers',
+                        const SizedBox(width: 2),
+                        _MapModeControl(
+                          key: const ValueKey<String>(
+                            'resource-map-command-workers',
+                          ),
+                          icon:
+                              workersIcon ??
+                              const Icon(Icons.account_tree_outlined),
+                          label: 'Workers',
+                          selected: workersSelected,
+                          onPressed: onWorkersPressed,
+                          reduceMotion: reduceMotion,
+                          showLabel: true,
+                          labeledMinWidth: 112,
                         ),
-                        icon:
-                            workersIcon ??
-                            const Icon(Icons.account_tree_outlined),
-                        label: 'Workers',
-                        selected: workersSelected,
-                        onPressed: onWorkersPressed,
-                        reduceMotion: reduceMotion,
-                        showLabel: true,
-                        labeledMinWidth: 112,
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
                 const SizedBox(width: 10),
@@ -191,6 +201,7 @@ class ResourceMapDesktopCommandBar extends StatelessWidget {
                     onTap: onSearchTapped,
                     onClear: onClearSearch,
                     icon: searchIcon,
+                    hintText: searchHintText,
                   ),
                 ),
               ],
@@ -1312,64 +1323,100 @@ class ResourceMapDesktopTaskStrip extends StatelessWidget {
       ),
       child: ConstrainedBox(
         key: const ValueKey<String>('resource-map-desktop-task-strip'),
-        constraints: const BoxConstraints(minHeight: 48),
-        child: DecoratedBox(
-          decoration: BoxDecoration(
-            gradient: chrome.taskStripGradient,
-            borderRadius: BorderRadius.circular(chrome.controlRadius),
-            border: Border.all(color: chrome.warmOutline),
-            boxShadow: const <BoxShadow>[
-              BoxShadow(
-                color: Color(0x4D000000),
-                blurRadius: 13,
-                offset: Offset(0, 5),
+        constraints: const BoxConstraints(minHeight: 46),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 2),
+          child: Row(
+            children: <Widget>[
+              if (onBack != null)
+                _MapIconControl(
+                  key: const ValueKey<String>('resource-map-task-back'),
+                  tooltip: 'Back',
+                  semanticLabel: 'Back',
+                  icon: Icons.arrow_back_rounded,
+                  onPressed: onBack!,
+                  compact: true,
+                )
+              else
+                Container(
+                  width: 32,
+                  height: 32,
+                  margin: const EdgeInsetsDirectional.only(start: 4),
+                  alignment: Alignment.center,
+                  decoration: BoxDecoration(
+                    color: chrome.primary.withValues(alpha: .12),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Icon(leadingIcon, size: 18, color: chrome.primary),
+                ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Text(title, style: chrome.headingStyle(fontSize: 14.5)),
               ),
+              ...actions,
+              if (onClose != null) ...<Widget>[
+                const SizedBox(width: 4),
+                _MapIconControl(
+                  key: const ValueKey<String>('resource-map-task-close'),
+                  tooltip: 'Close',
+                  semanticLabel: 'Close map task',
+                  icon: Icons.close_rounded,
+                  onPressed: onClose!,
+                  compact: true,
+                ),
+              ],
             ],
           ),
-          child: Padding(
-            padding: const EdgeInsets.all(4),
-            child: Row(
-              children: <Widget>[
-                if (onBack != null)
-                  _MapIconControl(
-                    key: const ValueKey<String>('resource-map-task-back'),
-                    tooltip: 'Back',
-                    semanticLabel: 'Back',
-                    icon: Icons.arrow_back_rounded,
-                    onPressed: onBack!,
-                    compact: true,
-                  )
-                else
-                  Container(
-                    width: 34,
-                    height: 34,
-                    margin: const EdgeInsets.symmetric(horizontal: 4),
-                    alignment: Alignment.center,
-                    decoration: BoxDecoration(
-                      color: chrome.trimWash,
-                      borderRadius: BorderRadius.circular(chrome.inlineRadius),
-                      border: Border.all(color: chrome.trimDeep),
-                    ),
-                    child: Icon(leadingIcon, size: 18, color: chrome.accent),
-                  ),
-                const SizedBox(width: 5),
-                Expanded(child: Text(title, style: chrome.headingStyle())),
-                ...actions,
-                if (onClose != null) ...<Widget>[
-                  const SizedBox(width: 4),
-                  _MapIconControl(
-                    key: const ValueKey<String>('resource-map-task-close'),
-                    tooltip: 'Close',
-                    semanticLabel: 'Close map task',
-                    icon: Icons.close_rounded,
-                    onPressed: onClose!,
-                    compact: true,
-                  ),
-                ],
-              ],
-            ),
-          ),
         ),
+      ),
+    );
+  }
+}
+
+/// A compact floating map workspace.
+///
+/// Unlike the old full-height edge wash, this surface has a clear physical
+/// boundary and leaves map space visible on every side. It is used for search,
+/// details, browse pages and the worker workbench so navigation feels like one
+/// coherent desktop product instead of a collection of drawers.
+class ResourceMapDesktopFloatingSurface extends StatelessWidget {
+  const ResourceMapDesktopFloatingSurface({
+    required this.child,
+    this.padding = EdgeInsets.zero,
+    this.radius = 20,
+    super.key,
+  });
+
+  final Widget child;
+  final EdgeInsetsGeometry padding;
+  final double radius;
+
+  @override
+  Widget build(BuildContext context) {
+    final chrome = ResourceMapChromeTheme.of(context);
+    return DecoratedBox(
+      key: const ValueKey<String>('resource-map-desktop-floating-surface'),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(radius),
+        boxShadow: <BoxShadow>[
+          BoxShadow(
+            color: Colors.black.withValues(alpha: .52),
+            blurRadius: 30,
+            spreadRadius: -8,
+            offset: const Offset(0, 14),
+          ),
+        ],
+      ),
+      child: Material(
+        key: const ValueKey<String>('resource-map-desktop-edge-surface'),
+        color: chrome.fillAlpha(chrome.chromeBase, .965),
+        elevation: 0,
+        clipBehavior: Clip.antiAlias,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(radius),
+          side: BorderSide(color: Colors.white.withValues(alpha: .10)),
+        ),
+        child: Padding(padding: padding, child: child),
       ),
     );
   }
@@ -1557,6 +1604,7 @@ class _MapSearchControl extends StatelessWidget {
     required this.onSubmitted,
     required this.onTap,
     required this.onClear,
+    required this.hintText,
     this.icon,
   });
 
@@ -1566,6 +1614,7 @@ class _MapSearchControl extends StatelessWidget {
   final ValueChanged<String> onSubmitted;
   final VoidCallback onTap;
   final VoidCallback onClear;
+  final String hintText;
   final Widget? icon;
 
   @override
@@ -1586,21 +1635,21 @@ class _MapSearchControl extends StatelessWidget {
                   : ResourceMapDesktopMotion.quick,
               curve: ResourceMapDesktopMotion.curve,
               decoration: BoxDecoration(
-                gradient: focused
-                    ? chrome.focusedSearchGradient
-                    : chrome.idleSearchGradient,
-                borderRadius: BorderRadius.circular(chrome.commandRadius),
+                color: chrome.fillAlpha(chrome.chromeBase, focused ? .98 : .94),
+                borderRadius: BorderRadius.circular(16),
                 border: Border.all(
-                  color: focused ? chrome.primary : chrome.warmOutline,
-                  width: focused ? 1.25 : 1,
+                  color: focused
+                      ? chrome.primary.withValues(alpha: .72)
+                      : Colors.white.withValues(alpha: .10),
+                  width: 1,
                 ),
                 boxShadow: <BoxShadow>[
                   BoxShadow(
                     color: focused
-                        ? chrome.primary.withValues(alpha: .24)
-                        : const Color(0x52000000),
-                    blurRadius: focused ? 16 : 12,
-                    offset: const Offset(0, 5),
+                        ? chrome.primary.withValues(alpha: .16)
+                        : Colors.black.withValues(alpha: .38),
+                    blurRadius: focused ? 22 : 18,
+                    offset: const Offset(0, 8),
                   ),
                 ],
               ),
@@ -1620,22 +1669,33 @@ class _MapSearchControl extends StatelessWidget {
                 ),
                 decoration: InputDecoration(
                   isDense: true,
-                  hintText: 'Find an item, source, node or town',
+                  hintText: hintText,
                   hintStyle: TextStyle(
                     color: chrome.muted,
                     fontSize: 13.5,
                     fontWeight: FontWeight.w500,
                   ),
-                  prefixIcon: IconTheme(
-                    data: IconThemeData(
-                      size: 22,
-                      color: focused ? chrome.primary : chrome.accent,
+                  prefixIcon: DecoratedBox(
+                    decoration: icon == null
+                        ? const BoxDecoration()
+                        : BoxDecoration(
+                            border: BorderDirectional(
+                              end: BorderSide(
+                                color: Colors.white.withValues(alpha: .08),
+                              ),
+                            ),
+                          ),
+                    child: IconTheme(
+                      data: IconThemeData(
+                        size: 21,
+                        color: focused ? chrome.primary : chrome.accent,
+                      ),
+                      child: icon ?? const Icon(Icons.search_rounded),
                     ),
-                    child: icon ?? const Icon(Icons.search_rounded),
                   ),
-                  prefixIconConstraints: const BoxConstraints(
-                    minWidth: 42,
-                    maxWidth: 42,
+                  prefixIconConstraints: BoxConstraints(
+                    minWidth: icon == null ? 42 : 112,
+                    maxWidth: icon == null ? 42 : 112,
                   ),
                   suffixIcon: queryActive
                       ? IconButton(
@@ -1723,7 +1783,7 @@ class _MapModeControl extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final chrome = ResourceMapChromeTheme.of(context);
-    final foreground = selected ? chrome.accent : chrome.text;
+    final foreground = selected ? chrome.ink : chrome.muted;
     final control = Semantics(
       button: true,
       selected: selected,
@@ -1732,13 +1792,13 @@ class _MapModeControl extends StatelessWidget {
         color: Colors.transparent,
         child: InkWell(
           onTap: onPressed,
-          borderRadius: BorderRadius.circular(chrome.commandRadius - 3),
+          borderRadius: BorderRadius.circular(13),
           hoverColor: chrome.accent.withValues(alpha: .08),
           focusColor: chrome.accent.withValues(alpha: .12),
           highlightColor: chrome.accent.withValues(alpha: .15),
           child: AnimatedContainer(
             width: showLabel ? null : 46,
-            height: 50,
+            height: 44,
             constraints: showLabel
                 ? BoxConstraints(minWidth: labeledMinWidth)
                 : null,
@@ -1749,29 +1809,25 @@ class _MapModeControl extends StatelessWidget {
                 : ResourceMapDesktopMotion.quick,
             curve: ResourceMapDesktopMotion.curve,
             decoration: BoxDecoration(
-              gradient: selected
-                  ? chrome.selectedModeGradient
-                  : chrome.idleControlGradient,
-              borderRadius: BorderRadius.circular(chrome.commandRadius),
+              color: selected
+                  ? chrome.primary.withValues(alpha: .18)
+                  : Colors.transparent,
+              borderRadius: BorderRadius.circular(13),
               border: Border.all(
-                color: selected ? chrome.primary : chrome.warmOutline,
+                color: selected
+                    ? chrome.primary.withValues(alpha: .55)
+                    : Colors.transparent,
               ),
-              boxShadow: <BoxShadow>[
-                BoxShadow(
-                  color: selected
-                      ? chrome.primary.withValues(alpha: .24)
-                      : const Color(0x52000000),
-                  blurRadius: selected ? 15 : 12,
-                  offset: const Offset(0, 5),
-                ),
-              ],
             ),
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: <Widget>[
                 IconTheme(
-                  data: IconThemeData(size: 26, color: foreground),
-                  child: SizedBox.square(dimension: 28, child: icon),
+                  data: IconThemeData(
+                    size: 24,
+                    color: selected ? chrome.primary : foreground,
+                  ),
+                  child: SizedBox.square(dimension: 26, child: icon),
                 ),
                 if (showLabel) ...<Widget>[
                   const SizedBox(width: 7),

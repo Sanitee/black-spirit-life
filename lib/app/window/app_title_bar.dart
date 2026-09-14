@@ -9,6 +9,7 @@ import '../../visual/sakura_night_garden/sakura_botanical_assets.dart';
 import '../../visual/sakura_night_garden/sakura_material_painters.dart';
 import '../../visual/sakura_night_garden/sakura_spec.dart';
 import '../../visual/standard/standard_spec.dart';
+import 'app_title_bar_visual.dart';
 import 'window_host_service.dart';
 
 @immutable
@@ -20,14 +21,23 @@ class AppTitleTab {
     required this.onPressed,
     this.icon,
     this.artworkAssetPath,
+    this.inactiveArtworkAssetPath,
+    this.artworkScale = 1,
   }) : assert(
          (icon == null) != (artworkAssetPath == null),
          'Provide exactly one tab icon or artwork asset.',
-       );
+       ),
+       assert(
+         inactiveArtworkAssetPath == null || artworkAssetPath != null,
+         'Inactive artwork requires a primary artwork asset.',
+       ),
+       assert(artworkScale > 0, 'Artwork scale must be greater than zero.');
 
   final Key tabKey;
   final IconData? icon;
   final String? artworkAssetPath;
+  final String? inactiveArtworkAssetPath;
+  final double artworkScale;
   final String label;
   final bool selected;
   final VoidCallback onPressed;
@@ -51,13 +61,14 @@ class AppTitleTabStrip extends StatelessWidget {
       ValueKey<String>('app-title-tab-surface-$label');
   static Key artworkKey(String label) =>
       ValueKey<String>('app-title-tab-artwork-$label');
-  static const double artworkSize = 34;
+  static const double artworkSize = 30;
 
   @override
   Widget build(BuildContext context) {
     final spec = ThemeSpecScope.maybeOf(context) ?? StandardSpec.theme;
+    final visual = AppTitleBarVisualScope.maybeOf(context);
     final textScaler = MediaQuery.textScalerOf(context);
-    final labelStyle = _tabLabelStyle(spec, selected: true);
+    final labelStyle = _tabLabelStyle(spec, selected: true, visual: visual);
     final animationDuration = MediaQuery.disableAnimationsOf(context)
         ? Duration.zero
         : spec.motion.interactionDuration;
@@ -207,10 +218,12 @@ class _AppTitleTabButtonState extends State<_AppTitleTabButton> {
   @override
   Widget build(BuildContext context) {
     final spec = ThemeSpecScope.maybeOf(context) ?? StandardSpec.theme;
+    final visual = AppTitleBarVisualScope.maybeOf(context);
     final selected = widget.tab.selected;
     final decoration = _tabDecoration(
       context,
       spec,
+      visual: visual,
       selected: selected,
       hovered: _hovered,
       focused: _focused,
@@ -218,6 +231,7 @@ class _AppTitleTabButtonState extends State<_AppTitleTabButton> {
     );
     final foreground = _tabForeground(
       spec,
+      visual: visual,
       selected: selected,
       hovered: _hovered,
     );
@@ -260,7 +274,7 @@ class _AppTitleTabButtonState extends State<_AppTitleTabButton> {
                     focusNode: _focusNode,
                     onFocusChange: (focused) =>
                         setState(() => _focused = focused),
-                    borderRadius: _tabRadius(spec),
+                    borderRadius: _tabRadius(spec, visual: visual),
                     focusColor: Colors.transparent,
                     hoverColor: Colors.transparent,
                     splashColor: foreground.withAlpha(28),
@@ -319,6 +333,7 @@ class _AppTitleTabButtonState extends State<_AppTitleTabButton> {
                                     style: _tabLabelStyle(
                                       spec,
                                       selected: selected,
+                                      visual: visual,
                                     ).copyWith(color: foreground),
                                   ),
                                 ),
@@ -346,27 +361,30 @@ class _TitleTabArtwork extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final assetPath = tab.artworkAssetPath;
+    final primaryAssetPath = tab.artworkAssetPath;
+    final assetPath = tab.selected
+        ? primaryAssetPath
+        : tab.inactiveArtworkAssetPath ?? primaryAssetPath;
     if (assetPath == null) {
       return Icon(tab.icon, size: 23, color: foreground);
     }
     final rasterScale = MediaQuery.devicePixelRatioOf(context).clamp(3.0, 5.0);
-    final rasterSize = (AppTitleTabStrip.artworkSize * rasterScale).ceil();
-    return ClipRRect(
+    final rasterSize =
+        (AppTitleTabStrip.artworkSize * rasterScale * tab.artworkScale).ceil();
+    return SizedBox.square(
       key: AppTitleTabStrip.artworkKey(tab.label),
-      borderRadius: BorderRadius.circular(8),
       child: Transform.scale(
-        // Both retained artworks include generous ornamental framing. A small
-        // crop keeps the actual cauldron/map symbol legible at title-bar size
-        // and prevents the artwork frame from reading as a second tab border.
-        scale: 1.18,
+        // The reviewed BDO markers share a visual family but not identical
+        // transparent margins. Per-tab optical scaling equalizes the visible
+        // symbols without repainting, tinting, or cropping the game artwork.
+        scale: tab.artworkScale,
         child: Image.asset(
           assetPath,
           width: AppTitleTabStrip.artworkSize,
           height: AppTitleTabStrip.artworkSize,
           cacheWidth: rasterSize,
           cacheHeight: rasterSize,
-          fit: BoxFit.cover,
+          fit: BoxFit.contain,
           filterQuality: FilterQuality.high,
           isAntiAlias: true,
           gaplessPlayback: true,
@@ -377,24 +395,33 @@ class _TitleTabArtwork extends StatelessWidget {
   }
 }
 
-TextStyle _tabLabelStyle(ThemeSpec spec, {required bool selected}) => TextStyle(
+TextStyle _tabLabelStyle(
+  ThemeSpec spec, {
+  required bool selected,
+  AppTitleBarVisual? visual,
+}) => TextStyle(
   color: spec.palette.text,
-  fontFamily: spec.family == RetainedVisualFamily.sakuraNightGarden
-      ? 'Georgia'
-      : 'Segoe UI',
+  fontFamily:
+      visual?.fontFamily ??
+      (spec.family == RetainedVisualFamily.sakuraNightGarden
+          ? 'Georgia'
+          : 'Segoe UI'),
   fontSize: 13,
   fontWeight: selected ? FontWeight.w700 : FontWeight.w600,
-  letterSpacing: spec.family == RetainedVisualFamily.sakuraNightGarden
+  letterSpacing:
+      visual == null && spec.family == RetainedVisualFamily.sakuraNightGarden
       ? .1
       : .2,
 );
 
-BorderRadius _tabRadius(ThemeSpec spec) {
-  final radius = switch (spec.family) {
-    RetainedVisualFamily.illuminatedLedger => 3.0,
-    RetainedVisualFamily.sakuraNightGarden => 7.0,
-    RetainedVisualFamily.standard => 8.0,
-  };
+BorderRadius _tabRadius(ThemeSpec spec, {AppTitleBarVisual? visual}) {
+  final radius =
+      visual?.tabRadius ??
+      switch (spec.family) {
+        RetainedVisualFamily.illuminatedLedger => 3.0,
+        RetainedVisualFamily.sakuraNightGarden => 7.0,
+        RetainedVisualFamily.standard => 8.0,
+      };
   return BorderRadius.only(
     topLeft: Radius.circular(radius),
     topRight: Radius.circular(radius),
@@ -405,9 +432,17 @@ BorderRadius _tabRadius(ThemeSpec spec) {
 
 Color _tabForeground(
   ThemeSpec spec, {
+  AppTitleBarVisual? visual,
   required bool selected,
   required bool hovered,
 }) {
+  if (visual != null) {
+    return selected
+        ? visual.tabSelectedForeground
+        : hovered
+        ? visual.tabHoverForeground
+        : visual.tabForeground;
+  }
   if (spec.family == RetainedVisualFamily.illuminatedLedger) {
     return selected
         ? const Color(0xFFFFEDBA)
@@ -448,7 +483,21 @@ class _TitleTabPalette {
   final Color divider;
 }
 
-_TitleTabPalette _tabPalette(BuildContext context, ThemeSpec spec) {
+_TitleTabPalette _tabPalette(
+  BuildContext context,
+  ThemeSpec spec, {
+  AppTitleBarVisual? visual,
+}) {
+  if (visual != null) {
+    return _TitleTabPalette(
+      accent: visual.tabAccent,
+      surface: visual.tabSurface,
+      selectedSurface: visual.tabSelectedSurface,
+      hoverSurface: visual.tabHoverSurface,
+      pressedSurface: visual.tabPressedSurface,
+      divider: visual.tabDivider,
+    );
+  }
   switch (spec.family) {
     case RetainedVisualFamily.standard:
       final settings = context.standardVisual;
@@ -498,12 +547,13 @@ _TitleTabPalette _tabPalette(BuildContext context, ThemeSpec spec) {
 BoxDecoration _tabDecoration(
   BuildContext context,
   ThemeSpec spec, {
+  AppTitleBarVisual? visual,
   required bool selected,
   required bool hovered,
   required bool focused,
   required bool pressed,
 }) {
-  final palette = _tabPalette(context, spec);
+  final palette = _tabPalette(context, spec, visual: visual);
   final color = pressed
       ? palette.pressedSurface
       : selected
@@ -520,7 +570,7 @@ BoxDecoration _tabDecoration(
       : palette.divider;
   return BoxDecoration(
     color: color,
-    borderRadius: _tabRadius(spec),
+    borderRadius: _tabRadius(spec, visual: visual),
     border: Border.all(color: borderColor, width: focused ? 1.4 : 1),
   );
 }
@@ -606,59 +656,70 @@ class _AppTitleBarState extends State<AppTitleBar> {
   Widget build(BuildContext context) {
     final spec = ThemeSpecScope.maybeOf(context);
     final family = spec?.family ?? RetainedVisualFamily.standard;
-    final decoration = switch (family) {
-      RetainedVisualFamily.illuminatedLedger => const BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.centerLeft,
-          end: Alignment.centerRight,
-          colors: <Color>[
-            Color(0xFF0A2744),
-            Color(0xFF123D69),
-            Color(0xFF071D35),
-          ],
-          stops: <double>[0, .56, 1],
-        ),
-        border: Border(
-          bottom: BorderSide(color: Color(0xFFC9A14A), width: 1.5),
-        ),
-      ),
-      RetainedVisualFamily.sakuraNightGarden => const BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.centerLeft,
-          end: Alignment.centerRight,
-          colors: <Color>[
-            Color(0xFF171415),
-            SakuraNightGardenSpec.nightCedar,
-            SakuraNightGardenSpec.canvasDeep,
-          ],
-          stops: <double>[0, .58, 1],
-        ),
-        border: Border(
-          bottom: BorderSide(color: SakuraNightGardenSpec.rosewood, width: 1),
-        ),
-        image: DecorationImage(
-          image: AssetImage(SakuraNightGardenSpec.blackenedCedarAssetPath),
-          fit: BoxFit.cover,
-          filterQuality: FilterQuality.high,
-          opacity: .42,
-        ),
-      ),
-      RetainedVisualFamily.standard => BoxDecoration(
-        gradient: StandardSpec.titleStripGradient(
-          context.standardVisual.backgroundId,
-        ),
-      ),
-    };
-    final foreground = switch (family) {
-      RetainedVisualFamily.illuminatedLedger => const Color(0xFFEAD8A4),
-      RetainedVisualFamily.sakuraNightGarden => SakuraNightGardenSpec.warmIvory,
-      RetainedVisualFamily.standard => const Color(0xFFFFF0D0),
-    };
-    final iconBorder = switch (family) {
-      RetainedVisualFamily.sakuraNightGarden =>
-        SakuraNightGardenSpec.copperHighlight.withAlpha(146),
-      _ => const Color(0xFF375F4F),
-    };
+    final visual = AppTitleBarVisualScope.maybeOf(context);
+    final decoration =
+        visual?.titleDecoration ??
+        switch (family) {
+          RetainedVisualFamily.illuminatedLedger => const BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.centerLeft,
+              end: Alignment.centerRight,
+              colors: <Color>[
+                Color(0xFF0A2744),
+                Color(0xFF123D69),
+                Color(0xFF071D35),
+              ],
+              stops: <double>[0, .56, 1],
+            ),
+            border: Border(
+              bottom: BorderSide(color: Color(0xFFC9A14A), width: 1.5),
+            ),
+          ),
+          RetainedVisualFamily.sakuraNightGarden => const BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.centerLeft,
+              end: Alignment.centerRight,
+              colors: <Color>[
+                Color(0xFF171415),
+                SakuraNightGardenSpec.nightCedar,
+                SakuraNightGardenSpec.canvasDeep,
+              ],
+              stops: <double>[0, .58, 1],
+            ),
+            border: Border(
+              bottom: BorderSide(
+                color: SakuraNightGardenSpec.rosewood,
+                width: 1,
+              ),
+            ),
+            image: DecorationImage(
+              image: AssetImage(SakuraNightGardenSpec.blackenedCedarAssetPath),
+              fit: BoxFit.cover,
+              filterQuality: FilterQuality.high,
+              opacity: .42,
+            ),
+          ),
+          RetainedVisualFamily.standard => BoxDecoration(
+            gradient: StandardSpec.titleStripGradient(
+              context.standardVisual.backgroundId,
+            ),
+          ),
+        };
+    final foreground =
+        visual?.foreground ??
+        switch (family) {
+          RetainedVisualFamily.illuminatedLedger => const Color(0xFFEAD8A4),
+          RetainedVisualFamily.sakuraNightGarden =>
+            SakuraNightGardenSpec.warmIvory,
+          RetainedVisualFamily.standard => const Color(0xFFFFF0D0),
+        };
+    final iconBorder =
+        visual?.iconBorder ??
+        switch (family) {
+          RetainedVisualFamily.sakuraNightGarden =>
+            SakuraNightGardenSpec.copperHighlight.withAlpha(146),
+          _ => const Color(0xFF375F4F),
+        };
     return SizedBox(
       height: 40,
       child: DecoratedBox(
@@ -667,7 +728,8 @@ class _AppTitleBarState extends State<AppTitleBar> {
         child: Stack(
           fit: StackFit.expand,
           children: <Widget>[
-            if (family == RetainedVisualFamily.sakuraNightGarden)
+            if (visual == null &&
+                family == RetainedVisualFamily.sakuraNightGarden)
               const Positioned.fill(
                 child: IgnorePointer(
                   child: ExcludeSemantics(
@@ -696,8 +758,9 @@ class _AppTitleBarState extends State<AppTitleBar> {
                         child: Stack(
                           fit: StackFit.expand,
                           children: <Widget>[
-                            if (family ==
-                                RetainedVisualFamily.sakuraNightGarden)
+                            if (visual == null &&
+                                family ==
+                                    RetainedVisualFamily.sakuraNightGarden)
                               const Positioned(
                                 top: 4,
                                 right: 10,
@@ -731,11 +794,12 @@ class _AppTitleBarState extends State<AppTitleBar> {
                                     style: TextStyle(
                                       color: foreground,
                                       fontFamily:
-                                          family ==
-                                              RetainedVisualFamily
-                                                  .sakuraNightGarden
-                                          ? 'Georgia'
-                                          : 'Segoe UI',
+                                          visual?.fontFamily ??
+                                          (family ==
+                                                  RetainedVisualFamily
+                                                      .sakuraNightGarden
+                                              ? 'Georgia'
+                                              : 'Segoe UI'),
                                       fontSize:
                                           family ==
                                               RetainedVisualFamily
@@ -832,12 +896,27 @@ class _CaptionButtonState extends State<_CaptionButton> {
   Widget build(BuildContext context) {
     final spec = ThemeSpecScope.maybeOf(context);
     final family = spec?.family ?? RetainedVisualFamily.standard;
+    final visual = AppTitleBarVisualScope.maybeOf(context);
     final standard = family == RetainedVisualFamily.standard
         ? context.standardVisual
         : null;
     final enabled = widget.onPressed != null;
     final BoxDecoration decoration;
-    if (family == RetainedVisualFamily.illuminatedLedger) {
+    if (visual != null) {
+      decoration = BoxDecoration(
+        color: widget.destructive
+            ? _pressed
+                  ? const Color(0xCC7F3038)
+                  : _hovered
+                  ? const Color(0xA65C272D)
+                  : Colors.transparent
+            : _pressed
+            ? visual.captionPressedSurface
+            : _hovered
+            ? visual.captionHoverSurface
+            : Colors.transparent,
+      );
+    } else if (family == RetainedVisualFamily.illuminatedLedger) {
       decoration = BoxDecoration(
         color: _hovered
             ? widget.destructive
@@ -891,16 +970,16 @@ class _CaptionButtonState extends State<_CaptionButton> {
         color: _hovered || _pressed ? null : Colors.transparent,
       );
     }
-    final foreground = switch (family) {
-      RetainedVisualFamily.sakuraNightGarden =>
-        widget.destructive && _hovered
-            ? const Color(0xFFFFECE8)
-            : SakuraNightGardenSpec.warmIvory,
-      _ =>
-        widget.destructive && _hovered
-            ? const Color(0xFFFFE5DF)
-            : const Color(0xFFFFF8EA),
-    };
+    final foreground = widget.destructive && _hovered
+        ? visual == null && family == RetainedVisualFamily.sakuraNightGarden
+              ? const Color(0xFFFFECE8)
+              : const Color(0xFFFFE5DF)
+        : visual?.foreground ??
+              switch (family) {
+                RetainedVisualFamily.sakuraNightGarden =>
+                  SakuraNightGardenSpec.warmIvory,
+                _ => const Color(0xFFFFF8EA),
+              };
     return Tooltip(
       message: widget.label,
       child: Semantics(

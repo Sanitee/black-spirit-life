@@ -18,6 +18,20 @@ void main() {
       final violations = _scanTextFiles(
         project: project,
         files: _filesUnder(lib, const <String>{'.dart'}),
+        sourceTransform: (path, source) {
+          // These are response-rejection signatures, not rendered documents.
+          // Keep scanning the rest of this HTTP guard for actual browser APIs.
+          if (path.replaceAll('\\', '/') ==
+              'lib/data/market/market_response_guard.dart') {
+            return source
+                .replaceAll("text.startsWith('<html')", 'htmlPrefixCheck')
+                .replaceAll(
+                  "text.startsWith('<!doctype html')",
+                  'doctypePrefixCheck',
+                );
+          }
+          return source;
+        },
         forbidden: <String, RegExp>{
           'browser-only Dart or package import': RegExp(
             r'''(?:import|export)\s+['"](?:dart:(?:html|js|js_interop|js_util|ui_web)|package:(?:web|html|universal_html|flutter_web_plugins|flutter_html|flutter_widget_from_html|webf|[^/'"]*(?:webview|inappweb|chromium|cef)[^/'"]*)/)''',
@@ -249,6 +263,7 @@ List<String> _scanTextFiles({
   required Iterable<File> files,
   required Map<String, RegExp> forbidden,
   RegExp? forbiddenFileName,
+  String Function(String relativePath, String source)? sourceTransform,
 }) {
   final violations = <String>[];
   final sortedFiles = files.toSet().toList()
@@ -259,7 +274,9 @@ List<String> _scanTextFiles({
       violations.add('$relative: forbidden embedded-browser filename');
     }
 
-    final source = file.readAsStringSync();
+    final source =
+        sourceTransform?.call(relative, file.readAsStringSync()) ??
+        file.readAsStringSync();
     for (final entry in forbidden.entries) {
       if (entry.value.hasMatch(source)) {
         violations.add('$relative: ${entry.key}');

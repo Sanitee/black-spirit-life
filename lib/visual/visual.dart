@@ -7,6 +7,7 @@ export 'components/app_surface.dart';
 export 'components/app_vector_glyph.dart';
 export 'components/button_effect_scope.dart';
 export 'components/retained_asset_image.dart';
+export 'components/sakura_petal_rain.dart';
 export 'components/section_header.dart';
 export 'foundations/app_scroll_behavior.dart';
 export 'foundations/theme_registry.dart';

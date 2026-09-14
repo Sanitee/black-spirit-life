@@ -5,41 +5,48 @@ import '../../app/state/planner_application_controller.dart';
 import '../../visual/foundations/theme_registry.dart';
 import '../../visual/foundations/theme_spec.dart';
 
-/// Resolves the Resource Map skin paired with an application theme.
+/// Resolves the application-independent Resource Map skin.
 ///
-/// Standard scenes intentionally retain the established Sakura cartographer
-/// chrome until a separate Standard map skin is designed and approved.
+/// The map is a separate workspace, so switching Planner appearances must not
+/// restyle its controls or reduce map readability.
 ResourceMapChromeThemeData resourceMapChromeThemeForPlannerTheme(
-  ThemeSpec spec,
-) => switch (spec.family) {
-  RetainedVisualFamily.illuminatedLedger =>
-    ResourceMapChromeThemeData.illuminatedAtlas,
-  RetainedVisualFamily.sakuraNightGarden || RetainedVisualFamily.standard =>
-    ResourceMapChromeThemeData.sakuraCartographer,
+  ThemeSpec spec, {
+  ResourceMapInterfaceStyle interfaceStyle =
+      ResourceMapInterfaceStyle.glassDock,
+}) => switch (interfaceStyle) {
+  ResourceMapInterfaceStyle.glassDock => ResourceMapChromeThemeData.glassDock,
+  ResourceMapInterfaceStyle.ghostLedger =>
+    ResourceMapChromeThemeData.ghostLedger,
 };
 
-/// Applies the map skin that belongs to [spec] without exposing a second map
-/// theme choice to the user.
+/// Applies the dedicated map skin without exposing another appearance choice.
+/// Both retained IDs use the shared navigation; the saved alternate tint is
+/// still respected without rewriting any planner or map preference.
 class ResourceMapThemeAdapter extends StatelessWidget {
   const ResourceMapThemeAdapter({
     required this.spec,
     required this.child,
+    this.interfaceStyle = ResourceMapInterfaceStyle.glassDock,
+    this.uiOpacity = ResourceMapUiOpacity.defaultValue,
     super.key,
   });
 
   final ThemeSpec spec;
   final Widget child;
+  final ResourceMapInterfaceStyle interfaceStyle;
+  final double uiOpacity;
 
   @override
   Widget build(BuildContext context) => ResourceMapChromeTheme(
-    data: resourceMapChromeThemeForPlannerTheme(spec),
+    data: resourceMapChromeThemeForPlannerTheme(
+      spec,
+      interfaceStyle: interfaceStyle,
+    ).withUiOpacity(uiOpacity),
     child: child,
   );
 }
 
-/// Keeps the retained Resource Map synchronized with the active Planner
-/// theme. Only the inherited chrome data changes; [child] remains mounted so
-/// its camera, search, checklist, and network-planning state are preserved.
+/// Keeps the retained Resource Map mounted while Planner themes change.
 class ResourceMapThemeBinding extends StatefulWidget {
   const ResourceMapThemeBinding({
     required this.controller,
@@ -76,11 +83,15 @@ class _ResourceMapThemeBindingState extends State<ResourceMapThemeBinding> {
     _activeMode = controller.active;
     controller.activeMode.addListener(_activeModeChanged);
     _activeMode.state.addListener(_appearanceChanged);
+    controller.resourceMapInterfaceStyle.addListener(_appearanceChanged);
+    controller.resourceMapUiOpacity.addListener(_appearanceChanged);
   }
 
   void _detach(PlannerApplicationController controller) {
     controller.activeMode.removeListener(_activeModeChanged);
     _activeMode.state.removeListener(_appearanceChanged);
+    controller.resourceMapInterfaceStyle.removeListener(_appearanceChanged);
+    controller.resourceMapUiOpacity.removeListener(_appearanceChanged);
   }
 
   void _activeModeChanged() {
@@ -105,6 +116,11 @@ class _ResourceMapThemeBindingState extends State<ResourceMapThemeBinding> {
     final spec = RetainedThemeRegistry.resolve(
       backgroundId: _activeMode.state.value.appearance.background,
     );
-    return ResourceMapThemeAdapter(spec: spec, child: widget.child);
+    return ResourceMapThemeAdapter(
+      spec: spec,
+      interfaceStyle: widget.controller.resourceMapInterfaceStyle.value,
+      uiOpacity: widget.controller.resourceMapUiOpacity.value,
+      child: widget.child,
+    );
   }
 }

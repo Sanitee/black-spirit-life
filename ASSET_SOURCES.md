@@ -1,7 +1,7 @@
 # Asset and dataset sources
 
-Review snapshot: 2026-08-26
-Release candidate: Black Spirit Life `0.1.5+24` sanitized public-source review
+Review snapshot: 2026-09-14
+Release candidate: Black Spirit Life `0.1.6+25` sanitized public-source review
 
 This inventory separates ownership of underlying material from the websites
 used to find or verify it. The controlling release decision is
@@ -36,11 +36,14 @@ references; Pearl Abyss is credited as owner of the underlying game content.
 | `windows/storage_ocr/BlackSpiritStorageOcr/Assets/RecipeBook/icons/items/**`: 3,897 sealed OCR reference icons plus two generated atlases | PA item artwork in the shared Black Spirit Hub Recipe Book snapshot | Local, hash-verified recognition references used only by the isolated Windows OCR helper | **PA fan content**; provenance and redistribution notices stay beside the helper |
 | `packages/bdo_map_core/assets/images/gathering_tools/*.webp`: eight tool icons | BDO Codex item pages and URLs recorded in `BDO-CODEX-GATHERING-TOOL-ICON-NOTICE.md` | Eight local 44 x 44 PA game icons | **PA fan content** |
 | `packages/bdo_map_core/assets/images/vendor_portraits/*.webp`: 231 portrait files for 251 mappings | PA NPC artwork retrieved through BDO Codex mirror paths; exact hashes/URLs in the project provenance manifest | Pinned local 360 x 360 files; no runtime hotlink; app silhouette used when artwork is unavailable | **PA fan content** |
+| `assets/opportunities/items/**`: 154 item icons | Read-only extraction from the owner's installed Black Desert PC client; client-relative provenance, hashes and sizes in `assets/opportunities/icon-provenance.json` | Unmodified local icons used by the Opportunities workspace; no local installation path or extractor payload retained | **PA fan content** |
+| Central Market eligibility and enhancement identity tables | Project-held audits of the 3 and 10 September 2026 PC client item metadata; public scope and source hashes in `docs/opportunities-market-eligibility.md` | Numeric item IDs and boolean/enhancement flags only; no client path, account data or extractor payload retained | **PA facts in project-authored records** |
+| Resource Map menu, house-use and bare-hands interaction textures | Read-only extraction from the owner's installed Black Desert PC client; exact archive paths and hashes in the three `pearl-abyss-*.md` notices beside the assets | Decoded local artwork used only in the public Resource Map interface | **PA fan content** |
 | Cooking/alchemy recipes | BDO Codex, BDOLytics, user lists and game verification | 178 added alchemy and 461 added cooking records normalized into the planner's ingredient/yield/variant schema | **PA facts in project-authored compilation**; no raw site export shipped |
 | Processing recipes | BDO Codex processing records and BDOLytics category cross-checks | 602 planner-relevant records curated from 4,824 reviewed rows; raw rows and site structure are not tracked or shipped | **PA facts in project-authored compilation** |
 | Edania Part II facts | Official PA patch notes plus BDO Codex item cross-checks | Two alchemy recipes, 32 conversions, 24 reference items and 83 icon entries in the existing planner schema | **PA fan content** |
 | Acquisition catalog | Official PA pages, market API and credited community research | 982 project-authored records / 1,164 routes with 2,569 traceability links | **PA facts plus project-authored summaries** |
-| Vendor map subset | BDO Codex seller/NPC records used as research | 51 relevant items selected into 266 physical pins and 1,241 listings; nonphysical/unmapped records fail closed | **PA facts in a purpose-limited project schema**; not a wholesale website database |
+| Vendor map subset | BDO Codex seller/NPC records used as research | 51 relevant items selected into 266 physical pins and 1,243 listings; nonphysical/unmapped records fail closed | **PA facts in a purpose-limited project schema**; not a wholesale website database |
 | Selected gathering coordinates | BDO Codex map records used as research | 501 Stone Cobra/Rock Scorpion, 34 Coral Stoneback Crab and 198 Stillcoral points transformed to game coordinates; no copied route, page or annotation | **PA facts in project-authored map records** |
 | Royal Workshop, Caphras and Edania node facts | Official PA pages, client verification and credited references | 124 goods/eight managers; 36 identities/18 coordinates; reduced Edania 28-node/37-resource seed | **PA facts in project-authored records** |
 

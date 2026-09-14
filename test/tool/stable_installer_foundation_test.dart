@@ -41,10 +41,10 @@ void main() {
   ).readAsStringSync();
 
   test('themed installer version surfaces stay synchronized', () {
-    expect(cmake, contains('BSL_INSTALLER_VERSION "0.1.5"'));
-    expect(cmake, contains('BSL_INSTALLER_BUILD_NUMBER "24"'));
+    expect(cmake, contains('BSL_INSTALLER_VERSION "0.1.6"'));
+    expect(cmake, contains('BSL_INSTALLER_BUILD_NUMBER "25"'));
     expect(cmake, contains('BSL_INSTALLER_VERSION_MAJOR'));
-    expect(model, contains('version = L"0.1.5"'));
+    expect(model, contains('version = L"0.1.6"'));
     expect(
       resources,
       contains(

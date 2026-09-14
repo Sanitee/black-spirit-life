@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../lodging/shop_lodging_catalog.dart';
 import 'draggable_dialog_surface.dart';
 import 'resource_map_chrome_theme.dart';
+import 'resource_map_panel_metrics.dart';
 
 /// Player-owned shop lodging for one town.
 ///
@@ -78,9 +79,6 @@ class _WorkerLodgingShopSetupDialogState
     return parsed != null && parsed >= 0 ? parsed : null;
   }
 
-  int get _previewTotal =>
-      _pearlPurchased + _loyaltyPurchased + (_otherBonus ?? 0);
-
   void _save() {
     final other = _otherBonus;
     if (other == null) {
@@ -105,45 +103,48 @@ class _WorkerLodgingShopSetupDialogState
     final catalogTown = widget.catalogTown;
     final pearlLimit = catalogTown?.pearlCouponLimit ?? 0;
     final loyaltyLimit = catalogTown?.loyaltyCouponLimit;
+    final help = <String>[
+      'Enter purchased coupons, not the remaining shop allowance.',
+      if (catalogTown == null)
+        'No verified town coupon is cataloged. Other bonus beds can still be recorded.',
+      if (widget.legacyUnsplitBonus > 0)
+        'Saving replaces the older unsplit total of ${widget.legacyUnsplitBonus} bonus beds.',
+    ].join('\n');
     return DraggableAlertDialog(
       identity: 'shop-lodging-${widget.townName}',
-      estimatedSize: const Size(438, 590),
+      estimatedSize: const Size(380, 310),
       dialogKey: const ValueKey<String>('resource-map-shop-lodging-dialog'),
       backgroundColor: chrome.paperRaised,
       surfaceTintColor: Colors.transparent,
-      insetPadding: const EdgeInsets.all(24),
-      titlePadding: const EdgeInsets.fromLTRB(20, 18, 14, 4),
-      contentPadding: const EdgeInsets.fromLTRB(20, 8, 20, 4),
-      actionsPadding: const EdgeInsets.fromLTRB(12, 4, 12, 12),
+      insetPadding: const EdgeInsets.all(20),
+      titlePadding: const EdgeInsets.fromLTRB(16, 12, 8, 0),
+      contentPadding: const EdgeInsets.fromLTRB(16, 6, 16, 0),
+      actionsPadding: const EdgeInsets.fromLTRB(12, 4, 12, 10),
       titleIsDragHandle: false,
       title: Row(
-        children: <Widget>[
+        children: [
           Expanded(
             child: DraggableDialogDragHandle(
               key: const ValueKey<String>(
                 'resource-map-shop-lodging-drag-handle',
               ),
-              child: Row(
-                children: <Widget>[
-                  Icon(
-                    Icons.storefront_outlined,
-                    size: 22,
-                    color: chrome.accent,
-                  ),
-                  const SizedBox(width: 9),
-                  Expanded(
-                    child: Text(
-                      'Shop lodging · ${widget.townName}',
-                      style: TextStyle(
-                        color: chrome.ink,
-                        fontFamily: chrome.headingFontFamily,
-                        fontSize: 18,
-                        fontWeight: FontWeight.w800,
-                      ),
-                    ),
-                  ),
-                ],
+              child: Text(
+                'Shop lodging · ${widget.townName}',
+                style: TextStyle(
+                  color: chrome.ink,
+                  fontFamily: chrome.headingFontFamily,
+                  fontSize: ResourceMapPanelMetrics.heading,
+                  fontWeight: FontWeight.w600,
+                ),
               ),
+            ),
+          ),
+          Tooltip(
+            message: help,
+            child: Icon(
+              Icons.info_outline_rounded,
+              size: 18,
+              color: chrome.muted,
             ),
           ),
           IconButton(
@@ -155,54 +156,24 @@ class _WorkerLodgingShopSetupDialogState
           ),
         ],
       ),
-      content: ConstrainedBox(
-        constraints: const BoxConstraints(maxWidth: 390),
+      content: SizedBox(
+        width: 330,
         child: SingleChildScrollView(
           child: Column(
             mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: <Widget>[
-              Text(
-                'Enter lodging you already own. The planner adds these beds '
-                'before recommending CP houses.',
-                style: TextStyle(
-                  color: chrome.text,
-                  fontSize: 12,
-                  height: 1.35,
-                ),
-              ),
-              const SizedBox(height: 12),
-              if (widget.legacyUnsplitBonus > 0) ...<Widget>[
-                _ShopLodgingNotice(
-                  text:
-                      '${widget.legacyUnsplitBonus} older bonus '
-                      '${widget.legacyUnsplitBonus == 1 ? 'bed is' : 'beds are'} '
-                      'saved without a Shop / Loyalty / Other split. Saving '
-                      'this setup replaces that older total.',
-                ),
-                const SizedBox(height: 8),
-              ],
-              if (catalogTown == null)
-                const _ShopLodgingNotice(
-                  text:
-                      'No verified town-specific shop coupon is cataloged '
-                      'here. You can still record event or other bonus beds.',
-                )
-              else ...<Widget>[
+            children: [
+              if (catalogTown != null) ...[
                 _PurchasedCounterRow(
                   key: const ValueKey<String>(
                     'resource-map-shop-lodging-pearl',
                   ),
                   icon: Icons.diamond_outlined,
-                  label: 'Pearl lodging',
+                  label: 'Pearl purchased',
                   value: _pearlPurchased,
                   maximum: pearlLimit,
-                  onChanged: (value) {
-                    setState(() => _pearlPurchased = value);
-                  },
+                  onChanged: (value) => setState(() => _pearlPurchased = value),
                 ),
-                if (loyaltyLimit != null) ...<Widget>[
-                  Divider(height: 1, color: chrome.divider),
+                if (loyaltyLimit != null)
                   SwitchListTile(
                     key: const ValueKey<String>(
                       'resource-map-shop-lodging-loyalty',
@@ -215,33 +186,22 @@ class _WorkerLodgingShopSetupDialogState
                       color: chrome.primary,
                     ),
                     title: Text(
-                      'Loyalty lodging',
+                      'Loyalty purchased',
                       style: TextStyle(
                         color: chrome.ink,
-                        fontFamily: chrome.headingFontFamily,
-                        fontSize: 12.5,
-                        fontWeight: FontWeight.w700,
+                        fontSize: ResourceMapPanelMetrics.primary,
                       ),
                     ),
-                    subtitle: Text(
-                      'One verified town coupon',
-                      style: TextStyle(color: chrome.muted, fontSize: 10.5),
-                    ),
                     value: _loyaltyPurchased > 0,
-                    onChanged: (value) {
-                      setState(() {
-                        _loyaltyPurchased = value ? loyaltyLimit : 0;
-                      });
-                    },
+                    onChanged: (value) => setState(
+                      () => _loyaltyPurchased = value ? loyaltyLimit : 0,
+                    ),
                   ),
-                ],
               ],
-              if (catalogTown != null)
-                Divider(height: 1, color: chrome.divider),
               Padding(
-                padding: const EdgeInsets.symmetric(vertical: 8),
+                padding: const EdgeInsets.symmetric(vertical: 4),
                 child: Row(
-                  children: <Widget>[
+                  children: [
                     Icon(
                       Icons.redeem_outlined,
                       size: 20,
@@ -249,30 +209,16 @@ class _WorkerLodgingShopSetupDialogState
                     ),
                     const SizedBox(width: 10),
                     Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: <Widget>[
-                          Text(
-                            'Other / event',
-                            style: TextStyle(
-                              color: chrome.ink,
-                              fontFamily: chrome.headingFontFamily,
-                              fontSize: 12.5,
-                              fontWeight: FontWeight.w700,
-                            ),
-                          ),
-                          Text(
-                            'Choice boxes, events, or older bonus beds',
-                            style: TextStyle(
-                              color: chrome.muted,
-                              fontSize: 10.5,
-                            ),
-                          ),
-                        ],
+                      child: Text(
+                        'Other / event',
+                        style: TextStyle(
+                          color: chrome.ink,
+                          fontSize: ResourceMapPanelMetrics.primary,
+                        ),
                       ),
                     ),
                     SizedBox(
-                      width: 74,
+                      width: 64,
                       child: TextField(
                         key: const ValueKey<String>(
                           'resource-map-shop-lodging-other',
@@ -281,9 +227,10 @@ class _WorkerLodgingShopSetupDialogState
                         keyboardType: TextInputType.number,
                         textInputAction: TextInputAction.done,
                         textAlign: TextAlign.center,
-                        onChanged: (_) {
-                          setState(() => _otherError = null);
-                        },
+                        style: TextStyle(
+                          fontSize: ResourceMapPanelMetrics.primary,
+                        ),
+                        onChanged: (_) => setState(() => _otherError = null),
                         onSubmitted: (_) => _save(),
                         decoration: const InputDecoration(
                           isDense: true,
@@ -300,41 +247,16 @@ class _WorkerLodgingShopSetupDialogState
                   key: const ValueKey<String>(
                     'resource-map-shop-lodging-error',
                   ),
-                  style: TextStyle(color: chrome.error, fontSize: 10.5),
-                ),
-              if (catalogTown != null) ...<Widget>[
-                const SizedBox(height: 8),
-                _ShopLodgingNotice(
-                  text:
-                      'F3 Pearl Shop → search “[Town] Worker’s Lodging”. '
-                      'Enter purchased, not remaining: 2 remaining out of '
-                      '$pearlLimit means ${pearlLimit >= 2 ? pearlLimit - 2 : 0} purchased.',
-                ),
-              ],
-              const SizedBox(height: 10),
-              Row(
-                children: <Widget>[
-                  Icon(Icons.bed_rounded, size: 17, color: chrome.positive),
-                  const SizedBox(width: 6),
-                  Text(
-                    'Adds $_previewTotal bonus '
-                    '${_previewTotal == 1 ? 'bed' : 'beds'}',
-                    key: const ValueKey<String>(
-                      'resource-map-shop-lodging-total',
-                    ),
-                    style: TextStyle(
-                      color: chrome.positive,
-                      fontSize: 12,
-                      fontWeight: FontWeight.w800,
-                    ),
+                  style: TextStyle(
+                    color: chrome.error,
+                    fontSize: ResourceMapPanelMetrics.secondary,
                   ),
-                ],
-              ),
+                ),
             ],
           ),
         ),
       ),
-      actions: <Widget>[
+      actions: [
         TextButton(
           onPressed: () => Navigator.of(context).pop(),
           child: const Text('Cancel'),
@@ -369,29 +291,21 @@ class _PurchasedCounterRow extends StatelessWidget {
   Widget build(BuildContext context) {
     final chrome = context.mapChrome;
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8),
+      padding: const EdgeInsets.symmetric(vertical: 4),
       child: Row(
         children: <Widget>[
           Icon(icon, size: 20, color: chrome.primary),
           const SizedBox(width: 10),
           Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: <Widget>[
-                Text(
-                  label,
-                  style: TextStyle(
-                    color: chrome.ink,
-                    fontFamily: chrome.headingFontFamily,
-                    fontSize: 12.5,
-                    fontWeight: FontWeight.w700,
-                  ),
+            child: Tooltip(
+              message: 'Up to $maximum purchased',
+              child: Text(
+                label,
+                style: TextStyle(
+                  color: chrome.ink,
+                  fontSize: ResourceMapPanelMetrics.primary,
                 ),
-                Text(
-                  '$value of $maximum purchased',
-                  style: TextStyle(color: chrome.muted, fontSize: 10.5),
-                ),
-              ],
+              ),
             ),
           ),
           IconButton(
@@ -410,8 +324,8 @@ class _PurchasedCounterRow extends StatelessWidget {
               textAlign: TextAlign.center,
               style: TextStyle(
                 color: chrome.ink,
-                fontSize: 14,
-                fontWeight: FontWeight.w900,
+                fontSize: ResourceMapPanelMetrics.primary,
+                fontWeight: FontWeight.w600,
               ),
             ),
           ),
@@ -424,37 +338,6 @@ class _PurchasedCounterRow extends StatelessWidget {
           ),
         ],
       ),
-    );
-  }
-}
-
-class _ShopLodgingNotice extends StatelessWidget {
-  const _ShopLodgingNotice({required this.text});
-
-  final String text;
-
-  @override
-  Widget build(BuildContext context) {
-    final chrome = context.mapChrome;
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: <Widget>[
-        Padding(
-          padding: const EdgeInsets.only(top: 1),
-          child: Icon(
-            Icons.info_outline_rounded,
-            size: 14,
-            color: chrome.muted,
-          ),
-        ),
-        const SizedBox(width: 6),
-        Expanded(
-          child: Text(
-            text,
-            style: TextStyle(color: chrome.muted, fontSize: 10.5, height: 1.35),
-          ),
-        ),
-      ],
     );
   }
 }

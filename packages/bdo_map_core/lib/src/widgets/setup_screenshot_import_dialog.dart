@@ -313,8 +313,7 @@ class _BdoSetupScreenshotImportDialogState
     await _readScreenshot(
       reader,
       emptyMessage:
-          'No screenshot image was found in the clipboard. Copy the image '
-          'in Lightshot, then try Paste screenshot again.',
+          'No image in the clipboard. Copy a screenshot, then paste it here.',
     );
   }
 
@@ -910,14 +909,9 @@ class _BdoSetupScreenshotImportDialogState
     final chrome = context.mapChrome;
     final media = MediaQuery.sizeOf(context);
     final choosing = _stage == _ImportStage.choose;
-    final chooseHeight = _screenshots.isEmpty ? 390.0 : 455.0;
     final estimated = Size(
-      math
-          .min(choosing ? 640 : 980, math.max(520, media.width - 36))
-          .toDouble(),
-      math
-          .min(choosing ? chooseHeight : 760, math.max(410, media.height - 36))
-          .toDouble(),
+      math.min(choosing ? 540 : 920, media.width - 36).toDouble(),
+      math.min(choosing ? 330 : 720, media.height - 36).toDouble(),
     );
     return DraggableAlertDialog(
       identity: 'setup-screenshot-import-${_mode?.name}-${_stage.name}',
@@ -930,12 +924,12 @@ class _BdoSetupScreenshotImportDialogState
         borderRadius: BorderRadius.circular(18),
         side: BorderSide(color: chrome.divider),
       ),
-      titlePadding: const EdgeInsets.fromLTRB(22, 18, 12, 0),
+      titlePadding: const EdgeInsets.fromLTRB(16, 12, 8, 0),
       title: Row(
         children: <Widget>[
           Container(
-            width: 38,
-            height: 38,
+            width: 28,
+            height: 28,
             decoration: BoxDecoration(
               color: chrome.primary.withValues(alpha: .13),
               borderRadius: BorderRadius.circular(11),
@@ -949,18 +943,14 @@ class _BdoSetupScreenshotImportDialogState
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
                 Text(
-                  'Scan screenshots',
+                  switch (_stage) {
+                    _ImportStage.choose => 'Import setup',
+                    _ImportStage.align => 'Align screenshot',
+                    _ImportStage.review => 'Review import',
+                  },
                   style: TextStyle(
                     color: chrome.ink,
-                    fontSize: 20,
-                    fontWeight: FontWeight.w800,
-                  ),
-                ),
-                Text(
-                  _stageLabel,
-                  style: TextStyle(
-                    color: chrome.muted,
-                    fontSize: 11.5,
+                    fontSize: 16,
                     fontWeight: FontWeight.w600,
                   ),
                 ),
@@ -975,45 +965,42 @@ class _BdoSetupScreenshotImportDialogState
           ),
         ],
       ),
-      contentPadding: const EdgeInsets.fromLTRB(22, 14, 22, 6),
-      content: SizedBox(
-        width: estimated.width - 44,
-        height: math.max(250, estimated.height - 126),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: <Widget>[
-            if (_error case final error?) ...<Widget>[
-              _MessageStrip(message: error, error: true),
-              const SizedBox(height: 10),
-            ],
-            Expanded(
-              child: AnimatedSwitcher(
-                duration: MediaQuery.disableAnimationsOf(context)
-                    ? Duration.zero
-                    : const Duration(milliseconds: 180),
-                child: switch (_stage) {
-                  _ImportStage.choose => _buildChooseStage(context),
-                  _ImportStage.align => _buildAlignStage(context),
-                  _ImportStage.review => _buildReviewStage(context),
-                },
+      contentPadding: const EdgeInsets.fromLTRB(16, 10, 16, 4),
+      content: ConstrainedBox(
+        constraints: BoxConstraints(
+          maxHeight: math.max(120, media.height - 190),
+        ),
+        child: SizedBox(
+          width: estimated.width - 32,
+          height: choosing ? null : math.max(120, estimated.height - 126),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: <Widget>[
+              if (_error case final error?) ...<Widget>[
+                _MessageStrip(message: error, error: true),
+                const SizedBox(height: 10),
+              ],
+              Flexible(
+                child: AnimatedSwitcher(
+                  duration: MediaQuery.disableAnimationsOf(context)
+                      ? Duration.zero
+                      : const Duration(milliseconds: 180),
+                  child: switch (_stage) {
+                    _ImportStage.choose => _buildChooseStage(context),
+                    _ImportStage.align => _buildAlignStage(context),
+                    _ImportStage.review => _buildReviewStage(context),
+                  },
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
-      actionsPadding: const EdgeInsets.fromLTRB(22, 7, 22, 18),
+      actionsPadding: const EdgeInsets.fromLTRB(16, 6, 16, 12),
       actions: _buildActions(context),
     );
   }
-
-  String get _stageLabel => switch (_stage) {
-    _ImportStage.choose =>
-      _screenshots.isEmpty
-          ? 'Import your current nodes or owned houses'
-          : '${_screenshots.length} part${_screenshots.length == 1 ? '' : 's'} ready to combine',
-    _ImportStage.align => 'Line up the map icons',
-    _ImportStage.review => 'Review before saving',
-  };
 
   Widget _buildChooseStage(BuildContext context) {
     final chrome = context.mapChrome;
@@ -1022,15 +1009,6 @@ class _BdoSetupScreenshotImportDialogState
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: <Widget>[
-          Text(
-            'What is shown?',
-            style: TextStyle(
-              color: chrome.ink,
-              fontSize: 14,
-              fontWeight: FontWeight.w800,
-            ),
-          ),
-          const SizedBox(height: 8),
           Row(
             children: <Widget>[
               Expanded(
@@ -1038,7 +1016,6 @@ class _BdoSetupScreenshotImportDialogState
                   key: const ValueKey<String>('setup-import-mode-nodes'),
                   icon: Icons.hub_outlined,
                   title: 'Worker nodes',
-                  detail: 'One or more world-map sections, including the sea.',
                   selected: _mode == BdoSetupScreenshotImportMode.workerNodes,
                   enabled:
                       _screenshots.isEmpty ||
@@ -1055,7 +1032,6 @@ class _BdoSetupScreenshotImportDialogState
                   key: const ValueKey<String>('setup-import-mode-houses'),
                   icon: Icons.holiday_village_outlined,
                   title: 'Town houses',
-                  detail: 'A fully zoomed town view with its house icons.',
                   selected: _mode == BdoSetupScreenshotImportMode.townHouses,
                   enabled:
                       widget.lodgingDataset != null &&
@@ -1069,34 +1045,24 @@ class _BdoSetupScreenshotImportDialogState
               ),
             ],
           ),
-          const SizedBox(height: 18),
+          const SizedBox(height: 8),
           if (_mode == BdoSetupScreenshotImportMode.workerNodes) ...<Widget>[
             if (widget.activeNodeRecordingPicker != null &&
                 widget.activeNodeRecordingScanner != null) ...<Widget>[
               _buildActiveNodeRecordingChoice(context),
-              const SizedBox(height: 14),
-              _SectionDivider(label: 'Or scan regional map screenshots'),
-              const SizedBox(height: 12),
+              const SizedBox(height: 8),
             ],
             _buildRegionSelector(context),
           ] else if (_mode == BdoSetupScreenshotImportMode.townHouses)
             _buildTownSelector(context),
-          if (_mode != null) ...<Widget>[
-            const SizedBox(height: 14),
-            _MessageStrip(
-              message: _mode == BdoSetupScreenshotImportMode.workerNodes
-                  ? 'Keep at least three node icons or route lines visible. You can scan several overlapping land or sea sections before saving.'
-                  : 'Zoom into the town. Scan several overlapping parts when one image cannot show every house clearly.',
-            ),
-          ],
           if (_screenshots.isNotEmpty) ...<Widget>[
             const SizedBox(height: 16),
             Text(
-              'Parts in this scan',
+              'Screenshots',
               style: TextStyle(
                 color: chrome.ink,
-                fontSize: 13,
-                fontWeight: FontWeight.w800,
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
               ),
             ),
             const SizedBox(height: 7),
@@ -1139,12 +1105,12 @@ class _BdoSetupScreenshotImportDialogState
         border: Border.all(color: chrome.primary.withValues(alpha: .52)),
       ),
       child: Padding(
-        padding: const EdgeInsets.fromLTRB(12, 10, 10, 10),
+        padding: const EdgeInsets.fromLTRB(10, 6, 8, 6),
         child: Row(
           children: <Widget>[
             Container(
-              width: 36,
-              height: 36,
+              width: 28,
+              height: 28,
               decoration: BoxDecoration(
                 color: chrome.primary.withValues(alpha: .14),
                 borderRadius: BorderRadius.circular(10),
@@ -1157,30 +1123,12 @@ class _BdoSetupScreenshotImportDialogState
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
-                  Row(
-                    children: <Widget>[
-                      Flexible(
-                        child: Text(
-                          'Activated list recording',
-                          overflow: TextOverflow.ellipsis,
-                          style: TextStyle(
-                            color: chrome.ink,
-                            fontSize: 13,
-                            fontWeight: FontWeight.w800,
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 7),
-                      _CompactTag(label: 'Recommended'),
-                    ],
-                  ),
-                  const SizedBox(height: 2),
                   Text(
-                    'Scroll the in-game Activated list once. Best for a full setup.',
+                    'Activated nodes',
                     style: TextStyle(
-                      color: chrome.muted,
-                      fontSize: 10.5,
-                      height: 1.25,
+                      color: chrome.ink,
+                      fontSize: 14,
+                      fontWeight: FontWeight.w500,
                     ),
                   ),
                 ],
@@ -1244,13 +1192,9 @@ class _BdoSetupScreenshotImportDialogState
                         'Anywhere / sea',
                         style: TextStyle(
                           color: chrome.ink,
-                          fontSize: 13,
-                          fontWeight: FontWeight.w800,
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
                         ),
-                      ),
-                      Text(
-                        'Use this when the region is unknown or the nodes are offshore.',
-                        style: TextStyle(color: chrome.muted, fontSize: 10.5),
                       ),
                     ],
                   ),
@@ -1300,7 +1244,7 @@ class _BdoSetupScreenshotImportDialogState
       key: const ValueKey<String>('setup-import-town-selector'),
       fieldKey: const ValueKey<String>('setup-import-town-search'),
       optionsKey: const ValueKey<String>('setup-import-town-suggestions'),
-      label: 'Town in the screenshot',
+      label: 'Town',
       hint: 'Type a town, e.g. Calpheon',
       icon: Icons.location_city_rounded,
       enabled: _screenshots.isEmpty,
@@ -1335,12 +1279,10 @@ class _BdoSetupScreenshotImportDialogState
           children: <Widget>[
             Expanded(
               child: Text(
-                'The labelled rings are alignment guides, not scan results. '
-                'Drag and resize them until the names sit on the same map '
-                'icons in your screenshot.',
+                'Alignment',
                 style: TextStyle(
                   color: chrome.text,
-                  fontSize: 12,
+                  fontSize: 14,
                   height: 1.35,
                 ),
               ),
@@ -1353,20 +1295,6 @@ class _BdoSetupScreenshotImportDialogState
             ),
           ],
         ),
-        if (screenshot.mode == BdoSetupScreenshotImportMode.workerNodes &&
-            screenshot.regionId == _anyScreenshotRegionId) ...<Widget>[
-          const SizedBox(height: 6),
-          Text(
-            'Regional screenshot? Go back and choose its region first. '
-            'Anywhere is best for a whole-world or offshore view.',
-            style: TextStyle(
-              color: chrome.primary,
-              fontSize: 10.5,
-              fontWeight: FontWeight.w700,
-              height: 1.3,
-            ),
-          ),
-        ],
         const SizedBox(height: 8),
         Expanded(child: _buildScreenshotPreview(context, screenshot)),
         const SizedBox(height: 10),
@@ -1380,16 +1308,12 @@ class _BdoSetupScreenshotImportDialogState
           dense: true,
           contentPadding: EdgeInsets.zero,
           title: Text(
-            'Improve recognition for unusual map colors',
+            'Custom map colors',
             style: TextStyle(
               color: chrome.ink,
-              fontSize: 12.5,
-              fontWeight: FontWeight.w800,
+              fontSize: 14,
+              fontWeight: FontWeight.w600,
             ),
-          ),
-          subtitle: Text(
-            'Optional. The normal BDO node and house colors are recognized automatically.',
-            style: TextStyle(color: chrome.muted, fontSize: 10.5),
           ),
         ),
         if (_improveRecognition) ...<Widget>[
@@ -1524,8 +1448,8 @@ class _BdoSetupScreenshotImportDialogState
                                   : 'Click the center of an uninvested icon',
                               style: TextStyle(
                                 color: chrome.ink,
-                                fontSize: 11,
-                                fontWeight: FontWeight.w800,
+                                fontSize: 14,
+                                fontWeight: FontWeight.w600,
                               ),
                             ),
                           ),
@@ -1542,42 +1466,11 @@ class _BdoSetupScreenshotImportDialogState
   }
 
   Widget _buildReviewStage(BuildContext context) {
-    final chrome = context.mapChrome;
     final targets = _reviewTargets;
-    final recognized = targets.where((target) => !target.uncertain).length;
-    final needsReview = targets
-        .where((target) => target.uncertain || target.conflict)
-        .length;
-    final alreadySaved = targets.where((target) => target.alreadySaved).length;
     return Column(
       key: const ValueKey<String>('setup-screenshot-import-review'),
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: <Widget>[
-        Wrap(
-          spacing: 8,
-          runSpacing: 7,
-          children: <Widget>[
-            _ReviewSummaryChip(
-              icon: Icons.document_scanner_outlined,
-              label: '$recognized recognized',
-            ),
-            _ReviewSummaryChip(
-              icon: Icons.visibility_outlined,
-              label: '$needsReview check manually',
-              warning: needsReview > 0,
-            ),
-            _ReviewSummaryChip(
-              icon: Icons.bookmark_added_outlined,
-              label: '$alreadySaved already saved',
-            ),
-          ],
-        ),
-        const SizedBox(height: 9),
-        Text(
-          'Only checked rows are added. Existing nodes and houses are never removed.',
-          style: TextStyle(color: chrome.muted, fontSize: 11.5, height: 1.3),
-        ),
-        const SizedBox(height: 9),
         Expanded(
           child: targets.isEmpty
               ? _EmptyReview(
@@ -1632,7 +1525,7 @@ class _BdoSetupScreenshotImportDialogState
                 )
               : const Icon(Icons.add_photo_alternate_outlined),
           label: Text(
-            _screenshots.isEmpty ? 'Choose screenshot' : 'Scan another part',
+            _screenshots.isEmpty ? 'Choose screenshot' : 'Add screenshot',
           ),
         ),
       ],
@@ -1668,7 +1561,7 @@ class _BdoSetupScreenshotImportDialogState
           key: const ValueKey<String>('setup-import-add-another'),
           onPressed: _busy ? null : _addAnotherScreenshot,
           icon: const Icon(Icons.add_photo_alternate_outlined),
-          label: const Text('Scan another part'),
+          label: const Text('Add screenshot'),
         ),
         TextButton(
           onPressed: _busy
@@ -1680,9 +1573,7 @@ class _BdoSetupScreenshotImportDialogState
           key: const ValueKey<String>('setup-import-confirm'),
           onPressed: _busy ? null : _confirm,
           icon: const Icon(Icons.add_task_rounded),
-          label: Text(
-            'Add ${_reviewTargets.where(_isReviewTargetChecked).length} to my setup',
-          ),
+          label: const Text('Import selected'),
         ),
       ],
     };
@@ -1804,7 +1695,8 @@ class _ScreenshotLocationTypeaheadState
           textEditingController: _controller,
           focusNode: _focusNode,
           displayStringForOption: (option) => option.label,
-          optionsViewOpenDirection: OptionsViewOpenDirection.down,
+          // Keep the compact dialog's footer actions reachable while searching.
+          optionsViewOpenDirection: OptionsViewOpenDirection.up,
           optionsBuilder: (value) {
             final query = _normalizedSearchText(value.text.trim());
             final matches =
@@ -1846,7 +1738,7 @@ class _ScreenshotLocationTypeaheadState
           optionsViewBuilder: (context, onSelected, options) {
             final values = options.toList(growable: false);
             return Align(
-              alignment: Alignment.topLeft,
+              alignment: Alignment.bottomLeft,
               child: Material(
                 key: widget.optionsKey,
                 elevation: 18,
@@ -1887,8 +1779,8 @@ class _ScreenshotLocationTypeaheadState
                               option.label,
                               style: TextStyle(
                                 color: chrome.ink,
-                                fontSize: 12.5,
-                                fontWeight: FontWeight.w700,
+                                fontSize: 14,
+                                fontWeight: FontWeight.w500,
                               ),
                             ),
                           ),
@@ -2037,8 +1929,8 @@ class _ScreenshotAlignmentPainter extends CustomPainter {
               text: '${index + 1}  ${target.label}',
               style: TextStyle(
                 color: ink,
-                fontSize: 10.5,
-                fontWeight: FontWeight.w800,
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
                 height: 1.1,
               ),
             ),
@@ -2117,7 +2009,6 @@ class _ModeCard extends StatelessWidget {
   const _ModeCard({
     required this.icon,
     required this.title,
-    required this.detail,
     required this.selected,
     required this.onTap,
     this.enabled = true,
@@ -2126,7 +2017,6 @@ class _ModeCard extends StatelessWidget {
 
   final IconData icon;
   final String title;
-  final String detail;
   final bool selected;
   final bool enabled;
   final VoidCallback onTap;
@@ -2149,7 +2039,7 @@ class _ModeCard extends StatelessWidget {
       child: InkWell(
         onTap: enabled ? onTap : null,
         child: Padding(
-          padding: const EdgeInsets.all(13),
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
           child: Row(
             children: <Widget>[
               Icon(
@@ -2169,19 +2059,8 @@ class _ModeCard extends StatelessWidget {
                       title,
                       style: TextStyle(
                         color: enabled ? chrome.ink : chrome.muted,
-                        fontSize: 13,
-                        fontWeight: FontWeight.w800,
-                      ),
-                    ),
-                    const SizedBox(height: 2),
-                    Text(
-                      detail,
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
-                        color: chrome.muted,
-                        fontSize: 10.5,
-                        height: 1.25,
+                        fontSize: 14,
+                        fontWeight: FontWeight.w500,
                       ),
                     ),
                   ],
@@ -2266,53 +2145,10 @@ class _MessageStrip extends StatelessWidget {
                 message,
                 style: TextStyle(
                   color: chrome.text,
-                  fontSize: 11.5,
+                  fontSize: 14,
                   height: 1.3,
-                  fontWeight: FontWeight.w600,
+                  fontWeight: FontWeight.w400,
                 ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _ReviewSummaryChip extends StatelessWidget {
-  const _ReviewSummaryChip({
-    required this.icon,
-    required this.label,
-    this.warning = false,
-  });
-
-  final IconData icon;
-  final String label;
-  final bool warning;
-
-  @override
-  Widget build(BuildContext context) {
-    final chrome = context.mapChrome;
-    final color = warning ? chrome.warning : chrome.primary;
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        color: color.withValues(alpha: .10),
-        borderRadius: BorderRadius.circular(999),
-        border: Border.all(color: color.withValues(alpha: .35)),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: <Widget>[
-            Icon(icon, size: 15, color: color),
-            const SizedBox(width: 5),
-            Text(
-              label,
-              style: TextStyle(
-                color: chrome.text,
-                fontSize: 10.5,
-                fontWeight: FontWeight.w800,
               ),
             ),
           ],
@@ -2337,16 +2173,13 @@ class _ScreenshotReviewRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final chrome = context.mapChrome;
-    final confidence = (target.confidence * 100).round().clamp(0, 100);
     final status = target.alreadySaved
         ? 'Already saved'
         : target.conflict
         ? 'Screenshots disagree'
         : target.highConfidence
-        ? target.supportCount > 1
-              ? 'Confirmed in ${target.supportCount} screenshots'
-              : 'Clear match'
-        : 'Check on the image';
+        ? ''
+        : 'Review match';
     final statusColor = target.alreadySaved
         ? chrome.muted
         : target.highConfidence
@@ -2381,24 +2214,26 @@ class _ScreenshotReviewRow extends StatelessWidget {
         ),
         title: Text(
           target.label,
-          maxLines: 1,
+          maxLines: 2,
           overflow: TextOverflow.ellipsis,
           style: TextStyle(
             color: chrome.ink,
-            fontSize: 12.5,
-            fontWeight: FontWeight.w800,
+            fontSize: 14,
+            fontWeight: FontWeight.w500,
           ),
         ),
-        subtitle: Text(
-          '$status · $confidence% confidence',
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-          style: TextStyle(
-            color: statusColor,
-            fontSize: 10.5,
-            fontWeight: FontWeight.w700,
-          ),
-        ),
+        subtitle: status.isEmpty
+            ? null
+            : Text(
+                status,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  color: statusColor,
+                  fontSize: 12.5,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
       ),
     );
   }
@@ -2420,27 +2255,17 @@ class _EmptyReview extends StatelessWidget {
           children: <Widget>[
             Icon(
               Icons.center_focus_weak_rounded,
-              size: 42,
+              size: 28,
               color: chrome.muted,
             ),
             const SizedBox(height: 10),
             Text(
-              'No reliable invested icons were found in this alignment.',
+              'No clear invested icons found',
               textAlign: TextAlign.center,
               style: TextStyle(
                 color: chrome.ink,
                 fontSize: 14,
-                fontWeight: FontWeight.w800,
-              ),
-            ),
-            const SizedBox(height: 5),
-            Text(
-              'Move the outlined markers more precisely, then run the check again.',
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                color: chrome.muted,
-                fontSize: 11.5,
-                height: 1.35,
+                fontWeight: FontWeight.w600,
               ),
             ),
             const SizedBox(height: 12),
@@ -2560,62 +2385,6 @@ double _mapDistanceSquared(BdoMapPoint first, BdoMapPoint second) {
     }
   }
   return null;
-}
-
-class _SectionDivider extends StatelessWidget {
-  const _SectionDivider({required this.label});
-
-  final String label;
-
-  @override
-  Widget build(BuildContext context) {
-    final chrome = context.mapChrome;
-    return Row(
-      children: <Widget>[
-        Expanded(child: Divider(color: chrome.divider)),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 10),
-          child: Text(
-            label,
-            style: TextStyle(
-              color: chrome.muted,
-              fontSize: 10.5,
-              fontWeight: FontWeight.w700,
-            ),
-          ),
-        ),
-        Expanded(child: Divider(color: chrome.divider)),
-      ],
-    );
-  }
-}
-
-class _CompactTag extends StatelessWidget {
-  const _CompactTag({required this.label});
-
-  final String label;
-
-  @override
-  Widget build(BuildContext context) {
-    final chrome = context.mapChrome;
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        color: chrome.primary.withValues(alpha: .13),
-        borderRadius: BorderRadius.circular(99),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
-        child: Text(
-          label,
-          style: TextStyle(
-            color: chrome.primary,
-            fontSize: 9,
-            fontWeight: FontWeight.w800,
-          ),
-        ),
-      ),
-    );
-  }
 }
 
 int _readUint32BigEndian(Uint8List bytes, int offset) =>

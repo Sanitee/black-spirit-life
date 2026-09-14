@@ -41,6 +41,7 @@ class AtomicFileStore {
     this.committer = const RenameAtomicFileCommitter(),
     DateTime Function()? utcNow,
     this.backupsToKeep = 3,
+    this.preserveMalformedTarget = false,
   }) : _fileName = _validateLeafName(fileName),
        _utcNow = utcNow ?? (() => DateTime.now().toUtc()) {
     if (backupsToKeep < 1) {
@@ -57,6 +58,10 @@ class AtomicFileStore {
   final AtomicFileCommitter committer;
   final DateTime Function() _utcNow;
   final int backupsToKeep;
+
+  /// Disposable caches may retain an invalid original before replacing it.
+  /// Settings and other authoritative state keep the strict default.
+  final bool preserveMalformedTarget;
   Future<void> _tail = Future<void>.value();
   int _sequence = 0;
 
@@ -103,11 +108,32 @@ class AtomicFileStore {
       final target = File(targetPath);
 
       if (await target.exists()) {
-        final backupName = '$_fileName.backup-$token';
-        backup = File(_join(directory.path, backupName));
         final previousBytes = await target.readAsBytes();
-        await Future<void>.sync(() => validate(previousBytes));
-        await _writeAndFlush(backup, previousBytes);
+        var malformed = false;
+        try {
+          await Future<void>.sync(() => validate(previousBytes));
+        } on FormatException {
+          if (!preserveMalformedTarget) rethrow;
+          malformed = true;
+        }
+        if (malformed) {
+          // Keep the active target in place until the validated replacement
+          // commits. In particular, a request ledger must never disappear
+          // between quarantine and replacement after a crash.
+          final preserved = await _createPreservedOriginal(token);
+          await _writeAndFlush(preserved, previousBytes);
+          final preservedBytes = await preserved.readAsBytes();
+          if (preservedBytes.length != previousBytes.length ||
+              sha256.convert(preservedBytes) != sha256.convert(previousBytes)) {
+            throw const FileSystemException(
+              'Could not preserve the malformed cache original.',
+            );
+          }
+        } else {
+          final backupName = '$_fileName.backup-$token';
+          backup = File(_join(directory.path, backupName));
+          await _writeAndFlush(backup, previousBytes);
+        }
       }
 
       await committer.replace(staged, target);
@@ -165,6 +191,22 @@ class AtomicFileStore {
       await handle.flush();
     } finally {
       await handle.close();
+    }
+  }
+
+  Future<File> _createPreservedOriginal(String token) async {
+    for (var suffix = 0; ; suffix++) {
+      final file = File(
+        _join(directory.path, '$_fileName.corrupt-$token-$suffix'),
+      );
+      try {
+        return await file.create(exclusive: true);
+      } on FileSystemException {
+        if (await FileSystemEntity.type(file.path) ==
+            FileSystemEntityType.notFound) {
+          rethrow;
+        }
+      }
     }
   }
 

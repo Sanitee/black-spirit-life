@@ -49,6 +49,7 @@ void main() {
           applicationFuture: Future<ApplicationBundle>.value(bundle),
           marketGateway: const EmptyMarketGateway(),
           enableBetaUpdates: false,
+          enableOpportunityAutoCheck: false,
           windowHost: windowHost,
         ),
       );

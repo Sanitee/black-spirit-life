@@ -62,9 +62,9 @@ class BdoNodeNetworkPreferences {
   static const bool defaultUseObservedTradeVolume = false;
   static const bool defaultShowCitiesAndTowns = true;
   static const bool defaultShowGatewayHubs = true;
-  static const bool defaultShowAllMapNodes = true;
-  static const bool defaultShowAllNodeConnections = true;
-  static const bool defaultShowWorkerOutputIcons = true;
+  static const bool defaultShowAllMapNodes = false;
+  static const bool defaultShowAllNodeConnections = false;
+  static const bool defaultShowWorkerOutputIcons = false;
 
   final int contributionPointBudget;
 
@@ -220,9 +220,10 @@ class BdoNodeNetworkPreferences {
     'useObservedTradeVolume': useObservedTradeVolume,
     if (!showCitiesAndTowns) 'showCitiesAndTowns': false,
     if (!showGatewayHubs) 'showGatewayHubs': false,
-    if (!showAllMapNodes) 'showAllMapNodes': false,
-    if (!showAllNodeConnections) 'showAllNodeConnections': false,
-    if (!showWorkerOutputIcons) 'showWorkerOutputIcons': false,
+    // Store both states: older versions assumed true when these were absent.
+    'showAllMapNodes': showAllMapNodes,
+    'showAllNodeConnections': showAllNodeConnections,
+    'showWorkerOutputIcons': showWorkerOutputIcons,
     if (mapVisualStyle != BdoMapVisualStyle.vivid)
       'mapVisualStyle': mapVisualStyle.name,
     if (desiredResourceNodeCounts.isNotEmpty)

@@ -232,39 +232,44 @@ void main() {
 
     await tester.pumpWidget(
       MaterialApp(
-        home: Scaffold(
-          backgroundColor: const Color(0xFF0B1210),
-          body: Center(
-            child: RepaintBoundary(
-              key: previewKey,
-              child: ColoredBox(
-                color: const Color(0xFF14201D),
-                child: Padding(
-                  padding: const EdgeInsets.all(12),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: <Widget>[
-                      for (final states in stateRows)
-                        Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 4),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: <Widget>[
-                              for (final kind in houseKinds)
-                                Padding(
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 7,
+        home: ResourceMapChromeTheme(
+          // Lock this shape/state baseline to its original palette. The
+          // selected border must not depend on the app's default map skin.
+          data: ResourceMapChromeThemeData.sakuraCartographer,
+          child: Scaffold(
+            backgroundColor: const Color(0xFF0B1210),
+            body: Center(
+              child: RepaintBoundary(
+                key: previewKey,
+                child: ColoredBox(
+                  color: const Color(0xFF14201D),
+                  child: Padding(
+                    padding: const EdgeInsets.all(12),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: <Widget>[
+                        for (final states in stateRows)
+                          Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 4),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: <Widget>[
+                                for (final kind in houseKinds)
+                                  Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 7,
+                                    ),
+                                    child: BdoMapSymbol(
+                                      kind: kind,
+                                      states: states,
+                                      size: 32,
+                                    ),
                                   ),
-                                  child: BdoMapSymbol(
-                                    kind: kind,
-                                    states: states,
-                                    size: 32,
-                                  ),
-                                ),
-                            ],
+                              ],
+                            ),
                           ),
-                        ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
               ),
@@ -277,6 +282,45 @@ void main() {
     await expectLater(
       find.byKey(previewKey),
       matchesGoldenFile('goldens/bdo_house_symbols.png'),
+    );
+  });
+
+  testWidgets('Field Atlas keeps recommendation fill and accents selection', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: ResourceMapChromeTheme(
+          data: ResourceMapChromeThemeData.fieldAtlas,
+          child: BdoMapSymbol(
+            kind: BdoMapSymbolKind.lodging,
+            states: {
+              BdoMapSymbolState.recommendedPrerequisite,
+              BdoMapSymbolState.selected,
+            },
+          ),
+        ),
+      ),
+    );
+    final painter = tester
+        .widgetList<CustomPaint>(find.byType(CustomPaint))
+        .map((widget) => widget.painter)
+        .whereType<BdoHouseMapSymbolPainter>()
+        .single;
+    final recommendation = bdoMapSymbolStyle({
+      BdoMapSymbolState.recommendedPrerequisite,
+    });
+    expect(painter.style.background, recommendation.background);
+    expect(painter.style.foreground, recommendation.foreground);
+    expect(painter.style.border, ResourceMapChromeThemeData.fieldAtlas.accent);
+    expect(
+      painter.style.halo,
+      ResourceMapChromeThemeData.fieldAtlas.accent.withAlpha(102),
+    );
+    expect(painter.selected, isTrue);
+    expect(
+      find.bySemanticsLabel('Lodging; Recommended prerequisite, selected'),
+      findsOneWidget,
     );
   });
 

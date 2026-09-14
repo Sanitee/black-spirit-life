@@ -360,7 +360,7 @@ void main() {
         findsNothing,
       );
       expect(
-        find.descendant(of: wolfRow, matching: find.text('20.000 in stock')),
+        find.descendant(of: wolfRow, matching: find.text('Stock 20.000')),
         findsOneWidget,
       );
       expect(

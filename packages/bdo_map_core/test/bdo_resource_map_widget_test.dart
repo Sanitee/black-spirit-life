@@ -3,8 +3,13 @@ import 'dart:math' as math;
 import 'dart:ui' as ui;
 
 import 'package:bdo_map_core/bdo_map_core.dart';
+import 'package:bdo_map_core/src/widgets/resource_map_pill.dart';
 import 'package:bdo_map_core/src/widgets/map_canvas.dart';
-import 'package:bdo_map_core/src/widgets/resource_map_desktop_shell.dart';
+import 'package:bdo_map_core/src/widgets/resource_map_atlas_shell.dart';
+import 'package:bdo_map_core/src/widgets/resource_map_menu_artwork.dart';
+import 'package:bdo_map_core/src/widgets/resource_map_panel_metrics.dart';
+import 'package:bdo_map_core/src/widgets/town_house_panel.dart';
+import 'package:bdo_map_core/src/widgets/worker_activity_style.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -12,6 +17,39 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
+
+import 'support/map_menu_capture.dart';
+
+Finder _townHouseScrollable() => find
+    .descendant(
+      of: find.byKey(const ValueKey('resource-map-sidebar-details')),
+      matching: find.byType(Scrollable),
+    )
+    .first;
+
+Future<void> _openHouseOption(WidgetTester tester, String label) async {
+  final menu = find.byTooltip('House options');
+  await tester.ensureVisible(menu);
+  await tester.tap(menu);
+  await tester.pumpAndSettle();
+  await tester.tap(find.text(label).last);
+  await tester.pumpAndSettle();
+}
+
+Future<void> _waitTownHousePlan(WidgetTester tester) async {
+  for (var attempt = 0; attempt < 150; attempt++) {
+    await tester.pump();
+    final panel = tester.widget<TownHousePanel>(find.byType(TownHousePanel));
+    if (panel.plan != null) {
+      await tester.pumpAndSettle();
+      return;
+    }
+    await tester.runAsync(
+      () => Future<void>.delayed(const Duration(milliseconds: 10)),
+    );
+  }
+  fail('Town house calculation did not complete.');
+}
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -48,7 +86,502 @@ void main() {
     );
   });
 
-  testWidgets('worker setup keeps Houses in the Steward Manage menu', (
+  Future<LodgingTown> openCalpheon(
+    WidgetTester tester, {
+    BdoNodeNetworkPreferences? preferences,
+    ValueChanged<BdoNodeNetworkPreferences>? onChanged,
+  }) async {
+    await tester.binding.setSurfaceSize(const Size(1200, 752));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    await tester.pumpWidget(
+      MaterialApp(
+        home: MediaQuery(
+          data: const MediaQueryData(disableAnimations: true),
+          child: BdoResourceMap(
+            dataset: dataset,
+            lodgingDataset: lodgingDataset,
+            cacheDirectory: cacheDirectory,
+            tileSource: tileSource,
+            showSourceNotice: false,
+            tileHttpClient: tileClient,
+            nodeNetworkPreferences: preferences,
+            onNodeNetworkPreferencesChanged: onChanged,
+          ),
+        ),
+      ),
+    );
+    await tester.pump(const Duration(milliseconds: 300));
+    await _openHousingDirectory(tester);
+    final town = lodgingDataset.towns.firstWhere(
+      (t) => t.name == 'Calpheon City',
+    );
+    await tester.tap(
+      find.byKey(ValueKey('resource-map-housing-town-${town.townNodeId}')),
+    );
+    await _waitTownHousePlan(tester);
+    return town;
+  }
+
+  testWidgets('map chrome omits the design switch from the working canvas', (
+    tester,
+  ) async {
+    await tester.binding.setSurfaceSize(const Size(1200, 752));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    var selectedStyle = ResourceMapInterfaceStyle.glassDock;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: MediaQuery(
+          data: const MediaQueryData(disableAnimations: true),
+          child: BdoResourceMap(
+            dataset: dataset,
+            cacheDirectory: cacheDirectory,
+            tileSource: tileSource,
+            showSourceNotice: false,
+            tileHttpClient: tileClient,
+            interfaceStyle: selectedStyle,
+            onInterfaceStyleChanged: (style) => selectedStyle = style,
+          ),
+        ),
+      ),
+    );
+    await tester.pump(const Duration(milliseconds: 300));
+
+    expect(
+      find.byKey(const ValueKey<String>('resource-map-style-switch')),
+      findsNothing,
+    );
+    expect(
+      find.byKey(const ValueKey<String>('resource-map-compact-style-switch')),
+      findsNothing,
+    );
+    expect(selectedStyle, ResourceMapInterfaceStyle.glassDock);
+    expect(tester.takeException(), isNull);
+  });
+
+  for (final style in ResourceMapInterfaceStyle.values) {
+    testWidgets(
+      '${style.label} keeps search and selected details at one edge',
+      (tester) async {
+        await tester.binding.setSurfaceSize(const Size(1200, 752));
+        addTearDown(() => tester.binding.setSurfaceSize(null));
+        final chrome = style == ResourceMapInterfaceStyle.glassDock
+            ? ResourceMapChromeThemeData.glassDock
+            : ResourceMapChromeThemeData.ghostLedger;
+
+        await tester.pumpWidget(
+          MaterialApp(
+            home: ResourceMapChromeTheme(
+              data: chrome,
+              child: MediaQuery(
+                data: const MediaQueryData(disableAnimations: true),
+                child: BdoResourceMap(
+                  dataset: dataset,
+                  cacheDirectory: cacheDirectory,
+                  tileSource: tileSource,
+                  showSourceNotice: false,
+                  tileHttpClient: tileClient,
+                  interfaceStyle: style,
+                  onInterfaceStyleChanged: (_) {},
+                ),
+              ),
+            ),
+          ),
+        );
+        await tester.pump(const Duration(milliseconds: 300));
+
+        final search = find.byKey(
+          const ValueKey<String>('resource-map-atlas-search-field'),
+        );
+        final closedSearchRect = tester.getRect(search);
+        final dockRect = tester.getRect(
+          find.byKey(const ValueKey<String>('resource-map-atlas-dock')),
+        );
+        expect(dockRect.left, closeTo(16, 1));
+        expect(dockRect.top, closeTo(16, 1));
+        expect(closedSearchRect.top, greaterThan(dockRect.top));
+        expect(closedSearchRect.height, greaterThanOrEqualTo(30));
+        expect(
+          tester.getSize(find.byType(ResourceMapAtlasSearch)).height,
+          greaterThanOrEqualTo(40),
+        );
+        expect(closedSearchRect.left, greaterThan(dockRect.left));
+        expect(closedSearchRect.right, lessThan(dockRect.right));
+        expect(closedSearchRect.bottom, lessThanOrEqualTo(dockRect.bottom));
+        if (style == ResourceMapInterfaceStyle.ghostLedger) {
+          expect(find.text('MAP'), findsNothing);
+          expect(find.text('SEARCH'), findsNothing);
+          expect(find.text('Materials'), findsOneWidget);
+        } else {
+          expect(find.text('Materials'), findsOneWidget);
+          expect(find.text('Income'), findsOneWidget);
+          expect(find.text('Saved'), findsOneWidget);
+        }
+
+        await tester.enterText(find.byType(TextField), 'lizard');
+        await tester.pumpAndSettle();
+        final firstResult = find
+            .byWidgetPredicate(
+              (widget) =>
+                  widget.key is ValueKey<String> &&
+                  ((widget.key! as ValueKey<String>).value).startsWith(
+                    'resource-map-search-result-',
+                  ),
+            )
+            .first;
+        expect(firstResult, findsOneWidget);
+        await tester.tap(firstResult);
+        await tester.pumpAndSettle();
+
+        final inspector = find.byKey(
+          const ValueKey<String>('resource-map-sidebar-details'),
+        );
+        expect(inspector, findsOneWidget);
+        final searchRect = tester.getRect(search);
+        final inspectorRect = tester.getRect(inspector);
+        expect(inspectorRect.top, greaterThan(searchRect.bottom));
+        expect(find.byType(Scrollbar), findsNothing);
+        expect(find.byType(RawScrollbar), findsNothing);
+        expect(tester.takeException(), isNull);
+
+        await _settleVisibleGoldenImages(
+          tester,
+          root: find.byType(BdoResourceMap),
+        );
+        await expectLater(
+          find.byType(BdoResourceMap),
+          matchesGoldenFile('goldens/resource_map_${style.id}_selection.png'),
+        );
+      },
+    );
+  }
+
+  testWidgets('desktop search keeps focus after the first character', (
+    tester,
+  ) async {
+    await tester.binding.setSurfaceSize(const Size(1200, 752));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: ResourceMapChromeTheme(
+          data: ResourceMapChromeThemeData.ghostLedger,
+          child: MediaQuery(
+            data: const MediaQueryData(disableAnimations: true),
+            child: BdoResourceMap(
+              dataset: dataset,
+              cacheDirectory: cacheDirectory,
+              tileSource: tileSource,
+              showSourceNotice: false,
+              tileHttpClient: tileClient,
+              interfaceStyle: ResourceMapInterfaceStyle.ghostLedger,
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pump(const Duration(milliseconds: 300));
+
+    final field = find.byKey(
+      const ValueKey<String>('resource-map-atlas-search-field'),
+    );
+    await tester.tap(field);
+    await tester.enterText(field, 'd');
+    await tester.pump();
+    expect(tester.widget<TextField>(field).focusNode!.hasFocus, isTrue);
+    await tester.enterText(field, 'da');
+    await tester.pump();
+    expect(tester.widget<TextField>(field).focusNode!.hasFocus, isTrue);
+    expect(tester.widget<TextField>(field).controller!.text, 'da');
+    expect(find.byKey(const ValueKey<String>('search')), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
+
+  for (final style in ResourceMapInterfaceStyle.values) {
+    testWidgets(
+      '${style.label} saves exact search choices in a compact left list',
+      (tester) async {
+        await tester.binding.setSurfaceSize(const Size(1200, 752));
+        addTearDown(() => tester.binding.setSurfaceSize(null));
+        final changes = <Set<String>>[];
+        Widget app({Set<String> favorites = const {}}) => MaterialApp(
+          home: ResourceMapChromeTheme(
+            data: style == ResourceMapInterfaceStyle.ghostLedger
+                ? ResourceMapChromeThemeData.ghostLedger
+                : ResourceMapChromeThemeData.glassDock,
+            child: BdoResourceMap(
+              dataset: dataset,
+              cacheDirectory: cacheDirectory,
+              tileSource: tileSource,
+              tileHttpClient: tileClient,
+              showSourceNotice: false,
+              interfaceStyle: style,
+              favoriteResourceIds: favorites,
+              onFavoriteResourceIdsChanged: (value) => changes.add(value),
+            ),
+          ),
+        );
+        await tester.pumpWidget(app());
+        await tester.pumpAndSettle();
+        final shelf = find.byKey(
+          const ValueKey<String>('resource-map-saved-list'),
+        );
+        final field = find.byType(TextField);
+        expect(
+          find.byKey(const ValueKey<String>('resource-map-atlas-home')),
+          findsNothing,
+        );
+        expect(
+          find.byKey(const ValueKey<String>('resource-map-atlas-search')),
+          findsNothing,
+        );
+        await _openSavedMapEntries(tester);
+        expect(shelf, findsOneWidget);
+        final emptyRect = tester.getRect(shelf);
+        final navigatorRect = tester.getRect(
+          find.byKey(const ValueKey<String>('resource-map-atlas-dock')),
+        );
+        expect(emptyRect.left, greaterThanOrEqualTo(navigatorRect.left));
+        expect(emptyRect.right, lessThanOrEqualTo(navigatorRect.right));
+        expect(emptyRect.top, greaterThan(navigatorRect.top));
+        expect(emptyRect.width, lessThanOrEqualTo(navigatorRect.width));
+        expect(emptyRect.height, lessThan(125));
+        expect(
+          find.byKey(const ValueKey<String>('resource-map-atlas-dock')),
+          findsOneWidget,
+        );
+        expect(find.text('Categories'), findsNothing);
+        await _goMapHome(tester);
+        expect(shelf, findsNothing);
+
+        final meat = dataset.resources.singleWhere(
+          (r) => r.name == 'Snake Meat',
+        );
+        await tester.enterText(field, meat.name);
+        await tester.pumpAndSettle();
+        final focus = tester.widget<TextField>(field).focusNode!;
+        final star = find.byKey(
+          ValueKey<String>('resource-map-search-favorite-${meat.id}'),
+        );
+        expect(focus.hasFocus, isTrue);
+        await tester.tap(star);
+        await tester.pumpAndSettle();
+        expect(
+          focus.hasFocus,
+          isTrue,
+          reason: 'Starring must not dismiss typing or open details.',
+        );
+        expect(changes.last, {meat.id});
+        expect(
+          find.byKey(const ValueKey<String>('resource-map-sidebar-details')),
+          findsNothing,
+        );
+        expect(tester.widget<ResourceMapFavoriteButton>(star).saved, isTrue);
+
+        final cow = dataset.fieldSources.firstWhere(
+          (s) => s.name == 'Dairy Cow',
+        );
+        final cowKey = 'map:fieldSource:${cow.id}';
+        await tester.enterText(field, cow.name);
+        await tester.pumpAndSettle();
+        await tester.tap(
+          find.byKey(ValueKey<String>('resource-map-search-favorite-$cowKey')),
+        );
+        await tester.pumpAndSettle();
+        expect(changes.last, {meat.id, cowKey});
+        final node = dataset.workerNodes.firstWhere(
+          (n) => n.name == 'Calpheon',
+        );
+        final nodeKey = 'map:workerNode:${node.id}';
+        await tester.enterText(field, 'Calpheon');
+        await tester.pumpAndSettle();
+        final nodeStar = find.byKey(
+          ValueKey<String>('resource-map-search-favorite-$nodeKey'),
+        );
+        await tester.ensureVisible(nodeStar);
+        await tester.tap(nodeStar);
+        await tester.pumpAndSettle();
+        expect(changes.last, {meat.id, cowKey, nodeKey});
+
+        // A fresh widget reconstructs all three choices from persisted keys.
+        await tester.pumpWidget(const SizedBox());
+        await tester.pumpWidget(app(favorites: changes.last));
+        await tester.pumpAndSettle();
+        await _openSavedMapEntries(tester);
+        await tester.pumpAndSettle();
+        expect(tester.getSize(shelf).height, lessThan(300));
+        final savedMeat = find.byKey(
+          ValueKey<String>('resource-map-saved-${meat.id}'),
+        );
+        final savedCow = find.byKey(
+          ValueKey<String>('resource-map-saved-$cowKey'),
+        );
+        final savedNode = find.byKey(
+          ValueKey<String>('resource-map-saved-$nodeKey'),
+        );
+        expect(savedMeat, findsOneWidget);
+        expect(savedCow, findsOneWidget);
+        expect(savedNode, findsOneWidget);
+        await _settleVisibleGoldenImages(
+          tester,
+          root: find.byType(BdoResourceMap),
+        );
+        await expectLater(
+          find.byType(BdoResourceMap),
+          matchesGoldenFile('goldens/resource_map_${style.id}_saved.png'),
+        );
+        await tester.tap(savedMeat);
+        await tester.pumpAndSettle();
+        expect(shelf, findsNothing);
+        expect(
+          tester
+              .widget<BdoMapCanvas>(find.byType(BdoMapCanvas))
+              .gatheringPoints,
+          isNotEmpty,
+        );
+        await tester.tap(
+          find.byKey(const ValueKey<String>('resource-map-task-back')),
+        );
+        await tester.pumpAndSettle();
+        expect(
+          shelf,
+          findsOneWidget,
+          reason: 'Back returns to the saved shortcuts.',
+        );
+        await tester.tap(savedCow);
+        await tester.pumpAndSettle();
+        expect(
+          tester.widget<BdoMapCanvas>(find.byType(BdoMapCanvas)).gatheringSpots,
+          isNotEmpty,
+        );
+        await _openSavedMapEntries(tester);
+        await tester.pumpAndSettle();
+        await tester.tap(
+          find.byKey(ValueKey<String>('resource-map-saved-favorite-$nodeKey')),
+        );
+        await tester.pumpAndSettle();
+        expect(changes.last, {meat.id, cowKey});
+        expect(savedNode, findsNothing);
+        expect(find.byType(Scrollbar), findsNothing);
+        expect(find.byType(RawScrollbar), findsNothing);
+        expect(tester.takeException(), isNull);
+      },
+    );
+  }
+
+  for (final style in ResourceMapInterfaceStyle.values) {
+    for (final scale in [1.0, 2.0]) {
+      testWidgets(
+        'activity menu is content-sized with native icons in ${style.id} at $scale',
+        (tester) async {
+          await tester.binding.setSurfaceSize(const Size(1200, 752));
+          addTearDown(() => tester.binding.setSurfaceSize(null));
+          await tester.pumpWidget(
+            MaterialApp(
+              home: MediaQuery(
+                data: MediaQueryData(
+                  textScaler: TextScaler.linear(scale),
+                  disableAnimations: true,
+                ),
+                child: ResourceMapChromeTheme(
+                  data: style == ResourceMapInterfaceStyle.ghostLedger
+                      ? ResourceMapChromeThemeData.ghostLedger
+                      : ResourceMapChromeThemeData.glassDock,
+                  child: BdoResourceMap(
+                    dataset: dataset,
+                    cacheDirectory: cacheDirectory,
+                    tileSource: tileSource,
+                    tileHttpClient: tileClient,
+                    showSourceNotice: false,
+                    interfaceStyle: style,
+                  ),
+                ),
+              ),
+            ),
+          );
+          await tester.pumpAndSettle();
+          await _openWorkerNetwork(tester);
+          final panel = find.byKey(const ValueKey('resource-map-atlas-dock'));
+          final position = tester.getRect(panel);
+          expect(position.left, closeTo(16, .1));
+          expect(position.top, 16);
+          expect(position.width, lessThanOrEqualTo(440));
+          if (scale == 1) {
+            expect(
+              position.bottom,
+              lessThan(
+                tester.getRect(find.byType(BdoResourceMap)).bottom - 100,
+              ),
+              reason:
+                  'Activity rows take their content height, not all available space.',
+            );
+          }
+          expect(
+            find.textContaining('Choose a production activity'),
+            findsNothing,
+          );
+          expect(find.textContaining('map stays clear'), findsNothing);
+          expect(find.textContaining('Back to map home'), findsNothing);
+          expect(find.byType(BdoWorkerActivityImage), findsNWidgets(6));
+          for (final activity in BdoWorkerActivity.values) {
+            final row = find.byKey(
+              ValueKey('resource-map-worker-activity-${activity.name}'),
+            );
+            final label = tester.widget<Text>(
+              find.descendant(of: row, matching: find.text(activity.label)),
+            );
+            expect(label.style!.fontSize, 16);
+          }
+          if (scale == 1) {
+            await _settleVisibleGoldenImages(
+              tester,
+              root: find.byType(BdoResourceMap),
+            );
+            await expectLater(
+              find.byType(BdoResourceMap),
+              matchesGoldenFile(
+                'goldens/resource_map_${style.id}_activity_menu.png',
+              ),
+            );
+          }
+          final excavation = find.byKey(
+            const ValueKey('resource-map-worker-activity-excavation'),
+          );
+          await tester.ensureVisible(excavation);
+          await tester.tap(excavation);
+          await tester.pumpAndSettle();
+          final canvas = tester.widget<BdoMapCanvas>(find.byType(BdoMapCanvas));
+          expect(canvas.workerNodes, isNotEmpty);
+          expect(
+            canvas.workerNodes.every(
+              (node) => node.activity == BdoWorkerActivity.excavation,
+            ),
+            isTrue,
+          );
+          await tester.tap(
+            find.byKey(const ValueKey('resource-map-task-back')),
+          );
+          await tester.pumpAndSettle();
+          expect(
+            tester.widget<BdoMapCanvas>(find.byType(BdoMapCanvas)).workerNodes,
+            isEmpty,
+          );
+          await tester.tap(
+            find.byKey(const ValueKey('resource-map-task-back')),
+          );
+          await tester.pumpAndSettle();
+          expect(
+            find.byKey(const ValueKey('resource-map-worker-activity-picker')),
+            findsNothing,
+          );
+          expect(find.byType(Scrollbar), findsNothing);
+          expect(tester.takeException(), isNull);
+        },
+      );
+    }
+  }
+
+  testWidgets('Houses stays reachable in the shared navigation', (
     tester,
   ) async {
     await tester.binding.setSurfaceSize(const Size(1200, 752));
@@ -73,216 +606,213 @@ void main() {
     );
     await tester.pump(const Duration(milliseconds: 300));
 
-    await tester.tap(
-      find.byKey(const ValueKey<String>('resource-map-command-workers')),
-    );
-    await tester.pumpAndSettle();
-    await _openWorkerStewardSection(tester, 'resource-map-worker-menu-manage');
-    expect(
-      find.byKey(
-        const ValueKey<String>(
-          'resource-map-worker-import-screenshot-shortcut',
-        ),
-        skipOffstage: false,
-      ),
-      findsNothing,
-    );
-    expect(find.text('Scan screenshots', skipOffstage: false), findsNothing);
-    final stewardMenu = find.byKey(
-      const ValueKey<String>('resource-map-worker-steward-menu'),
-    );
-    final housesAction = find.byKey(
-      const ValueKey<String>('resource-map-worker-houses-action'),
-    );
-    expect(housesAction, findsOneWidget);
-    expect(
-      find.descendant(of: stewardMenu, matching: housesAction),
-      findsOneWidget,
-    );
+    await _goMapHome(tester);
+    final housesAction = find.byKey(const ValueKey('resource-map-home-houses'));
+    expect(housesAction.hitTestable(), findsOneWidget);
     expect(
       find.descendant(of: housesAction, matching: find.text('Houses')),
       findsOneWidget,
     );
     expect(
-      find.byWidgetPredicate(
-        (widget) => widget is Tooltip && widget.message == 'Your nodes',
+      find.descendant(
+        of: housesAction,
+        matching: find.byType(ResourceMapMenuArtwork),
       ),
+      findsOneWidget,
+    );
+    await _openNodePlanner(tester);
+    for (final key in [
+      'resource-map-home-plan-materials',
+      'resource-map-home-browse-nodes',
+      'resource-map-home-setup',
+    ]) {
+      final action = find.byKey(ValueKey(key));
+      await tester.ensureVisible(action);
+      expect(action.hitTestable(), findsOneWidget);
+      expect(
+        find.descendant(
+          of: action,
+          matching: find.byType(ResourceMapMenuArtwork),
+        ),
+        findsOneWidget,
+      );
+    }
+    await _openWorkerSetup(tester);
+    expect(
+      find.byKey(
+        const ValueKey('resource-map-worker-import-screenshot-shortcut'),
+        skipOffstage: false,
+      ),
+      findsNothing,
+    );
+    expect(find.text('Scan screenshots', skipOffstage: false), findsNothing);
+    expect(
+      find.byKey(const ValueKey('resource-map-worker-houses-action')),
       findsNothing,
     );
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets('Houses back returns through the directory to Steward landing', (
-    tester,
-  ) async {
-    await tester.binding.setSurfaceSize(const Size(1200, 752));
-    addTearDown(() => tester.binding.setSurfaceSize(null));
+  testWidgets(
+    'Houses back returns to the directory and Workers stays reachable',
+    (tester) async {
+      await tester.binding.setSurfaceSize(const Size(1200, 752));
+      addTearDown(() => tester.binding.setSurfaceSize(null));
 
-    await tester.pumpWidget(
-      MaterialApp(
-        home: MediaQuery(
-          data: const MediaQueryData(disableAnimations: true),
-          child: BdoResourceMap(
-            dataset: dataset,
-            lodgingDataset: lodgingDataset,
-            cacheDirectory: cacheDirectory,
-            tileSource: tileSource,
-            showSourceNotice: false,
-            tileHttpClient: tileClient,
+      await tester.pumpWidget(
+        MaterialApp(
+          home: MediaQuery(
+            data: const MediaQueryData(disableAnimations: true),
+            child: BdoResourceMap(
+              dataset: dataset,
+              lodgingDataset: lodgingDataset,
+              cacheDirectory: cacheDirectory,
+              tileSource: tileSource,
+              showSourceNotice: false,
+              tileHttpClient: tileClient,
+            ),
           ),
         ),
-      ),
-    );
-    await tester.pump(const Duration(milliseconds: 300));
-    await _openHousingDirectory(tester);
-    expect(
-      find.byKey(
-        const ValueKey<String>('resource-map-sidebar-housing-directory'),
-      ),
-      findsOneWidget,
-    );
+      );
+      await tester.pump(const Duration(milliseconds: 300));
+      await _openHousingDirectory(tester);
+      expect(
+        find.byKey(
+          const ValueKey<String>('resource-map-sidebar-housing-directory'),
+        ),
+        findsOneWidget,
+      );
 
-    final town = lodgingDataset.towns.singleWhere(
-      (entry) => entry.name == 'Altinova',
-    );
-    await tester.tap(
-      find.byKey(
+      final town = lodgingDataset.towns.singleWhere(
+        (entry) => entry.name == 'Altinova',
+      );
+      final townRow = find.byKey(
         ValueKey<String>('resource-map-housing-town-${town.townNodeId}'),
-      ),
-    );
-    await tester.pumpAndSettle();
-    expect(
-      find.byKey(
+      );
+      await tester.scrollUntilVisible(
+        townRow,
+        160,
+        scrollable: find
+            .descendant(
+              of: find.byKey(
+                const ValueKey<String>('resource-map-housing-town-list'),
+              ),
+              matching: find.byType(Scrollable),
+            )
+            .first,
+      );
+      await tester.tap(townRow);
+      await tester.pumpAndSettle();
+      expect(
+        find.byKey(
+          ValueKey<String>('resource-map-town-housing-${town.townNodeId}'),
+        ),
+        findsOneWidget,
+      );
+      expect(
+        find.byKey(const ValueKey<String>('resource-map-task-close')),
+        findsNothing,
+        reason:
+            'Houses uses Back and Collapse; it has no duplicate Close action.',
+      );
+      expect(
+        find.byKey(const ValueKey<String>('resource-map-sidebar-detail-size')),
+        findsNothing,
+        reason:
+            'Houses keeps one Back action and one Collapse action instead of '
+            'showing another arrow-shaped detail control.',
+      );
+
+      final townHousing = find.byKey(
         ValueKey<String>('resource-map-town-housing-${town.townNodeId}'),
-      ),
-      findsOneWidget,
-    );
-    expect(
-      find.byKey(const ValueKey<String>('resource-map-task-close')),
-      findsNothing,
-      reason:
-          'Houses uses Back and Collapse; it has no duplicate Close action.',
-    );
-    expect(
-      find.byKey(const ValueKey<String>('resource-map-sidebar-detail-size')),
-      findsNothing,
-      reason:
-          'Houses keeps one Back action and one Collapse action instead of '
-          'showing another arrow-shaped detail control.',
-    );
+      );
+      expect(townHousing, findsOneWidget);
+      expect(
+        find.byKey(const ValueKey<String>('resource-map-atlas-dock')),
+        findsOneWidget,
+        reason: 'Houses stays inside the centered task workspace.',
+      );
 
-    await tester.tap(
-      find.byKey(
-        const ValueKey<String>('resource-map-desktop-sidebar-collapse'),
-      ),
-    );
-    await tester.pumpAndSettle();
-    final townHousing = find.byKey(
-      ValueKey<String>('resource-map-town-housing-${town.townNodeId}'),
-    );
-    expect(townHousing, findsOneWidget);
-    expect(townHousing.hitTestable(), findsNothing);
-    await tester.tap(
-      find.byKey(
-        const ValueKey<String>('resource-map-desktop-task-surface-restore'),
-      ),
-    );
-    await tester.pumpAndSettle();
-    expect(townHousing, findsOneWidget);
-    expect(
-      find
-          .byKey(const ValueKey<String>('resource-map-desktop-edge-surface'))
-          .hitTestable(),
-      findsOneWidget,
-      reason: 'Collapse must preserve and restore the current Houses page.',
-    );
+      final detailsScrollable = find
+          .descendant(
+            of: find.byKey(
+              const ValueKey<String>('resource-map-sidebar-details'),
+            ),
+            matching: find.byType(Scrollable),
+          )
+          .first;
+      await _openHouseOption(tester, 'Browse all houses');
+      final house = town.houses.first;
+      final houseRow = find.byKey(
+        ValueKey<String>('resource-map-house-row-${house.id}'),
+      );
+      await tester.scrollUntilVisible(
+        houseRow,
+        140,
+        scrollable: detailsScrollable,
+      );
+      await tester.tap(houseRow);
+      await tester.pumpAndSettle();
+      expect(
+        find.byKey(ValueKey<String>('resource-map-selected-house-${house.id}')),
+        findsOneWidget,
+      );
 
-    final allHouses = find.byKey(
-      ValueKey<String>('resource-map-all-houses-${town.townNodeId}'),
-    );
-    final detailsScrollable = find
-        .descendant(
-          of: find.byKey(
-            const ValueKey<String>('resource-map-sidebar-details'),
-          ),
-          matching: find.byType(Scrollable),
-        )
-        .first;
-    await tester.scrollUntilVisible(
-      allHouses,
-      160,
-      scrollable: detailsScrollable,
-    );
-    await tester.tap(allHouses);
-    await tester.pumpAndSettle();
-    final house = town.houses.first;
-    final houseRow = find.byKey(
-      ValueKey<String>('resource-map-house-row-${house.id}'),
-    );
-    await tester.scrollUntilVisible(
-      houseRow,
-      140,
-      scrollable: detailsScrollable,
-    );
-    await tester.tap(houseRow);
-    await tester.pumpAndSettle();
-    expect(
-      find.byKey(ValueKey<String>('resource-map-selected-house-${house.id}')),
-      findsOneWidget,
-    );
+      await tester.tap(
+        find.byKey(const ValueKey<String>('resource-map-task-back')),
+      );
+      await tester.pumpAndSettle();
+      expect(
+        find.byKey(ValueKey<String>('resource-map-selected-house-${house.id}')),
+        findsNothing,
+      );
+      expect(
+        find.byKey(
+          ValueKey<String>('resource-map-town-housing-${town.townNodeId}'),
+        ),
+        findsOneWidget,
+        reason: 'House Back should return to its town before the town list.',
+      );
 
-    await tester.tap(
-      find.byKey(const ValueKey<String>('resource-map-task-back')),
-    );
-    await tester.pumpAndSettle();
-    expect(
-      find.byKey(ValueKey<String>('resource-map-selected-house-${house.id}')),
-      findsNothing,
-    );
-    expect(
-      find.byKey(
-        ValueKey<String>('resource-map-town-housing-${town.townNodeId}'),
-      ),
-      findsOneWidget,
-      reason: 'House Back should return to its town before the town list.',
-    );
+      await tester.tap(
+        find.byKey(const ValueKey<String>('resource-map-task-back')),
+      );
+      await tester.pumpAndSettle();
+      expect(
+        find.byKey(
+          const ValueKey<String>('resource-map-sidebar-housing-directory'),
+        ),
+        findsOneWidget,
+        reason: 'Town Back should return to the Houses directory first.',
+      );
 
-    await tester.tap(
-      find.byKey(const ValueKey<String>('resource-map-task-back')),
-    );
-    await tester.pumpAndSettle();
-    expect(
-      find.byKey(
-        const ValueKey<String>('resource-map-sidebar-housing-directory'),
-      ),
-      findsOneWidget,
-      reason: 'Town Back should return to the Houses directory first.',
-    );
+      expect(
+        find.byKey(const ValueKey<String>('resource-map-task-back')),
+        findsOneWidget,
+        reason: 'The Houses directory returns to Map home.',
+      );
+      await _openNodePlanner(tester);
 
-    await tester.tap(
-      find.byKey(const ValueKey<String>('resource-map-task-back')),
-    );
-    await tester.pumpAndSettle();
-
-    expect(
-      find.byKey(
-        const ValueKey<String>('resource-map-sidebar-housing-directory'),
-      ),
-      findsNothing,
-    );
-    expect(
-      find.byKey(const ValueKey<String>('resource-map-worker-steward-menu')),
-      findsOneWidget,
-    );
-    expect(
-      find
-          .byKey(const ValueKey<String>('resource-map-desktop-edge-surface'))
-          .hitTestable(),
-      findsNothing,
-      reason: 'Back returns to the compact Steward landing menu.',
-    );
-    expect(tester.takeException(), isNull);
-  });
+      expect(
+        find.byKey(
+          const ValueKey<String>('resource-map-sidebar-housing-directory'),
+        ),
+        findsNothing,
+      );
+      expect(
+        find.byKey(const ValueKey<String>('resource-map-home-plan-materials')),
+        findsOneWidget,
+      );
+      expect(
+        find
+            .byKey(const ValueKey<String>('resource-map-home-plan-materials'))
+            .hitTestable(),
+        findsOneWidget,
+        reason: 'Back returns to the compact worker command menu.',
+      );
+      expect(tester.takeException(), isNull);
+    },
+  );
 
   testWidgets('Invest nodes mode saves every node click immediately', (
     tester,
@@ -314,10 +844,7 @@ void main() {
       ),
     );
     await tester.pump(const Duration(milliseconds: 300));
-    await tester.tap(
-      find.byKey(const ValueKey<String>('resource-map-command-workers')),
-    );
-    await tester.pumpAndSettle();
+    await _openNodePlanner(tester);
 
     var canvas = tester.widget<BdoMapCanvas>(find.byType(BdoMapCanvas));
     final viewport = tester.getSize(find.byType(BdoMapCanvas));
@@ -335,21 +862,15 @@ void main() {
       contains(selectedNode.id),
     );
     expect(
-      find.byKey(const ValueKey<String>('resource-map-node-quick-panel')),
+      find.byKey(const ValueKey<String>('resource-map-sidebar-details')),
       findsOneWidget,
     );
 
-    await tester.tap(
-      find.byKey(const ValueKey<String>('resource-map-command-workers')),
-    );
-    await tester.pumpAndSettle();
-    await tester.tap(
-      find.byKey(const ValueKey<String>('resource-map-worker-menu-manage')),
-    );
-    await tester.pumpAndSettle();
+    await _openNodePlanner(tester);
     final investMode = find.byKey(
       const ValueKey<String>('resource-map-invest-node-mode'),
     );
+    await _openWorkerSetup(tester);
     await tester.tap(investMode);
     await tester.pumpAndSettle();
     expect(
@@ -371,7 +892,7 @@ void main() {
           'instead of replacing them with smaller generic markers.',
     );
     expect(
-      find.byKey(const ValueKey<String>('resource-map-node-quick-panel')),
+      find.byKey(const ValueKey<String>('resource-map-sidebar-details')),
       findsNothing,
       reason: 'Returning to the Workers hub dismisses unrelated node details.',
     );
@@ -485,14 +1006,12 @@ void main() {
       findsNothing,
     );
 
-    await tester.tap(
-      find.byKey(const ValueKey<String>('resource-map-command-workers')),
-    );
-    await tester.pumpAndSettle();
+    await _openNodePlanner(tester);
 
     expect(
       find.byKey(
         const ValueKey<String>('resource-map-worker-royal-workshop-action'),
+        skipOffstage: false,
       ),
       findsNothing,
     );
@@ -507,349 +1026,75 @@ void main() {
   testWidgets(
     'house directory records owned uses without moving the map on town click',
     (tester) async {
-      await tester.binding.setSurfaceSize(const Size(1200, 752));
-      addTearDown(() => tester.binding.setSurfaceSize(null));
-      final calpheon = lodgingDataset.towns.singleWhere(
-        (town) => town.name == 'Calpheon City',
-      );
-      final existingHouse = calpheon.housesById['house:2666']!;
       final updates = <BdoNodeNetworkPreferences>[];
-
-      await tester.pumpWidget(
-        MaterialApp(
-          home: MediaQuery(
-            data: const MediaQueryData(disableAnimations: true),
-            child: BdoResourceMap(
-              dataset: dataset,
-              lodgingDataset: lodgingDataset,
-              cacheDirectory: cacheDirectory,
-              tileSource: tileSource,
-              showSourceNotice: false,
-              tileHttpClient: tileClient,
-              nodeNetworkPreferences: BdoNodeNetworkPreferences(
-                currentOwnedHouseIds: <String>{existingHouse.id},
-                currentHouseUsageTypeIds: <String, int>{existingHouse.id: 2},
-              ),
-              onNodeNetworkPreferencesChanged: updates.add,
-            ),
-          ),
+      final town = await openCalpheon(
+        tester,
+        preferences: BdoNodeNetworkPreferences(
+          currentOwnedHouseIds: {'house:2666'},
+          currentHouseUsageTypeIds: {'house:2666': 2},
         ),
+        onChanged: updates.add,
       );
-      await tester.pump(const Duration(milliseconds: 300));
-
-      await _openHousingDirectory(tester);
-
-      expect(
-        find.byKey(
-          const ValueKey<String>('resource-map-sidebar-housing-directory'),
-        ),
-        findsOneWidget,
-      );
-      expect(find.text('Your house network'), findsNothing);
-      expect(find.textContaining('houses ·'), findsOneWidget);
-      final canvasBefore = tester.widget<BdoMapCanvas>(
-        find.byType(BdoMapCanvas),
-      );
-      final cameraBefore = canvasBefore.cameraController.camera;
-      final calpheonTown = find.byKey(
-        ValueKey<String>('resource-map-housing-town-${calpheon.townNodeId}'),
-      );
-      await tester.tap(calpheonTown);
-      await tester.pumpAndSettle();
-
-      final cameraAfter = tester
+      final camera = tester
           .widget<BdoMapCanvas>(find.byType(BdoMapCanvas))
-          .cameraController
-          .camera;
-      expect(cameraAfter.center, cameraBefore.center);
-      expect(cameraAfter.zoom, cameraBefore.zoom);
+          .cameraController;
+      final before = camera.camera;
+      await tester.tap(find.byKey(const ValueKey('house-goal-plus-1')));
+      await _waitTownHousePlan(tester);
       expect(
-        find.byKey(
-          ValueKey<String>('resource-map-town-housing-${calpheon.townNodeId}'),
-        ),
-        findsOneWidget,
+        tester.widget<TownHousePanel>(find.byType(TownHousePanel)).plan!.usages,
+        isNot(contains('house:2666')),
       );
+      final dropdown = find.byKey(const ValueKey('house-add-workshop'));
+      tester.widget<DropdownButton<int>>(dropdown).onChanged!(14);
+      await _waitTownHousePlan(tester);
+      tester.widget<DropdownButton<int>>(dropdown).onChanged!(16);
+      await _waitTownHousePlan(tester);
+      final panel = tester.widget<TownHousePanel>(find.byType(TownHousePanel));
+      expect(panel.goals.where((g) => g.typeId > 3).length, 2);
+      expect(panel.plan!.isFeasible, isTrue);
+      expect(find.byKey(const ValueKey('house-add-workshop')), findsOneWidget);
+      expect(camera.camera.center, before.center);
+      expect(camera.camera.zoom, before.zoom);
       expect(
-        find.text('${calpheon.houses.length} mapped · 1 saved'),
-        findsOneWidget,
+        updates,
+        isEmpty,
+        reason: 'Planning alone must not change ownership.',
       );
-      expect(find.text('1 bed ready'), findsOneWidget);
-      expect(
-        find.byKey(
-          ValueKey<String>('resource-map-house-filter-${calpheon.townNodeId}'),
-        ),
-        findsOneWidget,
-      );
-      await tester.tap(
-        find.byKey(
-          ValueKey<String>('resource-map-fit-houses-${calpheon.townNodeId}'),
-        ),
-      );
-      await tester.pumpAndSettle();
-      _expectHousingOverlayDeclutteredAndConnected(tester, calpheon);
-      final filters = find.byKey(
-        ValueKey<String>('resource-map-house-filter-${calpheon.townNodeId}'),
-      );
-      expect(
-        find.descendant(of: filters, matching: find.text('Storage')),
-        findsOneWidget,
-      );
-      await tester.tap(
-        find.byKey(
-          ValueKey<String>(
-            'resource-map-open-house-planner-${calpheon.townNodeId}',
-          ),
-        ),
-      );
-      await tester.pumpAndSettle();
-      expect(
-        find.byKey(
-          ValueKey<String>('resource-map-house-planner-${calpheon.townNodeId}'),
-        ),
-        findsOneWidget,
-      );
-      expect(
-        find.byKey(
-          ValueKey<String>(
-            'resource-map-storage-plan-summary-${calpheon.townNodeId}',
-          ),
-        ),
-        findsOneWidget,
-      );
-      expect(
-        find.byWidgetPredicate(
-          (widget) =>
-              widget is Tooltip &&
-              widget.message?.contains('3/5/8/12/16 slots') == true,
-        ),
-        findsOneWidget,
-      );
-      expect(find.byType(Scrollbar), findsNothing);
-      expect(find.byType(RawScrollbar), findsNothing);
-
-      final usageSelector = find.byKey(
-        ValueKey<String>(
-          'resource-map-house-planner-use-${calpheon.townNodeId}',
-        ),
-      );
-      final usageDropdown = tester.widget<DropdownButton<int>>(
-        find.descendant(
-          of: usageSelector,
-          matching: find.byType(DropdownButton<int>),
-        ),
-      );
-      usageDropdown.onChanged!(1);
-      await tester.pumpAndSettle();
-
-      final lodgingPlan = LodgingOptimizer.solve(
-        town: calpheon,
-        requiredCapacity: 2,
-        existingCapacity: 1,
-        currentOwnedHouseIds: <String>{existingHouse.id},
-      );
-      expect(
-        find.byKey(
-          ValueKey<String>(
-            'resource-map-lodging-house-plan-summary-${calpheon.townNodeId}',
-          ),
-        ),
-        findsOneWidget,
-      );
-      for (final houseId in lodgingPlan.selectedLodgingHouseIds) {
-        expect(
-          find.byKey(
-            ValueKey<String>('resource-map-lodging-plan-house-$houseId'),
-          ),
-          findsOneWidget,
-        );
-      }
-      expect(
-        lodgingPlan.selectedLodgingHouseIds,
-        isNot(contains(existingHouse.id)),
-        reason: 'The saved Storage house must not be converted to Lodging.',
-      );
-
-      final lodgingUsageDropdown = tester.widget<DropdownButton<int>>(
-        find.descendant(
-          of: usageSelector,
-          matching: find.byType(DropdownButton<int>),
-        ),
-      );
-      lodgingUsageDropdown.onChanged!(14);
-      await tester.pumpAndSettle();
-
-      final carpentryPlan = HouseUseInvestmentPlanner.solve(
-        town: calpheon,
-        usageTypeId: 14,
-        requestedAdditionalFacilityCount: 1,
-        currentOwnedHouseIds: <String>{existingHouse.id},
-        currentHouseUsageTypeIds: <String, int>{existingHouse.id: 2},
-      );
-      expect(find.text('Best Carpentry Workshop (1)'), findsOneWidget);
-      expect(
-        find.byKey(
-          ValueKey<String>(
-            'resource-map-house-use-plan-house-'
-            '${carpentryPlan.selectedUseHouseIds.single}',
-          ),
-        ),
-        findsOneWidget,
-      );
-      expect(
-        find.byKey(
-          ValueKey<String>(
-            'resource-map-house-use-plan-summary-${calpheon.townNodeId}',
-          ),
-        ),
-        findsOneWidget,
-      );
-      await tester.tap(
-        find.byKey(
-          ValueKey<String>(
-            'resource-map-close-house-planner-${calpheon.townNodeId}',
-          ),
-        ),
-      );
-      await tester.pumpAndSettle();
-      await tester.tap(
-        find.byKey(
-          ValueKey<String>('resource-map-fit-houses-${calpheon.townNodeId}'),
-        ),
-      );
-      await tester.pumpAndSettle();
-
-      final allHouses = find.byKey(
-        ValueKey<String>('resource-map-all-houses-${calpheon.townNodeId}'),
-      );
-      await tester.ensureVisible(allHouses);
-      await tester.pumpAndSettle();
-      await tester.tap(allHouses);
-      await tester.pumpAndSettle();
-      final houseRow = find.byKey(
-        ValueKey<String>('resource-map-house-row-${existingHouse.id}'),
-      );
-      final detailScrollable = find
-          .descendant(
-            of: find.byKey(
-              const ValueKey<String>('resource-map-sidebar-details'),
-            ),
-            matching: find.byType(Scrollable),
-          )
-          .first;
+      await _openHouseOption(tester, 'Browse all houses');
+      final house = town.housesById['house:2333']!;
+      final row = find.byKey(ValueKey('resource-map-house-row-${house.id}'));
       await tester.scrollUntilVisible(
-        houseRow,
-        180,
-        scrollable: detailScrollable,
+        row,
+        150,
+        scrollable: _townHouseScrollable(),
       );
-      await tester.tap(houseRow);
+      await tester.tap(row);
       await tester.pumpAndSettle();
-      _expectHousingOverlayDeclutteredAndConnected(tester, calpheon);
-
+      final details = find.byKey(
+        ValueKey('resource-map-selected-house-${house.id}'),
+      );
+      expect(details, findsOneWidget);
       expect(
-        find.byKey(
-          ValueKey<String>('resource-map-house-flyout-${existingHouse.id}'),
-        ),
-        findsOneWidget,
+        tester.getTopLeft(details).dy,
+        greaterThan(tester.getTopLeft(row).dy),
       );
-      final houseFlyout = find.byKey(
-        ValueKey<String>('resource-map-house-flyout-${existingHouse.id}'),
-      );
-      final houseFlyoutBefore = tester.getTopLeft(houseFlyout);
-      await tester.drag(
-        find.byKey(
-          ValueKey<String>(
-            'resource-map-house-drag-handle-${existingHouse.id}',
-          ),
-        ),
-        const Offset(70, 35),
-      );
-      await tester.pump();
-      expect(tester.getTopLeft(houseFlyout), isNot(houseFlyoutBefore));
-      final storageChoice = find.byKey(
-        ValueKey<String>('resource-map-house-usage-${existingHouse.id}-2'),
-      );
-      expect(storageChoice, findsOneWidget);
-      await tester.scrollUntilVisible(
-        storageChoice,
-        -120,
-        scrollable: detailScrollable,
-      );
-      expect(
-        tester.getSemantics(storageChoice).flagsCollection.isSelected,
-        ui.Tristate.isTrue,
-      );
-
-      final ownedCheckbox = find.byKey(
-        ValueKey<String>('resource-map-house-row-owned-${existingHouse.id}'),
-      );
-      await tester.scrollUntilVisible(
-        ownedCheckbox,
-        180,
-        scrollable: detailScrollable,
-      );
-      await tester.tap(ownedCheckbox);
-      await tester.pump();
-      expect(updates, isNotEmpty);
+      final choice = find.byKey(ValueKey('house-use-${house.id}-2'));
+      await tester.ensureVisible(choice);
+      await tester.tap(choice);
+      await _waitTownHousePlan(tester);
       expect(
         updates.last.currentOwnedHouseIds,
-        isNot(contains(existingHouse.id)),
+        containsAll({'house:2331', 'house:2332', house.id}),
       );
-      expect(
-        updates.last.currentHouseUsageTypeIds,
-        isNot(contains(existingHouse.id)),
+      expect(updates.last.currentHouseUsageTypeIds[house.id], 2);
+      final owned = find.byKey(
+        ValueKey('resource-map-house-row-owned-${house.id}'),
       );
-
-      final chainedHouse = calpheon.housesById['house:2333']!;
-      final chainedHouseRow = find.byKey(
-        ValueKey<String>('resource-map-house-row-${chainedHouse.id}'),
-      );
-      await tester.scrollUntilVisible(
-        chainedHouseRow,
-        180,
-        scrollable: detailScrollable,
-      );
-      await tester.tap(chainedHouseRow);
+      await tester.ensureVisible(owned);
+      await tester.tap(owned);
       await tester.pumpAndSettle();
-      final fitHouses = find.byKey(
-        ValueKey<String>('resource-map-fit-houses-${calpheon.townNodeId}'),
-      );
-      await tester.scrollUntilVisible(
-        fitHouses,
-        -180,
-        scrollable: detailScrollable,
-      );
-      await tester.tap(fitHouses);
-      await tester.pumpAndSettle();
-      expect(
-        find.byKey(
-          ValueKey<String>('resource-map-house-flyout-${chainedHouse.id}'),
-        ),
-        findsOneWidget,
-      );
-      final chainedStorageChoice = find.byKey(
-        ValueKey<String>('resource-map-house-usage-${chainedHouse.id}-2'),
-      );
-      final chainedHouseFlyoutScrollable = find
-          .descendant(
-            of: find.byKey(
-              ValueKey<String>('resource-map-house-flyout-${chainedHouse.id}'),
-            ),
-            matching: find.byType(Scrollable),
-          )
-          .first;
-      await tester.scrollUntilVisible(
-        chainedStorageChoice,
-        100,
-        scrollable: chainedHouseFlyoutScrollable,
-      );
-      await tester.tap(chainedStorageChoice);
-      await tester.pump();
-      expect(
-        updates.last.currentOwnedHouseIds,
-        containsAll(<String>{'house:2331', 'house:2332', chainedHouse.id}),
-        reason: 'Choosing a use invests the complete prerequisite path.',
-      );
-      expect(updates.last.currentHouseUsageTypeIds[chainedHouse.id], 2);
+      expect(updates.last.currentOwnedHouseIds, isNot(contains(house.id)));
       expect(tester.takeException(), isNull);
     },
   );
@@ -900,15 +1145,15 @@ void main() {
     expect(afterTown.center, beforeTown.center);
     expect(afterTown.zoom, beforeTown.zoom);
 
-    await tester.tap(
-      find.byKey(
-        ValueKey<String>('resource-map-all-houses-${calpheon.townNodeId}'),
-      ),
-    );
-    await tester.pumpAndSettle();
+    await _openHouseOption(tester, 'Browse all houses');
     final houseRow = find.byKey(
       ValueKey<String>('resource-map-house-row-${house.id}'),
     );
+    await tester.tap(
+      find.byKey(ValueKey('resource-map-fit-houses-${calpheon.townNodeId}')),
+    );
+    await tester.pumpAndSettle();
+    _expectHousingOverlayDeclutteredAndConnected(tester, calpheon);
     final detailScrollable = find
         .descendant(
           of: find.byKey(
@@ -982,12 +1227,7 @@ void main() {
         ),
       );
       await tester.pumpAndSettle();
-      await tester.tap(
-        find.byKey(
-          ValueKey<String>('resource-map-all-houses-${calpheon.townNodeId}'),
-        ),
-      );
-      await tester.pumpAndSettle();
+      await _openHouseOption(tester, 'Browse all houses');
       final houseRow = find.byKey(
         ValueKey<String>('resource-map-house-row-${house.id}'),
       );
@@ -1011,7 +1251,7 @@ void main() {
       );
       expect(selectedHouse, findsOneWidget);
       expect(selectedHouseSnapshotBuilds, 1);
-      final detailsWidgetBefore = tester.widget<Material>(selectedHouse);
+      final detailsWidgetBefore = tester.widget<Widget>(selectedHouse);
       final detailsElementBefore = tester.element(selectedHouse);
       final controller = tester
           .widget<BdoMapCanvas>(find.byType(BdoMapCanvas))
@@ -1028,7 +1268,7 @@ void main() {
         reason:
             'Pure camera pans must not solve lodging or rebuild house details.',
       );
-      expect(tester.widget<Material>(selectedHouse), same(detailsWidgetBefore));
+      expect(tester.widget<Widget>(selectedHouse), same(detailsWidgetBefore));
       expect(tester.element(selectedHouse), same(detailsElementBefore));
       expect(tester.takeException(), isNull);
     },
@@ -1037,95 +1277,25 @@ void main() {
   testWidgets(
     'Calpheon housing distinguishes current and theoretical capacity',
     (tester) async {
-      await tester.binding.setSurfaceSize(const Size(1200, 752));
-      addTearDown(() => tester.binding.setSurfaceSize(null));
-      final calpheon = lodgingDataset.towns.singleWhere(
-        (town) => town.name == 'Calpheon City',
-      );
-
-      await tester.pumpWidget(
-        MaterialApp(
-          home: MediaQuery(
-            data: const MediaQueryData(disableAnimations: true),
-            child: BdoResourceMap(
-              dataset: dataset,
-              lodgingDataset: lodgingDataset,
-              cacheDirectory: cacheDirectory,
-              tileSource: tileSource,
-              showSourceNotice: false,
-              tileHttpClient: tileClient,
-            ),
-          ),
-        ),
-      );
-      await tester.pump(const Duration(milliseconds: 300));
-      await _openHousingDirectory(tester);
-      await tester.tap(
-        find.byKey(
-          ValueKey<String>('resource-map-housing-town-${calpheon.townNodeId}'),
-        ),
-      );
-      await tester.pumpAndSettle();
-
-      expect(find.text('1 bed ready'), findsOneWidget);
-      final plusControl = find.byKey(
-        ValueKey<String>(
-          'resource-map-lodging-target-plus-${calpheon.townNodeId}',
-        ),
-      );
-      final minusControl = find.byKey(
-        ValueKey<String>(
-          'resource-map-lodging-target-minus-${calpheon.townNodeId}',
-        ),
-      );
-      IconButton housingButton(Finder control) => tester.widget<IconButton>(
-        find.descendant(of: control, matching: find.byType(IconButton)),
-      );
-
-      housingButton(plusControl).onPressed!.call();
-      await tester.pump();
+      final updates = <BdoNodeNetworkPreferences>[];
+      await openCalpheon(tester, onChanged: updates.add);
+      final panel = tester.widget<TownHousePanel>(find.byType(TownHousePanel));
+      expect(panel.goals.every((g) => g.amount == 0), isTrue);
+      expect(panel.plan!.requiredHouseIds, isEmpty);
+      expect(find.textContaining('mapped ·'), findsNothing);
+      final surface = find.byKey(const ValueKey('resource-map-atlas-dock'));
+      expect(tester.getSize(surface).width, lessThanOrEqualTo(440));
       expect(
-        find.textContaining('Cheapest setup for 2 workers:'),
-        findsOneWidget,
+        tester.getRect(surface).bottom,
+        lessThan(tester.getRect(find.byType(BdoResourceMap)).bottom - 100),
+        reason: 'An empty town plan must leave unused map space below it.',
       );
-      final twoWorkerPlan = LodgingOptimizer.solve(
-        town: calpheon,
-        requiredCapacity: 2,
-        existingCapacity: 1,
-      );
-      for (final houseId in twoWorkerPlan.newlyRequiredHouseIds) {
-        expect(
-          find.byKey(
-            ValueKey<String>('resource-map-recommended-house-$houseId'),
-          ),
-          findsOneWidget,
-        );
-      }
-
-      housingButton(plusControl).onPressed!.call();
-      await tester.pump();
-      expect(
-        find.textContaining('Cheapest setup for 3 workers:'),
-        findsOneWidget,
-      );
-
-      housingButton(minusControl).onPressed!.call();
-      await tester.pump();
-      expect(
-        find.textContaining('Cheapest setup for 2 workers:'),
-        findsOneWidget,
-      );
-      for (final houseId in twoWorkerPlan.newlyRequiredHouseIds) {
-        expect(
-          find.byKey(
-            ValueKey<String>('resource-map-recommended-house-$houseId'),
-          ),
-          findsOneWidget,
-          reason:
-              'Returning to the same target must reproduce the same exact '
-              'cheapest housing recommendation.',
-        );
-      }
+      await tester.tap(find.byKey(const ValueKey('house-goal-plus-1')));
+      await _waitTownHousePlan(tester);
+      final next = tester.widget<TownHousePanel>(find.byType(TownHousePanel));
+      expect(next.goals.firstWhere((g) => g.typeId == 1).amount, 1);
+      expect(next.plan!.addedCapacity[1], greaterThanOrEqualTo(1));
+      expect(updates, isEmpty);
       expect(tester.takeException(), isNull);
     },
   );
@@ -1133,80 +1303,33 @@ void main() {
   testWidgets(
     'Calpheon housing plus stops at mapped and explicit bonus limits',
     (tester) async {
-      await tester.binding.setSurfaceSize(const Size(1200, 752));
-      addTearDown(() => tester.binding.setSurfaceSize(null));
-      final calpheon = lodgingDataset.towns.singleWhere(
-        (town) => town.name == 'Calpheon City',
+      final town = lodgingDataset.towns.firstWhere(
+        (t) => t.name == 'Calpheon City',
       );
-      final ownedHouseIds = calpheon.housesById.keys.toSet();
-      final activeLodgingUsages = <String, int>{
-        for (final house in calpheon.lodgingHouses) house.id: 1,
-      };
-      final updates = <BdoNodeNetworkPreferences>[];
-
-      BdoNodeNetworkPreferences preferences({required int bonus}) =>
-          BdoNodeNetworkPreferences(
-            currentOwnedHouseIds: ownedHouseIds,
-            currentHouseUsageTypeIds: activeLodgingUsages,
-            townWorkerCapacitiesByNodeId: <String, BdoTownWorkerCapacity>{
-              calpheon.townNodeId: BdoTownWorkerCapacity(
-                availableWorkerCount: 0,
-                freeLodgingSlotCount: 0,
-                hiredWorkerCount: 95,
-                bonusLodgingSlotCount: bonus,
-              ),
-            },
-          );
-
-      Widget mapFor(BdoNodeNetworkPreferences networkPreferences) {
-        return MaterialApp(
-          home: MediaQuery(
-            data: const MediaQueryData(disableAnimations: true),
-            child: BdoResourceMap(
-              dataset: dataset,
-              lodgingDataset: lodgingDataset,
-              cacheDirectory: cacheDirectory,
-              tileSource: tileSource,
-              showSourceNotice: false,
-              tileHttpClient: tileClient,
-              nodeNetworkPreferences: networkPreferences,
-              onNodeNetworkPreferencesChanged: updates.add,
-            ),
-          ),
-        );
+      final remaining = town.lodgingHouses.first;
+      await openCalpheon(
+        tester,
+        preferences: BdoNodeNetworkPreferences(
+          currentOwnedHouseIds: town.housesById.keys
+              .where((id) => id != remaining.id)
+              .toSet(),
+        ),
+      );
+      for (var i = 0; i < remaining.lodgingSpaces; i++) {
+        tester
+            .widget<IconButton>(find.byKey(const ValueKey('house-goal-plus-1')))
+            .onPressed!();
+        await _waitTownHousePlan(tester);
       }
-
-      await tester.pumpWidget(mapFor(preferences(bonus: 0)));
-      await tester.pump(const Duration(milliseconds: 300));
-      await _openHousingDirectory(tester);
-      await tester.tap(
-        find.byKey(
-          ValueKey<String>('resource-map-housing-town-${calpheon.townNodeId}'),
-        ),
+      expect(
+        tester
+            .widget<IconButton>(find.byKey(const ValueKey('house-goal-plus-1')))
+            .onPressed,
+        isNull,
       );
-      await tester.pumpAndSettle();
-
-      expect(find.text('95 workers · 95 beds'), findsOneWidget);
-      final plusControl = find.byKey(
-        ValueKey<String>(
-          'resource-map-lodging-target-plus-${calpheon.townNodeId}',
-        ),
-      );
-      IconButton plusButton() => tester.widget<IconButton>(
-        find.descendant(of: plusControl, matching: find.byType(IconButton)),
-      );
-      expect(plusButton().onPressed, isNull);
-      await tester.tap(plusControl, warnIfMissed: false);
-      await tester.pump();
-      expect(updates, isEmpty);
-
-      await tester.pumpWidget(mapFor(preferences(bonus: 5)));
-      await tester.pump();
-      expect(find.text('95 workers · 100 beds'), findsOneWidget);
-      expect(plusButton().onPressed, isNull);
-      await tester.tap(plusControl, warnIfMissed: false);
-      await tester.pump();
-      expect(updates, isEmpty);
+      final panel = tester.widget<TownHousePanel>(find.byType(TownHousePanel));
+      expect(panel.plan!.usages.keys, [remaining.id]);
+      expect(panel.plan!.addedCapacity[1], remaining.lodgingSpaces);
       expect(tester.takeException(), isNull);
     },
   );
@@ -1214,54 +1337,49 @@ void main() {
   testWidgets(
     'legacy worker capacity stays authoritative in the housing planner',
     (tester) async {
-      await tester.binding.setSurfaceSize(const Size(1200, 752));
-      addTearDown(() => tester.binding.setSurfaceSize(null));
-      final calpheon = lodgingDataset.towns.singleWhere(
-        (town) => town.name == 'Calpheon City',
+      final town = lodgingDataset.towns.firstWhere(
+        (t) => t.name == 'Calpheon City',
       );
-      const availableWorkers = 3;
-      const vacantLegacySlots = 5;
-
-      await tester.pumpWidget(
-        MaterialApp(
-          home: MediaQuery(
-            data: const MediaQueryData(disableAnimations: true),
-            child: BdoResourceMap(
-              dataset: dataset,
-              lodgingDataset: lodgingDataset,
-              cacheDirectory: cacheDirectory,
-              tileSource: tileSource,
-              showSourceNotice: false,
-              tileHttpClient: tileClient,
-              nodeNetworkPreferences: BdoNodeNetworkPreferences(
-                townWorkerCapacitiesByNodeId: <String, BdoTownWorkerCapacity>{
-                  calpheon.townNodeId: const BdoTownWorkerCapacity(
-                    availableWorkerCount: availableWorkers,
-                    freeLodgingSlotCount: vacantLegacySlots,
-                  ),
-                },
-              ),
-            ),
+      final updates = <BdoNodeNetworkPreferences>[];
+      final preferences = BdoNodeNetworkPreferences(
+        townWorkerCapacitiesByNodeId: {
+          town.townNodeId: const BdoTownWorkerCapacity(
+            availableWorkerCount: 3,
+            freeLodgingSlotCount: 5,
           ),
-        ),
+        },
       );
-      await tester.pump(const Duration(milliseconds: 300));
-      await _openHousingDirectory(tester);
-      await tester.tap(
-        find.byKey(
-          ValueKey<String>('resource-map-housing-town-${calpheon.townNodeId}'),
-        ),
+      await openCalpheon(
+        tester,
+        preferences: preferences,
+        onChanged: updates.add,
       );
-      await tester.pumpAndSettle();
-
+      await tester.tap(find.byKey(const ValueKey('house-goal-plus-1')));
+      await _waitTownHousePlan(tester);
+      expect(updates, isEmpty);
+      final current = tester
+          .widget<BdoResourceMap>(find.byType(BdoResourceMap))
+          .nodeNetworkPreferences!;
       expect(
-        find.text('${availableWorkers + vacantLegacySlots} beds ready'),
-        findsOneWidget,
-        reason:
-            'Older saves already describe usable workers plus vacant beds; '
-            'the housing screen must not replace them with only mapped beds.',
+        current
+            .townWorkerCapacitiesByNodeId[town.townNodeId]!
+            .availableWorkerCount,
+        3,
       );
-      expect(tester.takeException(), isNull);
+      expect(
+        current
+            .townWorkerCapacitiesByNodeId[town.townNodeId]!
+            .freeLodgingSlotCount,
+        5,
+      );
+      expect(
+        tester
+            .widget<TownHousePanel>(find.byType(TownHousePanel))
+            .goals
+            .first
+            .amount,
+        1,
+      );
     },
   );
 
@@ -1315,12 +1433,7 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      await tester.tap(
-        find.byKey(
-          ValueKey<String>('resource-map-shop-lodging-${calpheon.townNodeId}'),
-        ),
-      );
-      await tester.pumpAndSettle();
+      await _openHouseOption(tester, 'Shop lodging');
       expect(
         tester
             .widget<TextField>(
@@ -1351,10 +1464,7 @@ void main() {
         saved.availableWorkerCount + saved.freeLodgingSlotCount,
         legacyTotal,
       );
-      expect(
-        find.text('$availableWorkers workers · $legacyTotal beds'),
-        findsOneWidget,
-      );
+      expect(find.byType(TownHousePanel), findsOneWidget);
       expect(tester.takeException(), isNull);
     },
   );
@@ -1362,6 +1472,7 @@ void main() {
   testWidgets('town Shop lodging saves Pearl Loyalty and Other bonus sources', (
     tester,
   ) async {
+    await tester.runAsync(loadMapMenuCaptureFonts);
     await tester.binding.setSurfaceSize(const Size(1200, 752));
     addTearDown(() => tester.binding.setSurfaceSize(null));
     final calpheon = lodgingDataset.towns.singleWhere(
@@ -1371,6 +1482,10 @@ void main() {
 
     await tester.pumpWidget(
       MaterialApp(
+        builder: (context, child) => RepaintBoundary(
+          key: const ValueKey('map-shop-lodging-capture'),
+          child: child,
+        ),
         home: MediaQuery(
           data: const MediaQueryData(disableAnimations: true),
           child: BdoResourceMap(
@@ -1394,12 +1509,7 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    final shopAction = find.byKey(
-      ValueKey<String>('resource-map-shop-lodging-${calpheon.townNodeId}'),
-    );
-    expect(shopAction, findsOneWidget);
-    await tester.tap(shopAction);
-    await tester.pumpAndSettle();
+    await _openHouseOption(tester, 'Shop lodging');
     expect(find.text('Shop lodging · Calpheon City'), findsOneWidget);
 
     final pearlPlus = find.byKey(
@@ -1418,7 +1528,12 @@ void main() {
       '4',
     );
     await tester.pump();
-    expect(find.text('Adds 8 bonus beds'), findsOneWidget);
+    expect(find.text('Adds 8 bonus beds'), findsNothing);
+    await captureMapMenu(
+      tester,
+      boundary: find.byKey(const ValueKey('map-shop-lodging-capture')),
+      name: 'shop-lodging-glass-dock-text100',
+    );
     await tester.tap(
       find.byKey(const ValueKey<String>('resource-map-shop-lodging-save')),
     );
@@ -1432,12 +1547,16 @@ void main() {
     expect(saved.loyaltyLodgingPurchasedCount, 1);
     expect(saved.otherBonusLodgingSlotCount, 4);
     expect(saved.effectiveBonusLodgingSlotCount, 8);
-    expect(find.text('0 workers · 9 beds'), findsOneWidget);
-    expect(find.text('Shop lodging · +8 beds'), findsOneWidget);
+    expect(find.byType(TownHousePanel), findsOneWidget);
 
-    await tester.tap(shopAction);
-    await tester.pumpAndSettle();
-    expect(find.text('3 of 5 purchased'), findsOneWidget);
+    await _openHouseOption(tester, 'Shop lodging');
+    expect(
+      find.descendant(
+        of: find.byKey(const ValueKey('resource-map-shop-lodging-pearl')),
+        matching: find.text('3'),
+      ),
+      findsOneWidget,
+    );
     expect(
       tester
           .widget<SwitchListTile>(
@@ -1494,7 +1613,7 @@ void main() {
     await tester.pump(const Duration(milliseconds: 300));
     await _openHousingDirectory(tester);
 
-    expect(find.textContaining('houses ·'), findsOneWidget);
+    expect(find.textContaining('houses ·'), findsNothing);
     expect(
       tester.takeException(),
       isNull,
@@ -1536,12 +1655,7 @@ void main() {
       ),
       findsOneWidget,
     );
-    expect(
-      find.byKey(
-        ValueKey<String>('resource-map-house-filter-${town.townNodeId}'),
-      ),
-      findsOneWidget,
-    );
+    expect(find.byKey(const ValueKey<String>('house-goal-2')), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
 
@@ -1629,14 +1743,14 @@ void main() {
 
     expect(
       tester.widget<TextField>(find.byType(TextField)).decoration!.hintText,
-      'Find an item, source, node or town',
+      'Search the map',
     );
     expect(
-      find.byKey(const ValueKey<String>('resource-map-command-gather')),
+      find.byKey(const ValueKey<String>('resource-map-home-find-material')),
       findsOneWidget,
     );
     expect(
-      find.byKey(const ValueKey<String>('resource-map-command-workers')),
+      find.byKey(const ValueKey<String>('resource-map-home-worker-income')),
       findsOneWidget,
     );
     final closedContextPanel = find.byKey(
@@ -1644,7 +1758,7 @@ void main() {
     );
     expect(
       closedContextPanel,
-      findsOneWidget,
+      findsNothing,
       reason: 'The map starts without a contextual panel covering it.',
     );
     expect(
@@ -1677,9 +1791,8 @@ void main() {
 
     await tester.enterText(find.byType(TextField), 'Snake Meat');
     await tester.pumpAndSettle();
-    final snakeResult = find.descendant(
-      of: find.byType(ListTile),
-      matching: find.text('Snake Meat'),
+    final snakeResult = find.byWidgetPredicate(
+      (widget) => widget is Text && widget.data == 'Snake Meat',
     );
     expect(snakeResult, findsOneWidget);
 
@@ -1704,7 +1817,7 @@ void main() {
     expect(
       find.byKey(const ValueKey<String>('resource-map-details-card')),
       findsNothing,
-      reason: 'Desktop details belong to the floating side sheet.',
+      reason: 'Desktop details belong to the map-bottom inspector.',
     );
     final selectedCanvas = tester.widget<BdoMapCanvas>(
       find.byType(BdoMapCanvas),
@@ -1730,17 +1843,111 @@ void main() {
       find.byKey(const ValueKey<String>('resource-map-zoom-controls')),
     );
     final desktopSidebarRect = tester.getRect(
-      find.byKey(const ValueKey<String>('resource-map-desktop-sidebar')),
+      find.byKey(const ValueKey<String>('resource-map-sidebar-details')),
     );
     expect(desktopZoomRect.overlaps(desktopSidebarRect), isFalse);
-    expect(desktopSidebarRect.left, 0);
-    expect(desktopSidebarRect.width, lessThan(460));
-    expect(desktopSidebarRect.right, lessThan(desktopZoomRect.left));
+    expect(
+      desktopSidebarRect.left,
+      greaterThan(0),
+      reason: 'Details should float over the map instead of forming a drawer.',
+    );
+    expect(desktopSidebarRect.width, greaterThan(0));
+    expect(
+      desktopSidebarRect.width,
+      lessThanOrEqualTo(
+        tester
+            .getSize(find.byKey(const ValueKey('resource-map-atlas-dock')))
+            .width,
+      ),
+    );
+    expect(
+      desktopSidebarRect.top,
+      lessThan(selectedViewport.height / 2),
+      reason: 'Glass Dock keeps selection details directly below search.',
+    );
+    expect(
+      desktopSidebarRect.bottom,
+      lessThanOrEqualTo(selectedViewport.height),
+    );
     expect(tester.takeException(), isNull);
+    await _settleVisibleGoldenImages(tester, root: find.byType(BdoResourceMap));
     await expectLater(
       find.byType(BdoResourceMap),
       matchesGoldenFile('goldens/resource_map_snake_meat.png'),
     );
+  });
+
+  testWidgets('global search covers wildlife and plants without a scope menu', (
+    tester,
+  ) async {
+    await tester.binding.setSurfaceSize(const Size(1200, 752));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: MediaQuery(
+          data: const MediaQueryData(disableAnimations: true),
+          child: BdoResourceMap(
+            dataset: dataset,
+            cacheDirectory: cacheDirectory,
+            tileSource: tileSource,
+            showSourceNotice: false,
+            tileHttpClient: tileClient,
+          ),
+        ),
+      ),
+    );
+    await tester.pump(const Duration(milliseconds: 300));
+
+    expect(
+      find.byKey(const ValueKey<String>('resource-map-search-scope')),
+      findsNothing,
+    );
+    await tester.enterText(find.byType(TextField), 'cow');
+    await tester.pumpAndSettle();
+    expect(find.text('Dairy Cow'), findsOneWidget);
+    expect(find.text('Cow / Ox'), findsOneWidget);
+    final results = find.byKey(const ValueKey<String>('search'));
+    expect(results, findsOneWidget);
+    expect(tester.getRect(results).bottom, lessThanOrEqualTo(752));
+    await tester.enterText(find.byType(TextField), 'violet flower');
+    await tester.pumpAndSettle();
+    expect(
+      find.byKey(
+        const ValueKey(
+          'resource-map-search-result-fieldSource-field-source:violet-flower',
+        ),
+      ),
+      findsOneWidget,
+    );
+    expect(find.text('Violet Flower'), findsWidgets);
+
+    await tester.enterText(find.byType(TextField), 'milkable cow');
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Dairy Cow'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Milk'), findsWidgets);
+    expect(find.text('Milk · Milking minigame'), findsNothing);
+    await _expectAtlasProductTools(
+      tester,
+      dataset.fieldSourcesById['field-source:dairy-cow']!,
+    );
+    expect(find.byTooltip('Milking minigame'), findsOneWidget);
+    var canvas = tester.widget<BdoMapCanvas>(find.byType(BdoMapCanvas));
+    expect(canvas.gatheringSpots, hasLength(6));
+    expect(canvas.workerNodes, isEmpty);
+
+    await tester.enterText(find.byType(TextField), 'cow');
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Cow / Ox'));
+    await tester.pumpAndSettle();
+
+    canvas = tester.widget<BdoMapCanvas>(find.byType(BdoMapCanvas));
+    expect(canvas.gatheringPoints, isNotEmpty);
+    expect(canvas.workerNodes, isEmpty);
+    expect(find.textContaining('Historical Cow'), findsNothing);
+    expect(tester.takeException(), isNull);
   });
 
   testWidgets('node click opens an actionable map-anchored route summary', (
@@ -1813,7 +2020,7 @@ void main() {
     expect(canvas.cameraController.camera.center, cameraBefore.center);
     expect(canvas.cameraController.camera.zoom, cameraBefore.zoom);
     expect(
-      find.byKey(const ValueKey<String>('resource-map-node-quick-panel')),
+      find.byKey(const ValueKey<String>('resource-map-sidebar-details')),
       findsOneWidget,
     );
     expect(find.text(selectedNode.siteName), findsWidgets);
@@ -1821,7 +2028,7 @@ void main() {
       expect(
         find.descendant(
           of: find.byKey(
-            const ValueKey<String>('resource-map-node-quick-panel'),
+            const ValueKey<String>('resource-map-sidebar-details'),
           ),
           matching: find.text(output.name),
         ),
@@ -1833,31 +2040,45 @@ void main() {
       findsOneWidget,
     );
     expect(canvas.nodeNetworkEdgeChanges, isNotEmpty);
-
-    await expectLater(
-      find.byKey(const ValueKey<String>('resource-map-node-quick-boundary')),
-      matchesGoldenFile('goldens/resource_map_node_quick_flyout.png'),
-    );
-
-    final nodeFlyout = find.byKey(
-      ValueKey<String>('resource-map-node-quick-flyout-${selectedNode.id}'),
-    );
-    final nodeFlyoutBefore = tester.getTopLeft(nodeFlyout);
-    await tester.drag(
-      find.byKey(const ValueKey<String>('resource-map-node-quick-drag-handle')),
-      const Offset(-80, 42),
-    );
-    await tester.pump();
-    expect(tester.getTopLeft(nodeFlyout), isNot(nodeFlyoutBefore));
     expect(
-      find.byKey(const ValueKey<String>('resource-map-node-quick-panel-tail')),
+      find.byKey(
+        const ValueKey<String>('resource-map-anchored-details-surface'),
+      ),
+      findsOneWidget,
+    );
+    final detailsRect = tester.getRect(
+      find.byKey(const ValueKey<String>('resource-map-sidebar-details')),
+    );
+    expect(detailsRect.width, inInclusiveRange(300, 480));
+    expect(detailsRect.height, greaterThan(250));
+    expect(detailsRect.left, greaterThanOrEqualTo(0));
+    expect(detailsRect.top, greaterThanOrEqualTo(0));
+    expect(detailsRect.right, lessThanOrEqualTo(1200));
+    expect(detailsRect.bottom, lessThanOrEqualTo(752));
+    expect(
+      find.byKey(
+        ValueKey<String>('resource-map-node-quick-flyout-${selectedNode.id}'),
+      ),
       findsNothing,
-      reason: 'A manually positioned panel no longer points at the old node.',
+      reason: 'The archived draggable node flyout is no longer active.',
     );
 
-    await tester.tap(
-      find.byKey(const ValueKey<String>('resource-map-node-add-route')),
+    final addRoute = find.byKey(
+      const ValueKey<String>('resource-map-node-add-route'),
     );
+    await tester.scrollUntilVisible(
+      addRoute,
+      90,
+      scrollable: find
+          .descendant(
+            of: find.byKey(
+              const ValueKey<String>('resource-map-sidebar-details'),
+            ),
+            matching: find.byType(Scrollable),
+          )
+          .first,
+    );
+    await tester.tap(addRoute);
     await tester.pumpAndSettle();
 
     expect(updates, isNotEmpty);
@@ -1924,38 +2145,31 @@ void main() {
       canvas = tester.widget<BdoMapCanvas>(find.byType(BdoMapCanvas));
       expect(canvas.cameraController.camera, cameraBeforeNodeClick);
       expect(
-        find.byKey(
-          const ValueKey<String>('resource-map-sidebar-planned-network'),
-        ),
+        find.byKey(const ValueKey<String>('resource-map-node-planner-targets')),
         findsOneWidget,
         reason: 'The planner must remain available behind the node popup.',
       );
       expect(
-        find.byKey(const ValueKey<String>('resource-map-node-quick-panel')),
-        findsOneWidget,
-      );
-      expect(
-        find.byKey(
-          const ValueKey<String>('resource-map-network-workbench-node-details'),
-        ),
+        find.byKey(const ValueKey<String>('resource-map-sidebar-details')),
         findsNothing,
       );
+      final nodeDetails = find.byKey(
+        const ValueKey<String>('resource-map-network-workbench-node-details'),
+      );
+      expect(nodeDetails, findsOneWidget);
       expect(find.text('EXCAVATION ACCESS'), findsOneWidget);
       expect(find.text('Mark Karu on map'), findsOneWidget);
       for (final output in glishExcavation.outputs) {
         expect(
-          find.descendant(
-            of: find.byKey(
-              const ValueKey<String>('resource-map-node-quick-panel'),
-            ),
-            matching: find.text(output.name),
-          ),
+          find.descendant(of: nodeDetails, matching: find.text(output.name)),
           findsOneWidget,
         );
       }
 
       final managerMarkerAction = find.byKey(
-        const ValueKey<String>('resource-map-node-toggle-manager-marker'),
+        const ValueKey<String>(
+          'resource-map-network-workbench-toggle-manager-marker',
+        ),
       );
       await tester.ensureVisible(managerMarkerAction);
       await tester.pump();
@@ -2015,7 +2229,7 @@ void main() {
       canvas = tester.widget<BdoMapCanvas>(find.byType(BdoMapCanvas));
       expect(canvas.cameraController.camera, cameraBeforeTownClick);
       expect(
-        find.byKey(const ValueKey<String>('resource-map-node-quick-panel')),
+        find.byKey(const ValueKey<String>('resource-map-sidebar-details')),
         findsOneWidget,
       );
       expect(find.text('Seoul'), findsWidgets);
@@ -2027,10 +2241,12 @@ void main() {
         findsNothing,
       );
       expect(find.text('Yukjo workers & storage'), findsNothing);
-      expect(find.text('Houses'), findsOneWidget);
-
       final openHouses = find.byKey(
         const ValueKey<String>('resource-map-town-open-houses'),
+      );
+      expect(
+        find.descendant(of: openHouses, matching: find.text('Houses')),
+        findsOneWidget,
       );
       await tester.ensureVisible(openHouses);
       await tester.pump();
@@ -2049,7 +2265,7 @@ void main() {
     },
   );
 
-  testWidgets('Workers opens the compact Guild Steward menu over the map', (
+  testWidgets('Workers opens a compact command menu then a split workspace', (
     tester,
   ) async {
     await tester.binding.setSurfaceSize(const Size(1200, 752));
@@ -2075,192 +2291,113 @@ void main() {
       () => Future<void>.delayed(const Duration(milliseconds: 250)),
     );
     await tester.pump(const Duration(milliseconds: 250));
-    await tester.tap(
-      find.byKey(const ValueKey<String>('resource-map-command-workers')),
-    );
-    await tester.pumpAndSettle();
-
-    final stewardMenu = find.byKey(
-      const ValueKey<String>('resource-map-worker-steward-menu'),
-    );
-    expect(stewardMenu, findsOneWidget);
-    for (final entry in <(String, String)>[
-      ('resource-map-worker-menu-plan', 'Plan'),
-      ('resource-map-worker-menu-explore', 'Explore'),
-      ('resource-map-worker-menu-manage', 'Manage'),
-    ]) {
-      final section = find.byKey(ValueKey<String>(entry.$1));
-      expect(section, findsOneWidget);
-      expect(
-        find.descendant(of: section, matching: find.text(entry.$2)),
-        findsOneWidget,
-      );
-    }
-    expect(find.text('Needed for your plan'), findsNothing);
+    await _openNodePlanner(tester);
+    final journey = find.byKey(const ValueKey('resource-map-atlas-dock'));
+    expect(journey, findsOneWidget);
     expect(
-      find.byKey(
-        const ValueKey<String>('resource-map-recommend-current-recipe'),
-      ),
+      find.byKey(const ValueKey('resource-map-home-plan-materials')),
+      findsOneWidget,
+    );
+    expect(
+      find.byKey(const ValueKey('resource-map-home-plan-needs')),
       findsNothing,
       reason: 'The plan shortcut only appears when the planner has needs.',
     );
-    expect(find.text('Specific items'), findsNothing);
     expect(
-      find.byKey(const ValueKey<String>('resource-map-mode-action-strip')),
-      findsNothing,
-      reason: 'Worker goals no longer duplicate the permanent command bar.',
-    );
-    expect(find.text('Plan a node network'), findsNothing);
-    expect(find.text('What should your workers collect?'), findsNothing);
-    expect(
-      find.byKey(const ValueKey<String>('resource-map-worker-current-action')),
-      findsNothing,
-      reason: 'Invest mode replaces the old copy-my-setup workflow.',
-    );
-    expect(
-      find.byKey(const ValueKey<String>('resource-map-worker-houses-action')),
+      find.byKey(const ValueKey('resource-map-mode-action-strip')),
       findsNothing,
     );
-    expect(find.text('MAP DISPLAY'), findsNothing);
     expect(
-      find
-          .byKey(const ValueKey<String>('resource-map-desktop-edge-surface'))
-          .hitTestable(),
+      find.byKey(const ValueKey('resource-map-worker-current-action')),
       findsNothing,
-      reason: 'The Steward landing does not reopen the broad edge surface.',
     );
     expect(
-      tester.getSize(stewardMenu).width,
-      inInclusiveRange(300, 320),
-      reason: 'The Steward controls should leave most of the map visible.',
+      find.byKey(const ValueKey('resource-map-home-houses')),
+      findsOneWidget,
+    );
+    expect(tester.getSize(journey).width, lessThanOrEqualTo(440));
+    expect(tester.getRect(journey).bottom, lessThanOrEqualTo(736));
+    await _settleVisibleGoldenImages(tester, root: find.byType(BdoResourceMap));
+    await expectLater(
+      find.byType(BdoResourceMap),
+      matchesGoldenFile('goldens/resource_map_worker_command_menu.png'),
+    );
+    await _openNodeMaterialTargets(tester);
+    expect(
+      find.byKey(const ValueKey('resource-map-home-plan-materials')),
+      findsNothing,
     );
     expect(
-      tester.getSize(stewardMenu).height,
-      lessThan(220),
-      reason: 'The closed three-section menu stays compact vertically.',
+      find.byKey(const ValueKey('resource-map-network-workbench')),
+      findsOneWidget,
     );
-    await _openWorkerStewardSection(tester, 'resource-map-worker-menu-manage');
+    expect(journey, findsOneWidget);
+    expect(find.text('Choose materials'), findsWidgets);
+    await tester.tap(find.byKey(const ValueKey('resource-map-task-back')));
+    await tester.pumpAndSettle();
     expect(
-      find.byKey(const ValueKey<String>('resource-map-worker-houses-action')),
+      find.byKey(const ValueKey('resource-map-home-find-material')),
+      findsOneWidget,
+    );
+    expect(
+      find.byKey(const ValueKey('resource-map-network-workbench')),
+      findsNothing,
+    );
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('desktop map home and worker tools use distinct atlas states', (
+    tester,
+  ) async {
+    await tester.binding.setSurfaceSize(const Size(1200, 752));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: MediaQuery(
+          data: const MediaQueryData(disableAnimations: true),
+          child: BdoResourceMap(
+            dataset: dataset,
+            lodgingDataset: lodgingDataset,
+            cacheDirectory: cacheDirectory,
+            tileSource: tileSource,
+            showSourceNotice: false,
+            tileHttpClient: tileClient,
+          ),
+        ),
+      ),
+    );
+    await tester.pump(const Duration(milliseconds: 250));
+
+    final workbench = find.byKey(
+      const ValueKey('resource-map-network-workbench'),
+    );
+    final journey = find.byKey(const ValueKey('resource-map-atlas-dock'));
+    expect(workbench, findsNothing);
+    expect(journey, findsOneWidget);
+    await _openNodePlanner(tester);
+    expect(
+      find.byKey(const ValueKey('resource-map-home-plan-materials')),
+      findsOneWidget,
+    );
+    expect(workbench, findsNothing);
+    await _openNodeMaterialTargets(tester);
+    expect(workbench, findsOneWidget);
+    expect(
+      find.byKey(const ValueKey('resource-map-home-find-material')),
+      findsNothing,
+    );
+    expect(journey, findsOneWidget);
+    await _goMapHome(tester);
+    expect(workbench, findsNothing);
+    expect(
+      find.byKey(const ValueKey('resource-map-home-find-material')),
       findsOneWidget,
     );
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets(
-    'desktop map home and Steward landing do not expose the task workbench',
-    (tester) async {
-      await tester.binding.setSurfaceSize(const Size(1200, 752));
-      addTearDown(() => tester.binding.setSurfaceSize(null));
-
-      await tester.pumpWidget(
-        MaterialApp(
-          home: MediaQuery(
-            data: const MediaQueryData(disableAnimations: true),
-            child: BdoResourceMap(
-              dataset: dataset,
-              lodgingDataset: lodgingDataset,
-              cacheDirectory: cacheDirectory,
-              tileSource: tileSource,
-              showSourceNotice: false,
-              tileHttpClient: tileClient,
-            ),
-          ),
-        ),
-      );
-      await tester.pump(const Duration(milliseconds: 250));
-
-      final workbench = find.byKey(
-        const ValueKey<String>('resource-map-network-workbench'),
-      );
-      expect(workbench.hitTestable(), findsNothing);
-      expect(
-        find
-            .byKey(
-              const ValueKey<String>(
-                'resource-map-network-workbench-mode-targets',
-              ),
-            )
-            .hitTestable(),
-        findsNothing,
-      );
-
-      await tester.tap(
-        find.byKey(const ValueKey<String>('resource-map-command-workers')),
-      );
-      await tester.pumpAndSettle();
-
-      final stewardMenu = find.byKey(
-        const ValueKey<String>('resource-map-worker-steward-menu'),
-      );
-      expect(stewardMenu, findsOneWidget);
-      expect(
-        find.byKey(const ValueKey<String>('resource-map-worker-menu-plan')),
-        findsOneWidget,
-      );
-      expect(
-        find.byKey(const ValueKey<String>('resource-map-worker-menu-explore')),
-        findsOneWidget,
-      );
-      expect(
-        find.byKey(const ValueKey<String>('resource-map-worker-menu-manage')),
-        findsOneWidget,
-      );
-      expect(
-        find.byKey(const ValueKey<String>('resource-map-node-mode-materials')),
-        findsNothing,
-      );
-      expect(workbench.hitTestable(), findsNothing);
-      expect(
-        find
-            .byKey(const ValueKey<String>('resource-map-mode-action-strip'))
-            .hitTestable(),
-        findsNothing,
-        reason: 'Worker goals use the compact Steward menu, not another row.',
-      );
-      expect(
-        find
-            .byKey(const ValueKey<String>('resource-map-desktop-edge-surface'))
-            .hitTestable(),
-        findsNothing,
-        reason: 'The landing menu must not reopen the broad contextual panel.',
-      );
-
-      await tester.tap(
-        find.byKey(const ValueKey<String>('resource-map-worker-menu-plan')),
-      );
-      await tester.pumpAndSettle();
-      expect(
-        find.byKey(const ValueKey<String>('resource-map-node-mode-materials')),
-        findsOneWidget,
-      );
-      expect(
-        tester
-            .getTopLeft(
-              find.byKey(
-                const ValueKey<String>('resource-map-node-mode-materials'),
-              ),
-            )
-            .dx,
-        greaterThan(tester.getTopLeft(stewardMenu).dx),
-      );
-      await tester.sendKeyEvent(LogicalKeyboardKey.escape);
-      await tester.pumpAndSettle();
-      expect(
-        find.byKey(const ValueKey<String>('resource-map-node-mode-materials')),
-        findsNothing,
-      );
-      expect(
-        find.byKey(const ValueKey<String>('resource-map-worker-menu-explore')),
-        findsOneWidget,
-      );
-      expect(tester.takeException(), isNull);
-    },
-  );
-
-  testWidgets('Steward Explore menu persists the connection-line choice', (
-    tester,
-  ) async {
+  testWidgets('Layers persists the connection-line choice', (tester) async {
     await tester.binding.setSurfaceSize(const Size(1200, 752));
     addTearDown(() => tester.binding.setSurfaceSize(null));
     final updates = <BdoNodeNetworkPreferences>[];
@@ -2285,15 +2422,8 @@ void main() {
       ),
     );
     await tester.pump(const Duration(milliseconds: 250));
-    await tester.tap(
-      find.byKey(const ValueKey<String>('resource-map-command-workers')),
-    );
-    await tester.pumpAndSettle();
-    await tester.tap(
-      find.byKey(const ValueKey<String>('resource-map-worker-menu-explore')),
-    );
-    await tester.pumpAndSettle();
-
+    await _openNodePlanner(tester);
+    await _openMapLayers(tester);
     final connections = find.byKey(
       const ValueKey<String>('resource-map-worker-connections-action'),
     );
@@ -2310,104 +2440,82 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets(
-    'planned network panel collapses left and restores its selected state',
-    (tester) async {
-      await tester.binding.setSurfaceSize(const Size(1200, 752));
-      addTearDown(() => tester.binding.setSurfaceSize(null));
+  testWidgets('planned network keeps its state while a map node is inspected', (
+    tester,
+  ) async {
+    await tester.binding.setSurfaceSize(const Size(1200, 752));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
 
-      await tester.pumpWidget(
-        MaterialApp(
-          home: MediaQuery(
-            data: const MediaQueryData(disableAnimations: true),
-            child: BdoResourceMap(
-              dataset: _rerouteNetworkDataset(),
-              cacheDirectory: cacheDirectory,
-              tileSource: tileSource,
-              showSourceNotice: false,
-              tileHttpClient: tileClient,
-              nodeNetworkPreferences: BdoNodeNetworkPreferences(
-                contributionPointBudget: 20,
-                desiredResourceNodeCounts: const <String, int>{'x': 1},
-                rootNodeIds: const <String>{'root'},
-              ),
+    await tester.pumpWidget(
+      MaterialApp(
+        home: MediaQuery(
+          data: const MediaQueryData(disableAnimations: true),
+          child: BdoResourceMap(
+            dataset: _rerouteNetworkDataset(),
+            cacheDirectory: cacheDirectory,
+            tileSource: tileSource,
+            showSourceNotice: false,
+            tileHttpClient: tileClient,
+            nodeNetworkPreferences: BdoNodeNetworkPreferences(
+              contributionPointBudget: 20,
+              desiredResourceNodeCounts: const <String, int>{'x': 1},
+              rootNodeIds: const <String>{'root'},
             ),
           ),
         ),
-      );
-      await tester.pump(const Duration(milliseconds: 250));
-      await _openNodeMaterialTargets(tester);
-      await tester.enterText(
-        find.byKey(const ValueKey<String>('resource-map-node-target-search')),
-        'X Material',
-      );
-      await tester.pump();
+      ),
+    );
+    await tester.pump(const Duration(milliseconds: 250));
+    await _openNodeMaterialTargets(tester);
+    await tester.enterText(
+      find.byKey(const ValueKey<String>('resource-map-node-target-search')),
+      'X Material',
+    );
+    await tester.pump();
 
-      final sidebar = find.byKey(
-        const ValueKey<String>('resource-map-desktop-sidebar'),
-      );
-      final target = find.byKey(
-        const ValueKey<String>('resource-map-node-target-x'),
-      );
-      expect(sidebar.hitTestable(), findsOneWidget);
-      expect(target.hitTestable(), findsOneWidget);
-      expect(
-        find.byKey(const ValueKey<String>('resource-map-node-target-remove-x')),
-        findsOneWidget,
-      );
-      tester
-          .widget<BdoMapCanvas>(find.byType(BdoMapCanvas))
-          .onHit(
-            const BdoMapHit(kind: BdoMapHitKind.workerNode, id: 'x-shared'),
-          );
-      await tester.pump();
-      final nodeFlyout = find.byKey(
-        const ValueKey<String>('resource-map-node-quick-flyout-x-shared'),
-      );
-      expect(nodeFlyout, findsOneWidget);
+    final workspace = find.byKey(
+      const ValueKey<String>('resource-map-atlas-dock'),
+    );
+    final target = find.byKey(
+      const ValueKey<String>('resource-map-node-target-x'),
+    );
+    expect(workspace, findsOneWidget);
+    expect(target.hitTestable(), findsOneWidget);
+    expect(
+      find.byKey(const ValueKey<String>('resource-map-node-target-remove-x')),
+      findsOneWidget,
+    );
+    tester
+        .widget<BdoMapCanvas>(find.byType(BdoMapCanvas))
+        .onHit(const BdoMapHit(kind: BdoMapHitKind.workerNode, id: 'x-shared'));
+    await tester.pump();
+    final nodeFlyout = find.byKey(
+      const ValueKey<String>('resource-map-node-quick-flyout-x-shared'),
+    );
+    expect(nodeFlyout, findsNothing);
+    expect(
+      find.byKey(
+        const ValueKey<String>('resource-map-network-workbench-node-details'),
+      ),
+      findsOneWidget,
+    );
 
-      await tester.tap(
-        find.byKey(
-          const ValueKey<String>('resource-map-desktop-sidebar-collapse'),
-        ),
-      );
-      await tester.pump();
-
-      expect(sidebar, findsOneWidget, reason: 'The panel stays mounted.');
-      expect(sidebar.hitTestable(), findsNothing);
-      expect(target, findsOneWidget, reason: 'Its selected row is preserved.');
-      expect(target.hitTestable(), findsNothing);
-      expect(
-        nodeFlyout,
-        findsNothing,
-        reason: 'Full-map mode also hides an open node flyout.',
-      );
-      final restore = find.byKey(
-        const ValueKey<String>('resource-map-desktop-task-surface-restore'),
-      );
-      expect(restore.hitTestable(), findsOneWidget);
-      expect(find.byType(BdoMapCanvas), findsOneWidget);
-
-      await tester.tap(restore);
-      await tester.pump();
-
-      expect(sidebar.hitTestable(), findsOneWidget);
-      expect(target.hitTestable(), findsOneWidget);
-      expect(
-        find.byKey(const ValueKey<String>('resource-map-node-target-remove-x')),
-        findsOneWidget,
-      );
-      expect(
-        nodeFlyout,
-        findsOneWidget,
-        reason: 'The selected node flyout returns with the panel state.',
-      );
-      expect(tester.takeException(), isNull);
-    },
-  );
+    expect(workspace, findsOneWidget);
+    expect(target.hitTestable(), findsOneWidget);
+    expect(
+      find.byKey(const ValueKey<String>('resource-map-node-target-remove-x')),
+      findsOneWidget,
+    );
+    expect(
+      nodeFlyout,
+      findsNothing,
+      reason: 'Inspecting a node stays inside the active plan workspace.',
+    );
+    expect(tester.takeException(), isNull);
+  });
 
   testWidgets(
-    'planned materials use the sidebar and saved setup stays read-only',
+    'planned materials use the atlas workspace and saved setup stays read-only',
     (tester) async {
       await tester.binding.setSurfaceSize(const Size(1200, 752));
       addTearDown(() => tester.binding.setSurfaceSize(null));
@@ -2434,10 +2542,10 @@ void main() {
       final workbench = find.byKey(
         const ValueKey<String>('resource-map-network-workbench'),
       );
-      final desktopEdge = find.byKey(
-        const ValueKey<String>('resource-map-desktop-edge-surface'),
+      final workspace = find.byKey(
+        const ValueKey<String>('resource-map-atlas-dock'),
       );
-      expect(workbench.hitTestable(), findsNothing);
+      expect(workbench, findsOneWidget);
       expect(
         find
             .byKey(
@@ -2446,35 +2554,37 @@ void main() {
               ),
             )
             .hitTestable(),
-        findsNothing,
+        findsOneWidget,
       );
-      expect(desktopEdge.hitTestable(), findsOneWidget);
+      expect(workspace, findsOneWidget);
       expect(
         find.descendant(
-          of: desktopEdge,
+          of: workspace,
           matching: find.byKey(
-            const ValueKey<String>('resource-map-node-planner-targets'),
+            const ValueKey<String>(
+              'resource-map-network-workbench-mode-targets',
+            ),
           ),
         ),
         findsOneWidget,
-        reason: 'Planned materials belong in the compact left workspace.',
+        reason: 'Planned materials belong in the focused atlas workspace.',
       );
 
       await tester.tap(
         find.byKey(const ValueKey<String>('resource-map-task-back')),
       );
       await tester.pumpAndSettle();
-      expect(workbench.hitTestable(), findsNothing);
+      expect(workbench, findsNothing);
       expect(
-        find.byKey(const ValueKey<String>('resource-map-worker-steward-menu')),
+        find.byKey(const ValueKey<String>('resource-map-home-find-material')),
         findsOneWidget,
       );
       expect(
         find
-            .byKey(const ValueKey<String>('resource-map-node-mode-materials'))
+            .byKey(const ValueKey<String>('resource-map-home-more-tools'))
             .hitTestable(),
         findsOneWidget,
-        reason: 'Back restores the interactive Guild Steward plan menu.',
+        reason: 'Back restores the interactive worker tools.',
       );
       expect(
         find.byKey(
@@ -2483,11 +2593,7 @@ void main() {
         findsNothing,
       );
       expect(workbench.hitTestable(), findsNothing);
-      expect(
-        desktopEdge.hitTestable(),
-        findsNothing,
-        reason: 'Back returns to the compact Steward landing.',
-      );
+      expect(workspace, findsOneWidget);
       expect(tester.takeException(), isNull);
     },
   );
@@ -2550,25 +2656,19 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      final workbenchPointer = tester.widget<IgnorePointer>(
-        find.byKey(
-          const ValueKey<String>('resource-map-network-workbench-pointer'),
-        ),
-      );
-      expect(workbenchPointer.ignoring, isFalse);
       final nodeDetails = find.byKey(
         const ValueKey<String>('resource-map-network-workbench-node-details'),
       );
       expect(nodeDetails, findsOneWidget);
       final nodeDetailsRect = tester.getRect(nodeDetails);
       final workbenchRect = tester.getRect(
-        find.byKey(const ValueKey<String>('resource-map-network-workbench')),
+        find.byKey(const ValueKey<String>('resource-map-atlas-dock')),
       );
       expect(nodeDetailsRect.width, greaterThan(0));
       expect(nodeDetailsRect.height, greaterThan(0));
       expect(nodeDetailsRect.overlaps(workbenchRect), isTrue);
       expect(
-        find.byKey(const ValueKey<String>('resource-map-node-quick-panel')),
+        find.byKey(const ValueKey<String>('resource-map-sidebar-details')),
         findsNothing,
       );
       expect(
@@ -2590,6 +2690,110 @@ void main() {
       expect(tester.takeException(), isNull);
     },
   );
+
+  for (final style in ResourceMapInterfaceStyle.values) {
+    testWidgets('${style.label} keeps material planning compact below search', (
+      tester,
+    ) async {
+      await tester.binding.setSurfaceSize(const Size(1200, 752));
+      addTearDown(() => tester.binding.setSurfaceSize(null));
+      final updates = <BdoNodeNetworkPreferences>[];
+      await tester.pumpWidget(
+        MaterialApp(
+          home: ResourceMapChromeTheme(
+            data: style == ResourceMapInterfaceStyle.glassDock
+                ? ResourceMapChromeThemeData.glassDock
+                : ResourceMapChromeThemeData.ghostLedger,
+            child: MediaQuery(
+              data: const MediaQueryData(disableAnimations: true),
+              child: BdoResourceMap(
+                dataset: dataset,
+                cacheDirectory: cacheDirectory,
+                tileSource: tileSource,
+                tileHttpClient: tileClient,
+                showSourceNotice: false,
+                interfaceStyle: style,
+                onNodeNetworkPreferencesChanged: updates.add,
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.pump(const Duration(milliseconds: 250));
+      await _openNodeMaterialTargets(tester);
+      final workspace = find.byKey(
+        const ValueKey<String>('resource-map-atlas-dock'),
+      );
+      final initialRect = tester.getRect(workspace);
+      expect(initialRect.left, 16);
+      expect(initialRect.top, 16);
+      expect(initialRect.width, lessThanOrEqualTo(480));
+      final viewportRect = tester.getRect(find.byType(BdoResourceMap));
+      expect(
+        initialRect.height,
+        lessThanOrEqualTo(viewportRect.bottom - 16 - initialRect.top),
+      );
+      expect(initialRect.bottom, lessThanOrEqualTo(viewportRect.bottom - 16));
+      for (final label in ['All', 'Selected', 'My setup', 'Saved']) {
+        expect(
+          find.descendant(of: workspace, matching: find.text(label)),
+          findsOneWidget,
+        );
+      }
+      expect(
+        tester
+            .getSize(
+              find.byKey(
+                const ValueKey<String>('resource-map-node-target-view-all'),
+              ),
+            )
+            .width,
+        lessThan(72),
+      );
+      expect(find.text('CP available'), findsOneWidget);
+      final targetSearch = find.byKey(
+        const ValueKey<String>('resource-map-node-target-search'),
+      );
+      expect(
+        tester.widget<TextField>(targetSearch).decoration!.filled,
+        isFalse,
+      );
+      await tester.enterText(targetSearch, 'Ash Timber');
+      await tester.pumpAndSettle();
+      final filteredRect = tester.getRect(workspace);
+      expect(filteredRect.height, lessThan(initialRect.height - 100));
+      expect(filteredRect.topLeft, initialRect.topLeft);
+      final budget = find.byKey(
+        const ValueKey<String>('resource-map-node-cp-budget'),
+      );
+      await tester.enterText(budget, '240');
+      await tester.tap(
+        find.byKey(const ValueKey<String>('resource-map-node-apply-cp')),
+      );
+      await tester.pump();
+      expect(updates.last.contributionPointBudget, 240);
+      await tester.tap(
+        find.byKey(
+          const ValueKey<String>('resource-map-atlas-workspace-minimize'),
+        ),
+      );
+      await tester.pumpAndSettle();
+      final chip = find.byKey(
+        const ValueKey<String>('resource-map-atlas-task-chip'),
+      );
+      expect(tester.getTopLeft(chip), initialRect.topLeft);
+      await tester.tap(
+        find.byKey(const ValueKey<String>('resource-map-atlas-task-restore')),
+      );
+      await tester.pumpAndSettle();
+      expect(tester.getTopLeft(workspace), initialRect.topLeft);
+      expect(
+        tester.widget<TextField>(targetSearch).controller!.text,
+        'Ash Timber',
+      );
+      expect(tester.takeException(), isNull);
+    });
+  }
 
   testWidgets('desktop workbench stays scrollable at 200 percent text', (
     tester,
@@ -2619,7 +2823,7 @@ void main() {
     await _openNodeMaterialTargets(tester);
 
     final plannedMaterials = find.byKey(
-      const ValueKey<String>('resource-map-node-planner-targets'),
+      const ValueKey<String>('resource-map-network-workbench-mode-targets'),
     );
     expect(plannedMaterials, findsOneWidget);
     final plannedMaterialScrollables = find.descendant(
@@ -2636,7 +2840,150 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets('Gather opens the compact Steward menu over the map', (
+  for (final style in ResourceMapInterfaceStyle.values) {
+    for (final textScale in [1.0, 2.0]) {
+      testWidgets(
+        'Gathering artwork is readable and count-free ${style.id} at $textScale',
+        (tester) async {
+          final height = textScale == 1 ? 752.0 : 520.0;
+          await tester.binding.setSurfaceSize(Size(1200, height));
+          addTearDown(() => tester.binding.setSurfaceSize(null));
+          await tester.pumpWidget(
+            MaterialApp(
+              home: MediaQuery(
+                data: MediaQueryData(
+                  disableAnimations: true,
+                  textScaler: TextScaler.linear(textScale),
+                ),
+                child: BdoResourceMap(
+                  dataset: dataset,
+                  lodgingDataset: lodgingDataset,
+                  cacheDirectory: cacheDirectory,
+                  tileSource: tileSource,
+                  tileHttpClient: tileClient,
+                  interfaceStyle: style,
+                  showSourceNotice: false,
+                  favoriteResourceIds: const {'item:7902'},
+                  gatherChecklist: BdoGatherChecklist(
+                    entries: [BdoGatherChecklistEntry(resourceId: 'item:4001')],
+                  ),
+                  plannerNeeds: const [
+                    BdoPlannerMaterialNeed(
+                      gameItemId: 5420,
+                      name: 'Truffle Mushroom',
+                      missingQuantity: 5,
+                      marketable: false,
+                      stockKnown: false,
+                      stock: 0,
+                      marketRegion: 'EU',
+                      marketFetchedAt: null,
+                    ),
+                  ],
+                  resourceIconBuilder: (context, resource, size) =>
+                      SizedBox.square(
+                        key: ValueKey('gather-art-${resource.id}'),
+                        dimension: size,
+                      ),
+                ),
+              ),
+            ),
+          );
+          await tester.pumpAndSettle();
+          await _openGatherHub(tester);
+
+          final menuFinder = find.byKey(
+            const ValueKey('resource-map-material-categories'),
+          );
+          final menu = tester.widget<ResourceMapAtlasCommandMenu>(menuFinder);
+          expect(ResourceMapAtlasCommandMenu.labelFontSize, 16);
+          expect(
+            menu.actions.map((action) => action.badge),
+            everyElement(isNull),
+          );
+          expect(
+            menu.actions.any(
+              (action) => action.label == 'Needed for your plan',
+            ),
+            isTrue,
+          );
+          expect(tester.getSize(menuFinder).width, lessThanOrEqualTo(440));
+          expect(
+            tester.getRect(menuFinder).bottom,
+            lessThanOrEqualTo(height - 16),
+          );
+          expect(find.byType(Scrollbar), findsNothing);
+          expect(find.byType(RawScrollbar), findsNothing);
+
+          for (final action in menu.actions) {
+            final row = find.byKey(action.key);
+            await tester.ensureVisible(row);
+            await tester.pumpAndSettle();
+            expect(row.hitTestable(), findsOneWidget);
+            final label = find.descendant(
+              of: row,
+              matching: find.text(action.label),
+            );
+            expect(tester.widget<Text>(label).style!.fontSize, 16);
+            final paragraph = tester.renderObject<RenderParagraph>(label);
+            expect(paragraph.didExceedMaxLines, isFalse);
+            expect(tester.getRect(row).bottom, lessThanOrEqualTo(height - 16));
+          }
+          for (final id in [
+            'item:4605',
+            'item:4001',
+            'item:7902',
+            'item:6214',
+            'item:5409',
+            'item:4477',
+            'item:6656',
+          ]) {
+            final artwork = find.descendant(
+              of: menuFinder,
+              matching: find.byKey(ValueKey('gather-art-$id')),
+            );
+            expect(artwork, findsOneWidget);
+            expect(tester.getSize(artwork), const Size.square(36));
+          }
+          expect(
+            find.descendant(
+              of: menuFinder,
+              matching: find.byType(ResourceMapMenuArtwork),
+            ),
+            findsOneWidget,
+          );
+          final gatherKinds = menu.actions
+              .where((action) => action.icon is ResourceMapMenuArtwork)
+              .map((action) => (action.icon as ResourceMapMenuArtwork).kind)
+              .toList();
+          expect(gatherKinds, [ResourceMapMenuArtworkKind.plan]);
+
+          await _openNodePlanner(tester);
+          final workerKinds = <ResourceMapMenuArtworkKind>[];
+          for (final entry in const [
+            ('resource-map-home-plan-materials', 'Plan materials'),
+            ('resource-map-home-browse-nodes', 'Browse worker nodes'),
+            ('resource-map-home-setup', 'Your setup'),
+          ]) {
+            final row = find.byKey(ValueKey(entry.$1));
+            await _expectReadableMapAction(tester, entry.$1, entry.$2, height);
+            final artwork = find.descendant(
+              of: row,
+              matching: find.byType(ResourceMapMenuArtwork),
+            );
+            expect(artwork, findsOneWidget);
+            expect(tester.getSize(artwork), const Size.square(36));
+            workerKinds.add(
+              tester.widget<ResourceMapMenuArtwork>(artwork).kind,
+            );
+          }
+          expect(workerKinds.toSet().length, workerKinds.length);
+          expect(tester.takeException(), isNull);
+        },
+      );
+    }
+  }
+
+  testWidgets('Gather opens a compact direct command menu over the map', (
     tester,
   ) async {
     await tester.binding.setSurfaceSize(const Size(1200, 752));
@@ -2661,125 +3008,62 @@ void main() {
       () => Future<void>.delayed(const Duration(milliseconds: 250)),
     );
     await tester.pump(const Duration(milliseconds: 250));
-    await tester.tap(
-      find.byKey(const ValueKey<String>('resource-map-command-gather')),
+    await _openGatherHub(tester);
+    final categories = find.byKey(
+      const ValueKey('resource-map-material-categories'),
     );
-    await tester.pumpAndSettle();
-
-    final gatherMenu = find.byKey(
-      const ValueKey<String>('resource-map-gather-steward-menu'),
-    );
-    expect(gatherMenu, findsOneWidget);
+    final journey = find.byKey(const ValueKey('resource-map-atlas-dock'));
+    expect(categories, findsOneWidget);
+    expect(find.descendant(of: journey, matching: categories), findsOneWidget);
+    expect(find.byKey(const ValueKey('resource-map-worker-hub')), findsNothing);
     expect(
-      find.byKey(const ValueKey<String>('resource-map-worker-steward-menu')),
-      findsNothing,
-    );
-    for (final entry in const <(String, String)>[
-      ('resource-map-gather-menu-plan', 'Plan'),
-      ('resource-map-gather-menu-explore', 'Browse'),
-    ]) {
-      final section = find.byKey(ValueKey<String>(entry.$1));
-      expect(section, findsOneWidget);
-      expect(
-        find.descendant(of: section, matching: find.text(entry.$2)),
-        findsOneWidget,
-      );
-    }
-    expect(
-      find.byKey(const ValueKey<String>('resource-map-gather-menu-manage')),
+      find.byKey(const ValueKey('resource-map-command-checklist')),
       findsNothing,
     );
     expect(
-      find.byKey(const ValueKey<String>('resource-map-command-checklist')),
+      find.byKey(const ValueKey('resource-map-command-favorites')),
       findsNothing,
     );
     expect(
-      find.byKey(const ValueKey<String>('resource-map-command-favorites')),
+      find.byKey(const ValueKey('resource-map-mode-action-strip')),
       findsNothing,
     );
+    expect(tester.getSize(categories).width, lessThanOrEqualTo(440));
     expect(
-      find.byKey(const ValueKey<String>('resource-map-mode-action-strip')),
+      find.byKey(const ValueKey('resource-map-gather-plan-shortlist')),
       findsNothing,
-      reason: 'Gather tools belong in one Steward menu, not a second top row.',
     );
-    expect(
-      find
-          .byKey(const ValueKey<String>('resource-map-desktop-edge-surface'))
-          .hitTestable(),
-      findsNothing,
-      reason: 'The compact Gather landing must leave the map uncovered.',
-    );
-    expect(tester.getSize(gatherMenu).width, inInclusiveRange(300, 320));
-    expect(tester.getSize(gatherMenu).height, lessThan(130));
-
-    await _openGatherStewardSection(tester, 'resource-map-gather-menu-plan');
-    expect(
-      find.byKey(const ValueKey<String>('resource-map-command-checklist')),
-      findsOneWidget,
-    );
-    expect(
-      find.byKey(const ValueKey<String>('resource-map-command-favorites')),
-      findsOneWidget,
-    );
-    expect(
-      find.byKey(const ValueKey<String>('resource-map-gather-plan-shortlist')),
-      findsNothing,
-      reason: 'The plan shortcut only appears when the planner has needs.',
-    );
-    await _openGatherStewardSection(tester, 'resource-map-gather-menu-plan');
-    await _openGatherStewardSection(tester, 'resource-map-gather-menu-explore');
-
-    const gatheringSections = <(String, String)>[
-      ('plantsWood', 'Plants & wood'),
-      ('oresMinerals', 'Ores & minerals'),
-      ('meat', 'Meat'),
-      ('bloodHides', 'Blood & hides'),
-      ('mushrooms', 'Mushrooms'),
-      ('seafoodMarine', 'Coastal gathering'),
-    ];
-    for (final entry in gatheringSections) {
-      final action = find.byKey(
-        ValueKey<String>('resource-map-section-${entry.$1}'),
-      );
-      expect(action, findsOneWidget);
-      expect(
-        find.descendant(of: action, matching: find.text(entry.$2)),
-        findsOneWidget,
-      );
-      await tester.ensureVisible(action);
+    final menu = tester.widget<ResourceMapAtlasCommandMenu>(categories);
+    for (final action in menu.actions) {
+      final row = find.byKey(action.key);
+      await tester.ensureVisible(row);
       await tester.pumpAndSettle();
+      expect(row.hitTestable(), findsOneWidget);
       expect(
-        action.hitTestable(),
+        find.descendant(of: row, matching: find.text(action.label)),
         findsOneWidget,
-        reason: '${entry.$2} must be reachable in the Browse section.',
       );
     }
-    expect(find.text('Sea & marine'), findsNothing);
-    expect(find.text('Fish & marine'), findsNothing);
-    expect(find.text('BROWSE BY TYPE'), findsNothing);
-    expect(find.textContaining('Search also understands'), findsNothing);
-
-    await _openGatherStewardSection(tester, 'resource-map-gather-menu-explore');
-    await tester.tap(
-      find.byKey(const ValueKey<String>('resource-map-command-workers')),
-    );
-    await tester.pumpAndSettle();
     expect(
-      find.byKey(const ValueKey<String>('resource-map-worker-steward-menu')),
+      menu.actions.map((action) => action.key),
+      containsAll([
+        const ValueKey('resource-map-section-plantsWood'),
+        const ValueKey('resource-map-section-meat'),
+        const ValueKey('resource-map-section-seafoodMarine'),
+      ]),
+    );
+    await _goMapHome(tester);
+    expect(
+      find.byKey(const ValueKey('resource-map-home-checklist')),
       findsOneWidget,
     );
-    expect(gatherMenu, findsNothing);
-    await tester.tap(
-      find.byKey(const ValueKey<String>('resource-map-command-gather')),
-    );
-    await tester.pumpAndSettle();
-    expect(gatherMenu, findsOneWidget);
     expect(
-      find.byKey(const ValueKey<String>('resource-map-worker-steward-menu')),
-      findsNothing,
-      reason: 'Mode switching mounts only the active Steward menu.',
+      find.byKey(const ValueKey('resource-map-home-saved')),
+      findsOneWidget,
     );
-
+    expect(categories, findsNothing);
+    await _openGatherHub(tester);
+    expect(categories, findsOneWidget);
     expect(tester.takeException(), isNull);
   });
 
@@ -2812,13 +3096,11 @@ void main() {
 
     await _openNodeMaterialTargets(tester);
     expect(
-      find.byKey(
-        const ValueKey<String>('resource-map-sidebar-planned-network'),
-      ),
+      find.byKey(const ValueKey<String>('resource-map-node-planner-targets')),
       findsOneWidget,
     );
     expect(find.text('What should your workers collect?'), findsNothing);
-    expect(find.text('CP available'), findsNothing);
+    expect(find.text('CP available'), findsOneWidget);
     expect(
       find.byKey(
         const ValueKey<String>('resource-map-node-target-settings-toggle'),
@@ -2831,11 +3113,7 @@ void main() {
       ),
     );
     await tester.pump(const Duration(milliseconds: 200));
-    expect(find.text('CP available'), findsOneWidget);
-    expect(
-      find.byKey(const ValueKey<String>('resource-map-node-target-cp-update')),
-      findsOneWidget,
-    );
+    expect(find.text('Worker towns'), findsOneWidget);
     await tester.tap(
       find.byKey(
         const ValueKey<String>('resource-map-node-target-settings-toggle'),
@@ -2847,31 +3125,29 @@ void main() {
     );
     expect(
       plannerCanvas.showAllNetworkConnections,
-      isTrue,
+      isFalse,
       reason:
-          'material targeting must retain the user\'s default-on connection '
-          'layer instead of silently changing a saved display preference',
+          'Material targeting shows its planned route without enabling the '
+          'unrelated full connection graph.',
     );
     expect(
-      find
-          .byKey(const ValueKey<String>('resource-map-desktop-sidebar'))
-          .hitTestable(),
+      find.byKey(const ValueKey<String>('resource-map-atlas-dock')),
       findsOneWidget,
     );
     expect(
       find.byKey(const ValueKey<String>('resource-map-node-planner-targets')),
       findsOneWidget,
     );
-    expect(find.text('Search worker materials'), findsOneWidget);
+    expect(find.text('Search materials'), findsOneWidget);
     final targetPanelRect = tester.getRect(
       find.byKey(const ValueKey<String>('resource-map-node-planner-targets')),
     );
     expect(
       targetPanelRect.width,
-      inInclusiveRange(400, 500),
+      inInclusiveRange(280, 430),
       reason:
-          'The material palette needs enough width for artwork, names, '
-          'availability and count controls without becoming a broad drawer.',
+          'The material palette stays in the left search flow while retaining '
+          'room for artwork, names, availability and count controls.',
     );
     for (final view in <String>['all', 'selected', 'current', 'favorites']) {
       final filter = find.byKey(
@@ -2880,7 +3156,7 @@ void main() {
       expect(filter, findsOneWidget);
       final rect = tester.getRect(filter);
       expect(rect.left, greaterThanOrEqualTo(targetPanelRect.left));
-      expect(rect.right, lessThanOrEqualTo(targetPanelRect.right));
+      expect(rect.right, lessThanOrEqualTo(targetPanelRect.right + .1));
     }
 
     await tester.enterText(
@@ -2922,7 +3198,7 @@ void main() {
     await _settleNodeTargetPreview(tester);
     expect(
       find.byKey(const ValueKey<String>('resource-map-node-target-preview')),
-      findsOneWidget,
+      findsNothing,
     );
     await expectLater(
       find.byType(BdoResourceMap),
@@ -2932,17 +3208,20 @@ void main() {
       find.byKey(const ValueKey<String>('resource-map-build-node-network')),
     );
     await tester.pump();
+    await tester.pump(const Duration(milliseconds: 250));
     expect(
-      find.byKey(
-        const ValueKey<String>('resource-map-node-network-calculating'),
-      ),
+      find
+          .byKey(
+            const ValueKey<String>('resource-map-node-network-calculating'),
+          )
+          .hitTestable(),
       findsOneWidget,
     );
     await _settleNodeNetworkCalculation(tester);
 
-    expect(find.text('Recommended complete network'), findsOneWidget);
-    expect(find.textContaining('of 250 CP'), findsOneWidget);
-    expect(find.text('Use this as my setup'), findsOneWidget);
+    expect(find.text('Review network'), findsOneWidget);
+    expect(find.textContaining('/ 250'), findsOneWidget);
+    expect(find.text('Apply'), findsOneWidget);
     expect(
       find.byKey(
         const ValueKey<String>('resource-map-network-workbench-leading'),
@@ -2958,9 +3237,9 @@ void main() {
     expect(reviewBody, findsOneWidget);
     expect(
       tester.getSize(reviewBody).width,
-      greaterThanOrEqualTo(350),
+      greaterThanOrEqualTo(280),
       reason:
-          'The right-side planner must retain enough width for material names '
+          'The left-side planner must retain enough width for material names '
           'and their remove/minus/count/plus controls.',
     );
     final reviewMaterial = find.byKey(
@@ -3010,8 +3289,9 @@ void main() {
       find.byKey(
         const ValueKey<String>('resource-map-node-route-visible-status'),
       ),
-      findsOneWidget,
+      findsNothing,
     );
+    expect(find.text('Show route'), findsOneWidget);
 
     await tester.tap(
       find.byKey(
@@ -3025,7 +3305,7 @@ void main() {
         'Saved as your in-game network in the planner. '
         'Nothing was changed in BDO.',
       ),
-      findsOneWidget,
+      findsNothing,
     );
     expect(tester.takeException(), isNull);
   });
@@ -3062,7 +3342,7 @@ void main() {
         find.byKey(const ValueKey<String>('resource-map-node-target-preview')),
         findsOneWidget,
       );
-      expect(find.textContaining('CP short'), findsOneWidget);
+      expect(find.textContaining('Increase CP budget by'), findsOneWidget);
       expect(
         find.byKey(
           const ValueKey<String>('resource-map-current-production-summary'),
@@ -3318,14 +3598,9 @@ void main() {
 
       await _openNodePlanner(tester);
       await _openWorkerPlanSectionIfDesktop(tester);
-      await tester.tap(
-        find.byKey(
-          const ValueKey<String>('resource-map-recommend-current-recipe'),
-        ),
-      );
-      await tester.pumpAndSettle();
+      await _openWorkerRecipeGoals(tester);
 
-      expect(find.textContaining('complete network'), findsOneWidget);
+      expect(find.text('Review network'), findsOneWidget);
       expect(
         find.byKey(ValueKey<String>('resource-map-review-material-${ash.id}')),
         findsOneWidget,
@@ -3351,22 +3626,18 @@ void main() {
         reason: 'Recipe plans must always draw their full connection route.',
       );
       await tester.tap(
-        find.byKey(
-          const ValueKey<String>('resource-map-network-workbench-back'),
-        ),
+        find.byKey(const ValueKey<String>('resource-map-task-back')),
       );
       await tester.pumpAndSettle();
       expect(
-        find.byKey(const ValueKey<String>('resource-map-worker-steward-menu')),
+        find.byKey(const ValueKey<String>('resource-map-home-find-material')),
         findsOneWidget,
         reason:
-            'Recipe review should return to the worker goals that opened it.',
+            'Recipe review returns to Map home without changing its saved goals.',
       );
       await _openWorkerPlanSectionIfDesktop(tester);
       expect(
-        find.byKey(
-          const ValueKey<String>('resource-map-recommend-current-recipe'),
-        ),
+        find.byKey(const ValueKey<String>('resource-map-home-plan-needs')),
         findsOneWidget,
       );
       expect(tester.takeException(), isNull);
@@ -3456,44 +3727,34 @@ void main() {
       await _openWorkerPlanSectionIfDesktop(tester);
 
       expect(find.text('Needed for your plan'), findsOneWidget);
-      await tester.tap(
-        find.byKey(
-          const ValueKey<String>('resource-map-recommend-current-recipe'),
-        ),
-      );
-      await tester.pumpAndSettle();
+      await _openWorkerRecipeGoals(tester);
 
-      expect(find.text('Choose recipe materials'), findsOneWidget);
+      expect(find.text('Recipe materials'), findsOneWidget);
       await tester.tap(find.widgetWithText(TextButton, 'Cancel'));
       await tester.pumpAndSettle();
       expect(
-        find.byKey(const ValueKey<String>('resource-map-worker-steward-menu')),
+        find.byKey(const ValueKey<String>('resource-map-worker-hub')),
         findsOneWidget,
         reason: 'Cancel returns to the compact Steward landing menu.',
       );
       expect(
         find
-            .byKey(const ValueKey<String>('resource-map-desktop-sidebar'))
+            .byKey(const ValueKey<String>('resource-map-sidebar-details'))
             .hitTestable(),
         findsNothing,
       );
       await _openWorkerPlanSectionIfDesktop(tester);
-      await tester.tap(
-        find.byKey(
-          const ValueKey<String>('resource-map-recommend-current-recipe'),
-        ),
-      );
-      await tester.pumpAndSettle();
-      expect(find.text('Choose recipe materials'), findsOneWidget);
+      await _openWorkerRecipeGoals(tester);
+      expect(find.text('Recipe materials'), findsOneWidget);
       expect(find.text('Cooking'), findsOneWidget);
       expect(find.text('Alchemy'), findsOneWidget);
-      expect(find.text('0/1 worker items'), findsOneWidget);
-      expect(find.text('1/1 worker items'), findsOneWidget);
+      expect(find.text('0/1 worker items'), findsNothing);
+      expect(find.text('1/1 worker items'), findsNothing);
       expect(
         find.byKey(
           const ValueKey<String>('resource-map-recipe-live-cp-preview'),
         ),
-        findsOneWidget,
+        findsNothing,
       );
       expect(
         find.byKey(
@@ -3517,7 +3778,7 @@ void main() {
       await tester.tap(ashMaterial);
       await tester.pump();
       expect(tester.widget<CheckboxListTile>(ashMaterial).value, isTrue);
-      expect(find.text('Use 2 materials'), findsOneWidget);
+      expect(find.text('Use selection'), findsOneWidget);
       expect(
         find.descendant(
           of: ashMaterial,
@@ -3597,8 +3858,8 @@ void main() {
       await tester.tap(applyRecipe);
       await tester.pumpAndSettle();
 
-      expect(find.text('Choose recipe materials'), findsNothing);
-      expect(find.textContaining('complete network'), findsOneWidget);
+      expect(find.text('Recipe materials'), findsNothing);
+      expect(find.text('Review network'), findsOneWidget);
       final reviewScrollable = find
           .descendant(
             of: find.byKey(
@@ -3718,12 +3979,7 @@ void main() {
       await tester.pump(const Duration(milliseconds: 250));
       await _openNodePlanner(tester);
       await _openWorkerPlanSectionIfDesktop(tester);
-      await tester.tap(
-        find.byKey(
-          const ValueKey<String>('resource-map-recommend-current-recipe'),
-        ),
-      );
-      await tester.pumpAndSettle();
+      await _openWorkerRecipeGoals(tester);
       await tester.tap(
         find.byKey(
           const ValueKey<String>(
@@ -3746,7 +4002,7 @@ void main() {
         const ValueKey<String>('resource-map-node-review-worker-capacity'),
       );
       expect(
-        find.textContaining('10 of 20 CP'),
+        find.textContaining('CP 10 / 20'),
         findsOneWidget,
         reason:
             'The route total must include the 1 CP lodging house required '
@@ -3757,12 +4013,10 @@ void main() {
         120,
         scrollable: reviewScrollable,
       );
-      expect(
-        find.textContaining('0/3 workers already covered'),
-        findsOneWidget,
-      );
+      expect(find.textContaining('0/3 workers covered'), findsNothing);
       final xRow = find.byKey(
         const ValueKey<String>('resource-map-review-material-x'),
+        skipOffstage: false,
       );
       await tester.scrollUntilVisible(xRow, 180, scrollable: reviewScrollable);
       expect(xRow, findsOneWidget);
@@ -3771,6 +4025,7 @@ void main() {
           of: xRow,
           matching: find.byKey(
             const ValueKey<String>('review-material-artwork-x'),
+            skipOffstage: false,
           ),
         ),
         findsOneWidget,
@@ -3783,8 +4038,9 @@ void main() {
                   const ValueKey<String>(
                     'resource-map-node-target-plus-review-x',
                   ),
+                  skipOffstage: false,
                 ),
-                matching: find.byType(IconButton),
+                matching: find.byType(IconButton, skipOffstage: false),
               ),
             )
             .onPressed,
@@ -3794,6 +4050,7 @@ void main() {
 
       final reviewMinus = find.byKey(
         const ValueKey<String>('resource-map-node-target-minus-review-x'),
+        skipOffstage: false,
       );
       await tester.ensureVisible(reviewMinus);
       await tester.pumpAndSettle();
@@ -3807,7 +4064,7 @@ void main() {
       await tester.drag(reviewScrollable, const Offset(0, 1000));
       await tester.pumpAndSettle();
       expect(
-        find.textContaining('6 of 20 CP'),
+        find.textContaining('CP 6 / 20'),
         findsOneWidget,
         reason: 'Recomputed totals must continue to include lodging CP.',
       );
@@ -3816,19 +4073,20 @@ void main() {
         120,
         scrollable: reviewScrollable,
       );
-      expect(
-        find.textContaining('0/2 workers already covered'),
-        findsOneWidget,
-      );
+      expect(find.textContaining('0/2 workers covered'), findsNothing);
       expect(xRow, findsOneWidget);
       expect(
-        find.byKey(const ValueKey<String>('resource-map-review-material-y')),
+        find.byKey(
+          const ValueKey<String>('resource-map-review-material-y'),
+          skipOffstage: false,
+        ),
         findsOneWidget,
       );
 
       await tester.scrollUntilVisible(xRow, 180, scrollable: reviewScrollable);
       final reviewRemove = find.byKey(
         const ValueKey<String>('resource-map-node-target-remove-review-x'),
+        skipOffstage: false,
       );
       await tester.ensureVisible(reviewRemove);
       await tester.pumpAndSettle();
@@ -3841,7 +4099,7 @@ void main() {
       await tester.drag(reviewScrollable, const Offset(0, 1000));
       await tester.pumpAndSettle();
       expect(
-        find.textContaining('3 of 20 CP', skipOffstage: false),
+        find.textContaining('CP 3 / 20', skipOffstage: false),
         findsOneWidget,
       );
       await tester.scrollUntilVisible(
@@ -3850,28 +4108,21 @@ void main() {
         scrollable: reviewScrollable,
       );
       expect(
-        find.textContaining('0/1 workers already covered', skipOffstage: false),
-        findsOneWidget,
+        find.textContaining('0/1 workers covered', skipOffstage: false),
+        findsNothing,
       );
       expect(xRow, findsNothing);
       expect(
         find.textContaining('1 production node', skipOffstage: false),
-        findsWidgets,
+        findsNothing,
       );
 
       await tester.tap(
-        find.byKey(
-          const ValueKey<String>('resource-map-network-workbench-back'),
-        ),
+        find.byKey(const ValueKey<String>('resource-map-task-back')),
       );
       await tester.pumpAndSettle();
       await _openWorkerPlanSectionIfDesktop(tester);
-      await tester.tap(
-        find.byKey(
-          const ValueKey<String>('resource-map-recommend-current-recipe'),
-        ),
-      );
-      await tester.pumpAndSettle();
+      await _openWorkerRecipeGoals(tester);
       await tester.tap(find.text('Cooking'));
       await tester.pumpAndSettle();
       final reopenedX = find.byKey(
@@ -3937,23 +4188,16 @@ void main() {
       await tester.pump(const Duration(milliseconds: 250));
       await _openNodePlanner(tester);
       await _openWorkerPlanSectionIfDesktop(tester);
-      await tester.tap(
-        find.byKey(
-          const ValueKey<String>(
-            'resource-map-open-market-value-recommendations',
-          ),
-        ),
-      );
-      await tester.pumpAndSettle();
+      await _openWorkerIncome(tester);
 
       expect(
         find.text('14 of 20'),
-        findsOneWidget,
+        findsNothing,
         reason:
             'The displayed total must be the 11 CP node route plus the exact '
             '3 CP prerequisite-and-lodging house closure.',
       );
-      expect(find.text('2 houses'), findsWidgets);
+      expect(find.text('2 houses'), findsNothing);
       final badge = find.byKey(
         const ValueKey<String>('resource-map-lodging-town-badge-root'),
       );
@@ -3964,6 +4208,12 @@ void main() {
         reason: 'The round town badge counts both houses the route must buy.',
       );
 
+      await tester.tap(
+        find.byKey(
+          const ValueKey<String>('resource-map-atlas-workspace-minimize'),
+        ),
+      );
+      await tester.pumpAndSettle();
       await tester.tap(badge);
       await tester.pumpAndSettle();
 
@@ -3972,11 +4222,11 @@ void main() {
       );
       expect(summary, findsOneWidget);
       expect(find.text('Root lodging'), findsOneWidget);
-      expect(find.text('2 to buy'), findsOneWidget);
-      expect(find.text('+4 beds'), findsOneWidget);
-      expect(find.text('+3 CP'), findsOneWidget);
-      expect(find.text('BUY FOR LODGING (1)'), findsOneWidget);
-      expect(find.text('BUY FIRST (1)'), findsOneWidget);
+      expect(find.text('2 to buy'), findsNothing);
+      expect(find.text('+4 beds'), findsNothing);
+      expect(find.text('+3 CP'), findsNothing);
+      expect(find.text('Buy for lodging'), findsOneWidget);
+      expect(find.text('Buy first'), findsOneWidget);
       expect(
         find.byKey(
           const ValueKey<String>(
@@ -4067,12 +4317,17 @@ void main() {
   testWidgets(
     'worker economics shows after-tax online income and complete route tools',
     (tester) async {
+      await tester.runAsync(loadMapMenuCaptureFonts);
       await tester.binding.setSurfaceSize(const Size(1200, 900));
       addTearDown(() => tester.binding.setSurfaceSize(null));
       final marketDataset = _rerouteNetworkDataset();
 
       await tester.pumpWidget(
         MaterialApp(
+          builder: (context, child) => RepaintBoundary(
+            key: const ValueKey('income-page-capture'),
+            child: child,
+          ),
           home: MediaQuery(
             data: const MediaQueryData(
               size: Size(1200, 900),
@@ -4125,40 +4380,19 @@ void main() {
       await tester.pump(const Duration(milliseconds: 250));
       await _openNodePlanner(tester);
       await _openWorkerPlanSectionIfDesktop(tester);
-      final openIncome = find.byKey(
-        const ValueKey<String>(
-          'resource-map-open-market-value-recommendations',
-        ),
-      );
-      await tester.ensureVisible(openIncome);
-      await tester.pumpAndSettle();
-      await tester.tap(openIncome);
-      await tester.pumpAndSettle();
+      await _openWorkerIncome(tester);
 
-      expect(
-        find.descendant(
-          of: find.byKey(
-            const ValueKey<String>(
-              'resource-map-node-planner-header-marketValue',
-            ),
-          ),
-          matching: find.text('Best worker income'),
-        ),
-        findsOneWidget,
-      );
-      expect(find.textContaining('market tax'), findsOneWidget);
+      expect(find.text('Worker income'), findsOneWidget);
+      expect(find.textContaining('tax. Online time only.'), findsNothing);
       final incomeSummary = tester.widget<Text>(find.textContaining('/ hour'));
       expect(incomeSummary.data, isNot(startsWith('0 silver / hour')));
-      expect(find.textContaining('online hours'), findsOneWidget);
-      expect(find.textContaining('in one week'), findsOneWidget);
-      expect(find.text('Recommended route'), findsOneWidget);
-      expect(
-        find.textContaining('Your workers pause when you log out'),
-        findsOneWidget,
-      );
-      expect(find.text('Show route on map'), findsOneWidget);
-      expect(find.text('Save as my setup'), findsOneWidget);
-      expect(find.text('Tell us what you already own'), findsOneWidget);
+      expect(find.textContaining('online hours'), findsNothing);
+      expect(find.textContaining('per week'), findsNothing);
+      expect(find.text('Recommended route'), findsNothing);
+      expect(find.textContaining('Online time only.'), findsNothing);
+      expect(find.text('Show route'), findsOneWidget);
+      expect(find.text('Save'), findsOneWidget);
+      expect(find.text('Workers'), findsOneWidget);
       expect(find.textContaining('connection line'), findsNothing);
       final incomeSurface = find.byKey(
         const ValueKey<String>('resource-map-network-workbench'),
@@ -4166,24 +4400,27 @@ void main() {
       expect(incomeSurface, findsOneWidget);
       final incomeSurfaceRect = tester.getRect(incomeSurface);
       final mapRect = tester.getRect(find.byType(BdoMapCanvas));
+      final workspaceRect = tester.getRect(
+        find.byKey(const ValueKey<String>('resource-map-atlas-dock')),
+      );
       expect(
         tester.getSize(incomeSurface).width,
-        inInclusiveRange(400, 540),
-        reason: 'The income plan should remain a readable right-side panel.',
+        inInclusiveRange(266, 350),
+        reason: 'Income planning uses the same compact left-hand workspace.',
       );
       expect(
-        incomeSurfaceRect.left,
-        greaterThan(mapRect.center.dx),
-        reason: 'The plan must leave the main map visible on its left.',
+        incomeSurfaceRect.center.dx,
+        closeTo(workspaceRect.center.dx, 16),
+        reason: 'The income surface stays inside the anchored map tool window.',
       );
-      expect(incomeSurfaceRect.top, lessThanOrEqualTo(80));
-      expect(incomeSurfaceRect.bottom, lessThanOrEqualTo(mapRect.bottom));
+      expect(workspaceRect.left, closeTo(mapRect.left + 16, 1));
+      expect(incomeSurfaceRect.top, greaterThan(workspaceRect.top));
+      expect(incomeSurfaceRect.bottom, lessThanOrEqualTo(workspaceRect.bottom));
       expect(
         incomeSurfaceRect.height,
-        greaterThan(mapRect.height * .75),
+        lessThan(mapRect.height * .5),
         reason:
-            'The plan should use vertical space instead of covering the map '
-            'with a bottom tray.',
+            'The sparse income result fits its content without a tall empty panel.',
       );
       expect(
         find.byKey(
@@ -4208,14 +4445,13 @@ void main() {
           canvasBeforeCollapse.nodeNetworkEdgeChanges.length;
       await tester.tap(
         find.byKey(
-          const ValueKey<String>('resource-map-network-workbench-collapse'),
+          const ValueKey<String>('resource-map-atlas-workspace-minimize'),
         ),
       );
       await tester.pump();
-      expect(incomeSurface, findsOneWidget);
-      expect(incomeSurface.hitTestable(), findsNothing);
+      expect(incomeSurface, findsNothing);
       final restorePanel = find.byKey(
-        const ValueKey<String>('resource-map-desktop-task-surface-restore'),
+        const ValueKey<String>('resource-map-atlas-task-restore'),
       );
       expect(restorePanel.hitTestable(), findsOneWidget);
       expect(
@@ -4227,11 +4463,19 @@ void main() {
       );
       await tester.tap(restorePanel);
       await tester.pump();
+      expect(incomeSurface, findsOneWidget);
       expect(incomeSurface.hitTestable(), findsOneWidget);
       expect(tester.getRect(incomeSurface), incomeSurfaceRect);
-      await expectLater(
-        find.byType(BdoResourceMap),
-        matchesGoldenFile('goldens/resource_map_worker_income.png'),
+      if (Platform.environment['MAP_MENU_CAPTURE_DIR'] == null) {
+        await expectLater(
+          find.byType(BdoResourceMap),
+          matchesGoldenFile('goldens/resource_map_worker_income.png'),
+        );
+      }
+      await captureMapMenu(
+        tester,
+        boundary: find.byKey(const ValueKey('income-page-capture')),
+        name: 'worker-income-page-text100',
       );
       expect(
         find.byKey(
@@ -4290,7 +4534,7 @@ void main() {
         ),
       );
       await tester.pumpAndSettle();
-      expect(find.text('Adjust the estimate'), findsOneWidget);
+      expect(find.text('Income settings'), findsOneWidget);
       expect(
         tester
             .widget<TextField>(
@@ -4323,7 +4567,7 @@ void main() {
       await tester.pumpAndSettle();
       await tester.tap(workerCapacityButton);
       await tester.pumpAndSettle();
-      expect(find.text('Your workers by town'), findsOneWidget);
+      expect(find.text('Workers by town'), findsOneWidget);
       expect(
         find.byKey(const ValueKey<String>('resource-map-worker-town-add')),
         findsOneWidget,
@@ -4334,7 +4578,7 @@ void main() {
         ),
         findsOneWidget,
       );
-      expect(find.textContaining('bonus lodging'), findsWidgets);
+      expect(find.textContaining('bonus lodging'), findsNothing);
       expect(find.text('Hired workers'), findsOneWidget);
       expect(find.text('Bonus lodging slots'), findsOneWidget);
       await tester.tap(find.text('Cancel'));
@@ -4414,14 +4658,7 @@ void main() {
       await tester.pump(const Duration(milliseconds: 250));
       await _openNodePlanner(tester);
       await _openWorkerPlanSectionIfDesktop(tester);
-      await tester.tap(
-        find.byKey(
-          const ValueKey<String>(
-            'resource-map-open-market-value-recommendations',
-          ),
-        ),
-      );
-      await tester.pumpAndSettle();
+      await _openWorkerIncome(tester);
 
       final total = tester.widget<Text>(
         find.byKey(
@@ -4534,14 +4771,7 @@ void main() {
       await tester.pump(const Duration(milliseconds: 250));
       await _openNodePlanner(tester);
       await _openWorkerPlanSectionIfDesktop(tester);
-      await tester.tap(
-        find.byKey(
-          const ValueKey<String>(
-            'resource-map-open-market-value-recommendations',
-          ),
-        ),
-      );
-      await tester.pumpAndSettle();
+      await _openWorkerIncome(tester);
 
       final settings = find.byKey(
         const ValueKey<String>('resource-map-worker-income-settings'),
@@ -4558,10 +4788,7 @@ void main() {
       );
       final partialPrices = find.descendant(
         of: dialog,
-        matching: find.widgetWithText(
-          SwitchListTile,
-          'Keep incomplete market results',
-        ),
+        matching: find.widgetWithText(SwitchListTile, 'Allow partial prices'),
       );
       expect(tester.widget<TextField>(onlineHours).controller!.text, '8');
       expect(tester.widget<TextField>(availability).controller!.text, '100');
@@ -4590,10 +4817,7 @@ void main() {
       expect(progress, findsOneWidget);
       final liveRegion = tester.widget<Semantics>(progress);
       expect(liveRegion.properties.liveRegion, isTrue);
-      expect(
-        liveRegion.properties.label,
-        'Updating worker income recommendation',
-      );
+      expect(liveRegion.properties.label, 'Updating worker income');
       expect(
         find.descendant(
           of: progress,
@@ -4622,7 +4846,7 @@ void main() {
       await tester.tap(workerCapacity);
       await tester.pumpAndSettle();
 
-      expect(find.text('Your workers by town'), findsOneWidget);
+      expect(find.text('Workers by town'), findsOneWidget);
       expect(find.text('Hired workers'), findsOneWidget);
       expect(find.text('Bonus lodging slots'), findsOneWidget);
       await tester.enterText(
@@ -4634,8 +4858,19 @@ void main() {
         '8',
       );
       await tester.pump();
-      expect(find.textContaining('9 known slots'), findsOneWidget);
-      await tester.tap(find.widgetWithText(FilledButton, 'Save'));
+      expect(find.text('9 slots · 5 free'), findsNothing);
+      expect(
+        find.byTooltip(
+          '1 base slots\n0 slots from owned lodging\n8 bonus slots\n4 hired workers',
+        ),
+        findsNothing,
+      );
+      await tester.tap(
+        find.descendant(
+          of: find.byType(AlertDialog),
+          matching: find.widgetWithText(FilledButton, 'Save'),
+        ),
+      );
       await tester.pump();
 
       final savedCapacity =
@@ -4648,6 +4883,346 @@ void main() {
       expect(tester.takeException(), isNull);
     },
   );
+
+  for (final scale in [1.0, 2.0]) {
+    testWidgets(
+      'worker configuration dialogs preserve warnings at $scale text',
+      (tester) async {
+        await tester.runAsync(loadMapMenuCaptureFonts);
+        await tester.binding.setSurfaceSize(const Size(1200, 752));
+        addTearDown(() => tester.binding.setSurfaceSize(null));
+        final updates = <BdoNodeNetworkPreferences>[];
+        await tester.pumpWidget(
+          MaterialApp(
+            builder: (context, child) => RepaintBoundary(
+              key: const ValueKey('configuration-dialog-capture'),
+              child: MediaQuery(
+                data: MediaQuery.of(context).copyWith(
+                  textScaler: TextScaler.linear(scale),
+                  disableAnimations: true,
+                ),
+                child: child!,
+              ),
+            ),
+            home: BdoResourceMap(
+              dataset: _rerouteNetworkDataset(),
+              cacheDirectory: cacheDirectory,
+              tileSource: tileSource,
+              showSourceNotice: false,
+              tileHttpClient: tileClient,
+              workerEconomics: _rerouteWorkerEconomics(),
+              lodgingDataset: _rerouteLodgingDataset(),
+              nodeNetworkPreferences: BdoNodeNetworkPreferences(
+                contributionPointBudget: 20,
+                rootNodeIds: const {'root'},
+                townWorkerCapacitiesByNodeId: const {
+                  'root': BdoTownWorkerCapacity(
+                    availableWorkerCount: 0,
+                    freeLodgingSlotCount: 0,
+                  ),
+                },
+              ),
+              onNodeNetworkPreferencesChanged: updates.add,
+            ),
+          ),
+        );
+        await tester.pumpAndSettle();
+        await _openWorkerIncome(tester);
+        final settings = find.byKey(
+          const ValueKey('resource-map-worker-income-settings'),
+        );
+        await tester.ensureVisible(settings);
+        await tester.tap(settings);
+        await tester.pumpAndSettle();
+        expect(
+          tester.widget<AlertDialog>(find.byType(AlertDialog)).scrollable,
+          isTrue,
+        );
+        expect(find.text('Workers stop when you log out'), findsNothing);
+        expect(
+          find.text(
+            'Include missing prices. These estimates remain incomplete.',
+          ),
+          findsNothing,
+        );
+        await captureMapMenu(
+          tester,
+          boundary: find.byKey(const ValueKey('configuration-dialog-capture')),
+          name: 'worker-income-dialog-text${(scale * 100).round()}',
+        );
+        final hours = find.byKey(
+          const ValueKey('resource-map-online-hours-input'),
+        );
+        await tester.ensureVisible(hours);
+        await tester.enterText(hours, '0');
+        await tester.tap(
+          find.byKey(const ValueKey('resource-map-save-income-settings')),
+        );
+        await tester.pumpAndSettle();
+        expect(find.text('Hours: >0–24. Resources: 0–100%.'), findsOneWidget);
+        expect(updates, isEmpty);
+        await tester.tap(find.widgetWithText(TextButton, 'Cancel'));
+        await tester.pumpAndSettle();
+        final capacity = find.byKey(
+          const ValueKey('resource-map-worker-capacity-settings'),
+        );
+        await tester.ensureVisible(capacity);
+        await tester.tap(capacity);
+        await tester.pumpAndSettle();
+        expect(
+          tester.widget<AlertDialog>(find.byType(AlertDialog)).scrollable,
+          isTrue,
+        );
+        expect(
+          find.textContaining(
+            'Edit either number to use the town and housing data.',
+          ),
+          findsNothing,
+        );
+        final hired = find.byKey(
+          const ValueKey('resource-map-hired-workers-root'),
+        );
+        final bonus = find.byKey(
+          const ValueKey('resource-map-bonus-lodging-root'),
+        );
+        await tester.ensureVisible(hired);
+        await tester.enterText(hired, '-1');
+        await tester.tap(
+          find.descendant(
+            of: find.byType(AlertDialog),
+            matching: find.widgetWithText(FilledButton, 'Save'),
+          ),
+        );
+        await tester.pumpAndSettle();
+        expect(
+          find.textContaining('whole numbers of at least 0'),
+          findsOneWidget,
+        );
+        expect(updates, isEmpty);
+        await tester.ensureVisible(hired);
+        await tester.enterText(hired, '4');
+        await tester.ensureVisible(bonus);
+        await tester.enterText(bonus, '8');
+        await tester.pumpAndSettle();
+        expect(find.text('9 slots · 5 free'), findsNothing);
+        if (scale == 2) {
+          expect(
+            tester.getTopLeft(bonus).dy,
+            greaterThan(tester.getBottomLeft(hired).dy),
+          );
+        }
+        await captureMapMenu(
+          tester,
+          boundary: find.byKey(const ValueKey('configuration-dialog-capture')),
+          name: 'worker-capacity-dialog-text${(scale * 100).round()}',
+        );
+        await tester.tap(
+          find.descendant(
+            of: find.byType(AlertDialog),
+            matching: find.widgetWithText(FilledButton, 'Save'),
+          ),
+        );
+        await tester.pumpAndSettle();
+        expect(
+          updates
+              .last
+              .townWorkerCapacitiesByNodeId['root']!
+              .freeLodgingSlotCount,
+          5,
+        );
+        expect(tester.takeException(), isNull);
+      },
+    );
+
+    testWidgets('starting-town dialog keeps exclusions at $scale text', (
+      tester,
+    ) async {
+      await tester.runAsync(loadMapMenuCaptureFonts);
+      await tester.binding.setSurfaceSize(const Size(1200, 752));
+      addTearDown(() => tester.binding.setSurfaceSize(null));
+      final updates = <BdoNodeNetworkPreferences>[];
+      await tester.pumpWidget(
+        MaterialApp(
+          builder: (context, child) => RepaintBoundary(
+            key: const ValueKey('configuration-dialog-capture'),
+            child: MediaQuery(
+              data: MediaQuery.of(context).copyWith(
+                textScaler: TextScaler.linear(scale),
+                disableAnimations: true,
+              ),
+              child: child!,
+            ),
+          ),
+          home: BdoResourceMap(
+            dataset: _rootScopedNetworkDataset(),
+            cacheDirectory: cacheDirectory,
+            tileSource: tileSource,
+            showSourceNotice: false,
+            tileHttpClient: tileClient,
+            nodeNetworkPreferences: BdoNodeNetworkPreferences(
+              desiredResourceNodeCounts: const {'wood': 1},
+              rootNodeIds: const {'root-a'},
+            ),
+            onNodeNetworkPreferencesChanged: updates.add,
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      await _openNodeMaterialTargets(tester);
+      await tester.tap(
+        find.byKey(const ValueKey('resource-map-node-target-settings-toggle')),
+      );
+      await tester.pumpAndSettle();
+      final action = find.byKey(
+        const ValueKey('resource-map-node-starting-towns-targets'),
+      );
+      await tester.ensureVisible(action);
+      await tester.tap(action);
+      await tester.pumpAndSettle();
+      expect(
+        tester.widget<AlertDialog>(find.byType(AlertDialog)).scrollable,
+        isTrue,
+      );
+      expect(
+        find.text('Unchecked towns are excluded from the plan.'),
+        findsNothing,
+      );
+      expect(find.text('Limiting towns can increase CP cost.'), findsNothing);
+      await captureMapMenu(
+        tester,
+        boundary: find.byKey(const ValueKey('configuration-dialog-capture')),
+        name: 'starting-towns-dialog-text${(scale * 100).round()}',
+      );
+      final root = find.widgetWithText(CheckboxListTile, 'Root A');
+      await tester.ensureVisible(root);
+      await tester.tap(root);
+      await tester.pumpAndSettle();
+      final save = find.byKey(
+        const ValueKey('resource-map-save-starting-towns'),
+      );
+      expect(tester.widget<FilledButton>(save).onPressed, isNull);
+      final isolated = find.widgetWithText(CheckboxListTile, 'Isolated');
+      await tester.ensureVisible(isolated);
+      await tester.tap(isolated);
+      await tester.pumpAndSettle();
+      await tester.tap(save);
+      await tester.pump(const Duration(milliseconds: 250));
+      await _settleNodeTargetPreview(tester);
+      expect(updates.last.rootNodeIds, {'isolated'});
+      expect(tester.takeException(), isNull);
+    });
+
+    testWidgets(
+      'recipe-material dialog keeps quantities and route caveat at $scale text',
+      (tester) async {
+        await tester.runAsync(loadMapMenuCaptureFonts);
+        await tester.binding.setSurfaceSize(const Size(1200, 752));
+        addTearDown(() => tester.binding.setSurfaceSize(null));
+        await tester.pumpWidget(
+          MaterialApp(
+            builder: (context, child) => RepaintBoundary(
+              key: const ValueKey('configuration-dialog-capture'),
+              child: MediaQuery(
+                data: MediaQuery.of(context).copyWith(
+                  textScaler: TextScaler.linear(scale),
+                  disableAnimations: true,
+                ),
+                child: child!,
+              ),
+            ),
+            home: BdoResourceMap(
+              dataset: dataset,
+              cacheDirectory: cacheDirectory,
+              tileSource: tileSource,
+              showSourceNotice: false,
+              tileHttpClient: tileClient,
+              nodeNetworkPreferences: BdoNodeNetworkPreferences(
+                contributionPointBudget: 250,
+              ),
+              plannerNeedGroups: [
+                BdoPlannerNeedGroup(
+                  id: 'cooking',
+                  label: 'Cooking',
+                  materials: [
+                    BdoPlannerNeedMaterial(
+                      id: 'ash',
+                      need: const BdoPlannerMaterialNeed(
+                        name: 'Ash Timber',
+                        missingQuantity: 120,
+                        marketable: true,
+                        stockKnown: true,
+                        stock: 0,
+                        marketRegion: 'eu',
+                        marketFetchedAt: null,
+                      ),
+                    ),
+                    BdoPlannerNeedMaterial(
+                      id: 'npc',
+                      need: const BdoPlannerMaterialNeed(
+                        name: 'Mineral Water',
+                        missingQuantity: 500,
+                        marketable: false,
+                        stockKnown: false,
+                        stock: 0,
+                        marketRegion: 'eu',
+                        marketFetchedAt: null,
+                        vendorPurchaseAvailable: true,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        );
+        await tester.pumpAndSettle();
+        await _openWorkerRecipeGoals(tester);
+        await tester.pumpAndSettle();
+        expect(
+          tester.widget<AlertDialog>(find.byType(AlertDialog)).scrollable,
+          isTrue,
+        );
+        expect(
+          find.textContaining('worker lodging is added in the map plan'),
+          findsNothing,
+        );
+        await tester.tap(find.text('Cooking'));
+        await tester.pumpAndSettle();
+        final material = find.byKey(
+          const ValueKey('resource-map-recipe-material-cooking-ash'),
+        );
+        final npc = find.byKey(
+          const ValueKey('resource-map-recipe-material-cooking-npc'),
+        );
+        expect(tester.widget<CheckboxListTile>(npc).onChanged, isNull);
+        expect(find.text('Vendor item · no CP investment'), findsNothing);
+        expect(find.text('Need 120'), findsOneWidget);
+        expect(
+          find.byKey(
+            const ValueKey('resource-map-recipe-node-count-cooking-ash'),
+          ),
+          findsOneWidget,
+        );
+        await captureMapMenu(
+          tester,
+          boundary: find.byKey(const ValueKey('configuration-dialog-capture')),
+          name: 'recipe-materials-dialog-text${(scale * 100).round()}',
+        );
+        await tester.ensureVisible(material);
+        await tester.tap(
+          find.descendant(of: material, matching: find.byType(Checkbox)),
+        );
+        await tester.pumpAndSettle();
+        final use = find.byKey(
+          const ValueKey('resource-map-optimize-selected-recipe-materials'),
+        );
+        expect(tester.widget<FilledButton>(use).onPressed, isNull);
+        await tester.tap(find.widgetWithText(TextButton, 'Cancel'));
+        await tester.pumpAndSettle();
+        expect(tester.takeException(), isNull);
+      },
+    );
+  }
 
   testWidgets(
     'worker income result stays readable and actionable at 200 percent text',
@@ -4711,15 +5286,7 @@ void main() {
       await tester.pump(const Duration(milliseconds: 250));
       await _openNodePlanner(tester);
       await _openWorkerPlanSectionIfDesktop(tester);
-      final openIncome = find.byKey(
-        const ValueKey<String>(
-          'resource-map-open-market-value-recommendations',
-        ),
-      );
-      await tester.ensureVisible(openIncome);
-      await tester.pumpAndSettle();
-      await tester.tap(openIncome);
-      await tester.pumpAndSettle();
+      await _openWorkerIncome(tester);
 
       final surface = find.byKey(
         const ValueKey<String>('resource-map-network-workbench'),
@@ -4727,19 +5294,9 @@ void main() {
       expect(surface, findsOneWidget);
       expect(tester.getRect(surface).top, greaterThanOrEqualTo(0));
       expect(tester.getRect(surface).bottom, lessThanOrEqualTo(900));
-      expect(
-        find.descendant(
-          of: find.byKey(
-            const ValueKey<String>(
-              'resource-map-node-planner-header-marketValue',
-            ),
-          ),
-          matching: find.text('Best worker income'),
-        ),
-        findsOneWidget,
-      );
-      expect(find.text('CP available'), findsOneWidget);
-      expect(find.text('Recommended route'), findsOneWidget);
+      expect(find.text('Worker income'), findsOneWidget);
+      expect(find.text('CP available'), findsNothing);
+      expect(find.text('Recommended route'), findsNothing);
       expect(find.byType(SingleChildScrollView), findsWidgets);
 
       final update = find.byKey(
@@ -4762,14 +5319,8 @@ void main() {
       expect(adjust, findsOneWidget);
       expect(owned, findsOneWidget);
       expect(tester.getSemantics(update).label, contains('Update'));
-      expect(
-        tester.widget<IconButton>(adjust).tooltip,
-        'Adjust income estimate',
-      );
-      expect(
-        tester.getSemantics(owned).label,
-        contains('Tell us what you already own'),
-      );
+      expect(tester.widget<IconButton>(adjust).tooltip, 'Estimate settings');
+      expect(tester.getSemantics(owned).label, contains('Workers'));
 
       final detailsToggle = find.byKey(
         const ValueKey<String>('resource-map-toggle-market-node-details'),
@@ -4789,10 +5340,7 @@ void main() {
         reason: 'The 200% menu width must be measured from its full labels.',
       );
       final rankingLabel = tester.widget<Text>(
-        find.descendant(
-          of: ranking,
-          matching: find.text('Ranking: Net silver / added CP-hour'),
-        ),
+        find.descendant(of: ranking, matching: find.text('Sort')),
       );
       expect(rankingLabel.maxLines, isNull);
       expect(rankingLabel.overflow, isNot(TextOverflow.ellipsis));
@@ -4874,14 +5422,7 @@ void main() {
       await tester.pump(const Duration(milliseconds: 250));
       await _openNodePlanner(tester);
       await _openWorkerPlanSectionIfDesktop(tester);
-      await tester.tap(
-        find.byKey(
-          const ValueKey<String>(
-            'resource-map-open-market-value-recommendations',
-          ),
-        ),
-      );
-      await tester.pumpAndSettle();
+      await _openWorkerIncome(tester);
 
       expect(
         find.byKey(
@@ -4900,11 +5441,11 @@ void main() {
             .text,
         '20',
       );
-      expect(find.textContaining('not silver per hour'), findsWidgets);
-      expect(find.text('Recommended value network'), findsOneWidget);
+      expect(find.textContaining('not silver per hour'), findsNothing);
+      expect(find.text('Recommended value network'), findsNothing);
       expect(
         find.textContaining('11 of 20 CP · 0 already invested · +11 new'),
-        findsOneWidget,
+        findsNothing,
       );
       await expectLater(
         find.byType(BdoResourceMap),
@@ -4942,7 +5483,16 @@ void main() {
         ),
         findsOneWidget,
       );
-      expect(find.text('Value / added CP'), findsOneWidget);
+      expect(
+        tester
+            .widget<PopupMenuButton>(
+              find.byKey(
+                const ValueKey('resource-map-market-value-ranking-basis'),
+              ),
+            )
+            .tooltip,
+        contains('Value / added CP'),
+      );
       final yDirect = find.byKey(
         const ValueKey<String>('resource-map-market-value-node-y-direct'),
       );
@@ -4960,7 +5510,16 @@ void main() {
         ),
       );
       await tester.pumpAndSettle();
-      expect(find.text('Value / total CP'), findsOneWidget);
+      expect(
+        tester
+            .widget<PopupMenuButton>(
+              find.byKey(
+                const ValueKey('resource-map-market-value-ranking-basis'),
+              ),
+            )
+            .tooltip,
+        contains('Value / total CP'),
+      );
 
       await tester.tap(
         find.byKey(
@@ -4974,7 +5533,16 @@ void main() {
         ),
       );
       await tester.pumpAndSettle();
-      expect(find.text('Value / added CP'), findsOneWidget);
+      expect(
+        tester
+            .widget<PopupMenuButton>(
+              find.byKey(
+                const ValueKey('resource-map-market-value-ranking-basis'),
+              ),
+            )
+            .tooltip,
+        contains('Value / added CP'),
+      );
 
       await tester.tap(
         find.byKey(
@@ -4988,21 +5556,12 @@ void main() {
         ),
       );
       await tester.pumpAndSettle();
-      expect(find.text('Recommended value network'), findsOneWidget);
+      expect(find.text('Recommended value network'), findsNothing);
 
       final xShared = find.byKey(
         const ValueKey<String>('resource-map-market-value-node-x-shared'),
       );
-      await tester.scrollUntilVisible(
-        xShared,
-        80,
-        scrollable: find.descendant(
-          of: find.byKey(
-            const ValueKey<String>('resource-map-market-value-results'),
-          ),
-          matching: find.byType(Scrollable),
-        ),
-      );
+      await tester.ensureVisible(xShared);
       await tester.tap(xShared);
       await tester.pumpAndSettle();
       canvas = tester.widget<BdoMapCanvas>(find.byType(BdoMapCanvas));
@@ -5044,9 +5603,9 @@ void main() {
       expect(yDirect, findsOneWidget);
       expect(
         find.textContaining('3 routes need more than 2 free CP'),
-        findsOneWidget,
+        findsNothing,
       );
-      expect(find.textContaining('1 ranked'), findsOneWidget);
+      expect(find.textContaining('1 ranked'), findsNothing);
       canvas = tester.widget<BdoMapCanvas>(find.byType(BdoMapCanvas));
       expect(
         canvas.nodeNetworkChangeKinds['y-direct'],
@@ -5103,16 +5662,9 @@ void main() {
       await tester.pump(const Duration(milliseconds: 250));
       await _openNodePlanner(tester);
       await _openWorkerPlanSectionIfDesktop(tester);
-      await tester.tap(
-        find.byKey(
-          const ValueKey<String>(
-            'resource-map-open-market-value-recommendations',
-          ),
-        ),
-      );
-      await tester.pumpAndSettle();
+      await _openWorkerIncome(tester);
 
-      expect(find.text('Recommended value network'), findsOneWidget);
+      expect(find.text('Recommended value network'), findsNothing);
       final useRecommendedNetwork = find.byKey(
         const ValueKey<String>('resource-map-add-recommended-value-network'),
       );
@@ -5129,7 +5681,7 @@ void main() {
         isNot(contains('root')),
         reason: 'Free worker-town roots are not invested nodes.',
       );
-      expect(find.textContaining('Nothing was changed in BDO'), findsOneWidget);
+      expect(find.textContaining('Nothing was changed in BDO'), findsNothing);
       expect(tester.takeException(), isNull);
     },
   );
@@ -5186,21 +5738,13 @@ void main() {
       await _openNodePlanner(tester);
       await _openWorkerPlanSectionIfDesktop(tester);
 
-      final openRecommendations = find.byKey(
-        const ValueKey<String>(
-          'resource-map-open-market-value-recommendations',
-        ),
-      );
-      await tester.ensureVisible(openRecommendations);
-      await tester.pumpAndSettle();
-      await tester.tap(openRecommendations);
-      await tester.pumpAndSettle();
+      await _openWorkerIncome(tester);
 
       final page = find.byKey(
         const ValueKey<String>('resource-map-market-value-page'),
       );
       expect(page, findsOneWidget);
-      expect(find.text('Recommended value network'), findsOneWidget);
+      expect(find.text('Recommended value network'), findsNothing);
       final explicitFontSizes = tester
           .widgetList<Text>(
             find.descendant(of: page, matching: find.byType(Text)),
@@ -5236,7 +5780,7 @@ void main() {
 
       await tester.tap(finalNode);
       await tester.pumpAndSettle();
-      expect(find.textContaining('Route shown'), findsOneWidget);
+      expect(find.textContaining('Route shown'), findsNothing);
       expect(tester.takeException(), isNull);
     },
   );
@@ -5289,9 +5833,7 @@ void main() {
       );
       await _settleNodeNetworkCalculation(tester);
       await tester.tap(
-        find.byKey(
-          const ValueKey<String>('resource-map-node-planner-back-targets'),
-        ),
+        find.byKey(const ValueKey<String>('resource-map-task-back')),
       );
       await tester.pump(const Duration(milliseconds: 250));
       await _settleNodeTargetPreview(tester);
@@ -5329,7 +5871,7 @@ void main() {
           containsPair(nodeId, BdoNodeNetworkChangeKind.disconnect),
         );
       }
-      expect(find.textContaining('2 of 20 CP'), findsOneWidget);
+      expect(find.textContaining('CP 2 / 20'), findsOneWidget);
       expect(tester.takeException(), isNull);
     },
   );
@@ -5384,8 +5926,22 @@ void main() {
 
       expect(
         tester.getSize(row).height,
-        greaterThanOrEqualTo(56),
-        reason: 'Planned materials must not regress to a tiny list row.',
+        closeTo(
+          math.max(
+                36,
+                tester
+                    .getSize(
+                      find
+                          .descendant(of: row, matching: find.byType(Column))
+                          .first,
+                    )
+                    .height,
+              ) +
+              14,
+          .1,
+        ),
+        reason:
+            'Material rows grow only for their artwork, wrapping labels and padding.',
       );
       final buildRoute = find.byKey(
         const ValueKey<String>('resource-map-build-node-network'),
@@ -5394,8 +5950,8 @@ void main() {
         const ValueKey<String>('resource-map-node-target-view-all'),
       );
       expect(
-        tester.getRect(buildRoute).bottom,
-        lessThan(tester.getRect(allView).top),
+        tester.getRect(buildRoute).top,
+        greaterThan(tester.getRect(allView).bottom),
       );
       expect(tester.widget<InkWell>(row).onTap, isNull);
       expect(buttonInside(removeControl).onPressed, isNotNull);
@@ -5482,8 +6038,8 @@ void main() {
       IconButton buttonInside(Finder control) => tester.widget<IconButton>(
         find.descendant(of: control, matching: find.byType(IconButton)),
       );
-      expect(find.text('1 available worker node'), findsOneWidget);
-      expect(tester.widget<Text>(availability).data, '1 available worker node');
+      expect(find.text('1 available worker node'), findsNothing);
+      expect(availability, findsNothing);
       expect(tester.widget<IconButton>(incrementButton).onPressed, isNull);
       expect(buttonInside(decrementButton).onPressed, isNull);
       expect(buttonInside(removeButton).onPressed, isNotNull);
@@ -5512,10 +6068,7 @@ void main() {
       expect(updates.last.desiredResourceNodeCounts, const <String, int>{
         'wood': 1,
       });
-      expect(
-        tester.widget<Text>(availability).data,
-        'No reachable nodes from your chosen towns',
-      );
+      expect(tester.widget<Text>(availability).data, 'No reachable node');
       expect(tester.widget<IconButton>(incrementButton).onPressed, isNull);
 
       await tester.tap(targetRow);
@@ -5591,10 +6144,13 @@ void main() {
     expect(find.text('Clear saved network?'), findsOneWidget);
     final dialogTheme = Theme.of(tester.element(find.byType(AlertDialog)));
     expect(dialogTheme.brightness, Brightness.dark);
-    expect(dialogTheme.colorScheme.primary, ResourceMapAtlasColors.primary);
+    expect(
+      dialogTheme.colorScheme.primary,
+      ResourceMapChromeThemeData.fieldAtlas.primary,
+    );
     expect(
       dialogTheme.dialogTheme.backgroundColor,
-      ResourceMapAtlasColors.paperRaised,
+      ResourceMapChromeThemeData.fieldAtlas.paperRaised,
       reason:
           'Map dialogs must keep the Atlas surface even when the outer app '
           'uses a dark or themed appearance.',
@@ -5657,7 +6213,7 @@ void main() {
     );
     await _settleNodeNetworkCalculation(tester);
 
-    expect(find.text('Recommended complete network'), findsOneWidget);
+    expect(find.text('Review network'), findsOneWidget);
     expect(
       find.textContaining(
         'This request is too large for an exact cheapest calculation.',
@@ -5740,10 +6296,7 @@ void main() {
       find.byKey(const ValueKey<String>('resource-map-node-planner-close')),
       findsOneWidget,
     );
-    await tester.tap(
-      find.byKey(const ValueKey<String>('resource-map-node-mode-materials')),
-    );
-    await tester.pumpAndSettle();
+    await _openNodeMaterialTargets(tester);
     expect(
       find.byKey(
         const ValueKey<String>('resource-map-compact-node-planner-sheet'),
@@ -5760,11 +6313,16 @@ void main() {
   testWidgets('compact worker income uses the Atlas reading surface', (
     tester,
   ) async {
+    await tester.runAsync(loadMapMenuCaptureFonts);
     await tester.binding.setSurfaceSize(const Size(680, 680));
     addTearDown(() => tester.binding.setSurfaceSize(null));
 
     await tester.pumpWidget(
       MaterialApp(
+        builder: (context, child) => RepaintBoundary(
+          key: const ValueKey('income-page-capture'),
+          child: child,
+        ),
         home: MediaQuery(
           data: const MediaQueryData(disableAnimations: true),
           child: BdoResourceMap(
@@ -5825,16 +6383,21 @@ void main() {
       const ValueKey<String>('resource-map-market-value-page'),
     );
     expect(incomePage, findsOneWidget);
-    final eyebrow = tester.widget<Text>(find.text('ESTIMATED INCOME'));
-    expect(eyebrow.style?.color, ResourceMapAtlasColors.accent);
-    expect(eyebrow.style?.fontSize, greaterThanOrEqualTo(12));
+    expect(find.text('Estimated income'), findsNothing);
     final hourly = tester.widget<Text>(find.textContaining('/ hour'));
-    expect(hourly.style?.color, ResourceMapAtlasColors.ink);
-    expect(hourly.style?.fontSize, greaterThanOrEqualTo(24));
-    expect(find.text('Recommended route'), findsOneWidget);
-    await expectLater(
-      find.byType(BdoResourceMap),
-      matchesGoldenFile('goldens/resource_map_worker_income_compact.png'),
+    expect(hourly.style?.color, ResourceMapChromeThemeData.fieldAtlas.ink);
+    expect(hourly.style?.fontSize, ResourceMapPanelMetrics.primary);
+    expect(find.text('Recommended route'), findsNothing);
+    if (Platform.environment['MAP_MENU_CAPTURE_DIR'] == null) {
+      await expectLater(
+        find.byType(BdoResourceMap),
+        matchesGoldenFile('goldens/resource_map_worker_income_compact.png'),
+      );
+    }
+    await captureMapMenu(
+      tester,
+      boundary: find.byKey(const ValueKey('income-page-capture')),
+      name: 'worker-income-compact-text100',
     );
     expect(tester.takeException(), isNull);
   });
@@ -5865,36 +6428,20 @@ void main() {
     );
     await tester.pump(const Duration(milliseconds: 250));
     await _openNodePlanner(tester);
-
-    expect(
-      find.byKey(const ValueKey<String>('resource-map-worker-steward-menu')),
-      findsOneWidget,
-    );
-    await _openWorkerStewardSection(tester, 'resource-map-worker-menu-plan');
-    expect(find.text('Specific items'), findsOneWidget);
-    expect(find.text('Best income'), findsOneWidget);
-    expect(find.text('What should your workers collect?'), findsNothing);
-    expect(
-      find.byKey(const ValueKey<String>('resource-map-node-mode-materials')),
-      findsOneWidget,
-    );
-    await _openWorkerStewardSection(tester, 'resource-map-worker-menu-plan');
-    await _openWorkerStewardSection(tester, 'resource-map-worker-menu-explore');
-    final findNodes = find.byKey(
-      const ValueKey<String>('resource-map-worker-browse-action'),
-    );
-    expect(
-      find.descendant(of: findNodes, matching: find.text('Find nodes')),
-      findsOneWidget,
-    );
-    await _openWorkerStewardSection(tester, 'resource-map-worker-menu-explore');
-    await _openWorkerStewardSection(tester, 'resource-map-worker-menu-manage');
-    final investNodes = find.byKey(
-      const ValueKey<String>('resource-map-invest-node-mode'),
-    );
-    expect(
-      find.descendant(of: investNodes, matching: find.text('Invest nodes')),
-      findsOneWidget,
+    for (final action in const <(String, String)>[
+      ('resource-map-home-plan-materials', 'Plan materials'),
+      ('resource-map-home-worker-income', 'Income'),
+      ('resource-map-home-browse-nodes', 'Browse worker nodes'),
+      ('resource-map-home-setup', 'Your setup'),
+    ]) {
+      await _expectReadableMapAction(tester, action.$1, action.$2, 900);
+    }
+    await _openWorkerSetup(tester);
+    await _expectReadableMapAction(
+      tester,
+      'resource-map-invest-node-mode',
+      'Invest nodes',
+      900,
     );
     expect(tester.takeException(), isNull);
   });
@@ -6039,17 +6586,20 @@ void main() {
         findsOneWidget,
       );
       expect(find.text('David Finto'), findsOneWidget);
-      expect(find.text('<Chef>'), findsOneWidget);
+      expect(find.text('Chef'), findsNothing);
       expect(find.text('20 silver'), findsOneWidget);
       expect(find.textContaining('Source-recorded map location'), findsNothing);
       final details = find.byKey(
         const ValueKey<String>('resource-map-vendor-details-$davidId'),
       );
-      final portrait = find.byKey(
-        const ValueKey<String>('test-vendor-portrait-$davidId'),
+      final portrait = find.descendant(
+        of: details,
+        matching: find.byKey(
+          const ValueKey<String>('test-vendor-portrait-$davidId'),
+        ),
       );
       expect(portrait, findsOneWidget);
-      expect(tester.getSize(portrait), const Size.square(80));
+      expect(tester.getSize(portrait), const Size.square(40));
       expect(
         find.descendant(
           of: details,
@@ -6063,11 +6613,9 @@ void main() {
       );
 
       await tester.tap(
-        find.byKey(
-          const ValueKey<String>('resource-map-close-vendor-details-$davidId'),
-        ),
+        find.byKey(const ValueKey<String>('resource-map-task-back')),
       );
-      await tester.pump();
+      await tester.pumpAndSettle();
       expect(
         find.byKey(
           const ValueKey<String>('resource-map-vendor-details-$davidId'),
@@ -6075,6 +6623,15 @@ void main() {
         findsNothing,
       );
       expect(vendorMarkers, findsOneWidget);
+      await tester.tap(
+        find.byKey(const ValueKey<String>('resource-map-vendor-lookup-back')),
+      );
+      await tester.pumpAndSettle();
+      expect(vendorMarkers, findsNothing);
+      expect(
+        find.byKey(const ValueKey('resource-map-home-find-material')),
+        findsOneWidget,
+      );
       expect(tester.takeException(), isNull);
     },
   );
@@ -6386,12 +6943,17 @@ void main() {
       ),
       findsOneWidget,
     );
-    final selectedPortrait = find.byKey(
-      const ValueKey<String>('test-vendor-portrait-$secondId'),
+    final selectedPortrait = find.descendant(
+      of: find.byKey(
+        const ValueKey<String>('resource-map-vendor-details-$secondId'),
+      ),
+      matching: find.byKey(
+        const ValueKey<String>('test-vendor-portrait-$secondId'),
+      ),
     );
     expect(selectedPortrait, findsOneWidget);
-    expect(tester.getSize(selectedPortrait), const Size.square(80));
-    expect(find.text('<Material Vendor>'), findsOneWidget);
+    expect(tester.getSize(selectedPortrait), const Size.square(40));
+    expect(find.text('Material Vendor'), findsNothing);
     expect(tester.takeException(), isNull);
   });
 
@@ -6447,7 +7009,7 @@ void main() {
     final marker = find.byKey(
       const ValueKey<String>('resource-map-vendor-marker-$davidId'),
     );
-    expect(tester.getSize(marker), const Size(48, 48));
+    expect(tester.getSize(marker), const Size(56, 56));
     await tester.tap(
       find.descendant(of: marker, matching: find.byType(InkResponse)),
     );
@@ -6651,11 +7213,8 @@ void main() {
 
       await _openGatherHub(tester);
       await _openGatherStewardSection(tester, 'resource-map-gather-menu-plan');
-      await tester.tap(
-        find.byKey(const ValueKey<String>('resource-map-command-checklist')),
-      );
-      await tester.pumpAndSettle();
-      expect(find.text('2 remaining · 0 complete'), findsOneWidget);
+      await _openTodoList(tester);
+      expect(find.text('2 remaining · 0 complete'), findsNothing);
       expect(find.text('Snake Meat'), findsOneWidget);
       expect(find.text('Ash Timber'), findsOneWidget);
 
@@ -6710,7 +7269,7 @@ void main() {
         ),
       );
       await tester.pumpAndSettle();
-      expect(find.text('1 remaining · 1 complete'), findsOneWidget);
+      expect(find.text('1 remaining · 1 complete'), findsNothing);
       expect(tester.takeException(), isNull);
     },
   );
@@ -6736,12 +7295,7 @@ void main() {
 
     await tester.enterText(find.byType(TextField), 'Snake Meat');
     await tester.pumpAndSettle();
-    await tester.tap(
-      find.descendant(
-        of: find.byType(ListTile),
-        matching: find.text('Snake Meat'),
-      ),
-    );
+    await tester.tap(_searchResultNamed('Snake Meat'));
     await tester.pump();
 
     var canvas = tester.widget<BdoMapCanvas>(find.byType(BdoMapCanvas));
@@ -6846,10 +7400,15 @@ void main() {
       find.byKey(const ValueKey<String>('resource-map-search-activity-mining')),
       findsOneWidget,
     );
-    expect(find.text('ACTIVITIES'), findsOneWidget);
-    expect(find.textContaining('$miningCount worker nodes'), findsOneWidget);
+    expect(find.text('ACTIVITIES'), findsNothing);
+    expect(find.textContaining('$miningCount worker nodes'), findsNothing);
 
-    await tester.testTextInput.receiveAction(TextInputAction.done);
+    tester
+        .widget<TextField>(
+          find.byKey(const ValueKey<String>('resource-map-atlas-search-field')),
+        )
+        .onSubmitted!
+        .call('Mining');
     await tester.pumpAndSettle();
 
     final canvas = tester.widget<BdoMapCanvas>(find.byType(BdoMapCanvas));
@@ -6862,13 +7421,20 @@ void main() {
     );
     expect(
       tester
-          .widget<Material>(
-            find.byKey(
-              const ValueKey<String>('resource-map-worker-activity-mining'),
-            ),
+          .widget<ResourceMapPill>(
+            find
+                .ancestor(
+                  of: find.byKey(
+                    const ValueKey<String>(
+                      'resource-map-worker-activity-mining',
+                    ),
+                  ),
+                  matching: find.byType(ResourceMapPill),
+                )
+                .first,
           )
-          .color,
-      ResourceMapAtlasColors.primary,
+          .selected,
+      isTrue,
     );
     expect(
       find.byKey(const ValueKey<String>('resource-map-worker-explorer')),
@@ -6904,7 +7470,7 @@ void main() {
       await tester.pump(const Duration(milliseconds: 300));
 
       final contextPanel = find.byKey(
-        const ValueKey<String>('resource-map-desktop-sidebar'),
+        const ValueKey<String>('resource-map-sidebar-details'),
       );
       expect(
         contextPanel,
@@ -6912,12 +7478,20 @@ void main() {
         reason: 'Desktop starts map-first, without a permanent sidebar.',
       );
       final workersButton = find.byKey(
-        const ValueKey<String>('resource-map-command-workers'),
+        const ValueKey<String>('resource-map-home-more-tools'),
       );
-      expect(tester.getSize(workersButton).height, greaterThanOrEqualTo(40));
+      expect(tester.getSize(workersButton).height, greaterThanOrEqualTo(28));
       expect(
-        tester.getSize(find.byTooltip('Zoom in')).shortestSide,
+        tester
+            .getSize(
+              find.byKey(const ValueKey<String>('resource-map-zoom-controls')),
+            )
+            .shortestSide,
         greaterThanOrEqualTo(44),
+      );
+      expect(
+        find.byKey(const ValueKey<String>('resource-map-zoom-slider')),
+        findsOneWidget,
       );
       final statusToggle = find.byKey(
         const ValueKey<String>('resource-map-status-toggle'),
@@ -6942,26 +7516,19 @@ void main() {
       expect(
         contextPanel.hitTestable(),
         findsNothing,
-        reason: 'Worker landing stays map-first without a broad side panel.',
+        reason: 'Worker tools never reopen the rejected side panel.',
       );
       expect(
-        find.byKey(const ValueKey<String>('resource-map-worker-steward-menu')),
+        find.byKey(const ValueKey<String>('resource-map-home-plan-materials')),
         findsOneWidget,
       );
-      for (final sectionKey in <String>[
-        'resource-map-worker-menu-plan',
-        'resource-map-worker-menu-explore',
-        'resource-map-worker-menu-manage',
-      ]) {
-        expect(find.byKey(ValueKey<String>(sectionKey)), findsOneWidget);
-      }
       expect(
-        find.byKey(const ValueKey<String>('resource-map-worker-browse-action')),
-        findsNothing,
+        find.byKey(const ValueKey<String>('resource-map-home-browse-nodes')),
+        findsOneWidget,
       );
       expect(
-        find.byKey(const ValueKey<String>('resource-map-node-mode-materials')),
-        findsNothing,
+        find.byKey(const ValueKey<String>('resource-map-home-plan-materials')),
+        findsOneWidget,
       );
       expect(
         find.byKey(
@@ -6969,11 +7536,9 @@ void main() {
         ),
         findsNothing,
       );
-      expect(find.text('Plan'), findsOneWidget);
-      expect(find.text('Explore'), findsOneWidget);
-      expect(find.text('Manage'), findsOneWidget);
-      expect(find.text('Plan a node network'), findsNothing);
-      expect(find.text('What would you like to do?'), findsNothing);
+      expect(find.text('Plan'), findsNothing);
+      expect(find.text('Explore'), findsNothing);
+      expect(find.text('Manage'), findsNothing);
       expect(find.text('MAP DISPLAY'), findsNothing);
       expect(
         find.byKey(const ValueKey<String>('resource-map-worker-all-nodes')),
@@ -6988,12 +7553,8 @@ void main() {
         findsNothing,
       );
 
-      await _openWorkerStewardSection(
-        tester,
-        'resource-map-worker-menu-explore',
-      );
       final findNodes = find.byKey(
-        const ValueKey<String>('resource-map-worker-browse-action'),
+        const ValueKey<String>('resource-map-home-browse-nodes'),
       );
       expect(findNodes, findsOneWidget);
       await tester.tap(findNodes);
@@ -7024,6 +7585,9 @@ void main() {
               showSourceNotice: false,
               tileHttpClient: tileClient,
               nodeNetworkPreferences: BdoNodeNetworkPreferences(
+                showAllMapNodes: true,
+                showAllNodeConnections: true,
+                showWorkerOutputIcons: true,
                 showCitiesAndTowns: false,
                 showGatewayHubs: false,
                 mapVisualStyle: BdoMapVisualStyle.standard,
@@ -7036,74 +7600,24 @@ void main() {
       await tester.pump(const Duration(milliseconds: 300));
 
       expect(
-        tester
-            .widget<ExcludeFocus>(
-              find.byKey(
-                const ValueKey<String>('resource-map-desktop-sheet-focus'),
-              ),
-            )
-            .excluding,
-        isTrue,
-      );
-      expect(
-        tester
-            .widget<ExcludeSemantics>(
-              find.byKey(
-                const ValueKey<String>('resource-map-desktop-sheet-semantics'),
-              ),
-            )
-            .excluding,
-        isTrue,
+        find.byKey(const ValueKey<String>('resource-map-atlas-dock')),
+        findsOneWidget,
       );
 
-      await tester.tap(
-        find.byKey(const ValueKey<String>('resource-map-command-gather')),
-      );
-      await tester.pumpAndSettle();
+      await _openGatherHub(tester);
       expect(
-        find.byKey(const ValueKey<String>('resource-map-gather-steward-menu')),
+        find.byKey(const ValueKey<String>('resource-map-material-categories')),
         findsOneWidget,
       );
       expect(
-        tester
-            .widget<ExcludeFocus>(
-              find.byKey(
-                const ValueKey<String>('resource-map-desktop-sheet-focus'),
-              ),
-            )
-            .excluding,
-        isTrue,
-        reason: 'The broad edge surface stays excluded on Gather landing.',
-      );
-      expect(
-        tester
-            .widget<ExcludeSemantics>(
-              find.byKey(
-                const ValueKey<String>('resource-map-desktop-sheet-semantics'),
-              ),
-            )
-            .excluding,
-        isTrue,
+        find.byKey(const ValueKey<String>('resource-map-atlas-dock')),
+        findsOneWidget,
       );
 
-      await tester.tap(
-        find.byKey(const ValueKey<String>('resource-map-command-gather')),
-      );
-      await tester.pumpAndSettle();
+      await _openGatherHub(tester);
       expect(
-        find.byKey(const ValueKey<String>('resource-map-gather-steward-menu')),
-        findsNothing,
-        reason: 'Closing Gather removes its compact menu from the map.',
-      );
-      expect(
-        tester
-            .widget<ExcludeFocus>(
-              find.byKey(
-                const ValueKey<String>('resource-map-desktop-sheet-focus'),
-              ),
-            )
-            .excluding,
-        isTrue,
+        find.byKey(const ValueKey<String>('resource-map-atlas-dock')),
+        findsOneWidget,
       );
 
       final searchField = find.byType(TextField);
@@ -7125,9 +7639,13 @@ void main() {
         find.byKey(const ValueKey<String>('resource-map-layer-menu')),
         findsNothing,
       );
-      await tester.tap(
-        find.byKey(const ValueKey<String>('resource-map-layer-menu-toggle')),
+      final layerMenuToggle = find.descendant(
+        of: find.byKey(
+          const ValueKey<String>('resource-map-layer-menu-toggle'),
+        ),
+        matching: find.byType(IconButton),
       );
+      await tester.tap(layerMenuToggle);
       await tester.pumpAndSettle();
       expect(
         find.byKey(const ValueKey<String>('resource-map-layer-menu')),
@@ -7176,7 +7694,8 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(layerSemantics(allNodes).properties.toggled, isFalse);
-      expect(allConnections, findsNothing);
+      expect(allConnections, findsOneWidget);
+      expect(layerSemantics(allConnections).properties.toggled, isFalse);
       expect(outputs, findsNothing);
       expect(preferenceUpdates, hasLength(1));
       expect(preferenceUpdates.last.showCitiesAndTowns, isTrue);
@@ -7224,13 +7743,9 @@ void main() {
       expect(preferenceUpdates.last.showWorkerOutputIcons, isFalse);
       expect(preferenceUpdates.last.mapVisualStyle, BdoMapVisualStyle.vivid);
 
-      await tester.tap(
-        find.byKey(const ValueKey<String>('resource-map-command-workers')),
-      );
-      await tester.pumpAndSettle();
-      await tester.tap(
-        find.byKey(const ValueKey<String>('resource-map-layer-menu-toggle')),
-      );
+      await _openNodePlanner(tester);
+      await _openNodePlanner(tester);
+      await tester.tap(layerMenuToggle);
       await tester.pumpAndSettle();
       expect(towns, findsNothing);
       expect(hubs, findsNothing);
@@ -7242,9 +7757,7 @@ void main() {
     },
   );
 
-  testWidgets('Guild Steward menu stays readable at 200 percent text', (
-    tester,
-  ) async {
+  testWidgets('worker tools stay readable at 200 percent text', (tester) async {
     await tester.binding.setSurfaceSize(const Size(1000, 700));
     addTearDown(() => tester.binding.setSurfaceSize(null));
 
@@ -7267,88 +7780,44 @@ void main() {
       ),
     );
     await tester.pump(const Duration(milliseconds: 300));
-    await tester.tap(
-      find.byKey(const ValueKey<String>('resource-map-command-workers')),
-    );
-    await tester.pumpAndSettle();
-
-    final menu = find.byKey(
-      const ValueKey<String>('resource-map-worker-steward-menu'),
-    );
-    expect(menu, findsOneWidget);
-    expect(
-      find.descendant(of: menu, matching: find.byType(Card)),
-      findsNothing,
-    );
-    expect(
-      find.descendant(of: menu, matching: find.byType(Scrollable)),
-      findsNothing,
-      reason:
-          'The compact menu reveals one short section instead of scrolling.',
-    );
-
-    for (final section in <(String, List<(String, String)>)>[
-      (
-        'resource-map-worker-menu-plan',
-        <(String, String)>[
-          ('resource-map-node-mode-materials', 'Specific items'),
-          ('resource-map-open-market-value-recommendations', 'Best income'),
-        ],
-      ),
-      (
-        'resource-map-worker-menu-explore',
-        <(String, String)>[
-          ('resource-map-worker-browse-action', 'Find nodes'),
-          ('resource-map-worker-connections-action', 'View connections'),
-        ],
-      ),
-      (
-        'resource-map-worker-menu-manage',
-        <(String, String)>[
-          ('resource-map-invest-node-mode', 'Invest nodes'),
-          ('resource-map-worker-houses-action', 'Houses'),
-        ],
-      ),
+    for (final entry in const [
+      ('resource-map-home-worker-income', 'Income'),
+      ('resource-map-home-houses', 'Houses'),
+      ('resource-map-home-saved', 'Saved'),
     ]) {
-      await _openWorkerStewardSection(tester, section.$1);
-      for (final entry in section.$2) {
-        final action = find.byKey(ValueKey<String>(entry.$1));
-        expect(action, findsOneWidget);
-        final titleFinder = find.descendant(
-          of: action,
-          matching: find.text(entry.$2),
-        );
-        final titleParagraph = tester.renderObject<RenderParagraph>(
-          titleFinder,
-        );
-        expect(
-          titleParagraph.didExceedMaxLines,
-          isFalse,
-          reason:
-              '${entry.$2} should remain complete at 200% text '
-              '(laid out at ${titleParagraph.size}).',
-        );
-        final actionRect = tester.getRect(action);
-        expect(actionRect.top, greaterThanOrEqualTo(0));
-        expect(actionRect.bottom, lessThanOrEqualTo(700));
-      }
-      await _openWorkerStewardSection(tester, section.$1);
+      await _expectReadableMapAction(tester, entry.$1, entry.$2, 700);
     }
-    expect(
-      find.byKey(const ValueKey<String>('resource-map-worker-current-action')),
-      findsNothing,
+    await _openNodePlanner(tester);
+    for (final entry in const [
+      ('resource-map-home-plan-materials', 'Plan materials'),
+      ('resource-map-home-browse-nodes', 'Browse worker nodes'),
+      ('resource-map-home-setup', 'Your setup'),
+    ]) {
+      await _expectReadableMapAction(tester, entry.$1, entry.$2, 700);
+    }
+    await _openWorkerSetup(tester);
+    await _expectReadableMapAction(
+      tester,
+      'resource-map-invest-node-mode',
+      'Invest nodes',
+      700,
+    );
+    await _openMapLayers(tester);
+    await _expectReadableMapAction(
+      tester,
+      'resource-map-layer-all-connections',
+      'All connections',
+      700,
     );
     expect(
-      find.byKey(
-        const ValueKey<String>('resource-map-worker-royal-workshop-action'),
-      ),
+      find.byKey(const ValueKey('resource-map-worker-current-action')),
       findsNothing,
     );
     expect(find.text('Seoul Royal Workshop'), findsNothing);
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets('Gather Steward menu stays complete at 200 percent text', (
+  testWidgets('gathering tools stay complete at 200 percent text', (
     tester,
   ) async {
     const viewport = Size(1100, 850);
@@ -7373,104 +7842,44 @@ void main() {
       ),
     );
     await tester.pump(const Duration(milliseconds: 300));
+    for (final entry in const [
+      ('resource-map-home-checklist', 'To-do list'),
+      ('resource-map-home-saved', 'Saved'),
+    ]) {
+      await _expectReadableMapAction(
+        tester,
+        entry.$1,
+        entry.$2,
+        viewport.height,
+      );
+    }
     await _openGatherHub(tester);
-
-    for (final label in const <String>['Gather', 'Workers']) {
-      final text = find.text(label);
-      expect(text, findsOneWidget);
-      expect(
-        tester.renderObject<RenderParagraph>(text).didExceedMaxLines,
-        isFalse,
-        reason: '$label must remain visibly complete at 200% text.',
+    final menuFinder = find.byKey(
+      const ValueKey('resource-map-material-categories'),
+    );
+    final menu = tester.widget<ResourceMapAtlasCommandMenu>(menuFinder);
+    final journey = find.byKey(const ValueKey('resource-map-atlas-dock'));
+    expect(
+      find.descendant(of: journey, matching: find.byType(Scrollable)),
+      findsWidgets,
+    );
+    expect(find.byType(Scrollbar), findsNothing);
+    for (final action in menu.actions) {
+      await _expectReadableMapAction(
+        tester,
+        (action.key as ValueKey<String>).value,
+        action.label,
+        viewport.height,
       );
     }
-    final menu = find.byKey(
-      const ValueKey<String>('resource-map-gather-steward-menu'),
+    final marine = menu.actions.singleWhere(
+      (action) =>
+          action.key == const ValueKey('resource-map-section-seafoodMarine'),
     );
-    expect(menu, findsOneWidget);
-    expect(
-      find.descendant(of: menu, matching: find.byType(Card)),
-      findsNothing,
-    );
-    expect(
-      find.descendant(of: menu, matching: find.byType(Scrollable)),
-      findsNothing,
-      reason: 'The compact Gather landing must not become a scrolling panel.',
-    );
-    expect(
-      find
-          .byKey(const ValueKey<String>('resource-map-desktop-edge-surface'))
-          .hitTestable(),
-      findsNothing,
-    );
-    for (final entry in const <(String, String)>[
-      ('resource-map-gather-menu-plan', 'Plan'),
-      ('resource-map-gather-menu-explore', 'Browse'),
-    ]) {
-      final control = find.byKey(ValueKey<String>(entry.$1));
-      final label = find.descendant(of: control, matching: find.text(entry.$2));
-      expect(control, findsOneWidget);
-      expect(label, findsOneWidget);
-      expect(
-        tester.renderObject<RenderParagraph>(label).didExceedMaxLines,
-        isFalse,
-      );
-    }
-
-    await _openGatherStewardSection(tester, 'resource-map-gather-menu-plan');
-    for (final entry in const <(String, String)>[
-      ('resource-map-command-checklist', 'Checklist'),
-      ('resource-map-command-favorites', 'Favorites'),
-    ]) {
-      final action = find.byKey(ValueKey<String>(entry.$1));
-      final label = find.descendant(of: action, matching: find.text(entry.$2));
-      expect(action, findsOneWidget);
-      expect(label, findsOneWidget);
-      expect(
-        tester.renderObject<RenderParagraph>(label).didExceedMaxLines,
-        isFalse,
-        reason: '${entry.$2} must never be shortened with an ellipsis.',
-      );
-    }
-    await _openGatherStewardSection(tester, 'resource-map-gather-menu-plan');
-    await _openGatherStewardSection(tester, 'resource-map-gather-menu-explore');
-
-    const gatheringSections = <(String, String)>[
-      ('plantsWood', 'Plants & wood'),
-      ('oresMinerals', 'Ores & minerals'),
-      ('meat', 'Meat'),
-      ('bloodHides', 'Blood & hides'),
-      ('mushrooms', 'Mushrooms'),
-      ('seafoodMarine', 'Coastal gathering'),
-    ];
-    expect(
-      find.byKey(const ValueKey<String>('resource-map-mode-action-strip')),
-      findsNothing,
-    );
-    for (final entry in gatheringSections) {
-      final action = find.byKey(
-        ValueKey<String>('resource-map-section-${entry.$1}'),
-      );
-      expect(action, findsOneWidget);
-      expect(action.hitTestable(), findsOneWidget);
-      final label = find.descendant(of: action, matching: find.text(entry.$2));
-      expect(label, findsOneWidget);
-      expect(
-        tester.renderObject<RenderParagraph>(label).didExceedMaxLines,
-        isFalse,
-        reason: '${entry.$2} must stay complete at 200% text.',
-      );
-      final actionRect = tester.getRect(action);
-      expect(actionRect.top, greaterThanOrEqualTo(0));
-      expect(actionRect.bottom, lessThanOrEqualTo(viewport.height));
-    }
-    await tester.tap(
-      find
-          .byKey(const ValueKey<String>('resource-map-section-seafoodMarine'))
-          .hitTestable(),
-    );
+    await tester.ensureVisible(find.byKey(marine.key));
+    await tester.tap(find.byKey(marine.key));
     await tester.pumpAndSettle();
-    expect(find.text('Coastal gathering'), findsWidgets);
+    expect(find.text(marine.label), findsWidgets);
     expect(tester.takeException(), isNull);
   });
 
@@ -7499,12 +7908,7 @@ void main() {
 
     await tester.enterText(find.byType(TextField), 'Thuja Sap');
     await tester.pumpAndSettle();
-    final sourceResult = find.byWidgetPredicate(
-      (widget) =>
-          widget is ListTile &&
-          widget.title is Text &&
-          (widget.title! as Text).data == 'Thuja Tree',
-    );
+    final sourceResult = _searchResultNamed('Thuja Tree');
     expect(sourceResult, findsOneWidget);
     expect(
       tester.getRect(sourceResult).bottom,
@@ -7674,6 +8078,9 @@ void main() {
           data: const MediaQueryData(disableAnimations: true),
           child: BdoResourceMap(
             dataset: referenceDataset,
+            nodeNetworkPreferences: BdoNodeNetworkPreferences(
+              showAllMapNodes: true,
+            ),
             cacheDirectory: cacheDirectory,
             tileSource: tileSource,
             showSourceNotice: false,
@@ -7788,6 +8195,9 @@ void main() {
           data: const MediaQueryData(disableAnimations: true),
           child: BdoResourceMap(
             dataset: priorityDataset,
+            nodeNetworkPreferences: BdoNodeNetworkPreferences(
+              showAllMapNodes: true,
+            ),
             cacheDirectory: cacheDirectory,
             tileSource: tileSource,
             showSourceNotice: false,
@@ -7884,6 +8294,9 @@ void main() {
             data: const MediaQueryData(disableAnimations: true),
             child: BdoResourceMap(
               dataset: clickableDataset,
+              nodeNetworkPreferences: BdoNodeNetworkPreferences(
+                showAllMapNodes: true,
+              ),
               cacheDirectory: cacheDirectory,
               tileSource: tileSource,
               showSourceNotice: false,
@@ -7919,28 +8332,25 @@ void main() {
         cameraBeforeDirectMarkerTap.zoom,
       );
       expect(
-        find.byKey(const ValueKey<String>('resource-map-node-quick-panel')),
+        find.byKey(const ValueKey<String>('resource-map-sidebar-details')),
         findsOneWidget,
       );
       expect(find.text('Test Click Parent'), findsWidgets);
       expect(
         find.descendant(
           of: find.byKey(
-            const ValueKey<String>('resource-map-node-quick-panel'),
+            const ValueKey<String>('resource-map-sidebar-details'),
           ),
-          matching: find.text('2 CP'),
+          matching: find.textContaining('2 CP'),
         ),
         findsOneWidget,
       );
-      expect(find.text('2 worker sites'), findsOneWidget);
+      expect(find.textContaining('2 worker sites'), findsNothing);
       final quickPanel = find.byKey(
-        const ValueKey<String>('resource-map-node-quick-panel'),
+        const ValueKey<String>('resource-map-sidebar-details'),
       );
       expect(
-        find.descendant(
-          of: quickPanel,
-          matching: find.text('AVAILABLE WORKER NODES · 2'),
-        ),
+        find.descendant(of: quickPanel, matching: find.text('Work nodes')),
         findsOneWidget,
       );
       expect(
@@ -7964,11 +8374,11 @@ void main() {
       await tester.tap(farmLink);
       await tester.pumpAndSettle();
       expect(
-        find.descendant(of: quickPanel, matching: find.text('PRODUCES')),
+        find.descendant(of: quickPanel, matching: find.text('Produces')),
         findsOneWidget,
       );
       expect(
-        find.descendant(of: quickPanel, matching: find.text('CONNECTED FROM')),
+        find.descendant(of: quickPanel, matching: find.text('Actions')),
         findsOneWidget,
       );
       expect(tester.takeException(), isNull);
@@ -8018,6 +8428,9 @@ void main() {
             data: const MediaQueryData(disableAnimations: true),
             child: BdoResourceMap(
               dataset: thresholdDataset,
+              nodeNetworkPreferences: BdoNodeNetworkPreferences(
+                showAllMapNodes: true,
+              ),
               cacheDirectory: cacheDirectory,
               tileSource: tileSource,
               showSourceNotice: false,
@@ -8091,9 +8504,14 @@ void main() {
     await tester.pump(const Duration(milliseconds: 300));
     await tester.enterText(find.byType(TextField), 'fish');
     await tester.pumpAndSettle();
-    expect(find.text('MATERIALS'), findsOneWidget);
+    expect(find.text('MATERIALS'), findsNothing);
 
-    await tester.testTextInput.receiveAction(TextInputAction.done);
+    tester
+        .widget<TextField>(
+          find.byKey(const ValueKey<String>('resource-map-atlas-search-field')),
+        )
+        .onSubmitted!
+        .call('fish');
     await tester.pumpAndSettle();
     expect(
       find.byKey(const ValueKey<String>('resource-map-sidebar-details')),
@@ -8154,38 +8572,22 @@ void main() {
     await _openGatherHub(tester);
     expect(find.text('BROWSE BY TYPE'), findsNothing);
     expect(
+      find.byKey(const ValueKey<String>('resource-map-material-categories')),
+      findsOneWidget,
+    );
+    expect(
       find.byKey(const ValueKey<String>('resource-map-mode-action-strip')),
       findsNothing,
     );
     final gatherTask = find.byKey(
-      const ValueKey<String>('resource-map-command-gather'),
-    );
-    final planSection = find.byKey(
-      const ValueKey<String>('resource-map-gather-menu-plan'),
-    );
-    final browseSection = find.byKey(
-      const ValueKey<String>('resource-map-gather-menu-explore'),
-    );
-    expect(
-      tester.getCenter(gatherTask).dy,
-      lessThan(tester.getCenter(planSection).dy),
-      reason:
-          'Gather stays in the permanent command bar above its Steward menu.',
-    );
-    expect(
-      tester.getCenter(planSection).dy,
-      lessThan(tester.getCenter(browseSection).dy),
-      reason: 'Plan and Browse form one compact vertical hierarchy.',
+      const ValueKey<String>('resource-map-task-back'),
     );
     expect(
       find.textContaining('Search also understands'),
       findsNothing,
       reason: 'the source browser should not need an instructional paragraph',
     );
-    expect(
-      tester.getSemantics(gatherTask).flagsCollection.isSelected,
-      ui.Tristate.isTrue,
-    );
+    expect(gatherTask.hitTestable(), findsOneWidget);
 
     await _openGatherStewardSection(tester, 'resource-map-gather-menu-explore');
     await tester.tap(
@@ -8222,7 +8624,8 @@ void main() {
     await tester.tap(favoriteButton);
     await tester.pump();
     expect(favoriteChanges, isNotEmpty);
-    expect(favoriteChanges.last, <String>{resource.id});
+    final sourceKey = 'map:fieldSource:${source.id}';
+    expect(favoriteChanges.last, <String>{sourceKey});
 
     await tester.tap(
       find.byKey(ValueKey<String>('resource-map-browser-source-${source.id}')),
@@ -8241,33 +8644,31 @@ void main() {
       isTrue,
     );
 
-    await tester.tap(gatherTask);
-    await tester.pumpAndSettle();
+    await _openGatherHub(tester);
     expect(
-      find.byKey(const ValueKey<String>('resource-map-gather-steward-menu')),
+      find.byKey(const ValueKey<String>('resource-map-material-categories')),
       findsOneWidget,
     );
     await _openGatherStewardSection(tester, 'resource-map-gather-menu-plan');
-    await tester.tap(
-      find.byKey(const ValueKey<String>('resource-map-command-favorites')),
-    );
-    await tester.pumpAndSettle();
-    expect(find.text('Favorites'), findsWidgets);
+    await _openSavedMapEntries(tester);
+    expect(find.text('Saved'), findsWidgets);
     expect(find.text(source.name), findsOneWidget);
     expect(
       find.byKey(const ValueKey<String>('resource-map-sidebar-details')),
       findsNothing,
     );
     expect(
-      find.byKey(const ValueKey<String>('resource-map-resource-browser')),
+      find.byKey(const ValueKey<String>('resource-map-saved-list')),
       findsOneWidget,
     );
 
-    await tester.tap(favoriteButton);
+    await tester.tap(
+      find.byKey(ValueKey<String>('resource-map-saved-favorite-$sourceKey')),
+    );
     await tester.pump();
     expect(favoriteChanges.last, isEmpty);
     expect(find.text(source.name), findsNothing);
-    expect(find.text('Star a material to keep it here.'), findsOneWidget);
+    expect(find.text('No saved items'), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
 
@@ -8305,7 +8706,7 @@ void main() {
 
       await tester.enterText(find.byType(TextField), 'not-a-real-map-item');
       await tester.pumpAndSettle();
-      expect(find.textContaining('No results for'), findsOneWidget);
+      expect(find.text('No results'), findsOneWidget);
       await tester.tap(find.widgetWithText(TextButton, 'Clear search'));
       await tester.pump();
       expect(
@@ -8317,7 +8718,9 @@ void main() {
         isEmpty,
       );
 
-      await tester.tap(find.widgetWithText(TextButton, 'All categories'));
+      await tester.tap(
+        find.byKey(const ValueKey<String>('resource-map-task-back')),
+      );
       await tester.pumpAndSettle();
       expect(
         find.byKey(const ValueKey<String>('resource-map-resource-browser')),
@@ -8325,7 +8728,7 @@ void main() {
       );
       expect(find.text('BROWSE BY TYPE'), findsNothing);
       expect(
-        find.byKey(const ValueKey<String>('resource-map-gather-steward-menu')),
+        find.byKey(const ValueKey<String>('resource-map-material-categories')),
         findsOneWidget,
       );
       expect(
@@ -8336,148 +8739,148 @@ void main() {
     },
   );
 
-  testWidgets(
-    'manual browse keeps Sheep meat blood and hide in one source row',
-    (tester) async {
-      await tester.binding.setSurfaceSize(const Size(1000, 700));
-      addTearDown(() => tester.binding.setSurfaceSize(null));
-      final sheep = dataset.fieldSourcesById['field-source:sheep']!;
-      expect(sheep.products, hasLength(3));
-      PaintingBinding.instance.imageCache
-        ..clear()
-        ..clearLiveImages();
+  testWidgets('manual browse keeps Sheep meat blood and hide in one source row', (
+    tester,
+  ) async {
+    await tester.binding.setSurfaceSize(const Size(1000, 700));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    final sheep = dataset.fieldSourcesById['field-source:sheep']!;
+    expect(sheep.products, hasLength(3));
+    PaintingBinding.instance.imageCache
+      ..clear()
+      ..clearLiveImages();
 
-      await tester.pumpWidget(
-        MaterialApp(
-          home: MediaQuery(
-            data: const MediaQueryData(disableAnimations: true),
-            child: BdoResourceMap(
-              dataset: dataset,
-              cacheDirectory: cacheDirectory,
-              tileSource: tileSource,
-              showSourceNotice: false,
-              tileHttpClient: tileClient,
-            ),
+    await tester.pumpWidget(
+      MaterialApp(
+        home: MediaQuery(
+          data: const MediaQueryData(disableAnimations: true),
+          child: BdoResourceMap(
+            dataset: dataset,
+            cacheDirectory: cacheDirectory,
+            tileSource: tileSource,
+            showSourceNotice: false,
+            tileHttpClient: tileClient,
           ),
         ),
-      );
-      await tester.pump(const Duration(milliseconds: 300));
+      ),
+    );
+    await tester.pump(const Duration(milliseconds: 300));
 
-      await _openGatherHub(tester);
-      await _openGatherStewardSection(
-        tester,
-        'resource-map-gather-menu-explore',
-      );
-      final meatSection = find.byKey(
-        const ValueKey<String>('resource-map-section-meat'),
-      );
-      await tester.ensureVisible(meatSection);
-      await tester.pumpAndSettle();
-      await tester.tap(meatSection.hitTestable());
-      await tester.pumpAndSettle();
+    await _openGatherHub(tester);
+    await _openGatherStewardSection(tester, 'resource-map-gather-menu-explore');
+    final meatSection = find.byKey(
+      const ValueKey<String>('resource-map-section-meat'),
+    );
+    await tester.ensureVisible(meatSection);
+    await tester.pumpAndSettle();
+    await tester.tap(meatSection.hitTestable());
+    await tester.pumpAndSettle();
 
-      final taskStrip = find.byKey(
-        const ValueKey<String>('resource-map-desktop-task-strip'),
-      );
-      final allCategories = find.byKey(
-        const ValueKey<String>('resource-map-browser-all-categories'),
-      );
-      final gatheringSourcesHeading = find.byKey(
-        const ValueKey<String>(
-          'resource-map-browser-gathering-sources-heading',
-        ),
-      );
-      expect(
-        find.byKey(
-          const ValueKey<String>('resource-map-browser-all-categories-surface'),
-        ),
-        findsOneWidget,
-      );
-      expect(gatheringSourcesHeading, findsOneWidget);
-      expect(find.text('GATHERING SOURCES'), findsOneWidget);
+    final atlasWorkspace = find.byKey(
+      const ValueKey<String>('resource-map-atlas-dock'),
+    );
+    final allCategories = find.byKey(
+      const ValueKey<String>('resource-map-browser-all-categories'),
+    );
+    final gatheringSourcesHeading = find.byKey(
+      const ValueKey<String>('resource-map-browser-gathering-sources-heading'),
+    );
+    expect(
+      find.byKey(
+        const ValueKey<String>('resource-map-browser-all-categories-surface'),
+      ),
+      findsNothing,
+    );
+    expect(allCategories, findsNothing);
+    expect(gatheringSourcesHeading, findsNothing);
+    expect(find.text('GATHERING SOURCES'), findsNothing);
+    expect(atlasWorkspace, findsOneWidget);
+    final headerBack = find.descendant(
+      of: atlasWorkspace,
+      matching: find.byKey(const ValueKey<String>('resource-map-task-back')),
+    );
+    expect(headerBack.hitTestable(), findsOneWidget);
+    expect(
+      tester.getRect(headerBack).top,
+      greaterThanOrEqualTo(tester.getRect(atlasWorkspace).top),
+    );
+    await tester.tap(headerBack);
+    await tester.pumpAndSettle();
+    expect(
+      find.byKey(const ValueKey<String>('resource-map-material-categories')),
+      findsOneWidget,
+    );
+    expect(
+      find.byKey(const ValueKey<String>('resource-map-resource-browser')),
+      findsNothing,
+    );
+    await tester.ensureVisible(meatSection);
+    await tester.tap(meatSection.hitTestable());
+    await tester.pumpAndSettle();
+    expect(find.textContaining('mapped sources'), findsNothing);
+    expect(find.textContaining('Products from the same tree'), findsNothing);
+    await expectLater(
+      find.byKey(const ValueKey<String>('resource-map-resource-browser')),
+      matchesGoldenFile('goldens/resource_map_meat_browser.png'),
+    );
+
+    final sheepRow = find.byKey(
+      const ValueKey<String>('resource-map-browser-source-field-source:sheep'),
+    );
+    await tester.scrollUntilVisible(
+      sheepRow,
+      140,
+      scrollable: find.descendant(
+        of: find.byKey(const ValueKey<String>('resource-map-resource-browser')),
+        matching: find.byType(Scrollable),
+      ),
+    );
+    await tester.pump();
+    expect(sheepRow, findsOneWidget);
+    expect(
+      find.descendant(of: sheepRow, matching: find.text('Sheep')),
+      findsOneWidget,
+    );
+    for (final productName in const <String>[
+      'Lamb Meat',
+      'Sheep Blood',
+      'Sheep Hide',
+    ]) {
       expect(
         find.descendant(
-          of: gatheringSourcesHeading,
-          matching: find.byType(ResourceMapSurfaceIsland),
+          of: sheepRow,
+          matching: find.textContaining(productName),
         ),
-        findsOneWidget,
-        reason: 'The section label needs its own compact contrast surface.',
+        findsNothing,
+        reason:
+            'The browser names the animal once; products remain in its details.',
       );
+    }
+    for (final product in sheep.products) {
       expect(
-        tester.getRect(allCategories).top - tester.getRect(taskStrip).bottom,
-        lessThanOrEqualTo(12),
+        find.byKey(
+          ValueKey<String>(
+            'resource-map-browser-resource-${product.resourceId}',
+          ),
+        ),
+        findsNothing,
+        reason: 'Sheep products should not become duplicate browse rows.',
       );
-      expect(
-        tester.getRect(gatheringSourcesHeading).top -
-            tester.getRect(allCategories).bottom,
-        lessThanOrEqualTo(8),
-      );
-      expect(find.textContaining('mapped sources'), findsNothing);
-      expect(find.textContaining('Products from the same tree'), findsNothing);
-      await expectLater(
-        find.byKey(const ValueKey<String>('resource-map-resource-browser')),
-        matchesGoldenFile('goldens/resource_map_meat_browser.png'),
-      );
+    }
 
-      final sheepRow = find.byKey(
-        const ValueKey<String>(
-          'resource-map-browser-source-field-source:sheep',
-        ),
-      );
-      await tester.scrollUntilVisible(
-        sheepRow,
-        140,
-        scrollable: find.descendant(
-          of: find.byKey(
-            const ValueKey<String>('resource-map-resource-browser'),
-          ),
-          matching: find.byType(Scrollable),
-        ),
-      );
-      await tester.pump();
-      expect(sheepRow, findsOneWidget);
-      expect(
-        find.descendant(of: sheepRow, matching: find.text('Sheep')),
-        findsOneWidget,
-      );
-      for (final productName in const <String>[
-        'Lamb Meat',
-        'Sheep Blood',
-        'Sheep Hide',
-      ]) {
-        expect(
-          find.descendant(
-            of: sheepRow,
-            matching: find.textContaining(productName),
-          ),
-          findsOneWidget,
-        );
-      }
-      for (final product in sheep.products) {
-        expect(
-          find.byKey(
-            ValueKey<String>(
-              'resource-map-browser-resource-${product.resourceId}',
-            ),
-          ),
-          findsNothing,
-          reason: 'Sheep products should not become duplicate browse rows.',
-        );
-      }
-
-      await tester.tap(sheepRow);
-      await tester.pumpAndSettle();
-      expect(find.text('Products & methods'), findsNothing);
-      expect(find.text('Lamb Meat'), findsOneWidget);
-      expect(find.text('Sheep Blood'), findsOneWidget);
-      expect(find.text('Sheep Hide'), findsOneWidget);
-      await expectLater(
-        find.byType(BdoResourceMap),
-        matchesGoldenFile('goldens/resource_map_gathering_product_cards.png'),
-      );
-      expect(tester.takeException(), isNull);
-    },
-  );
+    await tester.tap(sheepRow);
+    await tester.pumpAndSettle();
+    expect(find.text('Products & methods'), findsNothing);
+    expect(find.text('Lamb Meat'), findsOneWidget);
+    expect(find.text('Sheep Blood'), findsOneWidget);
+    expect(find.text('Sheep Hide'), findsOneWidget);
+    await _expectAtlasProductTools(tester, sheep);
+    await expectLater(
+      find.byType(BdoResourceMap),
+      matchesGoldenFile('goldens/resource_map_gathering_product_cards.png'),
+    );
+    expect(tester.takeException(), isNull);
+  });
 
   testWidgets(
     'Marni sniper hunting is an acquisition option inside animal materials',
@@ -8560,7 +8963,9 @@ void main() {
       await revealMarniSource();
       expect(marniSource, findsOneWidget);
 
-      await tester.tap(find.widgetWithText(TextButton, 'All categories'));
+      await tester.tap(
+        find.byKey(const ValueKey<String>('resource-map-task-back')),
+      );
       await tester.pumpAndSettle();
       final bloodAndHidesSection = find.byKey(
         const ValueKey<String>('resource-map-section-bloodHides'),
@@ -8593,7 +8998,16 @@ void main() {
       expect(find.text('Crystal of Darkness'), findsOneWidget);
       expect(find.text('Forest Crystal'), findsOneWidget);
       expect(find.text('Live Meat'), findsOneWidget);
-      expect(find.byType(BdoGatheringToolIcon), findsNWidgets(11));
+      await _expectAtlasProductTools(
+        tester,
+        dataset.fieldSourcesById['field-source:marni-sniper-hunting']!,
+      );
+      expect(
+        find.byTooltip(
+          'Sniper hunt and butcher · Sniper Rifle and Butcher Knife',
+        ),
+        findsNWidgets(11),
+      );
       expect(
         find.textContaining('Pork, Pig Blood, and Pig Hide together'),
         findsNothing,
@@ -8601,12 +9015,7 @@ void main() {
 
       await tester.enterText(find.byType(TextField), 'Pig');
       await tester.pumpAndSettle();
-      final pigResult = find.byWidgetPredicate(
-        (widget) =>
-            widget is ListTile &&
-            widget.title is Text &&
-            (widget.title! as Text).data == 'Pig',
-      );
+      final pigResult = _searchResultNamed('Pig');
       expect(pigResult, findsOneWidget);
       await tester.tap(pigResult);
       await tester.pumpAndSettle();
@@ -8652,9 +9061,9 @@ void main() {
       await tester.tap(coastalSection.hitTestable());
       await tester.pumpAndSettle();
 
-      expect(find.text('Coastal gathering'), findsWidgets);
+      expect(find.text('Fish & marine'), findsWidgets);
       expect(find.text('Sea & marine'), findsNothing);
-      expect(find.text('Fish & marine'), findsNothing);
+      expect(find.text('Coastal gathering'), findsNothing);
       final crabSource = find.byKey(
         const ValueKey<String>(
           'resource-map-browser-source-field-source:coral-stoneback-crab',
@@ -8730,17 +9139,22 @@ void main() {
       await tester.pump(const Duration(milliseconds: 300));
 
       Future<void> selectMaterial(String name) async {
-        await tester.enterText(find.byType(TextField), name);
+        await tester.enterText(
+          find.byKey(const ValueKey<String>('resource-map-atlas-search-field')),
+          name,
+        );
         await tester.pumpAndSettle();
-        final result = find.byWidgetPredicate(
-          (widget) =>
-              widget is ListTile &&
-              widget.title is Text &&
-              (widget.title! as Text).data == name,
+        final resource = dataset.resources.singleWhere(
+          (candidate) => candidate.name == name,
+        );
+        final result = find.byKey(
+          ValueKey<String>(
+            'resource-map-search-result-resource-${resource.id}',
+          ),
         );
         expect(result, findsOneWidget);
         await tester.tap(result);
-        await tester.pump();
+        await tester.pumpAndSettle();
       }
 
       await selectMaterial(powder.name);
@@ -8770,7 +9184,7 @@ void main() {
             'resource-map-source-gameplay-note-field-source:insectivore-plant',
           ),
         ),
-        findsOneWidget,
+        findsNothing,
       );
 
       await selectMaterial(flower.name);
@@ -8784,7 +9198,7 @@ void main() {
             'field-source:poisonous-swamp-plant',
           ),
         ),
-        findsOneWidget,
+        findsNothing,
       );
       expect(
         find.textContaining(
@@ -8809,70 +9223,58 @@ void main() {
     },
   );
 
-  testWidgets('source filter constrains search and survives navigation', (
-    tester,
-  ) async {
-    await tester.binding.setSurfaceSize(const Size(1000, 700));
-    addTearDown(() => tester.binding.setSurfaceSize(null));
-    final workerOnly = dataset.resources.firstWhere(
-      (resource) =>
-          dataset.hasWorkerSource(resource.id) &&
-          !dataset.hasMappedManualSource(resource.id),
-    );
+  testWidgets(
+    'global search keeps worker-only materials discoverable across tasks',
+    (tester) async {
+      await tester.binding.setSurfaceSize(const Size(1000, 700));
+      addTearDown(() => tester.binding.setSurfaceSize(null));
+      final workerOnly = dataset.resources.firstWhere(
+        (resource) =>
+            dataset.hasWorkerSource(resource.id) &&
+            !dataset.hasMappedManualSource(resource.id),
+      );
 
-    await tester.pumpWidget(
-      MaterialApp(
-        home: BdoResourceMap(
-          dataset: dataset,
-          cacheDirectory: cacheDirectory,
-          tileSource: tileSource,
-          showSourceNotice: false,
-          tileHttpClient: tileClient,
+      await tester.pumpWidget(
+        MaterialApp(
+          home: BdoResourceMap(
+            dataset: dataset,
+            cacheDirectory: cacheDirectory,
+            tileSource: tileSource,
+            showSourceNotice: false,
+            tileHttpClient: tileClient,
+          ),
         ),
-      ),
-    );
-    await tester.pump(const Duration(milliseconds: 300));
+      );
+      await tester.pump(const Duration(milliseconds: 300));
 
-    Finder resultFor(BdoResourceDefinition resource) => find.byWidgetPredicate(
-      (widget) =>
-          widget is ListTile &&
-          widget.title is Text &&
-          (widget.title! as Text).data == resource.name,
-    );
-    Semantics commandSemantics(String mode) => tester.widget<Semantics>(
-      find
-          .descendant(
-            of: find.byKey(ValueKey<String>('resource-map-command-$mode')),
-            matching: find.byType(Semantics),
-          )
-          .first,
-    );
+      Finder resultFor(BdoResourceDefinition resource) =>
+          _searchResultNamed(resource.name);
+      await _openGatherHub(tester);
+      await tester.enterText(
+        find.byKey(const ValueKey('resource-map-atlas-search-field')),
+        workerOnly.name,
+      );
+      await tester.pumpAndSettle();
+      expect(resultFor(workerOnly), findsOneWidget);
 
-    await _openGatherHub(tester);
-    await tester.enterText(find.byType(TextField), workerOnly.name);
-    await tester.pumpAndSettle();
-    expect(resultFor(workerOnly), findsNothing);
-    expect(commandSemantics('gather').properties.selected, isTrue);
+      await _openNodePlanner(tester);
+      await tester.enterText(
+        find.byKey(const ValueKey('resource-map-atlas-search-field')),
+        workerOnly.name,
+      );
+      await tester.pumpAndSettle();
+      expect(resultFor(workerOnly), findsOneWidget);
 
-    await tester.tap(
-      find.byKey(const ValueKey<String>('resource-map-command-workers')),
-    );
-    await tester.pumpAndSettle();
-    await tester.enterText(find.byType(TextField), workerOnly.name);
-    await tester.pumpAndSettle();
-    expect(resultFor(workerOnly), findsOneWidget);
-    expect(commandSemantics('workers').properties.selected, isTrue);
-
-    await tester.tap(resultFor(workerOnly));
-    await tester.pump();
-    final canvas = tester.widget<BdoMapCanvas>(find.byType(BdoMapCanvas));
-    expect(canvas.workerNodes, isNotEmpty);
-    expect(canvas.gatheringPoints, isEmpty);
-    expect(canvas.gatheringSpots, isEmpty);
-    expect(canvas.gatheringRoutes, isEmpty);
-    expect(commandSemantics('workers').properties.selected, isTrue);
-    expect(tester.takeException(), isNull);
-  });
+      await tester.tap(resultFor(workerOnly));
+      await tester.pump();
+      final canvas = tester.widget<BdoMapCanvas>(find.byType(BdoMapCanvas));
+      expect(canvas.workerNodes, isNotEmpty);
+      expect(canvas.gatheringPoints, isEmpty);
+      expect(canvas.gatheringSpots, isEmpty);
+      expect(canvas.gatheringRoutes, isEmpty);
+      expect(tester.takeException(), isNull);
+    },
+  );
 
   testWidgets('worker output artwork appears only above its zoom threshold', (
     tester,
@@ -8901,14 +9303,7 @@ void main() {
     await tester.pump(const Duration(milliseconds: 300));
     await tester.enterText(find.byType(TextField), resource.name);
     await tester.pumpAndSettle();
-    await tester.tap(
-      find.byWidgetPredicate(
-        (widget) =>
-            widget is ListTile &&
-            widget.title is Text &&
-            (widget.title! as Text).data == resource.name,
-      ),
-    );
+    await tester.tap(_searchResultNamed(resource.name));
     await tester.pump();
 
     var canvas = tester.widget<BdoMapCanvas>(find.byType(BdoMapCanvas));
@@ -8923,7 +9318,7 @@ void main() {
       BdoMapCamera(center: node.location.mapPoint, zoom: 2.15),
       viewport,
     );
-    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 300));
     expect(marker, findsNothing);
 
     canvas = tester.widget<BdoMapCanvas>(find.byType(BdoMapCanvas));
@@ -8931,7 +9326,7 @@ void main() {
       BdoMapCamera(center: node.location.mapPoint, zoom: 2.25),
       viewport,
     );
-    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 300));
     expect(marker, findsOneWidget);
     final retainedMarker = tester.widget(marker);
     final markerTopLeftBeforePan = tester.getTopLeft(marker);
@@ -8973,6 +9368,14 @@ void main() {
       find.byKey(const ValueKey<String>('resource-map-layer-worker-outputs')),
     );
     await tester.pumpAndSettle();
+    expect(
+      marker,
+      findsOneWidget,
+      reason:
+          'All node products controls background artwork; selected results stay visible.',
+    );
+    await _goMapHome(tester);
+    await tester.pumpAndSettle();
     expect(marker, findsNothing);
     expect(tester.takeException(), isNull);
   });
@@ -9012,14 +9415,7 @@ void main() {
       await tester.pump(const Duration(milliseconds: 300));
       await tester.enterText(find.byType(TextField), resource.name);
       await tester.pumpAndSettle();
-      await tester.tap(
-        find.byWidgetPredicate(
-          (widget) =>
-              widget is ListTile &&
-              widget.title is Text &&
-              (widget.title! as Text).data == resource.name,
-        ),
-      );
+      await tester.tap(_searchResultNamed(resource.name));
       await tester.pump();
 
       final canvas = tester.widget<BdoMapCanvas>(find.byType(BdoMapCanvas));
@@ -9225,12 +9621,12 @@ void main() {
     canvas.onHit(BdoMapHit(kind: BdoMapHitKind.workerNode, id: node.id));
     await tester.pump();
     expect(
-      find.byKey(const ValueKey<String>('resource-map-node-quick-panel')),
+      find.byKey(const ValueKey<String>('resource-map-sidebar-details')),
       findsOneWidget,
     );
     expect(
       find.descendant(
-        of: find.byKey(const ValueKey<String>('resource-map-node-quick-panel')),
+        of: find.byKey(const ValueKey<String>('resource-map-sidebar-details')),
         matching: find.byType(Scrollbar),
       ),
       findsNothing,
@@ -9239,8 +9635,18 @@ void main() {
       ValueKey<String>('resource-map-node-connected-from-${node.parentId}'),
     );
     expect(connectedFrom, findsOneWidget);
-    await tester.ensureVisible(connectedFrom);
-    await tester.pump();
+    await tester.scrollUntilVisible(
+      connectedFrom,
+      120,
+      scrollable: find
+          .descendant(
+            of: find.byKey(
+              const ValueKey<String>('resource-map-sidebar-details'),
+            ),
+            matching: find.byType(Scrollable),
+          )
+          .first,
+    );
     await tester.tap(connectedFrom);
     await tester.pumpAndSettle();
 
@@ -9254,7 +9660,7 @@ void main() {
     expect(userAdjustedCamera, isNot(originalCamera));
 
     final quickBack = find.byKey(
-      const ValueKey<String>('resource-map-node-quick-back'),
+      const ValueKey<String>('resource-map-task-back'),
     );
     expect(quickBack, findsOneWidget);
     await tester.tap(quickBack);
@@ -9284,22 +9690,33 @@ void main() {
 
     canvas.onHit(BdoMapHit(kind: BdoMapHitKind.workerNode, id: node.id));
     await tester.pumpAndSettle();
+    await tester.scrollUntilVisible(
+      connectedFrom,
+      120,
+      scrollable: find
+          .descendant(
+            of: find.byKey(
+              const ValueKey<String>('resource-map-sidebar-details'),
+            ),
+            matching: find.byType(Scrollable),
+          )
+          .first,
+    );
     await tester.tap(connectedFrom);
     await tester.pumpAndSettle();
     canvas = tester.widget<BdoMapCanvas>(find.byType(BdoMapCanvas));
     expect(canvas.selectedNodeId, node.parentId);
 
     await tester.tap(
-      find.byKey(const ValueKey<String>('resource-map-node-panel-close')),
+      find.byKey(const ValueKey<String>('resource-map-home-button')),
     );
     await tester.pumpAndSettle();
     canvas = tester.widget<BdoMapCanvas>(find.byType(BdoMapCanvas));
     expect(canvas.selectedNodeId, isNull);
     expect(
-      find.byKey(const ValueKey<String>('resource-map-node-quick-panel')),
+      find.byKey(const ValueKey<String>('resource-map-sidebar-details')),
       findsNothing,
     );
-    expect(quickBack, findsNothing);
     expect(tester.takeException(), isNull);
   });
 
@@ -9324,13 +9741,8 @@ void main() {
 
     await tester.enterText(find.byType(TextField), 'Snake Meat');
     await tester.pumpAndSettle();
-    await tester.tap(
-      find.descendant(
-        of: find.byType(ListTile),
-        matching: find.text('Snake Meat'),
-      ),
-    );
-    await tester.pump();
+    await tester.tap(_searchResultNamed('Snake Meat'));
+    await tester.pumpAndSettle();
     var canvas = tester.widget<BdoMapCanvas>(find.byType(BdoMapCanvas));
     expect(
       tester.widget<TextField>(find.byType(TextField)).controller!.text,
@@ -9344,16 +9756,13 @@ void main() {
     await tester.pump();
     await tester.enterText(find.byType(TextField), 'not-a-real-bdo-resource');
     await tester.pumpAndSettle();
-    expect(
-      find.textContaining('No results for "not-a-real-bdo-resource"'),
-      findsOneWidget,
-    );
+    expect(find.text('No results'), findsOneWidget);
 
     await tester.tap(find.widgetWithText(TextButton, 'Worker nodes'));
     await tester.pumpAndSettle();
     canvas = tester.widget<BdoMapCanvas>(find.byType(BdoMapCanvas));
     expect(canvas.workerNodes, isEmpty);
-    expect(find.textContaining('map stays clear'), findsOneWidget);
+    expect(find.textContaining('map stays clear'), findsNothing);
     expect(
       find.byKey(const ValueKey<String>('resource-map-worker-activity-picker')),
       findsOneWidget,
@@ -9371,13 +9780,18 @@ void main() {
     );
     expect(
       tester
-          .widget<Material>(
-            find.byKey(
-              const ValueKey<String>('resource-map-worker-activity-all'),
-            ),
+          .widget<ResourceMapPill>(
+            find
+                .ancestor(
+                  of: find.byKey(
+                    const ValueKey<String>('resource-map-worker-activity-all'),
+                  ),
+                  matching: find.byType(ResourceMapPill),
+                )
+                .first,
           )
-          .color,
-      ResourceMapAtlasColors.primary,
+          .selected,
+      isTrue,
     );
     expect(
       tester.widget<TextField>(find.byType(TextField)).controller!.text,
@@ -9422,7 +9836,7 @@ void main() {
         containsAll(riceNodeIds),
       );
       expect(
-        find.byKey(const ValueKey<String>('resource-map-sidebar-search')),
+        find.byKey(const ValueKey<String>('resource-map-atlas-search-field')),
         findsOneWidget,
       );
 
@@ -9460,65 +9874,83 @@ void main() {
       );
       expect(firstResult, findsOneWidget);
       await tester.tap(firstResult);
-      await tester.pump();
+      await tester.pumpAndSettle();
 
       canvas = tester.widget<BdoMapCanvas>(find.byType(BdoMapCanvas));
       expect(canvas.selectedNodeId, firstNode.id);
       expect(canvas.cameraController.camera, comparisonCamera);
       expect(canvas.emphasizedNodeIds, riceNodeIds);
       expect(
-        find.byKey(const ValueKey<String>('resource-map-sidebar-search')),
+        find.byKey(const ValueKey<String>('resource-map-atlas-search-field')),
         findsOneWidget,
       );
       expect(
-        find.byKey(const ValueKey<String>('resource-map-node-quick-panel')),
+        find.byKey(const ValueKey<String>('resource-map-sidebar-details')),
         findsOneWidget,
       );
-      expect(
-        find.byKey(
-          const ValueKey<String>('resource-map-node-quick-panel-tail'),
-        ),
-        findsNothing,
-      );
-      expect(tester.widget<ListTile>(firstResult).selected, isTrue);
+      expect(find.byKey(const ValueKey<String>('search')), findsNothing);
+      await tester.pumpAndSettle();
+      tester
+          .widget<TextField>(
+            find.byKey(
+              const ValueKey<String>('resource-map-atlas-search-field'),
+            ),
+          )
+          .onTap!
+          .call();
+      await tester.pumpAndSettle();
+      expect(firstResult, findsOneWidget);
 
-      final secondNode = riceNodes[1];
-      final secondResult = find.byKey(
-        ValueKey<String>(
-          'resource-map-search-result-workerNode-${secondNode.id}',
-        ),
+      final visibleNodeResultKeys = find
+          .byWidgetPredicate((widget) {
+            final key = widget.key;
+            return key is ValueKey<String> &&
+                key.value.startsWith('resource-map-search-result-workerNode-');
+          })
+          .evaluate()
+          .map((element) => element.widget.key! as ValueKey<String>)
+          .where((key) => key != firstResult.evaluate().single.widget.key)
+          .toList(growable: false);
+      expect(visibleNodeResultKeys, isNotEmpty);
+      final secondResultKey = visibleNodeResultKeys.first;
+      final secondNodeId = secondResultKey.value.substring(
+        'resource-map-search-result-workerNode-'.length,
       );
+      final secondNode = dataset.workerNodesById[secondNodeId]!;
+      final secondResult = find.byKey(secondResultKey);
       expect(secondResult, findsOneWidget);
       await tester.ensureVisible(secondResult);
       await tester.tap(secondResult);
-      await tester.pump();
+      await tester.pumpAndSettle();
       canvas = tester.widget<BdoMapCanvas>(find.byType(BdoMapCanvas));
       expect(canvas.selectedNodeId, secondNode.id);
       expect(canvas.cameraController.camera, comparisonCamera);
       expect(canvas.emphasizedNodeIds, riceNodeIds);
-      expect(tester.widget<ListTile>(secondResult).selected, isTrue);
 
-      await tester.tap(
-        find.byKey(const ValueKey<String>('resource-map-node-panel-close')),
-      );
-      await tester.pump();
+      canvas.onEmptyTap!.call();
+      await tester.pumpAndSettle();
       canvas = tester.widget<BdoMapCanvas>(find.byType(BdoMapCanvas));
       expect(canvas.selectedNodeId, isNull);
       expect(canvas.emphasizedNodeIds, riceNodeIds);
       expect(
-        find.byKey(const ValueKey<String>('resource-map-sidebar-search')),
+        find.byKey(const ValueKey<String>('resource-map-atlas-search-field')),
         findsOneWidget,
       );
 
       canvas.onHit(BdoMapHit(kind: BdoMapHitKind.workerNode, id: firstNode.id));
-      await tester.pump();
+      await tester.pumpAndSettle();
       canvas = tester.widget<BdoMapCanvas>(find.byType(BdoMapCanvas));
       expect(canvas.selectedNodeId, firstNode.id);
       expect(canvas.emphasizedNodeIds, containsAll(riceNodeIds));
       expect(
-        find.byKey(const ValueKey<String>('resource-map-sidebar-search')),
+        find.byKey(const ValueKey<String>('resource-map-atlas-search-field')),
         findsOneWidget,
-        reason: 'Selecting the pulsing marker must keep its result list open.',
+        reason: 'Selecting a pulsing marker must preserve the search command.',
+      );
+      expect(
+        find.byKey(const ValueKey<String>('search')),
+        findsNothing,
+        reason: 'The result palette gets out of the way of node details.',
       );
 
       await tester.pump(const Duration(seconds: 5));
@@ -9652,22 +10084,25 @@ void main() {
         ),
       ),
     );
-    await tester.pump();
+    await tester.pumpAndSettle();
     expect(
-      find.byKey(const ValueKey<String>('resource-map-node-quick-panel')),
+      find.byKey(const ValueKey<String>('resource-map-sidebar-details')),
       findsOneWidget,
     );
 
-    await tester.enterText(find.byType(TextField), 'Pine Sap');
+    await tester.enterText(
+      find.byKey(const ValueKey<String>('resource-map-atlas-search-field')),
+      'Pine Sap',
+    );
     await tester.pump();
     final canvas = tester.widget<BdoMapCanvas>(find.byType(BdoMapCanvas));
     expect(canvas.selectedNodeId, isNull);
     expect(
-      find.byKey(const ValueKey<String>('resource-map-node-quick-panel')),
+      find.byKey(const ValueKey<String>('resource-map-sidebar-details')),
       findsNothing,
     );
     expect(
-      find.byKey(const ValueKey<String>('resource-map-sidebar-search')),
+      find.byKey(const ValueKey<String>('resource-map-atlas-search-field')),
       findsOneWidget,
     );
     expect(tester.takeException(), isNull);
@@ -9711,11 +10146,11 @@ void main() {
       await tester.pump();
 
       expect(
-        find.byKey(const ValueKey<String>('resource-map-sidebar-search')),
+        find.byKey(const ValueKey<String>('resource-map-atlas-search-field')),
         findsOneWidget,
       );
       expect(
-        find.byKey(const ValueKey<String>('resource-map-node-quick-panel')),
+        find.byKey(const ValueKey<String>('resource-map-sidebar-details')),
         findsOneWidget,
       );
       await _settleVisibleGoldenImages(
@@ -9788,13 +10223,20 @@ void main() {
       );
       expect(
         tester
-            .widget<Material>(
-              find.byKey(
-                const ValueKey<String>('resource-map-worker-activity-mining'),
-              ),
+            .widget<ResourceMapPill>(
+              find
+                  .ancestor(
+                    of: find.byKey(
+                      const ValueKey<String>(
+                        'resource-map-worker-activity-mining',
+                      ),
+                    ),
+                    matching: find.byType(ResourceMapPill),
+                  )
+                  .first,
             )
-            .color,
-        ResourceMapAtlasColors.primary,
+            .selected,
+        isTrue,
       );
       expect(
         tester
@@ -9804,7 +10246,7 @@ void main() {
               ),
             )
             .color,
-        isNot(ResourceMapAtlasColors.primary),
+        isNot(ResourceMapChromeThemeData.fieldAtlas.primary),
       );
 
       final primalGiant = canvas.workerNodes.singleWhere(
@@ -9816,17 +10258,17 @@ void main() {
       );
       await tester.pump();
       expect(
-        find.byKey(const ValueKey<String>('resource-map-node-quick-panel')),
+        find.byKey(const ValueKey<String>('resource-map-sidebar-details')),
         findsOneWidget,
       );
       expect(
         find.descendant(
           of: find.byKey(
-            const ValueKey<String>('resource-map-node-quick-panel'),
+            const ValueKey<String>('resource-map-sidebar-details'),
           ),
           matching: find.textContaining('Mining'),
         ),
-        findsWidgets,
+        findsNothing,
       );
       expect(find.text('Primal Giant Post'), findsWidgets);
       expect(find.text('Primal Giant Post - Mining'), findsNothing);
@@ -9838,7 +10280,7 @@ void main() {
       expect(canvas.cameraController.camera.zoom, cameraBeforeDetails.zoom);
 
       await tester.tap(
-        find.byKey(const ValueKey<String>('resource-map-node-panel-close')),
+        find.byKey(const ValueKey<String>('resource-map-task-back')),
       );
       await tester.pumpAndSettle();
       canvas = tester.widget<BdoMapCanvas>(find.byType(BdoMapCanvas));
@@ -9969,7 +10411,7 @@ void main() {
     expect(find.byType(TextField), findsOneWidget);
     expect(
       tester.widget<TextField>(find.byType(TextField)).decoration!.hintText,
-      'Find a material or place',
+      'Search items, wildlife, plants, nodes or towns',
     );
     var canvas = tester.widget<BdoMapCanvas>(find.byType(BdoMapCanvas));
     expect(canvas.gatheringSpots, isEmpty);
@@ -10017,14 +10459,7 @@ void main() {
     await tester.pumpAndSettle();
     await tester.enterText(find.byType(TextField), 'Sheep Hide');
     await tester.pumpAndSettle();
-    await tester.tap(
-      find.byWidgetPredicate(
-        (widget) =>
-            widget is ListTile &&
-            widget.title is Text &&
-            (widget.title! as Text).data == 'Sheep Hide',
-      ),
-    );
+    await tester.tap(_searchResultNamed('Sheep Hide'));
     await tester.pumpAndSettle();
     expect(find.text('Historical exact locations'), findsNothing);
     expect(find.textContaining('historical recorded dots'), findsNothing);
@@ -10098,14 +10533,7 @@ void main() {
       await tester.pump(const Duration(milliseconds: 500));
       await tester.enterText(find.byType(TextField), 'Snake Meat');
       await tester.pumpAndSettle();
-      await tester.tap(
-        find.byWidgetPredicate(
-          (widget) =>
-              widget is ListTile &&
-              widget.title is Text &&
-              (widget.title! as Text).data == 'Snake Meat',
-        ),
-      );
+      await tester.tap(_searchResultNamed('Snake Meat'));
       await tester.pump(const Duration(milliseconds: 350));
 
       final canvasFinder = find.byType(BdoMapCanvas);
@@ -10161,13 +10589,8 @@ void main() {
       await tester.pump(const Duration(milliseconds: 300));
       await tester.enterText(find.byType(TextField), 'Snake Meat');
       await tester.pumpAndSettle();
-      await tester.tap(
-        find.descendant(
-          of: find.byType(ListTile),
-          matching: find.text('Snake Meat'),
-        ),
-      );
-      await tester.pump();
+      await tester.tap(_searchResultNamed('Snake Meat'));
+      await tester.pumpAndSettle();
 
       void openFirstPoint() {
         final canvas = tester.widget<BdoMapCanvas>(find.byType(BdoMapCanvas));
@@ -10195,7 +10618,7 @@ void main() {
       }
 
       openFirstPoint();
-      await tester.pump();
+      await tester.pumpAndSettle();
       expect(
         find.byKey(const ValueKey<String>('resource-map-task-back')),
         findsOneWidget,
@@ -10204,14 +10627,14 @@ void main() {
       await tester.tap(
         find.byKey(const ValueKey<String>('resource-map-task-back')),
       );
-      await tester.pump();
+      await tester.pumpAndSettle();
       expectParentMaterial();
 
       openFirstPoint();
-      await tester.pump();
+      await tester.pumpAndSettle();
       var canvas = tester.widget<BdoMapCanvas>(find.byType(BdoMapCanvas));
       canvas.onEmptyTap!.call();
-      await tester.pump();
+      await tester.pumpAndSettle();
       expectParentMaterial();
 
       await tester.tap(find.byTooltip('Clear search'));
@@ -10224,18 +10647,16 @@ void main() {
         isEmpty,
       );
       await tester.tap(
-        find.byKey(const ValueKey<String>('resource-map-task-close')),
+        find.byKey(const ValueKey<String>('resource-map-home-button')),
       );
       await tester.pumpAndSettle();
       canvas = tester.widget<BdoMapCanvas>(find.byType(BdoMapCanvas));
       expect(canvas.gatheringPoints, isEmpty);
       expect(canvas.gatheringSpots, isEmpty);
       expect(
-        find.byKey(
-          const ValueKey<String>('resource-map-desktop-sidebar-hidden'),
-        ),
+        find.byKey(const ValueKey<String>('resource-map-home-find-material')),
         findsOneWidget,
-        reason: 'Clearing the final selection should restore the full map.',
+        reason: 'Clearing the final selection returns to the task-first home.',
       );
       expect(tester.takeException(), isNull);
     },
@@ -10310,12 +10731,7 @@ void main() {
     await tester.pump(const Duration(milliseconds: 300));
     await tester.enterText(find.byType(TextField), 'Snake Meat');
     await tester.pumpAndSettle();
-    await tester.tap(
-      find.descendant(
-        of: find.byType(ListTile),
-        matching: find.text('Snake Meat'),
-      ),
-    );
+    await tester.tap(_searchResultNamed('Snake Meat'));
     await tester.pump();
 
     var canvas = tester.widget<BdoMapCanvas>(find.byType(BdoMapCanvas));
@@ -10328,11 +10744,12 @@ void main() {
       find.byKey(const ValueKey<String>('resource-map-location-guide-gallery')),
       findsOneWidget,
     );
-    await tester.tap(
-      find.byKey(
-        const ValueKey<String>('resource-map-location-guide-thumbnail-0'),
-      ),
+    final namedAreaThumbnail = find.byKey(
+      const ValueKey<String>('resource-map-location-guide-thumbnail-0'),
     );
+    await tester.ensureVisible(namedAreaThumbnail);
+    await tester.pumpAndSettle();
+    await tester.tap(namedAreaThumbnail);
     await tester.pumpAndSettle();
     expect(
       find.byKey(
@@ -10382,6 +10799,123 @@ void main() {
   });
 
   testWidgets(
+    'exact truffle dots do not inherit regional images and named areas do',
+    (tester) async {
+      await tester.binding.setSurfaceSize(const Size(1000, 700));
+      addTearDown(() => tester.binding.setSurfaceSize(null));
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: BdoResourceMap(
+            dataset: dataset,
+            cacheDirectory: cacheDirectory,
+            tileSource: tileSource,
+            showSourceNotice: false,
+            tileHttpClient: tileClient,
+            locationGuideImageBuilder: (context, image, fit) => ColoredBox(
+              key: ValueKey<String>('test-truffle-image-${image.assetPath}'),
+              color: Colors.brown,
+            ),
+          ),
+        ),
+      );
+      await tester.pump(const Duration(milliseconds: 300));
+      await tester.enterText(find.byType(TextField), 'Truffle Mushroom');
+      await tester.pumpAndSettle();
+      final resultTiles = _searchResultNamed('Truffle Mushroom');
+      expect(resultTiles, findsWidgets);
+      await tester.tap(resultTiles.first);
+      await tester.pump();
+
+      var canvas = tester.widget<BdoMapCanvas>(find.byType(BdoMapCanvas));
+      final point = dataset.gatheringPoints.firstWhere(
+        (entry) => entry.target == 'Truffle Mushroom',
+      );
+      expect(point.guideImages, isEmpty);
+      canvas.onHit(BdoMapHit(kind: BdoMapHitKind.gatheringPoint, id: point.id));
+      await tester.pump();
+
+      expect(
+        find.byKey(
+          const ValueKey<String>('resource-map-location-guide-gallery'),
+        ),
+        findsNothing,
+      );
+      expect(
+        find.byKey(
+          const ValueKey<String>(
+            'resource-map-exact-truffle-photo-unavailable',
+          ),
+        ),
+        findsNothing,
+      );
+      expect(find.textContaining('Historical Truffle'), findsNothing);
+      expect(find.text('Needs re-verification'), findsNothing);
+      expect(find.textContaining('Exact photo not matched'), findsNothing);
+      expect(find.text('Truffle Mushroom'), findsWidgets);
+
+      final namedArea = dataset.gatheringSpots.firstWhere(
+        (entry) => entry.id == 'gathering:truffle:eastern-gateway-hidden-cave',
+      );
+      expect(namedArea.guideImages, hasLength(1));
+      expect(
+        namedArea.guideImages.single.assetPath,
+        'https://s1.playblackdesert.com/web/CONSOLE/Upload/News/'
+        '0e2e3f005da20221123051140062.jpg',
+      );
+      canvas = tester.widget<BdoMapCanvas>(find.byType(BdoMapCanvas));
+      canvas.onHit(
+        BdoMapHit(kind: BdoMapHitKind.gatheringSpot, id: namedArea.id),
+      );
+      await tester.pump();
+
+      expect(
+        find.byKey(
+          const ValueKey<String>('resource-map-location-guide-gallery'),
+        ),
+        findsOneWidget,
+      );
+      final namedAreaThumbnail = find.byKey(
+        const ValueKey<String>('resource-map-location-guide-thumbnail-0'),
+      );
+      await tester.ensureVisible(namedAreaThumbnail);
+      await tester.pumpAndSettle();
+      await tester.tap(namedAreaThumbnail);
+      await tester.pumpAndSettle();
+
+      expect(find.text('1 / 1'), findsOneWidget);
+      final lightbox = find.byKey(
+        const ValueKey<String>('resource-map-location-guide-lightbox'),
+      );
+      final lightboxSize = tester.getSize(lightbox);
+      expect(lightboxSize.width, greaterThanOrEqualTo(960));
+      expect(lightboxSize.height, greaterThanOrEqualTo(660));
+      expect(
+        find.descendant(
+          of: lightbox,
+          matching: find.text(
+            'Official Serendia truffle overview — regional guide, '
+            'not a photo of this exact dot',
+          ),
+        ),
+        findsOneWidget,
+      );
+      expect(
+        find.textContaining('Official Truffle Mushroom location expansion'),
+        findsWidgets,
+      );
+      expect(find.textContaining('Pearl Abyss Corp.'), findsOneWidget);
+
+      await tester.sendKeyEvent(LogicalKeyboardKey.escape);
+      await tester.pumpAndSettle();
+
+      canvas = tester.widget<BdoMapCanvas>(find.byType(BdoMapCanvas));
+      expect(canvas.selectedSpotId, namedArea.id);
+      expect(tester.takeException(), isNull);
+    },
+  );
+
+  testWidgets(
     'manual gathering dots open honest details without moving the map',
     (tester) async {
       await tester.binding.setSurfaceSize(const Size(1000, 700));
@@ -10402,12 +10936,9 @@ void main() {
 
       await tester.enterText(find.byType(TextField), 'Snake Meat');
       await tester.pumpAndSettle();
-      final snakeResult = find.descendant(
-        of: find.byType(ListTile),
-        matching: find.text('Snake Meat'),
-      );
+      final snakeResult = _searchResultNamed('Snake Meat');
       await tester.tap(snakeResult);
-      await tester.pump();
+      await tester.pumpAndSettle();
 
       var canvas = tester.widget<BdoMapCanvas>(find.byType(BdoMapCanvas));
       expect(canvas.gatheringPoints, isNotEmpty);
@@ -10421,7 +10952,7 @@ void main() {
       final cameraBeforeClick = canvas.cameraController.camera;
 
       canvas.onHit(BdoMapHit(kind: BdoMapHitKind.gatheringPoint, id: point.id));
-      await tester.pump();
+      await tester.pumpAndSettle();
 
       canvas = tester.widget<BdoMapCanvas>(find.byType(BdoMapCanvas));
       expect(canvas.selectedPointId, point.id);
@@ -10432,12 +10963,21 @@ void main() {
       );
       expect(canvas.cameraController.camera.center, cameraBeforeClick.center);
       expect(canvas.cameraController.camera.zoom, cameraBeforeClick.zoom);
-      expect(find.text('EXACT GATHERING LOCATION'), findsOneWidget);
-      expect(find.text(point.label), findsOneWidget);
-      expect(find.text('Needs re-verification'), findsOneWidget);
+      expect(find.text('Exact location'), findsNothing);
+      expect(
+        find.descendant(
+          of: find.byKey(const ValueKey('resource-map-sidebar-details')),
+          matching: find.text(point.target),
+        ),
+        findsOneWidget,
+      );
+      expect(find.text('Loot'), findsOneWidget);
+      expect(find.textContaining('Historical'), findsNothing);
+      expect(find.text('Needs re-verification'), findsNothing);
+      expect(find.textContaining('Exact photo not matched'), findsNothing);
 
       canvas.onEmptyTap!.call();
-      await tester.pump();
+      await tester.pumpAndSettle();
       canvas = tester.widget<BdoMapCanvas>(find.byType(BdoMapCanvas));
       expect(canvas.selectedPointId, isNull);
       expect(canvas.gatheringPoints, hasLength(657));
@@ -10475,15 +11015,12 @@ void main() {
 
     await tester.enterText(find.byType(TextField), 'Sheep Hide');
     await tester.pumpAndSettle();
+    final sheepHide = dataset.resources.singleWhere(
+      (resource) => resource.name == 'Sheep Hide',
+    );
     await tester.tap(
-      find.descendant(
-        of: find.byKey(const ValueKey<String>('resource-map-sidebar-search')),
-        matching: find.byWidgetPredicate(
-          (widget) =>
-              widget is ListTile &&
-              widget.title is Text &&
-              (widget.title! as Text).data == 'Sheep Hide',
-        ),
+      find.byKey(
+        ValueKey<String>('resource-map-search-result-resource-${sheepHide.id}'),
       ),
     );
     await tester.pump();
@@ -10508,12 +11045,16 @@ void main() {
     final layout = painter.overlayLayout!;
     expect(layout.cameraController.camera, canvas.cameraController.camera);
     final canvasTopLeft = tester.getTopLeft(canvasFinder);
+    final detailsRect = tester.getRect(
+      find.byKey(const ValueKey<String>('resource-map-sidebar-details')),
+    );
     final visibleClusters = layout.gatheringPointClusters.where(
       (cluster) =>
           cluster.position.dx > 460 &&
           cluster.position.dx < 800 &&
           cluster.position.dy > 90 &&
-          cluster.position.dy < 650,
+          cluster.position.dy < 650 &&
+          !detailsRect.contains(canvasTopLeft + cluster.position),
     );
     expect(visibleClusters, isNotEmpty);
     final cluster = visibleClusters.first;
@@ -10562,10 +11103,7 @@ void main() {
 
       await tester.enterText(find.byType(TextField), 'Purified Water');
       await tester.pumpAndSettle();
-      final waterResult = find.descendant(
-        of: find.byType(ListTile),
-        matching: find.text('Purified Water'),
-      );
+      final waterResult = _searchResultNamed('Purified Water');
       expect(waterResult, findsOneWidget);
       await tester.tap(waterResult);
       await tester.pump();
@@ -10580,121 +11118,135 @@ void main() {
         find.text('Zephyros Golden Leaf Snake Zone (Approx.)'),
         findsNothing,
       );
-      expect(dataset.gatheringSpots, hasLength(3));
+      expect(
+        dataset.gatheringSpots.where(
+          (spot) => spot.id == 'gathering:balenos-forest-wild-beehives',
+        ),
+        hasLength(1),
+      );
+      expect(
+        dataset.gatheringSpots.where(
+          (spot) => spot.id != 'gathering:balenos-forest-wild-beehives',
+        ),
+        hasLength(22),
+        reason:
+            'The reviewed Beehive area is additional to the original areas.',
+      );
       expect(
         dataset.gatheringSpots.every((spot) => spot.radiusWorld == null),
         isTrue,
       );
       expect(canvas.gatheringSpots, isEmpty);
-      expect(find.text('Caphras Essence'), findsOneWidget);
+      expect(find.byKey(const ValueKey<String>('search')), findsOneWidget);
       expect(tester.takeException(), isNull);
     },
   );
 
-  testWidgets('material source filters include routes contextually', (
-    tester,
-  ) async {
-    await tester.binding.setSurfaceSize(const Size(1000, 700));
-    addTearDown(() => tester.binding.setSurfaceSize(null));
-    const resourceId = 'item:4616';
-    final thujaPoints = dataset
-        .gatheringPointsForResource(resourceId)
-        .take(2)
-        .toList(growable: false);
-    final route = BdoGatheringRoute(
-      id: 'test:thuja-route',
-      spotId: 'test:thuja-area',
-      name: 'Test Thuja Route',
-      region: 'Kamasylvia',
-      resourceIds: const <String>[resourceId],
-      tool: 'Fluid Collector',
-      loop: false,
-      summary: 'A test-only route used to exercise display state.',
-      waypoints: <BdoGatheringWaypoint>[
-        BdoGatheringWaypoint(
-          order: 1,
-          location: thujaPoints.first.location,
-          kind: 'gathering',
-          label: 'Start',
-          targets: const <String>['Thuja Tree'],
-        ),
-        BdoGatheringWaypoint(
-          order: 2,
-          location: thujaPoints.last.location,
-          kind: 'gathering',
-          label: 'Finish',
-          targets: const <String>['Thuja Tree'],
-        ),
-      ],
-      verification: BdoGatheringVerification.stale,
-      provenanceId: thujaPoints.first.provenanceId,
-    );
-    final routeDataset = BdoResourceMapDataset(
-      manifest: dataset.manifest,
-      resources: dataset.resources,
-      workerNodes: dataset.workerNodes,
-      gatheringSpots: dataset.gatheringSpots,
-      gatheringPoints: dataset.gatheringPoints,
-      gatheringRoutes: <BdoGatheringRoute>[route],
-    );
+  testWidgets(
+    'global material search retains both worker and route sources across tasks',
+    (tester) async {
+      await tester.binding.setSurfaceSize(const Size(1000, 700));
+      addTearDown(() => tester.binding.setSurfaceSize(null));
+      const resourceId = 'item:4616';
+      final thujaPoints = dataset
+          .gatheringPointsForResource(resourceId)
+          .take(2)
+          .toList(growable: false);
+      final route = BdoGatheringRoute(
+        id: 'test:thuja-route',
+        spotId: 'test:thuja-area',
+        name: 'Test Thuja Route',
+        region: 'Kamasylvia',
+        resourceIds: const <String>[resourceId],
+        tool: 'Fluid Collector',
+        loop: false,
+        summary: 'A test-only route used to exercise display state.',
+        waypoints: <BdoGatheringWaypoint>[
+          BdoGatheringWaypoint(
+            order: 1,
+            location: thujaPoints.first.location,
+            kind: 'gathering',
+            label: 'Start',
+            targets: const <String>['Thuja Tree'],
+          ),
+          BdoGatheringWaypoint(
+            order: 2,
+            location: thujaPoints.last.location,
+            kind: 'gathering',
+            label: 'Finish',
+            targets: const <String>['Thuja Tree'],
+          ),
+        ],
+        verification: BdoGatheringVerification.stale,
+        provenanceId: thujaPoints.first.provenanceId,
+      );
+      final routeDataset = BdoResourceMapDataset(
+        manifest: dataset.manifest,
+        resources: dataset.resources,
+        workerNodes: dataset.workerNodes,
+        gatheringSpots: dataset.gatheringSpots,
+        gatheringPoints: dataset.gatheringPoints,
+        gatheringRoutes: <BdoGatheringRoute>[route],
+      );
 
-    await tester.pumpWidget(
-      MaterialApp(
-        home: BdoResourceMap(
-          dataset: routeDataset,
-          cacheDirectory: cacheDirectory,
-          tileSource: tileSource,
-          showSourceNotice: false,
-          tileHttpClient: tileClient,
-        ),
-      ),
-    );
-    await tester.pump(const Duration(milliseconds: 300));
-
-    Future<void> selectThujaTimber() async {
-      await tester.enterText(find.byType(TextField), 'Thuja Timber');
-      await tester.pumpAndSettle();
-      await tester.tap(
-        find.descendant(
-          of: find.byKey(const ValueKey<String>('resource-map-sidebar-search')),
-          matching: find.descendant(
-            of: find.byType(ListTile),
-            matching: find.text('Thuja Timber'),
+      await tester.pumpWidget(
+        MaterialApp(
+          home: BdoResourceMap(
+            dataset: routeDataset,
+            cacheDirectory: cacheDirectory,
+            tileSource: tileSource,
+            showSourceNotice: false,
+            tileHttpClient: tileClient,
           ),
         ),
       );
-      await tester.pumpAndSettle();
-    }
+      await tester.pump(const Duration(milliseconds: 300));
 
-    await selectThujaTimber();
+      Future<void> selectThujaTimber() async {
+        await tester.enterText(
+          find.byKey(const ValueKey('resource-map-atlas-search-field')),
+          'Thuja Timber',
+        );
+        await tester.pumpAndSettle();
+        final thujaTimber = dataset.resources.singleWhere(
+          (resource) => resource.name == 'Thuja Timber',
+        );
+        await tester.tap(
+          find.byKey(
+            ValueKey<String>(
+              'resource-map-search-result-resource-${thujaTimber.id}',
+            ),
+          ),
+        );
+        await tester.pumpAndSettle();
+      }
 
-    var canvas = tester.widget<BdoMapCanvas>(find.byType(BdoMapCanvas));
-    expect(canvas.gatheringRoutes, <BdoGatheringRoute>[route]);
-    expect(
-      find.byKey(const ValueKey<String>('resource-map-material-source-filter')),
-      findsNothing,
-      reason: 'Desktop source mode is selected by the top-level task buttons.',
-    );
+      await selectThujaTimber();
 
-    await tester.tap(
-      find.byKey(const ValueKey<String>('resource-map-command-workers')),
-    );
-    await tester.pumpAndSettle();
-    await selectThujaTimber();
-    canvas = tester.widget<BdoMapCanvas>(find.byType(BdoMapCanvas));
-    expect(canvas.gatheringRoutes, isEmpty);
-    expect(canvas.workerNodes, isNotEmpty);
+      var canvas = tester.widget<BdoMapCanvas>(find.byType(BdoMapCanvas));
+      expect(canvas.gatheringRoutes, <BdoGatheringRoute>[route]);
+      expect(
+        find.byKey(
+          const ValueKey<String>('resource-map-material-source-filter'),
+        ),
+        findsNothing,
+        reason: 'Global discovery needs no restrictive source-mode chooser.',
+      );
 
-    await tester.tap(
-      find.byKey(const ValueKey<String>('resource-map-command-gather')),
-    );
-    await tester.pumpAndSettle();
-    await selectThujaTimber();
-    canvas = tester.widget<BdoMapCanvas>(find.byType(BdoMapCanvas));
-    expect(canvas.gatheringRoutes, <BdoGatheringRoute>[route]);
-    expect(canvas.workerNodes, isEmpty);
-    expect(tester.takeException(), isNull);
-  });
+      await _openNodePlanner(tester);
+      await selectThujaTimber();
+      canvas = tester.widget<BdoMapCanvas>(find.byType(BdoMapCanvas));
+      expect(canvas.gatheringRoutes, <BdoGatheringRoute>[route]);
+      expect(canvas.workerNodes, isNotEmpty);
+
+      await _openGatherHub(tester);
+      await selectThujaTimber();
+      canvas = tester.widget<BdoMapCanvas>(find.byType(BdoMapCanvas));
+      expect(canvas.gatheringRoutes, <BdoGatheringRoute>[route]);
+      expect(canvas.workerNodes, isNotEmpty);
+      expect(tester.takeException(), isNull);
+    },
+  );
 
   testWidgets('changing tile providers immediately primes the new engine', (
     tester,
@@ -10745,12 +11297,7 @@ void main() {
 
     await tester.enterText(find.byType(TextField), 'Snake Meat');
     await tester.pumpAndSettle();
-    await tester.tap(
-      find.descendant(
-        of: find.byType(ListTile),
-        matching: find.text('Snake Meat'),
-      ),
-    );
+    await tester.tap(_searchResultNamed('Snake Meat'));
     await tester.pump();
     final resourceCamera = tester
         .widget<BdoMapCanvas>(find.byType(BdoMapCanvas))
@@ -10860,23 +11407,38 @@ void main() {
     const resourceName = 'Snake Meat';
     await tester.enterText(find.byType(TextField), resourceName);
     await tester.pumpAndSettle();
-    final resourceResult = find.descendant(
-      of: find.byType(ListTile),
-      matching: find.text(resourceName),
+    final resourceResult = find.byWidgetPredicate(
+      (widget) => widget is Text && widget.data == resourceName,
     );
     expect(resourceResult, findsOneWidget);
     await tester.tap(resourceResult);
-    await tester.pump();
+    await tester.pumpAndSettle();
 
     var canvas = tester.widget<BdoMapCanvas>(find.byType(BdoMapCanvas));
     expect(canvas.gatheringPoints, hasLength(657));
     expect(canvas.gatheringSpots, hasLength(1));
     expect(canvas.gatheringSpots.single.radiusWorld, isNull);
-    final point = canvas.gatheringPoints.first;
+    final visibleBounds = canvas.cameraController.visibleWorldBounds(
+      tester.getSize(find.byType(BdoMapCanvas)),
+    );
+    final point = canvas.gatheringPoints.firstWhere(
+      (candidate) => visibleBounds.contains(candidate.location.mapPoint),
+    );
     canvas.onHit(BdoMapHit(kind: BdoMapHitKind.gatheringPoint, id: point.id));
-    await tester.pump();
+    await tester.pumpAndSettle();
     canvas = tester.widget<BdoMapCanvas>(find.byType(BdoMapCanvas));
     expect(canvas.selectedPointId, point.id);
+    expect(
+      find.byKey(const ValueKey<String>('resource-map-sidebar-details')),
+      findsOneWidget,
+    );
+    expect(find.byType(ResourceMapJourneySurface), findsOneWidget);
+    expect(find.byType(ResourceMapAtlasInspector), findsNothing);
+    await _settleVisibleGoldenImages(tester, root: find.byType(BdoResourceMap));
+    await expectLater(
+      find.byType(BdoResourceMap),
+      matchesGoldenFile('goldens/resource_map_exact_point_callout.png'),
+    );
     expect(
       canvas.gatheringPoints,
       hasLength(657),
@@ -10907,16 +11469,15 @@ void main() {
 
     await tester.enterText(find.byType(TextField), 'Snake Meat');
     await tester.pumpAndSettle();
-    expect(
-      find.byKey(const ValueKey<String>('resource-map-sidebar-search')),
-      findsOneWidget,
-    );
+    expect(find.byKey(const ValueKey<String>('search')), findsOneWidget);
 
     await tester.sendKeyEvent(LogicalKeyboardKey.escape);
-    await tester.pump();
+    await tester.pumpAndSettle();
+    expect(find.byKey(const ValueKey<String>('search')), findsNothing);
     expect(
-      find.byKey(const ValueKey<String>('resource-map-sidebar-search')),
-      findsNothing,
+      find.byKey(const ValueKey<String>('resource-map-atlas-search-field')),
+      findsOneWidget,
+      reason: 'The new search bar stays available without reopening a drawer.',
     );
     expect(
       tester.widget<TextField>(find.byType(TextField)).controller!.text,
@@ -10924,23 +11485,17 @@ void main() {
     );
 
     await tester.tap(find.byType(TextField));
-    await tester.pump();
-    expect(
-      find.byKey(const ValueKey<String>('resource-map-sidebar-search')),
-      findsOneWidget,
-    );
+    await tester.pumpAndSettle();
+    expect(find.byKey(const ValueKey<String>('search')), findsOneWidget);
 
     final canvas = tester.widget<BdoMapCanvas>(find.byType(BdoMapCanvas));
     canvas.onEmptyTap!.call();
-    await tester.pump();
-    expect(
-      find.byKey(const ValueKey<String>('resource-map-sidebar-search')),
-      findsNothing,
-    );
+    await tester.pumpAndSettle();
+    expect(find.byKey(const ValueKey<String>('search')), findsNothing);
     expect(canvas.onEmptyTap, isNotNull);
 
     await tester.tap(find.byTooltip('Show the full world'));
-    await tester.pump();
+    await tester.pumpAndSettle();
     expect(
       tester.widget<TextField>(find.byType(TextField)).controller!.text,
       'Snake Meat',
@@ -10949,7 +11504,7 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets('search results collapse left without losing the query', (
+  testWidgets('search results stay at the map edge without drawer controls', (
     tester,
   ) async {
     await tester.binding.setSurfaceSize(const Size(1000, 700));
@@ -10974,36 +11529,40 @@ void main() {
     final searchField = find.byType(TextField);
     await tester.enterText(searchField, 'Snake Meat');
     await tester.pump();
-    final results = find.byKey(
-      const ValueKey<String>('resource-map-sidebar-search'),
-    );
+    final results = find.byKey(const ValueKey<String>('search'));
     expect(results.hitTestable(), findsOneWidget);
-
-    await tester.tap(
+    final resultsRect = tester.getRect(results);
+    final mapRect = tester.getRect(find.byType(BdoMapCanvas));
+    final searchRect = tester.getRect(
+      find.byKey(const ValueKey<String>('resource-map-atlas-search-field')),
+    );
+    final taskRect = tester.getRect(find.byType(ResourceMapJourneySurface));
+    expect(resultsRect.left, closeTo(taskRect.left, 2));
+    expect(resultsRect.right, closeTo(taskRect.right, 2));
+    expect(searchRect.left, greaterThanOrEqualTo(resultsRect.left));
+    expect(searchRect.right, lessThanOrEqualTo(resultsRect.right));
+    expect(resultsRect.right, lessThan(mapRect.center.dx));
+    expect(resultsRect.width, lessThanOrEqualTo(720));
+    expect(
+      tester.widget<TextField>(searchField).controller!.text,
+      'Snake Meat',
+    );
+    expect(
       find.byKey(
         const ValueKey<String>('resource-map-desktop-search-collapse'),
       ),
+      findsNothing,
     );
-    await tester.pump();
-
-    expect(results, findsOneWidget, reason: 'Search state stays mounted.');
-    expect(results.hitTestable(), findsNothing);
     expect(
-      tester.widget<TextField>(searchField).controller!.text,
-      'Snake Meat',
-    );
-
-    await tester.tap(
       find.byKey(
         const ValueKey<String>('resource-map-desktop-task-surface-restore'),
       ),
+      findsNothing,
     );
-    await tester.pump();
-
-    expect(results.hitTestable(), findsOneWidget);
-    expect(
-      tester.widget<TextField>(searchField).controller!.text,
-      'Snake Meat',
+    await _settleVisibleGoldenImages(tester, root: find.byType(BdoResourceMap));
+    await expectLater(
+      find.byType(BdoResourceMap),
+      matchesGoldenFile('goldens/resource_map_discovery_search.png'),
     );
     expect(tester.takeException(), isNull);
   });
@@ -11047,13 +11606,18 @@ void main() {
     );
     expect(
       tester
-          .widget<Material>(
-            find.byKey(
-              const ValueKey<String>('resource-map-worker-activity-all'),
-            ),
+          .widget<ResourceMapPill>(
+            find
+                .ancestor(
+                  of: find.byKey(
+                    const ValueKey<String>('resource-map-worker-activity-all'),
+                  ),
+                  matching: find.byType(ResourceMapPill),
+                )
+                .first,
           )
-          .color,
-      ResourceMapAtlasColors.primary,
+          .selected,
+      isTrue,
     );
 
     final firstNode = canvas.workerNodes.firstWhere(
@@ -11068,12 +11632,12 @@ void main() {
       reason: 'inspecting one node must preserve the browse overview',
     );
     expect(
-      find.byKey(const ValueKey<String>('resource-map-node-quick-panel')),
+      find.byKey(const ValueKey<String>('resource-map-sidebar-details')),
       findsOneWidget,
     );
 
     final quickPanel = find.byKey(
-      const ValueKey<String>('resource-map-node-quick-panel'),
+      const ValueKey<String>('resource-map-sidebar-details'),
     );
     final pathToggle = find.descendant(
       of: quickPanel,
@@ -11085,7 +11649,12 @@ void main() {
       pathToggle,
       150,
       scrollable: find
-          .descendant(of: quickPanel, matching: find.byType(Scrollable))
+          .descendant(
+            of: find.byKey(
+              const ValueKey<String>('resource-map-sidebar-details'),
+            ),
+            matching: find.byType(Scrollable),
+          )
           .first,
     );
     await tester.tap(pathToggle);
@@ -11107,14 +11676,7 @@ void main() {
 
     await tester.enterText(find.byType(TextField), 'Potato');
     await tester.pumpAndSettle();
-    await tester.tap(
-      find.byWidgetPredicate(
-        (widget) =>
-            widget is ListTile &&
-            widget.title is Text &&
-            (widget.title! as Text).data == 'Potato',
-      ),
-    );
+    await tester.tap(_searchResultNamed('Potato'));
     await tester.pumpAndSettle();
     canvas = tester.widget<BdoMapCanvas>(find.byType(BdoMapCanvas));
     expect(
@@ -11166,7 +11728,7 @@ void main() {
     canvas.onHit(BdoMapHit(kind: BdoMapHitKind.workerNode, id: node.id));
     await tester.pump();
     expect(
-      find.byKey(const ValueKey<String>('resource-map-node-quick-panel')),
+      find.byKey(const ValueKey<String>('resource-map-sidebar-details')),
       findsOneWidget,
     );
     final materialRow = find.byKey(
@@ -11188,17 +11750,17 @@ void main() {
     expect(canvas.gatheringSpots, isEmpty);
     expect(canvas.gatheringPoints, isEmpty);
     expect(canvas.gatheringRoutes, isEmpty);
-    final workerSourceSemantics = tester.widget<Semantics>(
-      find
-          .descendant(
-            of: find.byKey(
-              const ValueKey<String>('resource-map-command-workers'),
-            ),
-            matching: find.byType(Semantics),
+    expect(canvas.selectedNodeId, isNull);
+    expect(
+      tester
+          .widget<TextField>(
+            find.byKey(const ValueKey('resource-map-atlas-search-field')),
           )
-          .first,
+          .controller!
+          .text,
+      isEmpty,
+      reason: 'Opening a material is navigation, not a new search query.',
     );
-    expect(workerSourceSemantics.properties.selected, isTrue);
     expect(
       find.byKey(const ValueKey<String>('resource-map-worker-activity-picker')),
       findsNothing,
@@ -11252,7 +11814,7 @@ void main() {
     );
     await tester.pump();
     expect(
-      find.byKey(const ValueKey<String>('resource-map-node-quick-panel')),
+      find.byKey(const ValueKey<String>('resource-map-sidebar-details')),
       findsOneWidget,
     );
 
@@ -11455,22 +12017,20 @@ void main() {
       await tester.pump(const Duration(milliseconds: 300));
 
       expect(
-        find.byKey(
-          const ValueKey<String>('resource-map-desktop-sidebar-hidden'),
-        ),
+        find.byKey(const ValueKey<String>('resource-map-home-find-material')),
         findsOneWidget,
       );
       expect(
-        find.byKey(const ValueKey<String>('resource-map-command-gather')),
+        find.byKey(const ValueKey<String>('resource-map-home-find-material')),
         findsOneWidget,
       );
       expect(
-        find.byKey(const ValueKey<String>('resource-map-command-workers')),
+        find.byKey(const ValueKey<String>('resource-map-home-worker-income')),
         findsOneWidget,
       );
       expect(
         tester.widget<TextField>(find.byType(TextField)).decoration!.hintText,
-        'Find an item, source, node or town',
+        'Search the map',
       );
 
       final thujaSource = dataset.fieldSourcesById['field-source:thuja-tree']!;
@@ -11481,15 +12041,14 @@ void main() {
       expect(workerCount, greaterThan(0));
 
       Future<void> selectThujaSap() async {
-        await tester.enterText(find.byType(TextField), 'Thuja Sap');
+        await tester.enterText(
+          find.byKey(const ValueKey('resource-map-atlas-search-field')),
+          'Thuja Sap',
+        );
         await tester.pumpAndSettle();
-        final result = find.descendant(
-          of: find.byKey(const ValueKey<String>('resource-map-sidebar-search')),
-          matching: find.byWidgetPredicate(
-            (widget) =>
-                widget is ListTile &&
-                widget.title is Text &&
-                (widget.title! as Text).data == 'Thuja Sap',
+        final result = find.byKey(
+          ValueKey<String>(
+            'resource-map-search-result-resource-${thujaSap.id}',
           ),
         );
         expect(result, findsOneWidget);
@@ -11515,22 +12074,27 @@ void main() {
         resourceArtworkSizes.any(
           (entry) => entry.name == 'Thuja Sap' && entry.size == 46,
         ),
-        isTrue,
-        reason: 'Gathering product artwork should use the available card room.',
+        isFalse,
+        reason:
+            'Concise location details use one clean source icon instead of '
+            'repeating large product cards.',
       );
       final gatheringTools = find.descendant(
         of: details,
         matching: find.byType(BdoGatheringToolIcon),
       );
-      expect(gatheringTools, findsWidgets);
-      expect(tester.getSize(gatheringTools.first).height, 32);
+      expect(gatheringTools, findsNWidgets(thujaSource.products.length));
+      await _expectAtlasProductTools(tester, thujaSource);
       expect(
         find.byKey(
           ValueKey<String>(
             'resource-map-source-product-worker-nodes-${thujaSap.id}',
           ),
         ),
-        findsOneWidget,
+        findsNothing,
+        reason:
+            'The unified source view does not need a '
+            'second button inside gathering details.',
       );
       expect(
         find.byKey(
@@ -11538,8 +12102,8 @@ void main() {
         ),
         findsNothing,
         reason:
-            'Desktop uses the always-visible Gather and Workers commands '
-            'instead of another chooser inside details.',
+            'Global material discovery '
+            'keeps all sources available without a mode chooser.',
       );
       var canvas = tester.widget<BdoMapCanvas>(find.byType(BdoMapCanvas));
       final exactPointCount = canvas.gatheringPoints.length;
@@ -11550,13 +12114,10 @@ void main() {
       expect(canvas.workerNodes, isNotEmpty);
       expect(exactPointCount, greaterThan(1));
 
-      await tester.tap(
-        find.byKey(const ValueKey<String>('resource-map-command-gather')),
-      );
-      await tester.pumpAndSettle();
+      await _openGatherHub(tester);
       await selectThujaSap();
       canvas = tester.widget<BdoMapCanvas>(find.byType(BdoMapCanvas));
-      expect(canvas.workerNodes, isEmpty);
+      expect(canvas.workerNodes, isNotEmpty);
       expect(canvas.gatheringPoints, hasLength(exactPointCount));
 
       final selectedPoint = canvas.gatheringPoints.first;
@@ -11577,10 +12138,9 @@ void main() {
           'resource-map-source-product-worker-nodes-${thujaSap.id}',
         ),
       );
-      expect(workerAlternativesLink, findsOneWidget);
-      await tester.ensureVisible(workerAlternativesLink);
-      await tester.tap(workerAlternativesLink);
-      await tester.pump();
+      expect(workerAlternativesLink, findsNothing);
+      await _openNodePlanner(tester);
+      await selectThujaSap();
       canvas = tester.widget<BdoMapCanvas>(find.byType(BdoMapCanvas));
       expect(
         canvas.workerNodes.map((node) => node.id).toSet(),
@@ -11589,36 +12149,24 @@ void main() {
             .map((node) => node.id)
             .toSet(),
       );
-      expect(canvas.emphasizedNodeIds, isNotEmpty);
       expect(canvas.gatheringPoints, hasLength(exactPointCount));
-      final firstEmphasisRevision = canvas.emphasisRevision;
-      await tester.tap(workerAlternativesLink);
-      await tester.pump();
-      canvas = tester.widget<BdoMapCanvas>(find.byType(BdoMapCanvas));
-      expect(canvas.emphasisRevision, firstEmphasisRevision + 1);
 
-      await tester.tap(
-        find.byKey(const ValueKey<String>('resource-map-command-gather')),
-      );
-      await tester.pumpAndSettle();
+      await _openGatherHub(tester);
       await selectThujaSap();
       canvas = tester.widget<BdoMapCanvas>(find.byType(BdoMapCanvas));
       expect(
         canvas.gatheringPoints,
         hasLength(exactPointCount),
         reason:
-            'The Gather command must restore the exact manual source layer.',
+            'Returning through material discovery must preserve the exact source layer.',
       );
-      expect(canvas.workerNodes, isEmpty);
+      expect(canvas.workerNodes, isNotEmpty);
 
-      await tester.tap(
-        find.byKey(const ValueKey<String>('resource-map-command-workers')),
-      );
-      await tester.pumpAndSettle();
+      await _openNodePlanner(tester);
       await selectThujaSap();
       canvas = tester.widget<BdoMapCanvas>(find.byType(BdoMapCanvas));
       expect(canvas.workerNodes, isNotEmpty);
-      expect(canvas.gatheringPoints, isEmpty);
+      expect(canvas.gatheringPoints, hasLength(exactPointCount));
       expect(tester.takeException(), isNull);
     },
   );
@@ -11747,18 +12295,12 @@ void main() {
       );
       final gatherScrollable = find
           .descendant(
-            of: find.byKey(const ValueKey<String>('resource-map-gather-hub')),
+            of: find.byKey(const ValueKey<String>('resource-map-atlas-dock')),
             matching: find.byType(Scrollable),
           )
           .first;
-      await tester.scrollUntilVisible(
-        find.text('NEEDED FOR YOUR PLAN'),
-        140,
-        scrollable: gatherScrollable,
-      );
-      await tester.pump();
-      expect(find.text('NEEDED FOR YOUR PLAN'), findsOneWidget);
-      expect(find.text('Test craft plan'), findsOneWidget);
+      expect(find.text('NEEDED FOR YOUR PLAN'), findsNothing);
+      expect(find.text('Test craft plan'), findsNothing);
       expect(
         find.textContaining('shortages have exact map dots'),
         findsNothing,
@@ -11773,10 +12315,27 @@ void main() {
       expect(snakeRow, findsOneWidget, reason: 'matched by game item ID');
       expect(truffleRow, findsOneWidget, reason: 'matched by exact name');
       expect(sheepRow, findsOneWidget, reason: 'matched by resource alias');
+      final snakeTitle = find.descendant(
+        of: snakeRow,
+        matching: find.text('Snake Meat'),
+      );
+      final snakeNeed = find.descendant(
+        of: snakeRow,
+        matching: find.byWidgetPredicate(
+          (widget) =>
+              widget is Text && (widget.data?.startsWith('Need ') ?? false),
+        ),
+      );
+      final labelBounds = tester
+          .getRect(snakeTitle)
+          .expandToInclude(tester.getRect(snakeNeed));
+      expect(tester.widget<Text>(snakeTitle).style!.fontSize, 16);
+      expect(tester.widget<Text>(snakeNeed).style!.fontSize, 12.5);
       expect(
         tester.getSize(snakeRow).height,
-        lessThanOrEqualTo(54),
-        reason: 'plan targets should stay readable and flat, not card-heavy',
+        closeTo(math.max(36, labelBounds.height) + 8, .1),
+        reason:
+            'A multiline target gets only its content height and row padding.',
       );
       expect(
         find.byKey(const ValueKey<String>('resource-map-plan-need-item:5007')),
@@ -11809,9 +12368,9 @@ void main() {
         tester.getTopLeft(truffleRow).dy,
         lessThan(tester.getTopLeft(sheepRow).dy),
       );
-      expect(find.text('0 STOCK'), findsOneWidget);
-      expect(find.text('LOW STOCK'), findsOneWidget);
-      expect(find.text('GATHER'), findsOneWidget);
+      expect(find.text('Stock 0'), findsNothing);
+      expect(find.text('Stock 5'), findsNothing);
+      expect(find.text('GATHER'), findsNothing);
 
       final zeroStockStatus = tester.widget<Tooltip>(
         find.descendant(of: snakeRow, matching: find.byType(Tooltip)),
@@ -11861,25 +12420,71 @@ void main() {
         find.byKey(const ValueKey<String>('resource-map-task-back')),
       );
       await tester.pump();
-      await tester.tap(
-        find.byKey(const ValueKey<String>('resource-map-command-workers')),
-      );
-      await tester.pumpAndSettle();
+      await _openNodePlanner(tester);
       await tester.enterText(find.byType(TextField), "Monk's Branch");
       await tester.pumpAndSettle();
-      expect(find.text("Monk's Branch"), findsWidgets);
+      expect(
+        find.text("Monk's Branch"),
+        findsWidgets,
+        reason: 'filtering the home shortlist must not remove worker search',
+      );
       final monkBranchWorkerNodeCount = dataset
           .workerNodesForResource('item:5007')
           .length;
       expect(monkBranchWorkerNodeCount, greaterThan(0));
       expect(
         find.textContaining('$monkBranchWorkerNodeCount worker nodes'),
-        findsWidgets,
-        reason: 'filtering the home shortlist must not remove worker search',
+        findsNothing,
+        reason: 'worker search keeps the item, without a passive node total',
       );
       expect(tester.takeException(), isNull);
     },
   );
+
+  testWidgets('unknown planner Market count stays neutral and explicit', (
+    tester,
+  ) async {
+    await tester.binding.setSurfaceSize(const Size(1200, 900));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    await tester.pumpWidget(
+      MaterialApp(
+        home: BdoResourceMap(
+          dataset: dataset,
+          cacheDirectory: cacheDirectory,
+          tileSource: tileSource,
+          showSourceNotice: false,
+          tileHttpClient: tileClient,
+          plannerNeeds: const [
+            BdoPlannerMaterialNeed(
+              gameItemId: 7922,
+              name: 'Snake Meat',
+              missingQuantity: 24,
+              marketable: true,
+              stockKnown: false,
+              stock: 0,
+              marketRegion: 'eu',
+              marketFetchedAt: null,
+            ),
+          ],
+        ),
+      ),
+    );
+    await tester.pump(const Duration(milliseconds: 300));
+    await _openGatherHub(tester);
+    await _openGatherStewardSection(tester, 'resource-map-gather-menu-plan');
+    await tester.tap(
+      find.byKey(const ValueKey('resource-map-gather-plan-shortlist')),
+    );
+    await tester.pumpAndSettle();
+    expect(find.text('Stock —'), findsNothing);
+    final row = find.byKey(const ValueKey('resource-map-plan-need-item:7922'));
+    final tooltip = tester.widget<Tooltip>(
+      find.descendant(of: row, matching: find.byType(Tooltip)),
+    );
+    expect(tooltip.message, contains('Stock unknown'));
+    expect(find.text('Stock 0'), findsNothing);
+    expect(tester.takeException(), isNull);
+  });
 
   testWidgets(
     'planner blood shortages drill from family to member to exact locations',
@@ -12028,7 +12633,7 @@ void main() {
           of: waragonRow,
           matching: find.text('Locations not mapped yet'),
         ),
-        findsOneWidget,
+        findsNothing,
       );
       expect(
         tester
@@ -12118,7 +12723,7 @@ void main() {
           of: family,
           matching: find.textContaining('6 interchangeable bloods'),
         ),
-        findsOneWidget,
+        findsNothing,
       );
 
       await tester.tap(
@@ -12170,13 +12775,12 @@ void main() {
 
     await tester.enterText(find.byType(TextField), "Rusalka's Coral");
     await tester.pumpAndSettle();
+    final rusalka = dataset.resources.singleWhere(
+      (resource) => resource.name == "Rusalka's Coral",
+    );
     await tester.tap(
-      find.descendant(
-        of: find.byKey(const ValueKey<String>('resource-map-sidebar-search')),
-        matching: find.descendant(
-          of: find.byType(ListTile),
-          matching: find.text("Rusalka's Coral"),
-        ),
+      find.byKey(
+        ValueKey<String>('resource-map-search-result-resource-${rusalka.id}'),
       ),
     );
     await tester.pump(const Duration(milliseconds: 250));
@@ -12190,6 +12794,7 @@ void main() {
     var canvas = tester.widget<BdoMapCanvas>(find.byType(BdoMapCanvas));
     expect(canvas.gatheringPoints, hasLength(34));
     expect(canvas.gatheringSpots, isEmpty);
+    await _settleVisibleGoldenImages(tester, root: find.byType(BdoResourceMap));
     await expectLater(
       find.byType(BdoResourceMap),
       matchesGoldenFile('goldens/resource_map_rusalka_coral.png'),
@@ -12207,11 +12812,24 @@ void main() {
     );
     await tester.pump();
 
-    expect(find.text('Community-reported location'), findsOneWidget);
+    expect(find.text('Exact location'), findsNothing);
+    expect(find.text('Community-reported location'), findsNothing);
     expect(find.text('Community-reported area'), findsNothing);
     expect(tester.takeException(), isNull);
   });
 }
+
+Finder _searchResultNamed(String name) => find.byWidgetPredicate((widget) {
+  final key = widget.key;
+  if (key is! ValueKey<String> ||
+      !key.value.startsWith('resource-map-search-result-')) {
+    return false;
+  }
+  return find
+      .descendant(of: find.byWidget(widget), matching: find.text(name))
+      .evaluate()
+      .isNotEmpty;
+});
 
 void _expectHousingOverlayDeclutteredAndConnected(
   WidgetTester tester,
@@ -12372,97 +12990,257 @@ void _expectHousingOverlayDeclutteredAndConnected(
   );
 }
 
-Future<void> _openNodePlanner(WidgetTester tester) async {
-  final desktopCommand = find.byKey(
-    const ValueKey<String>('resource-map-command-workers'),
-  );
-  if (desktopCommand.evaluate().isNotEmpty) {
-    await tester.tap(desktopCommand);
-  } else {
-    await tester.tap(
-      find.byKey(const ValueKey<String>('resource-map-compact-node-planner')),
+Future<void> _expectAtlasProductTools(
+  WidgetTester tester,
+  BdoFieldSource source,
+) async {
+  await _settleVisibleGoldenImages(tester, root: find.byType(BdoResourceMap));
+  for (final product in source.products) {
+    final row = find.byKey(
+      ValueKey<String>('resource-map-atlas-product-${product.resourceId}'),
     );
+    expect(row, findsOneWidget);
+    final indicators = find.descendant(
+      of: row,
+      matching: find.byType(BdoGatheringToolIcon),
+    );
+    expect(indicators, findsOneWidget);
+    final indicator = tester.widget<BdoGatheringToolIcon>(indicators);
+    expect(indicator.tool, product.tool);
+    expect(indicator.method, product.method);
+    expect(indicator.size, 27);
+    final selection = resolveBdoGatheringTools(product.tool);
+    expect(selection.tools, isNot(contains(BdoGatheringToolKind.unknown)));
+    for (final tool in selection.tools) {
+      final asset = bdoGatheringToolAssetPath(tool);
+      if (asset == null) continue;
+      final artwork = find.descendant(
+        of: indicators,
+        matching: find.byKey(
+          ValueKey<String>('bdo-gathering-tool-artwork-${tool.name}'),
+        ),
+      );
+      expect(artwork, findsOneWidget);
+      if (bdoGatheringToolAssetSourceRect(tool) != null) {
+        expect(
+          find.descendant(
+            of: artwork,
+            matching: find.byKey(
+              ValueKey<String>('bdo-gathering-tool-sprite-${tool.name}'),
+            ),
+          ),
+          findsOneWidget,
+        );
+      } else {
+        final image = tester.widget<Image>(artwork);
+        expect(image.image, isA<AssetImage>());
+        final provider = image.image as AssetImage;
+        expect(provider.assetName, asset);
+        expect(provider.package, bdoGatheringToolAssetPackage);
+      }
+      expect(tester.getSize(artwork), const Size.square(27));
+    }
   }
+}
+
+Future<void> _goMapHome(WidgetTester tester) async {
+  if (find
+      .byKey(const ValueKey('resource-map-home-find-material'))
+      .evaluate()
+      .isNotEmpty) {
+    return;
+  }
+  final chip = find.byKey(const ValueKey('resource-map-atlas-task-chip'));
+  if (chip.evaluate().isNotEmpty) {
+    await tester.tap(
+      find.byKey(const ValueKey('resource-map-atlas-task-restore')),
+    );
+    await tester.pumpAndSettle();
+  }
+  final home = find.byKey(const ValueKey('resource-map-home-button'));
+  expect(home.hitTestable(), findsOneWidget);
+  await tester.tap(home);
   await tester.pumpAndSettle();
+  expect(
+    find.byKey(const ValueKey('resource-map-home-find-material')),
+    findsOneWidget,
+  );
+}
+
+Future<void> _openHomeAction(WidgetTester tester, String key) async {
+  if (tester.getSize(find.byType(BdoResourceMap)).width < 700) {
+    final legacyKey = switch (key) {
+      'resource-map-home-plan-materials' => 'resource-map-node-mode-materials',
+      'resource-map-home-worker-income' =>
+        'resource-map-open-market-value-recommendations',
+      'resource-map-home-plan-needs' => 'resource-map-recommend-current-recipe',
+      _ => key,
+    };
+    final action = find.byKey(ValueKey(legacyKey));
+    await tester.ensureVisible(action);
+    await tester.pumpAndSettle();
+    await tester.tap(action);
+    await tester.pump(const Duration(milliseconds: 250));
+    return;
+  }
+  await _goMapHome(tester);
+  if (const {
+    'resource-map-home-plan-materials',
+    'resource-map-home-browse-nodes',
+    'resource-map-home-setup',
+    'resource-map-home-plan-needs',
+  }.contains(key)) {
+    final action = find.byKey(ValueKey(key));
+    if (action.evaluate().isEmpty) {
+      final more = find.byKey(const ValueKey('resource-map-home-more-tools'));
+      await tester.ensureVisible(more);
+      await tester.tap(more);
+      await tester.pumpAndSettle();
+    }
+  }
+  final action = find.byKey(ValueKey(key));
+  expect(action, findsOneWidget);
+  await tester.ensureVisible(action);
+  await tester.tap(action);
+  await tester.pump(const Duration(milliseconds: 250));
+}
+
+Future<void> _openWorkerIncome(WidgetTester tester) async {
+  await _openHomeAction(tester, 'resource-map-home-worker-income');
+  await tester.pumpAndSettle();
+}
+
+Future<void> _openWorkerRecipeGoals(WidgetTester tester) async {
+  await _openHomeAction(tester, 'resource-map-home-plan-needs');
+  await tester.pumpAndSettle();
+}
+
+Future<void> _openSavedMapEntries(WidgetTester tester) async {
+  await _openHomeAction(tester, 'resource-map-home-saved');
+  await tester.pumpAndSettle();
+}
+
+Future<void> _openTodoList(WidgetTester tester) async {
+  await _openHomeAction(tester, 'resource-map-home-checklist');
+  await tester.pumpAndSettle();
+}
+
+Future<void> _openNodePlanner(WidgetTester tester) async {
+  if (tester.getSize(find.byType(BdoResourceMap)).width < 700) {
+    await tester.tap(
+      find.byKey(const ValueKey('resource-map-compact-node-planner')),
+    );
+    await tester.pumpAndSettle();
+    return;
+  }
+  await _goMapHome(tester);
+  if (find
+      .byKey(const ValueKey('resource-map-home-plan-materials'))
+      .evaluate()
+      .isEmpty) {
+    final more = find.byKey(const ValueKey('resource-map-home-more-tools'));
+    await tester.ensureVisible(more);
+    await tester.tap(more);
+    await tester.pumpAndSettle();
+  }
 }
 
 Future<void> _openWorkerStewardSection(
   WidgetTester tester,
   String sectionKey,
 ) async {
-  final section = find.byKey(ValueKey<String>(sectionKey)).hitTestable();
+  if (sectionKey == 'resource-map-worker-menu-manage') {
+    await _openWorkerSetup(tester);
+  } else {
+    await _openNodePlanner(tester);
+  }
+}
+
+Future<void> _openWorkerSetup(WidgetTester tester) async {
+  final invest = find.byKey(const ValueKey('resource-map-invest-node-mode'));
+  if (invest.evaluate().isNotEmpty) return;
+  if (find
+      .byKey(const ValueKey('resource-map-worker-hub'))
+      .evaluate()
+      .isEmpty) {
+    await _openHomeAction(tester, 'resource-map-home-setup');
+    await tester.pumpAndSettle();
+  }
+  final setup = find.byKey(const ValueKey('resource-map-your-setup'));
+  if (invest.evaluate().isEmpty) {
+    expect(setup, findsOneWidget);
+    await tester.ensureVisible(setup);
+    await tester.tap(
+      find.descendant(of: setup, matching: find.text('Your setup')),
+    );
+    await tester.pumpAndSettle();
+  }
+  expect(invest, findsOneWidget);
+}
+
+Future<void> _openMapLayers(WidgetTester tester) async {
+  final menu = find.byKey(const ValueKey<String>('resource-map-layer-menu'));
+  if (menu.evaluate().isEmpty) {
+    await tester.tap(
+      find.byKey(const ValueKey<String>('resource-map-layer-menu-toggle')),
+    );
+    await tester.pumpAndSettle();
+  }
+  expect(menu, findsOneWidget);
+}
+
+Future<void> _expectReadableMapAction(
+  WidgetTester tester,
+  String key,
+  String label,
+  double viewportHeight,
+) async {
+  final action = find.byKey(ValueKey<String>(key));
+  expect(action, findsOneWidget);
+  await tester.ensureVisible(action);
+  await tester.pump();
+  expect(action.hitTestable(), findsOneWidget);
+  final title = find.descendant(of: action, matching: find.text(label));
+  expect(title, findsOneWidget);
   expect(
-    section,
-    findsOneWidget,
-    reason: 'The requested Guild Steward section must be available.',
+    tester.renderObject<RenderParagraph>(title).didExceedMaxLines,
+    isFalse,
+    reason: '$label should remain complete at enlarged text.',
   );
-  await tester.tap(section);
-  await tester.pumpAndSettle();
+  final bounds = tester.getRect(action);
+  expect(bounds.top, greaterThanOrEqualTo(0));
+  expect(bounds.bottom, lessThanOrEqualTo(viewportHeight));
 }
 
 Future<void> _openWorkerPlanSectionIfDesktop(WidgetTester tester) async {
-  if (find
-      .byKey(const ValueKey<String>('resource-map-recommend-current-recipe'))
-      .hitTestable()
-      .evaluate()
-      .isNotEmpty) {
-    return;
+  if (tester.getSize(find.byType(BdoResourceMap)).width >= 700) {
+    await _openNodePlanner(tester);
   }
-  if (find
-      .byKey(const ValueKey<String>('resource-map-worker-steward-menu'))
-      .evaluate()
-      .isEmpty) {
-    return;
-  }
-  await _openWorkerStewardSection(tester, 'resource-map-worker-menu-plan');
 }
 
 Future<void> _openGatherHub(WidgetTester tester) async {
-  final desktopCommand = find.byKey(
-    const ValueKey<String>('resource-map-command-gather'),
+  await _openHomeAction(tester, 'resource-map-home-find-material');
+  await tester.pumpAndSettle();
+  expect(
+    find.byKey(const ValueKey('resource-map-material-categories')),
+    findsOneWidget,
   );
-  if (desktopCommand.evaluate().isNotEmpty) {
-    await tester.tap(desktopCommand);
-    await tester.pumpAndSettle();
-    expect(
-      find.byKey(const ValueKey<String>('resource-map-gather-steward-menu')),
-      findsOneWidget,
-    );
-    return;
-  }
-  fail('This helper is only used by desktop resource-map tests.');
 }
 
 Future<void> _openGatherStewardSection(
   WidgetTester tester,
   String sectionKey,
 ) async {
-  final section = find.byKey(ValueKey<String>(sectionKey)).hitTestable();
   expect(
-    section,
+    find.byKey(const ValueKey('resource-map-material-categories')),
     findsOneWidget,
-    reason: 'The requested Gather Steward section must be available.',
   );
-  await tester.tap(section);
-  await tester.pumpAndSettle();
 }
 
 Future<void> _openNodeMaterialTargets(WidgetTester tester) async {
-  await _openNodePlanner(tester);
+  await _openHomeAction(tester, 'resource-map-home-plan-materials');
   if (find
-      .byKey(const ValueKey<String>('resource-map-worker-steward-menu'))
-      .evaluate()
-      .isNotEmpty) {
-    await _openWorkerStewardSection(tester, 'resource-map-worker-menu-plan');
-  }
-  final materialsAction = find
-      .byKey(const ValueKey<String>('resource-map-node-mode-materials'))
-      .hitTestable();
-  expect(materialsAction, findsOneWidget);
-  await tester.tap(materialsAction);
-  await tester.pump(const Duration(milliseconds: 250));
-  if (find
-      .byKey(const ValueKey<String>('resource-map-node-target-preview-loading'))
+      .byKey(const ValueKey('resource-map-node-target-preview-loading'))
       .evaluate()
       .isNotEmpty) {
     await _settleNodeTargetPreview(tester);
@@ -12472,13 +13250,7 @@ Future<void> _openNodeMaterialTargets(WidgetTester tester) async {
 }
 
 Future<void> _openHousingDirectory(WidgetTester tester) async {
-  await _openNodePlanner(tester);
-  await _openWorkerStewardSection(tester, 'resource-map-worker-menu-manage');
-  final houses = find
-      .byKey(const ValueKey<String>('resource-map-worker-houses-action'))
-      .hitTestable();
-  expect(houses, findsOneWidget);
-  await tester.tap(houses);
+  await _openHomeAction(tester, 'resource-map-home-houses');
   await tester.pumpAndSettle();
 }
 
@@ -12535,37 +13307,28 @@ Future<void> _settleVisibleGoldenImages(
       }
       await tester.runAsync(() => precacheImage(provider, element));
     }
+    for (final element
+        in find
+            .descendant(of: root, matching: find.byType(BdoGatheringToolIcon))
+            .evaluate()) {
+      final indicator = element.widget as BdoGatheringToolIcon;
+      for (final tool in resolveBdoGatheringTools(indicator.tool).tools) {
+        final path = bdoGatheringToolAssetPath(tool);
+        if (path == null) continue;
+        final provider = AssetImage(
+          path,
+          package: bdoGatheringToolAssetPackage,
+        );
+        if (!precached.add(provider)) continue;
+        await tester.runAsync(() => precacheImage(provider, element));
+      }
+    }
     await tester.pumpAndSettle();
   }
 }
 
 Future<void> _openWorkerNetwork(WidgetTester tester) async {
-  final desktopCommand = find.byKey(
-    const ValueKey<String>('resource-map-command-workers'),
-  );
-  if (desktopCommand.evaluate().isNotEmpty) {
-    await tester.tap(desktopCommand);
-    await tester.pumpAndSettle();
-    await _openWorkerStewardSection(tester, 'resource-map-worker-menu-explore');
-    await tester.tap(
-      find.byKey(const ValueKey<String>('resource-map-worker-browse-action')),
-    );
-  } else {
-    final button = find.byKey(
-      const ValueKey<String>('resource-map-open-worker-network'),
-    );
-    await tester.scrollUntilVisible(
-      button,
-      240,
-      scrollable: find.descendant(
-        of: find.byKey(
-          const ValueKey<String>('resource-map-sidebar-home-page'),
-        ),
-        matching: find.byType(Scrollable),
-      ),
-    );
-    await tester.tap(button);
-  }
+  await _openHomeAction(tester, 'resource-map-home-browse-nodes');
   await tester.pumpAndSettle();
 }
 

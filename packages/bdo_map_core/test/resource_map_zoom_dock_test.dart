@@ -1,24 +1,26 @@
+import 'package:bdo_map_core/src/engine/map_camera.dart';
+import 'package:bdo_map_core/src/model/map_geometry.dart';
+import 'package:bdo_map_core/src/model/tile_source.dart';
 import 'package:bdo_map_core/src/widgets/resource_map_zoom_dock.dart';
-import 'package:bdo_map_core/src/widgets/resource_map_desktop_shell.dart';
 import 'package:bdo_map_core/src/widgets/resource_map_chrome_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('renders one connected atlas rail and preserves callbacks', (
+  testWidgets('renders a continuous slider rail and preserves callbacks', (
     tester,
   ) async {
     final semantics = tester.ensureSemantics();
-    var zoomIns = 0;
-    var zoomOuts = 0;
+    final camera = _camera();
+    final zoomValues = <double>[];
     var fullWorlds = 0;
 
     await tester.pumpWidget(
       _testApp(
         child: ResourceMapZoomDock(
           key: const ValueKey<String>('resource-map-zoom-controls'),
-          onZoomIn: () => zoomIns += 1,
-          onZoomOut: () => zoomOuts += 1,
+          cameraController: camera,
+          onZoomChanged: zoomValues.add,
           onShowFullWorld: () => fullWorlds += 1,
         ),
       ),
@@ -28,12 +30,13 @@ void main() {
       const ValueKey<String>('resource-map-zoom-dock-surface'),
     );
     final surface = tester.widget<Material>(surfaceFinder);
-    expect(surface.color, ResourceMapAtlasColors.paperRaised);
-    expect(surface.elevation, 2);
-    expect(surface.shadowColor, const Color(0x330A1512));
+    const chrome = ResourceMapChromeThemeData.sakuraCartographer;
+    expect(surface.color, chrome.chromeBase.withValues(alpha: .9));
+    expect(surface.elevation, 6);
+    expect(surface.shadowColor, const Color(0x59000000));
     expect(
       (surface.shape! as RoundedRectangleBorder).borderRadius,
-      BorderRadius.circular(10),
+      BorderRadius.circular(12),
     );
     expect(
       find.descendant(
@@ -44,35 +47,30 @@ void main() {
     );
     expect(
       find.byKey(const ValueKey<String>('resource-map-zoom-divider')),
-      findsNWidgets(2),
+      findsOneWidget,
     );
 
-    final actionFinders = <Finder>[
-      find.byKey(const ValueKey<String>('resource-map-zoom-in')),
-      find.byKey(const ValueKey<String>('resource-map-zoom-out')),
-      find.byKey(const ValueKey<String>('resource-map-full-world')),
-    ];
-    final actionRects = actionFinders.map(tester.getRect).toList();
-    for (final rect in actionRects) {
-      expect(rect.width, ResourceMapZoomDock.controlExtent);
-      expect(rect.height, ResourceMapZoomDock.controlExtent);
-    }
-    expect(actionRects[1].top, actionRects[0].bottom + 1);
-    expect(actionRects[2].top, actionRects[1].bottom + 1);
+    final slider = find.byKey(
+      const ValueKey<String>('resource-map-zoom-slider'),
+    );
+    final fullWorld = find.byKey(
+      const ValueKey<String>('resource-map-full-world'),
+    );
+    expect(slider, findsOneWidget);
+    expect(
+      tester.getRect(slider).height,
+      greaterThan(tester.getRect(slider).width),
+    );
+    expect(tester.getSize(fullWorld), const Size(44, 44));
 
-    expect(find.byTooltip('Zoom in'), findsOneWidget);
-    expect(find.byTooltip('Zoom out'), findsOneWidget);
     expect(find.byTooltip('Show the full world'), findsOneWidget);
-    expect(find.bySemanticsLabel('Zoom in'), findsOneWidget);
-    expect(find.bySemanticsLabel('Zoom out'), findsOneWidget);
+    expect(find.bySemanticsLabel('Map zoom level'), findsOneWidget);
     expect(find.bySemanticsLabel('Show full world'), findsOneWidget);
 
-    await tester.tap(actionFinders[0]);
-    await tester.tap(actionFinders[1]);
-    await tester.tap(actionFinders[2]);
+    tester.widget<Slider>(slider).onChanged!(5.25);
+    await tester.tap(fullWorld);
     await tester.pumpAndSettle();
-    expect(zoomIns, 1);
-    expect(zoomOuts, 1);
+    expect(zoomValues, <double>[5.25]);
     expect(fullWorlds, 1);
     expect(tester.takeException(), isNull);
     await expectLater(
@@ -87,8 +85,8 @@ void main() {
       _testApp(
         textScaler: TextScaler.linear(2),
         child: ResourceMapZoomDock(
-          onZoomIn: () {},
-          onZoomOut: () {},
+          cameraController: _camera(),
+          onZoomChanged: (_) {},
           onShowFullWorld: () {},
         ),
       ),
@@ -103,7 +101,7 @@ void main() {
             ),
           )
           .height,
-      ResourceMapZoomDock.controlExtent * 3 + 2,
+      ResourceMapZoomDock.sliderExtent + ResourceMapZoomDock.controlExtent + 1,
     );
     expect(find.byTooltip('Show the full world'), findsOneWidget);
   });
@@ -114,8 +112,8 @@ void main() {
       _testApp(
         chrome: chrome,
         child: ResourceMapZoomDock(
-          onZoomIn: () {},
-          onZoomOut: () {},
+          cameraController: _camera(),
+          onZoomChanged: (_) {},
           onShowFullWorld: () {},
         ),
       ),
@@ -126,28 +124,25 @@ void main() {
     );
     final surface = tester.widget<Material>(surfaceFinder);
     final shape = surface.shape! as RoundedRectangleBorder;
-    expect(surface.color, chrome.paperRaised);
-    expect(surface.shadowColor, chrome.idleShadow.color);
-    expect(shape.side.color, chrome.divider);
-    expect(shape.borderRadius, BorderRadius.circular(chrome.toolRadius));
-
-    final decoration =
-        tester
-                .widget<DecoratedBox>(
-                  find
-                      .descendant(
-                        of: surfaceFinder,
-                        matching: find.byType(DecoratedBox),
-                      )
-                      .first,
-                )
-                .decoration
-            as BoxDecoration;
-    final gradient = decoration.gradient! as LinearGradient;
-    expect(gradient.colors, <Color>[chrome.graphiteHighlight, chrome.graphite]);
+    expect(surface.color, chrome.chromeBase.withValues(alpha: .9));
+    expect(surface.shadowColor, const Color(0x59000000));
+    expect(shape.side.color, chrome.softOutline.withValues(alpha: .82));
+    expect(shape.borderRadius, BorderRadius.circular(12));
+    expect(
+      find.descendant(
+        of: surfaceFinder,
+        matching: find.byType(LinearProgressIndicator),
+      ),
+      findsNothing,
+    );
     expect(tester.takeException(), isNull);
   });
 }
+
+BdoMapCameraController _camera() => BdoMapCameraController(
+  tileSource: BdoTileSource.workermanCommunity,
+  initialCamera: const BdoMapCamera(center: BdoMapPoint(0, 0), zoom: 3),
+);
 
 Widget _testApp({
   required Widget child,

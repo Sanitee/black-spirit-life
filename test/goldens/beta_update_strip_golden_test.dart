@@ -6,7 +6,7 @@ import 'package:flutter_test/flutter_test.dart';
 import '../support/application_test_harness.dart';
 
 void main() {
-  testWidgets('available Beta patch adds a compact bottom status strip', (
+  testWidgets('available stable patch adds a compact bottom status strip', (
     tester,
   ) async {
     const goldenRoot = ValueKey<String>('beta-update-strip-golden-root');
@@ -22,7 +22,7 @@ void main() {
             applicationFuture: Future.value(harness.bundle),
             marketGateway: const EmptyMarketGateway(),
             updateService: service,
-            updateSource: r'C:\private-beta-feed',
+            updateSource: r'C:\public-stable-feed',
             enableBetaUpdates: true,
           ),
         ),
@@ -48,10 +48,10 @@ class _GoldenUpdateService implements BetaUpdateService {
 
   static const available = BetaUpdateSnapshot(
     phase: BetaUpdatePhase.available,
-    currentVersion: '0.1.0-beta.5',
-    targetVersion: '0.1.0-beta.6',
+    currentVersion: '0.1.5',
+    targetVersion: '0.1.6',
     sizeBytes: 2610822,
-    fullSizeBytes: 66854193,
+    fullSizeBytes: 217687337,
     deltaCount: 1,
   );
 

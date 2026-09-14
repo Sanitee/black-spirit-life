@@ -1,16 +1,21 @@
 import '../../data/catalog/catalog_repository.dart';
+import '../../domain/catalog/temporarily_archived_items.dart';
 import '../../domain/market/market_cancellation.dart';
 import '../../domain/market/market_price_gateway.dart';
 import '../../domain/market/market_price_models.dart';
 import '../../domain/models/catalog_models.dart';
 import '../../domain/models/craft_mode.dart';
+import '../../domain/planner/source_resolution.dart';
 import '../../domain/state/planner_state.dart';
+import '../planning/planner_assembly.dart';
 
 enum MarketRefreshStatus {
   updated,
   partiallyUpdated,
   noMarketListings,
   noResolvableItems,
+  npcPricesOnly,
+  temporarilyArchived,
   failed,
   cancelled,
 }
@@ -22,6 +27,7 @@ enum MarketRefreshDiagnosticCode {
   unresolvedMarketId,
   invalidMarketId,
   marketUnlisted,
+  temporarilyArchived,
   rowFailure,
   missingResponse,
   unexpectedResponse,
@@ -93,6 +99,8 @@ final class MarketRefreshSummary {
     MarketRefreshStatus.noResolvableItems =>
       'No requested materials have a usable market ID. Add or correct the '
           'market ID in item metadata, then retry.',
+    MarketRefreshStatus.npcPricesOnly => 'NPC prices are already included.',
+    MarketRefreshStatus.temporarilyArchived => 'Archived items were skipped.',
     MarketRefreshStatus.failed =>
       'The market check returned no usable updates. Existing cached values '
           'were kept.',
@@ -146,6 +154,9 @@ final class MarketRefreshCoordinator {
     required MarketState currentMarket,
     required Iterable<String> missingMaterialNames,
     MarketCancellationToken? cancellationToken,
+    bool forceRefresh = false,
+    void Function(MarketRefreshResult)? onUpdate,
+    MarketState Function()? latestMarket,
   }) async {
     final resolution = _resolveRequests(
       mode: mode,
@@ -157,9 +168,20 @@ final class MarketRefreshCoordinator {
       return _cancelled(currentMarket, resolution);
     }
     if (resolution.requests.isEmpty) {
+      final archivedOnly =
+          resolution.unresolvedMaterialCount == 0 &&
+          resolution.diagnostics.any(
+            (entry) =>
+                entry.code == MarketRefreshDiagnosticCode.temporarilyArchived,
+          );
       return MarketRefreshResult(
         summary: _summary(
-          status: MarketRefreshStatus.noResolvableItems,
+          status: archivedOnly
+              ? MarketRefreshStatus.temporarilyArchived
+              : resolution.npcMaterialCount > 0 &&
+                    resolution.unresolvedMaterialCount == 0
+              ? MarketRefreshStatus.npcPricesOnly
+              : MarketRefreshStatus.noResolvableItems,
           resolution: resolution,
         ),
         market: _copyMarket(currentMarket),
@@ -169,13 +191,29 @@ final class MarketRefreshCoordinator {
 
     MarketPriceFetchResult fetched;
     try {
-      fetched = await gateway.fetch(
-        resolution.requests,
-        cancellationToken: cancellationToken,
-      );
+      if (gateway case final ProgressiveMarketPriceGateway progressive) {
+        fetched = await progressive.fetchProgressive(
+          resolution.requests,
+          region: currentMarket.region,
+          forceRefresh: forceRefresh,
+          cancellationToken: cancellationToken,
+          onUpdate: onUpdate == null
+              ? null
+              : (partial) {
+                  final current = latestMarket?.call() ?? currentMarket;
+                  if (current.region != currentMarket.region) return;
+                  onUpdate(_merge(current, resolution, partial, partial: true));
+                },
+        );
+      } else {
+        fetched = await gateway.fetch(
+          resolution.requests,
+          cancellationToken: cancellationToken,
+        );
+      }
       cancellationToken?.throwIfCancelled();
     } on MarketFetchCancelledException {
-      return _cancelled(currentMarket, resolution);
+      return _cancelled(latestMarket?.call() ?? currentMarket, resolution);
     } catch (error) {
       return MarketRefreshResult(
         summary: _summary(
@@ -183,7 +221,7 @@ final class MarketRefreshCoordinator {
           resolution: resolution,
           failedRequestCount: resolution.requests.length,
         ),
-        market: _copyMarket(currentMarket),
+        market: _copyMarket(latestMarket?.call() ?? currentMarket),
         diagnostics: [
           ...resolution.diagnostics,
           MarketRefreshDiagnostic(
@@ -196,7 +234,46 @@ final class MarketRefreshCoordinator {
       );
     }
 
-    return _merge(currentMarket, resolution, fetched);
+    final current = latestMarket?.call() ?? currentMarket;
+    if (latestMarket != null && current.region != currentMarket.region) {
+      return _cancelled(current, resolution);
+    }
+    return _merge(current, resolution, fetched);
+  }
+
+  /// Apply shared receipts only to known, relevant names. This does not fetch,
+  /// mark unfinished requests as failed, or mix regional market snapshots.
+  MarketRefreshResult? mergeAvailable({
+    required CraftMode mode,
+    required Map<String, Recipe> assembledRecipes,
+    required MarketState currentMarket,
+    required Iterable<String> names,
+    required MarketPriceFetchResult fetched,
+  }) {
+    if (currentMarket.region.toLowerCase() != fetched.region.toLowerCase()) {
+      return null;
+    }
+    final resolution = _resolveRequests(
+      mode: mode,
+      assembledRecipes: assembledRecipes,
+      names: names,
+    );
+    final relevant = fetched.items
+        .where((row) => resolution.materialNamesById.containsKey(row.id))
+        .toList();
+    if (relevant.isEmpty) return null;
+    return _merge(
+      currentMarket,
+      resolution,
+      MarketPriceFetchResult(
+        region: fetched.region,
+        language: fetched.language,
+        fetchedAt: fetched.fetchedAt,
+        items: relevant,
+        attemptedSources: fetched.attemptedSources,
+      ),
+      partial: true,
+    );
   }
 
   _ResolutionPlan _resolveRequests({
@@ -209,6 +286,11 @@ final class MarketRefreshCoordinator {
     final diagnostics = <MarketRefreshDiagnostic>[];
     final seenNames = <String>{};
     final supporting = catalogRepository.snapshot.supportingData;
+    final sourceRules = const PlannerAssembly().plannerRules(supporting);
+    final recipesByName = <String, Recipe>{
+      for (final entry in assembledRecipes.entries)
+        _marketItemKey(entry.key): entry.value,
+    };
     final idResolver = _MarketIdResolver(
       catalogRecipes: catalogRepository.snapshot.forMode(mode).items,
       marketIds: _stringMap(supporting['marketIds']),
@@ -220,6 +302,7 @@ final class MarketRefreshCoordinator {
     var duplicateIdCount = 0;
     var unresolvedMaterialCount = 0;
     var resolvedMaterialCount = 0;
+    var npcMaterialCount = 0;
 
     for (final rawName in names) {
       requestedNameCount++;
@@ -246,6 +329,16 @@ final class MarketRefreshCoordinator {
         continue;
       }
 
+      final source = resolveSourceInfo(
+        name: name,
+        recipe: recipesByName[_marketItemKey(name)],
+        rules: sourceRules,
+      );
+      if (source.npcPrice.isFinite && source.npcPrice > 0) {
+        npcMaterialCount++;
+        continue;
+      }
+
       final resolved = _resolveId(
         assembledRecipes: assembledRecipes,
         name: name,
@@ -269,6 +362,19 @@ final class MarketRefreshCoordinator {
         continue;
       }
 
+      // Match the resolved identity, not its label: a custom name or alias can
+      // point at another real item without inheriting this temporary archive.
+      if (isTemporarilyArchivedMarketItemId(resolved.id!)) {
+        diagnostics.add(
+          MarketRefreshDiagnostic(
+            code: MarketRefreshDiagnosticCode.temporarilyArchived,
+            materialName: name,
+            marketId: resolved.id,
+            message: '$name is temporarily archived; saved values were kept.',
+          ),
+        );
+        continue;
+      }
       resolvedMaterialCount++;
       final targets = materialNamesById.putIfAbsent(resolved.id!, () {
         requests.add(MarketPriceRequest(name: name, id: resolved.id!));
@@ -300,6 +406,7 @@ final class MarketRefreshCoordinator {
       unresolvedMaterialCount: unresolvedMaterialCount,
       duplicateNameCount: duplicateNameCount,
       duplicateIdCount: duplicateIdCount,
+      npcMaterialCount: npcMaterialCount,
     );
   }
 
@@ -336,8 +443,9 @@ final class MarketRefreshCoordinator {
   MarketRefreshResult _merge(
     MarketState current,
     _ResolutionPlan resolution,
-    MarketPriceFetchResult fetched,
-  ) {
+    MarketPriceFetchResult fetched, {
+    bool partial = false,
+  }) {
     final prices = Map<String, double>.of(current.prices);
     final stock = Map<String, double>.of(current.stock);
     final tradeMarketIds = Map<String, String>.of(current.tradeMarketIds);
@@ -362,8 +470,10 @@ final class MarketRefreshCoordinator {
 
     for (final row in fetched.items) {
       final id = normalizeNumericMarketId(row.id);
-      final targets = id == null ? null : resolution.materialNamesById[id];
-      if (id == null || targets == null) {
+      final requestedTargets = id == null
+          ? null
+          : resolution.materialNamesById[id];
+      if (id == null || requestedTargets == null) {
         diagnostics.add(
           MarketRefreshDiagnostic(
             code: MarketRefreshDiagnosticCode.unexpectedResponse,
@@ -387,6 +497,22 @@ final class MarketRefreshCoordinator {
                 'first row was used.',
           ),
         );
+        continue;
+      }
+      // The shared raw cache can predate values already saved by an older
+      // loader. Compare only evidence for the same canonical item: remapping
+      // an alias must not inherit the previous item's freshness barrier.
+      final targets = row.ok || _isExpectedUnlisted(row.diagnosticCode)
+          ? requestedTargets.where((target) {
+              final previous = tradeObservedAt[target];
+              return tradeMarketIds[target] != id ||
+                  previous == null ||
+                  row.fetchedAt.millisecondsSinceEpoch >= previous;
+            }).toList()
+          : requestedTargets;
+      if (targets.isEmpty) {
+        // The receipt is valid but makes no changes; it is not a failed read.
+        successfulIds.add(id);
         continue;
       }
       if (!row.ok) {
@@ -447,6 +573,14 @@ final class MarketRefreshCoordinator {
         appliedAnyField = true;
       } else {
         unknownStockCount += targets.length;
+        if (row.aggregateStock != null) {
+          // This successful quote explicitly reports a different stock scope.
+          // Do not let a former all-enhancement count survive as base stock.
+          // Failed/ordinary unknown-stock rows still retain cached values.
+          for (final target in targets) {
+            appliedAnyField = stock.remove(target) != null || appliedAnyField;
+          }
+        }
       }
       for (final target in targets) {
         if (_mergeTradeEvidence(
@@ -483,6 +617,7 @@ final class MarketRefreshCoordinator {
     }
 
     for (final request in resolution.requests) {
+      if (partial) break;
       if (respondedIds.contains(request.id)) continue;
       diagnostics.add(
         MarketRefreshDiagnostic(
@@ -499,7 +634,9 @@ final class MarketRefreshCoordinator {
     }
 
     final failedRequestCount =
-        resolution.requests.length - successfulIds.length - unlistedIds.length;
+        (partial ? respondedIds.length : resolution.requests.length) -
+        successfulIds.length -
+        unlistedIds.length;
     if (successfulIds.isEmpty && failedRequestCount > 0) {
       return MarketRefreshResult(
         summary: _summary(
@@ -532,7 +669,9 @@ final class MarketRefreshCoordinator {
         : successfulIds.isEmpty
         ? MarketRefreshStatus.noMarketListings
         : MarketRefreshStatus.updated;
-    final fetchedAt = fetched.fetchedAt.millisecondsSinceEpoch;
+    final fetchedAt = updatedMaterialCount == 0 && unlistedIds.isEmpty
+        ? current.fetchedAt
+        : fetched.fetchedAt.millisecondsSinceEpoch;
     final updatedMarket = _copyMarket(
       current,
       prices: prices,
@@ -789,6 +928,7 @@ final class _ResolutionPlan {
     required this.unresolvedMaterialCount,
     required this.duplicateNameCount,
     required this.duplicateIdCount,
+    required this.npcMaterialCount,
   }) : requests = List<MarketPriceRequest>.unmodifiable(requests),
        materialNamesById = Map<String, List<String>>.unmodifiable({
          for (final entry in materialNamesById.entries)
@@ -805,4 +945,5 @@ final class _ResolutionPlan {
   final int unresolvedMaterialCount;
   final int duplicateNameCount;
   final int duplicateIdCount;
+  final int npcMaterialCount;
 }

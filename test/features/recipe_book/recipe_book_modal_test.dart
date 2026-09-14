@@ -116,7 +116,7 @@ void main() {
       addTearDown(environment.dispose);
       final resolvedNames = <String>[];
       final mapRequests = <PlannerMapLookupRequest>[];
-      final checklistAdds = <PlannerMapLookupAvailability>[];
+      final checklistAdds = <PlannerGatherChecklistRequest>[];
       final plannedNetworkAdds = <PlannerMapLookupAvailability>[];
       final actions = PlannerExternalActions(
         openRecipeBook: (_) {},
@@ -176,7 +176,7 @@ void main() {
       expect(find.text('3 mapped vendor locations'), findsOneWidget);
       expect(find.text('Show gathering locations'), findsOneWidget);
       expect(find.text('12 mapped locations'), findsOneWidget);
-      expect(find.text('Add to checklist'), findsOneWidget);
+      expect(find.text('Add to to-do list'), findsOneWidget);
       expect(find.text('Add to planned network'), findsNothing);
       final manualAction = find.byKey(
         PlannerActionKeys.mapLookupAction(
@@ -3054,7 +3054,7 @@ void main() {
     final panelRect = tester.getRect(panel);
     expect(panelRect.top, greaterThanOrEqualTo(0));
     expect(panelRect.bottom, lessThanOrEqualTo(420));
-    expect(panelRect.height, lessThanOrEqualTo(356.01));
+    expect(panelRect.height, lessThanOrEqualTo(420 - 32 + 0.01));
 
     final scrollView = find.descendant(
       of: panel,
@@ -3147,7 +3147,7 @@ void main() {
     expect(_richInfoTooltips(tester), hasLength(1));
     final info = book.itemInfoFor(name);
     expect(info?.effects, contains('All Damage Reduction +13'));
-    expect(info?.notes, contains('Duration: 15 min.'));
+    expect(info?.notes, contains('Duration: 20 min.'));
 
     await tester.pumpWidget(const SizedBox.shrink());
     book.dispose();

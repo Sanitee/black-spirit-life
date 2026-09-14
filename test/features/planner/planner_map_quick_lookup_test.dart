@@ -209,7 +209,7 @@ void main() {
       findsOneWidget,
     );
     expect(find.text('Show gathering locations'), findsNothing);
-    expect(find.text('Add to checklist'), findsNothing);
+    expect(find.text('Add to to-do list'), findsNothing);
     expect(find.text('Add to planned network'), findsNothing);
 
     await tester.tap(vendorAction);
@@ -237,7 +237,7 @@ void main() {
     'gather-checklist action forwards the exact resolved item without opening the map',
     (tester) async {
       await setPlannerTestSize(tester, const Size(1500, 940));
-      final added = <PlannerMapLookupAvailability>[];
+      final added = <PlannerGatherChecklistRequest>[];
       final availability = PlannerMapLookupAvailability(
         materialName: 'Sunrise Herb',
         hasManualGathering: true,
@@ -263,7 +263,7 @@ void main() {
 
       expect(find.text('Show gathering locations'), findsOneWidget);
       expect(find.text('Add to planned network'), findsOneWidget);
-      expect(find.text('Add to checklist'), findsOneWidget);
+      expect(find.text('Add to to-do list'), findsOneWidget);
       final manualAction = find.byKey(
         PlannerActionKeys.mapLookupAction(
           'need:Sunrise Herb',
@@ -305,9 +305,9 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(added, hasLength(1));
-      expect(added.single, same(availability));
-      expect(added.single.manualResourceId, 'item:5400');
-      expect(added.single.workerResourceId, 'item:5400');
+      expect(added.single.availability, same(availability));
+      expect(added.single.availability.manualResourceId, 'item:5400');
+      expect(added.single.availability.workerResourceId, 'item:5400');
       expect(harness.mapLookupRequests, isEmpty);
     },
   );
@@ -386,7 +386,7 @@ void main() {
       const visibleLabels = <String>[
         'Show gathering locations',
         '123456789 mapped locations',
-        'Add to checklist',
+        'Add to to-do list',
         'Keep it in your map checklist',
         'Add to planned network',
         '987654321 worker nodes available',
@@ -416,7 +416,7 @@ void main() {
     tester,
   ) async {
     await setPlannerTestSize(tester, const Size(1500, 940));
-    final added = <PlannerMapLookupAvailability>[];
+    final added = <PlannerGatherChecklistRequest>[];
     final harness = PlannerTestHarness(
       resolveMapLookup: (materialName) async => PlannerMapLookupAvailability(
         materialName: materialName,
@@ -438,7 +438,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Show gathering locations'), findsNothing);
-    expect(find.text('Add to checklist'), findsOneWidget);
+    expect(find.text('Add to to-do list'), findsOneWidget);
     expect(find.text('Add to planned network'), findsOneWidget);
     expect(find.text('3 worker nodes available'), findsOneWidget);
     await tester.tap(
@@ -451,7 +451,7 @@ void main() {
     );
     await tester.pumpAndSettle();
     expect(added, hasLength(1));
-    expect(added.single.workerResourceId, 'sunrise-herb');
+    expect(added.single.availability.workerResourceId, 'sunrise-herb');
   });
 
   testWidgets('long-press opens the same source-aware map menu', (

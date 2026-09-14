@@ -2,7 +2,7 @@
 
 ## Controlling source decision
 
-The source review remains complete for Black Spirit Life `0.1.5+24`.
+The source review remains complete for Black Spirit Life `0.1.6+25`.
 
 - Pearl Abyss-origin icons, portraits, descriptions, recipes, NPC information,
   prices, coordinates and node facts are treated as game content and factual
@@ -46,16 +46,16 @@ that Shrddr prohibits this use.
 
 ## Runtime data boundary
 
-The shipped `packages/bdo_map_core/assets/data/resource_map.json` is 7,801,681
+The shipped `packages/bdo_map_core/assets/data/resource_map.json` is 7,544,577
 bytes with SHA-256
-`50CFE1C7A6FAD8AA731578A67C305C9C703A619AF7EDCE5C5142EA9E826AC462`.
+`BE62E56A6B18F14C7A6439521A9CA9CA240974219DBD1E44D85CDEC136C94C15`.
 It contains Black Spirit Life's normalized application schema, including:
 
 - 1,052 Pearl Abyss-origin worker-node records and 1,622 output relationships;
 - 13,315 exact gathering points: 12,582 historical SomethingLovely points,
   501 Stone Cobra/Rock Scorpion points, 34 Rusalka points, and 198 Stillcoral
   coastal points;
-- 51 planner-relevant vendor items, 266 physical NPC pins, and 1,241
+- 51 planner-relevant vendor items, 266 physical NPC pins, and 1,243
   item-to-vendor listings; and
 - the retained Edania, Royal Workshop, hunting and resource-map relationships.
 
@@ -102,8 +102,8 @@ content-addressed and is not described as cryptographically pinned.
 Before publication:
 
 1. create and scan a public source commit directly on top of the sanitized
-   `v0.1.4` release;
-2. tag that exact commit `v0.1.5`;
+   `v0.1.5` release;
+2. tag that exact commit `v0.1.6`;
 3. build the Stable app and installer from that clean tagged commit with
    package `BlackSpiritLife.App`, channel `win-x64-stable`, and GitHub update
    source `https://github.com/Sanitee/black-spirit-life`;
@@ -112,8 +112,8 @@ Before publication:
    profile preservation, offline map/planner behavior, repair and both
    uninstall choices;
 6. enumerate the exact release files with byte lengths and SHA-256 hashes; and
-7. obtain immediate project-owner approval for the exact commit, tag, release
-   notes, files, hashes and GitHub actions before any public publication.
+7. confirm the project owner's 2026-09-14 publication authorization still
+   applies to the exact candidate after every preceding gate passes.
 
 The unsigned installer may trigger Windows SmartScreen or an
 unfamiliar-publisher warning; this must be disclosed on the release page.

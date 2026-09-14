@@ -2,10 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../../app/state/planner_application_controller.dart';
+import '../../app/workspace/planner_gather_checklist_bridge.dart'
+    show gatherNeededForPlan;
+import '../../data/catalog/catalog_repository.dart';
+import '../../domain/catalog/temporarily_archived_items.dart';
 import '../../domain/formatting/planner_formatters.dart';
 import '../../domain/models/catalog_models.dart';
-import '../../domain/models/craft_mode.dart';
-import '../../domain/planner/acquisition_recipe_resolution.dart';
 import '../../domain/planner/afk_weight_calculator.dart';
 import '../../domain/planner/ingredient_quality.dart';
 import '../../domain/planner/planner_models.dart';
@@ -14,7 +16,9 @@ import '../../domain/state/state_copy.dart';
 import '../../shared/overlays/anchored_popover.dart';
 import '../../visual/illuminated_ledger/ledger_ornament_painters.dart';
 import '../../visual/visual.dart';
+import '../recipe_book/recipe_book_controller.dart';
 import '../recipe_book/recipe_book_item_info.dart';
+import '../recipe_book/recipe_book_item_info_view.dart';
 import '../shared/mode_item_icon.dart';
 import '../shared/recipe_variant_selector.dart';
 import 'need_material_order.dart';
@@ -22,6 +26,25 @@ import 'planner_contracts.dart';
 import 'planner_keys.dart';
 
 typedef SelectPlannerTarget = bool Function(String name);
+
+typedef PlannerTargetOptionBuilder =
+    Widget Function(
+      BuildContext context,
+      String name,
+      bool selected,
+      VoidCallback onSelected,
+    );
+
+typedef PlannerTargetFieldBuilder =
+    Widget Function(
+      BuildContext context,
+      TextEditingController controller,
+      FocusNode focusNode,
+      ValueChanged<String> onChanged,
+      VoidCallback onTap,
+      ValueChanged<String> onSubmitted,
+      FocusOnKeyEventCallback onKeyEvent,
+    );
 
 /// Compact desktop height shared by the Standard Planner command controls.
 ///
@@ -51,14 +74,29 @@ class PlannerTargetChooser extends StatefulWidget {
     required this.semanticLabel,
     required this.actionKey,
     this.controlHeight,
+    this.hintText = 'Search craftable recipes',
+    this.emptyText = 'No matching craftable recipes',
+    this.popupWidth = 460,
+    this.popupMaxHeight = 420,
+    this.itemIconBuilder,
+    this.optionBuilder,
+    this.fieldBuilder,
     super.key,
-  });
+  }) : assert(popupWidth > 0),
+       assert(popupMaxHeight > 0);
 
   final ModeFeatureController controller;
   final PlannerCommandTarget target;
   final String semanticLabel;
   final Key actionKey;
   final double? controlHeight;
+  final String hintText;
+  final String emptyText;
+  final double popupWidth;
+  final double popupMaxHeight;
+  final Widget Function(BuildContext context, String name)? itemIconBuilder;
+  final PlannerTargetOptionBuilder? optionBuilder;
+  final PlannerTargetFieldBuilder? fieldBuilder;
 
   @override
   State<PlannerTargetChooser> createState() => _PlannerTargetChooserState();
@@ -216,8 +254,11 @@ class _PlannerTargetChooserState extends State<PlannerTargetChooser> {
               offset: const Offset(0, 6),
               showWhenUnlinked: false,
               child: SizedBox(
-                width: 460,
-                height: (matches.length * 66 + 16).clamp(82, 420).toDouble(),
+                width: widget.popupWidth,
+                height: (matches.length * 66 + 16)
+                    .clamp(82, double.infinity)
+                    .clamp(0, widget.popupMaxHeight)
+                    .toDouble(),
                 child: TapRegion(
                   groupId: this,
                   onTapOutside: (_) {
@@ -231,7 +272,7 @@ class _PlannerTargetChooserState extends State<PlannerTargetChooser> {
                     child: matches.isEmpty
                         ? Center(
                             child: Text(
-                              'No matching craftable recipes',
+                              widget.emptyText,
                               style: spec.typography.body,
                             ),
                           )
@@ -241,39 +282,51 @@ class _PlannerTargetChooserState extends State<PlannerTargetChooser> {
                               final name = matches[index];
                               return Padding(
                                 padding: const EdgeInsets.only(bottom: 6),
-                                child: AppButton(
-                                  selected: index == _highlighted,
-                                  role: AppButtonRole.navigation,
-                                  minimumSize: const Size.fromHeight(60),
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 12,
-                                    vertical: 8,
-                                  ),
-                                  semanticLabel: 'Select $name',
-                                  onPressed: () => _select(name),
-                                  child: Row(
-                                    children: <Widget>[
-                                      PlannerItemIcon(
-                                        controller: widget.controller,
-                                        name: name,
-                                        size: 42,
+                                child:
+                                    widget.optionBuilder?.call(
+                                      context,
+                                      name,
+                                      index == _highlighted,
+                                      () => _select(name),
+                                    ) ??
+                                    AppButton(
+                                      selected: index == _highlighted,
+                                      role: AppButtonRole.navigation,
+                                      minimumSize: const Size.fromHeight(60),
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 12,
+                                        vertical: 8,
                                       ),
-                                      const SizedBox(width: 10),
-                                      Expanded(
-                                        child: Text(
-                                          name,
-                                          maxLines: 2,
-                                          overflow: TextOverflow.ellipsis,
-                                          style: spec.typography.body.copyWith(
-                                            fontSize: 16,
-                                            fontWeight: FontWeight.w700,
-                                            height: 1.15,
+                                      semanticLabel: 'Select $name',
+                                      onPressed: () => _select(name),
+                                      child: Row(
+                                        children: <Widget>[
+                                          widget.itemIconBuilder?.call(
+                                                context,
+                                                name,
+                                              ) ??
+                                              PlannerItemIcon(
+                                                controller: widget.controller,
+                                                name: name,
+                                                size: 42,
+                                              ),
+                                          const SizedBox(width: 10),
+                                          Expanded(
+                                            child: Text(
+                                              name,
+                                              maxLines: 2,
+                                              overflow: TextOverflow.ellipsis,
+                                              style: spec.typography.body
+                                                  .copyWith(
+                                                    fontSize: 16,
+                                                    fontWeight: FontWeight.w700,
+                                                    height: 1.15,
+                                                  ),
+                                            ),
                                           ),
-                                        ),
+                                        ],
                                       ),
-                                    ],
-                                  ),
-                                ),
+                                    ),
                               );
                             },
                           ),
@@ -290,24 +343,34 @@ class _PlannerTargetChooserState extends State<PlannerTargetChooser> {
             child: Listener(
               behavior: HitTestBehavior.translucent,
               onPointerDown: (_) => _showFromUser(),
-              child: PlannerTextField(
-                controller: _text,
-                focusNode: _focus,
-                hintText: 'Search craftable recipes',
-                semanticLabel: widget.semanticLabel,
-                suffix: Icon(
-                  Icons.expand_more,
-                  color: spec.palette.textMuted,
-                  size: 22,
-                ),
-                onChanged: _filterChanged,
-                onTap: _showFromUser,
-                onSubmitted: _submit,
-                onKeyEvent: _handleKey,
-                fontSize: denseLayout ? 15 : plannerStandardTargetFontSize,
-                fontWeight: FontWeight.w700,
-                minimumHeight: widget.controlHeight,
-              ),
+              child:
+                  widget.fieldBuilder?.call(
+                    context,
+                    _text,
+                    _focus,
+                    _filterChanged,
+                    _showFromUser,
+                    _submit,
+                    _handleKey,
+                  ) ??
+                  PlannerTextField(
+                    controller: _text,
+                    focusNode: _focus,
+                    hintText: widget.hintText,
+                    semanticLabel: widget.semanticLabel,
+                    suffix: Icon(
+                      Icons.expand_more,
+                      color: spec.palette.textMuted,
+                      size: 22,
+                    ),
+                    onChanged: _filterChanged,
+                    onTap: _showFromUser,
+                    onSubmitted: _submit,
+                    onKeyEvent: _handleKey,
+                    fontSize: denseLayout ? 15 : plannerStandardTargetFontSize,
+                    fontWeight: FontWeight.w700,
+                    minimumHeight: widget.controlHeight,
+                  ),
             ),
           ),
         ),
@@ -742,11 +805,16 @@ class PlannerToggle extends StatelessWidget {
                     : null,
               ),
               const SizedBox(width: 7),
-              Text(
-                label.toUpperCase(),
-                style: spec.typography.button.copyWith(
-                  color: spec.palette.text,
-                  fontSize: 12,
+              Flexible(
+                child: Text(
+                  label.toUpperCase(),
+                  maxLines: 2,
+                  softWrap: true,
+                  overflow: TextOverflow.visible,
+                  style: spec.typography.button.copyWith(
+                    color: spec.palette.text,
+                    fontSize: 12,
+                  ),
                 ),
               ),
             ],
@@ -860,13 +928,28 @@ class PlannerPlanColumns extends StatefulWidget {
   State<PlannerPlanColumns> createState() => _PlannerPlanColumnsState();
 }
 
-class _PlannerPlanColumnsState extends State<PlannerPlanColumns> {
+class _PlannerPlanColumnsState extends State<PlannerPlanColumns>
+    with SingleTickerProviderStateMixin {
   final ScrollController _queueScroll = ScrollController();
   final ScrollController _needScroll = ScrollController();
   final NeedMaterialOrder _needMaterialOrder = NeedMaterialOrder();
   final Map<String, TextEditingController> _ownedDraftControllers =
       <String, TextEditingController>{};
   String? _openChoiceAnchor;
+  String? _changedSubstitute;
+  late final AnimationController _choiceMotion = AnimationController(
+    vsync: this,
+    value: 1,
+    duration: const Duration(milliseconds: 150),
+  );
+  late final CurvedAnimation _choiceCurve = CurvedAnimation(
+    parent: _choiceMotion,
+    curve: Curves.easeOutCubic,
+  );
+  late final Animation<double> _choiceStrength = Tween<double>(
+    begin: 1,
+    end: 0,
+  ).animate(_choiceCurve);
   String? _marketMessage;
   Map<String, List<PlannerMarketRowDiagnostic>> _marketRowDiagnostics =
       const <String, List<PlannerMarketRowDiagnostic>>{};
@@ -885,6 +968,8 @@ class _PlannerPlanColumnsState extends State<PlannerPlanColumns> {
     if (!targetChanged && !resetIdentityChanged) return;
 
     _openChoiceAnchor = null;
+    _changedSubstitute = null;
+    _choiceMotion.value = 1;
     _needMaterialOrder.reset();
     _resetScroll(_queueScroll);
     _resetScroll(_needScroll);
@@ -897,6 +982,8 @@ class _PlannerPlanColumnsState extends State<PlannerPlanColumns> {
 
   @override
   void dispose() {
+    _choiceCurve.dispose();
+    _choiceMotion.dispose();
     _queueScroll.dispose();
     _needScroll.dispose();
     for (final controller in _ownedDraftControllers.values) {
@@ -928,6 +1015,7 @@ class _PlannerPlanColumnsState extends State<PlannerPlanColumns> {
   void _stageNeedSubstitute(MissingMaterial source, String selection) {
     _adoptMarketOrderWhenReady = false;
     _needMaterialOrder.stageSubstitute(source: source, selection: selection);
+    _showSubstituteFeedback(selection);
   }
 
   void _stageStepSubstitute(PlanStepIngredient source, String selection) {
@@ -940,6 +1028,17 @@ class _PlannerPlanColumnsState extends State<PlannerPlanColumns> {
       sourceBaseName: source.baseName,
       selection: selection,
     );
+    _showSubstituteFeedback(selection);
+  }
+
+  void _showSubstituteFeedback(String selection) {
+    setState(() => _changedSubstitute = selection);
+    if (MediaQuery.disableAnimationsOf(context) ||
+        !TickerMode.valuesOf(context).enabled) {
+      _choiceMotion.value = 1;
+    } else {
+      _choiceMotion.forward(from: 0);
+    }
   }
 
   Future<void> _checkPrices() async {
@@ -957,6 +1056,9 @@ class _PlannerPlanColumnsState extends State<PlannerPlanColumns> {
         PlannerMarketRequest(
           controller: widget.controller,
           materials: widget.plan.missing,
+          materialNames: widget.controller
+              .recipeRouteMarketNamesForPlan(widget.plan)
+              .toList(),
         ),
       );
       widget.controller.replaceMarketValues(
@@ -1093,7 +1195,74 @@ class _PlannerPlanColumnsState extends State<PlannerPlanColumns> {
         );
       },
     );
-    return KeyedSubtree(key: widget.actionKey, child: content);
+    return KeyedSubtree(
+      key: widget.actionKey,
+      child: _PlannerGatherScope(
+        controller: widget.controller,
+        plan: widget.plan,
+        bonusPlan: widget.bonusPlan,
+        child: _PlannerChoiceFeedbackScope(
+          name: _changedSubstitute,
+          strength: _choiceStrength,
+          child: content,
+        ),
+      ),
+    );
+  }
+}
+
+class _PlannerChoiceFeedbackScope extends InheritedWidget {
+  const _PlannerChoiceFeedbackScope({
+    required this.name,
+    required this.strength,
+    required super.child,
+  });
+
+  final String? name;
+  final Animation<double> strength;
+
+  @override
+  bool updateShouldNotify(_PlannerChoiceFeedbackScope oldWidget) =>
+      name != oldWidget.name || strength != oldWidget.strength;
+}
+
+/// Paint-only feedback: values, focus and hit testing change immediately.
+class _PlannerChoiceFeedback extends StatelessWidget {
+  const _PlannerChoiceFeedback({required this.name, required this.child});
+
+  final String name;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    final scope = context
+        .dependOnInheritedWidgetOfExactType<_PlannerChoiceFeedbackScope>();
+    if (scope?.name == null ||
+        !_sameFolded(scope!.name!, name) ||
+        MediaQuery.disableAnimationsOf(context)) {
+      return child;
+    }
+    final spec = context.visualTheme;
+    return AnimatedBuilder(
+      key: ValueKey<String>('planner-choice-feedback:$name'),
+      animation: scope.strength,
+      child: child,
+      builder: (context, child) => DecoratedBox(
+        position: DecorationPosition.foreground,
+        decoration: BoxDecoration(
+          color: spec.palette.primaryBright.withValues(
+            alpha: .08 * scope.strength.value,
+          ),
+          border: Border.all(
+            color: spec.palette.primaryBright.withValues(
+              alpha: .34 * scope.strength.value,
+            ),
+          ),
+          borderRadius: BorderRadius.circular(spec.geometry.cardRadius),
+        ),
+        child: child,
+      ),
+    );
   }
 }
 
@@ -1153,41 +1322,47 @@ class _QueuePanel extends StatelessWidget {
         AppOverlayCoordinatorScope.maybeOf(context)?.dismissTop();
         return false;
       },
-      child: ListView.builder(
-        key: const PageStorageKey<String>('planner-craft-queue'),
-        controller: scrollController,
-        itemCount: steps.length,
-        itemBuilder: (context, index) {
-          final step = steps[index];
+      child: _QueuePresentationList(
+        controller: controller,
+        steps: steps,
+        scrollController: scrollController,
+        identity: (controller, plan.target, plan.want, bonusPlan),
+        itemBuilder: (context, step, index, onComplete) {
           final completed = _containsFolded(
             controller.state.value.completedSteps,
             step.name,
           );
           return Padding(
-            key: ValueKey<String>('queue:${step.name}'),
+            key: ValueKey<String>(
+              '${onComplete == null ? 'completed-queue-content' : 'queue'}:${step.name}',
+            ),
             padding: EdgeInsets.only(
               bottom: index + 1 < steps.length ? (denseLayout ? 8 : 14) : 0,
               right: denseLayout ? 8 : 0,
             ),
-            child: _QueueStepCard(
-              controller: controller,
-              step: step,
-              titleSubstituteSources: _incomingSubstituteSources(
-                plan,
-                step.name,
+            child: _PlannerChoiceFeedback(
+              name: step.name,
+              child: _QueueStepCard(
+                controller: controller,
+                step: step,
+                titleSubstituteSources: _incomingSubstituteSources(
+                  plan,
+                  step.name,
+                ),
+                index: index,
+                completed: completed,
+                expanded: isExpanded(step, index),
+                allowCompletion: allowCompletion,
+                sessionTargetName: plan.target,
+                sessionTargetAmount: plan.want,
+                bonusPlan: bonusPlan,
+                externalActions: externalActions,
+                openChoiceAnchor: openChoiceAnchor,
+                onSubstituteSelected: onSubstituteSelected,
+                onChoiceAnchorChanged: onChoiceAnchorChanged,
+                onToggleExpanded: () => onToggleExpanded(step, index),
+                onComplete: onComplete,
               ),
-              index: index,
-              completed: completed,
-              expanded: isExpanded(step, index),
-              allowCompletion: allowCompletion,
-              sessionTargetName: plan.target,
-              sessionTargetAmount: plan.want,
-              bonusPlan: bonusPlan,
-              externalActions: externalActions,
-              openChoiceAnchor: openChoiceAnchor,
-              onSubstituteSelected: onSubstituteSelected,
-              onChoiceAnchorChanged: onChoiceAnchorChanged,
-              onToggleExpanded: () => onToggleExpanded(step, index),
             ),
           );
         },
@@ -1212,19 +1387,198 @@ class _QueuePanel extends StatelessWidget {
               trailing: trailing,
             ),
             const SizedBox(height: 12),
-            Expanded(
-              child: steps.isEmpty
-                  ? const _PlannerEmpty(
-                      message:
-                          'No craft steps are needed for the current target and inventory.',
-                    )
-                  : queueListWithoutPlatformScrollbar,
-            ),
+            Expanded(child: queueListWithoutPlatformScrollbar),
           ],
         ),
       ),
     );
   }
+}
+
+typedef _QueuePresentationBuilder =
+    Widget Function(
+      BuildContext context,
+      PlanStep step,
+      int index,
+      VoidCallback? onComplete,
+    );
+
+/// Keeps only a short, non-interactive success presentation after the actual
+/// completion transaction has already updated the plan and shared inventory.
+class _QueuePresentationList extends StatefulWidget {
+  const _QueuePresentationList({
+    required this.controller,
+    required this.steps,
+    required this.scrollController,
+    required this.identity,
+    required this.itemBuilder,
+  });
+
+  final ModeFeatureController controller;
+  final List<PlanStep> steps;
+  final ScrollController scrollController;
+  final Object identity;
+  final _QueuePresentationBuilder itemBuilder;
+
+  @override
+  State<_QueuePresentationList> createState() => _QueuePresentationListState();
+}
+
+class _QueuePresentationListState extends State<_QueuePresentationList> {
+  final Map<String, ({PlanStep step, int index})> _completed = {};
+  bool _motion = false;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _motion =
+        !MediaQuery.disableAnimationsOf(context) &&
+        TickerMode.valuesOf(context).enabled;
+    if (!_motion) _completed.clear();
+  }
+
+  @override
+  void didUpdateWidget(_QueuePresentationList oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.identity != widget.identity) {
+      _completed.clear();
+      return;
+    }
+    _completed.removeWhere(
+      (name, _) =>
+          !_containsFolded(widget.controller.state.value.completedSteps, name),
+    );
+  }
+
+  void _complete(PlanStep step, int index) {
+    if (_completed.containsKey(step.name.toLowerCase())) return;
+    // No animation or timer is allowed to defer or repeat this transaction.
+    if (!widget.controller.completeStep(step) || !mounted || !_motion) return;
+    AppOverlayCoordinatorScope.maybeOf(context)?.dismissTop();
+    setState(() {
+      _completed[step.name.toLowerCase()] = (step: step, index: index);
+    });
+  }
+
+  void _finish(String name) {
+    if (!mounted || !_completed.containsKey(name)) return;
+    setState(() => _completed.remove(name));
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final rows = <({PlanStep step, int index, bool completed})>[
+      for (var index = 0; index < widget.steps.length; index++)
+        (step: widget.steps[index], index: index, completed: false),
+    ];
+    for (final entry in _completed.values) {
+      final existing = rows.indexWhere(
+        (row) => _sameFolded(row.step.name, entry.step.name),
+      );
+      final row = (step: entry.step, index: entry.index, completed: true);
+      if (existing >= 0) {
+        rows[existing] = row;
+      } else {
+        rows.insert(entry.index.clamp(0, rows.length), row);
+      }
+    }
+    if (rows.isEmpty) {
+      return const _PlannerEmpty(
+        message:
+            'No craft steps are needed for the current target and inventory.',
+      );
+    }
+    return ListView.builder(
+      key: const PageStorageKey<String>('planner-craft-queue'),
+      controller: widget.scrollController,
+      itemCount: rows.length,
+      findChildIndexCallback: (key) {
+        if (key is! ValueKey<String>) return null;
+        final index = rows.indexWhere(
+          (row) => key.value == 'queue:${row.step.name}',
+        );
+        return index < 0 ? null : index;
+      },
+      itemBuilder: (context, index) {
+        final row = rows[index];
+        final child = widget.itemBuilder(
+          context,
+          row.step,
+          row.index,
+          row.completed ? null : () => _complete(row.step, row.index),
+        );
+        if (!row.completed) return child;
+        return _QueueCompletionMotion(
+          key: ValueKey<String>('queue:${row.step.name}'),
+          name: row.step.name,
+          onFinish: () => _finish(row.step.name.toLowerCase()),
+          child: child,
+        );
+      },
+    );
+  }
+}
+
+class _QueueCompletionMotion extends StatefulWidget {
+  const _QueueCompletionMotion({
+    required this.name,
+    required this.onFinish,
+    required this.child,
+    super.key,
+  });
+
+  final String name;
+  final VoidCallback onFinish;
+  final Widget child;
+
+  @override
+  State<_QueueCompletionMotion> createState() => _QueueCompletionMotionState();
+}
+
+class _QueueCompletionMotionState extends State<_QueueCompletionMotion>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _controller =
+      AnimationController(
+        vsync: this,
+        duration: const Duration(milliseconds: 160),
+      )..addStatusListener((status) {
+        if (status == AnimationStatus.completed) widget.onFinish();
+      });
+  late final CurvedAnimation _curve = CurvedAnimation(
+    parent: _controller,
+    curve: const Interval(.25, 1, curve: Curves.easeInOutCubic),
+  );
+  late final Animation<double> _remaining = Tween<double>(
+    begin: 1,
+    end: 0,
+  ).animate(_curve);
+
+  @override
+  void initState() {
+    super.initState();
+    _controller.forward();
+  }
+
+  @override
+  void dispose() {
+    _curve.dispose();
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) => IgnorePointer(
+    key: ValueKey<String>('planner-completion-feedback:${widget.name}'),
+    child: ExcludeFocus(
+      child: ExcludeSemantics(
+        child: SizeTransition(
+          sizeFactor: _remaining,
+          alignment: Alignment.topCenter,
+          child: FadeTransition(opacity: _remaining, child: widget.child),
+        ),
+      ),
+    ),
+  );
 }
 
 class _QueueStepCard extends StatelessWidget {
@@ -1244,6 +1598,7 @@ class _QueueStepCard extends StatelessWidget {
     required this.onSubstituteSelected,
     required this.onChoiceAnchorChanged,
     required this.onToggleExpanded,
+    required this.onComplete,
   });
 
   final ModeFeatureController controller;
@@ -1262,6 +1617,7 @@ class _QueueStepCard extends StatelessWidget {
   onSubstituteSelected;
   final ValueChanged<String?> onChoiceAnchorChanged;
   final VoidCallback onToggleExpanded;
+  final VoidCallback? onComplete;
 
   @override
   Widget build(BuildContext context) {
@@ -1280,13 +1636,22 @@ class _QueueStepCard extends StatelessWidget {
           (source: source, ingredient: ingredient),
     ];
     final primaryTitleChoice = titleChoices.isEmpty ? null : titleChoices.first;
-    final titleAnchor = titleChoices.isEmpty
+    final processingChoice = controller.optionalProcessingRecipe(step.name);
+    final titleAnchor = titleChoices.isEmpty && processingChoice == null
         ? null
         : 'queue-title:${step.name}';
     final titleChooserOpen =
         titleAnchor != null && openChoiceAnchor == titleAnchor;
     final hasVariants = recipe?.hasRecipeVariants ?? false;
-    final summary = step.batchSize > 1
+    final routeSelection = hasVariants
+        ? controller.recipeRouteSelection(step.name, requestedOutput: step.net)
+        : null;
+    final showTotalIngredients = recipe?.type == 'processing';
+    final summary = showTotalIngredients && step.batchSize == 1
+        ? '${formatQuantity(step.count)} ${step.count == 1 ? 'batch' : 'batches'} · '
+              'Makes ${formatQuantity(step.produced)} · '
+              'Need ${formatQuantity(step.demand)}'
+        : step.batchSize > 1
         ? 'Craft ${formatQuantity(step.count)} | '
               'Mass batches ${formatQuantity(step.batchCount)} x${step.batchSize} | '
               'Results in ${formatQuantity(step.produced)} | '
@@ -1327,22 +1692,31 @@ class _QueueStepCard extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: <Widget>[
-                      if (primaryTitleChoice != null)
+                      if (primaryTitleChoice != null ||
+                          processingChoice != null)
                         _SubstituteNameAnchor(
+                          controller: controller,
                           key: PlannerActionKeys.row('P12', titleAnchor!),
                           nameKey: PlannerActionKeys.row('P10', step.name),
                           name: step.name,
-                          currentName: primaryTitleChoice.source.baseName,
-                          ingredient: primaryTitleChoice.ingredient,
+                          currentName:
+                              primaryTitleChoice?.source.baseName ?? step.name,
+                          ingredient:
+                              primaryTitleChoice?.ingredient ??
+                              _acquisitionAnchorIngredient(step.name),
                           fontSize: denseLayout ? 18 : 19,
                           isShowing: titleChooserOpen,
-                          semanticLabel: titleChoices.length > 1
+                          semanticLabel: primaryTitleChoice == null
+                              ? 'Choose how to get ${step.name}'
+                              : titleChoices.length > 1
                               ? 'Choose recipe substitutions affecting '
                                     '${step.name}; ${titleChoices.length} '
                                     'choices; '
                                     '${titleChooserOpen ? 'open' : 'closed'}'
                               : null,
-                          tooltip: titleChoices.length > 1
+                          tooltip: primaryTitleChoice == null
+                              ? 'Buy or process'
+                              : titleChoices.length > 1
                               ? 'More than one recipe choice contributes to '
                                     '${step.name}. Click to choose which one '
                                     'to change.'
@@ -1370,12 +1744,37 @@ class _QueueStepCard extends StatelessWidget {
                           ),
                           compact: denseLayout,
                           axisSpacing: denseLayout ? 13 : 16,
+                          isAutomatic: routeSelection?.isAutomatic ?? false,
+                          onAutomaticSelected: routeSelection == null
+                              ? null
+                              : () => controller.selectAutomaticRecipeRoute(
+                                  step.name,
+                                ),
+                          onBatchSelected: routeSelection?.isAutomatic == true
+                              ? (batch) =>
+                                    controller.selectAutomaticRecipeRoute(
+                                      step.name,
+                                      batchMultiplier: batch,
+                                    )
+                              : null,
                           onSelected: (variantId) =>
                               controller.selectRecipeVariant(
                                 recipeName: step.name,
                                 variantId: variantId,
                               ),
                         ),
+                        if (routeSelection != null &&
+                            routeSelection.hasComparison) ...<Widget>[
+                          const SizedBox(height: 6),
+                          RecipeRouteCostComparison(
+                            selection: routeSelection,
+                            itemIconBuilder: (name, size) => PlannerItemIcon(
+                              controller: controller,
+                              name: name,
+                              size: size,
+                            ),
+                          ),
+                        ],
                       ],
                       SizedBox(height: denseLayout ? 10 : 12),
                       Text(
@@ -1404,25 +1803,31 @@ class _QueueStepCard extends StatelessWidget {
                     semanticLabel: completed
                         ? '${step.name} is done'
                         : 'Done with ${step.name}',
-                    onPressed: completed
-                        ? null
-                        : () => controller.completeStep(step),
+                    onPressed: completed ? null : onComplete,
                   ),
                 ],
               ],
             ),
           ),
-          if (titleChooserOpen && titleChoices.isNotEmpty) ...<Widget>[
+          if (titleChooserOpen) ...<Widget>[
             SizedBox(height: denseLayout ? 5 : 7),
             Padding(
               padding: EdgeInsets.only(left: denseLayout ? 61 : 70),
-              child: _QueueTitleSubstituteChooser(
-                controller: controller,
-                stepName: step.name,
-                choices: titleChoices,
-                onSubstituteSelected: onSubstituteSelected,
-                onClose: () => onChoiceAnchorChanged(null),
-              ),
+              child: titleChoices.isEmpty
+                  ? _InlineSubstituteChooser(
+                      controller: controller,
+                      parentName: step.name,
+                      currentName: step.name,
+                      ingredient: _acquisitionAnchorIngredient(step.name),
+                      onClose: () => onChoiceAnchorChanged(null),
+                    )
+                  : _QueueTitleSubstituteChooser(
+                      controller: controller,
+                      stepName: step.name,
+                      choices: titleChoices,
+                      onSubstituteSelected: onSubstituteSelected,
+                      onClose: () => onChoiceAnchorChanged(null),
+                    ),
             ),
           ],
           SizedBox(height: denseLayout ? 13 : 16),
@@ -1478,13 +1883,17 @@ class _QueueStepCard extends StatelessWidget {
                           ? 6
                           : 8,
                     ),
-                    child: _IngredientRow(
-                      controller: controller,
-                      ingredient: step.ingredients[ingredientIndex],
-                      externalActions: externalActions,
-                      openChoiceAnchor: openChoiceAnchor,
-                      onSubstituteSelected: onSubstituteSelected,
-                      onChoiceAnchorChanged: onChoiceAnchorChanged,
+                    child: _PlannerChoiceFeedback(
+                      name: step.ingredients[ingredientIndex].baseName,
+                      child: _IngredientRow(
+                        controller: controller,
+                        ingredient: step.ingredients[ingredientIndex],
+                        showTotalQuantity: showTotalIngredients,
+                        externalActions: externalActions,
+                        openChoiceAnchor: openChoiceAnchor,
+                        onSubstituteSelected: onSubstituteSelected,
+                        onChoiceAnchorChanged: onChoiceAnchorChanged,
+                      ),
                     ),
                   ),
               ],
@@ -1511,8 +1920,10 @@ class _IngredientToggle extends StatelessWidget {
     final spec = context.visualTheme;
     final ledger = spec.isIlluminatedLedger;
     final denseLayout = spec.usesDenseSplitLayout;
-    final preferredWidth = denseLayout ? 156.0 : 188.0;
-    final height = denseLayout ? 36.0 : 38.0;
+    final textScale = MediaQuery.textScalerOf(context).scale(14) / 14;
+    final enlargement = textScale > 1.25 ? textScale : 1.0;
+    final preferredWidth = (denseLayout ? 156.0 : 188.0) * enlargement;
+    final height = (denseLayout ? 36.0 : 38.0) * enlargement;
     return SizedBox(
       width: preferredWidth,
       height: height,
@@ -2681,6 +3092,38 @@ enum _PlannerMapQuickAction {
   addToPlannedNetwork,
 }
 
+class _PlannerGatherScope extends InheritedWidget {
+  const _PlannerGatherScope({
+    required this.controller,
+    required this.plan,
+    required this.bonusPlan,
+    required super.child,
+  });
+  final ModeFeatureController controller;
+  final PlanResult plan;
+  final bool bonusPlan;
+
+  PlannerGatherDemand demandFor(String name) {
+    String identity(String value) => value.trim().toLowerCase();
+    return PlannerGatherDemand(
+      sourceId:
+          'planner:${controller.mode.key}:${bonusPlan ? 'bonus' : 'plan'}:${plan.target.toLowerCase()}',
+      sourceLabel: plan.target,
+      materialName: name,
+      neededQuantity: gatherNeededForPlan(plan, identity(name), identity),
+      plannerMode: controller.mode,
+      plannerTarget: plan.target,
+      bonusPlan: bonusPlan,
+    );
+  }
+
+  @override
+  bool updateShouldNotify(_PlannerGatherScope oldWidget) =>
+      oldWidget.plan != plan ||
+      oldWidget.controller != controller ||
+      oldWidget.bonusPlan != bonusPlan;
+}
+
 class _PlannerMapQuickLookupRegion extends StatefulWidget {
   const _PlannerMapQuickLookupRegion({
     required this.materialName,
@@ -2752,11 +3195,17 @@ class _PlannerMapQuickLookupRegionState
     final npcVendorDetail =
         '${availability.npcVendorCount} mapped vendor '
         '${availability.npcVendorCount == 1 ? 'location' : 'locations'}';
-    final manualDetail = availability.manualLocationCount > 0
+    final manualMaterialName = availability.manualMaterialName?.trim();
+    final hasManualAlternative = manualMaterialName?.isNotEmpty == true;
+    final manualDetail = hasManualAlternative
+        ? 'Optional source for ${availability.materialName}'
+        : availability.manualLocationCount > 0
         ? '${availability.manualLocationCount} mapped '
               '${availability.manualLocationCount == 1 ? 'location' : 'locations'}'
         : 'Open this material on the map';
-    final manualActionLabel = availability.manualLocationCount > 0
+    final manualActionLabel = hasManualAlternative
+        ? 'Show $manualMaterialName'
+        : availability.manualLocationCount > 0
         ? 'Show gathering locations'
         : 'Show source on map';
     const checklistDetail = 'Keep it in your map checklist';
@@ -2778,7 +3227,7 @@ class _PlannerMapQuickLookupRegionState
       actionLabels: <String>[
         if (canOpenNpcVendors) 'Show NPC vendors',
         if (canOpenManual) manualActionLabel,
-        if (canAddToChecklist) 'Add to checklist',
+        if (canAddToChecklist) 'Add to to-do list',
         if (canAddToPlannedNetwork) 'Add to planned network',
       ],
       actionDetails: <String>[
@@ -2848,7 +3297,7 @@ class _PlannerMapQuickLookupRegionState
             child: const _PlannerMapLookupMenuLabel(
               icon: Icons.checklist_rounded,
               tone: AppSurfaceTone.success,
-              label: 'Add to checklist',
+              label: 'Add to to-do list',
               detail: checklistDetail,
             ),
           ),
@@ -2871,7 +3320,14 @@ class _PlannerMapQuickLookupRegionState
     );
     if (selected == null || !mounted) return;
     if (selected == _PlannerMapQuickAction.addToGatherChecklist) {
-      widget.externalActions.addToGatherChecklist?.call(availability);
+      widget.externalActions.addToGatherChecklist?.call(
+        PlannerGatherChecklistRequest(
+          availability: availability,
+          demand: context
+              .getInheritedWidgetOfExactType<_PlannerGatherScope>()
+              ?.demandFor(widget.materialName),
+        ),
+      );
       return;
     }
     if (selected == _PlannerMapQuickAction.addToPlannedNetwork) {
@@ -2883,7 +3339,11 @@ class _PlannerMapQuickLookupRegionState
         : PlannerMapLookupSource.manualGathering;
     opener?.call(
       PlannerMapLookupRequest(
-        materialName: availability.materialName,
+        materialName:
+            source == PlannerMapLookupSource.manualGathering &&
+                hasManualAlternative
+            ? manualMaterialName!
+            : availability.materialName,
         resourceId: availability.resourceIdFor(source),
         source: source,
       ),
@@ -3054,6 +3514,7 @@ class _IngredientRow extends StatelessWidget {
   const _IngredientRow({
     required this.controller,
     required this.ingredient,
+    required this.showTotalQuantity,
     required this.externalActions,
     required this.openChoiceAnchor,
     required this.onSubstituteSelected,
@@ -3062,6 +3523,7 @@ class _IngredientRow extends StatelessWidget {
 
   final ModeFeatureController controller;
   final PlanStepIngredient ingredient;
+  final bool showTotalQuantity;
   final PlannerExternalActions externalActions;
   final String? openChoiceAnchor;
   final void Function(PlanStepIngredient source, String selection)
@@ -3082,7 +3544,9 @@ class _IngredientRow extends StatelessWidget {
     );
     final hasSubstitutes =
         domainIngredient != null && ingredient.options.length > 1;
-    final perAttemptQuantity = domainIngredient == null
+    final displayedQuantity = showTotalQuantity
+        ? ingredient.need
+        : domainIngredient == null
         ? null
         : controller
               .previewIngredientSelection(
@@ -3125,6 +3589,7 @@ class _IngredientRow extends StatelessWidget {
                       Flexible(
                         child: hasSubstitutes
                             ? _SubstituteNameAnchor(
+                                controller: controller,
                                 key: PlannerActionKeys.row('P12', anchor),
                                 nameKey: PlannerActionKeys.row(
                                   'P11',
@@ -3177,7 +3642,7 @@ class _IngredientRow extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(width: 10),
-                if (perAttemptQuantity != null) ...<Widget>[
+                if (displayedQuantity != null) ...<Widget>[
                   Padding(
                     padding: EdgeInsets.only(right: quantityRightInset),
                     child: SizedBox(
@@ -3186,7 +3651,7 @@ class _IngredientRow extends StatelessWidget {
                         fit: BoxFit.scaleDown,
                         alignment: Alignment.centerRight,
                         child: Text(
-                          formatQuantity(perAttemptQuantity),
+                          formatQuantity(displayedQuantity),
                           key: ValueKey<String>(
                             'planner-ingredient-batch-quantity:'
                             '${ingredient.parentName}:${ingredient.original}',
@@ -3244,13 +3709,12 @@ class _ItemAcquisitionPopover extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final details = _ingredientAcquisitionDetails(controller, name);
     final overlayId =
         '$overlayScope-acquisition:$stableId:${name.toLowerCase()}';
     return AnchoredPopover(
       overlayId: overlayId,
-      preferredWidth: 350,
-      maximumHeight: 430,
+      preferredWidth: itemReferenceCardWidth(context),
+      maximumHeight: itemReferenceCardHeight(context),
       margin: 24,
       gap: 12,
       placement: AnchoredPopoverPlacement.beside,
@@ -3258,7 +3722,7 @@ class _ItemAcquisitionPopover extends StatelessWidget {
       popoverBuilder: (context, close) => _IngredientAcquisitionCard(
         controller: controller,
         stableId: stableId,
-        details: details,
+        name: name,
         onClose: close,
       ),
       anchorBuilder: (context, toggle, isShowing) => _IngredientInfoAnchor(
@@ -3333,300 +3797,87 @@ class _IngredientInfoAnchor extends StatelessWidget {
   }
 }
 
-class _IngredientAcquisitionCard extends StatelessWidget {
+/// A reference session exists only while its popup is mounted, not per row.
+class _IngredientAcquisitionCard extends StatefulWidget {
   const _IngredientAcquisitionCard({
     required this.controller,
+    required this.name,
     required this.stableId,
-    required this.details,
     required this.onClose,
   });
 
   final ModeFeatureController controller;
+  final String name;
   final String stableId;
-  final _IngredientAcquisitionDetails details;
   final VoidCallback onClose;
 
   @override
-  Widget build(BuildContext context) {
-    final spec = context.visualTheme;
-    final ledger = spec.isIlluminatedLedger;
-    final sakura = spec.isSakuraNightGarden;
-    final standard = context.standardVisual;
-    final titleColor = ledger
-        ? const Color(0xFF6B2E29)
-        : sakura
-        ? spec.palette.text
-        : const Color(0xFFFFF1CF);
-    final bodyColor = ledger
-        ? const Color(0xFF65543F)
-        : sakura
-        ? spec.palette.textMuted
-        : const Color(0xFFD6EEE4);
-    final content = SingleChildScrollView(
-      padding: const EdgeInsets.fromLTRB(14, 12, 12, 14),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: <Widget>[
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: <Widget>[
-              Expanded(
-                child: AnchoredPopoverDragRegion(
-                  key: ValueKey<String>(
-                    'planner-acquisition-drag-region:$stableId',
-                  ),
-                  child: Row(
-                    children: <Widget>[
-                      PlannerItemIcon(
-                        controller: controller,
-                        name: details.name,
-                        size: 38,
-                      ),
-                      const SizedBox(width: 10),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: <Widget>[
-                            if (details.kind.isNotEmpty)
-                              Text(
-                                details.kind,
-                                style: spec.typography.meta.copyWith(
-                                  color: bodyColor.withAlpha(190),
-                                  fontSize: 11,
-                                  fontWeight: FontWeight.w700,
-                                ),
-                              ),
-                            Text(
-                              details.name,
-                              style:
-                                  (ledger
-                                          ? const TextStyle(
-                                              fontFamily: 'Georgia',
-                                              fontSize: 17,
-                                              fontWeight: FontWeight.w700,
-                                            )
-                                          : spec.typography.body.copyWith(
-                                              fontSize: 16,
-                                              fontWeight: FontWeight.w800,
-                                            ))
-                                      .copyWith(color: titleColor),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-              const SizedBox(width: 8),
-              _SourceInfoCloseButton(
-                semanticLabel:
-                    'Close acquisition information for ${details.name}',
-                onPressed: onClose,
-              ),
-            ],
-          ),
-          const SizedBox(height: 13),
-          Text(
-            'How to Obtain',
-            style: spec.typography.body.copyWith(
-              color: titleColor,
-              fontSize: 13,
-              fontWeight: FontWeight.w800,
-            ),
-          ),
-          const SizedBox(height: 7),
-          for (var index = 0; index < details.lines.length; index += 1)
-            Padding(
-              padding: EdgeInsets.only(
-                bottom: index + 1 == details.lines.length ? 0 : 7,
-              ),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: <Widget>[
-                  Padding(
-                    padding: const EdgeInsets.only(top: 1),
-                    child: Text(
-                      '•',
-                      style: TextStyle(
-                        color: sakura
-                            ? spec.palette.trimBright
-                            : ledger
-                            ? const Color(0xFF9A6639)
-                            : const Color(0xFFF0C67D),
-                        fontSize: 14,
-                        fontWeight: FontWeight.w800,
-                        height: 1.2,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 7),
-                  Expanded(
-                    child: Text(
-                      details.lines[index],
-                      key: index == 0
-                          ? ValueKey<String>(
-                              'planner-acquisition-body:$stableId',
-                            )
-                          : null,
-                      style: spec.typography.body.copyWith(
-                        color: bodyColor,
-                        fontSize: 12,
-                        fontWeight: FontWeight.w600,
-                        height: 1.28,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-        ],
-      ),
-    );
-    final decoration = BoxDecoration(
-      gradient: ledger
-          ? const LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: <Color>[
-                Color.fromARGB(249, 255, 247, 223),
-                Color.fromARGB(168, 231, 211, 171),
-              ],
-            )
-          : sakura
-          ? SakuraNightGardenSpec.raisedSurfaceGradient
-          : StandardSpec.glassGradient(topAlpha: 210, bottomAlpha: 92),
-      borderRadius: BorderRadius.circular(
-        ledger
-            ? 2
-            : sakura
-            ? spec.geometry.cardRadius
-            : 8,
-      ),
-      border: Border.all(
-        color: ledger
-            ? const Color(0xFFB9903E)
-            : sakura
-            ? spec.palette.trim
-            : StandardSpec.accentBrush(
-                standard.accentHue,
-                alpha: .48,
-                neon: standard.neon,
-              ),
-      ),
-      boxShadow: ledger
-          ? const <BoxShadow>[
-              BoxShadow(
-                color: Color(0x60352516),
-                blurRadius: 28,
-                offset: Offset(0, 10),
-              ),
-            ]
-          : sakura
-          ? spec.materials.highShadow
-          : const <BoxShadow>[
-              BoxShadow(
-                color: Color(0x73000000),
-                blurRadius: 24,
-                offset: Offset(0, 10),
-              ),
-            ],
-    );
-    Widget card = Container(
-      key: ValueKey<String>('planner-acquisition-card:$stableId'),
-      decoration: decoration,
-      child: ledger
-          ? CustomPaint(
-              foregroundPainter: const LedgerOrnamentFramePainter(),
-              child: content,
-            )
-          : content,
-    );
-    card = Semantics(
-      container: true,
-      explicitChildNodes: true,
-      label: 'How to obtain ${details.name}',
-      child: card,
-    );
-    return card;
+  State<_IngredientAcquisitionCard> createState() =>
+      _IngredientAcquisitionCardState();
+}
+
+class _IngredientAcquisitionCardState
+    extends State<_IngredientAcquisitionCard> {
+  late RecipeBookController _book;
+
+  @override
+  void initState() {
+    super.initState();
+    _createBook();
   }
-}
 
-final class _IngredientAcquisitionDetails {
-  const _IngredientAcquisitionDetails({
-    required this.name,
-    required this.kind,
-    required this.lines,
-  });
+  void _createBook() {
+    _book = RecipeBookController(
+      modeController: widget.controller,
+      catalogRepository: CatalogRepository(widget.controller.owner.catalog),
+      callingContext: RecipeBookCallingContext.planner,
+      allowedTargets: const <String>[],
+    );
+  }
 
-  final String name;
-  final String kind;
-  final List<String> lines;
-}
+  @override
+  void didUpdateWidget(_IngredientAcquisitionCard oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.controller != widget.controller) {
+      _book.dispose();
+      _createBook();
+    }
+  }
 
-_IngredientAcquisitionDetails _ingredientAcquisitionDetails(
-  ModeFeatureController controller,
-  String name,
-) {
-  final resolved = resolveAcquisitionRecipe(
-    name: name,
-    currentMode: controller.mode,
-    recipesByMode: <CraftMode, Map<String, Recipe>>{
-      for (final mode in CraftMode.values)
-        mode: controller.owner.modes[mode]!.recipes,
+  @override
+  void dispose() {
+    _book.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) => ListenableBuilder(
+    listenable: _book,
+    builder: (context, _) {
+      final mode = widget.controller.mode;
+      final info =
+          _book.itemInfoFor(widget.name, mode: mode) ??
+          RecipeBookItemInfo(title: widget.name, kind: 'Item', summary: '');
+      return Semantics(
+        container: true,
+        explicitChildNodes: true,
+        label: 'How to obtain ${widget.name}',
+        child: ItemReferenceCard(
+          key: ValueKey<String>('planner-acquisition-card:${widget.stableId}'),
+          controller: _book,
+          mode: mode,
+          name: widget.name,
+          info: info,
+          maxWidth: itemReferenceCardWidth(context),
+          spec: context.visualTheme,
+          onClose: widget.onClose,
+          headerDragKey: ValueKey<String>(
+            'planner-acquisition-drag-region:${widget.stableId}',
+          ),
+        ),
+      );
     },
   );
-  final recipe = resolved?.recipe;
-  final canonicalName = resolved?.name ?? name;
-  final itemInfo = recipeBookInfoFor(
-    name: canonicalName,
-    recipe: recipe,
-    searchTerms: const <String>[],
-    consumerRecipes: const <Recipe>[],
-  );
-  final source = controller.resolveItemSource(name, recipe: recipe);
-  final lines = <String>[];
-  for (final line in itemInfo?.howToObtain ?? const <String>[]) {
-    _addDistinctAcquisitionLine(lines, line);
-  }
-  for (final line
-      in controller
-              .resolveItemAcquisition(canonicalName)
-              ?.displayableSummaries ??
-          const <String>[]) {
-    _addDistinctAcquisitionLine(lines, line);
-  }
-  _addDistinctAcquisitionLine(lines, source.sourceNote);
-  final vendor = source.vendor?.trim() ?? '';
-  final location = source.location?.trim() ?? '';
-  if (vendor.isNotEmpty) {
-    _addDistinctAcquisitionLine(
-      lines,
-      'Buy from $vendor${location.isEmpty ? '' : ' in $location'}.',
-    );
-  }
-  if (lines.isEmpty) {
-    lines.add('No acquisition note has been saved for this custom ingredient.');
-  }
-  return _IngredientAcquisitionDetails(
-    name: canonicalName,
-    kind: itemInfo?.kind.trim() ?? recipe?.group?.trim() ?? 'Ingredient',
-    lines: List<String>.unmodifiable(lines),
-  );
-}
-
-void _addDistinctAcquisitionLine(List<String> lines, String? candidate) {
-  final line = candidate?.trim() ?? '';
-  if (line.isEmpty) return;
-  final folded = line.toLowerCase().replaceAll(RegExp(r'\s+'), ' ');
-  if (lines.any(
-    (existing) =>
-        existing.toLowerCase().replaceAll(RegExp(r'\s+'), ' ') == folded,
-  )) {
-    return;
-  }
-  lines.add(line);
 }
 
 class _NeedPanel extends StatelessWidget {
@@ -3715,19 +3966,22 @@ class _NeedPanel extends StatelessWidget {
             bottom: index + 1 < itemCount ? (denseLayout ? 6 : 10) : 0,
             right: denseLayout ? 8 : 0,
           ),
-          child: _NeedRow(
-            controller: controller,
-            row: row,
-            externalActions: externalActions,
-            draftController: ownedDraftController(row.name),
-            showPrices: showPrices,
-            marketDiagnostics: _marketDiagnosticsFor(
-              marketRowDiagnostics,
-              row.name,
+          child: _PlannerChoiceFeedback(
+            name: row.choice?.baseName ?? row.name,
+            child: _NeedRow(
+              controller: controller,
+              row: row,
+              externalActions: externalActions,
+              draftController: ownedDraftController(row.name),
+              showPrices: showPrices,
+              marketDiagnostics: _marketDiagnosticsFor(
+                marketRowDiagnostics,
+                row.name,
+              ),
+              openChoiceAnchor: openChoiceAnchor,
+              onSubstituteSelected: onSubstituteSelected,
+              onChoiceAnchorChanged: onChoiceAnchorChanged,
             ),
-            openChoiceAnchor: openChoiceAnchor,
-            onSubstituteSelected: onSubstituteSelected,
-            onChoiceAnchorChanged: onChoiceAnchorChanged,
           ),
         );
       },
@@ -3790,7 +4044,7 @@ class _NeedPanel extends StatelessWidget {
               child: materials.isEmpty && !showPrices
                   ? const _PlannerEmpty(
                       message:
-                          'All base materials are covered by inventory or craft steps.',
+                          'You have the materials, or they’re in your craft queue.',
                     )
                   : needListWithoutPlatformScrollbar,
             ),
@@ -3830,11 +4084,16 @@ class _NeedRow extends StatelessWidget {
     final spec = context.visualTheme;
     final denseLayout = spec.usesDenseSplitLayout;
     final choice = row.choice;
+    final processingChoice = controller.optionalProcessingRecipe(row.name);
     final anchor = choice == null
-        ? ''
+        ? processingChoice == null
+              ? ''
+              : 'missing-acquisition:${row.name}'
         : 'missing:${row.name}:${choice.substituteGroup}';
     final domainIngredient = choice == null
-        ? null
+        ? processingChoice == null
+              ? null
+              : _acquisitionAnchorIngredient(row.name)
         : _resolveIngredient(
             controller,
             choice.parentName,
@@ -3842,7 +4101,8 @@ class _NeedRow extends StatelessWidget {
             choice.substituteGroup,
           );
     final hasSubstitutes =
-        domainIngredient != null && choice != null && choice.options.length > 1;
+        domainIngredient != null &&
+        (processingChoice != null || (choice?.options.length ?? 0) > 1);
     final source = _sourceInfo(controller, row);
     final confirmedMarketUnlisted =
         controller.state.value.market.isItemUnlisted(row.name) ||
@@ -3891,14 +4151,21 @@ class _NeedRow extends StatelessWidget {
                           Flexible(
                             child: hasSubstitutes
                                 ? _SubstituteNameAnchor(
+                                    controller: controller,
                                     key: PlannerActionKeys.row('P12', anchor),
                                     nameKey: PlannerActionKeys.row(
                                       'P20',
                                       row.name,
                                     ),
                                     name: row.name,
-                                    currentName: choice.baseName,
+                                    currentName: choice?.baseName ?? row.name,
                                     ingredient: domainIngredient,
+                                    semanticLabel: choice == null
+                                        ? 'Choose how to get ${row.name}'
+                                        : null,
+                                    tooltip: choice == null
+                                        ? 'Buy or process'
+                                        : null,
                                     fontSize: denseLayout ? 16.5 : 17.5,
                                     isShowing: openChoiceAnchor == anchor,
                                     onToggle: () => onChoiceAnchorChanged(
@@ -3971,18 +4238,18 @@ class _NeedRow extends StatelessWidget {
               ],
             ),
             if (openChoiceAnchor == anchor &&
-                domainIngredient != null &&
-                choice != null) ...<Widget>[
+                domainIngredient != null) ...<Widget>[
               SizedBox(height: denseLayout ? 5 : 8),
               Padding(
                 padding: EdgeInsets.only(left: denseLayout ? 52 : 58),
                 child: _InlineSubstituteChooser(
                   controller: controller,
-                  parentName: choice.parentName,
-                  currentName: choice.baseName,
+                  parentName: choice?.parentName ?? row.name,
+                  currentName: choice?.baseName ?? row.name,
                   ingredient: domainIngredient,
-                  onBeforeSelection: (selection) =>
-                      onSubstituteSelected(row, selection),
+                  onBeforeSelection: choice == null
+                      ? null
+                      : (selection) => onSubstituteSelected(row, selection),
                   onClose: () => onChoiceAnchorChanged(null),
                 ),
               ),
@@ -4075,7 +4342,11 @@ class _OwnedDraftActionsState extends State<_OwnedDraftActions> {
       setState(() => _error = 'Enter an amount greater than zero to add');
       return;
     }
-    widget.controller.addMissingAmount(widget.name, value);
+    final added = widget.controller.addMissingAmount(widget.name, value);
+    if (!added) {
+      setState(() => _error = "Couldn't add right now");
+      return;
+    }
     _text.value = const TextEditingValue(
       text: '0',
       selection: TextSelection.collapsed(offset: 1),
@@ -4120,7 +4391,7 @@ class _OwnedDraftActionsState extends State<_OwnedDraftActions> {
                       fontWeight: FontWeight.w700,
                       minimumHeight: referenceGeometry ? 38 : null,
                       invalid: _error != null,
-                      onSubmitted: (_) => _validate(),
+                      onSubmitted: (_) => _add(),
                     ),
                   ),
                   if (_error case final error?) ...<Widget>[
@@ -4469,6 +4740,7 @@ class _SourceInfoCloseButtonState extends State<_SourceInfoCloseButton> {
 
 class _SubstituteNameAnchor extends StatefulWidget {
   const _SubstituteNameAnchor({
+    required this.controller,
     required this.name,
     required this.nameKey,
     required this.currentName,
@@ -4482,6 +4754,7 @@ class _SubstituteNameAnchor extends StatefulWidget {
     super.key,
   });
 
+  final ModeFeatureController controller;
   final String name;
   final Key nameKey;
   final String currentName;
@@ -4547,7 +4820,10 @@ class _SubstituteNameAnchorState extends State<_SubstituteNameAnchor> {
         : _hovered
         ? const Color(0x16FFFFFF)
         : Colors.transparent;
-    final options = _distinctFolded(widget.ingredient.options);
+    final options = _visibleSubstituteOptions(
+      widget.controller,
+      widget.ingredient,
+    );
     Widget control = Semantics(
       button: true,
       toggled: widget.isShowing,
@@ -4754,7 +5030,13 @@ class _InlineSubstituteChooserState extends State<_InlineSubstituteChooser> {
     final spec = context.visualTheme;
     final ledger = spec.isIlluminatedLedger;
     final sakura = spec.isSakuraNightGarden;
-    final options = _distinctFolded(widget.ingredient.options);
+    final options = _visibleSubstituteOptions(
+      widget.controller,
+      widget.ingredient,
+    );
+    final processingChoice = widget.controller.optionalProcessingRecipe(
+      widget.currentName,
+    );
     final selected = _selectedSubstituteFor(
       controller: widget.controller,
       parentName: widget.parentName,
@@ -4818,7 +5100,9 @@ class _InlineSubstituteChooserState extends State<_InlineSubstituteChooser> {
                 spacing: 6,
                 runSpacing: 6,
                 children: <Widget>[
-                  for (final option in options)
+                  for (final option in options.where(
+                    (_) => options.length > 1 || processingChoice == null,
+                  ))
                     SizedBox(
                       width: itemWidth,
                       height: spec.usesDenseSplitLayout ? 52 : 44,
@@ -4844,6 +5128,12 @@ class _InlineSubstituteChooserState extends State<_InlineSubstituteChooser> {
                         },
                       ),
                     ),
+                  if (processingChoice != null)
+                    _ProcessingAcquisitionOptions(
+                      controller: widget.controller,
+                      recipe: processingChoice,
+                      onClose: widget.onClose,
+                    ),
                 ],
               );
             },
@@ -4857,7 +5147,93 @@ class _InlineSubstituteChooserState extends State<_InlineSubstituteChooser> {
       label: 'Substitute choices for ${widget.ingredient.name}',
       child: panel,
     );
-    return panel;
+    if (MediaQuery.disableAnimationsOf(context)) return panel;
+    return TweenAnimationBuilder<double>(
+      key: ValueKey<String>(
+        'planner-choice-entrance:${widget.ingredient.name}',
+      ),
+      tween: Tween<double>(begin: .84, end: 1),
+      duration: const Duration(milliseconds: 140),
+      curve: Curves.easeOutCubic,
+      child: panel,
+      builder: (context, opacity, child) =>
+          Opacity(opacity: opacity, child: child),
+    );
+  }
+}
+
+Ingredient _acquisitionAnchorIngredient(String name) => Ingredient(
+  name: name,
+  quantity: 1,
+  options: [name],
+  substituteGroup: null,
+  substituteRatios: const {},
+);
+
+class _ProcessingAcquisitionOptions extends StatelessWidget {
+  const _ProcessingAcquisitionOptions({
+    required this.controller,
+    required this.recipe,
+    required this.onClose,
+  });
+  final ModeFeatureController controller;
+  final Recipe recipe;
+  final VoidCallback onClose;
+
+  @override
+  Widget build(BuildContext context) {
+    final processing = controller.processesAcquisition(recipe.name);
+    final formula = recipe.resolveVariant(
+      controller.selectedRecipeVariantId(recipe.name),
+    );
+    final tooltip = <String>[
+      formula.method ?? 'Processing',
+      for (final ingredient in formula.ingredients)
+        '${formatQuantity(ingredient.quantity)}× ${ingredient.name}',
+      if (formula.outputMinimum != null && formula.outputMaximum != null)
+        'Makes ${formatQuantity(formula.outputMinimum!)}–${formatQuantity(formula.outputMaximum!)} ${recipe.name}',
+    ].join('\n');
+    return Wrap(
+      spacing: 8,
+      runSpacing: 8,
+      children: [
+        for (final process in [false, true])
+          Tooltip(
+            message: process
+                ? tooltip
+                : 'Use the finished item. Market or workers.',
+            child: AppButton(
+              key: ValueKey(
+                'acquisition-choice:${recipe.name}:${process ? 'process' : 'buy'}',
+              ),
+              selected: processing == process,
+              role: AppButtonRole.optionPill,
+              semanticLabel: '${process ? 'Process' : 'Buy'} ${recipe.name}',
+              onPressed: () {
+                controller.selectProcessingAcquisition(
+                  recipe.name,
+                  process: process,
+                );
+                onClose();
+              },
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  PlannerItemIcon(
+                    controller: controller,
+                    name: process
+                        ? formula.ingredients.first.name
+                        : recipe.name,
+                    size: 28,
+                  ),
+                  const SizedBox(width: 8),
+                  Text(process ? 'Process' : 'Buy'),
+                ],
+              ),
+            ),
+          ),
+      ],
+    );
   }
 }
 
@@ -5227,21 +5603,19 @@ class _MarketPills extends StatelessWidget {
         ),
       );
     } else if (!suppressCentralMarket) {
-      final stockTone = !market.stockKnown
-          ? AppSurfaceTone.info
-          : market.stock >= row.missing
-          ? AppSurfaceTone.success
-          : market.stock > 0
-          ? AppSurfaceTone.warning
-          : AppSurfaceTone.danger;
       pills.add(
-        _StatusPill(
-          label: !market.stockKnown
-              ? 'Stock unknown'
-              : market.stock > 0
-              ? '${formatQuantity(market.stock)} in stock'
-              : '0 in stock',
-          tone: stockTone,
+        Tooltip(
+          message: !market.stockKnown
+              ? 'Stock has not been checked.'
+              : '${formatQuantity(market.stock)} listed on the Central Market.',
+          child: _StatusPill(
+            label: market.stockKnown
+                ? 'Stock ${formatQuantity(market.stock)}'
+                : 'Stock —',
+            tone: market.stockKnown && market.stock <= 0
+                ? AppSurfaceTone.danger
+                : AppSurfaceTone.neutral,
+          ),
         ),
       );
       pills.add(
@@ -5721,7 +6095,9 @@ PlannerSourceInfoRequest _sourceInfo(
   final source = controller.resolveItemSource(row.name, recipe: recipe);
   final vendor = source.vendor?.trim();
   final acquisition = controller.resolveItemAcquisition(row.name);
-  final npcPurchaseSummaries = acquisition == null
+  final npcPurchaseSummaries =
+      acquisition == null ||
+          acquisition.status.trim().toLowerCase() != 'reviewed'
       ? const <String>[]
       : acquisition.routes
             .where(
@@ -5832,9 +6208,29 @@ String _selectedSubstituteFor({
 }) {
   final key =
       'recipe:$parentName:${ingredient.substituteGroup ?? ingredient.name}';
-  return _stringFor(controller.state.value.substituteChoices, key) ??
-      currentName;
+  final saved = _stringFor(controller.state.value.substituteChoices, key);
+  final options = _visibleSubstituteOptions(controller, ingredient);
+  if (saved != null && options.any((option) => _sameFolded(option, saved))) {
+    return saved;
+  }
+  return currentName;
 }
+
+List<String> _visibleSubstituteOptions(
+  ModeFeatureController controller,
+  Ingredient ingredient,
+) => _distinctFolded(ingredient.options)
+    .where(
+      (name) => !isTemporarilyArchivedItem(
+        name,
+        itemId: controller.recipes.entries
+            .where((entry) => _sameFolded(entry.key, name))
+            .firstOrNull
+            ?.value
+            .marketId,
+      ),
+    )
+    .toList(growable: false);
 
 String? _stringFor(Map<String, String> values, String key) {
   final exact = values[key];

@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 
 import 'resource_map_chrome_theme.dart';
 import 'resource_map_desktop_shell.dart';
+import 'resource_map_panel_metrics.dart';
 
 /// The three human-sized sections in the Worker map menu.
 enum ResourceMapWorkerMenuSection { plan, explore, manage }
@@ -110,14 +111,14 @@ class ResourceMapStewardWorkerMenu extends StatefulWidget {
 class _ResourceMapStewardWorkerMenuState
     extends State<ResourceMapStewardWorkerMenu>
     with SingleTickerProviderStateMixin {
-  static const double _rowGap = 7;
-  static const double _parentWidth = 228;
+  static const double _rowGap = 5;
+  static const double _parentWidth = 200;
   // Action names are part of the navigation, not secondary metadata. Keep
   // enough room for the longest current label at the normal text scale and
   // let larger text use the expanded layout below. These controls must never
   // communicate their meaning through an ellipsis.
-  static const double _childWidth = 292;
-  static const double _childIndent = 21;
+  static const double _childWidth = ResourceMapPanelMetrics.menuWidth;
+  static const double _childIndent = 12;
 
   late final AnimationController _controller;
   ResourceMapWorkerMenuSection? _displayedSection;
@@ -225,8 +226,8 @@ class _ResourceMapStewardWorkerMenuState
   Widget build(BuildContext context) {
     final actions = _actionsFor(_displayedSection);
     final largeText = MediaQuery.textScalerOf(context).scale(14) > 20;
-    final rowHeight = largeText ? 74.0 : 50.0;
     final childWidth = largeText ? 350.0 : _childWidth;
+    final rowHeight = _measuredRowHeight(context, actions, childWidth);
     final visibleSectionCount = widget.visibleSections.length;
     final closedHeight =
         (rowHeight * visibleSectionCount) +
@@ -276,6 +277,40 @@ class _ResourceMapStewardWorkerMenuState
         },
       ),
     );
+  }
+
+  double _measuredRowHeight(
+    BuildContext context,
+    List<ResourceMapStewardMenuAction> actions,
+    double childWidth,
+  ) {
+    final scaler = MediaQuery.textScalerOf(context);
+    var height = math.max(
+      ResourceMapPanelMetrics.rowHeight,
+      scaler.scale(ResourceMapPanelMetrics.primary) * 1.2 + 12,
+    );
+    for (final entry in <(String, double)>[
+      for (final section in widget.visibleSections)
+        (_labelFor(section), _parentWidth),
+      for (final action in actions) (action.label, childWidth),
+    ]) {
+      final painter = TextPainter(
+        text: TextSpan(
+          text: entry.$1,
+          style: DefaultTextStyle.of(context).style.copyWith(
+            fontSize: ResourceMapPanelMetrics.primary,
+            height: 1.1,
+            fontWeight: FontWeight.w500,
+            letterSpacing: -.08,
+          ),
+        ),
+        textDirection: Directionality.of(context),
+        textScaler: scaler,
+      )..layout(maxWidth: entry.$2 - 95);
+      height = math.max(height, painter.height + 10);
+      painter.dispose();
+    }
+    return height.ceilToDouble();
   }
 
   Widget _buildParent(
@@ -373,7 +408,6 @@ class _ResourceMapStewardWorkerMenuState
                 semanticHint: action.semanticHint,
                 selected: action.selected,
                 onPressed: action.onPressed,
-                childAction: true,
               ),
             ),
           ),
@@ -394,7 +428,6 @@ class _StewardMenuButton extends StatefulWidget {
     this.selected = false,
     this.expanded,
     this.badge,
-    this.childAction = false,
     super.key,
   });
 
@@ -405,7 +438,6 @@ class _StewardMenuButton extends StatefulWidget {
   final bool selected;
   final bool? expanded;
   final String? badge;
-  final bool childAction;
 
   @override
   State<_StewardMenuButton> createState() => _StewardMenuButtonState();
@@ -420,7 +452,6 @@ class _StewardMenuButtonState extends State<_StewardMenuButton> {
     final chrome = ResourceMapChromeTheme.of(context);
     final active = widget.selected || _hovered || _focused;
     final reduceMotion = MediaQuery.disableAnimationsOf(context);
-    final largeText = MediaQuery.textScalerOf(context).scale(14) > 20;
     final clipper = _StewardButtonClipper();
     final semanticLabel = widget.badge == null
         ? '${widget.label}. ${widget.semanticHint}'
@@ -510,39 +541,22 @@ class _StewardMenuButtonState extends State<_StewardMenuButton> {
                           children: <Widget>[
                             ResourceMapStewardIcon(
                               kind: widget.icon,
-                              size: widget.childAction ? 38 : 40,
+                              size: ResourceMapPanelMetrics.navigationArtwork,
                             ),
                             const SizedBox(width: 10),
                             Expanded(
                               child: Text(
                                 widget.label,
-                                maxLines: 2,
                                 softWrap: true,
                                 style: TextStyle(
                                   color: chrome.ink,
-                                  fontSize: widget.childAction && largeText
-                                      ? 12
-                                      : widget.childAction
-                                      ? 13.5
-                                      : 14,
+                                  fontSize: ResourceMapPanelMetrics.primary,
                                   height: 1.1,
-                                  fontWeight: FontWeight.w800,
+                                  fontWeight: FontWeight.w500,
                                   letterSpacing: -.08,
                                 ),
                               ),
                             ),
-                            if (widget.badge case final badge?) ...<Widget>[
-                              const SizedBox(width: 6),
-                              Text(
-                                badge,
-                                maxLines: 1,
-                                style: TextStyle(
-                                  color: chrome.accent,
-                                  fontSize: 10.5,
-                                  fontWeight: FontWeight.w800,
-                                ),
-                              ),
-                            ],
                             const SizedBox(width: 4),
                             Icon(
                               widget.expanded == true
@@ -647,10 +661,13 @@ class _ResourceMapStewardListRowState extends State<ResourceMapStewardListRow> {
     final chrome = ResourceMapChromeTheme.of(context);
     final active = _hovered || _focused;
     final reduceMotion = MediaQuery.disableAnimationsOf(context);
-    final largeText = MediaQuery.textScalerOf(context).scale(13.5) > 20;
     return Semantics(
       button: widget.onPressed != null,
       label: widget.semanticLabel,
+      hint: [
+        widget.subtitle,
+        ?widget.badge,
+      ].where((value) => value.trim().isNotEmpty).join('. '),
       child: ExcludeSemantics(
         child: Padding(
           padding: const EdgeInsets.symmetric(vertical: 3),
@@ -674,7 +691,9 @@ class _ResourceMapStewardListRowState extends State<ResourceMapStewardListRow> {
                       ? Duration.zero
                       : ResourceMapDesktopMotion.quick,
                   curve: ResourceMapDesktopMotion.curve,
-                  constraints: const BoxConstraints(minHeight: 62),
+                  constraints: const BoxConstraints(
+                    minHeight: ResourceMapPanelMetrics.rowHeight,
+                  ),
                   decoration: BoxDecoration(
                     gradient: active
                         ? chrome.hoverControlGradient
@@ -708,64 +727,27 @@ class _ResourceMapStewardListRowState extends State<ResourceMapStewardListRow> {
                         Padding(
                           padding: const EdgeInsetsDirectional.fromSTEB(
                             10,
-                            7,
+                            6,
                             20,
-                            7,
+                            6,
                           ),
                           child: Row(
                             children: <Widget>[
                               ResourceMapStewardIcon(
                                 kind: widget.icon,
-                                size: 40,
+                                size: ResourceMapPanelMetrics.navigationArtwork,
                               ),
                               const SizedBox(width: 10),
                               Expanded(
-                                child: Column(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: <Widget>[
-                                    Text(
-                                      widget.title,
-                                      maxLines: largeText ? 3 : 2,
-                                      softWrap: true,
-                                      style: TextStyle(
-                                        color: chrome.ink,
-                                        fontSize: 13.5,
-                                        height: 1.1,
-                                        fontWeight: FontWeight.w800,
-                                      ),
-                                    ),
-                                    const SizedBox(height: 3),
-                                    Wrap(
-                                      spacing: 7,
-                                      runSpacing: 2,
-                                      crossAxisAlignment:
-                                          WrapCrossAlignment.center,
-                                      children: <Widget>[
-                                        Text(
-                                          widget.subtitle,
-                                          maxLines: 2,
-                                          softWrap: true,
-                                          style: TextStyle(
-                                            color: chrome.muted,
-                                            fontSize: 11.5,
-                                            height: 1.15,
-                                            fontWeight: FontWeight.w600,
-                                          ),
-                                        ),
-                                        if (widget.badge case final badge?)
-                                          Text(
-                                            badge,
-                                            maxLines: 1,
-                                            style: TextStyle(
-                                              color: chrome.accent,
-                                              fontSize: 10.5,
-                                              fontWeight: FontWeight.w800,
-                                            ),
-                                          ),
-                                      ],
-                                    ),
-                                  ],
+                                child: Text(
+                                  widget.title,
+                                  softWrap: true,
+                                  style: TextStyle(
+                                    color: chrome.ink,
+                                    fontSize: ResourceMapPanelMetrics.primary,
+                                    height: 1.1,
+                                    fontWeight: FontWeight.w500,
+                                  ),
                                 ),
                               ),
                               const SizedBox(width: 5),
@@ -817,7 +799,11 @@ class _StewardButtonClipper extends CustomClipper<Path> {
 
 /// One detailed, frameless physical object from the Guild Steward's Desk set.
 class ResourceMapStewardIcon extends StatelessWidget {
-  const ResourceMapStewardIcon({required this.kind, this.size = 34, super.key});
+  const ResourceMapStewardIcon({
+    required this.kind,
+    this.size = ResourceMapPanelMetrics.navigationArtwork,
+    super.key,
+  });
 
   final ResourceMapStewardIconKind kind;
   final double size;

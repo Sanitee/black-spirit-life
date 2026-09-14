@@ -180,14 +180,14 @@ void main() {
     );
 
     expect(dust?.uses, isEmpty);
-    expect(dust?.craftUses.single.output, 'Caphras Stone');
+    final caphrasUse = dust?.craftUses.firstWhere(
+      (use) => use.output == 'Caphras Stone',
+    );
     expect(
-      dust?.craftUses.single.formulas
-          .map((formula) => formula.batchMultiplier)
-          .toList(),
+      caphrasUse?.formulas.map((formula) => formula.batchMultiplier).toList(),
       const <int>[1, 10, 100],
     );
-    final formula = dust?.craftUses.single.formulas.first;
+    final formula = caphrasUse?.formulas.first;
     expect(formula?.method, 'Simple Alchemy');
     expect(
       formula?.ingredients
@@ -506,10 +506,8 @@ void main() {
 
     final ordinaryLightstone = infoFor('Lightstone of Earth: Boulder');
     expect(ordinaryLightstone?.kind, 'Lightstone');
-    expect(
-      ordinaryLightstone?.summary,
-      'A Lightstone infused into an Artifact for its listed effect.',
-    );
+    expect(ordinaryLightstone?.summary, isEmpty);
+    expect(ordinaryLightstone?.effects, isNotEmpty);
 
     final coral = infoFor('Coral Crystal');
     expect(coral?.kind, 'Crystal material');
@@ -520,14 +518,12 @@ void main() {
 
     final ahKrad = infoFor("Crystal of Void - Ah'krad");
     expect(ahKrad?.kind, 'Gear crystal');
-    expect(
-      ahKrad?.summary,
-      'A crystal equipped through a crystal preset for its listed effect.',
-    );
+    expect(ahKrad?.summary, isEmpty);
+    expect(ahKrad?.effects, isNotEmpty);
     expect(
       ahKrad?.uses.join(' ').toLowerCase(),
       isNot(contains('crystal preset')),
-      reason: 'The Description already explains how the crystal is equipped.',
+      reason: 'Concrete effects replace the generic crystal instruction.',
     );
 
     final margoria = infoFor('Margoria Crystal');
@@ -1072,7 +1068,7 @@ void main() {
     },
   );
 
-  test('effect-item copy adds a short definition and avoids long prose', () {
+  test('effect-item copy retains facts without generic crystal definitions', () {
     final lightstone = recipeBookInfoFor(
       name: 'Amplified Lightstone of Earth: Boulder',
       recipe: null,
@@ -1086,10 +1082,7 @@ void main() {
       consumerRecipes: const <Recipe>[],
     );
 
-    expect(
-      lightstone?.summary,
-      'A Lightstone infused into an Artifact for its listed effect.',
-    );
+    expect(lightstone?.summary, isEmpty);
     expect(lightstone?.effects, contains('Knockdown/Bound Resistance +4%'));
     expect(
       lightstone?.uses,
@@ -1103,7 +1096,7 @@ void main() {
       isNot(
         contains('Infuse it into an Artifact to apply the listed stat effect.'),
       ),
-      reason: 'The Description already explains how the Lightstone is used.',
+      reason: 'Concrete effects replace the generic Lightstone instruction.',
     );
     expect(draught?.summary, 'A temporary combat draught.');
     expect(draught?.effects, contains('All AP +13'));

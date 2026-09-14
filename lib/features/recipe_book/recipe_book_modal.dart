@@ -1352,6 +1352,8 @@ class _RecipeCard extends StatelessWidget {
             child: LayoutBuilder(
               builder: (context, constraints) {
                 final stock = entry.marketStock;
+                final showMarketStock =
+                    !entry.hidden && controller.showsMarketStockFor(entry.name);
                 final profitability = entry.profitability;
                 final targetRole = entry.hidden
                     ? AppButtonRole.secondary
@@ -1496,7 +1498,7 @@ class _RecipeCard extends StatelessWidget {
                               ),
                             ),
                           )
-                        else if (stock != null)
+                        else if (showMarketStock)
                           if (compactProcessingSix)
                             const Spacer()
                           else
@@ -1553,7 +1555,7 @@ class _RecipeCard extends StatelessWidget {
                     Expanded(
                       child:
                           (profitability != null || compactProcessingSix) &&
-                              stock != null
+                              showMarketStock
                           ? Row(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: <Widget>[
@@ -1888,26 +1890,21 @@ class _RecipeBookProfitabilityPill extends StatelessWidget {
 class _RecipeBookStockPill extends StatelessWidget {
   const _RecipeBookStockPill({required this.stock, this.compact = false});
 
-  final double stock;
+  final double? stock;
   final bool compact;
 
   @override
   Widget build(BuildContext context) {
     final spec = context.visualTheme;
-    final empty = stock <= 0;
     return Tooltip(
-      message: empty ? 'Out of stock' : '${formatQuantity(stock)} in stock',
+      message: stock == null
+          ? 'Stock has not been checked.'
+          : '${formatQuantity(stock!)} listed on the Central Market.',
       child: DecoratedBox(
         decoration: BoxDecoration(
-          color: empty
-              ? spec.palette.danger.withAlpha(92)
-              : spec.palette.success.withAlpha(86),
+          color: spec.palette.surfaceRaised.withAlpha(86),
           borderRadius: BorderRadius.circular(999),
-          border: Border.all(
-            color: empty
-                ? spec.palette.danger.withAlpha(178)
-                : spec.palette.success.withAlpha(165),
-          ),
+          border: Border.all(color: spec.palette.textMuted.withAlpha(165)),
         ),
         child: Padding(
           padding: EdgeInsets.symmetric(
@@ -1915,11 +1912,7 @@ class _RecipeBookStockPill extends StatelessWidget {
             vertical: 3,
           ),
           child: Text(
-            compact
-                ? formatQuantity(stock)
-                : empty
-                ? '0 stock'
-                : '${formatQuantity(stock)} stock',
+            stock == null ? 'Stock —' : 'Stock ${formatQuantity(stock!)}',
             style: spec.typography.meta.copyWith(
               color: spec.palette.text,
               fontSize: compact ? 9.5 : 10.5,
@@ -2643,6 +2636,13 @@ class _PreviewIngredientRow extends StatelessWidget {
       materialName: selected,
       stableId: stableId,
       externalActions: actions,
+      resolveGatherDemand: () => PlannerGatherDemand(
+        sourceId:
+            'recipe-book:${controller.modeController.mode.key}:$parentName:$ingredientIndex',
+        sourceLabel: parentName,
+        materialName: selected,
+        neededQuantity: ingredient.quantity * ratio,
+      ),
       child: row,
     );
   }

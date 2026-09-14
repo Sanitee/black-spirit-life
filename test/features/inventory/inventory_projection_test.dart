@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:bdo_craft_planner_flutter/app/state/planner_application_controller.dart';
 import 'package:bdo_craft_planner_flutter/data/catalog/bundled_catalog_parser.dart';
+import 'package:bdo_craft_planner_flutter/domain/catalog/temporarily_archived_items.dart';
 import 'package:bdo_craft_planner_flutter/domain/models/catalog_models.dart';
 import 'package:bdo_craft_planner_flutter/domain/models/craft_mode.dart';
 import 'package:bdo_craft_planner_flutter/domain/state/planner_state.dart';
@@ -72,6 +73,7 @@ void main() {
     final projectedInventoryNames = projection.items
         .map((item) => item.name.toLowerCase())
         .toSet();
+    expectedInventoryNames.removeWhere(isTemporarilyArchivedItem);
     expect(
       expectedInventoryNames.difference(projectedInventoryNames),
       isEmpty,

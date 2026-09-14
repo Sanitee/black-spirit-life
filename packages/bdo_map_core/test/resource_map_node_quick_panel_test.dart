@@ -80,16 +80,16 @@ void main() {
     expect(find.text('Production node · Serendia'), findsOneWidget);
     expect(find.text('2 CP'), findsOneWidget);
     expect(find.text('1h 18m'), findsOneWidget);
-    expect(find.text('2 worker sites'), findsOneWidget);
+    expect(find.text('2 worker sites'), findsNothing);
     expect(find.text('Pumpkin'), findsOneWidget);
     expect(find.text('Wheat'), findsOneWidget);
-    expect(find.text('AVAILABLE WORKER NODES · 1'), findsOneWidget);
+    expect(find.text('Worker nodes'), findsOneWidget);
     expect(find.text('Costa Farm - Farming'), findsOneWidget);
-    expect(find.text('CONNECTED FROM'), findsOneWidget);
+    expect(find.text('Connected from'), findsOneWidget);
     expect(find.text('Heidel'), findsOneWidget);
     expect(find.text('Show worker path'), findsOneWidget);
     expect(
-      find.text('Coordinates and node data: verified test fixture'),
+      find.byTooltip('Coordinates and node data: verified test fixture'),
       findsOneWidget,
     );
     expect(
@@ -329,7 +329,7 @@ void main() {
         ),
       );
 
-      expect(find.text('EXCAVATION ACCESS'), findsOneWidget);
+      expect(find.text('Unlock excavation'), findsOneWidget);
       expect(
         find.byKey(const ValueKey<String>('resource-map-node-unlock-notice')),
         findsOneWidget,
@@ -384,7 +384,9 @@ void main() {
       ),
     );
 
-    expect(find.textContaining('speak to Camira'), findsOneWidget);
+    expect(find.textContaining('speak to Camira'), findsNothing);
+    expect(find.text('Camira'), findsOneWidget);
+    expect(find.byTooltip(RegExp('speak to Camira')), findsOneWidget);
     expect(
       find.byKey(
         const ValueKey<String>('resource-map-node-toggle-manager-marker'),
@@ -421,7 +423,7 @@ void main() {
       ),
     );
 
-    expect(find.text('Open Royal Workshops'), findsOneWidget);
+    expect(find.text('Royal Workshops'), findsOneWidget);
     expect(find.text('Yukjo workers & storage'), findsOneWidget);
     expect(find.text('Houses'), findsOneWidget);
 
@@ -472,7 +474,7 @@ void main() {
 
     for (final label in <String>[
       'Seoul',
-      'Open Royal Workshops',
+      'Royal Workshops',
       'Yukjo workers & storage',
       'Houses',
     ]) {

@@ -418,6 +418,78 @@ final class MissingMaterial {
   };
 }
 
+/// Purchase comparison for the one exchanged ingredient in an equivalent
+/// fixed-output recipe route. Common ingredients are deliberately excluded.
+final class RecipeRouteOption {
+  const RecipeRouteOption({
+    required this.variantId,
+    required this.ingredientName,
+    required this.ingredientQuantity,
+    required this.outputPerCraft,
+    required this.batchMultiplier,
+    required this.unitPrice,
+    required this.npcBuyable,
+    required this.neededQuantity,
+    required this.ownedQuantity,
+    required this.missingQuantity,
+    required this.purchaseCost,
+    required this.stockKnown,
+    required this.availableStock,
+  });
+
+  final String variantId;
+  final String ingredientName;
+  final double ingredientQuantity;
+  final double outputPerCraft;
+  final int batchMultiplier;
+  final double? unitPrice;
+  final bool npcBuyable;
+  final double neededQuantity;
+  final double ownedQuantity;
+  final double missingQuantity;
+  final double? purchaseCost;
+  final bool stockKnown;
+  final double availableStock;
+
+  bool get canCoverNeed =>
+      missingQuantity <= 0 ||
+      npcBuyable ||
+      (stockKnown && availableStock >= missingQuantity);
+
+  double? get costPerOutput => unitPrice == null
+      ? null
+      : ingredientQuantity * unitPrice! / outputPerCraft;
+}
+
+final class RecipeRouteSelection {
+  RecipeRouteSelection({
+    required this.selectedVariantId,
+    required this.automaticVariantId,
+    required this.isAutomatic,
+    required Iterable<RecipeRouteOption> options,
+  }) : options = List.unmodifiable(options);
+
+  final String? selectedVariantId;
+  final String? automaticVariantId;
+  final bool isAutomatic;
+  final List<RecipeRouteOption> options;
+
+  bool get hasComparison => options.length > 1;
+
+  RecipeRouteOption? get selectedOption => _option(selectedVariantId);
+  RecipeRouteOption? get recommendedOption => _option(automaticVariantId);
+
+  bool get hasCompleteComparison =>
+      hasComparison && options.every((option) => option.purchaseCost != null);
+
+  RecipeRouteOption? _option(String? id) {
+    for (final option in options) {
+      if (option.variantId == id) return option;
+    }
+    return null;
+  }
+}
+
 final class PlanResult {
   PlanResult({
     required this.target,
@@ -425,12 +497,16 @@ final class PlanResult {
     required Iterable<PlanStep> steps,
     required Iterable<MissingMaterial> missing,
     required this.empty,
+    Map<String, RecipeRouteSelection> routeSelections =
+        const <String, RecipeRouteSelection>{},
   }) : steps = List.unmodifiable(steps),
-       missing = List.unmodifiable(missing);
+       missing = List.unmodifiable(missing),
+       routeSelections = Map.unmodifiable(routeSelections);
 
   PlanResult.empty({required this.target, required this.want})
     : steps = const <PlanStep>[],
       missing = const <MissingMaterial>[],
+      routeSelections = const <String, RecipeRouteSelection>{},
       empty = true;
 
   final String target;
@@ -438,6 +514,7 @@ final class PlanResult {
   final List<PlanStep> steps;
   final List<MissingMaterial> missing;
   final bool empty;
+  final Map<String, RecipeRouteSelection> routeSelections;
 
   Map<String, Object?> toJson() => <String, Object?>{
     'target': target,

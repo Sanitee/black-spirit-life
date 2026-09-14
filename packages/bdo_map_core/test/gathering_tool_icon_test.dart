@@ -16,6 +16,14 @@ void main() {
             BdoGatheringToolRelation relation,
           })
         >{
+          'Bare Hands': (
+            tools: <BdoGatheringToolKind>[BdoGatheringToolKind.bareHands],
+            relation: BdoGatheringToolRelation.single,
+          ),
+          'Milking minigame': (
+            tools: <BdoGatheringToolKind>[BdoGatheringToolKind.milking],
+            relation: BdoGatheringToolRelation.single,
+          ),
           'Bare hands / Hoe': (
             tools: <BdoGatheringToolKind>[
               BdoGatheringToolKind.bareHands,
@@ -44,6 +52,12 @@ void main() {
           ),
           'Hoe': (
             tools: <BdoGatheringToolKind>[BdoGatheringToolKind.hoe],
+            relation: BdoGatheringToolRelation.single,
+          ),
+          'Hunting Matchlock': (
+            tools: <BdoGatheringToolKind>[
+              BdoGatheringToolKind.huntingMatchlock,
+            ],
             relation: BdoGatheringToolRelation.single,
           ),
           'Hunting Matchlock and Butcher Knife': (
@@ -100,6 +114,25 @@ void main() {
       expect(resolved.displayLabel, 'Hunting Matchlock and Butcher Knife');
     });
 
+    testWidgets('covers tools in the complete current map dataset', (
+      tester,
+    ) async {
+      final dataset = await tester.runAsync(BdoResourceMapLoader.loadBundled);
+      final actualTools = dataset!.fieldSources
+          .expand((source) => source.products)
+          .map((product) => product.tool)
+          .toSet();
+
+      expect(actualTools, unorderedEquals(currentToolValues.keys));
+      for (final rawTool in actualTools) {
+        expect(
+          resolveBdoGatheringTools(rawTool).tools,
+          isNot(contains(BdoGatheringToolKind.unknown)),
+          reason: rawTool,
+        );
+      }
+    });
+
     test('keeps alternatives distinct from tools required together', () {
       final alternative = resolveBdoGatheringTools('Bare hands / Hoe');
       final together = resolveBdoGatheringTools('Sniper Rifle + Butcher Knife');
@@ -128,6 +161,7 @@ void main() {
         },
         const <BdoGatheringToolKind, String?>{
           BdoGatheringToolKind.bareHands: null,
+          BdoGatheringToolKind.milking: null,
           BdoGatheringToolKind.hoe: 'Hoe',
           BdoGatheringToolKind.fluidCollector: 'Fluid Collector',
           BdoGatheringToolKind.lumberingAxe: 'Lumbering Axe',
@@ -149,7 +183,10 @@ void main() {
             tool: bdoGatheringToolAssetPath(tool),
         },
         const <BdoGatheringToolKind, String?>{
-          BdoGatheringToolKind.bareHands: null,
+          BdoGatheringToolKind.bareHands:
+              'assets/images/gathering_tools/interaction_00.png',
+          BdoGatheringToolKind.milking:
+              'assets/images/gathering_tools/interaction_00.png',
           BdoGatheringToolKind.hoe: 'assets/images/gathering_tools/hoe.webp',
           BdoGatheringToolKind.fluidCollector:
               'assets/images/gathering_tools/fluid_collector.webp',
@@ -169,6 +206,19 @@ void main() {
           BdoGatheringToolKind.unknown: null,
         },
       );
+    });
+
+    test('selects only the original hand cell from the interaction atlas', () {
+      for (final kind in BdoGatheringToolKind.values) {
+        expect(
+          bdoGatheringToolAssetSourceRect(kind),
+          kind == BdoGatheringToolKind.bareHands ||
+                  kind == BdoGatheringToolKind.milking
+              ? const Rect.fromLTWH(211, 71, 34, 34)
+              : isNull,
+          reason: kind.name,
+        );
+      }
     });
   });
 
@@ -291,6 +341,33 @@ void main() {
       });
     });
 
+    testWidgets('checksum-locks the unchanged original interaction atlas', (
+      tester,
+    ) async {
+      await tester.runAsync(() async {
+        const asset = AssetImage(
+          'assets/images/gathering_tools/interaction_00.png',
+          package: bdoGatheringToolAssetPackage,
+        );
+        final key = await asset.obtainKey(ImageConfiguration.empty);
+        final data = await rootBundle.load(key.name);
+        final bytes = data.buffer.asUint8List(
+          data.offsetInBytes,
+          data.lengthInBytes,
+        );
+        expect(
+          sha256.convert(bytes).toString(),
+          '7bd9c32b3db4ef0d325db3901c563e8bb41cbbed62beb246941350afcc47171f',
+        );
+        final codec = await ui.instantiateImageCodec(bytes);
+        final frame = await codec.getNextFrame();
+        expect(frame.image.width, 512);
+        expect(frame.image.height, 256);
+        frame.image.dispose();
+        codec.dispose();
+      });
+    });
+
     testWidgets('is compact and exposes tooltip and semantics', (tester) async {
       await tester.pumpWidget(
         const MaterialApp(
@@ -312,6 +389,257 @@ void main() {
         findsOneWidget,
       );
       expect(tester.takeException(), isNull);
+    });
+
+    testWidgets('keeps acquisition steps in the tooltip and semantics only', (
+      tester,
+    ) async {
+      const methods = <({String tool, String method, String label})>[
+        (tool: 'Hoe', method: 'Gather', label: 'Hoe'),
+        (
+          tool: 'Pickaxe',
+          method: 'Defeat and mine',
+          label: 'Defeat and mine · Pickaxe',
+        ),
+        (
+          tool: 'Hunting Matchlock and Butcher Knife',
+          method: 'Hunt and butcher',
+          label: 'Hunt and butcher · Hunting Matchlock and Butcher Knife',
+        ),
+        (
+          tool: 'Sniper Rifle + Butcher Knife',
+          method: 'Sniper hunt and butcher',
+          label: 'Sniper hunt and butcher · Sniper Rifle and Butcher Knife',
+        ),
+      ];
+
+      for (final entry in methods) {
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Scaffold(
+              body: Center(
+                child: BdoGatheringToolIcon(
+                  tool: entry.tool,
+                  method: entry.method,
+                  size: 36,
+                ),
+              ),
+            ),
+          ),
+        );
+        await tester.pumpAndSettle();
+
+        final selection = resolveBdoGatheringTools(entry.tool);
+        final prefix = selection.tools.length == 1
+            ? 'Required tool'
+            : 'Required tools';
+        final semantics = entry.method == 'Gather'
+            ? '$prefix: ${selection.displayLabel}'
+            : '${entry.method}. $prefix: ${selection.displayLabel}';
+        expect(find.byTooltip(entry.label), findsOneWidget);
+        expect(find.bySemanticsLabel(semantics), findsOneWidget);
+        expect(find.text(entry.method), findsNothing);
+        expect(find.text(entry.label), findsNothing);
+        expect(tester.takeException(), isNull, reason: entry.tool);
+      }
+    });
+
+    testWidgets('uses original hand art without inventing an inventory tool', (
+      tester,
+    ) async {
+      var catalogRequests = 0;
+      const interactions =
+          <({String tool, String method, String label, String semantics})>[
+            (
+              tool: 'Bare Hands',
+              method: 'Gather',
+              label: 'Bare hands',
+              semantics: 'Required tool: Bare hands',
+            ),
+            (
+              tool: 'Milking minigame',
+              method: 'Milk',
+              label: 'Milking minigame',
+              semantics: 'Interaction: Milking minigame',
+            ),
+          ];
+
+      for (final entry in interactions) {
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Scaffold(
+              body: Center(
+                child: BdoGatheringToolArtworkScope(
+                  builder: (context, tool, canonicalItemName, size) {
+                    catalogRequests += 1;
+                    return const SizedBox.shrink();
+                  },
+                  child: BdoGatheringToolIcon(
+                    tool: entry.tool,
+                    method: entry.method,
+                    size: 28,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        );
+        await _settleHandAtlas(tester);
+
+        final icon = find.byType(BdoGatheringToolIcon);
+        expect(tester.getSize(icon), const Size(28, 28));
+        expect(
+          find.descendant(of: icon, matching: find.byType(CustomPaint)),
+          findsOneWidget,
+        );
+        final kind = resolveBdoGatheringTools(entry.tool).tools.single;
+        final artwork = find.byKey(
+          ValueKey('bdo-gathering-tool-artwork-${kind.name}'),
+        );
+        expect(artwork, findsOneWidget);
+        expect(tester.getSize(artwork), const Size.square(28));
+        expect(
+          find.byKey(ValueKey('bdo-gathering-tool-sprite-${kind.name}')),
+          findsOneWidget,
+        );
+        expect(
+          find.byKey(ValueKey('bdo-gathering-tool-fallback-${kind.name}')),
+          findsNothing,
+        );
+        expect(
+          find.descendant(of: icon, matching: find.byType(Image)),
+          findsNothing,
+        );
+        expect(bdoGatheringToolCatalogItemName(kind), isNull);
+        expect(find.byTooltip(entry.label), findsOneWidget);
+        expect(find.bySemanticsLabel(entry.semantics), findsOneWidget);
+        expect(find.byTooltip('Unknown tool'), findsNothing);
+        expect(find.text(entry.method), findsNothing);
+        expect(tester.takeException(), isNull, reason: entry.tool);
+      }
+      expect(catalogRequests, 0);
+    });
+
+    testWidgets(
+      'pairs the real hand with a hoe without a false hand catalog lookup',
+      (tester) async {
+        final catalogRequests = <String>[];
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Scaffold(
+              body: Center(
+                child: BdoGatheringToolArtworkScope(
+                  builder: (context, tool, canonicalItemName, size) {
+                    catalogRequests.add(canonicalItemName);
+                    return Image.asset(
+                      bdoGatheringToolAssetPath(tool)!,
+                      key: ValueKey('scoped-original-tool-${tool.name}'),
+                      package: bdoGatheringToolAssetPackage,
+                      width: size,
+                      height: size,
+                      fit: BoxFit.contain,
+                    );
+                  },
+                  child: const BdoGatheringToolIcon(
+                    tool: 'Bare Hands or Hoe',
+                    method: 'Gather',
+                    size: 28,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        );
+        await _settleHandAtlas(tester);
+        final icon = find.byType(BdoGatheringToolIcon);
+        expect(catalogRequests, <String>['Hoe']);
+        expect(tester.getSize(icon), const Size(70, 28));
+        for (final key in <String>[
+          'bdo-gathering-tool-artwork-bareHands',
+          'scoped-original-tool-hoe',
+        ]) {
+          final artwork = find.byKey(ValueKey(key));
+          expect(artwork, findsOneWidget);
+          expect(tester.getSize(artwork), const Size.square(28));
+        }
+        expect(find.text('/'), findsOneWidget);
+        expect(find.text('+'), findsNothing);
+        expect(find.byTooltip('Bare hands or Hoe'), findsOneWidget);
+        expect(
+          find.bySemanticsLabel('Required tools: Bare hands or Hoe'),
+          findsOneWidget,
+        );
+        expect(
+          find.descendant(of: icon, matching: find.byType(CustomPaint)),
+          findsOneWidget,
+        );
+        expect(
+          find.byKey(const ValueKey('bdo-gathering-tool-sprite-bareHands')),
+          findsOneWidget,
+        );
+        expect(
+          find.byKey(const ValueKey('bdo-gathering-tool-fallback-bareHands')),
+          findsNothing,
+        );
+        expect(tester.takeException(), isNull);
+      },
+    );
+
+    testWidgets('keeps tool separators balanced at 200 percent text', (
+      tester,
+    ) async {
+      const cases = <({String tool, String separator, String spokenLabel})>[
+        (
+          tool: 'Bare Hands or Hoe',
+          separator: '/',
+          spokenLabel: 'Required tools: Bare hands or Hoe',
+        ),
+        (
+          tool: 'Sniper Rifle + Butcher Knife',
+          separator: '+',
+          spokenLabel: 'Required tools: Sniper Rifle and Butcher Knife',
+        ),
+      ];
+      for (final entry in cases) {
+        await tester.pumpWidget(
+          MaterialApp(
+            home: MediaQuery(
+              data: const MediaQueryData(textScaler: TextScaler.linear(2)),
+              child: Scaffold(
+                body: Center(
+                  child: BdoGatheringToolIcon(tool: entry.tool, size: 28),
+                ),
+              ),
+            ),
+          ),
+        );
+        final selection = resolveBdoGatheringTools(entry.tool);
+        if (selection.tools.contains(BdoGatheringToolKind.bareHands)) {
+          await _settleHandAtlas(tester);
+        } else {
+          await tester.pumpAndSettle();
+        }
+        final icon = find.byType(BdoGatheringToolIcon);
+        expect(tester.getSize(icon), const Size(70, 28));
+        expect(MediaQuery.textScalerOf(tester.element(icon)).scale(17), 34);
+        for (final kind in selection.tools) {
+          final artwork = find.byKey(
+            ValueKey('bdo-gathering-tool-artwork-${kind.name}'),
+          );
+          expect(artwork, findsOneWidget);
+          expect(tester.getSize(artwork), const Size.square(28));
+        }
+        final separator = find.descendant(
+          of: icon,
+          matching: find.text(entry.separator),
+        );
+        expect(separator, findsOneWidget);
+        expect(tester.widget<Text>(separator).textScaler, TextScaler.noScaling);
+        expect(tester.getSize(separator).height, lessThanOrEqualTo(28));
+        expect(find.bySemanticsLabel(entry.spokenLabel), findsOneWidget);
+        expect(find.byTooltip(selection.displayLabel), findsOneWidget);
+        expect(tester.takeException(), isNull, reason: entry.tool);
+      }
     });
 
     testWidgets('renders two full-size tools with an explicit separator', (
@@ -498,4 +826,18 @@ void main() {
       expect(tester.takeException(), isNull);
     });
   });
+}
+
+Future<void> _settleHandAtlas(WidgetTester tester) async {
+  // Let the real asset codec complete outside the fake widget-test clock.
+  await tester.runAsync(
+    () => precacheImage(
+      const AssetImage(
+        'assets/images/gathering_tools/interaction_00.png',
+        package: bdoGatheringToolAssetPackage,
+      ),
+      tester.element(find.byType(BdoGatheringToolIcon).first),
+    ),
+  );
+  await tester.pumpAndSettle();
 }

@@ -1,4 +1,5 @@
 import '../../app/state/planner_application_controller.dart';
+import '../../domain/catalog/temporarily_archived_items.dart';
 import '../../domain/models/catalog_models.dart';
 import '../../domain/models/craft_mode.dart';
 import '../../domain/state/planner_state.dart';
@@ -218,6 +219,12 @@ final class InventoryProjection {
     for (final name in names.values) {
       final foldedName = _fold(name);
       final recipe = _foldedRecipe(recipes, foldedName);
+      // Keep existing belongings accessible without suggesting archived items
+      // to people who do not own them. No saved amount is removed.
+      if (isTemporarilyArchivedItem(name, itemId: recipe?.marketId) &&
+          (inventoryByName[foldedName] ?? 0) <= 0) {
+        continue;
+      }
       final metadata = metadataByName[foldedName];
       final bundledRecipe = bundledByName[foldedName];
       final userOnly =

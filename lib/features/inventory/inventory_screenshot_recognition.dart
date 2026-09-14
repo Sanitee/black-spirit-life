@@ -2131,7 +2131,14 @@ List<Uint8List> _decodeTemplateRgbTilesWithInsets(
   required bool includeInsets,
 }) {
   if (bytes == null) return const <Uint8List>[];
-  final decoded = image.decodeImage(bytes);
+  image.Image? decoded;
+  try {
+    decoded = image.decodeImage(bytes);
+  } on RangeError {
+    return const <Uint8List>[];
+  } on FormatException {
+    return const <Uint8List>[];
+  }
   if (decoded == null || decoded.width < 4 || decoded.height < 4) {
     return const <Uint8List>[];
   }

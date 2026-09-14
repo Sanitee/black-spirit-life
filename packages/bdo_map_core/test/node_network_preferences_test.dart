@@ -92,7 +92,7 @@ void main() {
   });
 
   test(
-    'new profiles enable every display option while explicit off choices persist',
+    'new and legacy profiles start clean while explicit display choices persist',
     () {
       final defaults = BdoNodeNetworkPreferences();
       final defaultJson = defaults.toJson();
@@ -100,15 +100,15 @@ void main() {
       expect(defaults.isDefault, isTrue);
       expect(defaults.showCitiesAndTowns, isTrue);
       expect(defaults.showGatewayHubs, isTrue);
-      expect(defaults.showAllMapNodes, isTrue);
-      expect(defaults.showAllNodeConnections, isTrue);
-      expect(defaults.showWorkerOutputIcons, isTrue);
+      expect(defaults.showAllMapNodes, isFalse);
+      expect(defaults.showAllNodeConnections, isFalse);
+      expect(defaults.showWorkerOutputIcons, isFalse);
       expect(defaults.mapVisualStyle, BdoMapVisualStyle.vivid);
       expect(defaultJson.containsKey('showCitiesAndTowns'), isFalse);
       expect(defaultJson.containsKey('showGatewayHubs'), isFalse);
-      expect(defaultJson.containsKey('showAllMapNodes'), isFalse);
-      expect(defaultJson.containsKey('showAllNodeConnections'), isFalse);
-      expect(defaultJson.containsKey('showWorkerOutputIcons'), isFalse);
+      expect(defaultJson['showAllMapNodes'], isFalse);
+      expect(defaultJson['showAllNodeConnections'], isFalse);
+      expect(defaultJson['showWorkerOutputIcons'], isFalse);
       expect(defaultJson.containsKey('mapVisualStyle'), isFalse);
 
       final legacyWithoutDisplayKeys = BdoNodeNetworkPreferences.fromJson(
@@ -119,9 +119,10 @@ void main() {
       );
       expect(legacyWithoutDisplayKeys.showCitiesAndTowns, isTrue);
       expect(legacyWithoutDisplayKeys.showGatewayHubs, isTrue);
-      expect(legacyWithoutDisplayKeys.showAllMapNodes, isTrue);
-      expect(legacyWithoutDisplayKeys.showAllNodeConnections, isTrue);
-      expect(legacyWithoutDisplayKeys.showWorkerOutputIcons, isTrue);
+      expect(legacyWithoutDisplayKeys.showAllMapNodes, isFalse);
+      expect(legacyWithoutDisplayKeys.showAllNodeConnections, isFalse);
+      expect(legacyWithoutDisplayKeys.showWorkerOutputIcons, isFalse);
+      expect(legacyWithoutDisplayKeys.contributionPointBudget, 275);
       expect(legacyWithoutDisplayKeys.mapVisualStyle, BdoMapVisualStyle.vivid);
 
       final explicitOff =
@@ -156,6 +157,76 @@ void main() {
       );
     },
   );
+
+  test(
+    'global layers round-trip on and off without changing the worker setup',
+    () {
+      final original = BdoNodeNetworkPreferences(
+        contributionPointBudget: 275,
+        desiredResourceNodeCounts: const {'item:4001': 2},
+        currentNodeIds: const {'44', '45'},
+        currentOwnedHouseIds: const {'velia-2-1'},
+        currentHouseUsageTypeIds: const {'velia-2-1': 1},
+        rootNodeIds: const {'1'},
+        onlineHoursPerDay: 12,
+        resourceAvailabilityPercent: 70,
+        useObservedTradeVolume: true,
+        townWorkerCapacitiesByNodeId: const {
+          '1': BdoTownWorkerCapacity(
+            availableWorkerCount: 3,
+            freeLodgingSlotCount: 2,
+          ),
+        },
+      );
+      for (final enabled in [true, false]) {
+        final changed = original.copyWith(
+          showAllMapNodes: enabled,
+          showAllNodeConnections: enabled,
+          showWorkerOutputIcons: enabled,
+        );
+        final json = changed.toJson();
+        expect(json['showAllMapNodes'], enabled);
+        expect(json['showAllNodeConnections'], enabled);
+        expect(json['showWorkerOutputIcons'], enabled);
+        final restored = BdoNodeNetworkPreferences.fromJson(json);
+        expect(restored.sameValuesAs(changed), isTrue);
+        expect(
+          restored
+              .copyWith(
+                showAllMapNodes: false,
+                showAllNodeConnections: false,
+                showWorkerOutputIcons: false,
+              )
+              .sameValuesAs(original),
+          isTrue,
+          reason:
+              'Layer choices must not rewrite targets, houses or worker settings.',
+        );
+      }
+      expect(original.isDefault, isFalse);
+      expect(original.showAllMapNodes, isFalse);
+    },
+  );
+
+  test('global layer choices remain independent across serialization', () {
+    for (final nodes in [false, true]) {
+      for (final connections in [false, true]) {
+        for (final products in [false, true]) {
+          final original = BdoNodeNetworkPreferences(
+            showAllMapNodes: nodes,
+            showAllNodeConnections: connections,
+            showWorkerOutputIcons: products,
+          );
+          expect(
+            BdoNodeNetworkPreferences.fromJson(
+              original.toJson(),
+            ).sameValuesAs(original),
+            isTrue,
+          );
+        }
+      }
+    }
+  });
 
   test('schema v6 preserves an older unsplit bonus total', () {
     final preferences = BdoNodeNetworkPreferences(
@@ -311,9 +382,9 @@ void main() {
     expect(restored.useObservedTradeVolume, isFalse);
     expect(restored.showCitiesAndTowns, isTrue);
     expect(restored.showGatewayHubs, isTrue);
-    expect(restored.showAllMapNodes, isTrue);
-    expect(restored.showAllNodeConnections, isTrue);
-    expect(restored.showWorkerOutputIcons, isTrue);
+    expect(restored.showAllMapNodes, isFalse);
+    expect(restored.showAllNodeConnections, isFalse);
+    expect(restored.showWorkerOutputIcons, isFalse);
     expect(restored.mapVisualStyle, BdoMapVisualStyle.vivid);
     expect(restored.townWorkerCapacitiesByNodeId, isEmpty);
     expect(restored.currentOwnedHouseIds, isEmpty);
@@ -369,9 +440,9 @@ void main() {
     expect(fromJson.useObservedTradeVolume, isFalse);
     expect(fromJson.showCitiesAndTowns, isTrue);
     expect(fromJson.showGatewayHubs, isTrue);
-    expect(fromJson.showAllMapNodes, isTrue);
-    expect(fromJson.showAllNodeConnections, isTrue);
-    expect(fromJson.showWorkerOutputIcons, isTrue);
+    expect(fromJson.showAllMapNodes, isFalse);
+    expect(fromJson.showAllNodeConnections, isFalse);
+    expect(fromJson.showWorkerOutputIcons, isFalse);
     expect(fromJson.townWorkerCapacitiesByNodeId.keys, const <String>{
       '100',
       '200',

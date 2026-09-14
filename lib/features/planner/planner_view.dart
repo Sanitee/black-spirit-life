@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
 import '../../app/state/planner_application_controller.dart';
-import '../../domain/state/state_copy.dart';
 import '../../visual/visual.dart';
 import 'planner_contracts.dart';
 import 'planner_keys.dart';
@@ -27,15 +26,8 @@ class PlannerView extends StatelessWidget {
         controller.expandedSteps,
       ]),
       builder: (context, _) {
-        final state = controller.state.value;
         final plan = controller.plan.value;
-        final completedPlan = state.completedSteps.isEmpty
-            ? plan
-            : controller.owner.assembly.build(
-                catalog: controller.owner.catalog,
-                mode: controller.mode,
-                state: state.copyWith(completedSteps: const <String>{}),
-              );
+        final completedPlan = controller.completedPlan;
         return Semantics(
           container: true,
           explicitChildNodes: true,
@@ -149,7 +141,10 @@ class _PlannerCommandBand extends StatelessWidget {
       padding: EdgeInsets.zero,
       semanticLabel: 'Build or recalculate plan',
       tooltip: 'Recalculate',
-      onPressed: controller.recalculate,
+      onPressed: () {
+        controller.recalculate();
+        externalActions.ensurePrices?.call(controller);
+      },
       child: const AppVectorGlyph('calc', size: 23),
     );
     final fullTarget = PlannerToggle(

@@ -1,10 +1,12 @@
 import 'dart:math' as math;
+import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
 
 /// The gathering method represented by a compact map or material-list glyph.
 enum BdoGatheringToolKind {
   bareHands,
+  milking,
   hoe,
   fluidCollector,
   lumberingAxe,
@@ -60,6 +62,7 @@ class BdoGatheringToolSelection {
 String bdoGatheringToolLabel(BdoGatheringToolKind tool) {
   return switch (tool) {
     BdoGatheringToolKind.bareHands => 'Bare hands',
+    BdoGatheringToolKind.milking => 'Milking minigame',
     BdoGatheringToolKind.hoe => 'Hoe',
     BdoGatheringToolKind.fluidCollector => 'Fluid Collector',
     BdoGatheringToolKind.lumberingAxe => 'Lumbering Axe',
@@ -89,6 +92,7 @@ String? bdoGatheringToolCatalogItemName(BdoGatheringToolKind tool) {
     BdoGatheringToolKind.huntingMatchlock => 'Hunting Matchlock',
     BdoGatheringToolKind.sniperRifle => '[Hunting] Sniper Rifle',
     BdoGatheringToolKind.bareHands ||
+    BdoGatheringToolKind.milking ||
     BdoGatheringToolKind.combat ||
     BdoGatheringToolKind.unknown => null,
   };
@@ -97,11 +101,10 @@ String? bdoGatheringToolCatalogItemName(BdoGatheringToolKind tool) {
 /// The package that owns the reviewed, locally bundled gathering-tool art.
 const String bdoGatheringToolAssetPackage = 'bdo_map_core';
 
-/// Returns the frame-free local artwork used for a real gathering tool.
+/// Returns the local game artwork used for a tool or bare-handed interaction.
 ///
-/// Bare hands and combat intentionally remain code-drawn concepts rather than
-/// pretending to be inventory items. Unknown future methods also retain the
-/// visible vector fallback.
+/// Hands use the game's interaction atlas, not an inventory item. Combat and
+/// unknown future methods retain the visible vector fallback.
 String? bdoGatheringToolAssetPath(BdoGatheringToolKind tool) {
   const assetDirectory = 'assets/images/gathering_tools';
   return switch (tool) {
@@ -116,10 +119,21 @@ String? bdoGatheringToolAssetPath(BdoGatheringToolKind tool) {
       '$assetDirectory/hunting_matchlock.webp',
     BdoGatheringToolKind.sniperRifle => '$assetDirectory/sniper_rifle.webp',
     BdoGatheringToolKind.bareHands ||
-    BdoGatheringToolKind.combat ||
-    BdoGatheringToolKind.unknown => null,
+    BdoGatheringToolKind.milking => '$assetDirectory/interaction_00.png',
+    BdoGatheringToolKind.combat || BdoGatheringToolKind.unknown => null,
   };
 }
+
+/// The original game's Button_Hand frame for bare-handed gathering.
+///
+/// Keep the entire texture unchanged and select its native frame at render
+/// time. Milking uses the hand interaction without inventing an inventory tool.
+Rect? bdoGatheringToolAssetSourceRect(BdoGatheringToolKind tool) =>
+    switch (tool) {
+      BdoGatheringToolKind.bareHands ||
+      BdoGatheringToolKind.milking => const Rect.fromLTWH(211, 71, 34, 34),
+      _ => null,
+    };
 
 /// Supplies app-owned, canonical item artwork to gathering-tool indicators.
 ///
@@ -157,6 +171,14 @@ BdoGatheringToolSelection resolveBdoGatheringTools(String rawTool) {
       .toLowerCase();
 
   return switch (normalized) {
+    'bare hands' => const BdoGatheringToolSelection(
+      tools: <BdoGatheringToolKind>[BdoGatheringToolKind.bareHands],
+      relation: BdoGatheringToolRelation.single,
+    ),
+    'milking minigame' => const BdoGatheringToolSelection(
+      tools: <BdoGatheringToolKind>[BdoGatheringToolKind.milking],
+      relation: BdoGatheringToolRelation.single,
+    ),
     'bare hands / hoe' ||
     'bare hands or hoe' => const BdoGatheringToolSelection(
       tools: <BdoGatheringToolKind>[
@@ -227,12 +249,14 @@ BdoGatheringToolSelection resolveBdoGatheringTools(String rawTool) {
 ///
 /// It is intentionally non-interactive so a whole material row can remain one
 /// clear hit target. Real tools use reviewed local game artwork by default;
-/// hands, combat, unknown methods, and failed asset loads keep a code-drawn
-/// fallback. The owning row may override fallback [color] through [IconTheme].
+/// hands use the original game interaction sprite. Combat, unknown methods,
+/// and failed asset loads keep a code-drawn fallback. The owning row may
+/// override fallback [color] through [IconTheme].
 class BdoGatheringToolIcon extends StatelessWidget {
   const BdoGatheringToolIcon({
     super.key,
     required this.tool,
+    this.method,
     this.size = 20,
     this.color,
     this.artworkBuilder,
@@ -240,6 +264,13 @@ class BdoGatheringToolIcon extends StatelessWidget {
 
   /// The unmodified `BdoFieldProduct.tool` value.
   final String tool;
+
+  /// Acquisition steps kept in the tooltip and accessible description.
+  ///
+  /// For example, a pickaxe alone does not explain that a Stoneback Crab must
+  /// first be defeated. Ordinary `Gather` is omitted because the tool already
+  /// conveys it, without repeating a second line beside every material.
+  final String? method;
   final double size;
   final Color? color;
   final BdoGatheringToolArtworkBuilder? artworkBuilder;
@@ -258,9 +289,27 @@ class BdoGatheringToolIcon extends StatelessWidget {
         ? size
         : (size * selection.tools.length) +
               (separatorWidth * (selection.tools.length - 1));
-    final semanticPrefix = selection.tools.length == 1
+    final isMilking =
+        selection.tools.singleOrNull == BdoGatheringToolKind.milking;
+    final acquisitionMethod = method?.trim().replaceAll(RegExp(r'\s+'), ' ');
+    final normalizedMethod = acquisitionMethod?.toLowerCase();
+    final showMethod =
+        acquisitionMethod != null &&
+        acquisitionMethod.isNotEmpty &&
+        normalizedMethod != 'gather' &&
+        normalizedMethod != selection.displayLabel.toLowerCase() &&
+        !(isMilking && normalizedMethod == 'milk');
+    final tooltipLabel = showMethod
+        ? '$acquisitionMethod · ${selection.displayLabel}'
+        : selection.displayLabel;
+    final semanticPrefix = isMilking
+        ? 'Interaction'
+        : selection.tools.length == 1
         ? 'Required tool'
         : 'Required tools';
+    final semanticLabel = showMethod
+        ? '$acquisitionMethod. $semanticPrefix: ${selection.displayLabel}'
+        : '$semanticPrefix: ${selection.displayLabel}';
 
     final glyph = SizedBox(
       width: width,
@@ -281,6 +330,9 @@ class BdoGatheringToolIcon extends StatelessWidget {
                       selection.relation == BdoGatheringToolRelation.alternative
                           ? '/'
                           : '+',
+                      // This is part of the icon, with a full spoken label on
+                      // the parent. Keep it proportional to the tool artwork.
+                      textScaler: TextScaler.noScaling,
                       style: TextStyle(
                         color: effectiveColor,
                         fontSize: math.max(10.0, size * .55),
@@ -306,9 +358,9 @@ class BdoGatheringToolIcon extends StatelessWidget {
     return Semantics(
       container: true,
       image: true,
-      label: '$semanticPrefix: ${selection.displayLabel}',
+      label: semanticLabel,
       child: Tooltip(
-        message: selection.displayLabel,
+        message: tooltipLabel,
         excludeFromSemantics: true,
         child: glyph,
       ),
@@ -331,6 +383,16 @@ class BdoGatheringToolIcon extends StatelessWidget {
     }
     final assetPath = bdoGatheringToolAssetPath(tool);
     if (assetPath != null) {
+      final sourceRect = bdoGatheringToolAssetSourceRect(tool);
+      if (sourceRect != null) {
+        return _BdoGatheringToolSprite(
+          tool: tool,
+          assetPath: assetPath,
+          sourceRect: sourceRect,
+          size: size,
+          fallbackColor: color,
+        );
+      }
       return SizedBox.square(
         dimension: size,
         child: Image.asset(
@@ -368,6 +430,120 @@ class BdoGatheringToolIcon extends StatelessWidget {
       ),
     );
   }
+}
+
+class _BdoGatheringToolSprite extends StatefulWidget {
+  const _BdoGatheringToolSprite({
+    required this.tool,
+    required this.assetPath,
+    required this.sourceRect,
+    required this.size,
+    required this.fallbackColor,
+  });
+
+  final BdoGatheringToolKind tool;
+  final String assetPath;
+  final Rect sourceRect;
+  final double size;
+  final Color fallbackColor;
+
+  @override
+  State<_BdoGatheringToolSprite> createState() =>
+      _BdoGatheringToolSpriteState();
+}
+
+class _BdoGatheringToolSpriteState extends State<_BdoGatheringToolSprite> {
+  ImageStream? _stream;
+  ImageInfo? _info;
+  late final _listener = ImageStreamListener(
+    (info, _) {
+      if (!mounted) {
+        info.dispose();
+        return;
+      }
+      setState(() {
+        _info?.dispose();
+        _info = info;
+      });
+    },
+    onError: (Object error, StackTrace? stackTrace) {
+      if (!mounted) return;
+      setState(() {
+        _info?.dispose();
+        _info = null;
+      });
+    },
+  );
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _resolveImage();
+  }
+
+  @override
+  void didUpdateWidget(_BdoGatheringToolSprite oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.assetPath != widget.assetPath) _resolveImage();
+  }
+
+  void _resolveImage() {
+    final stream = AssetImage(
+      widget.assetPath,
+      package: bdoGatheringToolAssetPackage,
+    ).resolve(createLocalImageConfiguration(context));
+    if (stream.key == _stream?.key) return;
+    _stream?.removeListener(_listener);
+    _info?.dispose();
+    _info = null;
+    _stream = stream..addListener(_listener);
+  }
+
+  @override
+  void dispose() {
+    _stream?.removeListener(_listener);
+    _info?.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) => SizedBox.square(
+    key: ValueKey<String>('bdo-gathering-tool-artwork-${widget.tool.name}'),
+    dimension: widget.size,
+    child: CustomPaint(
+      key: ValueKey<String>(
+        'bdo-gathering-tool-${_info == null ? 'fallback' : 'sprite'}-${widget.tool.name}',
+      ),
+      painter: _info == null
+          ? _BdoGatheringToolPainter(
+              selection: BdoGatheringToolSelection(
+                tools: <BdoGatheringToolKind>[widget.tool],
+                relation: BdoGatheringToolRelation.single,
+              ),
+              color: widget.fallbackColor,
+            )
+          : _BdoGatheringToolSpritePainter(_info!.image, widget.sourceRect),
+    ),
+  );
+}
+
+class _BdoGatheringToolSpritePainter extends CustomPainter {
+  const _BdoGatheringToolSpritePainter(this.image, this.source);
+
+  final ui.Image image;
+  final Rect source;
+
+  @override
+  void paint(Canvas canvas, Size size) => canvas.drawImageRect(
+    image,
+    source,
+    Offset.zero & size,
+    Paint()..filterQuality = FilterQuality.medium,
+  );
+
+  @override
+  bool shouldRepaint(_BdoGatheringToolSpritePainter old) =>
+      old.image != image || old.source != source;
 }
 
 class _BdoGatheringToolPainter extends CustomPainter {
@@ -440,6 +616,7 @@ class _BdoGatheringToolPainter extends CustomPainter {
 
     switch (kind) {
       case BdoGatheringToolKind.bareHands:
+      case BdoGatheringToolKind.milking:
         _drawBareHands(canvas, paint);
       case BdoGatheringToolKind.hoe:
         _drawHoe(canvas, paint);

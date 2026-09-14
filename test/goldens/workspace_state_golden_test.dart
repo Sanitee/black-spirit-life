@@ -71,6 +71,7 @@ void main() {
                 RepaintBoundary(
                   key: goldenRoot,
                   child: BdoCraftPlannerApp(
+                    enableOpportunityAutoCheck: false,
                     applicationFuture: Future.value(harness.bundle),
                     marketGateway: const EmptyMarketGateway(),
                   ),
@@ -158,8 +159,10 @@ Future<void> _prepareState(
       await tester.tap(action.first);
       await tester.pump(const Duration(milliseconds: 160));
       expect(
-        find.bySemanticsLabel(RegExp(r'^Substitute choices for ')),
-        findsOneWidget,
+        find
+            .bySemanticsLabel(RegExp(r'^Substitute choices for '))
+            .hitTestable(),
+        findsWidgets,
       );
       break;
     case 'source_popover':
@@ -193,9 +196,18 @@ Future<void> _prepareState(
       );
       break;
     case 'copy_toast':
-      final stepName =
-          harness.bundle.controller.active.plan.value.steps.first.name;
-      await tester.tap(find.byKey(PlannerActionKeys.row('P10', stepName)));
+      final copyAction = find
+          .bySemanticsLabel(
+            RegExp(r'^Copy (?:queue item|ingredient|Need First item) '),
+          )
+          .hitTestable();
+      expect(copyAction, findsWidgets);
+      final semantics = tester.widget<Semantics>(copyAction.first);
+      final stepName = semantics.properties.label!.replaceFirst(
+        RegExp(r'^Copy (?:queue item|ingredient|Need First item) '),
+        '',
+      );
+      await tester.tap(copyAction.first);
       await _pumpUntil(
         tester,
         () =>

@@ -6,6 +6,7 @@ import 'package:flutter/widgets.dart' show WidgetsBinding;
 
 import '../../app/state/planner_application_controller.dart';
 import '../../data/catalog/catalog_repository.dart';
+import '../../domain/catalog/temporarily_archived_items.dart';
 import '../../domain/market/recipe_profitability.dart';
 import '../../domain/models/catalog_models.dart';
 import '../../domain/models/craft_mode.dart';
@@ -100,6 +101,11 @@ final class RecipeBookController extends ChangeNotifier {
   RecipeBookUsageIndex? _usageIndex;
   final Map<CraftMode, Map<String, Recipe>> _usageRecipeSources =
       <CraftMode, Map<String, Recipe>>{};
+  // Hover and card rebuilds ask for the same immutable reference repeatedly.
+  // Keep a bounded session cache; market timestamps do not change these facts.
+  final Map<(String, CraftMode, bool), RecipeBookItemInfo?> _itemInfoCache = {};
+  final Map<CraftMode, Map<String, Recipe>> _itemInfoRecipeSources = {};
+  static const _itemInfoCacheLimit = 512;
 
   String get search => _search;
   RecipeBookDensity get density => _density;
@@ -299,7 +305,9 @@ final class RecipeBookController extends ChangeNotifier {
     if (recipe == null) return null;
     final contextualVariant = _ingredientSearchMatch(name, recipe)?.variantId;
     return recipe.resolveVariant(
-      contextualVariant ?? _savedRecipeVariantId(recipe),
+      contextualVariant ??
+          modeController.selectedRecipeVariantId(name) ??
+          _savedRecipeVariantId(recipe),
     );
   }
 
@@ -307,6 +315,7 @@ final class RecipeBookController extends ChangeNotifier {
     final recipe = recipeDefinitionFor(name);
     if (recipe == null) return null;
     return _ingredientSearchMatch(name, recipe)?.variantId ??
+        modeController.selectedRecipeVariantId(name) ??
         recipe.resolvedVariantId(_savedRecipeVariantId(recipe));
   }
 
@@ -315,6 +324,8 @@ final class RecipeBookController extends ChangeNotifier {
 
   bool canActivateUsedIn(RecipeBookUseEntry entry) =>
       !entry.hidden &&
+      !isTemporarilyArchivedItem(entry.name, itemId: entry.recipe.marketId) &&
+      entry.routes.any((route) => _canActivateUseRoute(entry, route)) &&
       (callingContext == RecipeBookCallingContext.planner ||
           (entry.mode == modeController.mode &&
               _poolExactName(entry.name) != null));
@@ -340,7 +351,7 @@ final class RecipeBookController extends ChangeNotifier {
         destination.selectedRecipeVariantId(entry.name),
       );
     }
-    if (route == null) return null;
+    if (route == null || !_canActivateUseRoute(entry, route)) return null;
     final resolvedVariantId = route.variantId;
     final ingredientSelections = route.matches
         .map(
@@ -400,6 +411,22 @@ final class RecipeBookController extends ChangeNotifier {
     return activation;
   }
 
+  bool _canActivateUseRoute(
+    RecipeBookUseEntry entry,
+    RecipeBookUseRoute route,
+  ) {
+    final recipes = modeController.owner.modes[entry.mode]!.recipes;
+    return route.matches.every(
+      (match) => !isTemporarilyArchivedItem(
+        match.selectedIngredientName,
+        itemId: _foldedEntry(
+          recipes,
+          match.selectedIngredientName,
+        )?.value.marketId,
+      ),
+    );
+  }
+
   bool selectRecipeVariant(String name, String variantId) {
     _clearUndo();
     final changed = modeController.selectRecipeVariant(
@@ -415,6 +442,34 @@ final class RecipeBookController extends ChangeNotifier {
 
   RecipeBookItemInfo? itemInfoFor(String name, {CraftMode? mode}) {
     final preferredMode = mode ?? modeController.mode;
+    var changed = false;
+    for (final sourceMode in CraftMode.values) {
+      final source = modeController.owner.modes[sourceMode]!.recipes;
+      if (!identical(_itemInfoRecipeSources[sourceMode], source)) {
+        _itemInfoRecipeSources[sourceMode] = source;
+        changed = true;
+      }
+    }
+    if (changed) _itemInfoCache.clear();
+    final key = (name, preferredMode, showHidden);
+    if (_itemInfoCache.containsKey(key)) {
+      // Reinsertion keeps the most recently viewed references in the cache.
+      final cached = _itemInfoCache.remove(key);
+      _itemInfoCache[key] = cached;
+      return cached;
+    }
+    final info = _buildItemInfo(name, preferredMode: preferredMode);
+    _itemInfoCache[key] = info;
+    if (_itemInfoCache.length > _itemInfoCacheLimit) {
+      _itemInfoCache.remove(_itemInfoCache.keys.first);
+    }
+    return info;
+  }
+
+  RecipeBookItemInfo? _buildItemInfo(
+    String name, {
+    required CraftMode preferredMode,
+  }) {
     final recipesByMode = <CraftMode, Map<String, Recipe>>{
       for (final mode in CraftMode.values)
         mode: showHidden
@@ -455,11 +510,22 @@ final class RecipeBookController extends ChangeNotifier {
     );
     if (info == null) return null;
     final researched = withResearchedAcquisition(
-      info,
+      withVisibleRecipeBookFormulas(
+        info,
+        itemIdFor: (candidate) =>
+            _foldedEntry(
+              resolvedController.recipes,
+              candidate,
+            )?.value.marketId ??
+            catalogRepository.bundledMarketId(candidate),
+      ),
       resolvedController
               .resolveItemAcquisition(resolvedName)
               ?.displayableSummaries ??
           const <String>[],
+      vendor: resolvedSource.vendor,
+      location: resolvedSource.location,
+      sourceNote: resolvedSource.sourceNote,
     );
     return withEstimatedRecipeBookOutputs(researched, _estimatedOutputNames);
   }
@@ -663,6 +729,16 @@ final class RecipeBookController extends ChangeNotifier {
 
   double? marketStockFor(String name) =>
       _foldedValue(modeController.state.value.market.stock, name);
+
+  bool showsMarketStockFor(String name) {
+    final recipe = recipeDefinitionFor(name);
+    return marketControlsVisible &&
+        recipe != null &&
+        !isBrowsableRecipeBookReference(recipe) &&
+        !modeController.state.value.market.isItemUnlisted(name) &&
+        modeController.resolveItemSource(name, recipe: recipe).npcPrice <= 0 &&
+        _hasMarketId(name, recipe);
+  }
 
   RecipeProfitabilityQuote? profitabilityFor(String name) {
     final recipe = recipeDefinitionFor(name);
@@ -958,8 +1034,16 @@ final class RecipeBookController extends ChangeNotifier {
   }
 
   List<String> substituteOptions(Ingredient ingredient) {
-    if (ingredient.options.isEmpty) return <String>[ingredient.name];
     final recipes = modeController.recipes;
+    bool archived(String name) => isTemporarilyArchivedItem(
+      name,
+      itemId: _foldedEntry(recipes, name)?.value.marketId,
+    );
+    if (ingredient.options.isEmpty) {
+      return archived(ingredient.name)
+          ? const <String>[]
+          : <String>[ingredient.name];
+    }
     final unavailable = modeController.owner.assembly
         .plannerRules(modeController.owner.catalog.supportingData)
         .legacyUnavailableItems
@@ -971,16 +1055,22 @@ final class RecipeBookController extends ChangeNotifier {
       final entry = _foldedEntry(recipes, option);
       if (entry == null ||
           unavailable.contains(_fold(option)) ||
+          archived(option) ||
           !seen.add(_fold(entry.key))) {
         continue;
       }
       result.add(entry.key);
     }
-    return result.isEmpty ? <String>[ingredient.name] : result;
+    return result.isEmpty && !archived(ingredient.name)
+        ? <String>[ingredient.name]
+        : result;
   }
 
   String selectedSubstitute(String parentName, Ingredient ingredient) {
     final options = substituteOptions(ingredient);
+    // A saved/reference-only formula can still show its original material,
+    // without offering that archived material as a new selection.
+    if (options.isEmpty) return ingredient.name;
     final key = _substituteDocumentKey(parentName, ingredient);
     final sessionKey = _searchSubstituteKey(parentName, ingredient);
     if (!_manualSearchSubstituteKeys.contains(sessionKey) &&
@@ -1013,6 +1103,7 @@ final class RecipeBookController extends ChangeNotifier {
     required Ingredient ingredient,
     required String selection,
   }) {
+    if (_foldedIn(substituteOptions(ingredient), selection) == null) return;
     _clearUndo();
     _manualSearchSubstituteKeys.add(
       _searchSubstituteKey(parentName, ingredient),
@@ -1194,6 +1285,8 @@ final class RecipeBookController extends ChangeNotifier {
   @override
   void dispose() {
     _disposed = true;
+    _itemInfoCache.clear();
+    _itemInfoRecipeSources.clear();
     for (final controller in modeController.owner.modes.values) {
       controller.state.removeListener(_documentStateChanged);
     }
@@ -1345,6 +1438,7 @@ final class RecipeBookController extends ChangeNotifier {
     for (final allowed in candidates) {
       final entry = _foldedEntry(recipes, allowed);
       if (entry == null ||
+          isTemporarilyArchivedItem(entry.key, itemId: entry.value.marketId) ||
           (!entry.value.isCraftable &&
               !isBrowsableRecipeBookReference(entry.value))) {
         continue;
@@ -1405,9 +1499,9 @@ final class RecipeBookController extends ChangeNotifier {
         ),
       );
     } else {
-      final preferredId = recipe.resolvedVariantId(
-        _savedRecipeVariantId(recipe),
-      );
+      final preferredId =
+          modeController.selectedRecipeVariantId(name) ??
+          recipe.resolvedVariantId(_savedRecipeVariantId(recipe));
       final preferred = recipe.variantById(preferredId);
       if (preferred != null) {
         formulas.add(
@@ -1418,7 +1512,13 @@ final class RecipeBookController extends ChangeNotifier {
           ),
         );
       }
-      for (final variant in recipe.variants) {
+      final orderedVariants = <RecipeVariant>[
+        for (final variant in recipe.variants)
+          if (variant.batchMultiplier == preferred?.batchMultiplier) variant,
+        for (final variant in recipe.variants)
+          if (variant.batchMultiplier != preferred?.batchMultiplier) variant,
+      ];
+      for (final variant in orderedVariants) {
         if (preferred != null && _sameName(variant.id, preferred.id)) continue;
         formulas.add(
           _RecipeSearchFormula(
@@ -1550,10 +1650,20 @@ final class RecipeBookController extends ChangeNotifier {
       var ingredientVisible = false;
       for (final ingredient in _allRecipeIngredients(recipe)) {
         final values = <String>[
-          ingredient.name,
           ingredient.substituteGroup ?? '',
-          ...ingredient.options,
-          ...ingredient.substituteRatios.keys,
+          ...<String>{
+            ingredient.name,
+            ...ingredient.options,
+            ...ingredient.substituteRatios.keys,
+          }.where(
+            (candidate) => !isTemporarilyArchivedItem(
+              candidate,
+              itemId: _foldedEntry(
+                modeController.recipes,
+                candidate,
+              )?.value.marketId,
+            ),
+          ),
         ];
         if (values.any((value) => _fold(value).contains(query))) {
           ingredientVisible = true;
@@ -1620,6 +1730,7 @@ final class RecipeBookController extends ChangeNotifier {
         recipes: recipes,
         state: modeController.state.value,
         rules: modeController.owner.plannerRules,
+        selectedVariantId: selectedRecipeVariantId(name),
       )) {
         final item = _foldedEntry(recipes, marketName)?.value;
         if (_hasMarketId(marketName, item)) {
@@ -1678,6 +1789,7 @@ final class RecipeBookController extends ChangeNotifier {
         state: modeController.state.value,
         rules: modeController.owner.plannerRules,
         marketTax: modeController.owner.documentSnapshot.marketTax,
+        selectedVariantId: selectedRecipeVariantId(recipe.name),
       );
 
   bool _hasProfitabilityMarketIds(Recipe recipe, Map<String, Recipe> recipes) =>
@@ -1687,6 +1799,7 @@ final class RecipeBookController extends ChangeNotifier {
             recipes: recipes,
             state: modeController.state.value,
             rules: modeController.owner.plannerRules,
+            selectedVariantId: selectedRecipeVariantId(recipe.name),
           )
           .every(
             (name) => _hasMarketId(name, _foldedEntry(recipes, name)?.value),
@@ -1713,7 +1826,10 @@ final class RecipeBookController extends ChangeNotifier {
     if (cached != null) return cached;
     final index = <String, Set<String>>{};
     for (final entry in recipes.entries) {
-      if (!entry.value.isCraftable) continue;
+      if (!entry.value.isCraftable ||
+          isTemporarilyArchivedItem(entry.key, itemId: entry.value.marketId)) {
+        continue;
+      }
       for (final ingredient in _allRecipeIngredients(entry.value)) {
         final referenced = <String>{
           ingredient.name,

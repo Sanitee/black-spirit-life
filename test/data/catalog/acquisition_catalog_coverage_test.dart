@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:bdo_craft_planner_flutter/app/planning/planner_assembly.dart';
 import 'package:bdo_craft_planner_flutter/data/catalog/bundled_catalog_parser.dart';
+import 'package:bdo_craft_planner_flutter/domain/catalog/temporarily_archived_items.dart';
 import 'package:bdo_craft_planner_flutter/domain/models/catalog_models.dart';
 import 'package:bdo_craft_planner_flutter/domain/models/craft_mode.dart';
 import 'package:bdo_craft_planner_flutter/domain/planner/acquisition_recipe_resolution.dart';
@@ -48,6 +49,15 @@ void main() {
     final failures = <String>[];
     for (final entry in acquisitionInfo.entries) {
       final item = _objectMap(entry.value);
+      if (_text(item['status']) == 'temporarily_archived') {
+        expect(
+          isTemporarilyArchivedItem(entry.key, itemId: '${item['itemId']}'),
+          isTrue,
+          reason:
+              'Only the reviewed archive may omit current acquisition guidance.',
+        );
+        continue;
+      }
       if (_text(item['status']).toLowerCase() != 'reviewed') {
         failures.add('${entry.key}: status is not reviewed');
       }
@@ -105,6 +115,7 @@ void main() {
 
     final uncovered = <String>[];
     for (final name in reachable) {
+      if (isTemporarilyArchivedItem(name)) continue;
       final recipe = resolveAcquisitionRecipe(
         name: name,
         currentMode: CraftMode.alchemy,
@@ -168,17 +179,19 @@ void main() {
     expect(guidance, contains('ocean stalker'));
   });
 
-  test('Monkey Blood has a reviewed gathering route', () {
-    final acquisition = resolveItemAcquisition(
-      name: 'Monkey Blood',
-      rules: rules,
-    );
-    final guidance =
-        acquisition?.displayableSummaries.join(' ').toLowerCase() ?? '';
-
-    expect(acquisition?.status, 'reviewed');
-    expect(guidance, contains('monkey'));
-    expect(guidance, contains('fluid collector'));
+  test('archived records do not claim a confirmed current source', () {
+    for (final entry in temporarilyArchivedItemsById.entries) {
+      final acquisition = resolveItemAcquisition(
+        name: entry.value,
+        rules: rules,
+      );
+      expect(
+        acquisition?.displayableSummaries ?? <String>[],
+        isEmpty,
+        reason: entry.value,
+      );
+      expect(catalog.supportingData['acquisitionInfo'], isNotNull);
+    }
   });
 
   test('Crystallized Energy of Endtimes uses practical acquisition routes '
@@ -318,7 +331,7 @@ void main() {
     }
 
     final alchemyShards = recipes['Alchemy Stone Shard']!;
-    expect(alchemyShards.role, RecipeRole.production);
+    expect(alchemyShards.role, RecipeRole.manualConversion);
     expect(alchemyShards.ingredients, hasLength(1));
     expect(alchemyShards.ingredients.single.options, const <String>[
       'Imperfect Alchemy Stone of Destruction',

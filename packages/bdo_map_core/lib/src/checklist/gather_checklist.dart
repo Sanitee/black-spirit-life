@@ -1,3 +1,5 @@
+import 'gather_checklist_demand.dart';
+
 /// The acquisition route that led to a gather-checklist entry.
 ///
 /// This is optional metadata rather than checklist identity. A resource may be
@@ -12,6 +14,7 @@ class BdoGatherChecklistEntry {
     String? displayName,
     BdoGatherChecklistSourceKind? sourceKind,
     bool isCompleted = false,
+    Iterable<BdoGatherChecklistDemand> demands = const [],
   }) {
     final normalizedId = _normalizedId(resourceId);
     if (normalizedId == null) {
@@ -26,6 +29,7 @@ class BdoGatherChecklistEntry {
       displayName: _normalizedOptionalText(displayName),
       sourceKind: sourceKind,
       isCompleted: isCompleted,
+      demands: _mergeDemands(demands),
     );
   }
 
@@ -34,6 +38,7 @@ class BdoGatherChecklistEntry {
     required this.displayName,
     required this.sourceKind,
     required this.isCompleted,
+    required this.demands,
   });
 
   /// The stable material/resource key. This is the entry's identity.
@@ -48,6 +53,11 @@ class BdoGatherChecklistEntry {
   final BdoGatherChecklistSourceKind? sourceKind;
 
   final bool isCompleted;
+  final List<BdoGatherChecklistDemand> demands;
+
+  double? get neededQuantity => demands.isEmpty
+      ? null
+      : demands.fold<double>(0, (sum, demand) => sum + demand.neededQuantity);
 
   BdoGatherChecklistEntry copyWith({
     String? displayName,
@@ -55,6 +65,7 @@ class BdoGatherChecklistEntry {
     BdoGatherChecklistSourceKind? sourceKind,
     bool clearSourceKind = false,
     bool? isCompleted,
+    Iterable<BdoGatherChecklistDemand>? demands,
   }) {
     return BdoGatherChecklistEntry._(
       resourceId: resourceId,
@@ -63,6 +74,7 @@ class BdoGatherChecklistEntry {
           : _normalizedOptionalText(displayName) ?? this.displayName,
       sourceKind: clearSourceKind ? null : sourceKind ?? this.sourceKind,
       isCompleted: isCompleted ?? this.isCompleted,
+      demands: demands == null ? this.demands : _mergeDemands(demands),
     );
   }
 
@@ -71,6 +83,8 @@ class BdoGatherChecklistEntry {
     'displayName': ?displayName,
     if (sourceKind case final kind?) 'sourceKind': _sourceKindName(kind),
     if (isCompleted) 'completed': true,
+    if (demands.isNotEmpty)
+      'demands': demands.map((demand) => demand.toJson()).toList(),
   };
 
   @override
@@ -79,11 +93,17 @@ class BdoGatherChecklistEntry {
       resourceId == other.resourceId &&
       displayName == other.displayName &&
       sourceKind == other.sourceKind &&
-      isCompleted == other.isCompleted;
+      isCompleted == other.isCompleted &&
+      _listsEqual(demands, other.demands);
 
   @override
-  int get hashCode =>
-      Object.hash(resourceId, displayName, sourceKind, isCompleted);
+  int get hashCode => Object.hash(
+    resourceId,
+    displayName,
+    sourceKind,
+    isCompleted,
+    Object.hashAll(demands),
+  );
 
   @override
   String toString() =>
@@ -118,7 +138,7 @@ class BdoGatherChecklist {
     required this.selectedResourceId,
   });
 
-  static const int schemaVersion = 1;
+  static const int schemaVersion = 2;
 
   final List<BdoGatherChecklistEntry> entries;
 
@@ -185,12 +205,14 @@ class BdoGatherChecklist {
     String? displayName,
     BdoGatherChecklistSourceKind? sourceKind,
     bool select = false,
+    Iterable<BdoGatherChecklistDemand> demands = const [],
   }) {
     return add(
       BdoGatherChecklistEntry(
         resourceId: resourceId,
         displayName: displayName,
         sourceKind: sourceKind,
+        demands: demands,
       ),
       select: select,
     );
@@ -425,6 +447,7 @@ BdoGatherChecklistEntry _mergeEntry(
     displayName: incoming.displayName,
     sourceKind: incoming.sourceKind,
     isCompleted: existing.isCompleted || incoming.isCompleted,
+    demands: [...existing.demands, ...incoming.demands],
   );
 }
 
@@ -496,6 +519,10 @@ BdoGatherChecklistEntry? _entryFromJson(
     isCompleted: _boolFromJson(
       value['completed'] ?? value['isCompleted'] ?? value['done'],
     ),
+    demands: [
+      if (value['demands'] case final Iterable values)
+        for (final raw in values) ?BdoGatherChecklistDemand.fromJson(raw),
+    ],
   );
 }
 
@@ -568,10 +595,7 @@ String _sourceKindName(BdoGatherChecklistSourceKind sourceKind) =>
       BdoGatherChecklistSourceKind.fishing => 'fishing',
     };
 
-bool _listsEqual(
-  List<BdoGatherChecklistEntry> left,
-  List<BdoGatherChecklistEntry> right,
-) {
+bool _listsEqual<T>(List<T> left, List<T> right) {
   if (left.length != right.length) {
     return false;
   }
@@ -582,3 +606,9 @@ bool _listsEqual(
   }
   return true;
 }
+
+List<BdoGatherChecklistDemand> _mergeDemands(
+  Iterable<BdoGatherChecklistDemand> values,
+) => List.unmodifiable(
+  {for (final value in values) value.identity: value}.values,
+);

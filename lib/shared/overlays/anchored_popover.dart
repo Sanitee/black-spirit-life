@@ -271,12 +271,6 @@ class _AnchoredPopoverState extends State<AnchoredPopover> {
     final anchorContext = _anchorKey.currentContext;
     final anchorBox = anchorContext?.findRenderObject();
     if (anchorBox is! RenderBox || !anchorBox.hasSize) return;
-    // OverlayPortal's overlay child is laid out in the root view coordinate
-    // space. Asking Overlay.of(context).context for an ancestor RenderBox can
-    // resolve an inner theater offset by the route's viewport padding, which
-    // displaced beside annotations from the visible anchor.
-    final origin = anchorBox.localToGlobal(Offset.zero);
-    _anchorRect = origin & anchorBox.size;
     _manualTopLeft = null;
     _activeDragTopLeft = null;
     _registeredCoordinator?.show(
@@ -357,11 +351,16 @@ class _AnchoredPopoverState extends State<AnchoredPopover> {
   void _cancelDrag() => _activeDragTopLeft = null;
 
   @override
-  Widget build(BuildContext context) => OverlayPortal(
+  Widget build(BuildContext context) => OverlayPortal.overlayChildLayoutBuilder(
     controller: _portal,
-    overlayChildBuilder: (context) {
-      final anchor = _anchorRect;
-      if (anchor == null) return const SizedBox.shrink();
+    overlayChildBuilder: (context, layout) {
+      // Tab-local navigators can have an inset overlay. Use the actual portal
+      // transform instead of mixing global-view and overlay coordinates.
+      final anchor = MatrixUtils.transformRect(
+        layout.childPaintTransform,
+        Offset.zero & layout.childSize,
+      );
+      _anchorRect = anchor;
       final popover = LayoutBuilder(
         builder: (context, constraints) {
           _viewportSize = constraints.biggest;
@@ -409,7 +408,19 @@ class _AnchoredPopoverState extends State<AnchoredPopover> {
                       onUpdate: _updateDrag,
                       onEnd: _endDrag,
                       onCancel: _cancelDrag,
-                      child: widget.popoverBuilder(context, _close),
+                      child: MediaQuery.disableAnimationsOf(context)
+                          ? widget.popoverBuilder(context, _close)
+                          : TweenAnimationBuilder<double>(
+                              key: ValueKey<String>(
+                                'popover-entrance:${widget.overlayId}',
+                              ),
+                              tween: Tween(begin: .84, end: 1),
+                              duration: const Duration(milliseconds: 140),
+                              curve: Curves.easeOutCubic,
+                              child: widget.popoverBuilder(context, _close),
+                              builder: (context, opacity, child) =>
+                                  Opacity(opacity: opacity, child: child),
+                            ),
                     ),
                   ),
                 ),

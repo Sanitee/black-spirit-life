@@ -1,6 +1,7 @@
 library;
 
 export 'src/checklist/gather_checklist.dart';
+export 'src/checklist/gather_checklist_demand.dart';
 export 'src/data/resource_map_loader.dart';
 export 'src/economics/worker_economics_data.dart';
 export 'src/economics/worker_income_estimator.dart';
@@ -17,6 +18,7 @@ export 'src/lodging/lodging_optimizer.dart';
 export 'src/lodging/shop_lodging_catalog.dart';
 export 'src/lodging/storage_house_planner.dart';
 export 'src/model/map_geometry.dart';
+export 'src/model/map_ui_opacity.dart';
 export 'src/model/map_visual_style.dart';
 export 'src/model/planner_material_need.dart';
 export 'src/model/resource_map_data.dart';

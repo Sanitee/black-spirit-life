@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../visual/illuminated_ledger/ledger_ornament_painters.dart';
 import '../../visual/visual.dart';
+import '../window/app_title_bar_visual.dart';
 
 /// Stable hooks for the app-owned copy confirmation surface.
 abstract final class ApplicationCopyToastKeys {
@@ -24,20 +25,25 @@ class ApplicationCopyToastOverlay extends StatelessWidget {
     required this.message,
     required this.spec,
     required this.standardSettings,
+    this.workspaceVisual,
     super.key,
   });
 
   final String message;
   final ThemeSpec spec;
   final StandardVisualSettings standardSettings;
+  final AppTitleBarVisual? workspaceVisual;
 
   @override
   Widget build(BuildContext context) {
-    final ledger = spec.family == RetainedVisualFamily.illuminatedLedger;
+    final ledger =
+        workspaceVisual == null &&
+        spec.family == RetainedVisualFamily.illuminatedLedger;
     final surface = _CopyToastSurface(
       message: message,
       spec: spec,
       standardSettings: standardSettings,
+      workspaceVisual: workspaceVisual,
     );
 
     return IgnorePointer(
@@ -78,14 +84,49 @@ class _CopyToastSurface extends StatelessWidget {
     required this.message,
     required this.spec,
     required this.standardSettings,
+    this.workspaceVisual,
   });
 
   final String message;
   final ThemeSpec spec;
   final StandardVisualSettings standardSettings;
+  final AppTitleBarVisual? workspaceVisual;
 
   @override
   Widget build(BuildContext context) {
+    if (workspaceVisual case final visual?) {
+      return Container(
+        key: ApplicationCopyToastKeys.surface,
+        padding: const EdgeInsets.symmetric(horizontal: 13, vertical: 8),
+        decoration: BoxDecoration(
+          gradient: spec.materials.surfaceRaised,
+          borderRadius: BorderRadius.circular(visual.tabRadius),
+          border: Border.all(color: spec.palette.trimBright),
+          boxShadow: spec.materials.highShadow,
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            AppVectorGlyph('check', size: 14, color: spec.palette.success),
+            const SizedBox(width: 7),
+            ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 340),
+              child: Text(
+                message,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  color: spec.palette.text,
+                  fontFamily: visual.fontFamily,
+                  fontSize: 13,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+          ],
+        ),
+      );
+    }
     final ledger = spec.family == RetainedVisualFamily.illuminatedLedger;
     final sakura = spec.family == RetainedVisualFamily.sakuraNightGarden;
     final effectiveHue = spec.family == RetainedVisualFamily.standard

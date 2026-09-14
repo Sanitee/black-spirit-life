@@ -23,7 +23,7 @@ final Map<String, ExactBuffInfo> exactBuffInfoByName = <String, ExactBuffInfo>{
       'Max HP +200',
       'Max Stamina +200',
     ],
-    duration: '15 min',
+    duration: '20 min',
     cooldown: '10 sec',
   ),
   'agile seal elixir': ExactBuffInfo(
@@ -49,7 +49,7 @@ final Map<String, ExactBuffInfo> exactBuffInfoByName = <String, ExactBuffInfo>{
       'Ignore All Resistance +5%',
       'All AP -15',
     ],
-    duration: '15 min',
+    duration: '20 min',
     cooldown: '10 sec',
   ),
   'beast\'s draught': ExactBuffInfo(
@@ -63,13 +63,13 @@ final Map<String, ExactBuffInfo> exactBuffInfoByName = <String, ExactBuffInfo>{
       'Critical Hit +3',
       'Weight Limit +100 LT',
     ],
-    duration: '15 min',
+    duration: '20 min',
     cooldown: '10 sec',
   ),
   'berserk draught': ExactBuffInfo(
     title: 'Berserk Draught',
     effects: <String>['All Special Attack Extra Damage +16%'],
-    duration: '15 min',
+    duration: '20 min',
     cooldown: '10 sec',
   ),
   'blessing of mystic beasts - accuracy': ExactBuffInfo(
@@ -138,7 +138,7 @@ final Map<String, ExactBuffInfo> exactBuffInfoByName = <String, ExactBuffInfo>{
       'Recover 17 HP on Critical Hits',
       'Recover 12 HP on Hits',
     ],
-    duration: '15 min',
+    duration: '20 min',
     cooldown: '10 sec',
   ),
   'deep blue tidal draught': ExactBuffInfo(
@@ -421,7 +421,7 @@ final Map<String, ExactBuffInfo> exactBuffInfoByName = <String, ExactBuffInfo>{
       'All Damage Reduction -20',
       'All Evasion -20',
     ],
-    duration: '15 min',
+    duration: '20 min',
     cooldown: '10 sec',
   ),
   'elixir of infinite skill': ExactBuffInfo(
@@ -709,7 +709,7 @@ final Map<String, ExactBuffInfo> exactBuffInfoByName = <String, ExactBuffInfo>{
       'Critical Hit Extra Damage +10%',
       'Weight Limit +100 LT',
     ],
-    duration: '15 min',
+    duration: '20 min',
     cooldown: '10 sec',
   ),
   'frenzy draught of corruption': ExactBuffInfo(
@@ -723,7 +723,7 @@ final Map<String, ExactBuffInfo> exactBuffInfoByName = <String, ExactBuffInfo>{
       'Critical Hit Extra Damage +10%',
       'Weight Limit +100 LT',
     ],
-    duration: '15 min',
+    duration: '20 min',
     cooldown: '10 sec',
   ),
   'fury draught': ExactBuffInfo(
@@ -733,7 +733,7 @@ final Map<String, ExactBuffInfo> exactBuffInfoByName = <String, ExactBuffInfo>{
       'All Accuracy +13',
       'All Special Attack Extra Damage +2%',
     ],
-    duration: '15 min',
+    duration: '20 min',
     cooldown: '10 sec',
   ),
   'giant\'s draught': ExactBuffInfo(
@@ -746,7 +746,7 @@ final Map<String, ExactBuffInfo> exactBuffInfoByName = <String, ExactBuffInfo>{
       'Critical Hit +3',
       'Max Stamina +200',
     ],
-    duration: '15 min',
+    duration: '20 min',
     cooldown: '10 sec',
   ),
   'glorious golden hand elixir': ExactBuffInfo(
@@ -801,7 +801,7 @@ final Map<String, ExactBuffInfo> exactBuffInfoByName = <String, ExactBuffInfo>{
       'Recover 12 HP on Hits',
       'All Special Attack Extra Damage +18%',
     ],
-    duration: '15 min',
+    duration: '20 min',
     cooldown: '10 sec',
   ),
   'harmony draught - demihuman': ExactBuffInfo(
@@ -823,7 +823,7 @@ final Map<String, ExactBuffInfo> exactBuffInfoByName = <String, ExactBuffInfo>{
       'All Special Attack Extra Damage +18%',
       'Monster Damage Reduction Rate +10%',
     ],
-    duration: '15 min',
+    duration: '20 min',
     cooldown: '10 sec',
   ),
   'harmony draught - edania': ExactBuffInfo(
@@ -845,7 +845,7 @@ final Map<String, ExactBuffInfo> exactBuffInfoByName = <String, ExactBuffInfo>{
       'All Special Attack Extra Damage +18%',
       'Monster Damage Reduction Rate +10%',
     ],
-    duration: '15 min',
+    duration: '20 min',
     cooldown: '10 sec',
   ),
   'harmony draught - human': ExactBuffInfo(
@@ -868,7 +868,7 @@ final Map<String, ExactBuffInfo> exactBuffInfoByName = <String, ExactBuffInfo>{
       'All Special Attack Extra Damage +18%',
       'Monster Damage Reduction Rate +10%',
     ],
-    duration: '15 min',
+    duration: '20 min',
     cooldown: '10 sec',
   ),
   'harmony draught - kamasylvia': ExactBuffInfo(
@@ -890,7 +890,7 @@ final Map<String, ExactBuffInfo> exactBuffInfoByName = <String, ExactBuffInfo>{
       'All Special Attack Extra Damage +18%',
       'Monster Damage Reduction Rate +10%',
     ],
-    duration: '15 min',
+    duration: '20 min',
     cooldown: '10 sec',
   ),
   'helix elixir': ExactBuffInfo(
@@ -908,7 +908,7 @@ final Map<String, ExactBuffInfo> exactBuffInfoByName = <String, ExactBuffInfo>{
       'Max HP +200',
       'Max Stamina +200',
     ],
-    duration: '15 min',
+    duration: '20 min',
     cooldown: '10 sec',
   ),
   'immortal: armor draught': ExactBuffInfo(
@@ -921,7 +921,7 @@ final Map<String, ExactBuffInfo> exactBuffInfoByName = <String, ExactBuffInfo>{
       'All Resistance +5%',
       'All AP -15',
     ],
-    duration: '15 min',
+    duration: '20 min',
     cooldown: '10 sec',
   ),
   'immortal: beast\'s draught': ExactBuffInfo(
@@ -935,13 +935,13 @@ final Map<String, ExactBuffInfo> exactBuffInfoByName = <String, ExactBuffInfo>{
       'Critical Hit +3',
       'Weight Limit +100 LT',
     ],
-    duration: '15 min',
+    duration: '20 min',
     cooldown: '10 sec',
   ),
   'immortal: berserk draught': ExactBuffInfo(
     title: 'Immortal: Berserk Draught',
     effects: <String>['All Special Attack Extra Damage +16%'],
-    duration: '15 min',
+    duration: '20 min',
     cooldown: '10 sec',
   ),
   'immortal: corruption draught': ExactBuffInfo(
@@ -952,7 +952,7 @@ final Map<String, ExactBuffInfo> exactBuffInfoByName = <String, ExactBuffInfo>{
       'Recover 17 HP on Critical Hits',
       'Recover 12 HP on Hits',
     ],
-    duration: '15 min',
+    duration: '20 min',
     cooldown: '10 sec',
   ),
   'immortal: elixir of indignation': ExactBuffInfo(
@@ -968,7 +968,7 @@ final Map<String, ExactBuffInfo> exactBuffInfoByName = <String, ExactBuffInfo>{
       'All Damage Reduction -20',
       'All Evasion -20',
     ],
-    duration: '15 min',
+    duration: '20 min',
     cooldown: '10 sec',
   ),
   'immortal: frenzy draught': ExactBuffInfo(
@@ -982,7 +982,7 @@ final Map<String, ExactBuffInfo> exactBuffInfoByName = <String, ExactBuffInfo>{
       'Critical Hit Extra Damage +10%',
       'Weight Limit +100 LT',
     ],
-    duration: '15 min',
+    duration: '20 min',
     cooldown: '10 sec',
   ),
   'immortal: frenzy draught of corruption': ExactBuffInfo(
@@ -996,7 +996,7 @@ final Map<String, ExactBuffInfo> exactBuffInfoByName = <String, ExactBuffInfo>{
       'Critical Hit Extra Damage +10%',
       'Weight Limit +100 LT',
     ],
-    duration: '15 min',
+    duration: '20 min',
     cooldown: '10 sec',
   ),
   'immortal: fury draught': ExactBuffInfo(
@@ -1006,7 +1006,7 @@ final Map<String, ExactBuffInfo> exactBuffInfoByName = <String, ExactBuffInfo>{
       'All Accuracy +13',
       'All Special Attack Extra Damage +2%',
     ],
-    duration: '15 min',
+    duration: '20 min',
     cooldown: '10 sec',
   ),
   'immortal: giant\'s draught': ExactBuffInfo(
@@ -1019,7 +1019,7 @@ final Map<String, ExactBuffInfo> exactBuffInfoByName = <String, ExactBuffInfo>{
       'Critical Hit +3',
       'Max Stamina +200',
     ],
-    duration: '15 min',
+    duration: '20 min',
     cooldown: '10 sec',
   ),
   'immortal: harmony draught': ExactBuffInfo(
@@ -1039,7 +1039,7 @@ final Map<String, ExactBuffInfo> exactBuffInfoByName = <String, ExactBuffInfo>{
       'Recover 12 HP on Hits',
       'All Special Attack Extra Damage +18%',
     ],
-    duration: '15 min',
+    duration: '20 min',
     cooldown: '10 sec',
   ),
   'immortal: perfume of bracing spirits': ExactBuffInfo(
@@ -1148,7 +1148,7 @@ final Map<String, ExactBuffInfo> exactBuffInfoByName = <String, ExactBuffInfo>{
       'Movement and Attack/Casting Speeds +5',
       'Critical Hit +5',
     ],
-    duration: '15 min',
+    duration: '20 min',
     cooldown: '10 sec',
   ),
   'immortal: savage draught': ExactBuffInfo(
@@ -1160,7 +1160,7 @@ final Map<String, ExactBuffInfo> exactBuffInfoByName = <String, ExactBuffInfo>{
       'Critical Hit +3',
       'Weight Limit +100 LT',
     ],
-    duration: '15 min',
+    duration: '20 min',
     cooldown: '10 sec',
   ),
   'improved elixir of amity': ExactBuffInfo(
@@ -1203,6 +1203,29 @@ final Map<String, ExactBuffInfo> exactBuffInfoByName = <String, ExactBuffInfo>{
     duration: '15 min',
     cooldown: '1 sec',
     party: true,
+  ),
+  'ocean draught': ExactBuffInfo(
+    title: 'Ocean Draught',
+    effects: <String>['Sailing EXP +20%', 'Barter EXP +20%', 'Sailor EXP +10%'],
+    duration: '180 min',
+    cooldown: '10 sec',
+  ),
+  'vast ocean draught': ExactBuffInfo(
+    title: 'Vast Ocean Draught',
+    effects: <String>['Sailing EXP +20%', 'Barter EXP +20%', 'Sailor EXP +10%'],
+    duration: '360 min',
+    cooldown: '10 sec',
+  ),
+  'endless ocean draught': ExactBuffInfo(
+    title: 'Endless Ocean Draught',
+    effects: <String>[
+      'Sailing EXP +25%',
+      'Barter EXP +25%',
+      'Sailor EXP +15%',
+      'Sailing Mastery +50',
+    ],
+    duration: '600 min',
+    cooldown: '10 sec',
   ),
   'perfume of bracing spirits': ExactBuffInfo(
     title: 'Perfume of Bracing Spirits',
@@ -1335,7 +1358,7 @@ final Map<String, ExactBuffInfo> exactBuffInfoByName = <String, ExactBuffInfo>{
       'Movement and Attack/Casting Speeds +5',
       'Critical Hit +5',
     ],
-    duration: '15 min',
+    duration: '20 min',
     cooldown: '10 sec',
   ),
   'reliable looney elixir': ExactBuffInfo(
@@ -1361,7 +1384,7 @@ final Map<String, ExactBuffInfo> exactBuffInfoByName = <String, ExactBuffInfo>{
       'Critical Hit +3',
       'Weight Limit +100 LT',
     ],
-    duration: '15 min',
+    duration: '20 min',
     cooldown: '10 sec',
   ),
   'skilled fisher\'s elixir': ExactBuffInfo(
@@ -1479,7 +1502,7 @@ final Map<String, ExactBuffInfo> exactBuffInfoByName = <String, ExactBuffInfo>{
       'Fishing Speed +3',
       'Weight Limit +300 LT',
     ],
-    duration: '15 min',
+    duration: '20 min',
     cooldown: '10 sec',
   ),
   'weenie elixir': ExactBuffInfo(

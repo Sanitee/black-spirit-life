@@ -1,8 +1,10 @@
+import '../catalog/temporarily_archived_items.dart';
 import '../models/catalog_models.dart';
 import '../models/craft_mode.dart';
 import 'ingredient_quality.dart';
 import 'mastery_yields.dart';
 import 'planner_models.dart';
+import 'recipe_route_economics.dart';
 import 'source_resolution.dart';
 
 final class PlannerEngine {
@@ -71,6 +73,56 @@ final class PlannerEngine {
     );
     return context.previewIngredient(parentName, ingredient);
   }
+
+  /// Reuses a recipe index for repeated ingredient previews of one formula.
+  /// Inventory, grades and substitutes remain per-call inputs. Variant changes
+  /// use the existing independent path rather than an incompatible index.
+  PreparedIngredientPreview prepareIngredientPreview({
+    required Map<String, Recipe> recipes,
+    required PlannerState state,
+    PlannerRules? rules,
+  }) => PreparedIngredientPreview._(
+    Map<String, Recipe>.unmodifiable(recipes),
+    state,
+    rules ?? PlannerRules(),
+  );
+}
+
+final class PreparedIngredientPreview {
+  PreparedIngredientPreview._(this._recipes, PlannerState state, this._rules)
+    : _variants = state.recipeVariantChoices,
+      _items = _RecipeIndex(_recipes, state, _rules);
+
+  final Map<String, Recipe> _recipes;
+  final Map<String, String> _variants;
+  final PlannerRules _rules;
+  // Only previewIngredient is reachable here; it never mutates route/index
+  // state. Full plan construction keeps its separate mutable route index.
+  final _RecipeIndex _items;
+
+  PlanStepIngredient preview({
+    required PlannerState state,
+    required String parentName,
+    required Ingredient ingredient,
+  }) {
+    final variants = state.recipeVariantChoices;
+    if (variants.length != _variants.length ||
+        _variants.entries.any((entry) => variants[entry.key] != entry.value)) {
+      return const PlannerEngine().previewIngredientSelection(
+        recipes: _recipes,
+        state: state,
+        parentName: parentName,
+        ingredient: ingredient,
+        rules: _rules,
+      );
+    }
+    return _PlannerContext.withItems(
+      mode: CraftMode.alchemy,
+      items: _items,
+      state: state,
+      rules: _rules,
+    ).previewIngredient(parentName, ingredient);
+  }
 }
 
 final class _PlannerContext {
@@ -79,7 +131,14 @@ final class _PlannerContext {
     required Map<String, Recipe> recipes,
     required this.state,
     required this.rules,
-  }) : items = _RecipeIndex(recipes, state.recipeVariantChoices);
+  }) : items = _RecipeIndex(recipes, state, rules);
+
+  _PlannerContext.withItems({
+    required this.mode,
+    required this.items,
+    required this.state,
+    required this.rules,
+  });
 
   final CraftMode mode;
   final _RecipeIndex items;
@@ -126,6 +185,7 @@ final class _PlannerContext {
       final net = completed ? 0.0 : _nonNegative(gross - have);
       netNeed[folded] = net;
 
+      items.resolveRoute(name, requestedOutput: net);
       final recipe = items[name];
       if (recipe == null || !_isCraftable(name)) {
         continue;
@@ -142,7 +202,7 @@ final class _PlannerContext {
 
       for (final ingredient in recipe.ingredients) {
         final selected = _ingredientSelection(name, ingredient, count);
-        if (selected.options.length > 1) {
+        if (selected.options.length > 1 && selected.quantity > 0) {
           optionMeta[_fold(selected.key)] = ChoiceMeta(
             parentName: name,
             original: ingredient.name,
@@ -241,6 +301,7 @@ final class _PlannerContext {
       steps: steps,
       missing: missing,
       empty: false,
+      routeSelections: items.routeSelections,
     );
   }
 
@@ -331,11 +392,21 @@ final class _PlannerContext {
         return;
       }
       visiting.add(folded);
+      items.resolveRoute(name);
       final recipe = items[name];
       if (recipe != null && _isCraftable(name)) {
         for (final ingredient in recipe.ingredients) {
           final selected = _ingredientSelection(name, ingredient, 1);
           visit(selected.key, level + 1);
+        }
+        // Equivalent routes exchange only leaf inputs. Include every candidate
+        // before the demand pass so a price/ownership choice cannot leave the
+        // newly selected material outside the dependency order.
+        final comparison = items.routeFor(name);
+        if (comparison != null) {
+          for (final option in comparison.options) {
+            visit(option.ingredientName, level + 1);
+          }
         }
       }
       visiting.remove(folded);
@@ -502,6 +573,7 @@ final class _PlannerContext {
       final folded = _fold(option);
       if (!items.contains(option) ||
           unavailable.contains(folded) ||
+          _isTemporarilyArchived(option) ||
           !seen.add(folded)) {
         continue;
       }
@@ -586,13 +658,32 @@ final class _PlannerContext {
       _isMarketable(name) ? _numberFor(state.marketStock, name) : 0;
 
   bool _isMarketable(String name) {
+    if (_isTemporarilyArchived(name)) return false;
     final recipeId = items[name]?.marketId;
     final configuredId = _stringFor(rules.marketIds, name);
     return (recipeId != null && recipeId.trim().isNotEmpty) ||
         (configuredId != null && configuredId.trim().isNotEmpty);
   }
 
+  bool _isTemporarilyArchived(String name) => isTemporarilyArchivedItem(
+    name,
+    itemId: items[name]?.marketId ?? _stringFor(rules.marketIds, name),
+  );
+
   MarketMaterialState _materialMarketState(String name, double missing) {
+    if (_isTemporarilyArchived(name)) {
+      return MarketMaterialState(
+        marketable: false,
+        stock: 0,
+        price: 0,
+        buyable: 0,
+        unavailable: 0,
+        total: 0,
+        status: missing <= 0 ? 'covered' : 'none',
+        hasSourceInfo: false,
+        stockKnown: false,
+      );
+    }
     final recipe = items[name];
     final source = resolveSourceInfo(name: name, recipe: recipe, rules: rules);
     final hasSource = source.hasDetails;
@@ -651,10 +742,8 @@ final class _PlannerContext {
 }
 
 final class _RecipeIndex {
-  _RecipeIndex(
-    Map<String, Recipe> recipes,
-    Map<String, String> recipeVariantChoices,
-  ) {
+  _RecipeIndex(Map<String, Recipe> recipes, this.state, this.rules)
+    : definitions = recipes {
     for (final entry in recipes.entries) {
       final folded = _fold(entry.key);
       final existing = _names[folded];
@@ -665,13 +754,38 @@ final class _RecipeIndex {
       }
       _names[folded] = entry.key;
       _recipes[folded] = entry.value.resolveVariant(
-        _stringFor(recipeVariantChoices, entry.key),
+        _stringFor(state.recipeVariantChoices, entry.key),
       );
     }
   }
 
   final Map<String, String> _names = <String, String>{};
   final Map<String, Recipe> _recipes = <String, Recipe>{};
+  final Map<String, Recipe> definitions;
+  final PlannerState state;
+  final PlannerRules rules;
+  final Map<String, RecipeRouteSelection> routeSelections =
+      <String, RecipeRouteSelection>{};
+
+  RecipeRouteSelection? routeFor(String name) =>
+      routeSelections[_names[_fold(name)]];
+
+  void resolveRoute(String name, {double? requestedOutput}) {
+    final canonical = _names[_fold(name)];
+    final definition = definitions[canonical];
+    if (definition == null || !definition.hasRecipeVariants) return;
+    final selection = resolveRecipeRoute(
+      recipe: definition,
+      recipes: definitions,
+      state: state,
+      rules: rules,
+      requestedOutput: requestedOutput,
+    );
+    _recipes[_fold(name)] = definition.resolveVariant(
+      selection.selectedVariantId,
+    );
+    if (selection.hasComparison) routeSelections[canonical!] = selection;
+  }
 
   Iterable<String> get names => _names.values;
 

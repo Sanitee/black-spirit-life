@@ -45,6 +45,7 @@ class ModeItemIcon extends StatefulWidget {
     this.aliases = const <String>[],
     this.fallbackIcon,
     this.showFrame = true,
+    this.fit = BoxFit.cover,
     this.customIconLoader = _loadCustomIconBytes,
     super.key,
   });
@@ -57,6 +58,7 @@ class ModeItemIcon extends StatefulWidget {
   final List<String> aliases;
   final IconData? fallbackIcon;
   final bool showFrame;
+  final BoxFit fit;
   final CustomIconBytesLoader customIconLoader;
 
   @override
@@ -171,7 +173,7 @@ class _ModeItemIconState extends State<ModeItemIcon> {
       _ResolvedIcon(:final bytes) => Image.memory(
         bytes,
         key: ModeItemIconKeys.image(widget.name),
-        fit: BoxFit.cover,
+        fit: widget.fit,
         gaplessPlayback: true,
         filterQuality: FilterQuality.medium,
         errorBuilder: (_, _, _) => _IconFailure(

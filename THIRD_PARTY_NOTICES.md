@@ -38,6 +38,13 @@ recognition; screenshots remain on the user's computer. The helper-specific
 asset notice is distributed at
 `windows/storage_ocr/BlackSpiritStorageOcr/Assets/RecipeBook/NOTICE.txt`.
 
+The Opportunities workspace includes 154 unmodified item icons extracted
+from the owner's installed Black Desert PC client. Its public provenance file
+records only client-relative asset paths, byte sizes and SHA-256 hashes. The
+Resource Map also includes reviewed house-use, navigation and bare-hands
+interaction textures with source notices beside those assets. No local client
+path, extractor executable, account data or game installation is distributed.
+
 ## Black Spirit Hub shared OCR source
 
 The Windows-only `BlackSpiritStorageOcr` recognition implementation and frozen

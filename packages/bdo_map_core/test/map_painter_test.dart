@@ -592,6 +592,75 @@ void main() {
     expect(layout.hitTest(const Offset(100, 200)), isNull);
   });
 
+  test('a Dairy Cow marker wins over a node at the same farm anchor', () {
+    const source = BdoTileSource(
+      id: 'dairy-hit-test',
+      displayName: 'Dairy hit test',
+      urlTemplate: 'https://example.test/{z}/{x}_{y}.png',
+      worldBounds: BdoMapBounds(
+        left: -1000,
+        top: -1000,
+        right: 1000,
+        bottom: 1000,
+      ),
+      attribution: 'Generated test fixture',
+      usageNotice: 'Generated test fixture',
+      minimumZoom: 0,
+      maximumZoom: 5,
+      worldUnitsAtZoomZero: 2000,
+      fileExtension: 'png',
+    );
+    final camera = BdoMapCameraController(
+      tileSource: source,
+      initialCamera: const BdoMapCamera(center: BdoMapPoint(0, 0), zoom: 2),
+    );
+    addTearDown(camera.dispose);
+    const node = BdoWorkerNode(
+      id: 'farm-node',
+      name: 'Farm node',
+      nodeType: 'Farm',
+      region: 'Test',
+      location: BdoWorldPoint(0, 0),
+      contributionPoints: 1,
+      linkIds: <String>[],
+      outputs: <BdoNodeOutput>[],
+      isResourceNode: false,
+    );
+    const spot = BdoGatheringSpot(
+      id: 'dairy-spot',
+      name: 'Farm Dairy Cows',
+      region: 'Test',
+      nearestNode: 'Farm node',
+      location: BdoWorldPoint(0, 0),
+      resourceIds: <String>['milk'],
+      targets: <BdoGatheringTarget>[
+        BdoGatheringTarget(
+          name: 'Dairy Cow',
+          tool: 'Milking minigame',
+          resourceIds: <String>['milk'],
+        ),
+      ],
+      quality: 'named area',
+      summary: 'Test fixture',
+      verification: BdoGatheringVerification.independentSurvey,
+      provenanceId: 'test',
+    );
+    final layout = BdoMapOverlayLayout(
+      cameraController: camera,
+      viewport: const Size(400, 400),
+      workerNodes: const <BdoWorkerNode>[node],
+      workerNodesById: const <String, BdoWorkerNode>{'farm-node': node},
+      gatheringSpots: const <BdoGatheringSpot>[spot],
+      gatheringRoutes: const <BdoGatheringRoute>[],
+    );
+
+    final hit = layout.hitTest(const Offset(200, 200));
+    expect(hit, isNotNull);
+    expect(hit!.hit.kind, BdoMapHitKind.gatheringSpot);
+    expect(hit.hit.id, spot.id);
+    expect(hit.hitRadius, 24);
+  });
+
   test('gathering-point overview keeps cluster hit targets world anchored', () {
     const source = BdoTileSource(
       id: 'point-zoom-test',
@@ -660,7 +729,7 @@ void main() {
 
     expect(target.hit.kind, BdoMapHitKind.gatheringPoint);
     expect(target.hit.id, point.id);
-    expect(target.label, point.label);
+    expect(target.label, point.target);
   });
 
   test('gathering-point overview clusters remain world anchored after pan', () {
@@ -1058,7 +1127,7 @@ void main() {
         semantics.properties.label,
         contains(
           '2 worker nodes, 3 gathering zones, '
-          '4 historical gathering points, and 1 gathering route',
+          '4 gathering locations, and 1 gathering route',
         ),
       );
       expect(semantics.properties.value, 'Zoom 0.0');
@@ -1163,9 +1232,9 @@ void main() {
           id: 'same-point',
           location: const BdoWorldPoint(0, 0),
           resourceIds: const <String>['test-resource'],
-          target: 'Test target',
+          target: label,
           kind: 'butchering',
-          label: label,
+          label: 'Legacy point label',
           verification: BdoGatheringVerification.stale,
           provenanceId: 'test',
         );

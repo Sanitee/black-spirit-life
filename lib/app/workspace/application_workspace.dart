@@ -1,26 +1,34 @@
 import 'dart:async';
-
 import 'dart:io';
 
 import 'package:bdo_map_core/bdo_map_core.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../../app_identity.dart';
 import '../../data/catalog/catalog_repository.dart';
 import '../../data/icons/custom_icon_store.dart';
-import '../../data/market/market_price_service.dart';
-import '../../data/market/package_http_market_transport.dart';
+import '../../data/market/shared_market_price_gateway.dart';
+import '../../data/market/shared_market_repository.dart';
+import '../../data/opportunities/opportunity_market_cache_store.dart';
+import '../../data/opportunities/opportunity_market_service.dart';
 import '../../data/persistence/personal_data_location_service.dart';
 import '../../data/portable/portable_custom_icon_bridge.dart';
+import '../../domain/catalog/temporarily_archived_items.dart';
 import '../../domain/market/market_price_gateway.dart';
+import '../../domain/market/market_price_models.dart';
 import '../../domain/models/craft_mode.dart';
+import '../../domain/planner/reviewed_acquisition_choices.dart';
 import '../../domain/state/planner_state.dart';
 import '../../features/about/about.dart';
 import '../../features/appearance/appearance.dart';
 import '../../features/data/data.dart';
 import '../../features/editor/editor.dart';
 import '../../features/inventory/inventory.dart';
+import '../../features/opportunities/opportunities_controller.dart';
+import '../../features/opportunities/opportunities_item_actions.dart';
+import '../../features/opportunities/opportunities_workspace.dart';
 import '../../features/planner/planner.dart';
 import '../../features/recipe_book/recipe_book.dart';
 import '../../features/resource_map/resource_map_theme_adapter.dart';
@@ -37,19 +45,25 @@ import '../update/beta_update.dart';
 import '../update/beta_update_indicator.dart';
 import '../update/beta_update_process_service.dart';
 import '../window/app_title_bar.dart';
+import '../window/app_title_bar_visual.dart';
 import '../window/native_active_node_video_service.dart';
 import '../window/native_clipboard_image_reader.dart';
 import '../window/native_file_dialog_service.dart';
 import '../window/native_inventory_ocr_service.dart';
 import '../window/window_host_service.dart';
 import 'application_copy_toast.dart';
+import 'application_workspace_presentation.dart';
+import 'planner_gather_checklist_bridge.dart';
 
-enum _TopWorkspaceDestination { planner, resourceMap }
+typedef _TopWorkspaceDestination = ApplicationWorkspaceDestination;
 
 class ApplicationWorkspace extends StatefulWidget {
   const ApplicationWorkspace({
     required this.bundle,
     this.marketGateway,
+    this.sharedMarket,
+    this.enableOpportunityAutoCheck = true,
+    this.opportunityMarketServiceFactory,
     this.windowHost = const WindowHostService(),
     this.fileDialogs = const NativeFileDialogService(),
     this.resourceMapConfiguration = const ResourceMapWorkspaceConfiguration(),
@@ -62,9 +76,20 @@ class ApplicationWorkspace extends StatefulWidget {
   static const Key contentClipKey = ValueKey<String>(
     'application-workspace-content-clip',
   );
+  static const Key activityDataFolderShortcutKey = ValueKey<String>(
+    'application-workspace-activity-data-folder-shortcut',
+  );
+  static Key focusGateKey(String destination) =>
+      ValueKey<String>('application-workspace-$destination-focus-gate');
+  static Key tickerModeKey(String destination) =>
+      ValueKey<String>('application-workspace-$destination-ticker-mode');
 
   final ApplicationBundle bundle;
   final MarketPriceGateway? marketGateway;
+  final SharedMarketRepository? sharedMarket;
+  final bool enableOpportunityAutoCheck;
+  final OpportunityMarketService Function(String region)?
+  opportunityMarketServiceFactory;
   final WindowHostService windowHost;
   final NativeFileDialogService fileDialogs;
   final ResourceMapWorkspaceConfiguration resourceMapConfiguration;
@@ -95,6 +120,7 @@ Map<String, List<PlannerMarketRowDiagnostic>> mapPlannerMarketRowDiagnostics(
       severity: switch (diagnostic.code) {
         MarketRefreshDiagnosticCode.duplicateMaterialName ||
         MarketRefreshDiagnosticCode.duplicateMarketId ||
+        MarketRefreshDiagnosticCode.temporarilyArchived ||
         MarketRefreshDiagnosticCode.marketUnlisted =>
           PlannerMarketDiagnosticSeverity.info,
         MarketRefreshDiagnosticCode.rowFailure =>
@@ -160,8 +186,12 @@ PlannerMapLookupAvailability resolvePlannerMapLookupAvailability(
     }
   }
 
+  final useBeehiveSource =
+      normalizedName == 'cooking honey' &&
+      (dataset.hasMappedManualSource('item:7701') ||
+          dataset.fieldSourcesForResource('item:7701').isNotEmpty);
   final manualIds =
-      matchingResourceIds
+      <String>{...matchingResourceIds, if (useBeehiveSource) 'item:7701'}
           .where(
             (resourceId) =>
                 dataset.hasMappedManualSource(resourceId) ||
@@ -204,6 +234,7 @@ PlannerMapLookupAvailability resolvePlannerMapLookupAvailability(
     npcVendorCount: mappedVendorCount,
     hasManualGathering: manualIds.isNotEmpty,
     manualResourceId: manualIds.length == 1 ? manualIds.single : null,
+    manualMaterialName: useBeehiveSource ? 'Wild Beehives' : null,
     manualLocationCount: manualLocationCount,
     hasWorkerNodes: workerIds.isNotEmpty,
     workerResourceId: workerIds.length == 1 ? workerIds.single : null,
@@ -232,7 +263,19 @@ class _ApplicationWorkspaceState extends State<ApplicationWorkspace>
 
   late final CatalogRepository _catalogRepository;
   late final MarketRefreshCoordinator _marketCoordinator;
-  late final PackageHttpMarketTransport? _ownedMarketTransport;
+  late final SharedMarketRepository _sharedMarket;
+  late final bool _ownsSharedMarket;
+  StreamSubscription<SharedMarketReceipt>? _marketSubscription;
+  Timer? _marketPublication;
+  final _pendingMarketReceipts = <String, Map<String, OpportunityMarketItem>>{};
+  final _watchedMarketNames = <CraftMode, Set<String>>{};
+  final _plannerMarketStates = <CraftMode, ModeState>{};
+  final _plannerMarketListeners = <CraftMode, VoidCallback>{};
+  final _pendingPlannerMarketChecks = <CraftMode>{};
+  final _plannerMarketWork = <CraftMode, Future<void>>{};
+  final _plannerMarketCancellation =
+      <CraftMode, MarketCancellationController>{};
+  Timer? _plannerMarketTimer;
   late final InventorySessionController _inventorySessions;
   late final RecipeEditorSessionController _editorSessions;
   late final DataSessionController _dataSession;
@@ -241,6 +284,7 @@ class _ApplicationWorkspaceState extends State<ApplicationWorkspace>
   late final BdoResourceMapController _resourceMapController;
   late final ResourceMapDatasetCache _resourceMapDatasetCache;
   late final PlannerExternalActions _plannerActions;
+  late final PlannerGatherChecklistBridge _gatherChecklistBridge;
   late final InventoryExternalActions _inventoryActions;
   late final EditorExternalActions _editorActions;
   late final BetaUpdateService _updateService;
@@ -255,8 +299,12 @@ class _ApplicationWorkspaceState extends State<ApplicationWorkspace>
   bool _personalDataCloseIssued = false;
   String? _personalDataRestartError;
   bool _updateInsetVisible = false;
+  _ToastRequest? _activeToast;
+  int _toastPresentation = 0;
+  int _toastReposition = 0;
   Timer? _copyToastTimer;
   String _copyToastText = '';
+  late final ApplicationWorkspacePresentationController _presentation;
   _TopWorkspaceDestination _topWorkspace = _TopWorkspaceDestination.planner;
   Widget? _resourceMapWorkspace;
 
@@ -265,21 +313,34 @@ class _ApplicationWorkspaceState extends State<ApplicationWorkspace>
   @override
   void initState() {
     super.initState();
+    _presentation = ApplicationWorkspacePresentationController(_controller);
     WidgetsBinding.instance.addObserver(this);
     _catalogRepository = CatalogRepository(widget.bundle.catalog);
-    final MarketPriceGateway gateway;
-    if (widget.marketGateway case final supplied?) {
-      _ownedMarketTransport = null;
-      gateway = supplied;
-    } else {
-      final transport = PackageHttpMarketTransport();
-      _ownedMarketTransport = transport;
-      gateway = MarketPriceService(transport: transport);
-    }
+    _gatherChecklistBridge = PlannerGatherChecklistBridge(
+      controller: _controller,
+      catalog: _catalogRepository,
+    );
+    _ownsSharedMarket = widget.sharedMarket == null;
+    _sharedMarket =
+        widget.sharedMarket ??
+        SharedMarketRepository.application(
+          cacheStore: OpportunityMarketCacheStore(
+            directory: Directory(
+              '${widget.bundle.stateRepository.paths.applicationDirectory.path}'
+              '${Platform.pathSeparator}opportunities',
+            ),
+          ),
+        );
+    final gateway =
+        widget.marketGateway ??
+        SharedMarketPriceGateway(repository: _sharedMarket);
     _marketCoordinator = MarketRefreshCoordinator(
       gateway: gateway,
       catalogRepository: _catalogRepository,
     );
+    if (widget.marketGateway == null) {
+      _marketSubscription = _sharedMarket.receipts.listen(_receiveSharedMarket);
+    }
     _inventorySessions = InventorySessionController();
     _editorSessions = RecipeEditorSessionController();
     _dataSession = DataSessionController();
@@ -294,12 +355,14 @@ class _ApplicationWorkspaceState extends State<ApplicationWorkspace>
       openRecipeBook: _openRecipeBook,
       copyName: _copyName,
       checkPrices: _checkPrices,
+      ensurePrices: _queuePlannerMarketCheck,
       resolveMapLookup: _resolvePlannerMapLookup,
       openMapLookup: _openPlannerMapLookup,
       addToGatherChecklist: _addPlannerMaterialToGatherChecklist,
       addToPlannedNetwork: _addPlannerMaterialToPlannedNetwork,
       copyAfkLoad: _copyAfkLoad,
       openAfkWeightSettings: _openAfkWeightSettings,
+      openPlannerTarget: _openPlannerTarget,
     );
     _inventoryActions = InventoryExternalActions(
       confirmClear: _confirmInventoryClear,
@@ -311,14 +374,13 @@ class _ApplicationWorkspaceState extends State<ApplicationWorkspace>
           _showToast(result.message, error: !result.restored),
       pasteScreenshot: _pasteInventoryScreenshot,
       chooseScreenshot: _chooseInventoryScreenshot,
-      // `Process.start` installs a zero-duration timer in Flutter's
-      // controlled-clock test zone. Native OCR is covered by its process-level integration
-      // tests, so keep widget and golden tests hermetic instead of launching
-      // the packaged helper while they render Inventory.
-      prewarmScreenshotRecognition:
-          Platform.environment['FLUTTER_TEST'] == 'true'
-          ? null
-          : () => _inventoryOcrService.prewarm(catalog: widget.bundle.catalog),
+      // Storage OCR is optional and uses a separately shipped executable.
+      // Starting that child speculatively makes Windows Smart App Control
+      // report "Part of this app has been blocked" in unsigned Beta builds.
+      // Keep startup quiet and launch recognition only after the user chooses
+      // or pastes a screenshot. A properly signed release can still use the
+      // same on-demand helper without weakening Windows protection.
+      prewarmScreenshotRecognition: null,
     );
     _editorActions = EditorExternalActions(
       // The running Avalonia editor deletes immediately and does not surface a
@@ -345,9 +407,18 @@ class _ApplicationWorkspaceState extends State<ApplicationWorkspace>
     _updateController.addListener(_updateVisibilityChanged);
     _visitedModes.add(_controller.activeMode.value);
     _controller.activeMode.addListener(_activeModeChanged);
+    for (final mode in CraftMode.values) {
+      _plannerMarketStates[mode] = _controller.modes[mode]!.state.value;
+      _plannerMarketListeners[mode] = () => _plannerMarketStateChanged(mode);
+      _controller.modes[mode]!.state.addListener(
+        _plannerMarketListeners[mode]!,
+      );
+    }
     _controller.saveError.addListener(_saveErrorChanged);
     widget.windowHost.installCloseRequestHandler(_flushBeforeClose);
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      if (widget.enableOpportunityAutoCheck) _ensureOpportunitiesController();
       _showStartupNotices();
       if (widget.enableBetaUpdates) {
         unawaited(_updateController.checkOnce());
@@ -360,6 +431,7 @@ class _ApplicationWorkspaceState extends State<ApplicationWorkspace>
     if (state == AppLifecycleState.detached ||
         state == AppLifecycleState.paused) {
       unawaited(_controller.flush());
+      unawaited(_flushSharedMarket());
     }
   }
 
@@ -369,6 +441,7 @@ class _ApplicationWorkspaceState extends State<ApplicationWorkspace>
       (key.currentState as _ModeWorkspaceState?)?.closeRecipeBook();
     }
     setState(() => _visitedModes.add(_controller.activeMode.value));
+    _queuePlannerMarketCheck(_controller.active);
   }
 
   void _saveErrorChanged() {
@@ -415,9 +488,22 @@ class _ApplicationWorkspaceState extends State<ApplicationWorkspace>
   }
 
   Future<void> _flushStateForRestart() async {
+    _cancelPlannerMarketChecks();
     await _controller.flush();
     if (_controller.saveError.value case final error?) {
       throw StateError('The planner state could not be saved: $error');
+    }
+    await _opportunitiesController?.flush();
+    await _flushSharedMarket();
+  }
+
+  Future<void> _flushSharedMarket() async {
+    _cancelPlannerMarketChecks();
+    try {
+      await _sharedMarket.flush();
+    } on Object {
+      // Prices can be fetched again. A cache-write failure must not prevent
+      // saving personal state or closing/restarting the application.
     }
   }
 
@@ -430,28 +516,51 @@ class _ApplicationWorkspaceState extends State<ApplicationWorkspace>
         visible ? BetaUpdateIndicator.height : 0,
       ),
     );
+    if (_activeToast case final toast?) {
+      final reposition = ++_toastReposition;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted ||
+            reposition != _toastReposition ||
+            !identical(_activeToast, toast)) {
+          return;
+        }
+        _presentToast(toast, replaceImmediately: true);
+      });
+    }
   }
 
   @override
   void dispose() {
+    _gatherChecklistBridge.dispose();
     WidgetsBinding.instance.removeObserver(this);
+    _activeToast = null;
+    _toastPresentation += 1;
+    _toastReposition += 1;
     _copyToastTimer?.cancel();
+    _presentation.dispose();
     _inventoryOcrService.dispose();
     widget.windowHost.removeCloseRequestHandler();
     _controller.activeMode.removeListener(_activeModeChanged);
+    _cancelPlannerMarketChecks();
+    for (final entry in _plannerMarketListeners.entries) {
+      _controller.modes[entry.key]!.state.removeListener(entry.value);
+    }
     _controller.saveError.removeListener(_saveErrorChanged);
     _inventorySessions.dispose();
     _editorSessions.dispose();
     _dataSession.dispose();
     _iconStore.dispose();
     _resourceMapController.dispose();
+    _opportunitiesController?.dispose();
+    _marketPublication?.cancel();
+    unawaited(_marketSubscription?.cancel());
     _updateController.removeListener(_updateVisibilityChanged);
     if (_updateInsetVisible) {
       unawaited(widget.windowHost.setBottomInset(0));
     }
     _updateController.dispose();
     if (_ownsUpdateService) unawaited(_updateService.dispose());
-    _ownedMarketTransport?.close();
+    if (_ownsSharedMarket) unawaited(_sharedMarket.close());
     unawaited(_controller.dispose());
     super.dispose();
   }
@@ -459,10 +568,6 @@ class _ApplicationWorkspaceState extends State<ApplicationWorkspace>
   @override
   Widget build(BuildContext context) {
     final active = _controller.activeMode.value;
-    final appearance = _controller.active.state.value.appearance;
-    final spec = RetainedThemeRegistry.resolve(
-      backgroundId: appearance.background,
-    );
     final restartPending = _restartAndApplyPending || _personalDataMovePending;
     return AppOverlayCoordinatorHost(
       child: ScaffoldMessenger(
@@ -479,11 +584,17 @@ class _ApplicationWorkspaceState extends State<ApplicationWorkspace>
                   child: Column(
                     children: <Widget>[
                       _ApplicationTitleStrip(
-                        controller: _controller,
+                        presentation: _presentation,
                         windowHost: widget.windowHost,
                         beforeClose: _flushBeforeClose,
                         activeWorkspace: _topWorkspace,
                         onWorkspaceChanged: _setTopWorkspace,
+                        personalDataPath: widget
+                            .bundle
+                            .personalDataLocation
+                            .applicationDirectory
+                            .path,
+                        onOpenActivityDataFolder: _openActivityDataFolder,
                         onCloseError: (error) => _showToast(
                           'Close canceled because the latest state could not be saved. $error',
                           error: true,
@@ -493,55 +604,50 @@ class _ApplicationWorkspaceState extends State<ApplicationWorkspace>
                         child: Stack(
                           fit: StackFit.expand,
                           children: <Widget>[
-                            Offstage(
-                              offstage:
-                                  _topWorkspace !=
-                                  _TopWorkspaceDestination.planner,
-                              child: ExcludeFocus(
-                                excluding:
-                                    _topWorkspace ==
-                                    _TopWorkspaceDestination.resourceMap,
-                                child: TickerMode(
-                                  enabled:
-                                      _topWorkspace ==
-                                      _TopWorkspaceDestination.planner,
-                                  child: Stack(
-                                    fit: StackFit.expand,
-                                    children: <Widget>[
-                                      for (final mode in CraftMode.values)
-                                        if (_visitedModes.contains(mode))
-                                          Offstage(
-                                            offstage: mode != active,
-                                            child: TickerMode(
-                                              enabled: mode == active,
-                                              child: _modeWorkspaceFor(mode),
-                                            ),
-                                          ),
-                                    ],
-                                  ),
-                                ),
+                            _retainedTopWorkspace(
+                              destination: _TopWorkspaceDestination.planner,
+                              child: Stack(
+                                fit: StackFit.expand,
+                                children: <Widget>[
+                                  for (final mode in CraftMode.values)
+                                    if (_visitedModes.contains(mode))
+                                      Offstage(
+                                        offstage: mode != active,
+                                        child: TickerMode(
+                                          enabled: mode == active,
+                                          child: _modeWorkspaceFor(mode),
+                                        ),
+                                      ),
+                                ],
                               ),
                             ),
                             if (_resourceMapWorkspace != null)
-                              Offstage(
-                                offstage:
-                                    _topWorkspace !=
+                              _retainedTopWorkspace(
+                                destination:
                                     _TopWorkspaceDestination.resourceMap,
-                                child: ExcludeFocus(
-                                  excluding:
-                                      _topWorkspace ==
-                                      _TopWorkspaceDestination.planner,
-                                  child: TickerMode(
-                                    enabled:
-                                        _topWorkspace ==
-                                        _TopWorkspaceDestination.resourceMap,
-                                    child: ClipRect(
-                                      key: ApplicationWorkspace.contentClipKey,
-                                      clipBehavior: Clip.hardEdge,
-                                      child: ResourceMapThemeBinding(
-                                        controller: _controller,
-                                        child: _resourceMapWorkspace!,
-                                      ),
+                                child: ClipRect(
+                                  key: ApplicationWorkspace.contentClipKey,
+                                  clipBehavior: Clip.hardEdge,
+                                  child: ResourceMapThemeBinding(
+                                    controller: _controller,
+                                    child: _resourceMapWorkspace!,
+                                  ),
+                                ),
+                              ),
+                            if (_opportunitiesVisited)
+                              _retainedTopWorkspace(
+                                destination:
+                                    _TopWorkspaceDestination.opportunities,
+                                child: CustomIconStoreScope(
+                                  store: _iconStore,
+                                  child: OpportunityItemActionsScope(
+                                    externalActions: _plannerActions,
+                                    child: OpportunitiesWorkspace(
+                                      controller: _opportunitiesController!,
+                                      active:
+                                          _topWorkspace ==
+                                          _TopWorkspaceDestination
+                                              .opportunities,
                                     ),
                                   ),
                                 ),
@@ -560,16 +666,17 @@ class _ApplicationWorkspaceState extends State<ApplicationWorkspace>
               ),
               if (_copyToastText.isNotEmpty)
                 Positioned.fill(
-                  child: ApplicationCopyToastOverlay(
-                    message: _copyToastText,
-                    spec: spec,
-                    standardSettings: StandardVisualSettings(
-                      backgroundId: appearance.background,
-                      accentHue: appearance.accentHue,
-                      rainbow: appearance.rainbow,
-                      neon: appearance.neon,
-                    ),
-                  ),
+                  child:
+                      ValueListenableBuilder<ApplicationWorkspacePresentation>(
+                        valueListenable: _presentation,
+                        builder: (context, presentation, _) =>
+                            ApplicationCopyToastOverlay(
+                              message: _copyToastText,
+                              spec: presentation.spec,
+                              standardSettings: presentation.standardSettings,
+                              workspaceVisual: presentation.titleVisual,
+                            ),
+                      ),
                 ),
               if (_personalDataRestartRequired)
                 Positioned.fill(
@@ -616,6 +723,26 @@ class _ApplicationWorkspaceState extends State<ApplicationWorkspace>
     ),
   );
 
+  Widget _retainedTopWorkspace({
+    required _TopWorkspaceDestination destination,
+    required Widget child,
+  }) {
+    final active = _topWorkspace == destination;
+    return Offstage(
+      key: ValueKey<_TopWorkspaceDestination>(destination),
+      offstage: !active,
+      child: ExcludeFocus(
+        key: ApplicationWorkspace.focusGateKey(destination.name),
+        excluding: !active,
+        child: TickerMode(
+          key: ApplicationWorkspace.tickerModeKey(destination.name),
+          enabled: active,
+          child: child,
+        ),
+      ),
+    );
+  }
+
   Future<Uint8List?> _pickResourceMapScreenshot() async {
     final path = await widget.fileDialogs.pickImageToOpen();
     if (path == null) {
@@ -658,28 +785,67 @@ class _ApplicationWorkspaceState extends State<ApplicationWorkspace>
     FocusManager.instance.primaryFocus?.unfocus();
     setState(() {
       _topWorkspace = destination;
-      if (destination == _TopWorkspaceDestination.resourceMap) {
-        _resourceMapWorkspace ??= ResourceMapWorkspace(
-          fallbackApplicationDirectory:
-              widget.bundle.stateRepository.paths.applicationDirectory,
-          appController: _controller,
-          catalogRepository: _catalogRepository,
-          configuration: widget.resourceMapConfiguration,
-          controller: _resourceMapController,
-          datasetCache: _resourceMapDatasetCache,
-          screenshotPicker: _pickResourceMapScreenshot,
-          screenshotClipboardReader: _pasteResourceMapScreenshot,
-          activeNodeRecordingLauncher:
-              _activeNodeVideoService.launchRectangleRecording,
-          activeNodeRecordingFinder: (modifiedAfter) => _activeNodeVideoService
-              .findLatestRecording(modifiedAfter: modifiedAfter),
-          activeNodeRecordingPicker: _pickActiveNodeRecording,
-          activeNodeRecordingScanner: _activeNodeVideoService.scanRecording,
-          onRefreshMarketEvidence: _refreshResourceMapMarketEvidence,
-        );
+      _presentation.select(destination);
+      switch (destination) {
+        case _TopWorkspaceDestination.planner:
+          _queuePlannerMarketCheck(_controller.active);
+          break;
+        case _TopWorkspaceDestination.resourceMap:
+          _ensureResourceMapWorkspace();
+          break;
+        case _TopWorkspaceDestination.opportunities:
+          _opportunitiesVisited = true;
+          final opportunities = _ensureOpportunitiesController();
+          opportunities.setWorkspaceActive(true);
+          opportunities.ensureMarketCurrent();
+          break;
       }
+      _opportunitiesController?.setWorkspaceActive(
+        destination == _TopWorkspaceDestination.opportunities,
+      );
     });
   }
+
+  void _ensureResourceMapWorkspace() {
+    _resourceMapWorkspace ??= ResourceMapWorkspace(
+      fallbackApplicationDirectory:
+          widget.bundle.stateRepository.paths.applicationDirectory,
+      appController: _controller,
+      catalogRepository: _catalogRepository,
+      configuration: widget.resourceMapConfiguration,
+      gatherChecklistBridge: _gatherChecklistBridge,
+      controller: _resourceMapController,
+      datasetCache: _resourceMapDatasetCache,
+      screenshotPicker: _pickResourceMapScreenshot,
+      screenshotClipboardReader: _pasteResourceMapScreenshot,
+      activeNodeRecordingLauncher:
+          _activeNodeVideoService.launchRectangleRecording,
+      activeNodeRecordingFinder: (modifiedAfter) => _activeNodeVideoService
+          .findLatestRecording(modifiedAfter: modifiedAfter),
+      activeNodeRecordingPicker: _pickActiveNodeRecording,
+      activeNodeRecordingScanner: _activeNodeVideoService.scanRecording,
+      onRefreshMarketEvidence: _refreshResourceMapMarketEvidence,
+    );
+  }
+
+  OpportunitiesController? _opportunitiesController;
+  bool _opportunitiesVisited = false;
+
+  OpportunitiesController _ensureOpportunitiesController() =>
+      _opportunitiesController ??= OpportunitiesController(
+        autoCheck: widget.enableOpportunityAutoCheck,
+        prefetchAll: true,
+        serviceFactory: widget.opportunityMarketServiceFactory,
+        sharedMarket: widget.opportunityMarketServiceFactory == null
+            ? _sharedMarket
+            : null,
+        appController: _controller,
+        catalog: _catalogRepository,
+        directory: Directory(
+          '${widget.bundle.stateRepository.paths.applicationDirectory.path}'
+          '${Platform.pathSeparator}opportunities',
+        ),
+      );
 
   Future<PlannerMapLookupAvailability> _resolvePlannerMapLookup(
     String materialName,
@@ -719,34 +885,42 @@ class _ApplicationWorkspaceState extends State<ApplicationWorkspace>
     _setTopWorkspace(_TopWorkspaceDestination.resourceMap);
   }
 
-  void _addPlannerMaterialToGatherChecklist(
-    PlannerMapLookupAvailability availability,
-  ) {
-    final resourceId =
-        availability.manualResourceId ?? availability.workerResourceId;
-    if (resourceId == null) {
-      _showToast(
-        'This material matches more than one mapped source. Open the map and '
-        'choose the exact material first.',
-        error: true,
-      );
+  void _openPlannerTarget(PlannerTargetRequest request) {
+    final destination = _controller.modes[request.mode]!;
+    final recipe = destination.recipes[request.exactName];
+    if (recipe == null ||
+        !recipe.isCraftable ||
+        isTemporarilyArchivedItem(recipe.name, itemId: recipe.marketId) ||
+        (request.variantId != null &&
+            recipe.variantById(request.variantId!) == null)) {
+      _showToast('This recipe is no longer available.', error: true);
       return;
     }
-    final current = _controller.resourceMapGatherChecklist.value;
-    final alreadyIncluded = current.contains(resourceId);
-    final next = current.addResource(
-      resourceId: resourceId,
-      displayName: availability.materialName,
-      sourceKind: availability.manualResourceId != null
-          ? BdoGatherChecklistSourceKind.manualGathering
-          : BdoGatherChecklistSourceKind.workerNode,
-    );
-    _controller.setResourceMapGatherChecklist(next);
-    _showToast(
-      alreadyIncluded
-          ? '${availability.materialName} is already in the gather checklist.'
-          : '${availability.materialName} added to the gather checklist.',
-    );
+    final selected = request.variantId == null
+        ? destination.selectTarget(request.exactName)
+        : destination.selectTargetVariant(
+            request.exactName,
+            variantId: request.variantId,
+          );
+    if (!selected) return;
+    destination.navigate('plan');
+    (_modeKeys[request.mode]?.currentState as _ModeWorkspaceState?)
+        ?.closeRecipeBook();
+    _controller.switchMode(request.mode);
+    _setTopWorkspace(_TopWorkspaceDestination.planner);
+  }
+
+  void _addPlannerMaterialToGatherChecklist(
+    PlannerGatherChecklistRequest request,
+  ) {
+    try {
+      _gatherChecklistBridge.add(request);
+      _showToast(
+        '${request.availability.materialName} added to the to-do list.',
+      );
+    } on StateError catch (error) {
+      _showToast(error.message, error: true);
+    }
   }
 
   void _addPlannerMaterialToPlannedNetwork(
@@ -800,11 +974,14 @@ class _ApplicationWorkspaceState extends State<ApplicationWorkspace>
   ) async {
     final mode = _controller.activeMode.value;
     final modeController = _controller.modes[mode]!;
+    _watchMarketNames(mode, outputNames);
     final result = await _marketCoordinator.refresh(
       mode: mode,
       assembledRecipes: modeController.recipes,
       currentMarket: modeController.state.value.market,
       missingMaterialNames: outputNames,
+      forceRefresh: false,
+      latestMarket: () => modeController.state.value.market,
     );
     modeController.replaceMarketValues(
       prices: result.prices,
@@ -868,6 +1045,11 @@ class _ApplicationWorkspaceState extends State<ApplicationWorkspace>
     _controller.active.navigate('data');
   }
 
+  void _openActivityDataFolder() {
+    _setTopWorkspace(_TopWorkspaceDestination.planner);
+    _controller.active.navigate('data');
+  }
+
   void _showCopyToast(String exactName) {
     _copyToastTimer?.cancel();
     if (!mounted) return;
@@ -879,14 +1061,142 @@ class _ApplicationWorkspaceState extends State<ApplicationWorkspace>
     });
   }
 
-  Future<PlannerMarketRefresh> _checkPrices(
-    PlannerMarketRequest request,
+  void _plannerMarketStateChanged(CraftMode mode) {
+    final current = _controller.modes[mode]!.state.value;
+    final previous = _plannerMarketStates[mode];
+    _plannerMarketStates[mode] = current;
+    if (previous == null ||
+        (previous.target == current.target &&
+            previous.want == current.want &&
+            previous.view == current.view &&
+            previous.market.region == current.market.region &&
+            previous.ignoreTargetInventory == current.ignoreTargetInventory &&
+            previous.ignoreIngredientInventory ==
+                current.ignoreIngredientInventory &&
+            mapEquals(previous.inventory, current.inventory) &&
+            mapEquals(previous.substituteChoices, current.substituteChoices) &&
+            mapEquals(previous.ingredientGrades, current.ingredientGrades) &&
+            setEquals(
+              selectedProcessingAcquisitions(previous),
+              selectedProcessingAcquisitions(current),
+            ) &&
+            mapEquals(
+              previous.recipeVariantChoices,
+              current.recipeVariantChoices,
+            ) &&
+            setEquals(previous.completedSteps, current.completedSteps))) {
+      return;
+    }
+    _queuePlannerMarketCheck(_controller.modes[mode]!);
+  }
+
+  bool _plannerMarketIsActive(ModeFeatureController controller) =>
+      mounted &&
+      _topWorkspace == _TopWorkspaceDestination.planner &&
+      _controller.activeMode.value == controller.mode &&
+      controller.state.value.view == 'plan';
+
+  void _queuePlannerMarketCheck(ModeFeatureController controller) {
+    if (!_plannerMarketIsActive(controller)) return;
+    _pendingPlannerMarketChecks.add(controller.mode);
+    _plannerMarketTimer?.cancel();
+    // User edits coalesce; market-only receipt notifications never enter here.
+    _plannerMarketTimer = Timer(const Duration(milliseconds: 150), () {
+      _plannerMarketTimer = null;
+      if (!_plannerMarketIsActive(controller)) {
+        _pendingPlannerMarketChecks.remove(controller.mode);
+        return;
+      }
+      if (_plannerMarketWork.containsKey(controller.mode)) return;
+      final work = _drainPlannerMarketChecks(controller);
+      _plannerMarketWork[controller.mode] = work;
+      unawaited(
+        work.whenComplete(() {
+          if (identical(_plannerMarketWork[controller.mode], work)) {
+            _plannerMarketWork.remove(controller.mode);
+          }
+        }),
+      );
+    });
+  }
+
+  Future<void> _drainPlannerMarketChecks(
+    ModeFeatureController controller,
   ) async {
+    while (_pendingPlannerMarketChecks.remove(controller.mode)) {
+      if (!_plannerMarketIsActive(controller)) return;
+      final plan = controller.plan.value;
+      final cancellation = MarketCancellationController();
+      _plannerMarketCancellation[controller.mode] = cancellation;
+      try {
+        final result = await _checkPrices(
+          PlannerMarketRequest(
+            controller: controller,
+            materials: plan.missing,
+            materialNames: controller
+                .recipeRouteMarketNamesForPlan(plan)
+                .toList(),
+          ),
+          cancellationToken: cancellation.token,
+        );
+        if (!mounted ||
+            cancellation.token.isCancelled ||
+            result.region != controller.state.value.market.region) {
+          continue;
+        }
+        controller.replaceMarketValues(
+          prices: result.prices,
+          stock: result.stock,
+          tradeMarketIds: result.tradeMarketIds,
+          totalTrades: result.totalTrades,
+          tradeObservedAt: result.tradeObservedAt,
+          observedDailyTrades: result.observedDailyTrades,
+          tradeObservationHours: result.tradeObservationHours,
+          lastSoldAtEpochSeconds: result.lastSoldAtEpochSeconds,
+          unlistedItemNames: result.unlistedItemNames,
+          fetchedAt: result.fetchedAt,
+          region: result.region,
+        );
+      } on Object {
+        if (mounted && !cancellation.token.isCancelled) {
+          _showToast(
+            'Market check failed. Cached values were kept.',
+            error: true,
+          );
+        }
+      } finally {
+        if (identical(
+          _plannerMarketCancellation[controller.mode],
+          cancellation,
+        )) {
+          _plannerMarketCancellation.remove(controller.mode);
+        }
+      }
+    }
+  }
+
+  void _cancelPlannerMarketChecks() {
+    _plannerMarketTimer?.cancel();
+    _plannerMarketTimer = null;
+    _pendingPlannerMarketChecks.clear();
+    for (final cancellation in _plannerMarketCancellation.values) {
+      cancellation.cancel();
+    }
+  }
+
+  Future<PlannerMarketRefresh> _checkPrices(
+    PlannerMarketRequest request, {
+    MarketCancellationToken? cancellationToken,
+  }) async {
+    _watchMarketNames(request.controller.mode, request.namesForRefresh);
     final result = await _marketCoordinator.refresh(
       mode: request.controller.mode,
       assembledRecipes: request.controller.recipes,
       currentMarket: request.controller.state.value.market,
       missingMaterialNames: request.namesForRefresh,
+      forceRefresh: false,
+      cancellationToken: cancellationToken,
+      latestMarket: () => request.controller.state.value.market,
     );
     return PlannerMarketRefresh(
       prices: result.prices,
@@ -903,6 +1213,83 @@ class _ApplicationWorkspaceState extends State<ApplicationWorkspace>
       lastSoldAtEpochSeconds: result.lastSoldAtEpochSeconds,
       rowDiagnostics: mapPlannerMarketRowDiagnostics(result.diagnostics),
     );
+  }
+
+  void _watchMarketNames(CraftMode mode, Iterable<String> names) {
+    _watchedMarketNames.putIfAbsent(mode, () => <String>{}).addAll(names);
+  }
+
+  void _receiveSharedMarket(SharedMarketReceipt receipt) {
+    if (receipt.part != SharedMarketPart.quote ||
+        receipt.fromCache ||
+        !mounted) {
+      return;
+    }
+    _pendingMarketReceipts.putIfAbsent(
+      receipt.key.region,
+      () => {},
+    )[receipt.key.itemId] = receipt.item;
+    _marketPublication ??= Timer(
+      const Duration(milliseconds: 200),
+      _publishSharedMarket,
+    );
+  }
+
+  void _publishSharedMarket() {
+    _marketPublication = null;
+    if (!mounted) return;
+    final pending = Map<String, Map<String, OpportunityMarketItem>>.of(
+      _pendingMarketReceipts,
+    );
+    _pendingMarketReceipts.clear();
+    for (final mode in CraftMode.values) {
+      final controller = _controller.modes[mode]!;
+      final current = controller.state.value.market;
+      final items = pending[current.region.toLowerCase()];
+      if (items == null || items.isEmpty) continue;
+      final names = <String>{
+        ...current.prices.keys,
+        ...current.stock.keys,
+        ...?_watchedMarketNames[mode],
+      };
+      if (names.isEmpty) continue;
+      final rows = items.values
+          .map((item) => sharedMarketPriceRow(item, name: item.itemId))
+          .toList();
+      final result = _marketCoordinator.mergeAvailable(
+        mode: mode,
+        assembledRecipes: controller.recipes,
+        currentMarket: current,
+        names: names,
+        fetched: MarketPriceFetchResult(
+          region: current.region,
+          language: 'en',
+          fetchedAt: rows
+              .map((row) => row.fetchedAt)
+              .reduce((a, b) => a.isBefore(b) ? a : b),
+          items: rows,
+          attemptedSources: const [MarketPriceSource.pearlAbyssCentralMarket],
+        ),
+      );
+      if (result == null ||
+          (!result.summary.hasUpdates &&
+              result.summary.unlistedRequestCount == 0)) {
+        continue;
+      }
+      controller.replaceMarketValues(
+        prices: result.prices,
+        stock: result.stock,
+        tradeMarketIds: result.tradeMarketIds,
+        totalTrades: result.totalTrades,
+        tradeObservedAt: result.tradeObservedAt,
+        observedDailyTrades: result.observedDailyTrades,
+        tradeObservationHours: result.tradeObservationHours,
+        lastSoldAtEpochSeconds: result.lastSoldAtEpochSeconds,
+        unlistedItemNames: result.market.unlistedItemNames,
+        fetchedAt: result.fetchedAt,
+        region: result.market.region,
+      );
+    }
   }
 
   Future<bool> _confirmInventoryClear(
@@ -1198,67 +1585,123 @@ class _ApplicationWorkspaceState extends State<ApplicationWorkspace>
     VoidCallback? onAction,
     Duration? duration,
   }) {
-    final messenger = _messengerKey.currentState;
-    if (messenger == null) return;
-    final appearance = _controller.active.state.value.appearance;
-    final spec = RetainedThemeRegistry.resolve(
-      backgroundId: appearance.background,
+    if (_messengerKey.currentState == null) return;
+    final toast = _ToastRequest(
+      message: message,
+      error: error,
+      actionLabel: actionLabel,
+      onAction: onAction,
+      duration: duration,
     );
-    messenger
-      ..hideCurrentSnackBar()
-      ..showSnackBar(
-        SnackBar(
-          duration:
-              duration ??
-              (actionLabel == null
-                  ? const Duration(seconds: 4)
-                  : const Duration(seconds: 8)),
-          behavior: SnackBarBehavior.floating,
-          margin: EdgeInsets.fromLTRB(
-            280,
-            0,
-            24,
-            20 + (_updateInsetVisible ? BetaUpdateIndicator.height : 0),
-          ),
-          elevation: 0,
-          backgroundColor: Colors.transparent,
-          padding: EdgeInsets.zero,
-          content: ThemeSpecScope(
-            spec: spec,
-            child: Theme(
-              data: spec.materialTheme(),
-              child: AppSurface(
-                role: AppSurfaceRole.popup,
-                tone: error ? AppSurfaceTone.danger : AppSurfaceTone.success,
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 14,
-                  vertical: 10,
-                ),
-                semanticLabel: error ? 'Operation error' : 'Operation status',
-                child: Row(
-                  children: <Widget>[
-                    Icon(
-                      error ? Icons.error_outline : Icons.check_circle_outline,
-                    ),
-                    const SizedBox(width: 10),
-                    Expanded(child: Text(message)),
-                    if (actionLabel != null && onAction != null) ...<Widget>[
-                      const SizedBox(width: 12),
-                      AppButton.label(
-                        actionLabel,
-                        minimumSize: const Size(72, 32),
-                        padding: const EdgeInsets.symmetric(horizontal: 10),
-                        onPressed: onAction,
+    _activeToast = toast;
+    _toastReposition += 1;
+    _presentToast(toast);
+  }
+
+  void _presentToast(_ToastRequest toast, {bool replaceImmediately = false}) {
+    final messenger = _messengerKey.currentState;
+    if (messenger == null || !identical(_activeToast, toast)) return;
+    final presentation = ++_toastPresentation;
+    messenger.clearSnackBars();
+    if (replaceImmediately) {
+      messenger.removeCurrentSnackBar();
+    }
+    final feature = messenger.showSnackBar(
+      SnackBar(
+        duration:
+            toast.duration ??
+            (toast.actionLabel == null
+                ? const Duration(seconds: 4)
+                : const Duration(seconds: 8)),
+        behavior: SnackBarBehavior.floating,
+        margin: EdgeInsets.fromLTRB(
+          280,
+          0,
+          24,
+          20 + (_updateInsetVisible ? BetaUpdateIndicator.height : 0),
+        ),
+        elevation: 0,
+        backgroundColor: Colors.transparent,
+        padding: EdgeInsets.zero,
+        content: ValueListenableBuilder<ApplicationWorkspacePresentation>(
+          valueListenable: _presentation,
+          builder: (context, presentation, _) => ThemeSpecScope(
+            spec: presentation.spec,
+            child: StandardVisualScope(
+              settings: presentation.standardSettings,
+              child: Theme(
+                data: presentation.spec.materialTheme(),
+                child: AppSurface(
+                  role: AppSurfaceRole.popup,
+                  tone: toast.error
+                      ? AppSurfaceTone.danger
+                      : AppSurfaceTone.success,
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 14,
+                    vertical: 10,
+                  ),
+                  semanticLabel: toast.error
+                      ? 'Operation error'
+                      : 'Operation status',
+                  child: Row(
+                    children: <Widget>[
+                      Icon(
+                        toast.error
+                            ? Icons.error_outline
+                            : Icons.check_circle_outline,
                       ),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: Text(
+                          toast.message,
+                          style: presentation.spec.typography.body.copyWith(
+                            color: presentation.spec.palette.text,
+                          ),
+                        ),
+                      ),
+                      if (toast.actionLabel != null &&
+                          toast.onAction != null) ...<Widget>[
+                        const SizedBox(width: 12),
+                        AppButton.label(
+                          toast.actionLabel!,
+                          minimumSize: const Size(72, 32),
+                          padding: const EdgeInsets.symmetric(horizontal: 10),
+                          onPressed: toast.onAction,
+                        ),
+                      ],
                     ],
-                  ],
+                  ),
                 ),
               ),
             ),
           ),
         ),
-      );
+      ),
+    );
+    unawaited(
+      feature.closed.then((_) {
+        if (!mounted || presentation != _toastPresentation) return;
+        _activeToast = null;
+        _toastReposition += 1;
+      }),
+    );
   }
+}
+
+class _ToastRequest {
+  const _ToastRequest({
+    required this.message,
+    required this.error,
+    required this.actionLabel,
+    required this.onAction,
+    required this.duration,
+  });
+
+  final String message;
+  final bool error;
+  final String? actionLabel;
+  final VoidCallback? onAction;
+  final Duration? duration;
 }
 
 class _PersonalDataRestartOverlay extends StatelessWidget {
@@ -1323,85 +1766,110 @@ class _PersonalDataRestartOverlay extends StatelessWidget {
   );
 }
 
-class _ApplicationTitleStrip extends StatefulWidget {
+class _ApplicationTitleStrip extends StatelessWidget {
   const _ApplicationTitleStrip({
-    required this.controller,
+    required this.presentation,
     required this.windowHost,
     required this.beforeClose,
     required this.onCloseError,
     required this.activeWorkspace,
     required this.onWorkspaceChanged,
+    required this.personalDataPath,
+    required this.onOpenActivityDataFolder,
   });
 
-  final PlannerApplicationController controller;
+  final ValueListenable<ApplicationWorkspacePresentation> presentation;
   final WindowHostService windowHost;
   final Future<void> Function() beforeClose;
   final ValueChanged<Object> onCloseError;
   final _TopWorkspaceDestination activeWorkspace;
   final ValueChanged<_TopWorkspaceDestination> onWorkspaceChanged;
+  final String personalDataPath;
+  final VoidCallback onOpenActivityDataFolder;
 
   @override
-  State<_ApplicationTitleStrip> createState() => _ApplicationTitleStripState();
+  Widget build(BuildContext context) =>
+      ValueListenableBuilder<ApplicationWorkspacePresentation>(
+        valueListenable: presentation,
+        builder: (context, presentation, _) {
+          final spec = presentation.spec;
+          final titleBar = ThemeSpecScope(
+            spec: spec,
+            child: StandardVisualScope(
+              settings: presentation.standardSettings,
+              child: Theme(
+                data: spec.materialTheme(),
+                child: AppTitleBar(
+                  windowHost: windowHost,
+                  beforeClose: beforeClose,
+                  onCloseError: onCloseError,
+                  workspaceNavigation: _WorkspaceNavigation(
+                    active: activeWorkspace,
+                    onChanged: onWorkspaceChanged,
+                  ),
+                  trailing: _ActivityDataFolderTitleAction(
+                    personalDataPath: personalDataPath,
+                    onPressed: onOpenActivityDataFolder,
+                  ),
+                ),
+              ),
+            ),
+          );
+          final visual = presentation.titleVisual;
+          if (visual == null) return titleBar;
+          return AppTitleBarVisualScope(visual: visual, child: titleBar);
+        },
+      );
 }
 
-class _ApplicationTitleStripState extends State<_ApplicationTitleStrip> {
-  late ModeFeatureController _mode;
-  late AppearanceSettings _appearance;
+class _ActivityDataFolderTitleAction extends StatelessWidget {
+  const _ActivityDataFolderTitleAction({
+    required this.personalDataPath,
+    required this.onPressed,
+  });
 
-  @override
-  void initState() {
-    super.initState();
-    _mode = widget.controller.active;
-    _appearance = _mode.state.value.appearance;
-    widget.controller.activeMode.addListener(_modeChanged);
-    _mode.state.addListener(_appearanceChanged);
-  }
-
-  void _modeChanged() {
-    _mode.state.removeListener(_appearanceChanged);
-    _mode = widget.controller.active;
-    _mode.state.addListener(_appearanceChanged);
-    _appearanceChanged(force: true);
-  }
-
-  void _appearanceChanged({bool force = false}) {
-    final next = _mode.state.value.appearance;
-    if (!force && identical(next, _appearance)) return;
-    if (mounted) setState(() => _appearance = next);
-  }
-
-  @override
-  void dispose() {
-    widget.controller.activeMode.removeListener(_modeChanged);
-    _mode.state.removeListener(_appearanceChanged);
-    super.dispose();
-  }
+  final String personalDataPath;
+  final VoidCallback onPressed;
 
   @override
   Widget build(BuildContext context) {
-    final spec = RetainedThemeRegistry.resolve(
-      backgroundId: _appearance.background,
-    );
-    return ThemeSpecScope(
-      spec: spec,
-      child: StandardVisualScope(
-        settings: StandardVisualSettings(
-          backgroundId: _appearance.background,
-          accentHue: _appearance.accentHue,
-          rainbow: _appearance.rainbow,
-          neon: _appearance.neon,
-        ),
-        child: Theme(
-          data: spec.materialTheme(),
-          child: AppTitleBar(
-            windowHost: widget.windowHost,
-            beforeClose: widget.beforeClose,
-            onCloseError: widget.onCloseError,
-            workspaceNavigation: _WorkspaceNavigation(
-              active: widget.activeWorkspace,
-              onChanged: widget.onWorkspaceChanged,
-            ),
+    final visual = AppTitleBarVisualScope.maybeOf(context);
+    final spec = ThemeSpecScope.maybeOf(context) ?? StandardSpec.theme;
+    final label =
+        'Personal data folder: $personalDataPath. '
+        'Open Craft Planner > Data to review or change it.';
+    final foreground = visual?.foreground ?? spec.palette.text;
+    final hover =
+        visual?.captionHoverSurface ?? spec.palette.primary.withAlpha(38);
+    final pressed =
+        visual?.captionPressedSurface ?? spec.palette.primary.withAlpha(64);
+
+    return Tooltip(
+      message: label,
+      excludeFromSemantics: true,
+      child: Semantics(
+        key: ApplicationWorkspace.activityDataFolderShortcutKey,
+        button: true,
+        label: label,
+        child: IconButton(
+          onPressed: onPressed,
+          style: ButtonStyle(
+            fixedSize: const WidgetStatePropertyAll(Size(40, 40)),
+            minimumSize: const WidgetStatePropertyAll(Size.zero),
+            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+            padding: const WidgetStatePropertyAll(EdgeInsets.zero),
+            shape: const WidgetStatePropertyAll(RoundedRectangleBorder()),
+            foregroundColor: WidgetStatePropertyAll(foreground),
+            overlayColor: WidgetStateProperty.resolveWith((states) {
+              if (states.contains(WidgetState.pressed)) return pressed;
+              if (states.contains(WidgetState.hovered) ||
+                  states.contains(WidgetState.focused)) {
+                return hover;
+              }
+              return Colors.transparent;
+            }),
           ),
+          icon: const Icon(Icons.folder_open_rounded, size: 20),
         ),
       ),
     );
@@ -1490,7 +1958,6 @@ class _WorkspaceNavigation extends StatelessWidget {
   static const resourceMapKey = ValueKey<String>(
     'top-workspace-tab-resource-map',
   );
-
   final _TopWorkspaceDestination active;
   final ValueChanged<_TopWorkspaceDestination> onChanged;
 
@@ -1500,17 +1967,31 @@ class _WorkspaceNavigation extends StatelessWidget {
       tabs: <AppTitleTab>[
         AppTitleTab(
           tabKey: plannerKey,
-          artworkAssetPath: 'assets/app/bdo_tool_icon.png',
+          artworkAssetPath:
+              'packages/bdo_map_core/assets/images/node_icons/14.png',
+          inactiveArtworkAssetPath:
+              'packages/bdo_map_core/assets/images/node_icons/gray/14.png',
           label: 'Craft Planner',
           selected: active == _TopWorkspaceDestination.planner,
           onPressed: () => onChanged(_TopWorkspaceDestination.planner),
         ),
         AppTitleTab(
           tabKey: resourceMapKey,
-          artworkAssetPath: 'assets/app/bdo_resource_map_icon.png',
+          artworkAssetPath:
+              'packages/bdo_map_core/assets/images/node_icons/0.png',
+          inactiveArtworkAssetPath:
+              'packages/bdo_map_core/assets/images/node_icons/gray/0.png',
+          artworkScale: 1.16,
           label: 'Resource Map',
           selected: active == _TopWorkspaceDestination.resourceMap,
           onPressed: () => onChanged(_TopWorkspaceDestination.resourceMap),
+        ),
+        AppTitleTab(
+          tabKey: const ValueKey<String>('top-workspace-tab-opportunities'),
+          artworkAssetPath: 'assets/opportunities/items/66771.webp',
+          label: 'Opportunities',
+          selected: active == _TopWorkspaceDestination.opportunities,
+          onPressed: () => onChanged(_TopWorkspaceDestination.opportunities),
         ),
       ],
     );

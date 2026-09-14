@@ -20,6 +20,13 @@ class CatalogRepository {
       );
 
   final CatalogSnapshot snapshot;
+
+  /// Recorded NPC purchase prices are item facts, not crafting-mode facts.
+  /// This fallback never reads client sell values or saved market prices.
+  /// Conflicting same-name records are omitted instead of guessed.
+  late final Map<String, double> npcPurchasePrices = _npcPurchasePrices(
+    snapshot,
+  );
   final Map<CraftMode, _NameIndex<Recipe>> _itemIndexes;
   final Map<CraftMode, _NameIndex<String>> _iconIndexes;
   final _NameIndex<String> _iconAliases;
@@ -101,6 +108,34 @@ class CatalogRepository {
     }
     return null;
   }
+}
+
+Map<String, double> _npcPurchasePrices(CatalogSnapshot snapshot) {
+  final prices = <String, double>{};
+  final identities = <String, String>{};
+  final conflicts = <String>{};
+  for (final mode in CraftMode.values) {
+    for (final recipe in snapshot.forMode(mode).items.values) {
+      final price = recipe.npcPrice;
+      if (!price.isFinite || price <= 0) continue;
+      final name = recipe.name.trim().toLowerCase();
+      final id = recipe.marketId?.trim();
+      final previousId = identities[name];
+      if ((prices.containsKey(name) && prices[name] != price) ||
+          (id != null &&
+              id.isNotEmpty &&
+              previousId != null &&
+              previousId != id)) {
+        conflicts.add(name);
+      }
+      prices[name] = price;
+      if (id != null && id.isNotEmpty) identities[name] = id;
+    }
+  }
+  for (final name in conflicts) {
+    prices.remove(name);
+  }
+  return Map.unmodifiable(prices);
 }
 
 String normalizeMarketName(String value) =>

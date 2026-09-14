@@ -1,4 +1,5 @@
 import '../../app/state/planner_application_controller.dart';
+import '../../domain/models/craft_mode.dart';
 import '../../domain/planner/planner_models.dart';
 
 enum RecipeBookCallingContext { planner, bonus }
@@ -16,6 +17,21 @@ final class RecipeBookRequest {
 }
 
 typedef OpenRecipeBook = void Function(RecipeBookRequest request);
+
+/// Opens a real, currently available recipe without changing its wanted amount.
+final class PlannerTargetRequest {
+  const PlannerTargetRequest({
+    required this.exactName,
+    required this.mode,
+    this.variantId,
+  });
+
+  final String exactName;
+  final CraftMode mode;
+  final String? variantId;
+}
+
+typedef OpenPlannerTarget = void Function(PlannerTargetRequest request);
 
 /// The application host owns the native clipboard and the named toast. Keeping
 /// the two effects behind one callback prevents a successful copy from losing
@@ -116,6 +132,7 @@ final class PlannerMapLookupAvailability {
     this.npcVendorCount = 0,
     this.hasManualGathering = false,
     this.manualResourceId,
+    this.manualMaterialName,
     this.manualLocationCount = 0,
     this.hasWorkerNodes = false,
     this.workerResourceId,
@@ -127,6 +144,9 @@ final class PlannerMapLookupAvailability {
   final int npcVendorCount;
   final bool hasManualGathering;
   final String? manualResourceId;
+
+  /// A different raw material that can optionally be processed into this item.
+  final String? manualMaterialName;
   final int manualLocationCount;
   final bool hasWorkerNodes;
   final String? workerResourceId;
@@ -157,8 +177,41 @@ final class PlannerMapLookupRequest {
 typedef ResolvePlannerMapLookup =
     Future<PlannerMapLookupAvailability> Function(String materialName);
 typedef OpenPlannerMapLookup = void Function(PlannerMapLookupRequest request);
+
+/// One recipe/plan's full requirement, before shared inventory is subtracted.
+/// Re-adding the same source and material replaces its previous requirement.
+final class PlannerGatherDemand {
+  const PlannerGatherDemand({
+    required this.sourceId,
+    required this.sourceLabel,
+    required this.materialName,
+    required this.neededQuantity,
+    this.plannerMode,
+    this.plannerTarget,
+    this.bonusPlan = false,
+  });
+
+  final String sourceId;
+  final String sourceLabel;
+  final String materialName;
+  final double neededQuantity;
+  final CraftMode? plannerMode;
+  final String? plannerTarget;
+  final bool bonusPlan;
+}
+
+final class PlannerGatherChecklistRequest {
+  const PlannerGatherChecklistRequest({
+    required this.availability,
+    this.demand,
+  });
+
+  final PlannerMapLookupAvailability availability;
+  final PlannerGatherDemand? demand;
+}
+
 typedef AddPlannerGatherChecklistItem =
-    void Function(PlannerMapLookupAvailability availability);
+    void Function(PlannerGatherChecklistRequest request);
 typedef AddPlannerWorkerNetworkMaterial =
     void Function(PlannerMapLookupAvailability availability);
 
@@ -193,21 +246,28 @@ final class PlannerExternalActions {
     required this.openRecipeBook,
     required this.copyName,
     required this.checkPrices,
+    this.ensurePrices,
     this.resolveMapLookup,
     this.openMapLookup,
     this.addToGatherChecklist,
     this.addToPlannedNetwork,
     this.copyAfkLoad,
     this.openAfkWeightSettings,
+    this.openPlannerTarget,
   });
 
   final OpenRecipeBook openRecipeBook;
   final CopyPlannerName copyName;
   final CheckPlannerPrices checkPrices;
+
+  /// On-demand cache check after an explicit plan action, without forcing a
+  /// fresh request or changing whether market rows are visible.
+  final void Function(ModeFeatureController controller)? ensurePrices;
   final ResolvePlannerMapLookup? resolveMapLookup;
   final OpenPlannerMapLookup? openMapLookup;
   final AddPlannerGatherChecklistItem? addToGatherChecklist;
   final AddPlannerWorkerNetworkMaterial? addToPlannedNetwork;
   final CopyAfkLoad? copyAfkLoad;
   final OpenAfkWeightSettings? openAfkWeightSettings;
+  final OpenPlannerTarget? openPlannerTarget;
 }

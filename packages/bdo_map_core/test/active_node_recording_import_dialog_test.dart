@@ -5,6 +5,57 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
+  testWidgets('compact recording dialog remains readable at double text size', (
+    tester,
+  ) async {
+    await tester.binding.setSurfaceSize(const Size(900, 820));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    var pickerCalls = 0;
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData.dark(useMaterial3: true),
+        builder: (context, child) => MediaQuery(
+          data: MediaQuery.of(
+            context,
+          ).copyWith(textScaler: const TextScaler.linear(2)),
+          child: child!,
+        ),
+        home: ResourceMapChromeTheme(
+          data: ResourceMapChromeThemeData.sakuraCartographer,
+          child: _RecordingHarness(
+            launcher: () async => true,
+            finder: (_) async => null,
+            picker: () async {
+              pickerCalls++;
+              return null;
+            },
+            scanner: (path, {onProgress}) async => _scan(path, <String>[]),
+          ),
+        ),
+      ),
+    );
+    await tester.tap(find.byKey(const ValueKey('open-recording-import')));
+    await tester.pumpAndSettle();
+    expect(tester.takeException(), isNull);
+    expect(pickerCalls, 0);
+    expect(find.text('Cancel').hitTestable(), findsOneWidget);
+    expect(
+      tester.widget<Text>(find.text('Import Activated nodes')).style?.fontSize,
+      16,
+    );
+    await tester.tap(find.byKey(const ValueKey('active-node-recording-start')));
+    await tester.pumpAndSettle();
+    await tester.tap(
+      find.byKey(const ValueKey('active-node-recording-find-latest')),
+    );
+    await tester.pumpAndSettle();
+    expect(find.textContaining('No new recording found'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+    await tester.tap(find.text('Cancel'));
+    await tester.pumpAndSettle();
+    expect(find.text('waiting'), findsOneWidget);
+  });
+
   testWidgets(
     'combines recordings and requires explicit duplicate-label choices',
     (tester) async {
@@ -36,14 +87,14 @@ void main() {
         find.byKey(const ValueKey<String>('open-recording-import')),
       );
       await tester.pumpAndSettle();
-      expect(find.text('Read Activated nodes'), findsOneWidget);
+      expect(find.text('Import Activated nodes'), findsOneWidget);
 
       await tester.tap(
         find.byKey(const ValueKey<String>('active-node-recording-choose')),
       );
       await tester.pumpAndSettle();
 
-      expect(find.textContaining('1 recording combined'), findsOneWidget);
+      expect(find.textContaining('recording added'), findsNothing);
       expect(find.text('Rice'), findsOneWidget);
       expect(find.text('Wheat'), findsOneWidget);
       final savedRice = tester.widget<CheckboxListTile>(
@@ -52,25 +103,21 @@ void main() {
       expect(savedRice.value, isTrue);
       expect(savedRice.onChanged, isNull);
 
-      await tester.tap(
-        find.byKey(const ValueKey<String>('active-node-candidate-godu-wheat')),
+      final wheat = find.byKey(
+        const ValueKey<String>('active-node-candidate-godu-wheat'),
       );
+      await tester.ensureVisible(wheat);
+      await tester.pumpAndSettle();
+      await tester.tap(wheat);
       await tester.pumpAndSettle();
 
       await tester.tap(
         find.byKey(const ValueKey<String>('active-node-recording-choose')),
       );
       await tester.pumpAndSettle();
-      expect(find.textContaining('2 recordings combined'), findsOneWidget);
-      await tester.scrollUntilVisible(
+      expect(find.textContaining('recordings added'), findsNothing);
+      await tester.ensureVisible(
         find.text("Pilgrim's Sanctum: Sincerity - Excavation"),
-        120,
-        scrollable: find.descendant(
-          of: find.byKey(
-            const ValueKey<String>('active-node-recording-results'),
-          ),
-          matching: find.byType(Scrollable),
-        ),
       );
       expect(
         find.text("Pilgrim's Sanctum: Sincerity - Excavation"),
@@ -127,8 +174,8 @@ void main() {
     await tester.pumpAndSettle();
     expect(launches, 1);
     expect(
-      find.textContaining('Record only the narrow Activated list'),
-      findsOneWidget,
+      find.textContaining('Record the Activated list from top to bottom'),
+      findsNothing,
     );
 
     await tester.tap(
@@ -136,7 +183,7 @@ void main() {
     );
     await tester.pumpAndSettle();
     expect(modifiedAfter, isNotNull);
-    expect(find.textContaining('1 recording combined'), findsOneWidget);
+    expect(find.text('Behr Riverhead - Mining'), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
 
@@ -182,7 +229,7 @@ void main() {
       ),
     );
     await tester.pump();
-    expect(find.text('Sampling video frames  0 of 18'), findsOneWidget);
+    expect(find.text('Checking video frames  0 of 18'), findsOneWidget);
 
     progressCallback!(
       const BdoActiveNodeScanProgress(
@@ -208,7 +255,7 @@ void main() {
       ),
     );
     await tester.pump();
-    expect(find.text('Collecting OCR result  18 of 18'), findsOneWidget);
+    expect(find.text('Finishing scan  18 of 18'), findsOneWidget);
     expect(find.text('97%'), findsOneWidget);
 
     completed.complete(

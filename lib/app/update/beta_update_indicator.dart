@@ -6,7 +6,7 @@ import 'package:flutter/material.dart';
 import '../../visual/visual.dart';
 import 'beta_update.dart';
 
-/// Compact, always-in-app status strip for Black Spirit Life updates.
+/// In-app status notice for Black Spirit Life updates.
 ///
 /// The strip deliberately avoids release-note dialogs and browser hand-offs:
 /// one activation downloads the selected update and restarts when it is ready.
@@ -17,10 +17,19 @@ class BetaUpdateIndicator extends StatefulWidget {
     super.key,
   });
 
-  static const double height = 44;
+  static const double height = 84;
   static const Key buttonKey = ValueKey<String>('beta-update-strip');
   static const Key iconKey = ValueKey<String>('beta-update-strip-icon');
-  static const Key sweepKey = ValueKey<String>('beta-update-strip-sweep');
+  static const Key availableContentKey = ValueKey<String>(
+    'beta-update-strip-available-content',
+  );
+  static const Key petalRainKey = ValueKey<String>(
+    'beta-update-strip-petal-rain',
+  );
+  static const Key savingsKey = ValueKey<String>('beta-update-strip-savings');
+  static const Key actionPanelKey = ValueKey<String>(
+    'beta-update-strip-action-panel',
+  );
   static const Key arrowKey = ValueKey<String>('beta-update-strip-arrow');
   static const Key progressKey = ValueKey<String>('beta-update-strip-progress');
 
@@ -35,9 +44,10 @@ class _BetaUpdateIndicatorState extends State<BetaUpdateIndicator>
     with SingleTickerProviderStateMixin {
   late final AnimationController _attention = AnimationController(
     vsync: this,
-    duration: const Duration(milliseconds: 2300),
+    duration: const Duration(milliseconds: 10400),
   );
   bool _activationPending = false;
+  String? _playedAvailableOffer;
 
   @override
   void initState() {
@@ -71,16 +81,47 @@ class _BetaUpdateIndicatorState extends State<BetaUpdateIndicator>
       !_activationPending &&
       !widget.controller.operationPending;
 
+  String get _availableOfferKey {
+    final snapshot = widget.controller.snapshot;
+    return <Object>[
+      snapshot.currentVersion,
+      snapshot.targetVersion,
+      snapshot.sizeBytes,
+      snapshot.fullSizeBytes,
+      snapshot.deltaCount,
+      snapshot.testOnly,
+    ].join('|');
+  }
+
   void _syncAnimation() {
     if (!mounted) return;
     final reduceMotion =
         MediaQuery.maybeOf(context)?.disableAnimations ?? false;
-    if (_shouldAnimateAttention && !reduceMotion) {
-      if (!_attention.isAnimating) _attention.repeat();
-    } else {
+    final phase = widget.controller.snapshot.phase;
+    if (phase != BetaUpdatePhase.available) {
+      _playedAvailableOffer = null;
       _attention
         ..stop()
         ..value = 0;
+      return;
+    }
+    if (reduceMotion) {
+      _playedAvailableOffer = _availableOfferKey;
+      _attention
+        ..stop()
+        ..value = 1;
+      return;
+    }
+    if (!_shouldAnimateAttention) {
+      _attention
+        ..stop()
+        ..value = 0;
+      return;
+    }
+    final offer = _availableOfferKey;
+    if (_playedAvailableOffer != offer) {
+      _playedAvailableOffer = offer;
+      unawaited(_attention.forward(from: 0));
     }
   }
 
@@ -129,7 +170,19 @@ class _BetaUpdateIndicatorState extends State<BetaUpdateIndicator>
     final reduceMotion =
         MediaQuery.maybeOf(context)?.disableAnimations ?? false;
     final animateAttention = _shouldAnimateAttention && !reduceMotion;
-    final semanticsLabel = presentation.actionHint.isEmpty
+    final petalBase = Color.lerp(
+      spec.palette.primary,
+      const Color(0xFFCF7F98),
+      .48,
+    )!;
+    final petalHighlight = Color.lerp(
+      spec.palette.primaryBright,
+      const Color(0xFFE8B0BF),
+      .58,
+    )!;
+    final semanticsLabel = snapshot.phase == BetaUpdatePhase.available
+        ? _availableSemanticsLabel(snapshot)
+        : presentation.actionHint.isEmpty
         ? presentation.label
         : '${presentation.label}. ${presentation.actionHint}';
 
@@ -156,57 +209,47 @@ class _BetaUpdateIndicatorState extends State<BetaUpdateIndicator>
               child: Stack(
                 fit: StackFit.expand,
                 children: <Widget>[
-                  if (animateAttention)
-                    _UpdateAttentionLayer(
-                      color: toneColor,
-                      animation: _attention,
-                    ),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 18),
-                    child: Row(
-                      children: <Widget>[
-                        _UpdateStatusGlyph(
-                          key: BetaUpdateIndicator.iconKey,
-                          snapshot: snapshot,
-                          color: toneColor,
-                          attention: _attention,
-                        ),
-                        const SizedBox(width: 11),
-                        Expanded(
-                          child: Text(
-                            presentation.label,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: spec.typography.label.copyWith(
-                              color: spec.palette.text,
-                              fontWeight: FontWeight.w700,
-                            ),
+                  ExcludeSemantics(
+                    child: IgnorePointer(
+                      child: DecoratedBox(
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                            colors: <Color>[
+                              toneColor.withAlpha(18),
+                              Colors.transparent,
+                              spec.palette.primary.withAlpha(13),
+                            ],
+                            stops: const <double>[0, .56, 1],
                           ),
                         ),
-                        if (presentation.actionHint.isNotEmpty) ...<Widget>[
-                          const SizedBox(width: 16),
-                          Text(
-                            presentation.actionHint,
-                            style: spec.typography.meta.copyWith(
-                              color: actionable
-                                  ? spec.palette.primaryBright
-                                  : spec.palette.textMuted,
-                              fontWeight: FontWeight.w700,
-                            ),
-                          ),
-                          if (actionable) ...<Widget>[
-                            const SizedBox(width: 5),
-                            _AnimatedActionArrow(
-                              color: spec.palette.primaryBright,
-                              animation: animateAttention
-                                  ? _attention
-                                  : kAlwaysDismissedAnimation,
-                            ),
-                          ],
-                        ],
-                      ],
+                      ),
                     ),
                   ),
+                  if (animateAttention)
+                    SakuraPetalRain(
+                      paintKey: BetaUpdateIndicator.petalRainKey,
+                      animation: _attention,
+                      baseColor: petalBase,
+                      highlightColor: petalHighlight,
+                    ),
+                  if (snapshot.phase == BetaUpdatePhase.available)
+                    _AvailableUpdateContent(
+                      snapshot: snapshot,
+                      actionable: actionable,
+                      attention: animateAttention
+                          ? _attention
+                          : kAlwaysDismissedAnimation,
+                      toneColor: toneColor,
+                    )
+                  else
+                    _UpdateStatusContent(
+                      snapshot: snapshot,
+                      presentation: presentation,
+                      actionable: actionable,
+                      toneColor: toneColor,
+                    ),
                 ],
               ),
             ),
@@ -217,61 +260,344 @@ class _BetaUpdateIndicatorState extends State<BetaUpdateIndicator>
   }
 }
 
-class _UpdateAttentionLayer extends StatelessWidget {
-  const _UpdateAttentionLayer({required this.color, required this.animation});
+class _AvailableUpdateContent extends StatelessWidget {
+  const _AvailableUpdateContent({
+    required this.snapshot,
+    required this.actionable,
+    required this.attention,
+    required this.toneColor,
+  });
 
-  final Color color;
-  final Animation<double> animation;
+  final BetaUpdateSnapshot snapshot;
+  final bool actionable;
+  final Animation<double> attention;
+  final Color toneColor;
 
   @override
-  Widget build(BuildContext context) => ExcludeSemantics(
-    child: IgnorePointer(
-      child: AnimatedBuilder(
-        animation: animation,
-        builder: (context, child) {
-          final pulse = _attentionPulse(animation.value);
-          return Stack(
-            fit: StackFit.expand,
+  Widget build(BuildContext context) {
+    final spec = context.visualTheme;
+    final version = snapshot.targetVersion.trim();
+    final kind = snapshot.usesDelta ? 'patch' : 'update';
+    final size = snapshot.sizeBytes > 0
+        ? '${_formatBytes(snapshot.sizeBytes)} $kind'
+        : '';
+    final savingsBytes = snapshot.usesDelta
+        ? snapshot.fullSizeBytes - snapshot.sizeBytes
+        : 0;
+    final savings = savingsBytes > 0
+        ? '${_formatBytes(savingsBytes)} smaller than the full download'
+        : '';
+    final eyebrow = snapshot.testOnly
+        ? 'TEST UPDATE'
+        : snapshot.usesDelta
+        ? 'DELTA UPDATE'
+        : 'APP UPDATE';
+    final heading = version.isEmpty
+        ? 'A new version is ready'
+        : 'Version $version is ready';
+
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final compact = constraints.maxWidth < 620;
+        final simplified = MediaQuery.textScalerOf(context).scale(1) > 1.35;
+        final behavior = snapshot.testOnly
+            ? compact
+                  ? 'simulates install flow'
+                  : 'simulates the automatic install flow'
+            : compact
+            ? 'installs automatically'
+            : 'installs and restarts automatically';
+        final meta = <String>[
+          if (size.isNotEmpty) size,
+          behavior,
+        ].join('  ·  ');
+        final accessibleMeta = snapshot.testOnly
+            ? <String>['TEST', if (size.isNotEmpty) size].join('  ·  ')
+            : snapshot.usesDelta
+            ? <String>[
+                if (size.isNotEmpty) size,
+                if (savingsBytes > 0) 'saves ${_formatBytes(savingsBytes)}',
+              ].join('  ·  ')
+            : size;
+        return Padding(
+          key: BetaUpdateIndicator.availableContentKey,
+          padding: EdgeInsets.symmetric(
+            horizontal: compact ? 12 : 18,
+            vertical: 8,
+          ),
+          child: Row(
             children: <Widget>[
-              DecoratedBox(
-                decoration: BoxDecoration(
-                  border: Border.all(
-                    color: color.withAlpha(34 + (pulse * 58).round()),
-                    width: 1.15,
-                  ),
-                ),
+              _UpdateStatusGlyph(
+                key: BetaUpdateIndicator.iconKey,
+                snapshot: snapshot,
+                color: toneColor,
+                attention: attention,
               ),
-              Align(
-                key: BetaUpdateIndicator.sweepKey,
-                alignment: Alignment(-1.4 + animation.value * 2.8, 0),
-                child: Transform.rotate(
-                  angle: -.16,
-                  child: FractionallySizedBox(
-                    widthFactor: .15,
-                    heightFactor: 1.7,
-                    child: DecoratedBox(
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          colors: <Color>[
-                            Colors.transparent,
-                            color.withAlpha(18),
-                            color.withAlpha(58),
-                            color.withAlpha(18),
-                            Colors.transparent,
+              SizedBox(width: compact ? 9 : 12),
+              Expanded(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                    if (!simplified) ...<Widget>[
+                      Row(
+                        children: <Widget>[
+                          Container(
+                            width: 5,
+                            height: 5,
+                            decoration: BoxDecoration(
+                              color: toneColor,
+                              shape: BoxShape.circle,
+                              boxShadow: <BoxShadow>[
+                                BoxShadow(
+                                  color: toneColor.withAlpha(118),
+                                  blurRadius: 5,
+                                ),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(width: 6),
+                          Flexible(
+                            child: Text(
+                              eyebrow,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: spec.typography.label.copyWith(
+                                color: toneColor,
+                                fontSize: 10,
+                                fontWeight: FontWeight.w800,
+                                letterSpacing: .78,
+                                height: 1.05,
+                              ),
+                            ),
+                          ),
+                          if (!compact && savings.isNotEmpty) ...<Widget>[
+                            const SizedBox(width: 10),
+                            Flexible(
+                              child: Text(
+                                savings,
+                                key: BetaUpdateIndicator.savingsKey,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: spec.typography.meta.copyWith(
+                                  color: spec.palette.textMuted,
+                                  fontSize: 10.5,
+                                  height: 1.05,
+                                ),
+                              ),
+                            ),
                           ],
-                          stops: const <double>[0, .28, .5, .72, 1],
-                        ),
+                        ],
+                      ),
+                      const SizedBox(height: 3),
+                    ],
+                    Text(
+                      heading,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: spec.typography.button.copyWith(
+                        color: spec.palette.text,
+                        fontSize: compact ? 13 : 14,
+                        fontWeight: FontWeight.w700,
+                        height: 1.05,
                       ),
                     ),
-                  ),
+                    if (!simplified) ...<Widget>[
+                      const SizedBox(height: 3),
+                      Text(
+                        meta,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: spec.typography.meta.copyWith(
+                          color: spec.palette.textMuted,
+                          fontSize: compact ? 10 : 11,
+                          height: 1.05,
+                        ),
+                      ),
+                    ] else if (accessibleMeta.isNotEmpty) ...<Widget>[
+                      const SizedBox(height: 3),
+                      Text(
+                        accessibleMeta,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: spec.typography.meta.copyWith(
+                          color: spec.palette.textMuted,
+                          fontSize: compact ? 10 : 11,
+                          height: 1.05,
+                        ),
+                      ),
+                    ],
+                  ],
                 ),
               ),
+              SizedBox(width: compact ? 8 : 18),
+              AnimatedBuilder(
+                animation: attention,
+                builder: (context, child) {
+                  final pulse = _arrivalPulse(attention.value);
+                  final actionColor = actionable
+                      ? spec.palette.primaryBright
+                      : spec.palette.textMuted;
+                  return Container(
+                    key: BetaUpdateIndicator.actionPanelKey,
+                    padding: EdgeInsets.symmetric(
+                      horizontal: compact ? 10 : 14,
+                      vertical: 10,
+                    ),
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                        colors: <Color>[
+                          spec.palette.primary.withAlpha(
+                            actionable ? 48 + (pulse * 20).round() : 20,
+                          ),
+                          spec.palette.surfaceInset.withAlpha(148),
+                        ],
+                      ),
+                      borderRadius: BorderRadius.circular(
+                        spec.geometry.buttonRadius + 2,
+                      ),
+                      border: Border.all(
+                        color: actionColor.withAlpha(
+                          actionable ? 128 + (pulse * 55).round() : 54,
+                        ),
+                      ),
+                      boxShadow: pulse <= 0
+                          ? const <BoxShadow>[]
+                          : <BoxShadow>[
+                              BoxShadow(
+                                color: actionColor.withAlpha(
+                                  (pulse * 70).round(),
+                                ),
+                                blurRadius: 8 + pulse * 8,
+                              ),
+                            ],
+                    ),
+                    child: child,
+                  );
+                },
+                child: compact
+                    ? SizedBox(
+                        width: 92,
+                        child: Row(
+                          children: <Widget>[
+                            Expanded(
+                              child: Text(
+                                'Update',
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: spec.typography.button.copyWith(
+                                  color: actionable
+                                      ? spec.palette.primaryBright
+                                      : spec.palette.textMuted,
+                                  fontSize: 11.5,
+                                  fontWeight: FontWeight.w700,
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 4),
+                            _AnimatedActionArrow(
+                              color: actionable
+                                  ? spec.palette.primaryBright
+                                  : spec.palette.textMuted,
+                              animation: attention,
+                            ),
+                          ],
+                        ),
+                      )
+                    : Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: <Widget>[
+                          Text(
+                            'Update now',
+                            style: spec.typography.button.copyWith(
+                              color: actionable
+                                  ? spec.palette.primaryBright
+                                  : spec.palette.textMuted,
+                              fontSize: 12.5,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                          const SizedBox(width: 5),
+                          _AnimatedActionArrow(
+                            color: actionable
+                                ? spec.palette.primaryBright
+                                : spec.palette.textMuted,
+                            animation: attention,
+                          ),
+                        ],
+                      ),
+              ),
             ],
-          );
-        },
+          ),
+        );
+      },
+    );
+  }
+}
+
+class _UpdateStatusContent extends StatelessWidget {
+  const _UpdateStatusContent({
+    required this.snapshot,
+    required this.presentation,
+    required this.actionable,
+    required this.toneColor,
+  });
+
+  final BetaUpdateSnapshot snapshot;
+  final _UpdatePresentation presentation;
+  final bool actionable;
+  final Color toneColor;
+
+  @override
+  Widget build(BuildContext context) {
+    final spec = context.visualTheme;
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 18),
+      child: Row(
+        children: <Widget>[
+          _UpdateStatusGlyph(
+            key: BetaUpdateIndicator.iconKey,
+            snapshot: snapshot,
+            color: toneColor,
+            attention: kAlwaysDismissedAnimation,
+          ),
+          const SizedBox(width: 11),
+          Expanded(
+            child: Text(
+              presentation.label,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: spec.typography.label.copyWith(
+                color: spec.palette.text,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+          ),
+          if (presentation.actionHint.isNotEmpty) ...<Widget>[
+            const SizedBox(width: 16),
+            Text(
+              presentation.actionHint,
+              style: spec.typography.meta.copyWith(
+                color: actionable
+                    ? spec.palette.primaryBright
+                    : spec.palette.textMuted,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+            if (actionable) ...<Widget>[
+              const SizedBox(width: 5),
+              _AnimatedActionArrow(
+                color: spec.palette.primaryBright,
+                animation: kAlwaysDismissedAnimation,
+              ),
+            ],
+          ],
+        ],
       ),
-    ),
-  );
+    );
+  }
 }
 
 class _AnimatedActionArrow extends StatelessWidget {
@@ -289,7 +615,7 @@ class _AnimatedActionArrow extends StatelessWidget {
         animation: animation,
         builder: (context, child) => Transform.translate(
           key: BetaUpdateIndicator.arrowKey,
-          offset: Offset(_attentionPulse(animation.value) * 4, 0),
+          offset: Offset(_arrivalPulse(animation.value) * 4, 0),
           child: child,
         ),
         child: Icon(Icons.arrow_forward_rounded, size: 17, color: color),
@@ -334,23 +660,23 @@ class _UpdateStatusGlyph extends StatelessWidget {
     return AnimatedBuilder(
       animation: attention,
       builder: (context, child) {
-        final pulse = _attentionPulse(attention.value);
+        final pulse = _arrivalPulse(attention.value);
         return Transform.scale(
-          scale: 1 + pulse * .11,
+          scale: 1 + pulse * .07,
           child: Container(
-            width: 29,
-            height: 29,
+            width: 32,
+            height: 32,
             decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: color.withAlpha(30 + (pulse * 38).round()),
+              borderRadius: BorderRadius.circular(8),
+              color: color.withAlpha(24 + (pulse * 28).round()),
               border: Border.all(
-                color: color.withAlpha(50 + (pulse * 82).round()),
+                color: color.withAlpha(76 + (pulse * 76).round()),
               ),
               boxShadow: <BoxShadow>[
                 BoxShadow(
-                  color: color.withAlpha(48 + (pulse * 112).round()),
-                  blurRadius: 5 + pulse * 6,
-                  spreadRadius: .5 + pulse * 1.5,
+                  color: color.withAlpha(32 + (pulse * 82).round()),
+                  blurRadius: 4 + pulse * 7,
+                  spreadRadius: pulse * 1.2,
                 ),
               ],
             ),
@@ -362,8 +688,10 @@ class _UpdateStatusGlyph extends StatelessWidget {
   }
 }
 
-double _attentionPulse(double progress) =>
-    (1 - math.cos(progress * math.pi * 2)) / 2;
+double _arrivalPulse(double progress) {
+  if (progress <= 0 || progress >= .30) return 0;
+  return math.sin(progress / .30 * math.pi);
+}
 
 _UpdatePresentation _presentation(BetaUpdateSnapshot snapshot) {
   switch (snapshot.phase) {
@@ -435,6 +763,26 @@ String _formatBytes(int bytes) {
   } while (value >= 1024 && unit < units.length - 1);
   final decimals = value >= 10 ? 0 : 1;
   return '${value.toStringAsFixed(decimals)} ${units[unit]}';
+}
+
+String _availableSemanticsLabel(BetaUpdateSnapshot snapshot) {
+  final version = snapshot.targetVersion.trim();
+  final size = snapshot.sizeBytes > 0 ? _formatBytes(snapshot.sizeBytes) : '';
+  final savingsBytes = snapshot.usesDelta
+      ? snapshot.fullSizeBytes - snapshot.sizeBytes
+      : 0;
+  return <String>[
+    snapshot.testOnly ? 'Test update available' : 'Update available',
+    if (version.isNotEmpty) 'Version $version',
+    if (size.isNotEmpty)
+      snapshot.usesDelta ? '$size delta patch' : '$size full update',
+    if (savingsBytes > 0)
+      'Saves ${_formatBytes(savingsBytes)} compared with the full download',
+    snapshot.testOnly
+        ? 'Runs a local simulation and does not install a package'
+        : 'Installs and restarts automatically',
+    snapshot.testOnly ? 'Run update test' : 'Update now',
+  ].join('. ');
 }
 
 class _UpdatePresentation {

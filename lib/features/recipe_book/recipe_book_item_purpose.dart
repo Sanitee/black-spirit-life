@@ -7,6 +7,7 @@ final class RecipeBookItemPurpose {
   const RecipeBookItemPurpose({
     this.kind,
     required this.description,
+    this.effectsTitle,
     this.effects = const <String>[],
     this.uses = const <String>[],
     this.notes = const <String>[],
@@ -15,6 +16,7 @@ final class RecipeBookItemPurpose {
 
   final String? kind;
   final String description;
+  final String? effectsTitle;
   final List<String> effects;
   final List<String> uses;
   final List<String> notes;
@@ -178,6 +180,7 @@ RecipeBookItemPurpose? _edaniaPartIiPurpose(String name, String foldedName) {
       description: 'A slot-specific Edania accessory material.',
       uses: <String>[
         'Crafts the $slot versions of Causality Shardstone and Apeiron.',
+        'Heat an unenhanced Apeiron $slot to recover 10 of this material.',
       ],
     );
   }
@@ -459,7 +462,7 @@ _verifiedEffectPurposes = <String, RecipeBookItemPurpose>{
   'destruction spirit stone': _activeStonePurpose(
     kind: 'Spirit stone',
     description:
-        'A charge-limited combat stone equipped in the alchemy-stone slot.',
+        'An activatable combat stone equipped in the alchemy-stone slot.',
     effects: <String>['All AP +6', 'All Accuracy +8'],
     duration: '5 min',
     cooldown: '5 min',
@@ -467,7 +470,7 @@ _verifiedEffectPurposes = <String, RecipeBookItemPurpose>{
   'guardian spirit stone': _activeStonePurpose(
     kind: 'Spirit stone',
     description:
-        'A charge-limited defense stone equipped in the alchemy-stone slot.',
+        'An activatable defense stone equipped in the alchemy-stone slot.',
     effects: <String>[
       'All Damage Reduction +6',
       'All Evasion +8',
@@ -479,7 +482,7 @@ _verifiedEffectPurposes = <String, RecipeBookItemPurpose>{
   'life spirit stone': _activeStonePurpose(
     kind: 'Spirit stone',
     description:
-        'A charge-limited Life Skill stone equipped in the alchemy-stone slot.',
+        'An activatable Life Skill stone equipped in the alchemy-stone slot.',
     effects: <String>[
       'Alchemy/Cooking Time -1.1 sec',
       'Processing Success Rate +11%',
@@ -488,14 +491,6 @@ _verifiedEffectPurposes = <String, RecipeBookItemPurpose>{
     ],
     duration: '10 min',
     cooldown: '10 min',
-  ),
-  'wild spirit stone': _activeStonePurpose(
-    kind: 'Spirit stone',
-    description:
-        'A charge-limited combat stone equipped in the alchemy-stone slot.',
-    effects: <String>['All AP +6', 'All Accuracy +8'],
-    duration: '5 min',
-    cooldown: '5 min',
   ),
   'imperfect alchemy stone of destruction': _activeStonePurpose(
     effects: <String>[
@@ -623,8 +618,7 @@ _verifiedEffectPurposes = <String, RecipeBookItemPurpose>{
   ),
   "khan's heart: destruction": _activeStonePurpose(
     kind: "Khan's Heart",
-    description:
-        "A rechargeable Khan's Heart equipped in the alchemy-stone slot.",
+    description: "A Khan's Heart equipped in the alchemy-stone slot.",
     effects: <String>[
       'All AP +7',
       'All Accuracy +9',
@@ -636,8 +630,7 @@ _verifiedEffectPurposes = <String, RecipeBookItemPurpose>{
   ),
   "khan's heart: life": _activeStonePurpose(
     kind: "Khan's Heart",
-    description:
-        "A rechargeable Khan's Heart equipped in the alchemy-stone slot.",
+    description: "A Khan's Heart equipped in the alchemy-stone slot.",
     effects: <String>[
       'Life EXP +30%',
       'Alchemy/Cooking Time -1.3 sec',
@@ -651,8 +644,7 @@ _verifiedEffectPurposes = <String, RecipeBookItemPurpose>{
   ),
   "khan's heart: protection": _activeStonePurpose(
     kind: "Khan's Heart",
-    description:
-        "A rechargeable Khan's Heart equipped in the alchemy-stone slot.",
+    description: "A Khan's Heart equipped in the alchemy-stone slot.",
     effects: <String>[
       'All Damage Reduction +7',
       'All Evasion +9',
@@ -664,8 +656,7 @@ _verifiedEffectPurposes = <String, RecipeBookItemPurpose>{
   ),
   "vell's heart": _activeStonePurpose(
     kind: "Vell's Heart",
-    description:
-        "A rechargeable Vell's Heart equipped in the alchemy-stone slot.",
+    description: "Vell's Heart equipped in the alchemy-stone slot.",
     effects: <String>[
       'All AP +8',
       'All Accuracy +10',
@@ -677,8 +668,99 @@ _verifiedEffectPurposes = <String, RecipeBookItemPurpose>{
   ),
 };
 
+// Reference copy only; this does not archive catalog records or change their
+// planner/market eligibility. Pearl Abyss removed these three crystals:
+// https://www.naeu.playblackdesert.com/en-US/News/Detail?groupContentNo=10550
+const _removedDawnLifeExpPurpose = RecipeBookItemPurpose(
+  kind: 'Legacy crystal',
+  description: 'Removed September 3, 2026; replaced with Evergreen Shards.',
+  effectsTitle: 'Former effects',
+);
+
 final Map<String, RecipeBookItemPurpose>
 _exactPurposes = <String, RecipeBookItemPurpose>{
+  'jin dawn crystal - life exp': _removedDawnLifeExpPurpose,
+  'bon dawn crystal - life exp': _removedDawnLifeExpPurpose,
+  'won dawn crystal - life exp': _removedDawnLifeExpPurpose,
+  'cron stone': const RecipeBookItemPurpose(
+    kind: 'Enhancement protection material',
+    description:
+        'A consumable that protects eligible gear from destruction or an enhancement-level drop.',
+    uses: <String>[
+      'Used during eligible gear enhancement and Courser Awakening.',
+      'Also obtained by Heating supported hammers, Ancient Black Stones, and bound Slumbering Origin gear.',
+    ],
+  ),
+  'crystal extraction tool': const RecipeBookItemPurpose(
+    kind: 'Crystal extraction tool',
+    description:
+        'A tool consumed by a blacksmith when extracting a crystal from the Crystal Inventory.',
+  ),
+  'pure forest breath': const RecipeBookItemPurpose(
+    kind: 'Courser training material',
+    description: 'A Strength training material used while preparing a Courser.',
+  ),
+  "dark bonghwang's tear": const RecipeBookItemPurpose(
+    kind: 'Essence conversion material',
+    description:
+        'A World Boss material that multiplies a selected Essence of Dawn through Simple Alchemy.',
+  ),
+  'concentrated spellbound catalyst': const RecipeBookItemPurpose(
+    kind: 'Mass-processing catalyst',
+    description:
+        'An Old Moon catalyst used for 100-draught batches and the revised party Harmony Draught recipes.',
+    notes: <String>[
+      'Old Moon Shops sell it for 10,000,000 Silver.',
+      'Old Moon merchants exchange it with Spellbound Catalyst at a 1:10 ratio in either direction.',
+    ],
+  ),
+  "lyngbakr's bone": const RecipeBookItemPurpose(
+    kind: 'Sea-monster material',
+    description: 'A Lyngbakr drop used to make Sturdy Coral Support.',
+  ),
+  "lyngbakr's scale": const RecipeBookItemPurpose(
+    kind: 'Sea-monster material',
+    description: 'A Lyngbakr drop used to make Raging Wave Plywood.',
+  ),
+  "lyngbakr's fluid": const RecipeBookItemPurpose(
+    kind: 'Sea-monster material',
+    description: 'A Lyngbakr drop used to make Dormant Crimson Coral Adhesive.',
+  ),
+  'red sea monster meat': const RecipeBookItemPurpose(
+    kind: 'Great Ocean cooking material',
+    description: 'A Lyngbakr material used to make Oquilla Wave Meal.',
+  ),
+  'ocean essence': const RecipeBookItemPurpose(
+    kind: 'Great Ocean draught material',
+    description:
+        'A Hollow Maretta and weekly-quest material used to make Endless Ocean Draught.',
+    notes: <String>['Cannot be registered on the Central Market.'],
+  ),
+  'sturdy coral support': const RecipeBookItemPurpose(
+    kind: 'Ship equipment material',
+    description:
+        'A processed Lyngbakr material used for Epheria Carrack and Panokseon equipment.',
+  ),
+  'raging wave plywood': const RecipeBookItemPurpose(
+    kind: 'Ship equipment material',
+    description:
+        'A processed Lyngbakr material used for Epheria Carrack and Panokseon equipment.',
+  ),
+  'dormant crimson coral adhesive': const RecipeBookItemPurpose(
+    kind: 'Ship equipment material',
+    description:
+        'A processed Lyngbakr material used for Epheria Carrack and Panokseon equipment.',
+  ),
+  'sunset coral essence': const RecipeBookItemPurpose(
+    kind: 'Ship enhancement material',
+    description:
+        'A Lyngbakr drop used to Heat Sunset Tidal Black Stones and exchange for ship blueprints.',
+  ),
+  'sunset tidal black stone': const RecipeBookItemPurpose(
+    kind: 'Ship enhancement material',
+    description:
+        'A Black Stone used to enhance yellow-grade or higher ship equipment.',
+  ),
   'antidote elixir': const RecipeBookItemPurpose(
     kind: 'Recovery consumable',
     description: 'An instant status-removal remedy.',
@@ -703,8 +785,7 @@ _exactPurposes = <String, RecipeBookItemPurpose>{
   ),
   'monkey blood': const RecipeBookItemPurpose(
     kind: 'Alchemy blood',
-    description:
-        'Animal blood obtained by hunting a Monkey and using Fluid Collecting.',
+    description: 'An animal-blood substitute in Blood Group 3.',
     uses: <String>[
       "Used for Wise Man's Blood, Elixir of Energy, and recipes that accept its blood group.",
     ],
@@ -1133,14 +1214,6 @@ _exactPurposes = <String, RecipeBookItemPurpose>{
       "Crafts Vaha's Dawn, the Mythical Censer, and Musical Spirit Wall Lamp.",
     ],
   ),
-  "vell's fine powder": const RecipeBookItemPurpose(
-    kind: 'Alchemy stone material',
-    description:
-        "A sea-boss material used in Vell's Heart and alchemy-stone recipes.",
-    uses: <String>[
-      "Recharges Vell's Heart, Khan's Heart, and ordinary alchemy stones.",
-    ],
-  ),
   'terrashard': const RecipeBookItemPurpose(
     kind: 'Star of Nostos material',
     description: 'A crystal condensed from deep-earth energy.',
@@ -1202,7 +1275,7 @@ _exactPurposes = <String, RecipeBookItemPurpose>{
   'splendid spirit stone of destruction': const RecipeBookItemPurpose(
     kind: 'Combat spirit stone',
     description:
-        'A charge-limited spirit stone activated from the alchemy-stone slot.',
+        'An activatable combat stone equipped in the alchemy-stone slot.',
     effects: <String>[
       'All AP +13',
       'All Accuracy +14',
@@ -1268,7 +1341,7 @@ RecipeBookItemPurpose _recoveryPurpose({
 RecipeBookItemPurpose _activeStonePurpose({
   String kind = 'Alchemy stone',
   String description =
-      'A rechargeable alchemy stone equipped in the alchemy-stone slot.',
+      'An activatable alchemy stone equipped in the alchemy-stone slot.',
   required List<String> effects,
   required String duration,
   required String cooldown,
@@ -1888,12 +1961,9 @@ String _derivedDescription({
   if (foldedKind == 'perfume') {
     return 'A temporary perfume buff.';
   }
-  if (foldedKind == 'lightstone') {
-    return 'A Lightstone infused into an Artifact for its listed effect.';
-  }
-  if (foldedKind == 'gear crystal') {
-    return 'A crystal equipped through a crystal preset for its listed effect.';
-  }
+  // The exact crystal/Lightstone registry supplies their actual effects.
+  // A category alone cannot supply a missing effect, and repeating "listed
+  // effect" would displace those facts in compact item references.
   if (foldedName.endsWith(' timber')) {
     return 'Raw wood that can be processed into planks.';
   }
@@ -1968,16 +2038,6 @@ List<String> _derivedTerminalUses({required String kind}) {
       foldedKind == 'elixir' ||
       foldedKind == 'perfume') {
     return const <String>['Consume it to activate the listed temporary buff.'];
-  }
-  if (foldedKind == 'gear crystal') {
-    return const <String>[
-      'Add it to a crystal preset to apply the listed stat effect.',
-    ];
-  }
-  if (foldedKind == 'lightstone') {
-    return const <String>[
-      'Infuse it into an Artifact to apply the listed stat effect.',
-    ];
   }
   if (foldedKind.contains('blood') ||
       foldedKind.contains('mushroom') ||

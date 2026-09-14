@@ -29,6 +29,8 @@ options are available.
 - Find gathering spots, worker nodes, and NPC vendors on the built-in map.
 - Turn missing materials into a checklist or a CP-aware worker-node plan, then
   compare lodging and storage-house investments.
+- Review market-aware crafting and exchange opportunities without placing
+  orders or sending personal planner data to a third party.
 - Keep your favorites, progress, profile settings, and appearance choices
   between sessions.
 
@@ -49,12 +51,15 @@ bar inside the app without opening a browser.
 
 ## Your data
 
-Your inventory, mastery, LT, plans, favorites, checklist, and settings are kept
-locally, separate from the application. You can see or move the folder from
-**Craft Profile**, and normal updates keep it in place.
+Your inventory, mastery, LT, plans, favorites, checklist, Opportunities
+preferences, and settings are kept locally, separate from the application. The
+current folder is visible from the app title bar; open **Craft Planner > Data**
+to review or change it. Normal updates keep that folder in place.
 
-A fresh install starts with an empty personal profile. It does not automatically
-copy data from Beta, an older planner, or another person.
+On first launch, the app loads an existing Stable profile only when one is
+already present in the selected local personal-data folder. With no saved
+profile, it starts empty. It does not automatically copy data from Beta, an
+older planner, or another person.
 
 ## Credits and help
 

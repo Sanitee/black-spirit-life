@@ -42,7 +42,7 @@ void main() {
             _fold(entry.key),
       };
 
-      expect(expected, hasLength(278));
+      expect(expected, hasLength(279));
       expect(
         exactFoodInfoByName.keys.toSet().difference(expected),
         isEmpty,

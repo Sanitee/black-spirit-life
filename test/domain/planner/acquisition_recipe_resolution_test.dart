@@ -52,7 +52,19 @@ void main() {
       }
     }
 
-    expect(maskedContexts, hasLength(145));
+    expect(maskedContexts, hasLength(150));
+    expect(maskedContexts, contains('cooking:Cooking Honey'));
+    expect(maskedContexts, contains('cooking:Purified Water'));
+    expect(maskedContexts, contains('alchemy:Purified Water'));
+    expect(maskedContexts, isNot(contains('alchemy:Alchemy Stone Shard')));
+    expect(
+      resolveAcquisitionRecipe(
+        name: 'Alchemy Stone Shard',
+        currentMode: CraftMode.alchemy,
+        recipesByMode: recipesByMode,
+      )?.recipe.isCraftable,
+      isFalse,
+    );
     expect(maskedContexts, contains('processing:Elixir of Seal'));
     expect(maskedContexts, contains('alchemy:Magical Olivine Powder'));
     expect(

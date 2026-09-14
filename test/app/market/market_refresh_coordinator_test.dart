@@ -13,6 +13,275 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   final fetchedAt = DateTime.utc(2026, 7, 20, 11, 30);
 
+  for (final newerSavedReceipt in [false, true]) {
+    test(
+      'aggregate stock correction respects the saved receipt barrier ($newerSavedReceipt)',
+      () {
+        const name = "Manos Cook's Clothes";
+        final recipes = {name: _recipe(name, marketId: '705037')};
+        final coordinator = _coordinator(
+          _FakeGateway((_, _) async => throw StateError('No fetch')),
+          recipes,
+        );
+        final savedAt = newerSavedReceipt
+            ? fetchedAt.add(const Duration(seconds: 1))
+            : fetchedAt;
+        final current = _market(
+          prices: {name: 241000000},
+          stock: {name: 6},
+          tradeMarketIds: {name: '705037'},
+          tradeObservedAt: {name: savedAt.millisecondsSinceEpoch},
+        );
+        final result = coordinator.mergeAvailable(
+          mode: CraftMode.alchemy,
+          assembledRecipes: recipes,
+          currentMarket: current,
+          names: [name],
+          fetched: MarketPriceFetchResult(
+            region: 'eu',
+            language: 'en',
+            fetchedAt: fetchedAt,
+            attemptedSources: const [MarketPriceSource.pearlAbyssCentralMarket],
+            items: [
+              MarketPriceRow(
+                name: name,
+                id: '705037',
+                ok: true,
+                price: 241000000,
+                stock: null,
+                aggregateStock: 6,
+                source: MarketPriceSource.pearlAbyssCentralMarket,
+                fetchedAt: fetchedAt,
+                diagnosticCode: MarketDiagnosticCode.none,
+              ),
+            ],
+          ),
+        )!;
+        expect(result.prices[name], 241000000);
+        expect(
+          result.stock.containsKey(name),
+          newerSavedReceipt,
+          reason:
+              'Corrected current aggregate evidence clears unsupported base stock; older receipts cannot overwrite genuinely newer observations.',
+        );
+        expect(result.summary.failedRequestCount, 0);
+        expect(result.market.region, 'eu');
+      },
+    );
+  }
+
+  test(
+    'a completed refresh preserves sibling updates received while awaiting HTTP',
+    () async {
+      final response = Completer<MarketPriceFetchResult>();
+      final recipe = _recipe('Wheat', marketId: '1');
+      final recipes = {'Wheat': recipe};
+      final coordinator = MarketRefreshCoordinator(
+        gateway: _FakeGateway((_, _) => response.future),
+        catalogRepository: _repository(recipes: recipes),
+      );
+      var current = _market(prices: {'Milk': 1});
+      final pending = coordinator.refresh(
+        mode: CraftMode.alchemy,
+        assembledRecipes: recipes,
+        currentMarket: current,
+        missingMaterialNames: ['Wheat'],
+        latestMarket: () => current,
+      );
+      current = _market(prices: {'Milk': 99});
+      response.complete(
+        MarketPriceFetchResult(
+          region: 'eu',
+          language: 'en',
+          fetchedAt: fetchedAt,
+          items: [
+            _success(
+              const MarketPriceRequest(name: 'Wheat', id: '1'),
+              price: 100,
+              stock: 5,
+              fetchedAt: fetchedAt,
+            ),
+          ],
+          attemptedSources: const [MarketPriceSource.pearlAbyssCentralMarket],
+        ),
+      );
+      expect((await pending).prices, {'Milk': 99, 'Wheat': 100});
+    },
+  );
+
+  test(
+    'a response from the previous region cannot overwrite a region change',
+    () async {
+      final response = Completer<MarketPriceFetchResult>();
+      final recipes = {'Wheat': _recipe('Wheat', marketId: '1')};
+      final coordinator = MarketRefreshCoordinator(
+        gateway: _FakeGateway((_, _) => response.future),
+        catalogRepository: _repository(recipes: recipes),
+      );
+      var current = MarketState(region: 'eu');
+      final pending = coordinator.refresh(
+        mode: CraftMode.alchemy,
+        assembledRecipes: recipes,
+        currentMarket: current,
+        missingMaterialNames: ['Wheat'],
+        latestMarket: () => current,
+      );
+      current = MarketState(region: 'na', prices: {'Wheat': 999});
+      response.complete(
+        MarketPriceFetchResult(
+          region: 'eu',
+          language: 'en',
+          fetchedAt: fetchedAt,
+          items: [
+            _success(
+              const MarketPriceRequest(name: 'Wheat', id: '1'),
+              price: 100,
+              stock: 5,
+              fetchedAt: fetchedAt,
+            ),
+          ],
+          attemptedSources: const [MarketPriceSource.pearlAbyssCentralMarket],
+        ),
+      );
+      final result = await pending;
+      expect(result.market.region, 'na');
+      expect(result.prices, {'Wheat': 999});
+      expect(result.status, MarketRefreshStatus.cancelled);
+    },
+  );
+
+  test(
+    'shared receipts update only relevant aliases without pending failures or requests',
+    () {
+      final gateway = _FakeGateway(
+        (_, _) async => throw StateError('Must not fetch'),
+      );
+      final recipes = {
+        'Wheat': _recipe('Wheat', marketId: '1'),
+        'Grain alias': _recipe('Grain alias', marketId: '1'),
+        'Milk': _recipe('Milk', marketId: '2'),
+      };
+      final coordinator = MarketRefreshCoordinator(
+        gateway: gateway,
+        catalogRepository: _repository(recipes: recipes),
+      );
+      final fetched = MarketPriceFetchResult(
+        region: 'eu',
+        language: 'en',
+        fetchedAt: fetchedAt,
+        items: [
+          _success(
+            const MarketPriceRequest(name: '1', id: '1'),
+            price: 100,
+            stock: 50,
+            fetchedAt: fetchedAt,
+          ),
+          _success(
+            const MarketPriceRequest(name: 'Other', id: '3'),
+            price: 999,
+            stock: 9,
+            fetchedAt: fetchedAt,
+          ),
+        ],
+        attemptedSources: const [MarketPriceSource.pearlAbyssCentralMarket],
+      );
+      final result = coordinator.mergeAvailable(
+        mode: CraftMode.alchemy,
+        assembledRecipes: recipes,
+        currentMarket: _market(prices: {'Milk': 42}),
+        names: recipes.keys,
+        fetched: fetched,
+      )!;
+      expect(result.prices, {'Wheat': 100, 'Grain alias': 100, 'Milk': 42});
+      expect(result.stock, {'Wheat': 50, 'Grain alias': 50});
+      expect(result.summary.failedRequestCount, 0);
+      expect(
+        result.diagnostics.where(
+          (d) => d.code == MarketRefreshDiagnosticCode.missingResponse,
+        ),
+        isEmpty,
+      );
+      expect(gateway.calls, isEmpty);
+      expect(
+        coordinator.mergeAvailable(
+          mode: CraftMode.alchemy,
+          assembledRecipes: recipes,
+          currentMarket: MarketState(region: 'na'),
+          names: recipes.keys,
+          fetched: fetched,
+        ),
+        isNull,
+      );
+    },
+  );
+
+  test(
+    'NPC prices bypass market requests even with a catalog item ID',
+    () async {
+      final recipes = <String, Recipe>{
+        'Oquilla Piece of the Old Moon': _recipe(
+          'Oquilla Piece of the Old Moon',
+          marketId: '8901',
+        ),
+        'Sharp Black Crystal Shard': _recipe(
+          'Sharp Black Crystal Shard',
+          marketId: '4998',
+        ),
+      };
+      final gateway = _FakeGateway((requests, _) async {
+        expect(requests.map((request) => request.id), ['4998']);
+        return _fetchResult(
+          fetchedAt: fetchedAt,
+          rows: [
+            _success(
+              requests.single,
+              price: 6000000,
+              stock: 2000,
+              fetchedAt: fetchedAt,
+            ),
+          ],
+        );
+      });
+      final coordinator = MarketRefreshCoordinator(
+        gateway: gateway,
+        catalogRepository: _repository(
+          recipes: recipes,
+          supportingData: {
+            'vendorInfo': {
+              'Oquilla Piece of the Old Moon': {
+                'vendor': 'Old Moon Manager',
+                'price': 50000000,
+              },
+            },
+          },
+        ),
+      );
+      final npcOnly = await coordinator.refresh(
+        mode: CraftMode.alchemy,
+        assembledRecipes: recipes,
+        currentMarket: _market(),
+        missingMaterialNames: ['Oquilla Piece of the Old Moon'],
+      );
+      expect(npcOnly.status, MarketRefreshStatus.npcPricesOnly);
+      expect(npcOnly.summary.message, 'NPC prices are already included.');
+      expect(npcOnly.diagnostics, isEmpty);
+      expect(gateway.calls, isEmpty);
+      final mixed = await coordinator.refresh(
+        mode: CraftMode.alchemy,
+        assembledRecipes: recipes,
+        currentMarket: _market(),
+        missingMaterialNames: recipes.keys,
+      );
+      expect(mixed.status, MarketRefreshStatus.updated);
+      expect(mixed.prices['Sharp Black Crystal Shard'], 6000000);
+      expect(
+        mixed.prices.containsKey('Oquilla Piece of the Old Moon'),
+        isFalse,
+      );
+      expect(mixed.diagnostics, isEmpty);
+    },
+  );
+
   test(
     'uses exact recipe, alias, then normalized catalog ID precedence',
     () async {

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import 'draggable_dialog_surface.dart';
 import 'resource_map_chrome_theme.dart';
+import 'resource_map_panel_metrics.dart';
 
 const Color _nodePanelSurface = Color(0xFA171419);
 const Color _nodePanelSurfaceRaised = Color(0xFA2A2229);
@@ -39,8 +40,8 @@ class _NodePanelPalette {
       );
     }
     return _NodePanelPalette(
-      surface: chrome.chromeBase.withValues(alpha: .98),
-      inset: chrome.canvas.withValues(alpha: .94),
+      surface: chrome.fillAlpha(chrome.chromeBase, .98),
+      inset: chrome.fillAlpha(chrome.canvas, .94),
       outline: chrome.warmOutline,
       divider: chrome.divider,
       shadowColor: chrome.idleShadow.color,
@@ -252,7 +253,7 @@ class ResourceMapNodeQuickPanel extends StatelessWidget {
                         child: ColoredBox(color: chrome.accent),
                       ),
                       Padding(
-                        padding: const EdgeInsets.fromLTRB(16, 14, 14, 14),
+                        padding: const EdgeInsets.fromLTRB(12, 10, 10, 10),
                         child: Column(
                           mainAxisSize: MainAxisSize.min,
                           crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -266,15 +267,16 @@ class ResourceMapNodeQuickPanel extends StatelessWidget {
                               backLabel: backLabel,
                               onClose: onClose,
                             ),
-                            const SizedBox(height: 12),
+                            const SizedBox(height: 6),
                             Wrap(
                               spacing: 7,
                               runSpacing: 7,
                               children: <Widget>[
-                                _NodeFact(
-                                  icon: Icons.stars_rounded,
-                                  label: '$contributionPoints CP',
-                                ),
+                                if (contributionPoints > 0)
+                                  _NodeFact(
+                                    icon: Icons.stars_rounded,
+                                    label: '$contributionPoints CP',
+                                  ),
                                 if (workTime != null)
                                   _NodeFact(
                                     icon: Icons.schedule_rounded,
@@ -286,14 +288,6 @@ class ResourceMapNodeQuickPanel extends StatelessWidget {
                                     icon: Icons.schedule_rounded,
                                     label: workload.trim(),
                                   ),
-                                if (workerSiteCount case final count?
-                                    when count > 0)
-                                  _NodeFact(
-                                    icon:
-                                        Icons.precision_manufacturing_outlined,
-                                    label:
-                                        '$count worker ${count == 1 ? 'site' : 'sites'}',
-                                  ),
                               ],
                             ),
                             if (townActions case final actions?) ...<Widget>[
@@ -304,7 +298,7 @@ class ResourceMapNodeQuickPanel extends StatelessWidget {
                                     'resource-map-town-open-royal-workshops',
                                   ),
                                   icon: Icons.auto_awesome_mosaic_outlined,
-                                  label: 'Open Royal Workshops',
+                                  label: 'Royal Workshops',
                                   semanticLabel:
                                       'Open Royal Workshops in $nodeName',
                                   onPressed: actions.onOpenRoyalWorkshops!,
@@ -362,10 +356,7 @@ class ResourceMapNodeQuickPanel extends StatelessWidget {
                             ],
                             if (availableWorkerNodes.isNotEmpty) ...<Widget>[
                               const SizedBox(height: 12),
-                              _NodeSectionHeading(
-                                label: 'Available worker nodes',
-                                count: availableWorkerNodes.length,
-                              ),
+                              const _NodeSectionHeading(label: 'Worker nodes'),
                               const SizedBox(height: 4),
                               for (final workerNode in availableWorkerNodes)
                                 _NodeLinkRow(
@@ -415,7 +406,7 @@ class ResourceMapNodeQuickPanel extends StatelessWidget {
                               const SizedBox(height: 10),
                               _NodeProvenance(text: source.trim()),
                             ],
-                            const SizedBox(height: 14),
+                            const SizedBox(height: 6),
                             if (onAddCompleteRoute != null)
                               Semantics(
                                 button: true,
@@ -485,7 +476,7 @@ class ResourceMapNodeQuickPanel extends StatelessWidget {
                                     'resource-map-node-preview-route',
                                   ),
                                   icon: Icons.route_outlined,
-                                  label: 'Preview complete route',
+                                  label: 'Preview route',
                                   semanticLabel:
                                       'Preview complete route to $nodeName',
                                   onPressed: onPreviewRoute!,
@@ -501,7 +492,7 @@ class ResourceMapNodeQuickPanel extends StatelessWidget {
                                       : Icons.bookmark_add_outlined,
                                   label: invested
                                       ? 'Remove from my setup'
-                                      : 'Mark as already invested',
+                                      : 'Mark as invested',
                                   semanticLabel: invested
                                       ? 'Remove $nodeName from my setup'
                                       : 'Mark $nodeName as already invested',
@@ -540,7 +531,7 @@ class ResourceMapNodeQuickPanel extends StatelessWidget {
       ),
       elevation: 0,
       textStyle: const TextStyle(
-        fontSize: 13,
+        fontSize: ResourceMapPanelMetrics.primary,
         height: 1.15,
         fontWeight: FontWeight.w800,
       ),
@@ -682,7 +673,7 @@ class _NodeHeader extends StatelessWidget {
                   style: TextStyle(
                     color: chrome.ink,
                     fontFamily: chrome.headingFontFamily,
-                    fontSize: 17,
+                    fontSize: ResourceMapPanelMetrics.heading,
                     height: 1.15,
                     fontWeight: FontWeight.w600,
                     letterSpacing: -.05,
@@ -695,7 +686,7 @@ class _NodeHeader extends StatelessWidget {
                       : '$nodeType · $trimmedRegion',
                   style: TextStyle(
                     color: chrome.muted,
-                    fontSize: 12.5,
+                    fontSize: ResourceMapPanelMetrics.secondary,
                     height: 1.25,
                     fontWeight: FontWeight.w500,
                   ),
@@ -721,7 +712,7 @@ class _NodeHeader extends StatelessWidget {
                               'Invested',
                               style: TextStyle(
                                 color: chrome.positive,
-                                fontSize: 12,
+                                fontSize: ResourceMapPanelMetrics.secondary,
                                 fontWeight: FontWeight.w700,
                               ),
                             ),
@@ -788,7 +779,7 @@ class _NodeFact extends StatelessWidget {
                   label,
                   style: TextStyle(
                     color: chrome.text,
-                    fontSize: 12.5,
+                    fontSize: ResourceMapPanelMetrics.secondary,
                     height: 1.1,
                     fontWeight: FontWeight.w600,
                   ),
@@ -803,22 +794,20 @@ class _NodeFact extends StatelessWidget {
 }
 
 class _NodeSectionHeading extends StatelessWidget {
-  const _NodeSectionHeading({required this.label, this.count});
+  const _NodeSectionHeading({required this.label});
 
   final String label;
-  final int? count;
 
   @override
   Widget build(BuildContext context) {
     final chrome = context.mapChrome;
     return Text(
-      (count == null ? label : '$label · $count').toUpperCase(),
+      label,
       style: TextStyle(
         color: chrome.muted,
-        fontSize: 10.5,
+        fontSize: ResourceMapPanelMetrics.secondary,
         height: 1.2,
         fontWeight: FontWeight.w700,
-        letterSpacing: .8,
       ),
     );
   }
@@ -868,7 +857,7 @@ class _NodeOutputRow extends StatelessWidget {
               output.name,
               style: TextStyle(
                 color: chrome.text,
-                fontSize: 13,
+                fontSize: ResourceMapPanelMetrics.primary,
                 height: 1.2,
                 fontWeight: FontWeight.w600,
               ),
@@ -941,7 +930,7 @@ class _NodeLinkRow extends StatelessWidget {
                           style: TextStyle(
                             color: chrome.ink,
                             fontFamily: chrome.headingFontFamily,
-                            fontSize: 12.5,
+                            fontSize: ResourceMapPanelMetrics.primary,
                             height: 1.2,
                             fontWeight: FontWeight.w700,
                           ),
@@ -952,7 +941,7 @@ class _NodeLinkRow extends StatelessWidget {
                             link.subtitle,
                             style: TextStyle(
                               color: chrome.muted,
-                              fontSize: 11.25,
+                              fontSize: ResourceMapPanelMetrics.secondary,
                               height: 1.3,
                               fontWeight: FontWeight.w500,
                             ),
@@ -985,30 +974,17 @@ class _NodeProvenance extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final chrome = context.mapChrome;
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: <Widget>[
-        Padding(
-          padding: const EdgeInsets.only(top: 1),
-          child: Icon(
-            Icons.folder_open_outlined,
-            size: 15,
-            color: chrome.muted,
-          ),
+    return Align(
+      alignment: Alignment.centerRight,
+      child: Tooltip(
+        message: text,
+        child: Icon(
+          Icons.info_outline_rounded,
+          semanticLabel: 'Source: $text',
+          size: ResourceMapPanelMetrics.controlGlyph,
+          color: chrome.muted,
         ),
-        const SizedBox(width: 7),
-        Expanded(
-          child: Text(
-            text,
-            style: TextStyle(
-              color: chrome.muted,
-              fontSize: 10.75,
-              height: 1.35,
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-        ),
-      ],
+      ),
     );
   }
 }
@@ -1052,7 +1028,7 @@ class _NodeActionRow extends StatelessWidget {
                       label,
                       style: TextStyle(
                         color: chrome.text,
-                        fontSize: 13,
+                        fontSize: ResourceMapPanelMetrics.primary,
                         height: 1.2,
                         fontWeight: FontWeight.w600,
                       ),
@@ -1111,27 +1087,27 @@ class _NodeUnlockNotice extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: <Widget>[
-                    Text(
-                      'EXCAVATION ACCESS',
-                      style: TextStyle(
-                        color: chrome.warning,
-                        fontFamily: chrome.headingFontFamily,
-                        fontSize: 10.5,
-                        height: 1.2,
-                        fontWeight: FontWeight.w800,
-                        letterSpacing: .65,
+                    Tooltip(
+                      message: notice.instructions,
+                      child: Text(
+                        'Unlock excavation',
+                        style: TextStyle(
+                          color: chrome.warning,
+                          fontFamily: chrome.headingFontFamily,
+                          fontSize: ResourceMapPanelMetrics.secondary,
+                          height: 1.2,
+                          fontWeight: FontWeight.w800,
+                        ),
                       ),
                     ),
-                    const SizedBox(height: 4),
-                    Text(
-                      notice.instructions,
-                      style: TextStyle(
-                        color: chrome.text,
-                        fontSize: 12.25,
-                        height: 1.35,
-                        fontWeight: FontWeight.w500,
+                    if (markerAction == null)
+                      Text(
+                        notice.managerName,
+                        style: TextStyle(
+                          color: chrome.text,
+                          fontSize: ResourceMapPanelMetrics.primary,
+                        ),
                       ),
-                    ),
                     if (markerAction != null) ...<Widget>[
                       const SizedBox(height: 2),
                       Align(
@@ -1166,7 +1142,7 @@ class _NodeUnlockNotice extends StatelessWidget {
                             tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                             alignment: Alignment.centerLeft,
                             textStyle: const TextStyle(
-                              fontSize: 12.5,
+                              fontSize: ResourceMapPanelMetrics.secondary,
                               height: 1.2,
                               fontWeight: FontWeight.w800,
                             ),

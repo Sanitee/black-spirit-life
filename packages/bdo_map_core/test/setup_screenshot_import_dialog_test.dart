@@ -8,6 +8,45 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
+  testWidgets('screenshot choices remain readable at double text size', (
+    tester,
+  ) async {
+    await tester.binding.setSurfaceSize(const Size(900, 820));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    var pickerCalls = 0;
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData.dark(useMaterial3: true),
+        builder: (context, child) => MediaQuery(
+          data: MediaQuery.of(
+            context,
+          ).copyWith(textScaler: const TextScaler.linear(2)),
+          child: child!,
+        ),
+        home: ResourceMapChromeTheme(
+          data: ResourceMapChromeThemeData.sakuraCartographer,
+          child: _DialogHarness(
+            dataset: _mapDataset(),
+            lodgingDataset: _lodgingDataset(),
+            picker: () async {
+              pickerCalls++;
+              return null;
+            },
+          ),
+        ),
+      ),
+    );
+    await tester.tap(find.byKey(const ValueKey('open-screenshot-import')));
+    await tester.pumpAndSettle();
+    expect(tester.takeException(), isNull);
+    expect(pickerCalls, 0);
+    expect(tester.widget<Text>(find.text('Worker nodes')).style?.fontSize, 14);
+    expect(find.text('Cancel').hitTestable(), findsOneWidget);
+    await tester.tap(find.text('Cancel'));
+    await tester.pumpAndSettle();
+    expect(find.text('nodes:0 houses:0'), findsOneWidget);
+  });
+
   testWidgets(
     'offers worker-node and town-house modes and cancellation changes nothing',
     (tester) async {
@@ -32,7 +71,7 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      expect(find.text('Scan screenshots'), findsOneWidget);
+      expect(find.text('Import setup'), findsOneWidget);
       expect(find.text('Worker nodes'), findsOneWidget);
       expect(find.text('Town houses'), findsOneWidget);
       final dialogSize = tester.getSize(
@@ -102,7 +141,7 @@ void main() {
       await tester.tap(find.text('Cancel'));
       await tester.pumpAndSettle();
 
-      expect(find.text('Scan screenshots'), findsNothing);
+      expect(find.text('Import setup'), findsNothing);
       expect(find.text('cancelled'), findsOneWidget);
       expect(find.text('nodes:0 houses:0'), findsOneWidget);
       expect(tester.takeException(), isNull);
@@ -256,13 +295,13 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      expect(find.text('Activated list recording'), findsOneWidget);
-      expect(find.text('Recommended'), findsOneWidget);
+      expect(find.text('Activated nodes'), findsOneWidget);
+      expect(find.text('Recommended'), findsNothing);
       await tester.tap(
         find.byKey(const ValueKey<String>('setup-import-active-list-open')),
       );
       await tester.pumpAndSettle();
-      expect(find.text('Read Activated nodes'), findsOneWidget);
+      expect(find.text('Import Activated nodes'), findsOneWidget);
 
       await tester.tap(
         find.byKey(const ValueKey<String>('active-node-recording-choose')),
@@ -361,10 +400,7 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    expect(
-      find.textContaining('No screenshot image was found'),
-      findsOneWidget,
-    );
+    expect(find.textContaining('No image in the clipboard'), findsOneWidget);
     expect(
       find.byKey(const ValueKey<String>('setup-screenshot-import-choose')),
       findsOneWidget,
@@ -421,17 +457,14 @@ void main() {
         find.byKey(const ValueKey<String>('setup-import-add-another')),
       );
       await tester.pumpAndSettle();
-      expect(find.text('Parts in this scan'), findsOneWidget);
+      expect(find.text('Screenshots'), findsOneWidget);
       expect(find.text('Screenshot 1'), findsOneWidget);
-      expect(find.text('Scan another part'), findsOneWidget);
+      expect(find.text('Add screenshot'), findsOneWidget);
 
       await _pickAndAnalyze(tester);
       expect(pickerCalls, 2);
       expect(centerRow, findsOneWidget);
-      expect(
-        find.textContaining('Confirmed in 2 screenshots'),
-        findsNWidgets(3),
-      );
+      expect(find.textContaining('Confirmed in 2 screenshots'), findsNothing);
       centerCheckbox = find.descendant(
         of: centerRow,
         matching: find.byType(Checkbox),
@@ -467,8 +500,9 @@ Future<void> _pickAndAnalyze(
     find.byKey(const ValueKey<String>('setup-import-screenshot-preview')),
     findsOneWidget,
   );
-  expect(find.textContaining('alignment guides'), findsOneWidget);
-  expect(find.textContaining('not scan results'), findsOneWidget);
+  expect(find.text('Align screenshot'), findsOneWidget);
+  expect(find.textContaining('alignment guides'), findsNothing);
+  expect(find.textContaining('not scan results'), findsNothing);
   await tester.tap(find.byKey(const ValueKey<String>('setup-import-analyze')));
   await tester.pumpAndSettle();
   expect(

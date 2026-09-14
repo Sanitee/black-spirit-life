@@ -1,4 +1,5 @@
 import '../../app/state/planner_application_controller.dart';
+import '../../domain/catalog/temporarily_archived_items.dart';
 import '../../domain/models/catalog_models.dart';
 import '../../domain/planner/mastery_yields.dart';
 import '../../domain/state/planner_state.dart';
@@ -83,14 +84,22 @@ final class RecipeEditorProjection {
 
   final List<EditorItemRecord> items;
   final List<String> itemNames;
+  // Historical names remain in itemNames for draft validation and renames.
+  List<String> get suggestedItemNames =>
+      filtered('').map((record) => record.name).toList(growable: false);
   final List<String> categories;
   final List<String> methods;
   final List<EditorTypeChoice> typeChoices;
 
   List<EditorItemRecord> filtered(String search) {
     final query = search.trim().toLowerCase();
-    if (query.isEmpty) return items;
     return items
+        .where(
+          (item) => !isTemporarilyArchivedItem(
+            item.name,
+            itemId: item.recipe.marketId,
+          ),
+        )
         .where((item) => item.name.toLowerCase().contains(query))
         .toList(growable: false);
   }

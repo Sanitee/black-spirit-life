@@ -26,7 +26,7 @@ void main() {
   });
 
   testWidgets(
-    'map chrome defaults to Sakura and accepts package-owned scopes',
+    'map chrome defaults to Field Atlas and accepts package-owned scopes',
     (tester) async {
       late ResourceMapChromeThemeData fallback;
       late ResourceMapChromeThemeData scoped;
@@ -55,7 +55,7 @@ void main() {
         ),
       );
 
-      expect(fallback, same(ResourceMapChromeThemeData.sakuraCartographer));
+      expect(fallback, same(ResourceMapChromeThemeData.fieldAtlas));
       expect(scoped, same(ResourceMapChromeThemeData.illuminatedAtlas));
       expect(scoped.headingFontFamily, 'Georgia');
       expect(scoped.commandRadius, lessThan(fallback.commandRadius));
@@ -113,11 +113,9 @@ void main() {
                 )
                 .decoration!
             as BoxDecoration;
-    expect(searchDecoration.gradient, chrome.idleSearchGradient);
-    expect(
-      searchDecoration.borderRadius,
-      BorderRadius.circular(chrome.commandRadius),
-    );
+    expect(searchDecoration.gradient, isNull);
+    expect(searchDecoration.color, chrome.chromeBase.withValues(alpha: .94));
+    expect(searchDecoration.borderRadius, BorderRadius.circular(16));
 
     final gatherDecoration =
         tester
@@ -133,8 +131,12 @@ void main() {
                 )
                 .decoration!
             as BoxDecoration;
-    expect(gatherDecoration.gradient, chrome.selectedModeGradient);
-    expect(gatherDecoration.border!.top.color, chrome.primary);
+    expect(gatherDecoration.gradient, isNull);
+    expect(gatherDecoration.color, chrome.primary.withValues(alpha: .18));
+    expect(
+      gatherDecoration.border!.top.color,
+      chrome.primary.withValues(alpha: .55),
+    );
 
     final taskTitle = tester.widget<Text>(find.text('Worker network'));
     expect(taskTitle.style!.fontFamily, 'Georgia');
@@ -201,7 +203,7 @@ void main() {
     );
   });
 
-  testWidgets('command bar uses separate labeled field-atlas controls', (
+  testWidgets('command bar uses one clean labeled mode switch and search', (
     tester,
   ) async {
     final controller = TextEditingController();
@@ -259,9 +261,11 @@ void main() {
       const ValueKey<String>('resource-map-command-action-rail'),
     );
     final rail = tester.widget<Material>(railFinder);
-    expect(rail.color, Colors.transparent);
+    final chrome = ResourceMapChromeTheme.of(tester.element(railFinder));
+    expect(rail.color, chrome.chromeBase.withValues(alpha: .94));
     expect(rail.elevation, 0);
     expect(rail.shape, isNull);
+    expect(rail.borderRadius, BorderRadius.circular(16));
 
     final gatherFinder = find.byKey(
       const ValueKey<String>('resource-map-command-gather'),
@@ -329,11 +333,14 @@ void main() {
           as BoxDecoration;
     }
 
-    expect(controlDecoration(gatherFinder).color, isNull);
-    expect(controlDecoration(gatherFinder).gradient, isA<LinearGradient>());
+    expect(
+      controlDecoration(gatherFinder).color,
+      ResourceMapAtlasColors.primary.withValues(alpha: .18),
+    );
+    expect(controlDecoration(gatherFinder).gradient, isNull);
     expect(
       controlDecoration(gatherFinder).border!.top.color,
-      ResourceMapAtlasColors.primary,
+      ResourceMapAtlasColors.primary.withValues(alpha: .55),
     );
     expect(
       controlDecoration(gatherFinder).border!.bottom.color,
@@ -344,8 +351,8 @@ void main() {
       find.descendant(of: gatherFinder, matching: find.byType(Positioned)),
       findsNothing,
     );
-    expect(controlDecoration(workersFinder).color, isNull);
-    expect(controlDecoration(workersFinder).gradient, isA<LinearGradient>());
+    expect(controlDecoration(workersFinder).color, Colors.transparent);
+    expect(controlDecoration(workersFinder).gradient, isNull);
     final gatherSemantics = tester.widget<Semantics>(
       find.descendant(
         of: gatherFinder,
@@ -422,11 +429,16 @@ void main() {
     final unfocusedDecoration =
         tester.widget<AnimatedContainer>(searchSurface).decoration!
             as BoxDecoration;
-    expect(unfocusedDecoration.color, isNull);
-    expect(unfocusedDecoration.gradient, isA<LinearGradient>());
+    expect(
+      unfocusedDecoration.color,
+      ResourceMapChromeTheme.of(
+        tester.element(searchSurface),
+      ).chromeBase.withValues(alpha: .94),
+    );
+    expect(unfocusedDecoration.gradient, isNull);
     expect(
       unfocusedDecoration.border!.top.color,
-      ResourceMapAtlasColors.warmOutline,
+      Colors.white.withValues(alpha: .10),
     );
     expect(unfocusedDecoration.boxShadow, isNotEmpty);
 
@@ -437,7 +449,10 @@ void main() {
     final focusedDecoration =
         tester.widget<AnimatedContainer>(searchSurface).decoration!
             as BoxDecoration;
-    expect(focusedDecoration.border!.top.color, ResourceMapAtlasColors.primary);
+    expect(
+      focusedDecoration.border!.top.color,
+      ResourceMapAtlasColors.primary.withValues(alpha: .72),
+    );
 
     await tester.enterText(fieldFinder, 'Thuja Sap');
     expect(changed, 'Thuja Sap');
@@ -1494,30 +1509,12 @@ void main() {
         const ValueKey<String>('resource-map-desktop-task-strip'),
       );
       final taskStrip = tester.getSize(taskStripFinder);
-      expect(taskStrip.height, 48);
-      final taskSurface = tester.widget<DecoratedBox>(
-        find
-            .descendant(
-              of: taskStripFinder,
-              matching: find.byType(DecoratedBox),
-            )
-            .first,
-      );
-      final taskDecoration = taskSurface.decoration as BoxDecoration;
-      expect(taskDecoration.gradient, isA<LinearGradient>());
-      expect(taskDecoration.boxShadow, isNotEmpty);
-      expect(
-        taskDecoration.border!.top.color,
-        ResourceMapAtlasColors.warmOutline,
-        reason:
-            'The section/back label carries a compact legibility island instead '
-            'of relying on a broad sidebar slab.',
-      );
+      expect(taskStrip.height, 46);
       expect(find.text('Worker network'), findsOneWidget);
       expect(find.text('18 CP'), findsOneWidget);
       final title = tester.widget<Text>(find.text('Worker network'));
       expect(title.style!.color, ResourceMapAtlasColors.ink);
-      expect(title.style!.fontSize, 15);
+      expect(title.style!.fontSize, 14.5);
       final inlineMaterial = tester.widget<Material>(
         find.descendant(
           of: find.byKey(const ValueKey<String>('test-inline-action')),
@@ -1587,13 +1584,18 @@ Widget _shellTestApp({
         disableAnimations: disableAnimations,
         textScaler: textScaler,
       ),
-      child: Material(
-        color: ResourceMapAtlasColors.canvas,
-        child: Center(
-          child: SizedBox(
-            width: width,
-            height: height,
-            child: Align(alignment: Alignment.topCenter, child: child),
+      // These legacy-shell assertions retain the original Sakura palette and
+      // material. Do not tie them to the current unscoped map-style fallback.
+      child: ResourceMapChromeTheme(
+        data: ResourceMapChromeThemeData.sakuraCartographer,
+        child: Material(
+          color: ResourceMapAtlasColors.canvas,
+          child: Center(
+            child: SizedBox(
+              width: width,
+              height: height,
+              child: Align(alignment: Alignment.topCenter, child: child),
+            ),
           ),
         ),
       ),

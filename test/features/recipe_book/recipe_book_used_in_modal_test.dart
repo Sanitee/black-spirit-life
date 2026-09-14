@@ -918,7 +918,10 @@ void main() {
         );
         expect(tester.getSize(usedIn), const Size.square(26));
 
-        final stockText = find.descendant(of: card, matching: find.text('125'));
+        final stockText = find.descendant(
+          of: card,
+          matching: find.text('Stock 125'),
+        );
         expect(stockText, findsOneWidget);
         expect(
           tester.renderObject<RenderParagraph>(stockText).didExceedMaxLines,

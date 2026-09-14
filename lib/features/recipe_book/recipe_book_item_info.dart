@@ -1,3 +1,5 @@
+import '../../domain/catalog/temporarily_archived_items.dart';
+import '../../domain/formatting/acquisition_notes.dart';
 import '../../domain/models/catalog_models.dart';
 import '../../domain/state/user_source_notes.dart';
 import 'recipe_book_exact_buff_info.dart';
@@ -65,7 +67,10 @@ final class RecipeBookFormula {
   final bool outputEstimated;
   final List<Ingredient> ingredients;
 
-  RecipeBookFormula copyWith({bool? outputEstimated}) => RecipeBookFormula(
+  RecipeBookFormula copyWith({
+    bool? outputEstimated,
+    List<Ingredient>? ingredients,
+  }) => RecipeBookFormula(
     outputName: outputName,
     type: type,
     method: method,
@@ -77,7 +82,7 @@ final class RecipeBookFormula {
     outputMinimum: outputMinimum,
     outputMaximum: outputMaximum,
     outputEstimated: outputEstimated ?? this.outputEstimated,
-    ingredients: ingredients,
+    ingredients: ingredients ?? this.ingredients,
   );
 }
 
@@ -95,6 +100,7 @@ final class RecipeBookItemInfo {
     List<String>? acquisitionNotes,
     this.example,
     this.notes = const <String>[],
+    this.isTemporarilyArchived = false,
   }) : acquisitionNotes = acquisitionNotes ?? howToObtain;
 
   final String title;
@@ -108,6 +114,7 @@ final class RecipeBookItemInfo {
   final List<String> acquisitionNotes;
   final String? example;
   final List<String> notes;
+  final bool isTemporarilyArchived;
 
   /// Compatibility view used by the Planner's separate acquisition popover.
   /// The Recipe Book itself renders [acquisitionFormulas] structurally.
@@ -141,6 +148,7 @@ final class RecipeBookItemInfo {
     List<String>? acquisitionNotes,
     String? example,
     List<String>? notes,
+    bool? isTemporarilyArchived,
   }) => RecipeBookItemInfo(
     title: title ?? this.title,
     kind: kind ?? this.kind,
@@ -153,6 +161,7 @@ final class RecipeBookItemInfo {
     acquisitionNotes: acquisitionNotes ?? this.acquisitionNotes,
     example: example ?? this.example,
     notes: notes ?? this.notes,
+    isTemporarilyArchived: isTemporarilyArchived ?? this.isTemporarilyArchived,
   );
 }
 
@@ -187,23 +196,209 @@ RecipeBookItemInfo withEstimatedRecipeBookOutputs(
   );
 }
 
+/// Presentation cleanup shared by every item-reference surface. Empty imported
+/// lines must not create headings, and a complete formula replaces its own
+/// repeated prose without losing a separate vendor, drop, or quest condition.
+RecipeBookItemInfo withReadableRecipeBookSections(RecipeBookItemInfo info) {
+  List<String> readable(Iterable<String> lines) => lines
+      .map((line) => line.trim())
+      .where((line) => line.isNotEmpty)
+      .toSet()
+      .toList(growable: false);
+  bool repeatsFormula(String note) {
+    if (info.acquisitionFormulas.any(
+      (formula) =>
+          _acquisitionReferenceIdentity(recipeBookFormulaSummary(formula)) ==
+          _acquisitionReferenceIdentity(note),
+    )) {
+      return true;
+    }
+    if (_fold(info.title) != 'magical shard') return false;
+    bool heatingContains(double crystals, {bool powder = false}) =>
+        info.acquisitionFormulas.any(
+          (formula) =>
+              _fold(formula.method) == 'heating' &&
+              formula.ingredients.any(
+                (input) =>
+                    _fold(input.name) == 'sealed black magic crystal' &&
+                    input.quantity == crystals,
+              ) &&
+              (!powder ||
+                  formula.ingredients.any(
+                    (input) =>
+                        _fold(input.name) == 'black stone powder' &&
+                        input.quantity == 1,
+                  )),
+        );
+    return switch (note) {
+      'Heat a Sealed Black Magic Crystal, or buy Magical Shards through the Central Market.' =>
+        heatingContains(1) &&
+            readable(
+              info.acquisitionNotes,
+            ).contains('Buy from the Central Market.'),
+      'Heat a Sealed Black Magic Crystal or another yellow-grade Black Magic Crystal.' =>
+        heatingContains(1),
+      'Bulk: heat 10 Sealed Black Magic Crystals with 1 Black Stone Powder.' =>
+        heatingContains(10, powder: true),
+      _ => false,
+    };
+  }
+
+  return info.copyWith(
+    effects: readable(info.effects),
+    uses: readable(info.uses),
+    acquisitionNotes: readable(
+      info.acquisitionNotes,
+    ).where((note) => !repeatsFormula(note)).toList(growable: false),
+    notes: readable(info.notes),
+  );
+}
+
+/// Projects readable, currently eligible alternatives without mutating the
+/// archived recipe record or any saved substitution choice.
+RecipeBookItemInfo withVisibleRecipeBookFormulas(
+  RecipeBookItemInfo info, {
+  String? Function(String name)? itemIdFor,
+}) {
+  bool archived(String name) =>
+      isTemporarilyArchivedItem(name, itemId: itemIdFor?.call(name));
+  RecipeBookFormula? project(RecipeBookFormula formula) {
+    final ingredients = <Ingredient>[];
+    for (final ingredient in formula.ingredients) {
+      final available = <String>{
+        ingredient.name,
+        ...ingredient.options,
+        ...ingredient.substituteRatios.keys,
+      }.where((name) => !archived(name)).toList();
+      if (available.isEmpty) return null;
+      final name = archived(ingredient.name)
+          ? available.first
+          : ingredient.name;
+      double ratioFor(String candidate) =>
+          ingredient.substituteRatios.entries
+              .where(
+                (entry) => _sameName(entry.key, candidate) && entry.value > 0,
+              )
+              .firstOrNull
+              ?.value ??
+          1;
+      final scale = _sameName(name, ingredient.name) ? 1.0 : ratioFor(name);
+      ingredients.add(
+        Ingredient(
+          name: name,
+          quantity: ingredient.quantity * scale,
+          options: ingredient.options.where((option) => !archived(option)),
+          substituteGroup: ingredient.substituteGroup,
+          substituteRatios: {
+            for (final entry in ingredient.substituteRatios.entries)
+              if (!archived(entry.key)) entry.key: entry.value / scale,
+          },
+        ),
+      );
+    }
+    return formula.copyWith(ingredients: ingredients);
+  }
+
+  List<RecipeBookFormula> projectAll(Iterable<RecipeBookFormula> formulas) =>
+      formulas
+          .map(project)
+          .whereType<RecipeBookFormula>()
+          .toList(growable: false);
+  return info.copyWith(
+    acquisitionFormulas: projectAll(info.acquisitionFormulas),
+    craftUses: info.craftUses
+        .map((use) => use.copyWith(formulas: projectAll(use.formulas)))
+        .toList(growable: false),
+  );
+}
+
 RecipeBookItemInfo withResearchedAcquisition(
   RecipeBookItemInfo info,
-  Iterable<String> researchedRoutes,
-) {
+  Iterable<String> researchedRoutes, {
+  String? vendor,
+  String? location,
+  String? sourceNote,
+}) {
+  if (info.isTemporarilyArchived) return info;
   final existingReferences = <String>[
     info.summary,
     ...info.effects,
     ...info.uses,
     ...info.acquisitionFormulas.map(recipeBookFormulaSummary),
+    ..._structuredReformAcquisitionSummaries(info),
     ...info.notes,
   ];
-  final routes = _uniqueInformationSentences(<String>[
-    ...info.acquisitionNotes,
-    ...researchedRoutes,
-  ], coveredBy: existingReferences);
+  // Acquisition facts depend on order: which NPC is in which city, which
+  // quantity belongs to which item, and whether a restriction applies.
+  // Do not use the description/effect word-set comparison for these notes.
+  final referenceIdentities = composeAcquisitionNotes(
+    notes: existingReferences,
+  ).map(_acquisitionReferenceIdentity).toSet();
+  final routes =
+      composeAcquisitionNotes(
+            notes: <String?>[
+              ...researchedRoutes,
+              ...info.acquisitionNotes,
+              sourceNote,
+            ],
+            vendor: vendor,
+            location: location,
+          )
+          .where(
+            (note) => !referenceIdentities.contains(
+              _acquisitionReferenceIdentity(note),
+            ),
+          )
+          .map(_conciseAcquisitionNote)
+          .toSet()
+          .toList(growable: false);
   if (_sameLines(routes, info.acquisitionNotes)) return info;
   return info.copyWith(acquisitionNotes: List<String>.unmodifiable(routes));
+}
+
+String _conciseAcquisitionNote(String note) => switch (note) {
+  'Open Essence of Dawn Boxes from eligible Black Shrine rewards for a chance '
+      'at this specialized essence, or buy it through the Central Market.' =>
+    'Chance from Essence of Dawn Boxes (Black Shrine rewards), or buy it on '
+        'the Central Market.',
+  _ => note,
+};
+
+String _acquisitionReferenceIdentity(String value) => value
+    .trim()
+    .toLowerCase()
+    .replaceAll(RegExp(r'\s+'), ' ')
+    .replaceFirst(RegExp(r'[.!?]+$'), '');
+
+Iterable<String> _structuredReformAcquisitionSummaries(
+  RecipeBookItemInfo info,
+) sync* {
+  if (info.effects.isEmpty) return;
+  for (final formula in info.acquisitionFormulas) {
+    // This narrowly represents the recorded one-accessory/one-cup reform.
+    // Other quantities, substitutions, outputs or extra conditions must
+    // retain their own acquisition note rather than being inferred away.
+    if (_fold(formula.method) != 'item reform' ||
+        !_sameName(formula.outputName, info.title) ||
+        formula.baseOutput != 1 ||
+        (formula.outputMinimum != null && formula.outputMinimum != 1) ||
+        (formula.outputMaximum != null && formula.outputMaximum != 1) ||
+        formula.outputEstimated ||
+        formula.batchMultiplier != 1 ||
+        formula.ingredients.length != 2 ||
+        formula.ingredients.any(
+          (ingredient) =>
+              ingredient.quantity != 1 ||
+              ingredient.options.isNotEmpty ||
+              ingredient.substituteRatios.isNotEmpty ||
+              ingredient.substituteGroup != null,
+        )) {
+      continue;
+    }
+    yield 'Reform ${formula.ingredients[0].name} '
+        'with ${formula.ingredients[1].name} '
+        'to gain ${info.effects.join(' and ')}.';
+  }
 }
 
 String recipeBookUseDescription(RecipeBookItemInfo info) {
@@ -354,7 +549,7 @@ _curatedInfo = <String, RecipeBookItemInfo>{
       'Max HP +200',
       'Max Stamina +200',
     ],
-    duration: '15 min',
+    duration: '20 min',
     cooldown: '10 sec',
     stackNote: 'Only the last draught effect applies.',
   ),
@@ -367,7 +562,7 @@ _curatedInfo = <String, RecipeBookItemInfo>{
       'All Accuracy +13',
       'All Special Attack Extra Damage +2%',
     ],
-    duration: '15 min',
+    duration: '20 min',
     cooldown: '10 sec',
     stackNote: 'Only the last draught effect applies.',
   ),
@@ -390,7 +585,7 @@ _curatedInfo = <String, RecipeBookItemInfo>{
       'Hits: recover 12 HP',
       'All Special Attack Extra Damage +18%',
     ],
-    duration: '15 min',
+    duration: '20 min',
     cooldown: '10 sec',
     stackNote: 'Only the last draught effect applies.',
   ),
@@ -1083,7 +1278,12 @@ List<RecipeBookCraftUse> _mergeCraftUses(
   Iterable<Recipe> consumers,
 ) {
   final result = <RecipeBookCraftUse>[...curated];
-  for (final use in _compactCraftUses(consumers, limit: 2)) {
+  final consumerList = consumers.toList(growable: false);
+  final candidateUses = _compactCraftUses(
+    consumerList,
+    limit: consumerList.length,
+  );
+  for (final use in candidateUses) {
     final existingIndex = result.indexWhere(
       (existing) => _sameName(existing.output, use.output),
     );
@@ -1093,8 +1293,13 @@ List<RecipeBookCraftUse> _mergeCraftUses(
           formulas: use.formulas,
         );
       }
-      continue;
     }
+  }
+  for (final use in candidateUses) {
+    final alreadyIncluded = result.any(
+      (existing) => _sameName(existing.output, use.output),
+    );
+    if (alreadyIncluded) continue;
     result.add(use);
     break;
   }
@@ -1156,20 +1361,29 @@ RecipeBookItemInfo _finishItemInfo(
       ? info.example!.trim()
       : purpose.example?.trim();
 
+  final archived = isTemporarilyArchivedItem(name, itemId: recipe?.marketId);
   return RecipeBookItemInfo(
     title: info.title.trim().isEmpty ? name : info.title,
-    kind: kind.isEmpty ? 'Item' : kind,
+    kind: archived
+        ? temporarilyArchivedItemLabel
+        : (kind.isEmpty ? 'Item' : kind),
     summary: description,
-    effectsTitle: info.effectsTitle,
+    effectsTitle: purpose.effectsTitle ?? info.effectsTitle,
     effects: List<String>.unmodifiable(effects),
     uses: List<String>.unmodifiable(uses),
     craftUses: info.craftUses,
-    acquisitionFormulas: List<RecipeBookFormula>.unmodifiable(
-      acquisitionFormulas,
-    ),
-    acquisitionNotes: List<String>.unmodifiable(acquisitionNotes),
+    acquisitionFormulas: archived
+        ? const <RecipeBookFormula>[]
+        : List<RecipeBookFormula>.unmodifiable(acquisitionFormulas),
+    acquisitionNotes: archived
+        ? const <String>[]
+        : List<String>.unmodifiable(acquisitionNotes),
     example: example?.isEmpty ?? true ? null : example,
-    notes: List<String>.unmodifiable(notes),
+    notes: List<String>.unmodifiable(<String>[
+      if (archived) temporarilyArchivedItemReason,
+      ...notes,
+    ]),
+    isTemporarilyArchived: archived,
   );
 }
 
@@ -1218,45 +1432,6 @@ bool _sameInformation(String left, String right) {
   return leftTerms.length >= 3 &&
       leftTerms.length == rightTerms.length &&
       leftTerms.containsAll(rightTerms);
-}
-
-List<String> _uniqueInformationSentences(
-  Iterable<String> values, {
-  required Iterable<String> coveredBy,
-}) {
-  final references = coveredBy
-      .map((value) => value.trim())
-      .where((value) => value.isNotEmpty)
-      .toList(growable: true);
-  final result = <String>[];
-  for (final value in values) {
-    for (final sentence in _splitInformationSentences(value)) {
-      if (_informationCoveredByReferences(sentence, references)) continue;
-      if (_informationCoveredByReferences(sentence, result)) continue;
-      result.add(sentence);
-    }
-  }
-  return result;
-}
-
-List<String> _splitInformationSentences(String value) {
-  final text = value.trim();
-  if (text.isEmpty) return const <String>[];
-  final result = <String>[];
-  var start = 0;
-  for (var index = 0; index < text.length; index++) {
-    final character = text[index];
-    if (character != '.' && character != '!' && character != '?') continue;
-    final isBoundary =
-        index + 1 == text.length || RegExp(r'\s').hasMatch(text[index + 1]);
-    if (!isBoundary) continue;
-    final sentence = text.substring(start, index + 1).trim();
-    if (sentence.isNotEmpty) result.add(sentence);
-    start = index + 1;
-  }
-  final remainder = text.substring(start).trim();
-  if (remainder.isNotEmpty) result.add(remainder);
-  return result;
 }
 
 bool _informationCoveredByReferences(

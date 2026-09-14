@@ -161,7 +161,7 @@ void main() {
 
         expect(restored, checklist);
         expect(restored.hashCode, checklist.hashCode);
-        expect(restored.toJson()['schemaVersion'], 1);
+        expect(restored.toJson()['schemaVersion'], 2);
       },
     );
 

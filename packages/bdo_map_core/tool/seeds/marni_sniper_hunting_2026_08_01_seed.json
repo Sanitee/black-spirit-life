@@ -1,0 +1,109 @@
+{
+  "schemaVersion": 1,
+  "status": "reviewedCurrentGuideFacts",
+  "sourceReview": {
+    "provider": "Pearl Abyss",
+    "url": "https://www.naeu.playblackdesert.com/en-US/Wiki?wikiNo=74",
+    "retrievedAt": "2026-08-01T10:00:00Z",
+    "rareRewardGuide": "https://www.naeu.playblackdesert.com/en-US/News/Detail?groupContentNo=5387",
+    "supplementalLocationGuide": "https://grumpygreen.cricket/sniper-guide/",
+    "locationAccuracy": "regionAnchor",
+    "distributionBoundary": "Factual acquisition guidance only; no source media or traced spawn geometry is included."
+  },
+  "mapAnchor": {
+    "nodeId": "1797",
+    "nodeName": "Beombawi Valley",
+    "x": -1198000.0,
+    "z": 1389200.0
+  },
+  "spot": {
+    "id": "gathering:beombawi-marni-sniper-preserve",
+    "name": "Beombawi Valley Marni Sniper Hunting",
+    "region": "Land of the Morning Light",
+    "nearestNode": "Beombawi Valley",
+    "quality": "Current hunting-region focus",
+    "resourceIds": [
+      "item:7905",
+      "item:6205",
+      "item:6005",
+      "item:7912",
+      "item:6213",
+      "item:6013",
+      "item:820039",
+      "item:820038",
+      "item:820037",
+      "item:820036",
+      "item:820139"
+    ],
+    "targets": [
+      {
+        "name": "Sensitive / Atrocious Boar",
+        "gameNpcIds": [26997, 27564],
+        "resourceIds": [
+          "item:7905",
+          "item:6205",
+          "item:6005",
+          "item:820036",
+          "item:820139"
+        ]
+      },
+      {
+        "name": "Sensitive / Atrocious Bear",
+        "gameNpcIds": [26993, 27563],
+        "resourceIds": [
+          "item:7912",
+          "item:6213",
+          "item:6013",
+          "item:820039",
+          "item:820038",
+          "item:820036",
+          "item:820139"
+        ]
+      },
+      {
+        "name": "Sensitive Hawk",
+        "gameNpcIds": [],
+        "resourceIds": [
+          "item:820037",
+          "item:820036",
+          "item:820139"
+        ]
+      },
+      {
+        "name": "Rare Tiger",
+        "gameNpcIds": [],
+        "resourceIds": [
+          "item:820039",
+          "item:820036",
+          "item:820139"
+        ]
+      }
+    ]
+  },
+  "fieldSource": {
+    "id": "field-source:marni-sniper-hunting",
+    "name": "Marni Sniper Hunting",
+    "category": "Hunting",
+    "aliases": [
+      "beombawi",
+      "bear hunting",
+      "atrocious bear",
+      "atrocious boar",
+      "crystal of bitterness",
+      "crystal of decimation",
+      "crystal of darkness",
+      "forest crystal",
+      "hawk hunting",
+      "live meat",
+      "marni hunting",
+      "marni sniper",
+      "pig hunting",
+      "sensitive bear",
+      "sensitive boar",
+      "sensitive hawk",
+      "sniper hunting",
+      "tiger hunting",
+      "wild game preserve"
+    ]
+  }
+}

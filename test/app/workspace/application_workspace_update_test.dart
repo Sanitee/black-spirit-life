@@ -37,7 +37,7 @@ void main() {
       BdoCraftPlannerApp(
         applicationFuture: Future.value(harness.bundle),
         marketGateway: const EmptyMarketGateway(),
-        updateSource: r'C:\private-beta-feed',
+        updateSource: r'C:\public-stable-feed',
         enableBetaUpdates: false,
       ),
     );
@@ -65,7 +65,7 @@ void main() {
         applicationFuture: Future.value(harness.bundle),
         marketGateway: const EmptyMarketGateway(),
         updateService: service,
-        updateSource: r'C:\private-beta-feed',
+        updateSource: r'C:\public-stable-feed',
         enableBetaUpdates: false,
       ),
     );
@@ -98,7 +98,7 @@ void main() {
         applicationFuture: Future.value(firstHarness.bundle),
         marketGateway: const EmptyMarketGateway(),
         updateService: service,
-        updateSource: r'C:\private-beta-feed',
+        updateSource: r'C:\public-stable-feed',
         enableBetaUpdates: true,
       ),
     );
@@ -129,7 +129,7 @@ void main() {
         applicationFuture: Future.value(secondHarness.bundle),
         marketGateway: const EmptyMarketGateway(),
         updateService: service,
-        updateSource: r'C:\private-beta-feed',
+        updateSource: r'C:\public-stable-feed',
         enableBetaUpdates: true,
       ),
     );
@@ -194,7 +194,7 @@ void main() {
         applicationFuture: Future.value(harness.bundle),
         marketGateway: const EmptyMarketGateway(),
         updateService: service,
-        updateSource: r'C:\private-beta-feed',
+        updateSource: r'C:\public-stable-feed',
         enableBetaUpdates: false,
         windowHost: windowHost,
       ),
@@ -239,10 +239,11 @@ void main() {
 
       await tester.pumpWidget(
         BdoCraftPlannerApp(
+          enableOpportunityAutoCheck: false,
           applicationFuture: Future.value(harness.bundle),
           marketGateway: const EmptyMarketGateway(),
           updateService: service,
-          updateSource: r'C:\private-beta-feed',
+          updateSource: r'C:\public-stable-feed',
           enableBetaUpdates: true,
           windowHost: windowHost,
         ),
@@ -281,10 +282,11 @@ void main() {
 
     await tester.pumpWidget(
       BdoCraftPlannerApp(
+        enableOpportunityAutoCheck: false,
         applicationFuture: Future.value(harness.bundle),
         marketGateway: const EmptyMarketGateway(),
         updateService: service,
-        updateSource: r'C:\private-beta-feed',
+        updateSource: r'C:\public-stable-feed',
         enableBetaUpdates: true,
         windowHost: windowHost,
       ),
@@ -330,7 +332,7 @@ void main() {
           applicationFuture: Future.value(harness.bundle),
           marketGateway: const EmptyMarketGateway(),
           updateService: service,
-          updateSource: r'C:\private-beta-feed',
+          updateSource: r'C:\public-stable-feed',
           enableBetaUpdates: true,
         ),
       );
@@ -388,10 +390,11 @@ void main() {
 
     await tester.pumpWidget(
       BdoCraftPlannerApp(
+        enableOpportunityAutoCheck: false,
         applicationFuture: Future.value(harness.bundle),
         marketGateway: const EmptyMarketGateway(),
         updateService: service,
-        updateSource: r'C:\private-beta-feed',
+        updateSource: r'C:\public-stable-feed',
         enableBetaUpdates: true,
         windowHost: windowHost,
       ),
@@ -445,10 +448,11 @@ void main() {
 
     await tester.pumpWidget(
       BdoCraftPlannerApp(
+        enableOpportunityAutoCheck: false,
         applicationFuture: Future.value(harness.bundle),
         marketGateway: const EmptyMarketGateway(),
         updateService: service,
-        updateSource: r'C:\private-beta-feed',
+        updateSource: r'C:\public-stable-feed',
         enableBetaUpdates: true,
         windowHost: windowHost,
       ),
@@ -504,10 +508,11 @@ void main() {
 
     await tester.pumpWidget(
       BdoCraftPlannerApp(
+        enableOpportunityAutoCheck: false,
         applicationFuture: Future.value(harness.bundle),
         marketGateway: const EmptyMarketGateway(),
         updateService: service,
-        updateSource: r'C:\private-beta-feed',
+        updateSource: r'C:\public-stable-feed',
         enableBetaUpdates: true,
         windowHost: windowHost,
       ),

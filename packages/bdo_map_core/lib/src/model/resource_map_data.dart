@@ -380,8 +380,9 @@ class BdoGatheringWaypoint {
   }
 }
 
-/// A licensed, bundled reference image that helps a player recognize an exact
-/// gathering location in the game world.
+/// A licensed reference image that helps a player recognize a gathering
+/// location in the game world. The path may identify a bundled asset or an
+/// official remote image.
 ///
 /// The provenance record carries the author, source URL, license, and required
 /// attribution. Keeping that relationship mandatory prevents an unattributed
@@ -703,6 +704,12 @@ class BdoSearchResult {
   final BdoMapBounds? bounds;
   final String? resourceId;
   final String? fieldSourceId;
+
+  /// Resource bookmarks retain their original IDs for saved-profile compatibility.
+  /// Other map entries have a kind-qualified key so saving a cow never silently
+  /// saves its first product, or collides with a node with the same ID.
+  String get favoriteKey =>
+      kind == BdoSearchKind.resource ? id : 'map:${kind.name}:$id';
 }
 
 class BdoVendorNpc {
@@ -945,6 +952,10 @@ class BdoResourceMapDataset {
   late final Map<String, List<BdoVendorListing>> _vendorListingsByItemName;
   late final Map<String, List<BdoVendorListing>> _vendorListingsByVendorId;
   late final List<BdoSearchResult> _searchIndex;
+  late final Map<String, BdoSearchResult> favoriteEntriesByKey =
+      Map<String, BdoSearchResult>.unmodifiable({
+        for (final entry in _searchIndex) entry.favoriteKey: entry,
+      });
 
   factory BdoResourceMapDataset.fromJson(Map<String, Object?> json) {
     return BdoResourceMapDataset(

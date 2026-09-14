@@ -5,7 +5,8 @@ import 'package:flutter/services.dart';
 
 import '../royal_workshop/royal_workshop_models.dart';
 import 'readable_select_controls.dart';
-import 'resource_map_desktop_shell.dart';
+import 'resource_map_chrome_theme.dart';
+import 'resource_map_panel_metrics.dart';
 
 class BdoRoyalWorkshopManager extends StatefulWidget {
   const BdoRoyalWorkshopManager({
@@ -77,48 +78,97 @@ class _BdoRoyalWorkshopManagerState extends State<BdoRoyalWorkshopManager> {
   @override
   Widget build(BuildContext context) {
     final selected = bdoRoyalWorkshopAreasById[_selectedAreaId];
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        color: ResourceMapAtlasColors.paperRaised,
-        border: Border.all(color: ResourceMapAtlasColors.divider),
-        borderRadius: BorderRadius.circular(18),
-        boxShadow: const <BoxShadow>[
-          BoxShadow(
-            color: Color(0x5A000000),
-            blurRadius: 28,
-            offset: Offset(0, 12),
-          ),
-        ],
+    final theme = Theme.of(context);
+    final controlText = theme.textTheme.labelLarge!.copyWith(
+      fontSize: ResourceMapPanelMetrics.primary,
+      fontWeight: FontWeight.w500,
+    );
+    final buttonStyle = ButtonStyle(
+      textStyle: WidgetStatePropertyAll(controlText),
+      minimumSize: const WidgetStatePropertyAll(Size(0, 32)),
+      padding: const WidgetStatePropertyAll(
+        EdgeInsets.symmetric(horizontal: 10, vertical: 6),
       ),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(18),
-        child: Column(
-          children: <Widget>[
-            _buildHeader(selected),
-            const Divider(height: 1, color: ResourceMapAtlasColors.divider),
-            Expanded(
-              child: AnimatedSwitcher(
-                duration: MediaQuery.disableAnimationsOf(context)
-                    ? Duration.zero
-                    : const Duration(milliseconds: 190),
-                switchInCurve: Curves.easeOutCubic,
-                switchOutCurve: Curves.easeInCubic,
-                transitionBuilder: (child, animation) => FadeTransition(
-                  opacity: animation,
-                  child: SlideTransition(
-                    position: Tween<Offset>(
-                      begin: const Offset(.025, 0),
-                      end: Offset.zero,
-                    ).animate(animation),
-                    child: child,
-                  ),
-                ),
-                child: selected == null
-                    ? _buildOverview(context)
-                    : _buildArea(context, selected),
-              ),
+      visualDensity: VisualDensity.compact,
+    );
+    return Theme(
+      data: theme.copyWith(
+        textTheme: theme.textTheme.copyWith(
+          bodyLarge: theme.textTheme.bodyLarge?.copyWith(
+            fontSize: ResourceMapPanelMetrics.primary,
+          ),
+          titleMedium: theme.textTheme.titleMedium?.copyWith(
+            fontSize: ResourceMapPanelMetrics.primary,
+          ),
+        ),
+        inputDecorationTheme: theme.inputDecorationTheme.copyWith(
+          isDense: true,
+          contentPadding: const EdgeInsets.symmetric(
+            horizontal: 10,
+            vertical: 10,
+          ),
+          labelStyle: const TextStyle(
+            fontSize: ResourceMapPanelMetrics.secondary,
+          ),
+          floatingLabelStyle: const TextStyle(
+            // InputDecorator scales a floating label to 75%.
+            fontSize: ResourceMapPanelMetrics.secondary / .75,
+          ),
+        ),
+        textButtonTheme: TextButtonThemeData(style: buttonStyle),
+        outlinedButtonTheme: OutlinedButtonThemeData(style: buttonStyle),
+        filledButtonTheme: FilledButtonThemeData(style: buttonStyle),
+        iconButtonTheme: const IconButtonThemeData(
+          style: ButtonStyle(
+            minimumSize: WidgetStatePropertyAll(Size(32, 32)),
+            padding: WidgetStatePropertyAll(EdgeInsets.all(6)),
+            visualDensity: VisualDensity.compact,
+          ),
+        ),
+      ),
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          color: context.mapChrome.paperRaised,
+          border: Border.all(color: context.mapChrome.divider),
+          borderRadius: BorderRadius.circular(18),
+          boxShadow: const <BoxShadow>[
+            BoxShadow(
+              color: Color(0x5A000000),
+              blurRadius: 28,
+              offset: Offset(0, 12),
             ),
           ],
+        ),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(18),
+          child: Column(
+            children: <Widget>[
+              _buildHeader(selected),
+              Divider(height: 1, color: context.mapChrome.divider),
+              Expanded(
+                child: AnimatedSwitcher(
+                  duration: MediaQuery.disableAnimationsOf(context)
+                      ? Duration.zero
+                      : const Duration(milliseconds: 190),
+                  switchInCurve: Curves.easeOutCubic,
+                  switchOutCurve: Curves.easeInCubic,
+                  transitionBuilder: (child, animation) => FadeTransition(
+                    opacity: animation,
+                    child: SlideTransition(
+                      position: Tween<Offset>(
+                        begin: const Offset(.025, 0),
+                        end: Offset.zero,
+                      ).animate(animation),
+                      child: child,
+                    ),
+                  ),
+                  child: selected == null
+                      ? _buildOverview(context)
+                      : _buildArea(context, selected),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -126,7 +176,7 @@ class _BdoRoyalWorkshopManagerState extends State<BdoRoyalWorkshopManager> {
 
   Widget _buildHeader(BdoRoyalWorkshopArea? selected) {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(18, 12, 14, 12),
+      padding: const EdgeInsets.fromLTRB(12, 6, 8, 6),
       child: Row(
         children: <Widget>[
           if (selected != null)
@@ -138,50 +188,20 @@ class _BdoRoyalWorkshopManagerState extends State<BdoRoyalWorkshopManager> {
                 _estimateExpanded = false;
                 _draftWorkshopIndexByArea.clear();
               }),
-              icon: const Icon(Icons.arrow_back_rounded),
+              icon: Icon(Icons.arrow_back_rounded),
             )
           else
             const _RoyalCrest(),
           const SizedBox(width: 10),
           Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: <Widget>[
-                Text(
-                  selected?.name ?? 'Seoul Royal Workshops',
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(
-                    color: ResourceMapAtlasColors.ink,
-                    fontSize: 18,
-                    height: 1.15,
-                    fontWeight: FontWeight.w800,
-                    letterSpacing: -.25,
-                  ),
-                ),
-                Text(
-                  selected == null
-                      ? 'Gyeongbokgung Palace • 8 work areas'
-                      : selected.kind == BdoRoyalWorkshopKind.production
-                      ? 'Production area'
-                      : 'Processing area',
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(
-                    color: ResourceMapAtlasColors.muted,
-                    fontSize: 11.5,
-                    height: 1.25,
-                  ),
-                ),
-              ],
+            child: Text(
+              selected?.name ?? 'Royal Workshops',
+              style: TextStyle(
+                color: context.mapChrome.ink,
+                fontSize: ResourceMapPanelMetrics.heading,
+                fontWeight: FontWeight.w600,
+              ),
             ),
-          ),
-          _RoyalStatusChip(
-            icon: widget.plan.accessInvested
-                ? Icons.check_rounded
-                : Icons.lock_outline_rounded,
-            label: widget.plan.accessInvested ? '5 CP active' : 'Needs 5 CP',
-            active: widget.plan.accessInvested,
           ),
           if (widget.onClose != null) ...<Widget>[
             const SizedBox(width: 7),
@@ -189,7 +209,7 @@ class _BdoRoyalWorkshopManagerState extends State<BdoRoyalWorkshopManager> {
               key: const ValueKey<String>('royal-workshop-close'),
               tooltip: 'Close Royal Workshops',
               onPressed: widget.onClose,
-              icon: const Icon(Icons.close_rounded),
+              icon: Icon(Icons.close_rounded),
             ),
           ],
         ],
@@ -202,18 +222,14 @@ class _BdoRoyalWorkshopManagerState extends State<BdoRoyalWorkshopManager> {
       plan: widget.plan,
       goodsById: _goodsById,
     );
-    return LayoutBuilder(
+    return ListView(
       key: const ValueKey<String>('resource-map-royal-workshop-overview'),
-      builder: (context, constraints) {
-        final wide = constraints.maxWidth >= 760;
-        final palace = _PalaceOverview(
-          plan: widget.plan,
-          goodsById: _goodsById,
-          onAreaPressed: (area) => setState(() => _selectedAreaId = area.id),
-        );
-        final summary = _buildOverviewSummary(estimate);
-        return ListView(
-          padding: const EdgeInsets.fromLTRB(18, 16, 18, 22),
+      padding: const EdgeInsets.all(12),
+      children: <Widget>[
+        Wrap(
+          spacing: 8,
+          runSpacing: 6,
+          crossAxisAlignment: WrapCrossAlignment.center,
           children: <Widget>[
             _RoyalAccessBanner(
               invested: widget.plan.accessInvested,
@@ -223,118 +239,41 @@ class _BdoRoyalWorkshopManagerState extends State<BdoRoyalWorkshopManager> {
                 ),
               ),
             ),
-            const SizedBox(height: 14),
-            if (wide)
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: <Widget>[
-                  Expanded(flex: 6, child: palace),
-                  const SizedBox(width: 18),
-                  Expanded(flex: 4, child: summary),
-                ],
-              )
-            else ...<Widget>[palace, const SizedBox(height: 14), summary],
-          ],
-        );
-      },
-    );
-  }
-
-  Widget _buildOverviewSummary(BdoRoyalWorkshopIncomeEstimate estimate) {
-    final duplicateWorkers = widget.plan.duplicateWorkerNames;
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: <Widget>[
-        const Text(
-          'Your palace',
-          style: TextStyle(
-            color: ResourceMapAtlasColors.ink,
-            fontSize: 16,
-            fontWeight: FontWeight.w800,
-          ),
-        ),
-        const SizedBox(height: 5),
-        const Text(
-          'Choose an area on the palace plan. Each area uses one Yukjo worker '
-          'and runs one selected workshop at a time.',
-          style: TextStyle(
-            color: ResourceMapAtlasColors.text,
-            fontSize: 12.5,
-            height: 1.4,
-          ),
-        ),
-        const SizedBox(height: 14),
-        Wrap(
-          spacing: 8,
-          runSpacing: 8,
-          children: <Widget>[
-            _RoyalMetric(
-              label: 'Assigned',
-              value: '${widget.plan.assignedWorkerCount} / 8 workers',
-              icon: Icons.engineering_outlined,
+            OutlinedButton.icon(
+              key: const ValueKey<String>('royal-workshop-open-yukjo-housing'),
+              icon: const Icon(Icons.home_work_outlined, size: 18),
+              label: const Text('Yukjo setup'),
+              onPressed: widget.onOpenYukjoHousing,
             ),
-            _RoyalMetric(
-              label: 'Running',
-              value: '${widget.plan.runningTaskCount} / 8 areas',
-              icon: Icons.play_circle_outline_rounded,
-            ),
-            _RoyalMetric(
-              label: 'Yukjo lodging',
-              value:
-                  '${widget.yukjoHiredWorkers} hired • '
-                  '${widget.yukjoLodgingSlots} slots',
-              icon: Icons.bed_outlined,
-            ),
+            if (estimate.includedAreaCount > 0)
+              Tooltip(
+                message: 'Net silver per online hour. Rare rolls excluded.',
+                child: Text(
+                  '${_shortSilver(estimate.netSilverPerOnlineHour)} / h',
+                  key: const ValueKey<String>('royal-workshop-income-summary'),
+                  style: TextStyle(
+                    color: context.mapChrome.positive,
+                    fontSize: ResourceMapPanelMetrics.primary,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
           ],
         ),
-        if (duplicateWorkers.isNotEmpty) ...<Widget>[
-          const SizedBox(height: 10),
+        if (widget.plan.duplicateWorkerNames.isNotEmpty) ...<Widget>[
+          const SizedBox(height: 8),
           _RoyalNotice(
             icon: Icons.warning_amber_rounded,
-            color: ResourceMapAtlasColors.warning,
-            text:
-                'A Yukjo worker is assigned more than once. Open those areas '
-                'and choose a different worker slot.',
+            color: context.mapChrome.warning,
+            text: 'Worker assigned twice.',
           ),
         ],
-        const SizedBox(height: 14),
-        _RoyalActionRow(
-          key: const ValueKey<String>('royal-workshop-open-yukjo-housing'),
-          icon: Icons.home_work_outlined,
-          title: 'Yukjo workers & storage',
-          subtitle: 'Set hired workers, lodging and owned houses.',
-          onPressed: widget.onOpenYukjoHousing,
+        const SizedBox(height: 10),
+        _PalaceOverview(
+          plan: widget.plan,
+          goodsById: _goodsById,
+          onAreaPressed: (area) => setState(() => _selectedAreaId = area.id),
         ),
-        if (estimate.includedAreaCount > 0) ...<Widget>[
-          const SizedBox(height: 13),
-          Text(
-            '${_shortSilver(estimate.netSilverPerOnlineHour)} / online hour',
-            key: const ValueKey<String>('royal-workshop-income-summary'),
-            style: const TextStyle(
-              color: ResourceMapAtlasColors.positive,
-              fontSize: 15,
-              fontWeight: FontWeight.w800,
-            ),
-          ),
-          Text(
-            'From ${estimate.includedAreaCount} recorded ordinary '
-            '${estimate.includedAreaCount == 1 ? 'task' : 'tasks'}.',
-            style: const TextStyle(
-              color: ResourceMapAtlasColors.muted,
-              fontSize: 11.5,
-            ),
-          ),
-        ],
-        if (estimate.excludedRareAreaCount > 0) ...<Widget>[
-          const SizedBox(height: 8),
-          const _RoyalNotice(
-            icon: Icons.casino_outlined,
-            color: ResourceMapAtlasColors.warning,
-            text:
-                'Rare rolls stay visible, but are not treated as dependable '
-                'hourly income because their chance is unknown.',
-          ),
-        ],
       ],
     );
   }
@@ -370,7 +309,9 @@ class _BdoRoyalWorkshopManagerState extends State<BdoRoyalWorkshopManager> {
     return LayoutBuilder(
       key: ValueKey<String>('royal-workshop-area-${area.id}'),
       builder: (context, constraints) {
-        final wide = constraints.maxWidth >= 760;
+        final wide =
+            constraints.maxWidth / MediaQuery.textScalerOf(context).scale(1) >=
+            620;
         final workshops = _buildWorkshopColumn(
           area,
           areaPlan,
@@ -389,16 +330,14 @@ class _BdoRoyalWorkshopManagerState extends State<BdoRoyalWorkshopManager> {
           workshopChangePending: workshopChangePending,
         );
         return ListView(
-          padding: const EdgeInsets.fromLTRB(18, 16, 18, 24),
+          padding: const EdgeInsets.all(12),
           children: <Widget>[
-            _buildAreaIntro(area, areaPlan),
-            const SizedBox(height: 14),
             if (wide)
               Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
-                  SizedBox(width: 310, child: workshops),
-                  const SizedBox(width: 18),
+                  SizedBox(width: 220, child: workshops),
+                  const SizedBox(width: 12),
                   Expanded(child: management),
                 ],
               )
@@ -406,55 +345,6 @@ class _BdoRoyalWorkshopManagerState extends State<BdoRoyalWorkshopManager> {
           ],
         );
       },
-    );
-  }
-
-  Widget _buildAreaIntro(
-    BdoRoyalWorkshopArea area,
-    BdoRoyalWorkshopAreaPlan plan,
-  ) {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: <Widget>[
-        _RoyalAreaGlyph(kind: area.kind, size: 46),
-        const SizedBox(width: 12),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: <Widget>[
-              Text(
-                plan.effectiveIsRunning
-                    ? 'Work is recorded as running'
-                    : 'Choose a workshop, worker and current task',
-                style: const TextStyle(
-                  color: ResourceMapAtlasColors.ink,
-                  fontSize: 14,
-                  fontWeight: FontWeight.w800,
-                ),
-              ),
-              const SizedBox(height: 3),
-              const Text(
-                'Changing workshops does not add another worker. One area can '
-                'only run one workshop at a time.',
-                style: TextStyle(
-                  color: ResourceMapAtlasColors.muted,
-                  fontSize: 11.5,
-                  height: 1.35,
-                ),
-              ),
-            ],
-          ),
-        ),
-        const SizedBox(width: 8),
-        TextButton.icon(
-          key: ValueKey<String>('royal-workshop-manager-${area.id}'),
-          onPressed: widget.onMarkManager == null
-              ? null
-              : () => widget.onMarkManager!(area),
-          icon: const Icon(Icons.near_me_outlined, size: 17),
-          label: Text(area.managerName),
-        ),
-      ],
     );
   }
 
@@ -468,35 +358,24 @@ class _BdoRoyalWorkshopManagerState extends State<BdoRoyalWorkshopManager> {
       children: <Widget>[
         Row(
           children: <Widget>[
-            const Expanded(
+            Expanded(
               child: Text(
                 'Workshops',
                 style: TextStyle(
-                  color: ResourceMapAtlasColors.ink,
-                  fontSize: 15,
-                  fontWeight: FontWeight.w800,
+                  color: context.mapChrome.ink,
+                  fontSize: ResourceMapPanelMetrics.primary,
+                  fontWeight: FontWeight.w600,
                 ),
               ),
             ),
-            Text(
-              '${areaPlan.unlockedWorkshopCount}/${area.maximumWorkshops} open',
-              style: const TextStyle(
-                color: ResourceMapAtlasColors.muted,
-                fontSize: 11.5,
-                fontWeight: FontWeight.w700,
+            if (widget.onMarkManager != null)
+              IconButton(
+                key: ValueKey<String>('royal-workshop-manager-${area.id}'),
+                tooltip: area.managerName,
+                onPressed: () => widget.onMarkManager!(area),
+                icon: const Icon(Icons.near_me_outlined, size: 18),
               ),
-            ),
           ],
-        ),
-        const SizedBox(height: 7),
-        Text(
-          'Unlock named workshops with ${area.managerName}. Use the manager '
-          'button above to mark the exact NPC location.',
-          style: const TextStyle(
-            color: ResourceMapAtlasColors.muted,
-            fontSize: 10.5,
-            height: 1.3,
-          ),
         ),
         const SizedBox(height: 8),
         for (var index = 0; index < area.maximumWorkshops; index++)
@@ -543,8 +422,8 @@ class _BdoRoyalWorkshopManagerState extends State<BdoRoyalWorkshopManager> {
                 ),
               );
             },
-            icon: const Icon(Icons.undo_rounded, size: 17),
-            label: const Text('Reset recorded unlocks'),
+            icon: Icon(Icons.undo_rounded, size: 17),
+            label: Text('Reset unlocks'),
             style: TextButton.styleFrom(alignment: Alignment.centerLeft),
           ),
       ],
@@ -565,6 +444,14 @@ class _BdoRoyalWorkshopManagerState extends State<BdoRoyalWorkshopManager> {
   }) {
     final definition = area.workshopAt(activeIndex);
     final currentWorker = areaPlan.effectiveWorkerName;
+    final readiness = [
+      if (!widget.plan.accessInvested) '5 CP required',
+      if (currentWorker.isEmpty) 'Choose a worker',
+      if (widget.plan.hasDuplicateWorkerName(currentWorker))
+        'Worker already in use',
+      if (workshopChangePending) 'Confirm workshop change',
+      if (!slotPlan.hasRecordedGood) 'Choose an item',
+    ].join(' · ');
     final usedElsewhere = _workersUsedOutside(area.id);
     final availableWorkers = <String>[
       for (var index = 1; index <= widget.yukjoHiredWorkers; index++)
@@ -588,25 +475,13 @@ class _BdoRoyalWorkshopManagerState extends State<BdoRoyalWorkshopManager> {
           definition.name,
           maxLines: 2,
           overflow: TextOverflow.ellipsis,
-          style: const TextStyle(
-            color: ResourceMapAtlasColors.ink,
-            fontSize: 17,
-            fontWeight: FontWeight.w800,
+          style: TextStyle(
+            color: context.mapChrome.ink,
+            fontSize: ResourceMapPanelMetrics.heading,
+            fontWeight: FontWeight.w600,
           ),
         ),
-        const SizedBox(height: 2),
-        Text(
-          definition.isStartingWorkshop
-              ? 'Available when the Royal Workshop is opened'
-              : 'Recorded unlocked • '
-                    '${definition.morningGratitudeTokenCost} Morning\'s '
-                    'Gratitude Tokens',
-          style: const TextStyle(
-            color: ResourceMapAtlasColors.muted,
-            fontSize: 11.5,
-          ),
-        ),
-        const SizedBox(height: 14),
+        const SizedBox(height: 10),
         if (workshopChangePending) ...<Widget>[
           _RoyalPendingWorkshopChange(
             fromName: area.workshopAt(storedActiveIndex).name,
@@ -624,26 +499,20 @@ class _BdoRoyalWorkshopManagerState extends State<BdoRoyalWorkshopManager> {
               );
             },
           ),
-          const SizedBox(height: 14),
+          const SizedBox(height: 10),
         ],
-        const _RoyalSectionLabel('YUKJO WORKER'),
         if (widget.yukjoHiredWorkers <= 0 && currentWorker.isEmpty)
           _RoyalNotice(
             icon: Icons.person_add_alt_1_rounded,
-            color: ResourceMapAtlasColors.accent,
-            text:
-                'No Yukjo workers are recorded yet. Set your hired workers '
-                'first, then return to assign one here.',
+            color: context.mapChrome.accent,
+            text: 'No workers',
             actionLabel: 'Set workers',
             onAction: widget.onOpenYukjoHousing,
           )
         else
           LayoutBuilder(
             builder: (context, constraints) {
-              final workerLabels = <String>[
-                'No worker assigned',
-                ...visibleWorkers,
-              ];
+              final workerLabels = <String>['Choose worker', ...visibleWorkers];
               final menuWidth = readableSelectMenuWidth(
                 context,
                 workerLabels,
@@ -652,10 +521,8 @@ class _BdoRoyalWorkshopManagerState extends State<BdoRoyalWorkshopManager> {
               return InputDecorator(
                 isEmpty: false,
                 decoration: const InputDecoration(
-                  labelText: 'Worker for this area',
+                  labelText: 'Worker',
                   prefixIcon: Icon(Icons.engineering_outlined, size: 19),
-                  helperText:
-                      'A worker already used in another area is hidden.',
                 ),
                 child: DropdownButtonHideUnderline(
                   child: DropdownButton<String>(
@@ -668,7 +535,7 @@ class _BdoRoyalWorkshopManagerState extends State<BdoRoyalWorkshopManager> {
                     items: <DropdownMenuItem<String>>[
                       const DropdownMenuItem<String>(
                         value: '',
-                        child: Text('No worker assigned'),
+                        child: Text('Choose worker'),
                       ),
                       for (final worker in visibleWorkers)
                         DropdownMenuItem<String>(
@@ -692,12 +559,7 @@ class _BdoRoyalWorkshopManagerState extends State<BdoRoyalWorkshopManager> {
               );
             },
           ),
-        const SizedBox(height: 14),
-        _RoyalSectionLabel(
-          area.kind == BdoRoyalWorkshopKind.production
-              ? 'CURRENT PRODUCTION ROLL'
-              : 'CURRENT PROCESSING RECIPE',
-        ),
+        const SizedBox(height: 10),
         if (area.kind == BdoRoyalWorkshopKind.production) ...<Widget>[
           _RoyalActionRow(
             key: const ValueKey<String>('royal-workshop-refresh-toggle'),
@@ -705,9 +567,8 @@ class _BdoRoyalWorkshopManagerState extends State<BdoRoyalWorkshopManager> {
                 ? Icons.refresh_rounded
                 : Icons.check_circle_outline_rounded,
             title: widget.plan.freeRefreshAvailable
-                ? 'Daily free refresh available'
-                : 'Daily refresh already used',
-            subtitle: 'Record the refresh state shown for production in BDO.',
+                ? 'Refresh'
+                : 'Refresh used',
             onPressed: () => widget.onChanged(
               widget.plan.copyWith(
                 freeRefreshAvailable: !widget.plan.freeRefreshAvailable,
@@ -758,12 +619,10 @@ class _BdoRoyalWorkshopManagerState extends State<BdoRoyalWorkshopManager> {
                     key: const ValueKey<String>('royal-workshop-good-options'),
                     elevation: 18,
                     shadowColor: const Color(0x3A17211F),
-                    color: ResourceMapAtlasColors.paperRaised,
+                    color: context.mapChrome.paperRaised,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(11),
-                      side: const BorderSide(
-                        color: ResourceMapAtlasColors.divider,
-                      ),
+                      side: BorderSide(color: context.mapChrome.divider),
                     ),
                     clipBehavior: Clip.antiAlias,
                     child: SizedBox(
@@ -781,7 +640,7 @@ class _BdoRoyalWorkshopManagerState extends State<BdoRoyalWorkshopManager> {
                                 index;
                             return ListTile(
                               tileColor: highlighted
-                                  ? ResourceMapAtlasColors.accent.withValues(
+                                  ? context.mapChrome.accent.withValues(
                                       alpha: .10,
                                     )
                                   : null,
@@ -837,19 +696,18 @@ class _BdoRoyalWorkshopManagerState extends State<BdoRoyalWorkshopManager> {
               },
               decoration: InputDecoration(
                 labelText: area.kind == BdoRoyalWorkshopKind.production
-                    ? 'Item currently shown in BDO'
-                    : 'Recipe currently selected in BDO',
-                hintText: 'Type the current item or recipe',
+                    ? 'Item'
+                    : 'Recipe',
                 prefixIcon: Icon(
                   area.kind == BdoRoyalWorkshopKind.production
                       ? Icons.casino_outlined
                       : Icons.inventory_2_outlined,
                   size: 19,
                 ),
-                helperText:
-                    'Suggestions recognize names; they do not guess which '
-                    'workshop can roll each item.',
-                helperMaxLines: 2,
+                suffixIcon: const Tooltip(
+                  message: 'Names only. Check the item shown in your workshop.',
+                  child: Icon(Icons.info_outline_rounded, size: 18),
+                ),
               ),
             );
           },
@@ -868,51 +726,54 @@ class _BdoRoyalWorkshopManagerState extends State<BdoRoyalWorkshopManager> {
               setState(() => _estimateExpanded = !_estimateExpanded),
           onChanged: (next) => _updateTask(area, areaPlan, activeIndex, next),
         ),
-        const SizedBox(height: 14),
+        const SizedBox(height: 10),
         Row(
           children: <Widget>[
             Expanded(
               child: OutlinedButton.icon(
                 onPressed: widget.onOpenYukjoHousing,
-                icon: const Icon(Icons.warehouse_outlined, size: 18),
-                label: const Text('Yukjo setup'),
+                icon: Icon(Icons.warehouse_outlined, size: 18),
+                label: Text('Yukjo setup'),
               ),
             ),
             const SizedBox(width: 9),
             Expanded(
-              child: FilledButton.icon(
-                key: ValueKey<String>('royal-workshop-start-${area.id}'),
-                onPressed: canRun
-                    ? () => _updateArea(
-                        area,
-                        areaPlan.withAreaRuntime(
-                          isRunning: !areaPlan.effectiveIsRunning,
-                        ),
-                      )
-                    : null,
-                icon: Icon(
-                  areaPlan.effectiveIsRunning
-                      ? Icons.stop_circle_outlined
-                      : Icons.play_arrow_rounded,
-                  size: 19,
-                ),
-                label: Text(
-                  areaPlan.effectiveIsRunning ? 'Mark stopped' : 'Mark running',
+              child: Tooltip(
+                message: readiness,
+                child: FilledButton.icon(
+                  key: ValueKey<String>('royal-workshop-start-${area.id}'),
+                  onPressed: canRun
+                      ? () => _updateArea(
+                          area,
+                          areaPlan.withAreaRuntime(
+                            isRunning: !areaPlan.effectiveIsRunning,
+                          ),
+                        )
+                      : null,
+                  icon: Icon(
+                    areaPlan.effectiveIsRunning
+                        ? Icons.stop_circle_outlined
+                        : Icons.play_arrow_rounded,
+                    size: 19,
+                  ),
+                  label: Text(
+                    areaPlan.effectiveIsRunning
+                        ? 'Mark stopped'
+                        : 'Mark running',
+                  ),
                 ),
               ),
             ),
           ],
         ),
-        if (!canRun)
-          const Padding(
-            padding: EdgeInsets.only(top: 7),
+        if (widget.plan.hasDuplicateWorkerName(currentWorker))
+          Padding(
+            padding: const EdgeInsets.only(top: 7),
             child: Text(
-              'To mark this area running: record the 5 CP investment, assign '
-              'one Yukjo worker, confirm the workshop, and enter the current '
-              'item or recipe.',
+              'Worker already in use',
               style: TextStyle(
-                color: ResourceMapAtlasColors.muted,
-                fontSize: 11.5,
+                color: context.mapChrome.muted,
+                fontSize: ResourceMapPanelMetrics.secondary,
                 height: 1.35,
               ),
             ),
@@ -935,53 +796,35 @@ class _PalaceOverview extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return AspectRatio(
-      aspectRatio: 1.16,
-      child: DecoratedBox(
-        decoration: BoxDecoration(
-          color: ResourceMapAtlasColors.paper,
-          borderRadius: BorderRadius.circular(14),
-          border: Border.all(color: ResourceMapAtlasColors.divider),
-        ),
-        child: LayoutBuilder(
-          builder: (context, constraints) => Stack(
-            children: <Widget>[
-              Positioned.fill(
-                child: CustomPaint(painter: const _PalacePlanPainter()),
-              ),
-              const Positioned(
-                left: 14,
-                top: 12,
-                child: Text(
-                  'GYEONGBOKGUNG PALACE',
-                  style: TextStyle(
-                    color: ResourceMapAtlasColors.muted,
-                    fontSize: 9.5,
-                    fontWeight: FontWeight.w800,
-                    letterSpacing: 1.1,
-                  ),
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final twoColumns =
+            constraints.maxWidth / MediaQuery.textScalerOf(context).scale(1) >=
+            440;
+        final width = twoColumns
+            ? (constraints.maxWidth - 8) / 2
+            : constraints.maxWidth;
+        return Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          children: <Widget>[
+            for (final area in bdoRoyalWorkshopAreas)
+              SizedBox(
+                width: width,
+                child: _RoyalAreaButton(
+                  area: area,
+                  plan: plan.planFor(area.id),
+                  good:
+                      goodsById[plan
+                          .planFor(area.id)
+                          .activePlan
+                          .selectedGoodId],
+                  onPressed: () => onAreaPressed(area),
                 ),
               ),
-              for (final area in bdoRoyalWorkshopAreas)
-                Positioned(
-                  left: area.mapX * constraints.maxWidth - 48,
-                  top: area.mapY * constraints.maxHeight - 31,
-                  width: 96,
-                  child: _RoyalAreaButton(
-                    area: area,
-                    plan: plan.planFor(area.id),
-                    good:
-                        goodsById[plan
-                            .planFor(area.id)
-                            .activePlan
-                            .selectedGoodId],
-                    onPressed: () => onAreaPressed(area),
-                  ),
-                ),
-            ],
-          ),
-        ),
-      ),
+          ],
+        );
+      },
     );
   }
 }
@@ -1003,9 +846,9 @@ class _RoyalPendingWorkshopChange extends StatelessWidget {
   Widget build(BuildContext context) {
     return DecoratedBox(
       decoration: BoxDecoration(
-        color: ResourceMapAtlasColors.accent.withValues(alpha: .08),
+        color: context.mapChrome.accent.withValues(alpha: .08),
         border: Border.all(
-          color: ResourceMapAtlasColors.accent.withValues(alpha: .52),
+          color: context.mapChrome.accent.withValues(alpha: .52),
         ),
         borderRadius: BorderRadius.circular(11),
       ),
@@ -1014,21 +857,21 @@ class _RoyalPendingWorkshopChange extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: <Widget>[
-            const Row(
+            Row(
               children: <Widget>[
                 Icon(
                   Icons.swap_horiz_rounded,
                   size: 18,
-                  color: ResourceMapAtlasColors.accent,
+                  color: context.mapChrome.accent,
                 ),
                 SizedBox(width: 7),
                 Expanded(
                   child: Text(
                     'Change active workshop?',
                     style: TextStyle(
-                      color: ResourceMapAtlasColors.ink,
-                      fontSize: 12.5,
-                      fontWeight: FontWeight.w800,
+                      color: context.mapChrome.ink,
+                      fontSize: ResourceMapPanelMetrics.primary,
+                      fontWeight: FontWeight.w600,
                     ),
                   ),
                 ),
@@ -1039,9 +882,9 @@ class _RoyalPendingWorkshopChange extends StatelessWidget {
               '$fromName  →  $toName',
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
-              style: const TextStyle(
-                color: ResourceMapAtlasColors.muted,
-                fontSize: 11.5,
+              style: TextStyle(
+                color: context.mapChrome.muted,
+                fontSize: ResourceMapPanelMetrics.secondary,
                 height: 1.3,
               ),
             ),
@@ -1052,13 +895,13 @@ class _RoyalPendingWorkshopChange extends StatelessWidget {
                 TextButton(
                   key: const ValueKey<String>('royal-workshop-change-cancel'),
                   onPressed: onCancel,
-                  child: const Text('Cancel'),
+                  child: Text('Cancel'),
                 ),
                 const SizedBox(width: 6),
                 FilledButton(
                   key: const ValueKey<String>('royal-workshop-change-confirm'),
                   onPressed: onConfirm,
-                  child: const Text('Change workshop'),
+                  child: Text('Change workshop'),
                 ),
               ],
             ),
@@ -1085,64 +928,60 @@ class _RoyalAreaButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final recordedName = good?.name ?? plan.activePlan.recordedGoodName.trim();
-    return Tooltip(
-      message: recordedName.isEmpty
-          ? '${area.name}: no current task recorded'
-          : '${area.name}: $recordedName',
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          key: ValueKey<String>('royal-workshop-area-button-${area.id}'),
-          onTap: onPressed,
-          borderRadius: BorderRadius.circular(12),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(vertical: 3),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: <Widget>[
-                Stack(
-                  clipBehavior: Clip.none,
+    return Material(
+      color: context.mapChrome.paper,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(9),
+        side: BorderSide(color: context.mapChrome.divider),
+      ),
+      clipBehavior: Clip.antiAlias,
+      child: InkWell(
+        key: ValueKey<String>('royal-workshop-area-button-${area.id}'),
+        onTap: onPressed,
+        child: Padding(
+          padding: const EdgeInsets.all(9),
+          child: Row(
+            children: <Widget>[
+              _RoyalAreaGlyph(
+                kind: area.kind,
+                size: ResourceMapPanelMetrics.navigationArtwork,
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
                   children: <Widget>[
-                    _RoyalAreaGlyph(kind: area.kind, size: 39),
-                    if (plan.effectiveIsRunning)
-                      const Positioned(
-                        right: -4,
-                        top: -4,
-                        child: Icon(
-                          Icons.play_circle_fill_rounded,
-                          size: 16,
-                          color: ResourceMapAtlasColors.positive,
+                    Text(
+                      area.name,
+                      style: TextStyle(
+                        color: context.mapChrome.ink,
+                        fontSize: ResourceMapPanelMetrics.primary,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    if (recordedName.isNotEmpty)
+                      Text(
+                        recordedName,
+                        style: TextStyle(
+                          color: context.mapChrome.muted,
+                          fontSize: ResourceMapPanelMetrics.secondary,
                         ),
                       ),
                   ],
                 ),
-                const SizedBox(height: 3),
-                DecoratedBox(
-                  decoration: BoxDecoration(
-                    color: const Color(0xE6151E1C),
-                    borderRadius: BorderRadius.circular(5),
-                  ),
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 5,
-                      vertical: 2,
-                    ),
-                    child: Text(
-                      area.name,
-                      maxLines: 2,
-                      textAlign: TextAlign.center,
-                      overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(
-                        color: ResourceMapAtlasColors.ink,
-                        fontSize: 9.5,
-                        height: 1.05,
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
+              ),
+              const SizedBox(width: 4),
+              Icon(
+                plan.effectiveIsRunning
+                    ? Icons.play_circle_fill_rounded
+                    : Icons.chevron_right_rounded,
+                size: 18,
+                color: plan.effectiveIsRunning
+                    ? context.mapChrome.positive
+                    : context.mapChrome.muted,
+              ),
+            ],
           ),
         ),
       ),
@@ -1171,20 +1010,20 @@ class _RoyalWorkshopRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final color = selected
-        ? ResourceMapAtlasColors.primary
+        ? context.mapChrome.primary
         : unlocked
-        ? ResourceMapAtlasColors.text
-        : ResourceMapAtlasColors.muted;
+        ? context.mapChrome.text
+        : context.mapChrome.muted;
     return Material(
       color: selected
-          ? ResourceMapAtlasColors.primary.withValues(alpha: .12)
-          : ResourceMapAtlasColors.paper,
+          ? context.mapChrome.primary.withValues(alpha: .12)
+          : context.mapChrome.paper,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(10),
         side: BorderSide(
           color: selected
-              ? ResourceMapAtlasColors.primary
-              : ResourceMapAtlasColors.divider,
+              ? context.mapChrome.primary
+              : context.mapChrome.divider,
         ),
       ),
       clipBehavior: Clip.antiAlias,
@@ -1208,8 +1047,8 @@ class _RoyalWorkshopRow extends StatelessWidget {
                         '$number',
                         style: TextStyle(
                           color: color,
-                          fontSize: 11,
-                          fontWeight: FontWeight.w800,
+                          fontSize: ResourceMapPanelMetrics.secondary,
+                          fontWeight: FontWeight.w600,
                         ),
                       )
                     : Icon(Icons.lock_outline_rounded, size: 15, color: color),
@@ -1221,35 +1060,31 @@ class _RoyalWorkshopRow extends StatelessWidget {
                   children: <Widget>[
                     Text(
                       definition.name,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
                       style: TextStyle(
                         color: color,
-                        fontSize: 12.5,
-                        fontWeight: FontWeight.w700,
+                        fontSize: ResourceMapPanelMetrics.primary,
+                        fontWeight: FontWeight.w600,
                       ),
                     ),
-                    Text(
-                      unlocked
-                          ? selected
-                                ? 'Current workshop'
-                                : 'Available'
-                          : '${definition.morningGratitudeTokenCost} tokens',
-                      style: const TextStyle(
-                        color: ResourceMapAtlasColors.muted,
-                        fontSize: 10.5,
+                    if (!unlocked)
+                      Text(
+                        '${definition.morningGratitudeTokenCost} tokens',
+                        style: TextStyle(
+                          color: context.mapChrome.muted,
+                          fontSize: ResourceMapPanelMetrics.secondary,
+                        ),
                       ),
-                    ),
                   ],
                 ),
               ),
               if (onUnlock != null)
-                const Text(
-                  'Record unlock',
-                  style: TextStyle(
-                    color: ResourceMapAtlasColors.accent,
-                    fontSize: 10.5,
-                    fontWeight: FontWeight.w800,
+                Tooltip(
+                  message: 'Mark unlocked',
+                  child: Icon(
+                    Icons.lock_open_rounded,
+                    semanticLabel: 'Mark unlocked',
+                    color: context.mapChrome.accent,
+                    size: ResourceMapPanelMetrics.controlGlyph,
                   ),
                 )
               else if (unlocked)
@@ -1295,9 +1130,9 @@ class _RoyalEstimateEditor extends StatelessWidget {
   Widget build(BuildContext context) {
     return DecoratedBox(
       decoration: BoxDecoration(
-        color: ResourceMapAtlasColors.paper,
+        color: context.mapChrome.paper,
         borderRadius: BorderRadius.circular(11),
-        border: Border.all(color: ResourceMapAtlasColors.divider),
+        border: Border.all(color: context.mapChrome.divider),
       ),
       child: Column(
         children: <Widget>[
@@ -1308,29 +1143,22 @@ class _RoyalEstimateEditor extends StatelessWidget {
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
               child: Row(
                 children: <Widget>[
-                  const Icon(
+                  Icon(
                     Icons.query_stats_rounded,
-                    color: ResourceMapAtlasColors.accent,
+                    color: context.mapChrome.accent,
                     size: 18,
                   ),
                   const SizedBox(width: 8),
-                  const Expanded(
+                  Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: <Widget>[
                         Text(
-                          'Income estimate',
+                          'Income',
                           style: TextStyle(
-                            color: ResourceMapAtlasColors.ink,
-                            fontSize: 12.5,
-                            fontWeight: FontWeight.w800,
-                          ),
-                        ),
-                        Text(
-                          'Optional: add the values shown for your worker.',
-                          style: TextStyle(
-                            color: ResourceMapAtlasColors.muted,
-                            fontSize: 10.5,
+                            color: context.mapChrome.ink,
+                            fontSize: ResourceMapPanelMetrics.primary,
+                            fontWeight: FontWeight.w600,
                           ),
                         ),
                       ],
@@ -1339,10 +1167,10 @@ class _RoyalEstimateEditor extends StatelessWidget {
                   if (hourly != null)
                     Text(
                       _shortSilver(hourly!),
-                      style: const TextStyle(
-                        color: ResourceMapAtlasColors.positive,
-                        fontSize: 11,
-                        fontWeight: FontWeight.w800,
+                      style: TextStyle(
+                        color: context.mapChrome.positive,
+                        fontSize: ResourceMapPanelMetrics.secondary,
+                        fontWeight: FontWeight.w600,
                       ),
                     ),
                   const SizedBox(width: 6),
@@ -1350,37 +1178,18 @@ class _RoyalEstimateEditor extends StatelessWidget {
                     expanded
                         ? Icons.expand_less_rounded
                         : Icons.expand_more_rounded,
-                    color: ResourceMapAtlasColors.muted,
+                    color: context.mapChrome.muted,
                   ),
                 ],
               ),
             ),
           ),
-          AnimatedSize(
-            duration: MediaQuery.disableAnimationsOf(context)
-                ? Duration.zero
-                : const Duration(milliseconds: 180),
-            curve: Curves.easeOutCubic,
+          _RoyalDetailsReveal(
             child: expanded
                 ? Padding(
                     padding: const EdgeInsets.fromLTRB(12, 2, 12, 12),
                     child: Column(
                       children: <Widget>[
-                        if (selectedGood?.durationAt150WorkerSpeedHours
-                            case final hours?)
-                          Padding(
-                            padding: const EdgeInsets.only(bottom: 8),
-                            child: Text(
-                              'Client reference: about '
-                              '${hours.toStringAsFixed(0)} hours at 150 worker '
-                              'speed. Use the time shown by your own worker.',
-                              style: const TextStyle(
-                                color: ResourceMapAtlasColors.muted,
-                                fontSize: 10.5,
-                                height: 1.3,
-                              ),
-                            ),
-                          ),
                         Row(
                           children: <Widget>[
                             Expanded(
@@ -1461,12 +1270,12 @@ class _RoyalEstimateEditor extends StatelessWidget {
                                       ),
                                     ),
                             ),
-                            const Expanded(
+                            Expanded(
                               child: Text(
-                                'Rare/special roll — exclude from steady income',
+                                'Rare roll',
                                 style: TextStyle(
-                                  color: ResourceMapAtlasColors.text,
-                                  fontSize: 11,
+                                  color: context.mapChrome.text,
+                                  fontSize: ResourceMapPanelMetrics.secondary,
                                 ),
                               ),
                             ),
@@ -1482,16 +1291,16 @@ class _RoyalEstimateEditor extends StatelessWidget {
                                         repeatCount: plan.repeatCount - 1,
                                       ),
                                     ),
-                              icon: const Icon(Icons.remove_rounded, size: 18),
+                              icon: Icon(Icons.remove_rounded, size: 18),
                             ),
                             Text(
                               '${plan.repeatCount}',
                               key: ValueKey<String>(
                                 'royal-workshop-cycles-${area.id}-$workshopIndex',
                               ),
-                              style: const TextStyle(
-                                color: ResourceMapAtlasColors.ink,
-                                fontWeight: FontWeight.w800,
+                              style: TextStyle(
+                                color: context.mapChrome.ink,
+                                fontWeight: FontWeight.w600,
                               ),
                             ),
                             IconButton(
@@ -1506,7 +1315,7 @@ class _RoyalEstimateEditor extends StatelessWidget {
                                         repeatCount: plan.repeatCount + 1,
                                       ),
                                     ),
-                              icon: const Icon(Icons.add_rounded, size: 18),
+                              icon: Icon(Icons.add_rounded, size: 18),
                             ),
                           ],
                         ),
@@ -1521,6 +1330,20 @@ class _RoyalEstimateEditor extends StatelessWidget {
   }
 }
 
+class _RoyalDetailsReveal extends StatelessWidget {
+  const _RoyalDetailsReveal({required this.child});
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) => MediaQuery.disableAnimationsOf(context)
+      ? child
+      : AnimatedSize(
+          duration: const Duration(milliseconds: 180),
+          curve: Curves.easeOutCubic,
+          child: child,
+        );
+}
+
 class _RoyalAccessBanner extends StatelessWidget {
   const _RoyalAccessBanner({required this.invested, required this.onPressed});
 
@@ -1529,66 +1352,14 @@ class _RoyalAccessBanner extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        color: invested
-            ? ResourceMapAtlasColors.positive.withValues(alpha: .1)
-            : ResourceMapAtlasColors.accent.withValues(alpha: .1),
-        borderRadius: BorderRadius.circular(11),
-        border: Border.all(
-          color: invested
-              ? ResourceMapAtlasColors.positive.withValues(alpha: .55)
-              : ResourceMapAtlasColors.accent.withValues(alpha: .55),
-        ),
+    return OutlinedButton.icon(
+      key: const ValueKey<String>('royal-workshop-invested'),
+      onPressed: onPressed,
+      icon: Icon(
+        invested ? Icons.check_circle_outline_rounded : Icons.lock_open_rounded,
+        size: 18,
       ),
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(12, 10, 8, 10),
-        child: Row(
-          children: <Widget>[
-            Icon(
-              invested
-                  ? Icons.check_circle_outline_rounded
-                  : Icons.lock_open_rounded,
-              color: invested
-                  ? ResourceMapAtlasColors.positive
-                  : ResourceMapAtlasColors.accent,
-              size: 22,
-            ),
-            const SizedBox(width: 10),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: <Widget>[
-                  Text(
-                    invested
-                        ? 'Royal Workshop access recorded'
-                        : 'Open the Royal Workshops for 5 CP',
-                    style: const TextStyle(
-                      color: ResourceMapAtlasColors.ink,
-                      fontSize: 13,
-                      fontWeight: FontWeight.w800,
-                    ),
-                  ),
-                  Text(
-                    invested
-                        ? 'The planner reserves these 5 CP from worker routes.'
-                        : 'Do this from Seoul in BDO, then record it here.',
-                    style: const TextStyle(
-                      color: ResourceMapAtlasColors.muted,
-                      fontSize: 11,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            TextButton(
-              key: const ValueKey<String>('royal-workshop-invested'),
-              onPressed: onPressed,
-              child: Text(invested ? 'Undo' : 'Record 5 CP'),
-            ),
-          ],
-        ),
-      ),
+      label: Text(invested ? '5 CP invested' : 'Record 5 CP'),
     );
   }
 }
@@ -1598,13 +1369,11 @@ class _RoyalActionRow extends StatelessWidget {
     super.key,
     required this.icon,
     required this.title,
-    required this.subtitle,
     required this.onPressed,
   });
 
   final IconData icon;
   final String title;
-  final String subtitle;
   final VoidCallback onPressed;
 
   @override
@@ -1616,7 +1385,7 @@ class _RoyalActionRow extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 9),
         child: Row(
           children: <Widget>[
-            Icon(icon, color: ResourceMapAtlasColors.accent, size: 19),
+            Icon(icon, color: context.mapChrome.accent, size: 19),
             const SizedBox(width: 9),
             Expanded(
               child: Column(
@@ -1624,25 +1393,18 @@ class _RoyalActionRow extends StatelessWidget {
                 children: <Widget>[
                   Text(
                     title,
-                    style: const TextStyle(
-                      color: ResourceMapAtlasColors.ink,
-                      fontSize: 12.5,
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                  Text(
-                    subtitle,
-                    style: const TextStyle(
-                      color: ResourceMapAtlasColors.muted,
-                      fontSize: 10.5,
+                    style: TextStyle(
+                      color: context.mapChrome.ink,
+                      fontSize: ResourceMapPanelMetrics.primary,
+                      fontWeight: FontWeight.w600,
                     ),
                   ),
                 ],
               ),
             ),
-            const Icon(
+            Icon(
               Icons.chevron_right_rounded,
-              color: ResourceMapAtlasColors.muted,
+              color: context.mapChrome.muted,
               size: 19,
             ),
           ],
@@ -1684,9 +1446,9 @@ class _RoyalNotice extends StatelessWidget {
             Expanded(
               child: Text(
                 text,
-                style: const TextStyle(
-                  color: ResourceMapAtlasColors.text,
-                  fontSize: 11,
+                style: TextStyle(
+                  color: context.mapChrome.text,
+                  fontSize: ResourceMapPanelMetrics.secondary,
                   height: 1.35,
                 ),
               ),
@@ -1700,123 +1462,24 @@ class _RoyalNotice extends StatelessWidget {
   }
 }
 
-class _RoyalMetric extends StatelessWidget {
-  const _RoyalMetric({
-    required this.label,
-    required this.value,
-    required this.icon,
-  });
-
-  final String label;
-  final String value;
-  final IconData icon;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      constraints: const BoxConstraints(minWidth: 132),
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 9),
-      decoration: BoxDecoration(
-        color: ResourceMapAtlasColors.paper,
-        borderRadius: BorderRadius.circular(9),
-        border: Border.all(color: ResourceMapAtlasColors.divider),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: <Widget>[
-          Icon(icon, size: 18, color: ResourceMapAtlasColors.primary),
-          const SizedBox(width: 7),
-          Flexible(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: <Widget>[
-                Text(
-                  label,
-                  style: const TextStyle(
-                    color: ResourceMapAtlasColors.muted,
-                    fontSize: 9.5,
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-                Text(
-                  value,
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(
-                    color: ResourceMapAtlasColors.ink,
-                    fontSize: 10.5,
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _RoyalStatusChip extends StatelessWidget {
-  const _RoyalStatusChip({
-    required this.icon,
-    required this.label,
-    required this.active,
-  });
-
-  final IconData icon;
-  final String label;
-  final bool active;
-
-  @override
-  Widget build(BuildContext context) {
-    final color = active
-        ? ResourceMapAtlasColors.positive
-        : ResourceMapAtlasColors.accent;
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 6),
-      decoration: BoxDecoration(
-        color: color.withValues(alpha: .1),
-        borderRadius: BorderRadius.circular(999),
-        border: Border.all(color: color.withValues(alpha: .45)),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: <Widget>[
-          Icon(icon, size: 14, color: color),
-          const SizedBox(width: 5),
-          Text(
-            label,
-            style: TextStyle(
-              color: color,
-              fontSize: 10.5,
-              fontWeight: FontWeight.w800,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
 class _RoyalCrest extends StatelessWidget {
   const _RoyalCrest();
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: 38,
-      height: 38,
+      width: ResourceMapPanelMetrics.navigationArtwork,
+      height: ResourceMapPanelMetrics.navigationArtwork,
       decoration: BoxDecoration(
-        color: ResourceMapAtlasColors.accent.withValues(alpha: .12),
+        color: context.mapChrome.accent.withValues(alpha: .12),
         shape: BoxShape.circle,
         border: Border.all(
-          color: ResourceMapAtlasColors.accent.withValues(alpha: .6),
+          color: context.mapChrome.accent.withValues(alpha: .6),
         ),
       ),
-      child: const Icon(
+      child: Icon(
         Icons.account_balance_rounded,
-        color: ResourceMapAtlasColors.accent,
+        color: context.mapChrome.accent,
         size: 21,
       ),
     );
@@ -1832,13 +1495,13 @@ class _RoyalAreaGlyph extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final color = kind == BdoRoyalWorkshopKind.production
-        ? ResourceMapAtlasColors.positive
-        : ResourceMapAtlasColors.accent;
+        ? context.mapChrome.positive
+        : context.mapChrome.accent;
     return Container(
       width: size,
       height: size,
       decoration: BoxDecoration(
-        color: ResourceMapAtlasColors.paperRaised,
+        color: context.mapChrome.paperRaised,
         shape: BoxShape.circle,
         border: Border.all(color: color, width: 2),
         boxShadow: const <BoxShadow>[
@@ -1854,79 +1517,6 @@ class _RoyalAreaGlyph extends StatelessWidget {
       ),
     );
   }
-}
-
-class _RoyalSectionLabel extends StatelessWidget {
-  const _RoyalSectionLabel(this.text);
-
-  final String text;
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 6),
-      child: Text(
-        text,
-        style: const TextStyle(
-          color: ResourceMapAtlasColors.muted,
-          fontSize: 10,
-          fontWeight: FontWeight.w800,
-          letterSpacing: .85,
-        ),
-      ),
-    );
-  }
-}
-
-class _PalacePlanPainter extends CustomPainter {
-  const _PalacePlanPainter();
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final courtyard = Paint()
-      ..color = const Color(0x243E5A50)
-      ..style = PaintingStyle.fill;
-    final outline = Paint()
-      ..color = const Color(0x8056A89A)
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 1.25;
-    final gold = Paint()
-      ..color = const Color(0x56C79B58)
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 1;
-    final center = RRect.fromRectAndRadius(
-      Rect.fromLTWH(
-        size.width * .35,
-        size.height * .1,
-        size.width * .2,
-        size.height * .76,
-      ),
-      const Radius.circular(6),
-    );
-    canvas.drawRRect(center, courtyard);
-    canvas.drawRRect(center, outline);
-    for (final y in <double>[.18, .32, .46, .60, .74]) {
-      final building = RRect.fromRectAndRadius(
-        Rect.fromLTWH(
-          size.width * .38,
-          size.height * y,
-          size.width * .14,
-          math.max(4, size.height * .055),
-        ),
-        const Radius.circular(2),
-      );
-      canvas.drawRRect(building, gold);
-    }
-    final outer = Path()
-      ..moveTo(size.width * .13, size.height * .91)
-      ..lineTo(size.width * .13, size.height * .08)
-      ..lineTo(size.width * .78, size.height * .08)
-      ..lineTo(size.width * .78, size.height * .91);
-    canvas.drawPath(outer, outline);
-  }
-
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
 
 String _shortSilver(double value) {

@@ -20,20 +20,19 @@ if ($PublicGitHubRepository -cnotmatch
     '^https://github\.com/[A-Za-z0-9](?:[A-Za-z0-9-]{0,38})/[A-Za-z0-9._-]{1,100}$') {
     throw 'The public update source must be the permanent canonical repository base URL: https://github.com/OWNER/REPOSITORY'
 }
-$Version = '0.1.5'
-$BuildNumber = '24'
-$PreviousStableVersion = '0.1.4'
+$Version = '0.1.6'
+$BuildNumber = '25'
+$PreviousStableVersion = '0.1.5'
 $PreviousStableCommit =
-    '91660bc84312a9fa4897078e0082976e869c9c83'
+    '8f600b3b6bbece1add1077a40a5fb1c5d56797f8'
 $UpdateSource = $PublicGitHubRepository
-$ReleaseNotesRelativePath = 'docs\releases\0.1.5.md'
+$ReleaseNotesRelativePath = 'docs\releases\0.1.6.md'
 $OutputDirectoryName = 'public-stable-candidate'
 $ManifestName = 'public-candidate-manifest.json'
 $RemainingBlockers = @(
-    'verify an installed 0.1.4 updates to 0.1.5 through the in-app update bar with its personal data intact',
+    'verify an installed 0.1.5 updates to 0.1.6 through the in-app update bar with its personal data intact',
     'complete fresh install, repair, and uninstall lifecycle verification',
-    'fresh-clone privacy and release-artifact scan',
-    'explicit final approval immediately before public GitHub publication'
+    'fresh-clone privacy and release-artifact scan'
 )
 
 $PackageId = 'BlackSpiritLife.App'
@@ -52,12 +51,12 @@ $VelopackRuntimeSha256 =
     'C36D8B984639A8AF9D3397088D3FFB8213FE1BD0917F555CF0C6E33F014403EC'
 $VelopackPackageUrl =
     'https://github.com/velopack/velopack/releases/download/1.2.0/vpk.1.2.0.nupkg'
-$PreviousFeedBytes = 10596L
+$PreviousFeedBytes = 10230L
 $PreviousFeedSha256 =
-    '91E60BA0C52D0B61500602696F20D137C3BF91E42963073AD64751C8EC6B68B5'
-$PreviousFullPackageBytes = 75114791L
+    '7F9F995660AA450C80EA610DB041C82BD7C51EA35593C1B1B06FFE77FFA91FF0'
+$PreviousFullPackageBytes = 217687337L
 $PreviousFullPackageSha256 =
-    '873D0F1BBBE132FA72FD3CC61F0693D25DB562E6E3BB54361E5275BA9858CC7A'
+    '9C3E9BEB7121B06BA7CE4D482546842866020DDA1C231601C4149B9E31302E28'
 
 function Assert-LastExitCode {
     param([Parameter(Mandatory = $true)][string]$Operation)
@@ -118,6 +117,36 @@ function Assert-CleanSource {
     }
 }
 
+function Assert-PublicSourceBoundary {
+    param([Parameter(Mandatory = $true)][string]$ProjectRoot)
+
+    $forbiddenRelativePaths = @(
+        'packages\bdo_fishing_core',
+        'packages\bdo_gathering_companion',
+        'windows\session_import',
+        'packages\bdo_map_core\tool\seeds\bdocodex_worldmap_2026_07_29_private_seed.json',
+        'packages\bdo_map_core\tool\seeds\bdocodex_worldmap_2026_08_15_private_seed.json',
+        'packages\bdo_map_core\tool\seeds\rusalka_coral_bdocodex_2026_07_28_private_seed.json',
+        'packages\bdo_map_core\tool\seeds\stillcoral_coastal_gathering_bdocodex_2026_08_01_private_seed.json',
+        'packages\bdo_map_core\tool\seeds\vendor_npcs_bdocodex_2026_08_15_private_seed.json',
+        'packages\bdo_map_core\tool\seeds\vendor_npc_portraits_2026_08_16_private_manifest.json'
+    )
+    foreach ($relativePath in $forbiddenRelativePaths) {
+        if (Test-Path -LiteralPath (Join-Path $ProjectRoot $relativePath)) {
+            throw "The public source contains an excluded private path: $relativePath"
+        }
+    }
+
+    $forbiddenPersonalFiles = @(Get-ChildItem -LiteralPath $ProjectRoot -Recurse -File |
+        Where-Object {
+            $_.FullName -notlike "$ProjectRoot\.git\*" -and
+            $_.Name -match '(?i)^(fish-journal.*\.sqlite3?|garmoth_spot_catalog\.json|connection\.json|planner-state\.json(?:\..*)?|personal-data-(?:location(?:\.committed)?|move-journal)\.json(?:\..*)?)$'
+        })
+    if ($forbiddenPersonalFiles.Count -ne 0) {
+        throw "The public source contains an excluded personal or service-data file: $($forbiddenPersonalFiles[0].FullName)"
+    }
+}
+
 function Assert-NoTextMarker {
     param(
         [Parameter(Mandatory = $true)][string]$Path,
@@ -172,7 +201,7 @@ function Assert-VelopackPackage {
             }
         }
         $forbiddenEntries = @($archive.Entries | Where-Object {
-            $_.FullName -match '(?i)(planner-state|personal-data-location|\.dmp$|\.log$|\.tmp$|\.bak$|screenshot)'
+            $_.FullName -match '(?i)(planner-state|personal-data-location|fish-journal|garmoth_spot_catalog|session_import|bdo_fishing_core|bdo_gathering_companion|\.sqlite3?$|\.dmp$|\.log$|\.tmp$|\.bak$|screenshot)'
         })
         if ($forbiddenEntries.Count -ne 0) {
             throw "The package contains a personal, diagnostic, or temporary file: $($forbiddenEntries[0].FullName)"
@@ -247,11 +276,12 @@ if ($sourceParentCommit -cne $PreviousStableCommit -or
 }
 $sourceCommitCount = (& git -C $ProjectRoot rev-list --count HEAD).Trim()
 Assert-LastExitCode -Operation 'Git public history count check'
-if ($sourceCommitCount -cne '4') {
-    throw 'The public candidate must contain only the reviewed four-commit public history through sanitized 0.1.5.'
+if ($sourceCommitCount -cne '5') {
+    throw 'The public candidate must contain only the reviewed five-commit public history through sanitized 0.1.6.'
 }
 $sourceTag = $expectedSourceTag
 Assert-CleanSource -ProjectRoot $ProjectRoot -ExpectedCommit $sourceCommit
+Assert-PublicSourceBoundary -ProjectRoot $ProjectRoot
 
 $identity = Get-Content -Raw -LiteralPath $IdentityPath
 $requiredIdentityFragments = @(
@@ -298,7 +328,7 @@ $publishedPreviousFeedHash =
     (Get-FileHash -Algorithm SHA256 -LiteralPath $publishedPreviousFeed).Hash
 if ($publishedPreviousFeedItem.Length -ne $PreviousFeedBytes -or
     $publishedPreviousFeedHash -cne $PreviousFeedSha256) {
-    throw 'The published 0.1.4 feed changed from the reviewed release input.'
+    throw 'The published 0.1.5 feed changed from the reviewed release input.'
 }
 $publishedPreviousFeedJson =
     Get-Content -Raw -LiteralPath $publishedPreviousFeed | ConvertFrom-Json
@@ -310,7 +340,7 @@ $publishedPreviousAssets = @($publishedPreviousFeedJson.Assets | Where-Object {
 })
 if ($publishedPreviousAssets.Count -ne 1 -or
     @($publishedPreviousFeedJson.Assets).Count -ne 3) {
-    throw 'The published 0.1.4 feed does not contain exactly the expected full package and reviewed asset set.'
+    throw 'The published 0.1.5 feed does not contain exactly the expected full package and reviewed asset set.'
 }
 Invoke-WebRequest `
     -Uri $previousPackageUrl `
@@ -322,14 +352,14 @@ $publishedPreviousPackageHash =
     (Get-FileHash -Algorithm SHA256 -LiteralPath $publishedPreviousPackage).Hash
 if ($publishedPreviousPackageItem.Length -ne $PreviousFullPackageBytes -or
     $publishedPreviousPackageHash -cne $PreviousFullPackageSha256) {
-    throw 'The published 0.1.4 full package changed from the reviewed release input.'
+    throw 'The published 0.1.5 full package changed from the reviewed release input.'
 }
 if ([long]$publishedPreviousAssets[0].Size -ne $publishedPreviousPackageItem.Length -or
     -not $publishedPreviousPackageHash.Equals(
         [string]$publishedPreviousAssets[0].SHA256,
         [System.StringComparison]::OrdinalIgnoreCase
     )) {
-    throw 'The published 0.1.4 full package does not match its published feed.'
+    throw 'The published 0.1.5 full package does not match its published feed.'
 }
 Assert-VelopackPackage `
     -PackagePath $publishedPreviousPackage `
@@ -440,7 +470,7 @@ if (Test-Path -LiteralPath $appLibrary -PathType Leaf) {
 }
 $forbiddenBundleFiles = @(Get-ChildItem -LiteralPath $BundleDirectory -Recurse -File |
     Where-Object {
-        $_.Name -match '(?i)(planner-state|personal-data-location|\.pdb$|\.dmp$|\.log$|\.tmp$|\.bak$|screenshot)'
+        $_.FullName -match '(?i)(planner-state|personal-data-location|fish-journal|garmoth_spot_catalog|session_import|bdo_fishing_core|bdo_gathering_companion|\.sqlite3?$|\.pdb$|\.dmp$|\.log$|\.tmp$|\.bak$|screenshot)'
     })
 if ($forbiddenBundleFiles.Count -ne 0) {
     throw "The application bundle contains a personal, diagnostic, or temporary file: $($forbiddenBundleFiles[0].FullName)"
@@ -500,7 +530,7 @@ $previousFullHash =
     (Get-FileHash -Algorithm SHA256 -LiteralPath $previousFullPackage).Hash
 if ($previousFullItem.Length -ne $PreviousFullPackageBytes -or
     $previousFullHash -cne $PreviousFullPackageSha256) {
-    throw 'Velopack changed the pinned published 0.1.4 full package.'
+    throw 'Velopack changed the pinned published 0.1.5 full package.'
 }
 $feedAssets = @($feed.Assets)
 if ($feedAssets.Count -ne 3) {
@@ -528,10 +558,10 @@ if ($matchingFullAssets.Count -ne 1) {
     throw 'The update feed does not contain exactly one expected full package.'
 }
 if ($matchingDeltaAssets.Count -ne 1) {
-    throw 'The update feed does not contain exactly one 0.1.4 to 0.1.5 delta package.'
+    throw 'The update feed does not contain exactly one 0.1.5 to 0.1.6 delta package.'
 }
 if ($matchingPreviousAssets.Count -ne 1) {
-    throw 'The update feed does not retain exactly one published 0.1.4 full package.'
+    throw 'The update feed does not retain exactly one published 0.1.5 full package.'
 }
 $fullItem = Get-Item -LiteralPath $fullPackage
 $fullHash = (Get-FileHash -Algorithm SHA256 -LiteralPath $fullPackage).Hash
@@ -544,6 +574,9 @@ if ([long]$matchingFullAssets[0].Size -ne $fullItem.Length -or
 }
 $deltaItem = Get-Item -LiteralPath $deltaPackage
 $deltaHash = (Get-FileHash -Algorithm SHA256 -LiteralPath $deltaPackage).Hash
+if ($deltaItem.Length -ge $fullItem.Length) {
+    throw 'The generated delta package must be smaller than the full package.'
+}
 if ([long]$matchingDeltaAssets[0].Size -ne $deltaItem.Length -or
     -not $deltaHash.Equals(
         [string]$matchingDeltaAssets[0].SHA256,
@@ -556,7 +589,7 @@ if ([long]$matchingPreviousAssets[0].Size -ne $previousFullItem.Length -or
         [string]$matchingPreviousAssets[0].SHA256,
         [System.StringComparison]::OrdinalIgnoreCase
     )) {
-    throw 'The updated feed changed the published 0.1.4 full-package identity.'
+    throw 'The updated feed changed the published 0.1.5 full-package identity.'
 }
 
 $setupHash = (Get-FileHash -Algorithm SHA256 -LiteralPath $generatedSetup).Hash

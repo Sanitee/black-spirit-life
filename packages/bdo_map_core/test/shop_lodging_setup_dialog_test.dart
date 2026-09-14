@@ -1,7 +1,10 @@
 import 'package:bdo_map_core/bdo_map_core.dart';
 import 'package:bdo_map_core/src/widgets/shop_lodging_setup_dialog.dart';
+import 'package:bdo_map_core/src/widgets/resource_map_panel_metrics.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+
+import 'support/map_menu_capture.dart';
 
 void main() {
   testWidgets(
@@ -26,14 +29,14 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('Shop lodging · Calpheon City'), findsOneWidget);
-      expect(find.text('0 of 5 purchased'), findsOneWidget);
+      expect(find.text('Pearl purchased'), findsOneWidget);
       expect(
         find.byKey(const ValueKey<String>('resource-map-shop-lodging-loyalty')),
         findsOneWidget,
       );
       expect(
         find.textContaining('Enter purchased, not remaining'),
-        findsOneWidget,
+        findsNothing,
       );
 
       final pearlPlus = find.byKey(
@@ -43,11 +46,11 @@ void main() {
         await tester.tap(pearlPlus);
         await tester.pump();
       }
-      expect(find.text('5 of 5 purchased'), findsOneWidget);
+      expect(find.text('5'), findsOneWidget);
       expect(tester.widget<IconButton>(pearlPlus).onPressed, isNull);
       await tester.tap(pearlPlus, warnIfMissed: false);
       await tester.pump();
-      expect(find.text('5 of 5 purchased'), findsOneWidget);
+      expect(find.text('5'), findsOneWidget);
 
       await tester.tap(
         find.byKey(const ValueKey<String>('resource-map-shop-lodging-loyalty')),
@@ -58,7 +61,7 @@ void main() {
         '3',
       );
       await tester.pump();
-      expect(find.text('Adds 9 bonus beds'), findsOneWidget);
+      expect(find.text('Adds 9 bonus beds'), findsNothing);
 
       await tester.tap(
         find.byKey(const ValueKey<String>('resource-map-shop-lodging-save')),
@@ -105,9 +108,9 @@ void main() {
     );
     expect(
       find.textContaining('No verified town-specific shop coupon'),
-      findsOneWidget,
+      findsNothing,
     );
-    expect(find.text('Adds 2 bonus beds'), findsOneWidget);
+    expect(find.text('Adds 2 bonus beds'), findsNothing);
 
     await tester.tap(
       find.byKey(const ValueKey<String>('resource-map-shop-lodging-save')),
@@ -139,10 +142,10 @@ void main() {
 
     expect(
       find.textContaining('8 older bonus beds are saved without'),
-      findsOneWidget,
+      findsNothing,
     );
-    expect(find.text('0 of 5 purchased'), findsOneWidget);
-    expect(find.text('Adds 0 bonus beds'), findsOneWidget);
+    expect(find.text('Pearl purchased'), findsOneWidget);
+    expect(find.text('Adds 0 bonus beds'), findsNothing);
     expect(tester.takeException(), isNull);
   });
 
@@ -214,21 +217,95 @@ void main() {
       expect(tester.takeException(), isNull);
     },
   );
+
+  for (final textScale in [1.0, 2.0]) {
+    testWidgets(
+      'lodging uses readable roles and keeps warnings at $textScale text',
+      (tester) async {
+        await tester.runAsync(loadMapMenuCaptureFonts);
+        await tester.binding.setSurfaceSize(const Size(700, 650));
+        addTearDown(() => tester.binding.setSurfaceSize(null));
+        final saved = <WorkerLodgingShopSetup>[];
+        await tester.pumpWidget(
+          _DialogHarness(
+            textScale: textScale,
+            dialog: WorkerLodgingShopSetupDialog(
+              townName: 'Calpheon City',
+              catalogTown: WorkerLodgingShopCatalog.findTown('Calpheon City'),
+              initialValue: const WorkerLodgingShopSetup(),
+              legacyUnsplitBonus: 8,
+              onSave: saved.add,
+            ),
+          ),
+        );
+        await tester.tap(find.text('Open'));
+        await tester.pumpAndSettle();
+        expect(
+          tester.widget<Text>(find.text('Pearl purchased')).style?.fontSize,
+          ResourceMapPanelMetrics.primary,
+        );
+        expect(find.byTooltip('Up to 5 purchased'), findsOneWidget);
+        expect(find.textContaining('Saving replaces'), findsNothing);
+        expect(find.textContaining('Enter purchased'), findsNothing);
+        expect(
+          find.byTooltip(
+            'Enter purchased coupons, not the remaining shop allowance.\nSaving replaces the older unsplit total of 8 bonus beds.',
+          ),
+          findsOneWidget,
+        );
+        await captureMapMenu(
+          tester,
+          boundary: find.byKey(const ValueKey('shop-lodging-capture')),
+          name: 'shop-lodging-dialog-text${(textScale * 100).round()}',
+        );
+        final other = find.byKey(
+          const ValueKey('resource-map-shop-lodging-other'),
+        );
+        await tester.ensureVisible(other);
+        await tester.enterText(other, '-1');
+        final save = find.byKey(
+          const ValueKey('resource-map-shop-lodging-save'),
+        );
+        await tester.tap(save);
+        await tester.pumpAndSettle();
+        expect(find.text('Enter a whole number of 0 or more.'), findsOneWidget);
+        expect(saved, isEmpty);
+        expect(save.hitTestable(), findsOneWidget);
+        await tester.ensureVisible(other);
+        await tester.enterText(other, '2');
+        await tester.tap(save);
+        await tester.pumpAndSettle();
+        expect(saved.single.otherBonus, 2);
+        expect(tester.takeException(), isNull);
+      },
+    );
+  }
 }
 
 class _DialogHarness extends StatelessWidget {
   const _DialogHarness({
     required this.dialog,
     this.chrome = ResourceMapChromeThemeData.sakuraCartographer,
+    this.textScale = 1,
   });
 
   final Widget dialog;
   final ResourceMapChromeThemeData chrome;
+  final double textScale;
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       theme: ThemeData.dark(useMaterial3: true),
+      builder: (context, child) => RepaintBoundary(
+        key: const ValueKey('shop-lodging-capture'),
+        child: MediaQuery(
+          data: MediaQuery.of(
+            context,
+          ).copyWith(textScaler: TextScaler.linear(textScale)),
+          child: child!,
+        ),
+      ),
       home: ResourceMapChromeTheme(
         data: chrome,
         child: Scaffold(

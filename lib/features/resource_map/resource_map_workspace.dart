@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 
 import '../../app/state/planner_application_controller.dart';
+import '../../app/workspace/planner_gather_checklist_bridge.dart';
 import '../../app_identity.dart';
 import '../../data/catalog/catalog_repository.dart';
 import '../../domain/market/market_calculations.dart';
@@ -94,6 +95,7 @@ class ResourceMapWorkspace extends StatefulWidget {
     this.activeNodeRecordingPicker,
     this.activeNodeRecordingScanner,
     this.onRefreshMarketEvidence,
+    this.gatherChecklistBridge,
     super.key,
   });
 
@@ -112,6 +114,7 @@ class ResourceMapWorkspace extends StatefulWidget {
   final BdoActiveNodeRecordingPicker? activeNodeRecordingPicker;
   final BdoActiveNodeRecordingScanner? activeNodeRecordingScanner;
   final BdoMarketEvidenceRefresh? onRefreshMarketEvidence;
+  final PlannerGatherChecklistBridge? gatherChecklistBridge;
 
   @override
   State<ResourceMapWorkspace> createState() => _ResourceMapWorkspaceState();
@@ -122,10 +125,17 @@ class _ResourceMapWorkspaceState extends State<ResourceMapWorkspace> {
   late ResourceMapWorkerEconomicsCache _workerEconomicsCache;
   late ResourceMapLodgingCache _lodgingCache;
   late Future<_ResourceMapWorkspaceData> _data;
+  late PlannerGatherChecklistBridge _gatherBridge;
 
   @override
   void initState() {
     super.initState();
+    _gatherBridge =
+        widget.gatherChecklistBridge ??
+        PlannerGatherChecklistBridge(
+          controller: widget.appController,
+          catalog: widget.catalogRepository,
+        );
     _datasetCache = widget.datasetCache ?? ResourceMapDatasetCache();
     _workerEconomicsCache =
         widget.workerEconomicsCache ?? ResourceMapWorkerEconomicsCache();
@@ -136,6 +146,16 @@ class _ResourceMapWorkspaceState extends State<ResourceMapWorkspace> {
   @override
   void didUpdateWidget(ResourceMapWorkspace oldWidget) {
     super.didUpdateWidget(oldWidget);
+    if (oldWidget.gatherChecklistBridge != widget.gatherChecklistBridge ||
+        oldWidget.appController != widget.appController) {
+      if (oldWidget.gatherChecklistBridge == null) _gatherBridge.dispose();
+      _gatherBridge =
+          widget.gatherChecklistBridge ??
+          PlannerGatherChecklistBridge(
+            controller: widget.appController,
+            catalog: widget.catalogRepository,
+          );
+    }
     if (oldWidget.datasetCache == widget.datasetCache &&
         oldWidget.workerEconomicsCache == widget.workerEconomicsCache &&
         oldWidget.lodgingCache == widget.lodgingCache) {
@@ -157,6 +177,12 @@ class _ResourceMapWorkspaceState extends State<ResourceMapWorkspace> {
       workerEconomics: await workerEconomics,
       lodging: await lodging,
     );
+  }
+
+  @override
+  void dispose() {
+    if (widget.gatherChecklistBridge == null) _gatherBridge.dispose();
+    super.dispose();
   }
 
   @override
@@ -208,6 +234,7 @@ class _ResourceMapWorkspaceState extends State<ResourceMapWorkspace> {
                                 controller.plan,
                               ],
                               widget.appController.marketTax,
+                              widget.appController.resourceMapUiOpacity,
                             ]),
                             builder: (context, _) {
                               final plan = modeController.plan.value;
@@ -249,6 +276,20 @@ class _ResourceMapWorkspaceState extends State<ResourceMapWorkspace> {
                               final target = plan.target.trim();
                               return BdoResourceMap(
                                 dataset: dataset,
+                                interfaceStyle: widget
+                                    .appController
+                                    .resourceMapInterfaceStyle
+                                    .value,
+                                onInterfaceStyleChanged: widget
+                                    .appController
+                                    .setResourceMapInterfaceStyle,
+                                uiOpacity: widget
+                                    .appController
+                                    .resourceMapUiOpacity
+                                    .value,
+                                onUiOpacityChanged: widget
+                                    .appController
+                                    .setResourceMapUiOpacity,
                                 workerEconomics: data.workerEconomics,
                                 lodgingDataset: data.lodging,
                                 cacheDirectory: _cacheDirectory(),
@@ -264,6 +305,14 @@ class _ResourceMapWorkspaceState extends State<ResourceMapWorkspace> {
                                     .appController
                                     .setResourceMapFavoriteIds,
                                 gatherChecklist: gatherChecklist,
+                                gatherChecklistQuantities: _gatherBridge
+                                    .quantities(dataset),
+                                onRecordGathered: (resourceId, quantity) =>
+                                    _gatherBridge.record(
+                                      dataset,
+                                      resourceId,
+                                      quantity,
+                                    ),
                                 onGatherChecklistChanged: widget
                                     .appController
                                     .setResourceMapGatherChecklist,

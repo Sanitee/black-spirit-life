@@ -1,3 +1,4 @@
+import '../catalog/temporarily_archived_items.dart';
 import 'planner_models.dart';
 
 /// Resolves reviewed acquisition guidance without treating a planner leaf as
@@ -7,9 +8,31 @@ ItemAcquisitionRule? resolveItemAcquisition({
   required PlannerRules rules,
 }) {
   final direct = _exactOrFolded(rules.acquisitionInfo, name);
-  if (direct != null) return direct;
+  if (direct != null) return _activeGuidance(direct);
   final alias = _exactOrFolded(rules.marketNameAliases, name);
-  return alias == null ? null : _exactOrFolded(rules.acquisitionInfo, alias);
+  final aliased = alias == null
+      ? null
+      : _exactOrFolded(rules.acquisitionInfo, alias);
+  return aliased == null ? null : _activeGuidance(aliased);
+}
+
+ItemAcquisitionRule _activeGuidance(ItemAcquisitionRule rule) {
+  if (!isTemporarilyArchivedItem(
+        rule.canonicalName,
+        itemId: rule.itemId?.toString(),
+      ) ||
+      rule.status == 'temporarily_archived') {
+    return rule;
+  }
+  // Preserve historical route facts, but do not present them as confirmed
+  // current acquisition advice in any feature that uses this shared resolver.
+  return ItemAcquisitionRule(
+    canonicalName: rule.canonicalName,
+    itemId: rule.itemId,
+    status: 'temporarily_archived',
+    reviewedAt: rule.reviewedAt,
+    routes: rule.routes,
+  );
 }
 
 T? _exactOrFolded<T>(Map<String, T> values, String name) {

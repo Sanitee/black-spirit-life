@@ -2886,9 +2886,7 @@ void main() {
       expect(
         find.descendant(
           of: acquisitionDrag,
-          matching: find.bySemanticsLabel(
-            'Close acquisition information for Sunrise Herb',
-          ),
+          matching: find.bySemanticsLabel('Close Sunrise Herb information'),
         ),
         findsNothing,
       );
@@ -2904,9 +2902,7 @@ void main() {
       await tester.tap(action);
       await tester.pump();
       expect(card, findsOneWidget);
-      await tester.tap(
-        find.bySemanticsLabel('Close acquisition information for Sunrise Herb'),
-      );
+      await tester.tap(find.bySemanticsLabel('Close Sunrise Herb information'));
       await tester.pump();
       expect(card, findsNothing);
 
@@ -3360,6 +3356,7 @@ void main() {
       await tester.tap(
         find.byKey(PlannerActionKeys.row('P08', 'Clear Liquid Reagent')),
       );
+      await tester.pump();
       await tester.pump(const Duration(milliseconds: 200));
 
       expect(
@@ -3383,9 +3380,7 @@ void main() {
         findsOneWidget,
       );
       expect(
-        find.text(
-          'All base materials are covered by inventory or craft steps.',
-        ),
+        find.text('You have the materials, or they’re in your craft queue.'),
         findsOneWidget,
       );
       expect(tester.takeException(), isNull);

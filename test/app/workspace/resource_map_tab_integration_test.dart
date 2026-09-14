@@ -113,7 +113,7 @@ void main() {
                     .imageProvider
                 as AssetImage)
             .assetName,
-        'assets/app/bdo_tool_icon.png',
+        'packages/bdo_map_core/assets/images/node_icons/14.png',
       );
       expect(
         ((tester
@@ -128,7 +128,7 @@ void main() {
                     .imageProvider
                 as AssetImage)
             .assetName,
-        'assets/app/bdo_resource_map_icon.png',
+        'packages/bdo_map_core/assets/images/node_icons/gray/0.png',
       );
       expect(find.byType(PlannerView), findsOneWidget);
       expect(
@@ -199,7 +199,7 @@ void main() {
       expect(siemoImage.alignment, Alignment.bottomCenter);
       expect(siemoImage.filterQuality, FilterQuality.high);
       expect(
-        find.widgetWithText(TextField, 'Find an item, source, node or town'),
+        find.byKey(const ValueKey<String>('resource-map-atlas-search-field')),
         findsOneWidget,
       );
       expect(find.byType(PlannerView), findsNothing);
@@ -265,7 +265,7 @@ void main() {
   );
 
   testWidgets(
-    'Planner theme changes automatically pair the retained Resource Map skin',
+    'Planner theme changes leave the retained Resource Map skin independent',
     (tester) async {
       configureApplicationTestSurface(tester, const Size(1500, 940));
       final harness = await _createHarness(tester);
@@ -294,7 +294,7 @@ void main() {
       final retainedMapState = tester.state(mapFinder);
       expect(
         ResourceMapChromeTheme.of(tester.element(mapFinder)).variant,
-        ResourceMapChromeThemeVariant.sakuraCartographer,
+        ResourceMapChromeThemeVariant.fieldAtlas,
       );
 
       await tester.enterText(find.byType(TextField), 'snake meat');
@@ -311,11 +311,11 @@ void main() {
       expect(
         tester.widget<TextField>(find.byType(TextField)).controller!.text,
         'snake meat',
-        reason: 'theme pairing must not recreate the retained map workspace',
+        reason: 'planner appearance must not recreate the map workspace',
       );
       expect(
         ResourceMapChromeTheme.of(tester.element(mapFinder)).variant,
-        ResourceMapChromeThemeVariant.illuminatedAtlas,
+        ResourceMapChromeThemeVariant.fieldAtlas,
       );
 
       harness.bundle.controller.updateDocument(
@@ -330,7 +330,7 @@ void main() {
       expect(tester.state(mapFinder), same(retainedMapState));
       expect(
         ResourceMapChromeTheme.of(tester.element(mapFinder)).variant,
-        ResourceMapChromeThemeVariant.sakuraCartographer,
+        ResourceMapChromeThemeVariant.fieldAtlas,
       );
       expect(tester.takeException(), isNull);
 
@@ -375,13 +375,7 @@ void main() {
       await _pumpUntilMapIsReady(tester);
       await tester.pump();
       await tester.tap(
-        find.byKey(const ValueKey<String>('resource-map-command-gather')),
-      );
-      await tester.pumpAndSettle();
-      await tester.tap(
-        find
-            .byKey(const ValueKey<String>('resource-map-gather-menu-plan'))
-            .hitTestable(),
+        find.byKey(const ValueKey<String>('resource-map-home-find-material')),
       );
       await tester.pumpAndSettle();
       await tester.tap(
@@ -395,21 +389,13 @@ void main() {
         const ValueKey<String>('resource-map-plan-need-item:821255'),
       );
       final homeScrollable = find.descendant(
-        of: find.byKey(const ValueKey<String>('resource-map-gather-hub')),
+        of: find.byKey(const ValueKey<String>('resource-map-atlas-dock')),
         matching: find.byType(Scrollable),
       );
-      final neededHeading = find.text('NEEDED FOR YOUR PLAN');
-      if (neededHeading.evaluate().isEmpty &&
-          homeScrollable.evaluate().isNotEmpty) {
-        await tester.scrollUntilVisible(
-          neededHeading,
-          180,
-          scrollable: homeScrollable.first,
-        );
-      }
+      final neededHeading = find.text('Needed for your plan');
       await tester.pump();
       expect(neededHeading, findsOneWidget);
-      expect(find.text('Alchemy · Perfume of Tenacity'), findsOneWidget);
+      expect(find.text('Alchemy · Perfume of Tenacity'), findsNothing);
       if (rusalkaRow.evaluate().isEmpty &&
           homeScrollable.evaluate().isNotEmpty) {
         await tester.scrollUntilVisible(
@@ -564,7 +550,7 @@ void main() {
 
       final mapFinder = find.byType(BdoResourceMap);
       final mapElement = tester.element(mapFinder);
-      await tester.enterText(find.byType(TextField), 'Silver Azalea');
+      await tester.enterText(find.byType(TextField), 'Ash Sap');
       await tester.pump();
       final refresh = tester
           .widget<BdoResourceMap>(mapFinder)
@@ -573,33 +559,33 @@ void main() {
 
       late String summary;
       await tester.runAsync(() async {
-        summary = await refresh!(const <String>{'Silver Azalea'});
+        summary = await refresh!(const <String>{'Ash Sap'});
       });
       await tester.pump();
 
       expect(summary, 'Market updated for 1 material(s).');
       expect(gateway.requests, hasLength(1));
-      expect(gateway.requests.single.name, 'Silver Azalea');
-      expect(gateway.requests.single.id, '5402');
+      expect(gateway.requests.single.name, 'Ash Sap');
+      expect(gateway.requests.single.id, '5001');
       final market = harness.bundle.controller.active.state.value.market;
-      expect(market.prices['Silver Azalea'], 24680);
-      expect(market.stock['Silver Azalea'], 135);
+      expect(market.prices['Ash Sap'], 24680);
+      expect(market.stock['Ash Sap'], 135);
       expect(market.region, 'na');
       expect(market.fetchedAt, refreshedAt.millisecondsSinceEpoch);
       final persistedMarket =
           harness.bundle.controller.documentSnapshot.alchemy.market;
-      expect(persistedMarket.prices['Silver Azalea'], 24680);
-      expect(persistedMarket.stock['Silver Azalea'], 135);
+      expect(persistedMarket.prices['Ash Sap'], 24680);
+      expect(persistedMarket.stock['Ash Sap'], 135);
       expect(persistedMarket.region, 'na');
       expect(persistedMarket.fetchedAt, refreshedAt.millisecondsSinceEpoch);
 
       expect(tester.element(mapFinder), same(mapElement));
       expect(
         tester.widget<TextField>(find.byType(TextField)).controller!.text,
-        'Silver Azalea',
+        'Ash Sap',
       );
       final updatedMap = tester.widget<BdoResourceMap>(mapFinder);
-      final evidence = updatedMap.marketOutputEvidenceByResourceId['item:5402'];
+      final evidence = updatedMap.marketOutputEvidenceByResourceId['item:5001'];
       expect(evidence, isNotNull);
       expect(evidence!.currentUnitPrice, 24680);
       expect(evidence.listedStock, 135);
@@ -945,8 +931,10 @@ void main() {
       await tester.pump();
       expect(find.text('Silver Azalea'), findsWidgets);
       expect(
-        find.textContaining('2 worker nodes'),
-        findsWidgets,
+        find.byKey(
+          const ValueKey('resource-map-search-result-resource-item:5402'),
+        ),
+        findsOneWidget,
         reason: 'shortlist filtering must not remove normal material search',
       );
       expect(tester.takeException(), isNull);
@@ -1051,7 +1039,7 @@ void main() {
     expect(_isSelected(tester, _workspaceTab('Resource Map')), isTrue);
     expect(find.byType(BdoResourceMap), findsOneWidget);
     expect(
-      find.widgetWithText(TextField, 'Find an item, source, node or town'),
+      find.byKey(const ValueKey<String>('resource-map-atlas-search-field')),
       findsOneWidget,
     );
     expect(tester.takeException(), isNull);
@@ -1119,7 +1107,7 @@ void main() {
 
       expect(find.text('Show gathering locations'), findsNothing);
       expect(find.text('Add to planned network'), findsOneWidget);
-      expect(find.text('Add to checklist'), findsOneWidget);
+      expect(find.text('Add to to-do list'), findsOneWidget);
 
       await tester.tap(
         find.byKey(
@@ -1152,16 +1140,20 @@ void main() {
       final resourceMap =
           harness.bundle.controller.documentSnapshot.extensions['resourceMap']
               as Map;
-      expect(resourceMap['gatherChecklist'], <String, Object?>{
-        'schemaVersion': 1,
-        'entries': <Object?>[
-          <String, Object?>{
-            'resourceId': 'item:5402',
-            'displayName': 'Silver Azalea',
-            'sourceKind': 'workerNode',
-          },
-        ],
-      });
+      final savedChecklist = BdoGatherChecklist.fromJson(
+        resourceMap['gatherChecklist'],
+      );
+      expect((resourceMap['gatherChecklist'] as Map)['schemaVersion'], 2);
+      expect(savedChecklist.entries.single.resourceId, 'item:5402');
+      expect(savedChecklist.entries.single.displayName, 'Silver Azalea');
+      expect(
+        savedChecklist.entries.single.sourceKind,
+        BdoGatherChecklistSourceKind.workerNode,
+      );
+      final demand = savedChecklist.entries.single.demands.single;
+      expect(demand.materialName, 'Silver Azalea');
+      expect(demand.plannerTarget, 'Pure Powder Reagent');
+      expect(demand.neededQuantity, greaterThan(0));
       expect(_isSelected(tester, _workspaceTab('Craft Planner')), isTrue);
       expect(tester.takeException(), isNull);
 
@@ -1238,7 +1230,10 @@ void main() {
       expect(_isSelected(tester, _workspaceTab('Craft Planner')), isFalse);
       expect(_isSelected(tester, _workspaceTab('Resource Map')), isTrue);
       expect(find.byType(BdoResourceMap), findsOneWidget);
-      expect(find.text('Plan specific items'), findsOneWidget);
+      expect(
+        find.byKey(const ValueKey<String>('resource-map-atlas-dock')),
+        findsOneWidget,
+      );
       expect(
         find.byKey(
           const ValueKey<String>('resource-map-node-target-item:5402'),
@@ -1316,7 +1311,10 @@ void main() {
         findsOneWidget,
       );
       expect(_isSelected(tester, _workspaceTab('Resource Map')), isTrue);
-      expect(find.text('Plan specific items'), findsOneWidget);
+      expect(
+        find.byKey(const ValueKey<String>('resource-map-atlas-dock')),
+        findsOneWidget,
+      );
       expect(tester.takeException(), isNull);
 
       await _disposeWidgetHarness(tester, harness);
@@ -1374,7 +1372,7 @@ void main() {
       await tester.enterText(searchField, 'Snake Meat');
       await tester.pump();
       expect(
-        find.byKey(const ValueKey<String>('resource-map-sidebar-search')),
+        find.byKey(const ValueKey<String>('resource-map-atlas-search-field')),
         findsOneWidget,
       );
       expectPersistentTabs(mapSelected: true);
@@ -1382,17 +1380,27 @@ void main() {
       await tester.sendKeyEvent(LogicalKeyboardKey.escape);
       await tester.pump();
       expect(
-        find.byKey(const ValueKey<String>('resource-map-sidebar-search')),
-        findsNothing,
+        find.byKey(const ValueKey<String>('resource-map-atlas-search-field')),
+        findsOneWidget,
       );
       expectPersistentTabs(mapSelected: true);
 
       await tester.tap(searchField);
       await tester.pump();
       final snakeResult = find
-          .descendant(
-            of: find.byType(ListTile),
-            matching: find.text('Snake Meat'),
+          .byWidgetPredicate(
+            (widget) =>
+                widget.key is ValueKey<String> &&
+                ((widget.key! as ValueKey<String>).value).startsWith(
+                  'resource-map-search-result-',
+                ) &&
+                find
+                    .descendant(
+                      of: find.byWidget(widget),
+                      matching: find.text('Snake Meat'),
+                    )
+                    .evaluate()
+                    .isNotEmpty,
           )
           .first;
       expect(snakeResult, findsOneWidget);
@@ -1404,14 +1412,34 @@ void main() {
       );
       expectPersistentTabs(mapSelected: true);
 
-      final detailSize = find.byKey(
-        const ValueKey<String>('resource-map-sidebar-detail-size'),
+      final minimizeDetails = find.byKey(
+        const ValueKey<String>('resource-map-atlas-workspace-minimize'),
       );
-      expect(detailSize, findsOneWidget);
-      await tester.tap(detailSize);
+      expect(minimizeDetails, findsOneWidget);
+      await tester.tap(minimizeDetails);
       await tester.pump(const Duration(milliseconds: 260));
-      expect(find.byTooltip('Use compact details'), findsOneWidget);
+      expect(
+        find.byKey(const ValueKey<String>('resource-map-sidebar-details')),
+        findsNothing,
+      );
       expectPersistentTabs(mapSelected: true);
+      await tester.tap(
+        find.byKey(const ValueKey<String>('resource-map-atlas-task-restore')),
+      );
+      await tester.pump(const Duration(milliseconds: 260));
+      expect(
+        find.byKey(const ValueKey<String>('resource-map-sidebar-details')),
+        findsOneWidget,
+      );
+      expectPersistentTabs(mapSelected: true);
+      await tester.tap(
+        find.byKey(const ValueKey<String>('resource-map-home-button')),
+      );
+      await tester.pump(const Duration(milliseconds: 260));
+      expect(
+        find.byKey(const ValueKey<String>('resource-map-sidebar-details')),
+        findsNothing,
+      );
 
       await tester.tap(
         find.byKey(const ValueKey<String>('resource-map-layer-menu-toggle')),
@@ -1432,23 +1460,21 @@ void main() {
       expectPersistentTabs(mapSelected: true);
 
       final gatherCommand = find.byKey(
-        const ValueKey<String>('resource-map-command-gather'),
+        const ValueKey<String>('resource-map-home-find-material'),
       );
       await tester.tap(gatherCommand);
       await tester.pump(const Duration(milliseconds: 260));
       expect(
-        find
-            .byKey(const ValueKey<String>('resource-map-gather-menu-plan'))
-            .hitTestable(),
+        find.byKey(const ValueKey<String>('resource-map-material-categories')),
         findsOneWidget,
       );
       expectPersistentTabs(mapSelected: true);
-      await tester.tap(gatherCommand);
+      await tester.tap(
+        find.byKey(const ValueKey<String>('resource-map-task-back')),
+      );
       await tester.pump(const Duration(milliseconds: 260));
       expect(
-        find
-            .byKey(const ValueKey<String>('resource-map-gather-menu-plan'))
-            .hitTestable(),
+        find.byKey(const ValueKey<String>('resource-map-material-categories')),
         findsNothing,
       );
       expectPersistentTabs(mapSelected: true);
@@ -1465,11 +1491,21 @@ void main() {
         expectPersistentTabs(mapSelected: true);
       }
       expect(
-        find
-            .byKey(const ValueKey<String>('resource-map-gather-menu-plan'))
-            .hitTestable(),
-        findsNothing,
+        find.byKey(const ValueKey<String>('resource-map-atlas-dock')),
+        findsOneWidget,
+      );
+      expect(
+        find.byKey(const ValueKey<String>('resource-map-home-find-material')),
+        findsOneWidget,
         reason: 'The retained map session should stay on its clean map home.',
+      );
+      expect(
+        find.byKey(const ValueKey<String>('resource-map-sidebar-details')),
+        findsNothing,
+      );
+      expect(
+        find.byKey(const ValueKey<String>('resource-map-material-categories')),
+        findsNothing,
       );
       expect(tester.takeException(), isNull);
 
@@ -1478,12 +1514,15 @@ void main() {
   );
 }
 
-Finder _workspaceTab(String label) => find.byWidgetPredicate(
-  (widget) =>
-      widget is Semantics &&
-      widget.properties.button == true &&
-      widget.properties.label == label,
-  description: '$label top-level workspace tab',
+Finder _workspaceTab(String label) => find.descendant(
+  of: find.byType(AppTitleTabStrip),
+  matching: find.byWidgetPredicate(
+    (widget) =>
+        widget is Semantics &&
+        widget.properties.button == true &&
+        widget.properties.label == label,
+    description: '$label top-level workspace tab',
+  ),
 );
 
 Finder _workspaceTabInkWell(String label) =>

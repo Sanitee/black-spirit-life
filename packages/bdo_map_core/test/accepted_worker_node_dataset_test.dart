@@ -20,16 +20,16 @@ void main() {
 
   group('accepted Stable worker-node dataset', () {
     test('pins the reviewed v17 payload and its public source boundary', () {
-      expect(bundledBytes, hasLength(7801681));
+      expect(bundledBytes, hasLength(7544577));
       expect(
         sha256.convert(bundledBytes).toString(),
-        '50cfe1c7a6fad8aa731578a67c305c9c703a619af7edce5c5142ea9e826ac462',
+        'be62e56a6b18f14c7a6439521a9ca9ca240974219dbd1e44d85cdec136c94c15',
         reason:
             'A data refresh must update the source review, accepted counts, '
             'and this checksum deliberately.',
       );
       expect(dataset.manifest.schemaVersion, 1);
-      expect(dataset.manifest.datasetVersion, '2026.08.16-stable-v1');
+      expect(dataset.manifest.datasetVersion, '2026.09.09-beta-v4');
 
       final currentSnapshot = dataset.manifest.provenance.singleWhere(
         (record) =>
@@ -47,7 +47,8 @@ void main() {
           contains('610 raw exploration-layer records'),
           contains('442 raw production-layer records'),
           contains('425 unique parent-linked children'),
-          contains('free noncommercial fan-content basis'),
+          contains('source research input is excluded'),
+          contains('BDO Codex credited as the retrieval/reference source'),
         ),
       );
 
@@ -58,14 +59,15 @@ void main() {
       expect(
         vendorSnapshot.permittedUse,
         allOf(
-          contains('51 reviewed planner vendor items'),
+          contains('52 reviewed planner vendor items'),
           contains('266 NPC location pins'),
-          contains('1241 item-to-location listings'),
-          contains('free noncommercial fan-content basis'),
+          contains('1243 item-to-location listings'),
+          contains('source research input is excluded'),
+          contains('Positions remain source-recorded'),
         ),
       );
       expect(dataset.vendorNpcs, hasLength(266));
-      expect(dataset.vendorListings, hasLength(1241));
+      expect(dataset.vendorListings, hasLength(1243));
     });
 
     test('retains the complete graph, including every fishing record', () {
@@ -110,7 +112,7 @@ void main() {
       expect(productionNodes, hasLength(442));
       expect(explorationNodes, hasLength(610));
       expect(resourceNodes, hasLength(366));
-      expect(dataset.resources, hasLength(356));
+      expect(dataset.resources, hasLength(358));
       expect(outputResourceIds, hasLength(285));
 
       expect(

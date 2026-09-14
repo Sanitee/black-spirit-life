@@ -1,86 +1,126 @@
 import 'package:flutter/material.dart';
 
+import '../engine/map_camera.dart';
 import 'resource_map_chrome_theme.dart';
 
-/// A single connected rail for the map's three viewport controls.
-///
-/// The parent decides where the rail is positioned and may provide the
-/// surrounding `resource-map-zoom-controls` key during integration.
+/// A compact continuous zoom rail with a separate full-world reset.
 class ResourceMapZoomDock extends StatelessWidget {
   const ResourceMapZoomDock({
-    required this.onZoomIn,
-    required this.onZoomOut,
+    required this.cameraController,
+    required this.onZoomChanged,
     required this.onShowFullWorld,
     super.key,
   });
 
-  final VoidCallback onZoomIn;
-  final VoidCallback onZoomOut;
+  final BdoMapCameraController cameraController;
+  final ValueChanged<double> onZoomChanged;
   final VoidCallback onShowFullWorld;
 
   static const double controlExtent = 44;
+  static const double sliderExtent = 126;
 
   @override
   Widget build(BuildContext context) {
     final chrome = context.mapChrome;
-    final isSakura =
-        chrome.variant == ResourceMapChromeThemeVariant.sakuraCartographer;
+    final ghost = chrome.variant == ResourceMapChromeThemeVariant.ghostLedger;
     return Semantics(
       container: true,
       explicitChildNodes: true,
       label: 'Map zoom controls',
       child: Material(
         key: const ValueKey<String>('resource-map-zoom-dock-surface'),
-        color: chrome.paperRaised,
-        elevation: 2,
-        shadowColor: isSakura
-            ? const Color(0x330A1512)
-            : chrome.idleShadow.color,
+        color: chrome.fillAlpha(chrome.chromeBase, ghost ? .68 : .9),
+        elevation: ghost ? 2 : 6,
+        shadowColor: const Color(0x59000000),
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(
-            isSakura ? 10 : chrome.toolRadius,
-          ),
-          side: BorderSide(color: chrome.divider),
+          borderRadius: BorderRadius.circular(ghost ? 8 : 12),
+          side: BorderSide(color: chrome.softOutline.withValues(alpha: .82)),
         ),
         clipBehavior: Clip.antiAlias,
-        child: DecoratedBox(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-              colors: <Color>[chrome.graphiteHighlight, chrome.graphite],
-            ),
-          ),
-          child: SizedBox(
-            width: controlExtent,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: <Widget>[
-                _ZoomDockControl(
-                  key: const ValueKey<String>('resource-map-zoom-in'),
-                  icon: Icons.add_rounded,
-                  tooltip: 'Zoom in',
-                  semanticLabel: 'Zoom in',
-                  onPressed: onZoomIn,
-                ),
-                const _ZoomDockDivider(),
-                _ZoomDockControl(
-                  key: const ValueKey<String>('resource-map-zoom-out'),
-                  icon: Icons.remove_rounded,
-                  tooltip: 'Zoom out',
-                  semanticLabel: 'Zoom out',
-                  onPressed: onZoomOut,
-                ),
-                const _ZoomDockDivider(),
-                _ZoomDockControl(
-                  key: const ValueKey<String>('resource-map-full-world'),
-                  icon: Icons.public_rounded,
-                  tooltip: 'Show the full world',
-                  semanticLabel: 'Show full world',
-                  onPressed: onShowFullWorld,
-                ),
-              ],
-            ),
+        child: SizedBox(
+          width: controlExtent,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              AnimatedBuilder(
+                animation: cameraController,
+                builder: (context, _) {
+                  final zoom = cameraController.camera.zoom
+                      .clamp(
+                        cameraController.minimumZoom,
+                        cameraController.maximumZoom,
+                      )
+                      .toDouble();
+                  return Semantics(
+                    label: 'Map zoom level',
+                    value: zoom.toStringAsFixed(1),
+                    increasedValue: (zoom + .5)
+                        .clamp(
+                          cameraController.minimumZoom,
+                          cameraController.maximumZoom,
+                        )
+                        .toStringAsFixed(1),
+                    decreasedValue: (zoom - .5)
+                        .clamp(
+                          cameraController.minimumZoom,
+                          cameraController.maximumZoom,
+                        )
+                        .toStringAsFixed(1),
+                    child: SizedBox(
+                      width: controlExtent,
+                      height: sliderExtent,
+                      child: RotatedBox(
+                        quarterTurns: 3,
+                        child: SliderTheme(
+                          data: SliderTheme.of(context).copyWith(
+                            trackHeight: 2,
+                            activeTrackColor: chrome.primary,
+                            inactiveTrackColor: chrome.softOutline.withValues(
+                              alpha: .72,
+                            ),
+                            thumbColor: chrome.ink,
+                            overlayColor: chrome.primary.withValues(alpha: .14),
+                            thumbShape: const RoundSliderThumbShape(
+                              enabledThumbRadius: 6,
+                              elevation: 0,
+                              pressedElevation: 0,
+                            ),
+                            overlayShape: const RoundSliderOverlayShape(
+                              overlayRadius: 15,
+                            ),
+                            showValueIndicator: ShowValueIndicator.onDrag,
+                            valueIndicatorColor: chrome.chromeRaised,
+                            valueIndicatorTextStyle: TextStyle(
+                              color: chrome.ink,
+                              fontSize: 11,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                          child: Slider(
+                            key: const ValueKey<String>(
+                              'resource-map-zoom-slider',
+                            ),
+                            min: cameraController.minimumZoom,
+                            max: cameraController.maximumZoom,
+                            value: zoom,
+                            label: zoom.toStringAsFixed(1),
+                            onChanged: onZoomChanged,
+                          ),
+                        ),
+                      ),
+                    ),
+                  );
+                },
+              ),
+              const _ZoomDockDivider(),
+              _ZoomDockControl(
+                key: const ValueKey<String>('resource-map-full-world'),
+                icon: Icons.public_rounded,
+                tooltip: 'Show the full world',
+                semanticLabel: 'Show full world',
+                onPressed: onShowFullWorld,
+              ),
+            ],
           ),
         ),
       ),
@@ -113,8 +153,6 @@ class _ZoomDockControlState extends State<_ZoomDockControl> {
   @override
   Widget build(BuildContext context) {
     final chrome = context.mapChrome;
-    final isSakura =
-        chrome.variant == ResourceMapChromeThemeVariant.sakuraCartographer;
     return Tooltip(
       message: widget.tooltip,
       child: Semantics(
@@ -138,25 +176,18 @@ class _ZoomDockControlState extends State<_ZoomDockControl> {
                         ? Duration.zero
                         : const Duration(milliseconds: 120),
                     curve: Curves.easeOutCubic,
-                    width: 34,
-                    height: 34,
+                    width: 30,
+                    height: 30,
                     alignment: Alignment.center,
                     decoration: BoxDecoration(
                       color: _hovered || _focused
-                          ? chrome.brassWash
-                          : chrome.graphiteRaised,
-                      borderRadius: BorderRadius.circular(
-                        isSakura ? 6 : chrome.compactRadius,
-                      ),
-                      border: Border.all(
-                        color: _hovered || _focused
-                            ? chrome.brassLine
-                            : chrome.softOutline,
-                      ),
+                          ? chrome.primary.withValues(alpha: .14)
+                          : Colors.transparent,
+                      borderRadius: BorderRadius.circular(7),
                     ),
                     child: Icon(
                       widget.icon,
-                      size: 20,
+                      size: 18,
                       color: _hovered || _focused ? chrome.accent : chrome.ink,
                     ),
                   ),
@@ -178,9 +209,9 @@ class _ZoomDockDivider extends StatelessWidget {
     final chrome = context.mapChrome;
     return SizedBox(
       key: const ValueKey<String>('resource-map-zoom-divider'),
-      width: ResourceMapZoomDock.controlExtent,
+      width: 18,
       height: 1,
-      child: ColoredBox(color: chrome.brassDeep),
+      child: ColoredBox(color: chrome.softOutline.withValues(alpha: .55)),
     );
   }
 }

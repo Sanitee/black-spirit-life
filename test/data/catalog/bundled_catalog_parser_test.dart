@@ -20,13 +20,13 @@ void main() {
 
     expect(catalog.sourceByteCount, productionCatalogByteCount);
     expect(catalog.sourceSha256, productionCatalogSha256);
-    expect(catalog.totalItemCount, 1646);
-    expect(catalog.totalCraftableCount, 948);
-    expect(catalog.totalIngredientRowCount, 2834);
+    expect(catalog.totalItemCount, 1681);
+    expect(catalog.totalCraftableCount, 962);
+    expect(catalog.totalIngredientRowCount, 2861);
     expect(catalog.collisions, hasLength(20));
-    expect(catalog.alchemy.iconDataUris, hasLength(442));
+    expect(catalog.alchemy.iconDataUris, hasLength(444));
     expect(catalog.cooking.iconDataUris, hasLength(612));
-    expect(catalog.processing.iconDataUris, hasLength(3436));
+    expect(catalog.processing.iconDataUris, hasLength(3461));
     expect(catalog.processing.searchAliases, hasLength(160));
     final bloodGroups =
         catalog.alchemy.metadata['bloodGroups'] as Map<String, Object?>;
@@ -62,8 +62,8 @@ void main() {
         catalog.supportingData['itemWeightIds'] as Map<String, Object?>;
     final itemWeightsLtById =
         catalog.supportingData['itemWeightsLtById'] as Map<String, Object?>;
-    expect(itemWeightIds, hasLength(1707));
-    expect(itemWeightsLtById, hasLength(1706));
+    expect(itemWeightIds, hasLength(1741));
+    expect(itemWeightsLtById, hasLength(1740));
     expect(itemWeightIds['Beer'], '9213');
     expect(itemWeightsLtById['9213'], 0.1);
     expect(itemWeightIds['Acacia Plank'], '4680');
@@ -81,8 +81,8 @@ void main() {
       isTrue,
     );
     expect(catalog.cooking.auditedCraftableCount, 172);
-    expect(catalog.cooking.plannerCraftableCount, 171);
-    expect(catalog.processing.plannerCraftableCount, 622);
+    expect(catalog.cooking.plannerCraftableCount, 169);
+    expect(catalog.processing.plannerCraftableCount, 628);
     final endtimes =
         catalog.processing.items['Crystallized Energy of Endtimes'];
     expect(endtimes?.marketId, '821252');
@@ -1026,7 +1026,7 @@ void main() {
           .map((entry) => entry.key)
           .toSet();
 
-      expect(actualBatchOutputs, hasLength(116));
+      expect(actualBatchOutputs, hasLength(132));
       expect(actualBatchOutputs, _supportedBatchOutputNames);
 
       final rawRoot = jsonDecode(source) as Map<String, dynamic>;
@@ -1227,6 +1227,22 @@ const _previouslySupportedBatchOutputNames = <String>{
 
 const _supportedBatchOutputNames = <String>{
   ..._previouslySupportedBatchOutputNames,
+  'Adaptation Draught',
+  'Berserk Draught',
+  'Corruption Draught',
+  'Crystal Extraction Tool',
+  'Dormant Crimson Coral Adhesive',
+  'Essence of Dawn - Accuracy',
+  "Essence of Dawn - Black Spirit's Rage",
+  'Essence of Dawn - Damage Reduction',
+  'Essence of Dawn - Evasion',
+  'Fury Draught',
+  'Oquilla Wave Meal',
+  'Potential Draught',
+  'Pure Forest Breath',
+  'Raging Wave Plywood',
+  'Sturdy Coral Support',
+  'Sunset Tidal Black Stone',
   'Improved Elixir of Amity',
   'Elixir of Sharp Thorn',
   'Strong Resurrection Elixir',

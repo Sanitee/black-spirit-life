@@ -372,7 +372,10 @@ class _AppearanceViewState extends State<AppearanceView> {
                 tabKey: const ValueKey<String>(
                   'theme-preview-tab-craft-planner',
                 ),
-                artworkAssetPath: 'assets/app/bdo_tool_icon.png',
+                artworkAssetPath:
+                    'packages/bdo_map_core/assets/images/node_icons/14.png',
+                inactiveArtworkAssetPath:
+                    'packages/bdo_map_core/assets/images/node_icons/gray/14.png',
                 label: 'Craft Planner',
                 selected: true,
                 onPressed: _rejectPreviewTabPress,
@@ -381,7 +384,11 @@ class _AppearanceViewState extends State<AppearanceView> {
                 tabKey: const ValueKey<String>(
                   'theme-preview-tab-resource-map',
                 ),
-                artworkAssetPath: 'assets/app/bdo_resource_map_icon.png',
+                artworkAssetPath:
+                    'packages/bdo_map_core/assets/images/node_icons/0.png',
+                inactiveArtworkAssetPath:
+                    'packages/bdo_map_core/assets/images/node_icons/gray/0.png',
+                artworkScale: 1.16,
                 label: 'Resource Map',
                 selected: false,
                 onPressed: _rejectPreviewTabPress,

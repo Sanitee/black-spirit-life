@@ -59,8 +59,8 @@ void main() {
     );
     expect(find.text('Gyeonghoeru Pavilion'), findsOneWidget);
     expect(find.text('Palace Kitchen'), findsOneWidget);
-    expect(find.textContaining('3 hired'), findsOneWidget);
-    expect(find.textContaining('7 slots'), findsOneWidget);
+    expect(find.textContaining('3 hired'), findsNothing);
+    expect(find.textContaining('7 slots'), findsNothing);
 
     await tester.tap(
       find.byKey(const ValueKey('royal-workshop-open-yukjo-housing')),
@@ -76,16 +76,20 @@ void main() {
       find.byKey(const ValueKey('royal-workshop-area-infirmary')),
       findsOneWidget,
     );
-    expect(find.text('YUKJO WORKER'), findsOneWidget);
-    expect(find.text('CURRENT PRODUCTION ROLL'), findsOneWidget);
+    expect(find.text('Worker'), findsOneWidget);
+    expect(find.text('CURRENT PRODUCTION ROLL'), findsNothing);
     expect(find.text('Basic workshop'), findsWidgets);
-    expect(find.text('Item currently shown in BDO'), findsOneWidget);
-    expect(find.textContaining('do not guess which workshop'), findsOneWidget);
+    expect(find.text('Item'), findsOneWidget);
+    expect(find.textContaining('do not guess which workshop'), findsNothing);
+    expect(
+      find.byTooltip('Names only. Check the item shown in your workshop.'),
+      findsOneWidget,
+    );
     expect(find.byType(DropdownButton<String>), findsOneWidget);
     expect(find.text('Mark running'), findsOneWidget);
   });
 
-  testWidgets('shows rare-roll warning and keeps it out of income', (
+  testWidgets('keeps rare task visible but excludes it from income', (
     tester,
   ) async {
     final plan = BdoRoyalWorkshopPlan(
@@ -140,7 +144,12 @@ void main() {
       ),
     );
 
-    expect(find.textContaining('Rare rolls stay visible'), findsOneWidget);
+    expect(
+      find.textContaining('Rare rolls are excluded from income'),
+      findsNothing,
+    );
+    expect(find.text('Bountiful Feast'), findsOneWidget);
+    expect(find.byIcon(Icons.play_circle_fill_rounded), findsOneWidget);
     expect(
       find.byKey(const ValueKey('royal-workshop-income-summary')),
       findsNothing,

@@ -1,3 +1,4 @@
+import '../../domain/catalog/temporarily_archived_items.dart';
 import '../../domain/models/catalog_models.dart';
 import '../../domain/models/craft_mode.dart';
 import '../../domain/planner/ingredient_quality.dart';
@@ -148,7 +149,10 @@ final class RecipeBookUsageIndex {
       final hiddenNames = hiddenNamesByMode[mode] ?? const <String>{};
       for (final recipeEntry in recipes.entries) {
         final recipe = recipeEntry.value;
-        if (!recipe.isCraftable) continue;
+        if (!recipe.isCraftable ||
+            isTemporarilyArchivedItem(recipe.name, itemId: recipe.marketId)) {
+          continue;
+        }
         final formulas = recipe.variants.isEmpty
             ? <_Formula>[_Formula.base(recipe)]
             : recipe.variants.map(_Formula.variant);

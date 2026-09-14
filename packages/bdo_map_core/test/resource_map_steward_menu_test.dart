@@ -1,10 +1,92 @@
 import 'package:bdo_map_core/src/widgets/resource_map_chrome_theme.dart';
+import 'package:bdo_map_core/src/widgets/resource_map_panel_metrics.dart';
 import 'package:bdo_map_core/src/widgets/resource_map_steward_menu.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import 'support/map_menu_capture.dart';
+
 void main() {
+  testWidgets('Steward uses compact rows without passive subtitles or badges', (
+    tester,
+  ) async {
+    final semantics = tester.ensureSemantics();
+    var opened = 0;
+    await tester.pumpWidget(
+      _testApp(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            ResourceMapStewardWorkerMenu(
+              selectedSection: ResourceMapWorkerMenuSection.plan,
+              onSectionChanged: (_) {},
+              planActions: [
+                ResourceMapStewardMenuAction(
+                  key: const ValueKey('compact-action'),
+                  icon: ResourceMapStewardIconKind.needed,
+                  label: 'To-do',
+                  semanticHint: 'Open saved materials',
+                  badge: '7 materials',
+                  onPressed: () => opened++,
+                ),
+              ],
+              exploreActions: const [],
+              manageActions: const [],
+            ),
+            ResourceMapStewardListRow(
+              key: const ValueKey('compact-list'),
+              icon: ResourceMapStewardIconKind.houses,
+              title: 'Velia',
+              subtitle: '4 houses',
+              badge: '2 lodging',
+              semanticLabel: 'Velia houses',
+              onPressed: () => opened++,
+            ),
+          ],
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(
+      tester.getSize(find.byKey(const ValueKey('compact-action'))).height,
+      ResourceMapPanelMetrics.rowHeight,
+    );
+    expect(
+      tester.getSize(find.byKey(const ValueKey('compact-list'))).height,
+      ResourceMapPanelMetrics.rowHeight + 6,
+    );
+    expect(find.text('7 materials'), findsNothing);
+    expect(find.text('4 houses'), findsNothing);
+    expect(find.text('2 lodging'), findsNothing);
+    expect(
+      tester
+          .getSemantics(find.byKey(const ValueKey('compact-list')))
+          .getSemanticsData()
+          .hint,
+      '4 houses. 2 lodging',
+    );
+    semantics.dispose();
+    for (final icon in tester.widgetList<ResourceMapStewardIcon>(
+      find.byType(ResourceMapStewardIcon),
+    )) {
+      expect(icon.size, ResourceMapPanelMetrics.navigationArtwork);
+    }
+    await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+    await tester.pump();
+    await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+    await tester.pump();
+    await tester.sendKeyEvent(LogicalKeyboardKey.enter);
+    await tester.pump();
+    expect(opened, 1);
+    // Pointer activation still reaches both the compact menu and list action.
+    await tester.tap(find.byKey(const ValueKey('compact-action')));
+    await tester.tap(find.byKey(const ValueKey('compact-list')));
+    expect(opened, 3);
+    expect(tester.takeException(), isNull);
+  });
+
   testWidgets(
     'Guild Steward menu glides between categories and staggered actions',
     (tester) async {
@@ -453,6 +535,77 @@ void main() {
       find.byKey(const ValueKey<String>('steward-gather-golden')),
       matchesGoldenFile('goldens/resource_map_steward_gather_menu.png'),
     );
+  });
+
+  testWidgets('compact Steward real-font review', (tester) async {
+    await tester.runAsync(loadMapMenuCaptureFonts);
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData.dark().copyWith(
+          textTheme: ThemeData.dark().textTheme.apply(fontFamily: 'Segoe UI'),
+        ),
+        home: ResourceMapChromeTheme(
+          data: ResourceMapChromeThemeData.glassDock,
+          child: RepaintBoundary(
+            key: const ValueKey('steward-review'),
+            child: Material(
+              color: const Color(0xff08161d),
+              child: Align(
+                alignment: Alignment.topLeft,
+                child: Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: SizedBox(
+                    width: 300,
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        ResourceMapStewardWorkerMenu(
+                          selectedSection: ResourceMapWorkerMenuSection.plan,
+                          onSectionChanged: (_) {},
+                          planActions: [
+                            for (final label in [
+                              'To-do',
+                              'Specific items',
+                              'Best income',
+                            ])
+                              ResourceMapStewardMenuAction(
+                                key: ValueKey(label),
+                                icon: ResourceMapStewardIconKind.plan,
+                                label: label,
+                                semanticHint: 'Open $label',
+                                badge: '4',
+                                onPressed: () {},
+                              ),
+                          ],
+                          exploreActions: const [],
+                          manageActions: const [],
+                        ),
+                        const SizedBox(height: 12),
+                        ResourceMapStewardListRow(
+                          icon: ResourceMapStewardIconKind.houses,
+                          title: 'Velia',
+                          subtitle: '4 houses',
+                          badge: '2 lodging',
+                          semanticLabel: 'Velia houses',
+                          onPressed: () {},
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    await captureMapMenu(
+      tester,
+      boundary: find.byKey(const ValueKey('steward-review')),
+      name: 'steward-compact-1.0',
+    );
+    expect(tester.takeException(), isNull);
   });
 }
 

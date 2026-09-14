@@ -118,15 +118,17 @@ and the correction/removal route are recorded in the public notices.
 
 ## Bundled data
 
-Dataset `2026.08.16-stable-v1` contains 1,052 numeric current nodes: 610 map
+Dataset `2026.08.28-beta-v4` contains 1,052 numeric current nodes: 610 map
 records, 76 non-resource town/service records, and 366 resource-producing
 production records. The source provides 425 unique factual production links.
 Twelve more relationships were matched from reviewed named node-detail
 records, so 437 production-layer rows are connected and five keep
 `parentId: null`; the generator never infers topology from proximity. The
-dataset contains 356 resources and 38 field sources. Citron resolves to both
+dataset contains 357 resources and 39 field sources. Citron resolves to both
 its worker node and a radius-free Maslan's Yulas Citron Orchard focus;
 individual tree coordinates are not fabricated.
+Milk resolves to a separate Dairy Cow source and six named farm-center
+anchors, so milking is not confused with Cow / Ox meat, blood, or hide.
 
 The 13,315 exact gathering points retain four distinct provenance groups:
 
@@ -155,9 +157,11 @@ existing tree coordinates rather than adding another point layer. Shared
 animal coordinates are reused for supported meat, blood, skin, and hide
 resources.
 
-The dataset has two radius-free focus records, zero broad gathering areas, and
-zero routes. Tshira groups reviewed exact Snake and Scorpion points. The
-Beombawi Valley focus identifies the Wild Game Preserve described by Pearl
+The dataset has 22 radius-free focus records, zero broad gathering areas, and
+zero routes. Thirteen are official named Truffle Mushroom areas, six are
+Dairy Cow farm-center anchors, and the remaining three cover Tshira,
+Beombawi Valley, and Maslan's Citron Orchard. Tshira groups reviewed exact
+Snake and Scorpion points. The Beombawi Valley focus identifies the Wild Game Preserve described by Pearl
 Abyss's
 [official Marni sniper-hunting guide](https://www.naeu.playblackdesert.com/en-US/Wiki?wikiNo=74)
 and uses the existing reviewed node coordinate only as a navigational region
@@ -168,6 +172,12 @@ Meat, Bear Blood, Bear Hide, Crystal of Decimation, Crystal of Bitterness,
 Crystal of Darkness, Forest Crystal, and Live Meat, as documented in Pearl
 Abyss's
 [Land of the Morning Light update](https://www.naeu.playblackdesert.com/en-US/News/Detail?groupContentNo=5387).
+The 96 historical Truffle Mushroom dots intentionally do not inherit broad
+regional maps. Each official named-area focus opens its one matching English
+Pearl Abyss regional overview. Exact dots show a clear unmatched-photo status
+until a screenshot has been individually matched and cleared for reuse; no
+community screenshot or unverified secret coordinate is bundled.
+
 Exact gathering records remain individual small dots at every zoom; spatial
 buckets enlarge only invisible low-zoom hit targets.
 
@@ -191,8 +201,8 @@ credited research and retrieval reference; it is not described as the owner of
 the Black Desert map, nodes, icons, NPCs, recipes, or coordinates. Raw private
 research inputs and website structures are not published.
 
-The reviewed generated `resource_map.json` is 7,801,681 bytes with SHA-256
-`50CFE1C7A6FAD8AA731578A67C305C9C703A619AF7EDCE5C5142EA9E826AC462`.
+The reviewed generated `resource_map.json` is 7,967,874 bytes with SHA-256
+`BCA30627453873569DF749F1ED3D137BE6C3B8C7AEBE29B44A554AF4E94BC78B`.
 It retains the full 1,052-node map, the 501 Stone Cobra/Rock Scorpion points,
 the 34 Coral Stoneback Crab points, the 198 Stillcoral points, vendor records,
 and Edania relationships in Black Spirit Life's own schema and presentation.

@@ -460,21 +460,21 @@ void main() {
       );
       expect(
         controller.resourceMapNodeNetworkPreferences.value.showAllMapNodes,
-        isTrue,
+        isFalse,
       );
       expect(
         controller
             .resourceMapNodeNetworkPreferences
             .value
             .showAllNodeConnections,
-        isTrue,
+        isFalse,
       );
       expect(
         controller
             .resourceMapNodeNetworkPreferences
             .value
             .showWorkerOutputIcons,
-        isTrue,
+        isFalse,
       );
       expect(
         controller.resourceMapNodeNetworkPreferences.value.currentOwnedHouseIds,
@@ -674,7 +674,7 @@ void main() {
       expect(resourceMap['favoriteResourceIds'], const <String>['ash']);
       expect(resourceMap['futureMapPreference'], 'compact');
       expect(resourceMap['gatherChecklist'], <String, Object?>{
-        'schemaVersion': 1,
+        'schemaVersion': 2,
         'entries': <Object?>[
           <String, Object?>{
             'resourceId': 'rusalkas-coral',

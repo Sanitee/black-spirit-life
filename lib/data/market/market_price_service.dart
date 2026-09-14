@@ -179,6 +179,7 @@ List<MarketPriceRow> _mergeTradeEvidence(
           ok: row.ok,
           price: row.price,
           stock: row.stock,
+          aggregateStock: row.aggregateStock,
           source: row.source,
           fetchedAt: row.fetchedAt,
           diagnosticCode: row.diagnosticCode,

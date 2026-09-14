@@ -23,6 +23,7 @@ class PlannerMapQuickLookupRegion extends StatefulWidget {
     required this.stableId,
     required this.externalActions,
     required this.child,
+    this.resolveGatherDemand,
     super.key,
   });
 
@@ -30,6 +31,7 @@ class PlannerMapQuickLookupRegion extends StatefulWidget {
   final String stableId;
   final PlannerExternalActions externalActions;
   final Widget child;
+  final PlannerGatherDemand? Function()? resolveGatherDemand;
 
   @override
   State<PlannerMapQuickLookupRegion> createState() =>
@@ -113,7 +115,7 @@ class _PlannerMapQuickLookupRegionState
       actionLabels: <String>[
         if (canOpenNpcVendors) 'Show NPC vendors',
         if (canOpenManual) manualActionLabel,
-        if (canAddToChecklist) 'Add to checklist',
+        if (canAddToChecklist) 'Add to to-do list',
         if (canAddToPlannedNetwork) 'Add to planned network',
       ],
       actionDetails: <String>[
@@ -183,7 +185,7 @@ class _PlannerMapQuickLookupRegionState
             child: const _PlannerMapLookupMenuLabel(
               icon: Icons.checklist_rounded,
               tone: AppSurfaceTone.success,
-              label: 'Add to checklist',
+              label: 'Add to to-do list',
               detail: checklistDetail,
             ),
           ),
@@ -206,7 +208,12 @@ class _PlannerMapQuickLookupRegionState
     );
     if (selected == null || !mounted) return;
     if (selected == _PlannerMapQuickAction.addToGatherChecklist) {
-      widget.externalActions.addToGatherChecklist?.call(availability);
+      widget.externalActions.addToGatherChecklist?.call(
+        PlannerGatherChecklistRequest(
+          availability: availability,
+          demand: widget.resolveGatherDemand?.call(),
+        ),
+      );
       return;
     }
     if (selected == _PlannerMapQuickAction.addToPlannedNetwork) {

@@ -7,7 +7,7 @@ void main() {
   test('Windows runner is locked to the public application identity', () {
     expect(AppIdentity.productName, 'Black Spirit Life');
     expect(AppIdentity.displayName, 'Black Spirit Life');
-    expect(AppIdentity.applicationVersion, '0.1.5');
+    expect(AppIdentity.applicationVersion, '0.1.6');
     expect(AppIdentity.inProcessBetaUpdatesEnabled, isFalse);
     expect(AppIdentity.outOfProcessBetaUpdatesEnabled, isTrue);
     expect(AppIdentity.releaseChannel, 'win-x64-stable');

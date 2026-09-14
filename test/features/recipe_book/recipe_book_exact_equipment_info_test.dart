@@ -197,6 +197,7 @@ void main() {
     expect(twilight.description, 'A slot-specific Edania accessory material.');
     expect(twilight.uses, <String>[
       'Crafts the Earring versions of Causality Shardstone and Apeiron.',
+      'Heat an unenhanced Apeiron Earring to recover 10 of this material.',
     ]);
 
     final olivine = purposeFor('Magical Olivine Powder');

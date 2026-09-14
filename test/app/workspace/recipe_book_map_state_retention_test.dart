@@ -124,9 +124,8 @@ void main() {
       expect(
         tester
             .widget<TextField>(
-              find.widgetWithText(
-                TextField,
-                'Find an item, source, node or town',
+              find.byKey(
+                const ValueKey<String>('resource-map-atlas-search-field'),
               ),
             )
             .controller

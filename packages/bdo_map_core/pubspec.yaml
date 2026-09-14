@@ -25,6 +25,8 @@ flutter:
     - assets/data/royal_workshop_goods.json
     - assets/data/worker_economics.json
     - assets/images/gathering_tools/
+    - assets/images/house_icons/
+    - assets/images/menu_artwork/
     - assets/images/node_icons/
     - assets/images/node_icons/gray/
     - assets/images/node_icons/highlighted/

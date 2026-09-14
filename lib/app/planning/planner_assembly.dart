@@ -3,6 +3,7 @@ import '../../domain/models/craft_mode.dart';
 import '../../domain/planner/ingredient_quality.dart';
 import '../../domain/planner/planner_engine.dart';
 import '../../domain/planner/planner_models.dart' as planner;
+import '../../domain/planner/reviewed_acquisition_choices.dart';
 import '../../domain/state/planner_state.dart' as stored;
 
 /// Assembles the immutable, mode-local planning snapshot consumed by feature
@@ -26,6 +27,7 @@ final class PlannerAssembly {
       supportingData: catalog.supportingData,
       sharedMetadata: catalog.alchemy.metadata,
       mode: mode,
+      processingRecipes: catalog.processing.items,
     );
     return engine.buildPlan(
       mode: mode,
@@ -43,6 +45,7 @@ final class PlannerAssembly {
     required Map<String, Object?> supportingData,
     Map<String, Object?>? sharedMetadata,
     required CraftMode mode,
+    Map<String, Recipe> processingRecipes = const {},
   }) {
     final items = Map<String, Recipe>.of(catalog.items);
     final tombstones = <String>{
@@ -66,6 +69,21 @@ final class PlannerAssembly {
           : edited.role ?? bundledRole;
       final recipe = _recipeFromState(name, edited, role: effectiveRole);
       if (_recipeTypeAllowed(mode, recipe.type)) items[name] = recipe;
+    }
+
+    // Reviewed leaf materials stay bought unless the user explicitly chooses
+    // their real Processing formula. Never turn a raw input into a substitute.
+    for (final name in selectedProcessingAcquisitions(state)) {
+      if (!hasReviewedProcessingChoice(mode, name)) continue;
+      final localKey = _foldedKey(items, name);
+      final processingKey = _foldedKey(processingRecipes, name);
+      if (localKey == null ||
+          processingKey == null ||
+          !items[localKey]!.isManualConversion) {
+        continue;
+      }
+      final processing = processingRecipes[processingKey]!;
+      if (processing.isCraftable) items[localKey] = processing;
     }
 
     for (final entry in state.ingredientMeta.entries) {

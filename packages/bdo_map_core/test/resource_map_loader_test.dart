@@ -31,17 +31,17 @@ void main() {
     radiusWorld: 10000,
   );
 
-  test('loads the attributed Stable v17 dataset', () {
+  test('loads the attributed September 9 Beta dataset', () {
     expect(dataset.manifest.schemaVersion, 1);
-    expect(dataset.manifest.datasetVersion, '2026.08.16-stable-v1');
+    expect(dataset.manifest.datasetVersion, '2026.09.09-beta-v4');
     expect(dataset.manifest.provenance, isNotEmpty);
     expect(dataset.workerNodes.length, 1052);
-    expect(dataset.resources.length, 356);
-    expect(dataset.gatheringSpots, hasLength(3));
+    expect(dataset.resources.length, 358);
+    expect(dataset.gatheringSpots, hasLength(23));
     expect(dataset.gatheringPoints, hasLength(13315));
-    expect(dataset.fieldSources, hasLength(38));
+    expect(dataset.fieldSources, hasLength(40));
     expect(dataset.vendorNpcs, hasLength(266));
-    expect(dataset.vendorListings, hasLength(1241));
+    expect(dataset.vendorListings, hasLength(1243));
     expect(
       dataset.workerNodes
           .where((node) => node.isResourceNode)
@@ -93,6 +93,37 @@ void main() {
       () => saltListings.clear(),
       throwsUnsupportedError,
       reason: 'Vendor indexes must stay immutable.',
+    );
+  });
+
+  test('indexes both reviewed Purified Water vendors', () {
+    final listings = dataset.vendorListingsForItem(
+      'Purified Water',
+      itemId: 6656,
+    );
+    final vendors = dataset.vendorNpcsForItem('Purified Water', itemId: 6656);
+
+    expect(listings, hasLength(2));
+    expect(listings.every((listing) => listing.priceSilver == 5000), isTrue);
+    expect(vendors.map((vendor) => vendor.name).toSet(), <String>{
+      'Waida',
+      'Yasum',
+    });
+    expect(
+      vendors.singleWhere((vendor) => vendor.name == 'Waida').sourceVendorId,
+      'npc:45105:1',
+    );
+    expect(
+      vendors.singleWhere((vendor) => vendor.name == 'Yasum').sourceVendorId,
+      'npc:45334:1',
+    );
+    expect(
+      bdoBundledVendorPortraitAsset('npc:45105:1'),
+      endsWith('ic_00885.webp'),
+    );
+    expect(
+      bdoBundledVendorPortraitAsset('npc:45334:1'),
+      endsWith('ic_01047.webp'),
     );
   });
 
@@ -165,7 +196,7 @@ void main() {
       BdoResourceSection.bloodHides: 30,
       BdoResourceSection.mushrooms: 27,
       BdoResourceSection.seafoodMarine: 57,
-      BdoResourceSection.other: 43,
+      BdoResourceSection.other: 45,
     };
 
     for (final entry in expectedCounts.entries) {
@@ -218,6 +249,7 @@ void main() {
       7921: BdoResourceSection.meat,
       8246: BdoResourceSection.seafoodMarine,
       9064: BdoResourceSection.other,
+      9065: BdoResourceSection.other,
       752023: BdoResourceSection.oresMinerals,
       821255: BdoResourceSection.seafoodMarine,
     };
@@ -927,7 +959,8 @@ void main() {
     expect(current.permittedUse, contains('five'));
     expect(current.permittedUse, contains('No parent'));
     expect(current.permittedUse, contains('Raw HTML'));
-    expect(current.permittedUse, contains('free noncommercial fan-content'));
+    expect(current.permittedUse, contains('source research input is excluded'));
+    expect(current.permittedUse, contains('BDO Codex credited'));
 
     final client = dataset.manifest.provenance.singleWhere(
       (record) => record.id == 'na-client-edania-node-facts-2026-reference',
@@ -938,8 +971,8 @@ void main() {
     );
     expect(client.license, contains('noncommercial licence'));
     expect(client.license, contains('Pearl Abyss-origin game facts'));
-    expect(client.permittedUse, contains('free noncommercial fan-content'));
-    expect(client.permittedUse, contains('extractor source'));
+    expect(client.permittedUse, contains('source research input is excluded'));
+    expect(client.permittedUse, contains('extractor is read-only'));
 
     final production2025 = dataset.manifest.provenance.singleWhere(
       (record) => record.id == 'pearl-abyss-edania-production-node-facts-2025',
@@ -965,7 +998,7 @@ void main() {
     expect(animalPoints.license, contains('Pearl Abyss-origin game facts'));
     expect(
       animalPoints.permittedUse,
-      contains('free noncommercial fan-content'),
+      contains('source research input is excluded'),
     );
     expect(
       animalPoints.permittedUse,
@@ -1140,7 +1173,7 @@ void main() {
         dataset.gatheringPointsById['gathering-point:390825:49175']!;
     expect(knownSnakePoint.target, 'Snake');
     expect(knownSnakePoint.kind, 'butchering / fluid collecting / tanning');
-    expect(knownSnakePoint.label, 'Historical snake gathering location');
+    expect(knownSnakePoint.label, 'Snake');
     expect(knownSnakePoint.areaId, isNull);
     expect(knownSnakePoint.verifiedAt, isNull);
     expect(
@@ -1153,7 +1186,7 @@ void main() {
         dataset.gatheringPointsById['gathering-point:-19000:-366881']!;
     expect(knownScorpionPoint.target, 'Scorpion');
     expect(knownScorpionPoint.kind, 'butchering / fluid collecting');
-    expect(knownScorpionPoint.label, 'Historical scorpion gathering location');
+    expect(knownScorpionPoint.label, 'Scorpion');
     final knownSheepPoint =
         dataset.gatheringPointsById['gathering-point:-25551:126']!;
     expect(knownSheepPoint.resourceIds, <String>[
@@ -1163,7 +1196,7 @@ void main() {
     ]);
     expect(knownSheepPoint.target, 'Sheep');
     expect(knownSheepPoint.kind, 'butchering / fluid collecting / tanning');
-    expect(knownSheepPoint.label, 'Historical sheep gathering location');
+    expect(knownSheepPoint.label, 'Sheep');
     expect(
       dataset.resourcesById['item:7922']!.acquisitionModes,
       <BdoAcquisitionMode>{
@@ -1419,6 +1452,105 @@ void main() {
     expect(
       dataset.fieldSourcesForResource('item:5020').map((source) => source.id),
       contains('field-source:thuja-tree'),
+    );
+  });
+
+  test('searches wildlife and plants by source name, alias, and product', () {
+    final lizardResults = dataset.search('lizard');
+    expect(
+      lizardResults.any(
+        (result) =>
+            result.kind == BdoSearchKind.fieldSource &&
+            result.fieldSourceId == 'field-source:lizard',
+      ),
+      isTrue,
+    );
+
+    final cowSources = dataset
+        .search('cow')
+        .where((result) => result.kind == BdoSearchKind.fieldSource)
+        .map((result) => result.fieldSourceId)
+        .toSet();
+    expect(
+      cowSources,
+      containsAll(<String>{'field-source:cow-ox', 'field-source:dairy-cow'}),
+    );
+
+    final dairy = dataset.fieldSourcesById['field-source:dairy-cow']!;
+    expect(dairy.category, 'Animals');
+    expect(dairy.products.single.resourceId, 'item:9065');
+    expect(dairy.products.single.method, 'Milk');
+    expect(dairy.products.single.tool, 'Milking minigame');
+    expect(dataset.gatheringSpotsForFieldSource(dairy.id), hasLength(6));
+    expect(
+      dataset
+          .gatheringSpotsForFieldSource(dairy.id)
+          .every((spot) => spot.radiusWorld == null),
+      isTrue,
+    );
+    expect(
+      dataset
+          .search('milkable cow')
+          .firstWhere((result) => result.kind == BdoSearchKind.fieldSource)
+          .fieldSourceId,
+      dairy.id,
+    );
+    expect(
+      dataset
+          .search('violet flower')
+          .any(
+            (result) => result.fieldSourceId == 'field-source:violet-flower',
+          ),
+      isTrue,
+    );
+  });
+
+  test('bundles official truffle areas and attributed regional guides', () {
+    final source = dataset.fieldSourcesById['field-source:truffle-mushroom']!;
+    final spots = dataset.gatheringSpotsForFieldSource(source.id);
+    final points = dataset.gatheringPointsForFieldSource(source.id);
+    final provenance = dataset.manifest.provenance.singleWhere(
+      (record) => record.id == 'pearl-abyss-truffle-location-update-2022-11-02',
+    );
+
+    expect(source.note, contains('13 areas with 87 mushrooms'));
+    expect(source.note, contains('33% shorter respawn time'));
+    expect(spots, hasLength(13));
+    expect(points, hasLength(96));
+    expect(spots.map((spot) => spot.region).toSet(), <String>{
+      'Serendia',
+      'Calpheon',
+      'Mediah',
+      'Drieghan',
+    });
+    expect(
+      spots.map((spot) => spot.name),
+      containsAll(<String>[
+        'Hidden Cave near Eastern Gateway',
+        'Glutoni Cave',
+        'Rock Cave near Hasrah Ancient Ruins',
+        'River near Morning Fog Post',
+      ]),
+    );
+    expect(
+      spots.every(
+        (spot) =>
+            spot.radiusWorld == null &&
+            spot.guideImages.length == 1 &&
+            spot.guideImages.single.assetPath.startsWith(
+              'https://s1.playblackdesert.com/web/CONSOLE/Upload/News/',
+            ),
+      ),
+      isTrue,
+    );
+    expect(points.every((point) => point.guideImages.isEmpty), isTrue);
+    expect(
+      provenance.permittedUse,
+      allOf(
+        contains('regional navigation guides'),
+        contains('never to individual historical dots'),
+        contains('no new exact spawn geometry is inferred'),
+      ),
     );
   });
 
@@ -1682,9 +1814,11 @@ void main() {
     );
     expect(provenance.url.toString(), 'https://bdocodex.com/us/npc/28115/');
     expect(provenance.license, contains('Pearl Abyss-origin game facts'));
-    expect(provenance.permittedUse, contains('free noncommercial fan-content'));
+    expect(
+      provenance.permittedUse,
+      contains('source research input is excluded'),
+    );
     expect(provenance.permittedUse, contains('open to correction'));
-    expect(provenance.permittedUse, contains('source-recorded'));
     expect(provenance.permittedUse, contains('(pixelX - 68600) * 25'));
     expect(provenance.permittedUse, contains('(72200 - pixelY) * 25'));
   });
@@ -1798,6 +1932,10 @@ void main() {
     expect(provenance.license, contains('Pearl Abyss-origin game facts'));
     expect(provenance.permittedUse, contains('198'));
     expect(provenance.permittedUse, contains('does not connect the dots'));
+    expect(
+      provenance.permittedUse,
+      contains('source research input is excluded'),
+    );
     expect(provenance.permittedUse, contains('open to correction'));
   });
 

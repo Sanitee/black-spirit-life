@@ -38,9 +38,9 @@ void main() {
               .toList()
             ..sort();
       expect(missing, isEmpty);
-      expect(requiredNames, hasLength(1687));
-      expect(rules.itemWeightIds, hasLength(1707));
-      expect(rules.itemWeightsLtById, hasLength(1706));
+      expect(requiredNames, hasLength(1712));
+      expect(rules.itemWeightIds, hasLength(1741));
+      expect(rules.itemWeightsLtById, hasLength(1740));
       expect(
         rules.itemWeightsLtById.values.every(
           (weight) => weight.isFinite && weight > 0,

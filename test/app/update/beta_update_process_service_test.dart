@@ -12,7 +12,7 @@ void main() {
     () async {
       final helper = _RecordingHelperClient();
       final service = ProcessBetaUpdateService(
-        source: r'C:\private-beta-feed',
+        source: r'C:\public-stable-feed',
         currentVersion: '0.1.0-beta.5',
         plannerProcessId: 4242,
         helperClient: helper,
@@ -21,7 +21,7 @@ void main() {
       final subscription = service.snapshots.listen(events.add);
 
       expect((await service.currentStatus()).phase, BetaUpdatePhase.idle);
-      final available = await service.checkForUpdates(r'C:\private-beta-feed');
+      final available = await service.checkForUpdates(r'C:\public-stable-feed');
       expect(available.phase, BetaUpdatePhase.available);
       expect(available.usesDelta, isTrue);
       expect(available.sizeBytes, 2610822);
@@ -54,7 +54,7 @@ void main() {
   test('service rejects a source change before starting the helper', () async {
     final helper = _RecordingHelperClient();
     final service = ProcessBetaUpdateService(
-      source: r'C:\private-beta-feed',
+      source: r'C:\public-stable-feed',
       helperClient: helper,
     );
 
@@ -70,17 +70,17 @@ void main() {
     () async {
       final helper = _AdvancingHelperClient();
       final service = ProcessBetaUpdateService(
-        source: r'C:\private-beta-feed',
+        source: r'C:\public-stable-feed',
         currentVersion: '0.1.0-beta.5',
         helperClient: helper,
       );
 
       expect(
-        (await service.checkForUpdates(r'C:\private-beta-feed')).targetVersion,
+        (await service.checkForUpdates(r'C:\public-stable-feed')).targetVersion,
         '0.1.0-beta.6',
       );
       expect(
-        (await service.checkForUpdates(r'C:\private-beta-feed')).targetVersion,
+        (await service.checkForUpdates(r'C:\public-stable-feed')).targetVersion,
         '0.1.0-beta.7',
       );
       expect(helper.requests[0].targetVersion, isEmpty);
@@ -113,7 +113,7 @@ void main() {
       final snapshot = await helper.run(
         const BetaUpdaterHelperRequest(
           operation: BetaUpdaterHelperOperation.status,
-          source: r'C:\private-beta-feed',
+          source: r'C:\public-stable-feed',
           currentVersion: AppIdentity.applicationVersion,
         ),
         onSnapshot: (_) {},

@@ -1,10 +1,44 @@
 import 'package:flutter/material.dart';
 
+import '../model/map_ui_opacity.dart';
+
+/// The two complete Resource Map interface systems available to the user.
+///
+/// [id] is deliberately stable because it is written into the portable
+/// planner document. Unknown or older values safely return to [glassDock].
+enum ResourceMapInterfaceStyle {
+  glassDock('glassDock', 'Glass Dock'),
+  ghostLedger('ghostLedger', 'Ghost Ledger');
+
+  const ResourceMapInterfaceStyle(this.id, this.label);
+
+  final String id;
+  final String label;
+
+  ResourceMapInterfaceStyle get alternate => switch (this) {
+    glassDock => ghostLedger,
+    ghostLedger => glassDock,
+  };
+
+  static ResourceMapInterfaceStyle fromId(Object? value) {
+    final id = value?.toString().trim();
+    return ResourceMapInterfaceStyle.values.firstWhere(
+      (style) => style.id == id,
+      orElse: () => ResourceMapInterfaceStyle.glassDock,
+    );
+  }
+}
+
 /// The visual language used by the Resource Map's package-owned chrome.
 ///
 /// This deliberately lives in `bdo_map_core`: applications can select a map
 /// skin without making the reusable map package depend on an app theme model.
-enum ResourceMapChromeThemeVariant { sakuraCartographer, illuminatedAtlas }
+enum ResourceMapChromeThemeVariant {
+  fieldAtlas,
+  ghostLedger,
+  sakuraCartographer,
+  illuminatedAtlas,
+}
 
 /// Semantic colors, materials and geometry for Resource Map controls.
 ///
@@ -14,6 +48,7 @@ enum ResourceMapChromeThemeVariant { sakuraCartographer, illuminatedAtlas }
 @immutable
 class ResourceMapChromeThemeData {
   const ResourceMapChromeThemeData({
+    this.uiOpacity = ResourceMapUiOpacity.defaultValue,
     required this.variant,
     required this.canvas,
     required this.paper,
@@ -73,6 +108,7 @@ class ResourceMapChromeThemeData {
   });
 
   final ResourceMapChromeThemeVariant variant;
+  final double uiOpacity;
   final Color canvas;
   final Color paper;
   final Color paperRaised;
@@ -143,6 +179,92 @@ class ResourceMapChromeThemeData {
   final double compactRadius;
   final double surfaceRadius;
 
+  double get materialOpacity => ResourceMapUiOpacity.material(uiOpacity);
+
+  /// Multiplies material fills and their shadows. Foreground colours, icons,
+  /// geometry and the basemap canvas are deliberately retained verbatim.
+  ResourceMapChromeThemeData withUiOpacity(Object? value) {
+    final opacity = ResourceMapUiOpacity.normalize(value);
+    if (opacity == uiOpacity) return this;
+    final multiplier = ResourceMapUiOpacity.material(opacity) / materialOpacity;
+    Color fade(Color color) => color.withValues(alpha: color.a * multiplier);
+    BoxShadow fadeShadow(BoxShadow shadow) =>
+        shadow.copyWith(color: fade(shadow.color));
+    LinearGradient fadeGradient(LinearGradient gradient) => LinearGradient(
+      begin: gradient.begin,
+      end: gradient.end,
+      colors: gradient.colors.map(fade).toList(growable: false),
+      stops: gradient.stops,
+      tileMode: gradient.tileMode,
+      transform: gradient.transform,
+    );
+    return ResourceMapChromeThemeData(
+      uiOpacity: opacity,
+      variant: variant,
+      canvas: canvas,
+      paper: fade(paper),
+      paperRaised: fade(paperRaised),
+      ink: ink,
+      text: text,
+      muted: muted,
+      warmOutline: warmOutline,
+      softOutline: softOutline,
+      primary: primary,
+      deepAccent: deepAccent,
+      onPrimary: onPrimary,
+      accent: accent,
+      positive: positive,
+      warning: warning,
+      error: error,
+      chromeBase: fade(chromeBase),
+      chromeRaised: fade(chromeRaised),
+      chromeHighlight: fade(chromeHighlight),
+      modeStripFadeColor: fade(modeStripFadeColor),
+      trimDeep: fade(trimDeep),
+      trimLine: trimLine,
+      trimWash: fade(trimWash),
+      idleControlGradient: fadeGradient(idleControlGradient),
+      idleCompactGradient: fadeGradient(idleCompactGradient),
+      hoverControlGradient: fadeGradient(hoverControlGradient),
+      selectedControlGradient: fadeGradient(selectedControlGradient),
+      selectedModeGradient: fadeGradient(selectedModeGradient),
+      selectedCompactGradient: fadeGradient(selectedCompactGradient),
+      selectedInlineGradient: fadeGradient(selectedInlineGradient),
+      idleInlineGradient: fadeGradient(idleInlineGradient),
+      idleSearchGradient: fadeGradient(idleSearchGradient),
+      focusedSearchGradient: fadeGradient(focusedSearchGradient),
+      surfaceGradient: fadeGradient(surfaceGradient),
+      subtleSurfaceGradient: fadeGradient(subtleSurfaceGradient),
+      taskStripGradient: fadeGradient(taskStripGradient),
+      readingSurfaceGradient: fadeGradient(readingSurfaceGradient),
+      edgeFadeGradient: fadeGradient(edgeFadeGradient),
+      contourColor: fade(contourColor),
+      fleckColor: fade(fleckColor),
+      readingInk: readingInk,
+      readingMuted: readingMuted,
+      readingOutline: readingOutline,
+      idleShadow: fadeShadow(idleShadow),
+      selectedShadow: fadeShadow(selectedShadow),
+      hoverShadow: fadeShadow(hoverShadow),
+      surfaceShadows: surfaceShadows.map(fadeShadow).toList(growable: false),
+      subtleSurfaceShadows: subtleSurfaceShadows
+          .map(fadeShadow)
+          .toList(growable: false),
+      headingFontFamily: headingFontFamily,
+      commandRadius: commandRadius,
+      controlRadius: controlRadius,
+      toolRadius: toolRadius,
+      inlineRadius: inlineRadius,
+      keycapRadius: keycapRadius,
+      compactRadius: compactRadius,
+      surfaceRadius: surfaceRadius,
+    );
+  }
+
+  /// For fills that deliberately override their role's base alpha.
+  Color fillAlpha(Color color, double alpha) =>
+      color.withValues(alpha: alpha * materialOpacity);
+
   TextStyle headingStyle({
     double fontSize = 15,
     Color? color,
@@ -154,6 +276,269 @@ class ResourceMapChromeThemeData {
     height: 1.2,
     fontWeight: fontWeight,
     letterSpacing: headingFontFamily == null ? .05 : .12,
+  );
+
+  /// Neutral, map-native chrome used by the application map workspace.
+  ///
+  /// It deliberately does not inherit the decorative identity of either
+  /// planner theme. Surfaces are compact graphite tools with cool location
+  /// accents, letting the basemap and familiar game artwork carry the view.
+  static const fieldAtlas = ResourceMapChromeThemeData(
+    variant: ResourceMapChromeThemeVariant.fieldAtlas,
+    canvas: Color(0xFF0C1C2D),
+    paper: Color(0xFF142A40),
+    paperRaised: Color(0xFF1C344B),
+    ink: Color(0xFFF0F4FA),
+    text: Color(0xFFE7EFF7),
+    muted: Color(0xFFC0CFDF),
+    warmOutline: Color(0x996689A0),
+    softOutline: Color(0x8847647C),
+    primary: Color(0xFF80D6D5),
+    deepAccent: Color(0xFF1C4559),
+    onPrimary: Color(0xFF071221),
+    accent: Color(0xFFACCFDF),
+    positive: Color(0xFF9CDEB7),
+    warning: Color(0xFFEDC38C),
+    error: Color(0xFFF2A39A),
+    chromeBase: Color(0xFF102338),
+    chromeRaised: Color(0xFF193249),
+    chromeHighlight: Color(0xFF26445B),
+    modeStripFadeColor: Color(0xF0102338),
+    trimDeep: Color(0xFF365D77),
+    trimLine: Color(0xFF80D6D5),
+    trimWash: Color(0x2480D6D5),
+    idleControlGradient: LinearGradient(
+      begin: Alignment.topLeft,
+      end: Alignment.bottomRight,
+      colors: <Color>[Color(0xF02B495F), Color(0xF51A3048)],
+    ),
+    idleCompactGradient: LinearGradient(
+      colors: <Color>[Color(0xF0233F55), Color(0xF0152B42)],
+    ),
+    hoverControlGradient: LinearGradient(
+      colors: <Color>[Color(0xFF345A70), Color(0xFF223B59)],
+    ),
+    selectedControlGradient: LinearGradient(
+      colors: <Color>[Color(0xFF2E6372), Color(0xFF214958)],
+    ),
+    selectedModeGradient: LinearGradient(
+      colors: <Color>[Color(0xFF2E6372), Color(0xFF214958)],
+    ),
+    selectedCompactGradient: LinearGradient(
+      colors: <Color>[Color(0xFF2E6372), Color(0xFF214958)],
+    ),
+    selectedInlineGradient: LinearGradient(
+      colors: <Color>[Color(0xFF285366), Color(0xFF1B3C53)],
+    ),
+    idleInlineGradient: LinearGradient(
+      colors: <Color>[Color(0xFF1E3C53), Color(0xFF162B43)],
+    ),
+    idleSearchGradient: LinearGradient(
+      colors: <Color>[Color(0xFF102338), Color(0xFF102338)],
+    ),
+    focusedSearchGradient: LinearGradient(
+      colors: <Color>[Color(0xFF193B50), Color(0xFF102338)],
+    ),
+    surfaceGradient: LinearGradient(
+      begin: Alignment.topLeft,
+      end: Alignment.bottomRight,
+      colors: <Color>[Color(0xF0213C51), Color(0xF5102036)],
+    ),
+    subtleSurfaceGradient: LinearGradient(
+      colors: <Color>[Color(0xEA1C354D), Color(0xED12263E)],
+    ),
+    taskStripGradient: LinearGradient(
+      colors: <Color>[Color(0xE318324A), Color(0xED172D45)],
+    ),
+    readingSurfaceGradient: LinearGradient(
+      begin: Alignment.topLeft,
+      end: Alignment.bottomRight,
+      colors: <Color>[Color(0xED18324A), Color(0xF0172D45), Color(0xF511203A)],
+      stops: <double>[0, .48, 1],
+    ),
+    edgeFadeGradient: LinearGradient(
+      begin: Alignment.centerLeft,
+      end: Alignment.centerRight,
+      colors: <Color>[Color(0xFA0E141A), Color(0xE60E141A), Color(0x000E141A)],
+      stops: <double>[0, .72, 1],
+    ),
+    contourColor: Color(0x00000000),
+    fleckColor: Color(0x00000000),
+    readingInk: Color(0xFFF0F4FA),
+    readingMuted: Color(0xFFC0CFDF),
+    readingOutline: Color(0x996689A0),
+    idleShadow: BoxShadow(
+      color: Color(0x59000000),
+      blurRadius: 10,
+      offset: Offset(0, 4),
+    ),
+    selectedShadow: BoxShadow(
+      color: Color(0x336CB7C8),
+      blurRadius: 12,
+      offset: Offset(0, 4),
+    ),
+    hoverShadow: BoxShadow(
+      color: Color(0x1F6CB7C8),
+      blurRadius: 9,
+      offset: Offset(0, 3),
+    ),
+    surfaceShadows: <BoxShadow>[
+      BoxShadow(color: Color(0x66000000), blurRadius: 14, offset: Offset(0, 6)),
+    ],
+    subtleSurfaceShadows: <BoxShadow>[
+      BoxShadow(color: Color(0x4D000000), blurRadius: 8, offset: Offset(0, 3)),
+    ],
+    headingFontFamily: 'Segoe UI',
+    commandRadius: 10,
+    controlRadius: 9,
+    toolRadius: 9,
+    inlineRadius: 8,
+    keycapRadius: 4,
+    compactRadius: 8,
+    surfaceRadius: 14,
+  );
+
+  /// Compact cyan smoked glass over the map.
+  ///
+  /// The geometry and material treatment live in the interface primitives;
+  /// these roles also restyle every dialog, form, notice and data surface that
+  /// can be opened from the map.
+  static const glassDock = fieldAtlas;
+
+  /// The saved alternate palette keeps its cool green tint, with the same
+  /// legible reading planes and shared navigation as the default glass.
+  static const ghostLedger = ResourceMapChromeThemeData(
+    variant: ResourceMapChromeThemeVariant.ghostLedger,
+    canvas: Color(0xFF071014),
+    paper: Color(0xE80A151A),
+    paperRaised: Color(0xEE0D1B21),
+    ink: Color(0xFFF1F7F6),
+    text: Color(0xFFE8F0F0),
+    muted: Color(0xFFCEDCD9),
+    warmOutline: Color(0x3667E3D0),
+    softOutline: Color(0x243D6967),
+    primary: Color(0xFF74E7D3),
+    deepAccent: Color(0xFF123D3B),
+    onPrimary: Color(0xFF04100F),
+    accent: Color(0xFFE8C278),
+    positive: Color(0xFF72D5A9),
+    warning: Color(0xFFE6B36C),
+    error: Color(0xFFF2A39A),
+    chromeBase: Color(0xD9081318),
+    chromeRaised: Color(0xE80B191F),
+    chromeHighlight: Color(0xD914292E),
+    modeStripFadeColor: Color(0xC9061116),
+    trimDeep: Color(0xFF1F5A55),
+    trimLine: Color(0xFF74E7D3),
+    trimWash: Color(0x1F74E7D3),
+    idleControlGradient: LinearGradient(
+      begin: Alignment.centerLeft,
+      end: Alignment.centerRight,
+      colors: <Color>[Color(0xB309161B), Color(0x7009161B), Color(0x0009161B)],
+      stops: <double>[0, .72, 1],
+    ),
+    idleCompactGradient: LinearGradient(
+      colors: <Color>[Color(0xA80A171C), Color(0x700A171C)],
+    ),
+    hoverControlGradient: LinearGradient(
+      begin: Alignment.centerLeft,
+      end: Alignment.centerRight,
+      colors: <Color>[Color(0xC4142B30), Color(0x70142B30), Color(0x00142B30)],
+      stops: <double>[0, .72, 1],
+    ),
+    selectedControlGradient: LinearGradient(
+      begin: Alignment.centerLeft,
+      end: Alignment.centerRight,
+      colors: <Color>[Color(0xC31B3E3C), Color(0x76142D2D), Color(0x00142D2D)],
+      stops: <double>[0, .76, 1],
+    ),
+    selectedModeGradient: LinearGradient(
+      begin: Alignment.centerLeft,
+      end: Alignment.centerRight,
+      colors: <Color>[Color(0xB71B3E3C), Color(0x00142D2D)],
+    ),
+    selectedCompactGradient: LinearGradient(
+      colors: <Color>[Color(0xB71B3E3C), Color(0x76142D2D)],
+    ),
+    selectedInlineGradient: LinearGradient(
+      begin: Alignment.centerLeft,
+      end: Alignment.centerRight,
+      colors: <Color>[Color(0xA61B3E3C), Color(0x00142D2D)],
+    ),
+    idleInlineGradient: LinearGradient(
+      begin: Alignment.centerLeft,
+      end: Alignment.centerRight,
+      colors: <Color>[Color(0x8A0A171C), Color(0x000A171C)],
+    ),
+    idleSearchGradient: LinearGradient(
+      begin: Alignment.centerLeft,
+      end: Alignment.centerRight,
+      colors: <Color>[Color(0xE609171C), Color(0xDA09171C), Color(0xC909171C)],
+      stops: <double>[0, .9, 1],
+    ),
+    focusedSearchGradient: LinearGradient(
+      begin: Alignment.centerLeft,
+      end: Alignment.centerRight,
+      colors: <Color>[Color(0xED0B2024), Color(0xE00B2024), Color(0xCD0B2024)],
+      stops: <double>[0, .9, 1],
+    ),
+    surfaceGradient: LinearGradient(
+      begin: Alignment.topLeft,
+      end: Alignment.bottomRight,
+      colors: <Color>[Color(0xF0193B42), Color(0xF1122D37), Color(0xF510202C)],
+      stops: <double>[0, .48, 1],
+    ),
+    subtleSurfaceGradient: LinearGradient(
+      begin: Alignment.centerLeft,
+      end: Alignment.centerRight,
+      colors: <Color>[Color(0xED14343B), Color(0xED102B34), Color(0xF010202C)],
+      stops: <double>[0, .72, 1],
+    ),
+    taskStripGradient: LinearGradient(
+      begin: Alignment.centerLeft,
+      end: Alignment.centerRight,
+      colors: <Color>[Color(0xED16393E), Color(0xF0132D34), Color(0xF010202C)],
+      stops: <double>[0, .9, 1],
+    ),
+    readingSurfaceGradient: LinearGradient(
+      begin: Alignment.topLeft,
+      end: Alignment.bottomRight,
+      colors: <Color>[Color(0xED16343D), Color(0xF0122B35), Color(0xF510202C)],
+      stops: <double>[0, .48, 1],
+    ),
+    edgeFadeGradient: LinearGradient(
+      begin: Alignment.centerLeft,
+      end: Alignment.centerRight,
+      colors: <Color>[
+        Color(0xF2081318),
+        Color(0xD9081318),
+        Color(0x78081318),
+        Color(0x00081318),
+      ],
+      stops: <double>[0, .68, .88, 1],
+    ),
+    contourColor: Color(0x00000000),
+    fleckColor: Color(0x00000000),
+    readingInk: Color(0xFFF1F7F6),
+    readingMuted: Color(0xFFCEDCD9),
+    readingOutline: Color(0x3674E7D3),
+    idleShadow: BoxShadow(color: Color(0x26000000), blurRadius: 12),
+    selectedShadow: BoxShadow(color: Color(0x2E74E7D3), blurRadius: 18),
+    hoverShadow: BoxShadow(color: Color(0x1F74E7D3), blurRadius: 14),
+    surfaceShadows: <BoxShadow>[
+      BoxShadow(color: Color(0x3D000000), blurRadius: 24, offset: Offset(0, 8)),
+    ],
+    subtleSurfaceShadows: <BoxShadow>[
+      BoxShadow(color: Color(0x26000000), blurRadius: 14, offset: Offset(0, 5)),
+    ],
+    headingFontFamily: 'Segoe UI',
+    commandRadius: 10,
+    controlRadius: 9,
+    toolRadius: 9,
+    inlineRadius: 8,
+    keycapRadius: 2,
+    compactRadius: 8,
+    surfaceRadius: 14,
   );
 
   /// The established dark Sakura/Emberglass map chrome.
@@ -457,8 +842,8 @@ class ResourceMapChromeThemeData {
 
 /// Installs a package-owned Resource Map chrome skin below this point.
 ///
-/// Without a scope, [ResourceMapChromeThemeData.sakuraCartographer] is used to
-/// preserve existing embedder behavior.
+/// Without a scope, the neutral [ResourceMapChromeThemeData.fieldAtlas] skin
+/// keeps the package visually independent from an embedding application.
 class ResourceMapChromeTheme extends InheritedTheme {
   const ResourceMapChromeTheme({
     required this.data,
@@ -472,7 +857,7 @@ class ResourceMapChromeTheme extends InheritedTheme {
       context
           .dependOnInheritedWidgetOfExactType<ResourceMapChromeTheme>()
           ?.data ??
-      ResourceMapChromeThemeData.sakuraCartographer;
+      ResourceMapChromeThemeData.fieldAtlas;
 
   static ResourceMapChromeThemeData? maybeOf(BuildContext context) => context
       .dependOnInheritedWidgetOfExactType<ResourceMapChromeTheme>()

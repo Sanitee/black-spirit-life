@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:bdo_craft_planner_flutter/app/update/beta_update.dart';
 import 'package:bdo_craft_planner_flutter/app/update/beta_update_indicator.dart';
+import 'package:bdo_craft_planner_flutter/visual/components/sakura_petal_rain.dart';
 import 'package:bdo_craft_planner_flutter/visual/foundations/theme_spec.dart';
 import 'package:bdo_craft_planner_flutter/visual/standard/standard_spec.dart';
 import 'package:flutter/material.dart';
@@ -23,14 +24,14 @@ void main() {
     expect(find.byKey(BetaUpdateIndicator.buttonKey), findsNothing);
   });
 
-  testWidgets('shows an animated one-click patch line when available', (
+  testWidgets('shows a one-shot Sakura patch notice when available', (
     tester,
   ) async {
     final semantics = tester.ensureSemantics();
     final service = _IndicatorService();
     final controller = BetaUpdateController(
       service: service,
-      source: r'C:\private-feed',
+      source: r'C:\public-stable-feed',
     );
     var updateCalls = 0;
     addTearDown(() async {
@@ -53,51 +54,63 @@ void main() {
     );
     await tester.pump();
 
+    expect(find.text('DELTA UPDATE'), findsOneWidget);
+    expect(find.text('61 MB smaller than the full download'), findsOneWidget);
+    expect(find.text('Version 0.1.0-beta.6 is ready'), findsOneWidget);
     expect(
-      find.text('Update available  ·  0.1.0-beta.6  ·  2.5 MB patch'),
+      find.text('2.5 MB patch  ·  installs and restarts automatically'),
       findsOneWidget,
     );
     expect(find.text('Update now'), findsOneWidget);
     expect(
       find.bySemanticsLabel(
-        'Update available  ·  0.1.0-beta.6  ·  2.5 MB patch. Update now',
+        'Update available. Version 0.1.0-beta.6. 2.5 MB delta patch. '
+        'Saves 61 MB compared with the full download. '
+        'Installs and restarts automatically. Update now',
       ),
       findsOneWidget,
     );
-    expect(find.byKey(BetaUpdateIndicator.sweepKey), findsOneWidget);
+    expect(find.byKey(BetaUpdateIndicator.petalRainKey), findsOneWidget);
     expect(find.byKey(BetaUpdateIndicator.arrowKey), findsOneWidget);
+    final petalsBefore = tester.widget<CustomPaint>(
+      find.byKey(BetaUpdateIndicator.petalRainKey),
+    );
+    final petalPainterBefore = petalsBefore.painter! as SakuraPetalRainPainter;
     final transformBefore = tester.widget<Transform>(
       find.descendant(
         of: find.byKey(BetaUpdateIndicator.iconKey),
         matching: find.byType(Transform),
       ),
     );
-    final sweepBefore = tester.widget<Align>(
-      find.byKey(BetaUpdateIndicator.sweepKey),
-    );
     final arrowBefore = tester.widget<Transform>(
       find.byKey(BetaUpdateIndicator.arrowKey),
     );
     await tester.pump(const Duration(milliseconds: 500));
+    final petalsAfter = tester.widget<CustomPaint>(
+      find.byKey(BetaUpdateIndicator.petalRainKey),
+    );
+    final petalPainterAfter = petalsAfter.painter! as SakuraPetalRainPainter;
     final transformAfter = tester.widget<Transform>(
       find.descendant(
         of: find.byKey(BetaUpdateIndicator.iconKey),
         matching: find.byType(Transform),
       ),
     );
-    final sweepAfter = tester.widget<Align>(
-      find.byKey(BetaUpdateIndicator.sweepKey),
-    );
     final arrowAfter = tester.widget<Transform>(
       find.byKey(BetaUpdateIndicator.arrowKey),
     );
+    expect(
+      petalPainterAfter.progress,
+      greaterThan(petalPainterBefore.progress),
+    );
     expect(transformAfter.transform, isNot(transformBefore.transform));
-    expect(sweepAfter.alignment, isNot(sweepBefore.alignment));
     expect(arrowAfter.transform, isNot(arrowBefore.transform));
 
     tester.semantics.tap(
       find.semantics.byLabel(
-        'Update available  ·  0.1.0-beta.6  ·  2.5 MB patch. Update now',
+        'Update available. Version 0.1.0-beta.6. 2.5 MB delta patch. '
+        'Saves 61 MB compared with the full download. '
+        'Installs and restarts automatically. Update now',
       ),
     );
     await tester.pump();
@@ -111,7 +124,7 @@ void main() {
     final service = _IndicatorService();
     final controller = BetaUpdateController(
       service: service,
-      source: r'C:\private-feed',
+      source: r'C:\public-stable-feed',
     );
     addTearDown(() async {
       controller.dispose();
@@ -121,7 +134,7 @@ void main() {
     await tester.pumpWidget(_host(controller, disableAnimations: true));
     service.emit(const BetaUpdateSnapshot(phase: BetaUpdatePhase.available));
     await tester.pump();
-    expect(find.byKey(BetaUpdateIndicator.sweepKey), findsNothing);
+    expect(find.byKey(BetaUpdateIndicator.petalRainKey), findsNothing);
     final transformBefore = tester.widget<Transform>(
       find.descendant(
         of: find.byKey(BetaUpdateIndicator.iconKey),
@@ -152,7 +165,7 @@ void main() {
     final service = _IndicatorService();
     final controller = BetaUpdateController(
       service: service,
-      source: r'C:\private-feed',
+      source: r'C:\public-stable-feed',
     );
     var updateCalls = 0;
     addTearDown(() async {
@@ -173,7 +186,7 @@ void main() {
 
     expect(find.text('Downloading update  ·  42%'), findsOneWidget);
     expect(find.byKey(BetaUpdateIndicator.progressKey), findsOneWidget);
-    expect(find.byKey(BetaUpdateIndicator.sweepKey), findsNothing);
+    expect(find.byKey(BetaUpdateIndicator.petalRainKey), findsNothing);
     expect(find.byKey(BetaUpdateIndicator.arrowKey), findsNothing);
     await tester.tap(find.byKey(BetaUpdateIndicator.buttonKey));
     await tester.pump();
@@ -186,7 +199,7 @@ void main() {
     final service = _IndicatorService();
     final controller = BetaUpdateController(
       service: service,
-      source: r'C:\private-feed',
+      source: r'C:\public-stable-feed',
     );
     var updateCalls = 0;
     addTearDown(() async {
@@ -207,7 +220,7 @@ void main() {
     await tester.pump();
     expect(find.text('Update ready'), findsOneWidget);
     expect(find.text('Restart to install'), findsOneWidget);
-    expect(find.byKey(BetaUpdateIndicator.sweepKey), findsNothing);
+    expect(find.byKey(BetaUpdateIndicator.petalRainKey), findsNothing);
     final readyIconBefore = tester.widget<Transform>(
       find.descendant(
         of: find.byKey(BetaUpdateIndicator.iconKey),
@@ -245,7 +258,7 @@ void main() {
     final service = _IndicatorService();
     final controller = BetaUpdateController(
       service: service,
-      source: r'C:\private-feed',
+      source: r'C:\public-stable-feed',
     );
     var updateCalls = 0;
     addTearDown(() async {
@@ -279,7 +292,7 @@ void main() {
     final service = _IndicatorService();
     final controller = BetaUpdateController(
       service: service,
-      source: r'C:\private-feed',
+      source: r'C:\public-stable-feed',
     );
     final pending = Completer<void>();
     var updateCalls = 0;

@@ -244,14 +244,15 @@ void main() {
         final image = tester.widget<Image>(
           find.descendant(of: artworkFinder, matching: find.byType(Image)),
         );
-        expect(image.fit, BoxFit.cover);
+        expect(image.fit, BoxFit.contain);
         expect(image.filterQuality, FilterQuality.high);
         expect(image.isAntiAlias, isTrue);
         expect(image.gaplessPlayback, isTrue);
         expect(image.image, isA<ResizeImage>());
         final resized = image.image as ResizeImage;
-        expect(resized.width, 102);
-        expect(resized.height, 102);
+        final expectedRasterSize = (AppTitleTabStrip.artworkSize * 3).ceil();
+        expect(resized.width, expectedRasterSize);
+        expect(resized.height, expectedRasterSize);
         expect(resized.imageProvider, isA<AssetImage>());
         expect((resized.imageProvider as AssetImage).assetName, entry.value);
       }
@@ -275,8 +276,17 @@ void main() {
           find.descendant(of: artworkFinder, matching: find.byType(Image)),
         );
         final resized = image.image as ResizeImage;
-        expect(resized.width, 102, reason: '$label at 300% display scale');
-        expect(resized.height, 102, reason: '$label at 300% display scale');
+        final expectedRasterSize = (AppTitleTabStrip.artworkSize * 3).ceil();
+        expect(
+          resized.width,
+          expectedRasterSize,
+          reason: '$label at 300% display scale',
+        );
+        expect(
+          resized.height,
+          expectedRasterSize,
+          reason: '$label at 300% display scale',
+        );
       }
       expect(tester.takeException(), isNull);
     },

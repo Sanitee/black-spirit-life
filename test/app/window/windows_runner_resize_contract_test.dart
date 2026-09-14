@@ -138,10 +138,7 @@ void main() {
     expect(source, contains('QueueBottomInset'));
     expect(source, contains('kApplyBottomInsetMessage'));
     expect(source, contains('PostMessage(window, kApplyBottomInsetMessage'));
-    expect(
-      source,
-      contains('SetBottomInset(pending_bottom_inset_logical_)'),
-    );
+    expect(source, contains('SetBottomInset(pending_bottom_inset_logical_)'));
     expect(
       source.indexOf('SetBottomInset(pending_bottom_inset_logical_)'),
       greaterThan(source.indexOf('case kApplyBottomInsetMessage')),
@@ -149,9 +146,11 @@ void main() {
     );
     expect(
       source,
-      isNot(contains(
-        'SetBottomInset(\n              DoubleArgument(call.arguments(), "logicalPixels"))',
-      )),
+      isNot(
+        contains(
+          'SetBottomInset(\n              DoubleArgument(call.arguments(), "logicalPixels"))',
+        ),
+      ),
       reason: 'Never resize Flutter synchronously inside its method handler.',
     );
     expect(source, contains('proposed->bottom - proposed->top - bottom_inset'));

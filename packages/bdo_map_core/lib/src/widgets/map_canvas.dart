@@ -51,6 +51,7 @@ class BdoMapHit {
     this.clusterNodeIds = const <String>[],
     this.clusterPointIds = const <String>[],
     this.clusterBounds,
+    this.mapPoint,
   });
 
   final BdoMapHitKind kind;
@@ -58,6 +59,7 @@ class BdoMapHit {
   final List<String> clusterNodeIds;
   final List<String> clusterPointIds;
   final BdoMapBounds? clusterBounds;
+  final BdoMapPoint? mapPoint;
 }
 
 class BdoMapCanvas extends StatefulWidget {
@@ -90,6 +92,7 @@ class BdoMapCanvas extends StatefulWidget {
     this.selectedRouteId,
     this.onViewportChanged,
     this.handlePointerSignals = true,
+    this.markerOverlays = const <Widget>[],
   });
 
   final BdoMapCameraController cameraController;
@@ -130,6 +133,12 @@ class BdoMapCanvas extends StatefulWidget {
   final String? selectedRouteId;
   final ValueChanged<BdoMapHit> onHit;
   final bool handlePointerSignals;
+
+  /// Geographic widgets that share the map's pan/pinch gesture arena.
+  ///
+  /// A marker keeps its own click action, but dragging from it moves the map.
+  /// Reading panels, popovers and navigation controls belong outside this list.
+  final List<Widget> markerOverlays;
   final VoidCallback? onEmptyTap;
   final ValueChanged<Size>? onViewportChanged;
 
@@ -530,7 +539,7 @@ class _BdoMapCanvasState extends State<BdoMapCanvas>
     return 'Interactive Black Desert resource map. '
         'Visible: ${_semanticCount(_overlayWorkerNodes.length, 'worker node')}, '
         '${_semanticCount(widget.gatheringSpots.length, 'gathering zone')}, '
-        '${_semanticCount(widget.gatheringPoints.length, 'historical gathering point')}, '
+        '${_semanticCount(widget.gatheringPoints.length, 'gathering location')}, '
         'and ${_semanticCount(widget.gatheringRoutes.length, 'gathering route')}.'
         '${emphasizedCount == 0 ? '' : ' ${_semanticCount(emphasizedCount, 'matching worker node')} highlighted.'}';
   }
@@ -538,7 +547,20 @@ class _BdoMapCanvasState extends State<BdoMapCanvas>
   void _handleTapUp(TapUpDetails details) {
     final target = _hitTargetAt(details.localPosition);
     if (target != null) {
-      widget.onHit(target.hit);
+      final hit = target.hit;
+      widget.onHit(
+        BdoMapHit(
+          kind: hit.kind,
+          id: hit.id,
+          clusterNodeIds: hit.clusterNodeIds,
+          clusterPointIds: hit.clusterPointIds,
+          clusterBounds: hit.clusterBounds,
+          mapPoint: widget.cameraController.screenToWorld(
+            details.localPosition,
+            _viewport,
+          ),
+        ),
+      );
     } else {
       widget.onEmptyTap?.call();
     }
@@ -650,117 +672,129 @@ class _BdoMapCanvasState extends State<BdoMapCanvas>
               focusNode: _focusNode,
               autofocus: true,
               onKeyEvent: _handleKeyEvent,
-              child: MouseRegion(
-                cursor: _dragging
-                    ? SystemMouseCursors.grabbing
-                    : _hoveredTarget != null
-                    ? SystemMouseCursors.click
-                    : SystemMouseCursors.grab,
-                onHover: _handleHover,
-                onExit: _handleExit,
-                child: Listener(
-                  onPointerSignal: widget.handlePointerSignals
-                      ? _handlePointerSignal
-                      : null,
-                  child: GestureDetector(
-                    behavior: HitTestBehavior.opaque,
-                    onScaleStart: _handleScaleStart,
-                    onScaleUpdate: _handleScaleUpdate,
-                    onScaleEnd: _handleScaleEnd,
-                    onDoubleTapDown: (details) {
-                      _doubleTapPosition = details.localPosition;
-                    },
-                    onDoubleTap: _handleDoubleTap,
-                    onTapUp: _handleTapUp,
-                    child: Stack(
-                      fit: StackFit.expand,
-                      children: <Widget>[
-                        RepaintBoundary(
-                          child: CustomPaint(
-                            painter: BdoMapPainter(
-                              repaint: Listenable.merge(<Listenable>[
-                                widget.cameraController,
-                                _tileFade,
-                                _tilePaintRevision,
-                              ]),
-                              cameraController: widget.cameraController,
-                              tileManager: widget.tileManager,
-                              workerNodes: widget.workerNodes,
-                              workerNodesById: widget.workerNodesById,
-                              gatheringSpots: widget.gatheringSpots,
-                              gatheringPoints: widget.gatheringPoints,
-                              gatheringRoutes: widget.gatheringRoutes,
-                              showConnections: widget.showConnections,
-                              showAllNetworkConnections:
-                                  widget.showAllNetworkConnections,
-                              nodeNetworkEdgeChanges:
-                                  widget.nodeNetworkEdgeChanges,
-                              nodeNetworkChangeKinds:
-                                  widget.nodeNetworkChangeKinds,
-                              activeNodeIds: widget.activeNodeIds,
-                              emphasizedNodeIds: widget.emphasizedNodeIds,
-                              nodeIconImages: _nodeIconImages,
-                              prioritizePlannedNetwork:
-                                  widget.prioritizePlannedNetwork,
-                              declutterWorkerLabelsForOutputArtwork:
-                                  widget.declutterWorkerLabelsForOutputArtwork,
-                              workerOutputArtworkMinimumZoom:
-                                  widget.workerOutputArtworkMinimumZoom,
-                              visualStyle: widget.visualStyle,
-                              chromeTheme: widget.chromeTheme,
-                              selectedNodeId: widget.selectedNodeId,
-                              selectedSpotId: widget.selectedSpotId,
-                              selectedPointId: widget.selectedPointId,
-                              selectedRouteId: widget.selectedRouteId,
-                              colorScheme: Theme.of(context).colorScheme,
-                              overlayLayoutProvider:
-                                  _overlayLayoutForCurrentViewport,
-                              overlayLayout: _overlayLayoutForCurrentViewport(),
-                              tilePaintRevision: _tilePaintRevision.value,
-                              tilePaintRevisionListenable: _tilePaintRevision,
-                              tileFadeProgress: _tileFade.value,
-                            ),
-                            size: Size.infinite,
+              child: Listener(
+                onPointerSignal: widget.handlePointerSignals
+                    ? _handlePointerSignal
+                    : null,
+                child: GestureDetector(
+                  behavior: HitTestBehavior.opaque,
+                  onScaleStart: _handleScaleStart,
+                  onScaleUpdate: _handleScaleUpdate,
+                  onScaleEnd: _handleScaleEnd,
+                  child: Stack(
+                    fit: StackFit.expand,
+                    children: <Widget>[
+                      MouseRegion(
+                        cursor: _dragging
+                            ? SystemMouseCursors.grabbing
+                            : _hoveredTarget != null
+                            ? SystemMouseCursors.click
+                            : SystemMouseCursors.grab,
+                        onHover: _handleHover,
+                        onExit: _handleExit,
+                        child: GestureDetector(
+                          behavior: HitTestBehavior.opaque,
+                          onDoubleTapDown: (details) {
+                            _doubleTapPosition = details.localPosition;
+                          },
+                          onDoubleTap: _handleDoubleTap,
+                          onTapUp: _handleTapUp,
+                          child: Stack(
+                            fit: StackFit.expand,
+                            children: <Widget>[
+                              RepaintBoundary(
+                                child: CustomPaint(
+                                  painter: BdoMapPainter(
+                                    repaint: Listenable.merge(<Listenable>[
+                                      widget.cameraController,
+                                      _tileFade,
+                                      _tilePaintRevision,
+                                    ]),
+                                    cameraController: widget.cameraController,
+                                    tileManager: widget.tileManager,
+                                    workerNodes: widget.workerNodes,
+                                    workerNodesById: widget.workerNodesById,
+                                    gatheringSpots: widget.gatheringSpots,
+                                    gatheringPoints: widget.gatheringPoints,
+                                    gatheringRoutes: widget.gatheringRoutes,
+                                    showConnections: widget.showConnections,
+                                    showAllNetworkConnections:
+                                        widget.showAllNetworkConnections,
+                                    nodeNetworkEdgeChanges:
+                                        widget.nodeNetworkEdgeChanges,
+                                    nodeNetworkChangeKinds:
+                                        widget.nodeNetworkChangeKinds,
+                                    activeNodeIds: widget.activeNodeIds,
+                                    emphasizedNodeIds: widget.emphasizedNodeIds,
+                                    nodeIconImages: _nodeIconImages,
+                                    prioritizePlannedNetwork:
+                                        widget.prioritizePlannedNetwork,
+                                    declutterWorkerLabelsForOutputArtwork: widget
+                                        .declutterWorkerLabelsForOutputArtwork,
+                                    workerOutputArtworkMinimumZoom:
+                                        widget.workerOutputArtworkMinimumZoom,
+                                    visualStyle: widget.visualStyle,
+                                    chromeTheme: widget.chromeTheme,
+                                    selectedNodeId: widget.selectedNodeId,
+                                    selectedSpotId: widget.selectedSpotId,
+                                    selectedPointId: widget.selectedPointId,
+                                    selectedRouteId: widget.selectedRouteId,
+                                    colorScheme: Theme.of(context).colorScheme,
+                                    overlayLayoutProvider:
+                                        _overlayLayoutForCurrentViewport,
+                                    overlayLayout:
+                                        _overlayLayoutForCurrentViewport(),
+                                    tilePaintRevision: _tilePaintRevision.value,
+                                    tilePaintRevisionListenable:
+                                        _tilePaintRevision,
+                                    tileFadeProgress: _tileFade.value,
+                                  ),
+                                  size: Size.infinite,
+                                ),
+                              ),
+                              if (widget.emphasizedNodeIds.isNotEmpty)
+                                RepaintBoundary(
+                                  key: const ValueKey<String>(
+                                    'bdo-map-search-emphasis-boundary',
+                                  ),
+                                  child: IgnorePointer(
+                                    child: AnimatedBuilder(
+                                      animation: _searchEmphasisPulse,
+                                      builder: (context, child) {
+                                        return CustomPaint(
+                                          key: const ValueKey<String>(
+                                            'bdo-map-search-emphasis-paint',
+                                          ),
+                                          painter: BdoMapSearchEmphasisPainter(
+                                            overlayLayoutProvider:
+                                                _overlayLayoutForCurrentViewport,
+                                            emphasizedNodeIds:
+                                                widget.emphasizedNodeIds,
+                                            selectedNodeId:
+                                                widget.selectedNodeId,
+                                            pulse: _searchEmphasisPulse.value,
+                                            chromeTheme: widget.chromeTheme,
+                                            repaint: widget.cameraController,
+                                          ),
+                                          size: Size.infinite,
+                                        );
+                                      },
+                                    ),
+                                  ),
+                                ),
+                              if (_hoveredTarget != null)
+                                _MapHoverLabel(
+                                  viewport: _viewport,
+                                  pointer: _hoverPosition,
+                                  label: _hoveredTarget!.label,
+                                  chromeTheme: widget.chromeTheme,
+                                ),
+                            ],
                           ),
                         ),
-                        if (widget.emphasizedNodeIds.isNotEmpty)
-                          RepaintBoundary(
-                            key: const ValueKey<String>(
-                              'bdo-map-search-emphasis-boundary',
-                            ),
-                            child: IgnorePointer(
-                              child: AnimatedBuilder(
-                                animation: _searchEmphasisPulse,
-                                builder: (context, child) {
-                                  return CustomPaint(
-                                    key: const ValueKey<String>(
-                                      'bdo-map-search-emphasis-paint',
-                                    ),
-                                    painter: BdoMapSearchEmphasisPainter(
-                                      overlayLayoutProvider:
-                                          _overlayLayoutForCurrentViewport,
-                                      emphasizedNodeIds:
-                                          widget.emphasizedNodeIds,
-                                      selectedNodeId: widget.selectedNodeId,
-                                      pulse: _searchEmphasisPulse.value,
-                                      chromeTheme: widget.chromeTheme,
-                                      repaint: widget.cameraController,
-                                    ),
-                                    size: Size.infinite,
-                                  );
-                                },
-                              ),
-                            ),
-                          ),
-                        if (_hoveredTarget != null)
-                          _MapHoverLabel(
-                            viewport: _viewport,
-                            pointer: _hoverPosition,
-                            label: _hoveredTarget!.label,
-                            chromeTheme: widget.chromeTheme,
-                          ),
-                      ],
-                    ),
+                      ),
+                      ...widget.markerOverlays,
+                    ],
                   ),
                 ),
               ),
@@ -1142,14 +1176,19 @@ class BdoMapOverlayLayout {
     }
     for (final spot in gatheringSpots) {
       final position = _worldToScreen(spot.location.mapPoint);
-      const hitRadius = 19.0;
+      final dairy = spot.targets.any((target) => target.name == 'Dairy Cow');
+      final hitRadius = dairy ? 24.0 : 19.0;
       if (_screenContains(position, viewport, padding: hitRadius + 32)) {
         result.add(
           BdoMapHitTarget(
             position: position,
             hitRadius: hitRadius,
             label: spot.name,
-            priority: 20,
+            // Gathering markers are shown only for the active material or
+            // wildlife search. They must win over a node at the same farm
+            // coordinate; otherwise clicking a Dairy Cow marker opens the
+            // node instead of the milking location.
+            priority: dairy ? 55 : 45,
             hit: BdoMapHit(kind: BdoMapHitKind.gatheringSpot, id: spot.id),
           ),
         );
@@ -1163,7 +1202,7 @@ class BdoMapOverlayLayout {
             BdoMapHitTarget(
               position: position,
               hitRadius: 10,
-              label: point.label,
+              label: point.target,
               priority: 40,
               hit: BdoMapHit(kind: BdoMapHitKind.gatheringPoint, id: point.id),
             ),
@@ -2793,10 +2832,18 @@ class BdoMapPainter extends CustomPainter {
         continue;
       }
       final selected = spot.id == selectedSpotId;
-      final radius = selected ? 10.0 : 7.5;
+      final dairy = spot.targets.any((target) => target.name == 'Dairy Cow');
+      final radius = selected ? (dairy ? 14.0 : 10.5) : (dairy ? 11.5 : 8.0);
+      if (dairy) {
+        canvas.drawCircle(
+          position,
+          radius + 7,
+          Paint()..color = const Color(0x38FFB266),
+        );
+      }
       canvas.drawCircle(
         position,
-        radius + 3,
+        radius + (dairy ? 4.5 : 3.5),
         Paint()..color = chromeTheme.chromeBase.withAlpha(216),
       );
       canvas.drawCircle(
@@ -2804,24 +2851,24 @@ class BdoMapPainter extends CustomPainter {
         radius,
         Paint()
           ..shader = const RadialGradient(
-            colors: <Color>[Color(0xFFB7E4CB), Color(0xFF4FA57D)],
+            colors: <Color>[Color(0xFFFFC58F), Color(0xFFE9784D)],
           ).createShader(Rect.fromCircle(center: position, radius: radius)),
       );
-      final leaf = Path()
-        ..moveTo(position.dx - 4, position.dy + 4)
-        ..quadraticBezierTo(
-          position.dx - 6,
-          position.dy - 5,
-          position.dx + 4,
-          position.dy - 6,
-        )
-        ..quadraticBezierTo(
-          position.dx + 6,
-          position.dy + 3,
-          position.dx - 4,
-          position.dy + 4,
+      canvas.drawCircle(
+        position,
+        selected ? 3.2 : 2.5,
+        Paint()..color = const Color(0xFFFFF3E8),
+      );
+      if (dairy) {
+        canvas.drawCircle(
+          position,
+          radius + 1.5,
+          Paint()
+            ..color = const Color(0xFFFFD39B)
+            ..style = PaintingStyle.stroke
+            ..strokeWidth = 2,
         );
-      canvas.drawPath(leaf, Paint()..color = const Color(0xFF17352B));
+      }
       final candidate = (spot: spot, position: position);
       if (selected) {
         selectedLabel = candidate;
@@ -3111,14 +3158,14 @@ class BdoMapPainter extends CustomPainter {
         continue;
       }
       final radius = selected
-          ? 6.5
+          ? 7.0
           : zoom < 3
-          ? 1.7
+          ? 3.0
           : zoom < _gatheringPointMinimumZoom
-          ? 2.1
+          ? 3.3
           : zoom >= 5.5
-          ? 3.8
-          : 3.1;
+          ? 4.2
+          : 3.7;
       canvas.drawCircle(
         position,
         radius + (selected ? 3.5 : 1.25),
@@ -3131,21 +3178,14 @@ class BdoMapPainter extends CustomPainter {
         position,
         radius,
         Paint()
-          ..color = switch (point.verification) {
-            BdoGatheringVerification.independentSurvey => const Color(
-              0xFFA8E4C2,
-            ),
-            BdoGatheringVerification.crossChecked => const Color(0xFF79CBA2),
-            BdoGatheringVerification.communityReported => const Color(
-              0xFF83B99E,
-            ),
-            BdoGatheringVerification.stale => const Color(0xFFD0A36F),
-          },
+          ..color = selected
+              ? const Color(0xFFFFE1C7)
+              : const Color(0xFFF2A05F),
       );
       if (selected) {
         _paintLabel(
           canvas,
-          point.label,
+          point.target,
           position + const Offset(0, -16),
           selected: selected,
         );

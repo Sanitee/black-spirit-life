@@ -402,8 +402,17 @@ void main() {
       (ingredient) => ingredient.name == 'Wolf Blood',
     );
 
-    expect(result.steps, hasLength(42));
-    expect(result.missing, hasLength(47));
+    expect(result.steps, hasLength(41));
+    expect(result.missing, hasLength(48));
+    expect(
+      result.steps.map((step) => step.name),
+      isNot(contains('Purified Water')),
+    );
+    expect(result.missing.map((item) => item.name), contains('Purified Water'));
+    expect(
+      result.missing.map((item) => item.name),
+      isNot(contains('Bottle of River Water')),
+    );
     expect(clownBlood.substituteGroup, 'Blood Group 1');
     expect(clownBlood.options, <String>[
       'Wolf Blood',
