@@ -7,9 +7,9 @@ import '../../features/opportunities/opportunities_visuals.dart';
 ///
 /// Planner deliberately does not use one of these overrides: its title strip
 /// continues to resolve from the user's selected Planner appearance. The
-/// Resource Map and Opportunities use the same color roles as their accepted
-/// surfaces so switching the top-level destination does not carry a Planner
-/// theme over an otherwise distinct workspace.
+/// Resource Map, Gathering, and Fish Map use the same color roles as their
+/// accepted surfaces so switching the top-level destination does not carry a
+/// Planner theme over an otherwise 1:1 embedded application.
 @immutable
 class AppTitleBarVisual {
   const AppTitleBarVisual({
@@ -63,54 +63,6 @@ class AppTitleBarVisual {
     ResourceMapChromeThemeData.ghostLedger,
   );
 
-  static final gathering = AppTitleBarVisual(
-    id: 'gathering-journal',
-    titleGradient: const LinearGradient(
-      begin: Alignment.centerLeft,
-      end: Alignment.centerRight,
-      colors: [Color(0xFF07100D), Color(0xFF13231B), Color(0xFF0A1110)],
-      stops: [0, .58, 1],
-    ),
-    titleDivider: const Color(0xFF355C48),
-    foreground: const Color(0xFFE7F2EA),
-    iconBorder: const Color(0xFF4C765E),
-    tabAccent: const Color(0xFF7ABF8C),
-    tabSurface: const Color(0xFF0A1110),
-    tabSelectedSurface: const Color(0xFF254333),
-    tabHoverSurface: const Color(0xFF172720),
-    tabPressedSurface: const Color(0xFF07100D),
-    tabDivider: const Color(0xFF355C48),
-    tabForeground: const Color(0xFFA8B9AD),
-    tabSelectedForeground: const Color(0xFFE7F2EA),
-    tabHoverForeground: const Color(0xFF9ED9AC),
-    captionHoverSurface: const Color(0xFF172720),
-    captionPressedSurface: const Color(0xFF254333),
-  );
-
-  static final fishing = AppTitleBarVisual(
-    id: 'fishing-journal',
-    titleGradient: const LinearGradient(
-      begin: Alignment.centerLeft,
-      end: Alignment.centerRight,
-      colors: [Color(0xFF100A12), Color(0xFF281329), Color(0xFF110B14)],
-      stops: [0, .58, 1],
-    ),
-    titleDivider: const Color(0xFF6C365F),
-    foreground: const Color(0xFFFFEDF7),
-    iconBorder: const Color(0xFF864471),
-    tabAccent: const Color(0xFFF18AC4),
-    tabSurface: const Color(0xFF110B14),
-    tabSelectedSurface: const Color(0xFF51243F),
-    tabHoverSurface: const Color(0xFF32182A),
-    tabPressedSurface: const Color(0xFF100A12),
-    tabDivider: const Color(0xFF6C365F),
-    tabForeground: const Color(0xFFC5A8B9),
-    tabSelectedForeground: const Color(0xFFFFEDF7),
-    tabHoverForeground: const Color(0xFFFFA9D8),
-    captionHoverSurface: const Color(0xFF32182A),
-    captionPressedSurface: const Color(0xFF51243F),
-  );
-
   static AppTitleBarVisual _mapVisual(ResourceMapChromeThemeData chrome) =>
       AppTitleBarVisual(
         id: 'resource-map-${chrome.variant.name}',
@@ -162,6 +114,60 @@ class AppTitleBarVisual {
     tabHoverForeground: OpportunitiesVisualSpec.palette.primaryBright,
     captionHoverSurface: OpportunitiesVisualSpec.palette.surface,
     captionPressedSurface: OpportunitiesVisualSpec.palette.surfaceInset,
+  );
+
+  /// Continues the Gathering field-journal's midnight and luminous teal roles.
+  static const gathering = AppTitleBarVisual(
+    id: 'gathering',
+    titleGradient: LinearGradient(
+      begin: Alignment.centerLeft,
+      end: Alignment.centerRight,
+      colors: <Color>[Color(0xFF0C151D), Color(0xFF1B2D38), Color(0xFF11252C)],
+      stops: <double>[0, .58, 1],
+    ),
+    titleDivider: Color(0xA6638695),
+    foreground: Color(0xFFF1F3ED),
+    iconBorder: Color(0xFF638695),
+    tabAccent: Color(0xFF7DE0D3),
+    tabSurface: Color(0xFF14232E),
+    tabSelectedSurface: Color(0xFF214A4D),
+    tabHoverSurface: Color(0xFF2A424E),
+    tabPressedSurface: Color(0xFF102A31),
+    tabDivider: Color(0xFF638695),
+    tabForeground: Color(0xFFB3C2C5),
+    tabSelectedForeground: Color(0xFFF1F3ED),
+    tabHoverForeground: Color(0xFFD8F2EE),
+    captionHoverSurface: Color(0xFF2A424E),
+    captionPressedSurface: Color(0xFF102A31),
+  );
+
+  /// Dark navy from the Fish Companion shell with its prize-fish burgundy.
+  ///
+  /// The burgundy is confined to the title strip and selection state; the
+  /// embedded Fish Companion remains byte-for-byte owned by its standalone
+  /// source and is never recolored by this wrapper.
+  static const fishMap = AppTitleBarVisual(
+    id: 'fish-map',
+    titleGradient: LinearGradient(
+      begin: Alignment.centerLeft,
+      end: Alignment.centerRight,
+      colors: <Color>[Color(0xFF0A0E12), Color(0xFF111A22), Color(0xFF24131A)],
+      stops: <double>[0, .58, 1],
+    ),
+    titleDivider: Color(0xA6FA6384),
+    foreground: Color(0xFFF2F5F7),
+    iconBorder: Color(0xFF8A4658),
+    tabAccent: Color(0xFFFA6384),
+    tabSurface: Color(0xFF111A22),
+    tabSelectedSurface: Color(0xFF3A1D28),
+    tabHoverSurface: Color(0xFF28202A),
+    tabPressedSurface: Color(0xFF0A0E12),
+    tabDivider: Color(0xFF714052),
+    tabForeground: Color(0xFFB8C7CE),
+    tabSelectedForeground: Color(0xFFFFE6EC),
+    tabHoverForeground: Color(0xFFFFD2DC),
+    captionHoverSurface: Color(0xFF28202A),
+    captionPressedSurface: Color(0xFF3A1D28),
   );
 }
 

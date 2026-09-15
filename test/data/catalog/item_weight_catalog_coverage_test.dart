@@ -38,7 +38,30 @@ void main() {
               .toList()
             ..sort();
       expect(missing, isEmpty);
+      // The reviewed Cooking water route is now optional. Its two extra raw
+      // alternatives leave the automatic graph but keep their exact weights.
       expect(requiredNames, hasLength(1712));
+      for (final name in ['Bag of Muddy Water', 'Cactus Sap']) {
+        expect(requiredNames, isNot(contains(name)));
+        expect(rules.itemWeightLtFor(name), greaterThan(0));
+        expect(
+          catalog.cooking.items['Purified Water']!.ingredients.single.options,
+          contains(name),
+        );
+      }
+      expect(
+        catalog.cooking.items['Purified Water']!.role,
+        RecipeRole.manualConversion,
+      );
+      expect(
+        requiredNames,
+        containsAll([
+          'Cooking Honey',
+          'Wild Beehive',
+          'Purified Water',
+          'Bottle of River Water',
+        ]),
+      );
       expect(rules.itemWeightIds, hasLength(1741));
       expect(rules.itemWeightsLtById, hasLength(1740));
       expect(

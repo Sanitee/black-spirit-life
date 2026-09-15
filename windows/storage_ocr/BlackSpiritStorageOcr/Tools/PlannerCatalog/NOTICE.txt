@@ -9,8 +9,7 @@ Planner names and embedded item icons come from this repository's
 assets/data/app-data.json. The icon artwork remains Black Desert Online client
 artwork. No third-party editorial artwork or community screenshots are added.
 
-Byte-exact upstream assets remain in Tools/PlannerCatalog/Upstream for public
-audit. The generated overlay, its modified catalog/atlas copies, and its
-generated icon files remain only in the private development repository and are
-excluded from this public source snapshot. Neither set is part of the runtime
-or publish payload.
+Byte-exact upstream assets remain in Tools/PlannerCatalog/Upstream. The
+generated overlay, its modified catalog/atlas copies, and its generated icon
+files are quarantined in Tools/PlannerCatalog/GeneratedOverlayBackup. Neither
+directory is part of the runtime or publish payload.

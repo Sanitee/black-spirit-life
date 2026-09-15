@@ -3,6 +3,8 @@
 #include <dwmapi.h>
 #include <flutter_windows.h>
 
+#include <algorithm>
+
 #include "resource.h"
 
 namespace {
@@ -122,8 +124,11 @@ Win32Window::~Win32Window() {
 
 bool Win32Window::Create(const std::wstring& title,
                          const Point& origin,
-                         const Size& size) {
+                         const Size& size,
+                         bool use_native_frame) {
   Destroy();
+  // CreateWindow can send frame-calculation messages before it returns.
+  use_native_frame_ = use_native_frame;
 
   const wchar_t* window_class =
       WindowClassRegistrar::GetInstance()->GetWindowClass();
@@ -134,12 +139,32 @@ bool Win32Window::Create(const std::wstring& title,
   UINT dpi = FlutterDesktopGetDpiForMonitor(monitor);
   double scale_factor = dpi / 96.0;
 
-  constexpr DWORD window_style =
-      WS_POPUP | WS_THICKFRAME | WS_MINIMIZEBOX | WS_MAXIMIZEBOX | WS_SYSMENU;
+  const DWORD window_style = use_native_frame
+      ? WS_OVERLAPPEDWINDOW
+      : WS_POPUP | WS_THICKFRAME | WS_MINIMIZEBOX | WS_MAXIMIZEBOX |
+            WS_SYSMENU;
+  int window_x = Scale(origin.x, scale_factor);
+  int window_y = Scale(origin.y, scale_factor);
+  int window_width = Scale(size.width, scale_factor);
+  int window_height = Scale(size.height, scale_factor);
+  if (use_native_frame) {
+    MONITORINFO monitor_info = {};
+    monitor_info.cbSize = sizeof(monitor_info);
+    if (GetMonitorInfo(monitor, &monitor_info)) {
+      const RECT& work = monitor_info.rcWork;
+      window_width =
+          (std::min)(window_width, static_cast<int>(work.right - work.left));
+      window_height =
+          (std::min)(window_height, static_cast<int>(work.bottom - work.top));
+      window_x = std::clamp(window_x, static_cast<int>(work.left),
+                            static_cast<int>(work.right) - window_width);
+      window_y = std::clamp(window_y, static_cast<int>(work.top),
+                            static_cast<int>(work.bottom) - window_height);
+    }
+  }
   HWND window = CreateWindow(
       window_class, title.c_str(), window_style,
-      Scale(origin.x, scale_factor), Scale(origin.y, scale_factor),
-      Scale(size.width, scale_factor), Scale(size.height, scale_factor),
+      window_x, window_y, window_width, window_height,
       nullptr, nullptr, GetModuleHandle(nullptr), this);
 
   if (!window) {
@@ -182,9 +207,10 @@ Win32Window::MessageHandler(HWND hwnd,
                             LPARAM const lparam) noexcept {
   switch (message) {
     case WM_NCCALCSIZE:
-      if (wparam == TRUE) {
+      if (!use_native_frame_ && wparam == TRUE) {
         return 0;
       }
+      // Let Windows preserve the helper's caption when moving or changing DPI.
       break;
     case WM_DESTROY:
       window_handle_ = nullptr;

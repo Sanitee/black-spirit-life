@@ -1,8 +1,10 @@
 # Asset and dataset sources
 
 Review snapshot: 2026-09-15
-Release candidate: Black Spirit Life `0.1.7+26`, inheriting the sanitized
-`0.1.6` asset baseline without adding third-party assets
+Release candidate: Black Spirit Life `0.1.9+28`, promoting the approved Beta
+product snapshot on top of the clean public `0.1.7` history. Publisher/player
+state and four privacy-bearing Gathering captures are excluded; the remaining
+credited product and reference assets are retained.
 
 This inventory separates ownership of underlying material from the websites
 used to find or verify it. The controlling release decision is
@@ -92,6 +94,12 @@ directed that the full current map and presentation remain intact.
 | Worker-economics calculation code | `bdo-empire` 0.8.1 / commit `4a24b6f...`; bundled Unlicense | **Licensed**; data inputs remain separately isolated above |
 | Sakura botanicals/materials and themed-installer derivatives | Project image-generation record in `docs/themes/sakura-night-garden/ASSET_GENERATION.md` | **Project-authored** |
 | App icons, Ledger art and eight scene backdrops | Project-held accepted application checkpoint; no community-site source identified | **Project-held**; complete older creation notes when available, but general provenance uncertainty is not an unrelated release blocker |
+| Fish Companion code and local service | Project-owned Dart/Python code plus CPython, PyInstaller, NumPy, Pillow, OpenSSL, libffi, zlib, and SQLite components documented beneath `packages/bdo_fishing_core/assets/fish_companion/runtime` | **Project-owned / licensed dependencies**; executable SBOM and complete dependency notices are retained |
+| Fishing map/reference snapshot, FishyStuff branding, node markers, and recognition icons | Public FishyStuff map/API/Dex/CDN responses and PA-origin item artwork, retained from the approved Beta with source URLs and catalog hashes | **Owner-approved credited reference use; no separate redistribution licence or written permission is claimed**; no profile or journal database is included |
+| Gathering companion reference data and Bairog/BDO Workshop material | Credited Bairog Haan / BDO Workshop gathering calculator, route benchmarks, logo, creator links, and PA-origin game facts/art | **Owner-approved credited reference use; no separate redistribution licence or written permission is claimed**; local user settings/loadouts/sessions are not bundled |
+| Eleven Gathering guide images | Four PA update illustrations plus credited MMOSUMO/alext96, GrumpyG, Saarith, and bunnygirl guide frames recorded in `packages/bdo_gathering_companion/assets/rotations/NOTICE.md` and `provenance.json` | **PA fan content / owner-approved credited creator references**; no creator licence or permission is claimed; four privacy-bearing full-frame captures are excluded |
+| Garmoth Session Import integration | Project-owned local helper/automation code, public Garmoth sidebar/session-column snapshot, official site icon, PA-origin static art, and source URLs recorded with the feature | **Project-owned code / owner-approved credited service references**; no Garmoth licence or written permission is claimed and no saved account/session/browser state is included |
+| `webview_flutter_windows` fork and WebView2 loader | BSD-3-Clause upstream source plus Microsoft WebView2 interfaces; the package retains its licence and local-change notice | **Licensed source dependency**; the installed runtime and generated user profiles are external to the release payload |
 | Original Black Spirit Life code | Project contributor ownership; root `LICENSE` | **Project-owned**; licence grants no rights in PA or other third-party material |
 | Velopack 1.2.0 | Bundled upstream licence | **Licensed** |
 | PaddleOCR PP-OCRv5 recognition model and ONNX Runtime 1.29.0 | Upstream licences and complete notices under `windows/storage_ocr/BlackSpiritStorageOcr/Assets/RecipeBook/ocr` | **Licensed**; notices remain in the helper payload |
@@ -127,12 +135,25 @@ records are app-specific research records rather than wholesale site exports;
 their exclusion is repository hygiene, not a content blocker. The internal
 copies remain untouched.
 
+The release also excludes every generated player record. In particular, the
+Fish service creates `fishing/fish-journal.sqlite3` (and SQLite sidecars) only
+inside the user's selected personal-data folder at runtime; no such database
+is present in source or packages. Generated browser/WebView profiles, Garmoth
+account state, Session Import drafts/receipts, Gathering loadouts/sessions,
+planner state, credentials, debug symbols, and machine-specific paths are
+likewise outside the immutable application payload.
+
 ## Runtime services
 
 Market-price refresh can contact official Pearl Abyss endpoints and the
-community Arsha/Black Desert Market API. No response corpus is bundled. The
-app must respect live service limits, fail without blocking offline use, and
-never mix responses into personal planner data without the user's action.
+community Arsha/Black Desert Market API. Fish Map ships its reviewed
+FishyStuff-derived reference snapshot and may refresh public reference data;
+that immutable/disposable reference material is not a player's Fishing
+profile or journal. Gathering can open credited creator videos, and Session
+Import can perform the user-directed Garmoth workflow. These services must
+respect live service limits, fail without blocking unrelated offline use, and
+must not include another user's profile, mastery, journal, loadout, session,
+credential, browser state, or local path in the release.
 
 ## Replacement boundary
 

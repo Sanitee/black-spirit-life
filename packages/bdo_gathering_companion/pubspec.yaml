@@ -1,0 +1,32 @@
+name: bdo_gathering_companion
+description: Native BDO gathering companion feature package.
+version: 1.0.0
+publish_to: none
+
+environment:
+  sdk: ^3.12.2
+
+dependencies:
+  crypto: ^3.0.7
+  flutter:
+    sdk: flutter
+  webview_flutter_windows:
+    path: ../webview_flutter_windows
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+
+flutter:
+  uses-material-design: true
+  assets:
+    - assets/data/
+    - assets/icons/buffs/
+    - assets/icons/tools/
+    - assets/icons/items/
+    - assets/icons/nodes/
+    - assets/icons/spots/
+    - assets/icons/pets/
+    - assets/icons/sources/
+    - assets/rotations/

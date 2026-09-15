@@ -12,7 +12,7 @@ void main() {
     () async {
       final helper = _RecordingHelperClient();
       final service = ProcessBetaUpdateService(
-        source: r'C:\public-stable-feed',
+        source: r'C:\private-beta-feed',
         currentVersion: '0.1.0-beta.5',
         plannerProcessId: 4242,
         helperClient: helper,
@@ -21,7 +21,7 @@ void main() {
       final subscription = service.snapshots.listen(events.add);
 
       expect((await service.currentStatus()).phase, BetaUpdatePhase.idle);
-      final available = await service.checkForUpdates(r'C:\public-stable-feed');
+      final available = await service.checkForUpdates(r'C:\private-beta-feed');
       expect(available.phase, BetaUpdatePhase.available);
       expect(available.usesDelta, isTrue);
       expect(available.sizeBytes, 2610822);
@@ -54,7 +54,7 @@ void main() {
   test('service rejects a source change before starting the helper', () async {
     final helper = _RecordingHelperClient();
     final service = ProcessBetaUpdateService(
-      source: r'C:\public-stable-feed',
+      source: r'C:\private-beta-feed',
       helperClient: helper,
     );
 
@@ -70,17 +70,17 @@ void main() {
     () async {
       final helper = _AdvancingHelperClient();
       final service = ProcessBetaUpdateService(
-        source: r'C:\public-stable-feed',
+        source: r'C:\private-beta-feed',
         currentVersion: '0.1.0-beta.5',
         helperClient: helper,
       );
 
       expect(
-        (await service.checkForUpdates(r'C:\public-stable-feed')).targetVersion,
+        (await service.checkForUpdates(r'C:\private-beta-feed')).targetVersion,
         '0.1.0-beta.6',
       );
       expect(
-        (await service.checkForUpdates(r'C:\public-stable-feed')).targetVersion,
+        (await service.checkForUpdates(r'C:\private-beta-feed')).targetVersion,
         '0.1.0-beta.7',
       );
       expect(helper.requests[0].targetVersion, isEmpty);
@@ -96,7 +96,10 @@ void main() {
   test('identity keeps in-process updates off and helper updates on', () {
     expect(AppIdentity.inProcessBetaUpdatesEnabled, isFalse);
     expect(AppIdentity.outOfProcessBetaUpdatesEnabled, isTrue);
-    expect(AppIdentity.windowsUpdaterHelperName, 'BlackSpiritLifeUpdater.exe');
+    expect(
+      AppIdentity.windowsUpdaterHelperName,
+      'BlackSpiritLifeUpdater.exe',
+    );
   });
 
   test(
@@ -113,7 +116,7 @@ void main() {
       final snapshot = await helper.run(
         const BetaUpdaterHelperRequest(
           operation: BetaUpdaterHelperOperation.status,
-          source: r'C:\public-stable-feed',
+          source: r'C:\private-beta-feed',
           currentVersion: AppIdentity.applicationVersion,
         ),
         onSnapshot: (_) {},
@@ -148,14 +151,14 @@ class _RecordingHelperClient implements BetaUpdaterHelperClient {
         installed: true,
         portable: false,
         currentVersion: '0.1.0-beta.5',
-        appId: 'BlackSpiritLife.App',
+        appId: 'BlackSpiritLife.App.LiveBeta',
       ),
       BetaUpdaterHelperOperation.check => const BetaUpdateSnapshot(
         phase: BetaUpdatePhase.available,
         installed: true,
         portable: false,
         currentVersion: '0.1.0-beta.5',
-        appId: 'BlackSpiritLife.App',
+        appId: 'BlackSpiritLife.App.LiveBeta',
         targetVersion: '0.1.0-beta.6',
         sizeBytes: 2610822,
         fullSizeBytes: 66854193,

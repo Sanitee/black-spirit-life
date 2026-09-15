@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 
 import '../app_identity.dart';
@@ -87,8 +88,13 @@ final class ApplicationBootstrapService {
     Future<CatalogSnapshot>? catalogFuture,
     PlannerStatePathPolicy? pathPolicy,
     PersonalDataLocationManager? personalDataLocation,
+    void Function(Directory directory)? onApplicationDirectoryResolved,
   }) async {
-    final catalog = await (catalogFuture ?? BundledDataService().load());
+    final pendingCatalog = catalogFuture ?? BundledDataService().load();
+    // Personal-data resolution now runs alongside catalog loading so Fish can
+    // start early. Attach an error observer immediately; the awaited future
+    // below still surfaces the original failure through the startup screen.
+    pendingCatalog.ignore();
     final basePaths =
         pathPolicy ??
         PlannerStatePathPolicy.fromEnvironment(Platform.environment);
@@ -147,6 +153,8 @@ final class ApplicationBootstrapService {
         );
       }
     }
+    onApplicationDirectoryResolved?.call(activeDirectory);
+    final catalog = await pendingCatalog;
     final paths = PlannerStatePathPolicy(
       applicationDirectory: activeDirectory,
       legacyStateFile: basePaths.legacyStateFile,

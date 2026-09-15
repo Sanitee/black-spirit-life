@@ -200,7 +200,8 @@ VelopackUpdateBridge::VelopackUpdateBridge(
           snapshot.release_notes_markdown.clear();
           snapshot.size_bytes = 0;
           snapshot.progress = 0;
-          snapshot.message = "Checking the Black Spirit Life update source.";
+          snapshot.message =
+              "Checking the Black Spirit Life update source.";
           state_->Publish(std::move(snapshot));
           std::thread(&VelopackUpdateBridge::CheckForUpdates, state_, source)
               .detach();

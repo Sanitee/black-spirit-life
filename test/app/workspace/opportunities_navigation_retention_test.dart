@@ -421,6 +421,7 @@ Future<_Fixture> _mount(
             bundle: rebound.bundle,
             marketGateway: const EmptyMarketGateway(),
             windowHost: window,
+            fishMapWorkspace: const SizedBox.shrink(),
             enableBetaUpdates: false,
             enableOpportunityAutoCheck: false,
             resourceMapConfiguration: ResourceMapWorkspaceConfiguration(

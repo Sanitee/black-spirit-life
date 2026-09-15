@@ -1,0 +1,12 @@
+{
+  "reviewedAt": "2026-09-05",
+  "owner": "Pearl Abyss",
+  "itemId": 15288,
+  "name": "Crystal of Breathing Verdure",
+  "icon": "assets/icons/items/15288.webp",
+  "source": "Existing game artwork embedded in assets/data/app-data.json",
+  "syncTool": "packages/bdo_gathering_companion/tool/sync_gathering_crystal_icon.mjs",
+  "sourceItemUrl": "https://bdocodex.com/us/item/15288/",
+  "sha256": "592e5c76223e5ca1bed1a277fe33c2bfd9f36c45fc6f4c00097a25042eba5f2b",
+  "byteLength": 1624
+}

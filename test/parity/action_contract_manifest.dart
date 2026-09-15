@@ -282,11 +282,11 @@ const _inventoryGroups = ActionAssertion(
   proves:
       'Owned and per-mode plan filters remain compact and combine or toggle independently as planner targets change.',
 );
-const _inventoryRename = ActionAssertion(
+const _inventoryEntryAndRemoval = ActionAssertion(
   testPath: 'test/features/inventory/inventory_view_test.dart',
-  testName: 'manually adds and removes one shared item',
+  testName: 'search and quantity replace the redundant Add item dialog',
   proves:
-      'Manual item entry saves one catalog item and amount to every mode, while removal clears it and records undo offers.',
+      'Search exposes a catalog item for direct amount entry across every mode, while removal clears it and records an undo offer.',
 );
 const _inventoryRows = ActionAssertion(
   testPath: 'test/features/inventory/inventory_view_test.dart',
@@ -375,9 +375,9 @@ const _marketSaleSettings = ActionAssertion(
 );
 const _masteryOutput = ActionAssertion(
   testPath: 'test/domain/planner/mastery_yields_test.dart',
-  testName: 'mastery output interpolates and clamps at locked values',
+  testName: 'mastery output interpolates and clamps at current values',
   proves:
-      'Alchemy and Cooking mastery output clamps and interpolates at locked values.',
+      'Alchemy and Cooking mastery output clamps and interpolates at the reviewed current values.',
 );
 const _massProcessing = ActionAssertion(
   testPath: 'test/domain/planner/mastery_yields_test.dart',
@@ -759,9 +759,10 @@ final List<ActionEvidence> actionEvidenceManifest = <ActionEvidence>[
   ),
   _e(
     'P18',
-    'Owned-amount commit validates a nonnegative row draft without mutation.',
+    'Owned-amount entry validates a positive row draft; Enter submits the same persisted Add action and recalculates.',
     _plannerRows,
-    ActionStateContract.session,
+    ActionStateContract.persisted,
+    state: _stateRoundTrip,
   ),
   _e(
     'P19',
@@ -1003,15 +1004,15 @@ final List<ActionEvidence> actionEvidenceManifest = <ActionEvidence>[
   ),
   _e(
     'I07',
-    'Manual Add Item saves a selected catalog item and amount into the shared inventory.',
-    _inventoryRename,
+    'Searching for a catalog item and entering its amount saves it into the shared inventory.',
+    _inventoryEntryAndRemoval,
     ActionStateContract.persisted,
     state: _stateRoundTrip,
   ),
   _e(
     'I08',
     'Removing one manually tracked item clears it from every planner mode and offers undo.',
-    _inventoryRename,
+    _inventoryEntryAndRemoval,
     ActionStateContract.persistedTransaction,
     state: _stateRoundTrip,
   ),

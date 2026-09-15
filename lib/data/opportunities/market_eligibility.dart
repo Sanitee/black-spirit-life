@@ -4,11 +4,12 @@ import '../../domain/catalog/temporarily_archived_items.dart';
 /// Only the normal Opportunities catalog scope was audited. Unknown/custom IDs
 /// remain eligible; server failures never add membership.
 ///
-/// Source: the project-held 2026-09-03 PC client item audit.
+/// Source: Patch Research/client-2026-09-03-audit/items.json.
 /// SHA-256: 108E8302014FDFBDAF324FFF08C833CF879AF39F9600BBD3DFD0C5808779FE2B.
 /// FORMATS.md defines bool marketable at icon offset 0. src/model/item.go uses
 /// json marketable,omitempty: absent means false on a present client record.
-/// Public scope and reproduction notes: docs/opportunities-market-eligibility.md.
+/// Original names and reproduction: docs/opportunities-market-eligibility.md
+/// and Migration Logs/shared-market-20260910/client-eligibility-audit.json.
 const reviewedNonMarketableOpportunityIds = <String>{
   '4916',
   '4925',

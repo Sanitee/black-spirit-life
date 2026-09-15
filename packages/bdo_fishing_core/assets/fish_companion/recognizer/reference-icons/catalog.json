@@ -1,0 +1,2135 @@
+{
+  "purpose": "runtime local visual-recognition templates",
+  "catalogSource": "https://fishystuff.fish/dex/",
+  "rightsNotice": "Item artwork remains Pearl Abyss intellectual property. FishyStuff is the credited third-party delivery/catalog source. These references ship in a free, noncommercial unofficial fan tool; no endorsement or separate redistribution licence is claimed.",
+  "items": [
+    {
+      "itemId": 8201,
+      "name": "Mudskipper",
+      "file": "00008201.webp",
+      "sourceUrl": "https://cdn.fishystuff.fish/images/items/00008201.webp",
+      "sha256": "f2ad0445b9b319f5477e58f52b4c55a730f95d8f8718154afccdc55ef3768c07"
+    },
+    {
+      "itemId": 8202,
+      "name": "Tuna",
+      "file": "00008202.webp",
+      "sourceUrl": "https://cdn.fishystuff.fish/images/items/00008202.webp",
+      "sha256": "49cbf7139ce00b6441cbc438914504ce1d120f4fd38c41fda1530ad090fc0a68"
+    },
+    {
+      "itemId": 8203,
+      "name": "Beltfish",
+      "file": "00008203.webp",
+      "sourceUrl": "https://cdn.fishystuff.fish/images/items/00008203.webp",
+      "sha256": "edf18bd4dfbabb63f3d2ed8d70fc83b0f392b7cd0ef62765899d7100bd4947b5"
+    },
+    {
+      "itemId": 8204,
+      "name": "Flounder",
+      "file": "00008204.webp",
+      "sourceUrl": "https://cdn.fishystuff.fish/images/items/00008204.webp",
+      "sha256": "714451b4b4836c3143ec045308b4554531a65899df1ed0c5445f0e79ed34c2d6"
+    },
+    {
+      "itemId": 8205,
+      "name": "Salmon",
+      "file": "00008205.webp",
+      "sourceUrl": "https://cdn.fishystuff.fish/images/items/00008205.webp",
+      "sha256": "5268bdc25fc9f0643bfe18429c41ef7863cf4ad608c77ba5b224acc92ce4bfb0"
+    },
+    {
+      "itemId": 8206,
+      "name": "Amberjack",
+      "file": "00008206.webp",
+      "sourceUrl": "https://cdn.fishystuff.fish/images/items/00008206.webp",
+      "sha256": "b82bad8af04beca38f08405d139c2bf83fb474849297108327f5602704ae548c"
+    },
+    {
+      "itemId": 8207,
+      "name": "Porgy",
+      "file": "00008207.webp",
+      "sourceUrl": "https://cdn.fishystuff.fish/images/items/00008207.webp",
+      "sha256": "07d8d4c13ed8e1ef9c415da5b6d8c6ef2ffcf2ee223acbb9796a1c3590737be0"
+    },
+    {
+      "itemId": 8208,
+      "name": "Swellfish",
+      "file": "00008208.webp",
+      "sourceUrl": "https://cdn.fishystuff.fish/images/items/00008208.webp",
+      "sha256": "85df857b1894a5e2b52c8025375f1c191b10d46db7115f372bbf498d3dab2292"
+    },
+    {
+      "itemId": 8209,
+      "name": "Saurel",
+      "file": "00008209.webp",
+      "sourceUrl": "https://cdn.fishystuff.fish/images/items/00008209.webp",
+      "sha256": "0c3c0d70ba05a495bcacd8033111aecf0f65e7274e83a33d4778a2da45402831"
+    },
+    {
+      "itemId": 8210,
+      "name": "Rockfish",
+      "file": "00008210.webp",
+      "sourceUrl": "https://cdn.fishystuff.fish/images/items/00008210.webp",
+      "sha256": "13130da4da0736e07f83ea1423bb6dadd9776f733e8cfd91ab29089becccd623"
+    },
+    {
+      "itemId": 8211,
+      "name": "Squid",
+      "file": "00008211.webp",
+      "sourceUrl": "https://cdn.fishystuff.fish/images/items/00008211.webp",
+      "sha256": "ccd67657940b3aec8c6fa62b3928e996a033784d1c0b6510e3f99926c13862eb"
+    },
+    {
+      "itemId": 8212,
+      "name": "Octopus",
+      "file": "00008212.webp",
+      "sourceUrl": "https://cdn.fishystuff.fish/images/items/00008212.webp",
+      "sha256": "14521b554b2c92097bbe55fe4f84727b8293118de8ac557e6d4e6c0d69b733f8"
+    },
+    {
+      "itemId": 8213,
+      "name": "Crab",
+      "file": "00008213.webp",
+      "sourceUrl": "https://cdn.fishystuff.fish/images/items/00008213.webp",
+      "sha256": "f423c707f1e0531405425ba459a8ca68fcb378dddeb745319b2e4ef06a52d0f4"
+    },
+    {
+      "itemId": 8214,
+      "name": "Jellyfish",
+      "file": "00008214.webp",
+      "sourceUrl": "https://cdn.fishystuff.fish/images/items/00008214.webp",
+      "sha256": "ea31d517e3b461115370fffd5283edaf732619698e595b5ad60b0e32adc23631"
+    },
+    {
+      "itemId": 8215,
+      "name": "Shellfish",
+      "file": "00008215.webp",
+      "sourceUrl": "https://cdn.fishystuff.fish/images/items/00008215.webp",
+      "sha256": "91b7c1d75a42433442d8782fa13a82057eb4f2689d28a23b3bcf1b2eb780412a"
+    },
+    {
+      "itemId": 8216,
+      "name": "Carp",
+      "file": "00008216.webp",
+      "sourceUrl": "https://cdn.fishystuff.fish/images/items/00008216.webp",
+      "sha256": "2fe0c7e4cab1f8d4a57ff2d0db4e7b9bd2658d8877e9dadadc9a68ca5a43884c"
+    },
+    {
+      "itemId": 8217,
+      "name": "Crucian Carp",
+      "file": "00008217.webp",
+      "sourceUrl": "https://cdn.fishystuff.fish/images/items/00008217.webp",
+      "sha256": "455ac5ce7ad396535f2a03056ddf08ccf992964fc04da79b7b7ebf8485bcb5fc"
+    },
+    {
+      "itemId": 8218,
+      "name": "Trout",
+      "file": "00008218.webp",
+      "sourceUrl": "https://cdn.fishystuff.fish/images/items/00008218.webp",
+      "sha256": "9aeb6eee8ac34c4bfe9b9fddb6559c5e60547212f6c58c6bbbf7873aa021c8b9"
+    },
+    {
+      "itemId": 8219,
+      "name": "Catfish",
+      "file": "00008219.webp",
+      "sourceUrl": "https://cdn.fishystuff.fish/images/items/00008219.webp",
+      "sha256": "7365c27e2a552f7829d3284feaf2801be674fc7796445c5ec5a3d48913208476"
+    },
+    {
+      "itemId": 8220,
+      "name": "Freshwater Eel",
+      "file": "00008220.webp",
+      "sourceUrl": "https://cdn.fishystuff.fish/images/items/00008220.webp",
+      "sha256": "7923f7de1849d020b3495a792e7d843092ac2ea443a981695a7b0d72055de4e4"
+    },
+    {
+      "itemId": 8221,
+      "name": "Snakehead",
+      "file": "00008221.webp",
+      "sourceUrl": "https://cdn.fishystuff.fish/images/items/00008221.webp",
+      "sha256": "dec0c743c2d5753263f95beea88dadfcc66bd033ddcd9d5ef60a3f6f258bdd28"
+    },
+    {
+      "itemId": 8222,
+      "name": "Cherry Salmon",
+      "file": "00008222.webp",
+      "sourceUrl": "https://cdn.fishystuff.fish/images/items/00008222.webp",
+      "sha256": "efd46fe4b59f8f84bf2d7270f1a89c45ece387950c7635fc1890dbe438810d9d"
+    },
+    {
+      "itemId": 8223,
+      "name": "Cuvier",
+      "file": "00008223.webp",
+      "sourceUrl": "https://cdn.fishystuff.fish/images/items/00008223.webp",
+      "sha256": "5716f396645d360448d8e3a36e23c9660f3a8733018063a6d9e6e70e56a4ed3c"
+    },
+    {
+      "itemId": 8224,
+      "name": "Sunfish",
+      "file": "00008224.webp",
+      "sourceUrl": "https://cdn.fishystuff.fish/images/items/00008224.webp",
+      "sha256": "01ab5f31cce840193e910a42c32f1c9b49ed6d673022759378894aee716c0546"
+    },
+    {
+      "itemId": 8225,
+      "name": "Sea Bass",
+      "file": "00008225.webp",
+      "sourceUrl": "https://cdn.fishystuff.fish/images/items/00008225.webp",
+      "sha256": "2c37061d46d3be26bfcd7173b0780ab93403a0a1e43dfc2029df1f4f90996ef4"
+    },
+    {
+      "itemId": 8226,
+      "name": "Angler",
+      "file": "00008226.webp",
+      "sourceUrl": "https://cdn.fishystuff.fish/images/items/00008226.webp",
+      "sha256": "dc60fde0403d15e816481ad0a6b3a16a11328a672cacc06c6ee04760e5fd98d4"
+    },
+    {
+      "itemId": 8227,
+      "name": "Swordfish",
+      "file": "00008227.webp",
+      "sourceUrl": "https://cdn.fishystuff.fish/images/items/00008227.webp",
+      "sha256": "ff635b6ba18d417377faa7998dc29f5d3a4bad3940bb6b610e47f88b6be6a88e"
+    },
+    {
+      "itemId": 8228,
+      "name": "Mackerel",
+      "file": "00008228.webp",
+      "sourceUrl": "https://cdn.fishystuff.fish/images/items/00008228.webp",
+      "sha256": "b3f9c6233bdfc13596e34bcbe8e0fd2eebdcd4041237b936625f77cf47f95b8b"
+    },
+    {
+      "itemId": 8229,
+      "name": "Flying Fish",
+      "file": "00008229.webp",
+      "sourceUrl": "https://cdn.fishystuff.fish/images/items/00008229.webp",
+      "sha256": "378d9e18f22a4d15e9e5e60b03dd3111d2ce600af0e1e4a22fb35578dccae56c"
+    },
+    {
+      "itemId": 8230,
+      "name": "Skipjack",
+      "file": "00008230.webp",
+      "sourceUrl": "https://cdn.fishystuff.fish/images/items/00008230.webp",
+      "sha256": "9b4556aaed5a6684446eb37d88edac6598f468840af43850b05967e896734302"
+    },
+    {
+      "itemId": 8231,
+      "name": "Ray",
+      "file": "00008231.webp",
+      "sourceUrl": "https://cdn.fishystuff.fish/images/items/00008231.webp",
+      "sha256": "a51c80e6f750816892535518eed7733e2ee19d2f15571da209990596ead0c441"
+    },
+    {
+      "itemId": 8232,
+      "name": "Seahorse",
+      "file": "00008232.webp",
+      "sourceUrl": "https://cdn.fishystuff.fish/images/items/00008232.webp",
+      "sha256": "efb4ddf8f96e3e7c380edfa6f0fce2d48d4322646710d4c33bd386d4f6603bea"
+    },
+    {
+      "itemId": 8233,
+      "name": "Starfish",
+      "file": "00008233.webp",
+      "sourceUrl": "https://cdn.fishystuff.fish/images/items/00008233.webp",
+      "sha256": "e1f779734ce58c3a6cb1c61d4461d590acc9b23b5a5b96cb7013df14509c715d"
+    },
+    {
+      "itemId": 8234,
+      "name": "Filefish",
+      "file": "00008234.webp",
+      "sourceUrl": "https://cdn.fishystuff.fish/images/items/00008234.webp",
+      "sha256": "af46fb4462bb050c3973b37c3278977075820b883a51202aae2d52c7c7667813"
+    },
+    {
+      "itemId": 8235,
+      "name": "Scorpion Fish",
+      "file": "00008235.webp",
+      "sourceUrl": "https://cdn.fishystuff.fish/images/items/00008235.webp",
+      "sha256": "a7a6fec83ac9b02e26bf97ae6d91fd173fdbb40bc46fdddf0bcff5791d6603aa"
+    },
+    {
+      "itemId": 8236,
+      "name": "Mullet",
+      "file": "00008236.webp",
+      "sourceUrl": "https://cdn.fishystuff.fish/images/items/00008236.webp",
+      "sha256": "a0125d95be3af61e55973fc61ead4d6ed365ea81c2ef089f6712cecb67f1be69"
+    },
+    {
+      "itemId": 8237,
+      "name": "Swiri",
+      "file": "00008237.webp",
+      "sourceUrl": "https://cdn.fishystuff.fish/images/items/00008237.webp",
+      "sha256": "c234a8a02a60cedcc1b9d601729ce6740266385f95d3b574984ccdf8d9bf2287"
+    },
+    {
+      "itemId": 8238,
+      "name": "Sturgeon",
+      "file": "00008238.webp",
+      "sourceUrl": "https://cdn.fishystuff.fish/images/items/00008238.webp",
+      "sha256": "6034fd65ad986111c600789df777e3ddb7eb8cb0092221a1a255edd75f8d1b70"
+    },
+    {
+      "itemId": 8239,
+      "name": "Piranha",
+      "file": "00008239.webp",
+      "sourceUrl": "https://cdn.fishystuff.fish/images/items/00008239.webp",
+      "sha256": "3ec871a273de335204d140ab94c4550381c5ddcbf97d565d829bed104e49c6ed"
+    },
+    {
+      "itemId": 8240,
+      "name": "Mandarin Fish",
+      "file": "00008240.webp",
+      "sourceUrl": "https://cdn.fishystuff.fish/images/items/00008240.webp",
+      "sha256": "dd4c457a3fd2ae6b84afebd922955a4fbcf83dea1635055cccc8f5f1b733da1e"
+    },
+    {
+      "itemId": 8241,
+      "name": "Lenok",
+      "file": "00008241.webp",
+      "sourceUrl": "https://cdn.fishystuff.fish/images/items/00008241.webp",
+      "sha256": "5a56f596824a79fdaf9b035388585013d14cdc68927670ca8e5549216b850cb7"
+    },
+    {
+      "itemId": 8242,
+      "name": "Arowana",
+      "file": "00008242.webp",
+      "sourceUrl": "https://cdn.fishystuff.fish/images/items/00008242.webp",
+      "sha256": "457e0f9661e071b441fe31f4d627148787a50005c9c69b33bddef30bc0a0c43f"
+    },
+    {
+      "itemId": 8243,
+      "name": "Sweetfish",
+      "file": "00008243.webp",
+      "sourceUrl": "https://cdn.fishystuff.fish/images/items/00008243.webp",
+      "sha256": "36c9296d0622295fd8909761e573a903dda93ffddcd44cf869fd9fec4275112b"
+    },
+    {
+      "itemId": 8244,
+      "name": "Terrapin",
+      "file": "00008244.webp",
+      "sourceUrl": "https://cdn.fishystuff.fish/images/items/00008244.webp",
+      "sha256": "5b85554bb09b43cb6bc43c63dc39a6bd9dad43774aa9357f49f6fe1819d3cd35"
+    },
+    {
+      "itemId": 8245,
+      "name": "Bass",
+      "file": "00008245.webp",
+      "sourceUrl": "https://cdn.fishystuff.fish/images/items/00008245.webp",
+      "sha256": "f6d340bf86e1a69a81c41dde14523889a7b2f3f548140e1c1679ab007751077d"
+    },
+    {
+      "itemId": 8246,
+      "name": "Crawfish",
+      "file": "00008246.webp",
+      "sourceUrl": "https://cdn.fishystuff.fish/images/items/00008246.webp",
+      "sha256": "a6345c249edc43a9aa5e5e77f8a873eb7fc34f821715e0302bc508c889afb2a0"
+    },
+    {
+      "itemId": 8247,
+      "name": "Dace",
+      "file": "00008247.webp",
+      "sourceUrl": "https://cdn.fishystuff.fish/images/items/00008247.webp",
+      "sha256": "016e5c2d1225059fa182206b3b633c6b866f48bc081916997c996c8310845979"
+    },
+    {
+      "itemId": 8248,
+      "name": "Bluegill",
+      "file": "00008248.webp",
+      "sourceUrl": "https://cdn.fishystuff.fish/images/items/00008248.webp",
+      "sha256": "887341136bb5ab3a816b17c3dc371ec3d1d7674e3ed94294777fd9c7dfcea862"
+    },
+    {
+      "itemId": 8249,
+      "name": "Perch",
+      "file": "00008249.webp",
+      "sourceUrl": "https://cdn.fishystuff.fish/images/items/00008249.webp",
+      "sha256": "07f9f9c6ea08f4c0b7faea66187d495691b33d2bdfd8fba493df666232da0ba9"
+    },
+    {
+      "itemId": 8250,
+      "name": "Notch Jaw",
+      "file": "00008250.webp",
+      "sourceUrl": "https://cdn.fishystuff.fish/images/items/00008250.webp",
+      "sha256": "4c4ad8d65c270cf6513e66e729948ad58119ba865f3d95d1e4e9e383fe9101ca"
+    },
+    {
+      "itemId": 8251,
+      "name": "Mudfish",
+      "file": "00008251.webp",
+      "sourceUrl": "https://cdn.fishystuff.fish/images/items/00008251.webp",
+      "sha256": "ca5ec2045fd7d7c8133ca6a5b5f69b835a8431f5f6f0ea4f5f67aed0faa8d8ae"
+    },
+    {
+      "itemId": 8252,
+      "name": "Goby Minnow",
+      "file": "00008252.webp",
+      "sourceUrl": "https://cdn.fishystuff.fish/images/items/00008252.webp",
+      "sha256": "9603fd9adab78d4e258da0b90d9b1094d58b8bdc456de28ee7322ed8a73fe2e3"
+    },
+    {
+      "itemId": 8253,
+      "name": "Bitterling",
+      "file": "00008253.webp",
+      "sourceUrl": "https://cdn.fishystuff.fish/images/items/00008253.webp",
+      "sha256": "beb0f15cffb5d8076cec5b1efb891eb4168192316f5e117605da36befce7d95a"
+    },
+    {
+      "itemId": 8254,
+      "name": "Bleeker",
+      "file": "00008254.webp",
+      "sourceUrl": "https://cdn.fishystuff.fish/images/items/00008254.webp",
+      "sha256": "b4a26694d60cc45266af37fd38fd97b6d16720a9bc638f9d31daaf4a5ad971db"
+    },
+    {
+      "itemId": 8255,
+      "name": "Yellowfin Sculpin",
+      "file": "00008255.webp",
+      "sourceUrl": "https://cdn.fishystuff.fish/images/items/00008255.webp",
+      "sha256": "3c7a6374bb0b9b78b3873dd245b3aed76608fd2fcbcb8bbdd1846a6f707cf14e"
+    },
+    {
+      "itemId": 8256,
+      "name": "Cero",
+      "file": "00008256.webp",
+      "sourceUrl": "https://cdn.fishystuff.fish/images/items/00008256.webp",
+      "sha256": "116364745a5916fd9deb54b508b7ad9d216287e0cd7ab4924f1e53f24e84d732"
+    },
+    {
+      "itemId": 8257,
+      "name": "Sea Eel",
+      "file": "00008257.webp",
+      "sourceUrl": "https://cdn.fishystuff.fish/images/items/00008257.webp",
+      "sha256": "502763b1baf7cac35268d43d0caea4643246f21170bb86e5343e82f7a9f7cefe"
+    },
+    {
+      "itemId": 8258,
+      "name": "Croaker",
+      "file": "00008258.webp",
+      "sourceUrl": "https://cdn.fishystuff.fish/images/items/00008258.webp",
+      "sha256": "bc3fe979c97ac5323fe30635d1b35844881c1a9d0a1140c6a6ca8842f7cddb52"
+    },
+    {
+      "itemId": 8259,
+      "name": "Greenling",
+      "file": "00008259.webp",
+      "sourceUrl": "https://cdn.fishystuff.fish/images/items/00008259.webp",
+      "sha256": "3b9f04b05ecb851bcc41bb80ff4d60cc2600e085d921d3a3f8354fe77e072737"
+    },
+    {
+      "itemId": 8260,
+      "name": "Flatfish",
+      "file": "00008260.webp",
+      "sourceUrl": "https://cdn.fishystuff.fish/images/items/00008260.webp",
+      "sha256": "26e6b1c0b017e56f373488207ac6acb9ae13e19b02936bba361bcaef0092c850"
+    },
+    {
+      "itemId": 8261,
+      "name": "Grunt",
+      "file": "00008261.webp",
+      "sourceUrl": "https://cdn.fishystuff.fish/images/items/00008261.webp",
+      "sha256": "7dde02aef3497f8d744910eeb590eb9023ecf80119b83700d6c50d7cb797f4c5"
+    },
+    {
+      "itemId": 8262,
+      "name": "Herring",
+      "file": "00008262.webp",
+      "sourceUrl": "https://cdn.fishystuff.fish/images/items/00008262.webp",
+      "sha256": "89490abf532384e6bddc7c61a0c4c01815577fcd604f5a40c210c8c95fd46a89"
+    },
+    {
+      "itemId": 8263,
+      "name": "Sardine",
+      "file": "00008263.webp",
+      "sourceUrl": "https://cdn.fishystuff.fish/images/items/00008263.webp",
+      "sha256": "b60c8ff7e972576973e8acd05d212d31eca2f4233456dec3795269570945103f"
+    },
+    {
+      "itemId": 8264,
+      "name": "Round Herring",
+      "file": "00008264.webp",
+      "sourceUrl": "https://cdn.fishystuff.fish/images/items/00008264.webp",
+      "sha256": "84924480a97b2fa070d59f034346042100257be80f34c70c302ab12f969074fd"
+    },
+    {
+      "itemId": 8265,
+      "name": "Silver-Stripe Round Herring",
+      "file": "00008265.webp",
+      "sourceUrl": "https://cdn.fishystuff.fish/images/items/00008265.webp",
+      "sha256": "2e2b45b8b1e1205751790f1d4ba01d211fb25b2ea4b76ca103b60f83f59f3bc5"
+    },
+    {
+      "itemId": 8266,
+      "name": "Whiting",
+      "file": "00008266.webp",
+      "sourceUrl": "https://cdn.fishystuff.fish/images/items/00008266.webp",
+      "sha256": "cd43cc2ab88925ed5e78e05c97fdbbdb7847af97beeff88cea44d4409356ac17"
+    },
+    {
+      "itemId": 8267,
+      "name": "Dolphinfish",
+      "file": "00008267.webp",
+      "sourceUrl": "https://cdn.fishystuff.fish/images/items/00008267.webp",
+      "sha256": "3285a2524dfb0c864aaec8efa15727af0f58640943b34985cf54e04fe91402a1"
+    },
+    {
+      "itemId": 8268,
+      "name": "Striped Catfish",
+      "file": "00008268.webp",
+      "sourceUrl": "https://cdn.fishystuff.fish/images/items/00008268.webp",
+      "sha256": "3ebffce6d3b816d8564837d56f66c563d127e569fcd09c3b90842dde677f9e9c"
+    },
+    {
+      "itemId": 8269,
+      "name": "Gunnel",
+      "file": "00008269.webp",
+      "sourceUrl": "https://cdn.fishystuff.fish/images/items/00008269.webp",
+      "sha256": "9d8f11c72a20dbf9396955c1f4e4458d57c57b9fda379f951e0b9513e80f0bdd"
+    },
+    {
+      "itemId": 8270,
+      "name": "Golden-thread",
+      "file": "00008270.webp",
+      "sourceUrl": "https://cdn.fishystuff.fish/images/items/00008270.webp",
+      "sha256": "031b4657dc1469f6e39f73d0e4599e085ce2d853cf240e2bef636b8ac1a8ad27"
+    },
+    {
+      "itemId": 8271,
+      "name": "Nibbler",
+      "file": "00008271.webp",
+      "sourceUrl": "https://cdn.fishystuff.fish/images/items/00008271.webp",
+      "sha256": "3490aed2d4eb0835d03fda10dc8e96ff01fc8a30a53f7db6bd7563fcc95644fb"
+    },
+    {
+      "itemId": 8272,
+      "name": "Siganid",
+      "file": "00008272.webp",
+      "sourceUrl": "https://cdn.fishystuff.fish/images/items/00008272.webp",
+      "sha256": "f777882456837c5130632085de57e025582f645b35cfd8c3e7d6530994560413"
+    },
+    {
+      "itemId": 8273,
+      "name": "Bluefish",
+      "file": "00008273.webp",
+      "sourceUrl": "https://cdn.fishystuff.fish/images/items/00008273.webp",
+      "sha256": "9324f3017e200c71f301ca1e49c58ed7a740b106bd51c0bbc24e14f7cbdae377"
+    },
+    {
+      "itemId": 8274,
+      "name": "Surfperch",
+      "file": "00008274.webp",
+      "sourceUrl": "https://cdn.fishystuff.fish/images/items/00008274.webp",
+      "sha256": "8872a840eb1f4cec1a4a0e90d69cb884ef2d23f27416298821150a676dd15d03"
+    },
+    {
+      "itemId": 8275,
+      "name": "Blackfin Sweeper",
+      "file": "00008275.webp",
+      "sourceUrl": "https://cdn.fishystuff.fish/images/items/00008275.webp",
+      "sha256": "d1b1f14735d5e8202e31c93f9c6c9b6d3465ca788dcaedbd5e0a239666a31b24"
+    },
+    {
+      "itemId": 8276,
+      "name": "Smokey Chromis",
+      "file": "00008276.webp",
+      "sourceUrl": "https://cdn.fishystuff.fish/images/items/00008276.webp",
+      "sha256": "9dc6f99372d137084f374887eaf554306b8ebc2f5057c32225e181aa333af5f2"
+    },
+    {
+      "itemId": 8277,
+      "name": "Maomao",
+      "file": "00008277.webp",
+      "sourceUrl": "https://cdn.fishystuff.fish/images/items/00008277.webp",
+      "sha256": "420c890ba7daece7b1d93c27fad24646f956924f6bf622ee278a0e8d209c8507"
+    },
+    {
+      "itemId": 8278,
+      "name": "Pintado",
+      "file": "00008278.webp",
+      "sourceUrl": "https://cdn.fishystuff.fish/images/items/00008278.webp",
+      "sha256": "0880b37b2afab4cf0bdc5b46a4b3bfde9519c9933a946b56783f1c6462a18072"
+    },
+    {
+      "itemId": 8279,
+      "name": "Gurnard",
+      "file": "00008279.webp",
+      "sourceUrl": "https://cdn.fishystuff.fish/images/items/00008279.webp",
+      "sha256": "73c482406077f8498034376b20fde9ed742d8fd5e1bc18092fa99b3d34c3bd52"
+    },
+    {
+      "itemId": 8281,
+      "name": "John Dory",
+      "file": "00008281.webp",
+      "sourceUrl": "https://cdn.fishystuff.fish/images/items/00008281.webp",
+      "sha256": "4a9e1d52b49fa38c68146176d0ecfde50d5dd6c26d2f06fcc24148e16adeb07b"
+    },
+    {
+      "itemId": 8282,
+      "name": "Sandfish",
+      "file": "00008282.webp",
+      "sourceUrl": "https://cdn.fishystuff.fish/images/items/00008282.webp",
+      "sha256": "e05752957578ca97a26404560c69e7addf45d5047d6f55ad297b532d99200552"
+    },
+    {
+      "itemId": 8283,
+      "name": "Rosefish",
+      "file": "00008283.webp",
+      "sourceUrl": "https://cdn.fishystuff.fish/images/items/00008283.webp",
+      "sha256": "ef0cb6c57d00e20ddd04541d95d20f7a40ccc9812b194851c28bd247f30453bc"
+    },
+    {
+      "itemId": 8284,
+      "name": "Grouper",
+      "file": "00008284.webp",
+      "sourceUrl": "https://cdn.fishystuff.fish/images/items/00008284.webp",
+      "sha256": "4e6b9379fa320ca6f51c292e17e147d6efd0ed06848ff0aa04d1fdb637a31b91"
+    },
+    {
+      "itemId": 8285,
+      "name": "Bigeye",
+      "file": "00008285.webp",
+      "sourceUrl": "https://cdn.fishystuff.fish/images/items/00008285.webp",
+      "sha256": "7e43d164ae4b65c199f9b01b5e942e3fa9a830f56067b4a0608c7307ede7f51f"
+    },
+    {
+      "itemId": 8286,
+      "name": "Fourfinger Threadfin",
+      "file": "00008286.webp",
+      "sourceUrl": "https://cdn.fishystuff.fish/images/items/00008286.webp",
+      "sha256": "4b31de58fdb4ca6bf07f30b79fe177df6e1a4533e2eecd511d17b10e4c6a0325"
+    },
+    {
+      "itemId": 8287,
+      "name": "Leather Carp",
+      "file": "00008287.webp",
+      "sourceUrl": "https://cdn.fishystuff.fish/images/items/00008287.webp",
+      "sha256": "2b6dc6d77ed6448f9aed100b57a8641c25cc7f071107bdc0ac91272692e8f088"
+    },
+    {
+      "itemId": 8288,
+      "name": "Striped Shiner",
+      "file": "00008288.webp",
+      "sourceUrl": "https://cdn.fishystuff.fish/images/items/00008288.webp",
+      "sha256": "40ea72e411a0fd9ec680011c94c88e86442235c87ab5aff47788f18110ee3045"
+    },
+    {
+      "itemId": 8289,
+      "name": "Barbel Steed",
+      "file": "00008289.webp",
+      "sourceUrl": "https://cdn.fishystuff.fish/images/items/00008289.webp",
+      "sha256": "6604e034fc3fab3b8039c6ea3137ee070be781d2cbbec03b41105057e1aa1b2f"
+    },
+    {
+      "itemId": 8290,
+      "name": "Soho Bitterling",
+      "file": "00008290.webp",
+      "sourceUrl": "https://cdn.fishystuff.fish/images/items/00008290.webp",
+      "sha256": "b38af8dbe345ce79cfc3cbc2638e36308026154ae0fd33d8c44dbd4f2e87e75d"
+    },
+    {
+      "itemId": 8291,
+      "name": "Bubble Eye",
+      "file": "00008291.webp",
+      "sourceUrl": "https://cdn.fishystuff.fish/images/items/00008291.webp",
+      "sha256": "e1f1520d66114f3b0cc194a3dee06404347a75ca9e3c8c04561d47fe69fec069"
+    },
+    {
+      "itemId": 8292,
+      "name": "Pacu",
+      "file": "00008292.webp",
+      "sourceUrl": "https://cdn.fishystuff.fish/images/items/00008292.webp",
+      "sha256": "9cb4b3957c335bdd7537c72aa9af7a406066c968041ea21b54425bfdfac8a0fc"
+    },
+    {
+      "itemId": 8293,
+      "name": "Yellow-head Catfish",
+      "file": "00008293.webp",
+      "sourceUrl": "https://cdn.fishystuff.fish/images/items/00008293.webp",
+      "sha256": "0d7a1e7edfa8eae87d2719619d1bf6d802234c9248ac3c95280e26537d11506f"
+    },
+    {
+      "itemId": 8294,
+      "name": "Smelt",
+      "file": "00008294.webp",
+      "sourceUrl": "https://cdn.fishystuff.fish/images/items/00008294.webp",
+      "sha256": "2a66a8a349f85c03b58bc9e090eaa15fcc52d198a7e04dae2917f4d0601d2dd6"
+    },
+    {
+      "itemId": 8295,
+      "name": "Rosy Bitterling",
+      "file": "00008295.webp",
+      "sourceUrl": "https://cdn.fishystuff.fish/images/items/00008295.webp",
+      "sha256": "64cf760066f18d0997d3811ed20a05188f907fd37310449812a4d36c7e279439"
+    },
+    {
+      "itemId": 8296,
+      "name": "Roundtail Paradisefish",
+      "file": "00008296.webp",
+      "sourceUrl": "https://cdn.fishystuff.fish/images/items/00008296.webp",
+      "sha256": "871a235ad8c705ecd73c7e15d4472b5e5f969dbef9233e5603148704adfe453d"
+    },
+    {
+      "itemId": 8297,
+      "name": "Grayling",
+      "file": "00008297.webp",
+      "sourceUrl": "https://cdn.fishystuff.fish/images/items/00008297.webp",
+      "sha256": "021586adc50ce7547a9f93b66065e062bc4bc29c2e5d7dc5f43b9038e9f12889"
+    },
+    {
+      "itemId": 8298,
+      "name": "Tapertail Anchovy",
+      "file": "00008298.webp",
+      "sourceUrl": "https://cdn.fishystuff.fish/images/items/00008298.webp",
+      "sha256": "e1882c0e7f104c6757f09c908bd554d2d48b969991215b0e0a5bea8c6718b824"
+    },
+    {
+      "itemId": 8299,
+      "name": "Kuhlia Marginata",
+      "file": "00008299.webp",
+      "sourceUrl": "https://cdn.fishystuff.fish/images/items/00008299.webp",
+      "sha256": "78a8c7bc3247ac3f251bd3254d8d875b648a990736900cc3273617cb2492a01c"
+    },
+    {
+      "itemId": 8300,
+      "name": "Rock Hind",
+      "file": "00008300.webp",
+      "sourceUrl": "https://cdn.fishystuff.fish/images/items/00008300.webp",
+      "sha256": "18bdb47cd0fc12c6fa4ef24689d5eeb60f9c0983136ed4c37fc80365d182139b"
+    },
+    {
+      "itemId": 8301,
+      "name": "Butterflyfish",
+      "file": "00008301.webp",
+      "sourceUrl": "https://cdn.fishystuff.fish/images/items/00008301.webp",
+      "sha256": "ae8b70745c3f7e66421cfc38a35f09cc7504c85641b743bf4a4643818ba34713"
+    },
+    {
+      "itemId": 8302,
+      "name": "Clownfish",
+      "file": "00008302.webp",
+      "sourceUrl": "https://cdn.fishystuff.fish/images/items/00008302.webp",
+      "sha256": "015bcdab095ed1d75768ba19416a4a6c4bd10d19c2778465033bf11f5233a582"
+    },
+    {
+      "itemId": 8303,
+      "name": "Blue Tang",
+      "file": "00008303.webp",
+      "sourceUrl": "https://cdn.fishystuff.fish/images/items/00008303.webp",
+      "sha256": "e9819b018617a9bd7e69cbb978eaf5a9a94eebdb9d336a77d6f56c2ae561d14f"
+    },
+    {
+      "itemId": 8304,
+      "name": "Checkerboard Wrasse",
+      "file": "00008304.webp",
+      "sourceUrl": "https://cdn.fishystuff.fish/images/items/00008304.webp",
+      "sha256": "5f306123b0851da9596c441fd78204eaeee4b016269fe16fbe63926abeabfbf8"
+    },
+    {
+      "itemId": 8305,
+      "name": "Pomfret",
+      "file": "00008305.webp",
+      "sourceUrl": "https://cdn.fishystuff.fish/images/items/00008305.webp",
+      "sha256": "d5d2f228cf709dbb2e0429b0e2e7d6a322f727d70221456cde52d0c0b17414f1"
+    },
+    {
+      "itemId": 8306,
+      "name": "Great White Shark",
+      "file": "00008306.webp",
+      "sourceUrl": "https://cdn.fishystuff.fish/images/items/00008306.webp",
+      "sha256": "d3fa558da9f1e638c36741cd9e0a45d244449b657016097d4e3cdbb6c5195365"
+    },
+    {
+      "itemId": 8307,
+      "name": "Mako Shark",
+      "file": "00008307.webp",
+      "sourceUrl": "https://cdn.fishystuff.fish/images/items/00008307.webp",
+      "sha256": "4c5971259e47f57102621bbbe22a743b7c1320802ef3e3eb20296fa5e9dd0fe4",
+      "visualCandidates": [
+        {
+          "itemId": 8307,
+          "name": "Mako Shark"
+        },
+        {
+          "itemId": 8477,
+          "name": "Blue Shark"
+        }
+      ]
+    },
+    {
+      "itemId": 8308,
+      "name": "Hammerhead",
+      "file": "00008308.webp",
+      "sourceUrl": "https://cdn.fishystuff.fish/images/items/00008308.webp",
+      "sha256": "d436ab313fea061e618fe9734768956239d4f647a17f2550a59c8364619d2d1d"
+    },
+    {
+      "itemId": 8309,
+      "name": "Requiem Shark",
+      "file": "00008309.webp",
+      "sourceUrl": "https://cdn.fishystuff.fish/images/items/00008309.webp",
+      "sha256": "1bb107a238205eaa58aafbe6551a33a31e55a58edfd95761b95432485f6dc25b"
+    },
+    {
+      "itemId": 8310,
+      "name": "Whale Shark",
+      "file": "00008310.webp",
+      "sourceUrl": "https://cdn.fishystuff.fish/images/items/00008310.webp",
+      "sha256": "400df6a2a8e56d77ba349869bb04c35dca48efdffc02555e9c3b21eb5e2db1fc"
+    },
+    {
+      "itemId": 8311,
+      "name": "Saw Shark",
+      "file": "00008311.webp",
+      "sourceUrl": "https://cdn.fishystuff.fish/images/items/00008311.webp",
+      "sha256": "554e520ef54fb24b9eef3096194735ed8eac2505bfe9731c25da6a3711457178"
+    },
+    {
+      "itemId": 8312,
+      "name": "Minke Whale",
+      "file": "00008312.webp",
+      "sourceUrl": "https://cdn.fishystuff.fish/images/items/00008312.webp",
+      "sha256": "4b74240b05324ed1f2e27e8fe026c745e76f043b38f227f95a238981cfd7cc63"
+    },
+    {
+      "itemId": 8313,
+      "name": "Humpback Whale",
+      "file": "00008313.webp",
+      "sourceUrl": "https://cdn.fishystuff.fish/images/items/00008313.webp",
+      "sha256": "6ca406af5d381e5bbc2bdd57d84821d1b2851c60e0c14c017bf7e57b66c1ca67"
+    },
+    {
+      "itemId": 8314,
+      "name": "Killer Whale",
+      "file": "00008314.webp",
+      "sourceUrl": "https://cdn.fishystuff.fish/images/items/00008314.webp",
+      "sha256": "eda186d2f19b53c2dcd75799abea322b3378290aca3a9e00f7193d8842139e83"
+    },
+    {
+      "itemId": 8315,
+      "name": "Hammer Whale",
+      "file": "00008315.webp",
+      "sourceUrl": "https://cdn.fishystuff.fish/images/items/00008315.webp",
+      "sha256": "ba21afed21b6e83cd63062d053edff4109f06b573c9a470e83355136b4510e24"
+    },
+    {
+      "itemId": 8316,
+      "name": "Narwhal",
+      "file": "00008316.webp",
+      "sourceUrl": "https://cdn.fishystuff.fish/images/items/00008316.webp",
+      "sha256": "378cce624aa6e79727665886c1092dfe21b0f42f2cc19cf56fd442f87d18f5f9"
+    },
+    {
+      "itemId": 8317,
+      "name": "Beluga Whale",
+      "file": "00008317.webp",
+      "sourceUrl": "https://cdn.fishystuff.fish/images/items/00008317.webp",
+      "sha256": "09b3a70e4453728a1f545c78fb6c16f6dacf168a53fa20c0d10af124c9878cff"
+    },
+    {
+      "itemId": 8318,
+      "name": "Bottlenose Dolphin",
+      "file": "00008318.webp",
+      "sourceUrl": "https://cdn.fishystuff.fish/images/items/00008318.webp",
+      "sha256": "f4e180509bc24552f6705cc22e5d2e6ca1fd180e1127f83b4db4783d22ff5171"
+    },
+    {
+      "itemId": 8319,
+      "name": "Mackerel Tuna",
+      "file": "00008319.webp",
+      "sourceUrl": "https://cdn.fishystuff.fish/images/items/00008319.webp",
+      "sha256": "a28c954465fd6a0853e93980ee35c519205f1054672c2b0c066f747c500d26f0"
+    },
+    {
+      "itemId": 8320,
+      "name": "Bigeye Tuna",
+      "file": "00008320.webp",
+      "sourceUrl": "https://cdn.fishystuff.fish/images/items/00008320.webp",
+      "sha256": "791eaf5192807f36def42c0c9099570bcdd58973e500de8c347180d523bf01c9"
+    },
+    {
+      "itemId": 8321,
+      "name": "Yellowfin Tuna",
+      "file": "00008321.webp",
+      "sourceUrl": "https://cdn.fishystuff.fish/images/items/00008321.webp",
+      "sha256": "11b1f2dab9837d4bb6ff6cf6220cdf57c1b62674357dee446261e67ee8d16888"
+    },
+    {
+      "itemId": 8322,
+      "name": "Albacore",
+      "file": "00008322.webp",
+      "sourceUrl": "https://cdn.fishystuff.fish/images/items/00008322.webp",
+      "sha256": "d980cfe3b2af5b0e838d563729269e1263920e296ffcda2f52d6ff370b749ae0"
+    },
+    {
+      "itemId": 8323,
+      "name": "Bluefin Tuna",
+      "file": "00008323.webp",
+      "sourceUrl": "https://cdn.fishystuff.fish/images/items/00008323.webp",
+      "sha256": "2c1427c3b7bf011f3b8dde9d1d0bfad28c96f1a2233fcb017fcd71f9dd59a648"
+    },
+    {
+      "itemId": 8324,
+      "name": "Yellow Swordfish",
+      "file": "00008324.webp",
+      "sourceUrl": "https://cdn.fishystuff.fish/images/items/00008324.webp",
+      "sha256": "ff635b6ba18d417377faa7998dc29f5d3a4bad3940bb6b610e47f88b6be6a88e"
+    },
+    {
+      "itemId": 8325,
+      "name": "Marlin",
+      "file": "00008325.webp",
+      "sourceUrl": "https://cdn.fishystuff.fish/images/items/00008325.webp",
+      "sha256": "9209a2b1bc98519bf761daf8bf9f5f70ce0e043d972f9a109be4d3b2faa2f6b8"
+    },
+    {
+      "itemId": 8326,
+      "name": "Sailfish",
+      "file": "00008326.webp",
+      "sourceUrl": "https://cdn.fishystuff.fish/images/items/00008326.webp",
+      "sha256": "92bb912f936ae1514e3837cbabbc611022711e7eeb8e318413a2bc19a5931a51"
+    },
+    {
+      "itemId": 8327,
+      "name": "Black Marlin",
+      "file": "00008327.webp",
+      "sourceUrl": "https://cdn.fishystuff.fish/images/items/00008327.webp",
+      "sha256": "40d3c208dad45798d3d82e9e9e60a791780d402ec5497c12910acf721d33e879"
+    },
+    {
+      "itemId": 8328,
+      "name": "Giant Grouper",
+      "file": "00008328.webp",
+      "sourceUrl": "https://cdn.fishystuff.fish/images/items/00008328.webp",
+      "sha256": "2bd9e93bbbb2d6e2874690af3200039a1a2295d1f3a6ca3a478dcf01575fa02d"
+    },
+    {
+      "itemId": 8329,
+      "name": "Moray",
+      "file": "00008329.webp",
+      "sourceUrl": "https://cdn.fishystuff.fish/images/items/00008329.webp",
+      "sha256": "19a4f5e7d694dd88c7b11e6d670de485dccfe812b6c8453a95106e823be0f994"
+    },
+    {
+      "itemId": 8330,
+      "name": "Tilefish",
+      "file": "00008330.webp",
+      "sourceUrl": "https://cdn.fishystuff.fish/images/items/00008330.webp",
+      "sha256": "a0d7e0a868013ddb5c8047e12beb6c8b9319c991870bfd9ed036adabce6f2b86"
+    },
+    {
+      "itemId": 8331,
+      "name": "Porcupine Fish",
+      "file": "00008331.webp",
+      "sourceUrl": "https://cdn.fishystuff.fish/images/items/00008331.webp",
+      "sha256": "8e7a8d044c0f8736036764e2764631839d4891ff96c72474c6453306f1d3af22"
+    },
+    {
+      "itemId": 8332,
+      "name": "Tongue Sole",
+      "file": "00008332.webp",
+      "sourceUrl": "https://cdn.fishystuff.fish/images/items/00008332.webp",
+      "sha256": "6901afb3ede43d717a8bcd0ce65e1525b7b1b36ac9b6f131655f19c07acbea21"
+    },
+    {
+      "itemId": 8333,
+      "name": "Atka Mackerel",
+      "file": "00008333.webp",
+      "sourceUrl": "https://cdn.fishystuff.fish/images/items/00008333.webp",
+      "sha256": "6d4f49425557fdc8531a7641d7d8762030703ca5aa7c8904bfe4d432dea5ef1f"
+    },
+    {
+      "itemId": 8334,
+      "name": "Cuttlefish",
+      "file": "00008334.webp",
+      "sourceUrl": "https://cdn.fishystuff.fish/images/items/00008334.webp",
+      "sha256": "2db6d582927e4a31812f94aac0ecef382b21248e7115b7d0740f62c7eb4d4950"
+    },
+    {
+      "itemId": 8335,
+      "name": "Mackerel Pike",
+      "file": "00008335.webp",
+      "sourceUrl": "https://cdn.fishystuff.fish/images/items/00008335.webp",
+      "sha256": "d1494416e64954ae2c6b3d49f5208e7ee191d8c3bc73dd2a1f044b1accd858a9"
+    },
+    {
+      "itemId": 8336,
+      "name": "Horn Fish",
+      "file": "00008336.webp",
+      "sourceUrl": "https://cdn.fishystuff.fish/images/items/00008336.webp",
+      "sha256": "69f68bbe17a8270185c55a7ee087649e25369e67a8e3dcb16e8135d9146b08ce"
+    },
+    {
+      "itemId": 8337,
+      "name": "Dollarfish",
+      "file": "00008337.webp",
+      "sourceUrl": "https://cdn.fishystuff.fish/images/items/00008337.webp",
+      "sha256": "088ba3ebd54702773ccf1e1e3318c0d3cbd4411ac06ac4a83cf3b966e1293ea1"
+    },
+    {
+      "itemId": 8338,
+      "name": "Sandeel",
+      "file": "00008338.webp",
+      "sourceUrl": "https://cdn.fishystuff.fish/images/items/00008338.webp",
+      "sha256": "643674533447e3d91363238c0121abe8dbdd8c39b7d219b2cac42f410385f97c"
+    },
+    {
+      "itemId": 8339,
+      "name": "Black Porgy",
+      "file": "00008339.webp",
+      "sourceUrl": "https://cdn.fishystuff.fish/images/items/00008339.webp",
+      "sha256": "585de0be8e964abef6ce5032baa06cee97a528402a7ba8b06ecf49e155ffd5d2"
+    },
+    {
+      "itemId": 8340,
+      "name": "Eyespot Puffer",
+      "file": "00008340.webp",
+      "sourceUrl": "https://cdn.fishystuff.fish/images/items/00008340.webp",
+      "sha256": "1576f0b66c703948c7692861e24a32e150f5e99edcfd6a80957f867e9bd71e02"
+    },
+    {
+      "itemId": 8341,
+      "name": "Spotted Sea Bass",
+      "file": "00008341.webp",
+      "sourceUrl": "https://cdn.fishystuff.fish/images/items/00008341.webp",
+      "sha256": "be1cf5ada465bc29778aed91227ce30942a49b0ab778bdaf1a3ef35db087b232"
+    },
+    {
+      "itemId": 8342,
+      "name": "Giant Octopus",
+      "file": "00008342.webp",
+      "sourceUrl": "https://cdn.fishystuff.fish/images/items/00008342.webp",
+      "sha256": "f7cd416a2bc3aca5298e3170b574754690424827c69a41277e21660539137207"
+    },
+    {
+      "itemId": 8343,
+      "name": "Blue Grouper",
+      "file": "00008343.webp",
+      "sourceUrl": "https://cdn.fishystuff.fish/images/items/00008343.webp",
+      "sha256": "da82065ea31a589993fb9235d3f79945753a1258c354e498309a67d64a0320a1"
+    },
+    {
+      "itemId": 8344,
+      "name": "Striped Goliath Grouper",
+      "file": "00008344.webp",
+      "sourceUrl": "https://cdn.fishystuff.fish/images/items/00008344.webp",
+      "sha256": "23d1ddeddab234f6097f9e02a99f8703b9c02f128824ebb9aab4d2c0897123b7"
+    },
+    {
+      "itemId": 8345,
+      "name": "Bahaba",
+      "file": "00008345.webp",
+      "sourceUrl": "https://cdn.fishystuff.fish/images/items/00008345.webp",
+      "sha256": "4abbd022db33fdb9f7bcfed66623eca4b61070be6e9a67a7dd9024ba1f5ac426"
+    },
+    {
+      "itemId": 8346,
+      "name": "Greater Amberjack",
+      "file": "00008346.webp",
+      "sourceUrl": "https://cdn.fishystuff.fish/images/items/00008346.webp",
+      "sha256": "fac00b5e3f9a7a4037ad3c9e51c135f44d72f47e49993df9e95c499c6a916b3c"
+    },
+    {
+      "itemId": 8347,
+      "name": "Skate",
+      "file": "00008347.webp",
+      "sourceUrl": "https://cdn.fishystuff.fish/images/items/00008347.webp",
+      "sha256": "924811e6182f0567695bb528d092858899709ecd3e986a66d7b1b29f8024dbae"
+    },
+    {
+      "itemId": 8348,
+      "name": "Blackfin Sea Perch",
+      "file": "00008348.webp",
+      "sourceUrl": "https://cdn.fishystuff.fish/images/items/00008348.webp",
+      "sha256": "9c2de2b332d336013c5304aa77872032ed0e272c2612bea77b1dba919d5c127a"
+    },
+    {
+      "itemId": 8349,
+      "name": "Goliath Grouper",
+      "file": "00008349.webp",
+      "sourceUrl": "https://cdn.fishystuff.fish/images/items/00008349.webp",
+      "sha256": "722a2b1fa3a117bff06e55a64e629d27995497bbddea060f0a8471160db4acad"
+    },
+    {
+      "itemId": 8350,
+      "name": "Striped Bonito",
+      "file": "00008350.webp",
+      "sourceUrl": "https://cdn.fishystuff.fish/images/items/00008350.webp",
+      "sha256": "4b08bd242cd96f04cf24f4fd18619b746b4fb6a638f390927a976636f649b10f"
+    },
+    {
+      "itemId": 8351,
+      "name": "Spotted Barbel",
+      "file": "00008351.webp",
+      "sourceUrl": "https://cdn.fishystuff.fish/images/items/00008351.webp",
+      "sha256": "0488638cee6cf4ab0d011dc9b0f30efe72b7443599a21d49ce439a70b80e3827"
+    },
+    {
+      "itemId": 8352,
+      "name": "Miho Spine Loach",
+      "file": "00008352.webp",
+      "sourceUrl": "https://cdn.fishystuff.fish/images/items/00008352.webp",
+      "sha256": "ffb0432160d65b3b952db8fd9781bac9fbc09c46c99748e12ba3f590fa8703de"
+    },
+    {
+      "itemId": 8353,
+      "name": "Diamond Minnow",
+      "file": "00008353.webp",
+      "sourceUrl": "https://cdn.fishystuff.fish/images/items/00008353.webp",
+      "sha256": "41779068e6b3312ae8f442ba84883a40a81f59175a9bbf5c082c700e6d354652"
+    },
+    {
+      "itemId": 8354,
+      "name": "Amur Minnow",
+      "file": "00008354.webp",
+      "sourceUrl": "https://cdn.fishystuff.fish/images/items/00008354.webp",
+      "sha256": "8c16f68da09c42c3fe93f8d7ad740cbd4fd7834eadfd74f37a753bc6beee32f3"
+    },
+    {
+      "itemId": 8355,
+      "name": "Common Minnow",
+      "file": "00008355.webp",
+      "sourceUrl": "https://cdn.fishystuff.fish/images/items/00008355.webp",
+      "sha256": "c1beb22ba2a22a276b7cbb3283748ebb4bd6673dc94008b869aa7b3b7d564788"
+    },
+    {
+      "itemId": 8356,
+      "name": "Stumpy Bullhead",
+      "file": "00008356.webp",
+      "sourceUrl": "https://cdn.fishystuff.fish/images/items/00008356.webp",
+      "sha256": "3711a337e719bbc7c6009bba69bb4223810e05eeaa207f7c6200e3fdf35754d4"
+    },
+    {
+      "itemId": 8357,
+      "name": "Shuttles Hoppfish",
+      "file": "00008357.webp",
+      "sourceUrl": "https://cdn.fishystuff.fish/images/items/00008357.webp",
+      "sha256": "0c7a234321a04a1d1a22ebe0f007d561154d935c54203aa99a92f9958bfb154e"
+    },
+    {
+      "itemId": 8358,
+      "name": "Oily Shiner",
+      "file": "00008358.webp",
+      "sourceUrl": "https://cdn.fishystuff.fish/images/items/00008358.webp",
+      "sha256": "e448d94c040c28b698f3ee7af40f13443429ff9bc9e005f0468ed11bfb2e7b86"
+    },
+    {
+      "itemId": 8359,
+      "name": "Morning Loach",
+      "file": "00008359.webp",
+      "sourceUrl": "https://cdn.fishystuff.fish/images/items/00008359.webp",
+      "sha256": "120a4ce8b7e33657fd96557cc93ac6c84eadf13964176a3e50b1f01b724c6327"
+    },
+    {
+      "itemId": 8360,
+      "name": "Minnow",
+      "file": "00008360.webp",
+      "sourceUrl": "https://cdn.fishystuff.fish/images/items/00008360.webp",
+      "sha256": "e0b19d8b11d0db41f636fe8768093e97bb3a0402de68df0b7b50efae2c1592c0"
+    },
+    {
+      "itemId": 8361,
+      "name": "Cherry Icefish",
+      "file": "00008361.webp",
+      "sourceUrl": "https://cdn.fishystuff.fish/images/items/00008361.webp",
+      "sha256": "9236c5b76750f327c8568912c3b3c319469753894c4bd00659f9e9acf874cb6a"
+    },
+    {
+      "itemId": 8362,
+      "name": "Spined Loach",
+      "file": "00008362.webp",
+      "sourceUrl": "https://cdn.fishystuff.fish/images/items/00008362.webp",
+      "sha256": "2a51590075cbb79fcf6309768293fc72a7c8410b20da8c986bafa726b772cbd3"
+    },
+    {
+      "itemId": 8363,
+      "name": "Amur Ide",
+      "file": "00008363.webp",
+      "sourceUrl": "https://cdn.fishystuff.fish/images/items/00008363.webp",
+      "sha256": "fe959defab1806d6672e1cd8944ce5b98b8317cf01f09d78cb4a64d7f1f6208e"
+    },
+    {
+      "itemId": 8364,
+      "name": "Stone Moroko",
+      "file": "00008364.webp",
+      "sourceUrl": "https://cdn.fishystuff.fish/images/items/00008364.webp",
+      "sha256": "30d7f28fe80123189c21ecc6a6143963d0313e27214bdfb6fd23b8a209c7c526"
+    },
+    {
+      "itemId": 8365,
+      "name": "Amur Goby",
+      "file": "00008365.webp",
+      "sourceUrl": "https://cdn.fishystuff.fish/images/items/00008365.webp",
+      "sha256": "acfd20e40366616f546a4c3f3f2ca420ecda60504b579b8bb7ba02852e77b439"
+    },
+    {
+      "itemId": 8366,
+      "name": "Stickleback",
+      "file": "00008366.webp",
+      "sourceUrl": "https://cdn.fishystuff.fish/images/items/00008366.webp",
+      "sha256": "5e0e98505bc453653ed2b0d668c097a209d3300c4ed98877f8bd88d688bdc3a4"
+    },
+    {
+      "itemId": 8367,
+      "name": "Mori",
+      "file": "00008367.webp",
+      "sourceUrl": "https://cdn.fishystuff.fish/images/items/00008367.webp",
+      "sha256": "a32772606a6a0b24663dc596fdfb04861fd9e3f004f84bc67591caadc6ffebae"
+    },
+    {
+      "itemId": 8368,
+      "name": "Grass Carp",
+      "file": "00008368.webp",
+      "sourceUrl": "https://cdn.fishystuff.fish/images/items/00008368.webp",
+      "sha256": "03278ad11d688d22c128402b05e98efc0b8cdd3a55f1cb23e96084745e60784f"
+    },
+    {
+      "itemId": 8369,
+      "name": "Black Shiner",
+      "file": "00008369.webp",
+      "sourceUrl": "https://cdn.fishystuff.fish/images/items/00008369.webp",
+      "sha256": "08614e4250673b6f354eadf3004602bfea10e53ffcddffcc8282a65c8c7da466"
+    },
+    {
+      "itemId": 8370,
+      "name": "Burbot",
+      "file": "00008370.webp",
+      "sourceUrl": "https://cdn.fishystuff.fish/images/items/00008370.webp",
+      "sha256": "10d18336128b8d606a4e984d38d5adb534bfe71fb9f0a1be7f846a3a9d6e0ddf"
+    },
+    {
+      "itemId": 8371,
+      "name": "Dark Chub",
+      "file": "00008371.webp",
+      "sourceUrl": "https://cdn.fishystuff.fish/images/items/00008371.webp",
+      "sha256": "05b0d03b5deb0deff7a4c93a379d053f5b511ba052db197e33d95c4cf288aaa0"
+    },
+    {
+      "itemId": 8372,
+      "name": "Flower Icefish",
+      "file": "00008372.webp",
+      "sourceUrl": "https://cdn.fishystuff.fish/images/items/00008372.webp",
+      "sha256": "928f1c65eff83f48d913e65179e0f25a1f8959aefaabef0b2e25fceb941eba2e"
+    },
+    {
+      "itemId": 8373,
+      "name": "Charr",
+      "file": "00008373.webp",
+      "sourceUrl": "https://cdn.fishystuff.fish/images/items/00008373.webp",
+      "sha256": "1b273c723d56c0c130240e7af4bdbdecbbd1a14dfd12dac0d8ce0395abdf43d1"
+    },
+    {
+      "itemId": 8374,
+      "name": "Yellowfin Sole",
+      "file": "00008374.webp",
+      "sourceUrl": "https://cdn.fishystuff.fish/images/items/00008374.webp",
+      "sha256": "3ecb0635c80bff605a4bdd1490bd03b2f3511ea23787686202cc6d750bbaba5a"
+    },
+    {
+      "itemId": 8375,
+      "name": "Stippled Gunnel",
+      "file": "00008375.webp",
+      "sourceUrl": "https://cdn.fishystuff.fish/images/items/00008375.webp",
+      "sha256": "3f2bf2f71afb2ec45ef680f28a03bba6bb788bfbbde96341be3a0c2643db8ea6"
+    },
+    {
+      "itemId": 8376,
+      "name": "Red Snow Crab",
+      "file": "00008376.webp",
+      "sourceUrl": "https://cdn.fishystuff.fish/images/items/00008376.webp",
+      "sha256": "e148815316f36496f1615e38528328f4f08b26b3c1e547d62f7a4287246ed860"
+    },
+    {
+      "itemId": 8377,
+      "name": "Redbreasted Wrasse",
+      "file": "00008377.webp",
+      "sourceUrl": "https://cdn.fishystuff.fish/images/items/00008377.webp",
+      "sha256": "c2cde7b8a90c65e13337f1be3f4123b8d966275b4245ad2e9f572b94dad4c620"
+    },
+    {
+      "itemId": 8378,
+      "name": "Green Sturgeon",
+      "file": "00008378.webp",
+      "sourceUrl": "https://cdn.fishystuff.fish/images/items/00008378.webp",
+      "sha256": "fae02bff66ffcec94386ba41a09ae485d512bd9d6c90837de449a13361b0d039"
+    },
+    {
+      "itemId": 8379,
+      "name": "Thresher Shark",
+      "file": "00008379.webp",
+      "sourceUrl": "https://cdn.fishystuff.fish/images/items/00008379.webp",
+      "sha256": "e605c9c81ac95acbbd2f84db3a8487fd9a36409715c2e0c33108fa944707411a"
+    },
+    {
+      "itemId": 8380,
+      "name": "Tiger Shark",
+      "file": "00008380.webp",
+      "sourceUrl": "https://cdn.fishystuff.fish/images/items/00008380.webp",
+      "sha256": "f944b82947b6ac453b74372e28601aec820f6e9ad48cce151c1ea8016c109396"
+    },
+    {
+      "itemId": 8381,
+      "name": "Basking Shark",
+      "file": "00008381.webp",
+      "sourceUrl": "https://cdn.fishystuff.fish/images/items/00008381.webp",
+      "sha256": "3881d2a926bf0e5f92ed16950ae5c9adffd8506600e84def2f5145bc2974bfd5"
+    },
+    {
+      "itemId": 8382,
+      "name": "Giant Oarfish",
+      "file": "00008382.webp",
+      "sourceUrl": "https://cdn.fishystuff.fish/images/items/00008382.webp",
+      "sha256": "af248f65523c459d799b3a98a67d905d7be34414d3ad231f573a56cbd43f50ca"
+    },
+    {
+      "itemId": 8383,
+      "name": "Ribbonfish",
+      "file": "00008383.webp",
+      "sourceUrl": "https://cdn.fishystuff.fish/images/items/00008383.webp",
+      "sha256": "44e9d9c09954ecb703b6f739899fca771fd10e06ab20b83f39342186062fb478"
+    },
+    {
+      "itemId": 8384,
+      "name": "Sharpbelly",
+      "file": "00008384.webp",
+      "sourceUrl": "https://cdn.fishystuff.fish/images/items/00008384.webp",
+      "sha256": "ef6e136b0ea913d88b241aade76668d2e97a6b1f8b313a955085c44fea91aaa9"
+    },
+    {
+      "itemId": 8385,
+      "name": "Lamprey",
+      "file": "00008385.webp",
+      "sourceUrl": "https://cdn.fishystuff.fish/images/items/00008385.webp",
+      "sha256": "42761529afe7c17511b481612ca652cdde8b0218151c252d81998aea34d927a4"
+    },
+    {
+      "itemId": 8386,
+      "name": "Yalu Grayling",
+      "file": "00008386.webp",
+      "sourceUrl": "https://cdn.fishystuff.fish/images/items/00008386.webp",
+      "sha256": "07996399e7651ec5c7f30a5c1a147dbe432282db98d721802451f88f51ed4eea"
+    },
+    {
+      "itemId": 8387,
+      "name": "Pike",
+      "file": "00008387.webp",
+      "sourceUrl": "https://cdn.fishystuff.fish/images/items/00008387.webp",
+      "sha256": "b1072e045f2a37d66761c88f97ecdd822d53def689ed9f1bf4515bb4af2e88e6"
+    },
+    {
+      "itemId": 8388,
+      "name": "Dark Sleeper",
+      "file": "00008388.webp",
+      "sourceUrl": "https://cdn.fishystuff.fish/images/items/00008388.webp",
+      "sha256": "34d1dfe14cd49dec78dacbb97f9a6cb26b8177200634847419779e7fc5304879"
+    },
+    {
+      "itemId": 8389,
+      "name": "Bowfin",
+      "file": "00008389.webp",
+      "sourceUrl": "https://cdn.fishystuff.fish/images/items/00008389.webp",
+      "sha256": "14afcd3159f163a4f096aca0b054791334112dbdebceea5568007265477580e0"
+    },
+    {
+      "itemId": 8390,
+      "name": "Longsnout Catfish",
+      "file": "00008390.webp",
+      "sourceUrl": "https://cdn.fishystuff.fish/images/items/00008390.webp",
+      "sha256": "88e95c7d8f8e4f197f018cbc220f8173d43ac8594ba851c42f60e1ac1c7bcd05"
+    },
+    {
+      "itemId": 8391,
+      "name": "Spined Bittering",
+      "file": "00008391.webp",
+      "sourceUrl": "https://cdn.fishystuff.fish/images/items/00008391.webp",
+      "sha256": "5948103102d16454d2480da3b356be86d9dcd1ac146e6d0a4c46d39530f1aab0"
+    },
+    {
+      "itemId": 8392,
+      "name": "Silver Carp",
+      "file": "00008392.webp",
+      "sourceUrl": "https://cdn.fishystuff.fish/images/items/00008392.webp",
+      "sha256": "5447c65a9681526415c528e611eb617d637033cc59444d014b40f31f612f9561"
+    },
+    {
+      "itemId": 8393,
+      "name": "Chameleon Goby",
+      "file": "00008393.webp",
+      "sourceUrl": "https://cdn.fishystuff.fish/images/items/00008393.webp",
+      "sha256": "59d6bec3a075095da8e99239776891e9ca29e50edf84b0b700f21a2f58d45998"
+    },
+    {
+      "itemId": 8394,
+      "name": "Ussurian Bullhead",
+      "file": "00008394.webp",
+      "sourceUrl": "https://cdn.fishystuff.fish/images/items/00008394.webp",
+      "sha256": "f1841a17d8c1ca5f4a7a898397dfa1c26f61ad4fc8128125fcde2589acdd4b82"
+    },
+    {
+      "itemId": 8395,
+      "name": "Common Bleak",
+      "file": "00008395.webp",
+      "sourceUrl": "https://cdn.fishystuff.fish/images/items/00008395.webp",
+      "sha256": "f8c3132e97156ec42c2202e2c726220352335976d983144ede0b77c943906314"
+    },
+    {
+      "itemId": 8451,
+      "name": "Sperm Whale",
+      "file": "00008451.webp",
+      "sourceUrl": "https://cdn.fishystuff.fish/images/items/00008451.webp",
+      "sha256": "71e920c8823e03904a8f08f3c1a069c84e8e2dd27502f45ff0a23d4f9cd53b50"
+    },
+    {
+      "itemId": 8452,
+      "name": "Coelacanth",
+      "file": "00008452.webp",
+      "sourceUrl": "https://cdn.fishystuff.fish/images/items/00008452.webp",
+      "sha256": "6a449e8980623ba9d9e8f7b47d3569ad1d01adacaa2fba88ad62f3e0b4abda97"
+    },
+    {
+      "itemId": 8453,
+      "name": "Luvar",
+      "file": "00008453.webp",
+      "sourceUrl": "https://cdn.fishystuff.fish/images/items/00008453.webp",
+      "sha256": "8dfbe0191458dcb6359675273ff15ce058bfac4d9ca689088c97e340342a7b50"
+    },
+    {
+      "itemId": 8454,
+      "name": "Giant Squid",
+      "file": "00008454.webp",
+      "sourceUrl": "https://cdn.fishystuff.fish/images/items/00008454.webp",
+      "sha256": "917e1439da1c18212fe421947464f538dded5720fa35d859b75cfa92e029f63b"
+    },
+    {
+      "itemId": 8455,
+      "name": "Golden Siniperca",
+      "file": "00008455.webp",
+      "sourceUrl": "https://cdn.fishystuff.fish/images/items/00008455.webp",
+      "sha256": "8843fff67973f24081f4b9664d7be9533d9b03a8814175eaace140c12f5e40b4"
+    },
+    {
+      "itemId": 8457,
+      "name": "Granges D'or",
+      "file": "00008457.webp",
+      "sourceUrl": "https://cdn.fishystuff.fish/images/items/00008457.webp",
+      "sha256": "24c7d455812631830a59b61fa95f5ca91fab3b3330acff0f769e9a743dfa26aa"
+    },
+    {
+      "itemId": 8458,
+      "name": "Axolotl",
+      "file": "00008458.webp",
+      "sourceUrl": "https://cdn.fishystuff.fish/images/items/00008458.webp",
+      "sha256": "00292fa929c1293dc7d2b8644e51f9b17e7d464e5ee08f21d8a1e98221a6ff50"
+    },
+    {
+      "itemId": 8467,
+      "name": "Black Spotted Dolphin",
+      "file": "00008467.webp",
+      "sourceUrl": "https://cdn.fishystuff.fish/images/items/00008467.webp",
+      "sha256": "3ba72e4eaf571e512b1bffffd44018738fc8a0612e17a2fb046f4d989d363d44"
+    },
+    {
+      "itemId": 8468,
+      "name": "Ghost Whale",
+      "file": "00008468.webp",
+      "sourceUrl": "https://cdn.fishystuff.fish/images/items/00008468.webp",
+      "sha256": "94dec772517ca9b3cb25489e814ecb0bbe5d9739ae6963e4b71eb8ae215e9373"
+    },
+    {
+      "itemId": 8469,
+      "name": "White Grouper",
+      "file": "00008469.webp",
+      "sourceUrl": "https://cdn.fishystuff.fish/images/items/00008469.webp",
+      "sha256": "58acdd278d22c86428d832f4b7dc0385bae57e0ce61fb71916ea04cd88d08e86"
+    },
+    {
+      "itemId": 8470,
+      "name": "Golden Albacore",
+      "file": "00008470.webp",
+      "sourceUrl": "https://cdn.fishystuff.fish/images/items/00008470.webp",
+      "sha256": "ead22547a8591b9eb0a9286833c0817caf60018da3d203cb2c9c98c8151ee538"
+    },
+    {
+      "itemId": 8471,
+      "name": "Giant Black Squid",
+      "file": "00008471.webp",
+      "sourceUrl": "https://cdn.fishystuff.fish/images/items/00008471.webp",
+      "sha256": "9dc3c343a8d02581d1db1b59e611877ad83f4da086731f8d29f37d5b66ab5be1"
+    },
+    {
+      "itemId": 8472,
+      "name": "Golden Sea Bass",
+      "file": "00008472.webp",
+      "sourceUrl": "https://cdn.fishystuff.fish/images/items/00008472.webp",
+      "sha256": "7a4bba48df5aa8009d30dc18386b75fadb2963958b74473f31901f1a85e880fa"
+    },
+    {
+      "itemId": 8473,
+      "name": "Yellow Corvina",
+      "file": "00008473.webp",
+      "sourceUrl": "https://cdn.fishystuff.fish/images/items/00008473.webp",
+      "sha256": "8d221a2fd300247ea0bdc009916195a8042d0c921004699aa26fc88be83db3cd"
+    },
+    {
+      "itemId": 8474,
+      "name": "Pirarucu",
+      "file": "00008474.webp",
+      "sourceUrl": "https://cdn.fishystuff.fish/images/items/00008474.webp",
+      "sha256": "2e97c5a1cba1c4835c8cb83827b60cb2bd20fdf79383e3243d6e5e1f9f6c9d33"
+    },
+    {
+      "itemId": 8475,
+      "name": "Albino Coelacanth",
+      "file": "00008475.webp",
+      "sourceUrl": "https://cdn.fishystuff.fish/images/items/00008475.webp",
+      "sha256": "454cc8c67f68c81dd58fb29491c02f4528e5c7210474f5baa762ea5476a3078d"
+    },
+    {
+      "itemId": 8476,
+      "name": "Blue Bat Star",
+      "file": "00008476.webp",
+      "sourceUrl": "https://cdn.fishystuff.fish/images/items/00008476.webp",
+      "sha256": "75eef86b56ad9b28632b3a1d55071fca7f0683fbf709ea98daa066bdf4478ff4"
+    },
+    {
+      "itemId": 8478,
+      "name": "Black Eye Crab",
+      "file": "00008478.webp",
+      "sourceUrl": "https://cdn.fishystuff.fish/images/items/00008478.webp",
+      "sha256": "e75833c0749cf3312084b0ff51db50e69ac906b9ed2c5a29d9280fe8c51b422a"
+    },
+    {
+      "itemId": 8479,
+      "name": "Footballfish",
+      "file": "00008479.webp",
+      "sourceUrl": "https://cdn.fishystuff.fish/images/items/00008479.webp",
+      "sha256": "ca4c05e90170e515b9a94dd4f3df5f983bc87b969301059e29b4402c30be53ad"
+    },
+    {
+      "itemId": 820502,
+      "name": "Morning River Goby",
+      "file": "00820502.webp",
+      "sourceUrl": "https://cdn.fishystuff.fish/images/items/00820502.webp",
+      "sha256": "540e09734669e8f1d26813046fe0be255e88b308608890a564cbe071536fb28f"
+    },
+    {
+      "itemId": 820503,
+      "name": "Rapid Goby",
+      "file": "00820503.webp",
+      "sourceUrl": "https://cdn.fishystuff.fish/images/items/00820503.webp",
+      "sha256": "24938d2fc3ac1fa746d993300776a2e92f963128387d21d5eb9741271e22bb2d"
+    },
+    {
+      "itemId": 820505,
+      "name": "Short Ninespine Stickleback",
+      "file": "00820505.webp",
+      "sourceUrl": "https://cdn.fishystuff.fish/images/items/00820505.webp",
+      "sha256": "904ea944370f045dd6082c57da856e5df3d8b66a2e500a52938066e42c225c7d"
+    },
+    {
+      "itemId": 820506,
+      "name": "South Torrent Catfish",
+      "file": "00820506.webp",
+      "sourceUrl": "https://cdn.fishystuff.fish/images/items/00820506.webp",
+      "sha256": "da09cbf7ef81c52f8f45bb318056cbe3cf00c26310d9d1105fddbc8bcc63ce2e"
+    },
+    {
+      "itemId": 820507,
+      "name": "Dwarf Gudgeon",
+      "file": "00820507.webp",
+      "sourceUrl": "https://cdn.fishystuff.fish/images/items/00820507.webp",
+      "sha256": "440fb8c7fb7992a12487a0cc0d4fede96021bdcba0d0224f756de81707bfb7e4"
+    },
+    {
+      "itemId": 820508,
+      "name": "Short Barbel Gudgeon",
+      "file": "00820508.webp",
+      "sourceUrl": "https://cdn.fishystuff.fish/images/items/00820508.webp",
+      "sha256": "4519c3cbe1267548247a8f24900ab5d4af247de58b752b2b1883742ab8a0c568"
+    },
+    {
+      "itemId": 820509,
+      "name": "King Spine Loach",
+      "file": "00820509.webp",
+      "sourceUrl": "https://cdn.fishystuff.fish/images/items/00820509.webp",
+      "sha256": "ffa8a37fb93ae4fe716937a482e00b59b073832cab9bdfa6e07611c55435c8ef"
+    },
+    {
+      "itemId": 820510,
+      "name": "Large-headed Goby",
+      "file": "00820510.webp",
+      "sourceUrl": "https://cdn.fishystuff.fish/images/items/00820510.webp",
+      "sha256": "95fcfa95144db295156b5bea0c79ad185be5b6b7d85451b287e7697e6468d89d"
+    },
+    {
+      "itemId": 820512,
+      "name": "Southern Rough Shrimp",
+      "file": "00820512.webp",
+      "sourceUrl": "https://cdn.fishystuff.fish/images/items/00820512.webp",
+      "sha256": "5b78a44f45dfdaf74c650bc9a726f182d31d302f0bc7673055adee1945cfcd10"
+    },
+    {
+      "itemId": 820513,
+      "name": "Bigfin Reef Squid",
+      "file": "00820513.webp",
+      "sourceUrl": "https://cdn.fishystuff.fish/images/items/00820513.webp",
+      "sha256": "e5d83269ecdd8dfa793a3e303d04a33262c18a03fd88d56535ffe56bb12f2ac7"
+    },
+    {
+      "itemId": 820514,
+      "name": "Neon Damselfish",
+      "file": "00820514.webp",
+      "sourceUrl": "https://cdn.fishystuff.fish/images/items/00820514.webp",
+      "sha256": "abef1f169f3816743fd9318a1241b8f642ceef87ccedbd622a1e3dc889f68ab1"
+    },
+    {
+      "itemId": 820515,
+      "name": "Ransonnet's Surfperch",
+      "file": "00820515.webp",
+      "sourceUrl": "https://cdn.fishystuff.fish/images/items/00820515.webp",
+      "sha256": "6bbbce6211e102d86c2c745d25e578764fb9ba4144e85641da75244c661c387f"
+    },
+    {
+      "itemId": 820516,
+      "name": "Pollack",
+      "file": "00820516.webp",
+      "sourceUrl": "https://cdn.fishystuff.fish/images/items/00820516.webp",
+      "sha256": "faae2b643f751feb047140e204da16938e35ae9d264c70bc939d8fb1c2ca2cc8"
+    },
+    {
+      "itemId": 820517,
+      "name": "Boxfish",
+      "file": "00820517.webp",
+      "sourceUrl": "https://cdn.fishystuff.fish/images/items/00820517.webp",
+      "sha256": "d7691dee61dc18d80efa46faa16a1aa37a2b8d6ac5dfd281af3170a039d11a1b"
+    },
+    {
+      "itemId": 820519,
+      "name": "Mitre Squid",
+      "file": "00820519.webp",
+      "sourceUrl": "https://cdn.fishystuff.fish/images/items/00820519.webp",
+      "sha256": "3313ececb9ed33d91a53f2d3656219c828a9ffb7291a92887ab54c46f71fde41"
+    },
+    {
+      "itemId": 820520,
+      "name": "Dark-banded Rockfish",
+      "file": "00820520.webp",
+      "sourceUrl": "https://cdn.fishystuff.fish/images/items/00820520.webp",
+      "sha256": "69fa7335a1065ef0378ea90eda749ebc8a6a114ee2bb5aa755c378d511bbb6ac"
+    },
+    {
+      "itemId": 820521,
+      "name": "Lionfish",
+      "file": "00820521.webp",
+      "sourceUrl": "https://cdn.fishystuff.fish/images/items/00820521.webp",
+      "sha256": "ab4aea352bdde9a86059121128477eddc2b5518d8d623204a4c3035d8a96f19c"
+    },
+    {
+      "itemId": 820523,
+      "name": "Blacktip Chromis",
+      "file": "00820523.webp",
+      "sourceUrl": "https://cdn.fishystuff.fish/images/items/00820523.webp",
+      "sha256": "47522102d8ba62cb30cc527c2d2bf1bf6dd8d8d7f2fa23536e4804308414e867"
+    },
+    {
+      "itemId": 820524,
+      "name": "Red Seabream",
+      "file": "00820524.webp",
+      "sourceUrl": "https://cdn.fishystuff.fish/images/items/00820524.webp",
+      "sha256": "b45b58ab62a6d1fbe8a0bc7ae42f86cccd722ddab4c3a7cd9c7a9e347043ff65"
+    },
+    {
+      "itemId": 820985,
+      "name": "Silver Beltfish",
+      "file": "00820985.webp",
+      "sourceUrl": "https://cdn.fishystuff.fish/images/items/00820985.webp",
+      "sha256": "97280008085f9cd4b1facedfcf7ff9cafe3beb42872a724454eb841affd1997f"
+    },
+    {
+      "itemId": 820986,
+      "name": "Pink Dolphin",
+      "file": "00820986.webp",
+      "sourceUrl": "https://cdn.fishystuff.fish/images/items/00820986.webp",
+      "sha256": "14430dd45ba45be66a564ceb94206d3889fe870e720aa5515c9df82e6bda9d50"
+    },
+    {
+      "itemId": 820987,
+      "name": "Flapjack Octopus",
+      "file": "00820987.webp",
+      "sourceUrl": "https://cdn.fishystuff.fish/images/items/00820987.webp",
+      "sha256": "232e4f8d5b5bb5c4e26bc47d21e6de9e2927492999987c0928c316a002af8f46"
+    },
+    {
+      "itemId": 820988,
+      "name": "Rainbowfish",
+      "file": "00820988.webp",
+      "sourceUrl": "https://cdn.fishystuff.fish/images/items/00820988.webp",
+      "sha256": "e7a2668f3c12989eafe5af71715e13659d3c6a320f36aecc6633222f0b7f6c45"
+    },
+    {
+      "itemId": 820990,
+      "name": "Migaloo",
+      "file": "00820990.webp",
+      "sourceUrl": "https://cdn.fishystuff.fish/images/items/00820990.webp",
+      "sha256": "a1ca8ec08f1c9717dd1e2d1fea6838777c4b8399c43950516c46c9b78edc00dc"
+    },
+    {
+      "itemId": 820991,
+      "name": "Blobfish",
+      "file": "00820991.webp",
+      "sourceUrl": "https://cdn.fishystuff.fish/images/items/00820991.webp",
+      "sha256": "9b480eee7cf07e9a2c26b16cbb36ab04e5ab66c1560f381d486108a2e69d0678"
+    },
+    {
+      "itemId": 820992,
+      "name": "Blanket Octopus",
+      "file": "00820992.webp",
+      "sourceUrl": "https://cdn.fishystuff.fish/images/items/00820992.webp",
+      "sha256": "65dc30e225eb88b50cd0cb069816fe8331904ae9bb0a121fa343aa5893a50b8e"
+    },
+    {
+      "itemId": 820993,
+      "name": "Manta Ray",
+      "file": "00820993.webp",
+      "sourceUrl": "https://cdn.fishystuff.fish/images/items/00820993.webp",
+      "sha256": "1fb50ec40ab52f7f0c07837874c5175237c64318fdde583b42bf56b730e33dde"
+    },
+    {
+      "itemId": 820994,
+      "name": "Blue Angel",
+      "file": "00820994.webp",
+      "sourceUrl": "https://cdn.fishystuff.fish/images/items/00820994.webp",
+      "sha256": "d333d0765e76d1d658ce82eb4c337a3077d5c62a4f9718ce3f2cc421d93164a4"
+    },
+    {
+      "itemId": 820995,
+      "name": "Cloaking Shark",
+      "file": "00820995.webp",
+      "sourceUrl": "https://cdn.fishystuff.fish/images/items/00820995.webp",
+      "sha256": "e8d8c8a4469f0a41b9cc4beb1d0907b8ee45ebc69a9ebccb4cc911e6192185cb"
+    },
+    {
+      "itemId": 820996,
+      "name": "Betta",
+      "file": "00820996.webp",
+      "sourceUrl": "https://cdn.fishystuff.fish/images/items/00820996.webp",
+      "sha256": "98e9d0df50323b753e3a2ba501c23c539055d846b7afe81c1afad031850b6351"
+    },
+    {
+      "itemId": 820997,
+      "name": "Tripod Fish",
+      "file": "00820997.webp",
+      "sourceUrl": "https://cdn.fishystuff.fish/images/items/00820997.webp",
+      "sha256": "12ee5f1a286a2cc17c60870698b295b301671ed07620f18d828d8310947b0e9e"
+    },
+    {
+      "itemId": 820998,
+      "name": "Duke Squid",
+      "file": "00820998.webp",
+      "sourceUrl": "https://cdn.fishystuff.fish/images/items/00820998.webp",
+      "sha256": "894172981ef0f7fb526c92392625da655a1bc7df6be38ffa770b028d6f2fdbef"
+    },
+    {
+      "itemId": 820999,
+      "name": "Koi",
+      "file": "00820999.webp",
+      "sourceUrl": "https://cdn.fishystuff.fish/images/items/00820999.webp",
+      "sha256": "67766a1d6a24e3d10f2e01b23b3479addf8314bcba14cafeeed201194c883da0"
+    },
+    {
+      "itemId": 821000,
+      "name": "Sea Angel",
+      "file": "00821000.webp",
+      "sourceUrl": "https://cdn.fishystuff.fish/images/items/00821000.webp",
+      "sha256": "2478bb13e410580b0f7bbe98d132c4a4ecf32727d69d20dcbf658bc1c3d3e4fa"
+    },
+    {
+      "itemId": 821001,
+      "name": "Ghost Fish",
+      "file": "00821001.webp",
+      "sourceUrl": "https://cdn.fishystuff.fish/images/items/00821001.webp",
+      "sha256": "829ab5632c7855d9e4711d765e8f6c9157427673505ebea15f69c2d18820b065"
+    },
+    {
+      "itemId": 821002,
+      "name": "Hammer Mackerel",
+      "file": "00821002.webp",
+      "sourceUrl": "https://cdn.fishystuff.fish/images/items/00821002.webp",
+      "sha256": "d70608212af1b6df34fae37f3b9a18a4fffc489c6ced45b616d1a4d92289d2ff"
+    },
+    {
+      "itemId": 821003,
+      "name": "Blue Lobster",
+      "file": "00821003.webp",
+      "sourceUrl": "https://cdn.fishystuff.fish/images/items/00821003.webp",
+      "sha256": "73b51e0ddac84a08c9ebb19b91b116c91f6f53630c3b9f08ed48d896198b1cb5"
+    },
+    {
+      "itemId": 821004,
+      "name": "Deep Sea Snailfish",
+      "file": "00821004.webp",
+      "sourceUrl": "https://cdn.fishystuff.fish/images/items/00821004.webp",
+      "sha256": "0c1706b5fe7da35cb83166a5cf2a809657cd177d56e3d8b32a54629b8f355be8"
+    },
+    {
+      "itemId": 821005,
+      "name": "Dorado",
+      "file": "00821005.webp",
+      "sourceUrl": "https://cdn.fishystuff.fish/images/items/00821005.webp",
+      "sha256": "3582345c604085933e3ef06c1a116d534c8f45c95bffad4dd1f997382d78d494"
+    },
+    {
+      "itemId": 821006,
+      "name": "Glass Octopus",
+      "file": "00821006.webp",
+      "sourceUrl": "https://cdn.fishystuff.fish/images/items/00821006.webp",
+      "sha256": "471dba2fd244bc11a1823e6c3de27485d01a8d4d1dbbf5a6f633c5e5a859b1a3"
+    },
+    {
+      "itemId": 821007,
+      "name": "Barreleye",
+      "file": "00821007.webp",
+      "sourceUrl": "https://cdn.fishystuff.fish/images/items/00821007.webp",
+      "sha256": "03325872970bdbce48f27730859b700bbd21a67c3175ba259b69e32caaa331c4"
+    },
+    {
+      "itemId": 821008,
+      "name": "Salp",
+      "file": "00821008.webp",
+      "sourceUrl": "https://cdn.fishystuff.fish/images/items/00821008.webp",
+      "sha256": "f815f0f72fad9f23a88e5130e89ea783444d228803de6e63cdd56ee40c5420b7"
+    },
+    {
+      "itemId": 821009,
+      "name": "Green Sea Turtle",
+      "file": "00821009.webp",
+      "sourceUrl": "https://cdn.fishystuff.fish/images/items/00821009.webp",
+      "sha256": "81fb2c23c57ca7d624614e93dab8671c13399e0b1137f0ab7e8a322b0875a819"
+    },
+    {
+      "itemId": 821010,
+      "name": "Ranchu",
+      "file": "00821010.webp",
+      "sourceUrl": "https://cdn.fishystuff.fish/images/items/00821010.webp",
+      "sha256": "088d8d0ed4721ea4b3b61d8db68ed21d22bc2f75d2a7eea977ef7dc36de3e190"
+    },
+    {
+      "itemId": 821011,
+      "name": "Humphead Parrotfish",
+      "file": "00821011.webp",
+      "sourceUrl": "https://cdn.fishystuff.fish/images/items/00821011.webp",
+      "sha256": "ba4a1ddd60c8978da0f853df70295038830b0dcf467b257a355356b70b78dfaf"
+    },
+    {
+      "itemId": 821012,
+      "name": "Vaquita",
+      "file": "00821012.webp",
+      "sourceUrl": "https://cdn.fishystuff.fish/images/items/00821012.webp",
+      "sha256": "24267452e61146fd10295b82fc9e97d17085b53d887fdc919f2b5ccef479ddf2"
+    },
+    {
+      "itemId": 821013,
+      "name": "Pelican Eel",
+      "file": "00821013.webp",
+      "sourceUrl": "https://cdn.fishystuff.fish/images/items/00821013.webp",
+      "sha256": "18947f7164250a3e675257ca22b0fc1d404802d15da8ec80b6f961dcedc183c9"
+    },
+    {
+      "itemId": 821015,
+      "name": "Frilled Shark",
+      "file": "00821015.webp",
+      "sourceUrl": "https://cdn.fishystuff.fish/images/items/00821015.webp",
+      "sha256": "4bfc833deeb4342e3b63907413d7a10753434e6733981b87e52d44da0e7c94ec"
+    },
+    {
+      "itemId": 821016,
+      "name": "Moon Jelly",
+      "file": "00821016.webp",
+      "sourceUrl": "https://cdn.fishystuff.fish/images/items/00821016.webp",
+      "sha256": "9d15a06ac6f64af6ff030a5b7521b386785cfe2bd076bce63f4059599b0ad92e"
+    },
+    {
+      "itemId": 821017,
+      "name": "Mantis Shrimp",
+      "file": "00821017.webp",
+      "sourceUrl": "https://cdn.fishystuff.fish/images/items/00821017.webp",
+      "sha256": "1dc9066a65520c2d8c5ec2221d63c73a057d3d3aa60cf1b63429ec7d4d75bce9"
+    },
+    {
+      "itemId": 821018,
+      "name": "Nautilus",
+      "file": "00821018.webp",
+      "sourceUrl": "https://cdn.fishystuff.fish/images/items/00821018.webp",
+      "sha256": "0eb8f5be08b6102ca5ea3f98157d0bbe05d8b630217ccc68e54c2057ab88432b"
+    },
+    {
+      "itemId": 821019,
+      "name": "Sea Pig",
+      "file": "00821019.webp",
+      "sourceUrl": "https://cdn.fishystuff.fish/images/items/00821019.webp",
+      "sha256": "66564816515810384aa9e62025e84d9323c7a5cd33bbed754fde4141226616af"
+    },
+    {
+      "itemId": 821020,
+      "name": "Red Handfish",
+      "file": "00821020.webp",
+      "sourceUrl": "https://cdn.fishystuff.fish/images/items/00821020.webp",
+      "sha256": "e7b4880b2d495a3119bc24f46c63abed50c312df3d8b15b573828beec7fd469d"
+    },
+    {
+      "itemId": 821021,
+      "name": "Gar",
+      "file": "00821021.webp",
+      "sourceUrl": "https://cdn.fishystuff.fish/images/items/00821021.webp",
+      "sha256": "fc8f423328cdc8a94fd785817d196bd37d031d73a9a46617d3c9c589d465c9e0"
+    },
+    {
+      "itemId": 821023,
+      "name": "Blue-ringed Octopus",
+      "file": "00821023.webp",
+      "sourceUrl": "https://cdn.fishystuff.fish/images/items/00821023.webp",
+      "sha256": "6baa99ab2797b75f2253e1b07871924f1eb2cb9328e9bb8ebd7897c9ae530cac"
+    },
+    {
+      "itemId": 821024,
+      "name": "Red Garra",
+      "file": "00821024.webp",
+      "sourceUrl": "https://cdn.fishystuff.fish/images/items/00821024.webp",
+      "sha256": "8f761b2b490c9ca245ef7b242a96c5e4b9a323d0abb0a91c1185932a2a4e7046"
+    },
+    {
+      "itemId": 821025,
+      "name": "Sea Bunny",
+      "file": "00821025.webp",
+      "sourceUrl": "https://cdn.fishystuff.fish/images/items/00821025.webp",
+      "sha256": "b5404c7ea6db6b1830e9f91b41c26f533bbde18030c9fb7391978c4cb0f914c2"
+    },
+    {
+      "itemId": 821026,
+      "name": "Rainbow Sardine",
+      "file": "00821026.webp",
+      "sourceUrl": "https://cdn.fishystuff.fish/images/items/00821026.webp",
+      "sha256": "1dcc407f39c785b253f3e39a9ed0b6ef4c6b8a6cc0c0a1fc30bbed3b931ad0a9"
+    },
+    {
+      "itemId": 821027,
+      "name": "Black Halibut",
+      "file": "00821027.webp",
+      "sourceUrl": "https://cdn.fishystuff.fish/images/items/00821027.webp",
+      "sha256": "c97f6ee1daf325f2ca9d482b58e60be412ea3de659cdcf28f2a18f1abde71507"
+    },
+    {
+      "itemId": 821028,
+      "name": "Whitefin Trevally",
+      "file": "00821028.webp",
+      "sourceUrl": "https://cdn.fishystuff.fish/images/items/00821028.webp",
+      "sha256": "d4a951361117c4ab486c97e2f4ee4dc2a603b7fc45084fe3deb9c5da2248779e"
+    },
+    {
+      "itemId": 821029,
+      "name": "Giant Bitterling",
+      "file": "00821029.webp",
+      "sourceUrl": "https://cdn.fishystuff.fish/images/items/00821029.webp",
+      "sha256": "7f7194380354eaee64f542e70969c175192c733a81be35a02f9d4c8eb3f4176a"
+    },
+    {
+      "itemId": 821030,
+      "name": "Spotted Spined Loach",
+      "file": "00821030.webp",
+      "sourceUrl": "https://cdn.fishystuff.fish/images/items/00821030.webp",
+      "sha256": "902a895e7115f663cce8cb42cd9a1c7de6368e7458b24621e7d7be5f694f9a06"
+    },
+    {
+      "itemId": 821031,
+      "name": "White Crucian Carp",
+      "file": "00821031.webp",
+      "sourceUrl": "https://cdn.fishystuff.fish/images/items/00821031.webp",
+      "sha256": "131d8dc18a056e5773f6b59abe33e3f6e8fa6831fd3a60b8f7a0a335077bd8d6"
+    },
+    {
+      "itemId": 821032,
+      "name": "Electric Catfish",
+      "file": "00821032.webp",
+      "sourceUrl": "https://cdn.fishystuff.fish/images/items/00821032.webp",
+      "sha256": "f4849119d265949da07d18419179a720c191da8d0cfc69226cbcb108fba65d56"
+    },
+    {
+      "itemId": 821274,
+      "name": "Leaffish",
+      "file": "00821274.webp",
+      "sourceUrl": "https://cdn.fishystuff.fish/images/items/00821274.webp",
+      "sha256": "ce5f578268d6e41e140bb4f76b939062d2c9f83fde4fbb51998d3a93d4e2c3f3"
+    },
+    {
+      "itemId": 821275,
+      "name": "Hatchetfish",
+      "file": "00821275.webp",
+      "sourceUrl": "https://cdn.fishystuff.fish/images/items/00821275.webp",
+      "sha256": "5ea3de24c7188ee47b013bfd1435f9a15dea885798d7ff62e5b512007fcb88f7"
+    },
+    {
+      "itemId": 821276,
+      "name": "Silver Prochilodus",
+      "file": "00821276.webp",
+      "sourceUrl": "https://cdn.fishystuff.fish/images/items/00821276.webp",
+      "sha256": "cb3206e5aa8aae7e2df1ee518bfad83da110857abdc0ce084cd4d7a705eeb273"
+    },
+    {
+      "itemId": 821277,
+      "name": "Common Pleco",
+      "file": "00821277.webp",
+      "sourceUrl": "https://cdn.fishystuff.fish/images/items/00821277.webp",
+      "sha256": "cfcc9d3003c6ba13e055cd5b33ee396ddfcaf683e19feaebaef6a0e833da8d2a"
+    },
+    {
+      "itemId": 821278,
+      "name": "Swamp Eel",
+      "file": "00821278.webp",
+      "sourceUrl": "https://cdn.fishystuff.fish/images/items/00821278.webp",
+      "sha256": "eef081d9c814fcc24c12e1985a1a10575e6860c9bf8a01ea54570ee70f8b6f5c"
+    },
+    {
+      "itemId": 821279,
+      "name": "Pike Characin",
+      "file": "00821279.webp",
+      "sourceUrl": "https://cdn.fishystuff.fish/images/items/00821279.webp",
+      "sha256": "73f169658b3656b938440f17ab0d56b07b8a6244529d562e73c4b9877e4d3f2e"
+    },
+    {
+      "itemId": 821280,
+      "name": "Lungfish",
+      "file": "00821280.webp",
+      "sourceUrl": "https://cdn.fishystuff.fish/images/items/00821280.webp",
+      "sha256": "4a97554883d68f246138086529d561a934d38ce2ecf1114293d80df7c51fe422"
+    },
+    {
+      "itemId": 821281,
+      "name": "Giant Talking Catfish",
+      "file": "00821281.webp",
+      "sourceUrl": "https://cdn.fishystuff.fish/images/items/00821281.webp",
+      "sha256": "a3d3cd7feefd91ab7550a15447ec7c169b3fb9cc93b838472168cb52e2872de6"
+    },
+    {
+      "itemId": 821282,
+      "name": "Longnose Gar",
+      "file": "00821282.webp",
+      "sourceUrl": "https://cdn.fishystuff.fish/images/items/00821282.webp",
+      "sha256": "a748822d551847776b3537711c336042d9dcdb28de09a0df05b4fce3c3e07834"
+    },
+    {
+      "itemId": 821283,
+      "name": "Goliath Tigerfish",
+      "file": "00821283.webp",
+      "sourceUrl": "https://cdn.fishystuff.fish/images/items/00821283.webp",
+      "sha256": "ca1b858800db654a879f45f69b6060d5d20e976eacac24853d4b92bd47c765da"
+    },
+    {
+      "itemId": 821284,
+      "name": "Lavascale Stargazer",
+      "file": "00821284.webp",
+      "sourceUrl": "https://cdn.fishystuff.fish/images/items/00821284.webp",
+      "sha256": "012794370c06a847adad98c5c4a3e7465fd9ff1f091281862f7828f44aa3a497"
+    },
+    {
+      "itemId": 821285,
+      "name": "Devil Stinger",
+      "file": "00821285.webp",
+      "sourceUrl": "https://cdn.fishystuff.fish/images/items/00821285.webp",
+      "sha256": "95ef600f096bb818a9f646ae06cd0b958b6ac63794cfebd47edb59e753cde501"
+    },
+    {
+      "itemId": 821286,
+      "name": "Brassy Chub",
+      "file": "00821286.webp",
+      "sourceUrl": "https://cdn.fishystuff.fish/images/items/00821286.webp",
+      "sha256": "7bfe812be2fdec877a771c6f4fd2ec9c3b9aebb750c7f1a38ab2de3ff856ad01"
+    },
+    {
+      "itemId": 821287,
+      "name": "Dusky Flathead",
+      "file": "00821287.webp",
+      "sourceUrl": "https://cdn.fishystuff.fish/images/items/00821287.webp",
+      "sha256": "fa466da61615717f04c5f479a19087e31825fdb3f0004059c4e111b0f641be47"
+    },
+    {
+      "itemId": 821288,
+      "name": "Obtuse Barracuda",
+      "file": "00821288.webp",
+      "sourceUrl": "https://cdn.fishystuff.fish/images/items/00821288.webp",
+      "sha256": "057db7e5154cc30cc5d03180adfc7bec1db6bda6b512b16c58d14633ef10822e"
+    },
+    {
+      "itemId": 821289,
+      "name": "Ribbon Eel",
+      "file": "00821289.webp",
+      "sourceUrl": "https://cdn.fishystuff.fish/images/items/00821289.webp",
+      "sha256": "7f27f7958baf9d205e55d790fe1bfa918435a9c6ed7826321d43ba665d6e3bd4"
+    },
+    {
+      "itemId": 821290,
+      "name": "Wrought Iron Butterflyfish",
+      "file": "00821290.webp",
+      "sourceUrl": "https://cdn.fishystuff.fish/images/items/00821290.webp",
+      "sha256": "20c6f478d561c002c764a3f41ed89aaa2215f022e5f25ba4fbcfa7103a6b761f"
+    },
+    {
+      "itemId": 821291,
+      "name": "Goldenstriped Soapfish",
+      "file": "00821291.webp",
+      "sourceUrl": "https://cdn.fishystuff.fish/images/items/00821291.webp",
+      "sha256": "5f90c577070c29f24e4ac8889d5fa66ee8a538a2a07dae0d483f1fc7d6d504b5"
+    },
+    {
+      "itemId": 821292,
+      "name": "Opah",
+      "file": "00821292.webp",
+      "sourceUrl": "https://cdn.fishystuff.fish/images/items/00821292.webp",
+      "sha256": "3fb66930af9fa76a6e4600811663d6e21f58c055bd748709c912e8b38bc31614"
+    },
+    {
+      "itemId": 821293,
+      "name": "Redfin Anthias",
+      "file": "00821293.webp",
+      "sourceUrl": "https://cdn.fishystuff.fish/images/items/00821293.webp",
+      "sha256": "0ea51d3125de84708e5954230036eee04c9a5e0350ec0b75cc2837638a157002"
+    },
+    {
+      "itemId": 821294,
+      "name": "Polka-dot Stingray",
+      "file": "00821294.webp",
+      "sourceUrl": "https://cdn.fishystuff.fish/images/items/00821294.webp",
+      "sha256": "3ba9847b7d5c53a794ecf0ded78ec93f7fa740ac0827b149e33225a821ca3547"
+    },
+    {
+      "itemId": 821295,
+      "name": "Pinecone Fish",
+      "file": "00821295.webp",
+      "sourceUrl": "https://cdn.fishystuff.fish/images/items/00821295.webp",
+      "sha256": "99e23a58f38947bbf24df557ab4c11e71ec9456657026ee70365a13a1767b086"
+    },
+    {
+      "itemId": 8431,
+      "name": "Balenos Mullet",
+      "file": "00008236.webp",
+      "sourceUrl": "https://bdocodex.com/items/new_icon/03_etc/07_productmaterial/00008236.webp",
+      "sha256": "a0125d95be3af61e55973fc61ead4d6ed365ea81c2ef089f6712cecb67f1be69",
+      "note": "Canonical item 8431 shares Mullet 8236 artwork; recognition must require identity confirmation."
+    },
+    {
+      "itemId": 821373,
+      "name": "Edania Gar",
+      "file": "00821373.webp",
+      "sourceUrl": "https://bdocodex.com/items/new_icon/03_etc/07_productmaterial/00821373.webp",
+      "sha256": "bd7b4fa8800fdd88e986353c5b914f9008dac972a5be5c0238454d0790676eab"
+    },
+    {
+      "itemId": 821374,
+      "name": "Cano Toadfish",
+      "file": "00821374.webp",
+      "sourceUrl": "https://bdocodex.com/items/new_icon/03_etc/07_productmaterial/00821374.webp",
+      "sha256": "462c0dab2a33db3ee16ed94eb4e39cd01480ead6c92cd071876a7808201cf243"
+    }
+  ],
+  "unavailable": [
+    "8477 Blue Shark: HTTP Error 404: Not Found"
+  ]
+}

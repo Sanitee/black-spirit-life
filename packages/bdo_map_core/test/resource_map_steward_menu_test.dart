@@ -12,7 +12,7 @@ void main() {
   testWidgets('Steward uses compact rows without passive subtitles or badges', (
     tester,
   ) async {
-    final semantics = tester.ensureSemantics();
+      final semantics = tester.ensureSemantics();
     var opened = 0;
     await tester.pumpWidget(
       _testApp(
@@ -65,9 +65,9 @@ void main() {
           .getSemantics(find.byKey(const ValueKey('compact-list')))
           .getSemanticsData()
           .hint,
-      '4 houses. 2 lodging',
-    );
-    semantics.dispose();
+        '4 houses. 2 lodging',
+      );
+      semantics.dispose();
     for (final icon in tester.widgetList<ResourceMapStewardIcon>(
       find.byType(ResourceMapStewardIcon),
     )) {

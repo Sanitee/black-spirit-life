@@ -12,9 +12,8 @@ or AI-generated icons. No additional frame, tint, or sharpening is applied.
   reviewed September 3, 2026 client extraction:
   `new_icon/09_cash/02_housing/inhouse_cash_workman_nampo_01.webp`.
 
-These game assets remain subject to the same recorded free, noncommercial,
-unofficial fan-content basis as the other bundled Pearl Abyss icons. This
-notice does not grant new rights.
+These game assets remain subject to the same private-app licensing constraints
+as the other bundled Pearl Abyss icons. This notice does not grant new rights.
 
 SHA-256 of the unchanged bundled files:
 

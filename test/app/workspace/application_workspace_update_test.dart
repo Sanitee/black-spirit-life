@@ -1,14 +1,17 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:bdo_craft_planner_flutter/app/app.dart';
 import 'package:bdo_craft_planner_flutter/app/update/beta_update.dart';
 import 'package:bdo_craft_planner_flutter/app/update/beta_update_indicator.dart';
+import 'package:bdo_craft_planner_flutter/app/window/app_title_bar.dart';
 import 'package:bdo_craft_planner_flutter/app/window/window_host_service.dart';
 import 'package:bdo_craft_planner_flutter/app_identity.dart';
 import 'package:bdo_craft_planner_flutter/domain/models/craft_mode.dart';
 import 'package:bdo_craft_planner_flutter/domain/state/planner_state.dart';
 import 'package:bdo_craft_planner_flutter/features/data/data.dart';
 import 'package:bdo_craft_planner_flutter/features/planner/planner.dart';
+import 'package:bdo_fishing_core/bdo_fishing_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -35,9 +38,10 @@ void main() {
 
     await tester.pumpWidget(
       BdoCraftPlannerApp(
+        enableOpportunityAutoCheck: false,
         applicationFuture: Future.value(harness.bundle),
         marketGateway: const EmptyMarketGateway(),
-        updateSource: r'C:\public-stable-feed',
+        updateSource: r'C:\private-beta-feed',
         enableBetaUpdates: false,
       ),
     );
@@ -62,10 +66,11 @@ void main() {
 
     await tester.pumpWidget(
       BdoCraftPlannerApp(
+        enableOpportunityAutoCheck: false,
         applicationFuture: Future.value(harness.bundle),
         marketGateway: const EmptyMarketGateway(),
         updateService: service,
-        updateSource: r'C:\public-stable-feed',
+        updateSource: r'C:\private-beta-feed',
         enableBetaUpdates: false,
       ),
     );
@@ -95,10 +100,11 @@ void main() {
 
     await tester.pumpWidget(
       BdoCraftPlannerApp(
+        enableOpportunityAutoCheck: false,
         applicationFuture: Future.value(firstHarness.bundle),
         marketGateway: const EmptyMarketGateway(),
         updateService: service,
-        updateSource: r'C:\public-stable-feed',
+        updateSource: r'C:\private-beta-feed',
         enableBetaUpdates: true,
       ),
     );
@@ -126,10 +132,11 @@ void main() {
     ))!;
     await tester.pumpWidget(
       BdoCraftPlannerApp(
+        enableOpportunityAutoCheck: false,
         applicationFuture: Future.value(secondHarness.bundle),
         marketGateway: const EmptyMarketGateway(),
         updateService: service,
-        updateSource: r'C:\public-stable-feed',
+        updateSource: r'C:\private-beta-feed',
         enableBetaUpdates: true,
       ),
     );
@@ -147,6 +154,69 @@ void main() {
     await service.dispose();
   });
 
+  testWidgets('a visible toast clears a newly surfaced update notice', (
+    tester,
+  ) async {
+    configureApplicationTestSurface(tester, const Size(1575, 987));
+    final harness = (await tester.runAsync(
+      () => ApplicationTestHarness.create(
+        startupNotices: const <String>['Startup notice remains visible.'],
+      ),
+    ))!;
+    final service = _DeferredUpdateService();
+    final windowHost = _RecordingWindowHost(<String>[]);
+
+    await tester.pumpWidget(
+      BdoCraftPlannerApp(
+        enableOpportunityAutoCheck: false,
+        applicationFuture: Future.value(harness.bundle),
+        marketGateway: const EmptyMarketGateway(),
+        updateService: service,
+        updateSource: r'C:\private-beta-feed',
+        enableBetaUpdates: true,
+        windowHost: windowHost,
+      ),
+    );
+    for (var index = 0; index < 4; index++) {
+      await tester.pump(const Duration(milliseconds: 80));
+    }
+
+    expect(find.text('Startup notice remains visible.'), findsOneWidget);
+    final beforeUpdate = tester.widget<SnackBar>(find.byType(SnackBar));
+    expect((beforeUpdate.margin! as EdgeInsets).bottom, 20);
+
+    service.emit(_AvailableUpdateService.available);
+    await tester.pump();
+    await tester.pump();
+
+    expect(find.byKey(BetaUpdateIndicator.buttonKey), findsOneWidget);
+    expect(find.text('Startup notice remains visible.'), findsOneWidget);
+    final afterUpdate = tester.widget<SnackBar>(find.byType(SnackBar));
+    expect(
+      (afterUpdate.margin! as EdgeInsets).bottom,
+      20 + BetaUpdateIndicator.height,
+    );
+    expect(windowHost.bottomInsets, <double>[BetaUpdateIndicator.height]);
+
+    tester.platformDispatcher.textScaleFactorTestValue = 2;
+    await tester.pump();
+    await tester.pump();
+
+    expect(
+      tester.getSize(find.byKey(BetaUpdateIndicator.buttonKey)).height,
+      64,
+    );
+    expect(windowHost.bottomInsets, <double>[BetaUpdateIndicator.height, 64]);
+    final afterTextScaleChange = tester.widget<SnackBar>(find.byType(SnackBar));
+    expect((afterTextScaleChange.margin! as EdgeInsets).bottom, 84);
+
+    service.completeCurrentStatus();
+    await tester.pump();
+    await tester.pumpWidget(const SizedBox.shrink());
+    await tester.runAsync(harness.dispose);
+    await service.dispose();
+  });
+
   testWidgets('an unavailable update source stays silent at startup', (
     tester,
   ) async {
@@ -157,6 +227,7 @@ void main() {
 
     await tester.pumpWidget(
       BdoCraftPlannerApp(
+        enableOpportunityAutoCheck: false,
         applicationFuture: Future.value(harness.bundle),
         marketGateway: const EmptyMarketGateway(),
         updateService: service,
@@ -191,10 +262,11 @@ void main() {
 
     await tester.pumpWidget(
       BdoCraftPlannerApp(
+        enableOpportunityAutoCheck: false,
         applicationFuture: Future.value(harness.bundle),
         marketGateway: const EmptyMarketGateway(),
         updateService: service,
-        updateSource: r'C:\public-stable-feed',
+        updateSource: r'C:\private-beta-feed',
         enableBetaUpdates: false,
         windowHost: windowHost,
       ),
@@ -236,6 +308,9 @@ void main() {
       final harness = (await tester.runAsync(ApplicationTestHarness.create))!;
       final service = _AvailableUpdateService();
       final windowHost = _RecordingWindowHost(<String>[]);
+      final fishRuntimeHost = _RecordingFishRuntimeHost(
+        failApplicationExit: true,
+      );
 
       await tester.pumpWidget(
         BdoCraftPlannerApp(
@@ -243,9 +318,10 @@ void main() {
           applicationFuture: Future.value(harness.bundle),
           marketGateway: const EmptyMarketGateway(),
           updateService: service,
-          updateSource: r'C:\public-stable-feed',
+          updateSource: r'C:\private-beta-feed',
           enableBetaUpdates: true,
           windowHost: windowHost,
+          fishCompanionRuntimeHost: fishRuntimeHost,
         ),
       );
       for (var index = 0; index < 5; index++) {
@@ -263,12 +339,116 @@ void main() {
       expect(service.downloadCalls, 1);
       expect(service.applyCalls, 1);
       expect(windowHost.closeCalls, 1);
+      expect(fishRuntimeHost.strictFreezeCalls, 1);
+      expect(fishRuntimeHost.applicationExitFreezeCalls, 0);
 
       await tester.pumpWidget(const SizedBox.shrink());
       await tester.pump();
       expect(windowHost.bottomInsets.last, 0);
       await tester.runAsync(harness.dispose);
       await service.dispose();
+    },
+  );
+
+  testWidgets('ordinary close uses only the application-exit Fish barrier', (
+    tester,
+  ) async {
+    configureApplicationTestSurface(tester, const Size(1575, 987));
+    final harness = (await tester.runAsync(ApplicationTestHarness.create))!;
+    final windowHost = _RecordingWindowHost(<String>[]);
+    final fishRuntimeHost = _RecordingFishRuntimeHost(failStrict: true);
+
+    await tester.pumpWidget(
+      BdoCraftPlannerApp(
+        enableOpportunityAutoCheck: false,
+        applicationFuture: Future.value(harness.bundle),
+        marketGateway: const EmptyMarketGateway(),
+        enableBetaUpdates: false,
+        windowHost: windowHost,
+        fishCompanionRuntimeHost: fishRuntimeHost,
+      ),
+    );
+    for (var index = 0; index < 5; index++) {
+      await tester.pump(const Duration(milliseconds: 80));
+    }
+
+    final closePreparation = windowHost.prepareOrdinaryClose();
+    await tester.pump();
+    await closePreparation;
+
+    expect(fishRuntimeHost.applicationExitFreezeCalls, 1);
+    expect(fishRuntimeHost.strictFreezeCalls, 0);
+
+    await tester.pumpWidget(const SizedBox.shrink());
+    await tester.runAsync(harness.dispose);
+  });
+
+  testWidgets(
+    'ordinary close recovery stays single-flight until delayed Fish resume completes',
+    (tester) async {
+      configureApplicationTestSurface(tester, const Size(1575, 987));
+      final harness = (await tester.runAsync(ApplicationTestHarness.create))!;
+      final windowHost = _RecordingWindowHost(
+        <String>[],
+        closeFlushTimeout: const Duration(milliseconds: 120),
+      );
+      final fishRuntimeHost = _DelayedCloseRecoveryFishRuntimeHost();
+
+      await tester.pumpWidget(
+        BdoCraftPlannerApp(
+          enableOpportunityAutoCheck: false,
+          applicationFuture: Future.value(harness.bundle),
+          marketGateway: const EmptyMarketGateway(),
+          enableBetaUpdates: false,
+          windowHost: windowHost,
+          fishCompanionRuntimeHost: fishRuntimeHost,
+        ),
+      );
+      for (var index = 0; index < 5; index++) {
+        await tester.pump(const Duration(milliseconds: 80));
+      }
+
+      await tester.tap(find.byKey(AppTitleBar.captionGlyphKey('close')));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 100));
+
+      expect(fishRuntimeHost.applicationExitFreezeCalls, 1);
+      expect(fishRuntimeHost.resumeCalls, 1);
+      expect(harness.bundle.controller.mutationsFrozen, isTrue);
+
+      await tester.pump(const Duration(milliseconds: 30));
+      expect(fishRuntimeHost.resumeCalls, 1);
+      expect(
+        tester
+            .widgetList<AbsorbPointer>(find.byType(AbsorbPointer))
+            .any((widget) => widget.absorbing),
+        isTrue,
+      );
+
+      await tester.pump(const Duration(milliseconds: 130));
+      expect(fishRuntimeHost.applicationExitFreezeCalls, 1);
+      expect(fishRuntimeHost.resumeCalls, 1);
+      expect(harness.bundle.controller.mutationsFrozen, isTrue);
+
+      fishRuntimeHost.completeResume();
+      await tester.pump();
+      await tester.pump();
+      expect(harness.bundle.controller.mutationsFrozen, isFalse);
+      expect(
+        tester
+            .widgetList<AbsorbPointer>(find.byType(AbsorbPointer))
+            .any((widget) => widget.absorbing),
+        isFalse,
+      );
+
+      final retry = windowHost.prepareOrdinaryClose();
+      await tester.pump();
+      await retry;
+      expect(fishRuntimeHost.applicationExitFreezeCalls, 2);
+      expect(fishRuntimeHost.resumeCalls, 1);
+
+      await tester.pumpWidget(const SizedBox.shrink());
+      await tester.runAsync(harness.dispose);
     },
   );
 
@@ -286,7 +466,7 @@ void main() {
         applicationFuture: Future.value(harness.bundle),
         marketGateway: const EmptyMarketGateway(),
         updateService: service,
-        updateSource: r'C:\public-stable-feed',
+        updateSource: r'C:\private-beta-feed',
         enableBetaUpdates: true,
         windowHost: windowHost,
       ),
@@ -329,10 +509,11 @@ void main() {
 
       await tester.pumpWidget(
         BdoCraftPlannerApp(
+          enableOpportunityAutoCheck: false,
           applicationFuture: Future.value(harness.bundle),
           marketGateway: const EmptyMarketGateway(),
           updateService: service,
-          updateSource: r'C:\public-stable-feed',
+          updateSource: r'C:\private-beta-feed',
           enableBetaUpdates: true,
         ),
       );
@@ -394,7 +575,7 @@ void main() {
         applicationFuture: Future.value(harness.bundle),
         marketGateway: const EmptyMarketGateway(),
         updateService: service,
-        updateSource: r'C:\public-stable-feed',
+        updateSource: r'C:\private-beta-feed',
         enableBetaUpdates: true,
         windowHost: windowHost,
       ),
@@ -452,7 +633,7 @@ void main() {
         applicationFuture: Future.value(harness.bundle),
         marketGateway: const EmptyMarketGateway(),
         updateService: service,
-        updateSource: r'C:\public-stable-feed',
+        updateSource: r'C:\private-beta-feed',
         enableBetaUpdates: true,
         windowHost: windowHost,
       ),
@@ -512,7 +693,7 @@ void main() {
         applicationFuture: Future.value(harness.bundle),
         marketGateway: const EmptyMarketGateway(),
         updateService: service,
-        updateSource: r'C:\public-stable-feed',
+        updateSource: r'C:\private-beta-feed',
         enableBetaUpdates: true,
         windowHost: windowHost,
       ),
@@ -558,6 +739,8 @@ class _DeferredUpdateService implements BetaUpdateService {
   Stream<BetaUpdateSnapshot> get snapshots => _events.stream;
 
   void completeCurrentStatus() => _current.complete(const BetaUpdateSnapshot());
+
+  void emit(BetaUpdateSnapshot snapshot) => _events.add(snapshot);
 
   @override
   Future<BetaUpdateSnapshot> currentStatus() {
@@ -720,17 +903,33 @@ class _DownloadFailureUpdateService extends _AvailableUpdateService {
 }
 
 class _RecordingWindowHost extends WindowHostService {
-  _RecordingWindowHost(this.events);
+  _RecordingWindowHost(
+    this.events, {
+    super.closeFlushTimeout,
+  });
 
   final List<String> events;
   int closeCalls = 0;
   final List<double> bottomInsets = <double>[];
+  Future<void> Function()? _beforeClose;
 
   @override
-  void installCloseRequestHandler(Future<void> Function()? handler) {}
+  void installCloseRequestHandler(Future<void> Function()? handler) {
+    _beforeClose = handler;
+  }
 
   @override
-  void removeCloseRequestHandler() {}
+  void removeCloseRequestHandler() {
+    _beforeClose = null;
+  }
+
+  Future<void> prepareOrdinaryClose() {
+    final beforeClose = _beforeClose;
+    if (beforeClose == null) {
+      throw StateError('The workspace close handler is not installed.');
+    }
+    return beforeClose();
+  }
 
   @override
   Future<bool> isMaximized() async => false;
@@ -745,6 +944,103 @@ class _RecordingWindowHost extends WindowHostService {
     closeCalls += 1;
     events.add('close');
   }
+}
+
+final class _RecordingFishRuntimeHost extends FishCompanionRuntimeHost {
+  _RecordingFishRuntimeHost({
+    this.failStrict = false,
+    this.failApplicationExit = false,
+  }) : super.withStarter((_) async => _NoopFishCompanionServiceHandle());
+
+  final bool failStrict;
+  final bool failApplicationExit;
+  final FishCompanionServiceHandle _handle = _NoopFishCompanionServiceHandle();
+  int strictFreezeCalls = 0;
+  int applicationExitFreezeCalls = 0;
+
+  @override
+  Future<FishCompanionServiceHandle> ready() async => _handle;
+
+  @override
+  Future<void> prewarm() async {}
+
+  @override
+  Future<void> flushForLifecycle() async {}
+
+  @override
+  Future<void> freezeAndFlush() async {
+    strictFreezeCalls += 1;
+    if (failStrict) throw StateError('strict Fish freeze must not be used');
+  }
+
+  @override
+  Future<void> freezeAndFlushForApplicationExit() async {
+    applicationExitFreezeCalls += 1;
+    if (failApplicationExit) {
+      throw StateError('application-exit Fish freeze must not be used');
+    }
+  }
+
+  @override
+  Future<void> resumeAfterFailure() async {}
+
+  @override
+  void dispose() {}
+}
+
+final class _DelayedCloseRecoveryFishRuntimeHost
+    extends FishCompanionRuntimeHost {
+  _DelayedCloseRecoveryFishRuntimeHost()
+    : super.withStarter((_) async => _NoopFishCompanionServiceHandle());
+
+  final Completer<void> _resume = Completer<void>();
+  final Completer<void> _firstApplicationExitFreeze = Completer<void>();
+  int applicationExitFreezeCalls = 0;
+  int resumeCalls = 0;
+
+  @override
+  Future<void> freezeAndFlushForApplicationExit() {
+    applicationExitFreezeCalls += 1;
+    if (applicationExitFreezeCalls == 1) {
+      return _firstApplicationExitFreeze.future;
+    }
+    return Future<void>.value();
+  }
+
+  @override
+  Future<void> resumeAfterFailure() async {
+    resumeCalls += 1;
+    await _resume.future;
+  }
+
+  void completeResume() => _resume.complete();
+
+  @override
+  void dispose() {}
+}
+
+final class _NoopFishCompanionServiceHandle
+    implements FishCompanionServiceHandle {
+  @override
+  final Directory root = Directory('unused-fish-service-fixture');
+
+  @override
+  final Directory personalDataRoot = Directory('unused-fish-personal-fixture');
+
+  @override
+  final Directory webViewDataRoot = Directory('unused-fish-webview-fixture');
+
+  @override
+  final Uri uri = Uri.parse('http://127.0.0.1:18765/');
+
+  @override
+  Future<void> checkpoint() async {}
+
+  @override
+  Future<void> shutdown() async {}
+
+  @override
+  void dispose() {}
 }
 
 class _RejectedApplyUpdateService extends _ReadyUpdateService {

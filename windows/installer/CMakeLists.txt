@@ -2,9 +2,9 @@ cmake_minimum_required(VERSION 3.25)
 
 project(BlackSpiritLifeInstaller LANGUAGES CXX RC)
 
-set(BSL_INSTALLER_VERSION "0.1.7" CACHE STRING
+set(BSL_INSTALLER_VERSION "0.1.9" CACHE STRING
     "Semantic version shown by the themed installer")
-set(BSL_INSTALLER_BUILD_NUMBER "26" CACHE STRING
+set(BSL_INSTALLER_BUILD_NUMBER "28" CACHE STRING
     "Flutter build number included in Windows version metadata")
 set(BSL_INSTALLER_PACKAGE_ID "BlackSpiritLife.App" CACHE STRING
     "Permanent Velopack package identity")
@@ -112,11 +112,16 @@ target_compile_definitions(BlackSpiritLifeInstaller PRIVATE
 )
 
 if(MSVC)
+  file(TO_NATIVE_PATH "${BSL_PROJECT_ROOT}" BSL_NATIVE_SOURCE_ROOT)
+  file(TO_NATIVE_PATH "${CMAKE_BINARY_DIR}" BSL_NATIVE_BUILD_ROOT)
   target_compile_options(BlackSpiritLifeInstaller PRIVATE
     /W4
     /permissive-
     /utf-8
     /EHsc
+    "$<$<CONFIG:Release>:/experimental:deterministic>"
+    "$<$<CONFIG:Release>:/pathmap:${BSL_NATIVE_SOURCE_ROOT}=bsl-src>"
+    "$<$<CONFIG:Release>:/pathmap:${BSL_NATIVE_BUILD_ROOT}=bsl-build>"
   )
   target_link_options(BlackSpiritLifeInstaller PRIVATE /MANIFEST:NO)
 endif()

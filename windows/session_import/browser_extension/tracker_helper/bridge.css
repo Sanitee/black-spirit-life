@@ -1,0 +1,55 @@
+:root {
+  color-scheme: dark;
+  font: 15px/1.45 system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  background: #0b1511;
+  color: #e5eee9;
+}
+
+body {
+  min-width: 360px;
+  margin: 0;
+}
+
+main {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 16px;
+  max-width: 640px;
+  margin: 48px auto;
+  padding: 24px;
+}
+
+.mark {
+  display: grid;
+  width: 42px;
+  height: 42px;
+  place-items: center;
+  border: 1px solid #65a780;
+  border-radius: 12px;
+  background: #14271e;
+  color: #9ed1af;
+  font-size: 24px;
+}
+
+h1 {
+  margin: 3px 0 8px;
+  font-size: 22px;
+}
+
+p {
+  margin: 0;
+}
+
+#status[data-state="connected"] {
+  color: #9ed1af;
+}
+
+#status[data-state="error"] {
+  color: #ef9b9b;
+}
+
+.note {
+  max-width: 54ch;
+  margin-top: 18px;
+  color: #9baca3;
+}

@@ -52,6 +52,10 @@ void main() {
       }
     }
 
+    // The September 3 catalog made Alchemy Stone Shard a manual conversion.
+    // Its Alchemy leaf must no longer resolve to an automatic acquisition route.
+    // Cooking Honey is now a shopping leaf in Cooking, while its explicit
+    // Grinding recipe remains available in Processing.
     expect(maskedContexts, hasLength(150));
     expect(maskedContexts, contains('cooking:Cooking Honey'));
     expect(maskedContexts, contains('cooking:Purified Water'));

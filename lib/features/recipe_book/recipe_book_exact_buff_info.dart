@@ -1206,13 +1206,21 @@ final Map<String, ExactBuffInfo> exactBuffInfoByName = <String, ExactBuffInfo>{
   ),
   'ocean draught': ExactBuffInfo(
     title: 'Ocean Draught',
-    effects: <String>['Sailing EXP +20%', 'Barter EXP +20%', 'Sailor EXP +10%'],
+    effects: <String>[
+      'Sailing EXP +20%',
+      'Barter EXP +20%',
+      'Sailor EXP +10%',
+    ],
     duration: '180 min',
     cooldown: '10 sec',
   ),
   'vast ocean draught': ExactBuffInfo(
     title: 'Vast Ocean Draught',
-    effects: <String>['Sailing EXP +20%', 'Barter EXP +20%', 'Sailor EXP +10%'],
+    effects: <String>[
+      'Sailing EXP +20%',
+      'Barter EXP +20%',
+      'Sailor EXP +10%',
+    ],
     duration: '360 min',
     cooldown: '10 sec',
   ),

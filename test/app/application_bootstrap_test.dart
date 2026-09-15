@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
@@ -39,6 +40,60 @@ void main() {
       await temporaryDirectory.delete(recursive: true);
     }
   });
+
+  test(
+    'reports the validated personal-data directory while catalog loading continues',
+    () async {
+      final catalog = Completer<CatalogSnapshot>();
+      final resolvedDirectory = Completer<Directory>();
+      var bootstrapCompleted = false;
+
+      final bootstrap =
+          const ApplicationBootstrapService(applicationVersion: 'test').load(
+            catalogFuture: catalog.future,
+            pathPolicy: paths,
+            onApplicationDirectoryResolved: resolvedDirectory.complete,
+          );
+      unawaited(
+        bootstrap.then<void>((_) {
+          bootstrapCompleted = true;
+        }),
+      );
+
+      expect((await resolvedDirectory.future).path, applicationDirectory.path);
+      expect(
+        bootstrapCompleted,
+        isFalse,
+        reason:
+            'Fish service startup should overlap catalog and state bootstrap',
+      );
+
+      catalog.complete(_catalog());
+      final bundle = await bootstrap;
+      addTearDown(bundle.controller.dispose);
+      expect(bootstrapCompleted, isTrue);
+    },
+  );
+
+  test(
+    'early directory resolution preserves a concurrent catalog failure',
+    () async {
+      final catalog = Completer<CatalogSnapshot>();
+      final resolvedDirectory = Completer<Directory>();
+      final error = StateError('fixture catalog failure');
+      final bootstrap =
+          const ApplicationBootstrapService(applicationVersion: 'test').load(
+            catalogFuture: catalog.future,
+            pathPolicy: paths,
+            onApplicationDirectoryResolved: resolvedDirectory.complete,
+          );
+
+      catalog.completeError(error);
+
+      expect((await resolvedDirectory.future).path, applicationDirectory.path);
+      await expectLater(bootstrap, throwsA(same(error)));
+    },
+  );
 
   test(
     'startup keeps saved editor tools off until explicitly enabled',

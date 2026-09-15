@@ -15,6 +15,12 @@ tmp/
 test/goldens/failures/
 test/goldens/review/
 **/test/failures/
+test/features/opportunities/failures/
+test/session_import/bin/
+test/session_import/obj/
+windows/session_import/**/bin/
+windows/session_import/**/obj/
+windows/storage_ocr/BlackSpiritStorageOcr/tests/fixtures/recipe-book-ocr/
 **/doc/api/
 *.iml
 *.ipr

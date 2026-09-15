@@ -28,7 +28,10 @@ void main() {
         harness.bundle.controller.documentSnapshot.alchemy.alchemyMastery;
 
     await tester.pumpWidget(
-      BdoCraftPlannerApp(applicationFuture: Future.value(harness.bundle)),
+      BdoCraftPlannerApp(
+        enableOpportunityAutoCheck: false,
+        applicationFuture: Future.value(harness.bundle),
+      ),
     );
     await tester.pumpAndSettle();
 
@@ -76,7 +79,10 @@ void main() {
     await tester.pump();
     harness = harness.rebindControllerInCurrentZone();
     await tester.pumpWidget(
-      BdoCraftPlannerApp(applicationFuture: Future.value(harness.bundle)),
+      BdoCraftPlannerApp(
+        enableOpportunityAutoCheck: false,
+        applicationFuture: Future.value(harness.bundle),
+      ),
     );
     await tester.pumpAndSettle();
 
@@ -253,7 +259,10 @@ void main() {
     );
 
     await tester.pumpWidget(
-      BdoCraftPlannerApp(applicationFuture: Future.value(harness.bundle)),
+      BdoCraftPlannerApp(
+        enableOpportunityAutoCheck: false,
+        applicationFuture: Future.value(harness.bundle),
+      ),
     );
     await tester.pumpAndSettle();
     await tester.tap(
@@ -288,7 +297,10 @@ void main() {
     harness = harness.rebindControllerInCurrentZone();
 
     await tester.pumpWidget(
-      BdoCraftPlannerApp(applicationFuture: Future.value(harness.bundle)),
+      BdoCraftPlannerApp(
+        enableOpportunityAutoCheck: false,
+        applicationFuture: Future.value(harness.bundle),
+      ),
     );
     await tester.pumpAndSettle();
 
@@ -332,7 +344,10 @@ void main() {
         harness.bundle.controller.documentSnapshot.afkWeightProfile;
 
     await tester.pumpWidget(
-      BdoCraftPlannerApp(applicationFuture: Future.value(harness.bundle)),
+      BdoCraftPlannerApp(
+        enableOpportunityAutoCheck: false,
+        applicationFuture: Future.value(harness.bundle),
+      ),
     );
     await tester.pumpAndSettle();
     expect(find.byType(FirstRunSetupView), findsNothing);
@@ -396,6 +411,7 @@ void main() {
 
       await tester.pumpWidget(
         BdoCraftPlannerApp(
+          enableOpportunityAutoCheck: false,
           applicationFuture: Future.value(harness.bundle),
           repeatFullSetupEveryApplicationVersion: false,
         ),
@@ -463,7 +479,10 @@ void main() {
     );
 
     await tester.pumpWidget(
-      BdoCraftPlannerApp(applicationFuture: Future.value(harness.bundle)),
+      BdoCraftPlannerApp(
+        enableOpportunityAutoCheck: false,
+        applicationFuture: Future.value(harness.bundle),
+      ),
     );
     await tester.pumpAndSettle();
     await _goToMarketAndSave(tester);
@@ -505,7 +524,10 @@ void main() {
     );
 
     await tester.pumpWidget(
-      BdoCraftPlannerApp(applicationFuture: Future.value(harness.bundle)),
+      BdoCraftPlannerApp(
+        enableOpportunityAutoCheck: false,
+        applicationFuture: Future.value(harness.bundle),
+      ),
     );
     await tester.pumpAndSettle();
     await _goToMarketAndSave(tester);

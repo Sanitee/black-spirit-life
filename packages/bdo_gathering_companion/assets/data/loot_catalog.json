@@ -1,0 +1,1413 @@
+{
+  "schemaVersion": 1,
+  "verifiedAt": "2026-08-31",
+  "source": "Local client-derived Black Spirit Life inventory recognizer RecipeBook catalog",
+  "sourceGeneratedAtUtc": "2026-08-06T11:57:41.185Z",
+  "items": [
+    {
+      "id": 25226,
+      "name": "[Manor] Stuffed Cliffside Mountain Sheep",
+      "icon": "assets/icons/items/25226.webp",
+      "nativeIcon": "icons/new_icon/03_etc/06_housing/mansion_dpf_booty_devil_goat_01.webp",
+      "sourceItemUrl": "https://bdocodex.com/us/item/25226/",
+      "verifiedAt": "2026-08-31"
+    },
+    {
+      "id": 25227,
+      "name": "[Manor] Stuffed Coral Stoneback Crab",
+      "icon": "assets/icons/items/25227.webp",
+      "nativeIcon": "icons/new_icon/03_etc/06_housing/mansion_dpf_booty_devil_landspider_01.webp",
+      "sourceItemUrl": "https://bdocodex.com/us/item/25227/",
+      "verifiedAt": "2026-08-31"
+    },
+    {
+      "id": 25225,
+      "name": "[Manor] Stuffed Golden Leaf Snake",
+      "icon": "assets/icons/items/25225.webp",
+      "nativeIcon": "icons/new_icon/03_etc/06_housing/mansion_dpf_booty_devil_snake_01.webp",
+      "sourceItemUrl": "https://bdocodex.com/us/item/25225/",
+      "verifiedAt": "2026-08-31"
+    },
+    {
+      "id": 25200,
+      "name": "[Manor] Stuffed Hawk",
+      "icon": "assets/icons/items/25200.webp",
+      "nativeIcon": "icons/new_icon/03_etc/06_housing/mansion_dpf_ori_hawk_01.webp",
+      "sourceItemUrl": "https://bdocodex.com/us/item/25200/",
+      "verifiedAt": "2026-08-31"
+    },
+    {
+      "id": 25224,
+      "name": "[Manor] Stuffed Rock Elephant",
+      "icon": "assets/icons/items/25224.webp",
+      "nativeIcon": "icons/new_icon/03_etc/06_housing/mansion_dpf_booty_devil_templeelephant_01.webp",
+      "sourceItemUrl": "https://bdocodex.com/us/item/25224/",
+      "verifiedAt": "2026-08-31"
+    },
+    {
+      "id": 25198,
+      "name": "[Manor] Stuffed Tiger",
+      "icon": "assets/icons/items/25198.webp",
+      "nativeIcon": "icons/new_icon/03_etc/06_housing/mansion_dpf_ori_sangun_01.webp",
+      "sourceItemUrl": "https://bdocodex.com/us/item/25198/",
+      "verifiedAt": "2026-08-31"
+    },
+    {
+      "id": 5013,
+      "name": "Acacia Sap",
+      "icon": "assets/icons/items/5013.webp",
+      "nativeIcon": "icons/items/b35222675e672a0414fcdddd8f4b85a43f319bce3a9ff9f96017307b783ee7be.webp"
+    },
+    {
+      "id": 5419,
+      "name": "Amanita Mushroom",
+      "icon": "assets/icons/items/5419.webp",
+      "nativeIcon": "icons/items/0b0820b78630213bca0b8faec4bc9b682bb4fc2e516a8e2b98720e28ff711ea6.webp"
+    },
+    {
+      "id": 721002,
+      "name": "Ancient Spirit Dust",
+      "icon": "assets/icons/items/721002.webp",
+      "nativeIcon": "icons/items/ded688f4af01d969d7cef2f5187f7d7b816d3e087a97d49ed90c48aa42163dee.webp"
+    },
+    {
+      "id": 5408,
+      "name": "Arrow Mushroom",
+      "icon": "assets/icons/items/5408.webp",
+      "nativeIcon": "icons/items/89457ecf22e320e5e98393ee20111437c707acb2fbe3e6e644be8ee373c1a83a.webp"
+    },
+    {
+      "id": 5001,
+      "name": "Ash Sap",
+      "icon": "assets/icons/items/5001.webp",
+      "nativeIcon": "icons/items/ae290200a8ba90f4d0041288689613ba1549a9f24dae90508512b9d32892e2ff.webp"
+    },
+    {
+      "id": 4601,
+      "name": "Ash Timber",
+      "icon": "assets/icons/items/4601.webp",
+      "nativeIcon": "icons/items/6097615919eb4ba6a78f8302147b2cbb5f9f771c2635ec82be1975d70b51601a.webp"
+    },
+    {
+      "id": 6213,
+      "name": "Bear Blood",
+      "icon": "assets/icons/items/6213.webp",
+      "nativeIcon": "icons/items/0eb332d73942a88e043b9f62f59d82cdd176382d60b16d9f9ae919f8132d3ead.webp"
+    },
+    {
+      "id": 6013,
+      "name": "Bear Hide",
+      "icon": "assets/icons/items/6013.webp",
+      "nativeIcon": "icons/items/c24cef0b5c6faed10508bad0f1d6695baa8fd1f5ae6d5304c2aad4b68cf78936.webp"
+    },
+    {
+      "id": 7912,
+      "name": "Bear Meat",
+      "icon": "assets/icons/items/7912.webp",
+      "nativeIcon": "icons/items/ef4665a1c1b884038cc11c42f32a0c264bafcd288b80b5876e714f73bde3e384.webp"
+    },
+    {
+      "id": 7906,
+      "name": "Beef",
+      "icon": "assets/icons/items/7906.webp",
+      "nativeIcon": "icons/items/ef4665a1c1b884038cc11c42f32a0c264bafcd288b80b5876e714f73bde3e384.webp"
+    },
+    {
+      "id": 5004,
+      "name": "Birch Sap",
+      "icon": "assets/icons/items/5004.webp",
+      "nativeIcon": "icons/items/86a45a5a7c3855be1cedc2ecf84483be066aaf3c1d689974581e053db8e30e2a.webp"
+    },
+    {
+      "id": 4604,
+      "name": "Birch Timber",
+      "icon": "assets/icons/items/4604.webp",
+      "nativeIcon": "icons/items/52280dc32ff3832afeaf7465b4c0bdd889e4b1972a6832d051dea4d36bb4023b.webp"
+    },
+    {
+      "id": 7953,
+      "name": "Bird Meat",
+      "icon": "assets/icons/items/7953.webp",
+      "nativeIcon": "icons/new_icon/03_etc/07_productmaterial/00007916.webp",
+      "sourceItemUrl": "https://bdocodex.com/us/item/7953/",
+      "verifiedAt": "2026-08-31"
+    },
+    {
+      "id": 5000,
+      "name": "Black Gem",
+      "icon": "assets/icons/items/5000.webp",
+      "nativeIcon": "icons/items/c90075a313074b3f7d06c5e55af256bd72e9e0738b5898e70c3f9fa188fe072f.webp"
+    },
+    {
+      "id": 4999,
+      "name": "Black Gem Fragment",
+      "icon": "assets/icons/items/4999.webp",
+      "nativeIcon": "icons/items/7a7f3d8666a810c9d7b397083aff1369b4b824b0fd9104d3041c73d83a2ead58.webp"
+    },
+    {
+      "id": 16001,
+      "name": "Black Stone",
+      "icon": "assets/icons/items/16001.webp",
+      "nativeIcon": "icons/items/092c80f42dac85cb53fa03d174fb008e1331181fa313d09e4c8101da90530b4c.webp"
+    },
+    {
+      "id": 5005,
+      "name": "Bloody Tree Knot",
+      "icon": "assets/icons/items/5005.webp",
+      "nativeIcon": "icons/new_icon/03_etc/07_productmaterial/00005005.webp",
+      "sourceItemUrl": "https://bdocodex.com/us/item/5005/",
+      "verifiedAt": "2026-08-31"
+    },
+    {
+      "id": 15277,
+      "name": "BON Dawn Crystal - Life EXP",
+      "icon": "assets/icons/items/15277.webp",
+      "nativeIcon": "icons/new_icon/03_etc/11_enchant_material/00015277_1.webp",
+      "sourceItemUrl": "https://bdocodex.com/us/item/15277/",
+      "verifiedAt": "2026-08-31"
+    },
+    {
+      "id": 5532,
+      "name": "Bracken",
+      "icon": "assets/icons/items/5532.webp",
+      "nativeIcon": "icons/items/21e5ce1450fb334ec82534b63bbef36bee210a4224507ff91aa906e4dc4c0d5b.webp"
+    },
+    {
+      "id": 56221,
+      "name": "Breath of Narcion",
+      "icon": "assets/icons/items/56221.webp",
+      "nativeIcon": "icons/new_icon/03_etc/04_dropitem/00056221_1.webp",
+      "sourceItemUrl": "https://bdocodex.com/us/item/56221/",
+      "verifiedAt": "2026-08-31"
+    },
+    {
+      "id": 767257,
+      "name": "Breath of the Endtimes",
+      "icon": "assets/icons/items/767257.webp",
+      "nativeIcon": "icons/new_icon/03_etc/04_dropitem/00767257_2.webp",
+      "sourceItemUrl": "https://bdocodex.com/us/item/767257/",
+      "verifiedAt": "2026-08-31"
+    },
+    {
+      "id": 56259,
+      "name": "Breath of the Morning",
+      "icon": "assets/icons/items/56259.webp",
+      "nativeIcon": "icons/items/46d2c97f659b82193b28b7988b0021b3803f7fbdf575de33eddd71eab4b8b33e.webp"
+    },
+    {
+      "id": 44236,
+      "name": "Broken Ivory",
+      "icon": "assets/icons/items/44236.webp",
+      "nativeIcon": "icons/new_icon/03_etc/04_dropitem/00044236.webp",
+      "sourceItemUrl": "https://bdocodex.com/us/item/44236/",
+      "verifiedAt": "2026-08-31"
+    },
+    {
+      "id": 821259,
+      "name": "Caphras Essence",
+      "icon": "assets/icons/items/821259.webp",
+      "nativeIcon": "icons/new_icon/03_etc/07_productmaterial/00821271.webp",
+      "sourceItemUrl": "https://bdocodex.com/us/item/821259/",
+      "verifiedAt": "2026-08-31"
+    },
+    {
+      "id": 721003,
+      "name": "Caphras Stone",
+      "icon": "assets/icons/items/721003.webp",
+      "nativeIcon": "icons/items/d9fd4c53826e110f905bdcf267e2a1c4231e8727765742622de937f9f2b395d6.webp"
+    },
+    {
+      "id": 4724,
+      "name": "Caphras Tree Plank",
+      "icon": "assets/icons/items/4724.webp",
+      "nativeIcon": "icons/new_icon/03_etc/07_productmaterial/00004724.webp",
+      "sourceItemUrl": "https://bdocodex.com/us/item/4724/",
+      "verifiedAt": "2026-08-31"
+    },
+    {
+      "id": 5025,
+      "name": "Caphras Tree Sap",
+      "icon": "assets/icons/items/5025.webp",
+      "nativeIcon": "icons/new_icon/03_etc/07_productmaterial/00005025.webp",
+      "sourceItemUrl": "https://bdocodex.com/us/item/5025/",
+      "verifiedAt": "2026-08-31"
+    },
+    {
+      "id": 4624,
+      "name": "Caphras Tree Timber",
+      "icon": "assets/icons/items/4624.webp",
+      "nativeIcon": "icons/new_icon/03_etc/07_productmaterial/00821116.webp",
+      "sourceItemUrl": "https://bdocodex.com/us/item/4624/",
+      "verifiedAt": "2026-08-31"
+    },
+    {
+      "id": 4666,
+      "name": "Cedar Plank",
+      "icon": "assets/icons/items/4666.webp",
+      "nativeIcon": "icons/new_icon/03_etc/07_productmaterial/00004666.webp",
+      "sourceItemUrl": "https://bdocodex.com/us/item/4666/",
+      "verifiedAt": "2026-08-31"
+    },
+    {
+      "id": 5010,
+      "name": "Cedar Sap",
+      "icon": "assets/icons/items/5010.webp",
+      "nativeIcon": "icons/items/6d5deb026058d0691d049d0f2bc8f198af8629e8cdb23142d61c12779cdfdfc4.webp"
+    },
+    {
+      "id": 4607,
+      "name": "Cedar Timber",
+      "icon": "assets/icons/items/4607.webp",
+      "nativeIcon": "icons/items/ef73b00f09f2b92cd928fa92ae42c77ca328cd39ac3c79ab1938114bb0560385.webp"
+    },
+    {
+      "id": 5544,
+      "name": "Chanterelle",
+      "icon": "assets/icons/items/5544.webp",
+      "nativeIcon": "icons/items/bfaa7c02ddedafe6d65ada6610e794e98b54953f2836f096ff0d4c6731a697df.webp"
+    },
+    {
+      "id": 7921,
+      "name": "Chicken Meat",
+      "icon": "assets/icons/items/7921.webp",
+      "nativeIcon": "icons/items/e3b0ad08fed6b98d51c480060785084230b03807c32927aeefc1f3268da3e58f.webp"
+    },
+    {
+      "id": 767254,
+      "name": "Cliffside Mountain Sheep Horn",
+      "icon": "assets/icons/items/767254.webp",
+      "nativeIcon": "icons/new_icon/03_etc/04_dropitem/00767254.webp",
+      "sourceItemUrl": "https://bdocodex.com/us/item/767254/",
+      "verifiedAt": "2026-08-31"
+    },
+    {
+      "id": 5410,
+      "name": "Cloud Mushroom",
+      "icon": "assets/icons/items/5410.webp",
+      "nativeIcon": "icons/items/c5c19a6e4b0887fef6cffcbf6ae41256932ae3556c42ffeb5c038b48013962b2.webp"
+    },
+    {
+      "id": 4007,
+      "name": "Coal",
+      "icon": "assets/icons/items/4007.webp",
+      "nativeIcon": "icons/new_icon/03_etc/07_productmaterial/00004007.webp",
+      "sourceItemUrl": "https://bdocodex.com/us/item/4007/",
+      "verifiedAt": "2026-08-31"
+    },
+    {
+      "id": 4987,
+      "name": "Concentrated Magical Black Gem",
+      "icon": "assets/icons/items/4987.webp",
+      "nativeIcon": "icons/items/9098dcd140c5b4fd61ed5bcd3d788434c6c972df893a4e485aa10ebb2f10d7e5.webp"
+    },
+    {
+      "id": 4003,
+      "name": "Copper Ore",
+      "icon": "assets/icons/items/4003.webp",
+      "nativeIcon": "icons/items/5e03b87ab0f883d16b6acc394149a2f9b2760367bdb726b5a5dc3b3a6e8e184e.webp"
+    },
+    {
+      "id": 6533,
+      "name": "Coral Crystal",
+      "icon": "assets/icons/items/6533.webp",
+      "nativeIcon": "icons/new_icon/03_etc/07_productmaterial/00006533.webp",
+      "sourceItemUrl": "https://bdocodex.com/us/item/6533/",
+      "verifiedAt": "2026-08-31"
+    },
+    {
+      "id": 6501,
+      "name": "Coral Piece",
+      "icon": "assets/icons/items/6501.webp",
+      "nativeIcon": "icons/new_icon/03_etc/07_productmaterial/00006501.webp",
+      "sourceItemUrl": "https://bdocodex.com/us/item/6501/",
+      "verifiedAt": "2026-08-31"
+    },
+    {
+      "id": 7757,
+      "name": "Cracked Horn",
+      "icon": "assets/icons/items/7757.webp",
+      "nativeIcon": "icons/items/f3b38b9c7943859332219890009bf64c713be6608c30bc2ab2646e6ca3d05cde.webp"
+    },
+    {
+      "id": 821350,
+      "name": "Cracked Terrashard",
+      "icon": "assets/icons/items/821350.webp",
+      "nativeIcon": "icons/new_icon/03_etc/07_productmaterial/00821350.webp",
+      "sourceItemUrl": "https://bdocodex.com/us/item/821350/",
+      "verifiedAt": "2026-08-31"
+    },
+    {
+      "id": 7760,
+      "name": "Cracked Tooth",
+      "icon": "assets/icons/items/7760.webp",
+      "nativeIcon": "icons/new_icon/07_productmaterial/00007760.webp",
+      "sourceItemUrl": "https://bdocodex.com/us/item/7760/",
+      "verifiedAt": "2026-08-31"
+    },
+    {
+      "id": 820038,
+      "name": "Crystal of Bitterness",
+      "icon": "assets/icons/items/820038.webp",
+      "nativeIcon": "icons/new_icon/03_etc/07_productmaterial/00008423.webp",
+      "sourceItemUrl": "https://bdocodex.com/us/item/820038/",
+      "verifiedAt": "2026-08-31"
+    },
+    {
+      "id": 820037,
+      "name": "Crystal of Darkness",
+      "icon": "assets/icons/items/820037.webp",
+      "nativeIcon": "icons/new_icon/03_etc/07_productmaterial/00008422.webp",
+      "sourceItemUrl": "https://bdocodex.com/us/item/820037/",
+      "verifiedAt": "2026-08-31"
+    },
+    {
+      "id": 820039,
+      "name": "Crystal of Decimation",
+      "icon": "assets/icons/items/820039.webp",
+      "nativeIcon": "icons/new_icon/03_etc/07_productmaterial/00008426.webp",
+      "sourceItemUrl": "https://bdocodex.com/us/item/820039/",
+      "verifiedAt": "2026-08-31"
+    },
+    {
+      "id": 7751,
+      "name": "Damaged Hide",
+      "icon": "assets/icons/items/7751.webp",
+      "nativeIcon": "icons/items/97ddd0bb817aa961250d6b0ce3e192bba28f7f6cb31eae58a06138fcaf7f2bd2.webp"
+    },
+    {
+      "id": 5019,
+      "name": "Dead Tree Essence",
+      "icon": "assets/icons/items/5019.webp",
+      "nativeIcon": "icons/new_icon/03_etc/07_productmaterial/00005019.webp",
+      "sourceItemUrl": "https://bdocodex.com/us/item/5019/",
+      "verifiedAt": "2026-08-31"
+    },
+    {
+      "id": 50810,
+      "name": "Deep Blue Hoof Root",
+      "icon": "assets/icons/items/50810.webp",
+      "nativeIcon": "icons/new_icon/03_etc/09_petitem/00050810.webp",
+      "sourceItemUrl": "https://bdocodex.com/us/item/50810/",
+      "verifiedAt": "2026-08-31"
+    },
+    {
+      "id": 6201,
+      "name": "Deer Blood",
+      "icon": "assets/icons/items/6201.webp",
+      "nativeIcon": "icons/items/37bbfa006af0128eb041211e893cca5a2ae937adad2786eac4ab98408715b74e.webp"
+    },
+    {
+      "id": 6001,
+      "name": "Deer Hide",
+      "icon": "assets/icons/items/6001.webp",
+      "nativeIcon": "icons/items/00bd91bd44a2476d3ad27bbe1d1eef23ccca6bde470e46d9773ac339f4f9b964.webp"
+    },
+    {
+      "id": 7901,
+      "name": "Deer Meat",
+      "icon": "assets/icons/items/7901.webp",
+      "nativeIcon": "icons/items/ef4665a1c1b884038cc11c42f32a0c264bafcd288b80b5876e714f73bde3e384.webp"
+    },
+    {
+      "id": 5538,
+      "name": "Delotia",
+      "icon": "assets/icons/items/5538.webp",
+      "nativeIcon": "icons/items/c0439ae118e78619301709f0c44ab190c4ec7939bd6f000cc6c910c8434eb32a.webp"
+    },
+    {
+      "id": 821353,
+      "name": "Dim Heartvein Shard",
+      "icon": "assets/icons/items/821353.webp",
+      "nativeIcon": "icons/new_icon/03_etc/07_productmaterial/00821353.webp",
+      "sourceItemUrl": "https://bdocodex.com/us/item/821353/",
+      "verifiedAt": "2026-08-31"
+    },
+    {
+      "id": 5404,
+      "name": "Dry Mane Grass",
+      "icon": "assets/icons/items/5404.webp",
+      "nativeIcon": "icons/items/703343359f8a70dc3c0eeeb648f5abc3c11606d24bd4f02191560042cf348048.webp"
+    },
+    {
+      "id": 6904,
+      "name": "Dry Mane Grass Seed",
+      "icon": "assets/icons/items/6904.webp",
+      "nativeIcon": "icons/new_icon/03_etc/07_productmaterial/00006904.webp",
+      "sourceItemUrl": "https://bdocodex.com/us/item/6904/",
+      "verifiedAt": "2026-08-31"
+    },
+    {
+      "id": 5409,
+      "name": "Dwarf Mushroom",
+      "icon": "assets/icons/items/5409.webp",
+      "nativeIcon": "icons/items/d26cf3fe8ee5a8c19a9630fa8023ae65e6e46ddf7dc5d49bca59c8c02f32f63a.webp"
+    },
+    {
+      "id": 6026,
+      "name": "Elephant Hide",
+      "icon": "assets/icons/items/6026.webp",
+      "nativeIcon": "icons/new_icon/03_etc/07_productmaterial/00006004.webp",
+      "sourceItemUrl": "https://bdocodex.com/us/item/6026/",
+      "verifiedAt": "2026-08-31"
+    },
+    {
+      "id": 5406,
+      "name": "Everlasting Herb",
+      "icon": "assets/icons/items/5406.webp",
+      "nativeIcon": "icons/items/6aabfbb227e391ecf1059b3e419f6bbf149d9ee6af7ea637b1df9c4de795f019.webp"
+    },
+    {
+      "id": 821352,
+      "name": "Faded Naturewoven Hide",
+      "icon": "assets/icons/items/821352.webp",
+      "nativeIcon": "icons/new_icon/03_etc/07_productmaterial/00821352.webp",
+      "sourceItemUrl": "https://bdocodex.com/us/item/821352/",
+      "verifiedAt": "2026-08-31"
+    },
+    {
+      "id": 821351,
+      "name": "Faint Wildsoul",
+      "icon": "assets/icons/items/821351.webp",
+      "nativeIcon": "icons/new_icon/03_etc/07_productmaterial/00821351.webp",
+      "sourceItemUrl": "https://bdocodex.com/us/item/821351/",
+      "verifiedAt": "2026-08-31"
+    },
+    {
+      "id": 5651,
+      "name": "Fairy Powder",
+      "icon": "assets/icons/items/5651.webp",
+      "nativeIcon": "icons/items/9c58fb65fdeb73fa631c34bf26a3323a1159e78130750f6a61bacca5a7d94db0.webp"
+    },
+    {
+      "id": 821371,
+      "name": "Fairy's Breath",
+      "icon": "assets/icons/items/821371.webp",
+      "nativeIcon": "icons/new_icon/03_etc/07_productmaterial/000820014.webp",
+      "sourceItemUrl": "https://bdocodex.com/us/item/821371/",
+      "verifiedAt": "2026-08-31"
+    },
+    {
+      "id": 5009,
+      "name": "Fir Sap",
+      "icon": "assets/icons/items/5009.webp",
+      "nativeIcon": "icons/items/9aa3c2d5cac9ee75e4fd7307018bfe3305e101db845b153f3e35e08db970dfc1.webp"
+    },
+    {
+      "id": 4606,
+      "name": "Fir Timber",
+      "icon": "assets/icons/items/4606.webp",
+      "nativeIcon": "icons/items/c0f1e77cb5406298a1c77f6eb51ec18f74796acf2b370d7b0489e0c7e0c00718.webp"
+    },
+    {
+      "id": 5403,
+      "name": "Fire Flake Flower",
+      "icon": "assets/icons/items/5403.webp",
+      "nativeIcon": "icons/items/21c1c996cd5100bbe44e18adbb43d99174dc7eeae72de9794b83aac06493c3af.webp"
+    },
+    {
+      "id": 6903,
+      "name": "Fire Flake Flower Seed",
+      "icon": "assets/icons/items/6903.webp",
+      "nativeIcon": "icons/new_icon/03_etc/07_productmaterial/00006903.webp",
+      "sourceItemUrl": "https://bdocodex.com/us/item/6903/",
+      "verifiedAt": "2026-08-31"
+    },
+    {
+      "id": 6185,
+      "name": "Fire Horn",
+      "icon": "assets/icons/items/6185.webp",
+      "nativeIcon": "icons/items/f020c85334654571337fa9d7cdf36644887d25b4160eae02b896a78b23e052a0.webp"
+    },
+    {
+      "id": 820036,
+      "name": "Forest Crystal",
+      "icon": "assets/icons/items/820036.webp",
+      "nativeIcon": "icons/new_icon/03_etc/07_productmaterial/000820033_1.webp",
+      "sourceItemUrl": "https://bdocodex.com/us/item/820036/",
+      "verifiedAt": "2026-08-31"
+    },
+    {
+      "id": 6203,
+      "name": "Fox Blood",
+      "icon": "assets/icons/items/6203.webp",
+      "nativeIcon": "icons/items/2e5e0a99b3d7a2406585a91637c006c697771a50dc4c21d7d4a9f781bc21d650.webp"
+    },
+    {
+      "id": 6003,
+      "name": "Fox Hide",
+      "icon": "assets/icons/items/6003.webp",
+      "nativeIcon": "icons/new_icon/03_etc/07_productmaterial/00006003.webp",
+      "sourceItemUrl": "https://bdocodex.com/us/item/6003/",
+      "verifiedAt": "2026-08-31"
+    },
+    {
+      "id": 7903,
+      "name": "Fox Meat",
+      "icon": "assets/icons/items/7903.webp",
+      "nativeIcon": "icons/items/ef4665a1c1b884038cc11c42f32a0c264bafcd288b80b5876e714f73bde3e384.webp"
+    },
+    {
+      "id": 5205,
+      "name": "Fruit of Nature",
+      "icon": "assets/icons/items/5205.webp",
+      "nativeIcon": "icons/items/6124e4faa9453e075ec448382f2407197ba9fe57b0bef7f196e569ab8aa21e2e.webp"
+    },
+    {
+      "id": 7925,
+      "name": "Gazelle Meat",
+      "icon": "assets/icons/items/7925.webp",
+      "nativeIcon": "icons/items/ef4665a1c1b884038cc11c42f32a0c264bafcd288b80b5876e714f73bde3e384.webp"
+    },
+    {
+      "id": 821345,
+      "name": "Gilded Leaf",
+      "icon": "assets/icons/items/821345.webp",
+      "nativeIcon": "icons/new_icon/03_etc/07_productmaterial/00821345.webp",
+      "sourceItemUrl": "https://bdocodex.com/us/item/821345/",
+      "verifiedAt": "2026-08-31"
+    },
+    {
+      "id": 4202,
+      "name": "Gold Ore",
+      "icon": "assets/icons/items/4202.webp",
+      "nativeIcon": "icons/items/c9ef55e1770bcc68e05e60d8311111b530f026cc87a59bb1fc73e3ec67a79d66.webp"
+    },
+    {
+      "id": 767255,
+      "name": "Golden Leaf Snake Scale",
+      "icon": "assets/icons/items/767255.webp",
+      "nativeIcon": "icons/new_icon/03_etc/04_dropitem/00767255.webp",
+      "sourceItemUrl": "https://bdocodex.com/us/item/767255/",
+      "verifiedAt": "2026-08-31"
+    },
+    {
+      "id": 4997,
+      "name": "Hard Black Crystal Shard",
+      "icon": "assets/icons/items/4997.webp",
+      "nativeIcon": "icons/items/5849f071552fb051ed95858720a4c66f23fe6dc17f8cd6fe66270e0a8fc3a9d2.webp"
+    },
+    {
+      "id": 6153,
+      "name": "Hard Hide",
+      "icon": "assets/icons/items/6153.webp",
+      "nativeIcon": "icons/new_icon/03_etc/07_productmaterial/00006153.webp",
+      "sourceItemUrl": "https://bdocodex.com/us/item/6153/",
+      "verifiedAt": "2026-08-31"
+    },
+    {
+      "id": 766107,
+      "name": "Imperfect Lightstone of Flora",
+      "icon": "assets/icons/items/766107.webp",
+      "nativeIcon": "icons/new_icon/03_etc/00766107.webp",
+      "sourceItemUrl": "https://bdocodex.com/us/item/766107/",
+      "verifiedAt": "2026-08-31"
+    },
+    {
+      "id": 7758,
+      "name": "Intact Horn",
+      "icon": "assets/icons/items/7758.webp",
+      "nativeIcon": "icons/items/d16f1c83b76c5a648e0b951fe63d12e29aaf350ebd6360ee1530d163f1641b96.webp"
+    },
+    {
+      "id": 7761,
+      "name": "Intact Tooth",
+      "icon": "assets/icons/items/7761.webp",
+      "nativeIcon": "icons/new_icon/07_productmaterial/00007761.webp",
+      "sourceItemUrl": "https://bdocodex.com/us/item/7761/",
+      "verifiedAt": "2026-08-31"
+    },
+    {
+      "id": 4001,
+      "name": "Iron Ore",
+      "icon": "assets/icons/items/4001.webp",
+      "nativeIcon": "icons/items/4ad42c127f052051d343d06f28ec6edb89b1c75053b0e413c22af0280ad6592a.webp"
+    },
+    {
+      "id": 54031,
+      "name": "Laila's Petal",
+      "icon": "assets/icons/items/54031.webp",
+      "nativeIcon": "icons/new_icon/03_etc/09_petitem/00054031.webp",
+      "sourceItemUrl": "https://bdocodex.com/us/item/54031/",
+      "verifiedAt": "2026-08-31"
+    },
+    {
+      "id": 7902,
+      "name": "Lamb Meat",
+      "icon": "assets/icons/items/7902.webp",
+      "nativeIcon": "icons/items/ef4665a1c1b884038cc11c42f32a0c264bafcd288b80b5876e714f73bde3e384.webp"
+    },
+    {
+      "id": 4002,
+      "name": "Lead Ore",
+      "icon": "assets/icons/items/4002.webp",
+      "nativeIcon": "icons/items/80253d740a565119e006980f5c27f98ccb67c8232d0cf235833a8c760f6d278c.webp"
+    },
+    {
+      "id": 6223,
+      "name": "Lion Blood",
+      "icon": "assets/icons/items/6223.webp",
+      "nativeIcon": "icons/items/0eb332d73942a88e043b9f62f59d82cdd176382d60b16d9f9ae919f8132d3ead.webp"
+    },
+    {
+      "id": 6020,
+      "name": "Lion Hide",
+      "icon": "assets/icons/items/6020.webp",
+      "nativeIcon": "icons/items/1f01e2c123a09c4bdef291f7d073d939ebf44a62d17ef6b5dcc2d7fff52992fe.webp"
+    },
+    {
+      "id": 7923,
+      "name": "Lion Meat",
+      "icon": "assets/icons/items/7923.webp",
+      "nativeIcon": "icons/items/cbd3e8c00801612fef9db623d80b8054dc895fc6f6ad1756a7ca18b5d931e7be.webp"
+    },
+    {
+      "id": 820139,
+      "name": "Live Meat",
+      "icon": "assets/icons/items/820139.webp",
+      "nativeIcon": "icons/new_icon/03_etc/07_productmaterial/00820139.webp",
+      "sourceItemUrl": "https://bdocodex.com/us/item/820139/",
+      "verifiedAt": "2026-08-31"
+    },
+    {
+      "id": 6208,
+      "name": "Lizard Blood",
+      "icon": "assets/icons/items/6208.webp",
+      "nativeIcon": "icons/new_icon/03_etc/07_productmaterial/00006217.webp",
+      "sourceItemUrl": "https://bdocodex.com/us/item/6208/",
+      "verifiedAt": "2026-08-31"
+    },
+    {
+      "id": 6008,
+      "name": "Lizard Hide",
+      "icon": "assets/icons/items/6008.webp",
+      "nativeIcon": "icons/new_icon/03_etc/07_productmaterial/00006008.webp",
+      "sourceItemUrl": "https://bdocodex.com/us/item/6008/",
+      "verifiedAt": "2026-08-31"
+    },
+    {
+      "id": 7908,
+      "name": "Lizard Meat",
+      "icon": "assets/icons/items/7908.webp",
+      "nativeIcon": "icons/new_icon/03_etc/07_productmaterial/00007907.webp",
+      "sourceItemUrl": "https://bdocodex.com/us/item/7908/",
+      "verifiedAt": "2026-08-31"
+    },
+    {
+      "id": 4605,
+      "name": "Log",
+      "icon": "assets/icons/items/4605.webp",
+      "nativeIcon": "icons/items/72141ea24d24e8b27f4f74acf2cf769bdb43ff7cb8e902cb100589292d8f720f.webp"
+    },
+    {
+      "id": 5018,
+      "name": "Loopy Tree Sap",
+      "icon": "assets/icons/items/5018.webp",
+      "nativeIcon": "icons/new_icon/03_etc/07_productmaterial/00005018.webp",
+      "sourceItemUrl": "https://bdocodex.com/us/item/5018/",
+      "verifiedAt": "2026-08-31"
+    },
+    {
+      "id": 5002,
+      "name": "Maple Sap",
+      "icon": "assets/icons/items/5002.webp",
+      "nativeIcon": "icons/items/9a8ec4bf0eba3858fa1366fff0c45e463a7d467a9d62d760a80c065d2109ee52.webp"
+    },
+    {
+      "id": 4602,
+      "name": "Maple Timber",
+      "icon": "assets/icons/items/4602.webp",
+      "nativeIcon": "icons/items/b44b7a1905188f7411af8c3565dd10ebf4810f2be3e7a6b81de33336c11534ec.webp"
+    },
+    {
+      "id": 752023,
+      "name": "Mass of Pure Magic",
+      "icon": "assets/icons/items/752023.webp",
+      "nativeIcon": "icons/new_icon/03_etc/00752023.webp",
+      "sourceItemUrl": "https://bdocodex.com/us/item/752023/",
+      "verifiedAt": "2026-08-31"
+    },
+    {
+      "id": 4057,
+      "name": "Melted Copper Shard",
+      "icon": "assets/icons/items/4057.webp",
+      "nativeIcon": "icons/new_icon/03_etc/07_productmaterial/00004057.webp",
+      "sourceItemUrl": "https://bdocodex.com/us/item/4057/",
+      "verifiedAt": "2026-08-31"
+    },
+    {
+      "id": 4063,
+      "name": "Melted Zinc Shard",
+      "icon": "assets/icons/items/4063.webp",
+      "nativeIcon": "icons/new_icon/03_etc/07_productmaterial/00004063.webp",
+      "sourceItemUrl": "https://bdocodex.com/us/item/4063/",
+      "verifiedAt": "2026-08-31"
+    },
+    {
+      "id": 9065,
+      "name": "Milk",
+      "icon": "assets/icons/items/9065.webp",
+      "nativeIcon": "icons/items/973968a77b55754ee5d0cfcf88c149da1d21fa9a69ac0b3d2114494961df6222.webp"
+    },
+    {
+      "id": 5007,
+      "name": "Monk's Branch",
+      "icon": "assets/icons/items/5007.webp",
+      "nativeIcon": "icons/items/3992c462ffed1dc455d581cfbd51c0da2a56a75682f191c996d8f4db1ff63533.webp"
+    },
+    {
+      "id": 820138,
+      "name": "Mysterious Powder",
+      "icon": "assets/icons/items/820138.webp",
+      "nativeIcon": "icons/items/ec9454ab780e8f47680c4036e0ef62a1bbf4f0813b1a085b7c91f95be191e9d5.webp"
+    },
+    {
+      "id": 821346,
+      "name": "Nymphamaré's Song",
+      "icon": "assets/icons/items/821346.webp",
+      "nativeIcon": "icons/new_icon/03_etc/07_productmaterial/00821346.webp",
+      "sourceItemUrl": "https://bdocodex.com/us/item/821346/",
+      "verifiedAt": "2026-08-31"
+    },
+    {
+      "id": 5008,
+      "name": "Old Tree Bark",
+      "icon": "assets/icons/items/5008.webp",
+      "nativeIcon": "icons/new_icon/03_etc/07_productmaterial/00005008.webp",
+      "sourceItemUrl": "https://bdocodex.com/us/item/5008/",
+      "verifiedAt": "2026-08-31"
+    },
+    {
+      "id": 6206,
+      "name": "Ox Blood",
+      "icon": "assets/icons/items/6206.webp",
+      "nativeIcon": "icons/new_icon/03_etc/07_productmaterial/00006201.webp",
+      "sourceItemUrl": "https://bdocodex.com/us/item/6206/",
+      "verifiedAt": "2026-08-31"
+    },
+    {
+      "id": 6006,
+      "name": "Ox Hide",
+      "icon": "assets/icons/items/6006.webp",
+      "nativeIcon": "icons/new_icon/03_etc/07_productmaterial/00006006.webp",
+      "sourceItemUrl": "https://bdocodex.com/us/item/6006/",
+      "verifiedAt": "2026-08-31"
+    },
+    {
+      "id": 6205,
+      "name": "Pig Blood",
+      "icon": "assets/icons/items/6205.webp",
+      "nativeIcon": "icons/items/37bbfa006af0128eb041211e893cca5a2ae937adad2786eac4ab98408715b74e.webp"
+    },
+    {
+      "id": 6005,
+      "name": "Pig Hide",
+      "icon": "assets/icons/items/6005.webp",
+      "nativeIcon": "icons/items/b4caefc594674757fcb0042314ac010b1324105f974e8679c570343ee5c30cc7.webp"
+    },
+    {
+      "id": 4657,
+      "name": "Pine Plank",
+      "icon": "assets/icons/items/4657.webp",
+      "nativeIcon": "icons/new_icon/03_etc/07_productmaterial/00004657.webp",
+      "sourceItemUrl": "https://bdocodex.com/us/item/4657/",
+      "verifiedAt": "2026-08-31"
+    },
+    {
+      "id": 5003,
+      "name": "Pine Sap",
+      "icon": "assets/icons/items/5003.webp",
+      "nativeIcon": "icons/items/5d23de5c27bb59554faf5ff64010e2dd868d5d0a7294f3be21c6e507f6a2c875.webp"
+    },
+    {
+      "id": 4603,
+      "name": "Pine Timber",
+      "icon": "assets/icons/items/4603.webp",
+      "nativeIcon": "icons/items/7f19ccc7d6047599094c00e649c0b74cf6c16923907bba20ee131100ef9e2851.webp"
+    },
+    {
+      "id": 4203,
+      "name": "Platinum Ore",
+      "icon": "assets/icons/items/4203.webp",
+      "nativeIcon": "icons/items/8034759597918a234e2f9fe942db2ed6b6deeaa1b1c11b7e878df1f28c5c2085.webp"
+    },
+    {
+      "id": 7905,
+      "name": "Pork",
+      "icon": "assets/icons/items/7905.webp",
+      "nativeIcon": "icons/items/ef4665a1c1b884038cc11c42f32a0c264bafcd288b80b5876e714f73bde3e384.webp"
+    },
+    {
+      "id": 66191,
+      "name": "Powder of Ascension",
+      "icon": "assets/icons/items/66191.webp",
+      "nativeIcon": "icons/new_icon/03_etc/03_quest_item/00750903.webp",
+      "sourceItemUrl": "https://bdocodex.com/us/item/66191/",
+      "verifiedAt": "2026-08-31"
+    },
+    {
+      "id": 5011,
+      "name": "Red Tree Lump",
+      "icon": "assets/icons/items/5011.webp",
+      "nativeIcon": "icons/new_icon/03_etc/07_productmaterial/00005011.webp",
+      "sourceItemUrl": "https://bdocodex.com/us/item/5011/",
+      "verifiedAt": "2026-08-31"
+    },
+    {
+      "id": 6359,
+      "name": "Rock Elephant Blood",
+      "icon": "assets/icons/items/6359.webp",
+      "nativeIcon": "icons/new_icon/03_etc/07_productmaterial/00006207.webp",
+      "sourceItemUrl": "https://bdocodex.com/us/item/6359/",
+      "verifiedAt": "2026-08-31"
+    },
+    {
+      "id": 7962,
+      "name": "Rock Elephant Meat",
+      "icon": "assets/icons/items/7962.webp",
+      "nativeIcon": "icons/items/ef4665a1c1b884038cc11c42f32a0c264bafcd288b80b5876e714f73bde3e384.webp"
+    },
+    {
+      "id": 767256,
+      "name": "Rock Elephant Tusk",
+      "icon": "assets/icons/items/767256.webp",
+      "nativeIcon": "icons/new_icon/03_etc/04_dropitem/00767256.webp",
+      "sourceItemUrl": "https://bdocodex.com/us/item/767256/",
+      "verifiedAt": "2026-08-31"
+    },
+    {
+      "id": 4411,
+      "name": "Rough Blue Crystal",
+      "icon": "assets/icons/items/4411.webp",
+      "nativeIcon": "icons/new_icon/03_etc/07_productmaterial/00004411.webp",
+      "sourceItemUrl": "https://bdocodex.com/us/item/4411/",
+      "verifiedAt": "2026-08-31"
+    },
+    {
+      "id": 4405,
+      "name": "Rough Diamond",
+      "icon": "assets/icons/items/4405.webp",
+      "nativeIcon": "icons/new_icon/03_etc/07_productmaterial/00004405.webp",
+      "sourceItemUrl": "https://bdocodex.com/us/item/4405/",
+      "verifiedAt": "2026-08-31"
+    },
+    {
+      "id": 4404,
+      "name": "Rough Emerald",
+      "icon": "assets/icons/items/4404.webp",
+      "nativeIcon": "icons/new_icon/03_etc/07_productmaterial/00004404.webp",
+      "sourceItemUrl": "https://bdocodex.com/us/item/4404/",
+      "verifiedAt": "2026-08-31"
+    },
+    {
+      "id": 4204,
+      "name": "Rough Opal",
+      "icon": "assets/icons/items/4204.webp",
+      "nativeIcon": "icons/items/e1f92d7fa350bbb9fea151e53571b27f9e9bd2ef0fb7055f426fd60369a077ac.webp"
+    },
+    {
+      "id": 4401,
+      "name": "Rough Ruby",
+      "icon": "assets/icons/items/4401.webp",
+      "nativeIcon": "icons/new_icon/03_etc/07_productmaterial/00004401.webp",
+      "sourceItemUrl": "https://bdocodex.com/us/item/4401/",
+      "verifiedAt": "2026-08-31"
+    },
+    {
+      "id": 4402,
+      "name": "Rough Sapphire",
+      "icon": "assets/icons/items/4402.webp",
+      "nativeIcon": "icons/new_icon/03_etc/07_productmaterial/00004402.webp",
+      "sourceItemUrl": "https://bdocodex.com/us/item/4402/",
+      "verifiedAt": "2026-08-31"
+    },
+    {
+      "id": 4006,
+      "name": "Rough Stone",
+      "icon": "assets/icons/items/4006.webp",
+      "nativeIcon": "icons/items/6acf0655d44e762e1940b4872b9929bcf4ae260430c202665631e520ce6b991a.webp"
+    },
+    {
+      "id": 4403,
+      "name": "Rough Topaz",
+      "icon": "assets/icons/items/4403.webp",
+      "nativeIcon": "icons/new_icon/03_etc/07_productmaterial/00004403.webp",
+      "sourceItemUrl": "https://bdocodex.com/us/item/4403/",
+      "verifiedAt": "2026-08-31"
+    },
+    {
+      "id": 4406,
+      "name": "Rough Translucent Crystal",
+      "icon": "assets/icons/items/4406.webp",
+      "nativeIcon": "icons/new_icon/03_etc/07_productmaterial/00004406.webp",
+      "sourceItemUrl": "https://bdocodex.com/us/item/4406/",
+      "verifiedAt": "2026-08-31"
+    },
+    {
+      "id": 821255,
+      "name": "Rusalka's Coral",
+      "icon": "assets/icons/items/821255.webp",
+      "nativeIcon": "icons/new_icon/03_etc/07_productmaterial/00821255.webp",
+      "sourceItemUrl": "https://bdocodex.com/us/item/821255/",
+      "verifiedAt": "2026-08-31"
+    },
+    {
+      "id": 7924,
+      "name": "Scorpion Meat",
+      "icon": "assets/icons/items/7924.webp",
+      "nativeIcon": "icons/items/476049a916071c819675161af6043ff7c96ff89178be9a59ad4c2c5b20ed0dbc.webp"
+    },
+    {
+      "id": 25199,
+      "name": "Sensitive Stuffed Bear Head",
+      "icon": "assets/icons/items/25199.webp",
+      "nativeIcon": "icons/new_icon/03_etc/06_housing/mansion_dpf_ori_bear_01.webp",
+      "sourceItemUrl": "https://bdocodex.com/us/item/25199/",
+      "verifiedAt": "2026-08-31"
+    },
+    {
+      "id": 735356,
+      "name": "Sethra's Artifact - Gathering EXP",
+      "icon": "assets/icons/items/735356.webp",
+      "nativeIcon": "icons/new_icon/06_pc_equipitem/00_common/00_etc/00735356_1.webp",
+      "sourceItemUrl": "https://bdocodex.com/us/item/735356/",
+      "verifiedAt": "2026-08-31"
+    },
+    {
+      "id": 735353,
+      "name": "Sethra's Artifact - Gathering Item Drop Rate",
+      "icon": "assets/icons/items/735353.webp",
+      "nativeIcon": "icons/new_icon/06_pc_equipitem/00_common/00_etc/00735353_1.webp",
+      "sourceItemUrl": "https://bdocodex.com/us/item/735353/",
+      "verifiedAt": "2026-08-31"
+    },
+    {
+      "id": 735367,
+      "name": "Sethra's Artifact - Gathering Mastery",
+      "icon": "assets/icons/items/735367.webp",
+      "nativeIcon": "icons/new_icon/06_pc_equipitem/00_common/00_etc/00735367_1.webp",
+      "sourceItemUrl": "https://bdocodex.com/us/item/735367/",
+      "verifiedAt": "2026-08-31"
+    },
+    {
+      "id": 735358,
+      "name": "Sethra's Artifact - Hunting EXP",
+      "icon": "assets/icons/items/735358.webp",
+      "nativeIcon": "icons/new_icon/06_pc_equipitem/00_common/00_etc/00735358_1.webp",
+      "sourceItemUrl": "https://bdocodex.com/us/item/735358/",
+      "verifiedAt": "2026-08-31"
+    },
+    {
+      "id": 735369,
+      "name": "Sethra's Artifact - Hunting Mastery",
+      "icon": "assets/icons/items/735369.webp",
+      "nativeIcon": "icons/new_icon/06_pc_equipitem/00_common/00_etc/00735369_1.webp",
+      "sourceItemUrl": "https://bdocodex.com/us/item/735369/",
+      "verifiedAt": "2026-08-31"
+    },
+    {
+      "id": 735351,
+      "name": "Sethra's Artifact - Life EXP",
+      "icon": "assets/icons/items/735351.webp",
+      "nativeIcon": "icons/new_icon/06_pc_equipitem/00_common/00_etc/00735351_1.webp",
+      "sourceItemUrl": "https://bdocodex.com/us/item/735351/",
+      "verifiedAt": "2026-08-31"
+    },
+    {
+      "id": 735352,
+      "name": "Sethra's Artifact - Life Skill Mastery",
+      "icon": "assets/icons/items/735352.webp",
+      "nativeIcon": "icons/new_icon/06_pc_equipitem/00_common/00_etc/00735352_1.webp",
+      "sourceItemUrl": "https://bdocodex.com/us/item/735352/",
+      "verifiedAt": "2026-08-31"
+    },
+    {
+      "id": 4998,
+      "name": "Sharp Black Crystal Shard",
+      "icon": "assets/icons/items/4998.webp",
+      "nativeIcon": "icons/items/666cb1019ce05f29c307eb554f549c77db652b7cd66c4a46ba887b5abd8b4b23.webp"
+    },
+    {
+      "id": 7759,
+      "name": "Sharp Horn",
+      "icon": "assets/icons/items/7759.webp",
+      "nativeIcon": "icons/items/10807cdc371a9cd8d699b2f33b954e3d9dc6a4d4e75f1aa2585e885a3a411496.webp"
+    },
+    {
+      "id": 7762,
+      "name": "Sharp Tooth",
+      "icon": "assets/icons/items/7762.webp",
+      "nativeIcon": "icons/new_icon/07_productmaterial/00007762.webp",
+      "sourceItemUrl": "https://bdocodex.com/us/item/7762/",
+      "verifiedAt": "2026-08-31"
+    },
+    {
+      "id": 6202,
+      "name": "Sheep Blood",
+      "icon": "assets/icons/items/6202.webp",
+      "nativeIcon": "icons/items/37bbfa006af0128eb041211e893cca5a2ae937adad2786eac4ab98408715b74e.webp"
+    },
+    {
+      "id": 6002,
+      "name": "Sheep Hide",
+      "icon": "assets/icons/items/6002.webp",
+      "nativeIcon": "icons/items/71ed2472f5824067eb22ae764851500de8b252e32a34989bdc2bdc11793a6a30.webp"
+    },
+    {
+      "id": 5405,
+      "name": "Silk Honey Grass",
+      "icon": "assets/icons/items/5405.webp",
+      "nativeIcon": "icons/items/e0fceec9ccc47fc2f994980d6df62e3184dd6008ef1d383890a0ff38249e063e.webp"
+    },
+    {
+      "id": 5402,
+      "name": "Silver Azalea",
+      "icon": "assets/icons/items/5402.webp",
+      "nativeIcon": "icons/items/3ef8e6050dd9e10c21b1a18e5a878d872185df5b6c93a016ba351d92d4670450.webp"
+    },
+    {
+      "id": 6902,
+      "name": "Silver Azalea Seed",
+      "icon": "assets/icons/items/6902.webp",
+      "nativeIcon": "icons/new_icon/03_etc/07_productmaterial/00006902.webp",
+      "sourceItemUrl": "https://bdocodex.com/us/item/6902/",
+      "verifiedAt": "2026-08-31"
+    },
+    {
+      "id": 4201,
+      "name": "Silver Ore",
+      "icon": "assets/icons/items/4201.webp",
+      "nativeIcon": "icons/items/2f7a29eb2ea52ef7dd8f03e19fb3c3fa6e561dcef62a3083a4743337544ecf17.webp"
+    },
+    {
+      "id": 7922,
+      "name": "Snake Meat",
+      "icon": "assets/icons/items/7922.webp",
+      "nativeIcon": "icons/items/a3f0b34ee4d18ce08da7fb4227b4cf3833b537f037dc33c951125971bacb1219.webp"
+    },
+    {
+      "id": 6019,
+      "name": "Snake Skin",
+      "icon": "assets/icons/items/6019.webp",
+      "nativeIcon": "icons/new_icon/03_etc/07_productmaterial/00006019.webp",
+      "sourceItemUrl": "https://bdocodex.com/us/item/6019/",
+      "verifiedAt": "2026-08-31"
+    },
+    {
+      "id": 6151,
+      "name": "Soft Hide",
+      "icon": "assets/icons/items/6151.webp",
+      "nativeIcon": "icons/new_icon/03_etc/07_productmaterial/00006151.webp",
+      "sourceItemUrl": "https://bdocodex.com/us/item/6151/",
+      "verifiedAt": "2026-08-31"
+    },
+    {
+      "id": 5006,
+      "name": "Spirit's Leaf",
+      "icon": "assets/icons/items/5006.webp",
+      "nativeIcon": "icons/new_icon/03_etc/07_productmaterial/00005006.webp",
+      "sourceItemUrl": "https://bdocodex.com/us/item/5006/",
+      "verifiedAt": "2026-08-31"
+    },
+    {
+      "id": 820143,
+      "name": "Strange and Beautiful Herb",
+      "icon": "assets/icons/items/820143.webp",
+      "nativeIcon": "icons/items/cd570171492922d8a7c42b2e0842ff745675c15fe43a592d201b17464ee315b8.webp"
+    },
+    {
+      "id": 25197,
+      "name": "Stuffed Boar Head",
+      "icon": "assets/icons/items/25197.webp",
+      "nativeIcon": "icons/new_icon/03_etc/06_housing/mansion_dpf_ori_boar_01.webp",
+      "sourceItemUrl": "https://bdocodex.com/us/item/25197/",
+      "verifiedAt": "2026-08-31"
+    },
+    {
+      "id": 25223,
+      "name": "Stuffed Cliffside Mountain Sheep Head",
+      "icon": "assets/icons/items/25223.webp",
+      "nativeIcon": "icons/new_icon/03_etc/06_housing/inhouse_z_booty_devil_goatdeco_01.webp",
+      "sourceItemUrl": "https://bdocodex.com/us/item/25223/",
+      "verifiedAt": "2026-08-31"
+    },
+    {
+      "id": 3054,
+      "name": "Stuffed Elk Head",
+      "icon": "assets/icons/items/3054.webp",
+      "nativeIcon": "icons/new_icon/03_etc/06_housing/inhouse_z_booty_deer_01.webp",
+      "sourceItemUrl": "https://bdocodex.com/us/item/3054/",
+      "verifiedAt": "2026-08-31"
+    },
+    {
+      "id": 25202,
+      "name": "Stuffed Ferocious Bear Head",
+      "icon": "assets/icons/items/25202.webp",
+      "nativeIcon": "icons/new_icon/03_etc/06_housing/mansion_dpf_ori_bear_03.webp",
+      "sourceItemUrl": "https://bdocodex.com/us/item/25202/",
+      "verifiedAt": "2026-08-31"
+    },
+    {
+      "id": 25201,
+      "name": "Stuffed Ferocious Boar Head",
+      "icon": "assets/icons/items/25201.webp",
+      "nativeIcon": "icons/new_icon/03_etc/06_housing/mansion_dpf_ori_boar_03.webp",
+      "sourceItemUrl": "https://bdocodex.com/us/item/25201/",
+      "verifiedAt": "2026-08-31"
+    },
+    {
+      "id": 25222,
+      "name": "Stuffed Golden Leaf Snake Head",
+      "icon": "assets/icons/items/25222.webp",
+      "nativeIcon": "icons/new_icon/03_etc/06_housing/inhouse_z_booty_devil_snakedeco_01.webp",
+      "sourceItemUrl": "https://bdocodex.com/us/item/25222/",
+      "verifiedAt": "2026-08-31"
+    },
+    {
+      "id": 25221,
+      "name": "Stuffed Rock Elephant Head",
+      "icon": "assets/icons/items/25221.webp",
+      "nativeIcon": "icons/new_icon/03_etc/06_housing/inhouse_z_booty_devil_elephantdeco_01.webp",
+      "sourceItemUrl": "https://bdocodex.com/us/item/25221/",
+      "verifiedAt": "2026-08-31"
+    },
+    {
+      "id": 3541,
+      "name": "Stuffed Verdure Buck",
+      "icon": "assets/icons/items/3541.webp",
+      "nativeIcon": "icons/new_icon/03_etc/06_housing/inhouse_z_booty_maledeer_01.webp",
+      "sourceItemUrl": "https://bdocodex.com/us/item/3541/",
+      "verifiedAt": "2026-08-31"
+    },
+    {
+      "id": 3542,
+      "name": "Stuffed Verdure Doe",
+      "icon": "assets/icons/items/3542.webp",
+      "nativeIcon": "icons/new_icon/03_etc/06_housing/inhouse_z_booty_femaledeer_01.webp",
+      "sourceItemUrl": "https://bdocodex.com/us/item/3542/",
+      "verifiedAt": "2026-08-31"
+    },
+    {
+      "id": 5401,
+      "name": "Sunrise Herb",
+      "icon": "assets/icons/items/5401.webp",
+      "nativeIcon": "icons/items/a2cf3d61bf8fc2e3f6eacba09e30506ec41efc522d49f4eaa22155c3832eee53.webp"
+    },
+    {
+      "id": 6901,
+      "name": "Sunrise Herb Seed",
+      "icon": "assets/icons/items/6901.webp",
+      "nativeIcon": "icons/new_icon/03_etc/07_productmaterial/00006901.webp",
+      "sourceItemUrl": "https://bdocodex.com/us/item/6901/",
+      "verifiedAt": "2026-08-31"
+    },
+    {
+      "id": 820158,
+      "name": "Supreme Bear Hide",
+      "icon": "assets/icons/items/820158.webp",
+      "nativeIcon": "icons/items/01fe55080dd96a41f35eefc25b85ed38f7f52d292e8ce10838edb2dd7ba2b308.webp"
+    },
+    {
+      "id": 820157,
+      "name": "Supreme Boar Hide",
+      "icon": "assets/icons/items/820157.webp",
+      "nativeIcon": "icons/items/75f3ba41a1d4bc576b24233560ec3450802bcc5953fbcab24c8338f3cbeb5966.webp"
+    },
+    {
+      "id": 820159,
+      "name": "Supreme Hawk Hide",
+      "icon": "assets/icons/items/820159.webp",
+      "nativeIcon": "icons/items/5b59aa7efc1869927c15e7b3ec8d55a1c72694d0da510857f29dedd088684980.webp"
+    },
+    {
+      "id": 7753,
+      "name": "Supreme Hide",
+      "icon": "assets/icons/items/7753.webp",
+      "nativeIcon": "icons/items/8430497bc8628574281a58ebe7101270db725afdf0a7912781cc0888cd83fc5c.webp"
+    },
+    {
+      "id": 820160,
+      "name": "Supreme Tiger Hide",
+      "icon": "assets/icons/items/820160.webp",
+      "nativeIcon": "icons/items/7b282b7d6ccb8b5a801890277c7a5e359f609ebc9d1ae5dab73a232748d8d82b.webp"
+    },
+    {
+      "id": 6155,
+      "name": "Thick Fur",
+      "icon": "assets/icons/items/6155.webp",
+      "nativeIcon": "icons/new_icon/03_etc/07_productmaterial/00006155.webp",
+      "sourceItemUrl": "https://bdocodex.com/us/item/6155/",
+      "verifiedAt": "2026-08-31"
+    },
+    {
+      "id": 821349,
+      "name": "Thin Essence of Life",
+      "icon": "assets/icons/items/821349.webp",
+      "nativeIcon": "icons/new_icon/03_etc/07_productmaterial/00821349.webp",
+      "sourceItemUrl": "https://bdocodex.com/us/item/821349/",
+      "verifiedAt": "2026-08-31"
+    },
+    {
+      "id": 5023,
+      "name": "Thornwood Sap",
+      "icon": "assets/icons/items/5023.webp",
+      "nativeIcon": "icons/items/edd62bc7d05547b631f6529fdeedf324bbfae6474f62f39c2940666e7aa2c866.webp"
+    },
+    {
+      "id": 6356,
+      "name": "Tiger Blood",
+      "icon": "assets/icons/items/6356.webp",
+      "nativeIcon": "icons/new_icon/03_etc/07_productmaterial/00006356.webp",
+      "sourceItemUrl": "https://bdocodex.com/us/item/6356/",
+      "verifiedAt": "2026-08-31"
+    },
+    {
+      "id": 6039,
+      "name": "Tiger Hide",
+      "icon": "assets/icons/items/6039.webp",
+      "nativeIcon": "icons/new_icon/03_etc/07_productmaterial/00006039_1.webp",
+      "sourceItemUrl": "https://bdocodex.com/us/item/6039/",
+      "verifiedAt": "2026-08-31"
+    },
+    {
+      "id": 7959,
+      "name": "Tiger Meat",
+      "icon": "assets/icons/items/7959.webp",
+      "nativeIcon": "icons/items/b62d3e51dab5b0cbb363d3e1c55b904f7df9b5ddd420ad3db5c7baa2f532b80f.webp"
+    },
+    {
+      "id": 5412,
+      "name": "Tiger Mushroom",
+      "icon": "assets/icons/items/5412.webp",
+      "nativeIcon": "icons/items/61ac3da845c89d1edf0a3d1e60ced6ea52979951f04b234fd62b298df6059abe.webp"
+    },
+    {
+      "id": 4004,
+      "name": "Tin Ore",
+      "icon": "assets/icons/items/4004.webp",
+      "nativeIcon": "icons/items/5cc6e02e38cae5758855faac45781344fcf78d9686fe3679980d5d868d8d1dc9.webp"
+    },
+    {
+      "id": 4009,
+      "name": "Titanium Ore",
+      "icon": "assets/icons/items/4009.webp",
+      "nativeIcon": "icons/items/ab53cdd3f382b1755933adee5255c6c2283639b3f048d1c887b1623c472148da.webp"
+    },
+    {
+      "id": 6152,
+      "name": "Tough Hide",
+      "icon": "assets/icons/items/6152.webp",
+      "nativeIcon": "icons/new_icon/03_etc/07_productmaterial/00006152.webp",
+      "sourceItemUrl": "https://bdocodex.com/us/item/6152/",
+      "verifiedAt": "2026-08-31"
+    },
+    {
+      "id": 5960,
+      "name": "Trace of Nature",
+      "icon": "assets/icons/items/5960.webp",
+      "nativeIcon": "icons/items/612a47bf1df150112fefe0a8d6c4d3a5821c9fec2c0c3cf6c557e6da1ac7b4c1.webp"
+    },
+    {
+      "id": 6220,
+      "name": "Troll Blood",
+      "icon": "assets/icons/items/6220.webp",
+      "nativeIcon": "icons/items/0eb332d73942a88e043b9f62f59d82cdd176382d60b16d9f9ae919f8132d3ead.webp"
+    },
+    {
+      "id": 5420,
+      "name": "Truffle Mushroom",
+      "icon": "assets/icons/items/5420.webp",
+      "nativeIcon": "icons/items/96a0b1642feb29a2e0b88b2fe1491b1a273d0ba192d7733b568777a894ee8863.webp"
+    },
+    {
+      "id": 7752,
+      "name": "Usable Hide",
+      "icon": "assets/icons/items/7752.webp",
+      "nativeIcon": "icons/items/3f46df4b0b7c6cbd557fcd0df53124b206ec8b88627f2e606a882f69b08c3ff6.webp"
+    },
+    {
+      "id": 4008,
+      "name": "Vanadium Ore",
+      "icon": "assets/icons/items/4008.webp",
+      "nativeIcon": "icons/items/b5f06443aae0fa4e7689ffee99fdc0eab663945541e41ee9398167ab79584644.webp"
+    },
+    {
+      "id": 5600,
+      "name": "Weeds",
+      "icon": "assets/icons/items/5600.webp",
+      "nativeIcon": "icons/items/b538f84da0dc71dd40a168cbbadcd4c710617e8597aaa72b3fe44d230b680d50.webp"
+    },
+    {
+      "id": 5012,
+      "name": "White Cedar Sap",
+      "icon": "assets/icons/items/5012.webp",
+      "nativeIcon": "icons/items/073af2f630f45e27a41d65608fa7af84e39aa05cf6f2696631b642deb3aca517.webp"
+    },
+    {
+      "id": 7701,
+      "name": "Wild Beehive",
+      "icon": "assets/icons/items/7701.webp",
+      "nativeIcon": "icons/items/846678ba6a19b08e8ec766451e773efbeb16d5360c701892af4443b6751458b6.webp"
+    },
+    {
+      "id": 5439,
+      "name": "Wild Grass",
+      "icon": "assets/icons/items/5439.webp",
+      "nativeIcon": "icons/items/6a10dd10d05199b4c00d551ba1b07d27957e8d78b2a09a10eea1bd4a29a3c4cb.webp"
+    },
+    {
+      "id": 9799,
+      "name": "Wildspark",
+      "icon": "assets/icons/items/9799.webp",
+      "nativeIcon": "icons/new_icon/03_etc/10_free_tradeitem/00800107.webp",
+      "sourceItemUrl": "https://bdocodex.com/us/item/9799/",
+      "verifiedAt": "2026-08-31"
+    },
+    {
+      "id": 821348,
+      "name": "Withered Wood Chip",
+      "icon": "assets/icons/items/821348.webp",
+      "nativeIcon": "icons/new_icon/03_etc/07_productmaterial/00821348.webp",
+      "sourceItemUrl": "https://bdocodex.com/us/item/821348/",
+      "verifiedAt": "2026-08-31"
+    },
+    {
+      "id": 6214,
+      "name": "Wolf Blood",
+      "icon": "assets/icons/items/6214.webp",
+      "nativeIcon": "icons/items/7133a3c458cef7d13205e504ff12d2fa4466d1d5ad0d8eed200d152cb375b6b0.webp"
+    },
+    {
+      "id": 6014,
+      "name": "Wolf Hide",
+      "icon": "assets/icons/items/6014.webp",
+      "nativeIcon": "icons/items/a778fc1c13515f718148e896b830dd0c749edc52e83a2c37a8b28182240b3ca3.webp"
+    },
+    {
+      "id": 7913,
+      "name": "Wolf Meat",
+      "icon": "assets/icons/items/7913.webp",
+      "nativeIcon": "icons/items/ef4665a1c1b884038cc11c42f32a0c264bafcd288b80b5876e714f73bde3e384.webp"
+    },
+    {
+      "id": 821469,
+      "name": "Evergreen Shard",
+      "icon": "assets/icons/items/821469.webp",
+      "nativeIcon": "icons/new_icon/03_etc/07_productmaterial/00821469.webp",
+      "sourceItemUrl": "https://www.naeu.playblackdesert.com/en-US/News/Detail?groupContentNo=10550&countryType=en-US",
+      "verifiedAt": "2026-09-03"
+    },
+    {
+      "id": 7954,
+      "name": "Yak Meat",
+      "icon": "assets/icons/items/7954.webp",
+      "nativeIcon": "icons/items/3822115ecc4ddad478921f28127bfdf38aac1ac020651a4fadea88945a765037.webp"
+    },
+    {
+      "id": 4005,
+      "name": "Zinc Ore",
+      "icon": "assets/icons/items/4005.webp",
+      "nativeIcon": "icons/items/2bf8f481ae258d5151b40e02d0954ee3184c122fd1a50ca240e7aa77bdfb34f7.webp"
+    }
+  ],
+  "additionalSource": "Current PC client 2026-08-28 item identities and unchanged local game icons; spot-specific method provenance in spots.json and research/spots.md."
+}

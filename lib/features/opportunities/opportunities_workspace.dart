@@ -14,6 +14,7 @@ import '../../domain/opportunities/exchange_models.dart';
 import '../../domain/opportunities/opportunity_best_use.dart';
 import '../../domain/opportunities/opportunity_calculator.dart';
 import '../../domain/opportunities/opportunity_market_models.dart';
+import '../../domain/opportunities/raw_ingredient_sales.dart';
 import '../../domain/planner/ingredient_quality.dart';
 import '../../domain/state/planner_state.dart';
 import '../../domain/state/state_copy.dart';
@@ -31,6 +32,7 @@ import 'opportunities_controller.dart';
 import 'opportunities_item_actions.dart';
 import 'opportunities_theme.dart';
 import 'opportunities_visuals.dart';
+import 'opportunity_inventory_input.dart';
 import 'opportunity_refresh_control.dart';
 
 part 'opportunity_substitutes.dart';
@@ -2376,6 +2378,14 @@ Widget _craftCalculationBody(
                           ],
                         ),
                       ),
+                      const SizedBox(width: 10),
+                      OpportunityInventoryInput(
+                        key: ValueKey(
+                          'ingredient-inventory:${ingredient.name}',
+                        ),
+                        controller: controller.modeController,
+                        itemName: ingredient.name,
+                      ),
                     ],
                   ),
                   const SizedBox(height: 10),
@@ -2520,7 +2530,18 @@ Widget _craftCalculationBody(
           key: const ValueKey('craft-reader-columns'),
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            SizedBox(width: 260, child: summary),
+            SizedBox(
+              width: 260,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  summary,
+                  const SizedBox(height: 12),
+                  _rawIngredientSalesSummary(context, controller, quote),
+                ],
+              ),
+            ),
             const SizedBox(width: 14),
             Expanded(child: ingredients),
           ],
@@ -2528,9 +2549,81 @@ Widget _craftCalculationBody(
       }
       return Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [summary, const SizedBox(height: 16), ingredients],
+        children: [
+          summary,
+          const SizedBox(height: 12),
+          Align(
+            alignment: Alignment.centerLeft,
+            child: ConstrainedBox(
+              constraints: BoxConstraints(maxWidth: 350 * scale),
+              child: _rawIngredientSalesSummary(context, controller, quote),
+            ),
+          ),
+          const SizedBox(height: 16),
+          ingredients,
+        ],
       );
     },
+  );
+}
+
+Widget _rawIngredientSalesSummary(
+  BuildContext context,
+  OpportunitiesController controller,
+  OpportunityQuote quote,
+) {
+  final spec = context.visualTheme;
+  final sales = calculateRawIngredientSales(
+    ingredients: quote.ingredients,
+    tax: controller.appController.marketTax.value,
+    now: controller.clock(),
+    maxAge: controller.cachedMarketMaxAge,
+    isMarketable: isOpportunityMarketRequestEligible,
+  );
+  return OpportunitySurface(
+    key: const ValueKey('raw-ingredient-sales'),
+    role: AppSurfaceRole.card,
+    padding: const EdgeInsets.all(14),
+    child: Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Text(
+          'Raw ingredient sales',
+          style: spec.typography.body.copyWith(
+            fontSize: 16,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+        const SizedBox(height: 6),
+        Text('After tax · same batch', style: spec.typography.meta),
+        const SizedBox(height: 4),
+        Text(
+          sales.afterTax == null
+              ? '—'
+              : '≈ ${_quantity(sales.afterTax!)} silver',
+          key: const ValueKey('raw-ingredient-sales-value'),
+          style: spec.typography.body.copyWith(
+            fontSize: 18,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+        if (sales.unpricedNames.isNotEmpty) ...[
+          const SizedBox(height: 8),
+          Text(
+            'Price unavailable: ${sales.unpricedNames.join(', ')}',
+            style: spec.typography.meta.copyWith(color: spec.palette.warning),
+          ),
+        ],
+        if (sales.excludedNames.isNotEmpty) ...[
+          const SizedBox(height: 8),
+          Text(
+            'Not market-sellable: ${sales.excludedNames.join(', ')}',
+            style: spec.typography.meta,
+          ),
+        ],
+      ],
+    ),
   );
 }
 

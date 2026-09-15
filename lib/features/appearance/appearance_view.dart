@@ -2892,6 +2892,9 @@ final class _ThemePreviewWindowHost extends WindowHostService {
   Future<void> minimize() async {}
 
   @override
+  Future<void> requestClose() async {}
+
+  @override
   Future<void> close() async {}
 
   @override

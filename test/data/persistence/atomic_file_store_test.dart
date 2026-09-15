@@ -130,6 +130,94 @@ void main() {
       throwsArgumentError,
     );
   });
+
+  test('strict default never replaces an invalid existing state', () async {
+    final store = AtomicFileStore(
+      directory: directory,
+      fileName: 'planner-state.json',
+    );
+    await File(store.targetPath).writeAsString('{broken');
+    await expectLater(
+      store.writeJson({'revision': 1}, validate: validateJson),
+      throwsFormatException,
+    );
+    expect(await File(store.targetPath).readAsString(), '{broken');
+    expect(await directory.list().length, 1);
+  });
+
+  test(
+    'cache opt-in preserves each invalid original without name collisions',
+    () async {
+      final now = DateTime.utc(2026, 9, 11);
+      for (var revision = 1; revision <= 2; revision++) {
+        // A replacement store with the same clock starts its sequence at zero.
+        final store = AtomicFileStore(
+          directory: directory,
+          fileName: 'cache.json',
+          utcNow: () => now,
+          preserveMalformedTarget: true,
+        );
+        await File(store.targetPath).writeAsString('broken-$revision');
+        await store.writeJson({'revision': revision}, validate: validateJson);
+        expect(jsonDecode(await File(store.targetPath).readAsString()), {
+          'revision': revision,
+        });
+      }
+      final originals = await directory
+          .list()
+          .where((entry) => entry.path.contains('.corrupt-'))
+          .cast<File>()
+          .toList();
+      expect(originals, hasLength(2));
+      expect(
+        await Future.wait(originals.map((file) => file.readAsString())),
+        unorderedEquals(['broken-1', 'broken-2']),
+      );
+    },
+  );
+
+  test(
+    'cache opt-in still rejects invalid replacement before preservation',
+    () async {
+      final store = AtomicFileStore(
+        directory: directory,
+        fileName: 'cache.json',
+        preserveMalformedTarget: true,
+      );
+      await File(store.targetPath).writeAsString('broken-original');
+      await expectLater(
+        store.writeJson({'wrong': true}, validate: validateJson),
+        throwsFormatException,
+      );
+      expect(await File(store.targetPath).readAsString(), 'broken-original');
+      expect(await directory.list().length, 1);
+    },
+  );
+
+  test(
+    'failed cache recovery commit never removes the active target',
+    () async {
+      final store = AtomicFileStore(
+        directory: directory,
+        fileName: 'cache.json',
+        preserveMalformedTarget: true,
+        committer: const _FailingCommitter(),
+      );
+      await File(store.targetPath).writeAsString('broken-original');
+      await expectLater(
+        store.writeJson({'revision': 1}, validate: validateJson),
+        throwsA(isA<FileSystemException>()),
+      );
+      expect(await File(store.targetPath).readAsString(), 'broken-original');
+      final original = await directory
+          .list()
+          .where((entry) => entry.path.contains('.corrupt-'))
+          .cast<File>()
+          .single;
+      expect(await original.readAsString(), 'broken-original');
+      expect(await directory.list().length, 2);
+    },
+  );
 }
 
 class _FailingCommitter implements AtomicFileCommitter {

@@ -9,6 +9,7 @@ import 'package:bdo_craft_planner_flutter/visual/illuminated_ledger/ledger_spec.
 import 'package:bdo_craft_planner_flutter/visual/sakura_night_garden/sakura_botanical_assets.dart';
 import 'package:bdo_craft_planner_flutter/visual/sakura_night_garden/sakura_spec.dart';
 import 'package:bdo_craft_planner_flutter/visual/standard/standard_spec.dart';
+import 'package:crypto/crypto.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
@@ -50,7 +51,7 @@ void main() {
     await tester.tap(find.byTooltip('Close'));
     await tester.pump();
 
-    expect(calls, ['minimize', 'toggleMaximize', 'close']);
+    expect(calls, ['minimize', 'toggleMaximize', 'requestClose']);
   });
 
   testWidgets('optional trailing action remains before every caption control', (
@@ -97,10 +98,10 @@ void main() {
     expect((icon.image as AssetImage).assetName, AppIdentity.appIconAssetPath);
   });
 
-  testWidgets('active application tab expands while the other stays compact', (
+  testWidgets('active application tab expands while three peers stay compact', (
     tester,
   ) async {
-    var plannerSelected = true;
+    var selectedTab = 0;
     late StateSetter updateTabs;
 
     await tester.pumpWidget(
@@ -119,17 +120,29 @@ void main() {
                         tabKey: const ValueKey<String>('planner-tab'),
                         icon: Icons.calculate_outlined,
                         label: 'Craft Planner',
-                        selected: plannerSelected,
-                        onPressed: () =>
-                            updateTabs(() => plannerSelected = true),
+                        selected: selectedTab == 0,
+                        onPressed: () => updateTabs(() => selectedTab = 0),
                       ),
                       AppTitleTab(
                         tabKey: const ValueKey<String>('map-tab'),
                         icon: Icons.travel_explore_outlined,
                         label: 'Resource Map',
-                        selected: !plannerSelected,
-                        onPressed: () =>
-                            updateTabs(() => plannerSelected = false),
+                        selected: selectedTab == 1,
+                        onPressed: () => updateTabs(() => selectedTab = 1),
+                      ),
+                      AppTitleTab(
+                        tabKey: const ValueKey<String>('gathering-tab'),
+                        icon: Icons.grass_rounded,
+                        label: 'Gathering',
+                        selected: selectedTab == 2,
+                        onPressed: () => updateTabs(() => selectedTab = 2),
+                      ),
+                      AppTitleTab(
+                        tabKey: const ValueKey<String>('fish-map-tab'),
+                        icon: Icons.set_meal_rounded,
+                        label: 'Fish Map',
+                        selected: selectedTab == 3,
+                        onPressed: () => updateTabs(() => selectedTab = 3),
                       ),
                     ],
                   );
@@ -145,15 +158,29 @@ void main() {
       AppTitleTabStrip.surfaceKey('Craft Planner'),
     );
     final mapSurface = find.byKey(AppTitleTabStrip.surfaceKey('Resource Map'));
+    final gatheringSurface = find.byKey(
+      AppTitleTabStrip.surfaceKey('Gathering'),
+    );
+    final fishMapSurface = find.byKey(AppTitleTabStrip.surfaceKey('Fish Map'));
     final plannerExpandedWidth = tester.getSize(plannerSurface).width;
     expect(plannerExpandedWidth, greaterThan(100));
     expect(tester.getSize(mapSurface).width, 52);
+    expect(tester.getSize(gatheringSurface).width, 52);
+    expect(tester.getSize(fishMapSurface).width, 52);
     expect(
       find.descendant(of: plannerSurface, matching: find.text('Craft Planner')),
       findsOneWidget,
     );
     expect(
       find.descendant(of: mapSurface, matching: find.text('Resource Map')),
+      findsNothing,
+    );
+    expect(
+      find.descendant(of: gatheringSurface, matching: find.text('Gathering')),
+      findsNothing,
+    );
+    expect(
+      find.descendant(of: fishMapSurface, matching: find.text('Fish Map')),
       findsNothing,
     );
     final plannerDecoration =
@@ -164,7 +191,7 @@ void main() {
     expect(plannerDecoration.boxShadow, isNull);
     expect(plannerDecoration.border, isNotNull);
 
-    await tester.tap(mapSurface);
+    await tester.tap(fishMapSurface);
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 45));
 
@@ -172,22 +199,24 @@ void main() {
       tester.getSize(plannerSurface).width,
       inExclusiveRange(52, plannerExpandedWidth),
     );
-    expect(tester.getSize(mapSurface).width, greaterThan(52));
+    expect(tester.getSize(fishMapSurface).width, greaterThan(52));
 
     await tester.pumpAndSettle();
 
     expect(tester.getSize(plannerSurface).width, 52);
-    expect(tester.getSize(mapSurface).width, greaterThan(100));
+    expect(tester.getSize(mapSurface).width, 52);
+    expect(tester.getSize(gatheringSurface).width, 52);
+    expect(tester.getSize(fishMapSurface).width, greaterThan(100));
     expect(
       find.descendant(of: plannerSurface, matching: find.text('Craft Planner')),
       findsNothing,
     );
     expect(
-      find.descendant(of: mapSurface, matching: find.text('Resource Map')),
+      find.descendant(of: fishMapSurface, matching: find.text('Fish Map')),
       findsOneWidget,
     );
     final mapDecoration =
-        tester.widget<AnimatedContainer>(mapSurface).decoration!
+        tester.widget<AnimatedContainer>(fishMapSurface).decoration!
             as BoxDecoration;
     expect(mapDecoration.border, isNotNull);
     expect(tester.takeException(), isNull);
@@ -200,8 +229,28 @@ void main() {
       addTearDown(tester.view.resetDevicePixelRatio);
 
       const artwork = <String, String>{
-        'Craft Planner': 'assets/app/bdo_tool_icon.png',
-        'Resource Map': 'assets/app/bdo_resource_map_icon.png',
+        'Craft Planner':
+            'packages/bdo_map_core/assets/images/node_icons/14.png',
+        'Resource Map': 'packages/bdo_map_core/assets/images/node_icons/0.png',
+        'Gathering': 'packages/bdo_map_core/assets/images/node_icons/6.png',
+        'Fish Map':
+            'packages/bdo_fishing_core/assets/fish_companion/static/fishystuff.png',
+      };
+      const inactiveArtwork = <String, String>{
+        'Craft Planner':
+            'packages/bdo_map_core/assets/images/node_icons/gray/14.png',
+        'Resource Map':
+            'packages/bdo_map_core/assets/images/node_icons/gray/0.png',
+        'Gathering':
+            'packages/bdo_map_core/assets/images/node_icons/gray/6.png',
+        'Fish Map':
+            'packages/bdo_fishing_core/assets/fish_companion/static/fishystuff.png',
+      };
+      const artworkScale = <String, double>{
+        'Craft Planner': 1,
+        'Resource Map': 1.16,
+        'Gathering': 1,
+        'Fish Map': 1,
       };
       await tester.pumpWidget(
         MaterialApp(
@@ -212,6 +261,8 @@ void main() {
                   AppTitleTab(
                     tabKey: const ValueKey<String>('planner-tab'),
                     artworkAssetPath: artwork['Craft Planner'],
+                    inactiveArtworkAssetPath: inactiveArtwork['Craft Planner'],
+                    artworkScale: artworkScale['Craft Planner']!,
                     label: 'Craft Planner',
                     selected: true,
                     onPressed: () {},
@@ -219,7 +270,27 @@ void main() {
                   AppTitleTab(
                     tabKey: const ValueKey<String>('map-tab'),
                     artworkAssetPath: artwork['Resource Map'],
+                    inactiveArtworkAssetPath: inactiveArtwork['Resource Map'],
+                    artworkScale: artworkScale['Resource Map']!,
                     label: 'Resource Map',
+                    selected: false,
+                    onPressed: () {},
+                  ),
+                  AppTitleTab(
+                    tabKey: const ValueKey<String>('gathering-tab'),
+                    artworkAssetPath: artwork['Gathering'],
+                    inactiveArtworkAssetPath: inactiveArtwork['Gathering'],
+                    artworkScale: artworkScale['Gathering']!,
+                    label: 'Gathering',
+                    selected: false,
+                    onPressed: () {},
+                  ),
+                  AppTitleTab(
+                    tabKey: const ValueKey<String>('fish-map-tab'),
+                    artworkAssetPath: artwork['Fish Map'],
+                    inactiveArtworkAssetPath: inactiveArtwork['Fish Map'],
+                    artworkScale: artworkScale['Fish Map']!,
+                    label: 'Fish Map',
                     selected: false,
                     onPressed: () {},
                   ),
@@ -240,6 +311,7 @@ void main() {
         expect(
           tester.getSize(artworkFinder),
           const Size.square(AppTitleTabStrip.artworkSize),
+          reason: entry.key,
         );
         final image = tester.widget<Image>(
           find.descendant(of: artworkFinder, matching: find.byType(Image)),
@@ -250,11 +322,18 @@ void main() {
         expect(image.gaplessPlayback, isTrue);
         expect(image.image, isA<ResizeImage>());
         final resized = image.image as ResizeImage;
-        final expectedRasterSize = (AppTitleTabStrip.artworkSize * 3).ceil();
+        final expectedRasterSize =
+            (AppTitleTabStrip.artworkSize * 3 * artworkScale[entry.key]!)
+                .ceil();
         expect(resized.width, expectedRasterSize);
         expect(resized.height, expectedRasterSize);
         expect(resized.imageProvider, isA<AssetImage>());
-        expect((resized.imageProvider as AssetImage).assetName, entry.value);
+        expect(
+          (resized.imageProvider as AssetImage).assetName,
+          entry.key == 'Craft Planner'
+              ? entry.value
+              : inactiveArtwork[entry.key],
+        );
       }
 
       final compactMap = find.byKey(
@@ -276,7 +355,8 @@ void main() {
           find.descendant(of: artworkFinder, matching: find.byType(Image)),
         );
         final resized = image.image as ResizeImage;
-        final expectedRasterSize = (AppTitleTabStrip.artworkSize * 3).ceil();
+        final expectedRasterSize =
+            (AppTitleTabStrip.artworkSize * 3 * artworkScale[label]!).ceil();
         expect(
           resized.width,
           expectedRasterSize,
@@ -292,12 +372,18 @@ void main() {
     },
   );
 
-  testWidgets('workspace destination artwork keeps high-resolution sources', (
+  testWidgets('workspace destinations use square in-game node markers', (
     tester,
   ) async {
     for (final path in const <String>[
-      'assets/app/bdo_tool_icon.png',
-      'assets/app/bdo_resource_map_icon.png',
+      'packages/bdo_map_core/assets/images/node_icons/14.png',
+      'packages/bdo_map_core/assets/images/node_icons/gray/14.png',
+      'packages/bdo_map_core/assets/images/node_icons/0.png',
+      'packages/bdo_map_core/assets/images/node_icons/gray/0.png',
+      'packages/bdo_map_core/assets/images/node_icons/6.png',
+      'packages/bdo_map_core/assets/images/node_icons/gray/6.png',
+      'packages/bdo_map_core/assets/images/node_icons/11.png',
+      'packages/bdo_map_core/assets/images/node_icons/gray/11.png',
     ]) {
       ui.Codec? codec;
       ui.FrameInfo? frame;
@@ -309,10 +395,64 @@ void main() {
         frame = await codec!.getNextFrame();
       });
       expect(frame, isNotNull);
-      expect(frame!.image.width, greaterThanOrEqualTo(1024), reason: path);
-      expect(frame!.image.height, greaterThanOrEqualTo(1024), reason: path);
+      expect(frame!.image.width, 256, reason: path);
+      expect(frame!.image.height, 256, reason: path);
       frame!.image.dispose();
       codec!.dispose();
+    }
+  });
+
+  test('tab artwork remains the exact reviewed in-game marker files', () async {
+    const expected = <String, ({int bytes, String sha256})>{
+      'packages/bdo_map_core/assets/images/node_icons/14.png': (
+        bytes: 18406,
+        sha256:
+            'e89ec2c3d7dee37550982c4a734660915e057054a2500d43c309475076e814a3',
+      ),
+      'packages/bdo_map_core/assets/images/node_icons/gray/14.png': (
+        bytes: 18075,
+        sha256:
+            '4cf0922df806ebf625a23ed76de7f6040895649f7fc4c4c1a5cbf6d70f40c062',
+      ),
+      'packages/bdo_map_core/assets/images/node_icons/0.png': (
+        bytes: 8643,
+        sha256:
+            '215517d2f96177950f9980d91c8d34a98c8c974db158e5d985d38a7dc5e6e7a9',
+      ),
+      'packages/bdo_map_core/assets/images/node_icons/gray/0.png': (
+        bytes: 8391,
+        sha256:
+            '01a7835579e9738d3343638be28710f77680c1265803117b142ae47c29c074f7',
+      ),
+      'packages/bdo_map_core/assets/images/node_icons/6.png': (
+        bytes: 19277,
+        sha256:
+            'a50586869e2acf02776c2e49e7c9553b24355952089ee75811a4598f9d73b929',
+      ),
+      'packages/bdo_map_core/assets/images/node_icons/gray/6.png': (
+        bytes: 18581,
+        sha256:
+            '66d6d3706d5141834cad4ca6375201f74aadd2283c370587ec65409dca63c3bb',
+      ),
+      'packages/bdo_map_core/assets/images/node_icons/11.png': (
+        bytes: 10672,
+        sha256:
+            'e008dcb5b6e53c34eec6d0d1ab98c60e1fb5904ade41e5139ae14f9a573ed205',
+      ),
+      'packages/bdo_map_core/assets/images/node_icons/gray/11.png': (
+        bytes: 10451,
+        sha256:
+            '6d98c2798d65f659b52f766172eb57ebfed69dd309f4a25d37e6e3c0bf41c031',
+      ),
+    };
+    for (final entry in expected.entries) {
+      final data = await rootBundle.load(entry.key);
+      final bytes = data.buffer.asUint8List(
+        data.offsetInBytes,
+        data.lengthInBytes,
+      );
+      expect(bytes.length, entry.value.bytes, reason: entry.key);
+      expect(sha256.convert(bytes).toString(), entry.value.sha256);
     }
   });
 
@@ -466,6 +606,20 @@ void main() {
                           selected: false,
                           onPressed: () {},
                         ),
+                        AppTitleTab(
+                          tabKey: const ValueKey<String>('gathering-tab'),
+                          icon: Icons.grass_rounded,
+                          label: 'Gathering',
+                          selected: false,
+                          onPressed: () {},
+                        ),
+                        AppTitleTab(
+                          tabKey: const ValueKey<String>('fish-map-tab'),
+                          icon: Icons.set_meal_rounded,
+                          label: 'Fish Map',
+                          selected: false,
+                          onPressed: () {},
+                        ),
                       ],
                     ),
                   ),
@@ -478,6 +632,8 @@ void main() {
 
       expect(find.text('Craft Planner'), findsOneWidget);
       expect(find.text('Resource Map'), findsNothing);
+      expect(find.text('Gathering'), findsNothing);
+      expect(find.text('Fish Map'), findsNothing);
       expect(
         tester
             .getSize(find.byKey(AppTitleTabStrip.surfaceKey('Craft Planner')))
@@ -490,12 +646,24 @@ void main() {
             .height,
         40,
       );
+      expect(
+        tester
+            .getSize(find.byKey(AppTitleTabStrip.surfaceKey('Gathering')))
+            .height,
+        40,
+      );
+      expect(
+        tester
+            .getSize(find.byKey(AppTitleTabStrip.surfaceKey('Fish Map')))
+            .height,
+        40,
+      );
       expect(tester.takeException(), isNull, reason: '${spec.family}');
     }
   });
 
   testWidgets(
-    '600 logical pixels at 200% text keeps Planner and captions reachable',
+    '600 logical pixels at 200% text keeps four tabs and captions reachable',
     (tester) async {
       tester.view
         ..physicalSize = const Size(600, 200)
@@ -503,7 +671,7 @@ void main() {
       tester.platformDispatcher.textScaleFactorTestValue = 2;
       addTearDown(tester.view.reset);
       addTearDown(tester.platformDispatcher.clearTextScaleFactorTestValue);
-      var plannerActivated = false;
+      final activated = <String>[];
 
       await tester.pumpWidget(
         MaterialApp(
@@ -520,14 +688,28 @@ void main() {
                         icon: Icons.calculate_outlined,
                         label: 'Craft Planner',
                         selected: false,
-                        onPressed: () => plannerActivated = true,
+                        onPressed: () => activated.add('Craft Planner'),
                       ),
                       AppTitleTab(
                         tabKey: const ValueKey<String>('map-tab'),
                         icon: Icons.travel_explore_outlined,
                         label: 'Resource Map',
                         selected: true,
-                        onPressed: () {},
+                        onPressed: () => activated.add('Resource Map'),
+                      ),
+                      AppTitleTab(
+                        tabKey: const ValueKey<String>('gathering-tab'),
+                        icon: Icons.grass_rounded,
+                        label: 'Gathering',
+                        selected: false,
+                        onPressed: () => activated.add('Gathering'),
+                      ),
+                      AppTitleTab(
+                        tabKey: const ValueKey<String>('fish-map-tab'),
+                        icon: Icons.set_meal_rounded,
+                        label: 'Fish Map',
+                        selected: false,
+                        onPressed: () => activated.add('Fish Map'),
                       ),
                     ],
                   ),
@@ -541,15 +723,15 @@ void main() {
 
       final planner = find.byKey(AppTitleTabStrip.surfaceKey('Craft Planner'));
       final map = find.byKey(AppTitleTabStrip.surfaceKey('Resource Map'));
+      final gathering = find.byKey(AppTitleTabStrip.surfaceKey('Gathering'));
+      final fishMap = find.byKey(AppTitleTabStrip.surfaceKey('Fish Map'));
       final titleRect = tester.getRect(find.byKey(AppTitleBar.materialKey));
 
-      expect(planner, findsOneWidget);
-      expect(map, findsOneWidget);
-      expect(planner.hitTestable(), findsOneWidget);
-      expect(map.hitTestable(), findsOneWidget);
-      expect(tester.getSize(planner), const Size(52, 40));
-      expect(tester.getSize(map).width, 52);
-      expect(tester.getSize(map).height, 40);
+      for (final tab in <Finder>[planner, map, gathering, fishMap]) {
+        expect(tab, findsOneWidget);
+        expect(tab.hitTestable(), findsOneWidget);
+        expect(tester.getSize(tab), const Size(52, 40));
+      }
       expect(
         find.descendant(of: map, matching: find.text('Resource Map')),
         findsNothing,
@@ -561,15 +743,20 @@ void main() {
         ),
         findsOneWidget,
       );
-      expect(
-        tester
-            .widget<Semantics>(
-              find.byKey(const ValueKey<String>('planner-tab')),
-            )
-            .properties
-            .label,
-        'Craft Planner',
-      );
+      for (final entry in const <String, String>{
+        'planner-tab': 'Craft Planner',
+        'map-tab': 'Resource Map',
+        'gathering-tab': 'Gathering',
+        'fish-map-tab': 'Fish Map',
+      }.entries) {
+        expect(
+          tester
+              .widget<Semantics>(find.byKey(ValueKey<String>(entry.key)))
+              .properties
+              .label,
+          entry.value,
+        );
+      }
 
       for (final tooltip in const <String>[
         'Minimize',
@@ -585,9 +772,16 @@ void main() {
         expect(captionRect.bottom, lessThanOrEqualTo(titleRect.bottom));
       }
 
-      await tester.tap(planner);
-      await tester.pump();
-      expect(plannerActivated, isTrue);
+      for (final tab in <Finder>[planner, map, gathering, fishMap]) {
+        await tester.tap(tab);
+        await tester.pump();
+      }
+      expect(activated, <String>[
+        'Craft Planner',
+        'Resource Map',
+        'Gathering',
+        'Fish Map',
+      ]);
       expect(tester.takeException(), isNull);
     },
   );
@@ -624,6 +818,20 @@ void main() {
                       selected: false,
                       onPressed: () {},
                     ),
+                    AppTitleTab(
+                      tabKey: const ValueKey<String>('gathering-tab'),
+                      icon: Icons.grass_rounded,
+                      label: 'Gathering',
+                      selected: false,
+                      onPressed: () {},
+                    ),
+                    AppTitleTab(
+                      tabKey: const ValueKey<String>('fish-map-tab'),
+                      icon: Icons.set_meal_rounded,
+                      label: 'Fish Map',
+                      selected: false,
+                      onPressed: () {},
+                    ),
                   ],
                 ),
               ),
@@ -634,7 +842,7 @@ void main() {
 
       final dragRect = tester.getRect(find.byKey(AppTitleBar.dragRegionKey));
       final tabsRight = tester
-          .getRect(find.byKey(AppTitleTabStrip.surfaceKey('Resource Map')))
+          .getRect(find.byKey(AppTitleTabStrip.surfaceKey('Fish Map')))
           .right;
       final clearTitlePoint = Offset(tabsRight + 28, dragRect.center.dy);
       expect(clearTitlePoint.dx, lessThan(dragRect.right));

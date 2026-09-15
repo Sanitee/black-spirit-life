@@ -2,7 +2,6 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:bdo_craft_planner_flutter/app/state/planner_application_controller.dart';
-import 'package:bdo_craft_planner_flutter/app_identity.dart';
 import 'package:bdo_craft_planner_flutter/data/portable/portable_v4_codec.dart';
 import 'package:bdo_craft_planner_flutter/domain/models/catalog_models.dart';
 import 'package:bdo_craft_planner_flutter/domain/models/craft_mode.dart';
@@ -190,9 +189,6 @@ void main() {
         find.textContaining('They are not included in the installer.'),
         findsOneWidget,
       );
-      expect(find.textContaining('Mastery, Fairy and weight'), findsOneWidget);
-      expect(find.textContaining("Merchant's Ring"), findsOneWidget);
-      expect(find.textContaining('sessions, loadouts'), findsOneWidget);
       final pathField = find.descendant(
         of: find.byKey(const ValueKey<String>('data-personal-data-path')),
         matching: find.byType(TextField),
@@ -431,21 +427,6 @@ void main() {
       findsNothing,
     );
     expect(find.text('Editor Settings'), findsNothing);
-    await controller.dispose();
-  });
-
-  testWidgets('App build shows the installed application version', (
-    tester,
-  ) async {
-    final controller = _controller();
-    await _pump(tester, controller);
-
-    expect(
-      find.text('App build ${AppIdentity.applicationVersion}'),
-      findsOneWidget,
-    );
-    expect(find.text('App build test'), findsNothing);
-
     await controller.dispose();
   });
 

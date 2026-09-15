@@ -18,3 +18,8 @@
 /windows/storage_ocr/BlackSpiritStorageOcr/**/*.json -text
 /windows/storage_ocr/BlackSpiritStorageOcr/Assets/RecipeBook/NOTICE.txt -text
 /windows/storage_ocr/BlackSpiritStorageOcr/Engine/*.cs -text
+
+# Fishing assets are integrity-pinned and must retain their exact approved
+# bytes even when Git for Windows is configured with core.autocrlf=true.
+/packages/bdo_fishing_core/assets/fish_companion/** -text
+/packages/bdo_fishing_core/assets/fish_companion_integrity.json -text

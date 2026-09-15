@@ -4,6 +4,56 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   test(
+    'native helper frame policy exists before Windows creates its frame',
+    () {
+      final source = File('windows/runner/win32_window.cpp').readAsStringSync();
+      final header = File('windows/runner/win32_window.h').readAsStringSync();
+      final runner = File('windows/runner/main.cpp').readAsStringSync();
+      final creation = source.substring(
+        source.indexOf('bool Win32Window::Create'),
+        source.indexOf('bool Win32Window::Show'),
+      );
+      final policy = creation.indexOf('use_native_frame_ = use_native_frame;');
+
+      expect(header, contains('bool use_native_frame_ = false;'));
+      expect(policy, greaterThan(creation.indexOf('Destroy();')));
+      expect(policy, lessThan(creation.indexOf('HWND window = CreateWindow(')));
+      expect(runner, contains('origin, size, reference_mode)'));
+      expect(creation, contains('? WS_OVERLAPPEDWINDOW'));
+    },
+  );
+
+  test(
+    'only the borderless workspace removes the Windows non-client frame',
+    () {
+      final source = File('windows/runner/win32_window.cpp').readAsStringSync();
+      final frameCalculation = source.substring(
+        source.indexOf('case WM_NCCALCSIZE:'),
+        source.indexOf('case WM_DESTROY:'),
+      );
+      final dpiChange = source.substring(
+        source.indexOf('case WM_DPICHANGED:'),
+        source.indexOf('case WM_SIZE:'),
+      );
+
+      expect(
+        frameCalculation,
+        contains('if (!use_native_frame_ && wparam == TRUE)'),
+      );
+      expect(frameCalculation, contains('break;'));
+      expect(
+        source,
+        contains(
+          'return DefWindowProc(window_handle_, message, wparam, lparam);',
+        ),
+      );
+      expect(dpiChange, contains('SetWindowPos(hwnd'));
+      expect(dpiChange, contains('SWP_NOZORDER | SWP_NOACTIVATE'));
+      expect(dpiChange, isNot(contains('SetWindowLong')));
+    },
+  );
+
+  test(
     'Windows runner prefers the high-performance GPU with safe fallback',
     () {
       final source = File('windows/runner/main.cpp').readAsStringSync();
@@ -194,7 +244,7 @@ void main() {
     expect(placementWorkRight, -40);
     expect(placementWorkBottom, 1000);
 
-    const inset = 44;
+    const inset = 84;
     const rawWidth = 1575.0;
     const rawTotalHeight = 1031.0;
     const rawWorkspaceHeight = rawTotalHeight - inset;
@@ -214,7 +264,7 @@ void main() {
     );
 
     // A 1200x752 work area cannot grow vertically. The native algorithm
-    // scales both workspace dimensions so the 44px strip fits without
+    // scales both workspace dimensions so the 84px notice fits without
     // distorting the 75:47 base, then retains the exact original for hide.
     const workWidth = 1200.0;
     const workHeight = 752.0;

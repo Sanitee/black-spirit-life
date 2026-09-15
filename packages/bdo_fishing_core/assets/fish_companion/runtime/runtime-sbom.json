@@ -1,0 +1,94 @@
+{
+  "schemaVersion": 1,
+  "artifact": {
+    "path": "fish_companion_service.exe",
+    "platform": "windows-x64",
+    "buildDate": "2026-09-15",
+    "byteCount": 28781551,
+    "sha256": "c0b5c5c84980be389420cf247d7a89ac8c256676b7313ce3a496c933cb0667a9"
+  },
+  "buildReproducibility": {
+    "pythonHashSeed": "0",
+    "sourceDateEpoch": "1789430400",
+    "specification": "tool/fish_companion_service.spec",
+    "independentMatchingBuilds": 2
+  },
+  "runtimeComponents": [
+    {
+      "name": "CPython",
+      "version": "3.12.14",
+      "license": "Python-2.0",
+      "licenseFile": "licenses/CPython-LICENSE.txt",
+      "licenseSha256": "886a0ead2d89030ee62dbff52b04e47ab91998341295bb9c56fb952b4e081c7a"
+    },
+    {
+      "name": "OpenSSL",
+      "version": "3.5.8",
+      "license": "Apache-2.0",
+      "licenseFile": "licenses/OpenSSL-LICENSE.txt",
+      "licenseSha256": "7d5450cb2d142651b8afa315b5f238efc805dad827d91ba367d8516bc9d49e7a"
+    },
+    {
+      "name": "SQLite",
+      "version": "3.53.1",
+      "license": "blessing/public-domain",
+      "role": "durable local journal and migration destination"
+    },
+    {
+      "name": "zlib",
+      "version": "1.3.2",
+      "license": "Zlib",
+      "licenseFile": "licenses/zlib-LICENSE.txt",
+      "licenseSha256": "845efc77857d485d91fb3e0b884aaa929368c717ae8186b66fe1ed2495753243"
+    },
+    {
+      "name": "libffi",
+      "version": "8 runtime ABI",
+      "license": "MIT",
+      "licenseFile": "licenses/libffi-LICENSE.txt",
+      "licenseSha256": "d5699fa516968e3a1550e6c902b7441c78856f2603d61bedd0b0662a26655366"
+    },
+    {
+      "name": "NumPy",
+      "version": "2.3.5",
+      "license": "BSD-3-Clause and bundled notices",
+      "licenseFile": "licenses/NumPy-LICENSE.txt",
+      "licenseSha256": "596b953e1dcbe829b32ae444387efa15003fc6abdeca8a2179f364a6364c286e"
+    },
+    {
+      "name": "Pillow",
+      "version": "12.3.0",
+      "license": "HPND and bundled notices",
+      "licenseFile": "licenses/Pillow-LICENSE.txt",
+      "licenseSha256": "4f7866a74802c6326f81faff59a56546b6aec2b10b91973e0e9308de95e79857"
+    },
+    {
+      "name": "PyInstaller bootloader",
+      "version": "6.22.2",
+      "license": "GPL-2.0-or-later WITH Bootloader-exception",
+      "licenseFile": "licenses/PyInstaller-COPYING.txt",
+      "licenseSha256": "dcf75fdb959db1e3b41c0f8505069d2ece781b5ec6b3d0a4d30975cfc6580245"
+    },
+    {
+      "name": "Microsoft Visual C++ and Universal C Runtime",
+      "version": "MSC v.1944 / Windows x64 redistributable",
+      "license": "Microsoft Distributable Code terms",
+      "licenseFile": "licenses/CPython-LICENSE.txt",
+      "licenseSha256": "886a0ead2d89030ee62dbff52b04e47ab91998341295bb9c56fb952b4e081c7a"
+    }
+  ],
+  "buildOnlyComponents": [
+    {"name": "altgraph", "version": "0.17.5"},
+    {"name": "packaging", "version": "26.3"},
+    {"name": "pefile", "version": "2024.8.26"},
+    {"name": "pyinstaller-hooks-contrib", "version": "2026.7"},
+    {"name": "pywin32-ctypes", "version": "0.2.3"},
+    {"name": "setuptools", "version": "84.0.0"}
+  ],
+  "excludedReferenceBundle": [
+    "data/cache",
+    "recognizer/reference-icons",
+    "static/node-icons",
+    "static/fishystuff.png"
+  ]
+}

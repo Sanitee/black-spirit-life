@@ -71,6 +71,7 @@ void main() {
                 RepaintBoundary(
                   key: goldenRoot,
                   child: BdoCraftPlannerApp(
+                    enableOpportunityAutoCheck: false,
                     applicationFuture: Future.value(harness.bundle),
                     marketGateway: const EmptyMarketGateway(),
                   ),

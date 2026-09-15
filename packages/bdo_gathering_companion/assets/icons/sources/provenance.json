@@ -1,0 +1,24 @@
+{
+  "bdoworkshop_logo.png": {
+    "source": "https://bdoworkshop.com/logo.png",
+    "capturedOn": "2026-09-02",
+    "dimensions": "170x170",
+    "sha256": "05587a53b041b83589d9932ee09cb26a11f75b91f212086588b3b13e35be0fd7",
+    "credit": "Bairog · BDO Workshop"
+  },
+  "garmoth_icon.png": {
+    "source": "https://garmoth.com/favicon/favicon-32x32.png",
+    "sourcePage": "https://garmoth.com/app",
+    "capturedOn": "2026-09-14",
+    "dimensions": "32x32",
+    "sha256": "f5842e298ec81ccf77bd19ff7af4de6a62e34e94d22261673972d19f4407808d",
+    "credit": "Garmoth.com official website icon; copied unchanged"
+  },
+  "minigame_helper.png": {
+    "source": "User-provided original minigame image",
+    "capturedOn": "2026-09-14",
+    "dimensions": "312x312",
+    "sha256": "7847698bb25cf870070472333bbb1d94b10f9905e3f4e5598b14a55f0abc78a2",
+    "credit": "User-provided Black Desert Online minigame screenshot; copied unchanged"
+  }
+}

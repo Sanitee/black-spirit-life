@@ -102,7 +102,7 @@ void main() {
       await f.settleCheck(tester);
       expect(f.transport.ids.length, bothRecipes);
 
-      await tester.tap(_topTab('resource-map'));
+      await tester.tap(_topTab('fish-map'));
       await tester.pump();
       f.now = f.now.add(const Duration(minutes: 6));
       expect(f.controller.selectTarget('Pure Powder Reagent'), isTrue);
@@ -118,7 +118,7 @@ void main() {
       await f.settleCheck(tester);
       expect(f.transport.ids.length, greaterThan(bothRecipes));
       final afterReturn = f.transport.ids.length;
-      await tester.tap(_topTab('resource-map'));
+      await tester.tap(_topTab('fish-map'));
       await tester.pump();
       await tester.tap(_topTab('planner'));
       await f.settleCheck(tester);
@@ -283,6 +283,7 @@ final class _Fixture {
           bundle: f.harness.bundle,
           sharedMarket: f.broker,
           windowHost: f.window,
+          fishMapWorkspace: const SizedBox.shrink(),
           enableBetaUpdates: false,
           enableOpportunityAutoCheck: false,
         ),

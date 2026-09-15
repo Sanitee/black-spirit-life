@@ -1,0 +1,260 @@
+{
+  "reviewedAt": "2026-09-01",
+  "owner": "Pearl Abyss",
+  "mirror": "BDO Codex NPC pages",
+  "use": "Private unofficial fan application; unchanged source game artwork bundled locally, no runtime hotlinking.",
+  "localIdentityReference": "Patch Research/client-2026-08-28/characters.json",
+  "portraits": [
+    {
+      "key": "wolf",
+      "icon": "assets/icons/spots/wolf.webp",
+      "npcId": 20005,
+      "npcName": "Wolf",
+      "sourcePage": "https://bdocodex.com/us/npc/20005/",
+      "sourceImage": "https://bdocodex.com/items/ui_artwork/ic_04005.webp",
+      "sha256": "36c19b3b470a46c650c7c58712633e1433330192f672e85a436de45b0cb8bd3f",
+      "byteLength": 31354,
+      "visualReview": "Actual animal portrait inspected; unchanged source image."
+    },
+    {
+      "key": "fox",
+      "icon": "assets/icons/spots/fox.webp",
+      "npcId": 20004,
+      "npcName": "Fox",
+      "sourcePage": "https://bdocodex.com/us/npc/20004/",
+      "sourceImage": "https://bdocodex.com/items/ui_artwork/ic_04004.webp",
+      "sha256": "7662a9802eac40d9e46a9871c09a1dac72b23398d6c26ed54a15e949d95bf29f",
+      "byteLength": 31070,
+      "visualReview": "Actual animal portrait inspected; unchanged source image."
+    },
+    {
+      "key": "sheep",
+      "icon": "assets/icons/spots/sheep.webp",
+      "npcId": 20305,
+      "npcName": "Sheep",
+      "sourcePage": "https://bdocodex.com/us/npc/20305/",
+      "sourceImage": "https://bdocodex.com/items/ui_artwork/ic_04149.webp",
+      "sha256": "170ee013aa906a9c4703c1cf080fad7a460092665f9cf91eacbdb7340e3e7aa1",
+      "byteLength": 32704,
+      "visualReview": "Actual animal portrait inspected; unchanged source image."
+    },
+    {
+      "key": "elk",
+      "icon": "assets/icons/spots/elk.webp",
+      "npcId": 20288,
+      "npcName": "Elk",
+      "sourcePage": "https://bdocodex.com/us/npc/20288/",
+      "sourceImage": "https://bdocodex.com/items/ui_artwork/ic_04293.webp",
+      "sha256": "df32eacb8a887349d767cdab3a8a6d0d314cb020601379dd5e1e280157d3655e",
+      "byteLength": 31410,
+      "visualReview": "Actual animal portrait inspected; unchanged source image."
+    },
+    {
+      "key": "bison",
+      "icon": "assets/icons/spots/bison.webp",
+      "npcId": 20093,
+      "npcName": "Bison",
+      "sourcePage": "https://bdocodex.com/us/npc/20093/",
+      "sourceImage": "https://bdocodex.com/items/ui_artwork/ic_04077.webp",
+      "sha256": "28aa46f88c0e82fbf60276b73cbdf39e2e46867e6f6fa8ddaa4ae7effc7f7594",
+      "byteLength": 34770,
+      "visualReview": "Actual animal portrait inspected; unchanged source image."
+    },
+    {
+      "key": "lizard",
+      "icon": "assets/icons/spots/lizard.webp",
+      "npcId": 20089,
+      "npcName": "Triangle Head Lizard",
+      "sourcePage": "https://bdocodex.com/us/npc/20089/",
+      "sourceImage": "https://bdocodex.com/items/ui_artwork/ic_04073.webp",
+      "sha256": "8ce3f44122ff016724ea98808249d9cd167967dc739ada96d5c24bb890d1907b",
+      "byteLength": 38916,
+      "visualReview": "Actual animal portrait inspected; unchanged source image."
+    },
+    {
+      "key": "stone_cobra",
+      "icon": "assets/icons/spots/stone_cobra.webp",
+      "npcId": 21758,
+      "npcName": "Stone Cobra",
+      "sourcePage": "https://bdocodex.com/us/npc/21758/",
+      "sourceImage": "https://bdocodex.com/items/ui_artwork/ic_05135.webp",
+      "sha256": "b6068ac17f26bb1cb6b61a2638b27803fee6e806d2bec3f9541660cf8b6476b7",
+      "byteLength": 42550,
+      "visualReview": "Actual animal portrait inspected; unchanged source image."
+    },
+    {
+      "key": "rock_scorpion",
+      "icon": "assets/icons/spots/rock_scorpion.webp",
+      "npcId": 21757,
+      "npcName": "Rock Scorpion",
+      "sourcePage": "https://bdocodex.com/us/npc/21757/",
+      "sourceImage": "https://bdocodex.com/items/ui_artwork/ic_05134.webp",
+      "sha256": "8e428b39e4f1fa151bdfbdff47045a14980b0bd703e8f63747a82dde88908221",
+      "byteLength": 51790,
+      "visualReview": "Actual animal portrait inspected; unchanged source image."
+    },
+    {
+      "key": "verdure_buck",
+      "icon": "assets/icons/spots/verdure_buck.webp",
+      "npcId": 27670,
+      "npcName": "Verdure Buck",
+      "sourcePage": "https://bdocodex.com/us/npc/27670/",
+      "sourceImage": "https://bdocodex.com/items/ui_artwork/ic_05201.webp",
+      "sha256": "6db504319b17e0cc6965e911db3d8d9d6183386427d0b1e3c66942997c9ab32e",
+      "byteLength": 49106,
+      "visualReview": "Actual animal portrait inspected; unchanged source image."
+    },
+    {
+      "key": "boar",
+      "icon": "assets/icons/spots/boar.webp",
+      "npcId": 23893,
+      "npcName": "Boar",
+      "sourcePage": "https://bdocodex.com/us/npc/23893/",
+      "sourceImage": "https://bdocodex.com/items/ui_artwork/ic_04006.webp",
+      "sha256": "f663bfe3958ec4dae5da24b37e2870ae12867fbbfc60308c00b9732aa42c6b0f",
+      "byteLength": 34170,
+      "visualReview": "Actual animal portrait inspected; unchanged source image."
+    },
+    {
+      "key": "hawk",
+      "icon": "assets/icons/spots/hawk.webp",
+      "npcId": 21090,
+      "npcName": "Hawk",
+      "sourcePage": "https://bdocodex.com/us/npc/21090/",
+      "sourceImage": "https://bdocodex.com/items/ui_artwork/ic_10423.webp",
+      "sha256": "a66a244220871559c4101bf2ba6766bab06076fe90ea2c3ad3bfe791320f4915",
+      "byteLength": 23250,
+      "visualReview": "Actual animal portrait inspected; unchanged source image."
+    },
+    {
+      "key": "bear",
+      "icon": "assets/icons/spots/bear.webp",
+      "npcId": 26994,
+      "npcName": "Bear",
+      "sourcePage": "https://bdocodex.com/us/npc/26994/",
+      "sourceImage": "https://bdocodex.com/items/ui_artwork/ic_010561.webp",
+      "sha256": "ea47b711befc8c9f3f366c9d701b9afd771fcc3b5100a0308ae3d86fca121a1a",
+      "byteLength": 49464,
+      "visualReview": "Actual Morning Light bear portrait inspected; unchanged source image. Species representative for Sensitive Bear, whose own NPC page serves an unrelated human portrait."
+    },
+    {
+      "key": "valencian_lion",
+      "npcId": 21207,
+      "sourcePage": "https://bdocodex.com/us/npc/21207/",
+      "sourceImage": "https://bdocodex.com/items/ui_artwork/ic_04893.webp",
+      "icon": "assets/icons/spots/valencian_lion.webp",
+      "npcName": "Valencian Lion",
+      "sha256": "5b38a5ac9e21d432fac126f33888a2ff5a51c1439daf93db4c07d025435dc8f7",
+      "byteLength": 29898,
+      "visualReview": "Actual animal portrait inspected; unchanged source game image."
+    },
+    {
+      "key": "coral_stoneback_crab",
+      "npcId": 28115,
+      "sourcePage": "https://bdocodex.com/us/npc/28115/",
+      "sourceImage": "https://bdocodex.com/items/ui_artwork/ic_014508.webp",
+      "icon": "assets/icons/spots/coral_stoneback_crab.webp",
+      "npcName": "Coral Stoneback Crab",
+      "sha256": "93054bb449dc7d77511c2fb1b97231b619d19aeade30e82e6ff08e82aa42380e",
+      "byteLength": 48168,
+      "visualReview": "Actual animal portrait inspected; unchanged source game image."
+    },
+    {
+      "key": "golden_leaf_snake",
+      "npcId": 28665,
+      "sourcePage": "https://bdocodex.com/us/npc/28665/",
+      "sourceImage": "https://bdocodex.com/items/ui_artwork/ic_014507.webp",
+      "icon": "assets/icons/spots/golden_leaf_snake.webp",
+      "npcName": "Golden Leaf Snake",
+      "sha256": "02082a0ec9fd7ce890196b8484d6f531ebbe55d92576929619c4ecd4a576b6cd",
+      "byteLength": 46178,
+      "visualReview": "Actual animal portrait inspected; unchanged source game image."
+    },
+    {
+      "key": "cliffside_sheep",
+      "npcId": 28664,
+      "sourcePage": "https://bdocodex.com/us/npc/28664/",
+      "sourceImage": "https://bdocodex.com/items/ui_artwork/ic_014506.webp",
+      "icon": "assets/icons/spots/cliffside_sheep.webp",
+      "npcName": "Cliffside Mountain Sheep",
+      "sha256": "474efcedffaca8c817373146a2200c57486879d27b5c22fb958a508e48bea691",
+      "byteLength": 47892,
+      "visualReview": "Actual animal portrait inspected; unchanged source game image."
+    },
+    {
+      "key": "rock_elephant",
+      "icon": "assets/icons/spots/rock_elephant.webp",
+      "npcId": 28666,
+      "npcName": "Rock Elephant",
+      "sourcePage": "https://bdocodex.com/us/npc/28666/",
+      "sourceImage": "https://bdocodex.com/items/ui_artwork/ic_014505.webp",
+      "sha256": "6647f9343971ed315628f459c28c9bbddaf54f2f11ac7b2268cb983b6bc645a9",
+      "byteLength": 53686,
+      "visualReview": "Visually inspected the actual stone-armored elephant; unchanged source artwork. Shared species portrait for NPC28165 ordinary and NPC28666 hunting."
+    },
+    {
+      "key": "gorgo_cobra",
+      "icon": "assets/icons/spots/gorgo_cobra.webp",
+      "npcId": 21040,
+      "npcName": "Gorgo Cobra",
+      "sourcePage": "https://bdocodex.com/us/npc/21040/",
+      "sourceImage": "https://bdocodex.com/items/ui_artwork/ic_04835.webp",
+      "sha256": "d7674c9ac5c803734efb35a6625a794ee0e5d0cd4fa3c7b1a62dd39ba00667ee",
+      "byteLength": 29408,
+      "visualReview": "Actual animal portrait inspected; unchanged source game image."
+    },
+    {
+      "key": "grass_rhino",
+      "icon": "assets/icons/spots/grass_rhino.webp",
+      "npcId": 27669,
+      "npcName": "Grass Rhino",
+      "sourcePage": "https://bdocodex.com/us/npc/27669/",
+      "sourceImage": "https://bdocodex.com/items/ui_artwork/ic_05198.webp",
+      "sha256": "8cbf49596a30bdbab9009254acce425a0736ab47a2506cef9347e94c7c455ef6",
+      "byteLength": 50936,
+      "visualReview": "Actual animal portrait inspected; unchanged source game image."
+    },
+    {
+      "key": "shadow_wolf",
+      "icon": "assets/icons/spots/shadow_wolf.webp",
+      "npcId": 27672,
+      "npcName": "Shadow Wolf",
+      "sourcePage": "https://bdocodex.com/us/npc/27672/",
+      "sourceImage": "https://bdocodex.com/items/ui_artwork/ic_05200.webp",
+      "sha256": "55e0749a1c6d4246a307492ce060e8bfc9bb75e61507cdd5c201dbc9d528e914",
+      "byteLength": 50794,
+      "visualReview": "Actual animal portrait inspected; unchanged source game image."
+    },
+    {
+      "key": "shadow_lion",
+      "icon": "assets/icons/spots/shadow_lion.webp",
+      "npcId": 27673,
+      "npcName": "Shadow Lion",
+      "sourcePage": "https://bdocodex.com/us/npc/27673/",
+      "sourceImage": "https://bdocodex.com/items/ui_artwork/ic_05203.webp",
+      "sha256": "4a301a45b0362a4993060bcfb1d6c7ee8a2b6c936daf74dbfb0262f0f517638c",
+      "byteLength": 38602,
+      "visualReview": "Actual animal portrait inspected; unchanged source game image."
+    }
+  ],
+  "rejected": [
+    {
+      "sourceImage": "https://bdocodex.com/items/ui_artwork/ic_00559.webp",
+      "reason": "Visually verified unrelated human NPC portrait; replaced by the actual Elk species portrait.",
+      "npcId": 27660,
+      "npcName": "Sensitive Giant Elk"
+    },
+    {
+      "sourceImage": "https://bdocodex.com/items/ui_artwork/ic_04643.webp",
+      "reason": "Generic animal silhouettes, not a bear portrait; not used.",
+      "npcId": 20556,
+      "npcName": "Brown Bear"
+    },
+    {
+      "reason": "Unrelated human NPC portrait; using verified Morning Light Bear 26994 species portrait.",
+      "sourceImage": "https://bdocodex.com/items/ui_artwork/ic_00559.webp",
+      "npcName": "Sensitive Bear",
+      "npcId": 26993
+    }
+  ]
+}

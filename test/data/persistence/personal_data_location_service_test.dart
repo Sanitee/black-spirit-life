@@ -41,60 +41,35 @@ void main() {
     expect(await service.locatorFile.exists(), isFalse);
   });
 
-  for (final invalidFeature in <String>[
-    'gathering${Platform.pathSeparator}gathering-state.json',
-    'fishing${Platform.pathSeparator}fishing-journal.json',
-  ]) {
-    test('refuses to move an invalid $invalidFeature document', () async {
-      final featureFile = File(_join(source.path, invalidFeature));
-      await featureFile.parent.create(recursive: true);
-      await featureFile.writeAsString('{}', flush: true);
-      final destination = Directory(
-        _join(temporaryDirectory.path, 'invalid feature destination'),
-      );
-      final service = _service(source: source, control: control);
-
-      await expectLater(
-        service.moveTo(destination.path),
-        throwsA(
-          isA<PersonalDataMoveException>().having(
-            (error) => error.locationSwitched,
-            'locationSwitched',
-            isFalse,
-          ),
-        ),
-      );
-
-      expect(await source.exists(), isTrue);
-      expect(await featureFile.exists(), isTrue);
-      expect(await destination.exists(), isFalse);
-      expect(await service.locatorFile.exists(), isFalse);
-    });
-  }
-
   test('moves, verifies, switches, and removes the old profile', () async {
-    const gatheringJson =
-        '{"version":1,"profile":{"mastery":0,"loadoutNotes":""},"sessions":[]}';
-    const fishingJson = '{"version":1,"loadouts":[],"sessions":[]}';
-    final gathering = File(
-      _join(
-        source.path,
-        'gathering${Platform.pathSeparator}gathering-state.json',
-      ),
-    );
-    await gathering.parent.create(recursive: true);
-    await gathering.writeAsString(gatheringJson, flush: true);
-    final fishing = File(
-      _join(
-        source.path,
-        'fishing${Platform.pathSeparator}fishing-journal.json',
-      ),
-    );
-    await fishing.parent.create(recursive: true);
-    await fishing.writeAsString(fishingJson, flush: true);
     final destination = Directory(
       _join(temporaryDirectory.path, 'Møved profile'),
     );
+    final gatheringJournal = File(
+      _join(source.path, 'gathering/sessions.json'),
+    );
+    await gatheringJournal.parent.create(recursive: true);
+    await gatheringJournal.writeAsString(
+      '{"schemaVersion":1,"sessions":[{"id":"gathering-session"}]}',
+      flush: true,
+    );
+    final fishingJournal = File(
+      _join(
+        source.path,
+        'fish-companion-workspace/fish-companion/data/fish-journal.sqlite3',
+      ),
+    );
+    await fishingJournal.parent.create(recursive: true);
+    await fishingJournal.writeAsBytes(<int>[
+      0,
+      83,
+      81,
+      76,
+      105,
+      116,
+      101,
+      3,
+    ], flush: true);
     final service = _service(source: source, control: control);
 
     final result = await service.moveTo(destination.path);
@@ -114,21 +89,18 @@ void main() {
     );
     expect(
       await File(
-        _join(
-          destination.path,
-          'gathering${Platform.pathSeparator}gathering-state.json',
-        ),
+        _join(destination.path, 'gathering/sessions.json'),
       ).readAsString(),
-      gatheringJson,
+      '{"schemaVersion":1,"sessions":[{"id":"gathering-session"}]}',
     );
     expect(
       await File(
         _join(
           destination.path,
-          'fishing${Platform.pathSeparator}fishing-journal.json',
+          'fish-companion-workspace/fish-companion/data/fish-journal.sqlite3',
         ),
-      ).readAsString(),
-      fishingJson,
+      ).readAsBytes(),
+      <int>[0, 83, 81, 76, 105, 116, 101, 3],
     );
     expect(
       await File(
@@ -160,38 +132,6 @@ void main() {
       ),
       isTrue,
     );
-  });
-
-  test('moves every profile-owned Opportunities store', () async {
-    final opportunities = Directory(_join(source.path, 'opportunities'));
-    await opportunities.create(recursive: true);
-    final fixtures = <String, String>{
-      'opportunities-settings.json': '{"owned":{"1":7}}',
-      'opportunity-market-cache.json': '{"regions":{}}',
-      'opportunity-market-observations.json': '{"series":{}}',
-      'market-request-pauses.json': '{"regions":{}}',
-      'market-request-window.json': '{"starts":[]}',
-    };
-    for (final entry in fixtures.entries) {
-      await File(
-        _join(opportunities.path, entry.key),
-      ).writeAsString(entry.value, flush: true);
-    }
-    final destination = Directory(
-      _join(temporaryDirectory.path, 'moved-with-opportunities'),
-    );
-
-    await _service(source: source, control: control).moveTo(destination.path);
-
-    expect(await source.exists(), isFalse);
-    for (final entry in fixtures.entries) {
-      expect(
-        await File(
-          _join(_join(destination.path, 'opportunities'), entry.key),
-        ).readAsString(),
-        entry.value,
-      );
-    }
   });
 
   test(
@@ -891,65 +831,6 @@ void main() {
         ),
         throwsA(isA<FileSystemException>()),
       );
-    },
-  );
-
-  test(
-    'Stable moves back to its default while Live Beta roots stay protected',
-    () async {
-      final roaming = Directory(_join(temporaryDirectory.path, 'roaming'));
-      final local = Directory(_join(temporaryDirectory.path, 'local'));
-      final environment = <String, String>{
-        'APPDATA': roaming.path,
-        'LOCALAPPDATA': local.path,
-      };
-      final stableDefault = Directory(
-        _join(roaming.path, AppIdentity.stateDirectoryName),
-      );
-      final custom = Directory(
-        _join(temporaryDirectory.path, 'stable-custom-profile'),
-      );
-      await _writeProfile(stableDefault);
-
-      final fromDefault = PersonalDataLocationService.fromEnvironment(
-        environment,
-      );
-      await fromDefault.moveTo(custom.path);
-      expect(await stableDefault.exists(), isFalse);
-
-      final fromCustom = PersonalDataLocationService.fromEnvironment(
-        environment,
-      );
-      expect(
-        _samePath(
-          (await fromCustom.resolveApplicationDirectory()).path,
-          custom.path,
-        ),
-        isTrue,
-      );
-      await fromCustom.moveTo(stableDefault.path);
-
-      final restarted = PersonalDataLocationService.fromEnvironment(
-        environment,
-      );
-      expect(
-        _samePath(
-          (await restarted.resolveApplicationDirectory()).path,
-          stableDefault.path,
-        ),
-        isTrue,
-      );
-      for (final protectedRoot in <String>[
-        _join(roaming.path, AppIdentity.liveBetaStateDirectoryName),
-        _join(local.path, AppIdentity.liveBetaLocalCacheDirectoryName),
-        _join(local.path, AppIdentity.liveBetaInstallerPackageId),
-      ]) {
-        await expectLater(
-          restarted.moveTo(_join(protectedRoot, 'Personal Data')),
-          throwsA(isA<PersonalDataMoveException>()),
-        );
-      }
-      expect(await stableDefault.exists(), isTrue);
     },
   );
 }

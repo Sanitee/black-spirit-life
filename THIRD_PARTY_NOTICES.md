@@ -45,6 +45,76 @@ Resource Map also includes reviewed house-use, navigation and bare-hands
 interaction textures with source notices beside those assets. No local client
 path, extractor executable, account data or game installation is distributed.
 
+## FishyStuff and Fishing reference material
+
+Fish Map includes the reviewed reference snapshot used by the approved Beta:
+FishyStuff map/API/Dex response data, derived map files, region imagery,
+FishyStuff branding, node-marker images, and a catalog of PA-origin fish/item
+recognition artwork delivered through FishyStuff or BDO Codex. FishyStuff is
+credited and linked visibly from Fish Map.
+
+- FishyStuff: <https://fishystuff.fish/map/>
+- FishyStuff Dex: <https://fishystuff.fish/dex/>
+- Exact recognition-image URLs and hashes:
+  `packages/bdo_fishing_core/assets/fish_companion/recognizer/reference-icons/catalog.json`
+
+Black Spirit Life does not claim that public availability or attribution is a
+licence, and no separate FishyStuff redistribution licence or written
+permission is documented. The project owner expressly approved retaining this
+credited material for the free, noncommercial release and accepts the residual
+risk. Pearl Abyss remains the owner of the underlying Black Desert item art.
+Corrections or removal requests can use the route at the end of this file.
+
+The immutable Fishing snapshot is not personal data. Every Fishing profile,
+mastery value, haul, journal entry, sale, note, and runtime SQLite database is
+created only beneath the user's selected local personal-data folder. No
+publisher database or user record is included in the source or installer.
+
+## Gathering creators, Bairog, and BDO Workshop
+
+The Gathering companion retains the approved Beta's credited calculator facts,
+20-route benchmark set, guide links, and Bairog/BDO Workshop source logo. It
+also includes eleven credited guide images: four official Pearl Abyss update
+illustrations and references attributed to MMOSUMO/alext96, GrumpyG, Saarith,
+and bunnygirl. Exact URLs, dates, hashes, limitations, and creator names are in
+`packages/bdo_gathering_companion/assets/rotations/NOTICE.md` and
+`provenance.json`.
+
+- Bairog / BDO Workshop gathering calculator:
+  <https://bdoworkshop.com/gathering-calculator>
+- Creator and image inventory:
+  `packages/bdo_gathering_companion/assets/rotations/NOTICE.md`
+
+No separate redistribution licence or written creator permission is claimed
+for the credited community material. The project owner approved its inclusion
+in this free, noncommercial release with the credits and source links intact.
+Four full-frame guide captures that exposed real player/browser context are
+not redistributed; the corresponding public guide links and credits remain.
+
+## Garmoth and Session Import
+
+Session Import retains the approved app-managed Garmoth workflow, a reviewed
+snapshot of public sidebar names, numeric site IDs and supported session
+columns, the Garmoth site icon, and PA-origin static item/spot art. The catalog
+records its public page patterns and describes its limits; it does not contain
+an account path, login, credential, cookie, or saved player session.
+
+- Garmoth: <https://garmoth.com/>
+- Catalog provenance is embedded in
+  `windows/session_import/src/SessionImport.App/Assets/garmoth_spot_catalog.json`.
+
+No Garmoth licence or written permission is claimed. The project owner
+approved the credited integration/reference snapshot for the free,
+noncommercial release. Any login, cookies, generated browser profile, drafts,
+receipts, and imported session history remain local to the user's selected
+personal-data folder and are never bundled in a release.
+
+Fish Map uses the vendored `webview_flutter_windows` fork; Session Import uses
+the Microsoft.Web.WebView2 package directly. The fork's BSD-3-Clause licence
+and local-change notice remain in its package. The Microsoft runtime is
+supplied by Windows/the user's installation, and generated browser profiles
+are not part of the installer.
+
 ## Black Spirit Hub shared OCR source
 
 The Windows-only `BlackSpiritStorageOcr` recognition implementation and frozen
@@ -193,6 +263,6 @@ in `docs/public-release-source-matrix.md`.
 Use this repository's **Issues** tab and select **Content correction or
 takedown**. Include the affected file, record, or screen; the source or rights
 basis; and the correction or removal requested. Do not post private personal
-information or confidential proof in a public issue. A private contact address
-must be selected and added before the first public release so sensitive rights
-evidence can be handled privately.
+information or confidential proof in a public issue. If sensitive evidence is
+needed and no private contact route is listed, open a minimal issue asking the
+project owner to provide one before sharing that evidence.

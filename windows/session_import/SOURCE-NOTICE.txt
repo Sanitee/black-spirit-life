@@ -1,0 +1,11 @@
+Session Import sidecar
+
+This production-only source payload was vendored from the accepted standalone
+Session Import Helper implementation on 2026-09-13. Generated files, test
+fixtures, browser profiles, build output, and debug symbols are intentionally
+excluded.
+
+build-publish.ps1 publishes the framework-dependent Windows application and
+native messaging host, compiles the Windows OCR helper outside this source
+tree, copies the exact production browser-extension files, and writes a
+SHA-256 payload manifest beside the runnable.

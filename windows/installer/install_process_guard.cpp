@@ -48,6 +48,7 @@ bool IsUniqueBetaProcessName(const wchar_t *name) {
     return false;
   constexpr const wchar_t *known_names[] = {L"BlackSpiritLife.exe",
                                             L"BlackSpiritLifeUpdater.exe",
+                                            L"BlackSpiritLifeFishHost.exe",
                                             L"BDOActiveNodeScanner.exe"};
   return std::any_of(
       std::begin(known_names), std::end(known_names),

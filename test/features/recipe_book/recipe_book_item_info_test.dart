@@ -7,6 +7,93 @@ import 'package:bdo_craft_planner_flutter/features/recipe_book/recipe_book_item_
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
+  test('shared sections remove blank lines without hiding useful sources', () {
+    final info = withReadableRecipeBookSections(
+      const RecipeBookItemInfo(
+        title: 'Item',
+        kind: 'Material',
+        summary: '',
+        effects: [' ', '\n'],
+        uses: [''],
+        acquisitionNotes: [' ', ' NPC vendor ', 'NPC vendor'],
+        notes: ['\t', 'Requires Heating knowledge.'],
+      ),
+    );
+    expect(info.effects, isEmpty);
+    expect(info.uses, isEmpty);
+    expect(info.acquisitionNotes, ['NPC vendor']);
+    expect(info.notes, ['Requires Heating knowledge.']);
+  });
+
+  test(
+    'Magical Shard retains market acquisition, removes repeated formula prose',
+    () {
+      final curated = curatedRecipeBookInfoForName('Magical Shard')!;
+      final crystal = Ingredient(
+        name: 'Sealed Black Magic Crystal',
+        quantity: 1,
+        options: [],
+        substituteGroup: null,
+        substituteRatios: {},
+      );
+      final powder = Ingredient(
+        name: 'Black Stone Powder',
+        quantity: 1,
+        options: [],
+        substituteGroup: null,
+        substituteRatios: {},
+      );
+      final info = withReadableRecipeBookSections(
+        curated.copyWith(
+          acquisitionFormulas: [
+            RecipeBookFormula(
+              outputName: 'Magical Shard',
+              type: 'processing',
+              method: 'Heating',
+              baseOutput: 1,
+              ingredients: [crystal],
+            ),
+            RecipeBookFormula(
+              outputName: 'Magical Shard',
+              type: 'processing',
+              method: 'Heating',
+              baseOutput: 10,
+              ingredients: [
+                Ingredient(
+                  name: 'Sealed Black Magic Crystal',
+                  quantity: 10,
+                  options: [],
+                  substituteGroup: null,
+                  substituteRatios: {},
+                ),
+                powder,
+              ],
+            ),
+          ],
+        ),
+      );
+      expect(info.acquisitionFormulas, hasLength(2));
+      expect(info.acquisitionNotes, ['Buy from the Central Market.']);
+      expect(
+        withReadableRecipeBookSections(curated).acquisitionNotes,
+        curated.acquisitionNotes,
+      );
+    },
+  );
+  test('curated draught fallbacks retain the revised 20-minute duration', () {
+    for (final name in const <String>[
+      'Adaptation Draught',
+      'Fury Draught',
+      'Harmony Draught',
+    ]) {
+      expect(
+        curatedRecipeBookInfoForName(name)?.notes,
+        contains('Duration: 20 min.'),
+        reason: name,
+      );
+    }
+  });
+
   test('terminal planner leaves do not invent Gathering acquisition', () {
     final info = recipeBookInfoFor(
       name: 'Unclassified Terminal Item',
@@ -576,6 +663,8 @@ void main() {
 
     final spiritStone = infoFor('Guardian Spirit Stone');
     expect(spiritStone?.kind, 'Spirit stone');
+    expect(spiritStone?.summary, contains('activatable'));
+    expect(spiritStone?.summary.toLowerCase(), isNot(contains('charge')));
     expect(
       spiritStone?.effects,
       containsAll(<String>[
@@ -588,10 +677,13 @@ void main() {
     final alchemyStone = infoFor('Splendid Alchemy Stone of Destruction');
     expect(alchemyStone?.kind, 'Alchemy stone');
     expect(alchemyStone?.effects, contains('All AP +13'));
+    expect(alchemyStone?.summary, contains('activatable'));
+    expect(alchemyStone?.summary.toLowerCase(), isNot(contains('recharg')));
 
     final heart = infoFor("Vell's Heart");
     expect(heart?.kind, "Vell's Heart");
     expect(heart?.effects, contains('All AP +8'));
+    expect(heart?.summary.toLowerCase(), isNot(contains('recharg')));
 
     final beasts = infoFor("Beast's Draught");
     expect(beasts?.kind, 'Draught');

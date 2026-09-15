@@ -12,6 +12,16 @@ class WindowHostService {
 
   Future<void> beginDrag() => _invoke('beginDrag');
   Future<void> minimize() => _invoke('minimize');
+
+  /// Asks the native runner to begin its Dart-approved close handshake.
+  ///
+  /// Startup surfaces use this path because they have no local durability
+  /// callback of their own. The runner posts WM_CLOSE without pre-authorizing
+  /// destruction, so the currently installed close-request handler can first
+  /// finish Fish native-surface teardown.
+  Future<void> requestClose() => _invoke('requestClose');
+
+  /// Closes after the caller has already completed its durability barrier.
   Future<void> close() => _invoke('close');
 
   /// Adds or removes a logical-pixel strip below the fixed-ratio workspace.
@@ -47,6 +57,10 @@ class WindowHostService {
       );
       return true;
     });
+    // The native window can exist briefly before Dart reaches this point. Let
+    // it replay one close request that arrived during that startup gap only
+    // after the callback above is able to guard application teardown.
+    unawaited(_invoke('closeHandlerReady'));
   }
 
   void removeCloseRequestHandler() => _channel.setMethodCallHandler(null);

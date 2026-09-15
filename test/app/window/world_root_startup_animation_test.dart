@@ -133,7 +133,10 @@ void main() {
   ) async {
     final pending = Completer<ApplicationBundle>();
     await tester.pumpWidget(
-      BdoCraftPlannerApp(applicationFuture: pending.future),
+      BdoCraftPlannerApp(
+        enableOpportunityAutoCheck: false,
+        applicationFuture: pending.future,
+      ),
     );
     await tester.pump(const Duration(milliseconds: 300));
     expect(find.byType(WorldRootStartupAnimation), findsOneWidget);
@@ -153,6 +156,7 @@ void main() {
     final pending = Completer<ApplicationBundle>();
     await tester.pumpWidget(
       BdoCraftPlannerApp(
+        enableOpportunityAutoCheck: false,
         applicationFuture: pending.future,
         marketGateway: const EmptyMarketGateway(),
       ),

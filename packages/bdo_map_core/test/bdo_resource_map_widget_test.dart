@@ -2040,21 +2040,11 @@ void main() {
       findsOneWidget,
     );
     expect(canvas.nodeNetworkEdgeChanges, isNotEmpty);
-    expect(
-      find.byKey(
-        const ValueKey<String>('resource-map-anchored-details-surface'),
-      ),
-      findsOneWidget,
-    );
-    final detailsRect = tester.getRect(
+
+    await expectLater(
       find.byKey(const ValueKey<String>('resource-map-sidebar-details')),
+      matchesGoldenFile('goldens/resource_map_node_quick_flyout.png'),
     );
-    expect(detailsRect.width, inInclusiveRange(300, 480));
-    expect(detailsRect.height, greaterThan(250));
-    expect(detailsRect.left, greaterThanOrEqualTo(0));
-    expect(detailsRect.top, greaterThanOrEqualTo(0));
-    expect(detailsRect.right, lessThanOrEqualTo(1200));
-    expect(detailsRect.bottom, lessThanOrEqualTo(752));
     expect(
       find.byKey(
         ValueKey<String>('resource-map-node-quick-flyout-${selectedNode.id}'),
@@ -6592,14 +6582,11 @@ void main() {
       final details = find.byKey(
         const ValueKey<String>('resource-map-vendor-details-$davidId'),
       );
-      final portrait = find.descendant(
-        of: details,
-        matching: find.byKey(
-          const ValueKey<String>('test-vendor-portrait-$davidId'),
-        ),
+      final portrait = find.byKey(
+        const ValueKey<String>('test-vendor-portrait-$davidId'),
       );
       expect(portrait, findsOneWidget);
-      expect(tester.getSize(portrait), const Size.square(40));
+      expect(tester.getSize(portrait), const Size.square(30));
       expect(
         find.descendant(
           of: details,
@@ -6943,16 +6930,11 @@ void main() {
       ),
       findsOneWidget,
     );
-    final selectedPortrait = find.descendant(
-      of: find.byKey(
-        const ValueKey<String>('resource-map-vendor-details-$secondId'),
-      ),
-      matching: find.byKey(
-        const ValueKey<String>('test-vendor-portrait-$secondId'),
-      ),
+    final selectedPortrait = find.byKey(
+      const ValueKey<String>('test-vendor-portrait-$secondId'),
     );
     expect(selectedPortrait, findsOneWidget);
-    expect(tester.getSize(selectedPortrait), const Size.square(40));
+    expect(tester.getSize(selectedPortrait), const Size.square(30));
     expect(find.text('Material Vendor'), findsNothing);
     expect(tester.takeException(), isNull);
   });
@@ -7009,7 +6991,7 @@ void main() {
     final marker = find.byKey(
       const ValueKey<String>('resource-map-vendor-marker-$davidId'),
     );
-    expect(tester.getSize(marker), const Size(56, 56));
+    expect(tester.getSize(marker), const Size(48, 48));
     await tester.tap(
       find.descendant(of: marker, matching: find.byType(InkResponse)),
     );

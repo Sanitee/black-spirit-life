@@ -1,10 +1,12 @@
 import 'dart:async';
 import 'dart:io';
 import 'dart:typed_data';
+import 'dart:ui' as ui;
 
 import 'package:bdo_craft_planner_flutter/data/catalog/bundled_catalog_parser.dart';
 import 'package:bdo_craft_planner_flutter/data/catalog/catalog_repository.dart';
 import 'package:bdo_craft_planner_flutter/data/icons/custom_icon_store.dart';
+import 'package:bdo_craft_planner_flutter/domain/models/craft_mode.dart';
 import 'package:bdo_craft_planner_flutter/domain/state/planner_state.dart';
 import 'package:bdo_craft_planner_flutter/domain/state/state_copy.dart';
 import 'package:bdo_craft_planner_flutter/features/shared/custom_icon_store_scope.dart';
@@ -18,6 +20,91 @@ import '../planner/planner_test_fixture.dart';
 import 'custom_icon_test_support.dart';
 
 void main() {
+  testWidgets('contain keeps non-square bundled artwork bytes and full edges', (
+    tester,
+  ) async {
+    final stored = (await tester.runAsync(StoredIconTestFixture.create))!;
+    addTearDown(() => tester.runAsync(stored.dispose));
+    final harness = PlannerTestHarness();
+    final repository = CatalogRepository(
+      const BundledCatalogParser().parse(
+        File('assets/data/app-data.json').readAsStringSync(),
+      ),
+    );
+    try {
+      expect(
+        ModeItemIcon(
+          controller: harness.controller.active,
+          name: 'Magnetite Ore',
+          size: 44,
+        ).fit,
+        BoxFit.cover,
+      );
+      for (final source in [
+        (name: "Margahan's Artifact", width: 48),
+        (name: 'Melted Magnetite Shard', width: 56),
+        (name: 'Magnetite Ore', width: 48),
+      ]) {
+        final uri = repository.iconDataUriAcrossModes(
+          CraftMode.processing,
+          source.name,
+        );
+        expect(uri, isNotNull);
+        final originalBytes = Uri.parse(uri!).data!.contentAsBytes();
+        final dimensions = await tester.runAsync(() async {
+          final codec = await ui.instantiateImageCodec(originalBytes);
+          try {
+            final frame = await codec.getNextFrame();
+            try {
+              return Size(
+                frame.image.width.toDouble(),
+                frame.image.height.toDouble(),
+              );
+            } finally {
+              frame.image.dispose();
+            }
+          } finally {
+            codec.dispose();
+          }
+        });
+        expect(dimensions, Size(source.width.toDouble(), 44));
+        for (final fit in [null, BoxFit.contain]) {
+          await tester.pumpWidget(
+            _host(
+              harness: harness,
+              store: stored.store,
+              name: source.name,
+              searchAcrossModes: true,
+              catalogRepository: repository,
+              fit: fit,
+              size: 44,
+            ),
+          );
+          final image = tester.widget<Image>(
+            find.byKey(ModeItemIconKeys.image(source.name)),
+          );
+          expect(image.fit, fit ?? BoxFit.cover);
+          expect(
+            (image.image as MemoryImage).bytes,
+            orderedEquals(originalBytes),
+          );
+          expect(tester.getSize(find.byType(ModeItemIcon)), const Size(44, 44));
+          if (fit == BoxFit.contain) {
+            final fitted = applyBoxFit(fit!, dimensions!, const Size(44, 44));
+            expect(fitted.source, dimensions);
+            expect(fitted.destination.width, 44);
+            expect(fitted.destination.height, lessThan(44));
+          }
+        }
+      }
+      expect(tester.takeException(), isNull);
+    } finally {
+      await tester.pumpWidget(const SizedBox.shrink());
+      await harness.controller.dispose();
+      stored.store.dispose();
+    }
+  });
+
   testWidgets(
     'custom files load asynchronously and missing files replace cached art',
     (tester) async {
@@ -46,6 +133,21 @@ void main() {
       );
       final image = find.byKey(ModeItemIconKeys.image('Clear Liquid Reagent'));
       await pumpUntilIconState(tester, image);
+      expect(
+        (tester.widget<Image>(image).image as MemoryImage).bytes,
+        orderedEquals(stored.bytes),
+      );
+      expect(tester.widget<Image>(image).fit, BoxFit.cover);
+      await tester.pumpWidget(
+        _host(
+          harness: harness,
+          store: stored.store,
+          name: 'Clear Liquid Reagent',
+          fit: BoxFit.contain,
+        ),
+      );
+      await pumpUntilIconState(tester, image);
+      expect(tester.widget<Image>(image).fit, BoxFit.contain);
       expect(
         (tester.widget<Image>(image).image as MemoryImage).bytes,
         orderedEquals(stored.bytes),
@@ -222,6 +324,8 @@ Widget _host({
   bool searchAcrossModes = false,
   IconData? fallbackIcon,
   CatalogRepository? catalogRepository,
+  BoxFit? fit,
+  double size = 48,
 }) => MaterialApp(
   theme: StandardSpec.theme.materialTheme(),
   home: ThemeSpecScope(
@@ -233,7 +337,8 @@ Widget _host({
           child: ModeItemIcon(
             controller: harness.controller.active,
             name: name,
-            size: 48,
+            size: size,
+            fit: fit ?? BoxFit.cover,
             aliases: aliases,
             searchAcrossModes: searchAcrossModes,
             fallbackIcon: fallbackIcon,

@@ -33,6 +33,25 @@ void main() {
     expect(vendorOnly.hasWorkerNodes, isFalse);
     expect(vendorOnly.resourceIdFor(PlannerMapLookupSource.npcVendors), isNull);
 
+    final purifiedWater = resolvePlannerMapLookupAvailability(
+      dataset,
+      'Purified Water',
+    );
+    expect(purifiedWater.hasNpcVendors, isTrue);
+    expect(purifiedWater.npcVendorCount, 2);
+    expect(purifiedWater.hasWorkerNodes, isTrue);
+    expect(purifiedWater.workerResourceId, 'item:6656');
+    expect(purifiedWater.hasManualGathering, isFalse);
+
+    final honey = resolvePlannerMapLookupAvailability(dataset, 'Cooking Honey');
+    expect(honey.hasManualGathering, isTrue);
+    expect(honey.manualResourceId, 'item:7701');
+    expect(honey.manualMaterialName, 'Wild Beehives');
+    expect(honey.manualLocationCount, greaterThan(0));
+    expect(honey.hasWorkerNodes, isTrue);
+    expect(honey.workerResourceId, 'item:7702');
+    expect(honey.workerNodeCount, 2);
+
     final both = resolvePlannerMapLookupAvailability(dataset, ' Thuja   Sap ');
     expect(both.hasManualGathering, isTrue);
     expect(both.manualResourceId, 'item:5020');

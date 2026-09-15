@@ -14,8 +14,6 @@ import 'package:bdo_craft_planner_flutter/domain/models/craft_mode.dart';
 import 'package:bdo_craft_planner_flutter/domain/state/planner_state.dart';
 import 'package:bdo_craft_planner_flutter/domain/state/state_copy.dart';
 import 'package:bdo_craft_planner_flutter/features/about/about.dart';
-import 'package:bdo_craft_planner_flutter/features/fishing/fishing.dart';
-import 'package:bdo_craft_planner_flutter/features/gathering/gathering_workspace.dart';
 import 'package:bdo_craft_planner_flutter/features/inventory/inventory.dart';
 import 'package:bdo_craft_planner_flutter/features/planner/planner.dart';
 import 'package:bdo_craft_planner_flutter/features/recipe_book/recipe_book.dart';
@@ -30,7 +28,11 @@ import '../../support/application_test_harness.dart';
 void main() {
   test('Windows runner keeps the proportional 1575x987 launch frame', () {
     final runnerSource = File('windows/runner/main.cpp').readAsStringSync();
-    expect(runnerSource, contains('Win32Window::Size size(1575, 987);'));
+    expect(
+      runnerSource,
+      contains('Win32Window::Size size(reference_mode ? 540 : 1575,'),
+    );
+    expect(runnerSource, contains('reference_mode ? 620 : 987);'));
   });
 
   testWidgets('isolated production bundle loads in the widget test zone', (
@@ -52,6 +54,7 @@ void main() {
       ))!;
       await tester.pumpWidget(
         BdoCraftPlannerApp(
+          enableOpportunityAutoCheck: false,
           applicationFuture: Future.value(harness.bundle),
           marketGateway: const EmptyMarketGateway(),
         ),
@@ -70,71 +73,6 @@ void main() {
     },
   );
 
-  testWidgets(
-    'five public destinations are available and fresh journals stay empty',
-    (tester) async {
-      configureApplicationTestSurface(tester, const Size(1575, 987));
-      final harness = (await tester.runAsync(
-        () => ApplicationTestHarness.create(),
-      ))!;
-      await tester.pumpWidget(
-        BdoCraftPlannerApp(
-          applicationFuture: Future.value(harness.bundle),
-          marketGateway: const EmptyMarketGateway(),
-          enableBetaUpdates: false,
-        ),
-      );
-      await _pumpWorkspace(tester);
-
-      const tabNames = <String>[
-        'planner',
-        'resource-map',
-        'gathering',
-        'fishing',
-        'opportunities',
-      ];
-      for (final name in tabNames) {
-        expect(
-          find.byKey(ValueKey<String>('top-workspace-tab-$name')),
-          findsOneWidget,
-        );
-      }
-
-      await tester.tap(
-        find.byKey(const ValueKey<String>('top-workspace-tab-gathering')),
-      );
-      await _pumpWorkspace(tester);
-      expect(find.byType(GatheringWorkspace), findsOneWidget);
-
-      await tester.tap(
-        find.byKey(const ValueKey<String>('top-workspace-tab-fishing')),
-      );
-      await _pumpWorkspace(tester);
-      expect(find.byType(FishingWorkspace), findsOneWidget);
-
-      final personalRoot =
-          harness.bundle.personalDataLocation.applicationDirectory.path;
-      await tester.runAsync(() async {
-        expect(
-          await File(
-            '$personalRoot${Platform.pathSeparator}gathering'
-            '${Platform.pathSeparator}gathering-state.json',
-          ).exists(),
-          isFalse,
-        );
-        expect(
-          await File(
-            '$personalRoot${Platform.pathSeparator}fishing'
-            '${Platform.pathSeparator}fishing-journal.json',
-          ).exists(),
-          isFalse,
-        );
-      });
-
-      await _disposeWidgetHarness(tester, harness);
-    },
-  );
-
   testWidgets('a retained About view falls back to Planner while gated', (
     tester,
   ) async {
@@ -145,6 +83,7 @@ void main() {
 
     await tester.pumpWidget(
       BdoCraftPlannerApp(
+        enableOpportunityAutoCheck: false,
         applicationFuture: Future.value(harness.bundle),
         marketGateway: const EmptyMarketGateway(),
         enableBetaUpdates: false,
@@ -193,6 +132,7 @@ void main() {
 
       await tester.pumpWidget(
         BdoCraftPlannerApp(
+          enableOpportunityAutoCheck: false,
           applicationFuture: Future.value(harness.bundle),
           marketGateway: const EmptyMarketGateway(),
         ),
@@ -276,6 +216,7 @@ void main() {
     );
     await tester.pumpWidget(
       BdoCraftPlannerApp(
+        enableOpportunityAutoCheck: false,
         applicationFuture: Future.value(harness.bundle),
         marketGateway: const EmptyMarketGateway(),
       ),
@@ -331,6 +272,7 @@ void main() {
 
       await tester.pumpWidget(
         BdoCraftPlannerApp(
+          enableOpportunityAutoCheck: false,
           applicationFuture: Future.value(harness.bundle),
           marketGateway: gateway,
         ),
@@ -460,6 +402,7 @@ void main() {
 
     await tester.pumpWidget(
       BdoCraftPlannerApp(
+        enableOpportunityAutoCheck: false,
         applicationFuture: Future.value(harness.bundle),
         marketGateway: const EmptyMarketGateway(),
       ),
@@ -587,6 +530,7 @@ void main() {
 
       await tester.pumpWidget(
         BdoCraftPlannerApp(
+          enableOpportunityAutoCheck: false,
           applicationFuture: Future.value(harness.bundle),
           marketGateway: const EmptyMarketGateway(),
         ),
@@ -696,6 +640,7 @@ void main() {
 
       await tester.pumpWidget(
         BdoCraftPlannerApp(
+          enableOpportunityAutoCheck: false,
           applicationFuture: Future.value(harness.bundle),
           marketGateway: const EmptyMarketGateway(),
         ),
@@ -760,6 +705,7 @@ void main() {
 
       await tester.pumpWidget(
         BdoCraftPlannerApp(
+          enableOpportunityAutoCheck: false,
           applicationFuture: Future.value(harness.bundle),
           marketGateway: const EmptyMarketGateway(),
         ),
@@ -812,6 +758,7 @@ void main() {
       );
       await tester.pumpWidget(
         BdoCraftPlannerApp(
+          enableOpportunityAutoCheck: false,
           applicationFuture: Future.value(harness.bundle),
           marketGateway: const EmptyMarketGateway(),
         ),
@@ -869,6 +816,7 @@ void main() {
     final application = Completer<ApplicationBundle>();
     await tester.pumpWidget(
       BdoCraftPlannerApp(
+        enableOpportunityAutoCheck: false,
         applicationFuture: application.future,
         marketGateway: const EmptyMarketGateway(),
       ),
@@ -910,6 +858,7 @@ void main() {
 
       await tester.pumpWidget(
         BdoCraftPlannerApp(
+          enableOpportunityAutoCheck: false,
           applicationFuture: Future.value(harness.bundle),
           marketGateway: const EmptyMarketGateway(),
         ),

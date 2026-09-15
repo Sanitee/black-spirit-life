@@ -2,19 +2,15 @@ import 'dart:async';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 
 import '../../app/state/planner_application_controller.dart';
-import '../../domain/formatting/planner_formatters.dart';
 import '../../domain/models/craft_mode.dart';
 import '../../domain/state/inventory_storage.dart';
 import '../../domain/state/planner_state.dart';
 import '../../domain/state/state_copy.dart';
 import '../../domain/state/transactions/state_transactions.dart';
 import '../../visual/visual.dart';
-import '../shared/mode_item_icon.dart';
 import 'inventory_action_keys.dart';
-import 'inventory_amount_input_formatter.dart';
 import 'inventory_contracts.dart';
 import 'inventory_item_row.dart';
 import 'inventory_projection.dart';
@@ -700,22 +696,6 @@ class _InventoryViewState extends State<InventoryView> {
     required List<InventoryItemRecord> rows,
   }) {
     final actionButtons = <Widget>[
-      AppButton(
-        key: InventoryActionKeys.addItem,
-        role: AppButtonRole.primary,
-        minimumSize: const Size(0, 40),
-        padding: const EdgeInsets.symmetric(horizontal: 13, vertical: 8),
-        semanticLabel: 'Add an item to Inventory',
-        onPressed: () => unawaited(_addItemManually(projection: projection)),
-        child: const Row(
-          mainAxisSize: MainAxisSize.min,
-          children: <Widget>[
-            Icon(Icons.add_rounded, size: 19),
-            SizedBox(width: 7),
-            Text('Add item'),
-          ],
-        ),
-      ),
       if (widget.externalActions.pasteScreenshot != null)
         AppButton(
           key: InventoryActionKeys.pasteScreenshot,
@@ -1089,57 +1069,6 @@ class _InventoryViewState extends State<InventoryView> {
         const SizedBox(height: 8),
         _buildGroupTools(context, state: state, projection: projection),
       ],
-    );
-  }
-
-  Future<void> _addItemManually({
-    required InventoryProjection projection,
-  }) async {
-    final availableItems = projection.items
-        .where((item) => !item.savedOnly && !item.equipmentLike)
-        .toList(growable: false);
-    if (availableItems.isEmpty) {
-      _setStatus('There are no planner items available to add.', error: true);
-      return;
-    }
-    final result = await showDialog<_ManualInventoryItemResult>(
-      context: context,
-      builder: (context) => _ManualInventoryItemDialog(
-        controller: widget.controller,
-        items: availableItems,
-        amountFor: (name) {
-          for (final item in projection.items) {
-            if (_same(item.name, name)) return item.owned;
-          }
-          return 0;
-        },
-      ),
-    );
-    if (!mounted || result == null) return;
-
-    final modeController = widget.controller;
-    final before = modeController.owner.documentSnapshot;
-    try {
-      await modeController.owner.updateDocumentDurably(
-        (document) => setSharedInventoryAmounts(document, <String, double>{
-          result.itemName: result.amount,
-        }),
-      );
-    } on Object catch (error) {
-      _setStatus(
-        '${result.itemName} was not saved because the change could not be written. $error',
-        error: true,
-      );
-      return;
-    }
-    if (!mounted || !identical(modeController, widget.controller)) return;
-    _session.selectedItem = result.itemName;
-    final message = '${result.itemName} saved in Inventory.';
-    _offerInventoryUndo(
-      operation: 'add-inventory-item',
-      message: message,
-      before: before,
-      after: modeController.owner.documentSnapshot,
     );
   }
 
@@ -2215,192 +2144,6 @@ int _compareNames(String left, String right) {
   return folded != 0 ? folded : left.compareTo(right);
 }
 
-final class _ManualInventoryItemDialog extends StatefulWidget {
-  const _ManualInventoryItemDialog({
-    required this.controller,
-    required this.items,
-    required this.amountFor,
-  });
-
-  final ModeFeatureController controller;
-  final List<InventoryItemRecord> items;
-  final double Function(String itemName) amountFor;
-
-  @override
-  State<_ManualInventoryItemDialog> createState() =>
-      _ManualInventoryItemDialogState();
-}
-
-final class _ManualInventoryItemDialogState
-    extends State<_ManualInventoryItemDialog> {
-  late final TextEditingController _itemQuery = TextEditingController();
-  late final TextEditingController _amount = TextEditingController(text: '1');
-  InventoryItemRecord? _selected;
-  String? _error;
-
-  @override
-  void dispose() {
-    _itemQuery.dispose();
-    _amount.dispose();
-    super.dispose();
-  }
-
-  void _select(InventoryItemRecord item) {
-    final saved = widget.amountFor(item.name);
-    setState(() {
-      _selected = item;
-      _itemQuery.value = TextEditingValue(
-        text: item.name,
-        selection: TextSelection.collapsed(offset: item.name.length),
-      );
-      _amount.value = TextEditingValue(
-        text: saved > 0 ? formatGroupedEditableQuantity(saved) : '1',
-        selection: TextSelection.collapsed(
-          offset: saved > 0 ? formatGroupedEditableQuantity(saved).length : 1,
-        ),
-      );
-      _error = null;
-    });
-  }
-
-  void _submit([String? _]) {
-    final selected = _selected;
-    final amount = parsePlannerNumber(_amount.text);
-    if (selected == null) {
-      setState(() => _error = 'Choose an item');
-      return;
-    }
-    if (amount == null || amount <= 0) {
-      setState(() => _error = 'Enter an amount above 0');
-      return;
-    }
-    Navigator.of(
-      context,
-    ).pop(_ManualInventoryItemResult(itemName: selected.name, amount: amount));
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final maxHeight = (MediaQuery.sizeOf(context).height - 40).clamp(
-      320.0,
-      700.0,
-    );
-    return Dialog(
-      backgroundColor: Colors.transparent,
-      child: ConstrainedBox(
-        key: const ValueKey<String>('inventory-manual-dialog-frame'),
-        constraints: BoxConstraints(maxWidth: 500, maxHeight: maxHeight),
-        child: AppSurface(
-          role: AppSurfaceRole.modal,
-          semanticLabel: 'Add an inventory item',
-          padding: const EdgeInsets.all(16),
-          child: SingleChildScrollView(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: <Widget>[
-                const SectionHeader(title: 'Add item'),
-                const SizedBox(height: 12),
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: <Widget>[
-                    if (_selected case final selected?) ...<Widget>[
-                      ModeItemIcon(
-                        controller: widget.controller,
-                        name: selected.name,
-                        size: 44,
-                        searchAcrossModes: true,
-                      ),
-                      const SizedBox(width: 10),
-                    ],
-                    Expanded(
-                      child: AppSearchSelect<InventoryItemRecord>(
-                        key: const ValueKey<String>(
-                          'inventory-manual-item-select',
-                        ),
-                        controller: _itemQuery,
-                        value: _selected,
-                        items: widget.items,
-                        labelFor: (item) => item.name,
-                        hintText: 'Search items',
-                        semanticLabel: 'Item to add',
-                        anchorMaxLines: 2,
-                        onSelected: _select,
-                        onQueryChanged: (_) {
-                          if (_selected != null &&
-                              !_same(_selected!.name, _itemQuery.text)) {
-                            setState(() => _selected = null);
-                          }
-                        },
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    SizedBox(
-                      width: 132,
-                      child: AppTextField(
-                        key: const ValueKey<String>(
-                          'inventory-manual-item-amount',
-                        ),
-                        controller: _amount,
-                        semanticLabel: 'Amount to save',
-                        hintText: 'Amount',
-                        keyboardType: const TextInputType.numberWithOptions(
-                          decimal: true,
-                        ),
-                        inputFormatters: const <TextInputFormatter>[
-                          InventoryAmountInputFormatter(),
-                        ],
-                        textAlign: TextAlign.right,
-                        onSubmitted: _submit,
-                        suffixIcon: _error == null
-                            ? null
-                            : Tooltip(
-                                message: _error!,
-                                child: const Icon(
-                                  Icons.error_outline,
-                                  size: 18,
-                                ),
-                              ),
-                      ),
-                    ),
-                  ],
-                ),
-                if (_error != null) ...<Widget>[
-                  const SizedBox(height: 6),
-                  Text(
-                    _error!,
-                    style: context.visualTheme.typography.meta.copyWith(
-                      color: context.visualTheme.palette.danger,
-                      fontStyle: FontStyle.normal,
-                    ),
-                  ),
-                ],
-                const SizedBox(height: 16),
-                Wrap(
-                  alignment: WrapAlignment.end,
-                  spacing: 8,
-                  runSpacing: 8,
-                  children: <Widget>[
-                    AppButton.label(
-                      'Cancel',
-                      onPressed: () => Navigator.of(context).pop(),
-                    ),
-                    AppButton.label(
-                      'Save item',
-                      role: AppButtonRole.primary,
-                      onPressed: _submit,
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
 final class _EmptyInventoryDialog extends StatelessWidget {
   const _EmptyInventoryDialog({required this.itemCount});
 
@@ -2448,16 +2191,6 @@ final class _EmptyInventoryDialog extends StatelessWidget {
       ),
     ),
   );
-}
-
-final class _ManualInventoryItemResult {
-  const _ManualInventoryItemResult({
-    required this.itemName,
-    required this.amount,
-  });
-
-  final String itemName;
-  final double amount;
 }
 
 final class _InventoryItemEditorDialog extends StatefulWidget {

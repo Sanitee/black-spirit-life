@@ -101,7 +101,7 @@ void main() {
   }
 
   testWidgets(
-    'third tab mounts lazily, retains both panes and leaves the planner intact',
+    'fifth tab mounts lazily, retains both panes and leaves the planner intact',
     (tester) async {
       configureApplicationTestSurface(tester, const Size(1500, 940));
       final harness = await _createHarness(tester);
@@ -116,7 +116,13 @@ void main() {
       await tester.pumpWidget(_host(harness, window));
       await tester.pump();
 
-      final topTabs = ['planner', 'resource-map', 'opportunities'];
+      final topTabs = [
+        'planner',
+        'resource-map',
+        'gathering',
+        'fish-map',
+        'opportunities',
+      ];
       for (final tab in topTabs) {
         expect(_topTab(tab), findsOneWidget);
       }
@@ -458,6 +464,7 @@ Widget _host(
     bundle: harness.bundle,
     marketGateway: const EmptyMarketGateway(),
     windowHost: window,
+    fishMapWorkspace: const SizedBox.shrink(),
     enableBetaUpdates: false,
     enableOpportunityAutoCheck: autoCheck,
     opportunityMarketServiceFactory: serviceFactory,

@@ -1,12 +1,16 @@
 name: bdo_craft_planner_flutter
 description: Free unofficial Windows-first Black Spirit Life companion
 publish_to: none
-version: 0.1.7+26
+version: 0.1.9+28
 
 environment:
   sdk: ^3.12.2
 
 dependencies:
+  bdo_fishing_core:
+    path: packages/bdo_fishing_core
+  bdo_gathering_companion:
+    path: packages/bdo_gathering_companion
   bdo_map_core:
     path: packages/bdo_map_core
   crypto: ^3.0.7
@@ -29,6 +33,8 @@ flutter:
     - assets/scenes/
     - assets/ledger/
     - assets/app/
+    - assets/app/bdo_gathering_tab_icon.webp
+    - assets/app/bdo_fish_map_tab_icon.webp
+    - assets/opportunities/items/
     - assets/sakura/botanicals/
     - assets/sakura/materials/
-    - assets/opportunities/items/

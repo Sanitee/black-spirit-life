@@ -82,6 +82,7 @@ set(FLUTTER_MANAGED_DIR "${CMAKE_CURRENT_SOURCE_DIR}/flutter")
 add_subdirectory(${FLUTTER_MANAGED_DIR})
 
 # Application build; see runner/CMakeLists.txt.
+include(CTest)
 add_subdirectory("runner")
 
 # Build the shared storage recognizer as a self-contained, isolated payload.
@@ -111,6 +112,58 @@ add_custom_target(BlackSpiritStorageOcrPayload
   DEPENDS "${STORAGE_OCR_EXECUTABLE}")
 add_dependencies(${BINARY_NAME} BlackSpiritStorageOcrPayload)
 
+# Publish the Session Import helper as a separate, framework-dependent payload.
+# Its native OCR executable and Firefox bridge remain outside the Flutter
+# process and are installed together beneath the main runnable.
+set(SESSION_IMPORT_SOURCE_DIR
+  "${CMAKE_CURRENT_SOURCE_DIR}/session_import")
+set(SESSION_IMPORT_PUBLISH_DIR "${CMAKE_BINARY_DIR}/session_import")
+set(SESSION_IMPORT_EXECUTABLE
+  "${SESSION_IMPORT_PUBLISH_DIR}/Session Import.exe")
+set(SESSION_IMPORT_OCR_EXECUTABLE
+  "${SESSION_IMPORT_PUBLISH_DIR}/SummaryOcrNative.exe")
+set(SESSION_IMPORT_HOST_EXECUTABLE
+  "${SESSION_IMPORT_PUBLISH_DIR}/browser_helper/BlackSpiritSessionImportHost.exe")
+set(SESSION_IMPORT_PAYLOAD_MANIFEST
+  "${SESSION_IMPORT_PUBLISH_DIR}/payload-manifest.json")
+set(SESSION_IMPORT_EXTENSION_MANIFEST
+  "${SESSION_IMPORT_PUBLISH_DIR}/browser_extension/tracker_helper/manifest.json")
+file(GLOB_RECURSE SESSION_IMPORT_INPUTS CONFIGURE_DEPENDS
+  "${SESSION_IMPORT_SOURCE_DIR}/*.cs"
+  "${SESSION_IMPORT_SOURCE_DIR}/*.csproj"
+  "${SESSION_IMPORT_SOURCE_DIR}/*.xaml"
+  "${SESSION_IMPORT_SOURCE_DIR}/*.cpp"
+  "${SESSION_IMPORT_SOURCE_DIR}/*.ps1"
+  "${SESSION_IMPORT_SOURCE_DIR}/*.ico"
+  "${SESSION_IMPORT_SOURCE_DIR}/*.png"
+  "${SESSION_IMPORT_SOURCE_DIR}/*.json"
+  "${SESSION_IMPORT_SOURCE_DIR}/*.js"
+  "${SESSION_IMPORT_SOURCE_DIR}/*.html"
+  "${SESSION_IMPORT_SOURCE_DIR}/*.css"
+  "${SESSION_IMPORT_SOURCE_DIR}/*.txt")
+add_custom_command(
+  OUTPUT
+    "${SESSION_IMPORT_EXECUTABLE}"
+    "${SESSION_IMPORT_OCR_EXECUTABLE}"
+    "${SESSION_IMPORT_HOST_EXECUTABLE}"
+    "${SESSION_IMPORT_PAYLOAD_MANIFEST}"
+    "${SESSION_IMPORT_EXTENSION_MANIFEST}"
+  COMMAND powershell.exe -NoProfile -ExecutionPolicy Bypass
+    -File "${SESSION_IMPORT_SOURCE_DIR}/build-publish.ps1"
+    -Configuration Release
+    -OutputPath "${SESSION_IMPORT_PUBLISH_DIR}"
+  DEPENDS ${SESSION_IMPORT_INPUTS}
+  COMMENT "Publishing the isolated Session Import helper"
+  VERBATIM)
+add_custom_target(BlackSpiritSessionImportPayload
+  DEPENDS
+    "${SESSION_IMPORT_EXECUTABLE}"
+    "${SESSION_IMPORT_OCR_EXECUTABLE}"
+    "${SESSION_IMPORT_HOST_EXECUTABLE}"
+    "${SESSION_IMPORT_PAYLOAD_MANIFEST}"
+    "${SESSION_IMPORT_EXTENSION_MANIFEST}")
+add_dependencies(${BINARY_NAME} BlackSpiritSessionImportPayload)
+
 
 # Generated plugin build rules, which manage building the plugins and adding
 # them to the application.
@@ -138,12 +191,22 @@ install(TARGETS BDOActiveNodeScanner RUNTIME DESTINATION "${CMAKE_INSTALL_PREFIX
 install(TARGETS BlackSpiritLifeUpdater
   RUNTIME DESTINATION "${CMAKE_INSTALL_PREFIX}"
   COMPONENT Runtime)
+install(TARGETS BlackSpiritLifeFishHost
+  RUNTIME DESTINATION "${CMAKE_INSTALL_PREFIX}"
+  COMPONENT Runtime)
 
 install(CODE "
   file(REMOVE_RECURSE \"${CMAKE_INSTALL_PREFIX}/storage_ocr\")
   " COMPONENT Runtime)
 install(DIRECTORY "${STORAGE_OCR_PUBLISH_DIR}/"
   DESTINATION "${CMAKE_INSTALL_PREFIX}/storage_ocr"
+  COMPONENT Runtime)
+
+install(CODE "
+  file(REMOVE_RECURSE \"${CMAKE_INSTALL_PREFIX}/session_import\")
+  " COMPONENT Runtime)
+install(DIRECTORY "${SESSION_IMPORT_PUBLISH_DIR}/"
+  DESTINATION "${CMAKE_INSTALL_PREFIX}/session_import"
   COMPONENT Runtime)
 
 install(FILES "${VELOPACK_DLL}" DESTINATION "${INSTALL_BUNDLE_LIB_DIR}"

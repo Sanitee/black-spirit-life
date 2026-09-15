@@ -1,0 +1,45 @@
+{
+  "manifest_version": 3,
+  "name": "Black Spirit Life Session Import Helper",
+  "version": "0.1.1",
+  "description": "Prepares reviewed BDO session drafts on Garmoth without submitting them.",
+  "permissions": [
+    "nativeMessaging",
+    "storage"
+  ],
+  "host_permissions": [
+    "https://garmoth.com/grind-tracker/*"
+  ],
+  "background": {
+    "scripts": [
+      "background.js"
+    ]
+  },
+  "action": {
+    "default_title": "Connect Session Import Helper"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "https://garmoth.com/grind-tracker/*"
+      ],
+      "js": [
+        "protocol.js",
+        "content.js"
+      ],
+      "run_at": "document_idle"
+    }
+  ],
+  "incognito": "not_allowed",
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "session-import-trial@blackspirit.life",
+      "strict_min_version": "121.0",
+      "data_collection_permissions": {
+        "required": [
+          "none"
+        ]
+      }
+    }
+  }
+}

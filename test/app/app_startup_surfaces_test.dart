@@ -29,7 +29,10 @@ void main() {
     final pending = Completer<ApplicationBundle>();
 
     await tester.pumpWidget(
-      BdoCraftPlannerApp(applicationFuture: pending.future),
+      BdoCraftPlannerApp(
+        enableOpportunityAutoCheck: false,
+        applicationFuture: pending.future,
+      ),
     );
 
     expect(find.byType(SakuraNightGardenBackdrop), findsOneWidget);
@@ -73,7 +76,10 @@ void main() {
     final pending = Completer<ApplicationBundle>();
 
     await tester.pumpWidget(
-      BdoCraftPlannerApp(applicationFuture: pending.future),
+      BdoCraftPlannerApp(
+        enableOpportunityAutoCheck: false,
+        applicationFuture: pending.future,
+      ),
     );
 
     expect(find.text('Preparing your planner'), findsOneWidget);
@@ -87,7 +93,10 @@ void main() {
   testWidgets('startup failure is a retained danger surface', (tester) async {
     final pending = Completer<ApplicationBundle>();
     await tester.pumpWidget(
-      BdoCraftPlannerApp(applicationFuture: pending.future),
+      BdoCraftPlannerApp(
+        enableOpportunityAutoCheck: false,
+        applicationFuture: pending.future,
+      ),
     );
 
     pending.completeError(StateError('catalog unavailable'));
@@ -196,6 +205,7 @@ void main() {
 
     await tester.pumpWidget(
       BdoCraftPlannerApp(
+        enableOpportunityAutoCheck: false,
         applicationFuture: Future<ApplicationBundle>.value(pendingBundle),
       ),
     );

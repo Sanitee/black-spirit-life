@@ -92,12 +92,12 @@ void main() {
     test('prefers a compiled private source over the process environment', () {
       expect(
         BetaUpdateSource.resolve(
-          compiledValue: r' C:\public-stable-feed ',
+          compiledValue: r' C:\private-feed ',
           process: const <String, String>{
             BetaUpdateSource.environmentKey: r'C:\other-feed',
           },
         ),
-        r'C:\public-stable-feed',
+        r'C:\private-feed',
       );
     });
 
@@ -121,7 +121,7 @@ void main() {
       );
       final controller = BetaUpdateController(
         service: service,
-        source: r'C:\public-stable-feed',
+        source: r'C:\private-feed',
         enabled: false,
       );
 
@@ -198,7 +198,7 @@ void main() {
         );
         final controller = BetaUpdateController(
           service: service,
-          source: r'C:\public-stable-feed',
+          source: r'C:\private-feed',
         );
 
         await controller.checkOnce();
@@ -213,7 +213,7 @@ void main() {
 
         expect(service.currentStatusCalls, 1);
         expect(service.checkCalls, 1);
-        expect(service.lastSource, r'C:\public-stable-feed');
+        expect(service.lastSource, r'C:\private-feed');
         expect(controller.snapshot.phase, BetaUpdatePhase.available);
         controller.dispose();
         await service.dispose();
@@ -224,7 +224,7 @@ void main() {
       final service = _ReadyStatusUpdateService();
       final controller = BetaUpdateController(
         service: service,
-        source: r'C:\public-stable-feed',
+        source: r'C:\private-feed',
       );
 
       await controller.checkOnce();
@@ -253,7 +253,7 @@ void main() {
       );
       final controller = BetaUpdateController(
         service: service,
-        source: r'C:\public-stable-feed',
+        source: r'C:\private-feed',
       );
 
       expect(await controller.prepareRestart(), isFalse);
@@ -308,7 +308,7 @@ void main() {
       final service = _DeferredActionUpdateService();
       final controller = BetaUpdateController(
         service: service,
-        source: r'C:\public-stable-feed',
+        source: r'C:\private-feed',
       );
 
       await controller.checkOnce();
@@ -338,7 +338,7 @@ void main() {
       final service = _DeferredStatusUpdateService();
       final controller = BetaUpdateController(
         service: service,
-        source: r'C:\public-stable-feed',
+        source: r'C:\private-feed',
       );
 
       final check = controller.checkOnce();
@@ -386,7 +386,7 @@ void main() {
         final subscription = service.snapshots.listen(events.add);
 
         await service.currentStatus();
-        await service.checkForUpdates(r'C:\public-stable-feed');
+        await service.checkForUpdates(r'C:\private-feed');
         await service.downloadUpdate();
         await TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
             .handlePlatformMessage(
@@ -410,7 +410,7 @@ void main() {
         ]);
         expect(
           (calls[1].arguments as Map<Object?, Object?>)['source'],
-          r'C:\public-stable-feed',
+          r'C:\private-feed',
         );
         expect(
           events,

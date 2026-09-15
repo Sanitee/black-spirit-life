@@ -97,7 +97,7 @@ void main() {
       );
     });
 
-    test('Windows runner and plugin registration contain no embedded browser', () {
+    test('Windows runner contains no unapproved embedded browser integration', () {
       final requiredIntegrationFiles = <File>[
         File(_join(project.path, 'windows', 'CMakeLists.txt')),
         File(_join(project.path, 'windows', 'flutter', 'CMakeLists.txt')),
@@ -162,6 +162,7 @@ void main() {
           r'(?:webview|chromium|cefsharp|libcef|electron)',
           caseSensitive: false,
         ),
+        sourceTransform: _removeApprovedGeneratedPluginReferences,
       );
       violations.addAll(_windowsPluginMetadataViolations(project));
       violations.sort();
@@ -170,8 +171,10 @@ void main() {
         violations,
         isEmpty,
         reason:
-            'The native Windows runner and generated plugin registration must '
-            'host Flutter directly and must not link or register a browser engine.',
+            'The native Windows runner must host Flutter directly. Generated '
+            'plugin registration may contain only the explicitly approved '
+            'webview_flutter_windows dependency used by the exact Fish Companion '
+            'surface and Gathering Companion video player.',
       );
     });
 
@@ -287,6 +290,31 @@ List<String> _scanTextFiles({
   return violations;
 }
 
+String _removeApprovedGeneratedPluginReferences(
+  String relativePath,
+  String source,
+) {
+  final normalized = relativePath.replaceAll('\\', '/').toLowerCase();
+  if (!const <String>{
+    'windows/flutter/generated_plugin_registrant.cc',
+    'windows/flutter/generated_plugin_registrant.h',
+    'windows/flutter/generated_plugins.cmake',
+  }.contains(normalized)) {
+    return source;
+  }
+
+  var sanitized = source;
+  for (final token in const <String>{
+    'webview_flutter_windows',
+    'webview_windows_plugin',
+    'WebviewWindowsPluginRegisterWithRegistrar',
+    'WebviewWindowsPlugin',
+  }) {
+    sanitized = sanitized.replaceAll(token, '');
+  }
+  return sanitized;
+}
+
 Iterable<File> _filesUnder(
   Directory root,
   Set<String> allowedExtensions,
@@ -385,19 +413,34 @@ List<String> _windowsPluginMetadataViolations(Directory project) {
   if (windowsPlugins is! List<dynamic>) return const <String>[];
 
   final violations = <String>[];
+  final approvedBrowserPluginsFound = <String>{};
   for (final plugin in windowsPlugins) {
     if (plugin is! Map<String, dynamic> || plugin['dev_dependency'] == true) {
       continue;
     }
     final name = plugin['name'];
     if (name is String && _isBrowserRenderingPackage(name)) {
+      if (_approvedEmbeddedBrowserPlugins.contains(name)) {
+        approvedBrowserPluginsFound.add(name);
+      } else {
+        violations.add(
+          '.flutter-plugins-dependencies: forbidden Windows plugin $name',
+        );
+      }
+    }
+  }
+  for (final expected in _approvedEmbeddedBrowserPlugins) {
+    if (!approvedBrowserPluginsFound.contains(expected)) {
       violations.add(
-        '.flutter-plugins-dependencies: forbidden Windows plugin $name',
+        '.flutter-plugins-dependencies: approved companion plugin $expected '
+        'is missing',
       );
     }
   }
   return violations;
 }
+
+const _approvedEmbeddedBrowserPlugins = <String>{'webview_flutter_windows'};
 
 Set<String> _declaredAssetPaths(String source) {
   final paths = <String>{};

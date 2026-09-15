@@ -5,6 +5,7 @@
 #include <flutter/flutter_view_controller.h>
 #include <flutter/method_channel.h>
 
+#include <cstdint>
 #include <memory>
 #include <string>
 
@@ -14,7 +15,8 @@
 class FlutterWindow : public Win32Window {
  public:
   // Creates a new FlutterWindow hosting a Flutter view running |project|.
-  explicit FlutterWindow(const flutter::DartProject& project);
+  explicit FlutterWindow(const flutter::DartProject& project,
+                         bool reference_mode = false);
   virtual ~FlutterWindow();
 
  protected:
@@ -25,22 +27,31 @@ class FlutterWindow : public Win32Window {
                          LPARAM const lparam) noexcept override;
 
  private:
+  void CancelDeferredCloseRetry();
+  void ReplayDeferredCloseRequest();
+  void ScheduleDeferredCloseRetry();
   void StopActiveNodeScanner(bool terminate);
   bool QueueBottomInset(double logical_pixels);
   void SetBottomInset(double logical_pixels);
 
   // The project to run.
   flutter::DartProject project_;
+  bool reference_mode_ = false;
 
   // The Flutter instance hosted by this window.
   std::unique_ptr<flutter::FlutterViewController> flutter_controller_;
   std::unique_ptr<flutter::MethodChannel<flutter::EncodableValue>>
       window_channel_;
   std::unique_ptr<flutter::MethodChannel<flutter::EncodableValue>>
+      gathering_native_channel_;
+  std::unique_ptr<flutter::MethodChannel<flutter::EncodableValue>>
       active_node_progress_channel_;
   HWND flutter_view_window_ = nullptr;
   bool native_close_allowed_ = false;
+  bool close_requested_before_handler_ = false;
   bool close_request_pending_ = false;
+  std::uint64_t close_handler_generation_ = 0;
+  unsigned int close_request_retry_count_ = 0;
   double bottom_inset_logical_ = 0;
   int bottom_inset_physical_ = 0;
   double pending_bottom_inset_logical_ = 0;

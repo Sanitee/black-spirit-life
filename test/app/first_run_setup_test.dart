@@ -115,7 +115,7 @@ void main() {
     expect(completed.processing.view, 'book');
   });
 
-  test('versioned setup repeats every setup group once per app version', () {
+  test('private Beta repeats every setup group once per app version', () {
     final document = buildStateFixture();
     final completedForBetaFive = completeFirstRunSetupDocument(
       document,

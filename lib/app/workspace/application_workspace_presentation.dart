@@ -11,7 +11,7 @@ enum ApplicationWorkspaceDestination {
   planner,
   resourceMap,
   gathering,
-  fishing,
+  fishMap,
   opportunities,
 }
 
@@ -50,7 +50,7 @@ class ApplicationWorkspacePresentation {
             ? AppTitleBarVisual.resourceMapGhost
             : AppTitleBarVisual.resourceMap,
       ApplicationWorkspaceDestination.gathering => AppTitleBarVisual.gathering,
-      ApplicationWorkspaceDestination.fishing => AppTitleBarVisual.fishing,
+      ApplicationWorkspaceDestination.fishMap => AppTitleBarVisual.fishMap,
       ApplicationWorkspaceDestination.opportunities =>
         AppTitleBarVisual.opportunities,
       ApplicationWorkspaceDestination.planner => throw StateError(
@@ -68,8 +68,6 @@ class ApplicationWorkspacePresentation {
         warning: map.warning,
         danger: map.error,
       ),
-      ApplicationWorkspaceDestination.gathering => _palette(visual),
-      ApplicationWorkspaceDestination.fishing => _palette(visual),
       _ => _palette(visual),
     };
     final reading = switch (destination) {
@@ -77,16 +75,6 @@ class ApplicationWorkspacePresentation {
         OpportunitiesVisualSpec.overlay,
       ApplicationWorkspaceDestination.resourceMap => _opaque(
         map.readingSurfaceGradient,
-      ),
-      ApplicationWorkspaceDestination.gathering => LinearGradient(
-        begin: Alignment.topLeft,
-        end: Alignment.bottomRight,
-        colors: [visual.tabHoverSurface, visual.tabSurface],
-      ),
-      ApplicationWorkspaceDestination.fishing => LinearGradient(
-        begin: Alignment.topLeft,
-        end: Alignment.bottomRight,
-        colors: [visual.tabHoverSurface, visual.tabSurface],
       ),
       _ => LinearGradient(
         begin: Alignment.topLeft,

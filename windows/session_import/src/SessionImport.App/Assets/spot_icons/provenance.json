@@ -1,0 +1,2121 @@
+{
+  "schemaVersion": 1,
+  "catalog": "Assets/garmoth_spot_catalog.json",
+  "catalogSha256": "B3A20972DB30DFE22EAD3497367076B0B6333359F72A0A5FF624C8DE7ECDE31D",
+  "spotCount": 174,
+  "uniqueArtworkCount": 138,
+  "reusedPixelIdenticalOriginalPngCount": 0,
+  "source": "Exact public static artwork URLs observed in the Garmoth sidebar catalog",
+  "meaning": "Presentation artwork only; filenames and spot artwork are not canonical item IDs or drop evidence",
+  "conversion": "Original decoded dimensions, RGBA pixels and embedded ICC profile preserved; no resizing, cropping, recolouring or border edits",
+  "naming": "Original URL filename stem including leading zeroes and suffixes, with .png extension",
+  "converter": "Pillow 12.3.0",
+  "assets": [
+    {
+      "url": "https://assets.garmoth.com/img/new_icon/03_etc/00752092.webp",
+      "file": "00752092.png",
+      "width": 44,
+      "height": 44,
+      "sourceSha256": "49DA66F362867C343F2F0E2FF9321B9F2B4F9566BAFBD5E5C989EAA654914B9A",
+      "sourceBytes": 4856,
+      "pngSha256": "BF154ABB484853DCC64FEC64B3C5779CDFB0FD69995BFA0C298B7D9E7523E2E8",
+      "pngBytes": 5510,
+      "decodedRgbaSha256": "989FA42676D7E9D9A60A4E2FAF0422360E45D8551E060EC991D9CF332CECA9CE",
+      "reusedOriginalPng": null,
+      "observedSiteSpotIds": [
+        "152"
+      ]
+    },
+    {
+      "url": "https://assets.garmoth.com/img/new_icon/03_etc/04_dropitem/00044069.webp",
+      "file": "00044069.png",
+      "width": 44,
+      "height": 44,
+      "sourceSha256": "E668FCEFA3AFD878DFCD5099C32ECF7DD0B0AB01CE29BD1BBE95D55D63F25C93",
+      "sourceBytes": 1862,
+      "pngSha256": "CC1C2D593F861D6F528841A2C8817A0CCED5FF8A9D40D6C2A0AF4C27D165D21A",
+      "pngBytes": 2360,
+      "decodedRgbaSha256": "EDDC55996879194C7EA755C1B32FC9FF280B1B24A27B46E5BD74932D4F690078",
+      "reusedOriginalPng": null,
+      "observedSiteSpotIds": [
+        "72"
+      ]
+    },
+    {
+      "url": "https://assets.garmoth.com/img/new_icon/03_etc/04_dropitem/00044180.webp",
+      "file": "00044180.png",
+      "width": 44,
+      "height": 44,
+      "sourceSha256": "BC4AB2A62A3EEA6752468B37B13FE54E0CE5B8169406E315FEF6F7358181452D",
+      "sourceBytes": 2178,
+      "pngSha256": "4F48E244F48D458931C395B87D7B1ADF7343C9C8BA8A60444F7069D64BC8CA6B",
+      "pngBytes": 3141,
+      "decodedRgbaSha256": "73B54FC5DF11FF7994454C5D865C13B35FDC22A23C06A7D813250B02EDBA63A7",
+      "reusedOriginalPng": null,
+      "observedSiteSpotIds": [
+        "34"
+      ]
+    },
+    {
+      "url": "https://assets.garmoth.com/img/new_icon/03_etc/04_dropitem/00044212.webp",
+      "file": "00044212.png",
+      "width": 44,
+      "height": 44,
+      "sourceSha256": "8D25D650B2E53B3AB2D778CD5715FABE0B0404E94C66C9C28EF55BC192E94998",
+      "sourceBytes": 2540,
+      "pngSha256": "E8EBDDAF7F63B3B1FD6D6FC641C75F9DA8FB40436A67422EE6EF932BB9A471D8",
+      "pngBytes": 3076,
+      "decodedRgbaSha256": "CDCAECFFBD874412A624B9DE43F55AF0F43016A4DC3A7BC31E7F499153EDDA3E",
+      "reusedOriginalPng": null,
+      "observedSiteSpotIds": [
+        "84"
+      ]
+    },
+    {
+      "url": "https://assets.garmoth.com/img/new_icon/03_etc/04_dropitem/00044213.webp",
+      "file": "00044213.png",
+      "width": 44,
+      "height": 44,
+      "sourceSha256": "5A0C397DB29A01C66701CFE2E7E97022B30F791E478363DFC6E607DBBD47F00D",
+      "sourceBytes": 2106,
+      "pngSha256": "84772E8F4D8A27AD24FCA94E72F6CFCB44EC3AF7941CE4BF9AFCAFECE8349E8F",
+      "pngBytes": 2696,
+      "decodedRgbaSha256": "249E7C92339B61BEC14BF32AB200A7691682E64A5DE7130D1B5586919A022511",
+      "reusedOriginalPng": null,
+      "observedSiteSpotIds": [
+        "89"
+      ]
+    },
+    {
+      "url": "https://assets.garmoth.com/img/new_icon/03_etc/04_dropitem/00044214.webp",
+      "file": "00044214.png",
+      "width": 44,
+      "height": 44,
+      "sourceSha256": "29F0DED7290496A46892CB4168858B2E1D326196578AA8E48402BBD19FEC454C",
+      "sourceBytes": 1982,
+      "pngSha256": "FF6AEB818A512E6EA91BF727453BCB33346B0625B01C4A631334CA71038CBD35",
+      "pngBytes": 2659,
+      "decodedRgbaSha256": "C2EC851D666EC1EA926841159E4F9BCEF2462B1A1AD53009BD7717E551188E70",
+      "reusedOriginalPng": null,
+      "observedSiteSpotIds": [
+        "86"
+      ]
+    },
+    {
+      "url": "https://assets.garmoth.com/img/new_icon/03_etc/04_dropitem/00044214_d.webp",
+      "file": "00044214_d.png",
+      "width": 42,
+      "height": 42,
+      "sourceSha256": "9B17DAA9C35FC89E9A448F2020B5C76A7411AE4F5D71CA344B221A639F416461",
+      "sourceBytes": 4484,
+      "pngSha256": "4B3BE8CB9973CF00A6672084E06E8561C65F0821B9A1E2E6C3A17EE0F167FA89",
+      "pngBytes": 4868,
+      "decodedRgbaSha256": "9EA8417ACA1A08D07659CD33578FB0C30D136DE40B1374004CB1BBBC428CB51C",
+      "reusedOriginalPng": null,
+      "observedSiteSpotIds": [
+        "163"
+      ]
+    },
+    {
+      "url": "https://assets.garmoth.com/img/new_icon/03_etc/04_dropitem/00044215.webp",
+      "file": "00044215.png",
+      "width": 44,
+      "height": 44,
+      "sourceSha256": "058AD01281E31116A737E6E4D1849F51C02557B6C55A9F4849C4DCFDEC331525",
+      "sourceBytes": 2512,
+      "pngSha256": "C31D0AE98454443A1ECA4153214B02353938F72BF8D2A53D2C65C014ACB1272A",
+      "pngBytes": 3114,
+      "decodedRgbaSha256": "EADB4C3C3E8FB009A591B10DD5F9145F18688BE65C788D0C7452E31FB2BD493E",
+      "reusedOriginalPng": null,
+      "observedSiteSpotIds": [
+        "90"
+      ]
+    },
+    {
+      "url": "https://assets.garmoth.com/img/new_icon/03_etc/04_dropitem/00044216.webp",
+      "file": "00044216.png",
+      "width": 44,
+      "height": 44,
+      "sourceSha256": "E61EF9593607EBDD2F91C81BFFCD5A87CDA5C324DF7BBFA0DE7D98A25709A374",
+      "sourceBytes": 2006,
+      "pngSha256": "238980574091B9C499F0A79F1FBAFFD93E55631639479C97BA01264343E20E0C",
+      "pngBytes": 2594,
+      "decodedRgbaSha256": "5718BFC04FB863D03BD8D4C8B7234347DFB9003066A9E1E3120916D838146497",
+      "reusedOriginalPng": null,
+      "observedSiteSpotIds": [
+        "88"
+      ]
+    },
+    {
+      "url": "https://assets.garmoth.com/img/new_icon/03_etc/04_dropitem/00044217.webp",
+      "file": "00044217.png",
+      "width": 44,
+      "height": 44,
+      "sourceSha256": "EE71B078C69D8C28BFFE76D4D9536DCF5F99B8474374269928B0CB2378D7E943",
+      "sourceBytes": 2524,
+      "pngSha256": "BC939B471A13F8CD1EFB49E1F0A3058178EFB58C81CC604C52B1226E25EDD7F9",
+      "pngBytes": 3074,
+      "decodedRgbaSha256": "6DA6ADAA0B3A4D718C6A295DAC61D7069B61DD321DAA0C156D50D3706B81D021",
+      "reusedOriginalPng": null,
+      "observedSiteSpotIds": [
+        "83"
+      ]
+    },
+    {
+      "url": "https://assets.garmoth.com/img/new_icon/03_etc/04_dropitem/00044218.webp",
+      "file": "00044218.png",
+      "width": 44,
+      "height": 44,
+      "sourceSha256": "0459B350018815444FBF3BD458BE6F88DBB2CF008B4470CE2F1F31164447E7D1",
+      "sourceBytes": 1854,
+      "pngSha256": "950590D5FC9D1BE1E5E326349B9AAEFC4828EEB318BAF726054CB18850CB37A3",
+      "pngBytes": 2227,
+      "decodedRgbaSha256": "F572FE92248C7176931829487BFEC56F23E52D12CE8A3E5C4500B4842FB4AB17",
+      "reusedOriginalPng": null,
+      "observedSiteSpotIds": [
+        "85"
+      ]
+    },
+    {
+      "url": "https://assets.garmoth.com/img/new_icon/03_etc/04_dropitem/00044218_d.webp",
+      "file": "00044218_d.png",
+      "width": 42,
+      "height": 42,
+      "sourceSha256": "086D0C4BE62BDF42821E88C2F673DF0CD233FC610FCE7AF7B0146EEF7E05FE8C",
+      "sourceBytes": 4522,
+      "pngSha256": "860BFE537163DD11F9743F29D77C575FF477F343B3D9211B63BA648C72600DF7",
+      "pngBytes": 5072,
+      "decodedRgbaSha256": "7443E3152DF541301B47E181F49D890988A19AE6E90E78F849DFDFA2A5D52F8F",
+      "reusedOriginalPng": null,
+      "observedSiteSpotIds": [
+        "160"
+      ]
+    },
+    {
+      "url": "https://assets.garmoth.com/img/new_icon/03_etc/04_dropitem/00044219.webp",
+      "file": "00044219.png",
+      "width": 44,
+      "height": 44,
+      "sourceSha256": "D62313CA7285F3D7D75FE675780F44AFDF4F22355DB7D27C5654DA9ADBEEC26D",
+      "sourceBytes": 2344,
+      "pngSha256": "5BC28A7D6D71420C5B5014D4774D014FE1D8B550EA17A147050A0C122DDFA6C7",
+      "pngBytes": 2812,
+      "decodedRgbaSha256": "3B59A606C52D1F2BBC06AA56958F6CB01A9D1F835A0AAE9963E965555E0A25B8",
+      "reusedOriginalPng": null,
+      "observedSiteSpotIds": [
+        "82"
+      ]
+    },
+    {
+      "url": "https://assets.garmoth.com/img/new_icon/03_etc/04_dropitem/00044220.webp",
+      "file": "00044220.png",
+      "width": 44,
+      "height": 44,
+      "sourceSha256": "CC7EA59FA0455541429347BE3689D42E70EA85B8DD9E52D14A2991E17B394DC0",
+      "sourceBytes": 2210,
+      "pngSha256": "C4930AB415A1100EB72DD842F10559B009D17F80133E3FD69541E34A7C6539DE",
+      "pngBytes": 2795,
+      "decodedRgbaSha256": "B93ED9DA60464704259DBE917AE5604B1761CA36532933A8E4000AEAAE594C61",
+      "reusedOriginalPng": null,
+      "observedSiteSpotIds": [
+        "43"
+      ]
+    },
+    {
+      "url": "https://assets.garmoth.com/img/new_icon/03_etc/04_dropitem/00044264.webp",
+      "file": "00044264.png",
+      "width": 44,
+      "height": 44,
+      "sourceSha256": "4EAC0B1786BE77576ECFA52EEF8193F275B7316C535340F820CE1E12A76C0797",
+      "sourceBytes": 3394,
+      "pngSha256": "BB1F2134781FE65226C3F1D62EFE1F0AC452D0046D68DCC52CCDE6FACB31610A",
+      "pngBytes": 4038,
+      "decodedRgbaSha256": "61243C865425BDF61FBC9D0B2B71FA43562CED7AB610BA5DD3B422986CF8A2A0",
+      "reusedOriginalPng": null,
+      "observedSiteSpotIds": [
+        "91"
+      ]
+    },
+    {
+      "url": "https://assets.garmoth.com/img/new_icon/03_etc/04_dropitem/00044264_d.webp",
+      "file": "00044264_d.png",
+      "width": 44,
+      "height": 44,
+      "sourceSha256": "E7EE141BB52D2E7AFC7DDAD480EDB46A3CD32E2F2F262B378EEC4D6F800A01AE",
+      "sourceBytes": 4570,
+      "pngSha256": "A37C1C468EDB58FC477EB3EB29FD641C7DA1352AE38DD3E0BB74B9C0A5EF257D",
+      "pngBytes": 5076,
+      "decodedRgbaSha256": "2069BC13E7E28010321DE85F684540A43D1E483B73816B761C9C07C4B28658AF",
+      "reusedOriginalPng": null,
+      "observedSiteSpotIds": [
+        "158"
+      ]
+    },
+    {
+      "url": "https://assets.garmoth.com/img/new_icon/03_etc/04_dropitem/00044265.webp",
+      "file": "00044265.png",
+      "width": 44,
+      "height": 44,
+      "sourceSha256": "394B62D8A9FA590D1CE7B564CB796B732839C68A3B083FAE92638BDE168854E2",
+      "sourceBytes": 2258,
+      "pngSha256": "D5CBAC9085F939706D4B9BD319DC0DB5DCC9F7D1AE3DCDF2720E2D9BBFF03136",
+      "pngBytes": 2915,
+      "decodedRgbaSha256": "FE7BD727D90B80BF0520024484B726A99724991192CB1AFE5848B36E2197D86E",
+      "reusedOriginalPng": null,
+      "observedSiteSpotIds": [
+        "92"
+      ]
+    },
+    {
+      "url": "https://assets.garmoth.com/img/new_icon/03_etc/04_dropitem/00044265_d.webp",
+      "file": "00044265_d.png",
+      "width": 44,
+      "height": 44,
+      "sourceSha256": "D560652EDE8A1B95836674B027C2C3623ADD48E25888A125A3B6F42B8C8342AA",
+      "sourceBytes": 4284,
+      "pngSha256": "C0F0023DC4B1FB55E596F4EA3B4D5DDE84B291B54FD05955EC31CC188DFEF8D2",
+      "pngBytes": 4927,
+      "decodedRgbaSha256": "4DF4648E8976C0ACEA54FF1514FBC925CFD6F43922E29930CD243AC9582C4914",
+      "reusedOriginalPng": null,
+      "observedSiteSpotIds": [
+        "159"
+      ]
+    },
+    {
+      "url": "https://assets.garmoth.com/img/new_icon/03_etc/04_dropitem/00044266.webp",
+      "file": "00044266.png",
+      "width": 44,
+      "height": 44,
+      "sourceSha256": "5AD95AD865E0CCC9A77B50BC173E9F3827405E9AA7DAC09412F2F88251BF1A38",
+      "sourceBytes": 2356,
+      "pngSha256": "EBF17C19275B7C6791D9854A992DE9964B37CD41DE79AF99291513042EE4A7D1",
+      "pngBytes": 2999,
+      "decodedRgbaSha256": "578EA7600609A59DC7EDA979946199AC28DBE5A3D21CF02E644821DF477C5E93",
+      "reusedOriginalPng": null,
+      "observedSiteSpotIds": [
+        "6"
+      ]
+    },
+    {
+      "url": "https://assets.garmoth.com/img/new_icon/03_etc/04_dropitem/00044266_d.webp",
+      "file": "00044266_d.png",
+      "width": 44,
+      "height": 44,
+      "sourceSha256": "88EF940B6A83B2A2D8065419022CE3F30F3955520F38343A4B95AA5CD314FE31",
+      "sourceBytes": 2568,
+      "pngSha256": "9A765C4B82FF7E227EE1123C7A4E8F43E7FBB64D5C6CF8526501986B89967B63",
+      "pngBytes": 3159,
+      "decodedRgbaSha256": "7F4FDF600899807EA7C2D84FE73AA698F3BFC4238C20772D520FC1C7D8820C25",
+      "reusedOriginalPng": null,
+      "observedSiteSpotIds": [
+        "155"
+      ]
+    },
+    {
+      "url": "https://assets.garmoth.com/img/new_icon/03_etc/04_dropitem/00044267.webp",
+      "file": "00044267.png",
+      "width": 44,
+      "height": 44,
+      "sourceSha256": "76B89F636BEF4F978F966CFAFF95109E02255C5369C06C9384550A0F53DE7486",
+      "sourceBytes": 2140,
+      "pngSha256": "4377875EB9FDC468F32838590D6FDE8D88F10527F0177FBDBB8B90AA538B4113",
+      "pngBytes": 2629,
+      "decodedRgbaSha256": "B7D0E0094F1BE7A919F93D423C662A3F25C501E5297F1D242262D9E0C2FE8850",
+      "reusedOriginalPng": null,
+      "observedSiteSpotIds": [
+        "3"
+      ]
+    },
+    {
+      "url": "https://assets.garmoth.com/img/new_icon/03_etc/04_dropitem/00044267_d.webp",
+      "file": "00044267_d.png",
+      "width": 44,
+      "height": 44,
+      "sourceSha256": "84CBF7AA5479B42A142A06F5019385235FF9BF7EEF04D26A18C002FCF111D129",
+      "sourceBytes": 4982,
+      "pngSha256": "B9992D80E8B43FDD3A26CAE77B7969BBFCB115D4ACC4DF1102078D6B10A499C6",
+      "pngBytes": 5564,
+      "decodedRgbaSha256": "FE4C7751101019CC8FC489151FFFDFA97EA0B35C275871C33048F4A2FEE8EC2D",
+      "reusedOriginalPng": null,
+      "observedSiteSpotIds": [
+        "156"
+      ]
+    },
+    {
+      "url": "https://assets.garmoth.com/img/new_icon/03_etc/04_dropitem/00044300.webp",
+      "file": "00044300.png",
+      "width": 44,
+      "height": 44,
+      "sourceSha256": "7AB359BCCCE38FE9F92A4F4CAEB6170CDD948EF85F4346097F212962975342AF",
+      "sourceBytes": 2010,
+      "pngSha256": "6874F41411794F4571B8F8F840A60ECD5C68A1863CE5907F53C5D7563CDD5918",
+      "pngBytes": 2330,
+      "decodedRgbaSha256": "66D23B64B4191CCC776DA386EA542637628CD873DA797BE015DA087CB6B48994",
+      "reusedOriginalPng": null,
+      "observedSiteSpotIds": [
+        "39"
+      ]
+    },
+    {
+      "url": "https://assets.garmoth.com/img/new_icon/03_etc/04_dropitem/00044302.webp",
+      "file": "00044302.png",
+      "width": 44,
+      "height": 44,
+      "sourceSha256": "B0D4B5EE0769A596D2B21E943701A53AB2C45BBD9804DC87AF8233F17F7A02E8",
+      "sourceBytes": 1210,
+      "pngSha256": "0C4A6D55726930ED35C21E71101605691ACCD78BE108623A7218988C2B77E510",
+      "pngBytes": 1823,
+      "decodedRgbaSha256": "6D96E7EA401CC42842B07C0FCDE97B035634C1286369235B2238FD36612BA054",
+      "reusedOriginalPng": null,
+      "observedSiteSpotIds": [
+        "25"
+      ]
+    },
+    {
+      "url": "https://assets.garmoth.com/img/new_icon/03_etc/04_dropitem/00044303.webp",
+      "file": "00044303.png",
+      "width": 44,
+      "height": 44,
+      "sourceSha256": "05570A5F156FDB0345AEC2AF4E01476F74EC7B57ED9E5B4546EF67422783337D",
+      "sourceBytes": 1238,
+      "pngSha256": "57D03467F15538EB35168985048FF7B3ABF2409BE646340CB1368889AAE5145B",
+      "pngBytes": 1747,
+      "decodedRgbaSha256": "448CB922EAD2DB5709EE9AF71CA58271048259A05D9AFC3C782A97967EB60AF9",
+      "reusedOriginalPng": null,
+      "observedSiteSpotIds": [
+        "28"
+      ]
+    },
+    {
+      "url": "https://assets.garmoth.com/img/new_icon/03_etc/04_dropitem/00044321.webp",
+      "file": "00044321.png",
+      "width": 44,
+      "height": 44,
+      "sourceSha256": "3DA8D6853A879715548A70D401CF91BB90BB2AD1E0FE8A33A5ED494A8D23A409",
+      "sourceBytes": 1622,
+      "pngSha256": "712081C547610C2BCA0EF38D0770EED0221E57F032676E0878770BE1F2FC1758",
+      "pngBytes": 2272,
+      "decodedRgbaSha256": "4478D45D4A1926E5AAE720844BCE0F348DDAE500F5D6193F7E5CFD3D0B403A87",
+      "reusedOriginalPng": null,
+      "observedSiteSpotIds": [
+        "38"
+      ]
+    },
+    {
+      "url": "https://assets.garmoth.com/img/new_icon/03_etc/04_dropitem/00044322.webp",
+      "file": "00044322.png",
+      "width": 44,
+      "height": 44,
+      "sourceSha256": "68BD7A0BA458A5388DF61215E2DED9945033EDF645A23427A4DAB6C467794996",
+      "sourceBytes": 1634,
+      "pngSha256": "B06C4F2D8935A3FB94BF9142BF5B587F26119478DABE63B61941238D81FEA037",
+      "pngBytes": 2059,
+      "decodedRgbaSha256": "93AA5F4080413E5F64027565BC62C8F2E3E3AF12977628C0EA00A411235A7E2F",
+      "reusedOriginalPng": null,
+      "observedSiteSpotIds": [
+        "29"
+      ]
+    },
+    {
+      "url": "https://assets.garmoth.com/img/new_icon/03_etc/04_dropitem/00044323.webp",
+      "file": "00044323.png",
+      "width": 44,
+      "height": 44,
+      "sourceSha256": "CC712D48238360D18C11AFAB9F62EBF3E463240B782A7A609BB4BEF123A56F5D",
+      "sourceBytes": 1438,
+      "pngSha256": "B4AB3B0C537F3C00E5AAAFDC29444079EDF30ED02B31D9772AEB956C56FC79C5",
+      "pngBytes": 2156,
+      "decodedRgbaSha256": "1DB7BA0FE5DCD62EF553C332AA86866CF3CC2C3347302B21DE3A410C0D616ABC",
+      "reusedOriginalPng": null,
+      "observedSiteSpotIds": [
+        "26"
+      ]
+    },
+    {
+      "url": "https://assets.garmoth.com/img/new_icon/03_etc/04_dropitem/00044324.webp",
+      "file": "00044324.png",
+      "width": 44,
+      "height": 44,
+      "sourceSha256": "E57E914B0D11159ACC268892ED4BEA52214EDE2B0BE52A0711FEA9B4CA720484",
+      "sourceBytes": 1392,
+      "pngSha256": "D2128045F493E17272076B632066CFAD18C1FC9025626CEFFF18A97F85B4EFFC",
+      "pngBytes": 2015,
+      "decodedRgbaSha256": "BF18FC5CA99F6B22F22DB03632FAB6A7C8B9909968232BFB35120224E51DC57E",
+      "reusedOriginalPng": null,
+      "observedSiteSpotIds": [
+        "33"
+      ]
+    },
+    {
+      "url": "https://assets.garmoth.com/img/new_icon/03_etc/04_dropitem/00044352.webp",
+      "file": "00044352.png",
+      "width": 44,
+      "height": 44,
+      "sourceSha256": "F7E5B1293264BC1ED4FBC93044151E7D84B414D76FB108BA744FA761385AFE4E",
+      "sourceBytes": 2776,
+      "pngSha256": "9E11C5325D8578C55BC019FA3192A444FFE12C26325360534881A76A3FD71797",
+      "pngBytes": 3451,
+      "decodedRgbaSha256": "C18536BE865412FCECA779FED3BDF56BFFFB2CBF5DA8BFC8B3EC3227A57054B5",
+      "reusedOriginalPng": null,
+      "observedSiteSpotIds": [
+        "22"
+      ]
+    },
+    {
+      "url": "https://assets.garmoth.com/img/new_icon/03_etc/04_dropitem/00044353.webp",
+      "file": "00044353.png",
+      "width": 44,
+      "height": 44,
+      "sourceSha256": "B60F27DC0213F5AF65130F4745181C9845E4E7462B19533664DD2E7783C5F20D",
+      "sourceBytes": 1834,
+      "pngSha256": "46800E6053F715C34DBA400A56BD94C725E425664056AB791FB2E01302A4D7DD",
+      "pngBytes": 2200,
+      "decodedRgbaSha256": "5E9896F0099A2758641A574A0AA3E7D2EDD619BBBBB9408F6C51BFCFA0AF1B8C",
+      "reusedOriginalPng": null,
+      "observedSiteSpotIds": [
+        "24"
+      ]
+    },
+    {
+      "url": "https://assets.garmoth.com/img/new_icon/03_etc/04_dropitem/00044354.webp",
+      "file": "00044354.png",
+      "width": 44,
+      "height": 44,
+      "sourceSha256": "DCBC1B6F7BE5CB42CF302068B2AF4D4EA9E5DFBBC786A76A0810F407E9846209",
+      "sourceBytes": 2116,
+      "pngSha256": "6F4461E883A2A1323F1AFFBAA7AEA03C37D35EE9C6F87EB69BBC171EE7C72990",
+      "pngBytes": 2924,
+      "decodedRgbaSha256": "D4E658232986BE4F70870FDFAEF39259BA76F18C8E1C9B113F733492C0EE04EF",
+      "reusedOriginalPng": null,
+      "observedSiteSpotIds": [
+        "119"
+      ]
+    },
+    {
+      "url": "https://assets.garmoth.com/img/new_icon/03_etc/04_dropitem/00044363.webp",
+      "file": "00044363.png",
+      "width": 44,
+      "height": 44,
+      "sourceSha256": "D5228487645020B144804A694118AD3654E4DD4A0CD924437DE5CADC63ECCB80",
+      "sourceBytes": 1986,
+      "pngSha256": "EBF8E4403E2F4F35023CC4DD5FBDDEFE5F2B35C049456401EB9F80DDFBD21317",
+      "pngBytes": 3216,
+      "decodedRgbaSha256": "A523CF811576CC9ABFA59CF62D06A9F0BF0132E3C5D0255BDA8F2EED8418826E",
+      "reusedOriginalPng": null,
+      "observedSiteSpotIds": [
+        "23"
+      ]
+    },
+    {
+      "url": "https://assets.garmoth.com/img/new_icon/03_etc/04_dropitem/00044378.webp",
+      "file": "00044378.png",
+      "width": 44,
+      "height": 44,
+      "sourceSha256": "5AA515E8D95F1A1EC52691FAAF8421D3FA3558E4CF1EABBE10FFDD9DFA44A64C",
+      "sourceBytes": 1816,
+      "pngSha256": "80A37A5DAD30B41E68D4791739A35D8643A152D319AC12CBDDBCB8A5772C0914",
+      "pngBytes": 2552,
+      "decodedRgbaSha256": "897D677D766EA75FBFA83400E574E7D501F62EB923C92C808CDE7CE17C787B3A",
+      "reusedOriginalPng": null,
+      "observedSiteSpotIds": [
+        "37"
+      ]
+    },
+    {
+      "url": "https://assets.garmoth.com/img/new_icon/03_etc/04_dropitem/00044380.webp",
+      "file": "00044380.png",
+      "width": 44,
+      "height": 44,
+      "sourceSha256": "0917807B612EF7617323794AB7B5EEA8EBC8B0C3181498020AD2356EE9091D51",
+      "sourceBytes": 2402,
+      "pngSha256": "7E7B38DD2E2CFDAA7EF9718A1BF0095CBD6762ECD15677F03FF55655713AAB93",
+      "pngBytes": 3124,
+      "decodedRgbaSha256": "022243CA815C030A90932629E09BBC8A7222D15BDE1BE2C3B200472CD6A2F2DB",
+      "reusedOriginalPng": null,
+      "observedSiteSpotIds": [
+        "1"
+      ]
+    },
+    {
+      "url": "https://assets.garmoth.com/img/new_icon/03_etc/04_dropitem/00044382.webp",
+      "file": "00044382.png",
+      "width": 44,
+      "height": 44,
+      "sourceSha256": "7D8C32B432F8050AED30DF1F342EC1D25130FBF59A40591739083852CD302A70",
+      "sourceBytes": 2028,
+      "pngSha256": "5FC44337353C07518BCC77CDBF646A0AEDE34419342D74DEC0F3FCAE3CC5D9CE",
+      "pngBytes": 2808,
+      "decodedRgbaSha256": "603403FF1420A4B72F184911935BCD0BA7C61ABFC6DDC0D07A5A245CDC7DDB91",
+      "reusedOriginalPng": null,
+      "observedSiteSpotIds": [
+        "32"
+      ]
+    },
+    {
+      "url": "https://assets.garmoth.com/img/new_icon/03_etc/04_dropitem/00044400.webp",
+      "file": "00044400.png",
+      "width": 44,
+      "height": 44,
+      "sourceSha256": "789CB09C25E718483151C696D4C04AB4387664FB372C213E5D1BCC9B6126D6B0",
+      "sourceBytes": 2246,
+      "pngSha256": "BF4D18BE40F468DA1EB371AE1B30BB4C794AAEF3CED9A059216D057683D79522",
+      "pngBytes": 2757,
+      "decodedRgbaSha256": "064AA713003C352D9BAA5D15B87C576804C471F89D1FA15B2D0B5FFB75BC547D",
+      "reusedOriginalPng": null,
+      "observedSiteSpotIds": [
+        "117",
+        "2"
+      ]
+    },
+    {
+      "url": "https://assets.garmoth.com/img/new_icon/03_etc/04_dropitem/00044411.webp",
+      "file": "00044411.png",
+      "width": 44,
+      "height": 44,
+      "sourceSha256": "2009073D0FA89F90D297D42CEEADF2AD6E979E8C4630E14A31B3D48664118836",
+      "sourceBytes": 2140,
+      "pngSha256": "418004E0A89C21F2200F79ECB6016F78D9D744015F51896F37E411401589212F",
+      "pngBytes": 3483,
+      "decodedRgbaSha256": "B37B4BA7C02D054D52BB0908574786E5B542099C315AAD3854D14FEAECEB003E",
+      "reusedOriginalPng": null,
+      "observedSiteSpotIds": [
+        "27"
+      ]
+    },
+    {
+      "url": "https://assets.garmoth.com/img/new_icon/03_etc/04_dropitem/00044423.webp",
+      "file": "00044423.png",
+      "width": 44,
+      "height": 44,
+      "sourceSha256": "F794FDFC63B530FC205A4BE6DD5C8F54E33C8BB19A0531EA95A1E322E91BE23E",
+      "sourceBytes": 3512,
+      "pngSha256": "0EE7175FC3C1A0D61609D8580A391AD560877AAE833CA78E56EE375D070138AD",
+      "pngBytes": 4132,
+      "decodedRgbaSha256": "01433A2FF98CE6D4E99B1EAF052E679C3D1F7998FAC566E5A566410EE3E7397B",
+      "reusedOriginalPng": null,
+      "observedSiteSpotIds": [
+        "9"
+      ]
+    },
+    {
+      "url": "https://assets.garmoth.com/img/new_icon/03_etc/04_dropitem/00044446.webp",
+      "file": "00044446.png",
+      "width": 44,
+      "height": 44,
+      "sourceSha256": "BF4E7BBA1B47205FD958535F45C586AC981C86A6B0E3C1F4CAA407A568406404",
+      "sourceBytes": 2226,
+      "pngSha256": "C5D226B945EAAB3E2BFB0C27F8C7E2EB8030219BDF52E9C3543559BF31C9734B",
+      "pngBytes": 3136,
+      "decodedRgbaSha256": "52A6446CBCB779E974D0DECFE76249DAD8E0EB9D4920F8A3866CCB851E851D94",
+      "reusedOriginalPng": null,
+      "observedSiteSpotIds": [
+        "11"
+      ]
+    },
+    {
+      "url": "https://assets.garmoth.com/img/new_icon/03_etc/04_dropitem/00044448.webp",
+      "file": "00044448.png",
+      "width": 44,
+      "height": 44,
+      "sourceSha256": "0A0231D659DD3144D4724163A8E3FA9082FF3E02A6FED150FC2DAD38AF7C4ABC",
+      "sourceBytes": 2918,
+      "pngSha256": "C9D36DF41DD9F89A86145124AE1D133DB9D402D9947120221D275884427D148D",
+      "pngBytes": 4450,
+      "decodedRgbaSha256": "C563FE74C616F27B4C683FF105A4F9E891B5820680809306E50105B775574DAF",
+      "reusedOriginalPng": null,
+      "observedSiteSpotIds": [
+        "10"
+      ]
+    },
+    {
+      "url": "https://assets.garmoth.com/img/new_icon/03_etc/04_dropitem/00044450.webp",
+      "file": "00044450.png",
+      "width": 44,
+      "height": 44,
+      "sourceSha256": "6EEC8C7017C13BC7FE42E2B81283FD7B84BBC5ECF93C9A7CF6207B826562CD19",
+      "sourceBytes": 1972,
+      "pngSha256": "2890C853834A98F1213EEC083E22B4CD974D2E19B2CC7AB18D29126B72DDB60A",
+      "pngBytes": 3293,
+      "decodedRgbaSha256": "A338B8C6D6710E65CC3E7AA674B6E2ED2DE98CC82A5DD6202D32EBAB1EEA147F",
+      "reusedOriginalPng": null,
+      "observedSiteSpotIds": [
+        "8"
+      ]
+    },
+    {
+      "url": "https://assets.garmoth.com/img/new_icon/03_etc/04_dropitem/00044451.webp",
+      "file": "00044451.png",
+      "width": 44,
+      "height": 44,
+      "sourceSha256": "3D0A944920C30B315C4A342F8317B9813FF8C4647E52A4EFBBEFF2516AF73A72",
+      "sourceBytes": 4636,
+      "pngSha256": "6FBC3F751F7ADD5A1CD3C318D3FD948ABEA43C1502577FAB67CC94BE5C8EAC3E",
+      "pngBytes": 5212,
+      "decodedRgbaSha256": "A46F7F44F035679FA974791CA95F8EAEDFAD1AAFDBBE6913A9F692489AE89FA8",
+      "reusedOriginalPng": null,
+      "observedSiteSpotIds": [
+        "7"
+      ]
+    },
+    {
+      "url": "https://assets.garmoth.com/img/new_icon/03_etc/04_dropitem/00044454.webp",
+      "file": "00044454.png",
+      "width": 44,
+      "height": 44,
+      "sourceSha256": "792D9C784ED93836FA6F5B73419FDB969442D4C1124BCF3AAE3EF272E36F1716",
+      "sourceBytes": 1576,
+      "pngSha256": "A419D9E075891235BB02857C1E5ED7F795D2C3D9152738C43BBE0E0CFB5479B2",
+      "pngBytes": 2009,
+      "decodedRgbaSha256": "E2AD9EBC6616BD2AB4604B2B87F4A6408899CC38E9A81E9B2DD68E15BD31A39A",
+      "reusedOriginalPng": null,
+      "observedSiteSpotIds": [
+        "4"
+      ]
+    },
+    {
+      "url": "https://assets.garmoth.com/img/new_icon/03_etc/04_dropitem/00044456.webp",
+      "file": "00044456.png",
+      "width": 44,
+      "height": 44,
+      "sourceSha256": "C016B360D93E76E6ABC1FAA0940CACE3793523F5D4BFBBDE78CC8558273D1D16",
+      "sourceBytes": 2100,
+      "pngSha256": "8CFCBDC06C9B3690E3C48C2C00273E884D2CF6DAC2AB5E14D8B5407B7830032A",
+      "pngBytes": 3220,
+      "decodedRgbaSha256": "7B78D7E1593B997B82372472A45B998DDE682AFF455B82EE880BF8513641B551",
+      "reusedOriginalPng": null,
+      "observedSiteSpotIds": [
+        "5"
+      ]
+    },
+    {
+      "url": "https://assets.garmoth.com/img/new_icon/03_etc/04_dropitem/00044482.webp",
+      "file": "00044482.png",
+      "width": 44,
+      "height": 44,
+      "sourceSha256": "3A231B9AD53F4AA90AEC8DB50C9334044412014CFCC85B259BCA795BB5E86859",
+      "sourceBytes": 3396,
+      "pngSha256": "26597D10E4F043D0AE681BAF608F309BBD50C4DB5CE5E8372695F71BF09856C5",
+      "pngBytes": 4284,
+      "decodedRgbaSha256": "1362B6FBCFDD6E1C0704605F2EF1B87AEBCB09DD62FE4BE9CD581C1275DBE072",
+      "reusedOriginalPng": null,
+      "observedSiteSpotIds": [
+        "17"
+      ]
+    },
+    {
+      "url": "https://assets.garmoth.com/img/new_icon/03_etc/04_dropitem/00044484.webp",
+      "file": "00044484.png",
+      "width": 44,
+      "height": 44,
+      "sourceSha256": "5EA9C6AE266627372EF3E13542FB177410FEE7DD40C79E2518243B5E96521E5B",
+      "sourceBytes": 3280,
+      "pngSha256": "01C6EAC27D79A955FCDED2423EF488302555EDF69A812D6E98A252AB64855E37",
+      "pngBytes": 3717,
+      "decodedRgbaSha256": "2EC60D58E6BA500E01E82CEAD926ABF1C2D767EA63587A5CD0CAE752F705278F",
+      "reusedOriginalPng": null,
+      "observedSiteSpotIds": [
+        "12"
+      ]
+    },
+    {
+      "url": "https://assets.garmoth.com/img/new_icon/03_etc/04_dropitem/00044485.webp",
+      "file": "00044485.png",
+      "width": 44,
+      "height": 44,
+      "sourceSha256": "8016AE8316F1D073B7B42C638FD35AAC043F41AA3ACD5F30FE192A8B8D070DFB",
+      "sourceBytes": 3194,
+      "pngSha256": "ACDA00B9964719A92535772C4FA5EE5E8E1F9E6D007A27B7A34D29CF1A34D249",
+      "pngBytes": 3941,
+      "decodedRgbaSha256": "DE8C71416893264493E03A06E994F2204CAD75D3EF0C2A6DE6D2321B40B7ECBD",
+      "reusedOriginalPng": null,
+      "observedSiteSpotIds": [
+        "14"
+      ]
+    },
+    {
+      "url": "https://assets.garmoth.com/img/new_icon/03_etc/04_dropitem/00044486.webp",
+      "file": "00044486.png",
+      "width": 44,
+      "height": 44,
+      "sourceSha256": "B21AD22BC1861E9B6A01621BD9E14A86C4392374BC496F38D459BA5DDE52C461",
+      "sourceBytes": 3102,
+      "pngSha256": "D242B20B02A2A9E3EAD8805EAFFFE12238A0533A83FE37DBC186BF6E50C51EC2",
+      "pngBytes": 3617,
+      "decodedRgbaSha256": "334CA5C1C5DA0023F2564B7777E6491445AFA1D3E02432841CB9C9AE2264AFE9",
+      "reusedOriginalPng": null,
+      "observedSiteSpotIds": [
+        "15"
+      ]
+    },
+    {
+      "url": "https://assets.garmoth.com/img/new_icon/03_etc/04_dropitem/00044487.webp",
+      "file": "00044487.png",
+      "width": 44,
+      "height": 44,
+      "sourceSha256": "337D4AED2C3FC3BF8A69C7307149FC2BDBC84553677F5FFDD3953E9191F79DE6",
+      "sourceBytes": 2882,
+      "pngSha256": "5166B427158F8BB1A69D6D43E4A7C32A24D458484BF1540DC6E25F28BD71C6A2",
+      "pngBytes": 3721,
+      "decodedRgbaSha256": "BCDDBB990ADA86D4DA8A2A82614AEF3C9BACE5BCED482983F7F3BA0136E598F5",
+      "reusedOriginalPng": null,
+      "observedSiteSpotIds": [
+        "16"
+      ]
+    },
+    {
+      "url": "https://assets.garmoth.com/img/new_icon/03_etc/04_dropitem/00044488.webp",
+      "file": "00044488.png",
+      "width": 44,
+      "height": 44,
+      "sourceSha256": "5ABF3A982286E2540D4B26456288A88F7531CA9E08A0EEE0FD017411037D38F3",
+      "sourceBytes": 2680,
+      "pngSha256": "4B4C49D77FE4D1815D05B7B42B4D44FCFE6E38A06E52EC6BF0737EB77C11C632",
+      "pngBytes": 3209,
+      "decodedRgbaSha256": "0B1233E553E348FF4B59F83FDE1F4986A908939A0FED772AB7EEBD59D8D82DAD",
+      "reusedOriginalPng": null,
+      "observedSiteSpotIds": [
+        "13"
+      ]
+    },
+    {
+      "url": "https://assets.garmoth.com/img/new_icon/03_etc/04_dropitem/00044489.webp",
+      "file": "00044489.png",
+      "width": 44,
+      "height": 44,
+      "sourceSha256": "82DA2DCB994BA27AFC19182449D74DC0165318DC7FEA1F20CB5A43DD2FAB92E8",
+      "sourceBytes": 3422,
+      "pngSha256": "E75020F277C4E0602756021AC0B3FFB1B8F3D36CD234BC54E6BB5344EC90A67A",
+      "pngBytes": 4204,
+      "decodedRgbaSha256": "37B6738B2F56C130A9C12B781B21086493F14C28338726266DDD6F8F024C2B0C",
+      "reusedOriginalPng": null,
+      "observedSiteSpotIds": [
+        "18"
+      ]
+    },
+    {
+      "url": "https://assets.garmoth.com/img/new_icon/03_etc/04_dropitem/00044490.webp",
+      "file": "00044490.png",
+      "width": 44,
+      "height": 44,
+      "sourceSha256": "E518BE4262B2CF03F048C771045E0ACFEF1287A3F25CF3A5E2FD83171F2DAB0B",
+      "sourceBytes": 4838,
+      "pngSha256": "5AAE617D69EE250607DFA8D9CF7C44DCC7997C47004D73667EED27588E5FCB01",
+      "pngBytes": 5336,
+      "decodedRgbaSha256": "EC4461E30D4381FCE4488AD64E826BCED2C231306C11B6B91DED1882136CD6E1",
+      "reusedOriginalPng": null,
+      "observedSiteSpotIds": [
+        "110"
+      ]
+    },
+    {
+      "url": "https://assets.garmoth.com/img/new_icon/03_etc/04_dropitem/00044494.webp",
+      "file": "00044494.png",
+      "width": 44,
+      "height": 44,
+      "sourceSha256": "21E7412693AF8B04027F0B4BF4D2F5570A05EEB9A78BC9C0134A80E07B2B461C",
+      "sourceBytes": 4340,
+      "pngSha256": "EDF4B56AA7BA877F053B7D22DACCA5C73319B626B024AF40AFDE0997C483731A",
+      "pngBytes": 5206,
+      "decodedRgbaSha256": "0510B2715F028DE4D0FEE0B5BF566D8B7CC5D522280A35B7961991D2F1E061BF",
+      "reusedOriginalPng": null,
+      "observedSiteSpotIds": [
+        "111"
+      ]
+    },
+    {
+      "url": "https://assets.garmoth.com/img/new_icon/03_etc/04_dropitem/00044495.webp",
+      "file": "00044495.png",
+      "width": 44,
+      "height": 44,
+      "sourceSha256": "77FE6F91C90C2C17B6C4935D3A26190765F3D5D360020A2C49284AF05F6C8CB9",
+      "sourceBytes": 2780,
+      "pngSha256": "4B5B51F484442A3809F0FDD6382A5A9C1C3EA1BEFDABA9D0456D4B34DC96AF37",
+      "pngBytes": 3635,
+      "decodedRgbaSha256": "F01CE4C8BC3E79AF30BDD795B13E78FBA3DCE1693378A47AF65104C722CDB2D2",
+      "reusedOriginalPng": null,
+      "observedSiteSpotIds": [
+        "112",
+        "149",
+        "150"
+      ]
+    },
+    {
+      "url": "https://assets.garmoth.com/img/new_icon/03_etc/04_dropitem/00044496.webp",
+      "file": "00044496.png",
+      "width": 44,
+      "height": 44,
+      "sourceSha256": "DF25C786BEB7391EFA4C190283AA9749B34E66D2715A5C140C8401EF39173F86",
+      "sourceBytes": 3652,
+      "pngSha256": "EF22D5AC1D2F4A019ABD6E3E42F341AC69B1D1DF317A3046C51BCEC5CFFE8283",
+      "pngBytes": 5250,
+      "decodedRgbaSha256": "A19E0FAC88A618707DB90F6802B91FF5938CA2415F800EE85F0E9E3FDB72AC53",
+      "reusedOriginalPng": null,
+      "observedSiteSpotIds": [
+        "113"
+      ]
+    },
+    {
+      "url": "https://assets.garmoth.com/img/new_icon/03_etc/04_dropitem/00044516.webp",
+      "file": "00044516.png",
+      "width": 44,
+      "height": 44,
+      "sourceSha256": "90BB677200E36CAE2DF2EF6F1D2A838D3CDEBFC6915650A96B55F51812E119CD",
+      "sourceBytes": 3860,
+      "pngSha256": "D62506F49F4002A65856DBAA19D4865E22F9587847721178A693F61A70A974CA",
+      "pngBytes": 4461,
+      "decodedRgbaSha256": "D4F062D81FAD3E9AAAB280D014B6F53E5D49B29A37C117644A3F45DE8DBAC335",
+      "reusedOriginalPng": null,
+      "observedSiteSpotIds": [
+        "97"
+      ]
+    },
+    {
+      "url": "https://assets.garmoth.com/img/new_icon/03_etc/04_dropitem/00044516_d.webp",
+      "file": "00044516_d.png",
+      "width": 44,
+      "height": 44,
+      "sourceSha256": "6B5107AFEAE1389C11B4C120AE0AB22E8A2F6FB42EE6372C4AC693BD75A5A416",
+      "sourceBytes": 4098,
+      "pngSha256": "E0EE7C5F2649E8A8061977A08D69B951A4EC1685DD7EFBCA7374BB69769D3CB4",
+      "pngBytes": 4614,
+      "decodedRgbaSha256": "2C1B8058A7848FA7FE1E5B9E97EE629A6D630E4AB14E4F3DCE5BFFD3B60EDB21",
+      "reusedOriginalPng": null,
+      "observedSiteSpotIds": [
+        "198"
+      ]
+    },
+    {
+      "url": "https://assets.garmoth.com/img/new_icon/03_etc/04_dropitem/00044518.webp",
+      "file": "00044518.png",
+      "width": 44,
+      "height": 44,
+      "sourceSha256": "04FCA823AFD6496D98008B807EE00807CDA9FA417DA920546DC054B21C853889",
+      "sourceBytes": 3998,
+      "pngSha256": "C53F5BFA02FF1570923410398B4845261F9C50206BCEB4683F2D8B00E72AE4CE",
+      "pngBytes": 5198,
+      "decodedRgbaSha256": "A3211908315F733494D06ACFD2FEE080DAA23EC1739C72BC34D7E818D996FE3F",
+      "reusedOriginalPng": null,
+      "observedSiteSpotIds": [
+        "143"
+      ]
+    },
+    {
+      "url": "https://assets.garmoth.com/img/new_icon/03_etc/04_dropitem/00044518_2.webp",
+      "file": "00044518_2.png",
+      "width": 44,
+      "height": 44,
+      "sourceSha256": "2A67D1CE432EDDF73E7BBBD8D26427E4F4C1F8CB8D149CA7C2C7CC2E54C69C56",
+      "sourceBytes": 4098,
+      "pngSha256": "D2C4B407DB97B5557B0479E0909D672A3CF8070712E42E0230F8802C69CF047C",
+      "pngBytes": 5037,
+      "decodedRgbaSha256": "2ED806B211AC8D7FC0819783DD4395385E2E0541155CE5A2B55A79702CAFD126",
+      "reusedOriginalPng": null,
+      "observedSiteSpotIds": [
+        "162"
+      ]
+    },
+    {
+      "url": "https://assets.garmoth.com/img/new_icon/03_etc/04_dropitem/00044519.webp",
+      "file": "00044519.png",
+      "width": 44,
+      "height": 44,
+      "sourceSha256": "590DAE008B8DF2443F181A84437157329B743E61DD0740032CE8D62A18BBDB82",
+      "sourceBytes": 4160,
+      "pngSha256": "CCE05FA188709E9B4706566BE14EA8C18C5DB5C02C752A51ED5F468E659578EA",
+      "pngBytes": 4679,
+      "decodedRgbaSha256": "19CDD4BD1F4CC0B61007EE098F7BC047C74B2D0FE8427E31C3A6CC3B4811E479",
+      "reusedOriginalPng": null,
+      "observedSiteSpotIds": [
+        "144"
+      ]
+    },
+    {
+      "url": "https://assets.garmoth.com/img/new_icon/03_etc/04_dropitem/00044519_2.webp",
+      "file": "00044519_2.png",
+      "width": 44,
+      "height": 44,
+      "sourceSha256": "37996655303E1F5318AF4F7EB79F3F762256A352C7886FE4E44FB126AD7D5C67",
+      "sourceBytes": 4210,
+      "pngSha256": "4162BF2F602D196FC8516C4722B5059FFB1FEF450367C21E34C2D07EC916075F",
+      "pngBytes": 4715,
+      "decodedRgbaSha256": "894921B072A79EA36B359940C0319DEA411585D784DE172D1561F23705A21E0A",
+      "reusedOriginalPng": null,
+      "observedSiteSpotIds": [
+        "161"
+      ]
+    },
+    {
+      "url": "https://assets.garmoth.com/img/new_icon/03_etc/04_dropitem/00044520.webp",
+      "file": "00044520.png",
+      "width": 44,
+      "height": 44,
+      "sourceSha256": "B8AAA93BE918BB58CDE0CAABA2C80EBEFBAFC807A092F2D80A023838F000275F",
+      "sourceBytes": 5222,
+      "pngSha256": "DFB6A697E4ECED45FD08F650E699CA3C359025FC44BD5156CCF29744D2DC0C93",
+      "pngBytes": 5824,
+      "decodedRgbaSha256": "2D3CF1CDCA99F86D7652D283A9BAB3EDAB45B3A18361D60EBB47B2CA25133025",
+      "reusedOriginalPng": null,
+      "observedSiteSpotIds": [
+        "146"
+      ]
+    },
+    {
+      "url": "https://assets.garmoth.com/img/new_icon/03_etc/04_dropitem/00044521.webp",
+      "file": "00044521.png",
+      "width": 44,
+      "height": 44,
+      "sourceSha256": "A33419091950F9C91946812DB65F880A54CA52DFFB35CD46E78457058F4B01A4",
+      "sourceBytes": 5314,
+      "pngSha256": "9E27373E34A57CC4236297238D24BCEF0CC9C7F8E0E540A1939C5BFAE1BB4479",
+      "pngBytes": 5711,
+      "decodedRgbaSha256": "31C842FA4AB80C1140C36F863A4348A5673A6118179E65FC22BBFD769F4B7B26",
+      "reusedOriginalPng": null,
+      "observedSiteSpotIds": [
+        "145"
+      ]
+    },
+    {
+      "url": "https://assets.garmoth.com/img/new_icon/03_etc/04_dropitem/00044522.webp",
+      "file": "00044522.png",
+      "width": 44,
+      "height": 44,
+      "sourceSha256": "480FAB3E0ABC2E953DEACF76EF741609F04A74D59C8AB69ECB4769F1D6249480",
+      "sourceBytes": 5202,
+      "pngSha256": "65CEC45C1EFAA5A548C0389951868AC171F0A8BB92835DD189DCE2F762C5C837",
+      "pngBytes": 5797,
+      "decodedRgbaSha256": "3EE49010B2F84B4DAF54CE07D62A8FE52B0C959BDCA029C62EFF2ED92A695351",
+      "reusedOriginalPng": null,
+      "observedSiteSpotIds": [
+        "151"
+      ]
+    },
+    {
+      "url": "https://assets.garmoth.com/img/new_icon/03_etc/04_dropitem/00044527_d.webp",
+      "file": "00044527_d.png",
+      "width": 44,
+      "height": 44,
+      "sourceSha256": "60C657A63ECA69B54BEA481425393BD5FE6C54AEF6F15E3E4CCE2EC628515907",
+      "sourceBytes": 5494,
+      "pngSha256": "3A394B8CCD6CBD323DE64B174D0D77791F5ABD2208211052B7FFF59304336EF2",
+      "pngBytes": 5780,
+      "decodedRgbaSha256": "34C3ACA4608DD7871CC049D848CDCD5C70D53C1E7410F4B7FDA080D309795EE0",
+      "reusedOriginalPng": null,
+      "observedSiteSpotIds": [
+        "199"
+      ]
+    },
+    {
+      "url": "https://assets.garmoth.com/img/new_icon/03_etc/04_dropitem/00056341.webp",
+      "file": "00056341.png",
+      "width": 44,
+      "height": 44,
+      "sourceSha256": "B88341FED85FE350FC1A0E6919A5E7F40BA48FB6382EE19E100E141ABCF9C230",
+      "sourceBytes": 4046,
+      "pngSha256": "8ADF30C5A2093B8DDB676F545B5E7C9DECC2D25510D0BDF5020D9091EEF1F24B",
+      "pngBytes": 5150,
+      "decodedRgbaSha256": "8D8EABF126DE2883E8DACFC6D95796216B3D152FDF13A7B2950DC8A45B7B45C8",
+      "reusedOriginalPng": null,
+      "observedSiteSpotIds": [
+        "201"
+      ]
+    },
+    {
+      "url": "https://assets.garmoth.com/img/new_icon/03_etc/04_dropitem/00056342.webp",
+      "file": "00056342.png",
+      "width": 44,
+      "height": 44,
+      "sourceSha256": "4E9535C8430B945D703220F569DC38CAB94A52CB829811E3B280BD45E76C77AB",
+      "sourceBytes": 3730,
+      "pngSha256": "71F3DE83505930EEABFABDEC6BC5FFF40B27C3A60BD3625CE137CE4AA864571A",
+      "pngBytes": 4901,
+      "decodedRgbaSha256": "9F12ED2F1950B34F1362DA956C08E2338BEE86B6021EFBACD98D5033477B0862",
+      "reusedOriginalPng": null,
+      "observedSiteSpotIds": [
+        "202"
+      ]
+    },
+    {
+      "url": "https://assets.garmoth.com/img/new_icon/03_etc/04_dropitem/00059797.webp",
+      "file": "00059797.png",
+      "width": 44,
+      "height": 44,
+      "sourceSha256": "5B494D17311D4582CDCF677BDB341F8CE0F859379E1CE48FE974598D54274083",
+      "sourceBytes": 3206,
+      "pngSha256": "BEAF84C4AEC962AE2B31DE8DBF5190C21A8900CCB2A0AF5E308BDD9724070CA3",
+      "pngBytes": 3968,
+      "decodedRgbaSha256": "6F3A0F9D300C089CDBF19A62B9D8F1413A9083722194BCF6938149843419E82B",
+      "reusedOriginalPng": null,
+      "observedSiteSpotIds": [
+        "122"
+      ]
+    },
+    {
+      "url": "https://assets.garmoth.com/img/new_icon/03_etc/04_dropitem/00059798.webp",
+      "file": "00059798.png",
+      "width": 44,
+      "height": 44,
+      "sourceSha256": "1D628862C266013B865E2688C96AC51FD0E3D17674E6A06B14EA4D45464A28AD",
+      "sourceBytes": 5446,
+      "pngSha256": "DAAA5F5FD2F13C9D207F93518E9446C97F99DC2791779161DA717F546C80FD79",
+      "pngBytes": 6073,
+      "decodedRgbaSha256": "BDFBD069EAA8F8A0B8848A4420D85A320D8A8B89A9B3259A16F6984CC0A26314",
+      "reusedOriginalPng": null,
+      "observedSiteSpotIds": [
+        "121"
+      ]
+    },
+    {
+      "url": "https://assets.garmoth.com/img/new_icon/03_etc/04_dropitem/00059799.webp",
+      "file": "00059799.png",
+      "width": 44,
+      "height": 44,
+      "sourceSha256": "D8347D2391495A625F242A96A3CE5671666C73B2CDBA64659741B5C24283DA3F",
+      "sourceBytes": 4096,
+      "pngSha256": "6552FC623B43A14986C13DAF3C0043B65CCCFA3857A6D44D3C5736F543D0F475",
+      "pngBytes": 5259,
+      "decodedRgbaSha256": "49957D8863E6D0B279750F889E3DC76038C20697A506BBEC14975BA11382A508",
+      "reusedOriginalPng": null,
+      "observedSiteSpotIds": [
+        "120"
+      ]
+    },
+    {
+      "url": "https://assets.garmoth.com/img/new_icon/03_etc/04_dropitem/00059800.webp",
+      "file": "00059800.png",
+      "width": 44,
+      "height": 44,
+      "sourceSha256": "2E53072AB123FD1029B54DF64A8C53C07F75DE382C81985CC4A7A8C738C8D947",
+      "sourceBytes": 4234,
+      "pngSha256": "86AD6685EAD776BA4D7617397F8D490F96916A76FD7244F774A52E4F4C141F4F",
+      "pngBytes": 5253,
+      "decodedRgbaSha256": "9AB03BEF6C6135F26C1B068C39E1506E9B07FB6186AB1B571E5B874A04CACE32",
+      "reusedOriginalPng": null,
+      "observedSiteSpotIds": [
+        "124"
+      ]
+    },
+    {
+      "url": "https://assets.garmoth.com/img/new_icon/03_etc/04_dropitem/00059801.webp",
+      "file": "00059801.png",
+      "width": 44,
+      "height": 44,
+      "sourceSha256": "8C6C2BAE3F07B6DA8555FAAD25D7DED697950F545D74635DD5B4EAA2801B974A",
+      "sourceBytes": 4456,
+      "pngSha256": "58A60D80785A7538DB0D6D2B5A875D925C5896F1A02A4097A94B0E87BB9E1D25",
+      "pngBytes": 5493,
+      "decodedRgbaSha256": "6B10F7DAB07CAF5A07A9A0B468386513EFC6699F8ED7D2CDD384C4CAB4BE46B7",
+      "reusedOriginalPng": null,
+      "observedSiteSpotIds": [
+        "123"
+      ]
+    },
+    {
+      "url": "https://assets.garmoth.com/img/new_icon/03_etc/04_dropitem/00059880.webp",
+      "file": "00059880.png",
+      "width": 44,
+      "height": 44,
+      "sourceSha256": "A08EFB26188A5A397F90D1E08B24097A60B52955453EC3A8E30E9720EB1E097B",
+      "sourceBytes": 3882,
+      "pngSha256": "58247F89AE33DF74060DC8AFAB376B6D867839C4DAE1E6A83CB1F8FD9796A5B8",
+      "pngBytes": 4655,
+      "decodedRgbaSha256": "5C662CD916BCC9BF983C2E64030E503BD698936873608EC9B722980C29205E63",
+      "reusedOriginalPng": null,
+      "observedSiteSpotIds": [
+        "157"
+      ]
+    },
+    {
+      "url": "https://assets.garmoth.com/img/new_icon/03_etc/04_dropitem/00065249.webp",
+      "file": "00065249.png",
+      "width": 44,
+      "height": 44,
+      "sourceSha256": "97B119DBD572B78D036E8EC393847A1C58A7CC214C5488D8D726199A261B575C",
+      "sourceBytes": 3096,
+      "pngSha256": "747D53B6D7E6ABC23CCC7F4626F800B3A5DDB4439172C4D62FC70657163F4694",
+      "pngBytes": 3825,
+      "decodedRgbaSha256": "946C4C247B2FD3E11D202BD181A27DEFC78FE79DFECF3B903A0869ECFF8F7D6D",
+      "reusedOriginalPng": null,
+      "observedSiteSpotIds": [
+        "165"
+      ]
+    },
+    {
+      "url": "https://assets.garmoth.com/img/new_icon/03_etc/04_dropitem/00065328.webp",
+      "file": "00065328.png",
+      "width": 44,
+      "height": 44,
+      "sourceSha256": "BCBE79F361897B4F1F5C0536A9B75F997B326FA07117B2700228B3B49E4A493B",
+      "sourceBytes": 4444,
+      "pngSha256": "ABD6FEC8A89981E94E3960925687FCC8653C44ED7716F7A7572B7747C2642060",
+      "pngBytes": 5418,
+      "decodedRgbaSha256": "9B70C08FF68461BDFAA33A1FB6096D4902B2C0DB77F9071E3C6C9D6B9F86EFE9",
+      "reusedOriginalPng": null,
+      "observedSiteSpotIds": [
+        "148"
+      ]
+    },
+    {
+      "url": "https://assets.garmoth.com/img/new_icon/03_etc/04_dropitem/00065329.webp",
+      "file": "00065329.png",
+      "width": 44,
+      "height": 44,
+      "sourceSha256": "A50B0273F212CA51540761E815B8CBF9D4DC75B46C6BE058658EC557FC2D9A56",
+      "sourceBytes": 4832,
+      "pngSha256": "371BEAC0E2D96CFD09684E76244FCBC8F277FBE5B2A8EF76435142D20AC40756",
+      "pngBytes": 5222,
+      "decodedRgbaSha256": "49A2A3502CF6A0F121DFF6DAB443F01661BC1FB367BFFA38C95E4C9BB9CBD33A",
+      "reusedOriginalPng": null,
+      "observedSiteSpotIds": [
+        "147"
+      ]
+    },
+    {
+      "url": "https://assets.garmoth.com/img/new_icon/03_etc/04_dropitem/00065330.webp",
+      "file": "00065330.png",
+      "width": 44,
+      "height": 44,
+      "sourceSha256": "E29E38B423E6CDBBD38DD1E895EEF3EA572BE848717AB7AD1DA513A5B1922455",
+      "sourceBytes": 2236,
+      "pngSha256": "591EDCC577A671FB6133A89459B419D94DB4F8BC4D3549C3BA3B5DD2DD444533",
+      "pngBytes": 3568,
+      "decodedRgbaSha256": "BC370706BC8C9B2EAC0426EEE345E8B31774EA51EDF2ABAC83C3B026A309889C",
+      "reusedOriginalPng": null,
+      "observedSiteSpotIds": [
+        "153"
+      ]
+    },
+    {
+      "url": "https://assets.garmoth.com/img/new_icon/03_etc/04_dropitem/00065331.webp",
+      "file": "00065331.png",
+      "width": 44,
+      "height": 44,
+      "sourceSha256": "EB853123AA4A675161FE2DF77BC67ECEEDEB4E743574A6DE1C03124CE508BDF6",
+      "sourceBytes": 3408,
+      "pngSha256": "7C4CCC09484D34671884AC4053E1A0AA586D46068DF8A3DA096471C7B2856629",
+      "pngBytes": 3793,
+      "decodedRgbaSha256": "F0F38787F6286F94218DB3A883191074FCC650168EF81941143A1CBBD060F609",
+      "reusedOriginalPng": null,
+      "observedSiteSpotIds": [
+        "168"
+      ]
+    },
+    {
+      "url": "https://assets.garmoth.com/img/new_icon/03_etc/04_dropitem/00065332.webp",
+      "file": "00065332.png",
+      "width": 44,
+      "height": 44,
+      "sourceSha256": "13A3869C55401B7E81179F9A8958AF3A903B01E716A07D0529DC094E2A931089",
+      "sourceBytes": 3198,
+      "pngSha256": "03F4F4CA145819A342CFE75C8D82FBC008EF6B4876299EF811BEC2251DC8D9F0",
+      "pngBytes": 4235,
+      "decodedRgbaSha256": "3451F63DF4F215C4150328F59F3F7B3F89D9BBF06370BBD6BDB3F238AD5AA5D1",
+      "reusedOriginalPng": null,
+      "observedSiteSpotIds": [
+        "166"
+      ]
+    },
+    {
+      "url": "https://assets.garmoth.com/img/new_icon/03_etc/04_dropitem/00065335.webp",
+      "file": "00065335.png",
+      "width": 44,
+      "height": 44,
+      "sourceSha256": "70302B64AFBE33125909B11A436D360435D1CA8DF362193AC3E57574DA139E9A",
+      "sourceBytes": 4476,
+      "pngSha256": "4C6A2A7FF99DE77F0D6B7E92F3052DC08505AE35A3CA8906C112EC0C92843219",
+      "pngBytes": 5017,
+      "decodedRgbaSha256": "A5630F8FB88509FADA035D38A59066D551607CD0BE3E72E1114914F6FE0BDC80",
+      "reusedOriginalPng": null,
+      "observedSiteSpotIds": [
+        "169"
+      ]
+    },
+    {
+      "url": "https://assets.garmoth.com/img/new_icon/03_etc/04_dropitem/00065337.webp",
+      "file": "00065337.png",
+      "width": 44,
+      "height": 44,
+      "sourceSha256": "D5F2D112787F44CAAC1434E82F332EB1C9CE80CA9DFD9A0C1240045C38835735",
+      "sourceBytes": 4340,
+      "pngSha256": "F97BCE62645DF858219BE875E207B4341FABEEB319F7727B0234FB2D4079B7CF",
+      "pngBytes": 4986,
+      "decodedRgbaSha256": "DA4845BC40D48DD11983E4BC225656758922410741294F9E86359828A01C88EA",
+      "reusedOriginalPng": null,
+      "observedSiteSpotIds": [
+        "167"
+      ]
+    },
+    {
+      "url": "https://assets.garmoth.com/img/new_icon/03_etc/04_dropitem/00065338.webp",
+      "file": "00065338.png",
+      "width": 44,
+      "height": 44,
+      "sourceSha256": "66FA55947EE90602F714FD32DB284D943F25D88BEC98E825FE615D36045CA5DB",
+      "sourceBytes": 2700,
+      "pngSha256": "5BA6C03AB5F628AE5ADCB41EF3E4BC64DD440238FC16AFFC9383B1C915EE6CD0",
+      "pngBytes": 3617,
+      "decodedRgbaSha256": "FB07D91715C81A5E33F5804381075D1FE23DE6D1D3F154CE12EEE701C8559C64",
+      "reusedOriginalPng": null,
+      "observedSiteSpotIds": [
+        "183"
+      ]
+    },
+    {
+      "url": "https://assets.garmoth.com/img/new_icon/03_etc/04_dropitem/00065339.webp",
+      "file": "00065339.png",
+      "width": 44,
+      "height": 44,
+      "sourceSha256": "736931565FB55EE2632CB77BA31B525E3034E004FD5A9F6216D113ECD7394FF8",
+      "sourceBytes": 3218,
+      "pngSha256": "11BD19757E13BA24F1A808E4FB301FC44A0458717BAAA11D7EED3A9FB659DD53",
+      "pngBytes": 4482,
+      "decodedRgbaSha256": "28608906D71950AC11ED8B665469034DE6BA20C4399C08A75192FF837B0CEDF7",
+      "reusedOriginalPng": null,
+      "observedSiteSpotIds": [
+        "185"
+      ]
+    },
+    {
+      "url": "https://assets.garmoth.com/img/new_icon/03_etc/04_dropitem/00065340.webp",
+      "file": "00065340.png",
+      "width": 44,
+      "height": 44,
+      "sourceSha256": "3FE4DE08969830F28285AA103FA7F196DD62679C166100BE430D4F7BF8DB8B2C",
+      "sourceBytes": 2900,
+      "pngSha256": "62FAE2E2A317717DE19AB8A123CAD9245E38CAFD421B22E88AB236CCC45F365F",
+      "pngBytes": 3323,
+      "decodedRgbaSha256": "28E4D4FFE690A43A50F63DB909DBCBF05BE34D07744D73831D2F844B4F9AC59D",
+      "reusedOriginalPng": null,
+      "observedSiteSpotIds": [
+        "184"
+      ]
+    },
+    {
+      "url": "https://assets.garmoth.com/img/new_icon/03_etc/04_dropitem/00065341.webp",
+      "file": "00065341.png",
+      "width": 44,
+      "height": 44,
+      "sourceSha256": "B168B631675293DED2FEF4448160B4E19CA49F43631ADB5E7DF0EF833477318F",
+      "sourceBytes": 4814,
+      "pngSha256": "ED5662C326CAD59223D5B5E50258D86AF4CEF6E579D6600B30A390FF27394FB5",
+      "pngBytes": 5596,
+      "decodedRgbaSha256": "09CBDE21DC179FEF4588419CB94A3B26ED38F9363BBA61EB6C5543DABAD98E53",
+      "reusedOriginalPng": null,
+      "observedSiteSpotIds": [
+        "193"
+      ]
+    },
+    {
+      "url": "https://assets.garmoth.com/img/new_icon/03_etc/04_dropitem/00065342.webp",
+      "file": "00065342.png",
+      "width": 44,
+      "height": 44,
+      "sourceSha256": "01D7ADD84A1D58C744156F82625B718497F839452ECFE6B9B60295C4EC763EF8",
+      "sourceBytes": 3658,
+      "pngSha256": "F15E66FD7EAA64AC77AFEC6A5BBA612A5E64218B4959E62AC8A3BEAD5302E171",
+      "pngBytes": 4297,
+      "decodedRgbaSha256": "77E8A3ED5D529478B86CEEB3929491E4C5E60C0C357019AEED4BE50594A10E80",
+      "reusedOriginalPng": null,
+      "observedSiteSpotIds": [
+        "194"
+      ]
+    },
+    {
+      "url": "https://assets.garmoth.com/img/new_icon/03_etc/04_dropitem/00767250.webp",
+      "file": "00767250.png",
+      "width": 44,
+      "height": 44,
+      "sourceSha256": "DF43FF8C8071170A70C5712A521017487EFAA6C3175D00257937707C3073C958",
+      "sourceBytes": 4046,
+      "pngSha256": "8C116FA93665A92F1C91F4301B25BB43059F26F2DE6B5090240F23012D2631CA",
+      "pngBytes": 4652,
+      "decodedRgbaSha256": "9003AFB2400D71EC29D1C4C1CC047E0D3AAA1374C5F7900641D4334142E6B53F",
+      "reusedOriginalPng": null,
+      "observedSiteSpotIds": [
+        "208",
+        "209",
+        "210"
+      ]
+    },
+    {
+      "url": "https://assets.garmoth.com/img/new_icon/03_etc/04_dropitem/00767251.webp",
+      "file": "00767251.png",
+      "width": 44,
+      "height": 44,
+      "sourceSha256": "F26C2282B045702CBD1812E82358AEFFB746FBF5300CA19CD05674A36DBB873D",
+      "sourceBytes": 3800,
+      "pngSha256": "CBCF296E2507E2A3ED6BF6E71974DAB629A5AEA9742CC7493D8DFC85F6CACF77",
+      "pngBytes": 4354,
+      "decodedRgbaSha256": "BC3A164B48E926A7DE12B0F74B1DCBD1A1B80AB8D1D2CEC90EF53F9BCD0F9BFE",
+      "reusedOriginalPng": null,
+      "observedSiteSpotIds": [
+        "200"
+      ]
+    },
+    {
+      "url": "https://assets.garmoth.com/img/new_icon/03_etc/04_dropitem/00767350.webp",
+      "file": "00767350.png",
+      "width": 44,
+      "height": 44,
+      "sourceSha256": "D29E3EC4E9D7F3DE4420C462EB8317EDDA7246198FD8E0399C3C2A544643F4A3",
+      "sourceBytes": 3856,
+      "pngSha256": "578192F55E5B43DFA112DEF54A90465C4A064C8A137C6E8B864B9D3F752DDD0C",
+      "pngBytes": 4608,
+      "decodedRgbaSha256": "3A3260250EEBD4C0BB03C7CF914F5001E6E33FAD5E99FF0CB2E2045DBA309E5C",
+      "reusedOriginalPng": null,
+      "observedSiteSpotIds": [
+        "212"
+      ]
+    },
+    {
+      "url": "https://assets.garmoth.com/img/new_icon/03_etc/04_dropitem/00980113.webp",
+      "file": "00980113.png",
+      "width": 44,
+      "height": 44,
+      "sourceSha256": "50F7C74638F27FACB77B8F03F8900B512BB9C30A1C4FC1AB616FB1CB1A3ADABA",
+      "sourceBytes": 3874,
+      "pngSha256": "F62FD6425DABD19F29F5F9A891E871438BA729C68E1CFE60C0FDF7171E33F22C",
+      "pngBytes": 4430,
+      "decodedRgbaSha256": "684AA93FE6DDC19E57E44B223CF2E6D4D6193BBEA71B8ABFDA1C97B736BB2EC1",
+      "reusedOriginalPng": null,
+      "observedSiteSpotIds": [
+        "219"
+      ]
+    },
+    {
+      "url": "https://assets.garmoth.com/img/new_icon/03_etc/04_dropitem/00980127.webp",
+      "file": "00980127.png",
+      "width": 44,
+      "height": 44,
+      "sourceSha256": "010D3105CC9502BD96F1BD33CBA4FDC27342D04E42409B6C7FE2DC5778C37C5B",
+      "sourceBytes": 2368,
+      "pngSha256": "C76452C29EF243997C1FCE8C5D1697160D86CB04AB12CE33818F598ADAB0E3C2",
+      "pngBytes": 6164,
+      "decodedRgbaSha256": "C0A56C61E7426C71607E697C51BA5E58E3B01E6A981C1C3BB4F499491EE03D7C",
+      "reusedOriginalPng": null,
+      "observedSiteSpotIds": [
+        "213"
+      ]
+    },
+    {
+      "url": "https://assets.garmoth.com/img/new_icon/03_etc/04_dropitem/00980128.webp",
+      "file": "00980128.png",
+      "width": 44,
+      "height": 44,
+      "sourceSha256": "2A5120E18CAB1DB1D6E4EE62F7D4FF2921E200F3B52874711A350807635F3786",
+      "sourceBytes": 2106,
+      "pngSha256": "04C73A8A144D753CA96A56FD8E180F6F51CA526DC54967F913D6BA376B715E4A",
+      "pngBytes": 5713,
+      "decodedRgbaSha256": "4D92D9AFC7D26DBC5D09AB7DE60EA29DAC0B9F491DDD3942221730BC3AC68C96",
+      "reusedOriginalPng": null,
+      "observedSiteSpotIds": [
+        "214"
+      ]
+    },
+    {
+      "url": "https://assets.garmoth.com/img/new_icon/03_etc/04_dropitem/00980129.webp",
+      "file": "00980129.png",
+      "width": 44,
+      "height": 44,
+      "sourceSha256": "2186EBE4717DD6128A39DC9F6F45E53C23F392EBAC5DCB341B63B249CE439215",
+      "sourceBytes": 2090,
+      "pngSha256": "7B145EC60560E549F222E45FE8E20DFCB6D798A4C98C8B93698ADDEA0CAD24C4",
+      "pngBytes": 6038,
+      "decodedRgbaSha256": "0E4C6178400EFDCA7613F6D72AFC69A2047D7BC43A1FE5039CE9D0A4569C55DF",
+      "reusedOriginalPng": null,
+      "observedSiteSpotIds": [
+        "215"
+      ]
+    },
+    {
+      "url": "https://assets.garmoth.com/img/new_icon/03_etc/04_dropitem/00980130.webp",
+      "file": "00980130.png",
+      "width": 44,
+      "height": 44,
+      "sourceSha256": "875A94B4DC40B8759E5FDB2C7AD1DDC43E5B302CAE550D76A752C52EA2653DBE",
+      "sourceBytes": 2064,
+      "pngSha256": "434BB78055457947E6A19E773E2C8F296C2327B050C41F777F0C50C886E338B9",
+      "pngBytes": 6147,
+      "decodedRgbaSha256": "119588538EA6193099507B86E69BEDC3DEB56766884F06DE854B2371356398BA",
+      "reusedOriginalPng": null,
+      "observedSiteSpotIds": [
+        "217"
+      ]
+    },
+    {
+      "url": "https://assets.garmoth.com/img/new_icon/03_etc/04_dropitem/00980131.webp",
+      "file": "00980131.png",
+      "width": 44,
+      "height": 44,
+      "sourceSha256": "BCBE566D8202ABD7A565A11BACDC5B865F923C101E8456666966C77AAFFAB838",
+      "sourceBytes": 2098,
+      "pngSha256": "5DD49B74524DAC22FD564BF6DBE317F26586E41368449182A0336B461244C061",
+      "pngBytes": 6045,
+      "decodedRgbaSha256": "1069A15A62AEB050776731B5DBAB175BC955760CB7AFFED43DB9190D42106B58",
+      "reusedOriginalPng": null,
+      "observedSiteSpotIds": [
+        "216"
+      ]
+    },
+    {
+      "url": "https://assets.garmoth.com/img/new_icon/03_etc/04_dropitem/00980132.webp",
+      "file": "00980132.png",
+      "width": 48,
+      "height": 44,
+      "sourceSha256": "955E8D7B740E96D2E4DAA581518A1A9BE67F20442C0CF2690F1C71ADEE050783",
+      "sourceBytes": 2192,
+      "pngSha256": "2B4A87CB0B32E33D3152505FFA2D6B63F62DB688D18E9B996A6D9E608474D87B",
+      "pngBytes": 6233,
+      "decodedRgbaSha256": "98AB1ACDB267C58BD0AF38FC8902B3A8EDFB1B2316C8F28C65F755E64E5194B0",
+      "reusedOriginalPng": null,
+      "observedSiteSpotIds": [
+        "218"
+      ]
+    },
+    {
+      "url": "https://assets.garmoth.com/img/new_icon/03_etc/07_productmaterial/00004006.webp",
+      "file": "00004006.png",
+      "width": 44,
+      "height": 44,
+      "sourceSha256": "518B21F30ACB96A69AA36282FCA39EC58C2D38DF0787A65738EFCC8BB70FAF0A",
+      "sourceBytes": 1896,
+      "pngSha256": "95991E9FF7DC99DA4B14850AFB5288FF7701405ED88634D7067E8F31A4DF678C",
+      "pngBytes": 2706,
+      "decodedRgbaSha256": "65AE5DE70879AFA7B44F35339219919B4036213BC5547C29461B3CB20D3D2AA9",
+      "reusedOriginalPng": null,
+      "observedSiteSpotIds": [
+        "57"
+      ]
+    },
+    {
+      "url": "https://assets.garmoth.com/img/new_icon/03_etc/07_productmaterial/00004602.webp",
+      "file": "00004602.png",
+      "width": 44,
+      "height": 44,
+      "sourceSha256": "EDAAA5576AD4B688B782C7AD12C89EBAEF8657E5104042EAB2E3C1D896624941",
+      "sourceBytes": 2220,
+      "pngSha256": "414982E8B759F288EA5596368CACF43D1070B22E29C1E5FBEB97020D72829D0C",
+      "pngBytes": 2928,
+      "decodedRgbaSha256": "5B86BB93565A636756798BC6DB51BAC2FE15030094B864C5961B0AEC847A8C6F",
+      "reusedOriginalPng": null,
+      "observedSiteSpotIds": [
+        "53"
+      ]
+    },
+    {
+      "url": "https://assets.garmoth.com/img/new_icon/03_etc/07_productmaterial/00004603.webp",
+      "file": "00004603.png",
+      "width": 44,
+      "height": 44,
+      "sourceSha256": "17FC47B8EC4E3992671296DADDC7A7C36152471F465F34F527C11989FFC96305",
+      "sourceBytes": 2112,
+      "pngSha256": "7C834C9AB43EA25986B1780EE43AF23E534B3A5466B4801D59446EA2E094F5F6",
+      "pngBytes": 2958,
+      "decodedRgbaSha256": "69E17DDC68EA55E40ED58911C0B5B5993B52DC4C34A898078C9A0592ACEC5FB6",
+      "reusedOriginalPng": null,
+      "observedSiteSpotIds": [
+        "52",
+        "67"
+      ]
+    },
+    {
+      "url": "https://assets.garmoth.com/img/new_icon/03_etc/07_productmaterial/00004607.webp",
+      "file": "00004607.png",
+      "width": 44,
+      "height": 44,
+      "sourceSha256": "8671822F6F203A543742C68A1978A193DA1F5C411D6DE677603E8D6B8AECBC06",
+      "sourceBytes": 2016,
+      "pngSha256": "E37CBA2C26F700C26BDCCAB376E9A0227652AA91BD2F929472B92A21D8884484",
+      "pngBytes": 2785,
+      "decodedRgbaSha256": "DD0FD90279659EFE62D1724B71479D468F28C0E09D4616FEE3FE5D1ECA36741D",
+      "reusedOriginalPng": null,
+      "observedSiteSpotIds": [
+        "51",
+        "94"
+      ]
+    },
+    {
+      "url": "https://assets.garmoth.com/img/new_icon/03_etc/07_productmaterial/00005001.webp",
+      "file": "00005001.png",
+      "width": 44,
+      "height": 44,
+      "sourceSha256": "08A5EEBB798B3CB723EE60FC4F23703EE88F752FD600CC457CD9FB249A773CBD",
+      "sourceBytes": 1588,
+      "pngSha256": "6A592BA93B217542AF6A6AED5829E9A407F5DEBD76887419278C2ED3F3B9638A",
+      "pngBytes": 2026,
+      "decodedRgbaSha256": "C93EC1D17F9FB327702DD86F7053B941524F10A9087D3495396D0CF1A33C30AA",
+      "reusedOriginalPng": null,
+      "observedSiteSpotIds": [
+        "195"
+      ]
+    },
+    {
+      "url": "https://assets.garmoth.com/img/new_icon/03_etc/07_productmaterial/00005004.webp",
+      "file": "00005004.png",
+      "width": 44,
+      "height": 44,
+      "sourceSha256": "815E4EBE17EFEAD84046F64E9AE4F9556728230EABEB962A1EC35E30E7D109EE",
+      "sourceBytes": 1588,
+      "pngSha256": "C95D027B2C97A0E6E2FA306775F9D5AA1511E00EA59A74F463F02205EEFD7362",
+      "pngBytes": 2008,
+      "decodedRgbaSha256": "6CE5384D9EC1A34D168ED1AF5A34946121C7D1EFA84EDF9BC2CB2519C96C71F2",
+      "reusedOriginalPng": null,
+      "observedSiteSpotIds": [
+        "196"
+      ]
+    },
+    {
+      "url": "https://assets.garmoth.com/img/new_icon/03_etc/07_productmaterial/00005009.webp",
+      "file": "00005009.png",
+      "width": 44,
+      "height": 44,
+      "sourceSha256": "A996713F66794388B469AE1D40B892BBAC8FC14F9A82DAA5E948FBE643024608",
+      "sourceBytes": 1604,
+      "pngSha256": "10BC51783D17B0836EE5D9A30E61403EEE56B78938078E839EBD01345C0996F1",
+      "pngBytes": 2001,
+      "decodedRgbaSha256": "447AF587F80791EB3BEEE7E12C27819F81775A89754EFA0410769644A72BF7CA",
+      "reusedOriginalPng": null,
+      "observedSiteSpotIds": [
+        "93"
+      ]
+    },
+    {
+      "url": "https://assets.garmoth.com/img/new_icon/03_etc/07_productmaterial/00005010.webp",
+      "file": "00005010.png",
+      "width": 44,
+      "height": 44,
+      "sourceSha256": "8BF0B487DEFFE9502D18101EF66129A9B8EE2874AC6C0C20A87792EDCE232664",
+      "sourceBytes": 1576,
+      "pngSha256": "034820EEFA19B0D3CE6C1D42552048C12F6836D1A44C48C7A4BF869014DBC521",
+      "pngBytes": 2018,
+      "decodedRgbaSha256": "016A080868B4720D117D12C2F62D07827DB4357857CD652789DCC023861D4FFD",
+      "reusedOriginalPng": null,
+      "observedSiteSpotIds": [
+        "197",
+        "62"
+      ]
+    },
+    {
+      "url": "https://assets.garmoth.com/img/new_icon/03_etc/07_productmaterial/00005018.webp",
+      "file": "00005018.png",
+      "width": 44,
+      "height": 44,
+      "sourceSha256": "967C5DFD360210EC04DA456AD81B02C47AFE63D02B7558159D69DFF6C558AA7D",
+      "sourceBytes": 1700,
+      "pngSha256": "FCCAA7CCF2C4CC14D1212C518941AC8371B6BF20E4D83AA7F5E36F52921AA584",
+      "pngBytes": 1999,
+      "decodedRgbaSha256": "815727882E6E05409111A17A045429E9B324BF533086A754F548C35557FED76E",
+      "reusedOriginalPng": null,
+      "observedSiteSpotIds": [
+        "56"
+      ]
+    },
+    {
+      "url": "https://assets.garmoth.com/img/new_icon/03_etc/07_productmaterial/00005019.webp",
+      "file": "00005019.png",
+      "width": 44,
+      "height": 44,
+      "sourceSha256": "E1C1C70228BD989BF4423EECAFB97C00823001ACAF875D0565507F1BE37AC99A",
+      "sourceBytes": 2962,
+      "pngSha256": "79181E962F5787EC9B367357EC58A21404783F4F73419A0096B43F343B5E63CD",
+      "pngBytes": 3527,
+      "decodedRgbaSha256": "8A6A988821F948CD75473890F5D78DBE9370291D7394B85465C0210C20D356C7",
+      "reusedOriginalPng": null,
+      "observedSiteSpotIds": [
+        "55"
+      ]
+    },
+    {
+      "url": "https://assets.garmoth.com/img/new_icon/03_etc/07_productmaterial/00005020.webp",
+      "file": "00005020.png",
+      "width": 44,
+      "height": 44,
+      "sourceSha256": "AC3245A68731CF717C8AF5806293510F3A86A1C6067BF3750C152B3C6DAD9CE4",
+      "sourceBytes": 1458,
+      "pngSha256": "40E481D95A10590C24C6F2C5E83097590AD105F170A4D39A6AB8FEC20C15378A",
+      "pngBytes": 1762,
+      "decodedRgbaSha256": "FA59A39508E4947C58F305DAA0636070F221EDDF7915B1759D25458B68D643F1",
+      "reusedOriginalPng": null,
+      "observedSiteSpotIds": [
+        "188",
+        "96"
+      ]
+    },
+    {
+      "url": "https://assets.garmoth.com/img/new_icon/03_etc/07_productmaterial/00005024.webp",
+      "file": "00005024.png",
+      "width": 44,
+      "height": 44,
+      "sourceSha256": "C0F001F63E989E46A2E9E4774FE216FC85D12D3E7C4727104D9BE6AE8A387CD1",
+      "sourceBytes": 1644,
+      "pngSha256": "30EF9D8AC0E2EEF99FB650888422AD429D9CC4429EF89187D78AEA80C0AE4D74",
+      "pngBytes": 2026,
+      "decodedRgbaSha256": "84B237CDBCB3E66DD35CC211E72C0A8E960E432C656EE356B788CC47E824AD18",
+      "reusedOriginalPng": null,
+      "observedSiteSpotIds": [
+        "115"
+      ]
+    },
+    {
+      "url": "https://assets.garmoth.com/img/new_icon/03_etc/07_productmaterial/00005025.webp",
+      "file": "00005025.png",
+      "width": 44,
+      "height": 44,
+      "sourceSha256": "60A192D4FEAA4320EBA5BE26232B4AA10EDFD0CDC12FB8405B54AB4D3A88CA65",
+      "sourceBytes": 3408,
+      "pngSha256": "0E6F0D032A31C2085DB4195E70A2EF584869C0CDAA4EDF8469A9329E60855D80",
+      "pngBytes": 3817,
+      "decodedRgbaSha256": "4CE115CFA788B7167B246196C060D490A90A3AD3023695379C4547603C5556B8",
+      "reusedOriginalPng": null,
+      "observedSiteSpotIds": [
+        "192"
+      ]
+    },
+    {
+      "url": "https://assets.garmoth.com/img/new_icon/03_etc/07_productmaterial/00005439.webp",
+      "file": "00005439.png",
+      "width": 44,
+      "height": 44,
+      "sourceSha256": "EF0B74155011C6FE9EDE7FF470B80DAD0AE78955A9386F77FCD668B94E9BF3FD",
+      "sourceBytes": 2172,
+      "pngSha256": "45108807BFE97CFCDE158E19F81D2F8E47BBDA993E2919EEB9D2117AFCD5F3CB",
+      "pngBytes": 2586,
+      "decodedRgbaSha256": "6D421E52217277E0D52911B815DD61D468C26655CAB4BA457F2722E5EDDEF794",
+      "reusedOriginalPng": null,
+      "observedSiteSpotIds": [
+        "187",
+        "54",
+        "77"
+      ]
+    },
+    {
+      "url": "https://assets.garmoth.com/img/new_icon/03_etc/07_productmaterial/00005526.webp",
+      "file": "00005526.png",
+      "width": 44,
+      "height": 44,
+      "sourceSha256": "B1C69E9FC1870AA169962252A39A3F845EAAEFFFAEA0265E169072A4C1F18A39",
+      "sourceBytes": 3270,
+      "pngSha256": "1660D31BC074FF5B53593C92D27CE39D8A76CC5D148EE769129B5BA81A2BBD1C",
+      "pngBytes": 3674,
+      "decodedRgbaSha256": "E02485709D4AE0778A3408C6F5C9BA99ACD75CAE641CEA7E4E25BC3268D13FEB",
+      "reusedOriginalPng": null,
+      "observedSiteSpotIds": [
+        "189"
+      ]
+    },
+    {
+      "url": "https://assets.garmoth.com/img/new_icon/03_etc/07_productmaterial/00005532.webp",
+      "file": "00005532.png",
+      "width": 44,
+      "height": 44,
+      "sourceSha256": "4C783DFEFF0D989809806B8107CA7E37F9C77D30547ED816EED5161C48E966BA",
+      "sourceBytes": 2424,
+      "pngSha256": "48227C7DBD97D9E99676424DD8A42630673C61FBE7055C9245A9250CB06DEC7B",
+      "pngBytes": 2992,
+      "decodedRgbaSha256": "5A46F8E1B07B71EC44FB76F1C8864C1A37806FDEFC5B5AC3830F4329338E7D26",
+      "reusedOriginalPng": null,
+      "observedSiteSpotIds": [
+        "65"
+      ]
+    },
+    {
+      "url": "https://assets.garmoth.com/img/new_icon/03_etc/07_productmaterial/00005538.webp",
+      "file": "00005538.png",
+      "width": 44,
+      "height": 44,
+      "sourceSha256": "58B028CAB4D78D8925ED26E7C2D99F7D3D2F2D54439BDB41A07490E3992BB812",
+      "sourceBytes": 4360,
+      "pngSha256": "903F97BF872B06874549C273557AAF94579F0F0BC859959536E55AD4398D4421",
+      "pngBytes": 5082,
+      "decodedRgbaSha256": "502E10F73225BFFC05EA98C609CDAC07573E1C9E1A7C88F1A418E852D171E02C",
+      "reusedOriginalPng": null,
+      "observedSiteSpotIds": [
+        "78"
+      ]
+    },
+    {
+      "url": "https://assets.garmoth.com/img/new_icon/03_etc/07_productmaterial/00006003.webp",
+      "file": "00006003.png",
+      "width": 44,
+      "height": 44,
+      "sourceSha256": "F51ECB24322162FBCAFFE2753347E68F0AD2CC32DBFC1DCB38385348849EBF2C",
+      "sourceBytes": 2220,
+      "pngSha256": "DAE5038B8EC2FF5F2626E3510A7EA042A90BE38E7A9302278A634CB389634AD1",
+      "pngBytes": 3055,
+      "decodedRgbaSha256": "9CC43770BD33B1B2189CAAAC9194CE9A553AFDBDD097493A65347406BFC2A132",
+      "reusedOriginalPng": null,
+      "observedSiteSpotIds": [
+        "211"
+      ]
+    },
+    {
+      "url": "https://assets.garmoth.com/img/new_icon/03_etc/07_productmaterial/00006004.webp",
+      "file": "00006004.png",
+      "width": 44,
+      "height": 44,
+      "sourceSha256": "C62D4F1C1C64128CDA6A39216C8B96925F2638A81E6AD2FE4B62306D0FF80427",
+      "sourceBytes": 2126,
+      "pngSha256": "7741260DE7C4FA09FFEA3DD51C444107BED16F3ED4A71CEB16B7E5BA7B177579",
+      "pngBytes": 2976,
+      "decodedRgbaSha256": "D7445C12F07C77B9C4B677EC99F96523D0C7664909ED7B427137410503A2A245",
+      "reusedOriginalPng": null,
+      "observedSiteSpotIds": [
+        "104"
+      ]
+    },
+    {
+      "url": "https://assets.garmoth.com/img/new_icon/03_etc/07_productmaterial/00006008.webp",
+      "file": "00006008.png",
+      "width": 44,
+      "height": 44,
+      "sourceSha256": "5CFD91121F177FD8A812950BC7E1CC85791F7024BAED7DCBFC2A370AEE868133",
+      "sourceBytes": 2140,
+      "pngSha256": "ECACA1A633A57E165BD1553C744090CBD1C8ECD73CCE32144D66380E11569C5C",
+      "pngBytes": 2934,
+      "decodedRgbaSha256": "C85BBA7A767D7C4B9B9E5F9D13F86C131E0AA42C1706ABC2D0A3C10F0D573AAC",
+      "reusedOriginalPng": null,
+      "observedSiteSpotIds": [
+        "81"
+      ]
+    },
+    {
+      "url": "https://assets.garmoth.com/img/new_icon/03_etc/07_productmaterial/00006017.webp",
+      "file": "00006017.png",
+      "width": 44,
+      "height": 44,
+      "sourceSha256": "1FD3AD2D75BAF7B875AE3CFDF8392A5FDFB7F6B20259EF5F772B3BF639A88BA8",
+      "sourceBytes": 1598,
+      "pngSha256": "E563C1F9FA0223267F203A8E5829567F54FEFE013BBCDA89D85D39EA5D70CCC0",
+      "pngBytes": 1939,
+      "decodedRgbaSha256": "D027151F4180C8509C89B2A7D370321AC219D031DCDC1DB7DDBC19761B69E86F",
+      "reusedOriginalPng": null,
+      "observedSiteSpotIds": [
+        "68"
+      ]
+    },
+    {
+      "url": "https://assets.garmoth.com/img/new_icon/03_etc/07_productmaterial/00006201.webp",
+      "file": "00006201.png",
+      "width": 44,
+      "height": 44,
+      "sourceSha256": "DF65C5E0565215BE58804E2852109E4BDD9C5D88763A3F2344F783EBFF7F7240",
+      "sourceBytes": 1188,
+      "pngSha256": "27868B8A41C33737311E200C6FFB71C08281CC999C4820E3204BB7939051426E",
+      "pngBytes": 1730,
+      "decodedRgbaSha256": "99F93A27DD7B66B51BA35F168F3E82EE7121A40E61812AA1B74013843B8EABEC",
+      "reusedOriginalPng": null,
+      "observedSiteSpotIds": [
+        "58",
+        "61"
+      ]
+    },
+    {
+      "url": "https://assets.garmoth.com/img/new_icon/03_etc/07_productmaterial/00006207.webp",
+      "file": "00006207.png",
+      "width": 44,
+      "height": 44,
+      "sourceSha256": "4181DAB767DFE78CAF6B90CF7AF0D58E78CA1217220F4F5855BE2D2D2EF4DC59",
+      "sourceBytes": 1488,
+      "pngSha256": "6FB4016D12E48052361298C15AFA2EFA389D3E8ED694C1A7865DC75996D1A57A",
+      "pngBytes": 1813,
+      "decodedRgbaSha256": "BCCC1585915679A49D69D49F466D3EB72C1FD2A552F8A41C24D5778C456181A9",
+      "reusedOriginalPng": null,
+      "observedSiteSpotIds": [
+        "70"
+      ]
+    },
+    {
+      "url": "https://assets.garmoth.com/img/new_icon/03_etc/07_productmaterial/00006210.webp",
+      "file": "00006210.png",
+      "width": 44,
+      "height": 44,
+      "sourceSha256": "C721B5D5A2523D990BBB465C55606620FDEF3392104E05CF90AFBC43080467DD",
+      "sourceBytes": 1114,
+      "pngSha256": "A95C242E9B0DAFB1AA7DB6DA8AF163394359B5BF82602EC9BE7B789395A12107",
+      "pngBytes": 1568,
+      "decodedRgbaSha256": "D908BDFCDC6CAF1A5E4BA69065285D85D81B7D4625548546DC8A5C890767CC1C",
+      "reusedOriginalPng": null,
+      "observedSiteSpotIds": [
+        "64"
+      ]
+    },
+    {
+      "url": "https://assets.garmoth.com/img/new_icon/03_etc/07_productmaterial/00006217.webp",
+      "file": "00006217.png",
+      "width": 44,
+      "height": 44,
+      "sourceSha256": "0F802E634CD0391B515DE148C9ECD4DC937AD722F6D50566B8DC69903B343DC8",
+      "sourceBytes": 1204,
+      "pngSha256": "858660A7AE46FDCE24E05419B3C87AC2E43E3886DEC6CCD18ABBDCCD2F5A183C",
+      "pngBytes": 1561,
+      "decodedRgbaSha256": "28B7A30E3F58EAA677E06B7D799CA62EB8FC7DDA11A56D0C1B1ACF89600F2255",
+      "reusedOriginalPng": null,
+      "observedSiteSpotIds": [
+        "80"
+      ]
+    },
+    {
+      "url": "https://assets.garmoth.com/img/new_icon/03_etc/07_productmaterial/00006226.webp",
+      "file": "00006226.png",
+      "width": 44,
+      "height": 44,
+      "sourceSha256": "3BC3B4A302FF4EE6008338ED8888140319AA7A412DEF71FF3BCABD81B3558A2D",
+      "sourceBytes": 1314,
+      "pngSha256": "1C7C1818C370DAB613B3D4E6641DE892964CFF8F5C7577BDFE7A75AC6F65037D",
+      "pngBytes": 1691,
+      "decodedRgbaSha256": "DDB3428732A9367567A2129B7E2212149AD301C14782DB1570CA1F7C2C6F05A4",
+      "reusedOriginalPng": null,
+      "observedSiteSpotIds": [
+        "59"
+      ]
+    },
+    {
+      "url": "https://assets.garmoth.com/img/new_icon/03_etc/07_productmaterial/00006501.webp",
+      "file": "00006501.png",
+      "width": 44,
+      "height": 44,
+      "sourceSha256": "5FD5BC667B5D977BB649AA4FD6ECE64C8B34D4F997FE135484289ECF418C4B44",
+      "sourceBytes": 2622,
+      "pngSha256": "E36B8C05A2353DFAC16BF9C55A5F7BDF34D59637D6851DF21D80DF206B755940",
+      "pngBytes": 3255,
+      "decodedRgbaSha256": "5714F439DAE15CF539F9A3F5F577652488EF2ED441FDBAFFBD9DA87F0B7C2CE8",
+      "reusedOriginalPng": null,
+      "observedSiteSpotIds": [
+        "206"
+      ]
+    },
+    {
+      "url": "https://assets.garmoth.com/img/new_icon/03_etc/07_productmaterial/00006511.webp",
+      "file": "00006511.png",
+      "width": 44,
+      "height": 44,
+      "sourceSha256": "889647B8EF6E87E0355CFD76FC3049A9843D650E0196DC2AF87B1B88C11CC06E",
+      "sourceBytes": 2650,
+      "pngSha256": "E5C63D9902FFB311C62D1EB7BB4873A12E70130B40C89F0D886F8BFF6947619A",
+      "pngBytes": 3088,
+      "decodedRgbaSha256": "229F72B51C3065E798FA7684E5BCF48279ABD75FBB249983C7E958B4DE33AA6C",
+      "reusedOriginalPng": null,
+      "observedSiteSpotIds": [
+        "69"
+      ]
+    },
+    {
+      "url": "https://assets.garmoth.com/img/new_icon/03_etc/07_productmaterial/00007901.webp",
+      "file": "00007901.png",
+      "width": 44,
+      "height": 44,
+      "sourceSha256": "86D5AB81828370455A653BCBBC9E9AFF86E13C754E190A62F5E7EAFD88D14215",
+      "sourceBytes": 1654,
+      "pngSha256": "90CA0CB4A25A809DDE16BADC286815B17AACC0423CDE7E5787E602141F322AD9",
+      "pngBytes": 2382,
+      "decodedRgbaSha256": "ECF767299BB49C1EF3C82864FC74FFB6C4F214A0DD83E8E71743888A68AB23DE",
+      "reusedOriginalPng": null,
+      "observedSiteSpotIds": [
+        "116",
+        "140",
+        "204",
+        "205",
+        "46",
+        "47",
+        "48",
+        "49",
+        "60",
+        "63",
+        "66",
+        "76",
+        "79"
+      ]
+    },
+    {
+      "url": "https://assets.garmoth.com/img/new_icon/03_etc/07_productmaterial/00007916.webp",
+      "file": "00007916.png",
+      "width": 44,
+      "height": 44,
+      "sourceSha256": "81D3D2F02E5DE7E0869DD6007CB6913A9DE289EC30ED12251046BAAFDF9F2AAB",
+      "sourceBytes": 1810,
+      "pngSha256": "F2187C6C6A56F3CD7434D9E5C3202CD470AAD9C64BF23E39998CA31CB6FC9991",
+      "pngBytes": 2487,
+      "decodedRgbaSha256": "2A559C09860DBEF036C858B452613BDFF2C6B6B7ED92FADEAF58D182FD537A14",
+      "reusedOriginalPng": null,
+      "observedSiteSpotIds": [
+        "103"
+      ]
+    },
+    {
+      "url": "https://assets.garmoth.com/img/new_icon/03_etc/07_productmaterial/00007922.webp",
+      "file": "00007922.png",
+      "width": 44,
+      "height": 44,
+      "sourceSha256": "9797F667D58C4354C96F882D6F9031C650CAE8A13A0FFB76DC7DF4C2D5777F5A",
+      "sourceBytes": 1634,
+      "pngSha256": "A3098166278E24E8DE34CA2E9D6EC057D87531E78E6CBCC393175C62D2CD0FAD",
+      "pngBytes": 2510,
+      "decodedRgbaSha256": "CC3E9F26710403E62F596A3BC47BCFEEBC3A8F514EA55D1C7425E0226E8D2EEB",
+      "reusedOriginalPng": null,
+      "observedSiteSpotIds": [
+        "190",
+        "207"
+      ]
+    },
+    {
+      "url": "https://assets.garmoth.com/img/new_icon/03_etc/07_productmaterial/00007923.webp",
+      "file": "00007923.png",
+      "width": 44,
+      "height": 44,
+      "sourceSha256": "1526961CDA275607179C4BAE78889F33734B85F029FA0CF20F63185CF34D93DA",
+      "sourceBytes": 1616,
+      "pngSha256": "DAE889A95176F6859C70F51F3331E97DABE690923DE45D797B59DE0A8D65D6C7",
+      "pngBytes": 2261,
+      "decodedRgbaSha256": "F8292333FACE610B7EC54B75195F2D64EFF748D4F28D1FB8E37CF00DC3EF026E",
+      "reusedOriginalPng": null,
+      "observedSiteSpotIds": [
+        "100",
+        "101",
+        "102",
+        "108",
+        "109",
+        "114",
+        "44",
+        "98",
+        "99"
+      ]
+    },
+    {
+      "url": "https://assets.garmoth.com/img/new_icon/03_etc/07_productmaterial/00007924.webp",
+      "file": "00007924.png",
+      "width": 44,
+      "height": 44,
+      "sourceSha256": "5DD5A3D380E2AC21EBC7A043D41BE1983827EA564DCADF63E0420A4415B3DF18",
+      "sourceBytes": 1534,
+      "pngSha256": "B81CCE6ECD1685FD3885ACD5688F5A51B8ADA45D6446D204C6B81DDF3FEA5302",
+      "pngBytes": 2053,
+      "decodedRgbaSha256": "F885AB1F348E77688A7268B20FCCCE6B297F3C10D502B85D7DAA1B7A3FC81247",
+      "reusedOriginalPng": null,
+      "observedSiteSpotIds": [
+        "191",
+        "50"
+      ]
+    },
+    {
+      "url": "https://assets.garmoth.com/img/new_icon/03_etc/07_productmaterial/00007954.webp",
+      "file": "00007954.png",
+      "width": 44,
+      "height": 44,
+      "sourceSha256": "76CDF801B0396FB8AD18EA2189790A411CF24BAA00612F93F659E8D60AB17372",
+      "sourceBytes": 2036,
+      "pngSha256": "7BB289BEBE87FC909233317F213DBC030ED66EB38CAB45DA25D899F4652DEEC1",
+      "pngBytes": 2996,
+      "decodedRgbaSha256": "C9763B4D5E2A276F0BC8632CE81535CC99CF52C2909A20B92509276D657C2255",
+      "reusedOriginalPng": null,
+      "observedSiteSpotIds": [
+        "105"
+      ]
+    },
+    {
+      "url": "https://assets.garmoth.com/img/new_icon/03_etc/07_productmaterial/00007955.webp",
+      "file": "00007955.png",
+      "width": 44,
+      "height": 44,
+      "sourceSha256": "8A64D8879968F9E9F2D36934CA58EC8B87C692B338F1D0C0B4ACC1CDFB566EF6",
+      "sourceBytes": 1304,
+      "pngSha256": "E9127CE8E32E865EEAC09C3DC16589C6A2D4C6E567F8B7DBF0F05D3E051FD738",
+      "pngBytes": 1903,
+      "decodedRgbaSha256": "2CECE1DD090F859AE5A3F3C3BDEFE856A197FFA56D6796BDE4751E4C614E8A4A",
+      "reusedOriginalPng": null,
+      "observedSiteSpotIds": [
+        "141"
+      ]
+    },
+    {
+      "url": "https://assets.garmoth.com/img/new_icon/03_etc/07_productmaterial/00007956.webp",
+      "file": "00007956.png",
+      "width": 44,
+      "height": 44,
+      "sourceSha256": "176A7B3986A2A29D7E8FCC44E6ACB87F785F405B31C97E08EA9E1D96BB3F67C5",
+      "sourceBytes": 1424,
+      "pngSha256": "72E37D905DFD5BE3D8C095FC827F8FCE263C2383C6647929F27440DCFB119A67",
+      "pngBytes": 2139,
+      "decodedRgbaSha256": "2BAB684B63B283EA1CD529AF24764F43DE7EEB048A37BDBA23D13FFF16962353",
+      "reusedOriginalPng": null,
+      "observedSiteSpotIds": [
+        "106",
+        "95"
+      ]
+    },
+    {
+      "url": "https://assets.garmoth.com/img/new_icon/03_etc/07_productmaterial/00009726.webp",
+      "file": "00009726.png",
+      "width": 44,
+      "height": 44,
+      "sourceSha256": "F61A51047C9B9815FB7539A9EEC4E290C3097F7D075C5DDAC7908C55CDBD9C85",
+      "sourceBytes": 2256,
+      "pngSha256": "752DB2240846863F4952A4B33B4903F3DBEDE7448D2B31DF1A7232A23559CEAE",
+      "pngBytes": 2958,
+      "decodedRgbaSha256": "2FA7346A61D86E9BF58B9A724E387D7A654CC9DA191ECA6DB25A47262E7C2E89",
+      "reusedOriginalPng": null,
+      "observedSiteSpotIds": [
+        "118"
+      ]
+    },
+    {
+      "url": "https://assets.garmoth.com/img/new_icon/03_etc/07_productmaterial/00009741.webp",
+      "file": "00009741.png",
+      "width": 44,
+      "height": 44,
+      "sourceSha256": "1CF03E4E9CB6B6AC28D706FDA87E971469233304343850C450F39460BA5FEC87",
+      "sourceBytes": 1118,
+      "pngSha256": "F1C5421946F033819972BAAF5D7C36452868B5D8B5CC837BA7ED562A6ABDF8C5",
+      "pngBytes": 1636,
+      "decodedRgbaSha256": "CB5A51C175499FB302DC5A7CB4EC40E1382C44308D40579A91E6DC06D14441EC",
+      "reusedOriginalPng": null,
+      "observedSiteSpotIds": [
+        "154"
+      ]
+    },
+    {
+      "url": "https://assets.garmoth.com/img/new_icon/03_etc/07_productmaterial/00821255.webp",
+      "file": "00821255.png",
+      "width": 44,
+      "height": 44,
+      "sourceSha256": "7505E67B7DE85D9FBCE16DB80085485F7C6D42B36BC2828065950A9C227FE6A5",
+      "sourceBytes": 4958,
+      "pngSha256": "112D60B26BA6552737B20A801970B26F8348E8C910D3F3687CA00AD44C36DD72",
+      "pngBytes": 5078,
+      "decodedRgbaSha256": "6D798A78C9B333C15C74DEC2D0E42BC5F321462B403D737324DA96D4797E5B69",
+      "reusedOriginalPng": null,
+      "observedSiteSpotIds": [
+        "186"
+      ]
+    },
+    {
+      "url": "https://assets.garmoth.com/img/new_icon/03_etc/10_free_tradeitem/00055052.webp",
+      "file": "00055052.png",
+      "width": 44,
+      "height": 44,
+      "sourceSha256": "9094B8787C09B2524CE27E62ED67F7D259480634BC13DAFA4D5E1ECE8835AA28",
+      "sourceBytes": 1434,
+      "pngSha256": "6C8CD27A0045A478E5E87FB9D7D634F5BC53E9E8B952AB5E4F07354B5C73E0CA",
+      "pngBytes": 1842,
+      "decodedRgbaSha256": "1A58B33AACFF6501578375B18000CA0EA069968A472ABE10D61FFADAB9D910C2",
+      "reusedOriginalPng": null,
+      "observedSiteSpotIds": [
+        "73",
+        "74"
+      ]
+    },
+    {
+      "url": "https://assets.garmoth.com/img/new_icon/06_pc_equipitem/00_common/00_etc/00016139.webp",
+      "file": "00016139.png",
+      "width": 44,
+      "height": 44,
+      "sourceSha256": "A89535146EC45F8109AA1F264C132057EB7CF82FA5D101C6F2C2FC943C473271",
+      "sourceBytes": 890,
+      "pngSha256": "779BD328F1D42C5F412C2364BB81F299BBB5A1DA8C473D0DC5AEBC4603C7591C",
+      "pngBytes": 1270,
+      "decodedRgbaSha256": "012D611C2168A60BBC713292277DC672A398A6FA7E7BC5E82FE8D1332894BB87",
+      "reusedOriginalPng": null,
+      "observedSiteSpotIds": [
+        "71"
+      ]
+    }
+  ]
+}

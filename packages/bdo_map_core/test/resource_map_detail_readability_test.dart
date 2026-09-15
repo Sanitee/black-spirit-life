@@ -141,11 +141,11 @@ void main() {
       );
       await tester.pumpAndSettle();
       expect(find.text('Worker'), findsOneWidget);
-      expect(find.text('Choose a worker · Choose an item'), findsNothing);
       expect(
-        find.byTooltip('Choose a worker · Choose an item'),
-        findsOneWidget,
+        find.text('Choose a worker · Choose an item'),
+        findsNothing,
       );
+      expect(find.byTooltip('Choose a worker · Choose an item'), findsOneWidget);
       expect(find.textContaining('Record the 5 CP investment.'), findsNothing);
       expect(find.textContaining('Unlock workshops with'), findsNothing);
       expect(find.text('Production area'), findsNothing);

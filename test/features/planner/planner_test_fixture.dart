@@ -30,6 +30,7 @@ final class PlannerTestHarness {
     bool includeRecipeVariants = false,
     bool includeQueueTitleSubstitutes = false,
     bool includeConvergingQueueTitleSubstitutes = false,
+    bool includeLightstoneNeed = false,
     bool showAdvancedEditor = false,
   }) : copied = <String>[],
        copiedAfkLoads = <String>[],
@@ -45,11 +46,15 @@ final class PlannerTestHarness {
            includeQueueTitleSubstitutes: includeQueueTitleSubstitutes,
            includeConvergingQueueTitleSubstitutes:
                includeConvergingQueueTitleSubstitutes,
+           includeLightstoneNeed: includeLightstoneNeed,
          ),
          initialState: _document(
            activeMode,
            alchemyMarket: alchemyMarket,
            sunriseNpcPrice: sunriseNpcPrice,
+           alchemyTarget: includeLightstoneNeed
+               ? 'Purified Lightstone of Flora'
+               : null,
            showAdvancedEditor: showAdvancedEditor,
          ),
          saveState: (state) async => state,
@@ -161,6 +166,7 @@ PlannerState _document(
   CraftMode activeMode, {
   MarketState? alchemyMarket,
   required double sunriseNpcPrice,
+  String? alchemyTarget,
   required bool showAdvancedEditor,
 }) => PlannerState(
   applicationVersion: 'test',
@@ -168,8 +174,8 @@ PlannerState _document(
   activeMode: activeMode,
   alchemy: _mode(
     CraftMode.alchemy,
-    target: 'Clear Liquid Reagent',
-    bonusTarget: 'Clear Liquid Reagent',
+    target: alchemyTarget ?? 'Clear Liquid Reagent',
+    bonusTarget: alchemyTarget ?? 'Clear Liquid Reagent',
     market: alchemyMarket,
     sunriseNpcPrice: sunriseNpcPrice,
   ),
@@ -217,6 +223,7 @@ CatalogSnapshot _catalog({
   required bool includeRecipeVariants,
   required bool includeQueueTitleSubstitutes,
   required bool includeConvergingQueueTitleSubstitutes,
+  required bool includeLightstoneNeed,
 }) => CatalogSnapshot(
   sourceSha256: 'planner-widget-fixture',
   sourceByteCount: 1,
@@ -312,6 +319,12 @@ CatalogSnapshot _catalog({
           'alchemy',
           <Ingredient>[_ingredient('Sunrise Herb', 1)],
         ),
+        if (includeLightstoneNeed)
+          'Purified Lightstone of Flora': _recipe(
+            'Purified Lightstone of Flora',
+            'alchemy',
+            <Ingredient>[_ingredient('Imperfect Lightstone of Flora', 4)],
+          ),
         "Clown's Blood": _recipe("Clown's Blood", 'alchemy', <Ingredient>[
           _ingredient('Sunrise Herb', 2),
         ]),
@@ -351,6 +364,8 @@ CatalogSnapshot _catalog({
         sourceNote: 'Gathered from wild herb nodes.',
       ),
       'Silver Azalea': _leaf('Silver Azalea'),
+      if (includeLightstoneNeed)
+        'Imperfect Lightstone of Flora': _leaf('Imperfect Lightstone of Flora'),
       if (includeQueueTitleSubstitutes) 'Ash Sap': _leaf('Ash Sap'),
     },
     iconDataUris: alchemyIconDataUris,

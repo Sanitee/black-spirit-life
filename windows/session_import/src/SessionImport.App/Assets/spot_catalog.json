@@ -1,0 +1,9077 @@
+{
+  "schemaVersion": 1,
+  "datasetVersion": "client-2026-09-10-companion-2026-09-14-v1",
+  "coverage": {
+    "clientGrindingZones": 112,
+    "companionSpots": 37,
+    "completeGameOrGarmothCatalog": false,
+    "description": "All 112 records from the preserved client zone snapshot and all 37 curated companion spots. Not an exhaustive game/Garmoth catalog; drop lists are positive evidence, not guaranteed or complete outcomes."
+  },
+  "provenance": {
+    "input": "catalog_sources/spot_catalog_input.json",
+    "inputSha256": "FE050A804D5B7F75A54352230AF7797C0FED7CE11BA3B6342624C1069B9AF453",
+    "sources": [
+      {
+        "kind": "client-zones",
+        "source": "client-2026-09-10-divine-audit/zones.json",
+        "sha256": "BD96350782B930149D3034231EA9067CCB68F246ED54CE9764D7DDC752A1F777",
+        "records": 112
+      },
+      {
+        "kind": "client-item-identities",
+        "source": "client-2026-09-10-divine-audit/items.json",
+        "sha256": "8998F94AA44A5DD86DC5F67F4CFA73EF1523E3B051B58D8F0F9DC42E592912E5",
+        "records": 74459
+      },
+      {
+        "kind": "companion-spots",
+        "source": "packages/bdo_gathering_companion/assets/data/spots.json",
+        "sha256": "9CCFF0676AFC37E56701131CDB957EA6FDB5B1EC9ADEF8E1EB2F0EFCA6D9EE5B",
+        "records": 37
+      },
+      {
+        "kind": "native-item-identities",
+        "source": "windows/session_import/src/SessionImport.App/Assets/loot_catalog.json",
+        "sha256": "783ACC22AB931ACD14DDBE95BE1ABDCAF164F050D4710BE335D7C9581E64FC37",
+        "records": 203
+      },
+      {
+        "kind": "companion-item-identities",
+        "source": "packages/bdo_gathering_companion/assets/data/loot_catalog.json",
+        "sha256": "A8B04B37F4930AC0F447740EBC87B5B6D2991ADEC07C13DCCBC1D4F0F63CCDBE",
+        "records": 201
+      }
+    ],
+    "aliases": "Exact source display names and item names only; no inferred Garmoth aliases, IDs, account routes or slugs."
+  },
+  "items": [
+    {
+      "id": "10992",
+      "name": "Derek's Light Leather Shoes",
+      "aliases": []
+    },
+    {
+      "id": "11070",
+      "name": "Lemoria Helmet",
+      "aliases": []
+    },
+    {
+      "id": "11071",
+      "name": "Lemoria Armor",
+      "aliases": []
+    },
+    {
+      "id": "11072",
+      "name": "Lemoria Gloves",
+      "aliases": []
+    },
+    {
+      "id": "11073",
+      "name": "Lemoria Shoes",
+      "aliases": []
+    },
+    {
+      "id": "11101",
+      "name": "Griffon's Helmet",
+      "aliases": []
+    },
+    {
+      "id": "11607",
+      "name": "Ogre Ring",
+      "aliases": []
+    },
+    {
+      "id": "11625",
+      "name": "Sicil's Necklace",
+      "aliases": []
+    },
+    {
+      "id": "11628",
+      "name": "Serap's Necklace",
+      "aliases": []
+    },
+    {
+      "id": "11629",
+      "name": "Tungrad Necklace",
+      "aliases": []
+    },
+    {
+      "id": "11630",
+      "name": "Laytenn's Power Stone",
+      "aliases": []
+    },
+    {
+      "id": "11631",
+      "name": "Necklace of Shultz the Gladiator",
+      "aliases": []
+    },
+    {
+      "id": "11653",
+      "name": "Deboreka Necklace",
+      "aliases": []
+    },
+    {
+      "id": "11662",
+      "name": "Revived River Necklace",
+      "aliases": []
+    },
+    {
+      "id": "11663",
+      "name": "Revived Lunar Necklace",
+      "aliases": []
+    },
+    {
+      "id": "11733",
+      "name": "Apeiron Necklace",
+      "aliases": []
+    },
+    {
+      "id": "1178",
+      "name": "Corrupt Oil of Immortality",
+      "aliases": []
+    },
+    {
+      "id": "11806",
+      "name": "Talis Earring",
+      "aliases": []
+    },
+    {
+      "id": "11807",
+      "name": "Token of Friendship",
+      "aliases": []
+    },
+    {
+      "id": "11808",
+      "name": "Witch's Earring",
+      "aliases": []
+    },
+    {
+      "id": "11810",
+      "name": "Mesto Earring",
+      "aliases": []
+    },
+    {
+      "id": "11816",
+      "name": "Blue Coral Earring",
+      "aliases": []
+    },
+    {
+      "id": "11817",
+      "name": "Red Coral Earring",
+      "aliases": []
+    },
+    {
+      "id": "11828",
+      "name": "Tungrad Earring",
+      "aliases": []
+    },
+    {
+      "id": "11834",
+      "name": "Narc Ear Accessory",
+      "aliases": []
+    },
+    {
+      "id": "11844",
+      "name": "Treant Spirit's Whisper Earring",
+      "aliases": []
+    },
+    {
+      "id": "11853",
+      "name": "Black Distortion Earring",
+      "aliases": []
+    },
+    {
+      "id": "11855",
+      "name": "Dawn Earring",
+      "aliases": []
+    },
+    {
+      "id": "11856",
+      "name": "Ethereal Earring",
+      "aliases": []
+    },
+    {
+      "id": "11882",
+      "name": "Deboreka Earring",
+      "aliases": []
+    },
+    {
+      "id": "11898",
+      "name": "Apeiron Earring",
+      "aliases": []
+    },
+    {
+      "id": "12012",
+      "name": "Outlaw's Ring",
+      "aliases": []
+    },
+    {
+      "id": "12031",
+      "name": "Ring of Crescent Guardian",
+      "aliases": []
+    },
+    {
+      "id": "12032",
+      "name": "Ring of Cadry Guardian",
+      "aliases": []
+    },
+    {
+      "id": "12042",
+      "name": "Forest Ronaros Ring",
+      "aliases": []
+    },
+    {
+      "id": "12045",
+      "name": "Rainbow Coral Ring",
+      "aliases": []
+    },
+    {
+      "id": "12050",
+      "name": "Treant Spirit's Echo Ring",
+      "aliases": []
+    },
+    {
+      "id": "12059",
+      "name": "Kagtum Submission Ring",
+      "aliases": []
+    },
+    {
+      "id": "12060",
+      "name": "Eye of the Ruins Ring",
+      "aliases": []
+    },
+    {
+      "id": "12061",
+      "name": "Tungrad Ring",
+      "aliases": []
+    },
+    {
+      "id": "12068",
+      "name": "Ominous Ring",
+      "aliases": []
+    },
+    {
+      "id": "12091",
+      "name": "Ocean Haze Ring",
+      "aliases": []
+    },
+    {
+      "id": "12094",
+      "name": "Deboreka Ring",
+      "aliases": []
+    },
+    {
+      "id": "12144",
+      "name": "Apeiron Ring",
+      "aliases": []
+    },
+    {
+      "id": "12208",
+      "name": "Rhutum Elite Belt",
+      "aliases": []
+    },
+    {
+      "id": "12210",
+      "name": "Tree Spirit Belt",
+      "aliases": []
+    },
+    {
+      "id": "12211",
+      "name": "Belt of Shultz the Gladiator",
+      "aliases": []
+    },
+    {
+      "id": "12220",
+      "name": "Ancient Weapon Core",
+      "aliases": []
+    },
+    {
+      "id": "12229",
+      "name": "Centaurus Belt",
+      "aliases": []
+    },
+    {
+      "id": "12230",
+      "name": "Basilisk's Belt",
+      "aliases": []
+    },
+    {
+      "id": "12236",
+      "name": "Valtarra Eclipsed Belt",
+      "aliases": []
+    },
+    {
+      "id": "12237",
+      "name": "Tungrad Belt",
+      "aliases": []
+    },
+    {
+      "id": "12238",
+      "name": "Asula's Crimson Eye Belt",
+      "aliases": []
+    },
+    {
+      "id": "12243",
+      "name": "Treant Spirit's Hope Belt",
+      "aliases": []
+    },
+    {
+      "id": "12251",
+      "name": "Orkinrad's Belt",
+      "aliases": []
+    },
+    {
+      "id": "12257",
+      "name": "Turo's Belt",
+      "aliases": []
+    },
+    {
+      "id": "12276",
+      "name": "Deboreka Belt",
+      "aliases": []
+    },
+    {
+      "id": "12298",
+      "name": "Apeiron Belt",
+      "aliases": []
+    },
+    {
+      "id": "15136",
+      "name": "Magic Crystal of Infinity - Max HP",
+      "aliases": []
+    },
+    {
+      "id": "15257",
+      "name": "Crystal of Precise Destruction",
+      "aliases": []
+    },
+    {
+      "id": "15258",
+      "name": "Crystal of Stalwart Fortitude",
+      "aliases": []
+    },
+    {
+      "id": "15259",
+      "name": "Crystal of Dogged Patience",
+      "aliases": []
+    },
+    {
+      "id": "15260",
+      "name": "Crystal of Unyielding Spirit",
+      "aliases": []
+    },
+    {
+      "id": "15262",
+      "name": "BON Dawn Crystal - All AP",
+      "aliases": []
+    },
+    {
+      "id": "15263",
+      "name": "WON Dawn Crystal - All AP",
+      "aliases": []
+    },
+    {
+      "id": "15265",
+      "name": "BON Dawn Crystal - Black Spirit's Rage",
+      "aliases": []
+    },
+    {
+      "id": "15266",
+      "name": "WON Dawn Crystal - Black Spirit's Rage",
+      "aliases": []
+    },
+    {
+      "id": "15268",
+      "name": "BON Dawn Crystal - Accuracy",
+      "aliases": []
+    },
+    {
+      "id": "15269",
+      "name": "WON Dawn Crystal - Accuracy",
+      "aliases": []
+    },
+    {
+      "id": "15271",
+      "name": "BON Dawn Crystal - Damage Reduction",
+      "aliases": []
+    },
+    {
+      "id": "15272",
+      "name": "WON Dawn Crystal - Damage Reduction",
+      "aliases": []
+    },
+    {
+      "id": "15274",
+      "name": "BON Dawn Crystal - Evasion",
+      "aliases": []
+    },
+    {
+      "id": "15275",
+      "name": "WON Dawn Crystal - Evasion",
+      "aliases": []
+    },
+    {
+      "id": "15277",
+      "name": "BON Dawn Crystal - Life EXP",
+      "aliases": []
+    },
+    {
+      "id": "15278",
+      "name": "WON Dawn Crystal - Life EXP",
+      "aliases": []
+    },
+    {
+      "id": "15286",
+      "name": "WON Crystal of Dusky Ruin",
+      "aliases": []
+    },
+    {
+      "id": "15287",
+      "name": "BON Crystal of Dusky Ruin",
+      "aliases": []
+    },
+    {
+      "id": "15290",
+      "name": "JIN Crystal of Dusky Ruin",
+      "aliases": []
+    },
+    {
+      "id": "15291",
+      "name": "HAN Crystal of Dusky Ruin",
+      "aliases": []
+    },
+    {
+      "id": "15294",
+      "name": "WON Wandering Origin Crystal",
+      "aliases": []
+    },
+    {
+      "id": "15295",
+      "name": "BON Wandering Origin Crystal",
+      "aliases": []
+    },
+    {
+      "id": "15296",
+      "name": "JIN Wandering Origin Crystal",
+      "aliases": []
+    },
+    {
+      "id": "15297",
+      "name": "HAN Wandering Origin Crystal",
+      "aliases": []
+    },
+    {
+      "id": "15601",
+      "name": "Ancient Magic Crystal - Harphia",
+      "aliases": []
+    },
+    {
+      "id": "15604",
+      "name": "Ancient Magic Crystal - Hystria",
+      "aliases": []
+    },
+    {
+      "id": "15605",
+      "name": "Ancient Magic Crystal - Carmae",
+      "aliases": []
+    },
+    {
+      "id": "15610",
+      "name": "Ancient Magic Crystal of Abundance - Armor",
+      "aliases": []
+    },
+    {
+      "id": "15616",
+      "name": "Ancient Magic Crystal of Nature - Adamantine",
+      "aliases": []
+    },
+    {
+      "id": "15649",
+      "name": "Ancient Magic Crystal - Addis",
+      "aliases": []
+    },
+    {
+      "id": "15662",
+      "name": "Combined Magic Crystal - Gervish",
+      "aliases": []
+    },
+    {
+      "id": "15663",
+      "name": "Combined Magic Crystal - Macalod",
+      "aliases": []
+    },
+    {
+      "id": "15664",
+      "name": "Combined Magic Crystal - Hoom",
+      "aliases": []
+    },
+    {
+      "id": "15668",
+      "name": "Kagtunak",
+      "aliases": []
+    },
+    {
+      "id": "15712",
+      "name": "Ancient Magic Crystal of Nature - Fighting Spirit",
+      "aliases": []
+    },
+    {
+      "id": "15714",
+      "name": "Ancient Magic Crystal of Nature - Giant",
+      "aliases": []
+    },
+    {
+      "id": "15741",
+      "name": "Corrupted Gluttony Crystal",
+      "aliases": []
+    },
+    {
+      "id": "16001",
+      "name": "Black Stone",
+      "aliases": []
+    },
+    {
+      "id": "16017",
+      "name": "Traveler's Map",
+      "aliases": []
+    },
+    {
+      "id": "25197",
+      "name": "Stuffed Boar Head",
+      "aliases": []
+    },
+    {
+      "id": "25198",
+      "name": "[Manor] Stuffed Tiger",
+      "aliases": []
+    },
+    {
+      "id": "25199",
+      "name": "Sensitive Stuffed Bear Head",
+      "aliases": []
+    },
+    {
+      "id": "25200",
+      "name": "[Manor] Stuffed Hawk",
+      "aliases": []
+    },
+    {
+      "id": "25201",
+      "name": "Stuffed Ferocious Boar Head",
+      "aliases": []
+    },
+    {
+      "id": "25202",
+      "name": "Stuffed Ferocious Bear Head",
+      "aliases": []
+    },
+    {
+      "id": "25221",
+      "name": "Stuffed Rock Elephant Head",
+      "aliases": []
+    },
+    {
+      "id": "25222",
+      "name": "Stuffed Golden Leaf Snake Head",
+      "aliases": []
+    },
+    {
+      "id": "25223",
+      "name": "Stuffed Cliffside Mountain Sheep Head",
+      "aliases": []
+    },
+    {
+      "id": "25224",
+      "name": "[Manor] Stuffed Rock Elephant",
+      "aliases": []
+    },
+    {
+      "id": "25225",
+      "name": "[Manor] Stuffed Golden Leaf Snake",
+      "aliases": []
+    },
+    {
+      "id": "25226",
+      "name": "[Manor] Stuffed Cliffside Mountain Sheep",
+      "aliases": []
+    },
+    {
+      "id": "25227",
+      "name": "[Manor] Stuffed Coral Stoneback Crab",
+      "aliases": []
+    },
+    {
+      "id": "28",
+      "name": "Prognyl Silver Bar",
+      "aliases": []
+    },
+    {
+      "id": "3054",
+      "name": "Stuffed Elk Head",
+      "aliases": []
+    },
+    {
+      "id": "3540",
+      "name": "Stuffed Grass Rhino Head",
+      "aliases": []
+    },
+    {
+      "id": "3541",
+      "name": "Stuffed Verdure Buck",
+      "aliases": []
+    },
+    {
+      "id": "3542",
+      "name": "Stuffed Verdure Doe",
+      "aliases": []
+    },
+    {
+      "id": "3543",
+      "name": "Stuffed Shadow Wolf Head",
+      "aliases": []
+    },
+    {
+      "id": "3544",
+      "name": "Stuffed Shadow Lion Head",
+      "aliases": []
+    },
+    {
+      "id": "4001",
+      "name": "Iron Ore",
+      "aliases": []
+    },
+    {
+      "id": "4002",
+      "name": "Lead Ore",
+      "aliases": []
+    },
+    {
+      "id": "4003",
+      "name": "Copper Ore",
+      "aliases": []
+    },
+    {
+      "id": "4004",
+      "name": "Tin Ore",
+      "aliases": []
+    },
+    {
+      "id": "4005",
+      "name": "Zinc Ore",
+      "aliases": []
+    },
+    {
+      "id": "4006",
+      "name": "Rough Stone",
+      "aliases": []
+    },
+    {
+      "id": "4007",
+      "name": "Coal",
+      "aliases": []
+    },
+    {
+      "id": "4008",
+      "name": "Vanadium Ore",
+      "aliases": []
+    },
+    {
+      "id": "4009",
+      "name": "Titanium Ore",
+      "aliases": []
+    },
+    {
+      "id": "40218",
+      "name": "Ancient Relic Crystal Shard",
+      "aliases": []
+    },
+    {
+      "id": "40220",
+      "name": "Forbidden Book",
+      "aliases": []
+    },
+    {
+      "id": "40228",
+      "name": "Scroll Written in Ancient Language",
+      "aliases": []
+    },
+    {
+      "id": "40258",
+      "name": "Black Spirit's Claw Piece",
+      "aliases": []
+    },
+    {
+      "id": "40383",
+      "name": "Manshaum Voodoo Doll",
+      "aliases": []
+    },
+    {
+      "id": "40448",
+      "name": "Asula's Weakened Magic Ring",
+      "aliases": []
+    },
+    {
+      "id": "40449",
+      "name": "Asula's Weakened Magic Earring",
+      "aliases": []
+    },
+    {
+      "id": "40450",
+      "name": "Asula's Weakened Magic Necklace",
+      "aliases": []
+    },
+    {
+      "id": "40451",
+      "name": "Asula's Weakened Magic Belt",
+      "aliases": []
+    },
+    {
+      "id": "40543",
+      "name": "Fragment of the Deep Sea",
+      "aliases": []
+    },
+    {
+      "id": "4057",
+      "name": "Melted Copper Shard",
+      "aliases": []
+    },
+    {
+      "id": "40603",
+      "name": "Marni's Research Box",
+      "aliases": []
+    },
+    {
+      "id": "40604",
+      "name": "Marni's Research Box",
+      "aliases": []
+    },
+    {
+      "id": "40605",
+      "name": "Marni's Research Box",
+      "aliases": []
+    },
+    {
+      "id": "40606",
+      "name": "Marni's Research Box",
+      "aliases": []
+    },
+    {
+      "id": "40607",
+      "name": "Marni's Research Box",
+      "aliases": []
+    },
+    {
+      "id": "40608",
+      "name": "Marni's Research Box",
+      "aliases": []
+    },
+    {
+      "id": "40609",
+      "name": "Marni's Research Box",
+      "aliases": []
+    },
+    {
+      "id": "40610",
+      "name": "Marni's Research Box",
+      "aliases": []
+    },
+    {
+      "id": "40611",
+      "name": "Marni's Research Box",
+      "aliases": []
+    },
+    {
+      "id": "40612",
+      "name": "Marni's Research Box",
+      "aliases": []
+    },
+    {
+      "id": "40613",
+      "name": "Marni's Research Box",
+      "aliases": []
+    },
+    {
+      "id": "40614",
+      "name": "Marni's Research Box",
+      "aliases": []
+    },
+    {
+      "id": "40615",
+      "name": "Marni's Research Box",
+      "aliases": []
+    },
+    {
+      "id": "40616",
+      "name": "Marni's Research Box",
+      "aliases": []
+    },
+    {
+      "id": "40617",
+      "name": "Marni's Research Box",
+      "aliases": []
+    },
+    {
+      "id": "40618",
+      "name": "Marni's Research Box",
+      "aliases": []
+    },
+    {
+      "id": "40619",
+      "name": "Marni's Research Box",
+      "aliases": []
+    },
+    {
+      "id": "40620",
+      "name": "Marni's Research Box",
+      "aliases": []
+    },
+    {
+      "id": "40621",
+      "name": "Marni's Research Box",
+      "aliases": []
+    },
+    {
+      "id": "4063",
+      "name": "Melted Zinc Shard",
+      "aliases": []
+    },
+    {
+      "id": "40682",
+      "name": "Sealed Ruins Slate",
+      "aliases": []
+    },
+    {
+      "id": "40706",
+      "name": "Ancient Sherekhan's Panacea",
+      "aliases": []
+    },
+    {
+      "id": "40707",
+      "name": "Ancient Valtarra's Clairvoyance",
+      "aliases": []
+    },
+    {
+      "id": "40708",
+      "name": "Ancient Narc's Crimson Tear",
+      "aliases": []
+    },
+    {
+      "id": "40709",
+      "name": "Ancient Ron's Tintinnabulum",
+      "aliases": []
+    },
+    {
+      "id": "40710",
+      "name": "Ancient Ash Halfmoon Kagtunak",
+      "aliases": []
+    },
+    {
+      "id": "40711",
+      "name": "Ancient Markthanan's Gland",
+      "aliases": []
+    },
+    {
+      "id": "40752",
+      "name": "Katzvariak's Venom",
+      "aliases": []
+    },
+    {
+      "id": "40754",
+      "name": "Valtarra's Memory",
+      "aliases": []
+    },
+    {
+      "id": "40756",
+      "name": "Narc's Solace",
+      "aliases": []
+    },
+    {
+      "id": "40758",
+      "name": "Tranquil Tinniolum",
+      "aliases": []
+    },
+    {
+      "id": "40760",
+      "name": "Blood Wolf's Oath",
+      "aliases": []
+    },
+    {
+      "id": "40762",
+      "name": "Dragon's Fang",
+      "aliases": []
+    },
+    {
+      "id": "40968",
+      "name": "Dew of Tranquil Forest",
+      "aliases": []
+    },
+    {
+      "id": "4201",
+      "name": "Silver Ore",
+      "aliases": []
+    },
+    {
+      "id": "4202",
+      "name": "Gold Ore",
+      "aliases": []
+    },
+    {
+      "id": "4203",
+      "name": "Platinum Ore",
+      "aliases": []
+    },
+    {
+      "id": "4204",
+      "name": "Rough Opal",
+      "aliases": []
+    },
+    {
+      "id": "42379",
+      "name": "Witch's Magic Amulet",
+      "aliases": []
+    },
+    {
+      "id": "42417",
+      "name": "Mark of a Secret Organization",
+      "aliases": []
+    },
+    {
+      "id": "42418",
+      "name": "Bluish Sulfur",
+      "aliases": []
+    },
+    {
+      "id": "42419",
+      "name": "Power Engine of Ancient Weapons",
+      "aliases": []
+    },
+    {
+      "id": "42420",
+      "name": "Lost Piece of a Forbidden Book",
+      "aliases": []
+    },
+    {
+      "id": "43775",
+      "name": "Mutant Loah Flower",
+      "aliases": []
+    },
+    {
+      "id": "4401",
+      "name": "Rough Ruby",
+      "aliases": []
+    },
+    {
+      "id": "4402",
+      "name": "Rough Sapphire",
+      "aliases": []
+    },
+    {
+      "id": "4403",
+      "name": "Rough Topaz",
+      "aliases": []
+    },
+    {
+      "id": "44032",
+      "name": "Cursed Fang",
+      "aliases": []
+    },
+    {
+      "id": "4404",
+      "name": "Rough Emerald",
+      "aliases": []
+    },
+    {
+      "id": "4405",
+      "name": "Rough Diamond",
+      "aliases": []
+    },
+    {
+      "id": "4406",
+      "name": "Rough Translucent Crystal",
+      "aliases": []
+    },
+    {
+      "id": "4409",
+      "name": "Rough Green Crystal",
+      "aliases": []
+    },
+    {
+      "id": "4411",
+      "name": "Rough Blue Crystal",
+      "aliases": []
+    },
+    {
+      "id": "44126",
+      "name": "Viscous Liquid",
+      "aliases": []
+    },
+    {
+      "id": "44138",
+      "name": "Ancient Artifact",
+      "aliases": []
+    },
+    {
+      "id": "44169",
+      "name": "Hard Timber Fragment",
+      "aliases": []
+    },
+    {
+      "id": "44174",
+      "name": "Useful Coin Pouch",
+      "aliases": []
+    },
+    {
+      "id": "44175",
+      "name": "Bunch of Loose Mane Hair",
+      "aliases": []
+    },
+    {
+      "id": "44180",
+      "name": "Armor Fragment",
+      "aliases": []
+    },
+    {
+      "id": "44181",
+      "name": "Robe Piece",
+      "aliases": []
+    },
+    {
+      "id": "44182",
+      "name": "Cultist's Token",
+      "aliases": []
+    },
+    {
+      "id": "44183",
+      "name": "Mark of Frenzy",
+      "aliases": []
+    },
+    {
+      "id": "44184",
+      "name": "Spell Necklace Ornament",
+      "aliases": []
+    },
+    {
+      "id": "44188",
+      "name": "Rock Fragment",
+      "aliases": []
+    },
+    {
+      "id": "44193",
+      "name": "Old Identification Tag",
+      "aliases": []
+    },
+    {
+      "id": "44194",
+      "name": "Sausan Supplies Package",
+      "aliases": []
+    },
+    {
+      "id": "44207",
+      "name": "Mysterious Rock Fragment",
+      "aliases": []
+    },
+    {
+      "id": "44221",
+      "name": "Sturdy Rock Fragment",
+      "aliases": []
+    },
+    {
+      "id": "44222",
+      "name": "Rusty Iron Piece",
+      "aliases": []
+    },
+    {
+      "id": "44223",
+      "name": "Sturdy Timber Fragment",
+      "aliases": []
+    },
+    {
+      "id": "44224",
+      "name": "Broken Desert Fogan Egg",
+      "aliases": []
+    },
+    {
+      "id": "44236",
+      "name": "Broken Ivory",
+      "aliases": []
+    },
+    {
+      "id": "44243",
+      "name": "Soiled Ring of Crescent Guardian",
+      "aliases": []
+    },
+    {
+      "id": "44245",
+      "name": "Soiled Centaurus Belt",
+      "aliases": []
+    },
+    {
+      "id": "44246",
+      "name": "Soiled Ogre Ring",
+      "aliases": []
+    },
+    {
+      "id": "44268",
+      "name": "Al Yurad's Ring Piece",
+      "aliases": []
+    },
+    {
+      "id": "44269",
+      "name": "Al Yurad's Ring Piece",
+      "aliases": []
+    },
+    {
+      "id": "44270",
+      "name": "Al Yurad's Ring Piece",
+      "aliases": []
+    },
+    {
+      "id": "44271",
+      "name": "Al Yurad's Ring Piece",
+      "aliases": []
+    },
+    {
+      "id": "44272",
+      "name": "Al Yurad's Ring Piece",
+      "aliases": []
+    },
+    {
+      "id": "44273",
+      "name": "Archaeologist's Map Piece",
+      "aliases": []
+    },
+    {
+      "id": "44274",
+      "name": "Archaeologist's Map Piece",
+      "aliases": []
+    },
+    {
+      "id": "44275",
+      "name": "Archaeologist's Map Piece",
+      "aliases": []
+    },
+    {
+      "id": "44276",
+      "name": "Archaeologist's Map Piece",
+      "aliases": []
+    },
+    {
+      "id": "44277",
+      "name": "Lafi Bedmountain's Upgraded Compass Parts",
+      "aliases": []
+    },
+    {
+      "id": "44278",
+      "name": "Lafi Bedmountain's Upgraded Compass Parts",
+      "aliases": []
+    },
+    {
+      "id": "44279",
+      "name": "Lafi Bedmountain's Upgraded Compass Parts",
+      "aliases": []
+    },
+    {
+      "id": "44284",
+      "name": "Soiled Sicil's Necklace",
+      "aliases": []
+    },
+    {
+      "id": "44286",
+      "name": "Part for Explorer's Compass",
+      "aliases": []
+    },
+    {
+      "id": "44304",
+      "name": "Wind Spirit Stone Fragment",
+      "aliases": []
+    },
+    {
+      "id": "44305",
+      "name": "Earth Spirit Stone Fragment",
+      "aliases": []
+    },
+    {
+      "id": "44306",
+      "name": "Water Spirit Stone Fragment",
+      "aliases": []
+    },
+    {
+      "id": "44310",
+      "name": "Gazelle Fur",
+      "aliases": []
+    },
+    {
+      "id": "44311",
+      "name": "Tree Spirit Stone Fragment",
+      "aliases": []
+    },
+    {
+      "id": "44350",
+      "name": "Yona's Fragment",
+      "aliases": []
+    },
+    {
+      "id": "44364",
+      "name": "Dragon Scale Fossil",
+      "aliases": []
+    },
+    {
+      "id": "44383",
+      "name": "Sycrid's Song",
+      "aliases": []
+    },
+    {
+      "id": "44400",
+      "name": "Sanguine Crystal of Despair",
+      "aliases": []
+    },
+    {
+      "id": "44401",
+      "name": "Destroyed Star Fragment",
+      "aliases": []
+    },
+    {
+      "id": "44405",
+      "name": "Clear Blackstar Crystal",
+      "aliases": []
+    },
+    {
+      "id": "44407",
+      "name": "Destructive Illusion",
+      "aliases": []
+    },
+    {
+      "id": "44411",
+      "name": "Specter's Cloth",
+      "aliases": []
+    },
+    {
+      "id": "44423",
+      "name": "Iridescent Rock Piece",
+      "aliases": []
+    },
+    {
+      "id": "44446",
+      "name": "Shadow Knight's Armor Ornament",
+      "aliases": []
+    },
+    {
+      "id": "44448",
+      "name": "Outlaw's Mark",
+      "aliases": []
+    },
+    {
+      "id": "44450",
+      "name": "Abyssal Ash",
+      "aliases": []
+    },
+    {
+      "id": "44451",
+      "name": "Moonlight Spirit Powder",
+      "aliases": []
+    },
+    {
+      "id": "44454",
+      "name": "Broken Horn Fragment",
+      "aliases": []
+    },
+    {
+      "id": "44455",
+      "name": "Old Warrior's Horn Decoration",
+      "aliases": []
+    },
+    {
+      "id": "44456",
+      "name": "Golem's Heart Fragment",
+      "aliases": []
+    },
+    {
+      "id": "44461",
+      "name": "Turo Heart",
+      "aliases": []
+    },
+    {
+      "id": "44462",
+      "name": "Flame of Despair",
+      "aliases": []
+    },
+    {
+      "id": "44475",
+      "name": "Embers of Despair",
+      "aliases": []
+    },
+    {
+      "id": "44477",
+      "name": "Shard of the Vengeful Undead",
+      "aliases": []
+    },
+    {
+      "id": "44482",
+      "name": "Oily Orange Mushroom",
+      "aliases": []
+    },
+    {
+      "id": "44484",
+      "name": "Proof of Reckless Courage",
+      "aliases": []
+    },
+    {
+      "id": "44485",
+      "name": "Hardened Casque",
+      "aliases": []
+    },
+    {
+      "id": "44486",
+      "name": "Bruised Naga Fin",
+      "aliases": []
+    },
+    {
+      "id": "44487",
+      "name": "Mark of Desperate Rebels",
+      "aliases": []
+    },
+    {
+      "id": "44488",
+      "name": "Covetous Eye",
+      "aliases": []
+    },
+    {
+      "id": "44489",
+      "name": "Proof of Blind Faith",
+      "aliases": []
+    },
+    {
+      "id": "44490",
+      "name": "Starlit Jade Powder",
+      "aliases": []
+    },
+    {
+      "id": "44495",
+      "name": "Evergrowing Scale",
+      "aliases": []
+    },
+    {
+      "id": "44496",
+      "name": "Winter Tree Snow Crystal",
+      "aliases": []
+    },
+    {
+      "id": "44497",
+      "name": "Flame of Frost",
+      "aliases": []
+    },
+    {
+      "id": "44498",
+      "name": "Embers of Frost",
+      "aliases": []
+    },
+    {
+      "id": "44501",
+      "name": "Murrowak Crystal Carapace",
+      "aliases": []
+    },
+    {
+      "id": "44516",
+      "name": "Bronze Fragment of Delusion",
+      "aliases": []
+    },
+    {
+      "id": "44517",
+      "name": "Decomposed Exocrine Gland",
+      "aliases": []
+    },
+    {
+      "id": "44518",
+      "name": "Tainted Specter's Cloth",
+      "aliases": []
+    },
+    {
+      "id": "44519",
+      "name": "Tainted Golem's Heart Fragment",
+      "aliases": []
+    },
+    {
+      "id": "44520",
+      "name": "Tainted Moonlight Spirit Powder",
+      "aliases": []
+    },
+    {
+      "id": "44521",
+      "name": "Tainted Broken Horn Fragment",
+      "aliases": []
+    },
+    {
+      "id": "44522",
+      "name": "Tainted Huge Spear",
+      "aliases": []
+    },
+    {
+      "id": "44523",
+      "name": "Corrupted Gargoyle Claw",
+      "aliases": []
+    },
+    {
+      "id": "44524",
+      "name": "Tainted Token of Crescent",
+      "aliases": []
+    },
+    {
+      "id": "44525",
+      "name": "Tainted Cadry's Token",
+      "aliases": []
+    },
+    {
+      "id": "44526",
+      "name": "Tainted Bronze Fragment",
+      "aliases": []
+    },
+    {
+      "id": "44527",
+      "name": "Tainted Wood Fragment",
+      "aliases": []
+    },
+    {
+      "id": "4477",
+      "name": "Blue Coral",
+      "aliases": []
+    },
+    {
+      "id": "44799",
+      "name": "Forgotten Witch's Token",
+      "aliases": []
+    },
+    {
+      "id": "44834",
+      "name": "Broken Rhutum Fang",
+      "aliases": []
+    },
+    {
+      "id": "44843",
+      "name": "Cursed Crystal",
+      "aliases": []
+    },
+    {
+      "id": "44845",
+      "name": "Huge Spear",
+      "aliases": []
+    },
+    {
+      "id": "44849",
+      "name": "Corrupt Crystal",
+      "aliases": []
+    },
+    {
+      "id": "44851",
+      "name": "Catfishman Scale",
+      "aliases": []
+    },
+    {
+      "id": "44852",
+      "name": "Sharp Bone Fragment",
+      "aliases": []
+    },
+    {
+      "id": "44858",
+      "name": "Armor Fragment",
+      "aliases": []
+    },
+    {
+      "id": "45013",
+      "name": "Quturan's Left Lung",
+      "aliases": []
+    },
+    {
+      "id": "45014",
+      "name": "Quturan's Right Lung",
+      "aliases": []
+    },
+    {
+      "id": "45017",
+      "name": "Quturan's Black Leaf",
+      "aliases": []
+    },
+    {
+      "id": "45018",
+      "name": "Quturan's Ashen Leaf",
+      "aliases": []
+    },
+    {
+      "id": "45298",
+      "name": "Destruction Spirit Stone",
+      "aliases": []
+    },
+    {
+      "id": "45300",
+      "name": "Guardian Spirit Stone",
+      "aliases": []
+    },
+    {
+      "id": "45302",
+      "name": "Life Spirit Stone",
+      "aliases": []
+    },
+    {
+      "id": "45976",
+      "name": "Desert Naga's Webfoot",
+      "aliases": []
+    },
+    {
+      "id": "45977",
+      "name": "Bashim Mane",
+      "aliases": []
+    },
+    {
+      "id": "45978",
+      "name": "Desert Fogan's Helmet Shard",
+      "aliases": []
+    },
+    {
+      "id": "45979",
+      "name": "Token of Crescent",
+      "aliases": []
+    },
+    {
+      "id": "45982",
+      "name": "Cadry's Token",
+      "aliases": []
+    },
+    {
+      "id": "45985",
+      "name": "Stone Waragon Hide",
+      "aliases": []
+    },
+    {
+      "id": "45987",
+      "name": "Basilisk Scale",
+      "aliases": []
+    },
+    {
+      "id": "45988",
+      "name": "Centaurus Mane",
+      "aliases": []
+    },
+    {
+      "id": "45989",
+      "name": "Warder's Token Piece",
+      "aliases": []
+    },
+    {
+      "id": "45990",
+      "name": "Sulfur Fragment",
+      "aliases": []
+    },
+    {
+      "id": "4601",
+      "name": "Ash Timber",
+      "aliases": []
+    },
+    {
+      "id": "4602",
+      "name": "Maple Timber",
+      "aliases": []
+    },
+    {
+      "id": "4603",
+      "name": "Pine Timber",
+      "aliases": []
+    },
+    {
+      "id": "4604",
+      "name": "Birch Timber",
+      "aliases": []
+    },
+    {
+      "id": "4605",
+      "name": "Log",
+      "aliases": []
+    },
+    {
+      "id": "4606",
+      "name": "Fir Timber",
+      "aliases": []
+    },
+    {
+      "id": "4607",
+      "name": "Cedar Timber",
+      "aliases": []
+    },
+    {
+      "id": "4613",
+      "name": "Old Tree Branch",
+      "aliases": []
+    },
+    {
+      "id": "4616",
+      "name": "Thuja Timber",
+      "aliases": []
+    },
+    {
+      "id": "4621",
+      "name": "Snowfield Cedar Timber",
+      "aliases": []
+    },
+    {
+      "id": "4624",
+      "name": "Caphras Tree Timber",
+      "aliases": []
+    },
+    {
+      "id": "4657",
+      "name": "Pine Plank",
+      "aliases": []
+    },
+    {
+      "id": "4666",
+      "name": "Cedar Plank",
+      "aliases": []
+    },
+    {
+      "id": "4721",
+      "name": "Snowfield Cedar Plank",
+      "aliases": []
+    },
+    {
+      "id": "4724",
+      "name": "Caphras Tree Plank",
+      "aliases": []
+    },
+    {
+      "id": "4917",
+      "name": "Forest Fury",
+      "aliases": []
+    },
+    {
+      "id": "4987",
+      "name": "Concentrated Magical Black Gem",
+      "aliases": []
+    },
+    {
+      "id": "4997",
+      "name": "Hard Black Crystal Shard",
+      "aliases": []
+    },
+    {
+      "id": "4998",
+      "name": "Sharp Black Crystal Shard",
+      "aliases": []
+    },
+    {
+      "id": "4999",
+      "name": "Black Gem Fragment",
+      "aliases": []
+    },
+    {
+      "id": "5000",
+      "name": "Black Gem",
+      "aliases": []
+    },
+    {
+      "id": "5001",
+      "name": "Ash Sap",
+      "aliases": []
+    },
+    {
+      "id": "5002",
+      "name": "Maple Sap",
+      "aliases": []
+    },
+    {
+      "id": "5003",
+      "name": "Pine Sap",
+      "aliases": []
+    },
+    {
+      "id": "5004",
+      "name": "Birch Sap",
+      "aliases": []
+    },
+    {
+      "id": "5005",
+      "name": "Bloody Tree Knot",
+      "aliases": []
+    },
+    {
+      "id": "5006",
+      "name": "Spirit's Leaf",
+      "aliases": []
+    },
+    {
+      "id": "5007",
+      "name": "Monk's Branch",
+      "aliases": []
+    },
+    {
+      "id": "5008",
+      "name": "Old Tree Bark",
+      "aliases": []
+    },
+    {
+      "id": "5009",
+      "name": "Fir Sap",
+      "aliases": []
+    },
+    {
+      "id": "5010",
+      "name": "Cedar Sap",
+      "aliases": []
+    },
+    {
+      "id": "5011",
+      "name": "Red Tree Lump",
+      "aliases": []
+    },
+    {
+      "id": "5012",
+      "name": "White Cedar Sap",
+      "aliases": []
+    },
+    {
+      "id": "5013",
+      "name": "Acacia Sap",
+      "aliases": []
+    },
+    {
+      "id": "5018",
+      "name": "Loopy Tree Sap",
+      "aliases": []
+    },
+    {
+      "id": "5019",
+      "name": "Dead Tree Essence",
+      "aliases": []
+    },
+    {
+      "id": "5020",
+      "name": "Thuja Sap",
+      "aliases": []
+    },
+    {
+      "id": "5023",
+      "name": "Thornwood Sap",
+      "aliases": []
+    },
+    {
+      "id": "5024",
+      "name": "Snowfield Cedar Sap",
+      "aliases": []
+    },
+    {
+      "id": "5025",
+      "name": "Caphras Tree Sap",
+      "aliases": []
+    },
+    {
+      "id": "50801",
+      "name": "Krogdalo's Origin Stone",
+      "aliases": []
+    },
+    {
+      "id": "50802",
+      "name": "Swaying Wind Shard",
+      "aliases": []
+    },
+    {
+      "id": "50803",
+      "name": "Rumbling Earth Shard",
+      "aliases": []
+    },
+    {
+      "id": "50807",
+      "name": "Pure Forest Breath",
+      "aliases": []
+    },
+    {
+      "id": "50810",
+      "name": "Deep Blue Hoof Root",
+      "aliases": []
+    },
+    {
+      "id": "5205",
+      "name": "Fruit of Nature",
+      "aliases": []
+    },
+    {
+      "id": "5401",
+      "name": "Sunrise Herb",
+      "aliases": []
+    },
+    {
+      "id": "5402",
+      "name": "Silver Azalea",
+      "aliases": []
+    },
+    {
+      "id": "5403",
+      "name": "Fire Flake Flower",
+      "aliases": []
+    },
+    {
+      "id": "54031",
+      "name": "Laila's Petal",
+      "aliases": []
+    },
+    {
+      "id": "5404",
+      "name": "Dry Mane Grass",
+      "aliases": []
+    },
+    {
+      "id": "5405",
+      "name": "Silk Honey Grass",
+      "aliases": []
+    },
+    {
+      "id": "5406",
+      "name": "Everlasting Herb",
+      "aliases": []
+    },
+    {
+      "id": "5408",
+      "name": "Arrow Mushroom",
+      "aliases": []
+    },
+    {
+      "id": "5409",
+      "name": "Dwarf Mushroom",
+      "aliases": []
+    },
+    {
+      "id": "5410",
+      "name": "Cloud Mushroom",
+      "aliases": []
+    },
+    {
+      "id": "5412",
+      "name": "Tiger Mushroom",
+      "aliases": []
+    },
+    {
+      "id": "5419",
+      "name": "Amanita Mushroom",
+      "aliases": []
+    },
+    {
+      "id": "5420",
+      "name": "Truffle Mushroom",
+      "aliases": []
+    },
+    {
+      "id": "5439",
+      "name": "Wild Grass",
+      "aliases": []
+    },
+    {
+      "id": "5524",
+      "name": "Yellow Flower",
+      "aliases": []
+    },
+    {
+      "id": "5525",
+      "name": "Sky Blue Flower",
+      "aliases": []
+    },
+    {
+      "id": "5526",
+      "name": "Violet Flower",
+      "aliases": []
+    },
+    {
+      "id": "5527",
+      "name": "Blue Flower",
+      "aliases": []
+    },
+    {
+      "id": "5532",
+      "name": "Bracken",
+      "aliases": []
+    },
+    {
+      "id": "5538",
+      "name": "Delotia",
+      "aliases": []
+    },
+    {
+      "id": "5544",
+      "name": "Chanterelle",
+      "aliases": []
+    },
+    {
+      "id": "5600",
+      "name": "Weeds",
+      "aliases": []
+    },
+    {
+      "id": "56221",
+      "name": "Breath of Narcion",
+      "aliases": []
+    },
+    {
+      "id": "56259",
+      "name": "Breath of the Morning",
+      "aliases": []
+    },
+    {
+      "id": "56284",
+      "name": "Forgotten Limbo Box",
+      "aliases": []
+    },
+    {
+      "id": "56322",
+      "name": "Tainted Specter's Cloth",
+      "aliases": []
+    },
+    {
+      "id": "56323",
+      "name": "Tainted Golem's Heart Fragment",
+      "aliases": []
+    },
+    {
+      "id": "56327",
+      "name": "Discarded Kkebicap",
+      "aliases": []
+    },
+    {
+      "id": "56328",
+      "name": "Faded Bandit Mask",
+      "aliases": []
+    },
+    {
+      "id": "56329",
+      "name": "Shattered Treasures",
+      "aliases": []
+    },
+    {
+      "id": "56334",
+      "name": "Thorn-Entwined Weapon Fragment",
+      "aliases": []
+    },
+    {
+      "id": "56335",
+      "name": "Golden Pigs Subjugation Token",
+      "aliases": []
+    },
+    {
+      "id": "56338",
+      "name": "Shiny Treasure",
+      "aliases": []
+    },
+    {
+      "id": "56339",
+      "name": "Corrupted Sanguine Crystal",
+      "aliases": []
+    },
+    {
+      "id": "56340",
+      "name": "Origin of Corruption",
+      "aliases": []
+    },
+    {
+      "id": "56341",
+      "name": "Underwater Ancient Weapon Power Stone",
+      "aliases": []
+    },
+    {
+      "id": "56342",
+      "name": "Destroyed Ancient Weapon Power Stone",
+      "aliases": []
+    },
+    {
+      "id": "56345",
+      "name": "Faint Sycraia's Memory",
+      "aliases": []
+    },
+    {
+      "id": "56346",
+      "name": "Gentle Sycraia's Memory",
+      "aliases": []
+    },
+    {
+      "id": "56347",
+      "name": "Intense Sycraia's Memory",
+      "aliases": []
+    },
+    {
+      "id": "56348",
+      "name": "Radiant Sycraia's Memory",
+      "aliases": []
+    },
+    {
+      "id": "56505",
+      "name": "Ancient Spirit Light",
+      "aliases": []
+    },
+    {
+      "id": "5651",
+      "name": "Fairy Powder",
+      "aliases": []
+    },
+    {
+      "id": "5960",
+      "name": "Trace of Nature",
+      "aliases": []
+    },
+    {
+      "id": "59797",
+      "name": "Gnawing Rhutum Fang",
+      "aliases": []
+    },
+    {
+      "id": "59798",
+      "name": "Fiery Troll Hide",
+      "aliases": []
+    },
+    {
+      "id": "59799",
+      "name": "Scornful Spear",
+      "aliases": []
+    },
+    {
+      "id": "59800",
+      "name": "Howling Bone Fragment",
+      "aliases": []
+    },
+    {
+      "id": "59801",
+      "name": "Icy Armor Fragment",
+      "aliases": []
+    },
+    {
+      "id": "59802",
+      "name": "Tattered Shadow",
+      "aliases": []
+    },
+    {
+      "id": "59811",
+      "name": "Fadus Armor Fragment",
+      "aliases": []
+    },
+    {
+      "id": "59812",
+      "name": "Mushroom Hypha",
+      "aliases": []
+    },
+    {
+      "id": "59813",
+      "name": "Hoof of Forest Ronaros",
+      "aliases": []
+    },
+    {
+      "id": "59814",
+      "name": "Fragment of Bronze Artifact",
+      "aliases": []
+    },
+    {
+      "id": "59815",
+      "name": "Griffon Beak",
+      "aliases": []
+    },
+    {
+      "id": "59816",
+      "name": "Ferri Beak",
+      "aliases": []
+    },
+    {
+      "id": "59817",
+      "name": "Belladonna Elephant Ivory Piece",
+      "aliases": []
+    },
+    {
+      "id": "59818",
+      "name": "Black Leopard Fang",
+      "aliases": []
+    },
+    {
+      "id": "59819",
+      "name": "Feather Wolf Tail",
+      "aliases": []
+    },
+    {
+      "id": "59820",
+      "name": "Narc Magic Mark",
+      "aliases": []
+    },
+    {
+      "id": "59821",
+      "name": "Degraded Wood Fragment",
+      "aliases": []
+    },
+    {
+      "id": "59822",
+      "name": "Blood Wolf Mane",
+      "aliases": []
+    },
+    {
+      "id": "59823",
+      "name": "Swamp Leaves",
+      "aliases": []
+    },
+    {
+      "id": "59824",
+      "name": "Token of Bravery",
+      "aliases": []
+    },
+    {
+      "id": "59826",
+      "name": "Mud Stained Branch",
+      "aliases": []
+    },
+    {
+      "id": "59827",
+      "name": "Blood Wolf Tooth",
+      "aliases": []
+    },
+    {
+      "id": "59828",
+      "name": "Medal of Bravery",
+      "aliases": []
+    },
+    {
+      "id": "59879",
+      "name": "Gahaz Seal",
+      "aliases": []
+    },
+    {
+      "id": "59880",
+      "name": "Corrupt Power Source",
+      "aliases": []
+    },
+    {
+      "id": "59881",
+      "name": "Kabua's Fragment",
+      "aliases": []
+    },
+    {
+      "id": "6001",
+      "name": "Deer Hide",
+      "aliases": []
+    },
+    {
+      "id": "6002",
+      "name": "Sheep Hide",
+      "aliases": []
+    },
+    {
+      "id": "6003",
+      "name": "Fox Hide",
+      "aliases": []
+    },
+    {
+      "id": "6004",
+      "name": "Rhino Hide",
+      "aliases": []
+    },
+    {
+      "id": "6005",
+      "name": "Pig Hide",
+      "aliases": []
+    },
+    {
+      "id": "6006",
+      "name": "Ox Hide",
+      "aliases": []
+    },
+    {
+      "id": "6008",
+      "name": "Lizard Hide",
+      "aliases": []
+    },
+    {
+      "id": "6009",
+      "name": "Worm Hide",
+      "aliases": []
+    },
+    {
+      "id": "6013",
+      "name": "Bear Hide",
+      "aliases": []
+    },
+    {
+      "id": "6014",
+      "name": "Wolf Hide",
+      "aliases": []
+    },
+    {
+      "id": "6015",
+      "name": "Waragon Hide",
+      "aliases": []
+    },
+    {
+      "id": "6019",
+      "name": "Snake Skin",
+      "aliases": []
+    },
+    {
+      "id": "6020",
+      "name": "Lion Hide",
+      "aliases": []
+    },
+    {
+      "id": "6026",
+      "name": "Elephant Hide",
+      "aliases": []
+    },
+    {
+      "id": "6039",
+      "name": "Tiger Hide",
+      "aliases": []
+    },
+    {
+      "id": "6151",
+      "name": "Soft Hide",
+      "aliases": []
+    },
+    {
+      "id": "6152",
+      "name": "Tough Hide",
+      "aliases": []
+    },
+    {
+      "id": "6153",
+      "name": "Hard Hide",
+      "aliases": []
+    },
+    {
+      "id": "6155",
+      "name": "Thick Fur",
+      "aliases": []
+    },
+    {
+      "id": "6185",
+      "name": "Fire Horn",
+      "aliases": []
+    },
+    {
+      "id": "6201",
+      "name": "Deer Blood",
+      "aliases": []
+    },
+    {
+      "id": "6202",
+      "name": "Sheep Blood",
+      "aliases": []
+    },
+    {
+      "id": "6203",
+      "name": "Fox Blood",
+      "aliases": []
+    },
+    {
+      "id": "6204",
+      "name": "Rhino Blood",
+      "aliases": []
+    },
+    {
+      "id": "6205",
+      "name": "Pig Blood",
+      "aliases": []
+    },
+    {
+      "id": "6206",
+      "name": "Ox Blood",
+      "aliases": []
+    },
+    {
+      "id": "6208",
+      "name": "Lizard Blood",
+      "aliases": []
+    },
+    {
+      "id": "6209",
+      "name": "Worm Blood",
+      "aliases": []
+    },
+    {
+      "id": "6213",
+      "name": "Bear Blood",
+      "aliases": []
+    },
+    {
+      "id": "6214",
+      "name": "Wolf Blood",
+      "aliases": []
+    },
+    {
+      "id": "6215",
+      "name": "Waragon Blood",
+      "aliases": []
+    },
+    {
+      "id": "6220",
+      "name": "Troll Blood",
+      "aliases": []
+    },
+    {
+      "id": "6222",
+      "name": "Cobra Blood",
+      "aliases": []
+    },
+    {
+      "id": "6223",
+      "name": "Lion Blood",
+      "aliases": []
+    },
+    {
+      "id": "6356",
+      "name": "Tiger Blood",
+      "aliases": []
+    },
+    {
+      "id": "6359",
+      "name": "Rock Elephant Blood",
+      "aliases": []
+    },
+    {
+      "id": "6393",
+      "name": "Elkarr",
+      "aliases": []
+    },
+    {
+      "id": "6399",
+      "name": "Ah'krad",
+      "aliases": []
+    },
+    {
+      "id": "6400",
+      "name": "Olucas",
+      "aliases": []
+    },
+    {
+      "id": "6501",
+      "name": "Coral Piece",
+      "aliases": []
+    },
+    {
+      "id": "6511",
+      "name": "Lobster",
+      "aliases": []
+    },
+    {
+      "id": "65282",
+      "name": "Protty Fin",
+      "aliases": []
+    },
+    {
+      "id": "65317",
+      "name": "Flame of Resonance",
+      "aliases": []
+    },
+    {
+      "id": "65318",
+      "name": "Embers of Resonance",
+      "aliases": []
+    },
+    {
+      "id": "65319",
+      "name": "Origin of Dark Hunger",
+      "aliases": []
+    },
+    {
+      "id": "65323",
+      "name": "Essence of Devouring",
+      "aliases": []
+    },
+    {
+      "id": "65327",
+      "name": "Lafi Bedmountain's Upgraded Telescope Parts",
+      "aliases": []
+    },
+    {
+      "id": "65328",
+      "name": "Tungrad Ruins Fragment",
+      "aliases": []
+    },
+    {
+      "id": "65329",
+      "name": "Mark of the Black Sands",
+      "aliases": []
+    },
+    {
+      "id": "6533",
+      "name": "Coral Crystal",
+      "aliases": []
+    },
+    {
+      "id": "65330",
+      "name": "Decayed Cloth",
+      "aliases": []
+    },
+    {
+      "id": "65331",
+      "name": "Lafi Bedmountain's Upgraded Telescope Parts",
+      "aliases": []
+    },
+    {
+      "id": "65332",
+      "name": "Lafi Bedmountain's Upgraded Telescope Parts",
+      "aliases": []
+    },
+    {
+      "id": "65334",
+      "name": "Aakman Guardian's Token",
+      "aliases": []
+    },
+    {
+      "id": "65335",
+      "name": "Hystria Ruins Fragment",
+      "aliases": []
+    },
+    {
+      "id": "65397",
+      "name": "Tainted Ruins Fragment",
+      "aliases": []
+    },
+    {
+      "id": "65398",
+      "name": "Tainted Sulfur Fragment",
+      "aliases": []
+    },
+    {
+      "id": "65399",
+      "name": "Tainted Token Piece",
+      "aliases": []
+    },
+    {
+      "id": "65400",
+      "name": "Tainted Aakman's Token",
+      "aliases": []
+    },
+    {
+      "id": "65770",
+      "name": "Venomous Night Fang",
+      "aliases": []
+    },
+    {
+      "id": "65778",
+      "name": "Al Rhundi's Secret Orders",
+      "aliases": []
+    },
+    {
+      "id": "65780",
+      "name": "Crimson Bell",
+      "aliases": []
+    },
+    {
+      "id": "66106",
+      "name": "Glimmering Treasure Key",
+      "aliases": []
+    },
+    {
+      "id": "66107",
+      "name": "Sparkling Treasure Key",
+      "aliases": []
+    },
+    {
+      "id": "66108",
+      "name": "Dazzling Treasure Key",
+      "aliases": []
+    },
+    {
+      "id": "66191",
+      "name": "Powder of Ascension",
+      "aliases": []
+    },
+    {
+      "id": "66945",
+      "name": "Fortunate Golden Pig King Summon Scroll",
+      "aliases": []
+    },
+    {
+      "id": "66946",
+      "name": "Golden Pig King Summon Scroll",
+      "aliases": []
+    },
+    {
+      "id": "6901",
+      "name": "Sunrise Herb Seed",
+      "aliases": []
+    },
+    {
+      "id": "6902",
+      "name": "Silver Azalea Seed",
+      "aliases": []
+    },
+    {
+      "id": "6903",
+      "name": "Fire Flake Flower Seed",
+      "aliases": []
+    },
+    {
+      "id": "6904",
+      "name": "Dry Mane Grass Seed",
+      "aliases": []
+    },
+    {
+      "id": "701011",
+      "name": "Akum Helmet",
+      "aliases": []
+    },
+    {
+      "id": "701012",
+      "name": "Akum Armor",
+      "aliases": []
+    },
+    {
+      "id": "701013",
+      "name": "Akum Gloves",
+      "aliases": []
+    },
+    {
+      "id": "701014",
+      "name": "Akum Shoes",
+      "aliases": []
+    },
+    {
+      "id": "705518",
+      "name": "Manos Craftsman's Clothes",
+      "aliases": []
+    },
+    {
+      "id": "721002",
+      "name": "Ancient Spirit Dust",
+      "aliases": []
+    },
+    {
+      "id": "721003",
+      "name": "Caphras Stone",
+      "aliases": []
+    },
+    {
+      "id": "721044",
+      "name": "Specter's Energy",
+      "aliases": []
+    },
+    {
+      "id": "735201",
+      "name": "Marsh's Artifact - Melee AP",
+      "aliases": []
+    },
+    {
+      "id": "735202",
+      "name": "Marsh's Artifact - Ranged AP",
+      "aliases": []
+    },
+    {
+      "id": "735203",
+      "name": "Marsh's Artifact - Magic AP",
+      "aliases": []
+    },
+    {
+      "id": "735204",
+      "name": "Marsh's Artifact - Melee Accuracy",
+      "aliases": []
+    },
+    {
+      "id": "735205",
+      "name": "Marsh's Artifact - Ranged Accuracy",
+      "aliases": []
+    },
+    {
+      "id": "735206",
+      "name": "Marsh's Artifact - Magic Accuracy",
+      "aliases": []
+    },
+    {
+      "id": "735207",
+      "name": "Marsh's Artifact - Extra AP Against Monsters",
+      "aliases": []
+    },
+    {
+      "id": "735251",
+      "name": "Lesha's Artifact - Melee Damage Reduction",
+      "aliases": []
+    },
+    {
+      "id": "735252",
+      "name": "Lesha's Artifact - Melee Evasion",
+      "aliases": []
+    },
+    {
+      "id": "735253",
+      "name": "Lesha's Artifact - Ranged Damage Reduction",
+      "aliases": []
+    },
+    {
+      "id": "735254",
+      "name": "Lesha's Artifact - Ranged Evasion",
+      "aliases": []
+    },
+    {
+      "id": "735255",
+      "name": "Lesha's Artifact - Magic Damage Reduction",
+      "aliases": []
+    },
+    {
+      "id": "735256",
+      "name": "Lesha's Artifact - Magic Evasion",
+      "aliases": []
+    },
+    {
+      "id": "735257",
+      "name": "Lesha's Artifact - All Damage Reduction",
+      "aliases": []
+    },
+    {
+      "id": "735258",
+      "name": "Lesha's Artifact - All Evasion",
+      "aliases": []
+    },
+    {
+      "id": "735259",
+      "name": "Lesha's Artifact - Monster Damage Reduction",
+      "aliases": []
+    },
+    {
+      "id": "735301",
+      "name": "Kehelle's Artifact - Max HP",
+      "aliases": []
+    },
+    {
+      "id": "735302",
+      "name": "Kehelle's Artifact - Max Stamina",
+      "aliases": []
+    },
+    {
+      "id": "735303",
+      "name": "Kehelle's Artifact - Black Spirit's Rage Max Increase",
+      "aliases": []
+    },
+    {
+      "id": "735351",
+      "name": "Sethra's Artifact - Life EXP",
+      "aliases": []
+    },
+    {
+      "id": "735352",
+      "name": "Sethra's Artifact - Life Skill Mastery",
+      "aliases": []
+    },
+    {
+      "id": "735353",
+      "name": "Sethra's Artifact - Gathering Item Drop Rate",
+      "aliases": []
+    },
+    {
+      "id": "735356",
+      "name": "Sethra's Artifact - Gathering EXP",
+      "aliases": []
+    },
+    {
+      "id": "735358",
+      "name": "Sethra's Artifact - Hunting EXP",
+      "aliases": []
+    },
+    {
+      "id": "735367",
+      "name": "Sethra's Artifact - Gathering Mastery",
+      "aliases": []
+    },
+    {
+      "id": "735369",
+      "name": "Sethra's Artifact - Hunting Mastery",
+      "aliases": []
+    },
+    {
+      "id": "742269",
+      "name": "Kabua's Artifact",
+      "aliases": []
+    },
+    {
+      "id": "748021",
+      "name": "Dehkia's Artifact - All Damage Reduction",
+      "aliases": []
+    },
+    {
+      "id": "748022",
+      "name": "Dehkia's Artifact - All Evasion",
+      "aliases": []
+    },
+    {
+      "id": "752023",
+      "name": "Mass of Pure Magic",
+      "aliases": []
+    },
+    {
+      "id": "752530",
+      "name": "Atanis' Element",
+      "aliases": []
+    },
+    {
+      "id": "757451",
+      "name": "Bares Main Weapon Box",
+      "aliases": []
+    },
+    {
+      "id": "757452",
+      "name": "Yuria Main Weapon Box",
+      "aliases": []
+    },
+    {
+      "id": "757453",
+      "name": "Krea Main Weapon Box",
+      "aliases": []
+    },
+    {
+      "id": "757454",
+      "name": "Seleth Main Weapon Box",
+      "aliases": []
+    },
+    {
+      "id": "757455",
+      "name": "Kalis Main Weapon Box",
+      "aliases": []
+    },
+    {
+      "id": "757460",
+      "name": "Rosar Main Weapon Box",
+      "aliases": []
+    },
+    {
+      "id": "757462",
+      "name": "Magic Crystal of Infinity Box",
+      "aliases": []
+    },
+    {
+      "id": "757463",
+      "name": "Hercules' Defense Gear Box",
+      "aliases": []
+    },
+    {
+      "id": "757464",
+      "name": "Heve's Defense Gear Box",
+      "aliases": []
+    },
+    {
+      "id": "757468",
+      "name": "Zereth Defense Gear Box",
+      "aliases": []
+    },
+    {
+      "id": "757469",
+      "name": "Talis Defense Gear Box",
+      "aliases": []
+    },
+    {
+      "id": "757470",
+      "name": "Grunil Defense Gear Box",
+      "aliases": []
+    },
+    {
+      "id": "757471",
+      "name": "Rocaba Defense Gear Box",
+      "aliases": []
+    },
+    {
+      "id": "757472",
+      "name": "Krea Sub-weapon Box",
+      "aliases": []
+    },
+    {
+      "id": "757473",
+      "name": "Rosar Sub-weapon Box",
+      "aliases": []
+    },
+    {
+      "id": "757474",
+      "name": "Accuracy Sub-weapon Box",
+      "aliases": []
+    },
+    {
+      "id": "757475",
+      "name": "Offensive Sub-weapon Box",
+      "aliases": []
+    },
+    {
+      "id": "757476",
+      "name": "Defensive Sub-weapon Box",
+      "aliases": []
+    },
+    {
+      "id": "757477",
+      "name": "Black Stone Bundle",
+      "aliases": []
+    },
+    {
+      "id": "757480",
+      "name": "Reliable Adventurer's Earring Box",
+      "aliases": []
+    },
+    {
+      "id": "761714",
+      "name": "Roud Sulfur Mine Paint",
+      "aliases": []
+    },
+    {
+      "id": "761715",
+      "name": "Pila Ku Jail Paint",
+      "aliases": []
+    },
+    {
+      "id": "761716",
+      "name": "Aakman Temple Paint",
+      "aliases": []
+    },
+    {
+      "id": "761717",
+      "name": "Hystria Ruins Paint",
+      "aliases": []
+    },
+    {
+      "id": "761718",
+      "name": "Sycraia Underwater Ruins Paint",
+      "aliases": []
+    },
+    {
+      "id": "761719",
+      "name": "Padix Island Paint",
+      "aliases": []
+    },
+    {
+      "id": "761720",
+      "name": "Ash Forest Paint",
+      "aliases": []
+    },
+    {
+      "id": "761721",
+      "name": "Crypt of Resting Thoughts Paint",
+      "aliases": []
+    },
+    {
+      "id": "761722",
+      "name": "Olun's Valley Paint",
+      "aliases": []
+    },
+    {
+      "id": "761723",
+      "name": "City of the Dead Paint",
+      "aliases": []
+    },
+    {
+      "id": "761724",
+      "name": "Tungrad Ruins Paint",
+      "aliases": []
+    },
+    {
+      "id": "761725",
+      "name": "Darkseekers' Retreat Paint",
+      "aliases": []
+    },
+    {
+      "id": "761726",
+      "name": "Gavinya Coastal Cliff Paint",
+      "aliases": []
+    },
+    {
+      "id": "761802",
+      "name": "Distorted Crystal of Origin",
+      "aliases": []
+    },
+    {
+      "id": "761803",
+      "name": "Silent Crystal of Origin",
+      "aliases": []
+    },
+    {
+      "id": "766101",
+      "name": "Iridescent Lightstone",
+      "aliases": []
+    },
+    {
+      "id": "766107",
+      "name": "Imperfect Lightstone of Flora",
+      "aliases": []
+    },
+    {
+      "id": "767091",
+      "name": "Dehkia's Fragment",
+      "aliases": []
+    },
+    {
+      "id": "767244",
+      "name": "Chilled Soul Piece",
+      "aliases": []
+    },
+    {
+      "id": "767245",
+      "name": "Contaminated Coral Piece",
+      "aliases": []
+    },
+    {
+      "id": "767246",
+      "name": "Ancient Soldier Fragment",
+      "aliases": []
+    },
+    {
+      "id": "767247",
+      "name": "Lightlost Core",
+      "aliases": []
+    },
+    {
+      "id": "767248",
+      "name": "Hardened Lava Chunk",
+      "aliases": []
+    },
+    {
+      "id": "767254",
+      "name": "Cliffside Mountain Sheep Horn",
+      "aliases": []
+    },
+    {
+      "id": "767255",
+      "name": "Golden Leaf Snake Scale",
+      "aliases": []
+    },
+    {
+      "id": "767256",
+      "name": "Rock Elephant Tusk",
+      "aliases": []
+    },
+    {
+      "id": "767257",
+      "name": "Breath of the Endtimes",
+      "aliases": []
+    },
+    {
+      "id": "767293",
+      "name": "Crimson Primordial Pigment - Sovereign",
+      "aliases": []
+    },
+    {
+      "id": "767294",
+      "name": "Violet Primordial Pigment - Sovereign",
+      "aliases": []
+    },
+    {
+      "id": "767296",
+      "name": "Violet Primordial Pigment - Edana",
+      "aliases": []
+    },
+    {
+      "id": "767337",
+      "name": "Refined Origin of Hunger",
+      "aliases": []
+    },
+    {
+      "id": "767338",
+      "name": "Refined Essence of Devouring",
+      "aliases": []
+    },
+    {
+      "id": "767339",
+      "name": "Sycrid's Scale Piece",
+      "aliases": []
+    },
+    {
+      "id": "767341",
+      "name": "Turquoise Primordial Pigment - Sovereign",
+      "aliases": []
+    },
+    {
+      "id": "767342",
+      "name": "Turquoise Primordial Pigment - Edana",
+      "aliases": []
+    },
+    {
+      "id": "767343",
+      "name": "White Primordial Pigment - Sovereign",
+      "aliases": []
+    },
+    {
+      "id": "767344",
+      "name": "White Primordial Pigment - Edana",
+      "aliases": []
+    },
+    {
+      "id": "767348",
+      "name": "Tainted Armor Fragment",
+      "aliases": []
+    },
+    {
+      "id": "767349",
+      "name": "Faded Dark Energy",
+      "aliases": []
+    },
+    {
+      "id": "767350",
+      "name": "Sulfur Golem Fragment",
+      "aliases": []
+    },
+    {
+      "id": "767353",
+      "name": "Sunset Primordial Pigment - Edana",
+      "aliases": []
+    },
+    {
+      "id": "768160",
+      "name": "Sealed Black Magic Crystal",
+      "aliases": []
+    },
+    {
+      "id": "7701",
+      "name": "Wild Beehive",
+      "aliases": []
+    },
+    {
+      "id": "7751",
+      "name": "Damaged Hide",
+      "aliases": []
+    },
+    {
+      "id": "7752",
+      "name": "Usable Hide",
+      "aliases": []
+    },
+    {
+      "id": "7753",
+      "name": "Supreme Hide",
+      "aliases": []
+    },
+    {
+      "id": "7757",
+      "name": "Cracked Horn",
+      "aliases": []
+    },
+    {
+      "id": "7758",
+      "name": "Intact Horn",
+      "aliases": []
+    },
+    {
+      "id": "7759",
+      "name": "Sharp Horn",
+      "aliases": []
+    },
+    {
+      "id": "7760",
+      "name": "Cracked Tooth",
+      "aliases": []
+    },
+    {
+      "id": "7761",
+      "name": "Intact Tooth",
+      "aliases": []
+    },
+    {
+      "id": "7762",
+      "name": "Sharp Tooth",
+      "aliases": []
+    },
+    {
+      "id": "7901",
+      "name": "Deer Meat",
+      "aliases": []
+    },
+    {
+      "id": "7902",
+      "name": "Lamb Meat",
+      "aliases": []
+    },
+    {
+      "id": "7903",
+      "name": "Fox Meat",
+      "aliases": []
+    },
+    {
+      "id": "7904",
+      "name": "Rhino Meat",
+      "aliases": []
+    },
+    {
+      "id": "7905",
+      "name": "Pork",
+      "aliases": []
+    },
+    {
+      "id": "7906",
+      "name": "Beef",
+      "aliases": []
+    },
+    {
+      "id": "790694",
+      "name": "Void Tainted Whispers",
+      "aliases": []
+    },
+    {
+      "id": "790699",
+      "name": "Resplendently-lit Gemstone",
+      "aliases": []
+    },
+    {
+      "id": "790700",
+      "name": "Torn Buccaneer Lapel",
+      "aliases": []
+    },
+    {
+      "id": "7908",
+      "name": "Lizard Meat",
+      "aliases": []
+    },
+    {
+      "id": "7909",
+      "name": "Worm Meat",
+      "aliases": []
+    },
+    {
+      "id": "7912",
+      "name": "Bear Meat",
+      "aliases": []
+    },
+    {
+      "id": "7913",
+      "name": "Wolf Meat",
+      "aliases": []
+    },
+    {
+      "id": "7914",
+      "name": "Waragon Meat",
+      "aliases": []
+    },
+    {
+      "id": "7921",
+      "name": "Chicken Meat",
+      "aliases": []
+    },
+    {
+      "id": "7922",
+      "name": "Snake Meat",
+      "aliases": []
+    },
+    {
+      "id": "7923",
+      "name": "Lion Meat",
+      "aliases": []
+    },
+    {
+      "id": "7924",
+      "name": "Scorpion Meat",
+      "aliases": []
+    },
+    {
+      "id": "7925",
+      "name": "Gazelle Meat",
+      "aliases": []
+    },
+    {
+      "id": "7953",
+      "name": "Bird Meat",
+      "aliases": []
+    },
+    {
+      "id": "7954",
+      "name": "Yak Meat",
+      "aliases": []
+    },
+    {
+      "id": "7959",
+      "name": "Tiger Meat",
+      "aliases": []
+    },
+    {
+      "id": "7962",
+      "name": "Rock Elephant Meat",
+      "aliases": []
+    },
+    {
+      "id": "8124",
+      "name": "Valtarra's Flame",
+      "aliases": []
+    },
+    {
+      "id": "8126",
+      "name": "Okiara's Tide",
+      "aliases": []
+    },
+    {
+      "id": "8129",
+      "name": "Narc's Lightning",
+      "aliases": []
+    },
+    {
+      "id": "8133",
+      "name": "Seed of Void",
+      "aliases": []
+    },
+    {
+      "id": "8135",
+      "name": "Heart of the Arid Forest",
+      "aliases": []
+    },
+    {
+      "id": "8145",
+      "name": "Shard of the Furious Night",
+      "aliases": []
+    },
+    {
+      "id": "8146",
+      "name": "Shard of the Tearful Night",
+      "aliases": []
+    },
+    {
+      "id": "8147",
+      "name": "Shard of the Drained Night",
+      "aliases": []
+    },
+    {
+      "id": "820036",
+      "name": "Forest Crystal",
+      "aliases": []
+    },
+    {
+      "id": "820037",
+      "name": "Crystal of Darkness",
+      "aliases": []
+    },
+    {
+      "id": "820038",
+      "name": "Crystal of Bitterness",
+      "aliases": []
+    },
+    {
+      "id": "820039",
+      "name": "Crystal of Decimation",
+      "aliases": []
+    },
+    {
+      "id": "820040",
+      "name": "Kuadir Fragment",
+      "aliases": []
+    },
+    {
+      "id": "820138",
+      "name": "Mysterious Powder",
+      "aliases": []
+    },
+    {
+      "id": "820139",
+      "name": "Live Meat",
+      "aliases": []
+    },
+    {
+      "id": "820143",
+      "name": "Strange and Beautiful Herb",
+      "aliases": []
+    },
+    {
+      "id": "820157",
+      "name": "Supreme Boar Hide",
+      "aliases": []
+    },
+    {
+      "id": "820158",
+      "name": "Supreme Bear Hide",
+      "aliases": []
+    },
+    {
+      "id": "820159",
+      "name": "Supreme Hawk Hide",
+      "aliases": []
+    },
+    {
+      "id": "820160",
+      "name": "Supreme Tiger Hide",
+      "aliases": []
+    },
+    {
+      "id": "820979",
+      "name": "Essence of Dawn",
+      "aliases": []
+    },
+    {
+      "id": "821182",
+      "name": "Gem of Void",
+      "aliases": []
+    },
+    {
+      "id": "821246",
+      "name": "Primordial Fragment",
+      "aliases": []
+    },
+    {
+      "id": "821250",
+      "name": "Herald's Crystal",
+      "aliases": []
+    },
+    {
+      "id": "821251",
+      "name": "Flawless Herald's Crystal",
+      "aliases": []
+    },
+    {
+      "id": "821252",
+      "name": "Crystallized Energy of Endtimes",
+      "aliases": []
+    },
+    {
+      "id": "821253",
+      "name": "WON Crystal of Ruin",
+      "aliases": []
+    },
+    {
+      "id": "821254",
+      "name": "BON Crystal of Ruin",
+      "aliases": []
+    },
+    {
+      "id": "821255",
+      "name": "Rusalka's Coral",
+      "aliases": []
+    },
+    {
+      "id": "821259",
+      "name": "Caphras Essence",
+      "aliases": []
+    },
+    {
+      "id": "821317",
+      "name": "Distorted Fragment of Origin",
+      "aliases": []
+    },
+    {
+      "id": "821318",
+      "name": "Silent Fragment of Origin",
+      "aliases": []
+    },
+    {
+      "id": "821319",
+      "name": "JIN Crystal of Ruin",
+      "aliases": []
+    },
+    {
+      "id": "821320",
+      "name": "HAN Crystal of Ruin",
+      "aliases": []
+    },
+    {
+      "id": "821341",
+      "name": "Crimson Primordial Luster - Sovereign",
+      "aliases": []
+    },
+    {
+      "id": "821342",
+      "name": "Violet Primordial Luster - Sovereign",
+      "aliases": []
+    },
+    {
+      "id": "821343",
+      "name": "Violet Primordial Luster - Edana",
+      "aliases": []
+    },
+    {
+      "id": "821344",
+      "name": "Gluttony Crystal",
+      "aliases": []
+    },
+    {
+      "id": "821345",
+      "name": "Gilded Leaf",
+      "aliases": []
+    },
+    {
+      "id": "821346",
+      "name": "Nymphamaré's Song",
+      "aliases": []
+    },
+    {
+      "id": "821347",
+      "name": "Sycraia Shard",
+      "aliases": []
+    },
+    {
+      "id": "821348",
+      "name": "Withered Wood Chip",
+      "aliases": []
+    },
+    {
+      "id": "821349",
+      "name": "Thin Essence of Life",
+      "aliases": []
+    },
+    {
+      "id": "821350",
+      "name": "Cracked Terrashard",
+      "aliases": []
+    },
+    {
+      "id": "821351",
+      "name": "Faint Wildsoul",
+      "aliases": []
+    },
+    {
+      "id": "821352",
+      "name": "Faded Naturewoven Hide",
+      "aliases": []
+    },
+    {
+      "id": "821353",
+      "name": "Dim Heartvein Shard",
+      "aliases": []
+    },
+    {
+      "id": "821371",
+      "name": "Fairy's Breath",
+      "aliases": []
+    },
+    {
+      "id": "821417",
+      "name": "Turquoise Primordial Luster - Sovereign",
+      "aliases": []
+    },
+    {
+      "id": "821418",
+      "name": "Turquoise Primordial Luster - Edana",
+      "aliases": []
+    },
+    {
+      "id": "821419",
+      "name": "White Primordial Luster - Sovereign",
+      "aliases": []
+    },
+    {
+      "id": "821420",
+      "name": "White Primordial Luster - Edana",
+      "aliases": []
+    },
+    {
+      "id": "821421",
+      "name": "Twilight of the End - Necklace",
+      "aliases": []
+    },
+    {
+      "id": "821422",
+      "name": "Twilight of the End - Earring",
+      "aliases": []
+    },
+    {
+      "id": "821423",
+      "name": "Twilight of the End - Ring",
+      "aliases": []
+    },
+    {
+      "id": "821424",
+      "name": "Twilight of the End - Belt",
+      "aliases": []
+    },
+    {
+      "id": "821430",
+      "name": "WON Origin Shard",
+      "aliases": []
+    },
+    {
+      "id": "821431",
+      "name": "BON Origin Shard",
+      "aliases": []
+    },
+    {
+      "id": "821432",
+      "name": "JIN Origin Shard",
+      "aliases": []
+    },
+    {
+      "id": "821433",
+      "name": "HAN Origin Shard",
+      "aliases": []
+    },
+    {
+      "id": "821459",
+      "name": "Sunset Primordial Luster - Edana",
+      "aliases": []
+    },
+    {
+      "id": "821460",
+      "name": "Nev's Fragment",
+      "aliases": []
+    },
+    {
+      "id": "821461",
+      "name": "Embers of Ynix - Helmet",
+      "aliases": []
+    },
+    {
+      "id": "821462",
+      "name": "Embers of Ynix - Armor",
+      "aliases": []
+    },
+    {
+      "id": "821463",
+      "name": "Embers of Ynix - Gloves",
+      "aliases": []
+    },
+    {
+      "id": "821464",
+      "name": "Embers of Ynix - Shoes",
+      "aliases": []
+    },
+    {
+      "id": "821469",
+      "name": "Evergreen Shard",
+      "aliases": []
+    },
+    {
+      "id": "821471",
+      "name": "Fusion Shard",
+      "aliases": []
+    },
+    {
+      "id": "8411",
+      "name": "Crystallized Despair",
+      "aliases": []
+    },
+    {
+      "id": "8421",
+      "name": "Blessed Soul Fragment",
+      "aliases": []
+    },
+    {
+      "id": "8427",
+      "name": "Corrupted Breath",
+      "aliases": []
+    },
+    {
+      "id": "9065",
+      "name": "Milk",
+      "aliases": []
+    },
+    {
+      "id": "9070",
+      "name": "Ouk Pill of Time and Tide",
+      "aliases": []
+    },
+    {
+      "id": "9749",
+      "name": "Black Energy Residue",
+      "aliases": []
+    },
+    {
+      "id": "9768",
+      "name": "Garmoth's Scale",
+      "aliases": []
+    },
+    {
+      "id": "9774",
+      "name": "Abyssal Essence",
+      "aliases": []
+    },
+    {
+      "id": "9778",
+      "name": "Thick Turo Blood",
+      "aliases": []
+    },
+    {
+      "id": "9791",
+      "name": "Essence of Insight",
+      "aliases": []
+    },
+    {
+      "id": "9792",
+      "name": "Starlit Jade's Breath",
+      "aliases": []
+    },
+    {
+      "id": "9799",
+      "name": "Wildspark",
+      "aliases": []
+    },
+    {
+      "id": "980115",
+      "name": "Sulfur Golem Power Core",
+      "aliases": []
+    },
+    {
+      "id": "980116",
+      "name": "Sulfur Golem Power Core Fragment",
+      "aliases": []
+    },
+    {
+      "id": "980127",
+      "name": "Branch of Abundance",
+      "aliases": []
+    },
+    {
+      "id": "980128",
+      "name": "Black Crystal Fragment",
+      "aliases": []
+    },
+    {
+      "id": "980129",
+      "name": "Elion Follower's Helmet",
+      "aliases": []
+    },
+    {
+      "id": "980130",
+      "name": "Elion Follower's Mark",
+      "aliases": []
+    },
+    {
+      "id": "980131",
+      "name": "Scorched Belt Ornament",
+      "aliases": []
+    },
+    {
+      "id": "980132",
+      "name": "Broken Gloves of the Void",
+      "aliases": []
+    },
+    {
+      "id": "980139",
+      "name": "Broken Vestige of Goldroot",
+      "aliases": []
+    },
+    {
+      "id": "980140",
+      "name": "Broken Vestige of Ebonmere",
+      "aliases": []
+    },
+    {
+      "id": "980141",
+      "name": "Broken Vestige of Everlight",
+      "aliases": []
+    },
+    {
+      "id": "980142",
+      "name": "Broken Vestige of Crimsonflare",
+      "aliases": []
+    },
+    {
+      "id": "980143",
+      "name": "Broken Vestige of Voidreach",
+      "aliases": []
+    }
+  ],
+  "spots": [
+    {
+      "id": "client-zone:3",
+      "name": "Mansha Forest",
+      "activity": "grinding",
+      "sourceKind": "client-zone",
+      "sourceId": "3",
+      "aliases": [],
+      "methodIds": [],
+      "dropItemIds": [
+        "11607",
+        "12050",
+        "16001",
+        "28",
+        "40218",
+        "44138",
+        "44169",
+        "44246",
+        "44849",
+        "721002",
+        "757475",
+        "757477"
+      ],
+      "commonDropItemIds": [
+        "28"
+      ],
+      "garmothSpotId": null
+    },
+    {
+      "id": "client-zone:257",
+      "name": "Catfishman Camp",
+      "activity": "grinding",
+      "sourceKind": "client-zone",
+      "sourceId": "257",
+      "aliases": [],
+      "methodIds": [],
+      "dropItemIds": [
+        "11844",
+        "16001",
+        "28",
+        "40218",
+        "44126",
+        "44851",
+        "721002",
+        "757468",
+        "757477",
+        "757480"
+      ],
+      "commonDropItemIds": [
+        "28"
+      ],
+      "garmothSpotId": null
+    },
+    {
+      "id": "client-zone:769",
+      "name": "Rhutum Outstation",
+      "activity": "grinding",
+      "sourceKind": "client-zone",
+      "sourceId": "769",
+      "aliases": [],
+      "methodIds": [],
+      "dropItemIds": [
+        "12208",
+        "12243",
+        "16001",
+        "28",
+        "40218",
+        "44126",
+        "44169",
+        "44834",
+        "721002",
+        "757451",
+        "757463",
+        "757474",
+        "757477"
+      ],
+      "commonDropItemIds": [
+        "28"
+      ],
+      "garmothSpotId": null
+    },
+    {
+      "id": "client-zone:1281",
+      "name": "Hexe Sanctuary",
+      "activity": "grinding",
+      "sourceKind": "client-zone",
+      "sourceId": "1281",
+      "aliases": [],
+      "methodIds": [],
+      "dropItemIds": [
+        "11808",
+        "16001",
+        "28",
+        "40218",
+        "42379",
+        "44843",
+        "44852",
+        "721002",
+        "757452",
+        "757464",
+        "757476",
+        "757477",
+        "757480"
+      ],
+      "commonDropItemIds": [
+        "28"
+      ],
+      "garmothSpotId": null
+    },
+    {
+      "id": "client-zone:1538",
+      "name": "Traitor's Graveyard",
+      "activity": "grinding",
+      "sourceKind": "client-zone",
+      "sourceId": "1538",
+      "aliases": [],
+      "methodIds": [],
+      "dropItemIds": [
+        "11808",
+        "16001",
+        "40218",
+        "44477",
+        "5960",
+        "721002",
+        "721003",
+        "735302",
+        "752023",
+        "752530"
+      ],
+      "commonDropItemIds": [],
+      "garmothSpotId": null
+    },
+    {
+      "id": "client-zone:2306",
+      "name": "Cyclops Land",
+      "activity": "grinding",
+      "sourceKind": "client-zone",
+      "sourceId": "2306",
+      "aliases": [],
+      "methodIds": [],
+      "dropItemIds": [
+        "11806",
+        "11807",
+        "15605",
+        "15649",
+        "16001",
+        "44032",
+        "44845",
+        "44849",
+        "721002"
+      ],
+      "commonDropItemIds": [],
+      "garmothSpotId": null
+    },
+    {
+      "id": "client-zone:2562",
+      "name": "North Kaia Mountain",
+      "activity": "grinding",
+      "sourceKind": "client-zone",
+      "sourceId": "2562",
+      "aliases": [],
+      "methodIds": [],
+      "dropItemIds": [
+        "12210",
+        "15601",
+        "16001"
+      ],
+      "commonDropItemIds": [],
+      "garmothSpotId": null
+    },
+    {
+      "id": "client-zone:2818",
+      "name": "Abandoned Monastery (Restricted Territory)",
+      "activity": "grinding",
+      "sourceKind": "client-zone",
+      "sourceId": "2818",
+      "aliases": [],
+      "methodIds": [],
+      "dropItemIds": [
+        "11855",
+        "15605",
+        "16001",
+        "40218",
+        "44446",
+        "721002",
+        "735204",
+        "735205",
+        "735206",
+        "752023"
+      ],
+      "commonDropItemIds": [],
+      "garmothSpotId": null
+    },
+    {
+      "id": "client-zone:3072",
+      "name": "Padix Island",
+      "activity": "grinding",
+      "sourceKind": "client-zone",
+      "sourceId": "3072",
+      "aliases": [],
+      "methodIds": [],
+      "dropItemIds": [
+        "11816",
+        "11817",
+        "11856",
+        "12091",
+        "16001",
+        "40258",
+        "43775",
+        "44269",
+        "44448",
+        "721002",
+        "721003",
+        "735257",
+        "735258",
+        "761719"
+      ],
+      "commonDropItemIds": [],
+      "garmothSpotId": null
+    },
+    {
+      "id": "client-zone:3328",
+      "name": "Abandoned Iron Mine",
+      "activity": "grinding",
+      "sourceKind": "client-zone",
+      "sourceId": "3328",
+      "aliases": [],
+      "methodIds": [],
+      "dropItemIds": [],
+      "commonDropItemIds": [],
+      "garmothSpotId": null
+    },
+    {
+      "id": "client-zone:4353",
+      "name": "Manes Hideout",
+      "activity": "grinding",
+      "sourceKind": "client-zone",
+      "sourceId": "4353",
+      "aliases": [],
+      "methodIds": [],
+      "dropItemIds": [
+        "11631",
+        "12211",
+        "15605",
+        "15649",
+        "16001",
+        "40220",
+        "44175",
+        "5960",
+        "757455",
+        "757462",
+        "757470",
+        "757477"
+      ],
+      "commonDropItemIds": [],
+      "garmothSpotId": null
+    },
+    {
+      "id": "client-zone:4609",
+      "name": "Wandering Rogue Den",
+      "activity": "grinding",
+      "sourceKind": "client-zone",
+      "sourceId": "4609",
+      "aliases": [],
+      "methodIds": [],
+      "dropItemIds": [
+        "11631",
+        "12211",
+        "15616",
+        "16001",
+        "40220",
+        "40258",
+        "44174",
+        "757462",
+        "757463",
+        "757474",
+        "757477"
+      ],
+      "commonDropItemIds": [],
+      "garmothSpotId": null
+    },
+    {
+      "id": "client-zone:4864",
+      "name": "Helms Post",
+      "activity": "grinding",
+      "sourceKind": "client-zone",
+      "sourceId": "4864",
+      "aliases": [],
+      "methodIds": [],
+      "dropItemIds": [],
+      "commonDropItemIds": [],
+      "garmothSpotId": null
+    },
+    {
+      "id": "client-zone:5120",
+      "name": "Elric Shrine",
+      "activity": "grinding",
+      "sourceKind": "client-zone",
+      "sourceId": "5120",
+      "aliases": [],
+      "methodIds": [],
+      "dropItemIds": [
+        "10992",
+        "12012",
+        "12238",
+        "15601",
+        "16001",
+        "40220",
+        "40451",
+        "44182",
+        "5960",
+        "757453",
+        "757462",
+        "757470",
+        "757472",
+        "757477"
+      ],
+      "commonDropItemIds": [],
+      "garmothSpotId": null
+    },
+    {
+      "id": "client-zone:5376",
+      "name": "Canyon of Corruption",
+      "activity": "grinding",
+      "sourceKind": "client-zone",
+      "sourceId": "5376",
+      "aliases": [],
+      "methodIds": [],
+      "dropItemIds": [
+        "10992",
+        "12012",
+        "12238",
+        "15601",
+        "16001",
+        "40220",
+        "40451",
+        "757453",
+        "757462",
+        "757470",
+        "757472",
+        "757477"
+      ],
+      "commonDropItemIds": [],
+      "garmothSpotId": null
+    },
+    {
+      "id": "client-zone:5632",
+      "name": "Soldier's Cemetery",
+      "activity": "grinding",
+      "sourceKind": "client-zone",
+      "sourceId": "5632",
+      "aliases": [],
+      "methodIds": [],
+      "dropItemIds": [
+        "11810",
+        "15604",
+        "15616",
+        "16001",
+        "40220",
+        "44183",
+        "44184",
+        "44193",
+        "5960",
+        "757452",
+        "757462",
+        "757469",
+        "757477"
+      ],
+      "commonDropItemIds": [],
+      "garmothSpotId": null
+    },
+    {
+      "id": "client-zone:5890",
+      "name": "Sausan Garrison",
+      "activity": "grinding",
+      "sourceKind": "client-zone",
+      "sourceId": "5890",
+      "aliases": [],
+      "methodIds": [],
+      "dropItemIds": [
+        "16001",
+        "40220",
+        "44180",
+        "44181",
+        "44194",
+        "5960",
+        "757462",
+        "757470",
+        "757472",
+        "757477"
+      ],
+      "commonDropItemIds": [],
+      "garmothSpotId": null
+    },
+    {
+      "id": "client-zone:6144",
+      "name": "Shultz Guard",
+      "activity": "grinding",
+      "sourceKind": "client-zone",
+      "sourceId": "6144",
+      "aliases": [],
+      "methodIds": [],
+      "dropItemIds": [
+        "11631",
+        "12211",
+        "16001",
+        "40220",
+        "44858",
+        "721002",
+        "721003",
+        "721044",
+        "735201",
+        "735251",
+        "735252",
+        "752023",
+        "757470",
+        "757477"
+      ],
+      "commonDropItemIds": [],
+      "garmothSpotId": null
+    },
+    {
+      "id": "client-zone:6400",
+      "name": "Hasrah Cliff",
+      "activity": "grinding",
+      "sourceKind": "client-zone",
+      "sourceId": "6400",
+      "aliases": [],
+      "methodIds": [],
+      "dropItemIds": [
+        "12220",
+        "15610",
+        "16001",
+        "40220",
+        "44188",
+        "44207",
+        "757462",
+        "757477"
+      ],
+      "commonDropItemIds": [],
+      "garmothSpotId": null
+    },
+    {
+      "id": "client-zone:6658",
+      "name": "Kratuga Ancient Ruins",
+      "activity": "grinding",
+      "sourceKind": "client-zone",
+      "sourceId": "6658",
+      "aliases": [],
+      "methodIds": [],
+      "dropItemIds": [
+        "11630",
+        "11828",
+        "16001",
+        "16017",
+        "40220",
+        "40682",
+        "44350",
+        "44423",
+        "6393",
+        "721002",
+        "721003",
+        "735201",
+        "735202",
+        "735203",
+        "735204",
+        "735205",
+        "735206",
+        "735207",
+        "735251",
+        "735252",
+        "735253",
+        "735254",
+        "735255",
+        "735256",
+        "735257",
+        "735258",
+        "735259",
+        "735301",
+        "735302",
+        "735303",
+        "752023",
+        "768160"
+      ],
+      "commonDropItemIds": [],
+      "garmothSpotId": null
+    },
+    {
+      "id": "client-zone:6914",
+      "name": "Bashim Base",
+      "activity": "grinding",
+      "sourceKind": "client-zone",
+      "sourceId": "6914",
+      "aliases": [],
+      "methodIds": [],
+      "dropItemIds": [
+        "16001",
+        "40228",
+        "40448",
+        "40603",
+        "44350",
+        "45977",
+        "5960",
+        "721002",
+        "721003",
+        "735201",
+        "735251",
+        "735252",
+        "752023",
+        "752530",
+        "757460",
+        "757473",
+        "757477",
+        "768160"
+      ],
+      "commonDropItemIds": [],
+      "garmothSpotId": null
+    },
+    {
+      "id": "client-zone:7169",
+      "name": "Titium Valley",
+      "activity": "grinding",
+      "sourceKind": "client-zone",
+      "sourceId": "7169",
+      "aliases": [],
+      "methodIds": [],
+      "dropItemIds": [
+        "11628",
+        "16001",
+        "40228",
+        "40448",
+        "40606",
+        "44221",
+        "44223",
+        "44224",
+        "44286",
+        "44350",
+        "45978",
+        "5960",
+        "721002",
+        "721003",
+        "721044",
+        "735203",
+        "735255",
+        "735256",
+        "752023",
+        "752530",
+        "757471",
+        "757477",
+        "768160"
+      ],
+      "commonDropItemIds": [],
+      "garmothSpotId": null
+    },
+    {
+      "id": "client-zone:7425",
+      "name": "Desert Naga Temple",
+      "activity": "grinding",
+      "sourceKind": "client-zone",
+      "sourceId": "7425",
+      "aliases": [],
+      "methodIds": [],
+      "dropItemIds": [
+        "11628",
+        "16001",
+        "16017",
+        "40228",
+        "40449",
+        "40605",
+        "44350",
+        "45976",
+        "5960",
+        "721002",
+        "721003",
+        "721044",
+        "735202",
+        "735253",
+        "735254",
+        "752023",
+        "752530",
+        "757471",
+        "757477",
+        "768160"
+      ],
+      "commonDropItemIds": [],
+      "garmothSpotId": null
+    },
+    {
+      "id": "client-zone:7681",
+      "name": "Waragon Nest",
+      "activity": "grinding",
+      "sourceKind": "client-zone",
+      "sourceId": "7681",
+      "aliases": [],
+      "methodIds": [],
+      "dropItemIds": [
+        "11628",
+        "16001",
+        "40228",
+        "40448",
+        "40449",
+        "44350",
+        "45985",
+        "6009",
+        "6015",
+        "6209",
+        "6215",
+        "721002",
+        "721003",
+        "721044",
+        "735203",
+        "735255",
+        "735256",
+        "752023",
+        "757471",
+        "757477",
+        "768160",
+        "7909",
+        "7914"
+      ],
+      "commonDropItemIds": [],
+      "garmothSpotId": null
+    },
+    {
+      "id": "client-zone:7938",
+      "name": "Gahaz Bandits' Lair",
+      "activity": "grinding",
+      "sourceKind": "client-zone",
+      "sourceId": "7938",
+      "aliases": [],
+      "methodIds": [],
+      "dropItemIds": [
+        "11628",
+        "16001",
+        "40228",
+        "40258",
+        "40449",
+        "40607",
+        "44350",
+        "5960",
+        "59879",
+        "721002",
+        "721003",
+        "721044",
+        "735201",
+        "735251",
+        "735252",
+        "752023",
+        "757460",
+        "757477",
+        "768160"
+      ],
+      "commonDropItemIds": [],
+      "garmothSpotId": null
+    },
+    {
+      "id": "client-zone:8192",
+      "name": "Cadry Ruins",
+      "activity": "grinding",
+      "sourceKind": "client-zone",
+      "sourceId": "8192",
+      "aliases": [],
+      "methodIds": [],
+      "dropItemIds": [
+        "11628",
+        "12032",
+        "16001",
+        "40228",
+        "40451",
+        "40604",
+        "44221",
+        "44222",
+        "44350",
+        "45982",
+        "5960",
+        "721002",
+        "721003",
+        "721044",
+        "735257",
+        "735258",
+        "752023",
+        "752530",
+        "757460",
+        "757477",
+        "768160"
+      ],
+      "commonDropItemIds": [],
+      "garmothSpotId": null
+    },
+    {
+      "id": "client-zone:8448",
+      "name": "Crescent Shrine",
+      "activity": "grinding",
+      "sourceKind": "client-zone",
+      "sourceId": "8448",
+      "aliases": [],
+      "methodIds": [],
+      "dropItemIds": [
+        "12031",
+        "16001",
+        "40228",
+        "40451",
+        "40608",
+        "44243",
+        "45979",
+        "5960",
+        "721002",
+        "721003",
+        "721044",
+        "735202",
+        "735253",
+        "735254",
+        "752023",
+        "752530",
+        "768160"
+      ],
+      "commonDropItemIds": [],
+      "garmothSpotId": null
+    },
+    {
+      "id": "client-zone:8705",
+      "name": "Centaurus Herd",
+      "activity": "grinding",
+      "sourceKind": "client-zone",
+      "sourceId": "8705",
+      "aliases": [],
+      "methodIds": [],
+      "dropItemIds": [
+        "12229",
+        "16001",
+        "40228",
+        "40450",
+        "40610",
+        "44245",
+        "44350",
+        "45988",
+        "5960",
+        "721002",
+        "721003",
+        "721044",
+        "735257",
+        "735258",
+        "752023",
+        "757471",
+        "757477",
+        "768160"
+      ],
+      "commonDropItemIds": [],
+      "garmothSpotId": null
+    },
+    {
+      "id": "client-zone:8961",
+      "name": "Basilisk Den",
+      "activity": "grinding",
+      "sourceKind": "client-zone",
+      "sourceId": "8961",
+      "aliases": [],
+      "methodIds": [],
+      "dropItemIds": [
+        "12230",
+        "16001",
+        "40228",
+        "40450",
+        "40609",
+        "4409",
+        "45987",
+        "5960",
+        "721002",
+        "721003",
+        "721044",
+        "735201",
+        "735251",
+        "735252",
+        "752023",
+        "757471",
+        "757477",
+        "768160"
+      ],
+      "commonDropItemIds": [],
+      "garmothSpotId": null
+    },
+    {
+      "id": "client-zone:9217",
+      "name": "Pila Ku Jail",
+      "activity": "grinding",
+      "sourceKind": "client-zone",
+      "sourceId": "9217",
+      "aliases": [],
+      "methodIds": [],
+      "dropItemIds": [
+        "11625",
+        "16001",
+        "16017",
+        "40228",
+        "40258",
+        "40612",
+        "42420",
+        "44274",
+        "44276",
+        "44284",
+        "44286",
+        "44350",
+        "45989",
+        "5960",
+        "721002",
+        "721003",
+        "721044",
+        "735202",
+        "735253",
+        "735254",
+        "752023",
+        "761715",
+        "768160"
+      ],
+      "commonDropItemIds": [],
+      "garmothSpotId": null
+    },
+    {
+      "id": "client-zone:9472",
+      "name": "Roud Sulfur Mine",
+      "activity": "grinding",
+      "sourceKind": "client-zone",
+      "sourceId": "9472",
+      "aliases": [],
+      "methodIds": [],
+      "dropItemIds": [
+        "11625",
+        "16001",
+        "16017",
+        "40228",
+        "40258",
+        "40611",
+        "42418",
+        "44221",
+        "44222",
+        "44223",
+        "44273",
+        "44275",
+        "44284",
+        "44286",
+        "44350",
+        "45990",
+        "5960",
+        "705518",
+        "721002",
+        "721003",
+        "721044",
+        "735201",
+        "735251",
+        "735252",
+        "752023",
+        "761714",
+        "768160"
+      ],
+      "commonDropItemIds": [],
+      "garmothSpotId": null
+    },
+    {
+      "id": "client-zone:9729",
+      "name": "Aakman",
+      "activity": "grinding",
+      "sourceKind": "client-zone",
+      "sourceId": "9729",
+      "aliases": [],
+      "methodIds": [],
+      "dropItemIds": [
+        "11828",
+        "16001",
+        "16017",
+        "40228",
+        "42417",
+        "44278",
+        "44286",
+        "65334",
+        "721002",
+        "721003",
+        "735303",
+        "752023",
+        "761716",
+        "768160"
+      ],
+      "commonDropItemIds": [],
+      "garmothSpotId": null
+    },
+    {
+      "id": "client-zone:9985",
+      "name": "Hystria Ruins",
+      "activity": "grinding",
+      "sourceKind": "client-zone",
+      "sourceId": "9985",
+      "aliases": [],
+      "methodIds": [],
+      "dropItemIds": [
+        "11629",
+        "11828",
+        "16001",
+        "16017",
+        "40228",
+        "42419",
+        "44277",
+        "44279",
+        "44286",
+        "65335",
+        "721003",
+        "735303",
+        "752023",
+        "761717",
+        "768160"
+      ],
+      "commonDropItemIds": [],
+      "garmothSpotId": null
+    },
+    {
+      "id": "client-zone:10242",
+      "name": "Polly's Forest",
+      "activity": "grinding",
+      "sourceKind": "client-zone",
+      "sourceId": "10242",
+      "aliases": [],
+      "methodIds": [],
+      "dropItemIds": [
+        "11071",
+        "11073",
+        "16001",
+        "40383",
+        "40615",
+        "40968",
+        "44306",
+        "45302",
+        "50807",
+        "5420",
+        "5960",
+        "59812",
+        "705518",
+        "721002",
+        "721003",
+        "721044",
+        "735201",
+        "735251",
+        "735252",
+        "752023",
+        "752530"
+      ],
+      "commonDropItemIds": [],
+      "garmothSpotId": null
+    },
+    {
+      "id": "client-zone:10499",
+      "name": "Fadus Habitat",
+      "activity": "grinding",
+      "sourceKind": "client-zone",
+      "sourceId": "10499",
+      "aliases": [],
+      "methodIds": [],
+      "dropItemIds": [
+        "11070",
+        "11072",
+        "16001",
+        "40383",
+        "40614",
+        "40968",
+        "44305",
+        "44407",
+        "45298",
+        "45300",
+        "4917",
+        "50802",
+        "5960",
+        "59811",
+        "721002",
+        "721003",
+        "721044",
+        "735203",
+        "735255",
+        "735256",
+        "752023",
+        "752530",
+        "757451",
+        "757452",
+        "757477"
+      ],
+      "commonDropItemIds": [],
+      "garmothSpotId": null
+    },
+    {
+      "id": "client-zone:10755",
+      "name": "Navarn Steppe",
+      "activity": "grinding",
+      "sourceKind": "client-zone",
+      "sourceId": "10755",
+      "aliases": [],
+      "methodIds": [],
+      "dropItemIds": [
+        "11101",
+        "16001",
+        "4006",
+        "40383",
+        "40707",
+        "40754",
+        "44304",
+        "44305",
+        "44310",
+        "45298",
+        "45302",
+        "50807",
+        "5960",
+        "59815",
+        "59816",
+        "59817",
+        "59818",
+        "59819",
+        "721002",
+        "721003",
+        "735203",
+        "735255",
+        "735256",
+        "752023"
+      ],
+      "commonDropItemIds": [],
+      "garmothSpotId": null
+    },
+    {
+      "id": "client-zone:11011",
+      "name": "Manshaum Forest",
+      "activity": "grinding",
+      "sourceKind": "client-zone",
+      "sourceId": "11011",
+      "aliases": [],
+      "methodIds": [],
+      "dropItemIds": [
+        "11072",
+        "11073",
+        "11834",
+        "16001",
+        "40383",
+        "40613",
+        "40708",
+        "40756",
+        "44306",
+        "45300",
+        "4917",
+        "50803",
+        "50807",
+        "5960",
+        "59820",
+        "721002",
+        "721003",
+        "721044",
+        "735203",
+        "735255",
+        "735256",
+        "752023"
+      ],
+      "commonDropItemIds": [],
+      "garmothSpotId": null
+    },
+    {
+      "id": "client-zone:11267",
+      "name": "Forest Ronaros Area",
+      "activity": "grinding",
+      "sourceKind": "client-zone",
+      "sourceId": "11267",
+      "aliases": [],
+      "methodIds": [],
+      "dropItemIds": [
+        "11072",
+        "11073",
+        "12042",
+        "40383",
+        "40616",
+        "40709",
+        "40758",
+        "44305",
+        "45300",
+        "4917",
+        "50801",
+        "50803",
+        "50807",
+        "5960",
+        "59813",
+        "721002",
+        "721003",
+        "721044",
+        "735204",
+        "735205",
+        "735206",
+        "752023"
+      ],
+      "commonDropItemIds": [],
+      "garmothSpotId": null
+    },
+    {
+      "id": "client-zone:11523",
+      "name": "Mirumok Ruins",
+      "activity": "grinding",
+      "sourceKind": "client-zone",
+      "sourceId": "11523",
+      "aliases": [],
+      "methodIds": [],
+      "dropItemIds": [
+        "11070",
+        "12236",
+        "16001",
+        "40383",
+        "44311",
+        "45298",
+        "4917",
+        "50801",
+        "50802",
+        "50803",
+        "50807",
+        "59821",
+        "721002",
+        "721003",
+        "735204",
+        "735205",
+        "735206",
+        "752023",
+        "752530"
+      ],
+      "commonDropItemIds": [],
+      "garmothSpotId": null
+    },
+    {
+      "id": "client-zone:11779",
+      "name": "Gyfin Rhasia Temple (Upper)",
+      "activity": "grinding",
+      "sourceKind": "client-zone",
+      "sourceId": "11779",
+      "aliases": [],
+      "methodIds": [],
+      "dropItemIds": [
+        "11070",
+        "11071",
+        "11072",
+        "11073",
+        "12237",
+        "40383",
+        "45298",
+        "4917",
+        "50801",
+        "50802",
+        "50803",
+        "50807",
+        "5960",
+        "59814",
+        "721002",
+        "721003",
+        "735303"
+      ],
+      "commonDropItemIds": [],
+      "garmothSpotId": null
+    },
+    {
+      "id": "client-zone:12035",
+      "name": "Gyfin Rhasia Temple (Underground)",
+      "activity": "grinding",
+      "sourceKind": "client-zone",
+      "sourceId": "12035",
+      "aliases": [],
+      "methodIds": [],
+      "dropItemIds": [
+        "11629",
+        "12237",
+        "16001",
+        "40383",
+        "44516",
+        "45298",
+        "4917",
+        "50801",
+        "50802",
+        "50803",
+        "50807",
+        "5960",
+        "6393",
+        "721002",
+        "721003",
+        "735303"
+      ],
+      "commonDropItemIds": [],
+      "garmothSpotId": null
+    },
+    {
+      "id": "client-zone:12291",
+      "name": "Tshira Ruins",
+      "activity": "grinding",
+      "sourceKind": "client-zone",
+      "sourceId": "12291",
+      "aliases": [],
+      "methodIds": [],
+      "dropItemIds": [
+        "12060",
+        "15662",
+        "15663",
+        "15664",
+        "16001",
+        "40617",
+        "40711",
+        "40752",
+        "44364",
+        "5960",
+        "59823",
+        "59826",
+        "701011",
+        "701012",
+        "701013",
+        "701014",
+        "721002",
+        "721003",
+        "721044",
+        "735203",
+        "735255",
+        "735256",
+        "752023",
+        "757454",
+        "757455",
+        "757477",
+        "9749",
+        "9768"
+      ],
+      "commonDropItemIds": [],
+      "garmothSpotId": null
+    },
+    {
+      "id": "client-zone:12802",
+      "name": "Khalk Canyon",
+      "activity": "grinding",
+      "sourceKind": "client-zone",
+      "sourceId": "12802",
+      "aliases": [],
+      "methodIds": [],
+      "dropItemIds": [
+        "12059",
+        "12060",
+        "15662",
+        "15664",
+        "15668",
+        "16001",
+        "40618",
+        "40710",
+        "40760",
+        "44364",
+        "5960",
+        "59822",
+        "59827",
+        "701011",
+        "701012",
+        "701013",
+        "701014",
+        "705518",
+        "721002",
+        "721003",
+        "721044",
+        "735201",
+        "735251",
+        "735252",
+        "752023",
+        "757454",
+        "757455",
+        "757477",
+        "9749",
+        "9768"
+      ],
+      "commonDropItemIds": [],
+      "garmothSpotId": null
+    },
+    {
+      "id": "client-zone:13057",
+      "name": "Blood Wolf Settlement",
+      "activity": "grinding",
+      "sourceKind": "client-zone",
+      "sourceId": "13057",
+      "aliases": [],
+      "methodIds": [],
+      "dropItemIds": [
+        "12251",
+        "15663",
+        "15664",
+        "16001",
+        "40619",
+        "40706",
+        "40762",
+        "44364",
+        "5960",
+        "59824",
+        "701011",
+        "701012",
+        "701013",
+        "701014",
+        "721002",
+        "721003",
+        "721044",
+        "735203",
+        "735255",
+        "735256",
+        "752023",
+        "757454",
+        "757455",
+        "757477",
+        "9749",
+        "9768"
+      ],
+      "commonDropItemIds": [],
+      "garmothSpotId": null
+    },
+    {
+      "id": "client-zone:13312",
+      "name": "Sherekhan Necropolis (Day)",
+      "activity": "grinding",
+      "sourceKind": "client-zone",
+      "sourceId": "13312",
+      "aliases": [],
+      "methodIds": [],
+      "dropItemIds": [
+        "12251",
+        "15663",
+        "15664",
+        "16001",
+        "40619",
+        "40706",
+        "40762",
+        "44364",
+        "5960",
+        "59828",
+        "701011",
+        "701012",
+        "701013",
+        "701014",
+        "721002",
+        "721003",
+        "721044",
+        "735203",
+        "735255",
+        "735256",
+        "752023",
+        "757454",
+        "757455",
+        "757477",
+        "9749",
+        "9768"
+      ],
+      "commonDropItemIds": [],
+      "garmothSpotId": null
+    },
+    {
+      "id": "client-zone:13568",
+      "name": "Sherekhan Necropolis (Night)",
+      "activity": "grinding",
+      "sourceKind": "client-zone",
+      "sourceId": "13568",
+      "aliases": [],
+      "methodIds": [],
+      "dropItemIds": [
+        "12045",
+        "12061",
+        "16001",
+        "40543",
+        "40621",
+        "44383",
+        "5960",
+        "65282",
+        "721002",
+        "721003",
+        "721044",
+        "735202",
+        "735253",
+        "735254",
+        "752023",
+        "752530",
+        "9774"
+      ],
+      "commonDropItemIds": [],
+      "garmothSpotId": null
+    },
+    {
+      "id": "client-zone:13825",
+      "name": "Protty Cave",
+      "activity": "grinding",
+      "sourceKind": "client-zone",
+      "sourceId": "13825",
+      "aliases": [],
+      "methodIds": [],
+      "dropItemIds": [
+        "12045",
+        "12061",
+        "12094",
+        "16001",
+        "16017",
+        "40543",
+        "40620",
+        "44270",
+        "44383",
+        "56284",
+        "56342",
+        "721002",
+        "721003",
+        "761718",
+        "767339",
+        "768160",
+        "9774"
+      ],
+      "commonDropItemIds": [],
+      "garmothSpotId": null
+    },
+    {
+      "id": "client-zone:14082",
+      "name": "Sycraia Ruins Upper Zone",
+      "activity": "grinding",
+      "sourceKind": "client-zone",
+      "sourceId": "14082",
+      "aliases": [],
+      "methodIds": [],
+      "dropItemIds": [
+        "12061",
+        "12094",
+        "16001",
+        "16017",
+        "44270",
+        "56341",
+        "56345",
+        "56346",
+        "56347",
+        "56348",
+        "721002",
+        "721003",
+        "735302",
+        "761718",
+        "768160",
+        "821347",
+        "9774"
+      ],
+      "commonDropItemIds": [],
+      "garmothSpotId": null
+    },
+    {
+      "id": "client-zone:14338",
+      "name": "Sycraia Ruins Lower Zone",
+      "activity": "grinding",
+      "sourceKind": "client-zone",
+      "sourceId": "14338",
+      "aliases": [],
+      "methodIds": [],
+      "dropItemIds": [
+        "11853",
+        "11882",
+        "15741",
+        "16001",
+        "44405",
+        "56339",
+        "56340",
+        "721002",
+        "721003",
+        "768160",
+        "821344"
+      ],
+      "commonDropItemIds": [],
+      "garmothSpotId": null
+    },
+    {
+      "id": "client-zone:14593",
+      "name": "Star's End",
+      "activity": "grinding",
+      "sourceKind": "client-zone",
+      "sourceId": "14593",
+      "aliases": [],
+      "methodIds": [],
+      "dropItemIds": [
+        "11653",
+        "16001",
+        "40383",
+        "44268",
+        "44411",
+        "45013",
+        "45017",
+        "5960",
+        "721003",
+        "735302",
+        "761720"
+      ],
+      "commonDropItemIds": [],
+      "garmothSpotId": null
+    },
+    {
+      "id": "client-zone:14851",
+      "name": "Ash Forest",
+      "activity": "grinding",
+      "sourceKind": "client-zone",
+      "sourceId": "14851",
+      "aliases": [],
+      "methodIds": [],
+      "dropItemIds": [
+        "12068",
+        "16001",
+        "44451",
+        "45013",
+        "45017",
+        "6399",
+        "65770",
+        "721002",
+        "721003",
+        "721044",
+        "735204",
+        "735205",
+        "735206",
+        "752023"
+      ],
+      "commonDropItemIds": [],
+      "garmothSpotId": null
+    },
+    {
+      "id": "client-zone:15107",
+      "name": "Thornwood Forest",
+      "activity": "grinding",
+      "sourceKind": "client-zone",
+      "sourceId": "15107",
+      "aliases": [],
+      "methodIds": [],
+      "dropItemIds": [
+        "12257",
+        "16001",
+        "44454",
+        "44455",
+        "44461",
+        "44462",
+        "44475",
+        "45014",
+        "45018",
+        "65770",
+        "721002",
+        "721003",
+        "735204",
+        "735205",
+        "735206",
+        "9778"
+      ],
+      "commonDropItemIds": [],
+      "garmothSpotId": null
+    },
+    {
+      "id": "client-zone:15363",
+      "name": "Tunkuta",
+      "activity": "grinding",
+      "sourceKind": "client-zone",
+      "sourceId": "15363",
+      "aliases": [],
+      "methodIds": [],
+      "dropItemIds": [
+        "11882",
+        "16001",
+        "44272",
+        "44456",
+        "45014",
+        "45018",
+        "5960",
+        "6400",
+        "65770",
+        "721002",
+        "721003",
+        "735301",
+        "761722"
+      ],
+      "commonDropItemIds": [],
+      "garmothSpotId": null
+    },
+    {
+      "id": "client-zone:15619",
+      "name": "Olun's Valley",
+      "activity": "grinding",
+      "sourceKind": "client-zone",
+      "sourceId": "15619",
+      "aliases": [],
+      "methodIds": [],
+      "dropItemIds": [
+        "12276",
+        "16001",
+        "44271",
+        "44450",
+        "45013",
+        "45014",
+        "45017",
+        "45018",
+        "56284",
+        "6399",
+        "65770",
+        "721002",
+        "721003",
+        "735301",
+        "761721"
+      ],
+      "commonDropItemIds": [],
+      "garmothSpotId": null
+    },
+    {
+      "id": "client-zone:15875",
+      "name": "Crypt of Resting Thoughts",
+      "activity": "grinding",
+      "sourceKind": "client-zone",
+      "sourceId": "15875",
+      "aliases": [],
+      "methodIds": [],
+      "dropItemIds": [
+        "11663",
+        "16001",
+        "44484",
+        "5960",
+        "66106",
+        "66107",
+        "66108",
+        "752023",
+        "768160",
+        "8129",
+        "8133",
+        "8147"
+      ],
+      "commonDropItemIds": [],
+      "garmothSpotId": null
+    },
+    {
+      "id": "client-zone:16128",
+      "name": "Biraghi Den [Elvia]",
+      "activity": "grinding",
+      "sourceKind": "client-zone",
+      "sourceId": "16128",
+      "aliases": [],
+      "methodIds": [],
+      "dropItemIds": [
+        "11662",
+        "16001",
+        "44488",
+        "5960",
+        "752023",
+        "768160",
+        "8126",
+        "8133",
+        "8146"
+      ],
+      "commonDropItemIds": [],
+      "garmothSpotId": null
+    },
+    {
+      "id": "client-zone:16385",
+      "name": "Altar Imps [Elvia]",
+      "activity": "grinding",
+      "sourceKind": "client-zone",
+      "sourceId": "16385",
+      "aliases": [],
+      "methodIds": [],
+      "dropItemIds": [
+        "11662",
+        "16001",
+        "44485",
+        "5960",
+        "752023",
+        "768160",
+        "8126",
+        "8133",
+        "8146"
+      ],
+      "commonDropItemIds": [],
+      "garmothSpotId": null
+    },
+    {
+      "id": "client-zone:16641",
+      "name": "Swamp Fogans [Elvia]",
+      "activity": "grinding",
+      "sourceKind": "client-zone",
+      "sourceId": "16641",
+      "aliases": [],
+      "methodIds": [],
+      "dropItemIds": [
+        "11663",
+        "16001",
+        "44486",
+        "5960",
+        "752023",
+        "768160",
+        "8129",
+        "8133",
+        "8147"
+      ],
+      "commonDropItemIds": [],
+      "garmothSpotId": null
+    },
+    {
+      "id": "client-zone:16897",
+      "name": "Swamp Nagas [Elvia]",
+      "activity": "grinding",
+      "sourceKind": "client-zone",
+      "sourceId": "16897",
+      "aliases": [],
+      "methodIds": [],
+      "dropItemIds": [
+        "16001",
+        "44487",
+        "5960",
+        "65778",
+        "752023",
+        "768160",
+        "8124",
+        "8133",
+        "8135",
+        "8145"
+      ],
+      "commonDropItemIds": [],
+      "garmothSpotId": null
+    },
+    {
+      "id": "client-zone:17152",
+      "name": "Castle Ruins [Elvia]",
+      "activity": "grinding",
+      "sourceKind": "client-zone",
+      "sourceId": "17152",
+      "aliases": [],
+      "methodIds": [],
+      "dropItemIds": [
+        "16001",
+        "44482",
+        "5960",
+        "752023",
+        "768160",
+        "8124",
+        "8133",
+        "8135",
+        "8145"
+      ],
+      "commonDropItemIds": [],
+      "garmothSpotId": null
+    },
+    {
+      "id": "client-zone:17409",
+      "name": "Orc Camp [Elvia]",
+      "activity": "grinding",
+      "sourceKind": "client-zone",
+      "sourceId": "17409",
+      "aliases": [],
+      "methodIds": [],
+      "dropItemIds": [
+        "11663",
+        "16001",
+        "44489",
+        "5960",
+        "65780",
+        "752023",
+        "768160",
+        "8129",
+        "8133",
+        "8147"
+      ],
+      "commonDropItemIds": [],
+      "garmothSpotId": null
+    },
+    {
+      "id": "client-zone:17664",
+      "name": "Bloody Monastery [Elvia]",
+      "activity": "grinding",
+      "sourceKind": "client-zone",
+      "sourceId": "17664",
+      "aliases": [],
+      "methodIds": [],
+      "dropItemIds": [
+        "16001",
+        "44364",
+        "44490",
+        "44497",
+        "44498",
+        "44799",
+        "721002",
+        "721003",
+        "735207",
+        "735259",
+        "766101",
+        "9792"
+      ],
+      "commonDropItemIds": [],
+      "garmothSpotId": null
+    },
+    {
+      "id": "client-zone:17921",
+      "name": "Jade Starlight Forest",
+      "activity": "grinding",
+      "sourceKind": "client-zone",
+      "sourceId": "17921",
+      "aliases": [],
+      "methodIds": [],
+      "dropItemIds": [
+        "15136",
+        "15616",
+        "15712",
+        "15714",
+        "16001",
+        "44364",
+        "44497",
+        "44498",
+        "44501",
+        "44517",
+        "44799",
+        "721002",
+        "721003",
+        "735207",
+        "735257",
+        "735258",
+        "735259",
+        "735301",
+        "766101",
+        "9070"
+      ],
+      "commonDropItemIds": [],
+      "garmothSpotId": null
+    },
+    {
+      "id": "client-zone:18178",
+      "name": "Murrowak's Labyrinth",
+      "activity": "grinding",
+      "sourceKind": "client-zone",
+      "sourceId": "18178",
+      "aliases": [],
+      "methodIds": [],
+      "dropItemIds": [
+        "15136",
+        "15616",
+        "15712",
+        "15714",
+        "16001",
+        "44364",
+        "44496",
+        "44799",
+        "721002",
+        "721003",
+        "735302",
+        "766101",
+        "9791",
+        "9792"
+      ],
+      "commonDropItemIds": [],
+      "garmothSpotId": null
+    },
+    {
+      "id": "client-zone:18434",
+      "name": "Winter Tree Fossil",
+      "activity": "grinding",
+      "sourceKind": "client-zone",
+      "sourceId": "18434",
+      "aliases": [],
+      "methodIds": [],
+      "dropItemIds": [
+        "15616",
+        "15712",
+        "15714",
+        "16001",
+        "44495",
+        "44497",
+        "44498",
+        "721002",
+        "721003",
+        "766101",
+        "9070",
+        "9791",
+        "9792"
+      ],
+      "commonDropItemIds": [],
+      "garmothSpotId": null
+    },
+    {
+      "id": "client-zone:18690",
+      "name": "Erethea's Limbo",
+      "activity": "grinding",
+      "sourceKind": "client-zone",
+      "sourceId": "18690",
+      "aliases": [],
+      "methodIds": [],
+      "dropItemIds": [
+        "11853",
+        "16001",
+        "56505",
+        "5960",
+        "59801",
+        "59802",
+        "721002",
+        "721003",
+        "752023",
+        "768160",
+        "8411",
+        "8421",
+        "8427"
+      ],
+      "commonDropItemIds": [],
+      "garmothSpotId": null
+    },
+    {
+      "id": "client-zone:18945",
+      "name": "Saunil Camp [Elvia]",
+      "activity": "grinding",
+      "sourceKind": "client-zone",
+      "sourceId": "18945",
+      "aliases": [],
+      "methodIds": [],
+      "dropItemIds": [
+        "11853",
+        "16001",
+        "56505",
+        "5960",
+        "59797",
+        "59802",
+        "721002",
+        "721003",
+        "752023",
+        "768160",
+        "8411",
+        "8421",
+        "8427"
+      ],
+      "commonDropItemIds": [],
+      "garmothSpotId": null
+    },
+    {
+      "id": "client-zone:19201",
+      "name": "Rhutum Outstation [Elvia]",
+      "activity": "grinding",
+      "sourceKind": "client-zone",
+      "sourceId": "19201",
+      "aliases": [],
+      "methodIds": [],
+      "dropItemIds": [
+        "11853",
+        "16001",
+        "56505",
+        "5960",
+        "59799",
+        "59802",
+        "721002",
+        "721003",
+        "752023",
+        "768160",
+        "8411",
+        "8421",
+        "8427"
+      ],
+      "commonDropItemIds": [],
+      "garmothSpotId": null
+    },
+    {
+      "id": "client-zone:19456",
+      "name": "Primal Giant Post [Elvia]",
+      "activity": "grinding",
+      "sourceKind": "client-zone",
+      "sourceId": "19456",
+      "aliases": [],
+      "methodIds": [],
+      "dropItemIds": [
+        "11853",
+        "16001",
+        "56505",
+        "5960",
+        "59800",
+        "59802",
+        "721002",
+        "721003",
+        "752023",
+        "768160",
+        "8411",
+        "8421",
+        "8427"
+      ],
+      "commonDropItemIds": [],
+      "garmothSpotId": null
+    },
+    {
+      "id": "client-zone:19714",
+      "name": "Hexe Sanctuary [Elvia]",
+      "activity": "grinding",
+      "sourceKind": "client-zone",
+      "sourceId": "19714",
+      "aliases": [],
+      "methodIds": [],
+      "dropItemIds": [
+        "11853",
+        "16001",
+        "56284",
+        "56505",
+        "5960",
+        "59798",
+        "59802",
+        "721003",
+        "752023",
+        "768160",
+        "8411",
+        "8421",
+        "8427"
+      ],
+      "commonDropItemIds": [],
+      "garmothSpotId": null
+    },
+    {
+      "id": "client-zone:19969",
+      "name": "Quint Hill [Elvia]",
+      "activity": "grinding",
+      "sourceKind": "client-zone",
+      "sourceId": "19969",
+      "aliases": [],
+      "methodIds": [],
+      "dropItemIds": [
+        "11855",
+        "15605",
+        "15649",
+        "16001",
+        "40218",
+        "44522",
+        "44523",
+        "56284",
+        "5960",
+        "721002",
+        "721003",
+        "767091",
+        "768160",
+        "790694"
+      ],
+      "commonDropItemIds": [],
+      "garmothSpotId": null
+    },
+    {
+      "id": "client-zone:20226",
+      "name": "Cyclops Land [Dehkia's Lantern]",
+      "activity": "grinding",
+      "sourceKind": "client-zone",
+      "sourceId": "20226",
+      "aliases": [],
+      "methodIds": [],
+      "dropItemIds": [
+        "11653",
+        "16001",
+        "40383",
+        "44268",
+        "44518",
+        "45013",
+        "45017",
+        "56284",
+        "5960",
+        "721003",
+        "735302",
+        "761720",
+        "767091",
+        "790694"
+      ],
+      "commonDropItemIds": [],
+      "garmothSpotId": null
+    },
+    {
+      "id": "client-zone:20483",
+      "name": "Ash Forest [Dehkia's Lantern]",
+      "activity": "grinding",
+      "sourceKind": "client-zone",
+      "sourceId": "20483",
+      "aliases": [],
+      "methodIds": [],
+      "dropItemIds": [
+        "12068",
+        "16001",
+        "44520",
+        "45013",
+        "45017",
+        "56284",
+        "6399",
+        "65770",
+        "721002",
+        "721003",
+        "721044",
+        "735204",
+        "735205",
+        "735206",
+        "752023",
+        "767091",
+        "790694"
+      ],
+      "commonDropItemIds": [],
+      "garmothSpotId": null
+    },
+    {
+      "id": "client-zone:20739",
+      "name": "Thornwood Forest [Dehkia's Lantern]",
+      "activity": "grinding",
+      "sourceKind": "client-zone",
+      "sourceId": "20739",
+      "aliases": [],
+      "methodIds": [],
+      "dropItemIds": [
+        "11882",
+        "16001",
+        "44272",
+        "44519",
+        "45014",
+        "45018",
+        "56284",
+        "6400",
+        "65770",
+        "721002",
+        "721003",
+        "735301",
+        "761722",
+        "767091",
+        "790694"
+      ],
+      "commonDropItemIds": [],
+      "garmothSpotId": null
+    },
+    {
+      "id": "client-zone:20995",
+      "name": "Olun's Valley [Dehkia's Lantern]",
+      "activity": "grinding",
+      "sourceKind": "client-zone",
+      "sourceId": "20995",
+      "aliases": [],
+      "methodIds": [],
+      "dropItemIds": [
+        "12257",
+        "16001",
+        "44455",
+        "44461",
+        "44462",
+        "44475",
+        "44521",
+        "45014",
+        "45018",
+        "56284",
+        "65770",
+        "721002",
+        "721003",
+        "735204",
+        "735205",
+        "735206",
+        "767091",
+        "790694",
+        "9778"
+      ],
+      "commonDropItemIds": [],
+      "garmothSpotId": null
+    },
+    {
+      "id": "client-zone:21251",
+      "name": "Tunkuta [Dehkia's Lantern]",
+      "activity": "grinding",
+      "sourceKind": "client-zone",
+      "sourceId": "21251",
+      "aliases": [],
+      "methodIds": [],
+      "dropItemIds": [
+        "15714",
+        "16001",
+        "56284",
+        "5960",
+        "59881",
+        "65318",
+        "65319",
+        "65323",
+        "65329",
+        "65331",
+        "65332",
+        "721002",
+        "721044",
+        "742269",
+        "761723",
+        "768160",
+        "820040"
+      ],
+      "commonDropItemIds": [],
+      "garmothSpotId": null
+    },
+    {
+      "id": "client-zone:21506",
+      "name": "City of the Dead",
+      "activity": "grinding",
+      "sourceKind": "client-zone",
+      "sourceId": "21506",
+      "aliases": [],
+      "methodIds": [],
+      "dropItemIds": [
+        "15714",
+        "16001",
+        "56284",
+        "5960",
+        "65318",
+        "65319",
+        "65323",
+        "65327",
+        "65328",
+        "65332",
+        "721002",
+        "721044",
+        "761724",
+        "768160",
+        "820040"
+      ],
+      "commonDropItemIds": [],
+      "garmothSpotId": null
+    },
+    {
+      "id": "client-zone:21761",
+      "name": "Tungrad Ruins",
+      "activity": "grinding",
+      "sourceKind": "client-zone",
+      "sourceId": "21761",
+      "aliases": [],
+      "methodIds": [],
+      "dropItemIds": [
+        "16001",
+        "56284",
+        "5960",
+        "59881",
+        "65317",
+        "65318",
+        "65319",
+        "65323",
+        "65330",
+        "65331",
+        "65332",
+        "721002",
+        "742269",
+        "761725",
+        "768160"
+      ],
+      "commonDropItemIds": [],
+      "garmothSpotId": null
+    },
+    {
+      "id": "client-zone:22017",
+      "name": "Darkseekers' Retreat",
+      "activity": "grinding",
+      "sourceKind": "client-zone",
+      "sourceId": "22017",
+      "aliases": [],
+      "methodIds": [],
+      "dropItemIds": [
+        "11828",
+        "11882",
+        "16001",
+        "40228",
+        "44278",
+        "65400",
+        "721002",
+        "721003",
+        "721044",
+        "735202",
+        "735253",
+        "735254",
+        "761716",
+        "767091",
+        "768160",
+        "790694"
+      ],
+      "commonDropItemIds": [],
+      "garmothSpotId": null
+    },
+    {
+      "id": "client-zone:22273",
+      "name": "Aakman Temple [Dehkia's Lantern]",
+      "activity": "grinding",
+      "sourceKind": "client-zone",
+      "sourceId": "22273",
+      "aliases": [],
+      "methodIds": [],
+      "dropItemIds": [
+        "11629",
+        "11828",
+        "11882",
+        "16001",
+        "40228",
+        "44277",
+        "44279",
+        "65397",
+        "721002",
+        "721003",
+        "735303",
+        "761717",
+        "767091",
+        "768160",
+        "790694"
+      ],
+      "commonDropItemIds": [],
+      "garmothSpotId": null
+    },
+    {
+      "id": "client-zone:22530",
+      "name": "Hystria Ruins [Dehkia's Lantern]",
+      "activity": "grinding",
+      "sourceKind": "client-zone",
+      "sourceId": "22530",
+      "aliases": [],
+      "methodIds": [],
+      "dropItemIds": [
+        "16001",
+        "56284",
+        "5960",
+        "59880",
+        "59881",
+        "65317",
+        "65318",
+        "721002",
+        "721003",
+        "742269",
+        "768160"
+      ],
+      "commonDropItemIds": [],
+      "garmothSpotId": null
+    },
+    {
+      "id": "client-zone:22786",
+      "name": "Yzrahid Highlands",
+      "activity": "grinding",
+      "sourceKind": "client-zone",
+      "sourceId": "22786",
+      "aliases": [],
+      "methodIds": [],
+      "dropItemIds": [
+        "11625",
+        "11882",
+        "16001",
+        "16017",
+        "40228",
+        "40258",
+        "40612",
+        "44274",
+        "44276",
+        "44284",
+        "44286",
+        "44350",
+        "5960",
+        "65399",
+        "721002",
+        "721003",
+        "721044",
+        "735202",
+        "735253",
+        "735254",
+        "752023",
+        "761715",
+        "767091",
+        "768160",
+        "790694"
+      ],
+      "commonDropItemIds": [],
+      "garmothSpotId": null
+    },
+    {
+      "id": "client-zone:23040",
+      "name": "Pila Ku Jail [Dehkia's Lantern]",
+      "activity": "grinding",
+      "sourceKind": "client-zone",
+      "sourceId": "23040",
+      "aliases": [],
+      "methodIds": [],
+      "dropItemIds": [
+        "11625",
+        "11882",
+        "16001",
+        "16017",
+        "40228",
+        "40258",
+        "40611",
+        "44273",
+        "44275",
+        "44284",
+        "44286",
+        "44350",
+        "5960",
+        "65398",
+        "705518",
+        "721002",
+        "721003",
+        "721044",
+        "735201",
+        "735251",
+        "735252",
+        "752023",
+        "761714",
+        "767091",
+        "768160",
+        "790694"
+      ],
+      "commonDropItemIds": [],
+      "garmothSpotId": null
+    },
+    {
+      "id": "client-zone:23297",
+      "name": "Roud Sulfur Mine [Dehkia's Lantern]",
+      "activity": "grinding",
+      "sourceKind": "client-zone",
+      "sourceId": "23297",
+      "aliases": [],
+      "methodIds": [],
+      "dropItemIds": [
+        "11653",
+        "15257",
+        "15258",
+        "15259",
+        "15260",
+        "16001",
+        "40383",
+        "44268",
+        "45013",
+        "45017",
+        "56284",
+        "56322",
+        "721003",
+        "748021",
+        "748022",
+        "761720",
+        "767091",
+        "790694"
+      ],
+      "commonDropItemIds": [],
+      "garmothSpotId": null
+    },
+    {
+      "id": "client-zone:23555",
+      "name": "Ash Forest [Dehkia's Lantern II]",
+      "activity": "grinding",
+      "sourceKind": "client-zone",
+      "sourceId": "23555",
+      "aliases": [],
+      "methodIds": [],
+      "dropItemIds": [
+        "11882",
+        "15257",
+        "15258",
+        "15259",
+        "15260",
+        "16001",
+        "44272",
+        "45014",
+        "45018",
+        "56284",
+        "56323",
+        "721002",
+        "721003",
+        "748021",
+        "748022",
+        "761722",
+        "767091",
+        "790694"
+      ],
+      "commonDropItemIds": [],
+      "garmothSpotId": null
+    },
+    {
+      "id": "client-zone:23811",
+      "name": "Olun's Valley [Dehkia's Lantern II]",
+      "activity": "grinding",
+      "sourceKind": "client-zone",
+      "sourceId": "23811",
+      "aliases": [],
+      "methodIds": [],
+      "dropItemIds": [
+        "12031",
+        "12094",
+        "16001",
+        "40228",
+        "40608",
+        "44524",
+        "56284",
+        "721002",
+        "721003",
+        "735202",
+        "735253",
+        "735254",
+        "767091",
+        "768160",
+        "790694"
+      ],
+      "commonDropItemIds": [],
+      "garmothSpotId": null
+    },
+    {
+      "id": "client-zone:24065",
+      "name": "Crescent Shrine [Dehkia's Lantern]",
+      "activity": "grinding",
+      "sourceKind": "client-zone",
+      "sourceId": "24065",
+      "aliases": [],
+      "methodIds": [],
+      "dropItemIds": [
+        "12032",
+        "12094",
+        "16001",
+        "40228",
+        "40604",
+        "44525",
+        "56284",
+        "721002",
+        "721003",
+        "735202",
+        "735253",
+        "735254",
+        "767091",
+        "768160",
+        "790694"
+      ],
+      "commonDropItemIds": [],
+      "garmothSpotId": null
+    },
+    {
+      "id": "client-zone:24320",
+      "name": "Cadry Ruins [Dehkia's Lantern]",
+      "activity": "grinding",
+      "sourceKind": "client-zone",
+      "sourceId": "24320",
+      "aliases": [],
+      "methodIds": [],
+      "dropItemIds": [
+        "15262",
+        "15263",
+        "15265",
+        "15266",
+        "15268",
+        "15269",
+        "15271",
+        "15272",
+        "15274",
+        "15275",
+        "16001",
+        "56328",
+        "721002",
+        "721003"
+      ],
+      "commonDropItemIds": [],
+      "garmothSpotId": null
+    },
+    {
+      "id": "client-zone:24577",
+      "name": "Honglim Base",
+      "activity": "grinding",
+      "sourceKind": "client-zone",
+      "sourceId": "24577",
+      "aliases": [],
+      "methodIds": [],
+      "dropItemIds": [
+        "15262",
+        "15263",
+        "15265",
+        "15266",
+        "15268",
+        "15269",
+        "15271",
+        "15272",
+        "15274",
+        "15275",
+        "16001",
+        "56327",
+        "721002",
+        "721003"
+      ],
+      "commonDropItemIds": [],
+      "garmothSpotId": null
+    },
+    {
+      "id": "client-zone:24833",
+      "name": "Dokkebi Forest",
+      "activity": "grinding",
+      "sourceKind": "client-zone",
+      "sourceId": "24833",
+      "aliases": [],
+      "methodIds": [],
+      "dropItemIds": [
+        "15262",
+        "15263",
+        "15265",
+        "15266",
+        "15268",
+        "15269",
+        "15271",
+        "15272",
+        "15274",
+        "15275",
+        "16001",
+        "56335",
+        "56338",
+        "66945",
+        "721002",
+        "721003"
+      ],
+      "commonDropItemIds": [],
+      "garmothSpotId": null
+    },
+    {
+      "id": "client-zone:25089",
+      "name": "Fortunate Golden Pig Cave",
+      "activity": "grinding",
+      "sourceKind": "client-zone",
+      "sourceId": "25089",
+      "aliases": [],
+      "methodIds": [],
+      "dropItemIds": [
+        "15262",
+        "15263",
+        "16001",
+        "56329",
+        "66946",
+        "721002",
+        "721003",
+        "820979"
+      ],
+      "commonDropItemIds": [],
+      "garmothSpotId": null
+    },
+    {
+      "id": "client-zone:25345",
+      "name": "Golden Pig Cave",
+      "activity": "grinding",
+      "sourceKind": "client-zone",
+      "sourceId": "25345",
+      "aliases": [],
+      "methodIds": [],
+      "dropItemIds": [
+        "11882",
+        "12276",
+        "16001",
+        "56334",
+        "721002",
+        "721003",
+        "768160",
+        "821182"
+      ],
+      "commonDropItemIds": [],
+      "garmothSpotId": null
+    },
+    {
+      "id": "client-zone:25602",
+      "name": "Orzekea",
+      "activity": "grinding",
+      "sourceKind": "client-zone",
+      "sourceId": "25602",
+      "aliases": [],
+      "methodIds": [],
+      "dropItemIds": [
+        "11653",
+        "11882",
+        "12094",
+        "12276",
+        "15286",
+        "16001",
+        "721002",
+        "721003",
+        "761802",
+        "761803",
+        "767244",
+        "821246",
+        "821253",
+        "821317",
+        "821318"
+      ],
+      "commonDropItemIds": [],
+      "garmothSpotId": null
+    },
+    {
+      "id": "client-zone:25860",
+      "name": "Aetherion Castle",
+      "activity": "grinding",
+      "sourceKind": "client-zone",
+      "sourceId": "25860",
+      "aliases": [],
+      "methodIds": [],
+      "dropItemIds": [
+        "11653",
+        "11882",
+        "12094",
+        "12276",
+        "15287",
+        "16001",
+        "721002",
+        "721003",
+        "761802",
+        "761803",
+        "767245",
+        "821252",
+        "821254",
+        "821317",
+        "821318"
+      ],
+      "commonDropItemIds": [],
+      "garmothSpotId": null
+    },
+    {
+      "id": "client-zone:26116",
+      "name": "Nymphamaré Castle",
+      "activity": "grinding",
+      "sourceKind": "client-zone",
+      "sourceId": "26116",
+      "aliases": [],
+      "methodIds": [],
+      "dropItemIds": [
+        "11653",
+        "11882",
+        "12094",
+        "12276",
+        "15291",
+        "16001",
+        "721002",
+        "721003",
+        "761802",
+        "761803",
+        "767246",
+        "821250",
+        "821251",
+        "821252",
+        "821317",
+        "821318",
+        "821320"
+      ],
+      "commonDropItemIds": [],
+      "garmothSpotId": null
+    },
+    {
+      "id": "client-zone:26372",
+      "name": "Tenebraum Castle",
+      "activity": "grinding",
+      "sourceKind": "client-zone",
+      "sourceId": "26372",
+      "aliases": [],
+      "methodIds": [],
+      "dropItemIds": [
+        "11653",
+        "11882",
+        "12094",
+        "12276",
+        "15290",
+        "16001",
+        "721002",
+        "721003",
+        "761802",
+        "761803",
+        "767247",
+        "821252",
+        "821317",
+        "821318",
+        "821319"
+      ],
+      "commonDropItemIds": [],
+      "garmothSpotId": null
+    },
+    {
+      "id": "client-zone:26628",
+      "name": "Orbita Castle",
+      "activity": "grinding",
+      "sourceKind": "client-zone",
+      "sourceId": "26628",
+      "aliases": [],
+      "methodIds": [],
+      "dropItemIds": [
+        "11653",
+        "11882",
+        "12094",
+        "12276",
+        "15291",
+        "16001",
+        "721002",
+        "721003",
+        "761802",
+        "761803",
+        "767248",
+        "768160",
+        "821250",
+        "821251",
+        "821252",
+        "821317",
+        "821318",
+        "821320"
+      ],
+      "commonDropItemIds": [],
+      "garmothSpotId": null
+    },
+    {
+      "id": "client-zone:26884",
+      "name": "Zephyros Castle",
+      "activity": "grinding",
+      "sourceKind": "client-zone",
+      "sourceId": "26884",
+      "aliases": [],
+      "methodIds": [],
+      "dropItemIds": [
+        "12237",
+        "12276",
+        "15258",
+        "15259",
+        "15260",
+        "16001",
+        "40383",
+        "44526",
+        "45298",
+        "45300",
+        "45302",
+        "4917",
+        "50801",
+        "50802",
+        "50803",
+        "50807",
+        "56284",
+        "5960",
+        "721002",
+        "721003",
+        "748021",
+        "748022",
+        "767091",
+        "790694"
+      ],
+      "commonDropItemIds": [],
+      "garmothSpotId": null
+    },
+    {
+      "id": "client-zone:27139",
+      "name": "Gyfin Rhasia Temple (Upper) [Dehkia's Lantern]",
+      "activity": "grinding",
+      "sourceKind": "client-zone",
+      "sourceId": "27139",
+      "aliases": [],
+      "methodIds": [],
+      "dropItemIds": [
+        "12236",
+        "12276",
+        "15258",
+        "15259",
+        "15260",
+        "16001",
+        "40383",
+        "44311",
+        "44527",
+        "45298",
+        "45300",
+        "45302",
+        "4917",
+        "50801",
+        "50802",
+        "50803",
+        "50807",
+        "56284",
+        "5960",
+        "721002",
+        "721003",
+        "748021",
+        "748022",
+        "767091",
+        "790694"
+      ],
+      "commonDropItemIds": [],
+      "garmothSpotId": null
+    },
+    {
+      "id": "client-zone:27395",
+      "name": "Mirumok Ruins [Dehkia's Lantern]",
+      "activity": "grinding",
+      "sourceKind": "client-zone",
+      "sourceId": "27395",
+      "aliases": [],
+      "methodIds": [],
+      "dropItemIds": [
+        "16001",
+        "16017",
+        "40258",
+        "721002",
+        "721003",
+        "735201",
+        "735202",
+        "735203",
+        "735204",
+        "735205",
+        "735206",
+        "735207",
+        "735251",
+        "735252",
+        "735253",
+        "735254",
+        "735255",
+        "735256",
+        "735257",
+        "735258",
+        "735259",
+        "735301",
+        "735302",
+        "735303",
+        "752023",
+        "768160",
+        "790699",
+        "790700"
+      ],
+      "commonDropItemIds": [],
+      "garmothSpotId": null
+    },
+    {
+      "id": "client-zone:27648",
+      "name": "Bumblin' Buccaneers",
+      "activity": "grinding",
+      "sourceKind": "client-zone",
+      "sourceId": "27648",
+      "aliases": [],
+      "methodIds": [],
+      "dropItemIds": [
+        "11853",
+        "15616",
+        "16001",
+        "44400",
+        "44401",
+        "44405",
+        "5960",
+        "721002",
+        "721003",
+        "735204",
+        "735205",
+        "735206",
+        "752023",
+        "768160"
+      ],
+      "commonDropItemIds": [],
+      "garmothSpotId": null
+    },
+    {
+      "id": "client-zone:27905",
+      "name": "Vessel of Inquisition",
+      "activity": "grinding",
+      "sourceKind": "client-zone",
+      "sourceId": "27905",
+      "aliases": [],
+      "methodIds": [],
+      "dropItemIds": [
+        "11653",
+        "11882",
+        "12094",
+        "12276",
+        "15291",
+        "16001",
+        "721002",
+        "721003",
+        "761802",
+        "761803",
+        "767348",
+        "767349",
+        "821250",
+        "821251",
+        "821252",
+        "821317",
+        "821318",
+        "821320"
+      ],
+      "commonDropItemIds": [],
+      "garmothSpotId": null
+    },
+    {
+      "id": "client-zone:28164",
+      "name": "Dark Energy Floodlands (Orbita)",
+      "activity": "grinding",
+      "sourceKind": "client-zone",
+      "sourceId": "28164",
+      "aliases": [],
+      "methodIds": [],
+      "dropItemIds": [
+        "11653",
+        "11882",
+        "12094",
+        "12276",
+        "15291",
+        "16001",
+        "721002",
+        "721003",
+        "761802",
+        "761803",
+        "767348",
+        "767349",
+        "821250",
+        "821251",
+        "821252",
+        "821317",
+        "821318",
+        "821320"
+      ],
+      "commonDropItemIds": [],
+      "garmothSpotId": null
+    },
+    {
+      "id": "client-zone:28420",
+      "name": "Dark Energy Floodlands (Great Red Spot)",
+      "activity": "grinding",
+      "sourceKind": "client-zone",
+      "sourceId": "28420",
+      "aliases": [],
+      "methodIds": [],
+      "dropItemIds": [
+        "11653",
+        "11882",
+        "12094",
+        "12276",
+        "15291",
+        "16001",
+        "721002",
+        "721003",
+        "761802",
+        "761803",
+        "767348",
+        "767349",
+        "821250",
+        "821251",
+        "821252",
+        "821317",
+        "821318",
+        "821320"
+      ],
+      "commonDropItemIds": [],
+      "garmothSpotId": null
+    },
+    {
+      "id": "client-zone:28676",
+      "name": "Dark Energy Floodlands (Zephyros)",
+      "activity": "grinding",
+      "sourceKind": "client-zone",
+      "sourceId": "28676",
+      "aliases": [],
+      "methodIds": [],
+      "dropItemIds": [],
+      "commonDropItemIds": [],
+      "garmothSpotId": null
+    },
+    {
+      "id": "client-zone:28928",
+      "name": "Pirate Island",
+      "activity": "grinding",
+      "sourceKind": "client-zone",
+      "sourceId": "28928",
+      "aliases": [],
+      "methodIds": [],
+      "dropItemIds": [
+        "11653",
+        "11882",
+        "12094",
+        "12276",
+        "16001",
+        "44272",
+        "721002",
+        "721003",
+        "761726",
+        "767341",
+        "767342",
+        "767350",
+        "768160",
+        "821417",
+        "821418",
+        "980115",
+        "980116"
+      ],
+      "commonDropItemIds": [],
+      "garmothSpotId": null
+    },
+    {
+      "id": "client-zone:29186",
+      "name": "Gavinya Coastal Cliff",
+      "activity": "grinding",
+      "sourceKind": "client-zone",
+      "sourceId": "29186",
+      "aliases": [],
+      "methodIds": [],
+      "dropItemIds": [
+        "11898",
+        "15294",
+        "16001",
+        "721002",
+        "721003",
+        "761803",
+        "768160",
+        "821318",
+        "821422",
+        "821430",
+        "821460",
+        "821462",
+        "821471",
+        "980127",
+        "980139"
+      ],
+      "commonDropItemIds": [],
+      "garmothSpotId": null
+    },
+    {
+      "id": "client-zone:29444",
+      "name": "Aphrodon Temple",
+      "activity": "grinding",
+      "sourceKind": "client-zone",
+      "sourceId": "29444",
+      "aliases": [],
+      "methodIds": [],
+      "dropItemIds": [
+        "1178",
+        "11898",
+        "12144",
+        "15295",
+        "16001",
+        "721002",
+        "721003",
+        "761803",
+        "767293",
+        "767294",
+        "767296",
+        "767337",
+        "767338",
+        "767353",
+        "821318",
+        "821341",
+        "821342",
+        "821343",
+        "821422",
+        "821423",
+        "821431",
+        "821459",
+        "821460",
+        "821461",
+        "821471",
+        "980128",
+        "980140"
+      ],
+      "commonDropItemIds": [],
+      "garmothSpotId": null
+    },
+    {
+      "id": "client-zone:29700",
+      "name": "Hermesia Inner Castle",
+      "activity": "grinding",
+      "sourceKind": "client-zone",
+      "sourceId": "29700",
+      "aliases": [],
+      "methodIds": [],
+      "dropItemIds": [
+        "1178",
+        "11898",
+        "12144",
+        "12298",
+        "15296",
+        "16001",
+        "721002",
+        "721003",
+        "761803",
+        "767293",
+        "767294",
+        "767296",
+        "767337",
+        "767338",
+        "767353",
+        "768160",
+        "821318",
+        "821341",
+        "821342",
+        "821343",
+        "821422",
+        "821423",
+        "821424",
+        "821432",
+        "821459",
+        "821460",
+        "821464",
+        "821471",
+        "980129",
+        "980141"
+      ],
+      "commonDropItemIds": [],
+      "garmothSpotId": null
+    },
+    {
+      "id": "client-zone:29956",
+      "name": "Magaia Temple",
+      "activity": "grinding",
+      "sourceKind": "client-zone",
+      "sourceId": "29956",
+      "aliases": [],
+      "methodIds": [],
+      "dropItemIds": [
+        "11733",
+        "1178",
+        "11898",
+        "12144",
+        "12298",
+        "15297",
+        "16001",
+        "721002",
+        "721003",
+        "761803",
+        "767293",
+        "767294",
+        "767296",
+        "767337",
+        "767338",
+        "767343",
+        "767344",
+        "767353",
+        "821318",
+        "821341",
+        "821342",
+        "821343",
+        "821419",
+        "821420",
+        "821421",
+        "821422",
+        "821423",
+        "821424",
+        "821433",
+        "821459",
+        "821460",
+        "821463",
+        "821471",
+        "980131",
+        "980142"
+      ],
+      "commonDropItemIds": [],
+      "garmothSpotId": null
+    },
+    {
+      "id": "client-zone:30212",
+      "name": "Aresion Temple",
+      "activity": "grinding",
+      "sourceKind": "client-zone",
+      "sourceId": "30212",
+      "aliases": [],
+      "methodIds": [],
+      "dropItemIds": [
+        "11733",
+        "1178",
+        "11898",
+        "12144",
+        "12298",
+        "15297",
+        "16001",
+        "721002",
+        "721003",
+        "761803",
+        "767293",
+        "767294",
+        "767296",
+        "767337",
+        "767338",
+        "767343",
+        "767344",
+        "767353",
+        "821318",
+        "821341",
+        "821342",
+        "821343",
+        "821419",
+        "821420",
+        "821421",
+        "821422",
+        "821423",
+        "821424",
+        "821433",
+        "821459",
+        "821460",
+        "821461",
+        "821462",
+        "821463",
+        "821464",
+        "821471",
+        "980132",
+        "980143"
+      ],
+      "commonDropItemIds": [],
+      "garmothSpotId": null
+    },
+    {
+      "id": "client-zone:30468",
+      "name": "Event Horizon",
+      "activity": "grinding",
+      "sourceKind": "client-zone",
+      "sourceId": "30468",
+      "aliases": [],
+      "methodIds": [],
+      "dropItemIds": [
+        "11733",
+        "1178",
+        "11898",
+        "12144",
+        "12298",
+        "15297",
+        "16001",
+        "721002",
+        "721003",
+        "761803",
+        "767293",
+        "767294",
+        "767296",
+        "767337",
+        "767338",
+        "767343",
+        "767344",
+        "767353",
+        "821318",
+        "821341",
+        "821342",
+        "821343",
+        "821419",
+        "821420",
+        "821421",
+        "821422",
+        "821423",
+        "821424",
+        "821433",
+        "821459",
+        "821460",
+        "821464",
+        "821471",
+        "980130",
+        "980141"
+      ],
+      "commonDropItemIds": [],
+      "garmothSpotId": null
+    },
+    {
+      "id": "companion:behr-herbs",
+      "name": "Behr · Wild herbs",
+      "activity": "gathering",
+      "sourceKind": "companion-spot",
+      "sourceId": "behr-herbs",
+      "aliases": [
+        "Wild herbs"
+      ],
+      "methodIds": [
+        "hoe"
+      ],
+      "dropItemIds": [
+        "4998",
+        "4999",
+        "50810",
+        "5205",
+        "5401",
+        "5402",
+        "5403",
+        "54031",
+        "5404",
+        "5405",
+        "5406",
+        "5439",
+        "5600",
+        "5651",
+        "5960",
+        "6901",
+        "6902",
+        "6903",
+        "6904",
+        "721002",
+        "721003",
+        "735351",
+        "735352",
+        "735353",
+        "735356",
+        "735367",
+        "752023",
+        "766107",
+        "821350",
+        "821371",
+        "821469"
+      ],
+      "commonDropItemIds": [
+        "4998",
+        "4999",
+        "50810",
+        "5205",
+        "54031",
+        "5651",
+        "5960",
+        "721002",
+        "721003",
+        "735351",
+        "735352",
+        "735353",
+        "735356",
+        "735367",
+        "752023",
+        "766107",
+        "821350",
+        "821371",
+        "821469"
+      ],
+      "garmothSpotId": null
+    },
+    {
+      "id": "companion:serene-spring-herbs",
+      "name": "Near Forest of Plunder · Serene Spring herbs",
+      "activity": "gathering",
+      "sourceKind": "companion-spot",
+      "sourceId": "serene-spring-herbs",
+      "aliases": [
+        "Serene Spring herbs"
+      ],
+      "methodIds": [
+        "hoe"
+      ],
+      "dropItemIds": [
+        "4998",
+        "4999",
+        "50810",
+        "5205",
+        "54031",
+        "5439",
+        "5651",
+        "5960",
+        "721002",
+        "721003",
+        "735351",
+        "735352",
+        "735353",
+        "735356",
+        "735367",
+        "752023",
+        "766107",
+        "821350",
+        "821371",
+        "821469"
+      ],
+      "commonDropItemIds": [
+        "4998",
+        "4999",
+        "50810",
+        "5205",
+        "54031",
+        "5651",
+        "5960",
+        "721002",
+        "721003",
+        "735351",
+        "735352",
+        "735353",
+        "735356",
+        "735367",
+        "752023",
+        "766107",
+        "821350",
+        "821371",
+        "821469"
+      ],
+      "garmothSpotId": null
+    },
+    {
+      "id": "companion:imp-cave-wolves",
+      "name": "Imp Cave · Wolves",
+      "activity": "gathering",
+      "sourceKind": "companion-spot",
+      "sourceId": "imp-cave-wolves",
+      "aliases": [
+        "Wolves"
+      ],
+      "methodIds": [
+        "butcher",
+        "fluid",
+        "tanning"
+      ],
+      "dropItemIds": [
+        "4998",
+        "4999",
+        "50810",
+        "54031",
+        "5651",
+        "5960",
+        "6014",
+        "6155",
+        "6185",
+        "6214",
+        "66191",
+        "721002",
+        "721003",
+        "735351",
+        "735352",
+        "735353",
+        "735356",
+        "735367",
+        "752023",
+        "766107",
+        "7913",
+        "821349",
+        "821351",
+        "821352",
+        "821371",
+        "821469"
+      ],
+      "commonDropItemIds": [
+        "4998",
+        "4999",
+        "50810",
+        "54031",
+        "5651",
+        "5960",
+        "6185",
+        "66191",
+        "721002",
+        "721003",
+        "735351",
+        "735352",
+        "735353",
+        "735356",
+        "735367",
+        "752023",
+        "766107",
+        "821349",
+        "821351",
+        "821352",
+        "821371",
+        "821469"
+      ],
+      "garmothSpotId": null
+    },
+    {
+      "id": "companion:forest-seclusion-foxes",
+      "name": "Forest of Seclusion · Foxes",
+      "activity": "gathering",
+      "sourceKind": "companion-spot",
+      "sourceId": "forest-seclusion-foxes",
+      "aliases": [
+        "Foxes"
+      ],
+      "methodIds": [
+        "butcher",
+        "fluid",
+        "tanning"
+      ],
+      "dropItemIds": [
+        "4998",
+        "4999",
+        "50810",
+        "54031",
+        "5651",
+        "5960",
+        "6003",
+        "6151",
+        "6185",
+        "6203",
+        "66191",
+        "721002",
+        "721003",
+        "735351",
+        "735352",
+        "735353",
+        "735356",
+        "735367",
+        "752023",
+        "766107",
+        "7903",
+        "821349",
+        "821351",
+        "821352",
+        "821371",
+        "821469"
+      ],
+      "commonDropItemIds": [
+        "4998",
+        "4999",
+        "50810",
+        "54031",
+        "5651",
+        "5960",
+        "6185",
+        "66191",
+        "721002",
+        "721003",
+        "735351",
+        "735352",
+        "735353",
+        "735356",
+        "735367",
+        "752023",
+        "766107",
+        "821349",
+        "821351",
+        "821352",
+        "821371",
+        "821469"
+      ],
+      "garmothSpotId": null
+    },
+    {
+      "id": "companion:sheep-mountain",
+      "name": "Sheep Mountain · Lynch Ranch",
+      "activity": "gathering",
+      "sourceKind": "companion-spot",
+      "sourceId": "sheep-mountain",
+      "aliases": [
+        "Sheep"
+      ],
+      "methodIds": [
+        "butcher",
+        "fluid",
+        "tanning"
+      ],
+      "dropItemIds": [
+        "4998",
+        "4999",
+        "50810",
+        "54031",
+        "5651",
+        "5960",
+        "6002",
+        "6151",
+        "6185",
+        "6202",
+        "66191",
+        "721002",
+        "721003",
+        "735351",
+        "735352",
+        "735353",
+        "735356",
+        "735367",
+        "752023",
+        "766107",
+        "7902",
+        "821349",
+        "821351",
+        "821352",
+        "821371",
+        "821469"
+      ],
+      "commonDropItemIds": [
+        "4998",
+        "4999",
+        "50810",
+        "54031",
+        "5651",
+        "5960",
+        "6185",
+        "66191",
+        "721002",
+        "721003",
+        "735351",
+        "735352",
+        "735353",
+        "735356",
+        "735367",
+        "752023",
+        "766107",
+        "821349",
+        "821351",
+        "821352",
+        "821371",
+        "821469"
+      ],
+      "garmothSpotId": null
+    },
+    {
+      "id": "companion:behr-deer",
+      "name": "Behr · Deer",
+      "activity": "gathering",
+      "sourceKind": "companion-spot",
+      "sourceId": "behr-deer",
+      "aliases": [
+        "Deer"
+      ],
+      "methodIds": [
+        "butcher",
+        "fluid",
+        "tanning"
+      ],
+      "dropItemIds": [
+        "4998",
+        "4999",
+        "50810",
+        "54031",
+        "5651",
+        "5960",
+        "6001",
+        "6151",
+        "6185",
+        "6201",
+        "66191",
+        "721002",
+        "721003",
+        "735351",
+        "735352",
+        "735353",
+        "735356",
+        "735367",
+        "752023",
+        "766107",
+        "7901",
+        "821349",
+        "821351",
+        "821352",
+        "821371",
+        "821469"
+      ],
+      "commonDropItemIds": [
+        "4998",
+        "4999",
+        "50810",
+        "54031",
+        "5651",
+        "5960",
+        "6185",
+        "66191",
+        "721002",
+        "721003",
+        "735351",
+        "735352",
+        "735353",
+        "735356",
+        "735367",
+        "752023",
+        "766107",
+        "821349",
+        "821351",
+        "821352",
+        "821371",
+        "821469"
+      ],
+      "garmothSpotId": null
+    },
+    {
+      "id": "companion:ancado-lions",
+      "name": "Ancado Inner Harbor · Lions",
+      "activity": "gathering",
+      "sourceKind": "companion-spot",
+      "sourceId": "ancado-lions",
+      "aliases": [
+        "Lions"
+      ],
+      "methodIds": [
+        "butcher",
+        "fluid",
+        "tanning"
+      ],
+      "dropItemIds": [
+        "4998",
+        "4999",
+        "50810",
+        "54031",
+        "5651",
+        "5960",
+        "6020",
+        "6155",
+        "6185",
+        "6223",
+        "66191",
+        "721002",
+        "721003",
+        "735351",
+        "735352",
+        "735353",
+        "735356",
+        "735367",
+        "752023",
+        "766107",
+        "7923",
+        "821349",
+        "821351",
+        "821352",
+        "821371",
+        "821469"
+      ],
+      "commonDropItemIds": [
+        "4998",
+        "4999",
+        "50810",
+        "54031",
+        "5651",
+        "5960",
+        "6185",
+        "66191",
+        "721002",
+        "721003",
+        "735351",
+        "735352",
+        "735353",
+        "735356",
+        "735367",
+        "752023",
+        "766107",
+        "821349",
+        "821351",
+        "821352",
+        "821371",
+        "821469"
+      ],
+      "garmothSpotId": null
+    },
+    {
+      "id": "companion:trent-herbs",
+      "name": "Trent · Wild herbs",
+      "activity": "gathering",
+      "sourceKind": "companion-spot",
+      "sourceId": "trent-herbs",
+      "aliases": [
+        "Wild herbs"
+      ],
+      "methodIds": [
+        "hoe"
+      ],
+      "dropItemIds": [
+        "4998",
+        "4999",
+        "50810",
+        "5205",
+        "5401",
+        "5402",
+        "5403",
+        "54031",
+        "5404",
+        "5405",
+        "5406",
+        "5439",
+        "5600",
+        "5651",
+        "5960",
+        "6901",
+        "6902",
+        "6903",
+        "6904",
+        "721002",
+        "721003",
+        "735351",
+        "735352",
+        "735353",
+        "735356",
+        "735367",
+        "752023",
+        "766107",
+        "821350",
+        "821371",
+        "821469"
+      ],
+      "commonDropItemIds": [
+        "4998",
+        "4999",
+        "50810",
+        "5205",
+        "54031",
+        "5651",
+        "5960",
+        "721002",
+        "721003",
+        "735351",
+        "735352",
+        "735353",
+        "735356",
+        "735367",
+        "752023",
+        "766107",
+        "821350",
+        "821371",
+        "821469"
+      ],
+      "garmothSpotId": null
+    },
+    {
+      "id": "companion:runn-wild-herbs",
+      "name": "Runn Gateway Intersection · Wild herbs",
+      "activity": "gathering",
+      "sourceKind": "companion-spot",
+      "sourceId": "runn-wild-herbs",
+      "aliases": [
+        "Wild herbs"
+      ],
+      "methodIds": [
+        "hoe"
+      ],
+      "dropItemIds": [
+        "4998",
+        "4999",
+        "50810",
+        "5205",
+        "5401",
+        "5402",
+        "5403",
+        "54031",
+        "5404",
+        "5405",
+        "5406",
+        "5439",
+        "5600",
+        "5651",
+        "5960",
+        "6901",
+        "6902",
+        "6903",
+        "6904",
+        "721002",
+        "721003",
+        "735351",
+        "735352",
+        "735353",
+        "735356",
+        "735367",
+        "752023",
+        "766107",
+        "821350",
+        "821371",
+        "821469"
+      ],
+      "commonDropItemIds": [
+        "4998",
+        "4999",
+        "50810",
+        "5205",
+        "54031",
+        "5651",
+        "5960",
+        "721002",
+        "721003",
+        "735351",
+        "735352",
+        "735353",
+        "735356",
+        "735367",
+        "752023",
+        "766107",
+        "821350",
+        "821371",
+        "821469"
+      ],
+      "garmothSpotId": null
+    },
+    {
+      "id": "companion:north-kaia-trees",
+      "name": "North Kaia Mountaintop · Trees",
+      "activity": "gathering",
+      "sourceKind": "companion-spot",
+      "sourceId": "north-kaia-trees",
+      "aliases": [
+        "Pine & cedar"
+      ],
+      "methodIds": [
+        "lumbering",
+        "fluid"
+      ],
+      "dropItemIds": [
+        "4603",
+        "4605",
+        "4607",
+        "4657",
+        "4666",
+        "4998",
+        "4999",
+        "5003",
+        "5005",
+        "5006",
+        "5007",
+        "5008",
+        "5010",
+        "5011",
+        "50810",
+        "54031",
+        "5651",
+        "5960",
+        "721002",
+        "721003",
+        "735351",
+        "735352",
+        "735353",
+        "735356",
+        "735367",
+        "752023",
+        "766107",
+        "821348",
+        "821349",
+        "821371",
+        "821469"
+      ],
+      "commonDropItemIds": [
+        "4998",
+        "4999",
+        "50810",
+        "54031",
+        "5651",
+        "5960",
+        "721002",
+        "721003",
+        "735351",
+        "735352",
+        "735353",
+        "735356",
+        "735367",
+        "752023",
+        "766107",
+        "821348",
+        "821349",
+        "821371",
+        "821469"
+      ],
+      "garmothSpotId": null
+    },
+    {
+      "id": "companion:lake-flondor-flowers",
+      "name": "Lake Flondor · Flower field",
+      "activity": "gathering",
+      "sourceKind": "companion-spot",
+      "sourceId": "lake-flondor-flowers",
+      "aliases": [
+        "Flower field"
+      ],
+      "methodIds": [
+        "hoe"
+      ],
+      "dropItemIds": [
+        "4998",
+        "4999",
+        "50810",
+        "5205",
+        "54031",
+        "5524",
+        "5525",
+        "5526",
+        "5527",
+        "5651",
+        "5960",
+        "721002",
+        "721003",
+        "735351",
+        "735352",
+        "735353",
+        "735356",
+        "735367",
+        "752023",
+        "766107",
+        "821350",
+        "821371",
+        "821469"
+      ],
+      "commonDropItemIds": [
+        "4998",
+        "4999",
+        "50810",
+        "5205",
+        "54031",
+        "5651",
+        "5960",
+        "721002",
+        "721003",
+        "735351",
+        "735352",
+        "735353",
+        "735356",
+        "735367",
+        "752023",
+        "766107",
+        "821350",
+        "821371",
+        "821469"
+      ],
+      "garmothSpotId": null
+    },
+    {
+      "id": "companion:stonetail-bisons",
+      "name": "Stonetail Horse Ranch · Bisons",
+      "activity": "gathering",
+      "sourceKind": "companion-spot",
+      "sourceId": "stonetail-bisons",
+      "aliases": [
+        "Bisons"
+      ],
+      "methodIds": [
+        "tanning",
+        "butcher",
+        "fluid"
+      ],
+      "dropItemIds": [
+        "4998",
+        "4999",
+        "50810",
+        "54031",
+        "5651",
+        "5960",
+        "6006",
+        "6152",
+        "6185",
+        "6206",
+        "66191",
+        "721002",
+        "721003",
+        "735351",
+        "735352",
+        "735353",
+        "735356",
+        "735367",
+        "752023",
+        "766107",
+        "7906",
+        "821349",
+        "821351",
+        "821352",
+        "821371",
+        "821469"
+      ],
+      "commonDropItemIds": [
+        "4998",
+        "4999",
+        "50810",
+        "54031",
+        "5651",
+        "5960",
+        "6185",
+        "66191",
+        "721002",
+        "721003",
+        "735351",
+        "735352",
+        "735353",
+        "735356",
+        "735367",
+        "752023",
+        "766107",
+        "821349",
+        "821351",
+        "821352",
+        "821371",
+        "821469"
+      ],
+      "garmothSpotId": null
+    },
+    {
+      "id": "companion:northwestern-lizards",
+      "name": "Northwestern Gateway · Lizards",
+      "activity": "gathering",
+      "sourceKind": "companion-spot",
+      "sourceId": "northwestern-lizards",
+      "aliases": [
+        "Lizards"
+      ],
+      "methodIds": [
+        "tanning",
+        "fluid",
+        "butcher"
+      ],
+      "dropItemIds": [
+        "4998",
+        "4999",
+        "50810",
+        "54031",
+        "5651",
+        "5960",
+        "6008",
+        "6153",
+        "6185",
+        "6208",
+        "66191",
+        "721002",
+        "721003",
+        "735351",
+        "735352",
+        "735353",
+        "735356",
+        "735367",
+        "752023",
+        "766107",
+        "7908",
+        "821349",
+        "821351",
+        "821352",
+        "821371",
+        "821469"
+      ],
+      "commonDropItemIds": [
+        "4998",
+        "4999",
+        "50810",
+        "54031",
+        "5651",
+        "5960",
+        "6185",
+        "66191",
+        "721002",
+        "721003",
+        "735351",
+        "735352",
+        "735353",
+        "735356",
+        "735367",
+        "752023",
+        "766107",
+        "821349",
+        "821351",
+        "821352",
+        "821371",
+        "821469"
+      ],
+      "garmothSpotId": null
+    },
+    {
+      "id": "companion:stillcoral-rusalka-mining",
+      "name": "Stillcoral Grove · Rusalka's coral",
+      "activity": "gathering",
+      "sourceKind": "companion-spot",
+      "sourceId": "stillcoral-rusalka-mining",
+      "aliases": [
+        "Rusalka's coral"
+      ],
+      "methodIds": [
+        "mining"
+      ],
+      "dropItemIds": [
+        "4006",
+        "4201",
+        "4203",
+        "4406",
+        "4411",
+        "4998",
+        "4999",
+        "50810",
+        "54031",
+        "5651",
+        "5960",
+        "6501",
+        "6533",
+        "721002",
+        "721003",
+        "735351",
+        "735352",
+        "735353",
+        "735356",
+        "735367",
+        "752023",
+        "766107",
+        "821255",
+        "821353",
+        "821371",
+        "821469"
+      ],
+      "commonDropItemIds": [
+        "4998",
+        "4999",
+        "50810",
+        "54031",
+        "5651",
+        "5960",
+        "721002",
+        "721003",
+        "735351",
+        "735352",
+        "735353",
+        "735356",
+        "735367",
+        "752023",
+        "766107",
+        "821353",
+        "821371",
+        "821469"
+      ],
+      "garmothSpotId": null
+    },
+    {
+      "id": "companion:pilgrims-haven-stone",
+      "name": "Pilgrim's Haven · Rough stone",
+      "activity": "gathering",
+      "sourceKind": "companion-spot",
+      "sourceId": "pilgrims-haven-stone",
+      "aliases": [
+        "Rough stone"
+      ],
+      "methodIds": [
+        "mining"
+      ],
+      "dropItemIds": [
+        "4003",
+        "4005",
+        "4006",
+        "4007",
+        "4057",
+        "4063",
+        "4201",
+        "4202",
+        "4203",
+        "4401",
+        "4402",
+        "4403",
+        "4404",
+        "4405",
+        "4998",
+        "4999",
+        "50810",
+        "54031",
+        "5651",
+        "5960",
+        "721002",
+        "721003",
+        "735351",
+        "735352",
+        "735353",
+        "735356",
+        "735367",
+        "752023",
+        "766107",
+        "821353",
+        "821371",
+        "821469"
+      ],
+      "commonDropItemIds": [
+        "4998",
+        "4999",
+        "50810",
+        "54031",
+        "5651",
+        "5960",
+        "721002",
+        "721003",
+        "735351",
+        "735352",
+        "735353",
+        "735356",
+        "735367",
+        "752023",
+        "766107",
+        "821353",
+        "821371",
+        "821469"
+      ],
+      "garmothSpotId": null
+    },
+    {
+      "id": "companion:orc-camp-maple",
+      "name": "Orc Camp · Maple sap",
+      "activity": "gathering",
+      "sourceKind": "companion-spot",
+      "sourceId": "orc-camp-maple",
+      "aliases": [
+        "Maple sap"
+      ],
+      "methodIds": [
+        "fluid"
+      ],
+      "dropItemIds": [
+        "4998",
+        "4999",
+        "5002",
+        "5005",
+        "5006",
+        "5007",
+        "5008",
+        "5011",
+        "50810",
+        "54031",
+        "5651",
+        "5960",
+        "721002",
+        "721003",
+        "735351",
+        "735352",
+        "735353",
+        "735356",
+        "735367",
+        "752023",
+        "766107",
+        "821349",
+        "821371",
+        "821469"
+      ],
+      "commonDropItemIds": [
+        "4998",
+        "4999",
+        "50810",
+        "54031",
+        "5651",
+        "5960",
+        "721002",
+        "721003",
+        "735351",
+        "735352",
+        "735353",
+        "735356",
+        "735367",
+        "752023",
+        "766107",
+        "821349",
+        "821371",
+        "821469"
+      ],
+      "garmothSpotId": null
+    },
+    {
+      "id": "companion:edania-caphras-trees",
+      "name": "Garden of Immortality · Caphras trees",
+      "activity": "gathering",
+      "sourceKind": "companion-spot",
+      "sourceId": "edania-caphras-trees",
+      "aliases": [
+        "Caphras trees"
+      ],
+      "methodIds": [
+        "fluid",
+        "lumbering"
+      ],
+      "dropItemIds": [
+        "4605",
+        "4624",
+        "4724",
+        "4998",
+        "4999",
+        "5005",
+        "5006",
+        "5007",
+        "5008",
+        "5011",
+        "5025",
+        "50810",
+        "54031",
+        "5651",
+        "5960",
+        "721002",
+        "721003",
+        "735351",
+        "735352",
+        "735353",
+        "735356",
+        "735367",
+        "752023",
+        "766107",
+        "821259",
+        "821348",
+        "821349",
+        "821371",
+        "821469"
+      ],
+      "commonDropItemIds": [
+        "4998",
+        "4999",
+        "50810",
+        "54031",
+        "5651",
+        "5960",
+        "721002",
+        "721003",
+        "735351",
+        "735352",
+        "735353",
+        "735356",
+        "735367",
+        "752023",
+        "766107",
+        "821348",
+        "821349",
+        "821371",
+        "821469"
+      ],
+      "garmothSpotId": null
+    },
+    {
+      "id": "companion:loopy-tree-sap",
+      "name": "Loopy Tree Forest · Sap",
+      "activity": "gathering",
+      "sourceKind": "companion-spot",
+      "sourceId": "loopy-tree-sap",
+      "aliases": [
+        "Loopy tree sap"
+      ],
+      "methodIds": [
+        "fluid"
+      ],
+      "dropItemIds": [
+        "4998",
+        "4999",
+        "5005",
+        "5006",
+        "5007",
+        "5008",
+        "5011",
+        "5018",
+        "5019",
+        "50810",
+        "54031",
+        "5651",
+        "5960",
+        "721002",
+        "721003",
+        "735351",
+        "735352",
+        "735353",
+        "735356",
+        "735367",
+        "752023",
+        "766107",
+        "821349",
+        "821371",
+        "821469"
+      ],
+      "commonDropItemIds": [
+        "4998",
+        "4999",
+        "50810",
+        "54031",
+        "5651",
+        "5960",
+        "721002",
+        "721003",
+        "735351",
+        "735352",
+        "735353",
+        "735356",
+        "735367",
+        "752023",
+        "766107",
+        "821349",
+        "821371",
+        "821469"
+      ],
+      "garmothSpotId": null
+    },
+    {
+      "id": "companion:gorgo-cobras",
+      "name": "Gorgo Rock Belt · Gorgo cobras",
+      "activity": "gathering",
+      "sourceKind": "companion-spot",
+      "sourceId": "gorgo-cobras",
+      "aliases": [
+        "Gorgo cobras"
+      ],
+      "methodIds": [
+        "butcher",
+        "fluid",
+        "tanning"
+      ],
+      "dropItemIds": [
+        "4998",
+        "4999",
+        "50810",
+        "54031",
+        "5651",
+        "5960",
+        "6019",
+        "6185",
+        "6222",
+        "66191",
+        "721002",
+        "721003",
+        "735351",
+        "735352",
+        "735353",
+        "735356",
+        "735367",
+        "752023",
+        "766107",
+        "7922",
+        "821349",
+        "821351",
+        "821352",
+        "821371",
+        "821469"
+      ],
+      "commonDropItemIds": [
+        "4998",
+        "4999",
+        "50810",
+        "54031",
+        "5651",
+        "5960",
+        "6185",
+        "66191",
+        "721002",
+        "721003",
+        "735351",
+        "735352",
+        "735353",
+        "735356",
+        "735367",
+        "752023",
+        "766107",
+        "821349",
+        "821351",
+        "821352",
+        "821371",
+        "821469"
+      ],
+      "garmothSpotId": null
+    },
+    {
+      "id": "companion:tshira-snake-scorpion",
+      "name": "Tshira Ruins · Snake & scorpion",
+      "activity": "gathering",
+      "sourceKind": "companion-spot",
+      "sourceId": "tshira-snake-scorpion",
+      "aliases": [
+        "Snakes & scorpions"
+      ],
+      "methodIds": [
+        "butcher"
+      ],
+      "dropItemIds": [
+        "4998",
+        "4999",
+        "50810",
+        "54031",
+        "5651",
+        "5960",
+        "6185",
+        "721002",
+        "721003",
+        "735351",
+        "735352",
+        "735353",
+        "735356",
+        "735367",
+        "752023",
+        "766107",
+        "7922",
+        "7924",
+        "821351",
+        "821371",
+        "821469"
+      ],
+      "commonDropItemIds": [
+        "4998",
+        "4999",
+        "50810",
+        "54031",
+        "5651",
+        "5960",
+        "6185",
+        "721002",
+        "721003",
+        "735351",
+        "735352",
+        "735353",
+        "735356",
+        "735367",
+        "752023",
+        "766107",
+        "821351",
+        "821371",
+        "821469"
+      ],
+      "garmothSpotId": null
+    },
+    {
+      "id": "companion:ash-forest-lumbering",
+      "name": "Ash Forest · Mixed timber",
+      "activity": "gathering",
+      "sourceKind": "companion-spot",
+      "sourceId": "ash-forest-lumbering",
+      "aliases": [
+        "Mixed timber"
+      ],
+      "methodIds": [
+        "lumbering"
+      ],
+      "dropItemIds": [
+        "4601",
+        "4603",
+        "4605",
+        "4606",
+        "4607",
+        "4998",
+        "4999",
+        "5008",
+        "5019",
+        "50810",
+        "54031",
+        "5651",
+        "5960",
+        "721002",
+        "721003",
+        "735351",
+        "735352",
+        "735353",
+        "735356",
+        "735367",
+        "752023",
+        "766107",
+        "821348",
+        "821371",
+        "821469"
+      ],
+      "commonDropItemIds": [
+        "4998",
+        "4999",
+        "50810",
+        "54031",
+        "5651",
+        "5960",
+        "721002",
+        "721003",
+        "735351",
+        "735352",
+        "735353",
+        "735356",
+        "735367",
+        "752023",
+        "766107",
+        "821348",
+        "821371",
+        "821469"
+      ],
+      "garmothSpotId": null
+    },
+    {
+      "id": "companion:garmoth-dead-tree-essence",
+      "name": "Garmoth's Nest · Dead Tree Essence",
+      "activity": "gathering",
+      "sourceKind": "companion-spot",
+      "sourceId": "garmoth-dead-tree-essence",
+      "aliases": [
+        "Dead Tree Essence"
+      ],
+      "methodIds": [
+        "lumbering"
+      ],
+      "dropItemIds": [
+        "4605",
+        "4613",
+        "4998",
+        "4999",
+        "5019",
+        "50810",
+        "54031",
+        "5651",
+        "5960",
+        "721002",
+        "721003",
+        "735351",
+        "735352",
+        "735353",
+        "735356",
+        "735367",
+        "752023",
+        "766107",
+        "821348",
+        "821371",
+        "821469"
+      ],
+      "commonDropItemIds": [
+        "4998",
+        "4999",
+        "50810",
+        "54031",
+        "5651",
+        "5960",
+        "721002",
+        "721003",
+        "735351",
+        "735352",
+        "735353",
+        "735356",
+        "735367",
+        "752023",
+        "766107",
+        "821348",
+        "821371",
+        "821469"
+      ],
+      "garmothSpotId": null
+    },
+    {
+      "id": "companion:snowfield-cedar",
+      "name": "East of Eilton · Snowfield Cedar",
+      "activity": "gathering",
+      "sourceKind": "companion-spot",
+      "sourceId": "snowfield-cedar",
+      "aliases": [
+        "Snowfield Cedar"
+      ],
+      "methodIds": [
+        "fluid",
+        "lumbering"
+      ],
+      "dropItemIds": [
+        "4605",
+        "4621",
+        "4721",
+        "4998",
+        "4999",
+        "5024",
+        "50810",
+        "54031",
+        "5651",
+        "5960",
+        "721002",
+        "721003",
+        "735351",
+        "735352",
+        "735353",
+        "735356",
+        "735367",
+        "752023",
+        "766107",
+        "821348",
+        "821349",
+        "821371",
+        "821469"
+      ],
+      "commonDropItemIds": [
+        "4998",
+        "4999",
+        "50810",
+        "54031",
+        "5651",
+        "5960",
+        "721002",
+        "721003",
+        "735351",
+        "735352",
+        "735353",
+        "735356",
+        "735367",
+        "752023",
+        "766107",
+        "821348",
+        "821349",
+        "821371",
+        "821469"
+      ],
+      "garmothSpotId": null
+    },
+    {
+      "id": "companion:balenos-sniper-elk",
+      "name": "Balenos · Beginner sniper elk",
+      "activity": "hunting",
+      "sourceKind": "companion-spot",
+      "sourceId": "balenos-sniper-elk",
+      "aliases": [
+        "Sniper elk"
+      ],
+      "methodIds": [
+        "sniper"
+      ],
+      "dropItemIds": [
+        "3054",
+        "4987",
+        "4998",
+        "4999",
+        "5000",
+        "6185",
+        "721003",
+        "735351",
+        "735352",
+        "735358",
+        "735369",
+        "7901"
+      ],
+      "commonDropItemIds": [],
+      "garmothSpotId": null
+    },
+    {
+      "id": "companion:narcion-grass-rhino-hunting",
+      "name": "Narcion · Grass rhino",
+      "activity": "hunting",
+      "sourceKind": "companion-spot",
+      "sourceId": "narcion-grass-rhino-hunting",
+      "aliases": [
+        "Grass rhino"
+      ],
+      "methodIds": [
+        "hunting"
+      ],
+      "dropItemIds": [
+        "3540",
+        "4987",
+        "4998",
+        "4999",
+        "5000",
+        "56221",
+        "6004",
+        "6152",
+        "6185",
+        "6204",
+        "721003",
+        "735351",
+        "735352",
+        "735358",
+        "735369",
+        "7751",
+        "7752",
+        "7753",
+        "7760",
+        "7761",
+        "7762",
+        "7904",
+        "9799"
+      ],
+      "commonDropItemIds": [],
+      "garmothSpotId": null
+    },
+    {
+      "id": "companion:narcion-shadow-wolf-hunting",
+      "name": "Narcion · Shadow wolf",
+      "activity": "hunting",
+      "sourceKind": "companion-spot",
+      "sourceId": "narcion-shadow-wolf-hunting",
+      "aliases": [
+        "Shadow wolf"
+      ],
+      "methodIds": [
+        "hunting"
+      ],
+      "dropItemIds": [
+        "3543",
+        "4987",
+        "4998",
+        "4999",
+        "5000",
+        "56221",
+        "6014",
+        "6155",
+        "6185",
+        "6214",
+        "721003",
+        "735351",
+        "735352",
+        "735358",
+        "735369",
+        "7751",
+        "7752",
+        "7753",
+        "7760",
+        "7761",
+        "7762",
+        "7913",
+        "9799"
+      ],
+      "commonDropItemIds": [],
+      "garmothSpotId": null
+    },
+    {
+      "id": "companion:narcion-shadow-lion-hunting",
+      "name": "Narcion · Shadow lion",
+      "activity": "hunting",
+      "sourceKind": "companion-spot",
+      "sourceId": "narcion-shadow-lion-hunting",
+      "aliases": [
+        "Shadow lion"
+      ],
+      "methodIds": [
+        "hunting"
+      ],
+      "dropItemIds": [
+        "3544",
+        "4987",
+        "4998",
+        "4999",
+        "5000",
+        "56221",
+        "6020",
+        "6155",
+        "6185",
+        "6223",
+        "721003",
+        "735351",
+        "735352",
+        "735358",
+        "735369",
+        "7751",
+        "7752",
+        "7753",
+        "7760",
+        "7761",
+        "7762",
+        "7923",
+        "9799"
+      ],
+      "commonDropItemIds": [],
+      "garmothSpotId": null
+    },
+    {
+      "id": "companion:narcion-deer-hunting",
+      "name": "Narcion · Verdure deer",
+      "activity": "hunting",
+      "sourceKind": "companion-spot",
+      "sourceId": "narcion-deer-hunting",
+      "aliases": [
+        "Verdure deer"
+      ],
+      "methodIds": [
+        "hunting"
+      ],
+      "dropItemIds": [
+        "3541",
+        "3542",
+        "4987",
+        "4998",
+        "4999",
+        "5000",
+        "56221",
+        "6001",
+        "6185",
+        "6201",
+        "721003",
+        "735351",
+        "735352",
+        "735358",
+        "735369",
+        "7751",
+        "7752",
+        "7753",
+        "7757",
+        "7758",
+        "7759",
+        "7901",
+        "9799"
+      ],
+      "commonDropItemIds": [],
+      "garmothSpotId": null
+    },
+    {
+      "id": "companion:loml-sniper-preserve",
+      "name": "Morning Light · Wild Game Preserve (Marni sniper rifle)",
+      "activity": "hunting",
+      "sourceKind": "companion-spot",
+      "sourceId": "loml-sniper-preserve",
+      "aliases": [
+        "Boars, bears & hawks"
+      ],
+      "methodIds": [
+        "sniper"
+      ],
+      "dropItemIds": [
+        "25197",
+        "25198",
+        "25199",
+        "25200",
+        "25201",
+        "25202",
+        "4987",
+        "4998",
+        "4999",
+        "5000",
+        "56259",
+        "6005",
+        "6013",
+        "6039",
+        "6185",
+        "6205",
+        "6213",
+        "6356",
+        "721003",
+        "735351",
+        "735352",
+        "735358",
+        "735369",
+        "7905",
+        "7912",
+        "7953",
+        "7959",
+        "820036",
+        "820037",
+        "820038",
+        "820039",
+        "820139",
+        "820157",
+        "820158",
+        "820159",
+        "820160"
+      ],
+      "commonDropItemIds": [],
+      "garmothSpotId": null
+    },
+    {
+      "id": "companion:edania-coral-crab-hunting",
+      "name": "Nymphamaré coast · Coral crab hunting",
+      "activity": "hunting",
+      "sourceKind": "companion-spot",
+      "sourceId": "edania-coral-crab-hunting",
+      "aliases": [
+        "Coral crabs"
+      ],
+      "methodIds": [
+        "hunting"
+      ],
+      "dropItemIds": [
+        "15277",
+        "25227",
+        "4006",
+        "4201",
+        "4987",
+        "4998",
+        "4999",
+        "5000",
+        "6185",
+        "6501",
+        "6533",
+        "735351",
+        "735352",
+        "735358",
+        "735369",
+        "767257",
+        "821255",
+        "821346",
+        "9799"
+      ],
+      "commonDropItemIds": [],
+      "garmothSpotId": null
+    },
+    {
+      "id": "companion:edania-golden-leaf-hunting",
+      "name": "Zephyros Castle · Golden leaf snakes",
+      "activity": "hunting",
+      "sourceKind": "companion-spot",
+      "sourceId": "edania-golden-leaf-hunting",
+      "aliases": [
+        "Golden leaf snakes"
+      ],
+      "methodIds": [
+        "hunting"
+      ],
+      "dropItemIds": [
+        "15277",
+        "25222",
+        "25225",
+        "4987",
+        "4998",
+        "4999",
+        "5000",
+        "6019",
+        "6185",
+        "735351",
+        "735352",
+        "735358",
+        "735369",
+        "767255",
+        "767257",
+        "7751",
+        "7752",
+        "7753",
+        "7760",
+        "7761",
+        "7762",
+        "7922",
+        "821259",
+        "821345",
+        "9799"
+      ],
+      "commonDropItemIds": [],
+      "garmothSpotId": null
+    },
+    {
+      "id": "companion:edania-cliffside-sheep-hunting",
+      "name": "Orbita Castle · Cliffside sheep",
+      "activity": "hunting",
+      "sourceKind": "companion-spot",
+      "sourceId": "edania-cliffside-sheep-hunting",
+      "aliases": [
+        "Cliffside sheep"
+      ],
+      "methodIds": [
+        "hunting"
+      ],
+      "dropItemIds": [
+        "15277",
+        "25223",
+        "25226",
+        "4987",
+        "4998",
+        "4999",
+        "5000",
+        "6002",
+        "6185",
+        "6202",
+        "735351",
+        "735352",
+        "735358",
+        "735369",
+        "767254",
+        "767257",
+        "7751",
+        "7752",
+        "7753",
+        "7757",
+        "7758",
+        "7759",
+        "7760",
+        "7761",
+        "7762",
+        "7902",
+        "9799"
+      ],
+      "commonDropItemIds": [],
+      "garmothSpotId": null
+    },
+    {
+      "id": "companion:edania-rock-elephant-hunting",
+      "name": "Hakinza Sanctuary · Rock elephant hunting",
+      "activity": "hunting",
+      "sourceKind": "companion-spot",
+      "sourceId": "edania-rock-elephant-hunting",
+      "aliases": [
+        "Rock elephant hunting"
+      ],
+      "methodIds": [
+        "hunting"
+      ],
+      "dropItemIds": [
+        "15277",
+        "25221",
+        "25224",
+        "44236",
+        "4987",
+        "4998",
+        "4999",
+        "5000",
+        "6026",
+        "6185",
+        "6359",
+        "735351",
+        "735352",
+        "735358",
+        "735369",
+        "767256",
+        "767257",
+        "7751",
+        "7752",
+        "7753",
+        "7757",
+        "7758",
+        "7759",
+        "7760",
+        "7761",
+        "7762",
+        "7962",
+        "9799"
+      ],
+      "commonDropItemIds": [],
+      "garmothSpotId": null
+    },
+    {
+      "id": "companion:edania-rock-elephant-gathering",
+      "name": "Hakinza Sanctuary · Rock elephant gathering",
+      "activity": "gathering",
+      "sourceKind": "companion-spot",
+      "sourceId": "edania-rock-elephant-gathering",
+      "aliases": [
+        "Rock elephant gathering"
+      ],
+      "methodIds": [
+        "butcher",
+        "tanning",
+        "fluid"
+      ],
+      "dropItemIds": [
+        "4998",
+        "4999",
+        "50810",
+        "54031",
+        "5651",
+        "5960",
+        "6026",
+        "6185",
+        "6359",
+        "66191",
+        "721002",
+        "721003",
+        "735351",
+        "735352",
+        "735353",
+        "735356",
+        "735367",
+        "752023",
+        "766107",
+        "7962",
+        "821349",
+        "821351",
+        "821352",
+        "821371",
+        "821469"
+      ],
+      "commonDropItemIds": [
+        "4998",
+        "4999",
+        "50810",
+        "54031",
+        "5651",
+        "5960",
+        "6185",
+        "66191",
+        "721002",
+        "721003",
+        "735351",
+        "735352",
+        "735353",
+        "735356",
+        "735367",
+        "752023",
+        "766107",
+        "821349",
+        "821351",
+        "821352",
+        "821371",
+        "821469"
+      ],
+      "garmothSpotId": null
+    },
+    {
+      "id": "companion:edania-thuja-bunnygirl",
+      "name": "Whispering Memorial · Thuja trees",
+      "activity": "gathering",
+      "sourceKind": "companion-spot",
+      "sourceId": "edania-thuja-bunnygirl",
+      "aliases": [
+        "Thuja trees"
+      ],
+      "methodIds": [
+        "fluid",
+        "lumbering"
+      ],
+      "dropItemIds": [
+        "4605",
+        "4616",
+        "4998",
+        "4999",
+        "5020",
+        "50810",
+        "54031",
+        "5651",
+        "5960",
+        "721002",
+        "721003",
+        "735351",
+        "735352",
+        "735353",
+        "735356",
+        "735367",
+        "752023",
+        "766107",
+        "821348",
+        "821349",
+        "821371",
+        "821469"
+      ],
+      "commonDropItemIds": [
+        "4998",
+        "4999",
+        "50810",
+        "54031",
+        "5651",
+        "5960",
+        "721002",
+        "721003",
+        "735351",
+        "735352",
+        "735353",
+        "735356",
+        "735367",
+        "752023",
+        "766107",
+        "821348",
+        "821349",
+        "821371",
+        "821469"
+      ],
+      "garmothSpotId": null
+    },
+    {
+      "id": "companion:edania-marble-bunnygirl-guide",
+      "name": "Edania · Marble guide",
+      "activity": "gathering",
+      "sourceKind": "companion-spot",
+      "sourceId": "edania-marble-bunnygirl-guide",
+      "aliases": [
+        "Marble"
+      ],
+      "methodIds": [
+        "mining"
+      ],
+      "dropItemIds": [
+        "4998",
+        "4999",
+        "50810",
+        "54031",
+        "5651",
+        "5960",
+        "721002",
+        "721003",
+        "735351",
+        "735352",
+        "735353",
+        "735356",
+        "735367",
+        "752023",
+        "766107",
+        "821353",
+        "821371",
+        "821469"
+      ],
+      "commonDropItemIds": [
+        "4998",
+        "4999",
+        "50810",
+        "54031",
+        "5651",
+        "5960",
+        "721002",
+        "721003",
+        "735351",
+        "735352",
+        "735353",
+        "735356",
+        "735367",
+        "752023",
+        "766107",
+        "821353",
+        "821371",
+        "821469"
+      ],
+      "garmothSpotId": null
+    },
+    {
+      "id": "companion:edania-basalt-magnetite-bunnygirl-guide",
+      "name": "Edania · Basalt and Magnetite guide",
+      "activity": "gathering",
+      "sourceKind": "companion-spot",
+      "sourceId": "edania-basalt-magnetite-bunnygirl-guide",
+      "aliases": [
+        "Basalt / Magnetite"
+      ],
+      "methodIds": [
+        "mining"
+      ],
+      "dropItemIds": [
+        "4998",
+        "4999",
+        "50810",
+        "54031",
+        "5651",
+        "5960",
+        "721002",
+        "721003",
+        "735351",
+        "735352",
+        "735353",
+        "735356",
+        "735367",
+        "752023",
+        "766107",
+        "821353",
+        "821371",
+        "821469"
+      ],
+      "commonDropItemIds": [
+        "4998",
+        "4999",
+        "50810",
+        "54031",
+        "5651",
+        "5960",
+        "721002",
+        "721003",
+        "735351",
+        "735352",
+        "735353",
+        "735356",
+        "735367",
+        "752023",
+        "766107",
+        "821353",
+        "821371",
+        "821469"
+      ],
+      "garmothSpotId": null
+    }
+  ]
+}
+

@@ -110,6 +110,17 @@ void main() {
   });
 
   test('nonstandard consumables retain their exact observable effects', () {
+    final oquilla = exactFoodInfoByName['oquilla wave meal'];
+    expect(oquilla?.kind, 'High-quality food');
+    expect(oquilla?.effects, <String>[
+      'Sailing EXP +25%',
+      'Barter EXP +25%',
+      'Sailor EXP +10%',
+      'Sailing Mastery +50',
+    ]);
+    expect(oquilla?.duration, '600 min');
+    expect(oquilla?.cooldown, '30 min');
+
     expect(exactFoodInfoByName['beer']?.effects, <String>[
       'Recover 2 Worker Stamina',
     ]);
@@ -188,9 +199,11 @@ void main() {
       containsAll(<String>[
         'Alchemy/Cooking Time -0.6 sec',
         'Life EXP +10%',
+        'Weight Limit +250 LT',
         'Life Skill Mastery +25',
       ]),
     );
+    expect(seafood?.effects, isNot(contains('Weight Limit +100 LT')));
     expect(seafood?.duration, '120 min');
     expect(seafood?.cooldown, '10 sec');
 

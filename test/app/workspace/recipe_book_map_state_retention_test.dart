@@ -25,6 +25,7 @@ void main() {
 
       await tester.pumpWidget(
         BdoCraftPlannerApp(
+          enableOpportunityAutoCheck: false,
           applicationFuture: Future.value(harness.bundle),
           marketGateway: const EmptyMarketGateway(),
           resourceMapConfiguration: _testMapConfiguration(harness, tileClient),

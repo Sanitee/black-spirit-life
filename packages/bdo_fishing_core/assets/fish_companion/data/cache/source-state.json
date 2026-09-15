@@ -1,0 +1,64 @@
+{
+  "status": "live-partial",
+  "revision": "git=4c4da834435e54a19e0de997ee7a9a35c44eea67;dolt=g9gh0mo8hitv06iq7em6hhbst7k5ss9e;api=q80a1i1;dolt_bundle=dn0881wj;edge=a9gf3ddy;site=w3kq96xj;cdn=hdd3vqxb;snapshot=bf0cz6dx",
+  "fetchedAt": "2026-09-02T10:19:56Z",
+  "message": null,
+  "evidenceStatus": "cached",
+  "evidenceRevision": "events-af7748bf44a04454",
+  "evidencePointCount": 9131,
+  "evidenceClusterCount": 9131,
+  "refreshInProgress": true,
+  "artifacts": {
+    "zones.json": {
+      "status": "live",
+      "fetchedAt": "2026-09-02T10:19:55Z",
+      "revision": null
+    },
+    "fish.json": {
+      "status": "live",
+      "fetchedAt": "2026-09-02T10:19:55Z",
+      "revision": "dolt:g9gh0mo8hitv06iq7em6hhbst7k5ss9e"
+    },
+    "zone-loot-facts.json": {
+      "status": "live",
+      "fetchedAt": "2026-09-02T10:19:55Z",
+      "revision": "dolt:g9gh0mo8hitv06iq7em6hhbst7k5ss9e"
+    },
+    "meta.json": {
+      "status": "live",
+      "fetchedAt": "2026-09-02T10:19:55Z",
+      "revision": "git=4c4da834435e54a19e0de997ee7a9a35c44eea67;dolt=g9gh0mo8hitv06iq7em6hhbst7k5ss9e;api=q80a1i1;dolt_bundle=dn0881wj;edge=a9gf3ddy;site=w3kq96xj;cdn=hdd3vqxb;snapshot=bf0cz6dx"
+    },
+    "tileset.json": {
+      "status": "live",
+      "fetchedAt": "2026-09-02T10:19:56Z",
+      "revision": null
+    },
+    "regions.meta.json": {
+      "status": "live",
+      "fetchedAt": "2026-09-02T10:19:56Z",
+      "revision": null
+    },
+    "region-groups.meta.json": {
+      "status": "live",
+      "fetchedAt": "2026-09-02T10:19:56Z",
+      "revision": null
+    },
+    "region-nodes.geojson": {
+      "status": "live",
+      "fetchedAt": "2026-09-02T10:19:56Z",
+      "revision": null
+    },
+    "zone_mask.v8.bin": {
+      "status": "cached",
+      "revision": "c97b39854e90b8d2",
+      "fetchedAt": "2026-09-02T10:11:22.847498+00:00"
+    }
+  },
+  "tableRefresh": {
+    "status": "not-checked",
+    "total": 0,
+    "checked": 0
+  },
+  "jsonStatus": "live"
+}

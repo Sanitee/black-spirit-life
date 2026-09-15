@@ -1,0 +1,5098 @@
+{
+  "source": {
+    "creator": "Bairog Haan",
+    "publisher": "BDO Workshop",
+    "url": "https://bdoworkshop.com/gathering-calculator",
+    "capturedAtUtc": "2026-09-03T07:09:57Z",
+    "siteVersion": "6cf60d72b2643077b1b3192cf34a781c",
+    "note": "Public calculator inputs. Formula independently implemented and visibly attributed in the app. The Sep. 3 Evergreen Shard identity follows Pearl Abyss's one-for-one replacement of the former WON crystal gathering drop; Bairog's captured hourly rate is retained."
+  },
+  "gatheringTypes": [
+    {
+      "id": 1,
+      "name": "Lumbering",
+      "gathering_category_id": 1,
+      "has_afuaru": true,
+      "agris_per_gather": 22,
+      "afuaru_spawn_rate": 0.005152,
+      "afuaru_avg_items": 1002.9574,
+      "afuaru_item_avgs": {
+        "38": 197.82978723404256,
+        "39": 198.8510638297872,
+        "40": 202.7234042553191,
+        "46": 198.91489361702128,
+        "47": 204.6382978723404
+      },
+      "chest_spawn_rate": 0.00035858,
+      "chest_item_avgs": {
+        "16": 18.445414847161572,
+        "19": 6.614264919941776,
+        "56": 23.64192139737991
+      },
+      "fever_time_spawn_rate": 0.00183794,
+      "fever_time_item_avgs": {
+        "16": 1.2432432432432432
+      }
+    },
+    {
+      "id": 2,
+      "name": "Fluid Collecting - Saps",
+      "gathering_category_id": 2,
+      "has_afuaru": true,
+      "agris_per_gather": 30,
+      "afuaru_spawn_rate": 0.004929,
+      "afuaru_avg_items": 1120.57,
+      "afuaru_item_avgs": {
+        "3": 456.43,
+        "87": 223.95,
+        "88": 297.6,
+        "95": 142.59
+      },
+      "chest_spawn_rate": 0.00035858,
+      "chest_item_avgs": {
+        "16": 18.445414847161572,
+        "19": 6.614264919941776,
+        "56": 23.64192139737991
+      },
+      "fever_time_spawn_rate": 0.00183794,
+      "fever_time_item_avgs": {
+        "16": 1.2432432432432432
+      }
+    },
+    {
+      "id": 3,
+      "name": "Fluid Collecting - Blood",
+      "gathering_category_id": 3,
+      "has_afuaru": false,
+      "agris_per_gather": 34,
+      "afuaru_spawn_rate": 0,
+      "afuaru_avg_items": null,
+      "afuaru_item_avgs": null,
+      "chest_spawn_rate": 0.00035858,
+      "chest_item_avgs": {
+        "16": 18.445414847161572,
+        "19": 6.614264919941776,
+        "56": 23.64192139737991
+      },
+      "fever_time_spawn_rate": 0.00183794,
+      "fever_time_item_avgs": {
+        "16": 1.2432432432432432
+      }
+    },
+    {
+      "id": 4,
+      "name": "Hoe Gathering",
+      "gathering_category_id": 4,
+      "has_afuaru": false,
+      "agris_per_gather": 22,
+      "afuaru_spawn_rate": 0,
+      "afuaru_avg_items": null,
+      "afuaru_item_avgs": null,
+      "chest_spawn_rate": 0.00035858,
+      "chest_item_avgs": {
+        "16": 18.445414847161572,
+        "19": 6.614264919941776,
+        "56": 23.64192139737991
+      },
+      "fever_time_spawn_rate": 0.00183794,
+      "fever_time_item_avgs": {
+        "16": 1.2432432432432432
+      }
+    },
+    {
+      "id": 5,
+      "name": "Butchering",
+      "gathering_category_id": 5,
+      "has_afuaru": false,
+      "agris_per_gather": 34,
+      "afuaru_spawn_rate": 0,
+      "afuaru_avg_items": null,
+      "afuaru_item_avgs": null,
+      "chest_spawn_rate": 0.00035858,
+      "chest_item_avgs": {
+        "16": 18.445414847161572,
+        "19": 6.614264919941776,
+        "56": 23.64192139737991
+      },
+      "fever_time_spawn_rate": 0.00183794,
+      "fever_time_item_avgs": {
+        "16": 1.2432432432432432
+      }
+    },
+    {
+      "id": 6,
+      "name": "Tanning",
+      "gathering_category_id": 6,
+      "has_afuaru": false,
+      "agris_per_gather": 22,
+      "afuaru_spawn_rate": 0,
+      "afuaru_avg_items": null,
+      "afuaru_item_avgs": null,
+      "chest_spawn_rate": 0.00035858,
+      "chest_item_avgs": {
+        "16": 18.445414847161572,
+        "19": 6.614264919941776,
+        "56": 23.64192139737991
+      },
+      "fever_time_spawn_rate": 0.00183794,
+      "fever_time_item_avgs": {
+        "16": 1.2432432432432432
+      }
+    },
+    {
+      "id": 7,
+      "name": "Mining",
+      "gathering_category_id": 7,
+      "has_afuaru": false,
+      "agris_per_gather": 42,
+      "afuaru_spawn_rate": 0,
+      "afuaru_avg_items": null,
+      "afuaru_item_avgs": null,
+      "chest_spawn_rate": 0.00035858,
+      "chest_item_avgs": {
+        "16": 18.445414847161572,
+        "19": 6.614264919941776,
+        "56": 23.64192139737991
+      },
+      "fever_time_spawn_rate": 0.00183794,
+      "fever_time_item_avgs": {
+        "16": 1.2432432432432432
+      }
+    },
+    {
+      "id": 15,
+      "name": "Mining - Rusalka crab",
+      "gathering_category_id": 7,
+      "has_afuaru": false,
+      "agris_per_gather": 42,
+      "afuaru_spawn_rate": 0,
+      "afuaru_avg_items": null,
+      "afuaru_item_avgs": null,
+      "chest_spawn_rate": 0.00035858,
+      "chest_item_avgs": {
+        "16": 18.445414847161572,
+        "19": 6.614264919941776,
+        "56": 23.64192139737991
+      },
+      "fever_time_spawn_rate": 0.00183794,
+      "fever_time_item_avgs": {
+        "16": 1.2432432432432432
+      }
+    },
+    {
+      "id": 16,
+      "name": "Caphras tree lumbering",
+      "gathering_category_id": 1,
+      "has_afuaru": true,
+      "agris_per_gather": 22,
+      "afuaru_spawn_rate": 0.004685,
+      "afuaru_avg_items": 1000.4091,
+      "afuaru_item_avgs": {
+        "38": 195.04545454545453,
+        "39": 197.63636363636363,
+        "40": 208.72727272727272,
+        "46": 203.02272727272728,
+        "47": 195.97727272727272
+      },
+      "chest_spawn_rate": 0.00035858,
+      "chest_item_avgs": {
+        "16": 18.445414847161572,
+        "19": 6.614264919941776,
+        "56": 23.64192139737991
+      },
+      "fever_time_spawn_rate": 0.00183794,
+      "fever_time_item_avgs": {
+        "16": 1.2432432432432432
+      }
+    },
+    {
+      "id": 17,
+      "name": "Sheep - tanning",
+      "gathering_category_id": 6,
+      "has_afuaru": false,
+      "agris_per_gather": 22,
+      "afuaru_spawn_rate": 0,
+      "afuaru_avg_items": null,
+      "afuaru_item_avgs": null,
+      "chest_spawn_rate": 0.00035858,
+      "chest_item_avgs": {
+        "16": 18.445414847161572,
+        "19": 6.614264919941776,
+        "56": 23.64192139737991
+      },
+      "fever_time_spawn_rate": 0.00183794,
+      "fever_time_item_avgs": {
+        "16": 1.2432432432432432
+      }
+    },
+    {
+      "id": 18,
+      "name": "Caphras tree sapping",
+      "gathering_category_id": 2,
+      "has_afuaru": true,
+      "agris_per_gather": 30,
+      "afuaru_spawn_rate": 0.004383,
+      "afuaru_avg_items": 1133.3514,
+      "afuaru_item_avgs": {
+        "103": 1133.3513513513512
+      },
+      "chest_spawn_rate": 0.00035858,
+      "chest_item_avgs": {
+        "16": 18.445414847161572,
+        "19": 6.614264919941776,
+        "56": 23.64192139737991
+      },
+      "fever_time_spawn_rate": 0.00183794,
+      "fever_time_item_avgs": {
+        "16": 1.2432432432432432
+      }
+    },
+    {
+      "id": 19,
+      "name": "Navarn - tanning",
+      "gathering_category_id": 6,
+      "has_afuaru": false,
+      "agris_per_gather": 22,
+      "afuaru_spawn_rate": null,
+      "afuaru_avg_items": null,
+      "afuaru_item_avgs": null,
+      "chest_spawn_rate": null,
+      "chest_item_avgs": null,
+      "fever_time_spawn_rate": null,
+      "fever_time_item_avgs": null
+    }
+  ],
+  "gatheringItemTypes": [
+    {
+      "id": 1,
+      "item_type": 0,
+      "procs_with_minigame": true,
+      "procs_with_hedgehog": true,
+      "multi_drop_factor": 1,
+      "global_drop": false,
+      "affected_by_agris": true,
+      "is_primary": false,
+      "only_vendor_price": null,
+      "bdo_item": {
+        "bdo_id": 4602,
+        "name": "Maple Timber",
+        "icon": "/images/New_Icon/03_etc/07_productmaterial/00004602.webp"
+      }
+    },
+    {
+      "id": 2,
+      "item_type": 0,
+      "procs_with_minigame": true,
+      "procs_with_hedgehog": true,
+      "multi_drop_factor": 1,
+      "global_drop": false,
+      "affected_by_agris": true,
+      "is_primary": true,
+      "only_vendor_price": null,
+      "bdo_item": {
+        "bdo_id": 4601,
+        "name": "Ash Timber",
+        "icon": "/images/New_Icon/03_etc/07_productmaterial/00004601.webp"
+      }
+    },
+    {
+      "id": 3,
+      "item_type": 0,
+      "procs_with_minigame": true,
+      "procs_with_hedgehog": true,
+      "multi_drop_factor": 1,
+      "global_drop": false,
+      "affected_by_agris": true,
+      "is_primary": true,
+      "only_vendor_price": null,
+      "bdo_item": {
+        "bdo_id": 5001,
+        "name": "Ash Sap",
+        "icon": "/images/New_Icon/03_etc/07_productmaterial/00005001.webp"
+      }
+    },
+    {
+      "id": 4,
+      "item_type": 0,
+      "procs_with_minigame": true,
+      "procs_with_hedgehog": true,
+      "multi_drop_factor": 1,
+      "global_drop": false,
+      "affected_by_agris": true,
+      "is_primary": true,
+      "only_vendor_price": null,
+      "bdo_item": {
+        "bdo_id": 5009,
+        "name": "Fir Sap",
+        "icon": "/images/New_Icon/03_etc/07_productmaterial/00005009.webp"
+      }
+    },
+    {
+      "id": 6,
+      "item_type": 0,
+      "procs_with_minigame": true,
+      "procs_with_hedgehog": true,
+      "multi_drop_factor": 1,
+      "global_drop": false,
+      "affected_by_agris": true,
+      "is_primary": true,
+      "only_vendor_price": null,
+      "bdo_item": {
+        "bdo_id": 6201,
+        "name": "Deer Blood",
+        "icon": "/images/New_Icon/03_etc/07_productmaterial/00006201.webp"
+      }
+    },
+    {
+      "id": 11,
+      "item_type": 0,
+      "procs_with_minigame": true,
+      "procs_with_hedgehog": true,
+      "multi_drop_factor": 1,
+      "global_drop": false,
+      "affected_by_agris": true,
+      "is_primary": true,
+      "only_vendor_price": null,
+      "bdo_item": {
+        "bdo_id": 6001,
+        "name": "Deer Hide",
+        "icon": "/images/New_Icon/03_etc/07_productmaterial/00006001.webp"
+      }
+    },
+    {
+      "id": 12,
+      "item_type": 0,
+      "procs_with_minigame": true,
+      "procs_with_hedgehog": true,
+      "multi_drop_factor": 1,
+      "global_drop": false,
+      "affected_by_agris": true,
+      "is_primary": true,
+      "only_vendor_price": null,
+      "bdo_item": {
+        "bdo_id": 6003,
+        "name": "Fox Hide",
+        "icon": "/images/New_Icon/03_etc/07_productmaterial/00006003.webp"
+      }
+    },
+    {
+      "id": 13,
+      "item_type": 0,
+      "procs_with_minigame": true,
+      "procs_with_hedgehog": true,
+      "multi_drop_factor": 1,
+      "global_drop": false,
+      "affected_by_agris": true,
+      "is_primary": false,
+      "only_vendor_price": null,
+      "bdo_item": {
+        "bdo_id": 4001,
+        "name": "Iron Ore",
+        "icon": "/images/New_Icon/03_etc/07_productmaterial/00004001.webp"
+      }
+    },
+    {
+      "id": 14,
+      "item_type": 0,
+      "procs_with_minigame": true,
+      "procs_with_hedgehog": true,
+      "multi_drop_factor": 1,
+      "global_drop": false,
+      "affected_by_agris": true,
+      "is_primary": true,
+      "only_vendor_price": null,
+      "bdo_item": {
+        "bdo_id": 4006,
+        "name": "Rough Stone",
+        "icon": "/images/New_Icon/03_etc/07_productmaterial/00004006.webp"
+      }
+    },
+    {
+      "id": 16,
+      "item_type": 2,
+      "procs_with_minigame": true,
+      "procs_with_hedgehog": false,
+      "multi_drop_factor": 1,
+      "global_drop": false,
+      "affected_by_agris": false,
+      "is_primary": false,
+      "only_vendor_price": null,
+      "bdo_item": {
+        "bdo_id": 4998,
+        "name": "Sharp Black Crystal Shard",
+        "icon": "/images/New_Icon/03_etc/07_productmaterial/00004998.webp"
+      }
+    },
+    {
+      "id": 17,
+      "item_type": 2,
+      "procs_with_minigame": true,
+      "procs_with_hedgehog": true,
+      "multi_drop_factor": 1,
+      "global_drop": false,
+      "affected_by_agris": false,
+      "is_primary": false,
+      "only_vendor_price": null,
+      "bdo_item": {
+        "bdo_id": 4999,
+        "name": "Black Gem Fragment",
+        "icon": "/images/New_Icon/03_etc/07_productmaterial/00004999.webp"
+      }
+    },
+    {
+      "id": 18,
+      "item_type": 2,
+      "procs_with_minigame": true,
+      "procs_with_hedgehog": true,
+      "multi_drop_factor": 1,
+      "global_drop": false,
+      "affected_by_agris": false,
+      "is_primary": false,
+      "only_vendor_price": null,
+      "bdo_item": {
+        "bdo_id": 721003,
+        "name": "Caphras Stone",
+        "icon": "/images/New_Icon/03_etc/00721003.webp"
+      }
+    },
+    {
+      "id": 19,
+      "item_type": 2,
+      "procs_with_minigame": true,
+      "procs_with_hedgehog": true,
+      "multi_drop_factor": 1,
+      "global_drop": false,
+      "affected_by_agris": false,
+      "is_primary": false,
+      "only_vendor_price": null,
+      "bdo_item": {
+        "bdo_id": 721002,
+        "name": "Ancient Spirit Dust",
+        "icon": "/images/New_Icon/03_etc/00721002.webp"
+      }
+    },
+    {
+      "id": 20,
+      "item_type": 1,
+      "procs_with_minigame": true,
+      "procs_with_hedgehog": true,
+      "multi_drop_factor": 1,
+      "global_drop": false,
+      "affected_by_agris": false,
+      "is_primary": false,
+      "only_vendor_price": null,
+      "bdo_item": {
+        "bdo_id": 50810,
+        "name": "Deep Blue Hoof Root",
+        "icon": "/images/New_Icon/03_etc/09_petitem/00050810.webp"
+      }
+    },
+    {
+      "id": 21,
+      "item_type": 1,
+      "procs_with_minigame": true,
+      "procs_with_hedgehog": true,
+      "multi_drop_factor": 1,
+      "global_drop": false,
+      "affected_by_agris": false,
+      "is_primary": false,
+      "only_vendor_price": null,
+      "bdo_item": {
+        "bdo_id": 54031,
+        "name": "Laila's Petal",
+        "icon": "/images/New_Icon/03_etc/09_petitem/00054031.webp"
+      }
+    },
+    {
+      "id": 22,
+      "item_type": 1,
+      "procs_with_minigame": true,
+      "procs_with_hedgehog": true,
+      "multi_drop_factor": 1,
+      "global_drop": false,
+      "affected_by_agris": false,
+      "is_primary": false,
+      "only_vendor_price": 10000,
+      "bdo_item": {
+        "bdo_id": 5651,
+        "name": "Fairy Powder",
+        "icon": "/images/New_Icon/03_etc/07_productmaterial/00005651.webp"
+      }
+    },
+    {
+      "id": 23,
+      "item_type": 1,
+      "procs_with_minigame": true,
+      "procs_with_hedgehog": true,
+      "multi_drop_factor": 1,
+      "global_drop": false,
+      "affected_by_agris": false,
+      "is_primary": false,
+      "only_vendor_price": null,
+      "bdo_item": {
+        "bdo_id": 5960,
+        "name": "Trace of Nature",
+        "icon": "/images/New_Icon/03_etc/07_productmaterial/00005960.webp"
+      }
+    },
+    {
+      "id": 25,
+      "item_type": 1,
+      "procs_with_minigame": true,
+      "procs_with_hedgehog": true,
+      "multi_drop_factor": 1,
+      "global_drop": false,
+      "affected_by_agris": false,
+      "is_primary": false,
+      "only_vendor_price": null,
+      "bdo_item": {
+        "bdo_id": 766107,
+        "name": "Imperfect Lightstone of Flora",
+        "icon": "/images/New_Icon/03_etc/00766107.webp"
+      }
+    },
+    {
+      "id": 27,
+      "item_type": 1,
+      "procs_with_minigame": false,
+      "procs_with_hedgehog": true,
+      "multi_drop_factor": 1,
+      "global_drop": true,
+      "affected_by_agris": false,
+      "is_primary": false,
+      "only_vendor_price": null,
+      "bdo_item": {
+        "bdo_id": 821469,
+        "name": "Evergreen Shard",
+        "icon": "/images/New_Icon/03_ETC/07_ProductMaterial/00821469.webp"
+      }
+    },
+    {
+      "id": 28,
+      "item_type": 2,
+      "procs_with_minigame": true,
+      "procs_with_hedgehog": true,
+      "multi_drop_factor": 1,
+      "global_drop": true,
+      "affected_by_agris": false,
+      "is_primary": false,
+      "only_vendor_price": null,
+      "bdo_item": {
+        "bdo_id": 752023,
+        "name": "Mass of Pure Magic",
+        "icon": "/images/New_Icon/03_etc/00752023.webp"
+      }
+    },
+    {
+      "id": 29,
+      "item_type": 2,
+      "procs_with_minigame": false,
+      "procs_with_hedgehog": true,
+      "multi_drop_factor": 1,
+      "global_drop": true,
+      "affected_by_agris": false,
+      "is_primary": false,
+      "only_vendor_price": null,
+      "bdo_item": {
+        "bdo_id": 735353,
+        "name": "Sethra's Artifact - Gathering Item Drop Rate",
+        "icon": "/images/New_Icon/06_pc_equipitem/00_common/00_etc/00735353_1.webp"
+      }
+    },
+    {
+      "id": 30,
+      "item_type": 2,
+      "procs_with_minigame": false,
+      "procs_with_hedgehog": true,
+      "multi_drop_factor": 1,
+      "global_drop": true,
+      "affected_by_agris": false,
+      "is_primary": false,
+      "only_vendor_price": null,
+      "bdo_item": {
+        "bdo_id": 735367,
+        "name": "Sethra's Artifact - Gathering Mastery",
+        "icon": "/images/New_Icon/06_pc_equipitem/00_common/00_etc/00735367_1.webp"
+      }
+    },
+    {
+      "id": 31,
+      "item_type": 2,
+      "procs_with_minigame": false,
+      "procs_with_hedgehog": true,
+      "multi_drop_factor": 1,
+      "global_drop": true,
+      "affected_by_agris": false,
+      "is_primary": false,
+      "only_vendor_price": null,
+      "bdo_item": {
+        "bdo_id": 735351,
+        "name": "Sethra's Artifact - Life EXP",
+        "icon": "/images/New_Icon/06_pc_equipitem/00_common/00_etc/00735351_1.webp"
+      }
+    },
+    {
+      "id": 32,
+      "item_type": 2,
+      "procs_with_minigame": false,
+      "procs_with_hedgehog": true,
+      "multi_drop_factor": 1,
+      "global_drop": true,
+      "affected_by_agris": false,
+      "is_primary": false,
+      "only_vendor_price": null,
+      "bdo_item": {
+        "bdo_id": 735352,
+        "name": "Sethra's Artifact - Life Skill Mastery",
+        "icon": "/images/New_Icon/06_pc_equipitem/00_common/00_etc/00735352_1.webp"
+      }
+    },
+    {
+      "id": 33,
+      "item_type": 0,
+      "procs_with_minigame": true,
+      "procs_with_hedgehog": true,
+      "multi_drop_factor": 1,
+      "global_drop": false,
+      "affected_by_agris": true,
+      "is_primary": true,
+      "only_vendor_price": null,
+      "bdo_item": {
+        "bdo_id": 6008,
+        "name": "Lizard Hide",
+        "icon": "/images/New_Icon/03_etc/07_productmaterial/00006008.webp"
+      }
+    },
+    {
+      "id": 34,
+      "item_type": 0,
+      "procs_with_minigame": true,
+      "procs_with_hedgehog": true,
+      "multi_drop_factor": 1,
+      "global_drop": false,
+      "affected_by_agris": false,
+      "is_primary": false,
+      "only_vendor_price": null,
+      "bdo_item": {
+        "bdo_id": 6153,
+        "name": "Hard Hide",
+        "icon": "/images/New_Icon/03_etc/07_productmaterial/00006153.webp"
+      }
+    },
+    {
+      "id": 35,
+      "item_type": 1,
+      "procs_with_minigame": true,
+      "procs_with_hedgehog": true,
+      "multi_drop_factor": 1,
+      "global_drop": false,
+      "affected_by_agris": false,
+      "is_primary": false,
+      "only_vendor_price": null,
+      "bdo_item": {
+        "bdo_id": 6185,
+        "name": "Fire Horn",
+        "icon": "/images/New_Icon/03_etc/07_productmaterial/00006185.webp"
+      }
+    },
+    {
+      "id": 36,
+      "item_type": 1,
+      "procs_with_minigame": true,
+      "procs_with_hedgehog": true,
+      "multi_drop_factor": 1,
+      "global_drop": false,
+      "affected_by_agris": false,
+      "is_primary": false,
+      "only_vendor_price": 1000000,
+      "bdo_item": {
+        "bdo_id": 66191,
+        "name": "Powder of Ascension",
+        "icon": "/images/New_Icon/03_etc/03_quest_item/00750903.webp"
+      }
+    },
+    {
+      "id": 37,
+      "item_type": 2,
+      "procs_with_minigame": true,
+      "procs_with_hedgehog": true,
+      "multi_drop_factor": 1,
+      "global_drop": false,
+      "affected_by_agris": false,
+      "is_primary": false,
+      "only_vendor_price": null,
+      "bdo_item": {
+        "bdo_id": 821352,
+        "name": "Faded Naturewoven Hide",
+        "icon": "/images/New_Icon/03_etc/07_productmaterial/00821352.webp"
+      }
+    },
+    {
+      "id": 38,
+      "item_type": 1,
+      "procs_with_minigame": true,
+      "procs_with_hedgehog": true,
+      "multi_drop_factor": 1,
+      "global_drop": false,
+      "affected_by_agris": false,
+      "is_primary": false,
+      "only_vendor_price": null,
+      "bdo_item": {
+        "bdo_id": 5006,
+        "name": "Spirit's Leaf",
+        "icon": "/images/New_Icon/03_etc/07_productmaterial/00005006.webp"
+      }
+    },
+    {
+      "id": 39,
+      "item_type": 1,
+      "procs_with_minigame": true,
+      "procs_with_hedgehog": true,
+      "multi_drop_factor": 1,
+      "global_drop": false,
+      "affected_by_agris": false,
+      "is_primary": false,
+      "only_vendor_price": null,
+      "bdo_item": {
+        "bdo_id": 5005,
+        "name": "Bloody Tree Knot",
+        "icon": "/images/New_Icon/03_etc/07_productmaterial/00005005.webp"
+      }
+    },
+    {
+      "id": 40,
+      "item_type": 1,
+      "procs_with_minigame": true,
+      "procs_with_hedgehog": true,
+      "multi_drop_factor": 1,
+      "global_drop": false,
+      "affected_by_agris": false,
+      "is_primary": false,
+      "only_vendor_price": null,
+      "bdo_item": {
+        "bdo_id": 5011,
+        "name": "Red Tree Lump",
+        "icon": "/images/New_Icon/03_etc/07_productmaterial/00005011.webp"
+      }
+    },
+    {
+      "id": 41,
+      "item_type": 2,
+      "procs_with_minigame": true,
+      "procs_with_hedgehog": true,
+      "multi_drop_factor": 1,
+      "global_drop": false,
+      "affected_by_agris": false,
+      "is_primary": false,
+      "only_vendor_price": null,
+      "bdo_item": {
+        "bdo_id": 821349,
+        "name": "Thin Essence of Life",
+        "icon": "/images/New_Icon/03_etc/07_productmaterial/00821349.webp"
+      }
+    },
+    {
+      "id": 42,
+      "item_type": 0,
+      "procs_with_minigame": true,
+      "procs_with_hedgehog": true,
+      "multi_drop_factor": 1,
+      "global_drop": false,
+      "affected_by_agris": true,
+      "is_primary": true,
+      "only_vendor_price": null,
+      "bdo_item": {
+        "bdo_id": 7913,
+        "name": "Wolf Meat",
+        "icon": "/images/New_Icon/03_etc/07_productmaterial/00007901.webp"
+      }
+    },
+    {
+      "id": 43,
+      "item_type": 2,
+      "procs_with_minigame": true,
+      "procs_with_hedgehog": true,
+      "multi_drop_factor": 1,
+      "global_drop": false,
+      "affected_by_agris": false,
+      "is_primary": false,
+      "only_vendor_price": null,
+      "bdo_item": {
+        "bdo_id": 821351,
+        "name": "Faint Wildsoul",
+        "icon": "/images/New_Icon/03_etc/07_productmaterial/00821351.webp"
+      }
+    },
+    {
+      "id": 44,
+      "item_type": 0,
+      "procs_with_minigame": true,
+      "procs_with_hedgehog": true,
+      "multi_drop_factor": 1,
+      "global_drop": false,
+      "affected_by_agris": true,
+      "is_primary": true,
+      "only_vendor_price": null,
+      "bdo_item": {
+        "bdo_id": 6014,
+        "name": "Wolf Hide",
+        "icon": "/images/New_Icon/03_etc/07_productmaterial/00006014.webp"
+      }
+    },
+    {
+      "id": 45,
+      "item_type": 0,
+      "procs_with_minigame": true,
+      "procs_with_hedgehog": true,
+      "multi_drop_factor": 1,
+      "global_drop": false,
+      "affected_by_agris": false,
+      "is_primary": false,
+      "only_vendor_price": null,
+      "bdo_item": {
+        "bdo_id": 6155,
+        "name": "Thick Fur",
+        "icon": "/images/New_Icon/03_etc/07_productmaterial/00006155.webp"
+      }
+    },
+    {
+      "id": 46,
+      "item_type": 1,
+      "procs_with_minigame": true,
+      "procs_with_hedgehog": true,
+      "multi_drop_factor": 1,
+      "global_drop": false,
+      "affected_by_agris": false,
+      "is_primary": false,
+      "only_vendor_price": null,
+      "bdo_item": {
+        "bdo_id": 5008,
+        "name": "Old Tree Bark",
+        "icon": "/images/New_Icon/03_etc/07_productmaterial/00005008.webp"
+      }
+    },
+    {
+      "id": 47,
+      "item_type": 1,
+      "procs_with_minigame": true,
+      "procs_with_hedgehog": true,
+      "multi_drop_factor": 1,
+      "global_drop": false,
+      "affected_by_agris": false,
+      "is_primary": false,
+      "only_vendor_price": null,
+      "bdo_item": {
+        "bdo_id": 5007,
+        "name": "Monk's Branch",
+        "icon": "/images/New_Icon/03_etc/07_productmaterial/00005007.webp"
+      }
+    },
+    {
+      "id": 48,
+      "item_type": 0,
+      "procs_with_minigame": true,
+      "procs_with_hedgehog": true,
+      "multi_drop_factor": 1,
+      "global_drop": false,
+      "affected_by_agris": false,
+      "is_primary": false,
+      "only_vendor_price": null,
+      "bdo_item": {
+        "bdo_id": 6151,
+        "name": "Soft Hide",
+        "icon": "/images/New_Icon/03_etc/07_productmaterial/00006151.webp"
+      }
+    },
+    {
+      "id": 49,
+      "item_type": 0,
+      "procs_with_minigame": true,
+      "procs_with_hedgehog": true,
+      "multi_drop_factor": 1,
+      "global_drop": false,
+      "affected_by_agris": true,
+      "is_primary": false,
+      "only_vendor_price": null,
+      "bdo_item": {
+        "bdo_id": 4605,
+        "name": "Log",
+        "icon": "/images/New_Icon/03_etc/07_productmaterial/00004605.webp"
+      }
+    },
+    {
+      "id": 50,
+      "item_type": 0,
+      "procs_with_minigame": true,
+      "procs_with_hedgehog": true,
+      "multi_drop_factor": 1,
+      "global_drop": false,
+      "affected_by_agris": true,
+      "is_primary": true,
+      "only_vendor_price": null,
+      "bdo_item": {
+        "bdo_id": 4607,
+        "name": "Cedar Timber",
+        "icon": "/images/New_Icon/03_etc/07_productmaterial/00004607.webp"
+      }
+    },
+    {
+      "id": 51,
+      "item_type": 0,
+      "procs_with_minigame": true,
+      "procs_with_hedgehog": true,
+      "multi_drop_factor": 1,
+      "global_drop": false,
+      "affected_by_agris": true,
+      "is_primary": true,
+      "only_vendor_price": null,
+      "bdo_item": {
+        "bdo_id": 4603,
+        "name": "Pine Timber",
+        "icon": "/images/New_Icon/03_etc/07_productmaterial/00004603.webp"
+      }
+    },
+    {
+      "id": 52,
+      "item_type": 0,
+      "procs_with_minigame": true,
+      "procs_with_hedgehog": true,
+      "multi_drop_factor": 1,
+      "global_drop": false,
+      "affected_by_agris": true,
+      "is_primary": true,
+      "only_vendor_price": null,
+      "bdo_item": {
+        "bdo_id": 4606,
+        "name": "Fir Timber",
+        "icon": "/images/New_Icon/03_etc/07_productmaterial/00004606.webp"
+      }
+    },
+    {
+      "id": 53,
+      "item_type": 0,
+      "procs_with_minigame": true,
+      "procs_with_hedgehog": true,
+      "multi_drop_factor": 1,
+      "global_drop": false,
+      "affected_by_agris": false,
+      "is_primary": false,
+      "only_vendor_price": null,
+      "bdo_item": {
+        "bdo_id": 4666,
+        "name": "Cedar Plank",
+        "icon": "/images/New_Icon/03_etc/07_productmaterial/00004666.webp"
+      }
+    },
+    {
+      "id": 54,
+      "item_type": 0,
+      "procs_with_minigame": true,
+      "procs_with_hedgehog": true,
+      "multi_drop_factor": 1,
+      "global_drop": false,
+      "affected_by_agris": false,
+      "is_primary": false,
+      "only_vendor_price": null,
+      "bdo_item": {
+        "bdo_id": 4657,
+        "name": "Pine Plank",
+        "icon": "/images/New_Icon/03_etc/07_productmaterial/00004657.webp"
+      }
+    },
+    {
+      "id": 55,
+      "item_type": 2,
+      "procs_with_minigame": true,
+      "procs_with_hedgehog": true,
+      "multi_drop_factor": 1,
+      "global_drop": false,
+      "affected_by_agris": false,
+      "is_primary": false,
+      "only_vendor_price": null,
+      "bdo_item": {
+        "bdo_id": 821348,
+        "name": "Withered Wood Chip",
+        "icon": "/images/New_Icon/03_etc/07_productmaterial/00821348.webp"
+      }
+    },
+    {
+      "id": 56,
+      "item_type": 1,
+      "procs_with_minigame": true,
+      "procs_with_hedgehog": true,
+      "multi_drop_factor": 5,
+      "global_drop": false,
+      "affected_by_agris": false,
+      "is_primary": false,
+      "only_vendor_price": null,
+      "bdo_item": {
+        "bdo_id": 5205,
+        "name": "Fruit of Nature",
+        "icon": "/images/New_Icon/03_etc/07_productmaterial/00005205.webp"
+      }
+    },
+    {
+      "id": 57,
+      "item_type": 0,
+      "procs_with_minigame": true,
+      "procs_with_hedgehog": true,
+      "multi_drop_factor": 1,
+      "global_drop": false,
+      "affected_by_agris": false,
+      "is_primary": false,
+      "only_vendor_price": null,
+      "bdo_item": {
+        "bdo_id": 4663,
+        "name": "Fir Plank",
+        "icon": "/images/New_Icon/03_etc/07_productmaterial/00004663.webp"
+      }
+    },
+    {
+      "id": 58,
+      "item_type": 2,
+      "procs_with_minigame": false,
+      "procs_with_hedgehog": true,
+      "multi_drop_factor": 1,
+      "global_drop": true,
+      "affected_by_agris": false,
+      "is_primary": false,
+      "only_vendor_price": null,
+      "bdo_item": {
+        "bdo_id": 735356,
+        "name": "Sethra's Artifact - Gathering EXP",
+        "icon": "/images/New_Icon/06_pc_equipitem/00_common/00_etc/00735356_1.webp"
+      }
+    },
+    {
+      "id": 59,
+      "item_type": 0,
+      "procs_with_minigame": true,
+      "procs_with_hedgehog": true,
+      "multi_drop_factor": 1,
+      "global_drop": false,
+      "affected_by_agris": false,
+      "is_primary": false,
+      "only_vendor_price": null,
+      "bdo_item": {
+        "bdo_id": 821255,
+        "name": "Rusalka's Coral",
+        "icon": "/images/New_Icon/03_etc/07_productmaterial/00821255.webp"
+      }
+    },
+    {
+      "id": 60,
+      "item_type": 0,
+      "procs_with_minigame": true,
+      "procs_with_hedgehog": true,
+      "multi_drop_factor": 1,
+      "global_drop": false,
+      "affected_by_agris": true,
+      "is_primary": false,
+      "only_vendor_price": null,
+      "bdo_item": {
+        "bdo_id": 4411,
+        "name": "Rough Blue Crystal",
+        "icon": "/images/New_Icon/03_etc/07_productmaterial/00004411.webp"
+      }
+    },
+    {
+      "id": 61,
+      "item_type": 0,
+      "procs_with_minigame": true,
+      "procs_with_hedgehog": true,
+      "multi_drop_factor": 1,
+      "global_drop": false,
+      "affected_by_agris": true,
+      "is_primary": false,
+      "only_vendor_price": null,
+      "bdo_item": {
+        "bdo_id": 4406,
+        "name": "Rough Translucent Crystal",
+        "icon": "/images/New_Icon/03_etc/07_productmaterial/00004406.webp"
+      }
+    },
+    {
+      "id": 62,
+      "item_type": 2,
+      "procs_with_minigame": true,
+      "procs_with_hedgehog": true,
+      "multi_drop_factor": 1,
+      "global_drop": false,
+      "affected_by_agris": false,
+      "is_primary": false,
+      "only_vendor_price": null,
+      "bdo_item": {
+        "bdo_id": 821353,
+        "name": "Dim Heartvein Shard",
+        "icon": "/images/New_Icon/03_etc/07_productmaterial/00821353.webp"
+      }
+    },
+    {
+      "id": 63,
+      "item_type": 0,
+      "procs_with_minigame": true,
+      "procs_with_hedgehog": true,
+      "multi_drop_factor": 1,
+      "global_drop": false,
+      "affected_by_agris": true,
+      "is_primary": false,
+      "only_vendor_price": null,
+      "bdo_item": {
+        "bdo_id": 4203,
+        "name": "Platinum Ore",
+        "icon": "/images/New_Icon/03_etc/07_productmaterial/00004203.webp"
+      }
+    },
+    {
+      "id": 64,
+      "item_type": 0,
+      "procs_with_minigame": true,
+      "procs_with_hedgehog": true,
+      "multi_drop_factor": 1,
+      "global_drop": false,
+      "affected_by_agris": true,
+      "is_primary": false,
+      "only_vendor_price": null,
+      "bdo_item": {
+        "bdo_id": 4201,
+        "name": "Silver Ore",
+        "icon": "/images/New_Icon/03_etc/07_productmaterial/00004201.webp"
+      }
+    },
+    {
+      "id": 65,
+      "item_type": 0,
+      "procs_with_minigame": true,
+      "procs_with_hedgehog": true,
+      "multi_drop_factor": 1,
+      "global_drop": false,
+      "affected_by_agris": false,
+      "is_primary": false,
+      "only_vendor_price": null,
+      "bdo_item": {
+        "bdo_id": 6501,
+        "name": "Coral Piece",
+        "icon": "/images/New_Icon/03_etc/07_productmaterial/00006501.webp"
+      }
+    },
+    {
+      "id": 66,
+      "item_type": 0,
+      "procs_with_minigame": true,
+      "procs_with_hedgehog": true,
+      "multi_drop_factor": 1,
+      "global_drop": false,
+      "affected_by_agris": false,
+      "is_primary": false,
+      "only_vendor_price": null,
+      "bdo_item": {
+        "bdo_id": 6533,
+        "name": "Coral Crystal",
+        "icon": "/images/New_Icon/03_etc/07_productmaterial/00006533.webp"
+      }
+    },
+    {
+      "id": 67,
+      "item_type": 0,
+      "procs_with_minigame": true,
+      "procs_with_hedgehog": true,
+      "multi_drop_factor": 1,
+      "global_drop": false,
+      "affected_by_agris": true,
+      "is_primary": false,
+      "only_vendor_price": null,
+      "bdo_item": {
+        "bdo_id": 4003,
+        "name": "Copper Ore",
+        "icon": "/images/New_Icon/03_etc/07_productmaterial/00004003.webp"
+      }
+    },
+    {
+      "id": 68,
+      "item_type": 0,
+      "procs_with_minigame": true,
+      "procs_with_hedgehog": true,
+      "multi_drop_factor": 1,
+      "global_drop": false,
+      "affected_by_agris": true,
+      "is_primary": false,
+      "only_vendor_price": null,
+      "bdo_item": {
+        "bdo_id": 4005,
+        "name": "Zinc Ore",
+        "icon": "/images/New_Icon/03_etc/07_productmaterial/00004005.webp"
+      }
+    },
+    {
+      "id": 69,
+      "item_type": 0,
+      "procs_with_minigame": true,
+      "procs_with_hedgehog": true,
+      "multi_drop_factor": 1,
+      "global_drop": false,
+      "affected_by_agris": true,
+      "is_primary": false,
+      "only_vendor_price": null,
+      "bdo_item": {
+        "bdo_id": 4202,
+        "name": "Gold Ore",
+        "icon": "/images/New_Icon/03_etc/07_productmaterial/00004202.webp"
+      }
+    },
+    {
+      "id": 70,
+      "item_type": 0,
+      "procs_with_minigame": true,
+      "procs_with_hedgehog": true,
+      "multi_drop_factor": 1,
+      "global_drop": false,
+      "affected_by_agris": false,
+      "is_primary": false,
+      "only_vendor_price": null,
+      "bdo_item": {
+        "bdo_id": 4057,
+        "name": "Melted Copper Shard",
+        "icon": "/images/New_Icon/03_etc/07_productmaterial/00004057.webp"
+      }
+    },
+    {
+      "id": 71,
+      "item_type": 0,
+      "procs_with_minigame": true,
+      "procs_with_hedgehog": true,
+      "multi_drop_factor": 1,
+      "global_drop": false,
+      "affected_by_agris": false,
+      "is_primary": false,
+      "only_vendor_price": null,
+      "bdo_item": {
+        "bdo_id": 4063,
+        "name": "Melted Zinc Shard",
+        "icon": "/images/New_Icon/03_etc/07_productmaterial/00004063.webp"
+      }
+    },
+    {
+      "id": 72,
+      "item_type": 0,
+      "procs_with_minigame": true,
+      "procs_with_hedgehog": true,
+      "multi_drop_factor": 1,
+      "global_drop": false,
+      "affected_by_agris": true,
+      "is_primary": false,
+      "only_vendor_price": null,
+      "bdo_item": {
+        "bdo_id": 4007,
+        "name": "Coal",
+        "icon": "/images/New_Icon/03_etc/07_productmaterial/00004007.webp"
+      }
+    },
+    {
+      "id": 73,
+      "item_type": 0,
+      "procs_with_minigame": true,
+      "procs_with_hedgehog": true,
+      "multi_drop_factor": 1,
+      "global_drop": false,
+      "affected_by_agris": true,
+      "is_primary": false,
+      "only_vendor_price": null,
+      "bdo_item": {
+        "bdo_id": 4402,
+        "name": "Rough Sapphire",
+        "icon": "/images/New_Icon/03_etc/07_productmaterial/00004402.webp"
+      }
+    },
+    {
+      "id": 74,
+      "item_type": 0,
+      "procs_with_minigame": true,
+      "procs_with_hedgehog": true,
+      "multi_drop_factor": 1,
+      "global_drop": false,
+      "affected_by_agris": false,
+      "is_primary": false,
+      "only_vendor_price": null,
+      "bdo_item": {
+        "bdo_id": 4051,
+        "name": "Melted Iron Shard",
+        "icon": "/images/New_Icon/03_etc/07_productmaterial/00004051.webp"
+      }
+    },
+    {
+      "id": 75,
+      "item_type": 0,
+      "procs_with_minigame": true,
+      "procs_with_hedgehog": true,
+      "multi_drop_factor": 1,
+      "global_drop": false,
+      "affected_by_agris": true,
+      "is_primary": false,
+      "only_vendor_price": null,
+      "bdo_item": {
+        "bdo_id": 4404,
+        "name": "Rough Emerald",
+        "icon": "/images/New_Icon/03_etc/07_productmaterial/00004404.webp"
+      }
+    },
+    {
+      "id": 76,
+      "item_type": 0,
+      "procs_with_minigame": true,
+      "procs_with_hedgehog": true,
+      "multi_drop_factor": 1,
+      "global_drop": false,
+      "affected_by_agris": true,
+      "is_primary": false,
+      "only_vendor_price": null,
+      "bdo_item": {
+        "bdo_id": 4403,
+        "name": "Rough Topaz",
+        "icon": "/images/New_Icon/03_etc/07_productmaterial/00004403.webp"
+      }
+    },
+    {
+      "id": 77,
+      "item_type": 0,
+      "procs_with_minigame": true,
+      "procs_with_hedgehog": true,
+      "multi_drop_factor": 1,
+      "global_drop": false,
+      "affected_by_agris": true,
+      "is_primary": false,
+      "only_vendor_price": null,
+      "bdo_item": {
+        "bdo_id": 4401,
+        "name": "Rough Ruby",
+        "icon": "/images/New_Icon/03_etc/07_productmaterial/00004401.webp"
+      }
+    },
+    {
+      "id": 78,
+      "item_type": 0,
+      "procs_with_minigame": true,
+      "procs_with_hedgehog": true,
+      "multi_drop_factor": 1,
+      "global_drop": false,
+      "affected_by_agris": true,
+      "is_primary": false,
+      "only_vendor_price": null,
+      "bdo_item": {
+        "bdo_id": 4405,
+        "name": "Rough Diamond",
+        "icon": "/images/New_Icon/03_etc/07_productmaterial/00004405.webp"
+      }
+    },
+    {
+      "id": 79,
+      "item_type": 0,
+      "procs_with_minigame": true,
+      "procs_with_hedgehog": true,
+      "multi_drop_factor": 1,
+      "global_drop": false,
+      "affected_by_agris": true,
+      "is_primary": true,
+      "only_vendor_price": null,
+      "bdo_item": {
+        "bdo_id": 5439,
+        "name": "Wild Grass",
+        "icon": "/images/New_Icon/03_etc/07_productmaterial/00005439.webp"
+      }
+    },
+    {
+      "id": 80,
+      "item_type": 0,
+      "procs_with_minigame": true,
+      "procs_with_hedgehog": true,
+      "multi_drop_factor": 1,
+      "global_drop": false,
+      "affected_by_agris": true,
+      "is_primary": false,
+      "only_vendor_price": null,
+      "bdo_item": {
+        "bdo_id": 5402,
+        "name": "Silver Azalea",
+        "icon": "/images/New_Icon/03_etc/07_productmaterial/00005402.webp"
+      }
+    },
+    {
+      "id": 81,
+      "item_type": 0,
+      "procs_with_minigame": true,
+      "procs_with_hedgehog": true,
+      "multi_drop_factor": 1,
+      "global_drop": false,
+      "affected_by_agris": true,
+      "is_primary": false,
+      "only_vendor_price": null,
+      "bdo_item": {
+        "bdo_id": 5401,
+        "name": "Sunrise Herb",
+        "icon": "/images/New_Icon/03_etc/07_productmaterial/00005401.webp"
+      }
+    },
+    {
+      "id": 82,
+      "item_type": 0,
+      "procs_with_minigame": true,
+      "procs_with_hedgehog": true,
+      "multi_drop_factor": 1,
+      "global_drop": false,
+      "affected_by_agris": true,
+      "is_primary": false,
+      "only_vendor_price": null,
+      "bdo_item": {
+        "bdo_id": 5403,
+        "name": "Fire Flake Flower",
+        "icon": "/images/New_Icon/03_etc/07_productmaterial/00005403.webp"
+      }
+    },
+    {
+      "id": 83,
+      "item_type": 0,
+      "procs_with_minigame": true,
+      "procs_with_hedgehog": true,
+      "multi_drop_factor": 1,
+      "global_drop": false,
+      "affected_by_agris": true,
+      "is_primary": false,
+      "only_vendor_price": null,
+      "bdo_item": {
+        "bdo_id": 5404,
+        "name": "Dry Mane Grass",
+        "icon": "/images/New_Icon/03_etc/07_productmaterial/00005404.webp"
+      }
+    },
+    {
+      "id": 84,
+      "item_type": 0,
+      "procs_with_minigame": true,
+      "procs_with_hedgehog": true,
+      "multi_drop_factor": 1,
+      "global_drop": false,
+      "affected_by_agris": true,
+      "is_primary": false,
+      "only_vendor_price": null,
+      "bdo_item": {
+        "bdo_id": 5405,
+        "name": "Silk Honey Grass",
+        "icon": "/images/New_Icon/03_etc/07_productmaterial/00005405.webp"
+      }
+    },
+    {
+      "id": 85,
+      "item_type": 0,
+      "procs_with_minigame": true,
+      "procs_with_hedgehog": true,
+      "multi_drop_factor": 1,
+      "global_drop": false,
+      "affected_by_agris": false,
+      "is_primary": false,
+      "only_vendor_price": null,
+      "bdo_item": {
+        "bdo_id": 5406,
+        "name": "Everlasting Herb",
+        "icon": "/images/New_Icon/03_etc/07_productmaterial/00005406.webp"
+      }
+    },
+    {
+      "id": 86,
+      "item_type": 2,
+      "procs_with_minigame": true,
+      "procs_with_hedgehog": true,
+      "multi_drop_factor": 1,
+      "global_drop": false,
+      "affected_by_agris": false,
+      "is_primary": false,
+      "only_vendor_price": null,
+      "bdo_item": {
+        "bdo_id": 821350,
+        "name": "Cracked Terrashard",
+        "icon": "/images/New_Icon/03_etc/07_productmaterial/00821350.webp"
+      }
+    },
+    {
+      "id": 87,
+      "item_type": 0,
+      "procs_with_minigame": true,
+      "procs_with_hedgehog": true,
+      "multi_drop_factor": 1,
+      "global_drop": false,
+      "affected_by_agris": true,
+      "is_primary": true,
+      "only_vendor_price": null,
+      "bdo_item": {
+        "bdo_id": 5010,
+        "name": "Cedar Sap",
+        "icon": "/images/New_Icon/03_etc/07_productmaterial/00005010.webp"
+      }
+    },
+    {
+      "id": 88,
+      "item_type": 0,
+      "procs_with_minigame": true,
+      "procs_with_hedgehog": true,
+      "multi_drop_factor": 1,
+      "global_drop": false,
+      "affected_by_agris": true,
+      "is_primary": true,
+      "only_vendor_price": null,
+      "bdo_item": {
+        "bdo_id": 5024,
+        "name": "Snowfield Cedar Sap",
+        "icon": "/images/New_Icon/03_etc/07_productmaterial/00005024.webp"
+      }
+    },
+    {
+      "id": 89,
+      "item_type": 0,
+      "procs_with_minigame": true,
+      "procs_with_hedgehog": true,
+      "multi_drop_factor": 1,
+      "global_drop": false,
+      "affected_by_agris": true,
+      "is_primary": true,
+      "only_vendor_price": null,
+      "bdo_item": {
+        "bdo_id": 5003,
+        "name": "Pine Sap",
+        "icon": "/images/New_Icon/03_etc/07_productmaterial/00005003.webp"
+      }
+    },
+    {
+      "id": 90,
+      "item_type": 0,
+      "procs_with_minigame": true,
+      "procs_with_hedgehog": true,
+      "multi_drop_factor": 1,
+      "global_drop": false,
+      "affected_by_agris": true,
+      "is_primary": true,
+      "only_vendor_price": null,
+      "bdo_item": {
+        "bdo_id": 4624,
+        "name": "Caphras Tree Timber",
+        "icon": "/images/New_Icon/03_etc/07_productmaterial/00821116.webp"
+      }
+    },
+    {
+      "id": 91,
+      "item_type": 0,
+      "procs_with_minigame": true,
+      "procs_with_hedgehog": true,
+      "multi_drop_factor": 1,
+      "global_drop": false,
+      "affected_by_agris": false,
+      "is_primary": false,
+      "only_vendor_price": null,
+      "bdo_item": {
+        "bdo_id": 4724,
+        "name": "Caphras Tree Plank",
+        "icon": "/images/New_Icon/03_etc/07_productmaterial/00004724.webp"
+      }
+    },
+    {
+      "id": 92,
+      "item_type": 0,
+      "procs_with_minigame": true,
+      "procs_with_hedgehog": true,
+      "multi_drop_factor": 1,
+      "global_drop": false,
+      "affected_by_agris": false,
+      "is_primary": false,
+      "only_vendor_price": null,
+      "bdo_item": {
+        "bdo_id": 821259,
+        "name": "Caphras Essence",
+        "icon": "/images/New_Icon/03_etc/07_productmaterial/00821271.webp"
+      }
+    },
+    {
+      "id": 93,
+      "item_type": 0,
+      "procs_with_minigame": true,
+      "procs_with_hedgehog": true,
+      "multi_drop_factor": 1,
+      "global_drop": false,
+      "affected_by_agris": true,
+      "is_primary": true,
+      "only_vendor_price": null,
+      "bdo_item": {
+        "bdo_id": 6203,
+        "name": "Fox Blood",
+        "icon": "/images/New_Icon/03_etc/07_productmaterial/00006210.webp"
+      }
+    },
+    {
+      "id": 94,
+      "item_type": 0,
+      "procs_with_minigame": true,
+      "procs_with_hedgehog": true,
+      "multi_drop_factor": 1,
+      "global_drop": false,
+      "affected_by_agris": true,
+      "is_primary": true,
+      "only_vendor_price": null,
+      "bdo_item": {
+        "bdo_id": 5004,
+        "name": "Birch Sap",
+        "icon": "/images/New_Icon/03_etc/07_productmaterial/00005004.webp"
+      }
+    },
+    {
+      "id": 95,
+      "item_type": 0,
+      "procs_with_minigame": true,
+      "procs_with_hedgehog": true,
+      "multi_drop_factor": 1,
+      "global_drop": false,
+      "affected_by_agris": true,
+      "is_primary": true,
+      "only_vendor_price": null,
+      "bdo_item": {
+        "bdo_id": 5020,
+        "name": "Thuja Sap",
+        "icon": "/images/New_Icon/03_etc/07_productmaterial/00005020.webp"
+      }
+    },
+    {
+      "id": 96,
+      "item_type": 0,
+      "procs_with_minigame": true,
+      "procs_with_hedgehog": true,
+      "multi_drop_factor": 1,
+      "global_drop": false,
+      "affected_by_agris": true,
+      "is_primary": true,
+      "only_vendor_price": null,
+      "bdo_item": {
+        "bdo_id": 6002,
+        "name": "Sheep Hide",
+        "icon": "/images/New_Icon/03_etc/07_productmaterial/00006002.webp"
+      }
+    },
+    {
+      "id": 97,
+      "item_type": 0,
+      "procs_with_minigame": true,
+      "procs_with_hedgehog": true,
+      "multi_drop_factor": 1,
+      "global_drop": false,
+      "affected_by_agris": true,
+      "is_primary": true,
+      "only_vendor_price": null,
+      "bdo_item": {
+        "bdo_id": 7924,
+        "name": "Scorpion Meat",
+        "icon": "/images/New_Icon/03_etc/07_productmaterial/00007924.webp"
+      }
+    },
+    {
+      "id": 98,
+      "item_type": 0,
+      "procs_with_minigame": true,
+      "procs_with_hedgehog": true,
+      "multi_drop_factor": 1,
+      "global_drop": false,
+      "affected_by_agris": true,
+      "is_primary": true,
+      "only_vendor_price": null,
+      "bdo_item": {
+        "bdo_id": 7922,
+        "name": "Snake Meat",
+        "icon": "/images/New_Icon/03_etc/07_productmaterial/00007922.webp"
+      }
+    },
+    {
+      "id": 99,
+      "item_type": 0,
+      "procs_with_minigame": true,
+      "procs_with_hedgehog": true,
+      "multi_drop_factor": 1,
+      "global_drop": false,
+      "affected_by_agris": true,
+      "is_primary": true,
+      "only_vendor_price": null,
+      "bdo_item": {
+        "bdo_id": 7923,
+        "name": "Lion Meat",
+        "icon": "/images/New_Icon/03_etc/07_productmaterial/00007923.webp"
+      }
+    },
+    {
+      "id": 101,
+      "item_type": 2,
+      "procs_with_minigame": true,
+      "procs_with_hedgehog": true,
+      "multi_drop_factor": 1,
+      "global_drop": false,
+      "affected_by_agris": false,
+      "is_primary": false,
+      "only_vendor_price": null,
+      "bdo_item": {
+        "bdo_id": 821371,
+        "name": "Fairy's Breath",
+        "icon": "/images/New_Icon/03_etc/07_productmaterial/000820014.webp"
+      }
+    },
+    {
+      "id": 102,
+      "item_type": 1,
+      "procs_with_minigame": true,
+      "procs_with_hedgehog": true,
+      "multi_drop_factor": 1,
+      "global_drop": false,
+      "affected_by_agris": false,
+      "is_primary": false,
+      "only_vendor_price": null,
+      "bdo_item": {
+        "bdo_id": 721048,
+        "name": "Time-filled Fragment",
+        "icon": "/images/New_Icon/03_etc/11_enchant_material/00721048.webp"
+      }
+    },
+    {
+      "id": 103,
+      "item_type": 0,
+      "procs_with_minigame": true,
+      "procs_with_hedgehog": true,
+      "multi_drop_factor": 1,
+      "global_drop": false,
+      "affected_by_agris": true,
+      "is_primary": true,
+      "only_vendor_price": null,
+      "bdo_item": {
+        "bdo_id": 5025,
+        "name": "Caphras Tree Sap",
+        "icon": "/images/New_Icon/03_etc/07_productmaterial/00005025.webp"
+      }
+    },
+    {
+      "id": 104,
+      "item_type": 0,
+      "procs_with_minigame": true,
+      "procs_with_hedgehog": true,
+      "multi_drop_factor": 1,
+      "global_drop": false,
+      "affected_by_agris": true,
+      "is_primary": true,
+      "only_vendor_price": null,
+      "bdo_item": {
+        "bdo_id": 5023,
+        "name": "Thornwood Sap",
+        "icon": "/images/New_Icon/03_etc/07_productmaterial/00005023.webp"
+      }
+    },
+    {
+      "id": 105,
+      "item_type": 0,
+      "procs_with_minigame": true,
+      "procs_with_hedgehog": true,
+      "multi_drop_factor": 1,
+      "global_drop": false,
+      "affected_by_agris": true,
+      "is_primary": true,
+      "only_vendor_price": null,
+      "bdo_item": {
+        "bdo_id": 5013,
+        "name": "Acacia Sap",
+        "icon": "/images/New_Icon/03_etc/07_productmaterial/00005013.webp"
+      }
+    },
+    {
+      "id": 106,
+      "item_type": 0,
+      "procs_with_minigame": true,
+      "procs_with_hedgehog": true,
+      "multi_drop_factor": 1,
+      "global_drop": false,
+      "affected_by_agris": true,
+      "is_primary": true,
+      "only_vendor_price": null,
+      "bdo_item": {
+        "bdo_id": 5016,
+        "name": "Cactus Sap",
+        "icon": "/images/New_Icon/03_etc/07_productmaterial/00005016.webp"
+      }
+    },
+    {
+      "id": 107,
+      "item_type": 0,
+      "procs_with_minigame": true,
+      "procs_with_hedgehog": true,
+      "multi_drop_factor": 1,
+      "global_drop": false,
+      "affected_by_agris": true,
+      "is_primary": true,
+      "only_vendor_price": null,
+      "bdo_item": {
+        "bdo_id": 821070,
+        "name": "Bamboo Sap",
+        "icon": "/images/New_Icon/03_etc/07_productmaterial/00820137.webp"
+      }
+    },
+    {
+      "id": 108,
+      "item_type": 0,
+      "procs_with_minigame": true,
+      "procs_with_hedgehog": true,
+      "multi_drop_factor": 1,
+      "global_drop": false,
+      "affected_by_agris": true,
+      "is_primary": true,
+      "only_vendor_price": null,
+      "bdo_item": {
+        "bdo_id": 5014,
+        "name": "Elder Tree Sap",
+        "icon": "/images/New_Icon/03_etc/07_productmaterial/00005014.webp"
+      }
+    },
+    {
+      "id": 109,
+      "item_type": 0,
+      "procs_with_minigame": false,
+      "procs_with_hedgehog": true,
+      "multi_drop_factor": 1,
+      "global_drop": false,
+      "affected_by_agris": true,
+      "is_primary": true,
+      "only_vendor_price": null,
+      "bdo_item": {
+        "bdo_id": 5018,
+        "name": "Loopy Tree Sap",
+        "icon": "/images/New_Icon/03_etc/07_productmaterial/00005018.webp"
+      }
+    },
+    {
+      "id": 110,
+      "item_type": 0,
+      "procs_with_minigame": true,
+      "procs_with_hedgehog": true,
+      "multi_drop_factor": 1,
+      "global_drop": false,
+      "affected_by_agris": true,
+      "is_primary": true,
+      "only_vendor_price": null,
+      "bdo_item": {
+        "bdo_id": 5017,
+        "name": "Moss Tree Sap",
+        "icon": "/images/New_Icon/03_etc/07_productmaterial/00005017.webp"
+      }
+    },
+    {
+      "id": 111,
+      "item_type": 0,
+      "procs_with_minigame": true,
+      "procs_with_hedgehog": true,
+      "multi_drop_factor": 1,
+      "global_drop": false,
+      "affected_by_agris": true,
+      "is_primary": true,
+      "only_vendor_price": null,
+      "bdo_item": {
+        "bdo_id": 5002,
+        "name": "Maple Sap",
+        "icon": "/images/New_Icon/03_etc/07_productmaterial/00005002.webp"
+      }
+    },
+    {
+      "id": 112,
+      "item_type": 0,
+      "procs_with_minigame": true,
+      "procs_with_hedgehog": true,
+      "multi_drop_factor": 1,
+      "global_drop": false,
+      "affected_by_agris": true,
+      "is_primary": true,
+      "only_vendor_price": null,
+      "bdo_item": {
+        "bdo_id": 5015,
+        "name": "Palm Sap",
+        "icon": "/images/New_Icon/03_etc/07_productmaterial/00005015.webp"
+      }
+    },
+    {
+      "id": 113,
+      "item_type": 0,
+      "procs_with_minigame": true,
+      "procs_with_hedgehog": true,
+      "multi_drop_factor": 1,
+      "global_drop": false,
+      "affected_by_agris": true,
+      "is_primary": true,
+      "only_vendor_price": null,
+      "bdo_item": {
+        "bdo_id": 6219,
+        "name": "Bat Blood",
+        "icon": "/images/New_Icon/03_etc/07_productmaterial/00006217.webp"
+      }
+    },
+    {
+      "id": 114,
+      "item_type": 0,
+      "procs_with_minigame": true,
+      "procs_with_hedgehog": true,
+      "multi_drop_factor": 1,
+      "global_drop": false,
+      "affected_by_agris": true,
+      "is_primary": true,
+      "only_vendor_price": null,
+      "bdo_item": {
+        "bdo_id": 6213,
+        "name": "Bear Blood",
+        "icon": "/images/New_Icon/03_etc/07_productmaterial/00006207.webp"
+      }
+    },
+    {
+      "id": 115,
+      "item_type": 0,
+      "procs_with_minigame": true,
+      "procs_with_hedgehog": true,
+      "multi_drop_factor": 1,
+      "global_drop": false,
+      "affected_by_agris": true,
+      "is_primary": true,
+      "only_vendor_price": null,
+      "bdo_item": {
+        "bdo_id": 6222,
+        "name": "Cobra Blood",
+        "icon": "/images/New_Icon/03_etc/07_productmaterial/00006217.webp"
+      }
+    },
+    {
+      "id": 116,
+      "item_type": 0,
+      "procs_with_minigame": true,
+      "procs_with_hedgehog": true,
+      "multi_drop_factor": 1,
+      "global_drop": false,
+      "affected_by_agris": true,
+      "is_primary": true,
+      "only_vendor_price": null,
+      "bdo_item": {
+        "bdo_id": 6207,
+        "name": "Dinosaur Blood",
+        "icon": "/images/New_Icon/03_etc/07_productmaterial/00006207.webp"
+      }
+    },
+    {
+      "id": 117,
+      "item_type": 0,
+      "procs_with_minigame": true,
+      "procs_with_hedgehog": true,
+      "multi_drop_factor": 1,
+      "global_drop": false,
+      "affected_by_agris": true,
+      "is_primary": true,
+      "only_vendor_price": null,
+      "bdo_item": {
+        "bdo_id": 6218,
+        "name": "Flamingo Blood",
+        "icon": "/images/New_Icon/03_etc/07_productmaterial/00006226.webp"
+      }
+    },
+    {
+      "id": 118,
+      "item_type": 0,
+      "procs_with_minigame": true,
+      "procs_with_hedgehog": true,
+      "multi_drop_factor": 1,
+      "global_drop": false,
+      "affected_by_agris": true,
+      "is_primary": true,
+      "only_vendor_price": null,
+      "bdo_item": {
+        "bdo_id": 6216,
+        "name": "Cheetah Dragon Blood",
+        "icon": "/images/New_Icon/03_etc/07_productmaterial/00006226.webp"
+      }
+    },
+    {
+      "id": 119,
+      "item_type": 0,
+      "procs_with_minigame": true,
+      "procs_with_hedgehog": true,
+      "multi_drop_factor": 1,
+      "global_drop": false,
+      "affected_by_agris": true,
+      "is_primary": true,
+      "only_vendor_price": null,
+      "bdo_item": {
+        "bdo_id": 6228,
+        "name": "Goat Blood",
+        "icon": "/images/New_Icon/03_etc/07_productmaterial/00006201.webp"
+      }
+    },
+    {
+      "id": 120,
+      "item_type": 0,
+      "procs_with_minigame": true,
+      "procs_with_hedgehog": true,
+      "multi_drop_factor": 1,
+      "global_drop": false,
+      "affected_by_agris": true,
+      "is_primary": true,
+      "only_vendor_price": null,
+      "bdo_item": {
+        "bdo_id": 6217,
+        "name": "Kuku Bird Blood",
+        "icon": "/images/New_Icon/03_etc/07_productmaterial/00006217.webp"
+      }
+    },
+    {
+      "id": 121,
+      "item_type": 0,
+      "procs_with_minigame": true,
+      "procs_with_hedgehog": true,
+      "multi_drop_factor": 1,
+      "global_drop": false,
+      "affected_by_agris": true,
+      "is_primary": true,
+      "only_vendor_price": null,
+      "bdo_item": {
+        "bdo_id": 6223,
+        "name": "Lion Blood",
+        "icon": "/images/New_Icon/03_etc/07_productmaterial/00006207.webp"
+      }
+    },
+    {
+      "id": 122,
+      "item_type": 0,
+      "procs_with_minigame": true,
+      "procs_with_hedgehog": true,
+      "multi_drop_factor": 1,
+      "global_drop": false,
+      "affected_by_agris": true,
+      "is_primary": true,
+      "only_vendor_price": null,
+      "bdo_item": {
+        "bdo_id": 6208,
+        "name": "Lizard Blood",
+        "icon": "/images/New_Icon/03_etc/07_productmaterial/00006217.webp"
+      }
+    },
+    {
+      "id": 123,
+      "item_type": 0,
+      "procs_with_minigame": true,
+      "procs_with_hedgehog": true,
+      "multi_drop_factor": 1,
+      "global_drop": false,
+      "affected_by_agris": true,
+      "is_primary": true,
+      "only_vendor_price": null,
+      "bdo_item": {
+        "bdo_id": 6227,
+        "name": "Llama Blood",
+        "icon": "/images/New_Icon/03_etc/07_productmaterial/00006201.webp"
+      }
+    },
+    {
+      "id": 124,
+      "item_type": 0,
+      "procs_with_minigame": true,
+      "procs_with_hedgehog": true,
+      "multi_drop_factor": 1,
+      "global_drop": false,
+      "affected_by_agris": true,
+      "is_primary": true,
+      "only_vendor_price": null,
+      "bdo_item": {
+        "bdo_id": 6226,
+        "name": "Marmot Blood",
+        "icon": "/images/New_Icon/03_etc/07_productmaterial/00006210.webp"
+      }
+    },
+    {
+      "id": 125,
+      "item_type": 0,
+      "procs_with_minigame": true,
+      "procs_with_hedgehog": true,
+      "multi_drop_factor": 1,
+      "global_drop": false,
+      "affected_by_agris": true,
+      "is_primary": true,
+      "only_vendor_price": null,
+      "bdo_item": {
+        "bdo_id": 6211,
+        "name": "Monkey Blood",
+        "icon": "/images/New_Icon/03_etc/07_productmaterial/00006210.webp"
+      }
+    },
+    {
+      "id": 126,
+      "item_type": 0,
+      "procs_with_minigame": true,
+      "procs_with_hedgehog": true,
+      "multi_drop_factor": 1,
+      "global_drop": false,
+      "affected_by_agris": true,
+      "is_primary": true,
+      "only_vendor_price": null,
+      "bdo_item": {
+        "bdo_id": 6025,
+        "name": "Soft Ferri Feather",
+        "icon": "/images/New_Icon/03_etc/07_productmaterial/00006017.webp"
+      }
+    },
+    {
+      "id": 127,
+      "item_type": 0,
+      "procs_with_minigame": true,
+      "procs_with_hedgehog": true,
+      "multi_drop_factor": 1,
+      "global_drop": false,
+      "affected_by_agris": false,
+      "is_primary": false,
+      "only_vendor_price": null,
+      "bdo_item": {
+        "bdo_id": 6157,
+        "name": "Lightweight Plume",
+        "icon": "/images/New_Icon/03_etc/07_productmaterial/00006157.webp"
+      }
+    }
+  ],
+  "droprates": [
+    {
+      "id": 25107,
+      "gathering_item_type_id": 79,
+      "gathering_type_id": 4,
+      "droprate": 1,
+      "dropamount": 3,
+      "drop_min": "2.00",
+      "drop_max": "4.00"
+    },
+    {
+      "id": 25108,
+      "gathering_item_type_id": 80,
+      "gathering_type_id": 4,
+      "droprate": 0.37699886397175,
+      "dropamount": 3,
+      "drop_min": "2.00",
+      "drop_max": "4.00"
+    },
+    {
+      "id": 25109,
+      "gathering_item_type_id": 81,
+      "gathering_type_id": 4,
+      "droprate": 0.36224544449645,
+      "dropamount": 3,
+      "drop_min": "2.00",
+      "drop_max": "4.00"
+    },
+    {
+      "id": 25110,
+      "gathering_item_type_id": 82,
+      "gathering_type_id": 4,
+      "droprate": 0.15088680685844,
+      "dropamount": 3,
+      "drop_min": "2.00",
+      "drop_max": "4.00"
+    },
+    {
+      "id": 25111,
+      "gathering_item_type_id": 83,
+      "gathering_type_id": 4,
+      "droprate": 0.15219262062043,
+      "dropamount": 3,
+      "drop_min": "2.00",
+      "drop_max": "4.00"
+    },
+    {
+      "id": 25112,
+      "gathering_item_type_id": 84,
+      "gathering_type_id": 4,
+      "droprate": 0.14802285332462,
+      "dropamount": 3,
+      "drop_min": "2.00",
+      "drop_max": "4.00"
+    },
+    {
+      "id": 25113,
+      "gathering_item_type_id": 56,
+      "gathering_type_id": 4,
+      "droprate": 0.029306888605035,
+      "dropamount": 1.5,
+      "drop_min": "1.00",
+      "drop_max": "2.00"
+    },
+    {
+      "id": 25114,
+      "gathering_item_type_id": 22,
+      "gathering_type_id": 4,
+      "droprate": 0.13445928121771,
+      "dropamount": 1,
+      "drop_min": "1.00",
+      "drop_max": "1.00"
+    },
+    {
+      "id": 25115,
+      "gathering_item_type_id": 85,
+      "gathering_type_id": 4,
+      "droprate": 0.052743932628656,
+      "dropamount": 1,
+      "drop_min": "1.00",
+      "drop_max": "1.00"
+    },
+    {
+      "id": 25116,
+      "gathering_item_type_id": 17,
+      "gathering_type_id": 4,
+      "droprate": 0.018453196116194,
+      "dropamount": 1,
+      "drop_min": "1.00",
+      "drop_max": "1.00"
+    },
+    {
+      "id": 25117,
+      "gathering_item_type_id": 23,
+      "gathering_type_id": 4,
+      "droprate": 0.0088325909034155,
+      "dropamount": 1.5,
+      "drop_min": "1.00",
+      "drop_max": "2.00"
+    },
+    {
+      "id": 25118,
+      "gathering_item_type_id": 16,
+      "gathering_type_id": 4,
+      "droprate": 0.015739417637483,
+      "dropamount": 1,
+      "drop_min": "1.00",
+      "drop_max": "1.00"
+    },
+    {
+      "id": 25119,
+      "gathering_item_type_id": 19,
+      "gathering_type_id": 4,
+      "droprate": 0.014677042433444,
+      "dropamount": 1,
+      "drop_min": "1.00",
+      "drop_max": "1.00"
+    },
+    {
+      "id": 25120,
+      "gathering_item_type_id": 86,
+      "gathering_type_id": 4,
+      "droprate": 0.0094721313910318,
+      "dropamount": 1,
+      "drop_min": "1.00",
+      "drop_max": "1.00"
+    },
+    {
+      "id": 25121,
+      "gathering_item_type_id": 18,
+      "gathering_type_id": 4,
+      "droprate": 0.0015230182302297,
+      "dropamount": 1,
+      "drop_min": "1.00",
+      "drop_max": "1.00"
+    },
+    {
+      "id": 25122,
+      "gathering_item_type_id": 21,
+      "gathering_type_id": 4,
+      "droprate": 0.00071973321321237,
+      "dropamount": 1,
+      "drop_min": "1.00",
+      "drop_max": "1.00"
+    },
+    {
+      "id": 25123,
+      "gathering_item_type_id": 25,
+      "gathering_type_id": 4,
+      "droprate": 0.00054309323695305,
+      "dropamount": 1,
+      "drop_min": "1.00",
+      "drop_max": "1.00"
+    },
+    {
+      "id": 25124,
+      "gathering_item_type_id": 20,
+      "gathering_type_id": 4,
+      "droprate": 0.00030157707190277,
+      "dropamount": 1,
+      "drop_min": "1.00",
+      "drop_max": "1.00"
+    },
+    {
+      "id": 25125,
+      "gathering_item_type_id": 101,
+      "gathering_type_id": 4,
+      "droprate": 0.031267834541363,
+      "dropamount": 3,
+      "drop_min": "2.00",
+      "drop_max": "4.00"
+    },
+    {
+      "id": 25126,
+      "gathering_item_type_id": 58,
+      "gathering_type_id": 4,
+      "droprate": 2.5613834564024E-05,
+      "dropamount": 1,
+      "drop_min": "1.00",
+      "drop_max": "1.00"
+    },
+    {
+      "id": 25127,
+      "gathering_item_type_id": 30,
+      "gathering_type_id": 4,
+      "droprate": 3.0045299231937E-05,
+      "dropamount": 1,
+      "drop_min": "1.00",
+      "drop_max": "1.00"
+    },
+    {
+      "id": 25128,
+      "gathering_item_type_id": 27,
+      "gathering_type_id": 4,
+      "droprate": 4.9960282074114E-05,
+      "dropamount": 1,
+      "drop_min": "1.00",
+      "drop_max": "1.00"
+    },
+    {
+      "id": 25129,
+      "gathering_item_type_id": 29,
+      "gathering_type_id": 4,
+      "droprate": 1.8130865809419E-05,
+      "dropamount": 1,
+      "drop_min": "1.00",
+      "drop_max": "1.00"
+    },
+    {
+      "id": 25130,
+      "gathering_item_type_id": 28,
+      "gathering_type_id": 4,
+      "droprate": 2.0988543480274E-05,
+      "dropamount": 1,
+      "drop_min": "1.00",
+      "drop_max": "1.00"
+    },
+    {
+      "id": 25131,
+      "gathering_item_type_id": 31,
+      "gathering_type_id": 4,
+      "droprate": 3.1678494369403E-05,
+      "dropamount": 1,
+      "drop_min": "1.00",
+      "drop_max": "1.00"
+    },
+    {
+      "id": 25132,
+      "gathering_item_type_id": 32,
+      "gathering_type_id": 4,
+      "droprate": 3.6031478477848E-05,
+      "dropamount": 1,
+      "drop_min": "1.00",
+      "drop_max": "1.00"
+    },
+    {
+      "id": 25133,
+      "gathering_item_type_id": 42,
+      "gathering_type_id": 5,
+      "droprate": 1,
+      "dropamount": 3,
+      "drop_min": "2.00",
+      "drop_max": "4.00"
+    },
+    {
+      "id": 25134,
+      "gathering_item_type_id": 22,
+      "gathering_type_id": 5,
+      "droprate": 0.099775492082465,
+      "dropamount": 1,
+      "drop_min": "1.00",
+      "drop_max": "1.00"
+    },
+    {
+      "id": 25135,
+      "gathering_item_type_id": 17,
+      "gathering_type_id": 5,
+      "droprate": 0.057598677475586,
+      "dropamount": 1,
+      "drop_min": "1.00",
+      "drop_max": "1.00"
+    },
+    {
+      "id": 25136,
+      "gathering_item_type_id": 16,
+      "gathering_type_id": 5,
+      "droprate": 0.023202215670347,
+      "dropamount": 1,
+      "drop_min": "1.00",
+      "drop_max": "1.00"
+    },
+    {
+      "id": 25137,
+      "gathering_item_type_id": 19,
+      "gathering_type_id": 5,
+      "droprate": 0.0083930195054253,
+      "dropamount": 1,
+      "drop_min": "1.00",
+      "drop_max": "1.00"
+    },
+    {
+      "id": 25138,
+      "gathering_item_type_id": 23,
+      "gathering_type_id": 5,
+      "droprate": 0.0080030692353202,
+      "dropamount": 1.5,
+      "drop_min": "1.00",
+      "drop_max": "2.00"
+    },
+    {
+      "id": 25139,
+      "gathering_item_type_id": 43,
+      "gathering_type_id": 5,
+      "droprate": 0.011342011795198,
+      "dropamount": 1,
+      "drop_min": "1.00",
+      "drop_max": "1.00"
+    },
+    {
+      "id": 25140,
+      "gathering_item_type_id": 20,
+      "gathering_type_id": 5,
+      "droprate": 0.00065247847585273,
+      "dropamount": 1,
+      "drop_min": "1.00",
+      "drop_max": "1.00"
+    },
+    {
+      "id": 25141,
+      "gathering_item_type_id": 18,
+      "gathering_type_id": 5,
+      "droprate": 0.00093191661418667,
+      "dropamount": 1,
+      "drop_min": "1.00",
+      "drop_max": "1.00"
+    },
+    {
+      "id": 25142,
+      "gathering_item_type_id": 21,
+      "gathering_type_id": 5,
+      "droprate": 0.00074912179898421,
+      "dropamount": 1,
+      "drop_min": "1.00",
+      "drop_max": "1.00"
+    },
+    {
+      "id": 25143,
+      "gathering_item_type_id": 25,
+      "gathering_type_id": 5,
+      "droprate": 0.00071816348201631,
+      "dropamount": 1,
+      "drop_min": "1.00",
+      "drop_max": "1.00"
+    },
+    {
+      "id": 25144,
+      "gathering_item_type_id": 101,
+      "gathering_type_id": 5,
+      "droprate": 0.0368643598265,
+      "dropamount": 3,
+      "drop_min": "2.00",
+      "drop_max": "4.00"
+    },
+    {
+      "id": 25145,
+      "gathering_item_type_id": 98,
+      "gathering_type_id": 5,
+      "droprate": 1,
+      "dropamount": 3,
+      "drop_min": "2.00",
+      "drop_max": "4.00"
+    },
+    {
+      "id": 25146,
+      "gathering_item_type_id": 97,
+      "gathering_type_id": 5,
+      "droprate": 1,
+      "dropamount": 3,
+      "drop_min": "2.00",
+      "drop_max": "4.00"
+    },
+    {
+      "id": 25147,
+      "gathering_item_type_id": 99,
+      "gathering_type_id": 5,
+      "droprate": 1,
+      "dropamount": 3,
+      "drop_min": "2.00",
+      "drop_max": "4.00"
+    },
+    {
+      "id": 25148,
+      "gathering_item_type_id": 58,
+      "gathering_type_id": 5,
+      "droprate": 2.5613834564024E-05,
+      "dropamount": 1,
+      "drop_min": "1.00",
+      "drop_max": "1.00"
+    },
+    {
+      "id": 25149,
+      "gathering_item_type_id": 30,
+      "gathering_type_id": 5,
+      "droprate": 3.0045299231937E-05,
+      "dropamount": 1,
+      "drop_min": "1.00",
+      "drop_max": "1.00"
+    },
+    {
+      "id": 25150,
+      "gathering_item_type_id": 27,
+      "gathering_type_id": 5,
+      "droprate": 4.9960282074114E-05,
+      "dropamount": 1,
+      "drop_min": "1.00",
+      "drop_max": "1.00"
+    },
+    {
+      "id": 25151,
+      "gathering_item_type_id": 29,
+      "gathering_type_id": 5,
+      "droprate": 1.8130865809419E-05,
+      "dropamount": 1,
+      "drop_min": "1.00",
+      "drop_max": "1.00"
+    },
+    {
+      "id": 25152,
+      "gathering_item_type_id": 28,
+      "gathering_type_id": 5,
+      "droprate": 2.0988543480274E-05,
+      "dropamount": 1,
+      "drop_min": "1.00",
+      "drop_max": "1.00"
+    },
+    {
+      "id": 25153,
+      "gathering_item_type_id": 31,
+      "gathering_type_id": 5,
+      "droprate": 3.1678494369403E-05,
+      "dropamount": 1,
+      "drop_min": "1.00",
+      "drop_max": "1.00"
+    },
+    {
+      "id": 25154,
+      "gathering_item_type_id": 32,
+      "gathering_type_id": 5,
+      "droprate": 3.6031478477848E-05,
+      "dropamount": 1,
+      "drop_min": "1.00",
+      "drop_max": "1.00"
+    },
+    {
+      "id": 25155,
+      "gathering_item_type_id": 3,
+      "gathering_type_id": 2,
+      "droprate": 1,
+      "dropamount": 4,
+      "drop_min": "3.00",
+      "drop_max": "5.00"
+    },
+    {
+      "id": 25156,
+      "gathering_item_type_id": 19,
+      "gathering_type_id": 2,
+      "droprate": 0.069583237059439,
+      "dropamount": 1.5,
+      "drop_min": "1.00",
+      "drop_max": "2.00"
+    },
+    {
+      "id": 25157,
+      "gathering_item_type_id": 22,
+      "gathering_type_id": 2,
+      "droprate": 0.10022093447715,
+      "dropamount": 1,
+      "drop_min": "1.00",
+      "drop_max": "1.00"
+    },
+    {
+      "id": 25158,
+      "gathering_item_type_id": 46,
+      "gathering_type_id": 2,
+      "droprate": 0.037189084563125,
+      "dropamount": 1.5,
+      "drop_min": "1.00",
+      "drop_max": "2.00"
+    },
+    {
+      "id": 25159,
+      "gathering_item_type_id": 47,
+      "gathering_type_id": 2,
+      "droprate": 0.037304056681056,
+      "dropamount": 1.5,
+      "drop_min": "1.00",
+      "drop_max": "2.00"
+    },
+    {
+      "id": 25160,
+      "gathering_item_type_id": 38,
+      "gathering_type_id": 2,
+      "droprate": 0.037283046536885,
+      "dropamount": 1.5,
+      "drop_min": "1.00",
+      "drop_max": "2.00"
+    },
+    {
+      "id": 25161,
+      "gathering_item_type_id": 39,
+      "gathering_type_id": 2,
+      "droprate": 0.012814810086393,
+      "dropamount": 1.5,
+      "drop_min": "1.00",
+      "drop_max": "2.00"
+    },
+    {
+      "id": 25162,
+      "gathering_item_type_id": 16,
+      "gathering_type_id": 2,
+      "droprate": 0.011970100253869,
+      "dropamount": 1,
+      "drop_min": "1.00",
+      "drop_max": "1.00"
+    },
+    {
+      "id": 25163,
+      "gathering_item_type_id": 40,
+      "gathering_type_id": 2,
+      "droprate": 0.012167613377882,
+      "dropamount": 1.5,
+      "drop_min": "1.00",
+      "drop_max": "2.00"
+    },
+    {
+      "id": 25164,
+      "gathering_item_type_id": 23,
+      "gathering_type_id": 2,
+      "droprate": 0.0099959809112771,
+      "dropamount": 1.5,
+      "drop_min": "1.00",
+      "drop_max": "2.00"
+    },
+    {
+      "id": 25165,
+      "gathering_item_type_id": 41,
+      "gathering_type_id": 2,
+      "droprate": 0.011134496022005,
+      "dropamount": 1,
+      "drop_min": "1.00",
+      "drop_max": "1.00"
+    },
+    {
+      "id": 25166,
+      "gathering_item_type_id": 18,
+      "gathering_type_id": 2,
+      "droprate": 0.0072038008637066,
+      "dropamount": 1.5,
+      "drop_min": "1.00",
+      "drop_max": "2.00"
+    },
+    {
+      "id": 25167,
+      "gathering_item_type_id": 20,
+      "gathering_type_id": 2,
+      "droprate": 0.00059927998670306,
+      "dropamount": 1,
+      "drop_min": "1.00",
+      "drop_max": "1.00"
+    },
+    {
+      "id": 25168,
+      "gathering_item_type_id": 21,
+      "gathering_type_id": 2,
+      "droprate": 0.00087800452328657,
+      "dropamount": 1,
+      "drop_min": "1.00",
+      "drop_max": "1.00"
+    },
+    {
+      "id": 25169,
+      "gathering_item_type_id": 25,
+      "gathering_type_id": 2,
+      "droprate": 0.00067037781710897,
+      "dropamount": 1,
+      "drop_min": "1.00",
+      "drop_max": "1.00"
+    },
+    {
+      "id": 25170,
+      "gathering_item_type_id": 17,
+      "gathering_type_id": 2,
+      "droprate": 0.00060793896578955,
+      "dropamount": 1,
+      "drop_min": "1.00",
+      "drop_max": "1.00"
+    },
+    {
+      "id": 25171,
+      "gathering_item_type_id": 101,
+      "gathering_type_id": 2,
+      "droprate": 0.045861261328769,
+      "dropamount": 3,
+      "drop_min": "2.00",
+      "drop_max": "4.00"
+    },
+    {
+      "id": 25172,
+      "gathering_item_type_id": 87,
+      "gathering_type_id": 2,
+      "droprate": 1,
+      "dropamount": 4,
+      "drop_min": "3.00",
+      "drop_max": "5.00"
+    },
+    {
+      "id": 25173,
+      "gathering_item_type_id": 94,
+      "gathering_type_id": 2,
+      "droprate": 1,
+      "dropamount": 4,
+      "drop_min": "3.00",
+      "drop_max": "5.00"
+    },
+    {
+      "id": 25174,
+      "gathering_item_type_id": 88,
+      "gathering_type_id": 2,
+      "droprate": 1,
+      "dropamount": 4,
+      "drop_min": "3.00",
+      "drop_max": "5.00"
+    },
+    {
+      "id": 25175,
+      "gathering_item_type_id": 95,
+      "gathering_type_id": 2,
+      "droprate": 1,
+      "dropamount": 4,
+      "drop_min": "3.00",
+      "drop_max": "5.00"
+    },
+    {
+      "id": 25176,
+      "gathering_item_type_id": 58,
+      "gathering_type_id": 2,
+      "droprate": 2.5613834564024E-05,
+      "dropamount": 1,
+      "drop_min": "1.00",
+      "drop_max": "1.00"
+    },
+    {
+      "id": 25177,
+      "gathering_item_type_id": 30,
+      "gathering_type_id": 2,
+      "droprate": 3.0045299231937E-05,
+      "dropamount": 1,
+      "drop_min": "1.00",
+      "drop_max": "1.00"
+    },
+    {
+      "id": 25178,
+      "gathering_item_type_id": 27,
+      "gathering_type_id": 2,
+      "droprate": 4.9960282074114E-05,
+      "dropamount": 1,
+      "drop_min": "1.00",
+      "drop_max": "1.00"
+    },
+    {
+      "id": 25179,
+      "gathering_item_type_id": 29,
+      "gathering_type_id": 2,
+      "droprate": 1.8130865809419E-05,
+      "dropamount": 1,
+      "drop_min": "1.00",
+      "drop_max": "1.00"
+    },
+    {
+      "id": 25180,
+      "gathering_item_type_id": 28,
+      "gathering_type_id": 2,
+      "droprate": 2.0988543480274E-05,
+      "dropamount": 1,
+      "drop_min": "1.00",
+      "drop_max": "1.00"
+    },
+    {
+      "id": 25181,
+      "gathering_item_type_id": 31,
+      "gathering_type_id": 2,
+      "droprate": 3.1678494369403E-05,
+      "dropamount": 1,
+      "drop_min": "1.00",
+      "drop_max": "1.00"
+    },
+    {
+      "id": 25182,
+      "gathering_item_type_id": 32,
+      "gathering_type_id": 2,
+      "droprate": 3.6031478477848E-05,
+      "dropamount": 1,
+      "drop_min": "1.00",
+      "drop_max": "1.00"
+    },
+    {
+      "id": 25183,
+      "gathering_item_type_id": 14,
+      "gathering_type_id": 7,
+      "droprate": 1,
+      "dropamount": 3,
+      "drop_min": "2.00",
+      "drop_max": "4.00"
+    },
+    {
+      "id": 25184,
+      "gathering_item_type_id": 67,
+      "gathering_type_id": 7,
+      "droprate": 0.21967106082479,
+      "dropamount": 3,
+      "drop_min": "2.00",
+      "drop_max": "4.00"
+    },
+    {
+      "id": 25185,
+      "gathering_item_type_id": 68,
+      "gathering_type_id": 7,
+      "droprate": 0.1386484739825,
+      "dropamount": 3,
+      "drop_min": "2.00",
+      "drop_max": "4.00"
+    },
+    {
+      "id": 25186,
+      "gathering_item_type_id": 64,
+      "gathering_type_id": 7,
+      "droprate": 0.092002455363887,
+      "dropamount": 1,
+      "drop_min": "1.00",
+      "drop_max": "1.00"
+    },
+    {
+      "id": 25187,
+      "gathering_item_type_id": 13,
+      "gathering_type_id": 7,
+      "droprate": 0.019822715653092,
+      "dropamount": 3,
+      "drop_min": "2.00",
+      "drop_max": "4.00"
+    },
+    {
+      "id": 25188,
+      "gathering_item_type_id": 69,
+      "gathering_type_id": 7,
+      "droprate": 0.071074383819358,
+      "dropamount": 1,
+      "drop_min": "1.00",
+      "drop_max": "1.00"
+    },
+    {
+      "id": 25189,
+      "gathering_item_type_id": 63,
+      "gathering_type_id": 7,
+      "droprate": 0.053057082788946,
+      "dropamount": 1,
+      "drop_min": "1.00",
+      "drop_max": "1.00"
+    },
+    {
+      "id": 25190,
+      "gathering_item_type_id": 22,
+      "gathering_type_id": 7,
+      "droprate": 0.097361213902386,
+      "dropamount": 1,
+      "drop_min": "1.00",
+      "drop_max": "1.00"
+    },
+    {
+      "id": 25191,
+      "gathering_item_type_id": 70,
+      "gathering_type_id": 7,
+      "droprate": 0.022917712149114,
+      "dropamount": 1,
+      "drop_min": "1.00",
+      "drop_max": "1.00"
+    },
+    {
+      "id": 25192,
+      "gathering_item_type_id": 71,
+      "gathering_type_id": 7,
+      "droprate": 0.016654028764308,
+      "dropamount": 1,
+      "drop_min": "1.00",
+      "drop_max": "1.00"
+    },
+    {
+      "id": 25193,
+      "gathering_item_type_id": 72,
+      "gathering_type_id": 7,
+      "droprate": 0.019380573296518,
+      "dropamount": 1,
+      "drop_min": "1.00",
+      "drop_max": "1.00"
+    },
+    {
+      "id": 25194,
+      "gathering_item_type_id": 19,
+      "gathering_type_id": 7,
+      "droprate": 0.019802532079472,
+      "dropamount": 1,
+      "drop_min": "1.00",
+      "drop_max": "1.00"
+    },
+    {
+      "id": 25195,
+      "gathering_item_type_id": 16,
+      "gathering_type_id": 7,
+      "droprate": 0.016834105179985,
+      "dropamount": 1,
+      "drop_min": "1.00",
+      "drop_max": "1.00"
+    },
+    {
+      "id": 25196,
+      "gathering_item_type_id": 62,
+      "gathering_type_id": 7,
+      "droprate": 0.010096557283123,
+      "dropamount": 1,
+      "drop_min": "1.00",
+      "drop_max": "1.00"
+    },
+    {
+      "id": 25197,
+      "gathering_item_type_id": 23,
+      "gathering_type_id": 7,
+      "droprate": 0.0078657671089373,
+      "dropamount": 1.5,
+      "drop_min": "1.00",
+      "drop_max": "2.00"
+    },
+    {
+      "id": 25198,
+      "gathering_item_type_id": 73,
+      "gathering_type_id": 7,
+      "droprate": 0.00486356592232,
+      "dropamount": 1,
+      "drop_min": "1.00",
+      "drop_max": "1.00"
+    },
+    {
+      "id": 25199,
+      "gathering_item_type_id": 74,
+      "gathering_type_id": 7,
+      "droprate": 0.0025423185503036,
+      "dropamount": 1,
+      "drop_min": "1.00",
+      "drop_max": "1.00"
+    },
+    {
+      "id": 25200,
+      "gathering_item_type_id": 75,
+      "gathering_type_id": 7,
+      "droprate": 0.0051583274933697,
+      "dropamount": 1,
+      "drop_min": "1.00",
+      "drop_max": "1.00"
+    },
+    {
+      "id": 25201,
+      "gathering_item_type_id": 17,
+      "gathering_type_id": 7,
+      "droprate": 0.0082217613466053,
+      "dropamount": 1,
+      "drop_min": "1.00",
+      "drop_max": "1.00"
+    },
+    {
+      "id": 25202,
+      "gathering_item_type_id": 76,
+      "gathering_type_id": 7,
+      "droprate": 0.0040529716019333,
+      "dropamount": 1,
+      "drop_min": "1.00",
+      "drop_max": "1.00"
+    },
+    {
+      "id": 25203,
+      "gathering_item_type_id": 77,
+      "gathering_type_id": 7,
+      "droprate": 0.0034634484598339,
+      "dropamount": 1,
+      "drop_min": "1.00",
+      "drop_max": "1.00"
+    },
+    {
+      "id": 25204,
+      "gathering_item_type_id": 78,
+      "gathering_type_id": 7,
+      "droprate": 0.0042740427802206,
+      "dropamount": 1,
+      "drop_min": "1.00",
+      "drop_max": "1.00"
+    },
+    {
+      "id": 25205,
+      "gathering_item_type_id": 20,
+      "gathering_type_id": 7,
+      "droprate": 0.00067037787860261,
+      "dropamount": 1,
+      "drop_min": "1.00",
+      "drop_max": "1.00"
+    },
+    {
+      "id": 25206,
+      "gathering_item_type_id": 21,
+      "gathering_type_id": 7,
+      "droprate": 0.00067037787860261,
+      "dropamount": 1,
+      "drop_min": "1.00",
+      "drop_max": "1.00"
+    },
+    {
+      "id": 25207,
+      "gathering_item_type_id": 25,
+      "gathering_type_id": 7,
+      "droprate": 0.00051395637359533,
+      "dropamount": 1,
+      "drop_min": "1.00",
+      "drop_max": "1.00"
+    },
+    {
+      "id": 25208,
+      "gathering_item_type_id": 18,
+      "gathering_type_id": 7,
+      "droprate": 0.0018162085635019,
+      "dropamount": 1,
+      "drop_min": "1.00",
+      "drop_max": "1.00"
+    },
+    {
+      "id": 25209,
+      "gathering_item_type_id": 101,
+      "gathering_type_id": 7,
+      "droprate": 0.029323625520718,
+      "dropamount": 3,
+      "drop_min": "2.00",
+      "drop_max": "4.00"
+    },
+    {
+      "id": 25210,
+      "gathering_item_type_id": 58,
+      "gathering_type_id": 7,
+      "droprate": 2.5613834564024E-05,
+      "dropamount": 1,
+      "drop_min": "1.00",
+      "drop_max": "1.00"
+    },
+    {
+      "id": 25211,
+      "gathering_item_type_id": 30,
+      "gathering_type_id": 7,
+      "droprate": 3.0045299231937E-05,
+      "dropamount": 1,
+      "drop_min": "1.00",
+      "drop_max": "1.00"
+    },
+    {
+      "id": 25212,
+      "gathering_item_type_id": 27,
+      "gathering_type_id": 7,
+      "droprate": 4.9960282074114E-05,
+      "dropamount": 1,
+      "drop_min": "1.00",
+      "drop_max": "1.00"
+    },
+    {
+      "id": 25213,
+      "gathering_item_type_id": 29,
+      "gathering_type_id": 7,
+      "droprate": 1.8130865809419E-05,
+      "dropamount": 1,
+      "drop_min": "1.00",
+      "drop_max": "1.00"
+    },
+    {
+      "id": 25214,
+      "gathering_item_type_id": 28,
+      "gathering_type_id": 7,
+      "droprate": 2.0988543480274E-05,
+      "dropamount": 1,
+      "drop_min": "1.00",
+      "drop_max": "1.00"
+    },
+    {
+      "id": 25215,
+      "gathering_item_type_id": 31,
+      "gathering_type_id": 7,
+      "droprate": 3.1678494369403E-05,
+      "dropamount": 1,
+      "drop_min": "1.00",
+      "drop_max": "1.00"
+    },
+    {
+      "id": 25216,
+      "gathering_item_type_id": 32,
+      "gathering_type_id": 7,
+      "droprate": 3.6031478477848E-05,
+      "dropamount": 1,
+      "drop_min": "1.00",
+      "drop_max": "1.00"
+    },
+    {
+      "id": 25217,
+      "gathering_item_type_id": 14,
+      "gathering_type_id": 15,
+      "droprate": 1,
+      "dropamount": 1.5,
+      "drop_min": "1.00",
+      "drop_max": "2.00"
+    },
+    {
+      "id": 25218,
+      "gathering_item_type_id": 22,
+      "gathering_type_id": 15,
+      "droprate": 0.10206445801909,
+      "dropamount": 1,
+      "drop_min": "1.00",
+      "drop_max": "1.00"
+    },
+    {
+      "id": 25219,
+      "gathering_item_type_id": 59,
+      "gathering_type_id": 15,
+      "droprate": 0.061992525895563,
+      "dropamount": 1,
+      "drop_min": "1.00",
+      "drop_max": "1.00"
+    },
+    {
+      "id": 25220,
+      "gathering_item_type_id": 61,
+      "gathering_type_id": 15,
+      "droprate": 0.0096922036627756,
+      "dropamount": 1,
+      "drop_min": "1.00",
+      "drop_max": "1.00"
+    },
+    {
+      "id": 25221,
+      "gathering_item_type_id": 19,
+      "gathering_type_id": 15,
+      "droprate": 0.020542463342375,
+      "dropamount": 1,
+      "drop_min": "1.00",
+      "drop_max": "1.00"
+    },
+    {
+      "id": 25222,
+      "gathering_item_type_id": 60,
+      "gathering_type_id": 15,
+      "droprate": 0.0096950995895791,
+      "dropamount": 1,
+      "drop_min": "1.00",
+      "drop_max": "1.00"
+    },
+    {
+      "id": 25223,
+      "gathering_item_type_id": 63,
+      "gathering_type_id": 15,
+      "droprate": 0.010574418804171,
+      "dropamount": 1,
+      "drop_min": "1.00",
+      "drop_max": "1.00"
+    },
+    {
+      "id": 25224,
+      "gathering_item_type_id": 16,
+      "gathering_type_id": 15,
+      "droprate": 0.0175783223821,
+      "dropamount": 1,
+      "drop_min": "1.00",
+      "drop_max": "1.00"
+    },
+    {
+      "id": 25225,
+      "gathering_item_type_id": 62,
+      "gathering_type_id": 15,
+      "droprate": 0.0090245370131322,
+      "dropamount": 1,
+      "drop_min": "1.00",
+      "drop_max": "1.00"
+    },
+    {
+      "id": 25226,
+      "gathering_item_type_id": 23,
+      "gathering_type_id": 15,
+      "droprate": 0.0069654832576187,
+      "dropamount": 1.5,
+      "drop_min": "1.00",
+      "drop_max": "2.00"
+    },
+    {
+      "id": 25227,
+      "gathering_item_type_id": 65,
+      "gathering_type_id": 15,
+      "droprate": 0.0050675243947777,
+      "dropamount": 1,
+      "drop_min": "1.00",
+      "drop_max": "1.00"
+    },
+    {
+      "id": 25228,
+      "gathering_item_type_id": 17,
+      "gathering_type_id": 15,
+      "droprate": 0.0084009808795773,
+      "dropamount": 1,
+      "drop_min": "1.00",
+      "drop_max": "1.00"
+    },
+    {
+      "id": 25229,
+      "gathering_item_type_id": 64,
+      "gathering_type_id": 15,
+      "droprate": 0.0033958796067685,
+      "dropamount": 1,
+      "drop_min": "1.00",
+      "drop_max": "1.00"
+    },
+    {
+      "id": 25230,
+      "gathering_item_type_id": 21,
+      "gathering_type_id": 15,
+      "droprate": 0.00073065514778315,
+      "dropamount": 1,
+      "drop_min": "1.00",
+      "drop_max": "1.00"
+    },
+    {
+      "id": 25231,
+      "gathering_item_type_id": 18,
+      "gathering_type_id": 15,
+      "droprate": 0.0017332088724601,
+      "dropamount": 1,
+      "drop_min": "1.00",
+      "drop_max": "1.00"
+    },
+    {
+      "id": 25232,
+      "gathering_item_type_id": 20,
+      "gathering_type_id": 15,
+      "droprate": 0.00048104948183506,
+      "dropamount": 1,
+      "drop_min": "1.00",
+      "drop_max": "1.00"
+    },
+    {
+      "id": 25233,
+      "gathering_item_type_id": 25,
+      "gathering_type_id": 15,
+      "droprate": 0.00047360767230648,
+      "dropamount": 1,
+      "drop_min": "1.00",
+      "drop_max": "1.00"
+    },
+    {
+      "id": 25234,
+      "gathering_item_type_id": 66,
+      "gathering_type_id": 15,
+      "droprate": 0.00051802466833471,
+      "dropamount": 1,
+      "drop_min": "1.00",
+      "drop_max": "1.00"
+    },
+    {
+      "id": 25235,
+      "gathering_item_type_id": 101,
+      "gathering_type_id": 15,
+      "droprate": 0.030002491141002,
+      "dropamount": 3,
+      "drop_min": "2.00",
+      "drop_max": "4.00"
+    },
+    {
+      "id": 25236,
+      "gathering_item_type_id": 58,
+      "gathering_type_id": 15,
+      "droprate": 2.5613834564024E-05,
+      "dropamount": 1,
+      "drop_min": "1.00",
+      "drop_max": "1.00"
+    },
+    {
+      "id": 25237,
+      "gathering_item_type_id": 30,
+      "gathering_type_id": 15,
+      "droprate": 3.0045299231937E-05,
+      "dropamount": 1,
+      "drop_min": "1.00",
+      "drop_max": "1.00"
+    },
+    {
+      "id": 25238,
+      "gathering_item_type_id": 27,
+      "gathering_type_id": 15,
+      "droprate": 4.9960282074114E-05,
+      "dropamount": 1,
+      "drop_min": "1.00",
+      "drop_max": "1.00"
+    },
+    {
+      "id": 25239,
+      "gathering_item_type_id": 29,
+      "gathering_type_id": 15,
+      "droprate": 1.8130865809419E-05,
+      "dropamount": 1,
+      "drop_min": "1.00",
+      "drop_max": "1.00"
+    },
+    {
+      "id": 25240,
+      "gathering_item_type_id": 28,
+      "gathering_type_id": 15,
+      "droprate": 2.0988543480274E-05,
+      "dropamount": 1,
+      "drop_min": "1.00",
+      "drop_max": "1.00"
+    },
+    {
+      "id": 25241,
+      "gathering_item_type_id": 31,
+      "gathering_type_id": 15,
+      "droprate": 3.1678494369403E-05,
+      "dropamount": 1,
+      "drop_min": "1.00",
+      "drop_max": "1.00"
+    },
+    {
+      "id": 25242,
+      "gathering_item_type_id": 32,
+      "gathering_type_id": 15,
+      "droprate": 3.6031478477848E-05,
+      "dropamount": 1,
+      "drop_min": "1.00",
+      "drop_max": "1.00"
+    },
+    {
+      "id": 25243,
+      "gathering_item_type_id": 33,
+      "gathering_type_id": 6,
+      "droprate": 1,
+      "dropamount": 3.5,
+      "drop_min": "2.00",
+      "drop_max": "5.00"
+    },
+    {
+      "id": 25244,
+      "gathering_item_type_id": 101,
+      "gathering_type_id": 6,
+      "droprate": 0.037065877120035,
+      "dropamount": 3,
+      "drop_min": "2.00",
+      "drop_max": "4.00"
+    },
+    {
+      "id": 25245,
+      "gathering_item_type_id": 22,
+      "gathering_type_id": 6,
+      "droprate": 0.10114384398326,
+      "dropamount": 1,
+      "drop_min": "1.00",
+      "drop_max": "1.00"
+    },
+    {
+      "id": 25246,
+      "gathering_item_type_id": 34,
+      "gathering_type_id": 6,
+      "droprate": 0.041835363957994,
+      "dropamount": 1,
+      "drop_min": "1.00",
+      "drop_max": "1.00"
+    },
+    {
+      "id": 25247,
+      "gathering_item_type_id": 17,
+      "gathering_type_id": 6,
+      "droprate": 0.059311130198375,
+      "dropamount": 1,
+      "drop_min": "1.00",
+      "drop_max": "1.00"
+    },
+    {
+      "id": 25248,
+      "gathering_item_type_id": 16,
+      "gathering_type_id": 6,
+      "droprate": 0.034885342844108,
+      "dropamount": 1,
+      "drop_min": "1.00",
+      "drop_max": "1.00"
+    },
+    {
+      "id": 25249,
+      "gathering_item_type_id": 35,
+      "gathering_type_id": 6,
+      "droprate": 0.020581319528603,
+      "dropamount": 1,
+      "drop_min": "1.00",
+      "drop_max": "1.00"
+    },
+    {
+      "id": 25250,
+      "gathering_item_type_id": 23,
+      "gathering_type_id": 6,
+      "droprate": 0.008382813406861,
+      "dropamount": 1.5,
+      "drop_min": "1.00",
+      "drop_max": "2.00"
+    },
+    {
+      "id": 25251,
+      "gathering_item_type_id": 19,
+      "gathering_type_id": 6,
+      "droprate": 0.0086358381243643,
+      "dropamount": 1,
+      "drop_min": "1.00",
+      "drop_max": "1.00"
+    },
+    {
+      "id": 25252,
+      "gathering_item_type_id": 36,
+      "gathering_type_id": 6,
+      "droprate": 0.0043322520456154,
+      "dropamount": 1,
+      "drop_min": "1.00",
+      "drop_max": "1.00"
+    },
+    {
+      "id": 25253,
+      "gathering_item_type_id": 20,
+      "gathering_type_id": 6,
+      "droprate": 0.00068616551240579,
+      "dropamount": 1,
+      "drop_min": "1.00",
+      "drop_max": "1.00"
+    },
+    {
+      "id": 25254,
+      "gathering_item_type_id": 18,
+      "gathering_type_id": 6,
+      "droprate": 0.00092103147738291,
+      "dropamount": 1,
+      "drop_min": "1.00",
+      "drop_max": "1.00"
+    },
+    {
+      "id": 25255,
+      "gathering_item_type_id": 25,
+      "gathering_type_id": 6,
+      "droprate": 0.00062063171681239,
+      "dropamount": 1,
+      "drop_min": "1.00",
+      "drop_max": "1.00"
+    },
+    {
+      "id": 25256,
+      "gathering_item_type_id": 21,
+      "gathering_type_id": 6,
+      "droprate": 0.00080472141124526,
+      "dropamount": 1,
+      "drop_min": "1.00",
+      "drop_max": "1.00"
+    },
+    {
+      "id": 25257,
+      "gathering_item_type_id": 37,
+      "gathering_type_id": 6,
+      "droprate": 0.0083245550788606,
+      "dropamount": 1,
+      "drop_min": "1.00",
+      "drop_max": "1.00"
+    },
+    {
+      "id": 25258,
+      "gathering_item_type_id": 44,
+      "gathering_type_id": 6,
+      "droprate": 1,
+      "dropamount": 3.5,
+      "drop_min": "2.00",
+      "drop_max": "5.00"
+    },
+    {
+      "id": 25259,
+      "gathering_item_type_id": 45,
+      "gathering_type_id": 6,
+      "droprate": 0.041467503745452,
+      "dropamount": 1,
+      "drop_min": "1.00",
+      "drop_max": "1.00"
+    },
+    {
+      "id": 25260,
+      "gathering_item_type_id": 11,
+      "gathering_type_id": 6,
+      "droprate": 1,
+      "dropamount": 3.5,
+      "drop_min": "2.00",
+      "drop_max": "5.00"
+    },
+    {
+      "id": 25261,
+      "gathering_item_type_id": 48,
+      "gathering_type_id": 6,
+      "droprate": 0.043857474780671,
+      "dropamount": 1,
+      "drop_min": "1.00",
+      "drop_max": "1.00"
+    },
+    {
+      "id": 25262,
+      "gathering_item_type_id": 58,
+      "gathering_type_id": 6,
+      "droprate": 2.5613834564024E-05,
+      "dropamount": 1,
+      "drop_min": "1.00",
+      "drop_max": "1.00"
+    },
+    {
+      "id": 25263,
+      "gathering_item_type_id": 30,
+      "gathering_type_id": 6,
+      "droprate": 3.0045299231937E-05,
+      "dropamount": 1,
+      "drop_min": "1.00",
+      "drop_max": "1.00"
+    },
+    {
+      "id": 25264,
+      "gathering_item_type_id": 27,
+      "gathering_type_id": 6,
+      "droprate": 4.9960282074114E-05,
+      "dropamount": 1,
+      "drop_min": "1.00",
+      "drop_max": "1.00"
+    },
+    {
+      "id": 25265,
+      "gathering_item_type_id": 29,
+      "gathering_type_id": 6,
+      "droprate": 1.8130865809419E-05,
+      "dropamount": 1,
+      "drop_min": "1.00",
+      "drop_max": "1.00"
+    },
+    {
+      "id": 25266,
+      "gathering_item_type_id": 28,
+      "gathering_type_id": 6,
+      "droprate": 2.0988543480274E-05,
+      "dropamount": 1,
+      "drop_min": "1.00",
+      "drop_max": "1.00"
+    },
+    {
+      "id": 25267,
+      "gathering_item_type_id": 31,
+      "gathering_type_id": 6,
+      "droprate": 3.1678494369403E-05,
+      "dropamount": 1,
+      "drop_min": "1.00",
+      "drop_max": "1.00"
+    },
+    {
+      "id": 25268,
+      "gathering_item_type_id": 32,
+      "gathering_type_id": 6,
+      "droprate": 3.6031478477848E-05,
+      "dropamount": 1,
+      "drop_min": "1.00",
+      "drop_max": "1.00"
+    },
+    {
+      "id": 25269,
+      "gathering_item_type_id": 49,
+      "gathering_type_id": 1,
+      "droprate": 0.37134920691486,
+      "dropamount": 3,
+      "drop_min": "2.00",
+      "drop_max": "4.00"
+    },
+    {
+      "id": 25270,
+      "gathering_item_type_id": 50,
+      "gathering_type_id": 1,
+      "droprate": 1,
+      "dropamount": 3,
+      "drop_min": "2.00",
+      "drop_max": "4.00"
+    },
+    {
+      "id": 25271,
+      "gathering_item_type_id": 51,
+      "gathering_type_id": 1,
+      "droprate": 1,
+      "dropamount": 3,
+      "drop_min": "2.00",
+      "drop_max": "4.00"
+    },
+    {
+      "id": 25272,
+      "gathering_item_type_id": 47,
+      "gathering_type_id": 1,
+      "droprate": 0.10596046038186,
+      "dropamount": 1.5,
+      "drop_min": "1.00",
+      "drop_max": "2.00"
+    },
+    {
+      "id": 25273,
+      "gathering_item_type_id": 40,
+      "gathering_type_id": 1,
+      "droprate": 0.10436077409226,
+      "dropamount": 1.5,
+      "drop_min": "1.00",
+      "drop_max": "2.00"
+    },
+    {
+      "id": 25274,
+      "gathering_item_type_id": 39,
+      "gathering_type_id": 1,
+      "droprate": 0.10306891185599,
+      "dropamount": 1.5,
+      "drop_min": "1.00",
+      "drop_max": "2.00"
+    },
+    {
+      "id": 25275,
+      "gathering_item_type_id": 52,
+      "gathering_type_id": 1,
+      "droprate": 1,
+      "dropamount": 3,
+      "drop_min": "2.00",
+      "drop_max": "4.00"
+    },
+    {
+      "id": 25276,
+      "gathering_item_type_id": 19,
+      "gathering_type_id": 1,
+      "droprate": 0.095136920478401,
+      "dropamount": 1.5,
+      "drop_min": "1.00",
+      "drop_max": "2.00"
+    },
+    {
+      "id": 25277,
+      "gathering_item_type_id": 38,
+      "gathering_type_id": 1,
+      "droprate": 0.10479605971833,
+      "dropamount": 1.5,
+      "drop_min": "1.00",
+      "drop_max": "2.00"
+    },
+    {
+      "id": 25278,
+      "gathering_item_type_id": 46,
+      "gathering_type_id": 1,
+      "droprate": 0.10397229212343,
+      "dropamount": 1.5,
+      "drop_min": "1.00",
+      "drop_max": "2.00"
+    },
+    {
+      "id": 25279,
+      "gathering_item_type_id": 22,
+      "gathering_type_id": 1,
+      "droprate": 0.093775482442808,
+      "dropamount": 1,
+      "drop_min": "1.00",
+      "drop_max": "1.00"
+    },
+    {
+      "id": 25280,
+      "gathering_item_type_id": 53,
+      "gathering_type_id": 1,
+      "droprate": 0.018198917035699,
+      "dropamount": 1,
+      "drop_min": "1.00",
+      "drop_max": "1.00"
+    },
+    {
+      "id": 25281,
+      "gathering_item_type_id": 16,
+      "gathering_type_id": 1,
+      "droprate": 0.020202596118163,
+      "dropamount": 1,
+      "drop_min": "1.00",
+      "drop_max": "1.00"
+    },
+    {
+      "id": 25282,
+      "gathering_item_type_id": 54,
+      "gathering_type_id": 1,
+      "droprate": 0.019098277110682,
+      "dropamount": 1,
+      "drop_min": "1.00",
+      "drop_max": "1.00"
+    },
+    {
+      "id": 25283,
+      "gathering_item_type_id": 55,
+      "gathering_type_id": 1,
+      "droprate": 0.011153391848598,
+      "dropamount": 1,
+      "drop_min": "1.00",
+      "drop_max": "1.00"
+    },
+    {
+      "id": 25284,
+      "gathering_item_type_id": 23,
+      "gathering_type_id": 1,
+      "droprate": 0.0092674725462057,
+      "dropamount": 1.5,
+      "drop_min": "1.00",
+      "drop_max": "2.00"
+    },
+    {
+      "id": 25285,
+      "gathering_item_type_id": 18,
+      "gathering_type_id": 1,
+      "droprate": 0.009209998046548,
+      "dropamount": 1.5,
+      "drop_min": "1.00",
+      "drop_max": "2.00"
+    },
+    {
+      "id": 25286,
+      "gathering_item_type_id": 57,
+      "gathering_type_id": 1,
+      "droprate": 0.0033973213217566,
+      "dropamount": 1,
+      "drop_min": "1.00",
+      "drop_max": "1.00"
+    },
+    {
+      "id": 25287,
+      "gathering_item_type_id": 20,
+      "gathering_type_id": 1,
+      "droprate": 0.00079931507096526,
+      "dropamount": 1,
+      "drop_min": "1.00",
+      "drop_max": "1.00"
+    },
+    {
+      "id": 25288,
+      "gathering_item_type_id": 21,
+      "gathering_type_id": 1,
+      "droprate": 0.00095848779933877,
+      "dropamount": 1,
+      "drop_min": "1.00",
+      "drop_max": "1.00"
+    },
+    {
+      "id": 25289,
+      "gathering_item_type_id": 17,
+      "gathering_type_id": 1,
+      "droprate": 0.0006143768571065,
+      "dropamount": 1,
+      "drop_min": "1.00",
+      "drop_max": "1.00"
+    },
+    {
+      "id": 25290,
+      "gathering_item_type_id": 25,
+      "gathering_type_id": 1,
+      "droprate": 0.00067409703576933,
+      "dropamount": 1,
+      "drop_min": "1.00",
+      "drop_max": "1.00"
+    },
+    {
+      "id": 25291,
+      "gathering_item_type_id": 101,
+      "gathering_type_id": 1,
+      "droprate": 0.04339535715064,
+      "dropamount": 3,
+      "drop_min": "2.00",
+      "drop_max": "4.00"
+    },
+    {
+      "id": 25292,
+      "gathering_item_type_id": 58,
+      "gathering_type_id": 1,
+      "droprate": 2.5613834564024E-05,
+      "dropamount": 1,
+      "drop_min": "1.00",
+      "drop_max": "1.00"
+    },
+    {
+      "id": 25293,
+      "gathering_item_type_id": 30,
+      "gathering_type_id": 1,
+      "droprate": 3.0045299231937E-05,
+      "dropamount": 1,
+      "drop_min": "1.00",
+      "drop_max": "1.00"
+    },
+    {
+      "id": 25294,
+      "gathering_item_type_id": 27,
+      "gathering_type_id": 1,
+      "droprate": 4.9960282074114E-05,
+      "dropamount": 1,
+      "drop_min": "1.00",
+      "drop_max": "1.00"
+    },
+    {
+      "id": 25295,
+      "gathering_item_type_id": 29,
+      "gathering_type_id": 1,
+      "droprate": 1.8130865809419E-05,
+      "dropamount": 1,
+      "drop_min": "1.00",
+      "drop_max": "1.00"
+    },
+    {
+      "id": 25296,
+      "gathering_item_type_id": 28,
+      "gathering_type_id": 1,
+      "droprate": 2.0988543480274E-05,
+      "dropamount": 1,
+      "drop_min": "1.00",
+      "drop_max": "1.00"
+    },
+    {
+      "id": 25297,
+      "gathering_item_type_id": 31,
+      "gathering_type_id": 1,
+      "droprate": 3.1678494369403E-05,
+      "dropamount": 1,
+      "drop_min": "1.00",
+      "drop_max": "1.00"
+    },
+    {
+      "id": 25298,
+      "gathering_item_type_id": 32,
+      "gathering_type_id": 1,
+      "droprate": 3.6031478477848E-05,
+      "dropamount": 1,
+      "drop_min": "1.00",
+      "drop_max": "1.00"
+    },
+    {
+      "id": 25299,
+      "gathering_item_type_id": 93,
+      "gathering_type_id": 3,
+      "droprate": 1,
+      "dropamount": 3,
+      "drop_min": "2.00",
+      "drop_max": "4.00"
+    },
+    {
+      "id": 25300,
+      "gathering_item_type_id": 22,
+      "gathering_type_id": 3,
+      "droprate": 0.10124151493596,
+      "dropamount": 1,
+      "drop_min": "1.00",
+      "drop_max": "1.00"
+    },
+    {
+      "id": 25301,
+      "gathering_item_type_id": 101,
+      "gathering_type_id": 3,
+      "droprate": 0.028316211733187,
+      "dropamount": 3,
+      "drop_min": "2.00",
+      "drop_max": "4.00"
+    },
+    {
+      "id": 25302,
+      "gathering_item_type_id": 17,
+      "gathering_type_id": 3,
+      "droprate": 0.043729572346715,
+      "dropamount": 1,
+      "drop_min": "1.00",
+      "drop_max": "1.00"
+    },
+    {
+      "id": 25303,
+      "gathering_item_type_id": 16,
+      "gathering_type_id": 3,
+      "droprate": 0.011521097832334,
+      "dropamount": 1,
+      "drop_min": "1.00",
+      "drop_max": "1.00"
+    },
+    {
+      "id": 25304,
+      "gathering_item_type_id": 41,
+      "gathering_type_id": 3,
+      "droprate": 0.0087186686298747,
+      "dropamount": 1,
+      "drop_min": "1.00",
+      "drop_max": "1.00"
+    },
+    {
+      "id": 25305,
+      "gathering_item_type_id": 23,
+      "gathering_type_id": 3,
+      "droprate": 0.0075380789728289,
+      "dropamount": 1.5,
+      "drop_min": "1.00",
+      "drop_max": "2.00"
+    },
+    {
+      "id": 25306,
+      "gathering_item_type_id": 19,
+      "gathering_type_id": 3,
+      "droprate": 0.0093219693609598,
+      "dropamount": 1,
+      "drop_min": "1.00",
+      "drop_max": "1.00"
+    },
+    {
+      "id": 25307,
+      "gathering_item_type_id": 20,
+      "gathering_type_id": 3,
+      "droprate": 0.00069462597979889,
+      "dropamount": 1,
+      "drop_min": "1.00",
+      "drop_max": "1.00"
+    },
+    {
+      "id": 25308,
+      "gathering_item_type_id": 18,
+      "gathering_type_id": 3,
+      "droprate": 0.00083683649795672,
+      "dropamount": 1,
+      "drop_min": "1.00",
+      "drop_max": "1.00"
+    },
+    {
+      "id": 25309,
+      "gathering_item_type_id": 21,
+      "gathering_type_id": 3,
+      "droprate": 0.00060037797128726,
+      "dropamount": 1,
+      "drop_min": "1.00",
+      "drop_max": "1.00"
+    },
+    {
+      "id": 25310,
+      "gathering_item_type_id": 25,
+      "gathering_type_id": 3,
+      "droprate": 0.00039377578308467,
+      "dropamount": 1,
+      "drop_min": "1.00",
+      "drop_max": "1.00"
+    },
+    {
+      "id": 25311,
+      "gathering_item_type_id": 58,
+      "gathering_type_id": 3,
+      "droprate": 2.5613834564024E-05,
+      "dropamount": 1,
+      "drop_min": "1.00",
+      "drop_max": "1.00"
+    },
+    {
+      "id": 25312,
+      "gathering_item_type_id": 30,
+      "gathering_type_id": 3,
+      "droprate": 3.0045299231937E-05,
+      "dropamount": 1,
+      "drop_min": "1.00",
+      "drop_max": "1.00"
+    },
+    {
+      "id": 25313,
+      "gathering_item_type_id": 27,
+      "gathering_type_id": 3,
+      "droprate": 4.9960282074114E-05,
+      "dropamount": 1,
+      "drop_min": "1.00",
+      "drop_max": "1.00"
+    },
+    {
+      "id": 25314,
+      "gathering_item_type_id": 29,
+      "gathering_type_id": 3,
+      "droprate": 1.8130865809419E-05,
+      "dropamount": 1,
+      "drop_min": "1.00",
+      "drop_max": "1.00"
+    },
+    {
+      "id": 25315,
+      "gathering_item_type_id": 28,
+      "gathering_type_id": 3,
+      "droprate": 2.0988543480274E-05,
+      "dropamount": 1,
+      "drop_min": "1.00",
+      "drop_max": "1.00"
+    },
+    {
+      "id": 25316,
+      "gathering_item_type_id": 31,
+      "gathering_type_id": 3,
+      "droprate": 3.1678494369403E-05,
+      "dropamount": 1,
+      "drop_min": "1.00",
+      "drop_max": "1.00"
+    },
+    {
+      "id": 25317,
+      "gathering_item_type_id": 32,
+      "gathering_type_id": 3,
+      "droprate": 3.6031478477848E-05,
+      "dropamount": 1,
+      "drop_min": "1.00",
+      "drop_max": "1.00"
+    },
+    {
+      "id": 25318,
+      "gathering_item_type_id": 90,
+      "gathering_type_id": 16,
+      "droprate": 1,
+      "dropamount": 3,
+      "drop_min": "2.00",
+      "drop_max": "4.00"
+    },
+    {
+      "id": 25319,
+      "gathering_item_type_id": 49,
+      "gathering_type_id": 16,
+      "droprate": 0.37621883794234,
+      "dropamount": 3,
+      "drop_min": "2.00",
+      "drop_max": "4.00"
+    },
+    {
+      "id": 25320,
+      "gathering_item_type_id": 46,
+      "gathering_type_id": 16,
+      "droprate": 0.10873284369747,
+      "dropamount": 1.5,
+      "drop_min": "1.00",
+      "drop_max": "2.00"
+    },
+    {
+      "id": 25321,
+      "gathering_item_type_id": 39,
+      "gathering_type_id": 16,
+      "droprate": 0.10681590766047,
+      "dropamount": 1.5,
+      "drop_min": "1.00",
+      "drop_max": "2.00"
+    },
+    {
+      "id": 25322,
+      "gathering_item_type_id": 38,
+      "gathering_type_id": 16,
+      "droprate": 0.10953651640771,
+      "dropamount": 1.5,
+      "drop_min": "1.00",
+      "drop_max": "2.00"
+    },
+    {
+      "id": 25323,
+      "gathering_item_type_id": 47,
+      "gathering_type_id": 16,
+      "droprate": 0.10847548379018,
+      "dropamount": 1.5,
+      "drop_min": "1.00",
+      "drop_max": "2.00"
+    },
+    {
+      "id": 25324,
+      "gathering_item_type_id": 40,
+      "gathering_type_id": 16,
+      "droprate": 0.10868155729855,
+      "dropamount": 1.5,
+      "drop_min": "1.00",
+      "drop_max": "2.00"
+    },
+    {
+      "id": 25325,
+      "gathering_item_type_id": 19,
+      "gathering_type_id": 16,
+      "droprate": 0.09835245097312,
+      "dropamount": 1.5,
+      "drop_min": "1.00",
+      "drop_max": "2.00"
+    },
+    {
+      "id": 25326,
+      "gathering_item_type_id": 101,
+      "gathering_type_id": 16,
+      "droprate": 0.046292593240257,
+      "dropamount": 3,
+      "drop_min": "2.00",
+      "drop_max": "4.00"
+    },
+    {
+      "id": 25327,
+      "gathering_item_type_id": 22,
+      "gathering_type_id": 16,
+      "droprate": 0.099178869651079,
+      "dropamount": 1,
+      "drop_min": "1.00",
+      "drop_max": "1.00"
+    },
+    {
+      "id": 25328,
+      "gathering_item_type_id": 91,
+      "gathering_type_id": 16,
+      "droprate": 0.041917596097839,
+      "dropamount": 1,
+      "drop_min": "1.00",
+      "drop_max": "1.00"
+    },
+    {
+      "id": 25329,
+      "gathering_item_type_id": 23,
+      "gathering_type_id": 16,
+      "droprate": 0.0096321208584368,
+      "dropamount": 1.5,
+      "drop_min": "1.00",
+      "drop_max": "2.00"
+    },
+    {
+      "id": 25330,
+      "gathering_item_type_id": 16,
+      "gathering_type_id": 16,
+      "droprate": 0.024063783027063,
+      "dropamount": 1,
+      "drop_min": "1.00",
+      "drop_max": "1.00"
+    },
+    {
+      "id": 25331,
+      "gathering_item_type_id": 18,
+      "gathering_type_id": 16,
+      "droprate": 0.010114358796425,
+      "dropamount": 1.5,
+      "drop_min": "1.00",
+      "drop_max": "2.00"
+    },
+    {
+      "id": 25332,
+      "gathering_item_type_id": 55,
+      "gathering_type_id": 16,
+      "droprate": 0.01190291724282,
+      "dropamount": 1,
+      "drop_min": "1.00",
+      "drop_max": "1.00"
+    },
+    {
+      "id": 25333,
+      "gathering_item_type_id": 92,
+      "gathering_type_id": 16,
+      "droprate": 0.0099216953530779,
+      "dropamount": 1,
+      "drop_min": "1.00",
+      "drop_max": "1.00"
+    },
+    {
+      "id": 25334,
+      "gathering_item_type_id": 21,
+      "gathering_type_id": 16,
+      "droprate": 0.0010633698545955,
+      "dropamount": 1,
+      "drop_min": "1.00",
+      "drop_max": "1.00"
+    },
+    {
+      "id": 25335,
+      "gathering_item_type_id": 25,
+      "gathering_type_id": 16,
+      "droprate": 0.00093589093166382,
+      "dropamount": 1,
+      "drop_min": "1.00",
+      "drop_max": "1.00"
+    },
+    {
+      "id": 25336,
+      "gathering_item_type_id": 20,
+      "gathering_type_id": 16,
+      "droprate": 0.00068850223742006,
+      "dropamount": 1,
+      "drop_min": "1.00",
+      "drop_max": "1.00"
+    },
+    {
+      "id": 25337,
+      "gathering_item_type_id": 17,
+      "gathering_type_id": 16,
+      "droprate": 0.00068204855048806,
+      "dropamount": 1,
+      "drop_min": "1.00",
+      "drop_max": "1.00"
+    },
+    {
+      "id": 25338,
+      "gathering_item_type_id": 58,
+      "gathering_type_id": 16,
+      "droprate": 2.5613834564024E-05,
+      "dropamount": 1,
+      "drop_min": "1.00",
+      "drop_max": "1.00"
+    },
+    {
+      "id": 25339,
+      "gathering_item_type_id": 30,
+      "gathering_type_id": 16,
+      "droprate": 3.0045299231937E-05,
+      "dropamount": 1,
+      "drop_min": "1.00",
+      "drop_max": "1.00"
+    },
+    {
+      "id": 25340,
+      "gathering_item_type_id": 27,
+      "gathering_type_id": 16,
+      "droprate": 4.9960282074114E-05,
+      "dropamount": 1,
+      "drop_min": "1.00",
+      "drop_max": "1.00"
+    },
+    {
+      "id": 25341,
+      "gathering_item_type_id": 29,
+      "gathering_type_id": 16,
+      "droprate": 1.8130865809419E-05,
+      "dropamount": 1,
+      "drop_min": "1.00",
+      "drop_max": "1.00"
+    },
+    {
+      "id": 25342,
+      "gathering_item_type_id": 28,
+      "gathering_type_id": 16,
+      "droprate": 2.0988543480274E-05,
+      "dropamount": 1,
+      "drop_min": "1.00",
+      "drop_max": "1.00"
+    },
+    {
+      "id": 25343,
+      "gathering_item_type_id": 31,
+      "gathering_type_id": 16,
+      "droprate": 3.1678494369403E-05,
+      "dropamount": 1,
+      "drop_min": "1.00",
+      "drop_max": "1.00"
+    },
+    {
+      "id": 25344,
+      "gathering_item_type_id": 32,
+      "gathering_type_id": 16,
+      "droprate": 3.6031478477848E-05,
+      "dropamount": 1,
+      "drop_min": "1.00",
+      "drop_max": "1.00"
+    },
+    {
+      "id": 25345,
+      "gathering_item_type_id": 96,
+      "gathering_type_id": 17,
+      "droprate": 1,
+      "dropamount": 3,
+      "drop_min": "2.00",
+      "drop_max": "4.00"
+    },
+    {
+      "id": 25346,
+      "gathering_item_type_id": 101,
+      "gathering_type_id": 17,
+      "droprate": 0.029724117108786,
+      "dropamount": 3,
+      "drop_min": "2.00",
+      "drop_max": "4.00"
+    },
+    {
+      "id": 25347,
+      "gathering_item_type_id": 22,
+      "gathering_type_id": 17,
+      "droprate": 0.10012041229271,
+      "dropamount": 1,
+      "drop_min": "1.00",
+      "drop_max": "1.00"
+    },
+    {
+      "id": 25348,
+      "gathering_item_type_id": 48,
+      "gathering_type_id": 17,
+      "droprate": 0.042252518499674,
+      "dropamount": 1,
+      "drop_min": "1.00",
+      "drop_max": "1.00"
+    },
+    {
+      "id": 25349,
+      "gathering_item_type_id": 17,
+      "gathering_type_id": 17,
+      "droprate": 0.047116221516722,
+      "dropamount": 1,
+      "drop_min": "1.00",
+      "drop_max": "1.00"
+    },
+    {
+      "id": 25350,
+      "gathering_item_type_id": 16,
+      "gathering_type_id": 17,
+      "droprate": 0.027698798960339,
+      "dropamount": 1,
+      "drop_min": "1.00",
+      "drop_max": "1.00"
+    },
+    {
+      "id": 25351,
+      "gathering_item_type_id": 35,
+      "gathering_type_id": 17,
+      "droprate": 0.019912154274677,
+      "dropamount": 1,
+      "drop_min": "1.00",
+      "drop_max": "1.00"
+    },
+    {
+      "id": 25352,
+      "gathering_item_type_id": 19,
+      "gathering_type_id": 17,
+      "droprate": 0.007371184409656,
+      "dropamount": 1,
+      "drop_min": "1.00",
+      "drop_max": "1.00"
+    },
+    {
+      "id": 25353,
+      "gathering_item_type_id": 23,
+      "gathering_type_id": 17,
+      "droprate": 0.008050471960466,
+      "dropamount": 1.5,
+      "drop_min": "1.00",
+      "drop_max": "2.00"
+    },
+    {
+      "id": 25354,
+      "gathering_item_type_id": 37,
+      "gathering_type_id": 17,
+      "droprate": 0.0087675174598641,
+      "dropamount": 1,
+      "drop_min": "1.00",
+      "drop_max": "1.00"
+    },
+    {
+      "id": 25355,
+      "gathering_item_type_id": 36,
+      "gathering_type_id": 17,
+      "droprate": 0.0048984806241741,
+      "dropamount": 1,
+      "drop_min": "1.00",
+      "drop_max": "1.00"
+    },
+    {
+      "id": 25356,
+      "gathering_item_type_id": 21,
+      "gathering_type_id": 17,
+      "droprate": 0.00083489250654261,
+      "dropamount": 1,
+      "drop_min": "1.00",
+      "drop_max": "1.00"
+    },
+    {
+      "id": 25357,
+      "gathering_item_type_id": 18,
+      "gathering_type_id": 17,
+      "droprate": 0.00090530993156909,
+      "dropamount": 1,
+      "drop_min": "1.00",
+      "drop_max": "1.00"
+    },
+    {
+      "id": 25358,
+      "gathering_item_type_id": 25,
+      "gathering_type_id": 17,
+      "droprate": 0.00065080132648029,
+      "dropamount": 1,
+      "drop_min": "1.00",
+      "drop_max": "1.00"
+    },
+    {
+      "id": 25359,
+      "gathering_item_type_id": 20,
+      "gathering_type_id": 17,
+      "droprate": 0.00042144305224195,
+      "dropamount": 1,
+      "drop_min": "1.00",
+      "drop_max": "1.00"
+    },
+    {
+      "id": 25360,
+      "gathering_item_type_id": 56,
+      "gathering_type_id": 17,
+      "droprate": 3.0544819028825E-05,
+      "dropamount": 1.5,
+      "drop_min": "1.00",
+      "drop_max": "2.00"
+    },
+    {
+      "id": 25361,
+      "gathering_item_type_id": 58,
+      "gathering_type_id": 17,
+      "droprate": 2.5613834564024E-05,
+      "dropamount": 1,
+      "drop_min": "1.00",
+      "drop_max": "1.00"
+    },
+    {
+      "id": 25362,
+      "gathering_item_type_id": 30,
+      "gathering_type_id": 17,
+      "droprate": 3.0045299231937E-05,
+      "dropamount": 1,
+      "drop_min": "1.00",
+      "drop_max": "1.00"
+    },
+    {
+      "id": 25363,
+      "gathering_item_type_id": 27,
+      "gathering_type_id": 17,
+      "droprate": 4.9960282074114E-05,
+      "dropamount": 1,
+      "drop_min": "1.00",
+      "drop_max": "1.00"
+    },
+    {
+      "id": 25364,
+      "gathering_item_type_id": 29,
+      "gathering_type_id": 17,
+      "droprate": 1.8130865809419E-05,
+      "dropamount": 1,
+      "drop_min": "1.00",
+      "drop_max": "1.00"
+    },
+    {
+      "id": 25365,
+      "gathering_item_type_id": 28,
+      "gathering_type_id": 17,
+      "droprate": 2.0988543480274E-05,
+      "dropamount": 1,
+      "drop_min": "1.00",
+      "drop_max": "1.00"
+    },
+    {
+      "id": 25366,
+      "gathering_item_type_id": 31,
+      "gathering_type_id": 17,
+      "droprate": 3.1678494369403E-05,
+      "dropamount": 1,
+      "drop_min": "1.00",
+      "drop_max": "1.00"
+    },
+    {
+      "id": 25367,
+      "gathering_item_type_id": 32,
+      "gathering_type_id": 17,
+      "droprate": 3.6031478477848E-05,
+      "dropamount": 1,
+      "drop_min": "1.00",
+      "drop_max": "1.00"
+    },
+    {
+      "id": 25368,
+      "gathering_item_type_id": 103,
+      "gathering_type_id": 18,
+      "droprate": 1,
+      "dropamount": 4,
+      "drop_min": "3.00",
+      "drop_max": "5.00"
+    },
+    {
+      "id": 25369,
+      "gathering_item_type_id": 101,
+      "gathering_type_id": 18,
+      "droprate": 0.04453265106721,
+      "dropamount": 3,
+      "drop_min": "2.00",
+      "drop_max": "4.00"
+    },
+    {
+      "id": 25370,
+      "gathering_item_type_id": 19,
+      "gathering_type_id": 18,
+      "droprate": 0.068694624166925,
+      "dropamount": 1.5,
+      "drop_min": "1.00",
+      "drop_max": "2.00"
+    },
+    {
+      "id": 25371,
+      "gathering_item_type_id": 22,
+      "gathering_type_id": 18,
+      "droprate": 0.09944597945855,
+      "dropamount": 1,
+      "drop_min": "1.00",
+      "drop_max": "1.00"
+    },
+    {
+      "id": 25372,
+      "gathering_item_type_id": 38,
+      "gathering_type_id": 18,
+      "droprate": 0.037538117628084,
+      "dropamount": 1.5,
+      "drop_min": "1.00",
+      "drop_max": "2.00"
+    },
+    {
+      "id": 25373,
+      "gathering_item_type_id": 47,
+      "gathering_type_id": 18,
+      "droprate": 0.037590642028744,
+      "dropamount": 1.5,
+      "drop_min": "1.00",
+      "drop_max": "2.00"
+    },
+    {
+      "id": 25374,
+      "gathering_item_type_id": 46,
+      "gathering_type_id": 18,
+      "droprate": 0.037200949103693,
+      "dropamount": 1.5,
+      "drop_min": "1.00",
+      "drop_max": "2.00"
+    },
+    {
+      "id": 25375,
+      "gathering_item_type_id": 92,
+      "gathering_type_id": 18,
+      "droprate": 0.0096763038585333,
+      "dropamount": 1,
+      "drop_min": "1.00",
+      "drop_max": "1.00"
+    },
+    {
+      "id": 25376,
+      "gathering_item_type_id": 39,
+      "gathering_type_id": 18,
+      "droprate": 0.013088436415434,
+      "dropamount": 1.5,
+      "drop_min": "1.00",
+      "drop_max": "2.00"
+    },
+    {
+      "id": 25377,
+      "gathering_item_type_id": 40,
+      "gathering_type_id": 18,
+      "droprate": 0.012309050565331,
+      "dropamount": 1.5,
+      "drop_min": "1.00",
+      "drop_max": "2.00"
+    },
+    {
+      "id": 25378,
+      "gathering_item_type_id": 16,
+      "gathering_type_id": 18,
+      "droprate": 0.011431084710294,
+      "dropamount": 1,
+      "drop_min": "1.00",
+      "drop_max": "1.00"
+    },
+    {
+      "id": 25379,
+      "gathering_item_type_id": 23,
+      "gathering_type_id": 18,
+      "droprate": 0.009840863897992,
+      "dropamount": 1.5,
+      "drop_min": "1.00",
+      "drop_max": "2.00"
+    },
+    {
+      "id": 25380,
+      "gathering_item_type_id": 41,
+      "gathering_type_id": 18,
+      "droprate": 0.011216455946343,
+      "dropamount": 1,
+      "drop_min": "1.00",
+      "drop_max": "1.00"
+    },
+    {
+      "id": 25381,
+      "gathering_item_type_id": 18,
+      "gathering_type_id": 18,
+      "droprate": 0.0067784908100077,
+      "dropamount": 1.5,
+      "drop_min": "1.00",
+      "drop_max": "2.00"
+    },
+    {
+      "id": 25382,
+      "gathering_item_type_id": 17,
+      "gathering_type_id": 18,
+      "droprate": 0.00054609148988272,
+      "dropamount": 1,
+      "drop_min": "1.00",
+      "drop_max": "1.00"
+    },
+    {
+      "id": 25383,
+      "gathering_item_type_id": 25,
+      "gathering_type_id": 18,
+      "droprate": 0.00089326085419372,
+      "dropamount": 1,
+      "drop_min": "1.00",
+      "drop_max": "1.00"
+    },
+    {
+      "id": 25384,
+      "gathering_item_type_id": 20,
+      "gathering_type_id": 18,
+      "droprate": 0.00076388441961022,
+      "dropamount": 1,
+      "drop_min": "1.00",
+      "drop_max": "1.00"
+    },
+    {
+      "id": 25385,
+      "gathering_item_type_id": 21,
+      "gathering_type_id": 18,
+      "droprate": 0.00095360510917145,
+      "dropamount": 1,
+      "drop_min": "1.00",
+      "drop_max": "1.00"
+    },
+    {
+      "id": 25386,
+      "gathering_item_type_id": 58,
+      "gathering_type_id": 18,
+      "droprate": 2.5613834564024E-05,
+      "dropamount": 1,
+      "drop_min": "1.00",
+      "drop_max": "1.00"
+    },
+    {
+      "id": 25387,
+      "gathering_item_type_id": 30,
+      "gathering_type_id": 18,
+      "droprate": 3.0045299231937E-05,
+      "dropamount": 1,
+      "drop_min": "1.00",
+      "drop_max": "1.00"
+    },
+    {
+      "id": 25388,
+      "gathering_item_type_id": 27,
+      "gathering_type_id": 18,
+      "droprate": 4.9960282074114E-05,
+      "dropamount": 1,
+      "drop_min": "1.00",
+      "drop_max": "1.00"
+    },
+    {
+      "id": 25389,
+      "gathering_item_type_id": 29,
+      "gathering_type_id": 18,
+      "droprate": 1.8130865809419E-05,
+      "dropamount": 1,
+      "drop_min": "1.00",
+      "drop_max": "1.00"
+    },
+    {
+      "id": 25390,
+      "gathering_item_type_id": 28,
+      "gathering_type_id": 18,
+      "droprate": 2.0988543480274E-05,
+      "dropamount": 1,
+      "drop_min": "1.00",
+      "drop_max": "1.00"
+    },
+    {
+      "id": 25391,
+      "gathering_item_type_id": 31,
+      "gathering_type_id": 18,
+      "droprate": 3.1678494369403E-05,
+      "dropamount": 1,
+      "drop_min": "1.00",
+      "drop_max": "1.00"
+    },
+    {
+      "id": 25392,
+      "gathering_item_type_id": 32,
+      "gathering_type_id": 18,
+      "droprate": 3.6031478477848E-05,
+      "dropamount": 1,
+      "drop_min": "1.00",
+      "drop_max": "1.00"
+    }
+  ],
+  "rotations": [
+    {
+      "id": 17,
+      "name": "Wolves at Imp Cave",
+      "rotation_video": "https://youtu.be/M8HdXKjzERs?si=VV1XFrTaxub3ciq7",
+      "gathering_type_id": 5,
+      "avg_gathers_per_hour": "930",
+      "session_count": 8,
+      "total_hours": "10.0",
+      "type_ratios": [
+        {
+          "gathering_type_id": 5,
+          "ratio": 1
+        }
+      ],
+      "primary_item_ratios": {
+        "42": 1
+      }
+    },
+    {
+      "id": 34,
+      "name": "Stillcoral Grove's Coral Crabs",
+      "rotation_video": "https://youtu.be/q8n_v9zdSfw",
+      "gathering_type_id": 15,
+      "avg_gathers_per_hour": "742",
+      "session_count": 10,
+      "total_hours": "16.0",
+      "type_ratios": [
+        {
+          "gathering_type_id": 15,
+          "ratio": 1
+        }
+      ],
+      "primary_item_ratios": {
+        "14": 1
+      }
+    },
+    {
+      "id": 35,
+      "name": "North Kaia Mountaintop",
+      "rotation_video": "https://youtu.be/sAsZ5_onf0s?si=kTpKVpmG2nfeBjPl",
+      "gathering_type_id": 1,
+      "avg_gathers_per_hour": "853",
+      "session_count": 10,
+      "total_hours": "10.7",
+      "type_ratios": [
+        {
+          "gathering_type_id": 1,
+          "ratio": 1
+        }
+      ],
+      "primary_item_ratios": {
+        "50": 0.4399,
+        "51": 0.4291,
+        "52": 0.131
+      }
+    },
+    {
+      "id": 36,
+      "name": "Northwestern Gateway Lizard",
+      "rotation_video": "https://youtu.be/4OdS5-yOsiQ",
+      "gathering_type_id": 6,
+      "avg_gathers_per_hour": "878",
+      "session_count": 4,
+      "total_hours": "4.7",
+      "type_ratios": [
+        {
+          "gathering_type_id": 6,
+          "ratio": 1
+        }
+      ],
+      "primary_item_ratios": {
+        "33": 1
+      }
+    },
+    {
+      "id": 37,
+      "name": "Bher Elk",
+      "rotation_video": "https://youtu.be/HOxEDCiDgsI?si=c8jDijojDoVpNHYV",
+      "gathering_type_id": 6,
+      "avg_gathers_per_hour": "850",
+      "session_count": 7,
+      "total_hours": "6.5",
+      "type_ratios": [
+        {
+          "gathering_type_id": 6,
+          "ratio": 1
+        }
+      ],
+      "primary_item_ratios": {
+        "11": 1
+      }
+    },
+    {
+      "id": 38,
+      "name": "Imp Cave Wolves",
+      "rotation_video": "https://youtu.be/M8HdXKjzERs?si=VV1XFrTaxub3ciq7",
+      "gathering_type_id": 6,
+      "avg_gathers_per_hour": "856",
+      "session_count": 1,
+      "total_hours": "1.0",
+      "type_ratios": [
+        {
+          "gathering_type_id": 6,
+          "ratio": 1
+        }
+      ],
+      "primary_item_ratios": {
+        "44": 1
+      }
+    },
+    {
+      "id": 39,
+      "name": "Behr Wild herbs",
+      "rotation_video": "https://youtu.be/2IiTI4WtE08?si=mG6TDeNa2kM9Lje5",
+      "gathering_type_id": 4,
+      "avg_gathers_per_hour": "1042",
+      "session_count": 11,
+      "total_hours": "10.2",
+      "type_ratios": [
+        {
+          "gathering_type_id": 4,
+          "ratio": 1
+        }
+      ],
+      "primary_item_ratios": {
+        "79": 1
+      }
+    },
+    {
+      "id": 40,
+      "name": "Biraghi's Den - Ash sap",
+      "rotation_video": "https://youtu.be/qFICJfx824o",
+      "gathering_type_id": 2,
+      "avg_gathers_per_hour": "872",
+      "session_count": 10,
+      "total_hours": "10.0",
+      "type_ratios": [
+        {
+          "gathering_type_id": 2,
+          "ratio": 1
+        }
+      ],
+      "primary_item_ratios": {
+        "3": 0.9606,
+        "87": 0.0394,
+        "94": 0
+      }
+    },
+    {
+      "id": 41,
+      "name": "Pilgrim's Heaven",
+      "rotation_video": "https://youtu.be/TI6fmKCP5Og?si=ragL7D1uVfdWEv5c",
+      "gathering_type_id": 7,
+      "avg_gathers_per_hour": "1036",
+      "session_count": 10,
+      "total_hours": "10.0",
+      "type_ratios": [
+        {
+          "gathering_type_id": 7,
+          "ratio": 1
+        }
+      ],
+      "primary_item_ratios": {
+        "14": 1
+      }
+    },
+    {
+      "id": 42,
+      "name": "Caphras Trees",
+      "rotation_video": "https://youtu.be/4NFkNLqwloY",
+      "gathering_type_id": 16,
+      "avg_gathers_per_hour": "702",
+      "session_count": 14,
+      "total_hours": "13.4",
+      "type_ratios": [
+        {
+          "gathering_type_id": 16,
+          "ratio": 1
+        }
+      ],
+      "primary_item_ratios": {
+        "90": 1
+      }
+    },
+    {
+      "id": 43,
+      "name": "Forest of Seclusion - fox",
+      "rotation_video": "https://youtu.be/C4izfVS_SO4?si=8JAPvNkkikSSf2VC",
+      "gathering_type_id": 3,
+      "avg_gathers_per_hour": "1035",
+      "session_count": 10,
+      "total_hours": "10.0",
+      "type_ratios": [
+        {
+          "gathering_type_id": 3,
+          "ratio": 1
+        }
+      ],
+      "primary_item_ratios": {
+        "93": 1
+      }
+    },
+    {
+      "id": 44,
+      "name": "Bloody Monastery Cedar sap",
+      "rotation_video": "https://youtu.be/pRL3akht-8Q",
+      "gathering_type_id": 2,
+      "avg_gathers_per_hour": "852",
+      "session_count": 6,
+      "total_hours": "5.7",
+      "type_ratios": [
+        {
+          "gathering_type_id": 2,
+          "ratio": 1
+        }
+      ],
+      "primary_item_ratios": {
+        "87": 1
+      }
+    },
+    {
+      "id": 45,
+      "name": "Eilton's snowfield cedar sap",
+      "rotation_video": "https://youtu.be/ILI51QJ9kIg",
+      "gathering_type_id": 2,
+      "avg_gathers_per_hour": "827",
+      "session_count": 5,
+      "total_hours": "5.0",
+      "type_ratios": [
+        {
+          "gathering_type_id": 2,
+          "ratio": 1
+        }
+      ],
+      "primary_item_ratios": {
+        "88": 1
+      }
+    },
+    {
+      "id": 46,
+      "name": "Seoul Thuja sap",
+      "rotation_video": "https://youtu.be/lD-8E-PnIyE",
+      "gathering_type_id": 2,
+      "avg_gathers_per_hour": "693",
+      "session_count": 4,
+      "total_hours": "3.8",
+      "type_ratios": [
+        {
+          "gathering_type_id": 2,
+          "ratio": 1
+        }
+      ],
+      "primary_item_ratios": {
+        "95": 1
+      }
+    },
+    {
+      "id": 47,
+      "name": "Serendia sheep mountain",
+      "rotation_video": "https://www.youtube.com/watch?v=lySkpq5wYfs",
+      "gathering_type_id": 17,
+      "avg_gathers_per_hour": "1039",
+      "session_count": 13,
+      "total_hours": "15.6",
+      "type_ratios": [
+        {
+          "gathering_type_id": 17,
+          "ratio": 1
+        }
+      ],
+      "primary_item_ratios": {
+        "96": 1
+      }
+    },
+    {
+      "id": 48,
+      "name": "Snake and Scorpions at Tshira Ruins",
+      "rotation_video": "https://www.youtube.com/watch?v=eFHD9QK_HIo",
+      "gathering_type_id": 5,
+      "avg_gathers_per_hour": "749",
+      "session_count": 4,
+      "total_hours": "3.4",
+      "type_ratios": [
+        {
+          "gathering_type_id": 5,
+          "ratio": 1
+        }
+      ],
+      "primary_item_ratios": {
+        "97": 0.3331,
+        "98": 0.6669
+      }
+    },
+    {
+      "id": 49,
+      "name": "Snake at Gorgo Rock Belt",
+      "rotation_video": "https://youtu.be/htuq7Fg_6To",
+      "gathering_type_id": 5,
+      "avg_gathers_per_hour": "739",
+      "session_count": 4,
+      "total_hours": "3.7",
+      "type_ratios": [
+        {
+          "gathering_type_id": 5,
+          "ratio": 1
+        }
+      ],
+      "primary_item_ratios": {
+        "98": 1
+      }
+    },
+    {
+      "id": 50,
+      "name": "Scorpions at Atumach",
+      "rotation_video": "https://youtu.be/zzUCv7IvDZA",
+      "gathering_type_id": 5,
+      "avg_gathers_per_hour": "617",
+      "session_count": 1,
+      "total_hours": "1.0",
+      "type_ratios": [
+        {
+          "gathering_type_id": 5,
+          "ratio": 1
+        }
+      ],
+      "primary_item_ratios": {
+        "97": 1
+      }
+    },
+    {
+      "id": 51,
+      "name": "Lions at Ancado Coast",
+      "rotation_video": "https://youtu.be/vhFmboBdTQo",
+      "gathering_type_id": 5,
+      "avg_gathers_per_hour": "837",
+      "session_count": 2,
+      "total_hours": "2.0",
+      "type_ratios": [
+        {
+          "gathering_type_id": 5,
+          "ratio": 1
+        }
+      ],
+      "primary_item_ratios": {
+        "99": 1
+      }
+    },
+    {
+      "id": 52,
+      "name": "Caphras trees",
+      "rotation_video": "https://youtu.be/4NFkNLqwloY",
+      "gathering_type_id": 18,
+      "avg_gathers_per_hour": "770",
+      "session_count": 11,
+      "total_hours": "11.0",
+      "type_ratios": [
+        {
+          "gathering_type_id": 18,
+          "ratio": 1
+        }
+      ],
+      "primary_item_ratios": {
+        "103": 1
+      }
+    }
+  ]
+}

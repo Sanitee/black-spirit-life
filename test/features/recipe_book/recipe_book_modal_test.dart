@@ -1333,6 +1333,21 @@ void main() {
         'Clear Liquid Reagent',
         'Elixir of Life',
       ]) {
+        final profitDecoration =
+            tester
+                    .widget<DecoratedBox>(
+                      find.descendant(
+                        of: find.byKey(RecipeBookKeys.profitPill(name)),
+                        matching: find.byType(DecoratedBox),
+                      ),
+                    )
+                    .decoration
+                as BoxDecoration;
+        expect(
+          profitDecoration.color,
+          StandardSpec.theme.palette.success.withAlpha(92),
+          reason: 'Profit remains positive-coloured, unlike market stock.',
+        );
         expect(
           find.descendant(
             of: find.byKey(RecipeBookKeys.profitPill(name)),
@@ -3054,6 +3069,7 @@ void main() {
     final panelRect = tester.getRect(panel);
     expect(panelRect.top, greaterThanOrEqualTo(0));
     expect(panelRect.bottom, lessThanOrEqualTo(420));
+    // Leave 16 logical pixels at each edge of the available overlay.
     expect(panelRect.height, lessThanOrEqualTo(420 - 32 + 0.01));
 
     final scrollView = find.descendant(

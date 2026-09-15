@@ -1,0 +1,999 @@
+{
+  "schemaVersion": 1,
+  "sourceReview": {
+    "extractorCommit": "2e4ace61e2a3967663cb36580edb7201b7ca3fd4",
+    "extractorRepository": "https://github.com/iDevelopThings/bdo-data-extractor",
+    "clientRegion": "NA",
+    "worldSha256": "9555d1a84c45e347f7d464ed16e69eeb6066478f8ced0833d2100d55ff7ca4c6",
+    "itemsSha256": "e36491ceffd3885de03688e8bf689f25cf9ba688767a8cc20267f3ca826ccb2b",
+    "reviewedAt": "2026-07-28",
+    "distributionScope": "Private, noncommercial candidate evaluation only. The extractor license covers its source code, not Pearl Abyss game data. Do not publish or redistribute this seed or a derived map build without permission."
+  },
+  "resources": [
+    {
+      "id": "item:4006",
+      "gameItemId": 4006,
+      "name": "Rough Stone",
+      "category": "Ore & minerals",
+      "aliases": [],
+      "acquisitionModes": [
+        "hunting"
+      ]
+    },
+    {
+      "id": "item:4008",
+      "gameItemId": 4008,
+      "name": "Vanadium Ore",
+      "category": "Ore & minerals",
+      "aliases": [],
+      "acquisitionModes": [
+        "workerNode"
+      ]
+    },
+    {
+      "id": "item:4009",
+      "gameItemId": 4009,
+      "name": "Titanium Ore",
+      "category": "Ore & minerals",
+      "aliases": [],
+      "acquisitionModes": [
+        "workerNode"
+      ]
+    },
+    {
+      "id": "item:4201",
+      "gameItemId": 4201,
+      "name": "Silver Ore",
+      "category": "Ore & minerals",
+      "aliases": [],
+      "acquisitionModes": [
+        "hunting"
+      ]
+    },
+    {
+      "id": "item:4406",
+      "gameItemId": 4406,
+      "name": "Rough Translucent Crystal",
+      "category": "Ore & minerals",
+      "aliases": [],
+      "acquisitionModes": [
+        "workerNode"
+      ]
+    },
+    {
+      "id": "item:4407",
+      "gameItemId": 4407,
+      "name": "Rough Mud Crystal",
+      "category": "Ore & minerals",
+      "aliases": [],
+      "acquisitionModes": [
+        "workerNode"
+      ]
+    },
+    {
+      "id": "item:4408",
+      "gameItemId": 4408,
+      "name": "Rough Red Crystal",
+      "category": "Ore & minerals",
+      "aliases": [],
+      "acquisitionModes": [
+        "workerNode"
+      ]
+    },
+    {
+      "id": "item:4409",
+      "gameItemId": 4409,
+      "name": "Rough Green Crystal",
+      "category": "Ore & minerals",
+      "aliases": [],
+      "acquisitionModes": [
+        "workerNode"
+      ]
+    },
+    {
+      "id": "item:4411",
+      "gameItemId": 4411,
+      "name": "Rough Blue Crystal",
+      "category": "Ore & minerals",
+      "aliases": [],
+      "acquisitionModes": [
+        "workerNode"
+      ]
+    },
+    {
+      "id": "item:4611",
+      "gameItemId": 4611,
+      "name": "Elder Tree Timber",
+      "category": "Timber & sap",
+      "aliases": [
+        "elder timber"
+      ],
+      "acquisitionModes": [
+        "workerNode"
+      ]
+    },
+    {
+      "id": "item:4624",
+      "gameItemId": 4624,
+      "name": "Caphras Tree Timber",
+      "category": "Timber & sap",
+      "aliases": [
+        "caphras timber"
+      ],
+      "acquisitionModes": [
+        "workerNode"
+      ]
+    },
+    {
+      "id": "item:4801",
+      "gameItemId": 4801,
+      "name": "Powder of Darkness",
+      "category": "Ore & minerals",
+      "aliases": [],
+      "acquisitionModes": [
+        "workerNode"
+      ]
+    },
+    {
+      "id": "item:4802",
+      "gameItemId": 4802,
+      "name": "Powder of Flame",
+      "category": "Ore & minerals",
+      "aliases": [],
+      "acquisitionModes": [
+        "workerNode"
+      ]
+    },
+    {
+      "id": "item:4804",
+      "gameItemId": 4804,
+      "name": "Powder of Earth",
+      "category": "Ore & minerals",
+      "aliases": [],
+      "acquisitionModes": [
+        "workerNode"
+      ]
+    },
+    {
+      "id": "item:4805",
+      "gameItemId": 4805,
+      "name": "Powder of Time",
+      "category": "Ore & minerals",
+      "aliases": [],
+      "acquisitionModes": [
+        "workerNode"
+      ]
+    },
+    {
+      "id": "item:5005",
+      "gameItemId": 5005,
+      "name": "Bloody Tree Knot",
+      "category": "Timber & sap",
+      "aliases": [],
+      "acquisitionModes": [
+        "workerNode"
+      ]
+    },
+    {
+      "id": "item:5006",
+      "gameItemId": 5006,
+      "name": "Spirit's Leaf",
+      "category": "Timber & sap",
+      "aliases": [],
+      "acquisitionModes": [
+        "workerNode"
+      ]
+    },
+    {
+      "id": "item:5007",
+      "gameItemId": 5007,
+      "name": "Monk's Branch",
+      "category": "Timber & sap",
+      "aliases": [],
+      "acquisitionModes": [
+        "workerNode"
+      ]
+    },
+    {
+      "id": "item:5008",
+      "gameItemId": 5008,
+      "name": "Old Tree Bark",
+      "category": "Timber & sap",
+      "aliases": [],
+      "acquisitionModes": [
+        "workerNode"
+      ]
+    },
+    {
+      "id": "item:5014",
+      "gameItemId": 5014,
+      "name": "Elder Tree Sap",
+      "category": "Timber & sap",
+      "aliases": [
+        "elder sap"
+      ],
+      "acquisitionModes": [
+        "workerNode"
+      ]
+    },
+    {
+      "id": "item:5025",
+      "gameItemId": 5025,
+      "name": "Caphras Tree Sap",
+      "category": "Timber & sap",
+      "aliases": [
+        "caphras sap"
+      ],
+      "acquisitionModes": [
+        "workerNode"
+      ]
+    },
+    {
+      "id": "item:5960",
+      "gameItemId": 5960,
+      "name": "Trace of Nature",
+      "category": "Alchemy material",
+      "aliases": [],
+      "acquisitionModes": [
+        "workerNode"
+      ]
+    },
+    {
+      "id": "item:6026",
+      "gameItemId": 6026,
+      "name": "Elephant Hide",
+      "category": "Gathering hide",
+      "aliases": [
+        "rock elephant hide"
+      ],
+      "acquisitionModes": [
+        "hunting"
+      ]
+    },
+    {
+      "id": "item:6359",
+      "gameItemId": 6359,
+      "name": "Rock Elephant Blood",
+      "category": "Gathering blood",
+      "aliases": [
+        "elephant blood"
+      ],
+      "acquisitionModes": [
+        "hunting"
+      ]
+    },
+    {
+      "id": "item:6501",
+      "gameItemId": 6501,
+      "name": "Coral Piece",
+      "category": "Marine material",
+      "aliases": [
+        "coral stoneback crab"
+      ],
+      "acquisitionModes": [
+        "hunting"
+      ]
+    },
+    {
+      "id": "item:6533",
+      "gameItemId": 6533,
+      "name": "Coral Crystal",
+      "category": "Marine material",
+      "aliases": [
+        "coral stoneback crab"
+      ],
+      "acquisitionModes": [
+        "hunting"
+      ]
+    },
+    {
+      "id": "item:6656",
+      "gameItemId": 6656,
+      "name": "Purified Water",
+      "category": "Cooking & alchemy",
+      "aliases": [],
+      "acquisitionModes": [
+        "workerNode"
+      ]
+    },
+    {
+      "id": "item:6657",
+      "gameItemId": 6657,
+      "name": "Bag of Muddy Water",
+      "category": "Cooking & alchemy",
+      "aliases": [
+        "muddy water"
+      ],
+      "acquisitionModes": [
+        "workerNode"
+      ]
+    },
+    {
+      "id": "item:7902",
+      "gameItemId": 7902,
+      "name": "Lamb Meat",
+      "category": "Gathering meat",
+      "aliases": [
+        "cliffside mountain sheep",
+        "sheep meat"
+      ],
+      "acquisitionModes": [
+        "hunting"
+      ]
+    },
+    {
+      "id": "item:7922",
+      "gameItemId": 7922,
+      "name": "Snake Meat",
+      "category": "Gathering meat",
+      "aliases": [],
+      "acquisitionModes": [
+        "hunting"
+      ]
+    },
+    {
+      "id": "item:7962",
+      "gameItemId": 7962,
+      "name": "Rock Elephant Meat",
+      "category": "Gathering meat",
+      "aliases": [
+        "elephant meat",
+        "rock elephant"
+      ],
+      "acquisitionModes": [
+        "hunting"
+      ]
+    },
+    {
+      "id": "item:821255",
+      "gameItemId": 821255,
+      "name": "Rusalka's Coral",
+      "category": "Alchemy material",
+      "aliases": [
+        "coral stoneback crab"
+      ],
+      "acquisitionModes": [
+        "fieldGathering"
+      ]
+    },
+    {
+      "id": "item:821259",
+      "gameItemId": 821259,
+      "name": "Caphras Essence",
+      "category": "Alchemy material",
+      "aliases": [
+        "golden leaf snake"
+      ],
+      "acquisitionModes": [
+        "hunting"
+      ]
+    },
+    {
+      "id": "item:821306",
+      "gameItemId": 821306,
+      "name": "Dried Lavascale Stargazer",
+      "category": "Seafood",
+      "aliases": [],
+      "acquisitionModes": [
+        "workerNode"
+      ]
+    },
+    {
+      "id": "item:821307",
+      "gameItemId": 821307,
+      "name": "Dried Devil Stinger",
+      "category": "Seafood",
+      "aliases": [],
+      "acquisitionModes": [
+        "workerNode"
+      ]
+    },
+    {
+      "id": "item:821311",
+      "gameItemId": 821311,
+      "name": "Dried Ribbon Eel",
+      "category": "Seafood",
+      "aliases": [],
+      "acquisitionModes": [
+        "workerNode"
+      ]
+    },
+    {
+      "id": "item:821313",
+      "gameItemId": 821313,
+      "name": "Dried Goldenstriped Soapfish",
+      "category": "Seafood",
+      "aliases": [],
+      "acquisitionModes": [
+        "workerNode"
+      ]
+    }
+  ],
+  "nodes": [
+    {
+      "id": "client:2010",
+      "gameNodeId": 2010,
+      "name": "Faith's Resting Place",
+      "nodeType": "Connection",
+      "x": 627250.0,
+      "z": 524008.0,
+      "contributionPoints": 1,
+      "linkIds": [
+        "client:2041"
+      ],
+      "outputs": []
+    },
+    {
+      "id": "client:2013",
+      "gameNodeId": 2013,
+      "name": "Litovan Mountains",
+      "nodeType": "Connection",
+      "x": 720240.0,
+      "z": 510445.0,
+      "contributionPoints": 1,
+      "linkIds": [
+        "client:2042",
+        "client:2043"
+      ],
+      "outputs": []
+    },
+    {
+      "id": "client:2014",
+      "gameNodeId": 2014,
+      "name": "Azure Battlefield",
+      "nodeType": "Connection",
+      "x": 583332.0,
+      "z": 621826.0,
+      "contributionPoints": 1,
+      "linkIds": [
+        "client:2040"
+      ],
+      "outputs": []
+    },
+    {
+      "id": "client:2016",
+      "gameNodeId": 2016,
+      "name": "Urnas Mountains",
+      "nodeType": "Connection",
+      "x": 515231.0,
+      "z": 576091.0,
+      "contributionPoints": 1,
+      "linkIds": [
+        "client:2039"
+      ],
+      "outputs": []
+    },
+    {
+      "id": "client:2022",
+      "gameNodeId": 2022,
+      "name": "Great Dark Spot",
+      "nodeType": "Connection",
+      "x": 507986.0,
+      "z": 723849.0,
+      "contributionPoints": 1,
+      "linkIds": [
+        "client:2047"
+      ],
+      "outputs": []
+    },
+    {
+      "id": "client:2024",
+      "gameNodeId": 2024,
+      "name": "Mount Rumanaré",
+      "nodeType": "Connection",
+      "x": 568544.0,
+      "z": 732006.0,
+      "contributionPoints": 1,
+      "linkIds": [
+        "client:2048",
+        "client:2049"
+      ],
+      "outputs": []
+    },
+    {
+      "id": "client:2028",
+      "gameNodeId": 2028,
+      "name": "Veiled Archives",
+      "nodeType": "Connection",
+      "x": 656561.0,
+      "z": 651425.0,
+      "contributionPoints": 1,
+      "linkIds": [
+        "client:2038"
+      ],
+      "outputs": []
+    },
+    {
+      "id": "client:2030",
+      "gameNodeId": 2030,
+      "name": "Ancient Ruins",
+      "nodeType": "Connection",
+      "x": 693452.0,
+      "z": 579113.0,
+      "contributionPoints": 1,
+      "linkIds": [
+        "client:2037",
+        "client:2044"
+      ],
+      "outputs": []
+    },
+    {
+      "id": "client:2034",
+      "gameNodeId": 2034,
+      "name": "Ebony Opening",
+      "nodeType": "Connection",
+      "x": 611454.0,
+      "z": 646459.0,
+      "contributionPoints": 1,
+      "linkIds": [
+        "client:2045"
+      ],
+      "outputs": []
+    },
+    {
+      "id": "client:2035",
+      "gameNodeId": 2035,
+      "name": "Platerra Mountains",
+      "nodeType": "Connection",
+      "x": 609412.0,
+      "z": 699216.0,
+      "contributionPoints": 1,
+      "linkIds": [
+        "client:2046",
+        "client:2050"
+      ],
+      "outputs": []
+    },
+    {
+      "id": "client:2036",
+      "gameNodeId": 2036,
+      "name": "Sanctuary Coastal Outpost",
+      "nodeType": "Connection",
+      "x": 495582.0,
+      "z": 461518.0,
+      "contributionPoints": 1,
+      "linkIds": [
+        "client:2051"
+      ],
+      "outputs": []
+    },
+    {
+      "id": "client:2037",
+      "gameNodeId": 2037,
+      "name": "Ancient Ruins - Lumbering",
+      "nodeType": "Lumbering",
+      "x": 695105.0,
+      "z": 572919.0,
+      "contributionPoints": 1,
+      "linkIds": [
+        "client:2030"
+      ],
+      "parentId": "client:2030",
+      "outputs": [
+        {
+          "resourceId": "item:4624",
+          "isPrimary": true
+        },
+        {
+          "resourceId": "item:5025",
+          "isPrimary": false
+        },
+        {
+          "resourceId": "item:5007",
+          "isPrimary": false
+        }
+      ]
+    },
+    {
+      "id": "client:2038",
+      "gameNodeId": 2038,
+      "name": "Veiled Archives - Mining",
+      "nodeType": "Mining",
+      "x": 658972.0,
+      "z": 663322.0,
+      "contributionPoints": 1,
+      "linkIds": [
+        "client:2028"
+      ],
+      "parentId": "client:2028",
+      "outputs": [
+        {
+          "resourceId": "item:4008",
+          "isPrimary": true
+        },
+        {
+          "resourceId": "item:4802",
+          "isPrimary": false
+        },
+        {
+          "resourceId": "item:4408",
+          "isPrimary": false
+        }
+      ]
+    },
+    {
+      "id": "client:2039",
+      "gameNodeId": 2039,
+      "name": "Urnas Mountains - Excavation",
+      "nodeType": "Excavation",
+      "x": 506732.0,
+      "z": 585833.0,
+      "contributionPoints": 1,
+      "linkIds": [
+        "client:2016"
+      ],
+      "parentId": "client:2016",
+      "outputs": [
+        {
+          "resourceId": "item:5960",
+          "isPrimary": true
+        },
+        {
+          "resourceId": "item:4409",
+          "isPrimary": false
+        }
+      ]
+    },
+    {
+      "id": "client:2040",
+      "gameNodeId": 2040,
+      "name": "Azure Battlefield - Mining",
+      "nodeType": "Mining",
+      "x": 582460.0,
+      "z": 626924.0,
+      "contributionPoints": 1,
+      "linkIds": [
+        "client:2014"
+      ],
+      "parentId": "client:2014",
+      "outputs": [
+        {
+          "resourceId": "item:4009",
+          "isPrimary": true
+        },
+        {
+          "resourceId": "item:4805",
+          "isPrimary": false
+        },
+        {
+          "resourceId": "item:4406",
+          "isPrimary": false
+        }
+      ]
+    },
+    {
+      "id": "client:2041",
+      "gameNodeId": 2041,
+      "name": "Faith's Resting Place - Lumbering",
+      "nodeType": "Lumbering",
+      "x": 622187.0,
+      "z": 527443.0,
+      "contributionPoints": 1,
+      "linkIds": [
+        "client:2010"
+      ],
+      "parentId": "client:2010",
+      "outputs": [
+        {
+          "resourceId": "item:4611",
+          "isPrimary": true
+        },
+        {
+          "resourceId": "item:5008",
+          "isPrimary": false
+        },
+        {
+          "resourceId": "item:5005",
+          "isPrimary": false
+        }
+      ]
+    },
+    {
+      "id": "client:2042",
+      "gameNodeId": 2042,
+      "name": "Litovan Mountains - Lumbering",
+      "nodeType": "Lumbering",
+      "x": 728901.0,
+      "z": 511499.0,
+      "contributionPoints": 1,
+      "linkIds": [
+        "client:2013"
+      ],
+      "parentId": "client:2013",
+      "outputs": [
+        {
+          "resourceId": "item:4611",
+          "isPrimary": true
+        },
+        {
+          "resourceId": "item:5014",
+          "isPrimary": false
+        },
+        {
+          "resourceId": "item:5007",
+          "isPrimary": false
+        }
+      ]
+    },
+    {
+      "id": "client:2043",
+      "gameNodeId": 2043,
+      "name": "Litovan Mountains - Lumbering",
+      "nodeType": "Lumbering",
+      "x": 722841.0,
+      "z": 518575.0,
+      "contributionPoints": 1,
+      "linkIds": [
+        "client:2013"
+      ],
+      "parentId": "client:2013",
+      "outputs": [
+        {
+          "resourceId": "item:4611",
+          "isPrimary": true
+        },
+        {
+          "resourceId": "item:5008",
+          "isPrimary": false
+        },
+        {
+          "resourceId": "item:5007",
+          "isPrimary": false
+        }
+      ]
+    },
+    {
+      "id": "client:2044",
+      "gameNodeId": 2044,
+      "name": "Ancient Ruins - Lumbering",
+      "nodeType": "Lumbering",
+      "x": 696401.0,
+      "z": 584463.0,
+      "contributionPoints": 1,
+      "linkIds": [
+        "client:2030"
+      ],
+      "parentId": "client:2030",
+      "outputs": [
+        {
+          "resourceId": "item:4624",
+          "isPrimary": true
+        },
+        {
+          "resourceId": "item:5025",
+          "isPrimary": false
+        },
+        {
+          "resourceId": "item:5006",
+          "isPrimary": false
+        }
+      ]
+    },
+    {
+      "id": "client:2045",
+      "gameNodeId": 2045,
+      "name": "Ebony Opening - Mining",
+      "nodeType": "Mining",
+      "x": 608634.0,
+      "z": 641680.0,
+      "contributionPoints": 1,
+      "linkIds": [
+        "client:2034"
+      ],
+      "parentId": "client:2034",
+      "outputs": [
+        {
+          "resourceId": "item:4009",
+          "isPrimary": true
+        },
+        {
+          "resourceId": "item:4804",
+          "isPrimary": false
+        },
+        {
+          "resourceId": "item:4406",
+          "isPrimary": false
+        }
+      ]
+    },
+    {
+      "id": "client:2046",
+      "gameNodeId": 2046,
+      "name": "Platerra Mountains - Mining",
+      "nodeType": "Mining",
+      "x": 604171.0,
+      "z": 708097.0,
+      "contributionPoints": 1,
+      "linkIds": [
+        "client:2035"
+      ],
+      "parentId": "client:2035",
+      "outputs": [
+        {
+          "resourceId": "item:4008",
+          "isPrimary": true
+        },
+        {
+          "resourceId": "item:4805",
+          "isPrimary": false
+        },
+        {
+          "resourceId": "item:4407",
+          "isPrimary": false
+        }
+      ]
+    },
+    {
+      "id": "client:2047",
+      "gameNodeId": 2047,
+      "name": "Great Dark Spot - Excavation",
+      "nodeType": "Excavation",
+      "x": 511244.0,
+      "z": 720529.0,
+      "contributionPoints": 1,
+      "linkIds": [
+        "client:2022"
+      ],
+      "parentId": "client:2022",
+      "outputs": [
+        {
+          "resourceId": "item:5960",
+          "isPrimary": true
+        },
+        {
+          "resourceId": "item:4411",
+          "isPrimary": false
+        }
+      ]
+    },
+    {
+      "id": "client:2048",
+      "gameNodeId": 2048,
+      "name": "Mount Rumanaré - Mining",
+      "nodeType": "Mining",
+      "x": 568312.0,
+      "z": 743496.0,
+      "contributionPoints": 1,
+      "linkIds": [
+        "client:2024"
+      ],
+      "parentId": "client:2024",
+      "outputs": [
+        {
+          "resourceId": "item:4009",
+          "isPrimary": true
+        },
+        {
+          "resourceId": "item:4804",
+          "isPrimary": false
+        },
+        {
+          "resourceId": "item:4406",
+          "isPrimary": false
+        }
+      ]
+    },
+    {
+      "id": "client:2049",
+      "gameNodeId": 2049,
+      "name": "Mount Rumanaré - Mining",
+      "nodeType": "Mining",
+      "x": 555733.0,
+      "z": 724275.0,
+      "contributionPoints": 1,
+      "linkIds": [
+        "client:2024"
+      ],
+      "parentId": "client:2024",
+      "outputs": [
+        {
+          "resourceId": "item:4008",
+          "isPrimary": true
+        },
+        {
+          "resourceId": "item:4801",
+          "isPrimary": false
+        },
+        {
+          "resourceId": "item:4411",
+          "isPrimary": false
+        }
+      ]
+    },
+    {
+      "id": "client:2050",
+      "gameNodeId": 2050,
+      "name": "Platerra Mountains - Lumbering",
+      "nodeType": "Lumbering",
+      "x": 612133.0,
+      "z": 695688.0,
+      "contributionPoints": 1,
+      "linkIds": [
+        "client:2035"
+      ],
+      "parentId": "client:2035",
+      "outputs": [
+        {
+          "resourceId": "item:4611",
+          "isPrimary": true
+        },
+        {
+          "resourceId": "item:5005",
+          "isPrimary": false
+        },
+        {
+          "resourceId": "item:5014",
+          "isPrimary": false
+        }
+      ]
+    },
+    {
+      "id": "client:2051",
+      "gameNodeId": 2051,
+      "name": "Sanctuary Coastal Outpost - Fish Drying Yard",
+      "nodeType": "Fish Drying Yard",
+      "x": 481683.0,
+      "z": 473464.0,
+      "contributionPoints": 1,
+      "linkIds": [
+        "client:2036"
+      ],
+      "parentId": "client:2036",
+      "outputs": [
+        {
+          "resourceId": "item:821307",
+          "isPrimary": true
+        },
+        {
+          "resourceId": "item:821306",
+          "isPrimary": false
+        },
+        {
+          "resourceId": "item:821311",
+          "isPrimary": false
+        },
+        {
+          "resourceId": "item:821313",
+          "isPrimary": false
+        }
+      ]
+    },
+    {
+      "id": "client:2053",
+      "gameNodeId": 2053,
+      "name": "Frozen Halo",
+      "nodeType": "Connection",
+      "x": 617526.0,
+      "z": 455827.0,
+      "contributionPoints": 1,
+      "linkIds": [
+        "client:2054"
+      ],
+      "outputs": []
+    },
+    {
+      "id": "client:2054",
+      "gameNodeId": 2054,
+      "name": "Frozen Halo - Gathering",
+      "nodeType": "Gathering",
+      "x": 622270.0,
+      "z": 449557.0,
+      "contributionPoints": 1,
+      "linkIds": [
+        "client:2053"
+      ],
+      "parentId": "client:2053",
+      "outputs": [
+        {
+          "resourceId": "item:6656",
+          "isPrimary": true
+        },
+        {
+          "resourceId": "item:6657",
+          "isPrimary": false
+        }
+      ]
+    }
+  ],
+  "gatheringSpots": []
+}

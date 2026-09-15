@@ -7,8 +7,6 @@ import 'package:crypto/crypto.dart';
 
 import '../../app_identity.dart';
 import '../../domain/state/planner_state_json_codec.dart';
-import '../../features/fishing/fishing_models.dart';
-import '../../features/gathering/gathering_personal_store.dart';
 import 'atomic_file_store.dart';
 
 enum PersonalDataMoveCheckpoint {
@@ -961,36 +959,6 @@ final class PersonalDataLocationService implements PersonalDataLocationManager {
     } on Object catch (error) {
       throw FileSystemException(
         'The personal-data folder contains an invalid planner state: $error',
-        file.path,
-      );
-    }
-    await _verifyOptionalFeatureDocument(
-      directory,
-      relativePath: 'gathering${Platform.pathSeparator}gathering-state.json',
-      label: 'Gathering state',
-      decode: GatheringPersonalData.fromJson,
-    );
-    await _verifyOptionalFeatureDocument(
-      directory,
-      relativePath: 'fishing${Platform.pathSeparator}fishing-journal.json',
-      label: 'Fishing journal',
-      decode: FishingJournal.fromJson,
-    );
-  }
-
-  Future<void> _verifyOptionalFeatureDocument(
-    Directory directory, {
-    required String relativePath,
-    required String label,
-    required Object? Function(Object?) decode,
-  }) async {
-    final file = File(_join(directory.path, relativePath));
-    if (!await file.exists()) return;
-    try {
-      decode(jsonDecode(await file.readAsString()));
-    } on Object catch (error) {
-      throw FileSystemException(
-        'The personal-data folder contains an invalid $label: $error',
         file.path,
       );
     }

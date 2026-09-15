@@ -31,14 +31,23 @@ options are available.
   compare lodging and storage-house investments.
 - Review market-aware crafting and exchange opportunities without placing
   orders or sending personal planner data to a third party.
-- Keep local Gathering and Fishing loadouts and session journals without an
-  account or cloud sync.
+- Prepare Gathering runs with the complete map, field guide, loot, market,
+  Bairog/BDO Workshop reference tools, loadouts, and local session history.
+- Use Fish Map, haul entry, journal, statistics, screenshot recognition, and
+  Fishing/Harpooning profiles without a Black Spirit Life account or cloud
+  sync.
+- Import and review Gathering activity locally, including the optional
+  app-managed Garmoth workflow.
 - Keep your favorites, progress, profile settings, and appearance choices
   between app sessions.
 
 ## Install
 
 Black Spirit Life requires 64-bit Windows 10 or 11.
+
+The optional **Session Import** window requires the Microsoft .NET 8 Desktop
+Runtime for x64. That runtime is installed separately and is not bundled with
+Black Spirit Life.
 
 1. Download `BlackSpiritLifeInstaller.exe` from the link above.
 2. Run it and choose where to install the app.
@@ -54,16 +63,28 @@ bar inside the app without opening a browser.
 ## Your data
 
 Your inventory, mastery, Fairy and weight settings, market bonuses, family
-fame, plans, favorites, checklist, Gathering/Fishing loadouts and sessions,
-Opportunities preferences, and settings are kept locally in one folder,
-separate from the application. The current folder is visible from the app
-title bar; open **Craft Planner > Craft Profile** to review or change it.
-Normal updates keep that folder in place.
+fame, plans, favorites, checklist, Gathering loadouts and sessions, Fishing
+profiles and journal, Session Import drafts/history, Garmoth connection and
+browser state, Opportunities preferences, and app settings are kept locally
+in one selected personal-data folder, separate from the application. The
+current folder is visible from the app title bar; open **Craft Planner > Craft
+Profile** to review or change it. Normal updates keep that folder in place.
 
 On first launch, the app loads an existing Stable profile only when one is
 already present in the selected local personal-data folder. With no saved
 profile, it starts empty. It does not automatically copy data from Beta, an
 older planner, or another person.
+
+When an existing Stable 0.1.7 profile is present in that selected folder,
+0.1.9 migrates its supported Gathering and Fishing records locally. The
+original records and recovery information stay on the same PC; nothing is
+uploaded as part of migration.
+
+The installer contains immutable app/reference data, including the credited
+Fishing and Gathering reference libraries. Those files are not a saved user
+profile or activity history. The release contains no publisher profile,
+mastery values, inventory, loadout, journal, session, credential, cookie,
+browser profile, or publisher/player-specific local machine path.
 
 ## Credits and help
 

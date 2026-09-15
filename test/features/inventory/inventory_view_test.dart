@@ -233,58 +233,24 @@ void main() {
     expect(find.byIcon(Icons.error_outline), findsOneWidget);
   });
 
-  testWidgets('manually adds and removes one shared item', (tester) async {
+  testWidgets('search and quantity replace the redundant Add item dialog', (
+    tester,
+  ) async {
     final harness = InventoryTestHarness();
     await pumpInventory(tester, harness, size: const Size(1500, 940));
-
-    await tester.tap(find.byKey(InventoryActionKeys.addItem));
-    await tester.pumpAndSettle();
-    final itemSearch = find.descendant(
-      of: find.byKey(const ValueKey<String>('inventory-manual-item-select')),
-      matching: find.byType(EditableText),
-    );
-    await tester.enterText(itemSearch, 'Salt');
-    await tester.pumpAndSettle();
-    await tester.tap(
-      find.descendant(
-        of: find.byType(MenuItemButton),
-        matching: find.text('Salt'),
-      ),
-    );
-    await tester.pumpAndSettle();
-    final manualFrame = tester.getRect(
-      find.byKey(const ValueKey<String>('inventory-manual-dialog-frame')),
-    );
-    final manualSelect = tester.getRect(
-      find.byKey(const ValueKey<String>('inventory-manual-item-select')),
-    );
-    final manualAmount = tester.getRect(
-      find.byKey(const ValueKey<String>('inventory-manual-item-amount')),
-    );
-    expect(manualFrame.width, lessThanOrEqualTo(500));
-    expect(manualFrame.height, lessThan(230));
-    expect(manualAmount.width, 132);
-    expect(manualSelect.width, lessThan(310));
-    expect(manualSelect.right + 10, lessThan(manualAmount.left));
-    await tester.enterText(
-      find.descendant(
-        of: find.byKey(const ValueKey<String>('inventory-manual-item-amount')),
-        matching: find.byType(EditableText),
-      ),
-      '250',
-    );
-    await tester.ensureVisible(find.text('Save item'));
-    await tester.tap(find.text('Save item'));
-    await tester.pumpAndSettle();
-
+    expect(find.byKey(InventoryActionKeys.addItem), findsNothing);
+    await tester.enterText(find.byKey(InventoryActionKeys.i01), 'Salt');
+    await tester.pump(const Duration(milliseconds: 200));
+    final amount = find.byKey(InventoryActionKeys.row('I10', 'Salt'));
+    await tester.enterText(amount, '250');
+    await tester.testTextInput.receiveAction(TextInputAction.done);
+    await tester.pump();
     for (final mode in CraftMode.values) {
       expect(
         harness.controller.modes[mode]!.state.value.inventory['Salt'],
         250,
       );
     }
-    await tester.enterText(find.byKey(InventoryActionKeys.i01), 'Salt');
-    await tester.pump(const Duration(milliseconds: 200));
     await tester.tap(find.byKey(InventoryActionKeys.row('I15', 'Salt')));
     await tester.pumpAndSettle();
     for (final mode in CraftMode.values) {
@@ -293,10 +259,10 @@ void main() {
         isNull,
       );
     }
-    expect(harness.undoOffers, hasLength(2));
+    expect(harness.undoOffers, hasLength(1));
   });
 
-  testWidgets('manual add stays compact with a long item at 200 percent text', (
+  testWidgets('long item can be found and entered at 200 percent text', (
     tester,
   ) async {
     final harness = InventoryTestHarness(includeLongItems: true);
@@ -306,38 +272,27 @@ void main() {
       size: const Size(1500, 940),
       textScaler: const TextScaler.linear(2),
     );
-
-    await tester.tap(find.byKey(InventoryActionKeys.addItem));
-    await tester.pumpAndSettle();
-    final itemSearch = find.descendant(
-      of: find.byKey(const ValueKey<String>('inventory-manual-item-select')),
-      matching: find.byType(EditableText),
+    expect(find.byKey(InventoryActionKeys.addItem), findsNothing);
+    await tester.enterText(
+      find.byKey(InventoryActionKeys.i01),
+      'Special Volcanic',
     );
-    await tester.enterText(itemSearch, 'Special Volcanic');
-    await tester.pumpAndSettle();
-    await tester.tap(
-      find.descendant(
-        of: find.byType(MenuItemButton),
-        matching: find.text('Special Volcanic Umbrella Mushroom'),
-      ),
+    await tester.pump(const Duration(milliseconds: 200));
+    final amount = find.byKey(
+      InventoryActionKeys.row('I10', 'Special Volcanic Umbrella Mushroom'),
     );
-    await tester.pumpAndSettle();
-
-    final frame = tester.getRect(
-      find.byKey(const ValueKey<String>('inventory-manual-dialog-frame')),
+    await tester.enterText(amount, '25000');
+    await tester.testTextInput.receiveAction(TextInputAction.done);
+    await tester.pump();
+    expect(
+      harness
+          .controller
+          .active
+          .state
+          .value
+          .inventory['Special Volcanic Umbrella Mushroom'],
+      25000,
     );
-    final selector = tester.widget<AppSearchSelect<InventoryItemRecord>>(
-      find.byKey(const ValueKey<String>('inventory-manual-item-select')),
-    );
-    final selectedText = tester.widget<EditableText>(itemSearch);
-    final amount = tester.getRect(
-      find.byKey(const ValueKey<String>('inventory-manual-item-amount')),
-    );
-    expect(frame.width, lessThanOrEqualTo(500));
-    expect(frame.height, lessThan(340));
-    expect(selector.anchorMaxLines, 2);
-    expect(selectedText.controller.text, 'Special Volcanic Umbrella Mushroom');
-    expect(amount.width, 132);
     expect(tester.takeException(), isNull);
   });
 

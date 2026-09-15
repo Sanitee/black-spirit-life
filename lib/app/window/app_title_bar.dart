@@ -644,8 +644,14 @@ class _AppTitleBarState extends State<AppTitleBar> {
             '${widget.windowHost.closeFlushTimeout.inSeconds} seconds.',
           ),
         );
+        await widget.windowHost.close();
+      } else {
+        await widget.windowHost.requestClose();
+        // requestClose only queues the native close handshake. If the
+        // installed startup barrier later declines or times out, keep the
+        // caption action available for a retry.
+        if (mounted) setState(() => _closing = false);
       }
-      await widget.windowHost.close();
     } on Object catch (error) {
       widget.onCloseError?.call(error);
       if (mounted) setState(() => _closing = false);

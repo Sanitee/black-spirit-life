@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:bdo_map_core/bdo_map_core.dart';
+import 'package:bdo_map_core/src/widgets/resource_map_atlas_shell.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -267,8 +268,7 @@ Finder get _searchField =>
 Finder get _searchSurface =>
     find.byKey(const ValueKey('resource-map-atlas-dock'));
 
-Finder get _inspector =>
-    find.byKey(const ValueKey('resource-map-sidebar-details'));
+Finder get _inspector => find.byType(ResourceMapJourneySurface);
 
 Finder get _searchRows => find.byWidgetPredicate((widget) {
   final key = widget.key;

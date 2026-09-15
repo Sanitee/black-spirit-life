@@ -16,144 +16,201 @@ if (-not (Test-Path -LiteralPath $project -PathType Container)) {
     throw "Production source root is missing: $project"
 }
 $project = (Get-Item -LiteralPath $project).FullName.TrimEnd('\')
-$productionRoots = @(
-    (Join-Path $project 'lib'),
-    (Join-Path $project 'windows\runner'),
-    (Join-Path $project 'packages\bdo_map_core\lib')
-)
-$nativeFeatureRoots = @(
-    (Join-Path $project 'lib\features\gathering'),
-    (Join-Path $project 'lib\features\fishing')
-)
-$forbiddenRelativePaths = @(
-    'packages\bdo_fishing_core',
-    'packages\bdo_gathering_companion',
-    'windows\session_import'
-)
-$sourceExtensions = @('.dart', '.cc', '.cpp', '.h', '.rc', '.manifest', '.cmake', '.txt')
-$rejectionPattern = '(?i)\b(TODO|FIXME|placeholder|lorem|sample|mock|fake|not[ -]implemented|coming[ -]soon)\b'
-$emptyCallbackPattern = 'on[A-Za-z]+\s*:\s*\([^)]*\)\s*\{\s*\}'
-$legacyVisualPattern = '(?i)(abyssal|tideglass|moonstone|astrarium)'
-$embeddedWebPattern = '(?i)(webview2|webview_flutter|flutter_inappwebview|microsoft\.web\.webview2|cefsharp|embedded[ -]?chromium|browser[ -]?hosted)'
-$pythonRuntimePattern = '(?i)(\bpython(?:3(?:\.\d+)*)?\b|cpython|pyinstaller|\.pyd\b|fish[_ -]?companion[_ -]?service)'
-$excludedFeaturePattern = '(?i)(fishy[ _-]*stuff|garmoth|bairog|fish[_ -]?companion|bdo[_ -]?fishing[_ -]?core|bdo[_ -]?gathering[_ -]?companion)'
-$personalDataFilePattern = '(?i)^(?:planner-state\.json(?:\..*)?|personal-data-(?:location(?:\.committed)?|move-journal)\.json(?:\..*)?|connection\.json(?:\..*)?|[^\\/]*(?:sessions?|journals?|loadouts?|user[ _-]?settings|app[ _-]?settings|opportunities[ _-]?settings|gathering[ _-]?state|fishing[ _-]?state|fishing[ _-]?profiles?|fishing[ _-]?setups?)[^\\/]*\.(?:json|csv|tsv|txt|ya?ml|toml|ini|config|dat|bin|db|sqlite3?)(?:-(?:wal|shm))?)$'
-$sqliteFilePattern = '(?i)\.(?:db|sqlite3?)(?:-(?:wal|shm))?$'
-$browserArtifactExtensions = @('.html', '.css', '.js')
-$pythonArtifactExtensions = @('.py', '.pyc', '.pyo', '.pyd')
-
-$violations = [System.Collections.Generic.List[string]]::new()
-foreach ($root in @($productionRoots) + @($nativeFeatureRoots)) {
-    if (-not (Test-Path -LiteralPath $root -PathType Container)) {
-        $violations.Add("$root`: required native production source directory is missing")
-    }
-}
-foreach ($relativePath in $forbiddenRelativePaths) {
-    $path = Join-Path $project $relativePath
-    if (Test-Path -LiteralPath $path) {
-        $violations.Add("$path`: excluded companion/runtime source tree")
-    }
-}
-
 $projectPrefix = "$project\"
-$projectFiles = @(Get-ChildItem -LiteralPath $project -Recurse -File | Where-Object {
-    $_.FullName -notlike "$project\.git\*" -and
-    $_.FullName -notlike "$project\.dart_tool\*" -and
-    $_.FullName -notlike "$project\build\*" -and
-    $_.FullName -notlike "$project\public-stable-candidate\*"
-})
-foreach ($file in $projectFiles) {
-    $relative = if ($file.FullName.StartsWith(
+
+$requiredPaths = @(
+    'assets\opportunities\icon-provenance.json',
+    'lib',
+    'lib\features\gathering',
+    'lib\features\fishing',
+    'windows\runner',
+    'packages\bdo_map_core\lib',
+    'packages\bdo_fishing_core\lib',
+    'packages\bdo_fishing_core\assets\fish_companion\backend',
+    'packages\bdo_fishing_core\assets\fish_companion\data\cache',
+    'packages\bdo_fishing_core\assets\fish_companion\recognizer\reference-icons',
+    'packages\bdo_fishing_core\assets\fish_companion\runtime',
+    'packages\bdo_fishing_core\assets\fish_companion\static',
+    'packages\bdo_gathering_companion\lib',
+    'packages\bdo_gathering_companion\assets',
+    'packages\webview_flutter_windows\lib',
+    'packages\webview_flutter_windows\windows',
+    'packages\webview_flutter_windows\LICENSE',
+    'windows\session_import\src',
+    'windows\session_import\browser_extension',
+    'windows\session_import\SOURCE-NOTICE.txt'
+)
+
+$excludedRelativePaths = @(
+    'packages/bdo_map_core/tool/seeds/bdocodex_worldmap_2026_07_29_private_seed.json',
+    'packages/bdo_map_core/tool/seeds/bdocodex_worldmap_2026_08_15_private_seed.json',
+    'packages/bdo_map_core/tool/seeds/rusalka_coral_bdocodex_2026_07_28_private_seed.json',
+    'packages/bdo_map_core/tool/seeds/stillcoral_coastal_gathering_bdocodex_2026_08_01_private_seed.json',
+    'packages/bdo_map_core/tool/seeds/vendor_npcs_bdocodex_2026_08_15_private_seed.json',
+    'packages/bdo_map_core/tool/seeds/vendor_npc_portraits_2026_08_16_private_manifest.json',
+    'packages/bdo_fishing_core/assets/fish_companion/data/fish-journal.sqlite3',
+    'packages/bdo_fishing_core/assets/fish_companion/data/fish-journal.sqlite3-wal',
+    'packages/bdo_fishing_core/assets/fish_companion/data/fish-journal.sqlite3-shm',
+    'packages/bdo_fishing_core/assets/fish_companion/data/fish-journal.before-sale-redesign.sqlite3',
+    'packages/bdo_fishing_core/assets/fish_companion/data/fish-journal.before-sale-redesign.sqlite3-wal',
+    'packages/bdo_fishing_core/assets/fish_companion/data/fish-journal.before-sale-redesign.sqlite3-shm',
+    'packages/bdo_gathering_companion/assets/rotations/luneye_matchlock_buffs_1424.png',
+    'packages/bdo_gathering_companion/assets/rotations/luneye_matchlock_crystals_1321.png',
+    'packages/bdo_gathering_companion/assets/rotations/luneye_sniper_buffs_1505.png',
+    'packages/bdo_gathering_companion/assets/rotations/tshira_evil_2024_rotation.jpg'
+)
+
+$generatedPathPattern =
+    '(?i)(?:^|/)(?:\.git|\.dart_tool|\.flutter-plugins-dependencies|build|public-stable-candidate|bin|obj|\.pytest_cache|test/failures|test/features/opportunities/failures|windows/flutter/ephemeral|doc/api)(?:/|$)'
+$browserStatePathPattern =
+    '(?i)(?:^|/)(?:webview2|video[ _-]*webview|webview[ _-]*profile|browser[ _-]*profile|user[ _-]*data|cookies?|local[ _-]*storage)(?:/|$)'
+$sessionImportReceiptPathPattern =
+    '(?i)(?:^|/)(?:session-import-inbox|BlackSpiritLife\.App\.Removal)(?:/|$)'
+$customIconPathPattern = '(?i)(?:^|/)icons/[0-9a-f]{64}\.png$'
+$personalDataFilePattern =
+    '(?i)^(?:planner-state\.json(?:[.-][^/]*)?|bdo-craft-planner-backup\.json(?:[.-][^/]*)?|sessions\.json(?:[.-][^/]*)?|personal-data-(?:location(?:\.committed)?|move-journal)\.json(?:[.-][^/]*)?|connection\.json(?:[.-][^/]*)?|\.black-spirit-life-(?:profile|intentional-reset|move-(?:manifest|source|stage))\.json(?:[.-][^/]*)?|pending-personal-data-removal(?:\.committed)?\.journal(?:[.-][^/]*)?|(?:map-candidate-native|avalonia-v1)-[0-9a-f]{64}\.json(?:[.-][^/]*)?|(?:opportunity-market-(?:cache|observations)|market-request-(?:pauses|window))\.json(?:[.-][^/]*)?|fish-journal(?:\.before-sale-redesign)?\.sqlite3(?:(?:-(?:wal|shm|journal))|\.(?:bak|backup)(?:-[^/]*)?)?|[^/]*(?:saved[ _-]*sessions?|journals?|loadouts?|saved[ _-]*imports?|receipts?|drafts?|user[ _-]*settings|app[ _-]*settings|opportunities[ _-]*settings|gathering[ _-]*state|fishing[ _-]*state|fishing[ _-]*profiles?|fishing[ _-]*setups?)[^/]*\.(?:json|csv|tsv|txt|ya?ml|toml|ini|config|dat|bin|db|sqlite3?)(?:(?:-(?:wal|shm|journal))|[.-][^/]*)?)$'
+$databaseOrSidecarPattern =
+    '(?i)(?:\.(?:db|sqlite3?)(?:(?:-(?:wal|shm|journal))|\.(?:bak|backup)(?:-[^/]*)?)?|-(?:wal|shm|journal))$'
+$temporaryArtifactPattern =
+    '(?i)(?:\.(?:pyc|pyo|dmp|log|tmp|bak)$|\.pdb(?:[.-][^/]*)?$)'
+$secretPattern =
+    '(?<![A-Za-z0-9_])(?-i:github_pat_[A-Za-z0-9_]{20,}|gh[oprsu]_[A-Za-z0-9]{20,}|AKIA[0-9A-Z]{16})(?![A-Za-z0-9_])'
+$machinePathPattern =
+    ('(?i)[A-Z]:(?:\\{1,2}|/)(?:' +
+        'Users(?:\\{1,2}|/)|' +
+        'Codex(?:\\{1,2}|/))')
+$privateMachineMarkers = @(
+    $env:USERPROFILE
+)
+$machinePathFixtureAllowlist = @(
+    # This integration test uses a fixed, non-personal Windows path while
+    # verifying that map navigation does not depend on a machine-specific root.
+    'test/app/workspace/resource_map_tab_integration_test.dart',
+    # This upstream conversion test intentionally contains a non-personal,
+    # escaped Windows path to exercise Unicode string conversion.
+    'packages/webview_flutter_windows/windows/test/string_converter_test.cc'
+)
+$textExtensions = @(
+    '.dart', '.yaml', '.yml', '.json', '.md', '.txt', '.ps1', '.cmake',
+    '.cpp', '.cc', '.c', '.h', '.hpp', '.rc', '.manifest', '.cs', '.csproj',
+    '.xaml', '.py', '.html', '.css', '.js', '.mjs', '.toml', '.ini', '.config'
+)
+$violations = [System.Collections.Generic.List[string]]::new()
+
+foreach ($relativePath in $requiredPaths) {
+    if (-not (Test-Path -LiteralPath (Join-Path $project $relativePath))) {
+        $violations.Add("$relativePath`: required exact-Beta production path is missing")
+    }
+}
+foreach ($relativePath in $excludedRelativePaths) {
+    if (Test-Path -LiteralPath (Join-Path $project $relativePath)) {
+        $violations.Add("$relativePath`: excluded personal, private-research, or machine-specific path")
+    }
+}
+$trackedGeneratedOutputs = @(& git -C $project ls-files -- 2>$null |
+    Where-Object {
+        $_ -match '(?i)(?:^|/)(?:\.dart_tool|build|bin|obj)(?:/|$)' -or
+        $_ -match '(?i)^windows/flutter/ephemeral(?:/|$)'
+    })
+if ($LASTEXITCODE -ne 0) {
+    $violations.Add('Git failed while checking for tracked generated output')
+}
+else {
+    foreach ($relativePath in $trackedGeneratedOutputs) {
+        $violations.Add("$relativePath`: tracked generated output is forbidden")
+    }
+}
+
+function Get-RelativeProductionPath {
+    param([Parameter(Mandatory = $true)][string]$FullName)
+    if ($FullName.StartsWith(
         $projectPrefix,
         [System.StringComparison]::OrdinalIgnoreCase
     )) {
-        $file.FullName.Substring($projectPrefix.Length).Replace('\', '/')
+        return $FullName.Substring($projectPrefix.Length).Replace('\', '/')
     }
-    else {
-        $file.FullName.Replace('\', '/')
+    return $FullName.Replace('\', '/')
+}
+
+function Test-SqliteFileHeader {
+    param([Parameter(Mandatory = $true)][string]$Path)
+
+    $stream = [System.IO.File]::OpenRead($Path)
+    try {
+        if ($stream.Length -lt 16) {
+            return $false
+        }
+        $header = [byte[]]::new(16)
+        if ($stream.Read($header, 0, $header.Length) -ne $header.Length) {
+            return $false
+        }
+        return [System.Text.Encoding]::ASCII.GetString($header) -ceq
+            "SQLite format 3`0"
     }
-    $extension = $file.Extension.ToLowerInvariant()
-    if ($browserArtifactExtensions -contains $extension) {
-        $violations.Add("$($file.FullName): browser-runtime artifact is forbidden")
-    }
-    if ($pythonArtifactExtensions -contains $extension -or
-        $file.Name -match '(?i)^python(?:3(?:\d+)*)?\.(?:exe|dll)$') {
-        $violations.Add("$($file.FullName): Python runtime/source artifact is forbidden")
-    }
-    if ($relative -match $excludedFeaturePattern) {
-        $violations.Add("$($file.FullName): excluded WebView/FishyStuff/Garmoth/Bairog companion artifact")
-    }
-    if ($file.Name -match $personalDataFilePattern -or
-        $file.Name -match $sqliteFilePattern) {
-        $violations.Add("$($file.FullName): bundled personal-data artifact is forbidden")
-    }
-    if (($relative.StartsWith('lib/features/gathering/', [System.StringComparison]::OrdinalIgnoreCase) -or
-         $relative.StartsWith('lib/features/fishing/', [System.StringComparison]::OrdinalIgnoreCase)) -and
-        $extension -cne '.dart') {
-        $violations.Add("$($file.FullName): native feature directories may contain Dart source only")
+    finally {
+        $stream.Dispose()
     }
 }
 
-foreach ($root in $productionRoots) {
-    if (-not (Test-Path -LiteralPath $root -PathType Container)) {
-        continue
+$projectFiles = @(
+    Get-ChildItem -LiteralPath $project -Recurse -File -Force |
+        Where-Object {
+            (Get-RelativeProductionPath -FullName $_.FullName) -notmatch
+                $generatedPathPattern
+        }
+)
+
+foreach ($file in $projectFiles) {
+    $relative = Get-RelativeProductionPath -FullName $file.FullName
+    $name = $file.Name
+    $extension = $file.Extension.ToLowerInvariant()
+
+    if ($relative -match $browserStatePathPattern) {
+        $violations.Add("$relative`: generated browser-profile state is forbidden")
     }
-    Get-ChildItem -LiteralPath $root -Recurse -File |
-        Where-Object { $sourceExtensions -contains $_.Extension } |
-        ForEach-Object {
-            $matches = Select-String -LiteralPath $_.FullName -Pattern $rejectionPattern, $emptyCallbackPattern
-            foreach ($match in $matches) {
-                $violations.Add("$($match.Path):$($match.LineNumber): $($match.Line.Trim())")
-            }
+    if ($relative -match $sessionImportReceiptPathPattern) {
+        $violations.Add("$relative`: generated Session Import receipt is forbidden")
+    }
+    if ($relative -match $customIconPathPattern) {
+        $violations.Add("$relative`: generated personal custom icon is forbidden")
+    }
+    if ($name -match $personalDataFilePattern -or
+        $name -match $databaseOrSidecarPattern) {
+        $violations.Add("$relative`: bundled personal-data database or record is forbidden")
+    }
+    elseif (Test-SqliteFileHeader -Path $file.FullName) {
+        $violations.Add("$relative`: SQLite content is forbidden regardless of file name")
+    }
+    if ($name -match $temporaryArtifactPattern) {
+        $violations.Add("$relative`: generated, diagnostic, temporary, backup, or debug artifact")
+    }
 
-            $isMigrationFile = $_.FullName -like '*\lib\domain\migration\*'
-            if (-not $isMigrationFile) {
-                $legacyMatches = Select-String -LiteralPath $_.FullName -Pattern $legacyVisualPattern
-                foreach ($match in $legacyMatches) {
-                    $violations.Add("$($match.Path):$($match.LineNumber): excluded visual identifier outside migration")
-                }
+    if ($textExtensions -contains $extension -and $file.Length -le 128MB) {
+        foreach ($marker in $privateMachineMarkers) {
+            if ([string]::IsNullOrWhiteSpace($marker)) {
+                continue
             }
-
-            $runtimeMatches = Select-String -LiteralPath $_.FullName -Pattern $pythonRuntimePattern, $excludedFeaturePattern
-            foreach ($match in $runtimeMatches) {
-                $violations.Add("$($match.Path):$($match.LineNumber): excluded companion/Python runtime reference")
+            $markerMatches = Select-String -LiteralPath $file.FullName -SimpleMatch $marker
+            foreach ($match in $markerMatches) {
+                $violations.Add("$relative`:$($match.LineNumber): private machine path")
             }
         }
-}
-
-$assetRoot = Join-Path $project 'assets'
-$legacyAsset = if (Test-Path -LiteralPath $assetRoot -PathType Container) {
-    @(Get-ChildItem -LiteralPath $assetRoot -Recurse -File |
-        Where-Object { $_.FullName -match $legacyVisualPattern })
-}
-else {
-    @()
-}
-foreach ($file in $legacyAsset) {
-    $violations.Add("$($file.FullName): excluded visual asset")
-}
-
-$dependencyFiles = @(
-    (Join-Path $project 'pubspec.yaml'),
-    (Join-Path $project 'pubspec.lock'),
-    (Join-Path $project 'packages\bdo_map_core\pubspec.yaml')
-) | Where-Object { Test-Path -LiteralPath $_ -PathType Leaf }
-$embeddedWebFiles = @($dependencyFiles) + @(
-    foreach ($root in $productionRoots) {
-        Get-ChildItem -LiteralPath $root -Recurse -File |
-            Where-Object { $sourceExtensions -contains $_.Extension }
-    }
-)
-foreach ($file in $embeddedWebFiles) {
-    $matches = Select-String -LiteralPath $file -Pattern $embeddedWebPattern, $pythonRuntimePattern, $excludedFeaturePattern
-    foreach ($match in $matches) {
-        $violations.Add("$($match.Path):$($match.LineNumber): embedded WebView/Python/companion dependency is forbidden")
+        $secretMatches = Select-String -LiteralPath $file.FullName -Pattern $secretPattern
+        foreach ($match in $secretMatches) {
+            $violations.Add("$relative`:$($match.LineNumber): credential-like secret marker")
+        }
+        if ($machinePathFixtureAllowlist -cnotcontains $relative) {
+            $pathMatches = Select-String -LiteralPath $file.FullName -Pattern $machinePathPattern
+            foreach ($match in $pathMatches) {
+                $violations.Add("$relative`:$($match.LineNumber): absolute user/private workspace path")
+            }
+        }
     }
 }
 
 if ($violations.Count -gt 0) {
-    $violations | ForEach-Object { Write-Error $_ }
+    $violations | ForEach-Object { Write-Error $_ -ErrorAction Continue }
     exit 1
 }
 
-Write-Output 'Production source verification passed.'
+Write-Output 'Production source verification passed for exact-Beta Stable 0.1.9.'

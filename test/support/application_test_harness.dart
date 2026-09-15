@@ -33,6 +33,7 @@ final class ApplicationTestHarness {
     String view = 'plan',
     bool setupCompleted = true,
     bool showDeleteTools = false,
+    List<String> startupNotices = const <String>[],
     SavePlannerState Function(PlannerStateRepository repository)?
     saveStateFactory,
   }) async {
@@ -80,6 +81,7 @@ final class ApplicationTestHarness {
           repository.paths.applicationDirectory,
         ),
         controller: controller,
+        startupNotices: startupNotices,
       ),
     );
   }
@@ -120,6 +122,7 @@ final class ApplicationTestHarness {
         stateRepository: bundle.stateRepository,
         personalDataLocation: bundle.personalDataLocation,
         controller: controller,
+        startupNotices: bundle.startupNotices,
       ),
     );
   }
@@ -146,6 +149,7 @@ void configureApplicationTestSurface(
   Size logicalSize, {
   double devicePixelRatio = 1,
   double textScaleFactor = 1,
+  bool disableAnimations = true,
 }) {
   tester.view
     ..devicePixelRatio = devicePixelRatio
@@ -155,7 +159,7 @@ void configureApplicationTestSurface(
     );
   tester.platformDispatcher.textScaleFactorTestValue = textScaleFactor;
   tester.platformDispatcher.accessibilityFeaturesTestValue =
-      const FakeAccessibilityFeatures(disableAnimations: true);
+      FakeAccessibilityFeatures(disableAnimations: disableAnimations);
   addTearDown(tester.view.reset);
   addTearDown(tester.platformDispatcher.clearAccessibilityFeaturesTestValue);
   addTearDown(tester.platformDispatcher.clearTextScaleFactorTestValue);

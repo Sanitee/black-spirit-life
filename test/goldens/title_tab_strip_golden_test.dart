@@ -46,11 +46,20 @@ void main() {
             body: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: <Widget>[
-                _themedTitleBar(StandardSpec.theme, mapSelected: false),
+                _themedTitleBar(
+                  StandardSpec.theme,
+                  selectedLabel: 'Craft Planner',
+                ),
                 const SizedBox(height: 8),
-                _themedTitleBar(IlluminatedLedgerSpec.theme, mapSelected: true),
+                _themedTitleBar(
+                  IlluminatedLedgerSpec.theme,
+                  selectedLabel: 'Resource Map',
+                ),
                 const SizedBox(height: 8),
-                _themedTitleBar(SakuraNightGardenSpec.theme, mapSelected: true),
+                _themedTitleBar(
+                  SakuraNightGardenSpec.theme,
+                  selectedLabel: 'Gathering',
+                ),
                 const SizedBox(height: 12),
                 Align(
                   alignment: Alignment.centerLeft,
@@ -70,7 +79,9 @@ void main() {
                               AppTitleTab(
                                 tabKey: ValueKey<String>('compact-planner-tab'),
                                 artworkAssetPath:
-                                    'assets/app/bdo_tool_icon.png',
+                                    'packages/bdo_map_core/assets/images/node_icons/14.png',
+                                inactiveArtworkAssetPath:
+                                    'packages/bdo_map_core/assets/images/node_icons/gray/14.png',
                                 label: 'Craft Planner',
                                 selected: false,
                                 onPressed: _noop,
@@ -78,8 +89,36 @@ void main() {
                               AppTitleTab(
                                 tabKey: ValueKey<String>('compact-map-tab'),
                                 artworkAssetPath:
-                                    'assets/app/bdo_resource_map_icon.png',
+                                    'packages/bdo_map_core/assets/images/node_icons/0.png',
+                                inactiveArtworkAssetPath:
+                                    'packages/bdo_map_core/assets/images/node_icons/gray/0.png',
+                                artworkScale: 1.16,
                                 label: 'Resource Map',
+                                selected: false,
+                                onPressed: _noop,
+                              ),
+                              AppTitleTab(
+                                tabKey: ValueKey<String>(
+                                  'compact-gathering-tab',
+                                ),
+                                artworkAssetPath:
+                                    'packages/bdo_map_core/assets/images/node_icons/6.png',
+                                inactiveArtworkAssetPath:
+                                    'packages/bdo_map_core/assets/images/node_icons/gray/6.png',
+                                label: 'Gathering',
+                                selected: false,
+                                onPressed: _noop,
+                              ),
+                              AppTitleTab(
+                                tabKey: ValueKey<String>(
+                                  'compact-fish-map-tab',
+                                ),
+                                artworkAssetPath:
+                                    'packages/bdo_map_core/assets/images/node_icons/11.png',
+                                inactiveArtworkAssetPath:
+                                    'packages/bdo_map_core/assets/images/node_icons/gray/11.png',
+                                artworkScale: 1.38,
+                                label: 'Fish Map',
                                 selected: true,
                                 onPressed: _noop,
                               ),
@@ -98,18 +137,17 @@ void main() {
     );
     final context = tester.element(find.byType(Scaffold).first);
     for (final assetPath in const <String>[
-      'assets/app/bdo_tool_icon.png',
-      'assets/app/bdo_resource_map_icon.png',
+      'packages/bdo_map_core/assets/images/node_icons/14.png',
+      'packages/bdo_map_core/assets/images/node_icons/gray/14.png',
+      'packages/bdo_map_core/assets/images/node_icons/0.png',
+      'packages/bdo_map_core/assets/images/node_icons/gray/0.png',
+      'packages/bdo_map_core/assets/images/node_icons/6.png',
+      'packages/bdo_map_core/assets/images/node_icons/gray/6.png',
+      'packages/bdo_map_core/assets/images/node_icons/11.png',
+      'packages/bdo_map_core/assets/images/node_icons/gray/11.png',
     ]) {
       await tester.runAsync(
-        () => precacheImage(
-          ResizeImage(
-            AssetImage(assetPath),
-            width: (AppTitleTabStrip.artworkSize * 3).round(),
-            height: (AppTitleTabStrip.artworkSize * 3).round(),
-          ),
-          context,
-        ),
+        () => precacheImage(AssetImage(assetPath), context),
       );
     }
     for (final assetPath in const <String>[
@@ -130,22 +168,50 @@ void main() {
   });
 }
 
-Widget _themedTitleBar(ThemeSpec spec, {required bool mapSelected}) {
+Widget _themedTitleBar(ThemeSpec spec, {required String selectedLabel}) {
   final titleBar = AppTitleBar(
     workspaceNavigation: AppTitleTabStrip(
       tabs: <AppTitleTab>[
         AppTitleTab(
           tabKey: ValueKey<String>('${spec.id}-planner-tab'),
-          artworkAssetPath: 'assets/app/bdo_tool_icon.png',
+          artworkAssetPath:
+              'packages/bdo_map_core/assets/images/node_icons/14.png',
+          inactiveArtworkAssetPath:
+              'packages/bdo_map_core/assets/images/node_icons/gray/14.png',
           label: 'Craft Planner',
-          selected: !mapSelected,
+          selected: selectedLabel == 'Craft Planner',
           onPressed: _noop,
         ),
         AppTitleTab(
           tabKey: ValueKey<String>('${spec.id}-map-tab'),
-          artworkAssetPath: 'assets/app/bdo_resource_map_icon.png',
+          artworkAssetPath:
+              'packages/bdo_map_core/assets/images/node_icons/0.png',
+          inactiveArtworkAssetPath:
+              'packages/bdo_map_core/assets/images/node_icons/gray/0.png',
+          artworkScale: 1.16,
           label: 'Resource Map',
-          selected: mapSelected,
+          selected: selectedLabel == 'Resource Map',
+          onPressed: _noop,
+        ),
+        AppTitleTab(
+          tabKey: ValueKey<String>('${spec.id}-gathering-tab'),
+          artworkAssetPath:
+              'packages/bdo_map_core/assets/images/node_icons/6.png',
+          inactiveArtworkAssetPath:
+              'packages/bdo_map_core/assets/images/node_icons/gray/6.png',
+          label: 'Gathering',
+          selected: selectedLabel == 'Gathering',
+          onPressed: _noop,
+        ),
+        AppTitleTab(
+          tabKey: ValueKey<String>('${spec.id}-fish-map-tab'),
+          artworkAssetPath:
+              'packages/bdo_map_core/assets/images/node_icons/11.png',
+          inactiveArtworkAssetPath:
+              'packages/bdo_map_core/assets/images/node_icons/gray/11.png',
+          artworkScale: 1.38,
+          label: 'Fish Map',
+          selected: selectedLabel == 'Fish Map',
           onPressed: _noop,
         ),
       ],

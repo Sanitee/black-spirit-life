@@ -1,0 +1,4631 @@
+{
+  "version": 1,
+  "reviewedAt": "2026-09-03",
+  "region": "NA/EU PC",
+  "clientDataDate": "2026-09-03",
+  "itemGradeProvenance": {
+    "verifiedCount": 77,
+    "clientSource": "Patch Research/client-2026-09-03-audit/items.json: grade matched by itemId",
+    "additionalClientSources": [
+      "Item 1181: Patch Research/client-2026-09-10-divine-audit/items.json"
+    ],
+    "displayColorSource": "https://bdocodex.com/assets/bundle-1779911275746.min.css",
+    "grades": {
+      "0": "white",
+      "1": "green",
+      "2": "blue",
+      "3": "yellow",
+      "4": "orange",
+      "5": "purple"
+    },
+    "notes": "All catalog grades match the current local game export. Grade colors remain visible when selected; selection uses a checkmark. The extractor calls grade 4 red; its in-game database frame is orange."
+  },
+  "ordering": "Curated starter convenience, not measured popularity or a live price ranking.",
+  "categories": [
+    {
+      "id": "foods",
+      "label": "Foods",
+      "description": "Choose a Cron Meal, or ordinary food buffs such as Fig Pie."
+    },
+    {
+      "id": "draughts",
+      "label": "Draughts",
+      "description": "One simple drink; replaces ordinary elixir buffs."
+    },
+    {
+      "id": "elixirs",
+      "label": "Elixirs",
+      "description": "An alternative to draughts; different elixir families can coexist."
+    },
+    {
+      "id": "perfumes",
+      "label": "Perfumes",
+      "description": "Optional. One perfume at a time, alongside food and draughts/elixirs."
+    },
+    {
+      "id": "scrolls",
+      "label": "Scrolls & books",
+      "description": "Record the scrolls you actually used; duplicate tiers do not add."
+    },
+    {
+      "id": "stones",
+      "label": "Alchemy & spirit stones",
+      "description": "One Life stone and optionally one combat stone. Active buffs only."
+    },
+    {
+      "id": "lightstones",
+      "label": "Lightstone sets",
+      "description": "Choose one complete Lightstone combination. Component stats are included in totals."
+    },
+    {
+      "id": "energy",
+      "label": "Energy",
+      "description": "Recovery, instant refills, Max Energy foods, and worthwhile Energy equipment aids."
+    },
+    {
+      "id": "other",
+      "label": "Other buffs",
+      "description": "Villa and account benefits. None are required purchases."
+    },
+    {
+      "id": "events",
+      "label": "Event items you may own",
+      "description": "Optional past-event items. Expand this only when you already own one."
+    }
+  ],
+  "stats": [
+    {
+      "id": "lifeMastery",
+      "label": "Life skill mastery",
+      "unit": "",
+      "note": "Selected buff contribution only; equipped gear and base mastery are not included."
+    },
+    {
+      "id": "gatheringMastery",
+      "label": "Gathering mastery",
+      "unit": "",
+      "note": "Selected buff contribution only; equipped gear and base mastery are not included."
+    },
+    {
+      "id": "huntingMastery",
+      "label": "Hunting mastery",
+      "unit": "",
+      "note": "Selected buff contribution only; equipped gear and base mastery are not included."
+    },
+    {
+      "id": "lifeExpPct",
+      "label": "Life EXP",
+      "unit": "%"
+    },
+    {
+      "id": "breathExpPct",
+      "label": "Breath EXP",
+      "unit": "%"
+    },
+    {
+      "id": "strengthExpPct",
+      "label": "Strength EXP",
+      "unit": "%"
+    },
+    {
+      "id": "healthExpPct",
+      "label": "Health EXP",
+      "unit": "%"
+    },
+    {
+      "id": "gatheringExpPct",
+      "label": "Gathering EXP",
+      "unit": "%"
+    },
+    {
+      "id": "huntingExpPct",
+      "label": "Hunting EXP",
+      "unit": "%"
+    },
+    {
+      "id": "gatheringItemDropPct",
+      "label": "Gathering item drop rate",
+      "unit": "%",
+      "note": "A gathering drop-rate contribution, not a guaranteed yield or silver increase. Sniper and matchlock applicability differ."
+    },
+    {
+      "id": "gatheringSpeed",
+      "label": "Gathering speed",
+      "unit": "levels",
+      "abilityCap": 5
+    },
+    {
+      "id": "movementSpeed",
+      "label": "Movement speed",
+      "unit": "levels",
+      "abilityCap": 5
+    },
+    {
+      "id": "luck",
+      "label": "Luck",
+      "unit": "levels",
+      "abilityCap": 5
+    },
+    {
+      "id": "attackSpeed",
+      "label": "Attack speed",
+      "unit": "levels",
+      "abilityCap": 5
+    },
+    {
+      "id": "criticalHit",
+      "label": "Critical hit",
+      "unit": "levels",
+      "abilityCap": 5
+    },
+    {
+      "id": "maxWeight",
+      "label": "Weight limit",
+      "unit": "LT"
+    },
+    {
+      "id": "energyRecovery",
+      "label": "Energy recovery",
+      "unit": "per recovery tick",
+      "note": "Bonus per normal recovery tick; do not display as energy per second or sum instant potions into this stat."
+    },
+    {
+      "id": "maxEnergy",
+      "label": "Maximum energy",
+      "unit": ""
+    },
+    {
+      "id": "criticalHitDamagePct",
+      "label": "Critical hit extra damage",
+      "unit": "%",
+      "note": "Matchlock-oriented; do not model as sniper shot damage."
+    },
+    {
+      "id": "backAttackDamagePct",
+      "label": "Back attack extra damage",
+      "unit": "%",
+      "note": "Matchlock-oriented; do not model as sniper shot damage."
+    },
+    {
+      "id": "specialAttackDamagePct",
+      "label": "All special attack extra damage",
+      "unit": "%",
+      "note": "Matchlock-oriented; retain as a separate bonus, not a predicted damage, loot, or silver increase."
+    },
+    {
+      "id": "attackSpeedPct",
+      "label": "Attack speed bonus",
+      "unit": "%"
+    },
+    {
+      "id": "maxHp",
+      "label": "Maximum HP",
+      "unit": ""
+    },
+    {
+      "id": "maxStamina",
+      "label": "Maximum stamina",
+      "unit": ""
+    },
+    {
+      "id": "allAp",
+      "label": "All AP",
+      "unit": ""
+    },
+    {
+      "id": "accuracy",
+      "label": "Accuracy",
+      "unit": ""
+    },
+    {
+      "id": "evasion",
+      "label": "Evasion",
+      "unit": ""
+    },
+    {
+      "id": "allResistancePct",
+      "label": "All resistance",
+      "unit": "%"
+    },
+    {
+      "id": "castingSpeed",
+      "label": "Casting speed",
+      "unit": "levels",
+      "abilityCap": 5
+    },
+    {
+      "id": "castingSpeedPct",
+      "label": "Casting speed bonus",
+      "unit": "%"
+    },
+    {
+      "id": "resourceRecoveryOnHit",
+      "label": "MP/WP/SP on hit",
+      "unit": "per hit"
+    },
+    {
+      "id": "cookingTimeSeconds",
+      "label": "Cooking time",
+      "unit": "seconds"
+    },
+    {
+      "id": "alchemyTimeSeconds",
+      "label": "Alchemy time",
+      "unit": "seconds"
+    },
+    {
+      "id": "processingSuccessPct",
+      "label": "Processing success rate",
+      "unit": "%"
+    },
+    {
+      "id": "fishingSpeed",
+      "label": "Fishing speed",
+      "unit": "levels",
+      "abilityCap": 5
+    },
+    {
+      "id": "mountExpPct",
+      "label": "Mount EXP",
+      "unit": "%"
+    },
+    {
+      "id": "mountSkillExpPct",
+      "label": "Mount Skill EXP",
+      "unit": "%"
+    },
+    {
+      "id": "amityPct",
+      "label": "Amity",
+      "unit": "%"
+    }
+  ],
+  "buffs": [
+    {
+      "id": "buff-9691",
+      "itemId": 9691,
+      "name": "Seafood Cron Meal",
+      "category": "foods",
+      "icon": "assets/icons/buffs/9691.webp",
+      "priority": 10,
+      "recommendedFor": [
+        "gathering",
+        "hunting",
+        "sniper"
+      ],
+      "durationMinutes": 120,
+      "effects": {
+        "lifeExpPct": 10,
+        "alchemyTimeSeconds": -0.6,
+        "cookingTimeSeconds": -0.6,
+        "processingSuccessPct": 10,
+        "gatheringSpeed": 2,
+        "movementSpeed": 2,
+        "fishingSpeed": 2,
+        "maxWeight": 250,
+        "lifeMastery": 25
+      },
+      "exclusiveGroup": "food-cron",
+      "conflictsWithGroups": [
+        "food-fig",
+        "food-whale"
+      ],
+      "notes": "Simple all-round food for mastery, EXP, weight, and gathering speed. Replaces ordinary food buffs, including Fig Pie.",
+      "sourceUrls": [
+        "https://blackdesert.pearlabyss.com/Asia/en-US/News/Notice/Detail?_boardNo=19773",
+        "https://bdocodex.com/us/item/9691/",
+        "https://www.blackdesertfoundry.com/gathering-guide/",
+        "https://garmoth.com/guides/post/sniper-rifle-hunting"
+      ],
+      "aliases": [],
+      "grade": 4,
+      "provenance": {
+        "clientDate": "2026-08-28",
+        "itemUrn": "urn::item:9691",
+        "originalIcon": "New_Icon/03_ETC/07_ProductMaterial/00009691.dds",
+        "evidence": "Local exported game item description and effects; no invented icon."
+      },
+      "clientEffectEvidence": [
+        {
+          "stat": "Life EXP",
+          "statId": "lifeExp",
+          "value": 10,
+          "op": "+",
+          "unit": "%",
+          "buffGroup": 5993,
+          "buffCategory": 1
+        },
+        {
+          "stat": "Alchemy Time",
+          "statId": "alchemyTime",
+          "value": 0.6,
+          "op": "-",
+          "unit": "sec",
+          "buffGroup": 5964,
+          "buffCategory": 1
+        },
+        {
+          "stat": "Cooking Time",
+          "statId": "cookingTime",
+          "value": 0.6,
+          "op": "-",
+          "unit": "sec",
+          "buffGroup": 5965,
+          "buffCategory": 1
+        },
+        {
+          "stat": "Life EXP",
+          "statId": "lifeExp",
+          "value": 10,
+          "op": "+",
+          "unit": "%",
+          "buffGroup": 5966,
+          "buffCategory": 1
+        },
+        {
+          "stat": "Processing Success Rate",
+          "statId": "processingSuccessRate",
+          "value": 10,
+          "op": "+",
+          "unit": "%",
+          "buffGroup": 5967,
+          "buffCategory": 1
+        },
+        {
+          "stat": "Gathering Speed",
+          "statId": "gatheringSpeed",
+          "value": 2,
+          "op": "+",
+          "buffGroup": 5968,
+          "buffCategory": 1
+        },
+        {
+          "stat": "Movement Speed",
+          "statId": "movementSpeedLevel",
+          "value": 2,
+          "op": "+",
+          "buffGroup": 5933,
+          "buffCategory": 1
+        },
+        {
+          "stat": "Fishing Speed",
+          "statId": "fishingSpeed",
+          "value": 2,
+          "op": "+",
+          "buffGroup": 5969,
+          "buffCategory": 1
+        },
+        {
+          "stat": "Weight Limit",
+          "statId": "weightLimit",
+          "value": 250,
+          "op": "+",
+          "unit": "LT",
+          "buffGroup": 5046,
+          "buffCategory": 1
+        },
+        {
+          "stat": "Life Skill Mastery",
+          "statId": "allMastery",
+          "value": 25,
+          "op": "+",
+          "buffGroup": 6349,
+          "buffCategory": 10
+        }
+      ],
+      "effectText": "A melt-in-your-mouth dish of soft cheese and fresh seafood.\n\n- Usage: Gain the following effects\n\n- Effects:\n   Alchemy/Cooking Time -0.6 sec\n   Life EXP +10%\n   Processing Success Rate +10%\n   Gathering Speed +2\n   Movement Speed +2\n   Fishing Speed +2\n   Weight Limit +250 LT\n   Life Skill Mastery +25\n\n- Duration: 120 min\n- Cooldown: 10 sec\n\n※ Type: High-quality food\n※ High-quality food effects do not stack with other food effects, except Health EXP gain.\n※ Only the effects of the last high-quality food used will be applied.\n\n- How to Obtain: Processing ({KeyBind:Manufacture}) - Simple Cooking with the following ingredients\n\n- Ingredients #1:\nBalenos Meal x3\nCalpheon Meal x3\nMargoria Seafood Meal x1\nAncient Cron Spice x1\n\n- Ingredients #2:\nSavory Steak x1\nBalenos Meal x3\nSute Tea x3\nAncient Cron Spice x1\n\n※ Higher grade versions of the same food item can be used as a substitute at a 1:3 ratio."
+    },
+    {
+      "id": "buff-9301",
+      "itemId": 9301,
+      "name": "Sweet Fig Pie",
+      "category": "foods",
+      "icon": "assets/icons/buffs/9301.webp",
+      "priority": 20,
+      "recommendedFor": [
+        "gathering",
+        "sniper"
+      ],
+      "durationMinutes": 90,
+      "effects": {
+        "gatheringItemDropPct": 3
+      },
+      "exclusiveGroup": "food-fig",
+      "conflictsWithGroups": [
+        "food-cron"
+      ],
+      "notes": "Drop-rate alternative to a Cron Meal; the same +3% as Fig Pie lasts longer. Can coexist with Whale Meat Salad, but not with a Cron Meal.",
+      "sourceUrls": [
+        "https://bdocodex.com/us/item/9301/",
+        "https://www.blackdesertfoundry.com/gathering-guide/",
+        "https://garmoth.com/guides/post/sniper-rifle-hunting"
+      ],
+      "aliases": [],
+      "grade": 2,
+      "provenance": {
+        "clientDate": "2026-08-28",
+        "itemUrn": "urn::item:9301",
+        "originalIcon": "New_Icon/03_ETC/07_ProductMaterial/00009301.dds",
+        "evidence": "Local exported game item description and effects; no invented icon."
+      },
+      "clientEffectEvidence": [
+        {
+          "stat": "Gathering Item Drop Rate",
+          "statId": "gatheringDropRate",
+          "value": 3,
+          "op": "+",
+          "unit": "%",
+          "buffGroup": 5772,
+          "buffCategory": 1
+        }
+      ],
+      "effectText": "A specially made pie filled with carefully selected figs that are sweeter.\n\n- Effect:\n   Gathering Item Drop Rate +3%\n\n- Duration: 90 min\n- Cooldown: 30 min\n\n- How to Obtain: Slight chance of obtaining Sweet Fig Pie while making Fig Pie if at least Cooking Professional 1"
+    },
+    {
+      "id": "buff-9216",
+      "itemId": 9216,
+      "name": "Fig Pie",
+      "category": "foods",
+      "icon": "assets/icons/buffs/9216.webp",
+      "priority": 21,
+      "recommendedFor": [
+        "gathering",
+        "sniper"
+      ],
+      "durationMinutes": 60,
+      "effects": {
+        "gatheringItemDropPct": 3
+      },
+      "exclusiveGroup": "food-fig",
+      "conflictsWithGroups": [
+        "food-cron"
+      ],
+      "notes": "Same gathering drop-rate bonus as Sweet Fig Pie, for 60 minutes. Pick whichever version you have.",
+      "sourceUrls": [
+        "https://bdocodex.com/us/item/9216/",
+        "https://www.blackdesertfoundry.com/gathering-guide/",
+        "https://garmoth.com/guides/post/sniper-rifle-hunting"
+      ],
+      "aliases": [],
+      "grade": 1,
+      "provenance": {
+        "clientDate": "2026-08-28",
+        "itemUrn": "urn::item:9216",
+        "originalIcon": "New_Icon/03_ETC/07_ProductMaterial/00009216.dds",
+        "evidence": "Local exported game item description and effects; no invented icon."
+      },
+      "clientEffectEvidence": [
+        {
+          "stat": "Gathering Item Drop Rate",
+          "statId": "gatheringDropRate",
+          "value": 3,
+          "op": "+",
+          "unit": "%",
+          "buffGroup": 5772,
+          "buffCategory": 1
+        }
+      ],
+      "effectText": "A sweet pie with fig fruit inside.\n\n- Effect:\n   Gathering Item Drop Rate +3%\n\n- Duration: 60 min\n- Cooldown: 30 min\n\n- How to Obtain: Craft via a Cooking Utensil in your residence if at least Cooking Apprentice 1 (slight chance of obtaining Sweet Fig Pie while making Fig Pie if at least Cooking Professional 1)\n\n- Ingredients:\nFig x5\nWheat Dough x3\nSugar x3\nOlive Oil x2"
+    },
+    {
+      "id": "buff-9458",
+      "itemId": 9458,
+      "name": "Fresh Whale Meat Salad",
+      "category": "energy",
+      "icon": "assets/icons/buffs/9458.webp",
+      "priority": 93,
+      "recommendedFor": [
+        "gathering",
+        "hunting",
+        "sniper"
+      ],
+      "durationMinutes": 120,
+      "effects": {
+        "lifeExpPct": 15,
+        "maxEnergy": 20
+      },
+      "exclusiveGroup": "food-whale",
+      "conflictsWithGroups": [
+        "food-cron"
+      ],
+      "notes": "EXP-focused ordinary food. Can coexist with Fig Pie; food cooldowns mean you must apply the foods separately.",
+      "sourceUrls": [
+        "https://bdocodex.com/us/item/9458/",
+        "https://www.blackdesertfoundry.com/gathering-guide/",
+        "https://garmoth.com/guides/post/sniper-rifle-hunting"
+      ],
+      "aliases": [],
+      "grade": 2,
+      "provenance": {
+        "clientDate": "2026-08-28",
+        "itemUrn": "urn::item:9458",
+        "originalIcon": "New_Icon/03_ETC/07_ProductMaterial/00009458.dds",
+        "evidence": "Local exported game item description and effects; no invented icon."
+      },
+      "clientEffectEvidence": [
+        {
+          "stat": "Life EXP",
+          "statId": "lifeExp",
+          "value": 15,
+          "op": "+",
+          "unit": "%",
+          "buffGroup": 5693,
+          "buffCategory": 1
+        },
+        {
+          "stat": "Max Energy",
+          "statId": "maxEnergy",
+          "value": 20,
+          "op": "+",
+          "buffGroup": 5695,
+          "buffCategory": 1
+        }
+      ],
+      "effectText": "A delicious salad made with lightly cooked fresh whale meat on top.\n\n- Effects:\n   Life EXP +15%\n   Max Energy +20\n\n- Duration: 120 min\n- Cooldown: 30 min\n\nHow to Obtain: Slight chance of obtaining Fresh Whale Meat Salad when making Whale Meat Salad if at least Cooking Professional 1",
+      "effectSummary": "Life EXP +15% · Max Energy +20 for 120 min",
+      "obtainSummary": "Rare result while cooking Whale Meat Salad; also Marketplace."
+    },
+    {
+      "id": "buff-9693",
+      "itemId": 9693,
+      "name": "Exquisite Cron Meal",
+      "category": "foods",
+      "icon": "assets/icons/buffs/9693.webp",
+      "priority": 40,
+      "recommendedFor": [
+        "hunting"
+      ],
+      "durationMinutes": 120,
+      "effects": {
+        "allAp": 8,
+        "accuracy": 15,
+        "movementSpeed": 2,
+        "criticalHit": 2,
+        "evasion": 15,
+        "maxHp": 525,
+        "allResistancePct": 4,
+        "attackSpeed": 2,
+        "castingSpeed": 2,
+        "maxStamina": 200,
+        "backAttackDamagePct": 5,
+        "criticalHitDamagePct": 5
+      },
+      "exclusiveGroup": "food-cron",
+      "conflictsWithGroups": [
+        "food-fig",
+        "food-whale"
+      ],
+      "notes": "Matchlock alternative when gathering speed is already covered. Critical and back-attack damage are not recommended for sniper shots. General AP is not a matchlock-damage bonus.",
+      "sourceUrls": [
+        "https://bdocodex.com/us/item/9693/",
+        "https://www.blackdesertfoundry.com/hunting-guide/"
+      ],
+      "aliases": [],
+      "grade": 4,
+      "provenance": {
+        "clientDate": "2026-08-28",
+        "itemUrn": "urn::item:9693",
+        "originalIcon": "New_Icon/03_ETC/07_ProductMaterial/00009693.dds",
+        "evidence": "Local exported game item description and effects; no invented icon."
+      },
+      "clientEffectEvidence": [
+        {
+          "stat": "All AP",
+          "value": 8,
+          "op": "+",
+          "buffGroup": 5996,
+          "buffCategory": 1
+        },
+        {
+          "stat": "All AP",
+          "statId": "hiddenAp",
+          "value": 8,
+          "op": "+",
+          "buffGroup": 5931,
+          "buffCategory": 1
+        },
+        {
+          "stat": "All Accuracy",
+          "statId": "accuracy",
+          "value": 15,
+          "op": "+",
+          "buffGroup": 5932,
+          "buffCategory": 1
+        },
+        {
+          "stat": "Movement Speed",
+          "statId": "movementSpeedLevel",
+          "value": 2,
+          "op": "+",
+          "buffGroup": 5933,
+          "buffCategory": 1
+        },
+        {
+          "stat": "Critical Hit",
+          "statId": "critLevel",
+          "value": 2,
+          "op": "+",
+          "buffGroup": 5934,
+          "buffCategory": 1
+        },
+        {
+          "stat": "All Evasion",
+          "statId": "evasion",
+          "value": 15,
+          "op": "+",
+          "buffGroup": 5935,
+          "buffCategory": 1
+        },
+        {
+          "stat": "Max HP",
+          "statId": "maxHp",
+          "value": 525,
+          "op": "+",
+          "buffGroup": 7840,
+          "buffCategory": 1
+        },
+        {
+          "stat": "All Resistance",
+          "statId": "allResistance",
+          "value": 4,
+          "op": "+",
+          "unit": "%",
+          "buffGroup": 5960,
+          "buffCategory": 1
+        },
+        {
+          "stat": "Attack Speed",
+          "statId": "attackSpeedLevel",
+          "value": 2,
+          "op": "+",
+          "buffGroup": 6320,
+          "buffCategory": 10
+        },
+        {
+          "stat": "Casting Speed",
+          "statId": "castingSpeedLevel",
+          "value": 2,
+          "op": "+",
+          "buffGroup": 6321,
+          "buffCategory": 10
+        },
+        {
+          "stat": "Max Stamina",
+          "statId": "maxStamina",
+          "value": 200,
+          "op": "+",
+          "buffGroup": 6322,
+          "buffCategory": 10
+        },
+        {
+          "stat": "Back Attack Extra Damage",
+          "statId": "backAttackDamage",
+          "value": 5,
+          "op": "+",
+          "unit": "%",
+          "buffGroup": 6323,
+          "buffCategory": 10
+        },
+        {
+          "stat": "Critical Hit Extra Damage",
+          "statId": "critDamage",
+          "value": 5,
+          "op": "+",
+          "unit": "%",
+          "buffGroup": 6324,
+          "buffCategory": 10
+        }
+      ],
+      "effectText": "A dish enjoyed in the past by Cron nobles, it was made by combining rare foods from all over the world.\n\n- Usage: Gain the following effects\n\n- Effects:\n   All AP +8\n   All Accuracy +15\n   Attack/Casting Speed +2\n   Movement Speed +2\n   Critical Hit +2\n   All Evasion +15\n   Max HP +525\n   Max Stamina +200\n   Back Attack Extra Damage +5%\n   Critical Hit Extra Damage +5%\n   All Resistance +4%\n\n- Duration: 120 min\n- Cooldown: 10 sec\n\n※ Type: High-quality Food\n※ High-quality food effects do not stack with other food effects, except Health EXP gain.\n※ Only the effects of the last high-quality food used will be applied.\n\n- How to Obtain: Processing ({KeyBind:Manufacture}) - Simple Cooking with the following ingredients\nSerendia Meal x3\nSpecial Arehaza Meal x1\nKamasylvia Meal x3\nAncient Cron Spice x1\n\n※ Higher grade versions of the same food item can be used as a substitute at a 1:3 ratio."
+    },
+    {
+      "id": "buff-791",
+      "itemId": 791,
+      "name": "Verdure Draught",
+      "category": "draughts",
+      "icon": "assets/icons/buffs/791.webp",
+      "priority": 10,
+      "recommendedFor": [
+        "gathering",
+        "hunting",
+        "sniper"
+      ],
+      "durationMinutes": 20,
+      "effects": {
+        "lifeExpPct": 20,
+        "gatheringSpeed": 3,
+        "fishingSpeed": 3,
+        "movementSpeed": 3,
+        "maxWeight": 200,
+        "alchemyTimeSeconds": -1,
+        "cookingTimeSeconds": -1,
+        "processingSuccessPct": 20
+      },
+      "exclusiveGroup": "draught",
+      "conflictsWithGroups": [
+        "elixir-labor",
+        "elixir-time",
+        "elixir-mastery",
+        "elixir-wind",
+        "elixir-swiftness",
+        "elixir-shock",
+        "elixir-worker",
+        "elixir-detection",
+        "elixir-assassin"
+      ],
+      "notes": "Simple gathering starter choice: one drink covers EXP, speed, and weight. It replaces all ordinary elixirs; do not combine with Rough Labor or Flowing Wind.",
+      "sourceUrls": [
+        "https://bdocodex.com/us/item/791/",
+        "https://www.blackdesertfoundry.com/gathering-guide/",
+        "https://garmoth.com/guides/post/sniper-rifle-hunting"
+      ],
+      "aliases": [],
+      "grade": 3,
+      "provenance": {
+        "clientDate": "2026-08-28",
+        "itemUrn": "urn::item:791",
+        "originalIcon": "New_Icon/03_ETC/08_Potion/00000791.dds",
+        "evidence": "Local exported game item description and effects; no invented icon."
+      },
+      "clientEffectEvidence": [
+        {
+          "stat": "Life EXP",
+          "statId": "lifeExp",
+          "value": 20,
+          "op": "+",
+          "unit": "%",
+          "buffGroup": 5997,
+          "buffCategory": 2
+        },
+        {
+          "stat": "Gathering Speed",
+          "statId": "gatheringSpeed",
+          "value": 3,
+          "op": "+",
+          "buffGroup": 5986,
+          "buffCategory": 2
+        },
+        {
+          "stat": "Fishing Speed",
+          "statId": "fishingSpeed",
+          "value": 3,
+          "op": "+",
+          "buffGroup": 5987,
+          "buffCategory": 2
+        },
+        {
+          "stat": "Movement Speed",
+          "statId": "movementSpeedLevel",
+          "value": 3,
+          "op": "+",
+          "buffGroup": 5988,
+          "buffCategory": 2
+        },
+        {
+          "stat": "Life EXP",
+          "statId": "lifeExp",
+          "value": 20,
+          "op": "+",
+          "unit": "%",
+          "buffGroup": 5989,
+          "buffCategory": 2
+        },
+        {
+          "stat": "Weight Limit",
+          "statId": "weightLimit",
+          "value": 200,
+          "op": "+",
+          "unit": "LT",
+          "buffGroup": 5982,
+          "buffCategory": 2
+        },
+        {
+          "stat": "Alchemy Time",
+          "statId": "alchemyTime",
+          "value": 1,
+          "op": "-",
+          "unit": "sec",
+          "buffGroup": 5990,
+          "buffCategory": 2
+        },
+        {
+          "stat": "Cooking Time",
+          "statId": "cookingTime",
+          "value": 1,
+          "op": "-",
+          "unit": "sec",
+          "buffGroup": 5991,
+          "buffCategory": 2
+        },
+        {
+          "stat": "Processing Success Rate",
+          "statId": "processingSuccessRate",
+          "value": 20,
+          "op": "+",
+          "unit": "%",
+          "buffGroup": 5992,
+          "buffCategory": 2
+        }
+      ],
+      "effectText": "A draught with a practical function.\n\n- Usage: Gain the following effects\n\n- Effects: \n   Alchemy/Cooking Time -1 sec\n   Life EXP +20%\n   Processing Success Rate +20%\n   Gathering Speed +3\n   Movement Speed +3\n   Fishing Speed +3\n   Weight Limit +200 LT\n\n- Duration: 20 min\n- Cooldown: 10 sec \n\n※ Type: Draught\n※ Only the effects of the last draught used will be applied.\n※ Draught effects do not stack with other elixir/draught effects, except with perfumes, Whale Tendon Elixir, and Tough Whale Tendon Elixir.\n\n- How to Obtain: Processing ({KeyBind:Manufacture}) - Simple Alchemy with the following materials\n\n- Materials:\nWorker's Elixir x3\nElixir of Time x3\nElixir of Swiftness x3\nTears of the Falling Moon x1\n\n※ Higher grade versions of the same elixir can be used as a substitute at a 1:3 ratio."
+    },
+    {
+      "id": "buff-752047",
+      "itemId": 752047,
+      "name": "[Event] Magical: Verdure Draught",
+      "category": "events",
+      "icon": "assets/icons/buffs/752047.webp",
+      "priority": 20,
+      "recommendedFor": [
+        "gathering",
+        "hunting",
+        "sniper"
+      ],
+      "durationMinutes": 60,
+      "effects": {
+        "lifeExpPct": 20,
+        "gatheringSpeed": 3,
+        "fishingSpeed": 3,
+        "movementSpeed": 3,
+        "maxWeight": 200,
+        "alchemyTimeSeconds": -1,
+        "cookingTimeSeconds": -1,
+        "processingSuccessPct": 20
+      },
+      "exclusiveGroup": "draught",
+      "conflictsWithGroups": [
+        "elixir-labor",
+        "elixir-time",
+        "elixir-mastery",
+        "elixir-wind",
+        "elixir-swiftness",
+        "elixir-shock",
+        "elixir-worker",
+        "elixir-detection",
+        "elixir-assassin"
+      ],
+      "notes": "Event version of Verdure with the same effects for 60 minutes. Select this instead of ordinary Verdure if it is what you actually used.",
+      "sourceUrls": [
+        "https://bdocodex.com/us/item/752047/",
+        "https://www.blackdesertfoundry.com/gathering-guide/",
+        "https://garmoth.com/guides/post/sniper-rifle-hunting"
+      ],
+      "aliases": [
+        "Magical Verdure Draught"
+      ],
+      "grade": 3,
+      "provenance": {
+        "clientDate": "2026-08-28",
+        "itemUrn": "urn::item:752047",
+        "originalIcon": "New_Icon/03_ETC/00752047.dds",
+        "evidence": "Local exported game item description and effects; no invented icon."
+      },
+      "clientEffectEvidence": [
+        {
+          "stat": "Life EXP",
+          "statId": "lifeExp",
+          "value": 20,
+          "op": "+",
+          "unit": "%",
+          "buffGroup": 6679,
+          "buffCategory": 2
+        },
+        {
+          "stat": "Gathering Speed",
+          "statId": "gatheringSpeed",
+          "value": 3,
+          "op": "+",
+          "buffGroup": 6680,
+          "buffCategory": 2
+        },
+        {
+          "stat": "Fishing Speed",
+          "statId": "fishingSpeed",
+          "value": 3,
+          "op": "+",
+          "buffGroup": 6681,
+          "buffCategory": 2
+        },
+        {
+          "stat": "Movement Speed",
+          "statId": "movementSpeedLevel",
+          "value": 3,
+          "op": "+",
+          "buffGroup": 6682,
+          "buffCategory": 2
+        },
+        {
+          "stat": "Life EXP",
+          "statId": "lifeExp",
+          "value": 20,
+          "op": "+",
+          "unit": "%",
+          "buffGroup": 6683,
+          "buffCategory": 2
+        },
+        {
+          "stat": "Weight Limit",
+          "statId": "weightLimit",
+          "value": 200,
+          "op": "+",
+          "unit": "LT",
+          "buffGroup": 6687,
+          "buffCategory": 2
+        },
+        {
+          "stat": "Alchemy Time",
+          "statId": "alchemyTime",
+          "value": 1,
+          "op": "-",
+          "unit": "sec",
+          "buffGroup": 6684,
+          "buffCategory": 2
+        },
+        {
+          "stat": "Cooking Time",
+          "statId": "cookingTime",
+          "value": 1,
+          "op": "-",
+          "unit": "sec",
+          "buffGroup": 6685,
+          "buffCategory": 2
+        },
+        {
+          "stat": "Processing Success Rate",
+          "statId": "processingSuccessRate",
+          "value": 20,
+          "op": "+",
+          "unit": "%",
+          "buffGroup": 6686,
+          "buffCategory": 2
+        }
+      ],
+      "effectText": "A draught with a practical function.\n\n- Effects:\n   Alchemy/Cooking Time -1 sec\n   Life EXP +20%\n   Processing Success Rate +20%\n   Gathering Speed +3\n   Movement Speed +3\n   Fishing Speed +3\n   Weight Limit +200 LT\n\n- Duration: 60 min\n- Cooldown: 10 sec\n\n※ Type: Draught\n\n※ Draught effects do not stack with other elixir/draught effects, except with perfumes, Whale Tendon Elixir, and Tough Whale Tendon Elixir.\n※ Only the effects of the last draught used will be applied."
+    },
+    {
+      "id": "buff-800",
+      "itemId": 800,
+      "name": "Viridian Draught",
+      "category": "draughts",
+      "icon": "assets/icons/buffs/800.webp",
+      "priority": 30,
+      "recommendedFor": [
+        "gathering",
+        "hunting",
+        "sniper"
+      ],
+      "durationMinutes": 20,
+      "effects": {
+        "lifeMastery": 25,
+        "lifeExpPct": 30,
+        "gatheringSpeed": 3,
+        "fishingSpeed": 3,
+        "movementSpeed": 3,
+        "alchemyTimeSeconds": -3,
+        "cookingTimeSeconds": -3,
+        "processingSuccessPct": 25,
+        "maxWeight": 300
+      },
+      "exclusiveGroup": "draught",
+      "conflictsWithGroups": [
+        "elixir-labor",
+        "elixir-time",
+        "elixir-mastery",
+        "elixir-wind",
+        "elixir-swiftness",
+        "elixir-shock",
+        "elixir-worker",
+        "elixir-detection",
+        "elixir-assassin"
+      ],
+      "notes": "Newer optional upgrade with +25 mastery and +30% Life EXP. Compare its cost with ordinary Verdure; not required for a beginner.",
+      "sourceUrls": [
+        "https://bdocodex.com/us/item/800/",
+        "https://www.naeu.playblackdesert.com/en-US/News/Detail?groupContentNo=10451",
+        "https://www.blackdesertfoundry.com/gathering-guide/",
+        "https://garmoth.com/guides/post/sniper-rifle-hunting"
+      ],
+      "aliases": [],
+      "grade": 3,
+      "provenance": {
+        "clientDate": "2026-08-28",
+        "itemUrn": "urn::item:800",
+        "originalIcon": "New_Icon/03_ETC/08_Potion/00000800.dds",
+        "evidence": "Local exported game item description and effects; no invented icon."
+      },
+      "clientEffectEvidence": [
+        {
+          "stat": "Life Skill Mastery",
+          "value": 25,
+          "op": "+",
+          "buffGroup": 9103,
+          "buffCategory": 2
+        },
+        {
+          "stat": "Life Skill Mastery",
+          "statId": "allMastery",
+          "value": 25,
+          "op": "+",
+          "buffGroup": 9104,
+          "buffCategory": 2
+        },
+        {
+          "stat": "Life EXP",
+          "statId": "lifeExp",
+          "value": 30,
+          "op": "+",
+          "unit": "%",
+          "buffGroup": 9105,
+          "buffCategory": 2
+        },
+        {
+          "stat": "Gathering Speed",
+          "statId": "gatheringSpeed",
+          "value": 3,
+          "op": "+",
+          "buffGroup": 9106,
+          "buffCategory": 2
+        },
+        {
+          "stat": "Fishing Speed",
+          "statId": "fishingSpeed",
+          "value": 3,
+          "op": "+",
+          "buffGroup": 9107,
+          "buffCategory": 2
+        },
+        {
+          "stat": "Movement Speed",
+          "statId": "movementSpeedLevel",
+          "value": 3,
+          "op": "+",
+          "buffGroup": 9108,
+          "buffCategory": 2
+        },
+        {
+          "stat": "Alchemy Time",
+          "statId": "alchemyTime",
+          "value": 3,
+          "op": "-",
+          "unit": "sec",
+          "buffGroup": 9109,
+          "buffCategory": 2
+        },
+        {
+          "stat": "Cooking Time",
+          "statId": "cookingTime",
+          "value": 3,
+          "op": "-",
+          "unit": "sec",
+          "buffGroup": 9110,
+          "buffCategory": 2
+        },
+        {
+          "stat": "Processing Success Rate",
+          "statId": "processingSuccessRate",
+          "value": 25,
+          "op": "+",
+          "unit": "%",
+          "buffGroup": 9111,
+          "buffCategory": 2
+        },
+        {
+          "stat": "Weight Limit",
+          "statId": "weightLimit",
+          "value": 300,
+          "op": "+",
+          "unit": "LT",
+          "buffGroup": 9112,
+          "buffCategory": 2
+        }
+      ],
+      "effectText": "A draught with a practical function.\n\n- Usage: Gain the following effects\n\n- Effects:\n   Life Skill Mastery +25\n   Life EXP +30%\n   Alchemy/Cooking Time -3 sec\n   Processing Success Rate +25%\n   Gathering Speed +3\n   Movement Speed +3\n   Fishing Speed +3\n   Weight Limit +300 LT\n\n- Duration: 20 min\n- Cooldown: 10 sec\n\n※ Type: Draught\n※ Only the effects of the last draught used will be applied.\n※ Draught effects do not stack with other elixir/draught effects, except with perfumes, Whale Tendon Elixir, and Tough Whale Tendon Elixir.\n\n- How to Obtain: Processing ({KeyBind:Manufacture}) - Simple Alchemy with the following materials \n\n- Materials:\nElixir of Mastery x3\nElixir of Time x3\nTears of the Falling Moon x1\nMagical Olivine Powder x10\n\n※ Higher-grade versions of the same elixir can be used as a substitute at a 1:3 ratio."
+    },
+    {
+      "id": "buff-1159",
+      "itemId": 1159,
+      "name": "Elixir of Rough Labor",
+      "category": "elixirs",
+      "icon": "assets/icons/buffs/1159.webp",
+      "priority": 10,
+      "recommendedFor": [
+        "gathering",
+        "hunting",
+        "sniper"
+      ],
+      "durationMinutes": 15,
+      "effects": {
+        "gatheringItemDropPct": 5
+      },
+      "exclusiveGroup": "elixir-labor",
+      "conflictsWithGroups": [
+        "draught"
+      ],
+      "notes": "Drop-rate choice when using an elixir setup. Constantly consumes MP/WP/SP. Cannot coexist with a draught.",
+      "sourceUrls": [
+        "https://bdocodex.com/us/item/1159/",
+        "https://www.blackdesertfoundry.com/gathering-guide/",
+        "https://garmoth.com/guides/post/sniper-rifle-hunting",
+        "https://www.youtube.com/watch?v=KnfbewYBxhE&t=858s"
+      ],
+      "aliases": [],
+      "grade": 2,
+      "provenance": {
+        "clientDate": "2026-08-28",
+        "itemUrn": "urn::item:1159",
+        "originalIcon": "New_Icon/03_ETC/08_Potion/00001358.dds",
+        "evidence": "Local exported game item description and effects; no invented icon."
+      },
+      "clientEffectEvidence": [
+        {
+          "stat": "Gathering Item Drop Rate",
+          "statId": "gatheringDropRate",
+          "value": 5,
+          "op": "+",
+          "unit": "%",
+          "buffGroup": 6415,
+          "buffCategory": 2
+        }
+      ]
+    },
+    {
+      "id": "buff-750",
+      "itemId": 750,
+      "name": "Elixir of Flowing Time",
+      "category": "elixirs",
+      "icon": "assets/icons/buffs/750.webp",
+      "priority": 20,
+      "recommendedFor": [
+        "gathering",
+        "hunting",
+        "sniper"
+      ],
+      "durationMinutes": 15,
+      "effects": {
+        "lifeExpPct": 15
+      },
+      "exclusiveGroup": "elixir-time",
+      "conflictsWithGroups": [
+        "draught"
+      ],
+      "notes": "EXP option for an elixir setup. Can coexist with other elixir families; replaces the weaker Elixir of Time.",
+      "sourceUrls": [
+        "https://bdocodex.com/us/item/750/",
+        "https://www.blackdesertfoundry.com/gathering-guide/",
+        "https://garmoth.com/guides/post/sniper-rifle-hunting"
+      ],
+      "aliases": [],
+      "grade": 2,
+      "provenance": {
+        "clientDate": "2026-08-28",
+        "itemUrn": "urn::item:750",
+        "originalIcon": "New_Icon/03_ETC/08_Potion/00000752.dds",
+        "evidence": "Local exported game item description and effects; no invented icon."
+      },
+      "clientEffectEvidence": [
+        {
+          "stat": "Life EXP",
+          "statId": "lifeExp",
+          "value": 15,
+          "op": "+",
+          "unit": "%",
+          "buffGroup": 5735,
+          "buffCategory": 2
+        }
+      ]
+    },
+    {
+      "id": "buff-689",
+      "itemId": 689,
+      "name": "Elixir of Flowing Wind",
+      "category": "elixirs",
+      "icon": "assets/icons/buffs/689.webp",
+      "priority": 30,
+      "recommendedFor": [
+        "hunting",
+        "sniper"
+      ],
+      "durationMinutes": 15,
+      "effects": {
+        "attackSpeed": 3
+      },
+      "exclusiveGroup": "elixir-wind",
+      "conflictsWithGroups": [
+        "draught"
+      ],
+      "notes": "Useful for matchlock and sniper attack speed. The +3 is an ability level bonus, not +3% speed.",
+      "sourceUrls": [
+        "https://bdocodex.com/us/item/689/",
+        "https://www.blackdesertfoundry.com/gathering-guide/",
+        "https://garmoth.com/guides/post/sniper-rifle-hunting"
+      ],
+      "aliases": [],
+      "grade": 2,
+      "provenance": {
+        "clientDate": "2026-08-28",
+        "itemUrn": "urn::item:689",
+        "originalIcon": "New_Icon/03_ETC/08_Potion/00000626.dds",
+        "evidence": "Local exported game item description and effects; no invented icon."
+      },
+      "clientEffectEvidence": [
+        {
+          "stat": "Attack Speed",
+          "statId": "attackSpeedLevel",
+          "value": 3,
+          "op": "+",
+          "buffGroup": 5656,
+          "buffCategory": 2
+        }
+      ]
+    },
+    {
+      "id": "buff-1158",
+      "itemId": 1158,
+      "name": "Elixir of Improved Mastery",
+      "category": "elixirs",
+      "icon": "assets/icons/buffs/1158.webp",
+      "priority": 40,
+      "recommendedFor": [
+        "gathering",
+        "hunting",
+        "sniper"
+      ],
+      "durationMinutes": 15,
+      "effects": {
+        "lifeMastery": 15
+      },
+      "exclusiveGroup": "elixir-mastery",
+      "conflictsWithGroups": [
+        "draught"
+      ],
+      "notes": "Optional +15 mastery, most useful when it reaches another mastery bracket. Constantly consumes MP/WP/SP.",
+      "sourceUrls": [
+        "https://bdocodex.com/us/item/1158/",
+        "https://www.blackdesertfoundry.com/gathering-guide/",
+        "https://garmoth.com/guides/post/sniper-rifle-hunting"
+      ],
+      "aliases": [],
+      "grade": 2,
+      "provenance": {
+        "clientDate": "2026-08-28",
+        "itemUrn": "urn::item:1158",
+        "originalIcon": "New_Icon/03_ETC/08_Potion/00001357.dds",
+        "evidence": "Local exported game item description and effects; no invented icon."
+      },
+      "clientEffectEvidence": [
+        {
+          "stat": "Life Skill Mastery",
+          "statId": "allMastery",
+          "value": 15,
+          "op": "+",
+          "buffGroup": 6413,
+          "buffCategory": 2
+        }
+      ]
+    },
+    {
+      "id": "buff-691",
+      "itemId": 691,
+      "name": "Elixir of Intrepid Swiftness",
+      "category": "elixirs",
+      "icon": "assets/icons/buffs/691.webp",
+      "priority": 50,
+      "recommendedFor": [
+        "gathering",
+        "hunting",
+        "sniper"
+      ],
+      "durationMinutes": 15,
+      "effects": {
+        "movementSpeed": 3
+      },
+      "exclusiveGroup": "elixir-swiftness",
+      "conflictsWithGroups": [
+        "draught"
+      ],
+      "notes": "Fill missing movement-speed levels. Skip when your gear and other buffs already reach level 5.",
+      "sourceUrls": [
+        "https://bdocodex.com/us/item/691/",
+        "https://www.blackdesertfoundry.com/gathering-guide/",
+        "https://garmoth.com/guides/post/sniper-rifle-hunting"
+      ],
+      "aliases": [],
+      "grade": 2,
+      "provenance": {
+        "clientDate": "2026-08-28",
+        "itemUrn": "urn::item:691",
+        "originalIcon": "New_Icon/03_ETC/08_Potion/00000628.dds",
+        "evidence": "Local exported game item description and effects; no invented icon."
+      },
+      "clientEffectEvidence": [
+        {
+          "stat": "Movement Speed",
+          "statId": "movementSpeedLevel",
+          "value": 3,
+          "op": "+",
+          "buffGroup": 5655,
+          "buffCategory": 2
+        }
+      ]
+    },
+    {
+      "id": "buff-725",
+      "itemId": 725,
+      "name": "Skilled Worker's Elixir",
+      "category": "elixirs",
+      "icon": "assets/icons/buffs/725.webp",
+      "priority": 60,
+      "recommendedFor": [
+        "gathering",
+        "hunting",
+        "sniper"
+      ],
+      "durationMinutes": 15,
+      "effects": {
+        "gatheringSpeed": 3
+      },
+      "exclusiveGroup": "elixir-worker",
+      "conflictsWithGroups": [
+        "draught"
+      ],
+      "notes": "Fill missing gathering-speed levels. Skip when your gear, guild, stone, and other buffs already reach level 5.",
+      "sourceUrls": [
+        "https://bdocodex.com/us/item/725/",
+        "https://www.blackdesertfoundry.com/gathering-guide/",
+        "https://garmoth.com/guides/post/sniper-rifle-hunting"
+      ],
+      "aliases": [],
+      "grade": 2,
+      "provenance": {
+        "clientDate": "2026-08-28",
+        "itemUrn": "urn::item:725",
+        "originalIcon": "New_Icon/03_ETC/08_Potion/00000662.dds",
+        "evidence": "Local exported game item description and effects; no invented icon."
+      },
+      "clientEffectEvidence": [
+        {
+          "stat": "Gathering Speed",
+          "statId": "gatheringSpeed",
+          "value": 3,
+          "op": "+",
+          "buffGroup": 5751,
+          "buffCategory": 2
+        }
+      ]
+    },
+    {
+      "id": "buff-763",
+      "itemId": 763,
+      "name": "Elixir of Strong Shock",
+      "category": "elixirs",
+      "icon": "assets/icons/buffs/763.webp",
+      "priority": 70,
+      "recommendedFor": [
+        "hunting"
+      ],
+      "durationMinutes": 15,
+      "effects": {
+        "criticalHit": 3
+      },
+      "exclusiveGroup": "elixir-shock",
+      "conflictsWithGroups": [
+        "draught"
+      ],
+      "notes": "Matchlock critical-hit levels. Not a sniper recommendation; skip when already at critical-hit level 5.",
+      "sourceUrls": [
+        "https://bdocodex.com/us/item/763/",
+        "https://www.blackdesertfoundry.com/hunting-guide/"
+      ],
+      "aliases": [],
+      "grade": 2,
+      "provenance": {
+        "clientDate": "2026-08-28",
+        "itemUrn": "urn::item:763",
+        "originalIcon": "New_Icon/03_ETC/08_Potion/00000765.dds",
+        "evidence": "Local exported game item description and effects; no invented icon."
+      },
+      "clientEffectEvidence": [
+        {
+          "stat": "Critical Hit",
+          "statId": "critLevel",
+          "value": 3,
+          "op": "+",
+          "buffGroup": 5792,
+          "buffCategory": 2
+        }
+      ]
+    },
+    {
+      "id": "buff-699",
+      "itemId": 699,
+      "name": "Elixir of Sharp Detection",
+      "category": "elixirs",
+      "icon": "assets/icons/buffs/699.webp",
+      "priority": 80,
+      "recommendedFor": [
+        "hunting"
+      ],
+      "durationMinutes": 15,
+      "effects": {
+        "criticalHitDamagePct": 15
+      },
+      "exclusiveGroup": "elixir-detection",
+      "conflictsWithGroups": [
+        "draught"
+      ],
+      "notes": "Optional matchlock critical damage. Do not treat it as a sniper damage increase.",
+      "sourceUrls": [
+        "https://bdocodex.com/us/item/699/",
+        "https://www.blackdesertfoundry.com/hunting-guide/"
+      ],
+      "aliases": [],
+      "grade": 2,
+      "provenance": {
+        "clientDate": "2026-08-28",
+        "itemUrn": "urn::item:699",
+        "originalIcon": "New_Icon/03_ETC/08_Potion/00000636.dds",
+        "evidence": "Local exported game item description and effects; no invented icon."
+      },
+      "clientEffectEvidence": [
+        {
+          "stat": "Critical Hit Extra Damage",
+          "statId": "critDamage",
+          "value": 15,
+          "op": "+",
+          "unit": "%",
+          "buffGroup": 5660,
+          "buffCategory": 2
+        }
+      ]
+    },
+    {
+      "id": "buff-697",
+      "itemId": 697,
+      "name": "Elixir of Lethal Assassin",
+      "category": "elixirs",
+      "icon": "assets/icons/buffs/697.webp",
+      "priority": 90,
+      "recommendedFor": [
+        "hunting"
+      ],
+      "durationMinutes": 15,
+      "effects": {
+        "backAttackDamagePct": 15
+      },
+      "exclusiveGroup": "elixir-assassin",
+      "conflictsWithGroups": [
+        "draught"
+      ],
+      "notes": "Optional matchlock back-attack damage. Formerly named Elixir of Lethal Assassination in some guides; not a sniper damage increase.",
+      "sourceUrls": [
+        "https://bdocodex.com/us/item/697/",
+        "https://www.blackdesertfoundry.com/hunting-guide/"
+      ],
+      "aliases": [
+        "Elixir of Lethal Assassination"
+      ],
+      "grade": 2,
+      "provenance": {
+        "clientDate": "2026-08-28",
+        "itemUrn": "urn::item:697",
+        "originalIcon": "New_Icon/03_ETC/08_Potion/00000634.dds",
+        "evidence": "Local exported game item description and effects; no invented icon."
+      },
+      "clientEffectEvidence": [
+        {
+          "stat": "Back Attack Extra Damage",
+          "statId": "backAttackDamage",
+          "value": 15,
+          "op": "+",
+          "unit": "%",
+          "buffGroup": 5659,
+          "buffCategory": 2
+        }
+      ]
+    },
+    {
+      "id": "buff-1181",
+      "itemId": 1181,
+      "name": "Elixir of Lethal Destruction",
+      "category": "elixirs",
+      "icon": "assets/icons/buffs/1181.webp",
+      "priority": 100,
+      "recommendedFor": [
+        "hunting"
+      ],
+      "durationMinutes": 15,
+      "effects": {
+        "specialAttackDamagePct": 2
+      },
+      "exclusiveGroup": "elixir-destruction",
+      "conflictsWithGroups": [
+        "draught"
+      ],
+      "notes": "Optional matchlock special-attack damage. Not a sniper damage recommendation or a predicted loot increase.",
+      "sourceUrls": [
+        "https://bdocodex.com/us/item/1181/",
+        "https://www.youtube.com/watch?v=KnfbewYBxhE&t=858s",
+        "https://www.naeu.playblackdesert.com/en-US/News/Detail?groupContentNo=10550&countryType=en-US"
+      ],
+      "aliases": [],
+      "grade": 2,
+      "provenance": {
+        "clientDate": "2026-09-10",
+        "reviewedAt": "2026-09-14",
+        "itemUrn": "urn::item:1181",
+        "originalIcon": "New_Icon/03_ETC/08_Potion/00001183.dds",
+        "clientSource": "Patch Research/client-2026-09-10-divine-audit/items.json",
+        "iconSource": "assets/data/app-data.json:itemIcons:Elixir of Lethal Destruction",
+        "iconByteLength": 932,
+        "iconSha256": "ae8f9357df71ee7c40390f5ba668c30d31ac903de6938ed22940b0b0da5482fa",
+        "review": "docs/gathering-luneye-hunting-review-2026-09-14.md",
+        "evidence": "Current exported item effect and grade match BDO Codex. The original bundled 44 x 44 WebP is copied unchanged. Luneye's September 13 guide recommends this for matchlock hunting."
+      },
+      "clientEffectEvidence": [
+        {
+          "stat": "All Special Attack Extra Damage",
+          "statId": "specialAttackDamage",
+          "value": 2,
+          "op": "+",
+          "unit": "%",
+          "buff": 55971,
+          "buffModule": 93,
+          "buffGroup": 6943,
+          "buffCategory": 2,
+          "durationMs": 900000,
+          "cooldownMs": 1000
+        }
+      ]
+    },
+    {
+      "id": "buff-1156",
+      "itemId": 1156,
+      "name": "Elixir of Labor",
+      "category": "elixirs",
+      "icon": "assets/icons/buffs/1156.webp",
+      "priority": 110,
+      "recommendedFor": [
+        "gathering",
+        "sniper"
+      ],
+      "durationMinutes": 10,
+      "effects": {
+        "gatheringItemDropPct": 3
+      },
+      "exclusiveGroup": "elixir-labor",
+      "conflictsWithGroups": [
+        "draught"
+      ],
+      "notes": "Weaker 10-minute alternative to Rough Labor. Constantly consumes MP/WP/SP.",
+      "sourceUrls": [
+        "https://bdocodex.com/us/item/1156/",
+        "https://www.blackdesertfoundry.com/gathering-guide/",
+        "https://garmoth.com/guides/post/sniper-rifle-hunting"
+      ],
+      "aliases": [],
+      "grade": 1,
+      "provenance": {
+        "clientDate": "2026-08-28",
+        "itemUrn": "urn::item:1156",
+        "originalIcon": "New_Icon/03_ETC/08_Potion/00001355.dds",
+        "evidence": "Local exported game item description and effects; no invented icon."
+      },
+      "clientEffectEvidence": [
+        {
+          "stat": "Gathering Item Drop Rate",
+          "statId": "gatheringDropRate",
+          "value": 3,
+          "op": "+",
+          "unit": "%",
+          "buffGroup": 6415,
+          "buffCategory": 2
+        }
+      ]
+    },
+    {
+      "id": "buff-749",
+      "itemId": 749,
+      "name": "Elixir of Time",
+      "category": "elixirs",
+      "icon": "assets/icons/buffs/749.webp",
+      "priority": 120,
+      "recommendedFor": [
+        "gathering",
+        "hunting",
+        "sniper"
+      ],
+      "durationMinutes": 10,
+      "effects": {
+        "lifeExpPct": 10
+      },
+      "exclusiveGroup": "elixir-time",
+      "conflictsWithGroups": [
+        "draught"
+      ],
+      "notes": "Weaker 10-minute alternative to Flowing Time.",
+      "sourceUrls": [
+        "https://bdocodex.com/us/item/749/",
+        "https://www.blackdesertfoundry.com/gathering-guide/",
+        "https://garmoth.com/guides/post/sniper-rifle-hunting"
+      ],
+      "aliases": [],
+      "grade": 1,
+      "provenance": {
+        "clientDate": "2026-08-28",
+        "itemUrn": "urn::item:749",
+        "originalIcon": "New_Icon/03_ETC/08_Potion/00000751.dds",
+        "evidence": "Local exported game item description and effects; no invented icon."
+      },
+      "clientEffectEvidence": [
+        {
+          "stat": "Life EXP",
+          "statId": "lifeExp",
+          "value": 10,
+          "op": "+",
+          "unit": "%",
+          "buffGroup": 5735,
+          "buffCategory": 2
+        }
+      ]
+    },
+    {
+      "id": "buff-1155",
+      "itemId": 1155,
+      "name": "Elixir of Mastery",
+      "category": "elixirs",
+      "icon": "assets/icons/buffs/1155.webp",
+      "priority": 130,
+      "recommendedFor": [
+        "gathering",
+        "hunting",
+        "sniper"
+      ],
+      "durationMinutes": 10,
+      "effects": {
+        "lifeMastery": 10
+      },
+      "exclusiveGroup": "elixir-mastery",
+      "conflictsWithGroups": [
+        "draught"
+      ],
+      "notes": "Weaker 10-minute alternative to Improved Mastery. Constantly consumes MP/WP/SP.",
+      "sourceUrls": [
+        "https://bdocodex.com/us/item/1155/",
+        "https://www.blackdesertfoundry.com/gathering-guide/",
+        "https://garmoth.com/guides/post/sniper-rifle-hunting"
+      ],
+      "aliases": [],
+      "grade": 1,
+      "provenance": {
+        "clientDate": "2026-08-28",
+        "itemUrn": "urn::item:1155",
+        "originalIcon": "New_Icon/03_ETC/08_Potion/00001354.dds",
+        "evidence": "Local exported game item description and effects; no invented icon."
+      },
+      "clientEffectEvidence": [
+        {
+          "stat": "Life Skill Mastery",
+          "statId": "allMastery",
+          "value": 10,
+          "op": "+",
+          "buffGroup": 6413,
+          "buffCategory": 2
+        }
+      ]
+    },
+    {
+      "id": "buff-690",
+      "itemId": 690,
+      "name": "Elixir of Swiftness",
+      "category": "elixirs",
+      "icon": "assets/icons/buffs/690.webp",
+      "priority": 140,
+      "recommendedFor": [
+        "gathering",
+        "hunting",
+        "sniper"
+      ],
+      "durationMinutes": 10,
+      "effects": {
+        "movementSpeed": 2
+      },
+      "exclusiveGroup": "elixir-swiftness",
+      "conflictsWithGroups": [
+        "draught"
+      ],
+      "notes": "Lower tier is sufficient if you only need +2 movement speed.",
+      "sourceUrls": [
+        "https://bdocodex.com/us/item/690/",
+        "https://www.blackdesertfoundry.com/gathering-guide/",
+        "https://garmoth.com/guides/post/sniper-rifle-hunting"
+      ],
+      "aliases": [],
+      "grade": 1,
+      "provenance": {
+        "clientDate": "2026-08-28",
+        "itemUrn": "urn::item:690",
+        "originalIcon": "New_Icon/03_ETC/08_Potion/00000627.dds",
+        "evidence": "Local exported game item description and effects; no invented icon."
+      },
+      "clientEffectEvidence": [
+        {
+          "stat": "Movement Speed",
+          "statId": "movementSpeedLevel",
+          "value": 2,
+          "op": "+",
+          "buffGroup": 5655,
+          "buffCategory": 2
+        }
+      ]
+    },
+    {
+      "id": "buff-724",
+      "itemId": 724,
+      "name": "Worker's Elixir",
+      "category": "elixirs",
+      "icon": "assets/icons/buffs/724.webp",
+      "priority": 150,
+      "recommendedFor": [
+        "gathering",
+        "hunting",
+        "sniper"
+      ],
+      "durationMinutes": 10,
+      "effects": {
+        "gatheringSpeed": 2
+      },
+      "exclusiveGroup": "elixir-worker",
+      "conflictsWithGroups": [
+        "draught"
+      ],
+      "notes": "Lower tier is sufficient if you only need +2 gathering speed.",
+      "sourceUrls": [
+        "https://bdocodex.com/us/item/724/",
+        "https://www.blackdesertfoundry.com/gathering-guide/",
+        "https://garmoth.com/guides/post/sniper-rifle-hunting"
+      ],
+      "aliases": [],
+      "grade": 1,
+      "provenance": {
+        "clientDate": "2026-08-28",
+        "itemUrn": "urn::item:724",
+        "originalIcon": "New_Icon/03_ETC/08_Potion/00000661.dds",
+        "evidence": "Local exported game item description and effects; no invented icon."
+      },
+      "clientEffectEvidence": [
+        {
+          "stat": "Gathering Speed",
+          "statId": "gatheringSpeed",
+          "value": 2,
+          "op": "+",
+          "buffGroup": 5751,
+          "buffCategory": 2
+        }
+      ]
+    },
+    {
+      "id": "buff-762",
+      "itemId": 762,
+      "name": "Elixir of Shock",
+      "category": "elixirs",
+      "icon": "assets/icons/buffs/762.webp",
+      "priority": 160,
+      "recommendedFor": [
+        "hunting"
+      ],
+      "durationMinutes": 10,
+      "effects": {
+        "criticalHit": 2
+      },
+      "exclusiveGroup": "elixir-shock",
+      "conflictsWithGroups": [
+        "draught"
+      ],
+      "notes": "Lower tier is sufficient if a matchlock setup only needs +2 critical-hit levels.",
+      "sourceUrls": [
+        "https://bdocodex.com/us/item/762/",
+        "https://www.blackdesertfoundry.com/hunting-guide/"
+      ],
+      "aliases": [],
+      "grade": 1,
+      "provenance": {
+        "clientDate": "2026-08-28",
+        "itemUrn": "urn::item:762",
+        "originalIcon": "New_Icon/03_ETC/08_Potion/00000764.dds",
+        "evidence": "Local exported game item description and effects; no invented icon."
+      },
+      "clientEffectEvidence": [
+        {
+          "stat": "Critical Hit",
+          "statId": "critLevel",
+          "value": 2,
+          "op": "+",
+          "buffGroup": 5792,
+          "buffCategory": 2
+        }
+      ]
+    },
+    {
+      "id": "buff-735",
+      "itemId": 735,
+      "name": "Perfume of Swiftness",
+      "category": "perfumes",
+      "icon": "assets/icons/buffs/735.webp",
+      "priority": 10,
+      "recommendedFor": [
+        "gathering",
+        "hunting",
+        "sniper"
+      ],
+      "durationMinutes": 20,
+      "effects": {
+        "lifeExpPct": 20,
+        "movementSpeed": 5,
+        "gatheringSpeed": 5,
+        "fishingSpeed": 5,
+        "maxWeight": 200
+      },
+      "exclusiveGroup": "perfume",
+      "conflictsWithGroups": [],
+      "notes": "Optional EXP and weight boost that can coexist with a draught or an elixir setup. One perfume at a time.",
+      "sourceUrls": [
+        "https://bdocodex.com/us/item/735/",
+        "https://www.blackdesertfoundry.com/gathering-guide/",
+        "https://garmoth.com/guides/post/sniper-rifle-hunting"
+      ],
+      "aliases": [],
+      "grade": 3,
+      "provenance": {
+        "clientDate": "2026-08-28",
+        "itemUrn": "urn::item:735",
+        "originalIcon": "New_Icon/03_ETC/07_ProductMaterial/00000735.dds",
+        "evidence": "Local exported game item description and effects; no invented icon."
+      },
+      "clientEffectEvidence": [
+        {
+          "stat": "Life EXP",
+          "statId": "lifeExp",
+          "value": 20,
+          "op": "+",
+          "unit": "%",
+          "buffGroup": 6804,
+          "buffCategory": 6
+        },
+        {
+          "stat": "Movement Speed",
+          "statId": "movementSpeedLevel",
+          "value": 5,
+          "op": "+",
+          "buffGroup": 5698,
+          "buffCategory": 6
+        },
+        {
+          "stat": "Gathering Speed",
+          "statId": "gatheringSpeed",
+          "value": 5,
+          "op": "+",
+          "buffGroup": 5703,
+          "buffCategory": 6
+        },
+        {
+          "stat": "Fishing Speed",
+          "statId": "fishingSpeed",
+          "value": 5,
+          "op": "+",
+          "buffGroup": 5704,
+          "buffCategory": 6
+        },
+        {
+          "stat": "Weight Limit",
+          "statId": "weightLimit",
+          "value": 200,
+          "op": "+",
+          "unit": "LT",
+          "buffGroup": 5705,
+          "buffCategory": 6
+        },
+        {
+          "stat": "Life EXP",
+          "statId": "lifeExp",
+          "value": 20,
+          "op": "+",
+          "unit": "%",
+          "buffGroup": 5706,
+          "buffCategory": 6
+        }
+      ],
+      "effectText": "A perfume with a practical function.\n\n- Effects:\n   Weight Limit +200 LT\n   Life EXP +20%\n   Movement Speed +5\n   Gathering Speed +5\n   Fishing Speed +5\n\n- Duration: 20 min\n- Cooldown: 10 sec\n\n※ Type: Perfume\n※ Only the effects of the last perfume used will be applied.\n\n- How to Obtain: Craft via an alchemy tool in your residence with the following materials if at least Alchemy Skilled 1\n\n- Materials:\nGreat Ocean Oil x1\nPowder of Time x4\nEverlasting Herb x6\nPurified Water x4\nClear Liquid Reagent x2"
+    },
+    {
+      "id": "buff-890",
+      "itemId": 890,
+      "name": "Perfume of Verdure",
+      "category": "perfumes",
+      "icon": "assets/icons/buffs/890.webp",
+      "priority": 20,
+      "recommendedFor": [
+        "gathering",
+        "hunting",
+        "sniper"
+      ],
+      "durationMinutes": 20,
+      "effects": {
+        "lifeMastery": 50,
+        "lifeExpPct": 25,
+        "movementSpeed": 5,
+        "gatheringSpeed": 5,
+        "fishingSpeed": 5,
+        "maxWeight": 300
+      },
+      "exclusiveGroup": "perfume",
+      "conflictsWithGroups": [],
+      "notes": "Newer mastery upgrade to Swiftness. Check the current market cost before using; no perfume is mandatory.",
+      "sourceUrls": [
+        "https://bdocodex.com/us/item/890/",
+        "https://www.naeu.playblackdesert.com/en-US/News/Detail?groupContentNo=10451",
+        "https://www.blackdesertfoundry.com/gathering-guide/",
+        "https://garmoth.com/guides/post/sniper-rifle-hunting"
+      ],
+      "aliases": [],
+      "grade": 3,
+      "provenance": {
+        "clientDate": "2026-08-28",
+        "itemUrn": "urn::item:890",
+        "originalIcon": "New_Icon/03_ETC/07_ProductMaterial/00000890.dds",
+        "evidence": "Local exported game item description and effects; no invented icon."
+      },
+      "clientEffectEvidence": [
+        {
+          "stat": "Life Skill Mastery",
+          "value": 50,
+          "op": "+",
+          "buffGroup": 9113,
+          "buffCategory": 6
+        },
+        {
+          "stat": "Life Skill Mastery",
+          "statId": "allMastery",
+          "value": 50,
+          "op": "+",
+          "buffGroup": 9114,
+          "buffCategory": 6
+        },
+        {
+          "stat": "Life EXP",
+          "statId": "lifeExp",
+          "value": 25,
+          "op": "+",
+          "unit": "%",
+          "buffGroup": 9115,
+          "buffCategory": 6
+        },
+        {
+          "stat": "Movement Speed",
+          "statId": "movementSpeedLevel",
+          "value": 5,
+          "op": "+",
+          "buffGroup": 9116,
+          "buffCategory": 6
+        },
+        {
+          "stat": "Gathering Speed",
+          "statId": "gatheringSpeed",
+          "value": 5,
+          "op": "+",
+          "buffGroup": 9117,
+          "buffCategory": 6
+        },
+        {
+          "stat": "Fishing Speed",
+          "statId": "fishingSpeed",
+          "value": 5,
+          "op": "+",
+          "buffGroup": 9118,
+          "buffCategory": 6
+        },
+        {
+          "stat": "Weight Limit",
+          "statId": "weightLimit",
+          "value": 300,
+          "op": "+",
+          "unit": "LT",
+          "buffGroup": 9119,
+          "buffCategory": 6
+        }
+      ],
+      "effectText": "A perfume with a practical function.\n\n- Usage: Gain the following effects\n\n- Effects:\n   Life Skill Mastery +50\n   Life EXP +25%\n   Movement Speed +5\n   Gathering Speed +5\n   Fishing Speed +5\n   Weight Limit +300 LT\n\n- Duration: 20 min\n- Cooldown: 10 sec\n\n※ Type: Perfume\n※ Only the effects of the last perfume used will be applied.\n\n- How to Obtain: Craft via an alchemy tool in your residence with the following materials if at least Alchemy Skilled 1\n\n- Materials:\nTrace of Nature x5\nEverlasting Herb x5\nClear Liquid Reagent x5\nOil of Tranquility x6\nMagical Olivine Powder x50"
+    },
+    {
+      "id": "buff-781",
+      "itemId": 781,
+      "name": "Perfume of Spirits",
+      "category": "perfumes",
+      "icon": "assets/icons/buffs/781.webp",
+      "priority": 30,
+      "recommendedFor": [
+        "hunting"
+      ],
+      "durationMinutes": 20,
+      "effects": {
+        "maxHp": 300,
+        "criticalHit": 5,
+        "resourceRecoveryOnHit": 9
+      },
+      "exclusiveGroup": "perfume",
+      "conflictsWithGroups": [],
+      "notes": "Matchlock option for +5 critical-hit levels. Current name of Spirit Perfume Elixir; replaces Swiftness/Verdure perfume.",
+      "sourceUrls": [
+        "https://bdocodex.com/us/item/781/",
+        "https://www.blackdesertfoundry.com/hunting-guide/"
+      ],
+      "aliases": [
+        "Spirit Perfume Elixir"
+      ],
+      "grade": 3,
+      "provenance": {
+        "clientDate": "2026-08-28",
+        "itemUrn": "urn::item:781",
+        "originalIcon": "New_Icon/03_ETC/08_Potion/00000781.dds",
+        "evidence": "Local exported game item description and effects; no invented icon."
+      },
+      "clientEffectEvidence": [
+        {
+          "stat": "Max HP",
+          "statId": "maxHp",
+          "value": 300,
+          "op": "+",
+          "buffGroup": 6807,
+          "buffCategory": 6
+        },
+        {
+          "stat": "Max HP",
+          "statId": "maxHp",
+          "value": 300,
+          "op": "+",
+          "buffGroup": 5024,
+          "buffCategory": 6
+        },
+        {
+          "stat": "Critical Hit",
+          "statId": "critLevel",
+          "value": 5,
+          "op": "+",
+          "buffGroup": 5025,
+          "buffCategory": 6
+        },
+        {
+          "stat": "MP/WP/SP Recovery on Hit",
+          "statId": "resourceRecoveryOnHit",
+          "value": 9,
+          "op": "+",
+          "buffGroup": 5026,
+          "buffCategory": 6
+        }
+      ],
+      "effectText": "A perfume with an offensive function.\n\n- Usage: Gain the following effects\n\n- Effects:\n   Max HP +300\n   Critical Hit +5 \n   Recover 9 MP/WP/SP on Hits\n\n- Duration: 20 min\n- Cooldown: 10 sec\n\n※ Type: Perfume\n※ Only the effects of the last perfume used will be applied.\n\n- How to Obtain: Craft via an alchemy tool in your residence with the following materials if at least Alchemy Skilled 1  \n\n- Materials:\nLoopy Tree Sap x10\nFruit of Nature x1\nViolet Flower x2, Purple Pink Flower x2, Yellow Flower x2, Sky Blue Flower x2, or Blue Flower x2\nPowder of Darkness x10\nDead Tree Essence x1"
+    },
+    {
+      "id": "buff-768064",
+      "itemId": 768064,
+      "name": "Secret Book of Florin",
+      "category": "scrolls",
+      "icon": "assets/icons/buffs/768064.webp",
+      "priority": 10,
+      "recommendedFor": [
+        "gathering",
+        "hunting",
+        "sniper"
+      ],
+      "durationMinutes": 60,
+      "effects": {
+        "lifeMastery": 100,
+        "lifeExpPct": 20
+      },
+      "exclusiveGroup": "florin",
+      "conflictsWithGroups": [],
+      "notes": "Useful mastery and EXP boost. Add only if used; no need to spend a scroll for every short session.",
+      "sourceUrls": [
+        "https://bdocodex.com/us/item/768064/",
+        "https://www.blackdesertfoundry.com/gathering-guide/",
+        "https://garmoth.com/guides/post/sniper-rifle-hunting"
+      ],
+      "aliases": [],
+      "grade": 3,
+      "provenance": {
+        "clientDate": "2026-08-28",
+        "itemUrn": "urn::item:768064",
+        "originalIcon": "New_Icon/03_ETC/00768064.dds",
+        "evidence": "Local exported game item description and effects; no invented icon."
+      },
+      "clientEffectEvidence": [
+        {
+          "stat": "Life Skill Mastery",
+          "statId": "allMastery",
+          "value": 100,
+          "op": "+"
+        },
+        {
+          "stat": "Life EXP",
+          "statId": "lifeExp",
+          "value": 20,
+          "op": "+",
+          "unit": "%"
+        }
+      ]
+    },
+    {
+      "id": "buff-768919",
+      "itemId": 768919,
+      "name": "Mercenary's Life (60 min) · 150%",
+      "category": "scrolls",
+      "icon": "assets/icons/buffs/768919.webp",
+      "priority": 20,
+      "recommendedFor": [
+        "gathering",
+        "hunting",
+        "sniper"
+      ],
+      "durationMinutes": 60,
+      "effects": {
+        "lifeExpPct": 150
+      },
+      "exclusiveGroup": "mercenary-life",
+      "conflictsWithGroups": [],
+      "notes": "150% version made from three identical 50% Mercenary scrolls. Replaces the 50% version.",
+      "sourceUrls": [
+        "https://bdocodex.com/us/item/768919/",
+        "https://www.blackdesertfoundry.com/gathering-guide/",
+        "https://garmoth.com/guides/post/sniper-rifle-hunting"
+      ],
+      "aliases": [
+        "Mercenary's Life +150%"
+      ],
+      "grade": 3,
+      "provenance": {
+        "clientDate": "2026-08-28",
+        "itemUrn": "urn::item:768919",
+        "originalIcon": "New_Icon/03_ETC/00768918.dds",
+        "evidence": "Local exported game item description and effects; no invented icon."
+      },
+      "clientEffectEvidence": [
+        {
+          "stat": "Life EXP",
+          "statId": "lifeExp",
+          "value": 150,
+          "op": "+",
+          "unit": "%",
+          "buffGroup": 7665
+        }
+      ]
+    },
+    {
+      "id": "buff-768918",
+      "itemId": 768918,
+      "name": "Mercenary's Life (60 min) · 50%",
+      "category": "scrolls",
+      "icon": "assets/icons/buffs/768918.webp",
+      "priority": 21,
+      "recommendedFor": [
+        "gathering",
+        "hunting",
+        "sniper"
+      ],
+      "durationMinutes": 60,
+      "effects": {
+        "lifeExpPct": 50
+      },
+      "exclusiveGroup": "mercenary-life",
+      "conflictsWithGroups": [],
+      "notes": "Daily-challenge 50% version. Select this or the 150% version, not both.",
+      "sourceUrls": [
+        "https://bdocodex.com/us/item/768918/",
+        "https://www.blackdesertfoundry.com/gathering-guide/",
+        "https://garmoth.com/guides/post/sniper-rifle-hunting"
+      ],
+      "aliases": [
+        "Mercenary's Life +50%"
+      ],
+      "grade": 3,
+      "provenance": {
+        "clientDate": "2026-08-28",
+        "itemUrn": "urn::item:768918",
+        "originalIcon": "New_Icon/03_ETC/00768918.dds",
+        "evidence": "Local exported game item description and effects; no invented icon."
+      },
+      "clientEffectEvidence": [
+        {
+          "stat": "Life EXP",
+          "statId": "lifeExp",
+          "value": 50,
+          "op": "+",
+          "unit": "%",
+          "buffGroup": 7665
+        }
+      ]
+    },
+    {
+      "id": "buff-18926",
+      "itemId": 18926,
+      "name": "[Event] Book of Life (7 Days)",
+      "category": "events",
+      "icon": "assets/icons/buffs/18926.webp",
+      "priority": 30,
+      "recommendedFor": [
+        "gathering",
+        "hunting",
+        "sniper"
+      ],
+      "durationMinutes": 1440,
+      "effects": {
+        "lifeExpPct": 50
+      },
+      "exclusiveGroup": "book-or-extra-life",
+      "conflictsWithGroups": [],
+      "notes": "The opened book gives a 24-hour buff; seven days is the book availability, not one buff duration. Does not stack with Extra Life EXP Scroll.",
+      "sourceUrls": [
+        "https://bdocodex.com/us/item/18926/",
+        "https://www.blackdesertfoundry.com/gathering-guide/",
+        "https://garmoth.com/guides/post/sniper-rifle-hunting"
+      ],
+      "aliases": [
+        "Book of Life",
+        "Sealed Book of Life"
+      ],
+      "grade": 4,
+      "provenance": {
+        "clientDate": "2026-08-28",
+        "itemUrn": "urn::item:18926",
+        "originalIcon": "New_Icon/09_Cash/00018925.dds",
+        "evidence": "Local exported game item description and effects; no invented icon."
+      },
+      "clientEffectEvidence": [
+        {
+          "stat": "Life EXP",
+          "statId": "lifeExp",
+          "value": 50,
+          "op": "+",
+          "unit": "%",
+          "buffGroup": 5680
+        }
+      ]
+    },
+    {
+      "id": "buff-17562",
+      "itemId": 17562,
+      "name": "Extra Life EXP Scroll",
+      "category": "scrolls",
+      "icon": "assets/icons/buffs/17562.webp",
+      "priority": 31,
+      "recommendedFor": [
+        "gathering",
+        "hunting",
+        "sniper"
+      ],
+      "durationMinutes": 60,
+      "effects": {
+        "lifeExpPct": 50
+      },
+      "exclusiveGroup": "book-or-extra-life",
+      "conflictsWithGroups": [],
+      "notes": "Alternative to the Book of Life buff. Pearl, loyalty, and event copies of this same effect do not add together.",
+      "sourceUrls": [
+        "https://bdocodex.com/us/item/17562/",
+        "https://www.blackdesertfoundry.com/gathering-guide/",
+        "https://garmoth.com/guides/post/sniper-rifle-hunting"
+      ],
+      "aliases": [],
+      "grade": 3,
+      "provenance": {
+        "clientDate": "2026-08-28",
+        "itemUrn": "urn::item:17562",
+        "originalIcon": "New_Icon/09_Cash/00017562.dds",
+        "evidence": "Local exported game item description and effects; no invented icon."
+      },
+      "clientEffectEvidence": [
+        {
+          "stat": "Life EXP",
+          "statId": "lifeExp",
+          "value": 50,
+          "op": "+",
+          "unit": "%",
+          "buffGroup": 5680
+        }
+      ]
+    },
+    {
+      "id": "buff-750589",
+      "itemId": 750589,
+      "name": "[Event] Giovan Grolin's Support Scroll",
+      "category": "events",
+      "icon": "assets/icons/buffs/750589.webp",
+      "priority": 40,
+      "recommendedFor": [
+        "gathering",
+        "hunting",
+        "sniper"
+      ],
+      "durationMinutes": 60,
+      "effects": {
+        "lifeMastery": 100,
+        "lifeExpPct": 20
+      },
+      "exclusiveGroup": "giovan",
+      "conflictsWithGroups": [],
+      "notes": "Event mastery/EXP scroll. Its description explicitly allows other buffs, including Secret Book of Florin.",
+      "sourceUrls": [
+        "https://bdocodex.com/us/item/750589/",
+        "https://www.blackdesertfoundry.com/gathering-guide/",
+        "https://garmoth.com/guides/post/sniper-rifle-hunting"
+      ],
+      "aliases": [],
+      "grade": 3,
+      "provenance": {
+        "clientDate": "2026-08-28",
+        "itemUrn": "urn::item:750589",
+        "originalIcon": "New_Icon/03_ETC/03_Quest_Item/00042569.dds",
+        "evidence": "Local exported game item description and effects; no invented icon."
+      },
+      "clientEffectEvidence": [
+        {
+          "stat": "Life Skill Mastery",
+          "statId": "allMastery",
+          "value": 100,
+          "op": "+",
+          "buffGroup": 6440
+        },
+        {
+          "stat": "Life EXP",
+          "statId": "lifeExp",
+          "value": 20,
+          "op": "+",
+          "unit": "%",
+          "buffGroup": 6441
+        }
+      ]
+    },
+    {
+      "id": "buff-790781",
+      "itemId": 790781,
+      "name": "Blessing of Mystic Beasts - Life Skill Mastery",
+      "category": "scrolls",
+      "icon": "assets/icons/buffs/790781.webp",
+      "priority": 70,
+      "recommendedFor": [
+        "gathering",
+        "hunting",
+        "sniper"
+      ],
+      "durationMinutes": 60,
+      "effects": {
+        "lifeMastery": 100
+      },
+      "exclusiveGroup": "furniture",
+      "conflictsWithGroups": [],
+      "notes": "Optional mastery upgrade, not part of the beginner preset. This is a furniture-type effect and replaces residence furniture buffs.",
+      "sourceUrls": [
+        "https://bdocodex.com/us/item/790781/",
+        "https://www.blackdesertfoundry.com/gathering-guide/",
+        "https://garmoth.com/guides/post/sniper-rifle-hunting"
+      ],
+      "aliases": [],
+      "grade": 3,
+      "provenance": {
+        "clientDate": "2026-08-28",
+        "itemUrn": "urn::item:790781",
+        "originalIcon": "New_Icon/03_ETC/00790781.dds",
+        "evidence": "Local exported game item description and effects; no invented icon."
+      },
+      "clientEffectEvidence": [
+        {
+          "stat": "Life Skill Mastery",
+          "statId": "allMastery",
+          "value": 100,
+          "op": "+",
+          "buffGroup": 9090,
+          "buffCategory": 35
+        }
+      ]
+    },
+    {
+      "id": "buff-721092",
+      "itemId": 721092,
+      "name": "Treant's Tear",
+      "category": "stones",
+      "icon": "assets/icons/buffs/721092.webp",
+      "priority": 10,
+      "recommendedFor": [
+        "gathering",
+        "hunting",
+        "sniper"
+      ],
+      "durationMinutes": 10,
+      "effects": {
+        "lifeExpPct": 30,
+        "alchemyTimeSeconds": -1,
+        "cookingTimeSeconds": -1,
+        "processingSuccessPct": 10,
+        "maxWeight": 50,
+        "gatheringSpeed": 2,
+        "fishingSpeed": 2,
+        "gatheringItemDropPct": 10
+      },
+      "exclusiveGroup": "stone-life",
+      "conflictsWithGroups": [],
+      "notes": "Accessible Life stone with EXP and gathering drop rate. Select only while its active buff is running.",
+      "sourceUrls": [
+        "https://bdocodex.com/us/item/721092/",
+        "https://www.blackdesertfoundry.com/gathering-guide/",
+        "https://garmoth.com/guides/post/sniper-rifle-hunting"
+      ],
+      "aliases": [],
+      "grade": 3,
+      "provenance": {
+        "clientDate": "2026-08-28",
+        "itemUrn": "urn::item:721092",
+        "originalIcon": "New_Icon/03_ETC/00721092.dds",
+        "evidence": "Local exported game item description and effects; no invented icon."
+      },
+      "clientEffectEvidence": [
+        {
+          "stat": "Life EXP",
+          "statId": "lifeExp",
+          "value": 30,
+          "op": "+",
+          "unit": "%",
+          "buffGroup": 7575
+        },
+        {
+          "stat": "Life EXP",
+          "statId": "lifeExp",
+          "value": 30,
+          "op": "+",
+          "unit": "%",
+          "buffGroup": 7576
+        },
+        {
+          "stat": "Alchemy Time",
+          "statId": "alchemyTime",
+          "value": 1,
+          "op": "-",
+          "unit": "sec",
+          "buffGroup": 7577
+        },
+        {
+          "stat": "Cooking Time",
+          "statId": "cookingTime",
+          "value": 1,
+          "op": "-",
+          "unit": "sec",
+          "buffGroup": 7578
+        },
+        {
+          "stat": "Processing Success Rate",
+          "statId": "processingSuccessRate",
+          "value": 10,
+          "op": "+",
+          "unit": "%",
+          "buffGroup": 7579
+        },
+        {
+          "stat": "Weight Limit",
+          "statId": "weightLimit",
+          "value": 50,
+          "op": "+",
+          "unit": "LT",
+          "buffGroup": 7580
+        },
+        {
+          "stat": "Gathering Speed",
+          "statId": "gatheringSpeed",
+          "value": 2,
+          "op": "+",
+          "buffGroup": 7581
+        },
+        {
+          "stat": "Fishing Speed",
+          "statId": "fishingSpeed",
+          "value": 2,
+          "op": "+",
+          "buffGroup": 7582
+        },
+        {
+          "stat": "Gathering Item Drop Rate",
+          "statId": "gatheringDropRate",
+          "value": 10,
+          "op": "+",
+          "unit": "%",
+          "buffGroup": 7583
+        }
+      ],
+      "effectText": "An alchemy stone emitting the energies of a young Treant.\n\n- Effects:\n   Life EXP +30%\n   Alchemy/Cooking Time -1 sec\n   Processing Success Rate +10%\n   Weight Limit +50 LT\n   Gathering/Fishing Speed +2\n   Gathering Item Drop Rate +10%\n\n- How to Use:  the Treant's Tear in your Inventory, then press ({KeyBind:AlchemyStone}) to use. Can be used with other alchemy/spirit stones, except Life types.\n\n- Duration: 10 min\n- Cooldown: 10 min"
+    },
+    {
+      "id": "buff-45302",
+      "itemId": 45302,
+      "name": "Life Spirit Stone",
+      "category": "stones",
+      "icon": "assets/icons/buffs/45302.webp",
+      "priority": 20,
+      "recommendedFor": [
+        "gathering",
+        "hunting",
+        "sniper"
+      ],
+      "durationMinutes": 10,
+      "effects": {
+        "processingSuccessPct": 11,
+        "alchemyTimeSeconds": -1.1,
+        "cookingTimeSeconds": -1.1,
+        "gatheringSpeed": 2,
+        "fishingSpeed": 2,
+        "gatheringItemDropPct": 10
+      },
+      "exclusiveGroup": "stone-life",
+      "conflictsWithGroups": [],
+      "notes": "Blue-grade Life Spirit Stone with gathering item drop rate. The former green-grade version was removed.",
+      "sourceUrls": [
+        "https://bdocodex.com/us/item/45302/",
+        "https://www.blackdesertfoundry.com/gathering-guide/",
+        "https://garmoth.com/guides/post/sniper-rifle-hunting"
+      ],
+      "aliases": [],
+      "grade": 2,
+      "provenance": {
+        "clientDate": "2026-08-28",
+        "itemUrn": "urn::item:45302",
+        "originalIcon": "New_Icon/03_ETC/07_ProductMaterial/00045302.dds",
+        "evidence": "Local exported game item description and effects; no invented icon."
+      },
+      "clientEffectEvidence": [
+        {
+          "stat": "Processing Success Rate",
+          "statId": "processingSuccessRate",
+          "value": 11,
+          "op": "+",
+          "unit": "%",
+          "buffGroup": 6140
+        },
+        {
+          "stat": "Alchemy Time",
+          "statId": "alchemyTime",
+          "value": 1.1,
+          "op": "-",
+          "unit": "sec",
+          "buffGroup": 5747
+        },
+        {
+          "stat": "Cooking Time",
+          "statId": "cookingTime",
+          "value": 1.1,
+          "op": "-",
+          "unit": "sec",
+          "buffGroup": 5748
+        },
+        {
+          "stat": "Processing Success Rate",
+          "statId": "processingSuccessRate",
+          "value": 11,
+          "op": "+",
+          "unit": "%",
+          "buffGroup": 5749
+        },
+        {
+          "stat": "Gathering Speed",
+          "statId": "gatheringSpeed",
+          "value": 2,
+          "op": "+",
+          "buffGroup": 5673
+        },
+        {
+          "stat": "Fishing Speed",
+          "statId": "fishingSpeed",
+          "value": 2,
+          "op": "+",
+          "buffGroup": 5674
+        },
+        {
+          "stat": "Gathering Item Drop Rate",
+          "statId": "gatheringDropRate",
+          "value": 10,
+          "op": "+",
+          "unit": "%",
+          "buffGroup": 5754
+        }
+      ],
+      "effectText": "A spirit-laden stone.\n\n- Effects:\n   Alchemy/Cooking Time -1.1 sec\n   Processing Success Rate +11%\n   Gathering/Fishing Speed +2\n   Gathering Item Drop Rate +10%\n\n- How to Use:  a spirit stone in your Inventory, then press ({KeyBind:AlchemyStone}) to use. Cannot be used with other alchemy/spirit stones, except Destruction/Protection types.\n\n- Duration: 10 min\n- Cooldown: 10 min"
+    },
+    {
+      "id": "buff-750472",
+      "itemId": 750472,
+      "name": "[Event] Stella's Spirit Stone",
+      "category": "events",
+      "icon": "assets/icons/buffs/750472.webp",
+      "priority": 30,
+      "recommendedFor": [
+        "gathering",
+        "hunting",
+        "sniper"
+      ],
+      "durationMinutes": 10,
+      "effects": {
+        "processingSuccessPct": 11,
+        "alchemyTimeSeconds": -1.1,
+        "cookingTimeSeconds": -1.1,
+        "gatheringSpeed": 2,
+        "fishingSpeed": 2,
+        "gatheringItemDropPct": 10,
+        "lifeMastery": 100,
+        "maxWeight": 60
+      },
+      "exclusiveGroup": "stone-life",
+      "conflictsWithGroups": [],
+      "notes": "Event stone with +100 mastery. Use if already owned; do not assume an event is currently giving it out.",
+      "sourceUrls": [
+        "https://bdocodex.com/us/item/750472/",
+        "https://www.blackdesertfoundry.com/gathering-guide/",
+        "https://garmoth.com/guides/post/sniper-rifle-hunting"
+      ],
+      "aliases": [],
+      "grade": 3,
+      "provenance": {
+        "clientDate": "2026-08-28",
+        "itemUrn": "urn::item:750472",
+        "originalIcon": "New_Icon/03_ETC/00750472.dds",
+        "evidence": "Local exported game item description and effects; no invented icon."
+      },
+      "clientEffectEvidence": [
+        {
+          "stat": "Processing Success Rate",
+          "statId": "processingSuccessRate",
+          "value": 11,
+          "op": "+",
+          "unit": "%",
+          "buffGroup": 7535
+        },
+        {
+          "stat": "Alchemy Time",
+          "statId": "alchemyTime",
+          "value": 1.1,
+          "op": "-",
+          "unit": "sec",
+          "buffGroup": 5747
+        },
+        {
+          "stat": "Cooking Time",
+          "statId": "cookingTime",
+          "value": 1.1,
+          "op": "-",
+          "unit": "sec",
+          "buffGroup": 5748
+        },
+        {
+          "stat": "Processing Success Rate",
+          "statId": "processingSuccessRate",
+          "value": 11,
+          "op": "+",
+          "unit": "%",
+          "buffGroup": 5749
+        },
+        {
+          "stat": "Gathering Speed",
+          "statId": "gatheringSpeed",
+          "value": 2,
+          "op": "+",
+          "buffGroup": 5673
+        },
+        {
+          "stat": "Fishing Speed",
+          "statId": "fishingSpeed",
+          "value": 2,
+          "op": "+",
+          "buffGroup": 5674
+        },
+        {
+          "stat": "Gathering Item Drop Rate",
+          "statId": "gatheringDropRate",
+          "value": 10,
+          "op": "+",
+          "unit": "%",
+          "buffGroup": 5754
+        },
+        {
+          "stat": "Life Skill Mastery",
+          "statId": "allMastery",
+          "value": 100,
+          "op": "+",
+          "buffGroup": 7536
+        },
+        {
+          "stat": "Weight Limit",
+          "statId": "weightLimit",
+          "value": 60,
+          "op": "+",
+          "unit": "LT",
+          "buffGroup": 5753
+        }
+      ],
+      "effectText": "A spirit stone made using an essence extracted by Stella of Florin.\n\n- Effects:\n   Alchemy/Cooking Time -1.1 sec\n   Processing Success Rate +11%\n   Gathering/Fishing Speed +2\n   Gathering Item Drop Rate +10%\n   Weight Limit +60 LT\n   Life Skill Mastery +100\n\n- How to use: a Spirit Stone in your Inventory, and press ({KeyBind:AlchemyStone}) to use. You can use it along with Alchemy/Spirit Stone of Destruction/Protection.\n\n- Duration: 10 min\n- Cooldown: 10 min"
+    },
+    {
+      "id": "buff-45514",
+      "itemId": 45514,
+      "name": "Khan's Heart: Life",
+      "category": "stones",
+      "icon": "assets/icons/buffs/45514.webp",
+      "priority": 40,
+      "recommendedFor": [
+        "gathering",
+        "hunting",
+        "sniper"
+      ],
+      "durationMinutes": 10,
+      "effects": {
+        "lifeExpPct": 30,
+        "alchemyTimeSeconds": -1.3,
+        "cookingTimeSeconds": -1.3,
+        "processingSuccessPct": 13,
+        "maxWeight": 70,
+        "gatheringSpeed": 2,
+        "fishingSpeed": 2,
+        "gatheringItemDropPct": 12
+      },
+      "exclusiveGroup": "stone-life",
+      "conflictsWithGroups": [],
+      "notes": "Upgrade if already owned. Current active effects include +30% Life EXP; this catalog does not add an old, guide-listed +25 mastery.",
+      "sourceUrls": [
+        "https://bdocodex.com/us/item/45514/",
+        "https://www.blackdesertfoundry.com/gathering-guide/",
+        "https://garmoth.com/guides/post/sniper-rifle-hunting"
+      ],
+      "aliases": [],
+      "grade": 3,
+      "provenance": {
+        "clientDate": "2026-08-28",
+        "itemUrn": "urn::item:45514",
+        "originalIcon": "New_Icon/03_ETC/00045514.dds",
+        "evidence": "Local exported game item description and effects; no invented icon."
+      },
+      "clientEffectEvidence": [
+        {
+          "stat": "Life EXP",
+          "statId": "lifeExp",
+          "value": 30,
+          "op": "+",
+          "unit": "%",
+          "buffGroup": 6351
+        },
+        {
+          "stat": "Alchemy Time",
+          "statId": "alchemyTime",
+          "value": 1.3,
+          "op": "-",
+          "unit": "sec",
+          "buffGroup": 5747
+        },
+        {
+          "stat": "Cooking Time",
+          "statId": "cookingTime",
+          "value": 1.3,
+          "op": "-",
+          "unit": "sec",
+          "buffGroup": 5748
+        },
+        {
+          "stat": "Processing Success Rate",
+          "statId": "processingSuccessRate",
+          "value": 13,
+          "op": "+",
+          "unit": "%",
+          "buffGroup": 5749
+        },
+        {
+          "stat": "Weight Limit",
+          "statId": "weightLimit",
+          "value": 70,
+          "op": "+",
+          "unit": "LT",
+          "buffGroup": 5753
+        },
+        {
+          "stat": "Gathering Speed",
+          "statId": "gatheringSpeed",
+          "value": 2,
+          "op": "+",
+          "buffGroup": 5673
+        },
+        {
+          "stat": "Fishing Speed",
+          "statId": "fishingSpeed",
+          "value": 2,
+          "op": "+",
+          "buffGroup": 5674
+        },
+        {
+          "stat": "Gathering Item Drop Rate",
+          "statId": "gatheringDropRate",
+          "value": 12,
+          "op": "+",
+          "unit": "%",
+          "buffGroup": 5754
+        },
+        {
+          "stat": "Life EXP",
+          "statId": "lifeExp",
+          "value": 30,
+          "op": "+",
+          "unit": "%",
+          "buffGroup": 7576
+        }
+      ],
+      "effectText": "An alchemy stone condensed with the life force of Khan's magic.\n\n- Effects:\n   Life EXP +30%\n   Alchemy/Cooking Time -1.3 sec\n   Processing Success Rate +13%\n   Weight Limit +70 LT\n   Gathering/Fishing Speed +2\n   Gathering Item Drop Rate +12%\n\n- How to Use:  Khan's Heart in your Inventory, then press ({KeyBind:AlchemyStone}) to use. Can be used with other alchemy/spirit stones, except Life types.\n\n- Duration: 10 min\n- Cooldown: 10 min"
+    },
+    {
+      "id": "buff-45298",
+      "itemId": 45298,
+      "name": "Destruction Spirit Stone",
+      "category": "stones",
+      "icon": "assets/icons/buffs/45298.webp",
+      "priority": 60,
+      "recommendedFor": [
+        "hunting",
+        "sniper"
+      ],
+      "durationMinutes": 5,
+      "effects": {
+        "allAp": 6,
+        "accuracy": 8,
+        "attackSpeedPct": 4,
+        "castingSpeedPct": 4
+      },
+      "exclusiveGroup": "stone-combat",
+      "conflictsWithGroups": [],
+      "notes": "Optional blue Destruction stone with +4% attack speed. A Life stone can be active alongside it; +4% is separate from ability speed levels.",
+      "sourceUrls": [
+        "https://bdocodex.com/us/item/45298/",
+        "https://www.blackdesertfoundry.com/gathering-guide/",
+        "https://garmoth.com/guides/post/sniper-rifle-hunting"
+      ],
+      "aliases": [],
+      "grade": 2,
+      "provenance": {
+        "clientDate": "2026-08-28",
+        "itemUrn": "urn::item:45298",
+        "originalIcon": "New_Icon/03_ETC/07_ProductMaterial/00045298.dds",
+        "evidence": "Local exported game item description and effects; no invented icon."
+      },
+      "clientEffectEvidence": [
+        {
+          "stat": "All AP",
+          "value": 6,
+          "op": "+",
+          "buffGroup": 6136
+        },
+        {
+          "stat": "All AP",
+          "statId": "hiddenAp",
+          "value": 6,
+          "op": "+",
+          "buffGroup": 5675
+        },
+        {
+          "stat": "All Accuracy",
+          "statId": "accuracy",
+          "value": 8,
+          "op": "+",
+          "buffGroup": 5661
+        },
+        {
+          "stat": "Attack Speed",
+          "statId": "attackSpeed",
+          "value": 4,
+          "op": "+",
+          "unit": "%",
+          "buffGroup": 5755
+        },
+        {
+          "stat": "Casting Speed",
+          "statId": "castingSpeed",
+          "value": 4,
+          "op": "+",
+          "unit": "%",
+          "buffGroup": 5756
+        }
+      ],
+      "effectText": "A spirit-laden stone.\n\n- Effects:\n   All AP +6\n   All Accuracy +8\n   Attack Speed +4%\n   Casting Speed +4%\n\n- How to Use:  a spirit stone in your Inventory, then press ({KeyBind:AlchemyStone}) to use. Cannot be used with other alchemy/spirit stones, except Life types.\n\n- Duration: 5 min\n- Cooldown: 5 min"
+    },
+    {
+      "id": "buff-820150",
+      "itemId": 820150,
+      "name": "Miraculous Herbal Medicine",
+      "category": "energy",
+      "icon": "assets/icons/buffs/820150.webp",
+      "priority": 10,
+      "recommendedFor": [
+        "gathering"
+      ],
+      "durationMinutes": 60,
+      "effects": {
+        "energyRecovery": 30
+      },
+      "conflictsWithGroups": [],
+      "effectSummary": "+500 Energy instantly · +30 Energy recovery/tick for 60 min · 22 hr cooldown",
+      "obtainSummary": "Simple Alchemy: Energy Potion (Extra Large) x1, Everlasting Herb x5, Mysterious Powder x10, Strange and Beautiful Herb x50.",
+      "notes": "The instant +500 is shown as reference text and is deliberately excluded from ongoing recovery totals.",
+      "sourceUrls": [
+        "https://bdocodex.com/us/item/820150/"
+      ],
+      "aliases": [],
+      "grade": 4,
+      "provenance": {
+        "clientDate": "2026-08-28",
+        "itemUrn": "urn::item:820150",
+        "originalIcon": "New_Icon/03_ETC/07_ProductMaterial/00820150.dds",
+        "evidence": "Current local game export; exact installed-client artwork."
+      }
+    },
+    {
+      "id": "buff-821144",
+      "itemId": 821144,
+      "name": "Mystical Herbal Medicine",
+      "category": "energy",
+      "icon": "assets/icons/buffs/821144.webp",
+      "priority": 20,
+      "recommendedFor": [
+        "gathering"
+      ],
+      "durationMinutes": 180,
+      "effects": {
+        "energyRecovery": 50,
+        "maxWeight": 100
+      },
+      "exclusiveGroup": "energy-royal-herbal-medicine",
+      "conflictsWithGroups": [],
+      "effectSummary": "+50 Energy recovery/tick · +100 LT for 3 hr · 3 hr cooldown",
+      "obtainSummary": "Royal Workshop production or Marketplace.",
+      "notes": "Mutually exclusive with Mellow Herbal Medicine.",
+      "sourceUrls": [
+        "https://bdocodex.com/us/item/821144/"
+      ],
+      "aliases": [],
+      "grade": 4,
+      "provenance": {
+        "clientDate": "2026-08-28",
+        "itemUrn": "urn::item:821144",
+        "originalIcon": "New_Icon/03_ETC/07_ProductMaterial/00820151.dds",
+        "evidence": "Current local game export; exact installed-client artwork."
+      }
+    },
+    {
+      "id": "buff-821145",
+      "itemId": 821145,
+      "name": "Mellow Herbal Medicine",
+      "category": "energy",
+      "icon": "assets/icons/buffs/821145.webp",
+      "priority": 21,
+      "recommendedFor": [
+        "gathering"
+      ],
+      "durationMinutes": 180,
+      "effects": {
+        "energyRecovery": 25,
+        "maxWeight": 50
+      },
+      "exclusiveGroup": "energy-royal-herbal-medicine",
+      "conflictsWithGroups": [],
+      "effectSummary": "+25 Energy recovery/tick · +50 LT for 3 hr · 3 hr cooldown",
+      "obtainSummary": "Royal Workshop production or Marketplace.",
+      "notes": "Mutually exclusive with Mystical Herbal Medicine.",
+      "sourceUrls": [
+        "https://bdocodex.com/us/item/821145/"
+      ],
+      "aliases": [],
+      "grade": 3,
+      "provenance": {
+        "clientDate": "2026-08-28",
+        "itemUrn": "urn::item:821145",
+        "originalIcon": "New_Icon/03_ETC/03_Quest_Item/00066671.dds",
+        "evidence": "Current local game export; exact installed-client artwork."
+      }
+    },
+    {
+      "id": "buff-820152",
+      "itemId": 820152,
+      "name": "Millennial Wild Ginseng",
+      "category": "energy",
+      "icon": "assets/icons/buffs/820152.webp",
+      "priority": 30,
+      "recommendedFor": [
+        "gathering"
+      ],
+      "durationMinutes": 129600,
+      "effects": {
+        "maxEnergy": 50,
+        "energyRecovery": 1
+      },
+      "exclusiveGroup": "millennial-wild-ginseng",
+      "conflictsWithGroups": [],
+      "effectSummary": "Family-wide: Max Energy +50 · +1 Energy recovery/tick for 90 days",
+      "obtainSummary": "Ultra-rare Gathering minigame drop or Marketplace.",
+      "notes": "Ninety-day family-wide effect.",
+      "sourceUrls": [
+        "https://bdocodex.com/us/item/820152/"
+      ],
+      "aliases": [],
+      "grade": 4,
+      "provenance": {
+        "clientDate": "2026-08-28",
+        "itemUrn": "urn::item:820152",
+        "originalIcon": "New_Icon/03_ETC/07_ProductMaterial/00820152.dds",
+        "evidence": "Current local game export; exact installed-client artwork."
+      }
+    },
+    {
+      "id": "buff-589",
+      "itemId": 589,
+      "name": "Energy Potion (Extra Large)",
+      "category": "energy",
+      "icon": "assets/icons/buffs/589.webp",
+      "priority": 70,
+      "recommendedFor": [
+        "gathering"
+      ],
+      "effects": {},
+      "conflictsWithGroups": [],
+      "referenceOnly": true,
+      "effectSummary": "+50 Energy instantly · 10 min cooldown",
+      "obtainSummary": "Exchange 200 Energy with Alustin or Dalishain (4:1), or buy from the Marketplace.",
+      "notes": "Reference only: instant restoration is never added to ongoing recovery totals.",
+      "sourceUrls": [
+        "https://bdocodex.com/us/item/589/"
+      ],
+      "aliases": [],
+      "grade": 2,
+      "provenance": {
+        "clientDate": "2026-08-28",
+        "itemUrn": "urn::item:589",
+        "originalIcon": "New_Icon/03_ETC/08_Potion/00000589.dds",
+        "evidence": "Current local game export; exact installed-client artwork."
+      }
+    },
+    {
+      "id": "buff-17503",
+      "itemId": 17503,
+      "name": "Energy Tonic (L)",
+      "category": "energy",
+      "icon": "assets/icons/buffs/17503.webp",
+      "priority": 71,
+      "recommendedFor": [
+        "gathering"
+      ],
+      "effects": {},
+      "conflictsWithGroups": [],
+      "referenceOnly": true,
+      "effectSummary": "+50 Energy instantly · separate 10 min cooldown",
+      "obtainSummary": "Pearl Shop or event packs.",
+      "notes": "Reference only. This catalog intentionally omits the weaker S and M tiers.",
+      "sourceUrls": [
+        "https://bdocodex.com/us/item/17503/"
+      ],
+      "aliases": [],
+      "grade": 3,
+      "provenance": {
+        "clientDate": "2026-08-28",
+        "itemUrn": "urn::item:17503",
+        "originalIcon": "New_Icon/09_Cash/00017503.dds",
+        "evidence": "Current local game export; exact installed-client artwork."
+      }
+    },
+    {
+      "id": "buff-721032",
+      "itemId": 721032,
+      "name": "Bonfire Tool",
+      "category": "energy",
+      "icon": "assets/icons/buffs/721032.webp",
+      "priority": 80,
+      "recommendedFor": [
+        "gathering"
+      ],
+      "effects": {},
+      "conflictsWithGroups": [],
+      "referenceOnly": true,
+      "effectSummary": "+1 Energy recovery/tick while near the bonfire · bonfire lasts 30 min",
+      "obtainSummary": "Simple Alchemy: Rough Stone x5, Log or Timber x5, Powder of Flame x5.",
+      "notes": "Reference only because the benefit depends on standing near the placed bonfire.",
+      "sourceUrls": [
+        "https://bdocodex.com/us/item/721032/"
+      ],
+      "aliases": [],
+      "grade": 1,
+      "provenance": {
+        "clientDate": "2026-08-28",
+        "itemUrn": "urn::item:721032",
+        "originalIcon": "New_Icon/03_ETC/00721032.dds",
+        "evidence": "Current local game export; exact installed-client artwork."
+      }
+    },
+    {
+      "id": "buff-27866",
+      "itemId": 27866,
+      "name": "Kamasylvia Bed",
+      "category": "energy",
+      "icon": "assets/icons/buffs/27866.webp",
+      "priority": 81,
+      "recommendedFor": [
+        "gathering"
+      ],
+      "effects": {},
+      "conflictsWithGroups": [],
+      "referenceOnly": true,
+      "effectSummary": "+2 Energy recovery/tick while lying in bed and online",
+      "obtainSummary": "Craft at the Old Moon Furniture Workshop.",
+      "notes": "Representative best-tier Energy bed; reference only because it applies only while lying in it.",
+      "sourceUrls": [
+        "https://bdocodex.com/us/item/27866/"
+      ],
+      "aliases": [],
+      "grade": 3,
+      "provenance": {
+        "clientDate": "2026-08-28",
+        "itemUrn": "urn::item:27866",
+        "originalIcon": "New_Icon/03_ETC/06_Housing/InHouse_034_DFF_Bed_01.dds",
+        "evidence": "Current local game export; exact installed-client artwork."
+      }
+    },
+    {
+      "id": "buff-9408",
+      "itemId": 9408,
+      "name": "Borscht",
+      "category": "energy",
+      "icon": "assets/icons/buffs/9408.webp",
+      "priority": 90,
+      "recommendedFor": [
+        "gathering"
+      ],
+      "durationMinutes": 60,
+      "effects": {
+        "maxEnergy": 10
+      },
+      "exclusiveGroup": "food-borscht",
+      "conflictsWithGroups": [
+        "food-cron"
+      ],
+      "effectSummary": "Max Energy +10 for 60 min",
+      "obtainSummary": "Cook Fragrant Jerky x7, Milk x3, Mineral Water x2, Cinnamon x1; also Marketplace.",
+      "notes": "Max Energy food; no instant recovery is included in ongoing totals.",
+      "sourceUrls": [
+        "https://bdocodex.com/us/item/9408/"
+      ],
+      "aliases": [],
+      "grade": 1,
+      "provenance": {
+        "clientDate": "2026-08-28",
+        "itemUrn": "urn::item:9408",
+        "originalIcon": "New_Icon/03_ETC/07_ProductMaterial/00009408.dds",
+        "evidence": "Current local game export; exact installed-client artwork."
+      }
+    },
+    {
+      "id": "buff-9452",
+      "itemId": 9452,
+      "name": "Fragrant Borscht",
+      "category": "energy",
+      "icon": "assets/icons/buffs/9452.webp",
+      "priority": 91,
+      "recommendedFor": [
+        "gathering"
+      ],
+      "durationMinutes": 90,
+      "effects": {
+        "maxEnergy": 20
+      },
+      "exclusiveGroup": "food-borscht",
+      "conflictsWithGroups": [
+        "food-cron"
+      ],
+      "effectSummary": "Max Energy +20 for 90 min",
+      "obtainSummary": "Rare result while cooking Borscht; also Marketplace.",
+      "notes": "Higher-grade Max Energy food.",
+      "sourceUrls": [
+        "https://bdocodex.com/us/item/9452/"
+      ],
+      "aliases": [],
+      "grade": 2,
+      "provenance": {
+        "clientDate": "2026-08-28",
+        "itemUrn": "urn::item:9452",
+        "originalIcon": "New_Icon/03_ETC/07_ProductMaterial/00009452.dds",
+        "evidence": "Current local game export; exact installed-client artwork."
+      }
+    },
+    {
+      "id": "buff-9456",
+      "itemId": 9456,
+      "name": "Whale Meat Salad",
+      "category": "energy",
+      "icon": "assets/icons/buffs/9456.webp",
+      "priority": 92,
+      "recommendedFor": [
+        "gathering"
+      ],
+      "durationMinutes": 90,
+      "effects": {
+        "lifeExpPct": 10,
+        "maxEnergy": 10
+      },
+      "exclusiveGroup": "food-whale",
+      "conflictsWithGroups": [
+        "food-cron"
+      ],
+      "effectSummary": "Life EXP +10% · Max Energy +10 for 90 min",
+      "obtainSummary": "Cook Blue Whale Meat x1, Egg x3, Cabbage x6, Pepper x4, Dressing x2; also Marketplace.",
+      "notes": "Max Energy and Life EXP food; instant restoration is not added to ongoing totals.",
+      "sourceUrls": [
+        "https://bdocodex.com/us/item/9456/"
+      ],
+      "aliases": [],
+      "grade": 1,
+      "provenance": {
+        "clientDate": "2026-08-28",
+        "itemUrn": "urn::item:9456",
+        "originalIcon": "New_Icon/03_ETC/07_ProductMaterial/00009456.dds",
+        "evidence": "Current local game export; exact installed-client artwork."
+      }
+    },
+    {
+      "id": "buff-616409",
+      "itemId": 616409,
+      "name": "Ancient Book of Life (7 Days)",
+      "category": "energy",
+      "icon": "assets/icons/buffs/616409.webp",
+      "priority": 31,
+      "recommendedFor": [
+        "gathering"
+      ],
+      "durationMinutes": 60,
+      "cooldownMinutes": 60,
+      "effects": {
+        "maxWeight": 250,
+        "lifeExpPct": 50,
+        "lifeMastery": 25,
+        "energyRecovery": 2,
+        "breathExpPct": 30,
+        "strengthExpPct": 30,
+        "healthExpPct": 30
+      },
+      "exclusiveGroup": "ancient-book-life",
+      "conflictsWithGroups": [],
+      "effectSummary": "60 min: Weight +250 LT · Life EXP +50% · Life Mastery +25 · Energy Recovery +2/tick · Breath, Strength, and Health EXP +30%",
+      "obtainSummary": "Pearl Shop bundles or event rewards; the unsealed book expires after 7 days.",
+      "notes": "The seven-day lifespan and the renewable 60-minute buff are separate. It can be registered in a Radiant Fairy's Continuous Care skill.",
+      "sourceUrls": [
+        "https://bdocodex.com/us/item/616409/"
+      ],
+      "aliases": [
+        "Sealed Ancient Book of Life (7 Days)"
+      ],
+      "grade": 4,
+      "durationNote": "The active buff lasts 60 minutes; the unsealed book itself has a seven-day lifespan.",
+      "provenance": {
+        "clientDate": "2026-08-28",
+        "itemUrn": "urn::item:616409",
+        "originalIcon": "New_Icon/09_Cash/00616408.dds",
+        "evidence": "Current local game export; exact installed-client effects and artwork."
+      }
+    },
+    {
+      "id": "buff-761074",
+      "itemId": 761074,
+      "name": "Fughar's Magical Elixir",
+      "category": "energy",
+      "icon": "assets/icons/buffs/761074.webp",
+      "priority": 32,
+      "recommendedFor": [
+        "gathering",
+        "hunting",
+        "sniper"
+      ],
+      "durationMinutes": 600,
+      "cooldownMinutes": 600,
+      "effects": {
+        "mountExpPct": 50,
+        "mountSkillExpPct": 20,
+        "lifeExpPct": 30,
+        "lifeMastery": 25,
+        "energyRecovery": 1,
+        "maxWeight": 100
+      },
+      "exclusiveGroup": "fughar-magical-elixir",
+      "conflictsWithGroups": [],
+      "effectSummary": "10 h: Life EXP +30% · Life Mastery +25 · Energy Recovery +1/tick · Weight +100 LT · Mount EXP +50% · Mount Skill EXP +20%",
+      "obtainSummary": "Loyalty Shop or limited reward bundles.",
+      "notes": "A practical long-duration Energy recovery option. It is not treated as an event-only item.",
+      "sourceUrls": [
+        "https://bdocodex.com/us/item/761074/"
+      ],
+      "aliases": [],
+      "grade": 3,
+      "provenance": {
+        "clientDate": "2026-08-28",
+        "itemUrn": "urn::item:761074",
+        "originalIcon": "New_Icon/03_ETC/00752488.dds",
+        "evidence": "Current local game export; exact installed-client effects and artwork."
+      }
+    },
+    {
+      "id": "buff-yawning-hedgehog",
+      "name": "Yawning Hedgehog",
+      "category": "lightstones",
+      "icon": "assets/icons/items/766101.webp",
+      "priority": 55,
+      "recommendedFor": [
+        "gathering"
+      ],
+      "effects": {
+        "gatheringItemDropPct": 10,
+        "gatheringExpPct": 13,
+        "lifeExpPct": 3,
+        "gatheringMastery": 25,
+        "gatheringSpeed": 1
+      },
+      "exclusiveGroup": "lightstone-set",
+      "conflictsWithGroups": [],
+      "effectSummary": "Combination bonus: Gathering Item Drop Rate +10% · Gathering EXP +10% · Gathering Mastery +20 · Gathering Speed +1. Component stats are listed in details.",
+      "obtainSummary": "Equip Flora: Plains, Flora: Forest, Flora: Wildlife, and Iridescent Lightstones.",
+      "notes": "Current September 3, 2026 recipe. The former Energy Recovery +1 effect was removed.",
+      "sourceUrls": [
+        "https://blackdesert.pearlabyss.com/Asia/en-US/News/Notice/Detail?_boardNo=19773",
+        "https://bdocodex.com/us/lightstoneset/159/"
+      ],
+      "components": [
+        {
+          "itemId": 764011,
+          "name": "Lightstone of Flora: Plains",
+          "icon": "assets/icons/items/764011.webp",
+          "grade": 2,
+          "effectSummary": "Gathering EXP +3%",
+          "effects": {
+            "gatheringExpPct": 3
+          }
+        },
+        {
+          "itemId": 764003,
+          "name": "Lightstone of Flora: Forest",
+          "icon": "assets/icons/items/764003.webp",
+          "grade": 2,
+          "effectSummary": "Gathering Mastery +5",
+          "effects": {
+            "gatheringMastery": 5
+          }
+        },
+        {
+          "itemId": 764001,
+          "name": "Lightstone of Flora: Wildlife",
+          "icon": "assets/icons/items/764001.webp",
+          "grade": 2,
+          "effectSummary": "Life EXP +3%",
+          "effects": {
+            "lifeExpPct": 3
+          }
+        },
+        {
+          "itemId": 766101,
+          "name": "Iridescent Lightstone",
+          "icon": "assets/icons/items/766101.webp",
+          "grade": 3,
+          "effectSummary": "No stats on its own; enables the combination effect."
+        }
+      ],
+      "aliases": [
+        "[Yawning Hedgehog]"
+      ],
+      "grade": 3,
+      "provenance": {
+        "patchDate": "2026-09-03",
+        "itemUrn": "urn::lightstoneset:159",
+        "originalIcon": "New_Icon/03_ETC/00766101.dds",
+        "evidence": "September 3, 2026 official update for the current effects and recipe; exact installed-client Lightstone artwork."
+      }
+    },
+    {
+      "id": "buff-scurrying-weasel",
+      "name": "Scurrying Weasel",
+      "category": "lightstones",
+      "icon": "assets/icons/items/766101.webp",
+      "priority": 56,
+      "recommendedFor": [
+        "gathering"
+      ],
+      "effects": {
+        "gatheringItemDropPct": 5,
+        "gatheringExpPct": 16,
+        "gatheringMastery": 25,
+        "gatheringSpeed": 1
+      },
+      "exclusiveGroup": "lightstone-set",
+      "conflictsWithGroups": [],
+      "effectSummary": "Combination bonus: Gathering Item Drop Rate +5% · Gathering EXP +10% · Gathering Mastery +20 · Gathering Speed +1. Component stats are listed in details.",
+      "obtainSummary": "Equip Flora: Plains, Flora: Forest, a second Flora: Plains, and an Iridescent Lightstone.",
+      "notes": "Current September 3, 2026 recipe. The former Movement Speed +3% effect was removed.",
+      "sourceUrls": [
+        "https://blackdesert.pearlabyss.com/Asia/en-US/News/Notice/Detail?_boardNo=19773",
+        "https://bdocodex.com/us/lightstoneset/158/"
+      ],
+      "components": [
+        {
+          "id": "764011-first",
+          "itemId": 764011,
+          "name": "Lightstone of Flora: Plains",
+          "icon": "assets/icons/items/764011.webp",
+          "grade": 2,
+          "effectSummary": "Gathering EXP +3%",
+          "effects": {
+            "gatheringExpPct": 3
+          }
+        },
+        {
+          "itemId": 764003,
+          "name": "Lightstone of Flora: Forest",
+          "icon": "assets/icons/items/764003.webp",
+          "grade": 2,
+          "effectSummary": "Gathering Mastery +5",
+          "effects": {
+            "gatheringMastery": 5
+          }
+        },
+        {
+          "id": "764011-second",
+          "itemId": 764011,
+          "name": "Lightstone of Flora: Plains",
+          "icon": "assets/icons/items/764011.webp",
+          "grade": 2,
+          "effectSummary": "Gathering EXP +3%",
+          "effects": {
+            "gatheringExpPct": 3
+          }
+        },
+        {
+          "itemId": 766101,
+          "name": "Iridescent Lightstone",
+          "icon": "assets/icons/items/766101.webp",
+          "grade": 3,
+          "effectSummary": "No stats on its own; enables the combination effect."
+        }
+      ],
+      "aliases": [
+        "[Scurrying Weasel]"
+      ],
+      "grade": 3,
+      "provenance": {
+        "patchDate": "2026-09-03",
+        "itemUrn": "urn::lightstoneset:158",
+        "originalIcon": "New_Icon/03_ETC/00766101.dds",
+        "evidence": "September 3, 2026 official update for the current effects and recipe; exact installed-client Lightstone artwork."
+      }
+    },
+    {
+      "id": "buff-delotia",
+      "name": "Delotia",
+      "category": "lightstones",
+      "icon": "assets/icons/items/766101.webp",
+      "priority": 57,
+      "recommendedFor": [
+        "gathering"
+      ],
+      "effects": {
+        "lifeExpPct": 26
+      },
+      "exclusiveGroup": "lightstone-set",
+      "conflictsWithGroups": [],
+      "effectSummary": "Combination bonus: Life EXP +17%. Component stats are listed in details.",
+      "obtainSummary": "Equip three Flora: Wildlife Lightstones and an Iridescent Lightstone.",
+      "notes": "Current September 3, 2026 recipe.",
+      "sourceUrls": [
+        "https://blackdesert.pearlabyss.com/Asia/en-US/News/Notice/Detail?_boardNo=19773",
+        "https://bdocodex.com/us/lightstoneset/98/"
+      ],
+      "components": [
+        {
+          "id": "764001-first",
+          "itemId": 764001,
+          "name": "Lightstone of Flora: Wildlife",
+          "icon": "assets/icons/items/764001.webp",
+          "grade": 2,
+          "effectSummary": "Life EXP +3%",
+          "effects": {
+            "lifeExpPct": 3
+          }
+        },
+        {
+          "id": "764001-second",
+          "itemId": 764001,
+          "name": "Lightstone of Flora: Wildlife",
+          "icon": "assets/icons/items/764001.webp",
+          "grade": 2,
+          "effectSummary": "Life EXP +3%",
+          "effects": {
+            "lifeExpPct": 3
+          }
+        },
+        {
+          "id": "764001-third",
+          "itemId": 764001,
+          "name": "Lightstone of Flora: Wildlife",
+          "icon": "assets/icons/items/764001.webp",
+          "grade": 2,
+          "effectSummary": "Life EXP +3%",
+          "effects": {
+            "lifeExpPct": 3
+          }
+        },
+        {
+          "itemId": 766101,
+          "name": "Iridescent Lightstone",
+          "icon": "assets/icons/items/766101.webp",
+          "grade": 3,
+          "effectSummary": "No stats on its own; enables the combination effect."
+        }
+      ],
+      "aliases": [
+        "[Delotia]"
+      ],
+      "grade": 3,
+      "provenance": {
+        "patchDate": "2026-09-03",
+        "itemUrn": "urn::lightstoneset:98",
+        "originalIcon": "New_Icon/03_ETC/00766101.dds",
+        "evidence": "September 3, 2026 official update for the current recipe and effect; exact installed-client Lightstone artwork."
+      }
+    },
+    {
+      "id": "buff-hand-of-manos",
+      "name": "Hand of Manos",
+      "category": "lightstones",
+      "icon": "assets/icons/items/766101.webp",
+      "priority": 58,
+      "recommendedFor": [
+        "gathering"
+      ],
+      "effects": {
+        "lifeMastery": 45
+      },
+      "exclusiveGroup": "lightstone-set",
+      "conflictsWithGroups": [],
+      "effectSummary": "Combination bonus: Life Skill Mastery +30. Component stats are listed in details.",
+      "obtainSummary": "Equip three Flora: Paradise Lightstones and an Iridescent Lightstone.",
+      "notes": "Current September 3, 2026 recipe.",
+      "sourceUrls": [
+        "https://blackdesert.pearlabyss.com/Asia/en-US/News/Notice/Detail?_boardNo=19773",
+        "https://bdocodex.com/us/lightstoneset/99/"
+      ],
+      "components": [
+        {
+          "id": "764002-first",
+          "itemId": 764002,
+          "name": "Lightstone of Flora: Paradise",
+          "icon": "assets/icons/items/764002.webp",
+          "grade": 2,
+          "effectSummary": "Life Skill Mastery +5",
+          "effects": {
+            "lifeMastery": 5
+          }
+        },
+        {
+          "id": "764002-second",
+          "itemId": 764002,
+          "name": "Lightstone of Flora: Paradise",
+          "icon": "assets/icons/items/764002.webp",
+          "grade": 2,
+          "effectSummary": "Life Skill Mastery +5",
+          "effects": {
+            "lifeMastery": 5
+          }
+        },
+        {
+          "id": "764002-third",
+          "itemId": 764002,
+          "name": "Lightstone of Flora: Paradise",
+          "icon": "assets/icons/items/764002.webp",
+          "grade": 2,
+          "effectSummary": "Life Skill Mastery +5",
+          "effects": {
+            "lifeMastery": 5
+          }
+        },
+        {
+          "itemId": 766101,
+          "name": "Iridescent Lightstone",
+          "icon": "assets/icons/items/766101.webp",
+          "grade": 3,
+          "effectSummary": "No stats on its own; enables the combination effect."
+        }
+      ],
+      "aliases": [
+        "[Hand of Manos]"
+      ],
+      "grade": 3,
+      "provenance": {
+        "patchDate": "2026-09-03",
+        "itemUrn": "urn::lightstoneset:99",
+        "originalIcon": "New_Icon/03_ETC/00766101.dds",
+        "evidence": "September 3, 2026 official update for the current recipe and effect; exact installed-client Lightstone artwork."
+      }
+    },
+    {
+      "id": "buff-fortress-of-nature",
+      "name": "Fortress of Nature",
+      "category": "lightstones",
+      "icon": "assets/icons/items/766101.webp",
+      "priority": 59,
+      "recommendedFor": [
+        "gathering"
+      ],
+      "effects": {
+        "lifeExpPct": 18,
+        "lifeMastery": 25
+      },
+      "exclusiveGroup": "lightstone-set",
+      "conflictsWithGroups": [],
+      "effectSummary": "Combination bonus: Life EXP +12% · Life Skill Mastery +20. Component stats are listed in details.",
+      "obtainSummary": "Equip two Flora: Wildlife, one Flora: Paradise, and one Iridescent Lightstone.",
+      "notes": "Current September 3, 2026 recipe.",
+      "sourceUrls": [
+        "https://blackdesert.pearlabyss.com/Asia/en-US/News/Notice/Detail?_boardNo=19773",
+        "https://bdocodex.com/us/lightstoneset/100/"
+      ],
+      "components": [
+        {
+          "id": "764001-first",
+          "itemId": 764001,
+          "name": "Lightstone of Flora: Wildlife",
+          "icon": "assets/icons/items/764001.webp",
+          "grade": 2,
+          "effectSummary": "Life EXP +3%",
+          "effects": {
+            "lifeExpPct": 3
+          }
+        },
+        {
+          "itemId": 764002,
+          "name": "Lightstone of Flora: Paradise",
+          "icon": "assets/icons/items/764002.webp",
+          "grade": 2,
+          "effectSummary": "Life Skill Mastery +5",
+          "effects": {
+            "lifeMastery": 5
+          }
+        },
+        {
+          "id": "764001-second",
+          "itemId": 764001,
+          "name": "Lightstone of Flora: Wildlife",
+          "icon": "assets/icons/items/764001.webp",
+          "grade": 2,
+          "effectSummary": "Life EXP +3%",
+          "effects": {
+            "lifeExpPct": 3
+          }
+        },
+        {
+          "itemId": 766101,
+          "name": "Iridescent Lightstone",
+          "icon": "assets/icons/items/766101.webp",
+          "grade": 3,
+          "effectSummary": "No stats on its own; enables the combination effect."
+        }
+      ],
+      "aliases": [
+        "[Fortress of Nature]"
+      ],
+      "grade": 3,
+      "provenance": {
+        "patchDate": "2026-09-03",
+        "itemUrn": "urn::lightstoneset:100",
+        "originalIcon": "New_Icon/03_ETC/00766101.dds",
+        "evidence": "September 3, 2026 official update for the current recipe and effects; exact installed-client Lightstone artwork."
+      }
+    },
+    {
+      "id": "buff-choice-focus-gathering",
+      "name": "Choice & Focus: Gathering",
+      "category": "lightstones",
+      "icon": "assets/icons/items/766101.webp",
+      "priority": 60,
+      "recommendedFor": [
+        "gathering"
+      ],
+      "effects": {
+        "gatheringMastery": -500,
+        "gatheringExpPct": 41,
+        "lifeExpPct": 3
+      },
+      "exclusiveGroup": "lightstone-set",
+      "conflictsWithGroups": [],
+      "effectSummary": "Combination bonus: Gathering Mastery -500 · Gathering EXP +35%. Component stats are listed in details.",
+      "obtainSummary": "Equip two Flora: Plains, one Flora: Wildlife, and one Iridescent Lightstone.",
+      "notes": "Current September 3, 2026 recipe.",
+      "sourceUrls": [
+        "https://blackdesert.pearlabyss.com/Asia/en-US/News/Notice/Detail?_boardNo=19773",
+        "https://bdocodex.com/us/lightstoneset/174/"
+      ],
+      "components": [
+        {
+          "id": "764011-first",
+          "itemId": 764011,
+          "name": "Lightstone of Flora: Plains",
+          "icon": "assets/icons/items/764011.webp",
+          "grade": 2,
+          "effectSummary": "Gathering EXP +3%",
+          "effects": {
+            "gatheringExpPct": 3
+          }
+        },
+        {
+          "id": "764011-second",
+          "itemId": 764011,
+          "name": "Lightstone of Flora: Plains",
+          "icon": "assets/icons/items/764011.webp",
+          "grade": 2,
+          "effectSummary": "Gathering EXP +3%",
+          "effects": {
+            "gatheringExpPct": 3
+          }
+        },
+        {
+          "itemId": 764001,
+          "name": "Lightstone of Flora: Wildlife",
+          "icon": "assets/icons/items/764001.webp",
+          "grade": 2,
+          "effectSummary": "Life EXP +3%",
+          "effects": {
+            "lifeExpPct": 3
+          }
+        },
+        {
+          "itemId": 766101,
+          "name": "Iridescent Lightstone",
+          "icon": "assets/icons/items/766101.webp",
+          "grade": 3,
+          "effectSummary": "No stats on its own; enables the combination effect."
+        }
+      ],
+      "aliases": [
+        "[Choice & Focus: Gathering]"
+      ],
+      "grade": 3,
+      "provenance": {
+        "patchDate": "2026-09-03",
+        "itemUrn": "urn::lightstoneset:174",
+        "originalIcon": "New_Icon/03_ETC/00766101.dds",
+        "evidence": "September 3, 2026 official update for the current recipe and effects; exact installed-client Lightstone artwork."
+      }
+    },
+    {
+      "id": "buff-750490",
+      "itemId": 750490,
+      "name": "[Event] Lara's Warm Black Tea",
+      "category": "events",
+      "icon": "assets/icons/buffs/750490.webp",
+      "priority": 10,
+      "recommendedFor": [
+        "gathering",
+        "hunting",
+        "sniper"
+      ],
+      "durationMinutes": 180,
+      "effects": {
+        "mountExpPct": 50,
+        "lifeExpPct": 30,
+        "maxWeight": 100,
+        "gatheringItemDropPct": 10
+      },
+      "exclusiveGroup": "lara-tea",
+      "conflictsWithGroups": [],
+      "notes": "Event/loyalty reward if already owned. Explicitly stacks with other item effects, including food. Not an ordinary food buff.",
+      "sourceUrls": [
+        "https://bdocodex.com/us/item/750490/",
+        "https://www.blackdesertfoundry.com/gathering-guide/",
+        "https://garmoth.com/guides/post/sniper-rifle-hunting"
+      ],
+      "aliases": [],
+      "grade": 2,
+      "provenance": {
+        "clientDate": "2026-08-28",
+        "itemUrn": "urn::item:750490",
+        "originalIcon": "New_Icon/03_ETC/00750490.dds",
+        "evidence": "Local exported game item description and effects; no invented icon."
+      },
+      "clientEffectEvidence": [
+        {
+          "stat": "Mount EXP",
+          "statId": "mountExp",
+          "value": 50,
+          "op": "+",
+          "unit": "%",
+          "buffGroup": 6373
+        },
+        {
+          "stat": "Life EXP",
+          "statId": "lifeExp",
+          "value": 30,
+          "op": "+",
+          "unit": "%",
+          "buffGroup": 6374
+        },
+        {
+          "stat": "Weight Limit",
+          "statId": "weightLimit",
+          "value": 100,
+          "op": "+",
+          "unit": "LT",
+          "buffGroup": 6375
+        },
+        {
+          "stat": "Mount EXP",
+          "statId": "mountExp",
+          "value": 50,
+          "op": "+",
+          "unit": "%",
+          "buffGroup": 6376
+        },
+        {
+          "stat": "Gathering Item Drop Rate",
+          "statId": "gatheringDropRate",
+          "value": 10,
+          "op": "+",
+          "unit": "%",
+          "buffGroup": 6377
+        }
+      ]
+    },
+    {
+      "id": "buff-43704",
+      "itemId": 43704,
+      "name": "[Villa] Turning Gates (180 min)",
+      "category": "energy",
+      "icon": "assets/icons/buffs/43704.webp",
+      "priority": 40,
+      "recommendedFor": [
+        "gathering",
+        "hunting",
+        "sniper"
+      ],
+      "durationMinutes": 180,
+      "effects": {
+        "energyRecovery": 1,
+        "amityPct": 10,
+        "lifeExpPct": 10
+      },
+      "exclusiveGroup": "villa",
+      "conflictsWithGroups": [],
+      "notes": "180-minute Villa Turning Gates buff. Record after purchasing/applying it in game. Energy Recovery means an extra amount per recovery tick, not per second.",
+      "sourceUrls": [
+        "https://bdocodex.com/us/item/43704/",
+        "https://www.blackdesertfoundry.com/gathering-guide/",
+        "https://garmoth.com/guides/post/sniper-rifle-hunting"
+      ],
+      "aliases": [],
+      "grade": 4,
+      "provenance": {
+        "clientDate": "2026-08-28",
+        "itemUrn": "urn::item:43704",
+        "originalIcon": "New_Icon/04_PC_Skill/03_Buff/Product_EXPUP.dds",
+        "evidence": "Local exported game item description and effects; no invented icon."
+      },
+      "clientEffectEvidence": [
+        {
+          "stat": "Energy Recovery",
+          "statId": "energyRecovery",
+          "value": 1,
+          "op": "+",
+          "buffGroup": 6317,
+          "buffCategory": 3
+        },
+        {
+          "stat": "Energy Recovery",
+          "statId": "energyRecovery",
+          "value": 1,
+          "op": "+",
+          "buffGroup": 7420,
+          "buffCategory": 3
+        },
+        {
+          "stat": "Amity",
+          "statId": "amity",
+          "value": 10,
+          "op": "+",
+          "unit": "%",
+          "buffGroup": 7421,
+          "buffCategory": 3
+        },
+        {
+          "stat": "Life EXP",
+          "statId": "lifeExp",
+          "value": 10,
+          "op": "+",
+          "unit": "%",
+          "buffGroup": 7422,
+          "buffCategory": 3
+        }
+      ],
+      "effectSummary": "+1 Energy recovery/tick · Life EXP +10% · Amity +10% for 180 min",
+      "obtainSummary": "Buy the Turning Gates villa buff at a villa or tent while you have villa access."
+    },
+    {
+      "id": "buff-761893",
+      "itemId": 761893,
+      "name": "[Scroll] Turning Gates",
+      "category": "energy",
+      "icon": "assets/icons/buffs/761893.webp",
+      "priority": 41,
+      "recommendedFor": [
+        "gathering",
+        "hunting",
+        "sniper"
+      ],
+      "durationMinutes": 60,
+      "effects": {
+        "energyRecovery": 1,
+        "amityPct": 10,
+        "lifeExpPct": 10
+      },
+      "exclusiveGroup": "villa",
+      "conflictsWithGroups": [],
+      "notes": "Portable 60-minute Turning Gates version. Requires active Secret Book of Old Moon to buy and use. Replaces the other Turning Gates entry.",
+      "sourceUrls": [
+        "https://bdocodex.com/us/item/761893/",
+        "https://www.blackdesertfoundry.com/gathering-guide/",
+        "https://garmoth.com/guides/post/sniper-rifle-hunting"
+      ],
+      "aliases": [],
+      "grade": 0,
+      "provenance": {
+        "clientDate": "2026-08-28",
+        "itemUrn": "urn::item:761893",
+        "originalIcon": "New_Icon/03_ETC/00761893.dds",
+        "evidence": "Local exported game item description and effects; no invented icon."
+      },
+      "clientEffectEvidence": [
+        {
+          "stat": "Energy Recovery",
+          "statId": "energyRecovery",
+          "value": 1,
+          "op": "+",
+          "buffGroup": 7446,
+          "buffCategory": 3
+        },
+        {
+          "stat": "Energy Recovery",
+          "statId": "energyRecovery",
+          "value": 1,
+          "op": "+",
+          "buffGroup": 7451,
+          "buffCategory": 3
+        },
+        {
+          "stat": "Amity",
+          "statId": "amity",
+          "value": 10,
+          "op": "+",
+          "unit": "%",
+          "buffGroup": 7452,
+          "buffCategory": 3
+        },
+        {
+          "stat": "Life EXP",
+          "statId": "lifeExp",
+          "value": 10,
+          "op": "+",
+          "unit": "%",
+          "buffGroup": 7453,
+          "buffCategory": 3
+        }
+      ],
+      "effectSummary": "+1 Energy recovery/tick · Life EXP +10% · Amity +10% for 60 min",
+      "obtainSummary": "Use the portable scroll route with an active Secret Book of Old Moon."
+    },
+    {
+      "id": "buff-17583",
+      "itemId": 17583,
+      "name": "Value Pack (30 Days)",
+      "category": "other",
+      "icon": "assets/icons/buffs/17583.webp",
+      "priority": 40,
+      "recommendedFor": [
+        "gathering",
+        "hunting",
+        "sniper"
+      ],
+      "durationMinutes": 43200,
+      "effects": {
+        "lifeExpPct": 30,
+        "maxWeight": 200,
+        "mountExpPct": 30
+      },
+      "exclusiveGroup": "value-pack",
+      "conflictsWithGroups": [],
+      "notes": "Optional account benefit: record only if already active. Current client gives +30% Life EXP. No subscription is required to use this tracker.",
+      "sourceUrls": [
+        "https://bdocodex.com/us/item/17583/",
+        "https://www.blackdesertfoundry.com/gathering-guide/",
+        "https://garmoth.com/guides/post/sniper-rifle-hunting"
+      ],
+      "aliases": [],
+      "grade": 3,
+      "provenance": {
+        "clientDate": "2026-08-28",
+        "itemUrn": "urn::item:17583",
+        "originalIcon": "New_Icon/09_Cash/00017583.dds",
+        "evidence": "Local exported game item description and effects; no invented icon."
+      },
+      "clientEffectEvidence": [],
+      "durationNote": "Representative entitlement item; actual remaining account duration can differ."
+    },
+    {
+      "id": "buff-47003",
+      "itemId": 47003,
+      "name": "Secret Book of Old Moon (3 Days)",
+      "category": "other",
+      "icon": "assets/icons/buffs/47003.webp",
+      "priority": 50,
+      "recommendedFor": [
+        "gathering",
+        "hunting",
+        "sniper"
+      ],
+      "durationMinutes": 4320,
+      "effects": {
+        "lifeExpPct": 50
+      },
+      "exclusiveGroup": "old-moon",
+      "conflictsWithGroups": [],
+      "notes": "Optional account benefit, independent of Book of Life. Record only if already active; the catalog shows a representative three-day item.",
+      "sourceUrls": [
+        "https://bdocodex.com/us/item/47003/",
+        "https://www.blackdesertfoundry.com/gathering-guide/",
+        "https://garmoth.com/guides/post/sniper-rifle-hunting"
+      ],
+      "aliases": [],
+      "grade": 3,
+      "provenance": {
+        "clientDate": "2026-08-28",
+        "itemUrn": "urn::item:47003",
+        "originalIcon": "New_Icon/09_Cash/00601201.dds",
+        "evidence": "Local exported game item description and effects; no invented icon."
+      },
+      "clientEffectEvidence": [],
+      "durationNote": "Representative entitlement item; actual remaining account duration can differ."
+    },
+    {
+      "id": "buff-47002",
+      "itemId": 47002,
+      "name": "Blessing of Kamasylve (3 Days)",
+      "category": "energy",
+      "icon": "assets/icons/buffs/47002.webp",
+      "priority": 50,
+      "recommendedFor": [
+        "gathering"
+      ],
+      "durationMinutes": 4320,
+      "effects": {
+        "energyRecovery": 2
+      },
+      "exclusiveGroup": "kamasylve",
+      "conflictsWithGroups": [],
+      "notes": "Optional account benefit for energy recovery. Its normal Item Drop Rate +20% is NOT Gathering Item Drop Rate, and is not added to that total.",
+      "sourceUrls": [
+        "https://bdocodex.com/us/item/47002/",
+        "https://www.blackdesertfoundry.com/gathering-guide/",
+        "https://garmoth.com/guides/post/sniper-rifle-hunting"
+      ],
+      "aliases": [],
+      "grade": 3,
+      "provenance": {
+        "clientDate": "2026-08-28",
+        "itemUrn": "urn::item:47002",
+        "originalIcon": "New_Icon/09_Cash/00017081.dds",
+        "evidence": "Local exported game item description and effects; no invented icon."
+      },
+      "clientEffectEvidence": [],
+      "durationNote": "Representative entitlement item; actual remaining account duration can differ.",
+      "effectSummary": "+2 Energy recovery/tick while the account benefit is active",
+      "obtainSummary": "Pearl Shop, Marketplace, or event variants."
+    },
+    {
+      "id": "buff-17325",
+      "itemId": 17325,
+      "name": "Energy Tonic (XL)",
+      "category": "energy",
+      "icon": "assets/icons/buffs/17325.webp",
+      "priority": 72,
+      "recommendedFor": [
+        "gathering"
+      ],
+      "effects": {},
+      "conflictsWithGroups": [],
+      "referenceOnly": true,
+      "effectSummary": "+100 Energy instantly · separate 10 min cooldown",
+      "obtainSummary": "Pearl Shop or event packs.",
+      "notes": "Reference only. This is the strongest Energy Tonic tier and is not added to ongoing recovery totals.",
+      "sourceUrls": [
+        "https://blackdesert.pearlabyss.com/Asia/en-us/News/Notice/Detail?_boardNo=19771",
+        "https://bdocodex.com/us/item/17325/"
+      ],
+      "aliases": [],
+      "grade": 3,
+      "provenance": {
+        "clientDate": "2026-09-03",
+        "itemUrn": "urn::item:17325",
+        "originalIcon": "New_Icon/09_Cash/00017325.dds",
+        "evidence": "Current installed-client description, effect, cooldown, grade, and exact artwork."
+      }
+    },
+    {
+      "id": "buff-860435",
+      "itemId": 860435,
+      "name": "Gatherer's Special Herbal Tea",
+      "category": "events",
+      "icon": "assets/icons/buffs/860435.webp",
+      "priority": 11,
+      "recommendedFor": [
+        "gathering"
+      ],
+      "durationMinutes": 60,
+      "effects": {
+        "gatheringExpPct": 100,
+        "gatheringMastery": 150,
+        "energyRecovery": 15,
+        "maxWeight": 150,
+        "gatheringItemDropPct": 10
+      },
+      "conflictsWithGroups": [],
+      "effectSummary": "Gathering EXP +100% · Gathering Mastery +150 · Energy Recovery +15/tick · Weight Limit +150 LT · Gathering Item Drop Rate +10% · 60 min",
+      "obtainSummary": "Gathering Special Pass reward.",
+      "notes": "Current limited-pass item. The duplicate client EXP modules describe one displayed +100% Gathering EXP effect, not +200%.",
+      "sourceUrls": [
+        "https://blackdesert.pearlabyss.com/Asia/en-us/News/Notice/Detail?_boardNo=19776",
+        "https://bdocodex.com/us/item/860435/"
+      ],
+      "aliases": [],
+      "grade": 4,
+      "provenance": {
+        "clientDate": "2026-09-03",
+        "itemUrn": "urn::item:860435",
+        "originalIcon": "New_Icon/09_Cash/00860435.dds",
+        "evidence": "New in the 3 September 2026 installed-client export; description and effects match the current official pass notice."
+      }
+    },
+    {
+      "id": "buff-752459",
+      "itemId": 752459,
+      "name": "[Event] Energy Gourd Bottle",
+      "category": "events",
+      "icon": "assets/icons/buffs/752459.webp",
+      "priority": 60,
+      "recommendedFor": [
+        "gathering"
+      ],
+      "effects": {},
+      "conflictsWithGroups": [],
+      "referenceOnly": true,
+      "effectSummary": "+100 Energy instantly · 10 min cooldown",
+      "obtainSummary": "Event reward.",
+      "notes": "Reference only: instant restoration is never added to ongoing recovery totals.",
+      "sourceUrls": [
+        "https://www.naeu.playblackdesert.com/en-US/News/Detail?countryType=en-US&groupContentNo=8797",
+        "https://bdocodex.com/us/item/752459/"
+      ],
+      "aliases": [],
+      "grade": 3,
+      "provenance": {
+        "clientDate": "2026-09-03",
+        "itemUrn": "urn::item:752459",
+        "originalIcon": "New_Icon/03_ETC/00752459.dds",
+        "evidence": "Current installed-client description confirms 100 Energy instantly, a 10-minute cooldown, event acquisition, grade, and exact artwork."
+      }
+    },
+    {
+      "id": "buff-752460",
+      "itemId": 752460,
+      "name": "[Event] Marni's Endurance Potion",
+      "category": "events",
+      "icon": "assets/icons/buffs/752460.webp",
+      "priority": 61,
+      "recommendedFor": [
+        "gathering"
+      ],
+      "effects": {},
+      "conflictsWithGroups": [],
+      "referenceOnly": true,
+      "effectSummary": "+100 Energy instantly · 10 min cooldown",
+      "obtainSummary": "Event reward.",
+      "notes": "Reference only: instant restoration is never added to ongoing recovery totals.",
+      "sourceUrls": [
+        "https://blackdesert.pearlabyss.com/Asia/en-US/News/Notice/Detail?_boardNo=3762",
+        "https://bdocodex.com/us/item/752460/"
+      ],
+      "aliases": [],
+      "grade": 3,
+      "provenance": {
+        "clientDate": "2026-09-03",
+        "itemUrn": "urn::item:752460",
+        "originalIcon": "New_Icon/03_ETC/00752460.dds",
+        "evidence": "Current installed-client description confirms 100 Energy instantly, a 10-minute cooldown, event acquisition, grade, and exact artwork."
+      }
+    },
+    {
+      "id": "buff-790575",
+      "itemId": 790575,
+      "name": "[Event] FESTA Beer",
+      "category": "events",
+      "icon": "assets/icons/buffs/790575.webp",
+      "priority": 62,
+      "recommendedFor": [
+        "gathering"
+      ],
+      "effects": {},
+      "conflictsWithGroups": [],
+      "referenceOnly": true,
+      "effectSummary": "+100 Energy instantly",
+      "obtainSummary": "2023 FESTA event reward.",
+      "notes": "Reference only. It also grants immediate Skill and Contribution EXP, which are outside gathering-buff totals.",
+      "sourceUrls": [
+        "https://blackdesert.pearlabyss.com/Asia/en-us/News/Notice/Detail?_boardNo=3888",
+        "https://bdocodex.com/us/item/790575/"
+      ],
+      "aliases": [],
+      "grade": 3,
+      "provenance": {
+        "clientDate": "2026-09-03",
+        "itemUrn": "urn::item:790575",
+        "originalIcon": "New_Icon/03_ETC/07_ProductMaterial/00008094.dds",
+        "evidence": "Current installed-client description and official event notice confirm immediate 100 Energy recovery, grade, and exact artwork."
+      }
+    },
+    {
+      "id": "buff-752740",
+      "itemId": 752740,
+      "name": "[Event] Scary Halloween Candy",
+      "category": "events",
+      "icon": "assets/icons/buffs/752740.webp",
+      "priority": 70,
+      "recommendedFor": [
+        "gathering"
+      ],
+      "durationMinutes": 60,
+      "effects": {
+        "lifeExpPct": 30,
+        "lifeMastery": 25,
+        "gatheringItemDropPct": 5,
+        "energyRecovery": 1
+      },
+      "conflictsWithGroups": [],
+      "effectSummary": "Life EXP +30% · Life Mastery +25 · Gathering Item Drop Rate +5% · Energy Recovery +1/tick · 60 min",
+      "obtainSummary": "Halloween event reward.",
+      "notes": "Past-event item retained for players who still own it.",
+      "sourceUrls": [
+        "https://www.naeu.playblackdesert.com/en-us/News/Detail?groupContentNo=8591",
+        "https://bdocodex.com/us/item/752740/"
+      ],
+      "aliases": [],
+      "grade": 3,
+      "provenance": {
+        "clientDate": "2026-09-03",
+        "itemUrn": "urn::item:752740",
+        "originalIcon": "New_Icon/03_ETC/00752740.dds",
+        "evidence": "Current installed-client description supplies every effect, duration, cooldown, grade, and exact artwork; the official 2025 update confirms continuing item support."
+      }
+    },
+    {
+      "id": "buff-767137",
+      "itemId": 767137,
+      "name": "[Event] Western Bourbon Whiskey",
+      "category": "events",
+      "icon": "assets/icons/buffs/767137.webp",
+      "priority": 71,
+      "recommendedFor": [
+        "gathering"
+      ],
+      "durationMinutes": 180,
+      "effects": {
+        "lifeMastery": 100,
+        "lifeExpPct": 50,
+        "energyRecovery": 5,
+        "gatheringItemDropPct": 10,
+        "movementSpeed": 5,
+        "luck": 5,
+        "maxWeight": 100
+      },
+      "conflictsWithGroups": [],
+      "effectSummary": "Life Mastery +100 · Life EXP +50% · Energy Recovery +5/tick · Gathering Item Drop Rate +10% · Movement Speed +5 · Luck +5 · Weight Limit +100 LT · 180 min",
+      "obtainSummary": "Event reward.",
+      "notes": "Past-event item retained for players who still own it.",
+      "sourceUrls": [
+        "https://www.naeu.playblackdesert.com/en-us/News/Detail?groupContentNo=8591",
+        "https://bdocodex.com/us/item/767137/"
+      ],
+      "aliases": [],
+      "grade": 3,
+      "provenance": {
+        "clientDate": "2026-09-03",
+        "itemUrn": "urn::item:767137",
+        "originalIcon": "New_Icon/03_ETC/00016630.dds",
+        "evidence": "Current installed-client description supplies every effect, duration, cooldown, grade, and exact artwork; the official 2025 update confirms continuing item support."
+      }
+    },
+    {
+      "id": "buff-760681",
+      "itemId": 760681,
+      "name": "[Event] Dragon King's Hyangon Wine",
+      "category": "events",
+      "icon": "assets/icons/buffs/760681.webp",
+      "priority": 72,
+      "recommendedFor": [
+        "gathering"
+      ],
+      "durationMinutes": 600,
+      "effects": {
+        "lifeExpPct": 30,
+        "lifeMastery": 50,
+        "energyRecovery": 1,
+        "maxWeight": 100
+      },
+      "conflictsWithGroups": [],
+      "effectSummary": "Life EXP +30% · Life Mastery +50 · Energy Recovery +1/tick · Weight Limit +100 LT · 10 hr",
+      "obtainSummary": "Event reward.",
+      "notes": "Its Item Drop Rate +20% is normal monster-loot rate, not Gathering Item Drop Rate, so it is not added to the gathering total.",
+      "sourceUrls": [
+        "https://www.naeu.playblackdesert.com/en-US/News/Detail?countryType=en-US&groupContentNo=8797",
+        "https://www.naeu.playblackdesert.com/en-us/News/Detail?groupContentNo=8591",
+        "https://bdocodex.com/us/item/760681/"
+      ],
+      "aliases": [],
+      "grade": 3,
+      "provenance": {
+        "clientDate": "2026-09-03",
+        "itemUrn": "urn::item:760681",
+        "originalIcon": "New_Icon/03_ETC/000760681.dds",
+        "evidence": "Current installed-client description supplies the gathering-relevant effects, duration, cooldown, grade, and exact artwork; official notices confirm event distribution and continuing support."
+      }
+    },
+    {
+      "id": "buff-46952",
+      "itemId": 46952,
+      "name": "[Event] Bubble-bobblin' Budae Jjigae",
+      "category": "events",
+      "icon": "assets/icons/buffs/46952.webp",
+      "priority": 73,
+      "recommendedFor": [
+        "gathering"
+      ],
+      "durationMinutes": 180,
+      "effects": {
+        "energyRecovery": 1
+      },
+      "conflictsWithGroups": [],
+      "effectSummary": "+20 Energy instantly · Energy Recovery +1/tick · 3 hr",
+      "obtainSummary": "Past event reward.",
+      "notes": "The instant +20 is shown as reference text and is deliberately excluded from ongoing recovery totals.",
+      "sourceUrls": [
+        "https://www.naeu.playblackdesert.com/en-us/News/Detail?groupContentNo=8591",
+        "https://bdocodex.com/us/item/46952/"
+      ],
+      "aliases": [],
+      "grade": 3,
+      "provenance": {
+        "clientDate": "2026-09-03",
+        "itemUrn": "urn::item:46952",
+        "originalIcon": "New_Icon/09_Cash/00046952.dds",
+        "evidence": "Current installed-client description supplies the instant and ongoing effects, duration, cooldown, grade, and exact artwork; the official 2025 update confirms continuing item support."
+      }
+    },
+    {
+      "id": "buff-47110",
+      "itemId": 47110,
+      "name": "[Event] Coming-of-Age Perfume",
+      "category": "events",
+      "icon": "assets/icons/buffs/47110.webp",
+      "priority": 74,
+      "recommendedFor": [
+        "gathering"
+      ],
+      "durationMinutes": 60,
+      "effects": {
+        "energyRecovery": 2,
+        "lifeExpPct": 20
+      },
+      "conflictsWithGroups": [],
+      "effectSummary": "Energy Recovery +2/tick · Life EXP +20% · 60 min",
+      "obtainSummary": "Past event reward.",
+      "notes": "Past-event item retained for players who still own it.",
+      "sourceUrls": [
+        "https://www.naeu.playblackdesert.com/en-us/News/Detail?groupContentNo=8591",
+        "https://bdocodex.com/us/item/47110/"
+      ],
+      "aliases": [],
+      "grade": 2,
+      "provenance": {
+        "clientDate": "2026-09-03",
+        "itemUrn": "urn::item:47110",
+        "originalIcon": "New_Icon/09_Cash/00018971.dds",
+        "evidence": "Current installed-client description supplies every effect, duration, cooldown, grade, and exact artwork; the official 2025 update confirms continuing item support."
+      }
+    },
+    {
+      "id": "buff-767989",
+      "itemId": 767989,
+      "name": "[Event] Scroll - Life Skill I",
+      "category": "events",
+      "icon": "assets/icons/buffs/767989.webp",
+      "priority": 75,
+      "recommendedFor": [
+        "gathering"
+      ],
+      "durationMinutes": 120,
+      "effects": {
+        "lifeMastery": 100,
+        "lifeExpPct": 20,
+        "energyRecovery": 1
+      },
+      "exclusiveGroup": "furniture",
+      "conflictsWithGroups": [],
+      "effectSummary": "Life Mastery +100 · Life EXP +20% · Energy Recovery +1/tick · 2 hr",
+      "obtainSummary": "Past event reward.",
+      "notes": "Portable residence-furniture buff. Only the latest furniture or Life Skill Scroll effect applies.",
+      "sourceUrls": [
+        "https://bdocodex.com/us/item/767989/"
+      ],
+      "aliases": [],
+      "grade": 3,
+      "provenance": {
+        "clientDate": "2026-09-03",
+        "itemUrn": "urn::item:767989",
+        "originalIcon": "New_Icon/03_ETC/00750470.dds",
+        "evidence": "Current installed-client description supplies every effect, duration, cooldown, furniture-stacking rule, grade, and exact artwork."
+      }
+    },
+    {
+      "id": "buff-767990",
+      "itemId": 767990,
+      "name": "[Event] Scroll - Life Skill II",
+      "category": "events",
+      "icon": "assets/icons/buffs/767990.webp",
+      "priority": 76,
+      "recommendedFor": [
+        "gathering"
+      ],
+      "durationMinutes": 180,
+      "effects": {
+        "lifeExpPct": 100,
+        "lifeMastery": 100,
+        "mountExpPct": 50,
+        "energyRecovery": 1
+      },
+      "exclusiveGroup": "furniture",
+      "conflictsWithGroups": [],
+      "effectSummary": "Life EXP +100% · Life Mastery +100 · Mount EXP +50% · Energy Recovery +1/tick · 3 hr",
+      "obtainSummary": "Past event reward.",
+      "notes": "Portable residence-furniture buff. Only the latest furniture or Life Skill Scroll effect applies.",
+      "sourceUrls": [
+        "https://bdocodex.com/us/item/767990/"
+      ],
+      "aliases": [],
+      "grade": 3,
+      "provenance": {
+        "clientDate": "2026-09-03",
+        "itemUrn": "urn::item:767990",
+        "originalIcon": "New_Icon/03_ETC/00750470.dds",
+        "evidence": "Current installed-client description supplies every effect, duration, cooldown, furniture-stacking rule, grade, and exact artwork."
+      }
+    },
+    {
+      "id": "buff-1000408",
+      "itemId": 1000408,
+      "name": "[Event] Divine Blessing of Life",
+      "category": "events",
+      "icon": "assets/icons/buffs/1000408.webp",
+      "priority": 77,
+      "recommendedFor": [
+        "gathering"
+      ],
+      "durationMinutes": 180,
+      "effects": {
+        "lifeMastery": 150,
+        "lifeExpPct": 50,
+        "maxWeight": 200,
+        "energyRecovery": 5,
+        "movementSpeed": 5,
+        "luck": 5
+      },
+      "conflictsWithGroups": [],
+      "effectSummary": "Life Mastery +150 · Life EXP +50% · Weight Limit +200 LT · Energy Recovery +5/tick · Movement Speed +5 · Luck +5 · 3 hr",
+      "obtainSummary": "Event reward.",
+      "notes": "Limited event item retained for players who still own it.",
+      "sourceUrls": [
+        "https://www.tr.playblackdesert.com/EN-US/News/Detail?countryType=EN-US&groupContentNo=12506",
+        "https://bdocodex.com/us/item/1000408/"
+      ],
+      "aliases": [],
+      "grade": 3,
+      "provenance": {
+        "clientDate": "2026-09-03",
+        "itemUrn": "urn::item:1000408",
+        "originalIcon": "New_Icon/03_ETC/01000408.dds",
+        "evidence": "Current installed-client description supplies every effect, duration, cooldown, grade, and exact artwork; an official event notice confirms recent distribution."
+      }
+    }
+  ],
+  "stackingNotes": [
+    "Totals are selected active buff contributions only, not your final character stats. Durations do not add together and selecting a buff does not apply it in game.",
+    "Ability levels (gathering, movement, attack speed, critical hit) are different from percentage bonuses. The game ability level cap is 5; excess selected levels are not extra speed.",
+    "Cron Meals replace other food effects. Ordinary Fig Pie and Whale Meat Salad can coexist, but the 30-minute food cooldown still applies. Two Fig Pie tiers never add together.",
+    "One draught replaces ordinary elixir buffs. Different elixir families can coexist without a draught, but duplicate tiers of the same family cannot. Perfumes are separate.",
+    "Only the last perfume applies. Spirit Perfume Elixir is now named Perfume of Spirits in the current client.",
+    "Life alchemy/spirit stones exclude other Life stones. Current descriptions allow one Life stone together with a Destruction/Protection type; this catalog has one optional Destruction stone.",
+    "Book of Life and Extra Life EXP Scroll share one effect and cannot stack. Mercenary Life has its own family: choose either 50% or 150%. Secret Book of Old Moon is a separate account effect.",
+    "Giovan Grolin Support Scroll and Lara Warm Black Tea explicitly stack with other buffs. Tea is not blocked by the ordinary food group.",
+    "Blessing of Mystic Beasts and Event Life Skill Scrolls I/II replace residence furniture effects; only the latest furniture-family buff applies. Turning Gates entries are alternative durations of the same Villa buff.",
+    "Normal Item Drop Rate (for example Kamasylve Blessing and monster loot scrolls) must not be renamed or added to Gathering Item Drop Rate.",
+    "Food and stone names are current-client names. Event availability is not guaranteed; event items are offered only so owned buffs can be recorded."
+  ],
+  "presets": [
+    {
+      "id": "gathering-simple",
+      "name": "Simple gathering",
+      "activity": "gathering",
+      "buffIds": [
+        "buff-9691",
+        "buff-791",
+        "buff-721092"
+      ],
+      "notes": "A small starter selection, if you own these items. Add scrolls or tea only when used. Treant Tear can be swapped for a Life Spirit Stone."
+    },
+    {
+      "id": "gathering-elixirs",
+      "name": "Gathering · elixir alternative",
+      "activity": "gathering",
+      "buffIds": [
+        "buff-9301",
+        "buff-1159",
+        "buff-750",
+        "buff-725",
+        "buff-691",
+        "buff-721092"
+      ],
+      "notes": "Drop-rate food and elixirs instead of a Cron Meal and draught. Remove speed elixirs when gear or guild already fills the level-5 caps."
+    },
+    {
+      "id": "hunting-simple",
+      "name": "Matchlock · basic elixirs",
+      "activity": "hunting",
+      "buffIds": [
+        "buff-9691",
+        "buff-750",
+        "buff-689",
+        "buff-763",
+        "buff-721092"
+      ],
+      "notes": "Starter buff contributions, not a complete +5 build. Gear/guild must supply the remaining attack-speed and critical-hit levels. Change perfumes if needed."
+    },
+    {
+      "id": "sniper-simple",
+      "name": "Sniper · simple elixirs",
+      "activity": "sniper",
+      "buffIds": [
+        "buff-9301",
+        "buff-1159",
+        "buff-750",
+        "buff-689",
+        "buff-691",
+        "buff-721092"
+      ],
+      "notes": "A practical sniper selection from the current Garmoth guide. Check gathering-speed level 5 with guild/gear, or add Worker elixir. No critical/back-attack elixirs."
+    }
+  ],
+  "limitations": [
+    "Not a gear planner: equipped mastery, guild skills, pets, crystals, artifacts, Black Spirit buffs and other unlisted effects must not be assumed included.",
+    "No profitability claim is made from added drop rate or mastery. Not all gathering modifiers affect all hunting loot.",
+    "No potion consumption, cooldown scheduling, or automatic buff detection. This records what the user selected.",
+    "Current game-export effects and descriptions take priority over older community guide values. The original item tooltips remain the final reference.",
+    "Event buff catalog is intentionally small. Short-lived giveaways and unverified effects are omitted."
+  ]
+}

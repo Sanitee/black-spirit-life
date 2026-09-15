@@ -97,15 +97,11 @@ $publishArguments = @(
     '-p:PublishSingleFile=false',
     '-p:PublishReadyToRun=false',
     '-p:PublishTrimmed=false',
+    '-p:DebugType=None',
+    '-p:DebugSymbols=false',
     '-p:RestoreDisableParallel=true',
     '--output', $resolvedOutput
 )
-if ($Configuration -ceq 'Release') {
-    $publishArguments += @(
-        '-p:DebugSymbols=false',
-        '-p:DebugType=None'
-    )
-}
 
 & $dotnetExecutable @publishArguments
 if ($LASTEXITCODE -ne 0) {
@@ -113,8 +109,8 @@ if ($LASTEXITCODE -ne 0) {
 }
 
 $debugSymbols = @(Get-ChildItem -LiteralPath $resolvedOutput -Recurse -File -Filter '*.pdb')
-if ($Configuration -ceq 'Release' -and $debugSymbols.Count -ne 0) {
-    throw "Release OCR helper publish contains debug symbols: $($debugSymbols[0].FullName)"
+if ($debugSymbols.Count -ne 0) {
+    throw "OCR helper release publish contains a debug symbol: $($debugSymbols[0].FullName)"
 }
 
 $requiredRuntimeFiles = @(

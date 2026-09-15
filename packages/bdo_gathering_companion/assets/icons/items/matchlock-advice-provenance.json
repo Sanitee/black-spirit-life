@@ -1,0 +1,46 @@
+{
+  "owner": "Pearl Abyss",
+  "transformation": "None; unchanged bundled WebP bytes",
+  "entries": [
+    {
+      "id": 15672,
+      "name": "Corrupted Magic Crystal",
+      "asset": "assets/icons/items/15672.webp",
+      "byteLength": 896,
+      "sha256": "16ad111ec79c5ff6219b1cd7075dfb25b7f90569245e62fc0f6771d17cb54ed0",
+      "source": "assets/data/app-data.json#processing.itemIcons[\"Corrupted Magic Crystal\"]"
+    },
+    {
+      "id": 15257,
+      "name": "Crystal of Precise Destruction",
+      "asset": "assets/icons/items/15257.webp",
+      "byteLength": 1672,
+      "sha256": "8e5f76fa7b837d597c2e458ed9d6cff57ef7139608f4cede87f71f2efbcf736b",
+      "source": "assets/data/app-data.json#processing.itemIcons[\"Crystal of Precise Destruction\"]"
+    },
+    {
+      "id": 15256,
+      "name": "Crystal of Brutal Decimation",
+      "asset": "assets/icons/items/15256.webp",
+      "byteLength": 1912,
+      "sha256": "aa68e3c542b6129d7a2c0cf3d066f9586eb6ae6835fe19662778a727a5044f31",
+      "source": "assets/data/app-data.json#processing.itemIcons[\"Crystal of Brutal Decimation\"]"
+    },
+    {
+      "id": 15690,
+      "name": "Glorious Crystal of Gallantry - Ah'krad",
+      "asset": "assets/icons/items/15690.webp",
+      "byteLength": 1322,
+      "sha256": "253d2e17b3eeed58d33374ff2e972efd8a51f0850679d95d5a982d294828d936",
+      "source": "assets/data/app-data.json#processing.itemIcons[\"Glorious Crystal of Gallantry - Ah'krad\"]"
+    },
+    {
+      "id": 15736,
+      "name": "Girin's Tear",
+      "asset": "assets/icons/items/15736.webp",
+      "byteLength": 2116,
+      "sha256": "2dbd94e5862d71f5e2ea4510c0c344f38775e3f79b99e021c0f070f1b502ed36",
+      "source": "assets/data/app-data.json#processing.itemIcons[\"Girin's Tear\"]"
+    }
+  ]
+}

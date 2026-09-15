@@ -1,0 +1,35 @@
+{
+  "reviewedAt": "2026-09-03",
+  "owner": "Pearl Abyss",
+  "use": "Private unofficial fan application; unchanged source game artwork bundled locally.",
+  "items": [
+    {
+      "itemId": 4616,
+      "name": "Thuja Timber",
+      "icon": "assets/icons/items/4616.webp",
+      "clientIcon": "New_Icon/03_ETC/07_ProductMaterial/00004616.dds",
+      "extractedFrom": "Patch Research/client-2026-09-03-audit/icons/new_icon/03_etc/07_productmaterial/00004616.webp",
+      "sha256": "a956d72305e8eba81e5952979b14bf098a4812996ed3c78767319fc904987aa9",
+      "byteLength": 2504,
+      "reviewedAt": "2026-09-11"
+    },
+    {
+      "itemId": 821469,
+      "name": "Evergreen Shard",
+      "icon": "assets/icons/items/821469.webp",
+      "clientIcon": "New_Icon/03_ETC/07_ProductMaterial/00821469.dds",
+      "extractedFrom": "Patch Research/client-2026-09-03-audit/icons/new_icon/03_etc/07_productmaterial/00821469.webp",
+      "sha256": "660e563a2ba1b1a4d7cd0b933c5f5ead8bd03b57134d7c28d3bb26e63962f666",
+      "byteLength": 2536
+    },
+    {
+      "itemId": 764002,
+      "name": "Lightstone of Flora: Paradise",
+      "icon": "assets/icons/items/764002.webp",
+      "clientIcon": "New_Icon/03_ETC/00760005.dds",
+      "extractedFrom": "Patch Research/client-2026-09-03-audit/icons/new_icon/03_etc/00760005.webp",
+      "sha256": "e53e2507d1ddfa538aa46fb9be247d174ba26a2145845a8c4df395a544921459",
+      "byteLength": 2536
+    }
+  ]
+}

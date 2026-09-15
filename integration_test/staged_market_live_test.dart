@@ -168,6 +168,7 @@ void main() {
           home: ApplicationWorkspace(
             bundle: bundle,
             sharedMarket: market,
+            fishMapWorkspace: const SizedBox.shrink(),
             enableBetaUpdates: false,
           ),
         ),

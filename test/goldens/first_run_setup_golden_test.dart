@@ -41,7 +41,10 @@ void main() {
       await tester.pumpWidget(
         RepaintBoundary(
           key: goldenRoot,
-          child: BdoCraftPlannerApp(applicationFuture: applicationFuture),
+          child: BdoCraftPlannerApp(
+            enableOpportunityAutoCheck: false,
+            applicationFuture: applicationFuture,
+          ),
         ),
       );
       await tester.pumpAndSettle();

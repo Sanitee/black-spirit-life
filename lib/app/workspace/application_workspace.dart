@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:bdo_gathering_companion/bdo_gathering_companion.dart';
 import 'package:bdo_map_core/bdo_map_core.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -14,7 +15,6 @@ import '../../data/market/shared_market_repository.dart';
 import '../../data/opportunities/opportunity_market_cache_store.dart';
 import '../../data/opportunities/opportunity_market_service.dart';
 import '../../data/persistence/personal_data_location_service.dart';
-import '../../data/persistence/personal_data_write_gate.dart';
 import '../../data/portable/portable_custom_icon_bridge.dart';
 import '../../domain/catalog/temporarily_archived_items.dart';
 import '../../domain/market/market_price_gateway.dart';
@@ -26,8 +26,8 @@ import '../../features/about/about.dart';
 import '../../features/appearance/appearance.dart';
 import '../../features/data/data.dart';
 import '../../features/editor/editor.dart';
-import '../../features/fishing/fishing.dart';
 import '../../features/gathering/gathering_workspace.dart';
+import '../../features/gathering/shared_gathering_market_loader.dart';
 import '../../features/inventory/inventory.dart';
 import '../../features/opportunities/opportunities_controller.dart';
 import '../../features/opportunities/opportunities_item_actions.dart';
@@ -60,6 +60,24 @@ import 'planner_gather_checklist_bridge.dart';
 
 typedef _TopWorkspaceDestination = ApplicationWorkspaceDestination;
 
+/// Connects an embedded workspace's persistence boundary to the Stable shell.
+/// The participant checkpoints accepted writes, freezes new writes before a
+/// data-root move/update, and resumes them if the outer operation fails.
+@immutable
+final class ApplicationWorkspaceDurabilityParticipant {
+  const ApplicationWorkspaceDurabilityParticipant({
+    required this.flushForLifecycle,
+    required this.freezeAndFlush,
+    required this.freezeAndFlushForApplicationExit,
+    required this.resumeAfterFailure,
+  });
+
+  final AsyncCallback flushForLifecycle;
+  final AsyncCallback freezeAndFlush;
+  final AsyncCallback freezeAndFlushForApplicationExit;
+  final AsyncCallback resumeAfterFailure;
+}
+
 class ApplicationWorkspace extends StatefulWidget {
   const ApplicationWorkspace({
     required this.bundle,
@@ -70,6 +88,10 @@ class ApplicationWorkspace extends StatefulWidget {
     this.windowHost = const WindowHostService(),
     this.fileDialogs = const NativeFileDialogService(),
     this.resourceMapConfiguration = const ResourceMapWorkspaceConfiguration(),
+    required this.fishMapWorkspace,
+    this.gatheringDurabilityController,
+    this.gatheringDurabilityParticipant,
+    this.fishMapDurabilityParticipant,
     this.updateService,
     this.updateSource,
     this.enableBetaUpdates = AppIdentity.outOfProcessBetaUpdatesEnabled,
@@ -78,6 +100,12 @@ class ApplicationWorkspace extends StatefulWidget {
 
   static const Key contentClipKey = ValueKey<String>(
     'application-workspace-content-clip',
+  );
+  static const Key gatheringContentClipKey = ValueKey<String>(
+    'application-workspace-gathering-content-clip',
+  );
+  static const Key fishMapContentClipKey = ValueKey<String>(
+    'application-workspace-fish-map-content-clip',
   );
   static const Key activityDataFolderShortcutKey = ValueKey<String>(
     'application-workspace-activity-data-folder-shortcut',
@@ -96,6 +124,11 @@ class ApplicationWorkspace extends StatefulWidget {
   final WindowHostService windowHost;
   final NativeFileDialogService fileDialogs;
   final ResourceMapWorkspaceConfiguration resourceMapConfiguration;
+  final Widget fishMapWorkspace;
+  final GatheringDurabilityController? gatheringDurabilityController;
+  final ApplicationWorkspaceDurabilityParticipant?
+  gatheringDurabilityParticipant;
+  final ApplicationWorkspaceDurabilityParticipant? fishMapDurabilityParticipant;
   final BetaUpdateService? updateService;
   final String? updateSource;
   final bool enableBetaUpdates;
@@ -268,6 +301,7 @@ class _ApplicationWorkspaceState extends State<ApplicationWorkspace>
   late final MarketRefreshCoordinator _marketCoordinator;
   late final SharedMarketRepository _sharedMarket;
   late final bool _ownsSharedMarket;
+  late final SharedGatheringMarketLoader _gatheringMarketLoader;
   StreamSubscription<SharedMarketReceipt>? _marketSubscription;
   Timer? _marketPublication;
   final _pendingMarketReceipts = <String, Map<String, OpportunityMarketItem>>{};
@@ -298,13 +332,14 @@ class _ApplicationWorkspaceState extends State<ApplicationWorkspace>
   bool _ordinaryClosePending = false;
   bool _ordinaryCloseOwnsMutationFreeze = false;
   Future<void>? _ordinaryClosePreparation;
+  Future<void>? _ordinaryCloseRecovery;
   bool _restartAndApplyPending = false;
   bool _personalDataMovePending = false;
   bool _personalDataRestartRequired = false;
   bool _personalDataCloseRetryPending = false;
   bool _personalDataCloseIssued = false;
   String? _personalDataRestartError;
-  bool _updateInsetVisible = false;
+  double _updateInsetHeight = 0;
   _ToastRequest? _activeToast;
   int _toastPresentation = 0;
   int _toastReposition = 0;
@@ -313,13 +348,19 @@ class _ApplicationWorkspaceState extends State<ApplicationWorkspace>
   late final ApplicationWorkspacePresentationController _presentation;
   _TopWorkspaceDestination _topWorkspace = _TopWorkspaceDestination.planner;
   Widget? _resourceMapWorkspace;
-  bool _gatheringVisited = false;
-  bool _fishingVisited = false;
-  final PersonalDataWriteGate _gatheringWriteGate = PersonalDataWriteGate();
-  final FishingWorkspaceController _fishingController =
-      FishingWorkspaceController();
+  Widget? _gatheringWorkspace;
 
   PlannerApplicationController get _controller => widget.bundle.controller;
+
+  Iterable<ApplicationWorkspaceDurabilityParticipant>
+  get _embeddedDurabilityParticipants sync* {
+    if (widget.gatheringDurabilityParticipant case final participant?) {
+      yield participant;
+    }
+    if (widget.fishMapDurabilityParticipant case final participant?) {
+      yield participant;
+    }
+  }
 
   @override
   void initState() {
@@ -342,6 +383,10 @@ class _ApplicationWorkspaceState extends State<ApplicationWorkspace>
             ),
           ),
         );
+    _gatheringMarketLoader = SharedGatheringMarketLoader(
+      repository: _sharedMarket,
+      region: 'eu',
+    );
     final gateway =
         widget.marketGateway ??
         SharedMarketPriceGateway(repository: _sharedMarket);
@@ -438,6 +483,12 @@ class _ApplicationWorkspaceState extends State<ApplicationWorkspace>
   }
 
   @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _syncUpdateInset();
+  }
+
+  @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.detached ||
         state == AppLifecycleState.paused) {
@@ -452,14 +503,14 @@ class _ApplicationWorkspaceState extends State<ApplicationWorkspace>
       try {
         await flush();
       } on Object {
-        // The ordinary-close and restart paths surface durable-write failures.
-        // A best-effort pause/detach flush must not become an uncaught error.
+        // Explicit close/restart paths surface durable-write failures. A
+        // best-effort pause/detach flush must not become an uncaught error.
       }
     }
 
     await Future.wait(<Future<void>>[
-      ignoreFailure(_gatheringWriteGate.flush),
-      ignoreFailure(_fishingController.flush),
+      for (final participant in _embeddedDurabilityParticipants)
+        ignoreFailure(participant.flushForLifecycle),
       if (_opportunitiesController case final controller?)
         ignoreFailure(controller.flush),
     ]);
@@ -553,15 +604,13 @@ class _ApplicationWorkspaceState extends State<ApplicationWorkspace>
 
       _controller.freezeMutationsForRestart();
       _ordinaryCloseOwnsMutationFreeze = true;
-      final gatheringFlush = _gatheringWriteGate.freezeAndFlush();
-      final fishingFlush = _fishingController.freezeAndFlush();
       await Future.wait(<Future<void>>[
-        gatheringFlush,
-        fishingFlush,
+        for (final participant in _embeddedDurabilityParticipants)
+          participant.freezeAndFlushForApplicationExit(),
         _flushStateForRestart(),
       ]).timeout(_remainingClosePreparationTime(deadline));
     } on Object {
-      _resumeAfterOrdinaryCloseFailure();
+      await _resumeAfterOrdinaryCloseFailure();
       rethrow;
     }
   }
@@ -587,18 +636,44 @@ class _ApplicationWorkspaceState extends State<ApplicationWorkspace>
   }
 
   void _handleOrdinaryCloseError(Object error) {
-    _resumeAfterOrdinaryCloseFailure();
+    unawaited(_resumeAfterOrdinaryCloseFailure());
     _showToast(
       'Close canceled because the latest state could not be saved. $error',
       error: true,
     );
   }
 
-  void _resumeAfterOrdinaryCloseFailure() {
+  Future<void> _resumeAfterOrdinaryCloseFailure() {
+    if (_ordinaryCloseRecovery case final recovery?) {
+      return recovery;
+    }
+    final completer = Completer<void>();
+    final recovery = completer.future;
+    _ordinaryCloseRecovery = recovery;
+    unawaited(_completeOrdinaryCloseRecovery(completer, recovery));
+    return recovery;
+  }
+
+  Future<void> _completeOrdinaryCloseRecovery(
+    Completer<void> completer,
+    Future<void> recovery,
+  ) async {
+    try {
+      await _performOrdinaryCloseRecovery();
+      completer.complete();
+    } on Object catch (error, stackTrace) {
+      completer.completeError(error, stackTrace);
+    } finally {
+      if (identical(_ordinaryCloseRecovery, recovery)) {
+        _ordinaryCloseRecovery = null;
+      }
+    }
+  }
+
+  Future<void> _performOrdinaryCloseRecovery() async {
     if (_ordinaryCloseOwnsMutationFreeze) {
+      await _resumeEmbeddedDurabilityParticipants();
       _controller.resumeMutationsAfterRestartFailure();
-      _gatheringWriteGate.resumeAfterMoveFailure();
-      _fishingController.resumeAfterFailedSwitch();
       _ordinaryCloseOwnsMutationFreeze = false;
     }
     _ordinaryClosePreparation = null;
@@ -615,10 +690,42 @@ class _ApplicationWorkspaceState extends State<ApplicationWorkspace>
     if (_controller.saveError.value case final error?) {
       throw StateError('The planner state could not be saved: $error');
     }
-    await _gatheringWriteGate.flush();
-    await _fishingController.flush();
     await _opportunitiesController?.flush();
     await _flushSharedMarket();
+  }
+
+  Future<void> _freezeAndFlushEmbeddedDurabilityParticipants() async {
+    await Future.wait(<Future<void>>[
+      for (final participant in _embeddedDurabilityParticipants)
+        participant.freezeAndFlush(),
+    ]);
+  }
+
+  Future<void> _resumeEmbeddedDurabilityParticipants() async {
+    Future<void> resumeParticipant(
+      ApplicationWorkspaceDurabilityParticipant participant,
+    ) async {
+      try {
+        await participant.resumeAfterFailure();
+      } on Object catch (error, stackTrace) {
+        FlutterError.reportError(
+          FlutterErrorDetails(
+            exception: error,
+            stack: stackTrace,
+            library: 'Black Spirit Life workspace durability',
+            context: ErrorDescription(
+              'while resuming an embedded workspace after a canceled '
+              'close, update, or personal-data move',
+            ),
+          ),
+        );
+      }
+    }
+
+    await Future.wait(<Future<void>>[
+      for (final participant in _embeddedDurabilityParticipants)
+        resumeParticipant(participant),
+    ]);
   }
 
   Future<void> _flushSharedMarket() async {
@@ -631,15 +738,16 @@ class _ApplicationWorkspaceState extends State<ApplicationWorkspace>
     }
   }
 
-  void _updateVisibilityChanged() {
-    final visible = _updateController.snapshot.showsIndicator;
-    if (visible == _updateInsetVisible) return;
-    _updateInsetVisible = visible;
-    unawaited(
-      widget.windowHost.setBottomInset(
-        visible ? BetaUpdateIndicator.height : 0,
-      ),
-    );
+  void _updateVisibilityChanged() => _syncUpdateInset();
+
+  void _syncUpdateInset() {
+    final resolvedHeight = BetaUpdateIndicator.heightFor(context);
+    final insetHeight = _updateController.snapshot.showsIndicator
+        ? resolvedHeight
+        : 0.0;
+    if (insetHeight == _updateInsetHeight) return;
+    _updateInsetHeight = insetHeight;
+    unawaited(widget.windowHost.setBottomInset(insetHeight));
     if (_activeToast case final toast?) {
       final reposition = ++_toastReposition;
       WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -679,7 +787,7 @@ class _ApplicationWorkspaceState extends State<ApplicationWorkspace>
     _marketPublication?.cancel();
     unawaited(_marketSubscription?.cancel());
     _updateController.removeListener(_updateVisibilityChanged);
-    if (_updateInsetVisible) {
+    if (_updateInsetHeight > 0) {
       unawaited(widget.windowHost.setBottomInset(0));
     }
     _updateController.dispose();
@@ -759,28 +867,24 @@ class _ApplicationWorkspaceState extends State<ApplicationWorkspace>
                                   ),
                                 ),
                               ),
-                            if (_gatheringVisited)
+                            if (_gatheringWorkspace != null)
                               _retainedTopWorkspace(
                                 destination: _TopWorkspaceDestination.gathering,
-                                child: GatheringWorkspace(
-                                  personalDataDirectory: widget
-                                      .bundle
-                                      .personalDataLocation
-                                      .applicationDirectory,
-                                  writeGate: _gatheringWriteGate,
+                                child: ClipRect(
+                                  key: ApplicationWorkspace
+                                      .gatheringContentClipKey,
+                                  clipBehavior: Clip.hardEdge,
+                                  child: _gatheringWorkspace!,
                                 ),
                               ),
-                            if (_fishingVisited)
-                              _retainedTopWorkspace(
-                                destination: _TopWorkspaceDestination.fishing,
-                                child: FishingWorkspace(
-                                  personalDataDirectory: widget
-                                      .bundle
-                                      .personalDataLocation
-                                      .applicationDirectory,
-                                  controller: _fishingController,
-                                ),
+                            _retainedTopWorkspace(
+                              destination: _TopWorkspaceDestination.fishMap,
+                              child: ClipRect(
+                                key: ApplicationWorkspace.fishMapContentClipKey,
+                                clipBehavior: Clip.hardEdge,
+                                child: widget.fishMapWorkspace,
                               ),
+                            ),
                             if (_opportunitiesVisited)
                               _retainedTopWorkspace(
                                 destination:
@@ -941,10 +1045,9 @@ class _ApplicationWorkspaceState extends State<ApplicationWorkspace>
           _ensureResourceMapWorkspace();
           break;
         case _TopWorkspaceDestination.gathering:
-          _gatheringVisited = true;
+          _ensureGatheringWorkspace();
           break;
-        case _TopWorkspaceDestination.fishing:
-          _fishingVisited = true;
+        case _TopWorkspaceDestination.fishMap:
           break;
         case _TopWorkspaceDestination.opportunities:
           _opportunitiesVisited = true;
@@ -978,6 +1081,18 @@ class _ApplicationWorkspaceState extends State<ApplicationWorkspace>
       activeNodeRecordingPicker: _pickActiveNodeRecording,
       activeNodeRecordingScanner: _activeNodeVideoService.scanRecording,
       onRefreshMarketEvidence: _refreshResourceMapMarketEvidence,
+    );
+  }
+
+  void _ensureGatheringWorkspace() {
+    _gatheringWorkspace ??= GatheringWorkspace(
+      durabilityController: widget.gatheringDurabilityController,
+      sharedMarketLoader: _gatheringMarketLoader.load,
+      sharedMarketUpdates: _gatheringMarketLoader.updates,
+      marketFreshFor: sharedMarketFreshness,
+      dataDirectory: Directory(
+        '${widget.bundle.stateRepository.paths.applicationDirectory.path}${Platform.pathSeparator}gathering',
+      ),
     );
   }
 
@@ -1613,15 +1728,13 @@ class _ApplicationWorkspaceState extends State<ApplicationWorkspace>
       // mutation surface before the durable restart flush.
       await WidgetsBinding.instance.endOfFrame;
       if (!mounted ||
-          _personalDataMovePending ||
           _ordinaryClosePending ||
           _ordinaryClosePreparation != null) {
         return;
       }
       _controller.freezeMutationsForRestart();
       mutationsFrozen = true;
-      await _gatheringWriteGate.freezeAndFlush();
-      await _fishingController.freezeAndFlush();
+      await _freezeAndFlushEmbeddedDurabilityParticipants();
       await _flushStateForRestart();
       final prepared = await _updateController.prepareRestart();
       if (!mounted) return;
@@ -1645,9 +1758,8 @@ class _ApplicationWorkspaceState extends State<ApplicationWorkspace>
     } finally {
       if (!closeIssued) {
         if (mutationsFrozen) {
+          await _resumeEmbeddedDurabilityParticipants();
           _controller.resumeMutationsAfterRestartFailure();
-          _gatheringWriteGate.resumeAfterMoveFailure();
-          _fishingController.resumeAfterFailedSwitch();
         }
         if (mounted) {
           setState(() => _restartAndApplyPending = false);
@@ -1666,7 +1778,7 @@ class _ApplicationWorkspaceState extends State<ApplicationWorkspace>
         _updateController.operationPending ||
         _dataSession.profileIoBusy) {
       throw StateError(
-        'Finish the current close, update, restart, import, or export before moving personal data.',
+        'Finish the current update, restart, import, or export before moving personal data.',
       );
     }
     setState(() => _personalDataMovePending = true);
@@ -1676,16 +1788,14 @@ class _ApplicationWorkspaceState extends State<ApplicationWorkspace>
     try {
       FocusManager.instance.primaryFocus?.unfocus();
       await WidgetsBinding.instance.endOfFrame;
-      if (!mounted) return;
-      if (_ordinaryClosePending || _ordinaryClosePreparation != null) {
-        throw StateError(
-          'Wait for the current close request to finish before moving personal data.',
-        );
+      if (!mounted ||
+          _ordinaryClosePending ||
+          _ordinaryClosePreparation != null) {
+        return;
       }
       _controller.freezeMutationsForRestart();
       mutationsFrozen = true;
-      await _gatheringWriteGate.freezeAndFlush();
-      await _fishingController.freezeAndFlush();
+      await _freezeAndFlushEmbeddedDurabilityParticipants();
       await _flushStateForRestart();
       final result = await widget.bundle.personalDataLocation.moveTo(
         destinationPath,
@@ -1707,9 +1817,8 @@ class _ApplicationWorkspaceState extends State<ApplicationWorkspace>
     } finally {
       if (!closeIssued && !locationSwitched) {
         if (mutationsFrozen) {
+          await _resumeEmbeddedDurabilityParticipants();
           _controller.resumeMutationsAfterRestartFailure();
-          _gatheringWriteGate.resumeAfterMoveFailure();
-          _fishingController.resumeAfterFailedSwitch();
         }
         if (mounted) {
           setState(() => _personalDataMovePending = false);
@@ -1794,12 +1903,7 @@ class _ApplicationWorkspaceState extends State<ApplicationWorkspace>
                 ? const Duration(seconds: 4)
                 : const Duration(seconds: 8)),
         behavior: SnackBarBehavior.floating,
-        margin: EdgeInsets.fromLTRB(
-          280,
-          0,
-          24,
-          20 + (_updateInsetVisible ? BetaUpdateIndicator.height : 0),
-        ),
+        margin: EdgeInsets.fromLTRB(280, 0, 24, 20 + _updateInsetHeight),
         elevation: 0,
         backgroundColor: Colors.transparent,
         padding: EdgeInsets.zero,
@@ -1987,10 +2091,14 @@ class _ApplicationTitleStrip extends StatelessWidget {
                     active: activeWorkspace,
                     onChanged: onWorkspaceChanged,
                   ),
-                  trailing: _ActivityDataFolderTitleAction(
-                    personalDataPath: personalDataPath,
-                    onPressed: onOpenActivityDataFolder,
-                  ),
+                  trailing:
+                      activeWorkspace == _TopWorkspaceDestination.gathering ||
+                          activeWorkspace == _TopWorkspaceDestination.fishMap
+                      ? _ActivityDataFolderTitleAction(
+                          personalDataPath: personalDataPath,
+                          onPressed: onOpenActivityDataFolder,
+                        )
+                      : null,
                 ),
               ),
             ),
@@ -2016,8 +2124,8 @@ class _ActivityDataFolderTitleAction extends StatelessWidget {
     final visual = AppTitleBarVisualScope.maybeOf(context);
     final spec = ThemeSpecScope.maybeOf(context) ?? StandardSpec.theme;
     final label =
-        'Personal data folder: $personalDataPath. '
-        'Open Craft Planner > Data to review or change it.';
+        'Save folder for Gathering sessions and Fishing hauls. '
+        'Current folder: $personalDataPath. Open Craft Planner > Data.';
     final foreground = visual?.foreground ?? spec.palette.text;
     final hover =
         visual?.captionHoverSurface ?? spec.palette.primary.withAlpha(38);
@@ -2138,6 +2246,9 @@ class _WorkspaceNavigation extends StatelessWidget {
   static const resourceMapKey = ValueKey<String>(
     'top-workspace-tab-resource-map',
   );
+  static const gatheringKey = ValueKey<String>('top-workspace-tab-gathering');
+  static const fishMapKey = ValueKey<String>('top-workspace-tab-fish-map');
+
   final _TopWorkspaceDestination active;
   final ValueChanged<_TopWorkspaceDestination> onChanged;
 
@@ -2167,18 +2278,22 @@ class _WorkspaceNavigation extends StatelessWidget {
           onPressed: () => onChanged(_TopWorkspaceDestination.resourceMap),
         ),
         AppTitleTab(
-          tabKey: const ValueKey<String>('top-workspace-tab-gathering'),
-          icon: Icons.eco_rounded,
+          tabKey: gatheringKey,
+          artworkAssetPath:
+              'packages/bdo_map_core/assets/images/node_icons/6.png',
+          inactiveArtworkAssetPath:
+              'packages/bdo_map_core/assets/images/node_icons/gray/6.png',
           label: 'Gathering',
           selected: active == _TopWorkspaceDestination.gathering,
           onPressed: () => onChanged(_TopWorkspaceDestination.gathering),
         ),
         AppTitleTab(
-          tabKey: const ValueKey<String>('top-workspace-tab-fishing'),
-          icon: Icons.set_meal_rounded,
-          label: 'Fishing',
-          selected: active == _TopWorkspaceDestination.fishing,
-          onPressed: () => onChanged(_TopWorkspaceDestination.fishing),
+          tabKey: fishMapKey,
+          artworkAssetPath:
+              'packages/bdo_fishing_core/assets/fish_companion/static/fishystuff.png',
+          label: 'Fish Map',
+          selected: active == _TopWorkspaceDestination.fishMap,
+          onPressed: () => onChanged(_TopWorkspaceDestination.fishMap),
         ),
         AppTitleTab(
           tabKey: const ValueKey<String>('top-workspace-tab-opportunities'),

@@ -17,6 +17,135 @@ import 'recipe_book_test_support.dart';
 
 void main() {
   test(
+    'reviewed NPC acquisition notes do not repeat generated vendor copy',
+    () {
+      final environment = _aetherEnvironment(
+        sharpPrice: 6_000_000,
+        sharpStock: 10000,
+      );
+      final mode = environment.application.modes[CraftMode.processing]!;
+      final book = RecipeBookController(
+        modeController: mode,
+        catalogRepository: environment.catalogRepository,
+        callingContext: RecipeBookCallingContext.planner,
+        allowedTargets: mode.craftableNames,
+      );
+      addTearDown(book.dispose);
+      addTearDown(environment.dispose);
+
+      final oquilla = book.itemInfoFor('Oquilla Piece of the Old Moon')!;
+      expect(
+        oquilla.acquisitionNotes.where(
+          (line) => line.contains('Old Moon Manager'),
+        ),
+        hasLength(1),
+      );
+      expect(
+        oquilla.acquisitionNotes,
+        contains('Price: 50,000,000 Silver each.'),
+      );
+      expect(
+        oquilla.acquisitionNotes,
+        contains('Cannot be registered on the Central Market.'),
+      );
+
+      final water = book.itemInfoFor('Purified Water')!;
+      final waterNotes = water.acquisitionNotes.join('\n');
+      expect(waterNotes, contains('Waida at Sand Grain Bazaar'));
+      expect(waterNotes, contains('Yasum in Arehaza'));
+      expect(waterNotes, contains('5,000 Silver'));
+      expect(
+        waterNotes,
+        isNot(contains('Buy from Waida in Sand Grain Bazaar.')),
+      );
+      expect(water.howToObtain.join('\n'), contains('Filtering'));
+    },
+  );
+
+  test(
+    'Recipe Book quote follows the active Auto route at full plan demand',
+    () {
+      final environment = _aetherEnvironment(
+        sharpPrice: 3_000_000,
+        sharpStock: 100,
+      );
+      final mode = environment.application.modes[CraftMode.processing]!;
+      final book = RecipeBookController(
+        modeController: mode,
+        catalogRepository: environment.catalogRepository,
+        callingContext: RecipeBookCallingContext.planner,
+        allowedTargets: mode.craftableNames,
+      );
+      addTearDown(book.dispose);
+      addTearDown(environment.dispose);
+
+      const name = 'Brimming Essence of Aether';
+      expect(
+        mode.plan.value.routeSelections[name]!.selectedVariantId,
+        'oquilla-pieces',
+      );
+      expect(
+        book.recipeFor(name)!.ingredients.first.name,
+        'Oquilla Piece of the Old Moon',
+      );
+      expect(
+        book.profitabilityFor(name)!.selectedVariantId,
+        book.selectedRecipeVariantId(name),
+      );
+      expect(
+        book.profitabilityFor(name)!.ingredientCosts.first.selectedName,
+        'Oquilla Piece of the Old Moon',
+      );
+    },
+  );
+
+  test(
+    'ingredient search preserves Auto batch unless another input is requested',
+    () {
+      final environment = _aetherEnvironment(
+        sharpPrice: 6_000_000,
+        sharpStock: 10000,
+      );
+      final mode = environment.application.modes[CraftMode.processing]!;
+      const name = 'Brimming Essence of Aether';
+      expect(
+        mode.selectAutomaticRecipeRoute(name, batchMultiplier: 10),
+        isTrue,
+      );
+      final book = RecipeBookController(
+        modeController: mode,
+        catalogRepository: environment.catalogRepository,
+        callingContext: RecipeBookCallingContext.planner,
+        allowedTargets: mode.craftableNames,
+      );
+      addTearDown(book.dispose);
+      addTearDown(environment.dispose);
+      book.setSearchByIngredient(true);
+
+      book.setSearch('Faint Essence of Aether');
+      expect(book.selectedRecipeVariantId(name), 'oquilla-pieces-10x');
+      expect(book.activate(name), isNotNull);
+      expect(mode.state.value.recipeVariantChoices[name], '__auto_batch_10');
+
+      book.setSearch('Oquilla Piece of the Old Moon');
+      expect(book.selectedRecipeVariantId(name), 'oquilla-pieces-10x');
+      expect(
+        book.profitabilityFor(name)!.selectedVariantId,
+        'oquilla-pieces-10x',
+      );
+
+      book.setSearch('Sharp Black Crystal Shard');
+      expect(book.selectedRecipeVariantId(name), 'sharp-shards-10x');
+      expect(
+        book.profitabilityFor(name)!.selectedVariantId,
+        'sharp-shards-10x',
+      );
+      expect(book.activate(name), isNotNull);
+      expect(mode.selectedRecipeVariantId(name), 'sharp-shards-10x');
+    },
+  );
+
+  test(
     'Processing Elixir of Seal acquisition uses its real Alchemy recipe',
     () {
       final catalog = const BundledCatalogParser().parse(
@@ -1618,3 +1747,49 @@ ModeState _productionMode(CraftMode mode, {required String target}) =>
       market: MarketState(),
       appearance: AppearanceSettings.defaultsFor(mode),
     );
+
+RecipeBookTestEnvironment _aetherEnvironment({
+  required double sharpPrice,
+  required double sharpStock,
+}) {
+  final catalog = const BundledCatalogParser().parse(
+    File('assets/data/app-data.json').readAsStringSync(),
+  );
+  final application = PlannerApplicationController(
+    catalog: catalog,
+    initialState: PlannerState(
+      applicationVersion: 'aether-book-route-test',
+      lastSuccessfulWriteUtc: DateTime.utc(2026, 9, 5),
+      activeMode: CraftMode.processing,
+      alchemy: _productionMode(
+        CraftMode.alchemy,
+        target: 'Clear Liquid Reagent',
+      ),
+      cooking: _productionMode(CraftMode.cooking, target: 'Beer'),
+      processing:
+          _productionMode(
+            CraftMode.processing,
+            target: 'Brimming Essence of Aether',
+          ).copyWith(
+            want: 100,
+            market: MarketState(
+              prices: {
+                'Brimming Essence of Aether': 200_000_000,
+                'Sharp Black Crystal Shard': sharpPrice,
+                'Black Stone Powder': 1000,
+              },
+              stock: {'Sharp Black Crystal Shard': sharpStock},
+            ),
+          ),
+      processingYields: const {},
+      marketTax: MarketTax(),
+      showDeleteTools: false,
+    ),
+    saveState: (state) async => state,
+    saveDebounce: Duration.zero,
+  );
+  return RecipeBookTestEnvironment(
+    application: application,
+    catalogRepository: CatalogRepository(catalog),
+  );
+}

@@ -162,6 +162,89 @@ void main() {
     });
   });
 
+  test(
+    'independent Auto profitability buys all inputs regardless of ownership',
+    () {
+      final product = _npcExchangeRecipe();
+      final recipes = <String, Recipe>{
+        product.name: product,
+        'Sharp': _leaf('Sharp'),
+        'NPC Piece': _leaf('NPC Piece', npcPrice: 50_000_000),
+        'Common': _leaf('Common'),
+      };
+      final state = _state(
+        inventory: const {'Sharp': 20},
+        market: MarketState(
+          prices: const {
+            'Exchange Product': 200_000_000,
+            'Sharp': 6_000_000,
+            'Common': 10,
+          },
+          stock: const {'Sharp': 1000},
+        ),
+      );
+      final quote = calculator.calculate(
+        recipe: product,
+        recipes: recipes,
+        state: state,
+        rules: PlannerRules(marketIds: const {'Sharp': '4998'}),
+        marketTax: MarketTax(enabled: false),
+      );
+      expect(quote.selectedVariantId, 'npc');
+      expect(quote.ingredientCost, 100_000_010);
+      expect(quote.directMarketItemNames, {
+        'Exchange Product',
+        'Common',
+        'Sharp',
+      });
+    },
+  );
+
+  test(
+    'explicit displayed route controls the quote and its refreshed inputs',
+    () {
+      final product = _npcExchangeRecipe();
+      final recipes = <String, Recipe>{
+        product.name: product,
+        'Sharp': _leaf('Sharp'),
+        'NPC Piece': _leaf('NPC Piece', npcPrice: 50_000_000),
+        'Common': _leaf('Common'),
+      };
+      final state = _state(
+        market: MarketState(
+          prices: const {
+            'Exchange Product': 200_000_000,
+            'Sharp': 1_000_000,
+            'Common': 10,
+          },
+          stock: const {'Sharp': 100},
+        ),
+      );
+      final rules = PlannerRules(marketIds: const {'Sharp': '4998'});
+      final quote = calculator.calculate(
+        recipe: product,
+        recipes: recipes,
+        state: state,
+        rules: rules,
+        marketTax: MarketTax(enabled: false),
+        selectedVariantId: 'npc',
+      );
+      expect(quote.selectedVariantId, 'npc');
+      expect(quote.ingredientCost, 100_000_010);
+      expect(quote.ingredientCosts.first.selectedName, 'NPC Piece');
+      expect(
+        calculator.directMarketItemNames(
+          recipe: product,
+          recipes: recipes,
+          state: state,
+          rules: rules,
+          selectedVariantId: 'npc',
+        ),
+        {'Exchange Product', 'Common', 'Sharp'},
+      );
+    },
+  );
+
   test('honors saved substitute ratios and grade ceiling conversion', () {
     final product = _recipe(
       'Quality Product',
@@ -450,6 +533,7 @@ ModeState _state({
   Map<String, String> ingredientGrades = const <String, String>{},
   Map<String, String> recipeVariantChoices = const <String, String>{},
   int processingMastery = 0,
+  Map<String, double> inventory = const <String, double>{},
 }) => ModeState(
   target: 'Product',
   bonusTarget: 'Product',
@@ -457,6 +541,8 @@ ModeState _state({
   ingredientGrades: ingredientGrades,
   recipeVariantChoices: recipeVariantChoices,
   processingMastery: processingMastery,
+  inventory: inventory,
+  ignoreIngredientInventory: false,
   market: market ?? MarketState(),
   appearance: AppearanceSettings.defaultsFor(CraftMode.alchemy),
 );
@@ -533,4 +619,29 @@ RecipeVariant _variant({
   ingredients: ingredients,
   outputMinimum: null,
   outputMaximum: null,
+);
+
+Recipe _npcExchangeRecipe() => _recipe(
+  'Exchange Product',
+  type: 'processing',
+  ingredients: [_ingredient('Sharp', 20), _ingredient('Common', 1)],
+  outputMinimum: 1,
+  outputMaximum: 1,
+  defaultVariantId: 'sharp',
+  variants: [
+    for (final npc in [false, true])
+      RecipeVariant(
+        id: npc ? 'npc' : 'sharp',
+        label: npc ? 'NPC' : 'Sharp',
+        type: 'processing',
+        baseOutput: 1,
+        method: 'Simple Alchemy',
+        ingredients: [
+          _ingredient(npc ? 'NPC Piece' : 'Sharp', npc ? 2 : 20),
+          _ingredient('Common', 1),
+        ],
+        outputMinimum: 1,
+        outputMaximum: 1,
+      ),
+  ],
 );

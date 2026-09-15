@@ -1,0 +1,57 @@
+{
+  "version": 1,
+  "map_size_px": [
+    11560,
+    10540
+  ],
+  "tile_size_px": 512,
+  "output_size_px": 1542,
+  "image_format": "webp",
+  "webp_quality": 90,
+  "webp_method": 6,
+  "lossless_finest_levels": 1,
+  "sample_filter": "nearest",
+  "root": "/images/tiles/minimap_visual/v4",
+  "levels": [
+    {
+      "z": 0,
+      "min_x": 0,
+      "min_y": 0,
+      "width": 23,
+      "height": 21,
+      "tile_count": 483,
+      "path": "{z}/{x}_{y}.webp",
+      "occupancy_b64": "/////////////////////////////////////////////////////////////////////////////////w=="
+    },
+    {
+      "z": 1,
+      "min_x": 0,
+      "min_y": 0,
+      "width": 12,
+      "height": 11,
+      "tile_count": 132,
+      "path": "{z}/{x}_{y}.webp",
+      "occupancy_b64": "//////////////////////8="
+    },
+    {
+      "z": 2,
+      "min_x": 0,
+      "min_y": 0,
+      "width": 6,
+      "height": 6,
+      "tile_count": 36,
+      "path": "{z}/{x}_{y}.webp",
+      "occupancy_b64": "//////8="
+    },
+    {
+      "z": 3,
+      "min_x": 0,
+      "min_y": 0,
+      "width": 3,
+      "height": 3,
+      "tile_count": 9,
+      "path": "{z}/{x}_{y}.webp",
+      "occupancy_b64": "//8="
+    }
+  ]
+}

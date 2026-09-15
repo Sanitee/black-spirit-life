@@ -9,6 +9,67 @@ import 'planner_test_fixture.dart';
 
 void main() {
   testWidgets(
+    'optional raw-material action names Beehives while workers keep Honey',
+    (tester) async {
+      await setPlannerTestSize(tester, const Size(1500, 940));
+      final harness = PlannerTestHarness(
+        resolveMapLookup: (_) async => const PlannerMapLookupAvailability(
+          materialName: 'Cooking Honey',
+          hasManualGathering: true,
+          manualResourceId: 'item:7701',
+          manualMaterialName: 'Wild Beehives',
+          manualLocationCount: 1,
+          hasWorkerNodes: true,
+          workerResourceId: 'item:7702',
+        ),
+      );
+      addTearDown(harness.controller.dispose);
+      await tester.pumpWidget(harness.plannerHost());
+      await tester.pump();
+      final region = find.byKey(
+        PlannerActionKeys.mapLookupRegion('need:Sunrise Herb'),
+      );
+      await tester.tap(
+        region,
+        buttons: kSecondaryMouseButton,
+        kind: PointerDeviceKind.mouse,
+      );
+      await tester.pumpAndSettle();
+      expect(find.text('Show Wild Beehives'), findsOneWidget);
+      expect(find.text('Optional source for Cooking Honey'), findsOneWidget);
+      await tester.tap(
+        find.byKey(
+          PlannerActionKeys.mapLookupAction(
+            'need:Sunrise Herb',
+            PlannerMapLookupSource.manualGathering.name,
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(harness.mapLookupRequests.single.materialName, 'Wild Beehives');
+      expect(harness.mapLookupRequests.single.resourceId, 'item:7701');
+      await tester.tap(
+        region,
+        buttons: kSecondaryMouseButton,
+        kind: PointerDeviceKind.mouse,
+      );
+      await tester.pumpAndSettle();
+      await tester.tap(
+        find.byKey(
+          PlannerActionKeys.mapLookupAction(
+            'need:Sunrise Herb',
+            'addToPlannedNetwork',
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(harness.plannedNetworkAdds.single.materialName, 'Cooking Honey');
+      expect(harness.plannedNetworkAdds.single.workerResourceId, 'item:7702');
+      expect(harness.copied, isEmpty);
+    },
+  );
+
+  testWidgets(
     'Need First right-click queues worker materials without opening the map',
     (tester) async {
       await setPlannerTestSize(tester, const Size(1500, 940));
@@ -308,6 +369,11 @@ void main() {
       expect(added.single.availability, same(availability));
       expect(added.single.availability.manualResourceId, 'item:5400');
       expect(added.single.availability.workerResourceId, 'item:5400');
+      expect(
+        added.single.demand?.plannerTarget,
+        harness.controller.active.state.value.target,
+      );
+      expect(added.single.demand?.neededQuantity, greaterThan(0));
       expect(harness.mapLookupRequests, isEmpty);
     },
   );

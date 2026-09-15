@@ -1,8 +1,7 @@
 /// Marketable items with maxEnhance > 0 in the reviewed 2026-09-10 PC client.
-/// Source: the project-held 2026-09-10 PC client item audit.
+/// Source: Patch Research/client-2026-09-10-divine-audit/items.json.
 /// SHA-256: 8998F94AA44A5DD86DC5F67F4CFA73EF1523E3B051B58D8F0F9DC42E592912E5.
 /// All 2,842 identities agree with enhancement.maxLevel > 0 in that export.
-/// Public scope and reproduction notes: docs/opportunities-market-eligibility.md.
 ///
 /// Search summaries combine their enhancement levels. This table identifies
 /// that scope; it is not a price, availability, or market-request exclusion.

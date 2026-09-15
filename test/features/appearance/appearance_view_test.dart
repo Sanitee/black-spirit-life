@@ -279,6 +279,34 @@ void main() {
     await controller.dispose();
   });
 
+  testWidgets('theme-preview caption controls cannot reach the native window', (
+    tester,
+  ) async {
+    const channel = MethodChannel('com.bdocraftplanner.flutter/window');
+    final nativeCalls = <MethodCall>[];
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+        .setMockMethodCallHandler(channel, (call) async {
+          nativeCalls.add(call);
+          return null;
+        });
+    addTearDown(
+      () => TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+          .setMockMethodCallHandler(channel, null),
+    );
+
+    final controller = _controller();
+    await _pump(tester, controller, const Size(1200, 752));
+
+    final preview = find.byKey(const ValueKey<String>('sakura-theme-preview'));
+    final titleBar = tester.widget<AppTitleBar>(
+      find.descendant(of: preview, matching: find.byType(AppTitleBar)),
+    );
+    await titleBar.windowHost.requestClose();
+
+    expect(nativeCalls, isEmpty);
+    await controller.dispose();
+  });
+
   testWidgets('theme selection and transition controls persist', (
     tester,
   ) async {

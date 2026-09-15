@@ -21,6 +21,7 @@
 #include "active_node_video_scanner.h"
 #include "clipboard_image_reader.h"
 #include "flutter/generated_plugin_registrant.h"
+#include "gathering_native_bridge.h"
 
 namespace {
 
@@ -216,6 +217,10 @@ constexpr int kResizeAspectHeight = 47;
 constexpr int kMinimumWindowWidth = 1200;
 constexpr int kMinimumWindowHeight = 752;
 constexpr UINT_PTR kFlutterViewResizeSubclassId = 1;
+constexpr UINT_PTR kDeferredCloseRetryTimerId = 0x42534C43;
+constexpr UINT kDeferredCloseRetryInitialDelayMilliseconds = 25;
+constexpr UINT kDeferredCloseRetryMaximumDelayMilliseconds = 200;
+constexpr unsigned int kDeferredCloseRetryLimit = 80;
 constexpr UINT kApplyBottomInsetMessage = WM_APP + 0x51;
 
 bool IsCornerResize(WPARAM edge) {
@@ -537,10 +542,51 @@ DirectoryPickResult PickDirectory(HWND owner,
 
 }  // namespace
 
-FlutterWindow::FlutterWindow(const flutter::DartProject& project)
-    : project_(project) {}
+FlutterWindow::FlutterWindow(const flutter::DartProject& project,
+                             bool reference_mode)
+    : project_(project), reference_mode_(reference_mode) {
+  native_close_allowed_ = reference_mode;
+}
 
 FlutterWindow::~FlutterWindow() {}
+
+void FlutterWindow::CancelDeferredCloseRetry() {
+  const HWND window = GetHandle();
+  if (window != nullptr) {
+    KillTimer(window, kDeferredCloseRetryTimerId);
+  }
+  close_request_retry_count_ = 0;
+}
+
+void FlutterWindow::ScheduleDeferredCloseRetry() {
+  close_requested_before_handler_ = true;
+  const HWND window = GetHandle();
+  if (window == nullptr ||
+      close_request_retry_count_ >= kDeferredCloseRetryLimit) {
+    return;
+  }
+  const unsigned int backoff_shift =
+      std::min(close_request_retry_count_, 3u);
+  const UINT delay = std::min(
+      kDeferredCloseRetryInitialDelayMilliseconds << backoff_shift,
+      kDeferredCloseRetryMaximumDelayMilliseconds);
+  if (SetTimer(window, kDeferredCloseRetryTimerId, delay, nullptr) != 0) {
+    close_request_retry_count_ += 1;
+  }
+}
+
+void FlutterWindow::ReplayDeferredCloseRequest() {
+  const HWND window = GetHandle();
+  if (!close_requested_before_handler_ || close_request_pending_ ||
+      window == nullptr) {
+    return;
+  }
+  KillTimer(window, kDeferredCloseRetryTimerId);
+  close_requested_before_handler_ = false;
+  if (PostMessage(window, WM_CLOSE, 0, 0) == 0) {
+    ScheduleDeferredCloseRetry();
+  }
+}
 
 bool FlutterWindow::QueueBottomInset(double logical_pixels) {
   if (!std::isfinite(logical_pixels)) logical_pixels = 0;
@@ -697,6 +743,8 @@ bool FlutterWindow::OnCreate() {
     return false;
   }
   RegisterPlugins(flutter_controller_->engine());
+  gathering_native_channel_ = CreateGatheringNativeBridge(
+      flutter_controller_->engine()->messenger(), GetHandle());
   window_channel_ =
       std::make_unique<flutter::MethodChannel<flutter::EncodableValue>>(
           flutter_controller_->engine()->messenger(),
@@ -726,6 +774,25 @@ bool FlutterWindow::OnCreate() {
         } else if (call.method_name() == "toggleMaximize") {
           ShowWindow(window, IsZoomed(window) ? SW_RESTORE : SW_MAXIMIZE);
           result->Success(flutter::EncodableValue(IsZoomed(window) != FALSE));
+        } else if (call.method_name() == "closeHandlerReady") {
+          // The window can receive WM_CLOSE before Dart has registered its
+          // guarded callback. Advance the generation before replaying a
+          // deferred request so an overlapping notImplemented reply can see
+          // that a newer handler is already ready.
+          close_handler_generation_ += 1;
+          result->Success();
+          ReplayDeferredCloseRequest();
+        } else if (call.method_name() == "requestClose") {
+          // Startup surfaces have no local save barrier. Route their caption
+          // button through the same Dart close-request handshake as Alt+F4 so
+          // an offstage Fish native view can finish channel teardown before
+          // the Flutter engine is destroyed.
+          if (PostMessage(window, WM_CLOSE, 0, 0) == 0) {
+            result->Error("window_close_failed",
+                          "Windows could not queue the close request.");
+          } else {
+            result->Success();
+          }
         } else if (call.method_name() == "close") {
           native_close_allowed_ = true;
           if (PostMessage(window, WM_CLOSE, 0, 0) == 0) {
@@ -940,6 +1007,10 @@ bool FlutterWindow::OnCreate() {
           result->NotImplemented();
         }
       });
+  // A re-entrant WM_CLOSE can arrive while Flutter starts but before this
+  // channel exists. Replay it now even if Dart's one-shot readiness message
+  // was already sent too early and received MissingPlugin.
+  ReplayDeferredCloseRequest();
   flutter_view_window_ = flutter_controller_->view()->GetNativeWindow();
   SetChildContent(flutter_view_window_);
   if (SetWindowSubclass(flutter_view_window_, FlutterViewResizeSubclassProc,
@@ -961,6 +1032,7 @@ bool FlutterWindow::OnCreate() {
 }
 
 void FlutterWindow::OnDestroy() {
+  CancelDeferredCloseRetry();
   StopActiveNodeScanner(true);
   if (flutter_view_window_ != nullptr) {
     RemoveWindowSubclass(flutter_view_window_, FlutterViewResizeSubclassProc,
@@ -969,6 +1041,7 @@ void FlutterWindow::OnDestroy() {
   }
   if (flutter_controller_) {
     active_node_progress_channel_.reset();
+    gathering_native_channel_.reset();
     window_channel_.reset();
     flutter_controller_ = nullptr;
   }
@@ -980,7 +1053,7 @@ LRESULT
 FlutterWindow::MessageHandler(HWND hwnd, UINT const message,
                               WPARAM const wparam,
                                LPARAM const lparam) noexcept {
-  if (message == WM_DPICHANGED) {
+  if (!reference_mode_ && message == WM_DPICHANGED) {
     const UINT next_dpi = HIWORD(wparam);
     bottom_inset_physical_ = static_cast<int>(std::lround(
         bottom_inset_logical_ * static_cast<double>(next_dpi) / 96.0));
@@ -993,6 +1066,71 @@ FlutterWindow::MessageHandler(HWND hwnd, UINT const message,
   // embedded view can otherwise answer HTCLIENT first, swallowing the custom
   // resize frame around this borderless window.
   switch (message) {
+    case WM_CLOSE: {
+      // Own every close before Flutter's WindowsLifecycleManager sees it. The
+      // engine intentionally consumes a first WM_CLOSE while asking Dart for
+      // permission; during cold startup that framework callback may not exist
+      // yet, so allowing Flutter to run first can lose the only close request.
+      if (native_close_allowed_) {
+        CancelDeferredCloseRetry();
+        DestroyWindow(hwnd);
+        return 0;
+      }
+      if (window_channel_ == nullptr) {
+        ScheduleDeferredCloseRetry();
+        return 0;
+      }
+      if (close_request_pending_) {
+        return 0;
+      }
+      KillTimer(hwnd, kDeferredCloseRetryTimerId);
+      close_request_pending_ = true;
+      close_requested_before_handler_ = false;
+      const std::uint64_t close_handler_generation =
+          close_handler_generation_;
+      window_channel_->InvokeMethod(
+          "closeRequested", std::make_unique<flutter::EncodableValue>(),
+          std::make_unique<flutter::MethodResultFunctions<
+              flutter::EncodableValue>>(
+              [this](const flutter::EncodableValue* result) {
+                close_request_pending_ = false;
+                CancelDeferredCloseRetry();
+                const bool* approved =
+                    result == nullptr ? nullptr : std::get_if<bool>(result);
+                if (approved == nullptr || !*approved || GetHandle() == nullptr) {
+                  return;
+                }
+                native_close_allowed_ = true;
+                if (PostMessage(GetHandle(), WM_CLOSE, 0, 0) == 0) {
+                  native_close_allowed_ = false;
+                }
+              },
+              [this](const std::string&, const std::string&,
+                     const flutter::EncodableValue*) {
+                close_request_pending_ = false;
+                CancelDeferredCloseRetry();
+              },
+              [this, close_handler_generation]() {
+                // A handler may be replaced while the app changes startup
+                // surfaces. Preserve this close until the replacement Dart
+                // callback announces readiness. If that signal crossed this
+                // reply in flight, replay immediately instead of waiting for
+                // another signal that has already arrived.
+                close_request_pending_ = false;
+                ScheduleDeferredCloseRetry();
+                if (close_handler_generation_ != close_handler_generation) {
+                  ReplayDeferredCloseRequest();
+                }
+              }));
+      return 0;
+    }
+    case WM_TIMER:
+      if (wparam == kDeferredCloseRetryTimerId) {
+        KillTimer(hwnd, kDeferredCloseRetryTimerId);
+        ReplayDeferredCloseRequest();
+        return 0;
+      }
+      break;
     case kApplyBottomInsetMessage: {
       // SetWindowPos synchronously sends WM_SIZE to Flutter's child view.
       // Applying it inside the platform-channel callback can therefore
@@ -1003,13 +1141,31 @@ FlutterWindow::MessageHandler(HWND hwnd, UINT const message,
       return 0;
     }
     case WM_NCHITTEST:
-      return HitTestResizeFrame(hwnd, lparam);
+      if (!reference_mode_) return HitTestResizeFrame(hwnd, lparam);
+      break;
     case WM_SIZING:
-      PreserveResizeAspect(hwnd, wparam, reinterpret_cast<RECT*>(lparam),
-                           bottom_inset_physical_);
-      return TRUE;
+      if (!reference_mode_) {
+        PreserveResizeAspect(hwnd, wparam, reinterpret_cast<RECT*>(lparam),
+                             bottom_inset_physical_);
+        return TRUE;
+      }
+      break;
     case WM_GETMINMAXINFO: {
       auto* info = reinterpret_cast<MINMAXINFO*>(lparam);
+      if (reference_mode_) {
+        const UINT raw_dpi = GetDpiForWindow(hwnd);
+        const int dpi = static_cast<int>(raw_dpi == 0 ? 96 : raw_dpi);
+        RECT minimum = {0, 0, MulDiv(360, dpi, 96),
+                        MulDiv(340, dpi, 96)};
+        AdjustWindowRectExForDpi(
+            &minimum, static_cast<DWORD>(GetWindowLongPtr(hwnd, GWL_STYLE)),
+            FALSE,
+            static_cast<DWORD>(GetWindowLongPtr(hwnd, GWL_EXSTYLE)),
+            static_cast<UINT>(dpi));
+        info->ptMinTrackSize.x = minimum.right - minimum.left;
+        info->ptMinTrackSize.y = minimum.bottom - minimum.top;
+        return 0;
+      }
       // These parity/audit bounds are physical window dimensions. Scaling the
       // track minimum a second time made 1200x752 become 1500x940 at 125% DPI,
       // preventing both normal edge resizing and UI automation from reaching
@@ -1032,38 +1188,6 @@ FlutterWindow::MessageHandler(HWND hwnd, UINT const message,
   }
 
   switch (message) {
-    case WM_CLOSE: {
-      if (native_close_allowed_) {
-        DestroyWindow(hwnd);
-        return 0;
-      }
-      if (close_request_pending_ || window_channel_ == nullptr) {
-        return 0;
-      }
-      close_request_pending_ = true;
-      window_channel_->InvokeMethod(
-          "closeRequested", std::make_unique<flutter::EncodableValue>(),
-          std::make_unique<flutter::MethodResultFunctions<
-              flutter::EncodableValue>>(
-              [this](const flutter::EncodableValue* result) {
-                close_request_pending_ = false;
-                const bool* approved =
-                    result == nullptr ? nullptr : std::get_if<bool>(result);
-                if (approved == nullptr || !*approved || GetHandle() == nullptr) {
-                  return;
-                }
-                native_close_allowed_ = true;
-                if (PostMessage(GetHandle(), WM_CLOSE, 0, 0) == 0) {
-                  native_close_allowed_ = false;
-                }
-              },
-              [this](const std::string&, const std::string&,
-                     const flutter::EncodableValue*) {
-                close_request_pending_ = false;
-              },
-              [this]() { close_request_pending_ = false; }));
-      return 0;
-    }
     case WM_FONTCHANGE:
       flutter_controller_->engine()->ReloadSystemFonts();
       break;

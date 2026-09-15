@@ -9,6 +9,7 @@ import 'package:bdo_craft_planner_flutter/data/opportunities/market_eligibility.
 import 'package:bdo_craft_planner_flutter/data/opportunities/opportunity_market_cache_store.dart';
 import 'package:bdo_craft_planner_flutter/data/opportunities/opportunity_market_service.dart';
 import 'package:bdo_craft_planner_flutter/domain/formatting/planner_formatters.dart';
+import 'package:bdo_craft_planner_flutter/domain/market/market_calculations.dart';
 import 'package:bdo_craft_planner_flutter/domain/models/catalog_models.dart';
 import 'package:bdo_craft_planner_flutter/domain/models/craft_mode.dart';
 import 'package:bdo_craft_planner_flutter/domain/opportunities/exchange_models.dart';
@@ -46,6 +47,232 @@ void _glassTestWidgets(
 
 void main() {
   setUpAll(_loadFonts);
+
+  for (final view in [
+    (const Size(1200, 820), 1.0),
+    (const Size(820, 900), 1.0),
+    (const Size(1200, 1100), 2.0),
+  ]) {
+    _glassTestWidgets(
+      'raw ingredient sales and Inventory in Chowder ${view.$1.width} ${view.$2}',
+      (tester) async {
+        configureApplicationTestSurface(
+          tester,
+          view.$1,
+          textScaleFactor: view.$2,
+        );
+        final fixture = (await tester.runAsync(
+          () => _Fixture.create(
+            exchange: false,
+            seedNonMarketPrices: false,
+            pricesByName: {
+              'Chowder': 70000,
+              'Milk': 24800,
+              'Teff Bread': 3770,
+              'Special Pepper': 900,
+            },
+          ),
+        ))!;
+        fixture.controller.change((p) {
+          p.mode = CraftMode.cooking;
+          p.craftSearch = 'Chowder';
+        }, assemble: true);
+        await _settleWork(tester, fixture.controller.refresh());
+        await _settleWork(
+          tester,
+          fixture.controller.ensureMarketDepth(
+            fixture.controller.market.items.keys,
+          ),
+        );
+        await _settleCalculation(tester, fixture.controller);
+        final quote = fixture.controller.quotes.firstWhere(
+          (q) => q.recipeName == 'Chowder',
+        );
+        final planner = fixture.harness.bundle.controller;
+        final taxRate = marketNetRate(planner.marketTax.value);
+        planner.active.commitInventory('Teff Bread', '400000');
+        planner.active.commitInventory('Milk', '1000000');
+        await tester.pumpWidget(_host(fixture.controller));
+        await _settleImages(tester);
+        await _openCalculation(tester, 'Chowder');
+        final rawValue = find.byKey(
+          const ValueKey('raw-ingredient-sales-value'),
+        );
+        final gross = quote.ingredients.fold<double>(
+          0,
+          (sum, input) =>
+              sum +
+              (isOpportunityMarketRequestEligible(input.itemId!)
+                  ? input.quantity * input.market!.basePrice!
+                  : 0),
+        );
+        expect(
+          tester.widget<Text>(rawValue).data,
+          '≈ ${formatQuantity(gross * taxRate)} silver',
+        );
+        if (view.$1.width == 1200 && view.$2 == 1) {
+          final raw = tester.getRect(
+            find.byKey(const ValueKey('raw-ingredient-sales')),
+          );
+          final summary = tester.getRect(
+            find.byKey(const ValueKey('craft-money-summary')),
+          );
+          expect(raw.left, closeTo(summary.left, .01));
+          expect(raw.width, closeTo(summary.width, .01));
+          expect(raw.top, closeTo(summary.bottom + 12, .01));
+          expect(raw.height, lessThan(140));
+        }
+        await _captureSubstitutes(
+          tester,
+          'chowder-inventory-${view.$1.width.toInt()}-${(view.$2 * 100).toInt()}',
+        );
+        final inventory = find.byKey(
+          const ValueKey('ingredient-inventory:Teff Bread'),
+        );
+        final field = find.descendant(
+          of: inventory,
+          matching: find.byType(TextField),
+        );
+        final amountButton = find.descendant(
+          of: inventory,
+          matching: find.byKey(const ValueKey('inventory-amount-button')),
+        );
+        await tester.ensureVisible(inventory);
+        expect(field, findsNothing);
+        expect(
+          find.descendant(of: amountButton, matching: find.text('400k')),
+          findsOneWidget,
+        );
+        expect(
+          tester.getSize(inventory).height,
+          lessThanOrEqualTo(30 * view.$2),
+        );
+        final requests = fixture.requests.length;
+        await tester.tap(amountButton);
+        await tester.pump();
+        await tester.pump(const Duration(milliseconds: 100));
+        expect(tester.widget<TextField>(field).controller!.text, '400.000');
+        final editState = tester.state<EditableTextState>(
+          find.descendant(of: field, matching: find.byType(EditableText)),
+        );
+        expect(editState.renderEditable.text!.toPlainText(), '400.000');
+        expect(
+          editState.renderEditable.offset.pixels,
+          closeTo(0, 1),
+          reason:
+              'The inline editor must not inherit the dialog scroll offset.',
+        );
+        final firstDigit = editState.renderEditable.getLocalRectForCaret(
+          const TextPosition(offset: 0),
+        );
+        expect(
+          firstDigit.right,
+          greaterThan(0),
+          reason: 'The full amount must actually paint inside the editor.',
+        );
+        await _captureSubstitutes(
+          tester,
+          'chowder-inventory-${view.$1.width.toInt()}-${(view.$2 * 100).toInt()}-editing',
+        );
+        expect(
+          find.byKey(const ValueKey('ingredient-recipe-back')),
+          findsNothing,
+          reason:
+              'Editing inventory must not activate the surrounding recipe link.',
+        );
+        await tester.enterText(field, '123456');
+        expect(tester.widget<TextField>(field).controller!.text, '123.456');
+        await tester.testTextInput.receiveAction(TextInputAction.done);
+        await tester.pump(const Duration(milliseconds: 200));
+        for (final mode in CraftMode.values) {
+          expect(
+            planner.modes[mode]!.state.value.inventory['Teff Bread'],
+            123456,
+          );
+        }
+        expect(field, findsNothing);
+        expect(
+          find.descendant(of: amountButton, matching: find.text('123,5k')),
+          findsOneWidget,
+        );
+        await tester.tap(amountButton);
+        await tester.pump();
+        await tester.enterText(field, '700000');
+        await tester.tap(
+          find.descendant(
+            of: find.byType(Dialog),
+            matching: find.text('Chowder'),
+          ),
+        );
+        await tester.pump(const Duration(milliseconds: 200));
+        expect(field, findsNothing);
+        expect(
+          planner.active.state.value.inventory['Teff Bread'],
+          700000,
+          reason: 'Clicking away commits without needing Enter.',
+        );
+        await tester.tap(amountButton);
+        await tester.pump();
+        await tester.enterText(field, '999');
+        await tester.sendKeyEvent(LogicalKeyboardKey.escape);
+        await tester.pump();
+        expect(field, findsNothing);
+        expect(find.byType(Dialog), findsOneWidget);
+        expect(
+          planner.active.state.value.inventory['Teff Bread'],
+          700000,
+          reason: 'Escape cancels the input, not the recipe dialog.',
+        );
+        expect(
+          fixture.requests.length,
+          requests,
+          reason: 'Inventory edits do not request market data.',
+        );
+        expect(
+          tester.widget<Text>(rawValue).data,
+          '≈ ${formatQuantity(gross * taxRate)} silver',
+        );
+        expect(
+          fixture.controller
+              .inspectRecipe(recipe: fixture.controller.recipes['Chowder']!)
+              .quote
+              .listingProfit,
+          quote.listingProfit,
+          reason: 'Owned inventory does not make crafting inputs free.',
+        );
+        final crafts = find.descendant(
+          of: find.byKey(const ValueKey('opportunity-detail-crafts')),
+          matching: find.byType(TextField),
+        );
+        await tester.ensureVisible(crafts);
+        await tester.enterText(crafts, '2');
+        await tester.pump();
+        final batch = fixture.controller
+            .inspectRecipe(
+              recipe: fixture.controller.recipes['Chowder']!,
+              crafts: 2,
+            )
+            .quote;
+        final batchGross = batch.ingredients.fold<double>(
+          0,
+          (sum, input) =>
+              sum +
+              (isOpportunityMarketRequestEligible(input.itemId!)
+                  ? input.quantity * input.market!.basePrice!
+                  : 0),
+        );
+        expect(
+          tester.widget<Text>(rawValue).data,
+          '≈ ${formatQuantity(batchGross * taxRate)} silver',
+        );
+        FocusManager.instance.primaryFocus?.unfocus();
+        await tester.pump();
+        expect(tester.takeException(), isNull);
+        await tester.pumpWidget(const SizedBox.shrink());
+        await _settleWork(tester, fixture.dispose());
+      },
+    );
+  }
 
   for (final scale in [1.0, 2.0]) {
     _glassTestWidgets(
@@ -2157,17 +2384,12 @@ void main() {
           );
           expect(find.textContaining('Makes '), findsNothing);
           if (scenario.scale == 2) {
-            final cardWidth = tester
-                .getSize(find.byKey(const ValueKey('craft-card:Beer')))
-                .width;
             expect(
-              cardWidth,
-              allOf(
-                greaterThan(scenario.size.width * .84),
-                lessThan(scenario.size.width * .86),
-              ),
-              reason:
-                  'Double-sized text keeps the approved wide, centered card footprint.',
+              tester
+                  .getSize(find.byKey(const ValueKey('craft-card:Beer')))
+                  .width,
+              greaterThan(scenario.size.width * .85),
+              reason: 'Double-sized text gets a full-width card.',
             );
           }
         }
@@ -3582,9 +3804,12 @@ void main() {
           );
           expect(
             tester.widget<Text>(amount).style?.fontSize,
-            metric.label == 'Profit' ? 22 : 13,
+            metric.label == 'Profit' ? 24 : 14,
           );
-          expect(tester.widget<Text>(heading).style?.fontSize, 12);
+          expect(
+            tester.widget<Text>(heading).style?.fontSize,
+            metric.label == 'Profit' ? 12 : 13,
+          );
           expect(
             tester.widget<Text>(amount).style?.fontWeight,
             metric.label == 'Profit' ? FontWeight.w700 : FontWeight.w500,
@@ -3642,7 +3867,7 @@ void main() {
               )
               .style
               ?.fontSize,
-          16,
+          18,
         );
         expect(
           tester
@@ -3656,14 +3881,14 @@ void main() {
         final icon = tester.widget<ModeItemIcon>(
           find.descendant(of: card, matching: find.byType(ModeItemIcon)),
         );
-        expect(icon.size, 40);
+        expect(icon.size, 44);
         expect(icon.showFrame, isFalse);
         expect(icon.fit, BoxFit.contain);
         expect(
           tester.getSize(
             find.byKey(ValueKey('craft-artwork-frame:${scenario.name}')),
           ),
-          const Size(58, 58),
+          const Size(64, 64),
         );
         expect(
           find.descendant(

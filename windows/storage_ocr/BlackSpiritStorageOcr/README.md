@@ -59,15 +59,22 @@ The result also records whether a suggested amount came from agreeing direct
 reads or from a recovery/single-view path, so the review UI highlights only
 the latter instead of treating every normal K/M display as uncertain.
 
-An inactive catalog-extension experiment remains available only in the private
-development repository for recovery and review. Its generated overlay is
-excluded from this public source snapshot, `Assets/RecipeBook`, and every build
-or publish output. It must not be enabled without an explicit decision to fork
-the sealed OCR tool.
+An inactive catalog-extension experiment is preserved under
+`Tools/PlannerCatalog/GeneratedOverlayBackup` for recovery and review. It is
+not part of `Assets/RecipeBook`, is not copied to build or publish output, and
+must not be enabled without an explicit decision to fork the sealed OCR tool.
 
-## Private golden-fixture validation
+## Golden fixture runner
 
-Contributor screenshot fixtures remain in the private development repository.
-They are excluded from this public source snapshot and every build or publish
-output. Before promotion, the private fixture suite passed at schema 4 with 5
-cases and 284 slots, including the pinned numeric-grammar review suggestions.
+The fixture screenshots live under `tests/` and are never copied to build or
+publish output. After publishing, run:
+
+```powershell
+& <publish>\BlackSpiritStorageOcr.exe --fixture `
+  .\tests\fixtures\recipe-book-ocr\manifest.json
+```
+
+The expected result is schema 4, 5 cases, 284 slots, 260 resolved quantities,
+18 abstentions, 2 assumed-one quantities, 12 material assertions, 40 border
+assertions, minimum border confidence 0.721, and three pinned numeric-grammar
+review suggestions for the difficult short-number fixture.

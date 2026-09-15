@@ -344,6 +344,19 @@ void main() {
       ).where((name) => name.startsWith('Shining Alchemy Stone')),
       isEmpty,
     );
+    expect(alchemyShards.variants, hasLength(2));
+    final spiritStoneRoute = alchemyShards.resolveVariant('spirit-stone');
+    expect(spiritStoneRoute.outputMinimum, 10);
+    expect(spiritStoneRoute.outputMaximum, 18);
+    expect(spiritStoneRoute.ingredients.single.options, const <String>[
+      'Destruction Spirit Stone',
+      'Guardian Spirit Stone',
+      'Life Spirit Stone',
+    ]);
+    expect(
+      spiritStoneRoute.ingredients.single.options,
+      isNot(contains('Wild Spirit Stone')),
+    );
   });
 
   test('legacy materials are removed from current recipes and market '
@@ -599,6 +612,22 @@ void main() {
       guidanceFor('Rusalka Sea Crystal'),
       allOf(contains('right-click'), contains('simple alchemy')),
     );
+    expect(
+      guidanceFor('Purified Water'),
+      allOf(
+        contains('5,000 silver'),
+        contains('sand grain bazaar'),
+        contains('arehaza'),
+        contains('right-click'),
+        contains('filter'),
+      ),
+    );
+    final purifiedWaterVendor = _objectMap(
+      _objectMap(rawCatalog['vendorInfo'])['Purified Water'],
+    );
+    expect(_text(purifiedWaterVendor['vendor']), 'Waida');
+    expect(_text(purifiedWaterVendor['location']), 'Sand Grain Bazaar');
+    expect(purifiedWaterVendor['price'], 5000);
 
     final allGuidance = acquisitionInfo.values
         .expand(
@@ -618,6 +647,83 @@ void main() {
     ]) {
       expect(allGuidance, isNot(contains(stalePhrase)));
     }
+  });
+
+  test('Oquilla purchases use the fixed NPC price throughout the plan', () {
+    const name = 'Oquilla Piece of the Old Moon';
+    final source = resolveSourceInfo(name: name, recipe: null, rules: rules);
+    expect(source.vendor, 'Old Moon Manager');
+    expect(source.location, 'major cities');
+    expect(source.npcPrice, 50000000);
+    expect(
+      resolveItemAcquisition(name: name, rules: rules)!.displayableSummaries,
+      contains(
+        allOf(contains('50,000,000 Silver'), contains('Old Moon Manager')),
+      ),
+    );
+
+    final result = assembly.build(
+      catalog: catalog,
+      mode: CraftMode.processing,
+      state: ModeState(
+        target: 'Brimming Essence of Aether',
+        want: 100,
+        bonusTarget: '',
+        recipeVariantChoices: const {
+          'Brimming Essence of Aether': 'oquilla-pieces',
+        },
+        market: MarketState(prices: const {name: 1}, stock: const {name: 0}),
+        appearance: AppearanceSettings.defaultsFor(CraftMode.processing),
+      ),
+    );
+    final oquilla = result.missing.singleWhere((row) => row.name == name);
+    expect(oquilla.missing, 200);
+    expect(oquilla.market.status, 'vendor');
+    expect(oquilla.market.marketable, isFalse);
+    expect(oquilla.market.buyable, 200);
+    expect(oquilla.market.price, 50000000);
+    expect(oquilla.market.total, 10000000000);
+  });
+
+  test('current Fairy Breath and legacy copies keep distinct exchanges', () {
+    final current = resolveItemAcquisition(
+      name: "Fairy's Breath",
+      rules: rules,
+    )!;
+    final dormant = resolveItemAcquisition(
+      name: "Dormant Fairy's Breath",
+      rules: rules,
+    )!;
+    expect(current.itemId, 821371);
+    expect(dormant.itemId, 820014);
+    final currentLines = current.displayableSummaries.join('\n').split('\n');
+    expect(
+      currentLines,
+      containsAll(<String>[
+        '30 Wild Grass',
+        '20 Log',
+        '12 Rough Stone',
+        '1 Fruit of Nature',
+        '1 Trace of Nature',
+        '900 Contribution EXP and 30 Gathering EXP',
+      ]),
+    );
+    expect(currentLines.join('\n'), contains('does not exchange for Sharps'));
+    expect(
+      dormant.displayableSummaries.join('\n'),
+      allOf(
+        contains('no longer obtainable'),
+        contains('2 Sharp Black Crystal Shards'),
+      ),
+    );
+    expect(dormant.routes.single.availability, 'existing-items-only');
+
+    final sharp = resolveItemAcquisition(
+      name: 'Sharp Black Crystal Shard',
+      rules: rules,
+    )!;
+    expect(sharp.routes.first.summary, isNot(contains("Fairy's Breath")));
+    expect(sharp.routes.last.summary, contains("Dormant Fairy's Breath"));
   });
 
   test('Elixir of Life uses the corrected production ingredients', () {

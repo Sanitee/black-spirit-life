@@ -27,7 +27,40 @@ void main() {
     );
   });
 
-  test('mastery output interpolates and clamps at locked values', () {
+  test('official maximum-quantity anchors match both main-output formulas', () {
+    for (final (mastery, cookingChance, alchemyChance) in [
+      (0.0, 0.0, 0.0),
+      (1000.0, .178084, .219024),
+      (1900.0, .556516, .467856),
+      (2000.0, .611524, .5),
+      (3000.0, .7645, .625),
+    ]) {
+      expect(
+        masteryTableChance(cookingMaxDishChance, mastery),
+        closeTo(cookingChance, 1e-12),
+      );
+      expect(
+        masteryTableChance(alchemyMaxProcChance, mastery),
+        closeTo(alchemyChance, 1e-12),
+      );
+      expect(
+        cookingExpectedOutput(mastery, 1, 4),
+        closeTo(2.5 * (1 - cookingChance) + 4 * cookingChance, 1e-12),
+      );
+      expect(
+        alchemyExpectedOutput(mastery, 1, 4),
+        closeTo(2.5 * (1 - alchemyChance) + 4 * alchemyChance, 1e-12),
+      );
+      // An exceptional recipe range must not inherit the normal 1-4 average.
+      expect(
+        cookingExpectedOutput(mastery, 2, 3),
+        closeTo(2.5 * (1 - cookingChance) + 3 * cookingChance, 1e-12),
+      );
+      expect(alchemyExpectedOutput(mastery, 1, 1), 1);
+    }
+  });
+
+  test('mastery output interpolates and clamps at current values', () {
     expect(alchemyExpectedOutput(0, 1, 4), 2.5);
     expect(alchemyExpectedOutput(25, 1, 4), closeTo(2.5432, 1e-12));
     expect(alchemyExpectedOutput(50, 1, 4), closeTo(2.5864, 1e-12));

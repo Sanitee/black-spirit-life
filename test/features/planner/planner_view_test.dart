@@ -6,6 +6,7 @@ import 'package:bdo_craft_planner_flutter/domain/state/planner_state.dart';
 import 'package:bdo_craft_planner_flutter/domain/state/state_copy.dart';
 import 'package:bdo_craft_planner_flutter/features/planner/planner.dart';
 import 'package:bdo_craft_planner_flutter/features/planner/planner_shared.dart';
+import 'package:bdo_craft_planner_flutter/features/recipe_book/recipe_book_item_info_view.dart';
 import 'package:bdo_craft_planner_flutter/features/shared/mode_item_icon.dart';
 import 'package:bdo_craft_planner_flutter/features/shared/recipe_variant_selector.dart';
 import 'package:bdo_craft_planner_flutter/shared/overlays/anchored_popover.dart';
@@ -997,6 +998,102 @@ void main() {
   );
 
   testWidgets(
+    'Imperfect Lightstone Need First supports Enter and Add without a double add',
+    (tester) async {
+      await setPlannerTestSize(tester, const Size(1500, 940));
+      final harness = PlannerTestHarness(includeLightstoneNeed: true);
+      const name = 'Imperfect Lightstone of Flora';
+
+      await tester.pumpWidget(harness.plannerHost());
+      await tester.pump(const Duration(milliseconds: 200));
+
+      Finder ownedActions() => find.byKey(PlannerActionKeys.row('P18', name));
+      Finder ownedField() =>
+          find.descendant(of: ownedActions(), matching: find.byType(TextField));
+
+      expect(
+        harness.controller.active.state.value.ignoreIngredientInventory,
+        isTrue,
+      );
+      expect(find.text('Need 40 | Have 0 | Missing 40'), findsOneWidget);
+      await tester.ensureVisible(ownedField());
+      await tester.enterText(ownedField(), '12');
+      await tester.testTextInput.receiveAction(TextInputAction.done);
+      await tester.pump(const Duration(milliseconds: 200));
+
+      expect(harness.controller.active.state.value.inventory[name], 12);
+      expect(
+        harness.controller.active.state.value.ignoreIngredientInventory,
+        isFalse,
+      );
+      expect(find.text('Need 40 | Have 12 | Missing 28'), findsOneWidget);
+      expect(tester.widget<TextField>(ownedField()).controller!.text, '0');
+
+      await tester.enterText(ownedField(), '28');
+      await tester.tap(find.byKey(PlannerActionKeys.row('P19', name)));
+      await tester.pump(const Duration(milliseconds: 200));
+
+      expect(harness.controller.active.state.value.inventory[name], 40);
+      expect(ownedActions(), findsNothing);
+      expect(tester.takeException(), isNull);
+      await harness.controller.dispose();
+    },
+  );
+
+  testWidgets(
+    'Need First keeps invalid, zero, and paused Add drafts without mutation',
+    (tester) async {
+      await setPlannerTestSize(tester, const Size(1500, 940));
+      final harness = PlannerTestHarness(includeLightstoneNeed: true);
+      const name = 'Imperfect Lightstone of Flora';
+
+      await tester.pumpWidget(harness.plannerHost());
+      await tester.pump(const Duration(milliseconds: 200));
+
+      final ownedActions = find.byKey(PlannerActionKeys.row('P18', name));
+      final ownedField = find.descendant(
+        of: ownedActions,
+        matching: find.byType(TextField),
+      );
+      await tester.ensureVisible(ownedField);
+
+      await tester.enterText(ownedField, 'not a number');
+      await tester.testTextInput.receiveAction(TextInputAction.done);
+      await tester.pump();
+      expect(find.text('Enter a nonnegative amount'), findsOneWidget);
+      expect(harness.controller.active.state.value.inventory, isEmpty);
+      expect(
+        harness.controller.active.state.value.ignoreIngredientInventory,
+        isTrue,
+      );
+
+      await tester.enterText(ownedField, '0');
+      await tester.tap(find.byKey(PlannerActionKeys.row('P19', name)));
+      await tester.pump();
+      expect(
+        find.text('Enter an amount greater than zero to add'),
+        findsOneWidget,
+      );
+      expect(tester.widget<TextField>(ownedField).controller!.text, '0');
+      expect(harness.controller.active.state.value.inventory, isEmpty);
+
+      await tester.enterText(ownedField, '7');
+      harness.controller.freezeMutationsForRestart();
+      await tester.tap(find.byKey(PlannerActionKeys.row('P19', name)));
+      await tester.pump();
+      expect(find.text("Couldn't add right now"), findsOneWidget);
+      expect(tester.widget<TextField>(ownedField).controller!.text, '7');
+      expect(harness.controller.active.state.value.inventory, isEmpty);
+      expect(
+        harness.controller.active.state.value.ignoreIngredientInventory,
+        isTrue,
+      );
+      expect(tester.takeException(), isNull);
+      await harness.controller.dispose();
+    },
+  );
+
+  testWidgets(
     'target options keep icons while the selected field stays icon-free',
     (tester) async {
       await setPlannerTestSize(tester, const Size(1500, 940));
@@ -1805,7 +1902,7 @@ void main() {
       find.text("Can't be registered on the Central Market."),
       findsOneWidget,
     );
-    expect(find.text('Stock unknown'), findsNothing);
+    expect(find.text('Stock —'), findsNothing);
     expect(find.text('No price'), findsNothing);
     expect(find.text('Total -'), findsNothing);
     expect(
@@ -1850,7 +1947,7 @@ void main() {
       expect(find.text('500 each'), findsOneWidget);
       expect(find.textContaining('Total '), findsOneWidget);
       expect(find.text('Total -'), findsNothing);
-      expect(find.text('Stock unknown'), findsNothing);
+      expect(find.text('Stock —'), findsNothing);
       expect(
         find.text("Can't be registered on the Central Market."),
         findsOneWidget,
@@ -1888,7 +1985,7 @@ void main() {
         find.text("Can't be registered on the Central Market."),
         findsOneWidget,
       );
-      expect(find.text('Stock unknown'), findsNothing);
+      expect(find.text('Stock —'), findsNothing);
 
       refresh.complete(
         const PlannerMarketRefresh(
@@ -2876,6 +2973,19 @@ void main() {
         findsNothing,
       );
       expect(card, findsOneWidget);
+      final reference = tester.widget<ItemReferenceCard>(
+        find.descendant(of: card, matching: find.byType(ItemReferenceCard)),
+      );
+      final referenceSession = reference.controller;
+      expect(referenceSession.checkPrices, isNull);
+      expect(
+        reference.info.acquisitionNotes,
+        referenceSession.itemInfoFor('Sunrise Herb')!.acquisitionNotes,
+      );
+      expect(
+        reference.info.effects,
+        referenceSession.itemInfoFor('Sunrise Herb')!.effects,
+      );
       final acquisitionDrag = find.byKey(
         const ValueKey<String>(
           'planner-acquisition-drag-region:'
@@ -2898,10 +3008,21 @@ void main() {
       await tester.sendKeyEvent(LogicalKeyboardKey.escape);
       await tester.pump();
       expect(card, findsNothing);
+      expect(
+        () => ChangeNotifier.debugAssertNotDisposed(referenceSession),
+        throwsFlutterError,
+        reason: 'The reference controller must not outlive its popup.',
+      );
 
       await tester.tap(action);
       await tester.pump();
       expect(card, findsOneWidget);
+      expect(
+        tester
+            .widget<ItemReferenceCard>(find.byType(ItemReferenceCard))
+            .controller,
+        isNot(same(referenceSession)),
+      );
       await tester.tap(find.bySemanticsLabel('Close Sunrise Herb information'));
       await tester.pump();
       expect(card, findsNothing);
@@ -3356,6 +3477,7 @@ void main() {
       await tester.tap(
         find.byKey(PlannerActionKeys.row('P08', 'Clear Liquid Reagent')),
       );
+      // Mount the immediate, non-interactive success presentation first.
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 200));
 

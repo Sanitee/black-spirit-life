@@ -20,17 +20,17 @@ if ($PublicGitHubRepository -cnotmatch
     '^https://github\.com/[A-Za-z0-9](?:[A-Za-z0-9-]{0,38})/[A-Za-z0-9._-]{1,100}$') {
     throw 'The public update source must be the permanent canonical repository base URL: https://github.com/OWNER/REPOSITORY'
 }
-$Version = '0.1.7'
-$BuildNumber = '26'
-$PreviousStableVersion = '0.1.6'
+$Version = '0.1.9'
+$BuildNumber = '28'
+$PreviousStableVersion = '0.1.7'
 $PreviousStableCommit =
-    'bebc1a03815303df25fdfc939edfd840d9cbbe0c'
+    '74e9b21887ce84d2c51d2ed82182acee4f8495ec'
 $UpdateSource = $PublicGitHubRepository
-$ReleaseNotesRelativePath = 'docs\releases\0.1.7.md'
+$ReleaseNotesRelativePath = 'docs\releases\0.1.9.md'
 $OutputDirectoryName = 'public-stable-candidate'
 $ManifestName = 'public-candidate-manifest.json'
 $RemainingBlockers = @(
-    'verify an installed 0.1.6 updates to 0.1.7 through the in-app update bar with its personal data intact',
+    'verify an installed 0.1.7 updates to 0.1.9 through the in-app update bar with its selected personal-data root intact',
     'complete fresh install, repair, and uninstall lifecycle verification',
     'fresh-clone privacy and release-artifact scan'
 )
@@ -41,6 +41,7 @@ $DisplayName = 'Black Spirit Life'
 $InstallerProductName = 'Black Spirit Life Installer'
 $ExecutableName = 'BlackSpiritLife.exe'
 $UpdaterHelperName = 'BlackSpiritLifeUpdater.exe'
+$FishHostHelperName = 'BlackSpiritLifeFishHost.exe'
 $BuiltInstallerName = 'BlackSpiritLifeInstaller.exe'
 $InstallerName = 'BlackSpiritLifeInstaller.exe'
 $UpdateSourceEnvironmentKey = 'BLACK_SPIRIT_LIFE_UPDATE_SOURCE'
@@ -51,14 +52,25 @@ $VelopackRuntimeSha256 =
     'C36D8B984639A8AF9D3397088D3FFB8213FE1BD0917F555CF0C6E33F014403EC'
 $VelopackPackageUrl =
     'https://github.com/velopack/velopack/releases/download/1.2.0/vpk.1.2.0.nupkg'
-$PreviousFeedBytes = 14322L
+$PreviousFeedBytes = 16577L
 $PreviousFeedSha256 =
-    'A8DD060274DF561F8523D7F34FA2870402CBF5810428D814726957CD47ACC8BF'
-$PreviousFullPackageBytes = 218730095L
+    'C37C7B35BCD2F9E95D12FD227A9F2EC0D0365288E32F68605E02629F221B3A44'
+$PreviousFullPackageBytes = 218802840L
 $PreviousFullPackageSha256 =
-    '956B3E3184894EDBA8EBDE9D8727575542C5402F591C8FF1E3A8178EA50C0042'
-$ForbiddenPackagedArtifactPattern =
-    '(?i)(webview|python|fishy[ _-]*stuff|garmoth|bairog|fish[_ -]?companion|bdo[_ -]?fishing[_ -]?core|bdo[_ -]?gathering[_ -]?companion|session_import|planner-state|personal-data-location|personal-data-move-journal|connection\.json|(?:^|[\\/])[^\\/]*(?:sessions?|journals?|loadouts?|user[ _-]?settings|app[ _-]?settings|opportunities[ _-]?settings|gathering[ _-]?state|fishing[ _-]?state|fishing[ _-]?profiles?|fishing[ _-]?setups?)[^\\/]*\.(?:json|csv|tsv|txt|ya?ml|toml|ini|config|dat|bin|db|sqlite3?)(?:-(?:wal|shm))?|\.(?:db|sqlite3?)(?:-(?:wal|shm))?|\.(?:py|pyc|pyo|pyd)$|\.dmp$|\.log$|\.tmp$|\.bak$|screenshot)'
+    '6D42ECBF970A4549F2B32DC2C9069F96918250A938CF8CB54ADD1DDDD1AE29E6'
+$PrivateMachinePathPattern =
+    '(?i)[A-Z]:(?:\\{1,2}|/)(?:Users|Codex)(?:\\{1,2}|/)'
+$ForbiddenPackagedArtifactPattern = @(
+    '(?i)(?:^|[\\/])(?:webview2|video[ _-]*webview|webview[ _-]*profile|browser[ _-]*profile|user[ _-]*data|cookies?|local[ _-]*storage)(?:[\\/]|$)',
+    '(?i)(?:^|[\\/])(?:session-import-inbox|BlackSpiritLife\.App\.Removal)(?:[\\/]|$)',
+    '(?i)(?:^|[\\/])(?:planner-state\.json(?:[.-][^\\/]*)?|bdo-craft-planner-backup\.json(?:[.-][^\\/]*)?|sessions\.json(?:[.-][^\\/]*)?|personal-data-(?:location(?:\.committed)?|move-journal)\.json(?:[.-][^\\/]*)?|connection\.json(?:[.-][^\\/]*)?|\.black-spirit-life-(?:profile|intentional-reset|move-(?:manifest|source|stage))\.json(?:[.-][^\\/]*)?|pending-personal-data-removal(?:\.committed)?\.journal(?:[.-][^\\/]*)?|(?:map-candidate-native|avalonia-v1)-[0-9a-f]{64}\.json(?:[.-][^\\/]*)?|(?:opportunity-market-(?:cache|observations)|market-request-(?:pauses|window))\.json(?:[.-][^\\/]*)?)$',
+    '(?i)(?:^|[\\/])icons[\\/][0-9a-f]{64}\.png$',
+    '(?i)(?:^|[\\/])[^\\/]*(?:saved[ _-]*sessions?|journals?|loadouts?|saved[ _-]*imports?|receipts?|drafts?|user[ _-]*settings|app[ _-]*settings|opportunities[ _-]*settings|gathering[ _-]*state|fishing[ _-]*state|fishing[ _-]*profiles?|fishing[ _-]*setups?)[^\\/]*\.(?:json|csv|tsv|txt|ya?ml|toml|ini|config|dat|bin|db|sqlite3?)(?:(?:-(?:wal|shm|journal))|[.-][^\\/]*)?$',
+    '(?i)(?:^|[\\/])fish-journal(?:\.before-sale-redesign)?\.sqlite3(?:(?:-(?:wal|shm|journal))|\.(?:bak|backup)(?:-[^\\/]*)?)?$',
+    '(?i)\.(?:db|sqlite3?)(?:(?:-(?:wal|shm|journal))|\.(?:bak|backup)(?:-[^\\/]*)?)?$',
+    '(?i)(?:^|[\\/])__pycache__(?:[\\/]|$)|\.(?:pyc|pyo|dmp|log|tmp|bak)$|\.pdb(?:[.-][^\\/]*)?$',
+    '(?i)(?:^|[\\/])(?:luneye_(?:matchlock_buffs_1424|matchlock_crystals_1321|sniper_buffs_1505)\.png|tshira_evil_2024_rotation\.jpg)$'
+) -join '|'
 
 function Assert-LastExitCode {
     param([Parameter(Mandatory = $true)][string]$Operation)
@@ -78,6 +90,26 @@ function Assert-OrdinaryFile {
         throw "Required file is not an ordinary non-empty file: $Path"
     }
     return $item
+}
+
+function Test-SqliteFileHeader {
+    param([Parameter(Mandatory = $true)][string]$Path)
+
+    $stream = [System.IO.File]::OpenRead($Path)
+    try {
+        if ($stream.Length -lt 16) {
+            return $false
+        }
+        $header = [byte[]]::new(16)
+        if ($stream.Read($header, 0, $header.Length) -ne $header.Length) {
+            return $false
+        }
+        return [System.Text.Encoding]::ASCII.GetString($header) -ceq
+            "SQLite format 3`0"
+    }
+    finally {
+        $stream.Dispose()
+    }
 }
 
 function Get-ArtifactRecord {
@@ -119,30 +151,39 @@ function Assert-CleanSource {
     }
 }
 
-function Reset-VerifiedBuildBundle {
+function Reset-VerifiedWindowsBuildTree {
     param(
         [Parameter(Mandatory = $true)][string]$ProjectRoot,
         [Parameter(Mandatory = $true)][string]$BundleDirectory
     )
+    $resolvedBuildRoot = [System.IO.Path]::GetFullPath(
+        (Join-Path $ProjectRoot 'build')
+    )
+    $resolvedWindowsBuildRoot = [System.IO.Path]::GetFullPath(
+        (Join-Path $resolvedBuildRoot 'windows\x64')
+    )
     $resolvedRunnerRoot = [System.IO.Path]::GetFullPath(
-        (Join-Path $ProjectRoot 'build\windows\x64\runner')
+        (Join-Path $resolvedWindowsBuildRoot 'runner')
     )
     $expectedBundle = [System.IO.Path]::GetFullPath(
         (Join-Path $resolvedRunnerRoot 'Release')
     )
     $resolvedBundle = [System.IO.Path]::GetFullPath($BundleDirectory)
+    $buildPrefix = $resolvedBuildRoot.TrimEnd('\') + '\'
     $runnerPrefix = $resolvedRunnerRoot.TrimEnd('\') + '\'
     if ($resolvedBundle -cne $expectedBundle -or
+        -not $resolvedWindowsBuildRoot.StartsWith(
+            $buildPrefix,
+            [System.StringComparison]::OrdinalIgnoreCase
+        ) -or
         -not $resolvedBundle.StartsWith(
             $runnerPrefix,
             [System.StringComparison]::OrdinalIgnoreCase
         )) {
-        throw 'Refusing to clean an unexpected Flutter build directory.'
+        throw 'Refusing to clean an unexpected Flutter Windows build directory.'
     }
-    $pathToInspect = [System.IO.Path]::GetFullPath(
-        (Join-Path $ProjectRoot 'build')
-    )
-    foreach ($segment in @('windows', 'x64', 'runner', 'Release')) {
+    $pathToInspect = $resolvedBuildRoot
+    foreach ($segment in @('windows', 'x64')) {
         if (Test-Path -LiteralPath $pathToInspect) {
             $pathItem = Get-Item -LiteralPath $pathToInspect -Force
             if (($pathItem.Attributes -band
@@ -152,32 +193,49 @@ function Reset-VerifiedBuildBundle {
         }
         $pathToInspect = Join-Path $pathToInspect $segment
     }
-    if (Test-Path -LiteralPath $resolvedBundle) {
-        $bundleItem = Get-Item -LiteralPath $resolvedBundle -Force
-        if (($bundleItem.Attributes -band
+    if (Test-Path -LiteralPath $resolvedWindowsBuildRoot) {
+        $buildItem = Get-Item -LiteralPath $resolvedWindowsBuildRoot -Force
+        if (($buildItem.Attributes -band
             [System.IO.FileAttributes]::ReparsePoint) -ne 0) {
-            throw 'Refusing to clean a reparse-point Flutter build directory.'
+            throw 'Refusing to clean a reparse-point Flutter Windows build directory.'
         }
-        Remove-Item -LiteralPath $resolvedBundle -Recurse -Force
+        Remove-Item -LiteralPath $resolvedWindowsBuildRoot -Recurse -Force
     }
-    if (Test-Path -LiteralPath $resolvedBundle) {
-        throw 'The previous Flutter release bundle could not be removed.'
+    if (Test-Path -LiteralPath $resolvedWindowsBuildRoot) {
+        throw 'The previous Flutter Windows build tree could not be removed.'
     }
 }
 
 function Assert-PublicSourceBoundary {
     param([Parameter(Mandatory = $true)][string]$ProjectRoot)
 
+    $trackedGeneratedOutputs = @(& git -C $ProjectRoot ls-files -- 2>$null |
+        Where-Object {
+            $_ -match '(?i)(?:^|/)(?:\.dart_tool|build|bin|obj)(?:/|$)' -or
+            $_ -match '(?i)^windows/flutter/ephemeral(?:/|$)'
+        })
+    Assert-LastExitCode -Operation 'Tracked generated-output boundary check'
+    if ($trackedGeneratedOutputs.Count -ne 0) {
+        throw "The public source tracks generated output that source scanning would exclude: $($trackedGeneratedOutputs[0])"
+    }
+
     $forbiddenRelativePaths = @(
-        'packages\bdo_fishing_core',
-        'packages\bdo_gathering_companion',
-        'windows\session_import',
         'packages\bdo_map_core\tool\seeds\bdocodex_worldmap_2026_07_29_private_seed.json',
         'packages\bdo_map_core\tool\seeds\bdocodex_worldmap_2026_08_15_private_seed.json',
         'packages\bdo_map_core\tool\seeds\rusalka_coral_bdocodex_2026_07_28_private_seed.json',
         'packages\bdo_map_core\tool\seeds\stillcoral_coastal_gathering_bdocodex_2026_08_01_private_seed.json',
         'packages\bdo_map_core\tool\seeds\vendor_npcs_bdocodex_2026_08_15_private_seed.json',
-        'packages\bdo_map_core\tool\seeds\vendor_npc_portraits_2026_08_16_private_manifest.json'
+        'packages\bdo_map_core\tool\seeds\vendor_npc_portraits_2026_08_16_private_manifest.json',
+        'packages\bdo_fishing_core\assets\fish_companion\data\fish-journal.sqlite3',
+        'packages\bdo_fishing_core\assets\fish_companion\data\fish-journal.sqlite3-wal',
+        'packages\bdo_fishing_core\assets\fish_companion\data\fish-journal.sqlite3-shm',
+        'packages\bdo_fishing_core\assets\fish_companion\data\fish-journal.before-sale-redesign.sqlite3',
+        'packages\bdo_fishing_core\assets\fish_companion\data\fish-journal.before-sale-redesign.sqlite3-wal',
+        'packages\bdo_fishing_core\assets\fish_companion\data\fish-journal.before-sale-redesign.sqlite3-shm',
+        'packages\bdo_gathering_companion\assets\rotations\luneye_matchlock_buffs_1424.png',
+        'packages\bdo_gathering_companion\assets\rotations\luneye_matchlock_crystals_1321.png',
+        'packages\bdo_gathering_companion\assets\rotations\luneye_sniper_buffs_1505.png',
+        'packages\bdo_gathering_companion\assets\rotations\tshira_evil_2024_rotation.jpg'
     )
     foreach ($relativePath in $forbiddenRelativePaths) {
         if (Test-Path -LiteralPath (Join-Path $ProjectRoot $relativePath)) {
@@ -185,47 +243,201 @@ function Assert-PublicSourceBoundary {
         }
     }
 
-    foreach ($relativePath in @(
+    $requiredProductionPaths = @(
+        'assets\opportunities\icon-provenance.json',
         'lib\features\gathering',
-        'lib\features\fishing'
-    )) {
-        $featureRoot = Join-Path $ProjectRoot $relativePath
-        if (-not (Test-Path -LiteralPath $featureRoot -PathType Container)) {
-            throw "The public source is missing the required native feature path: $relativePath"
-        }
-        $nonDartFiles = @(Get-ChildItem -LiteralPath $featureRoot -Recurse -File |
-            Where-Object { $_.Extension -cne '.dart' })
-        if ($nonDartFiles.Count -ne 0) {
-            throw "The native feature source contains a bundled runtime, cache, or asset: $($nonDartFiles[0].FullName)"
+        'lib\features\fishing',
+        'packages\bdo_fishing_core\lib',
+        'packages\bdo_fishing_core\assets\fish_companion\backend',
+        'packages\bdo_fishing_core\assets\fish_companion\data\cache',
+        'packages\bdo_fishing_core\assets\fish_companion\recognizer\reference-icons',
+        'packages\bdo_fishing_core\assets\fish_companion\runtime',
+        'packages\bdo_fishing_core\assets\fish_companion\static',
+        'packages\bdo_gathering_companion\lib',
+        'packages\bdo_gathering_companion\assets',
+        'packages\webview_flutter_windows\lib',
+        'packages\webview_flutter_windows\windows',
+        'packages\webview_flutter_windows\LICENSE',
+        'windows\session_import\src',
+        'windows\session_import\browser_extension',
+        'windows\session_import\SOURCE-NOTICE.txt'
+    )
+    foreach ($relativePath in $requiredProductionPaths) {
+        if (-not (Test-Path -LiteralPath (Join-Path $ProjectRoot $relativePath))) {
+            throw "The public source is missing a required exact-Beta production path: $relativePath"
         }
     }
 
     $forbiddenPersonalFiles = @(Get-ChildItem -LiteralPath $ProjectRoot -Recurse -File |
         Where-Object {
-            $_.FullName -notlike "$ProjectRoot\.git\*" -and
-            ($_.Name -match '(?i)^(?:planner-state\.json(?:\..*)?|personal-data-(?:location(?:\.committed)?|move-journal)\.json(?:\..*)?|connection\.json(?:\..*)?|[^\\/]*(?:sessions?|journals?|loadouts?|user[ _-]?settings|app[ _-]?settings|opportunities[ _-]?settings|gathering[ _-]?state|fishing[ _-]?state|fishing[ _-]?profiles?|fishing[ _-]?setups?)[^\\/]*\.(?:json|csv|tsv|txt|ya?ml|toml|ini|config|dat|bin|db|sqlite3?)(?:-(?:wal|shm))?)$' -or
-             $_.Name -match '(?i)\.(?:db|sqlite3?)(?:-(?:wal|shm))?$')
+            $_.FullName -notmatch '\\(?:\.git|\.dart_tool|build|bin|obj)\\' -and
+            $_.FullName -notmatch '\\windows\\flutter\\ephemeral\\' -and
+            ($_.FullName -match $ForbiddenPackagedArtifactPattern -or
+             (Test-SqliteFileHeader -Path $_.FullName))
         })
     if ($forbiddenPersonalFiles.Count -ne 0) {
-        throw "The public source contains an excluded personal or service-data file: $($forbiddenPersonalFiles[0].FullName)"
+        throw "The public source contains personal state, a database, or a debug symbol: $($forbiddenPersonalFiles[0].FullName)"
     }
 
-    $forbiddenRuntimeFiles = @(Get-ChildItem -LiteralPath $ProjectRoot -Recurse -File |
+    $generatedBrowserState = @(Get-ChildItem -LiteralPath $ProjectRoot -Recurse -Directory -Force |
         Where-Object {
-            $_.FullName -notlike "$ProjectRoot\.git\*" -and
-            ($_.FullName -match '(?i)(webview|fishy[ _-]*stuff|garmoth|bairog|fish[_ -]?companion|bdo[_ -]?fishing[_ -]?core|bdo[_ -]?gathering[_ -]?companion)' -or
-             $_.Extension -in @('.html', '.css', '.js', '.py', '.pyc', '.pyo', '.pyd') -or
-             $_.Name -match '(?i)^python(?:3(?:\d+)*)?\.(?:exe|dll)$')
+            $_.FullName -notmatch '\\(?:\.git|\.dart_tool|build|bin|obj)\\' -and
+            $_.FullName -notmatch '\\windows\\flutter\\ephemeral\\' -and
+            $_.Name -match '(?i)^(?:webview2|video[ _-]*webview|webview[ _-]*profile|browser[ _-]*profile|user[ _-]*data|cookies?|local[ _-]*storage|BlackSpiritLife\.App\.Removal)$'
         })
-    if ($forbiddenRuntimeFiles.Count -ne 0) {
-        throw "The public source contains an excluded WebView/Python/FishyStuff/Garmoth/Bairog runtime, cache, or asset: $($forbiddenRuntimeFiles[0].FullName)"
+    if ($generatedBrowserState.Count -ne 0) {
+        throw "The public source contains generated browser-profile state: $($generatedBrowserState[0].FullName)"
     }
+    $sessionImportInboxes = @(Get-ChildItem -LiteralPath $ProjectRoot -Recurse -Directory -Force |
+        Where-Object {
+            $_.FullName -notmatch '\\(?:\.git|\.dart_tool|build|bin|obj)\\' -and
+            $_.FullName -notmatch '\\windows\\flutter\\ephemeral\\' -and
+            $_.Name -ieq 'session-import-inbox'
+        })
+    if ($sessionImportInboxes.Count -ne 0) {
+        throw "The public source contains generated Session Import receipts: $($sessionImportInboxes[0].FullName)"
+    }
+    $customIcons = @(Get-ChildItem -LiteralPath $ProjectRoot -Recurse -File -Force |
+        Where-Object {
+            $_.FullName -notmatch '\\(?:\.git|\.dart_tool|build|bin|obj)\\' -and
+            $_.FullName -notmatch '\\windows\\flutter\\ephemeral\\' -and
+            $_.FullName -match '(?i)[\\/]icons[\\/][0-9a-f]{64}\.png$'
+        })
+    if ($customIcons.Count -ne 0) {
+        throw "The public source contains a generated personal custom icon: $($customIcons[0].FullName)"
+    }
+}
+
+function Get-SourceInventoryFingerprint {
+    param(
+        [Parameter(Mandatory = $true)][System.IO.FileInfo[]]$Files,
+        [Parameter(Mandatory = $true)][string]$RootPath
+    )
+
+    $root = [System.IO.Path]::GetFullPath($RootPath).TrimEnd([char[]]@('\', '/'))
+    $records = [System.Collections.Generic.List[string]]::new()
+    foreach ($file in $Files) {
+        $relativePath = $file.FullName.Substring($root.Length + 1).Replace('\', '/')
+        $fileHash = (Get-FileHash -Algorithm SHA256 -LiteralPath $file.FullName).Hash.ToLowerInvariant()
+        $records.Add("$relativePath`t$($file.Length)`t$fileHash`n")
+    }
+    $records.Sort([System.StringComparer]::Ordinal)
+
+    $builder = [System.Text.StringBuilder]::new()
+    foreach ($record in $records) {
+        [void]$builder.Append($record)
+    }
+
+    $hasher = [System.Security.Cryptography.SHA256]::Create()
+    try {
+        $bytes = [System.Text.Encoding]::UTF8.GetBytes($builder.ToString())
+        return ([System.BitConverter]::ToString($hasher.ComputeHash($bytes))).Replace('-', '').ToLowerInvariant()
+    }
+    finally {
+        $hasher.Dispose()
+    }
+}
+
+function Assert-SessionImportPayload {
+    param(
+        [Parameter(Mandatory = $true)][string]$Directory,
+        [Parameter(Mandatory = $true)][string]$SourceDirectory
+    )
+
+    $requiredFiles = @(
+        # The WPF app is deliberately published as one framework-dependent
+        # executable; its managed assemblies and runtime metadata are bundled.
+        'Session Import.exe',
+        'SummaryOcrNative.exe',
+        'WebView2Loader.dll',
+        'browser_helper\BlackSpiritSessionImportHost.exe',
+        'browser_extension\tracker_helper\manifest.json',
+        'Assets\loot_catalog.json',
+        'Assets\spot_catalog.json',
+        'Assets\garmoth_spot_catalog.json'
+    )
+    foreach ($relativePath in $requiredFiles) {
+        $null = Assert-OrdinaryFile -Path (Join-Path $Directory $relativePath)
+    }
+
+    $manifestPath = Join-Path $Directory 'payload-manifest.json'
+    $null = Assert-OrdinaryFile -Path $manifestPath
+    $manifest = Get-Content -Raw -LiteralPath $manifestPath | ConvertFrom-Json
+    if ($manifest.schemaVersion -ne 1 -or
+        $manifest.source.path -cne 'windows/session_import' -or
+        $manifest.build.configuration -cne 'Release' -or
+        $manifest.build.runtimeIdentifier -cne 'win-x64' -or
+        $manifest.build.frameworkDependent -ne $true) {
+        throw 'The Session Import payload manifest has the wrong production identity.'
+    }
+
+    $sourceFiles = @(Get-ChildItem -LiteralPath $SourceDirectory -Recurse -File |
+        Where-Object { $_.FullName -notmatch '\\(bin|obj|build|artifacts|tests)\\' })
+    $sourceFingerprint = Get-SourceInventoryFingerprint `
+        -Files $sourceFiles `
+        -RootPath $SourceDirectory
+    if ([int]$manifest.source.fileCount -ne $sourceFiles.Count -or
+        -not ([string]$manifest.source.fingerprintSha256).Equals(
+            $sourceFingerprint,
+            [System.StringComparison]::OrdinalIgnoreCase
+        )) {
+        throw 'The Session Import payload was not built from the current tagged source.'
+    }
+
+    $records = @($manifest.payload.files)
+    $actualPayloadFiles = @(Get-ChildItem -LiteralPath $Directory -Recurse -File |
+        Where-Object { $_.FullName -cne $manifestPath })
+    if ([int]$manifest.payload.fileCount -ne $records.Count -or
+        $records.Count -ne $actualPayloadFiles.Count) {
+        throw 'The Session Import payload manifest has an unexpected file set.'
+    }
+    foreach ($file in $actualPayloadFiles) {
+        if ($file.Name -match '(?i)\.pdb(?:$|[.-])') {
+            throw "The Session Import payload contains a debug symbol: $($file.FullName)"
+        }
+        $relativePath = $file.FullName.Substring($Directory.Length + 1).Replace('\', '/')
+        $matches = @($records | Where-Object { $_.path -ceq $relativePath })
+        if ($matches.Count -ne 1 -or
+            [long]$matches[0].bytes -ne $file.Length -or
+            -not $matches[0].sha256.Equals(
+                (Get-FileHash -Algorithm SHA256 -LiteralPath $file.FullName).Hash,
+                [System.StringComparison]::OrdinalIgnoreCase
+            )) {
+            throw "The Session Import payload manifest does not match $relativePath."
+        }
+    }
+}
+
+function Test-UnreviewedAbsolutePath {
+    param(
+        [Parameter(Mandatory = $true)][string]$Text,
+        [switch]$AllowReviewedVelopackBuildPaths
+    )
+
+    foreach ($match in [regex]::Matches($Text, $PrivateMachinePathPattern)) {
+        if ($AllowReviewedVelopackBuildPaths.IsPresent) {
+            $tailLength = [Math]::Min(128, $Text.Length - $match.Index)
+            $pathTail = $Text.Substring($match.Index, $tailLength)
+            $reviewedVelopackBuildRootPattern =
+                '(?i)^C:' +
+                '\\Users\\runneradmin\\(?:\.cargo|\.rustup)\\'
+            if ([regex]::IsMatch(
+                $pathTail,
+                $reviewedVelopackBuildRootPattern
+            )) {
+                continue
+            }
+        }
+        return $true
+    }
+    return $false
 }
 
 function Assert-NoTextMarker {
     param(
         [Parameter(Mandatory = $true)][string]$Path,
-        [Parameter(Mandatory = $true)][string[]]$Markers
+        [Parameter(Mandatory = $true)][string[]]$Markers,
+        [switch]$AllowReviewedVelopackBuildPaths
     )
     $bytes = [System.IO.File]::ReadAllBytes($Path)
     $utf8 = [System.Text.Encoding]::UTF8.GetString($bytes)
@@ -239,6 +451,25 @@ function Assert-NoTextMarker {
             throw "Packaged file contains a private-machine marker '$marker': $Path"
         }
     }
+    # The pinned upstream Velopack runtime contains its own Windows compiler
+    # path. Only its exact reviewed hash may bypass this generic path test;
+    # the explicit project/user/private markers above still apply.
+    $isPinnedVelopackRuntime =
+        [System.IO.Path]::GetFileName($Path) -ceq 'velopack_libc.dll' -and
+        (Get-FileHash -Algorithm SHA256 -LiteralPath $Path).Hash -ceq
+            $VelopackRuntimeSha256
+    # The pinned upstream Rust Setup engine retains its public GitHub Actions
+    # .cargo/.rustup roots. Only those two prefixes may be ignored when the
+    # caller opts in; explicit project/user markers above are never exempted.
+    if (-not $isPinnedVelopackRuntime -and
+        ((Test-UnreviewedAbsolutePath `
+            -Text $utf8 `
+            -AllowReviewedVelopackBuildPaths:$AllowReviewedVelopackBuildPaths) -or
+         (Test-UnreviewedAbsolutePath `
+            -Text $utf16 `
+            -AllowReviewedVelopackBuildPaths:$AllowReviewedVelopackBuildPaths))) {
+        throw "Packaged file contains an absolute user/private workspace path: $Path"
+    }
 }
 
 function Assert-VelopackPackage {
@@ -249,7 +480,8 @@ function Assert-VelopackPackage {
         [Parameter(Mandatory = $true)][string]$ExpectedChannel,
         [Parameter(Mandatory = $true)][string]$ExpectedTitle,
         [Parameter(Mandatory = $true)][string]$ExpectedExecutable,
-        [Parameter(Mandatory = $true)][string]$ExpectedUpdater
+        [Parameter(Mandatory = $true)][string]$ExpectedUpdater,
+        [string[]]$ExpectedPayloads = @()
     )
     Add-Type -AssemblyName System.IO.Compression.FileSystem
     $archive = [System.IO.Compression.ZipFile]::OpenRead($PackagePath)
@@ -267,7 +499,10 @@ function Assert-VelopackPackage {
         finally {
             $reader.Dispose()
         }
-        foreach ($requiredName in @($ExpectedExecutable, $ExpectedUpdater)) {
+        foreach ($requiredName in @(
+            $ExpectedExecutable,
+            $ExpectedUpdater
+        ) + $ExpectedPayloads) {
             $matches = @($archive.Entries | Where-Object {
                 $_.Name -ceq $requiredName -and $_.Length -gt 0
             })
@@ -351,8 +586,8 @@ if ($sourceParentCommit -cne $PreviousStableCommit -or
 }
 $sourceCommitCount = (& git -C $ProjectRoot rev-list --count HEAD).Trim()
 Assert-LastExitCode -Operation 'Git public history count check'
-if ($sourceCommitCount -cne '6') {
-    throw 'The public candidate must contain only the reviewed six-commit public history through sanitized 0.1.7.'
+if ($sourceCommitCount -cne '7') {
+    throw 'The public candidate must contain only the reviewed seven-commit public history through exact-Beta Stable 0.1.9.'
 }
 $sourceTag = $expectedSourceTag
 Assert-CleanSource -ProjectRoot $ProjectRoot -ExpectedCommit $sourceCommit
@@ -406,7 +641,7 @@ $publishedPreviousFeedHash =
     (Get-FileHash -Algorithm SHA256 -LiteralPath $publishedPreviousFeed).Hash
 if ($publishedPreviousFeedItem.Length -ne $PreviousFeedBytes -or
     $publishedPreviousFeedHash -cne $PreviousFeedSha256) {
-    throw 'The published 0.1.6 feed changed from the reviewed release input.'
+    throw 'The published 0.1.7 feed changed from the reviewed release input.'
 }
 $publishedPreviousFeedJson =
     Get-Content -Raw -LiteralPath $publishedPreviousFeed | ConvertFrom-Json
@@ -418,7 +653,7 @@ $publishedPreviousAssets = @($publishedPreviousFeedJson.Assets | Where-Object {
 })
 if ($publishedPreviousAssets.Count -ne 1 -or
     @($publishedPreviousFeedJson.Assets).Count -ne 3) {
-    throw 'The published 0.1.6 feed does not contain exactly the expected full package and reviewed asset set.'
+    throw 'The published 0.1.7 feed does not contain exactly the expected full package and reviewed asset set.'
 }
 Invoke-WebRequest `
     -Uri $previousPackageUrl `
@@ -430,14 +665,14 @@ $publishedPreviousPackageHash =
     (Get-FileHash -Algorithm SHA256 -LiteralPath $publishedPreviousPackage).Hash
 if ($publishedPreviousPackageItem.Length -ne $PreviousFullPackageBytes -or
     $publishedPreviousPackageHash -cne $PreviousFullPackageSha256) {
-    throw 'The published 0.1.6 full package changed from the reviewed release input.'
+    throw 'The published 0.1.7 full package changed from the reviewed release input.'
 }
 if ([long]$publishedPreviousAssets[0].Size -ne $publishedPreviousPackageItem.Length -or
     -not $publishedPreviousPackageHash.Equals(
         [string]$publishedPreviousAssets[0].SHA256,
         [System.StringComparison]::OrdinalIgnoreCase
     )) {
-    throw 'The published 0.1.6 full package does not match its published feed.'
+    throw 'The published 0.1.7 full package does not match its published feed.'
 }
 Assert-VelopackPackage `
     -PackagePath $publishedPreviousPackage `
@@ -511,7 +746,7 @@ if ($null -eq (Get-Command dotnet -ErrorAction SilentlyContinue)) {
 # Flutter's incremental Windows build does not guarantee removal of unrelated
 # files already present at the bundle root. Recreate this exact verified output
 # so no stale local file can be carried into the public full or delta package.
-Reset-VerifiedBuildBundle `
+Reset-VerifiedWindowsBuildTree `
     -ProjectRoot $ProjectRoot `
     -BundleDirectory $BundleDirectory
 
@@ -528,10 +763,53 @@ Assert-CleanSource -ProjectRoot $ProjectRoot -ExpectedCommit $sourceCommit
 
 $bundleExecutable = Join-Path $BundleDirectory $ExecutableName
 $bundleUpdater = Join-Path $BundleDirectory $UpdaterHelperName
+$bundleFishHost = Join-Path $BundleDirectory $FishHostHelperName
 $bundleRuntime = Join-Path $BundleDirectory 'velopack_libc.dll'
-foreach ($required in @($bundleExecutable, $bundleUpdater, $bundleRuntime)) {
+foreach ($required in @(
+    $bundleExecutable,
+    $bundleUpdater,
+    $bundleFishHost,
+    $bundleRuntime
+)) {
     $null = Assert-OrdinaryFile -Path $required
 }
+$requiredBundleRelativeFiles = @(
+    'webview_flutter_windows_plugin.dll',
+    'WebView2Loader.dll',
+    'session_import\Session Import.exe',
+    'session_import\SummaryOcrNative.exe',
+    'session_import\browser_helper\BlackSpiritSessionImportHost.exe',
+    'session_import\browser_extension\tracker_helper\manifest.json',
+    'session_import\Assets\garmoth_spot_catalog.json',
+    'session_import\payload-manifest.json',
+    'data\flutter_assets\packages\bdo_fishing_core\assets\fish_companion\runtime\fish_companion_service.exe',
+    'data\flutter_assets\packages\bdo_fishing_core\assets\fish_companion\runtime\runtime-sbom.json',
+    'data\flutter_assets\packages\bdo_fishing_core\assets\fish_companion\runtime\THIRD_PARTY_NOTICES.md',
+    'data\flutter_assets\packages\bdo_fishing_core\assets\fish_companion\runtime\licenses\CPython-LICENSE.txt',
+    'data\flutter_assets\packages\bdo_fishing_core\assets\fish_companion\runtime\licenses\libffi-LICENSE.txt',
+    'data\flutter_assets\packages\bdo_fishing_core\assets\fish_companion\runtime\licenses\NumPy-LICENSE.txt',
+    'data\flutter_assets\packages\bdo_fishing_core\assets\fish_companion\runtime\licenses\OpenSSL-LICENSE.txt',
+    'data\flutter_assets\packages\bdo_fishing_core\assets\fish_companion\runtime\licenses\Pillow-LICENSE.txt',
+    'data\flutter_assets\packages\bdo_fishing_core\assets\fish_companion\runtime\licenses\PyInstaller-COPYING.txt',
+    'data\flutter_assets\packages\bdo_fishing_core\assets\fish_companion\runtime\licenses\zlib-LICENSE.txt',
+    'data\flutter_assets\packages\bdo_fishing_core\assets\fish_companion\data\install-critical-manifest.v1.json',
+    'data\flutter_assets\packages\bdo_fishing_core\assets\fish_companion\data\cache\source-state.json',
+    'data\flutter_assets\packages\bdo_fishing_core\assets\fish_companion\static\index.html',
+    'data\flutter_assets\packages\bdo_fishing_core\assets\fish_companion\static\node-icons\NOTICE.md',
+    'data\flutter_assets\packages\bdo_fishing_core\assets\fish_companion\data\cache\fish.json',
+    'data\flutter_assets\packages\bdo_fishing_core\assets\fish_companion\data\cache\zones.json',
+    'data\flutter_assets\packages\bdo_fishing_core\assets\fish_companion\recognizer\reference-icons\catalog.json',
+    'data\flutter_assets\packages\bdo_fishing_core\assets\fish_companion_integrity.json',
+    'data\flutter_assets\packages\bdo_gathering_companion\assets\data\loot_catalog.json',
+    'data\flutter_assets\packages\bdo_gathering_companion\assets\rotations\NOTICE.md',
+    'data\flutter_assets\packages\bdo_gathering_companion\assets\rotations\provenance.json'
+)
+foreach ($relativePath in $requiredBundleRelativeFiles) {
+    $null = Assert-OrdinaryFile -Path (Join-Path $BundleDirectory $relativePath)
+}
+Assert-SessionImportPayload `
+    -Directory (Join-Path $BundleDirectory 'session_import') `
+    -SourceDirectory (Join-Path $ProjectRoot 'windows\session_import')
 if ((Get-FileHash -Algorithm SHA256 -LiteralPath $bundleRuntime).Hash -cne
     $VelopackRuntimeSha256) {
     throw 'The bundled Velopack runtime failed its pinned SHA-256 check.'
@@ -553,10 +831,27 @@ $appLibrary = Join-Path $BundleDirectory 'data\app.so'
 if (Test-Path -LiteralPath $appLibrary -PathType Leaf) {
     Assert-NoTextMarker -Path $appLibrary -Markers $privateMarkers
 }
+$bundleNativePayloads = @(Get-ChildItem -LiteralPath $BundleDirectory -Recurse -File |
+    Where-Object { $_.Extension -in @('.exe', '.dll') })
+foreach ($payload in $bundleNativePayloads) {
+    Assert-NoTextMarker -Path $payload.FullName -Markers $privateMarkers
+}
+$bundleTextPayloads = @(Get-ChildItem -LiteralPath $BundleDirectory -Recurse -File |
+    Where-Object {
+        $_.Length -le 32MB -and
+        $_.Extension -in @(
+            '.json', '.md', '.txt', '.html', '.css', '.js', '.mjs', '.py',
+            '.yaml', '.yml', '.xml', '.config', '.ini', '.toml'
+        )
+    })
+foreach ($payload in $bundleTextPayloads) {
+    Assert-NoTextMarker -Path $payload.FullName -Markers $privateMarkers
+}
 $forbiddenBundleFiles = @(Get-ChildItem -LiteralPath $BundleDirectory -Recurse -File |
     Where-Object {
         $_.FullName -match $ForbiddenPackagedArtifactPattern -or
-        $_.Extension -ceq '.pdb'
+        $_.Name -match '(?i)\.pdb(?:$|[.-])' -or
+        (Test-SqliteFileHeader -Path $_.FullName)
     })
 if ($forbiddenBundleFiles.Count -ne 0) {
     throw "The application bundle contains a personal, diagnostic, or temporary file: $($forbiddenBundleFiles[0].FullName)"
@@ -608,7 +903,8 @@ Assert-VelopackPackage `
     -ExpectedChannel $UpdateChannel `
     -ExpectedTitle $DisplayName `
     -ExpectedExecutable $ExecutableName `
-    -ExpectedUpdater $UpdaterHelperName
+    -ExpectedUpdater $UpdaterHelperName `
+    -ExpectedPayloads @($FishHostHelperName)
 
 $feed = Get-Content -Raw -LiteralPath $feedIndex | ConvertFrom-Json
 $previousFullItem = Assert-OrdinaryFile -Path $previousFullPackage
@@ -616,7 +912,7 @@ $previousFullHash =
     (Get-FileHash -Algorithm SHA256 -LiteralPath $previousFullPackage).Hash
 if ($previousFullItem.Length -ne $PreviousFullPackageBytes -or
     $previousFullHash -cne $PreviousFullPackageSha256) {
-    throw 'Velopack changed the pinned published 0.1.6 full package.'
+    throw 'Velopack changed the pinned published 0.1.7 full package.'
 }
 $feedAssets = @($feed.Assets)
 if ($feedAssets.Count -ne 3) {
@@ -644,10 +940,10 @@ if ($matchingFullAssets.Count -ne 1) {
     throw 'The update feed does not contain exactly one expected full package.'
 }
 if ($matchingDeltaAssets.Count -ne 1) {
-    throw 'The update feed does not contain exactly one 0.1.6 to 0.1.7 delta package.'
+    throw 'The update feed does not contain exactly one 0.1.7 to 0.1.9 delta package.'
 }
 if ($matchingPreviousAssets.Count -ne 1) {
-    throw 'The update feed does not retain exactly one published 0.1.6 full package.'
+    throw 'The update feed does not retain exactly one published 0.1.7 full package.'
 }
 $fullItem = Get-Item -LiteralPath $fullPackage
 $fullHash = (Get-FileHash -Algorithm SHA256 -LiteralPath $fullPackage).Hash
@@ -675,7 +971,7 @@ if ([long]$matchingPreviousAssets[0].Size -ne $previousFullItem.Length -or
         [string]$matchingPreviousAssets[0].SHA256,
         [System.StringComparison]::OrdinalIgnoreCase
     )) {
-    throw 'The updated feed changed the published 0.1.6 full-package identity.'
+    throw 'The updated feed changed the published 0.1.7 full-package identity.'
 }
 
 $setupHash = (Get-FileHash -Algorithm SHA256 -LiteralPath $generatedSetup).Hash
@@ -718,7 +1014,10 @@ if ($installerInfo.ProductName -cne $InstallerProductName -or
     $installerInfo.FileVersion -cne "$Version.$BuildNumber") {
     throw 'The themed installer does not have the plain product identity.'
 }
-Assert-NoTextMarker -Path $candidateInstaller -Markers $privateMarkers
+Assert-NoTextMarker `
+    -Path $candidateInstaller `
+    -Markers $privateMarkers `
+    -AllowReviewedVelopackBuildPaths
 Assert-CleanSource -ProjectRoot $ProjectRoot -ExpectedCommit $sourceCommit
 
 $installerRecord = Get-ArtifactRecord `
@@ -774,9 +1073,18 @@ $manifest = [ordered]@{
     }
     cleanProfile = [ordered]@{
         stateDirectory = '%APPDATA%\Black Spirit Life'
+        selectedRootIsMovable = $true
         autoImportsFormerProfiles = $false
         initialMasteries = 0
         initialInventoryEntries = 0
+        initialGatheringLoadouts = 0
+        initialGatheringSessions = 0
+        initialFishingProfiles = 0
+        initialFishingJournalEntries = 0
+        initialSessionImportDrafts = 0
+        bundledPersonalDataFiles = 0
+        generatedBrowserProfilesBundled = 0
+        fishReferenceSnapshotIsPersonalData = $false
     }
     artifacts = $artifacts
     publicUploadArtifacts = @(

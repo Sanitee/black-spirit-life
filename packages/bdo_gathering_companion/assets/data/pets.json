@@ -1,0 +1,313 @@
+{
+  "schemaVersion": 1,
+  "reviewedAt": "2026-08-31",
+  "region": "NA/EU PC",
+  "pets": [
+    {
+      "id": "hedgehog",
+      "name": "Hedgehog",
+      "icon": "assets/icons/pets/hedgehog.webp",
+      "itemId": 18090,
+      "petId": 55090,
+      "priority": 1,
+      "methodIds": [
+        "hoe",
+        "butcher",
+        "fluid",
+        "tanning",
+        "lumbering",
+        "mining",
+        "hunting",
+        "sniper"
+      ],
+      "spotIdsByMethod": {
+        "hunting": [
+          "narcion-deer-hunting"
+        ],
+        "sniper": [
+          "balenos-sniper-elk"
+        ]
+      },
+      "summary": "Extra materials · Life EXP",
+      "details": [
+        "Extra-gather chance: T1–2 30%, T3 40%, T4–5 50%. It rolls extra materials separately; this is not a percentage increase to all loot or Gathering Item Drop Rate.",
+        "Life EXP: T1 +1%, T2 +2%, T3 +3%, T4–5 +4%. A T5 pet appointed Alpha gives +5%.",
+        "Hedgehog, Golden Hedgehog and Llama gathering abilities do not stack. Only one applies.",
+        "Keep it fed, summoned and its special ability on. Only eligible materials and hunting targets get extra gathers.",
+        "Learned Gathering/Hunting EXP and Gathering Speed skills vary by pet. Check your pet’s own skills in game."
+      ],
+      "sourceUrls": [
+        "https://www.naeu.playblackdesert.com/en-US/Wiki?wikiNo=148",
+        "https://www.naeu.playblackdesert.com/en-US/Wiki?wikiNo=264",
+        "https://bdocodex.com/us/pet/55090/",
+        "https://bdocodex.com/us/pet/55091/",
+        "https://bdocodex.com/us/pet/55092/",
+        "https://bdocodex.com/us/pet/55095/",
+        "https://bdocodex.com/us/pet/56252/",
+        "https://bdocodex.com/us/pet/56253/",
+        "https://bdocodex.com/us/pet/56254/"
+      ],
+      "reviewedAt": "2026-08-31",
+      "exclusiveAbilityGroup": "gathering-extra-proc",
+      "effectsAreInformational": true,
+      "tiers": [
+        {
+          "tier": 1,
+          "extraGatherProcChancePct": 30,
+          "lifeExpPct": 1,
+          "alphaLifeExpPct": null
+        },
+        {
+          "tier": 2,
+          "extraGatherProcChancePct": 30,
+          "lifeExpPct": 2,
+          "alphaLifeExpPct": null
+        },
+        {
+          "tier": 3,
+          "extraGatherProcChancePct": 40,
+          "lifeExpPct": 3,
+          "alphaLifeExpPct": null
+        },
+        {
+          "tier": 4,
+          "extraGatherProcChancePct": 50,
+          "lifeExpPct": 4,
+          "alphaLifeExpPct": null
+        },
+        {
+          "tier": 5,
+          "extraGatherProcChancePct": 50,
+          "lifeExpPct": 4,
+          "alphaLifeExpPct": 5
+        }
+      ],
+      "hoverDetails": [
+        "Extra-gather chance: T1–2 30% · T3 40% · T4–5 50%.",
+        "Life EXP: +1–4% by tier; +5% as a T5 Alpha.",
+        "Only one Hedgehog/Llama gathering ability applies.",
+        "Keep it fed, summoned and its special ability on."
+      ]
+    },
+    {
+      "id": "pwudgy-llama",
+      "name": "Pwudgy Llama",
+      "icon": "assets/icons/pets/pwudgy_llama.webp",
+      "itemId": 830012,
+      "petId": 56251,
+      "priority": 2,
+      "methodIds": [
+        "hoe",
+        "butcher",
+        "fluid",
+        "tanning",
+        "lumbering",
+        "mining",
+        "hunting",
+        "sniper"
+      ],
+      "spotIdsByMethod": {
+        "hunting": [
+          "narcion-deer-hunting"
+        ],
+        "sniper": [
+          "balenos-sniper-elk"
+        ]
+      },
+      "summary": "Extra materials · Life EXP",
+      "details": [
+        "Extra-gather chance: T1–2 30%, T3 40%, T4–5 50%. It rolls extra materials separately; this is not a percentage increase to all loot or Gathering Item Drop Rate.",
+        "Life EXP: T1 +1%, T2 +2%, T3 +3%, T4–5 +4%. A T5 pet appointed Alpha gives +5%.",
+        "Hedgehog, Golden Hedgehog and Llama gathering abilities do not stack. Only one applies.",
+        "Keep it fed, summoned and its special ability on. Only eligible materials and hunting targets get extra gathers.",
+        "Learned Gathering/Hunting EXP and Gathering Speed skills vary by pet. Check your pet’s own skills in game."
+      ],
+      "sourceUrls": [
+        "https://www.naeu.playblackdesert.com/en-US/Wiki?wikiNo=148",
+        "https://www.naeu.playblackdesert.com/en-US/Wiki?wikiNo=264",
+        "https://bdocodex.com/us/pet/56251/",
+        "https://bdocodex.com/us/pet/55091/",
+        "https://bdocodex.com/us/pet/55092/",
+        "https://bdocodex.com/us/pet/55095/",
+        "https://bdocodex.com/us/pet/56252/",
+        "https://bdocodex.com/us/pet/56253/",
+        "https://bdocodex.com/us/pet/56254/"
+      ],
+      "reviewedAt": "2026-08-31",
+      "exclusiveAbilityGroup": "gathering-extra-proc",
+      "effectsAreInformational": true,
+      "tiers": [
+        {
+          "tier": 1,
+          "extraGatherProcChancePct": 30,
+          "lifeExpPct": 1,
+          "alphaLifeExpPct": null
+        },
+        {
+          "tier": 2,
+          "extraGatherProcChancePct": 30,
+          "lifeExpPct": 2,
+          "alphaLifeExpPct": null
+        },
+        {
+          "tier": 3,
+          "extraGatherProcChancePct": 40,
+          "lifeExpPct": 3,
+          "alphaLifeExpPct": null
+        },
+        {
+          "tier": 4,
+          "extraGatherProcChancePct": 50,
+          "lifeExpPct": 4,
+          "alphaLifeExpPct": null
+        },
+        {
+          "tier": 5,
+          "extraGatherProcChancePct": 50,
+          "lifeExpPct": 4,
+          "alphaLifeExpPct": 5
+        }
+      ],
+      "hoverDetails": [
+        "Extra-gather chance: T1–2 30% · T3 40% · T4–5 50%.",
+        "Life EXP: +1–4% by tier; +5% as a T5 Alpha.",
+        "Only one Hedgehog/Llama gathering ability applies.",
+        "Keep it fed, summoned and its special ability on."
+      ]
+    },
+    {
+      "id": "golden-hedgehog",
+      "name": "Golden Hedgehog",
+      "icon": "assets/icons/pets/golden_hedgehog.webp",
+      "itemId": 331042,
+      "petId": 55781,
+      "priority": 3,
+      "methodIds": [
+        "hoe",
+        "butcher",
+        "fluid",
+        "tanning",
+        "lumbering",
+        "mining",
+        "hunting",
+        "sniper"
+      ],
+      "spotIdsByMethod": {
+        "hunting": [
+          "narcion-deer-hunting"
+        ],
+        "sniper": [
+          "balenos-sniper-elk"
+        ]
+      },
+      "summary": "Extra materials · Life EXP",
+      "details": [
+        "Extra-gather chance: T1–2 30%, T3 40%, T4–5 50%. It rolls extra materials separately; this is not a percentage increase to all loot or Gathering Item Drop Rate.",
+        "Life EXP: T1 +1%, T2 +2%, T3 +3%, T4–5 +4%. A T5 pet appointed Alpha gives +5%.",
+        "Hedgehog, Golden Hedgehog and Llama gathering abilities do not stack. Only one applies.",
+        "Keep it fed, summoned and its special ability on. Only eligible materials and hunting targets get extra gathers.",
+        "Learned Gathering/Hunting EXP and Gathering Speed skills vary by pet. Check your pet’s own skills in game.",
+        "The golden appearance has the same gathering bonus as a regular Hedgehog."
+      ],
+      "sourceUrls": [
+        "https://www.naeu.playblackdesert.com/en-US/Wiki?wikiNo=148",
+        "https://www.naeu.playblackdesert.com/en-US/Wiki?wikiNo=264",
+        "https://bdocodex.com/us/pet/55781/",
+        "https://bdocodex.com/us/pet/55091/",
+        "https://bdocodex.com/us/pet/55092/",
+        "https://bdocodex.com/us/pet/55095/",
+        "https://bdocodex.com/us/pet/56252/",
+        "https://bdocodex.com/us/pet/56253/",
+        "https://bdocodex.com/us/pet/56254/",
+        "https://www.blackdesertfoundry.com/pets-guide/"
+      ],
+      "reviewedAt": "2026-08-31",
+      "exclusiveAbilityGroup": "gathering-extra-proc",
+      "effectsAreInformational": true,
+      "tiers": [
+        {
+          "tier": 1,
+          "extraGatherProcChancePct": 30,
+          "lifeExpPct": 1,
+          "alphaLifeExpPct": null
+        },
+        {
+          "tier": 2,
+          "extraGatherProcChancePct": 30,
+          "lifeExpPct": 2,
+          "alphaLifeExpPct": null
+        },
+        {
+          "tier": 3,
+          "extraGatherProcChancePct": 40,
+          "lifeExpPct": 3,
+          "alphaLifeExpPct": null
+        },
+        {
+          "tier": 4,
+          "extraGatherProcChancePct": 50,
+          "lifeExpPct": 4,
+          "alphaLifeExpPct": null
+        },
+        {
+          "tier": 5,
+          "extraGatherProcChancePct": 50,
+          "lifeExpPct": 4,
+          "alphaLifeExpPct": 5
+        }
+      ],
+      "hoverDetails": [
+        "Extra-gather chance: T1–2 30% · T3 40% · T4–5 50%.",
+        "Life EXP: +1–4% by tier; +5% as a T5 Alpha.",
+        "Only one Hedgehog/Llama gathering ability applies.",
+        "Keep it fed, summoned and its special ability on."
+      ]
+    },
+    {
+      "id": "bareeds-junaid",
+      "name": "Bareeds' Junaid",
+      "icon": "assets/icons/pets/bareeds_junaid.webp",
+      "itemId": 331061,
+      "petId": 9717,
+      "priority": 4,
+      "methodIds": [
+        "hoe",
+        "butcher",
+        "fluid",
+        "tanning",
+        "lumbering",
+        "mining",
+        "hunting",
+        "sniper"
+      ],
+      "summary": "Free quest pet · Life EXP",
+      "details": [
+        "Life EXP +1% at T1. This pet has no extra-gather ability.",
+        "After the Mediah main story, get its pet quest from Prince Bareeds III. Available once per family.",
+        "Keep it fed and summoned. Higher tiers and learned skills depend on your pet; check its current bonuses in game."
+      ],
+      "sourceUrls": [
+        "https://www.naeu.playblackdesert.com/en-US/Wiki?wikiNo=148",
+        "https://bdocodex.com/us/item/331061/"
+      ],
+      "reviewedAt": "2026-08-31",
+      "effectsAreInformational": true,
+      "tiers": [
+        {
+          "tier": 1,
+          "lifeExpPct": 1,
+          "extraGatherProcChancePct": null
+        }
+      ],
+      "hoverDetails": [
+        "Life EXP +1% at T1.",
+        "Free quest reward after the Mediah main story.",
+        "Keep it fed and summoned."
+      ]
+    }
+  ],
+  "notes": [
+    "Recommendations only. Pets are not selected session buffs, and no pet effect contributes to aggregate buff totals.",
+    "Pet tiers are distinct from item quality grades. No pet tier or grade is inferred from the icon frame."
+  ]
+}

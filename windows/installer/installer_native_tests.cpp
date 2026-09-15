@@ -146,8 +146,10 @@ bool RunPersonalDataRemovalTests(const std::filesystem::path &test_root) {
       roaming / L"Black Spirit Life";
   const std::filesystem::path local_data =
       local / L"Black Spirit Life";
-  const std::filesystem::path live_beta =
+  const std::filesystem::path live_beta_profile =
       roaming / L"Black Spirit Life Live Beta";
+  const std::filesystem::path live_beta_cache =
+      local / L"Black Spirit Life Live Beta";
   const std::filesystem::path former_beta =
       roaming / L"Black Spirit Life Beta";
   const std::filesystem::path former =
@@ -156,7 +158,8 @@ bool RunPersonalDataRemovalTests(const std::filesystem::path &test_root) {
       WriteInstalledRemovalFixture(install, "0.1.0") &&
           WriteText(profile / L"planner-state.json", "{\"owned\":true}") &&
           WriteText(local_data / L"Map Cache" / L"tile.bin", "tile") &&
-          WriteText(live_beta / L"keep.txt", "live-beta") &&
+          WriteText(live_beta_profile / L"keep.txt", "live-beta-profile") &&
+          WriteText(live_beta_cache / L"keep.txt", "live-beta-cache") &&
           WriteText(former_beta / L"keep.txt", "former-beta") &&
           WriteText(former / L"keep.txt", "former"),
       "Personal-data removal fixtures could not be written.");
@@ -292,7 +295,8 @@ bool RunPersonalDataRemovalTests(const std::filesystem::path &test_root) {
           !std::filesystem::exists(profile / L"planner-state.json") &&
           std::filesystem::exists(reset_marker) &&
           !std::filesystem::exists(local_data) &&
-          std::filesystem::exists(live_beta / L"keep.txt") &&
+          std::filesystem::exists(live_beta_profile / L"keep.txt") &&
+          std::filesystem::exists(live_beta_cache / L"keep.txt") &&
           std::filesystem::exists(former_beta / L"keep.txt") &&
           std::filesystem::exists(former / L"keep.txt") &&
           !std::filesystem::exists(plan.journal_path) &&
@@ -518,6 +522,21 @@ int wmain(int argc, wchar_t **argv) {
            .valid,
       "The durable personal-data removal control root was accepted as an "
       "installation directory.");
+  const std::filesystem::path live_beta_profile =
+      roaming / L"Black Spirit Life Live Beta";
+  const std::filesystem::path live_beta_cache =
+      local / L"Black Spirit Life Live Beta";
+  std::filesystem::create_directories(live_beta_profile);
+  std::filesystem::create_directories(live_beta_cache);
+  passed &= Require(
+      !bsl::installer::ValidateFreshInstallPath(
+           (live_beta_profile / L"Application").wstring())
+           .valid &&
+          !bsl::installer::ValidateFreshInstallPath(
+               (live_beta_cache / L"Application").wstring())
+               .valid,
+      "A Live Beta state or cache folder was accepted as an installation "
+      "directory.");
 
   const std::filesystem::path custom_profile =
       test_root / L"Custom Personal Data";
@@ -730,6 +749,52 @@ int wmain(int argc, wchar_t **argv) {
     CloseHandle(portable_ready);
   if (portable_stop != nullptr)
     CloseHandle(portable_stop);
+
+  const std::filesystem::path portable_fish_host =
+      test_root / L"Portable" / L"BlackSpiritLifeFishHost.exe";
+  std::filesystem::copy_file(executable, portable_fish_host,
+                             std::filesystem::copy_options::overwrite_existing);
+  const std::wstring fish_host_ready_name =
+      L"Local\\BlackSpiritLifeInstallerFishHostReady-" + run_id;
+  const std::wstring fish_host_stop_name =
+      L"Local\\BlackSpiritLifeInstallerFishHostStop-" + run_id;
+  HANDLE fish_host_ready =
+      CreateEventW(nullptr, TRUE, FALSE, fish_host_ready_name.c_str());
+  HANDLE fish_host_stop =
+      CreateEventW(nullptr, TRUE, FALSE, fish_host_stop_name.c_str());
+  std::wstring fish_host_command =
+      Quote(portable_fish_host.wstring()) + L" --wait-events " +
+      Quote(fish_host_ready_name) + L" " + Quote(fish_host_stop_name);
+  std::vector<wchar_t> mutable_fish_host_command(fish_host_command.begin(),
+                                                  fish_host_command.end());
+  mutable_fish_host_command.push_back(L'\0');
+  STARTUPINFOW fish_host_startup{sizeof(STARTUPINFOW)};
+  PROCESS_INFORMATION fish_host_child{};
+  const bool fish_host_started =
+      CreateProcessW(portable_fish_host.c_str(),
+                     mutable_fish_host_command.data(), nullptr, nullptr, FALSE,
+                     CREATE_NO_WINDOW, nullptr, nullptr, &fish_host_startup,
+                     &fish_host_child) != FALSE;
+  passed &= Require(fish_host_started,
+                    "The Fish process-host fixture did not start.");
+  if (fish_host_started) {
+    passed &=
+        Require(WaitForSingleObject(fish_host_ready, 5000) == WAIT_OBJECT_0,
+                "The Fish process-host fixture did not become ready.");
+    std::wstring process_error;
+    passed &= Require(
+        !bsl::installer::EnsureNoRunningBetaProcess(running_root.wstring(),
+                                                    &process_error),
+        "A running Fish process host was not blocked before maintenance.");
+    SetEvent(fish_host_stop);
+    WaitForSingleObject(fish_host_child.hProcess, 5000);
+    CloseHandle(fish_host_child.hThread);
+    CloseHandle(fish_host_child.hProcess);
+  }
+  if (fish_host_ready != nullptr)
+    CloseHandle(fish_host_ready);
+  if (fish_host_stop != nullptr)
+    CloseHandle(fish_host_stop);
 
   passed &= RunPersonalDataRemovalTests(test_root);
 

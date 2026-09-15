@@ -1,0 +1,124 @@
+name: bdo_fishing_core
+description: Exact embedded Fish Companion for Black Spirit Life.
+version: 0.1.0
+publish_to: none
+
+environment:
+  sdk: ^3.12.2
+  flutter: ">=3.44.0"
+
+dependencies:
+  crypto: ^3.0.7
+  flutter:
+    sdk: flutter
+  webview_flutter_windows:
+    path: ../webview_flutter_windows
+
+dev_dependencies:
+  flutter_lints: ^6.0.0
+  flutter_test:
+    sdk: flutter
+
+flutter:
+  assets:
+    - assets/fish_companion/backend/
+    - assets/fish_companion/data/install-critical-manifest.v1.json
+    - assets/fish_companion/data/cache/
+    - assets/fish_companion/data/cache/fishing-region-highlights/000087/1/
+    - assets/fish_companion/data/cache/fishing-region-highlights/016405-e49a3a/0/
+    - assets/fish_companion/data/cache/fishing-region-highlights/016405/1/
+    - assets/fish_companion/data/cache/fishing-region-highlights/0182dc/0/
+    - assets/fish_companion/data/cache/fishing-region-highlights/0182dc/1/
+    - assets/fish_companion/data/cache/fishing-region-highlights/0182f0/0/
+    - assets/fish_companion/data/cache/fishing-region-highlights/028c8c-e49a3a/0/
+    - assets/fish_companion/data/cache/fishing-region-highlights/028c8c/1/
+    - assets/fish_companion/data/cache/fishing-region-highlights/028cfa-f0527b/0/
+    - assets/fish_companion/data/cache/fishing-region-highlights/028cfa-f0527b/1/
+    - assets/fish_companion/data/cache/fishing-region-highlights/028cfa/0/
+    - assets/fish_companion/data/cache/fishing-region-highlights/028cfa/1/
+    - assets/fish_companion/data/cache/fishing-region-highlights/028cfa/2/
+    - assets/fish_companion/data/cache/fishing-region-highlights/028cfa/3/
+    - assets/fish_companion/data/cache/fishing-region-highlights/1e4b28/0/
+    - assets/fish_companion/data/cache/fishing-region-highlights/3c3c96/1/
+    - assets/fish_companion/data/cache/fishing-region-highlights/425914/1/
+    - assets/fish_companion/data/cache/fishing-region-highlights/425965-52d6ca/0/
+    - assets/fish_companion/data/cache/fishing-region-highlights/4259da/1/
+    - assets/fish_companion/data/cache/fishing-region-highlights/4259fa-52d6ca/0/
+    - assets/fish_companion/data/cache/fishing-region-highlights/4259fa-52d6ca/1/
+    - assets/fish_companion/data/cache/fishing-region-highlights/42b614/1/
+    - assets/fish_companion/data/cache/fishing-region-highlights/505050/1/
+    - assets/fish_companion/data/cache/fishing-region-highlights/60ae9b-d8b659/1/
+    - assets/fish_companion/data/cache/fishing-region-highlights/60ae9b-d8b659/2/
+    - assets/fish_companion/data/cache/fishing-region-highlights/636332-52d6ca/0/
+    - assets/fish_companion/data/cache/fishing-region-highlights/636332-52d6ca/1/
+    - assets/fish_companion/data/cache/fishing-region-highlights/636396/1/
+    - assets/fish_companion/data/cache/fishing-region-highlights/6363a0/1/
+    - assets/fish_companion/data/cache/fishing-region-highlights/6363aa/1/
+    - assets/fish_companion/data/cache/fishing-region-highlights/6982ff-52d6ca/0/
+    - assets/fish_companion/data/cache/fishing-region-highlights/6cb2ed/1/
+    - assets/fish_companion/data/cache/fishing-region-highlights/810000/1/
+    - assets/fish_companion/data/cache/fishing-region-highlights/949500-52d6ca/0/
+    - assets/fish_companion/data/cache/fishing-region-highlights/963c3c/1/
+    - assets/fish_companion/data/cache/fishing-region-highlights/965973/0/
+    - assets/fish_companion/data/cache/fishing-region-highlights/965973/1/
+    - assets/fish_companion/data/cache/fishing-region-highlights/966332-52d6ca/1/
+    - assets/fish_companion/data/cache/fishing-region-highlights/966396-52d6ca/1/
+    - assets/fish_companion/data/cache/fishing-region-highlights/9a4c4c/1/
+    - assets/fish_companion/data/cache/fishing-region-highlights/9fb7cb/1/
+    - assets/fish_companion/data/cache/fishing-region-highlights/aa64f5-52d6ca/0/
+    - assets/fish_companion/data/cache/fishing-region-highlights/aa64f5/1/
+    - assets/fish_companion/data/cache/fishing-region-highlights/b4fffa-8a9497/1/
+    - assets/fish_companion/data/cache/fishing-region-highlights/b60000/1/
+    - assets/fish_companion/data/cache/fishing-region-highlights/c57d7d-e49a3a/0/
+    - assets/fish_companion/data/cache/fishing-region-highlights/c57d7d-e49a3a/1/
+    - assets/fish_companion/data/cache/fishing-region-highlights/c57d7d-f0527b/0/
+    - assets/fish_companion/data/cache/fishing-region-highlights/c58787-e49a3a/0/
+    - assets/fish_companion/data/cache/fishing-region-highlights/c8c805-e49a3a/0/
+    - assets/fish_companion/data/cache/fishing-region-highlights/c97b39854e90b8d2/028cfa-f0527b/1/
+    - assets/fish_companion/data/cache/fishing-region-highlights/c97b39854e90b8d2/60aed4-e49a3a/1/
+    - assets/fish_companion/data/cache/fishing-region-highlights/c97b39854e90b8d2/8a8b00-52d6ca/1/
+    - assets/fish_companion/data/cache/fishing-region-highlights/c97b39854e90b8d2/c8c8fa-f0527b/1/
+    - assets/fish_companion/data/cache/fishing-region-highlights/c97b39854e90b8d2/d48484-f0527b/1/
+    - assets/fish_companion/data/cache/fishing-region-highlights/c97b39854e90b8d2/fafa64-30ff60/0/
+    - assets/fish_companion/data/cache/fishing-region-highlights/d7212a/1/
+    - assets/fish_companion/data/cache/fishing-region-highlights/d88958/1/
+    - assets/fish_companion/data/cache/fishing-region-highlights/d88976/1/
+    - assets/fish_companion/data/cache/fishing-region-highlights/efdb8a/0/
+    - assets/fish_companion/data/cache/fishing-region-highlights/efdb8a/1/
+    - assets/fish_companion/data/cache/fishing-region-highlights/fa02c8-e49a3a/0/
+    - assets/fish_companion/data/cache/fishing-region-highlights/fafa00/1/
+    - assets/fish_companion/data/cache/fishing-region-highlights/fafa64-30ff60/0/
+    - assets/fish_companion/data/cache/fishing-region-highlights/fafa64/0/
+    - assets/fish_companion/data/cache/fishing-region-highlights/fafa64/1/
+    - assets/fish_companion/data/cache/fishing-region-highlights/ff009c/0/
+    - assets/fish_companion/data/cache/fishing-region-highlights/ff009c/1/
+    - assets/fish_companion/data/cache/fishing-region-highlights/ff00ff/1/
+    - assets/fish_companion/data/cache/fishing-region-highlights/ffc0cb/1/
+    - assets/fish_companion/data/cache/fishing-region-highlights/ffdb8a-52d6ca/0/
+    - assets/fish_companion/data/cache/fishing-region-highlights/ffdb8a/0/
+    - assets/fish_companion/data/cache/fishing-region-highlights/ffdb8a/1/
+    - assets/fish_companion/data/cache/fishing-region-highlights/ffdb8a/2/
+    - assets/fish_companion/data/cache/fishing-region-highlights/ffdb8a/3/
+    - assets/fish_companion/data/cache/fishing-region-tiles/0/
+    - assets/fish_companion/data/cache/fishing-region-tiles/1/
+    - assets/fish_companion/data/cache/fishing-region-tiles/2/
+    - assets/fish_companion/data/cache/fishing-region-tiles/3/
+    - assets/fish_companion/data/cache/fishing-region-tiles/c97b39854e90b8d2-display2/0/
+    - assets/fish_companion/data/cache/fishing-region-tiles/c97b39854e90b8d2-display2/1/
+    - assets/fish_companion/data/cache/fishing-region-tiles/c97b39854e90b8d2-display2/2/
+    - assets/fish_companion/data/cache/fishing-region-tiles/c97b39854e90b8d2/0/
+    - assets/fish_companion/data/cache/fishing-region-tiles/c97b39854e90b8d2/1/
+    - assets/fish_companion/data/cache/icons-4x/
+    - assets/fish_companion/data/cache/icons-original/
+    - assets/fish_companion/data/cache/tiles/0/
+    - assets/fish_companion/data/cache/tiles/1/
+    - assets/fish_companion/data/cache/tiles/2/
+    - assets/fish_companion/data/cache/tiles/3/
+    - assets/fish_companion/data/cache/zone-details/
+    - assets/fish_companion/recognizer/
+    - assets/fish_companion/recognizer/reference-icons/
+    - assets/fish_companion/runtime/
+    - assets/fish_companion/runtime/licenses/
+    - assets/fish_companion/static/
+    - assets/fish_companion/static/node-icons/
+    - assets/fish_companion_integrity.json

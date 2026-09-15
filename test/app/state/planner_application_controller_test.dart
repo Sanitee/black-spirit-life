@@ -15,10 +15,50 @@ import 'package:bdo_map_core/bdo_map_core.dart'
         BdoGatherChecklistSourceKind,
         BdoMapVisualStyle,
         BdoNodeNetworkPreferences,
-        BdoTownWorkerCapacity;
+        BdoTownWorkerCapacity,
+        ResourceMapInterfaceStyle;
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
+  test(
+    'map favorites round-trip materials and typed locations without touching inventory',
+    () async {
+      final saved = <PlannerState>[];
+      final controller = PlannerApplicationController(
+        catalog: _catalog(),
+        initialState: _document(),
+        saveState: (state) async {
+          saved.add(state);
+          return state;
+        },
+      );
+      final inventoryBefore = Map<String, double>.of(
+        controller.documentSnapshot.alchemy.inventory,
+      );
+      const keys = <String>{
+        'ash',
+        'map:fieldSource:field-source:dairy-cow',
+        'map:workerNode:123',
+      };
+      controller.setResourceMapFavoriteIds(keys);
+      await controller.flush();
+      final reloaded = PlannerApplicationController(
+        catalog: _catalog(),
+        initialState: saved.last,
+        saveState: (state) async => state,
+      );
+      expect(reloaded.resourceMapFavoriteIds.value, keys);
+      expect(reloaded.documentSnapshot.alchemy.inventory, inventoryBefore);
+      reloaded.setResourceMapFavoriteIds({'ash', 'map:workerNode:123'});
+      expect(reloaded.resourceMapFavoriteIds.value, {
+        'ash',
+        'map:workerNode:123',
+      });
+      await reloaded.dispose();
+      await controller.dispose();
+    },
+  );
+
   test(
     'planner actions keep planner state scoped and Inventory shared',
     () async {
@@ -41,7 +81,7 @@ void main() {
       alchemy.setIgnoreOwnedIngredients(false);
       alchemy.toggleCompleted('Potion');
       alchemy.toggleIngredients('Potion');
-      alchemy.addMissingAmount('Base', 4);
+      expect(alchemy.addMissingAmount('Base', 4), isTrue);
 
       expect(alchemy.state.value.ignoreTargetInventory, isFalse);
       expect(alchemy.state.value.ignoreIngredientInventory, isFalse);
@@ -70,6 +110,48 @@ void main() {
 
     await controller.dispose();
   });
+
+  test(
+    'Need First Add updates shared inventory and owned-material planning atomically',
+    () async {
+      final controller = _controller();
+      final mode = controller.active;
+      const name = 'Imperfect Lightstone of Flora';
+      var notifications = 0;
+      mode.state.addListener(() => notifications += 1);
+
+      expect(mode.state.value.ignoreIngredientInventory, isTrue);
+      expect(mode.addMissingAmount(name, 12), isTrue);
+
+      expect(notifications, 1);
+      expect(mode.state.value.ignoreIngredientInventory, isFalse);
+      for (final craftMode in CraftMode.values) {
+        expect(controller.modes[craftMode]!.state.value.inventory[name], 12);
+      }
+      expect(
+        controller
+            .modes[CraftMode.cooking]!
+            .state
+            .value
+            .ignoreIngredientInventory,
+        isTrue,
+      );
+
+      final snapshot = controller.documentSnapshot;
+      expect(mode.addMissingAmount(name, 0), isFalse);
+      expect(mode.addMissingAmount(name, double.nan), isFalse);
+      expect(identical(controller.documentSnapshot, snapshot), isTrue);
+      expect(notifications, 1);
+
+      controller.freezeMutationsForRestart();
+      expect(mode.addMissingAmount(name, 4), isFalse);
+      expect(mode.state.value.inventory[name], 12);
+      expect(notifications, 1);
+
+      await controller.dispose();
+      expect(mode.addMissingAmount(name, 4), isFalse);
+    },
+  );
 
   test(
     'completing a queue step consumes inputs and adds output once',
@@ -383,6 +465,73 @@ void main() {
         <String>{'first', 'second'},
         <String>{},
       ]);
+      await controller.dispose();
+    },
+  );
+
+  test(
+    'resource map interface style persists and rejects unknown values',
+    () async {
+      final saves = <PlannerState>[];
+      final controller = PlannerApplicationController(
+        catalog: _catalog(),
+        initialState: _document().copyWith(
+          extensions: const <String, Object?>{
+            'resourceMap': <String, Object?>{
+              'favoriteResourceIds': <String>['ash'],
+              'interfaceStyle': 'ghostLedger',
+            },
+          },
+        ),
+        saveState: (state) async {
+          saves.add(state);
+          return state;
+        },
+        saveDebounce: const Duration(days: 1),
+      );
+
+      expect(
+        controller.resourceMapInterfaceStyle.value,
+        ResourceMapInterfaceStyle.ghostLedger,
+      );
+      controller.setResourceMapInterfaceStyle(
+        ResourceMapInterfaceStyle.glassDock,
+      );
+      expect(
+        controller.resourceMapInterfaceStyle.value,
+        ResourceMapInterfaceStyle.glassDock,
+      );
+      expect(
+        (controller.documentSnapshot.extensions['resourceMap']
+            as Map)['favoriteResourceIds'],
+        const <String>['ash'],
+      );
+      expect(
+        (controller.documentSnapshot.extensions['resourceMap'] as Map)
+            .containsKey('interfaceStyle'),
+        isFalse,
+      );
+
+      controller.updateDocument(
+        (document) => document.copyWith(
+          extensions: const <String, Object?>{
+            'resourceMap': <String, Object?>{'interfaceStyle': 'future-style'},
+          },
+        ),
+      );
+      expect(
+        controller.resourceMapInterfaceStyle.value,
+        ResourceMapInterfaceStyle.glassDock,
+      );
+
+      controller.setResourceMapInterfaceStyle(
+        ResourceMapInterfaceStyle.ghostLedger,
+      );
+      await controller.flush();
+      expect(
+        (saves.last.extensions['resourceMap'] as Map)['interfaceStyle'],
+        'ghostLedger',
+      );
       await controller.dispose();
     },
   );

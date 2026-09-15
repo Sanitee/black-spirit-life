@@ -1,0 +1,52 @@
+{
+  "schemaVersion": 1,
+  "immutableFiles": [
+    {
+      "path": "runtime/fish_companion_service.exe",
+      "byteCount": 28781551,
+      "sha256": "c0b5c5c84980be389420cf247d7a89ac8c256676b7313ce3a496c933cb0667a9"
+    },
+    {
+      "path": "static/app.css",
+      "byteCount": 173232,
+      "sha256": "b0af198d1ff00f405084aaf8f02f9aafaa207ed8d7ab68ac4955b87c1c99d251"
+    },
+    {
+      "path": "static/app.js",
+      "byteCount": 263778,
+      "sha256": "6ad514af8ec434c5fcf4892dbc42f8714617663f699f34d2c6ba36ed7420bd75"
+    },
+    {
+      "path": "static/index.html",
+      "byteCount": 40575,
+      "sha256": "aee4831039334c685845e91ec313d39936e64bed39f272345a12d054da23f787"
+    }
+  ],
+  "snapshotFiles": [
+    {
+      "path": "data/cache/derived-index.v1.json",
+      "byteCount": 30355065,
+      "sha256": "4e00dd17de392624fa0cde04f3e57242f10acc68847052ab70721c0a10f2218b"
+    },
+    {
+      "path": "data/cache/fish.json",
+      "byteCount": 307893,
+      "sha256": "41d69478a52c49454570c448796ff580de39225f9b0d972472fd5c8fed360ed1"
+    },
+    {
+      "path": "data/cache/meta.json",
+      "byteCount": 4839,
+      "sha256": "b968a1c8b5d62450644bd27e2167ea8696137843d05675bbaad67caf8a3ad489"
+    },
+    {
+      "path": "data/cache/zone_mask.v8.bin",
+      "byteCount": 1775176,
+      "sha256": "c97b39854e90b8d229058272bc32302a2581dd35eb2797d128aaa949a2781c8d"
+    },
+    {
+      "path": "data/cache/zones.json",
+      "byteCount": 55597,
+      "sha256": "12752de64dc56409651847542d6ffbf8b048b04a3e4c5caf40b86f555de80495"
+    }
+  ]
+}

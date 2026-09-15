@@ -1,0 +1,58 @@
+<Window x:Class="BlackSpiritLife.SessionImport.App.GarmothBrowserWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Garmoth · Session Import" Icon="session-import.ico"
+        Width="1100" Height="780" MinWidth="800" MinHeight="570"
+        WindowStartupLocation="CenterOwner" Background="{StaticResource Canvas}"
+        Style="{StaticResource {x:Type Window}}">
+  <Grid Margin="16">
+    <Grid.RowDefinitions>
+      <RowDefinition Height="Auto" />
+      <RowDefinition Height="12" />
+      <RowDefinition Height="*" />
+      <RowDefinition Height="Auto" />
+    </Grid.RowDefinitions>
+    <Grid>
+      <Grid.ColumnDefinitions>
+        <ColumnDefinition Width="Auto" />
+        <ColumnDefinition Width="Auto" />
+        <ColumnDefinition Width="*" />
+        <ColumnDefinition Width="Auto" />
+      </Grid.ColumnDefinitions>
+      <Image Source="Assets/black_spirit_life_icon.png" Width="30" Height="30" Margin="0,0,12,0"
+             Stretch="Uniform" RenderOptions.BitmapScalingMode="HighQuality" SnapsToDevicePixels="True" />
+      <StackPanel Grid.Column="1" Orientation="Horizontal">
+        <Button x:Name="BackButton" Content="←" Click="Back_Click" Padding="10,6" Margin="0,0,6,0"
+                IsEnabled="False" AutomationProperties.Name="Back" />
+        <Button x:Name="ReloadButton" Content="↻" Click="Reload_Click" Padding="10,6" Margin="0,0,12,0"
+                IsEnabled="False" AutomationProperties.Name="Reload" />
+      </StackPanel>
+      <StackPanel Grid.Column="2" VerticalAlignment="Center">
+        <TextBlock Text="Garmoth" FontSize="16" FontWeight="SemiBold" />
+        <TextBlock x:Name="HostText" Text="Session Import · Black Spirit Life" FontSize="12.5"
+                   Foreground="{StaticResource Muted}" TextTrimming="CharacterEllipsis" />
+      </StackPanel>
+      <Button Grid.Column="3" x:Name="ForgetButton" Content="Forget connection" Click="Forget_Click"
+              Visibility="Collapsed" Padding="12,6" Margin="12,0,0,0" />
+    </Grid>
+    <Border Grid.Row="2" Background="{StaticResource Surface}" BorderBrush="{StaticResource Border}"
+            BorderThickness="1" CornerRadius="10">
+      <Grid>
+        <Grid x:Name="BrowserHost" Visibility="Collapsed" />
+        <StackPanel x:Name="ConnectionPanel" MaxWidth="440" Margin="28" VerticalAlignment="Center">
+          <TextBlock Text="Connect to Garmoth" FontSize="23" FontWeight="SemiBold" />
+          <TextBlock Text="Sign in in this app's browser, then return to Session Import to prepare your draft."
+                     Margin="0,12,0,18" TextWrapping="Wrap" Foreground="{StaticResource Muted}" />
+          <CheckBox x:Name="RememberBox" Content="Remember me on this device" IsChecked="False"
+                    Foreground="{StaticResource Text}" Margin="0,0,0,8" />
+          <TextBlock Text="Otherwise, your sign-in is not kept when this connection closes."
+                     Foreground="{StaticResource Muted}" FontSize="12.5" TextWrapping="Wrap" Margin="0,0,0,20" />
+          <Button x:Name="OpenButton" Content="Open Garmoth" Click="Open_Click"
+                  Style="{StaticResource PrimaryButton}" HorizontalAlignment="Left" />
+        </StackPanel>
+      </Grid>
+    </Border>
+    <TextBlock Grid.Row="3" x:Name="StatusText" TextWrapping="Wrap" FontSize="12.5"
+               Foreground="{StaticResource Muted}" Margin="0,10,0,0" />
+  </Grid>
+</Window>

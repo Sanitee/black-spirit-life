@@ -17,7 +17,19 @@ class BetaUpdateIndicator extends StatefulWidget {
     super.key,
   });
 
-  static const double height = 84;
+  // Keep the updater as a notice strip, not a second toolbar. The previous
+  // 84 px presentation consumed too much of the workspace at normal desktop
+  // sizes even though the same information fits comfortably in two compact
+  // text rows.
+  static const double height = 56;
+
+  /// The ordinary desktop notice stays compact while accessibility text is
+  /// allowed enough vertical room to remain unclipped.
+  static double heightFor(BuildContext context) {
+    final textScale = MediaQuery.textScalerOf(context).scale(1);
+    return math.max(height, 8 + 28 * textScale);
+  }
+
   static const Key buttonKey = ValueKey<String>('beta-update-strip');
   static const Key iconKey = ValueKey<String>('beta-update-strip-icon');
   static const Key availableContentKey = ValueKey<String>(
@@ -187,7 +199,7 @@ class _BetaUpdateIndicatorState extends State<BetaUpdateIndicator>
         : '${presentation.label}. ${presentation.actionHint}';
 
     return SizedBox(
-      height: BetaUpdateIndicator.height,
+      height: BetaUpdateIndicator.heightFor(context),
       width: double.infinity,
       child: AppSurface(
         role: AppSurfaceRole.commandBand,
@@ -299,7 +311,7 @@ class _AvailableUpdateContent extends StatelessWidget {
     return LayoutBuilder(
       builder: (context, constraints) {
         final compact = constraints.maxWidth < 620;
-        final simplified = MediaQuery.textScalerOf(context).scale(1) > 1.35;
+        final simplified = MediaQuery.textScalerOf(context).scale(1) >= 1.25;
         final behavior = snapshot.testOnly
             ? compact
                   ? 'simulates install flow'
@@ -323,7 +335,7 @@ class _AvailableUpdateContent extends StatelessWidget {
           key: BetaUpdateIndicator.availableContentKey,
           padding: EdgeInsets.symmetric(
             horizontal: compact ? 12 : 18,
-            vertical: 8,
+            vertical: 4,
           ),
           child: Row(
             children: <Widget>[
@@ -389,7 +401,7 @@ class _AvailableUpdateContent extends StatelessWidget {
                           ],
                         ],
                       ),
-                      const SizedBox(height: 3),
+                      const SizedBox(height: 1),
                     ],
                     Text(
                       heading,
@@ -397,13 +409,13 @@ class _AvailableUpdateContent extends StatelessWidget {
                       overflow: TextOverflow.ellipsis,
                       style: spec.typography.button.copyWith(
                         color: spec.palette.text,
-                        fontSize: compact ? 13 : 14,
+                        fontSize: compact ? 12.5 : 13.5,
                         fontWeight: FontWeight.w700,
                         height: 1.05,
                       ),
                     ),
                     if (!simplified) ...<Widget>[
-                      const SizedBox(height: 3),
+                      const SizedBox(height: 1),
                       Text(
                         meta,
                         maxLines: 1,
@@ -415,7 +427,7 @@ class _AvailableUpdateContent extends StatelessWidget {
                         ),
                       ),
                     ] else if (accessibleMeta.isNotEmpty) ...<Widget>[
-                      const SizedBox(height: 3),
+                      const SizedBox(height: 1),
                       Text(
                         accessibleMeta,
                         maxLines: 1,
@@ -442,7 +454,7 @@ class _AvailableUpdateContent extends StatelessWidget {
                     key: BetaUpdateIndicator.actionPanelKey,
                     padding: EdgeInsets.symmetric(
                       horizontal: compact ? 10 : 14,
-                      vertical: 10,
+                      vertical: 7,
                     ),
                     decoration: BoxDecoration(
                       gradient: LinearGradient(

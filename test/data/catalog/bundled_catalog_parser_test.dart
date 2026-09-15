@@ -82,6 +82,15 @@ void main() {
     );
     expect(catalog.cooking.auditedCraftableCount, 172);
     expect(catalog.cooking.plannerCraftableCount, 169);
+    for (final name in ['Cooking Honey', 'Purified Water']) {
+      expect(catalog.cooking.items[name]!.role, RecipeRole.manualConversion);
+      expect(catalog.cooking.items[name]!.ingredients, isNotEmpty);
+      expect(catalog.processing.items[name]!.isCraftable, isTrue);
+    }
+    expect(
+      catalog.alchemy.items['Purified Water']!.role,
+      RecipeRole.manualConversion,
+    );
     expect(catalog.processing.plannerCraftableCount, 628);
     final endtimes =
         catalog.processing.items['Crystallized Energy of Endtimes'];
@@ -401,6 +410,149 @@ void main() {
         reason: '$name must use bundled in-game item artwork',
       );
     }
+  });
+
+  test('locks the reviewed life-skill patch data through September 3', () {
+    final catalog = const BundledCatalogParser().parse(source);
+    final rawRoot = jsonDecode(source) as Map<String, dynamic>;
+    final review = rawRoot['weeklyPatchReview'] as Map<String, dynamic>;
+    final evidence = review['clientEvidence'] as Map<String, dynamic>;
+    final discrepancies = (review['knownSourceDiscrepancies'] as List<dynamic>)
+        .cast<Map<String, dynamic>>();
+
+    expect(review['reviewedAt'], '2026-09-03');
+    expect(review['range'], '2026-07-23 through 2026-09-03');
+    expect(review['officialSources'] as List<dynamic>, hasLength(7));
+    expect(evidence['clientDate'], '2026-09-03');
+    expect(
+      evidence['recipesSha256'],
+      'ef5f41af2b6ab904f6db3195f254e2e9f4dec866e7123474ae9036613aef5574',
+    );
+    expect(
+      discrepancies.map((entry) => entry['detail']),
+      contains(contains('executable recipe data consumes 1')),
+    );
+    expect(
+      discrepancies.map((entry) => entry['detail']),
+      contains(contains('dormant legacy rows')),
+    );
+    expect(review['housePlannerStatus'], contains('No production-node'));
+
+    expect(
+      catalog
+          .processing
+          .items['Crystal Extraction Tool']!
+          .variantBatchMultipliers,
+      <int>[1, 10],
+    );
+    expect(
+      catalog.processing.items['Pure Forest Breath']!.variants,
+      hasLength(12),
+    );
+    expect(catalog.processing.items['Cron Stone']!.variants, hasLength(12));
+    expect(
+      catalog.processing.items['Essence of Dawn - Accuracy']!.variants,
+      hasLength(3),
+    );
+    final oquilla = catalog.processing.items['Oquilla Wave Meal']!;
+    expect(oquilla.variantBatchMultipliers, <int>[1, 10]);
+    expect(
+      _ingredientRows(oquilla.resolveVariant('simple-cooking-10x')),
+      contains("Nadia Rowen's Special Sauce:1.0"),
+    );
+    for (final name in const <String>[
+      'Sturdy Coral Support',
+      'Raging Wave Plywood',
+      'Dormant Crimson Coral Adhesive',
+      'Sunset Tidal Black Stone',
+    ]) {
+      expect(catalog.processing.items[name]!.variantBatchMultipliers, <int>[
+        1,
+        10,
+      ], reason: name);
+    }
+    expect(catalog.alchemy.items['Ocean Draught']!.variants, hasLength(2));
+    expect(
+      catalog.alchemy.items['Vast Ocean Draught']!.ingredients,
+      hasLength(5),
+    );
+    expect(
+      catalog.alchemy.items['Endless Ocean Draught']!.variants,
+      hasLength(2),
+    );
+    expect(
+      catalog.alchemy.items['Adaptation Draught']!.variantBatchMultipliers,
+      <int>[10, 100],
+    );
+
+    expect(catalog.alchemy.items, contains('Great Ocean Oil'));
+    expect(catalog.alchemy.items, isNot(contains('Blue Whale Oil')));
+    final supporting = catalog.supportingData;
+    final marketIds = supporting['marketIds'] as Map<String, Object?>;
+    final marketAliases =
+        supporting['marketNameAliases'] as Map<String, Object?>;
+    expect(marketIds['Great Ocean Oil'], '9727');
+    expect(marketIds, isNot(contains('Blue Whale Oil')));
+    expect(marketAliases['Blue Whale Oil'], 'Great Ocean Oil');
+    expect(marketIds['Destruction Spirit Stone'], '45298');
+    expect(marketIds['Guardian Spirit Stone'], '45300');
+    expect(marketIds['Life Spirit Stone'], '45302');
+
+    final breath = catalog.processing.items['Breath of All Creations']!;
+    expect(_ingredientRows(breath), <String>[
+      'Oil of Fortitude:20.0',
+      'Energy of All Creations:1.0',
+      'Ancient Spirit Dust:10.0',
+    ]);
+    final tear = catalog.processing.items["Elion's Tear"]!;
+    expect(_ingredientRows(tear), <String>[
+      'Tears of War:1.0',
+      'Ancient Spirit Dust:50.0',
+    ]);
+
+    final shards = catalog.processing.items['Alchemy Stone Shard']!;
+    expect(shards.role, RecipeRole.manualConversion);
+    expect(shards.variants, hasLength(2));
+    final spiritStoneRoute = shards.resolveVariant('spirit-stone');
+    expect(spiritStoneRoute.outputMinimum, 10);
+    expect(spiritStoneRoute.outputMaximum, 18);
+    expect(
+      spiritStoneRoute.ingredients.single.options,
+      containsAll(<String>[
+        'Destruction Spirit Stone',
+        'Guardian Spirit Stone',
+        'Life Spirit Stone',
+      ]),
+    );
+    expect(
+      spiritStoneRoute.ingredients.single.options,
+      isNot(contains('Wild Spirit Stone')),
+    );
+
+    final legacyUnavailable =
+        supporting['legacyUnavailableItems'] as List<Object?>;
+    expect(
+      legacyUnavailable,
+      containsAll(<String>[
+        'Mystical Spirit Powder',
+        "Vell's Fine Powder",
+        'Wild Spirit Stone',
+      ]),
+    );
+    expect(catalog.processing.items, isNot(contains('Mystical Spirit Powder')));
+    expect(catalog.alchemy.items, isNot(contains("Vell's Fine Powder")));
+    final processingRoot = rawRoot['processing'] as Map<String, dynamic>;
+    final processingIcons = processingRoot['itemIcons'] as Map<String, dynamic>;
+    final alchemyIcons = rawRoot['itemIcons'] as Map<String, dynamic>;
+    expect(processingIcons, isNot(contains('Mystical Spirit Powder')));
+    expect(processingIcons, isNot(contains('Wild Spirit Stone')));
+    expect(alchemyIcons, isNot(contains("Vell's Fine Powder")));
+    expect(marketIds, isNot(contains('Mystical Spirit Powder')));
+    expect(marketIds, isNot(contains("Vell's Fine Powder")));
+    expect(marketIds, isNot(contains('Wild Spirit Stone')));
+    final acquisitionInfo =
+        supporting['acquisitionInfo'] as Map<String, Object?>;
+    expect(acquisitionInfo, isNot(contains('Wild Spirit Stone')));
   });
 
   test('processing outputs come from each bundled recipe result record', () {

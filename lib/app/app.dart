@@ -1,8 +1,14 @@
+import 'dart:async';
+import 'dart:io';
+
+import 'package:bdo_fishing_core/bdo_fishing_core.dart';
+import 'package:bdo_gathering_companion/bdo_gathering_companion.dart';
 import 'package:flutter/material.dart';
 
 import '../app_identity.dart';
 import '../data/persistence/planner_state_repository.dart';
 import '../domain/market/market_price_gateway.dart';
+import '../features/fishing/fish_map_workspace.dart';
 import '../features/resource_map/resource_map_workspace.dart';
 import '../shared/overlays/draggable_overlay_surface.dart';
 import '../visual/components/app_button.dart';
@@ -22,11 +28,94 @@ import 'window/window_host_service.dart';
 import 'window/world_root_startup_animation.dart';
 import 'workspace/application_workspace.dart';
 
+/// Creates the app-owned Fish service host without waiting for the full
+/// application bundle. The service starts as soon as the validated personal
+/// data directory is available, while the normal app bootstrap continues.
+FishCompanionRuntimeHost createApplicationFishCompanionRuntimeHost({
+  required Future<Directory> Function() applicationDirectory,
+  Directory? referenceCacheDirectory,
+  FishCompanionRuntimeStarter? starter,
+}) {
+  return FishCompanionRuntimeHost.withStarter((cancellation) async {
+    final directory = await _waitForFishStartupValue(
+      applicationDirectory(),
+      cancellation,
+    );
+    if (starter != null) return starter(cancellation);
+    return FishCompanionRuntime(
+      personalDataRoot: directory,
+      webViewDataRoot: Directory(
+        '${directory.absolute.path}${Platform.pathSeparator}webview2',
+      ),
+      referenceCacheRoot:
+          referenceCacheDirectory ?? applicationFishReferenceCacheDirectory(),
+    ).start(cancellation: cancellation);
+  });
+}
+
+Future<T> _waitForFishStartupValue<T>(
+  Future<T> value,
+  FishCompanionStartupCancellation cancellation,
+) {
+  cancellation.throwIfCanceled();
+  final result = Completer<T>();
+  var settled = false;
+  unawaited(
+    value.then<void>(
+      (resolved) {
+        if (settled) return;
+        settled = true;
+        result.complete(resolved);
+      },
+      onError: (Object error, StackTrace stackTrace) {
+        if (settled) return;
+        settled = true;
+        result.completeError(error, stackTrace);
+      },
+    ),
+  );
+  unawaited(
+    cancellation.whenCanceled.then<void>((_) {
+      if (settled) return;
+      settled = true;
+      result.completeError(const FishCompanionStartupCanceled());
+    }),
+  );
+  return result.future;
+}
+
+/// Resolves disposable Fish reference data outside the movable personal-data
+/// root. The runtime still receives this directory explicitly and will reject
+/// it if a user-selected personal root overlaps it.
+Directory applicationFishReferenceCacheDirectory({
+  Map<String, String>? environment,
+}) {
+  final localAppData = (environment ?? Platform.environment)['LOCALAPPDATA']
+      ?.trim();
+  if (localAppData == null || localAppData.isEmpty) {
+    throw StateError(
+      'LOCALAPPDATA is unavailable; the Fish reference cache cannot be '
+      'resolved.',
+    );
+  }
+  return Directory(
+    <String>[
+      localAppData,
+      AppIdentity.localCacheDirectoryName,
+      'Reference Cache',
+      'Fish Companion',
+    ].join(Platform.pathSeparator),
+  );
+}
+
 class BdoCraftPlannerApp extends StatelessWidget {
   const BdoCraftPlannerApp({
     required this.applicationFuture,
     this.marketGateway,
     this.resourceMapConfiguration = const ResourceMapWorkspaceConfiguration(),
+    this.fishCompanionRuntimeHost,
+    this.fishCompanionRuntimeStarter,
+    this.fishCompanionPageReadinessOverride,
     this.updateService,
     this.updateSource,
     this.enableBetaUpdates = AppIdentity.outOfProcessBetaUpdatesEnabled,
@@ -35,11 +124,18 @@ class BdoCraftPlannerApp extends StatelessWidget {
         AppIdentity.repeatFullSetupEveryApplicationVersion,
     this.windowHost = const WindowHostService(),
     super.key,
-  });
+  }) : assert(
+         fishCompanionRuntimeHost == null ||
+             fishCompanionRuntimeStarter == null,
+         'Provide either a Fish runtime host or a starter, not both.',
+       );
 
   final Future<ApplicationBundle> applicationFuture;
   final MarketPriceGateway? marketGateway;
   final ResourceMapWorkspaceConfiguration resourceMapConfiguration;
+  final FishCompanionRuntimeHost? fishCompanionRuntimeHost;
+  final FishCompanionRuntimeStarter? fishCompanionRuntimeStarter;
+  final FishCompanionPageReadinessOverride? fishCompanionPageReadinessOverride;
   final BetaUpdateService? updateService;
   final String? updateSource;
   final bool enableBetaUpdates;
@@ -64,6 +160,10 @@ class BdoCraftPlannerApp extends StatelessWidget {
           applicationFuture: applicationFuture,
           marketGateway: marketGateway,
           resourceMapConfiguration: resourceMapConfiguration,
+          fishCompanionRuntimeHost: fishCompanionRuntimeHost,
+          fishCompanionRuntimeStarter: fishCompanionRuntimeStarter,
+          fishCompanionPageReadinessOverride:
+              fishCompanionPageReadinessOverride,
           updateService: updateService,
           updateSource: updateSource,
           enableBetaUpdates: enableBetaUpdates,
@@ -82,6 +182,9 @@ class _BootstrapGate extends StatefulWidget {
     required this.applicationFuture,
     required this.marketGateway,
     required this.resourceMapConfiguration,
+    required this.fishCompanionRuntimeHost,
+    required this.fishCompanionRuntimeStarter,
+    required this.fishCompanionPageReadinessOverride,
     required this.updateService,
     required this.updateSource,
     required this.enableBetaUpdates,
@@ -93,6 +196,9 @@ class _BootstrapGate extends StatefulWidget {
   final Future<ApplicationBundle> applicationFuture;
   final MarketPriceGateway? marketGateway;
   final ResourceMapWorkspaceConfiguration resourceMapConfiguration;
+  final FishCompanionRuntimeHost? fishCompanionRuntimeHost;
+  final FishCompanionRuntimeStarter? fishCompanionRuntimeStarter;
+  final FishCompanionPageReadinessOverride? fishCompanionPageReadinessOverride;
   final BetaUpdateService? updateService;
   final String? updateSource;
   final bool enableBetaUpdates;
@@ -105,6 +211,11 @@ class _BootstrapGate extends StatefulWidget {
 }
 
 class _BootstrapGateState extends State<_BootstrapGate> {
+  final GatheringDurabilityController _gatheringDurabilityController =
+      GatheringDurabilityController();
+  late FishCompanionRuntimeHost _fishCompanionRuntimeHost;
+  late FishMapWorkspace _fishMapWorkspace;
+  int _fishMapWorkspaceGeneration = 0;
   ApplicationBundle? _resolvedBundle;
   FirstLaunchMigrationResolution? _migrationOutcome;
   bool _resolvingMigration = false;
@@ -115,8 +226,42 @@ class _BootstrapGateState extends State<_BootstrapGate> {
   Object? _setupError;
 
   @override
+  void initState() {
+    super.initState();
+    _fishCompanionRuntimeHost = _createFishCompanionRuntimeHost();
+    _recreateFishMapWorkspace();
+    _prewarmFishCompanion();
+  }
+
+  @override
   void didUpdateWidget(_BootstrapGate oldWidget) {
     super.didUpdateWidget(oldWidget);
+    final externalFishHostChanged = !identical(
+      oldWidget.fishCompanionRuntimeHost,
+      widget.fishCompanionRuntimeHost,
+    );
+    final ownedFishHostConfigurationChanged =
+        oldWidget.fishCompanionRuntimeHost == null &&
+        widget.fishCompanionRuntimeHost == null &&
+        (!identical(oldWidget.applicationFuture, widget.applicationFuture) ||
+            !identical(
+              oldWidget.fishCompanionRuntimeStarter,
+              widget.fishCompanionRuntimeStarter,
+            ));
+    final fishRuntimeChanged =
+        externalFishHostChanged || ownedFishHostConfigurationChanged;
+    if (fishRuntimeChanged) {
+      _fishCompanionRuntimeHost.dispose();
+      _fishCompanionRuntimeHost = _createFishCompanionRuntimeHost();
+      _prewarmFishCompanion();
+    }
+    if (fishRuntimeChanged ||
+        !identical(
+          oldWidget.fishCompanionPageReadinessOverride,
+          widget.fishCompanionPageReadinessOverride,
+        )) {
+      _recreateFishMapWorkspace();
+    }
     if (!identical(oldWidget.applicationFuture, widget.applicationFuture)) {
       _resolvedBundle = null;
       _migrationOutcome = null;
@@ -133,24 +278,32 @@ class _BootstrapGateState extends State<_BootstrapGate> {
   Widget build(BuildContext context) => FutureBuilder<ApplicationBundle>(
     future: widget.applicationFuture,
     builder: (context, snapshot) {
-      if (snapshot.hasError) return _StartupFailure(error: snapshot.error);
+      if (snapshot.hasError) {
+        return _withPrewarmedFishMap(_StartupFailure(error: snapshot.error));
+      }
       final bundle = _resolvedBundle ?? snapshot.data;
-      if (bundle == null) return const _StartupLoading();
+      if (bundle == null) {
+        return _withPrewarmedFishMap(const _StartupLoading());
+      }
       if (_migrationOutcome case final outcome?) {
-        return FirstLaunchMigrationReportView(
-          outcome: outcome,
-          onContinue: () => setState(() => _migrationOutcome = null),
+        return _withPrewarmedFishMap(
+          FirstLaunchMigrationReportView(
+            outcome: outcome,
+            onContinue: () => setState(() => _migrationOutcome = null),
+          ),
         );
       }
       if (bundle.firstLaunchMigration case final migration?) {
-        return FirstLaunchMigrationPreviewView(
-          migration: migration,
-          busy: _resolvingMigration,
-          error: _migrationError,
-          onImport: migration.preview.canImport
-              ? () => _resolveMigration(bundle, import: true)
-              : null,
-          onStartFresh: () => _resolveMigration(bundle, import: false),
+        return _withPrewarmedFishMap(
+          FirstLaunchMigrationPreviewView(
+            migration: migration,
+            busy: _resolvingMigration,
+            error: _migrationError,
+            onImport: migration.preview.canImport
+                ? () => _resolveMigration(bundle, import: true)
+                : null,
+            onStartFresh: () => _resolveMigration(bundle, import: false),
+          ),
         );
       }
       final setupProgress = FirstRunSetupProgress.fromDocument(
@@ -162,20 +315,39 @@ class _BootstrapGateState extends State<_BootstrapGate> {
       );
       if (!_setupDismissedForSession &&
           (setupProgress.shouldShow || _setupCompletionPending)) {
-        return FirstRunSetupView(
-          document: bundle.controller.documentSnapshot,
-          groups: setupProgress.pendingGroups,
-          busy: _setupBusy,
-          error: _setupError,
-          onSkip: () => _skipSetup(bundle),
-          onFinish: (answers) =>
-              _finishSetup(bundle, setupProgress.pendingGroups, answers),
+        return _withPrewarmedFishMap(
+          FirstRunSetupView(
+            document: bundle.controller.documentSnapshot,
+            groups: setupProgress.pendingGroups,
+            busy: _setupBusy,
+            error: _setupError,
+            onSkip: () => _skipSetup(bundle),
+            onFinish: (answers) =>
+                _finishSetup(bundle, setupProgress.pendingGroups, answers),
+          ),
         );
       }
       return ApplicationWorkspace(
         bundle: bundle,
         marketGateway: widget.marketGateway,
         resourceMapConfiguration: widget.resourceMapConfiguration,
+        fishMapWorkspace: _fishMapWorkspace,
+        gatheringDurabilityController: _gatheringDurabilityController,
+        gatheringDurabilityParticipant:
+            ApplicationWorkspaceDurabilityParticipant(
+              flushForLifecycle: _gatheringDurabilityController.flush,
+              freezeAndFlush: _gatheringDurabilityController.freezeAndFlush,
+              freezeAndFlushForApplicationExit:
+                  _gatheringDurabilityController.freezeAndFlush,
+              resumeAfterFailure: _gatheringDurabilityController.resume,
+            ),
+        fishMapDurabilityParticipant: ApplicationWorkspaceDurabilityParticipant(
+          flushForLifecycle: _fishCompanionRuntimeHost.flushForLifecycle,
+          freezeAndFlush: _fishCompanionRuntimeHost.freezeAndFlush,
+          freezeAndFlushForApplicationExit:
+              _fishCompanionRuntimeHost.freezeAndFlushForApplicationExit,
+          resumeAfterFailure: _fishCompanionRuntimeHost.resumeAfterFailure,
+        ),
         updateService: widget.updateService,
         updateSource: widget.updateSource,
         enableBetaUpdates: widget.enableBetaUpdates,
@@ -184,6 +356,56 @@ class _BootstrapGateState extends State<_BootstrapGate> {
       );
     },
   );
+
+  Widget _withPrewarmedFishMap(Widget foreground) => Stack(
+    fit: StackFit.expand,
+    children: <Widget>[
+      Offstage(
+        offstage: true,
+        child: ExcludeFocus(
+          excluding: true,
+          child: TickerMode(enabled: false, child: _fishMapWorkspace),
+        ),
+      ),
+      foreground,
+    ],
+  );
+
+  FishCompanionRuntimeHost _createFishCompanionRuntimeHost() {
+    return widget.fishCompanionRuntimeHost ??
+        createApplicationFishCompanionRuntimeHost(
+          applicationDirectory: () async => (await widget.applicationFuture)
+              .stateRepository
+              .paths
+              .applicationDirectory,
+          starter: widget.fishCompanionRuntimeStarter,
+        );
+  }
+
+  void _recreateFishMapWorkspace() {
+    _fishMapWorkspaceGeneration += 1;
+    _fishMapWorkspace = FishMapWorkspace(
+      key: GlobalKey(
+        debugLabel: 'bootstrap-fish-map-workspace-$_fishMapWorkspaceGeneration',
+      ),
+      runtimeHost: _fishCompanionRuntimeHost,
+      pageReadinessOverride: widget.fishCompanionPageReadinessOverride,
+    );
+  }
+
+  void _prewarmFishCompanion() {
+    if (widget.fishCompanionRuntimeHost != null ||
+        widget.fishCompanionRuntimeStarter != null ||
+        Platform.environment['FLUTTER_TEST'] != 'true') {
+      unawaited(_fishCompanionRuntimeHost.prewarm());
+    }
+  }
+
+  @override
+  void dispose() {
+    _fishCompanionRuntimeHost.dispose();
+    super.dispose();
+  }
 
   Future<void> _resolveMigration(
     ApplicationBundle source, {
