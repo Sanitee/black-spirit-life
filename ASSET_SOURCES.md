@@ -1,7 +1,8 @@
 # Asset and dataset sources
 
-Review snapshot: 2026-09-14
-Release candidate: Black Spirit Life `0.1.6+25` sanitized public-source review
+Review snapshot: 2026-09-15
+Release candidate: Black Spirit Life `0.1.7+26`, inheriting the sanitized
+`0.1.6` asset baseline without adding third-party assets
 
 This inventory separates ownership of underlying material from the websites
 used to find or verify it. The controlling release decision is

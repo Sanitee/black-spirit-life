@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 
 import '../../app/state/planner_application_controller.dart';
 import '../../app/window/native_file_dialog_service.dart';
+import '../../app_identity.dart';
 import '../../data/portable/portable_custom_icon_bridge.dart';
 import '../../data/portable/portable_file_service.dart';
 import '../../data/portable/portable_v4_codec.dart';
@@ -799,7 +800,7 @@ class _DataViewState extends State<DataView> {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: <Widget>[
         Text(
-          'Favorites, checklist items, custom recipes, icons, and planner settings are stored only on this PC. They are not included in the installer.',
+          "Mastery, Fairy and weight settings, Value Pack, Merchant's Ring, family fame, inventories, favorites, sessions, loadouts, custom recipes, icons, and all other personal settings are stored only in this folder on this PC. They are not included in the installer.",
           style: context.visualTheme.typography.body,
         ),
         const SizedBox(height: 12),
@@ -931,8 +932,7 @@ class _DataViewState extends State<DataView> {
   );
 
   Widget _buildVersionUnlock() {
-    final version = widget.controller.documentSnapshot.applicationVersion
-        .trim();
+    final version = AppIdentity.applicationVersion.trim();
     final label = version.isEmpty ? 'App build' : 'App build $version';
     return Semantics(
       button: true,

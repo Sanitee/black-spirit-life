@@ -63,6 +63,54 @@ class AppTitleBarVisual {
     ResourceMapChromeThemeData.ghostLedger,
   );
 
+  static final gathering = AppTitleBarVisual(
+    id: 'gathering-journal',
+    titleGradient: const LinearGradient(
+      begin: Alignment.centerLeft,
+      end: Alignment.centerRight,
+      colors: [Color(0xFF07100D), Color(0xFF13231B), Color(0xFF0A1110)],
+      stops: [0, .58, 1],
+    ),
+    titleDivider: const Color(0xFF355C48),
+    foreground: const Color(0xFFE7F2EA),
+    iconBorder: const Color(0xFF4C765E),
+    tabAccent: const Color(0xFF7ABF8C),
+    tabSurface: const Color(0xFF0A1110),
+    tabSelectedSurface: const Color(0xFF254333),
+    tabHoverSurface: const Color(0xFF172720),
+    tabPressedSurface: const Color(0xFF07100D),
+    tabDivider: const Color(0xFF355C48),
+    tabForeground: const Color(0xFFA8B9AD),
+    tabSelectedForeground: const Color(0xFFE7F2EA),
+    tabHoverForeground: const Color(0xFF9ED9AC),
+    captionHoverSurface: const Color(0xFF172720),
+    captionPressedSurface: const Color(0xFF254333),
+  );
+
+  static final fishing = AppTitleBarVisual(
+    id: 'fishing-journal',
+    titleGradient: const LinearGradient(
+      begin: Alignment.centerLeft,
+      end: Alignment.centerRight,
+      colors: [Color(0xFF100A12), Color(0xFF281329), Color(0xFF110B14)],
+      stops: [0, .58, 1],
+    ),
+    titleDivider: const Color(0xFF6C365F),
+    foreground: const Color(0xFFFFEDF7),
+    iconBorder: const Color(0xFF864471),
+    tabAccent: const Color(0xFFF18AC4),
+    tabSurface: const Color(0xFF110B14),
+    tabSelectedSurface: const Color(0xFF51243F),
+    tabHoverSurface: const Color(0xFF32182A),
+    tabPressedSurface: const Color(0xFF100A12),
+    tabDivider: const Color(0xFF6C365F),
+    tabForeground: const Color(0xFFC5A8B9),
+    tabSelectedForeground: const Color(0xFFFFEDF7),
+    tabHoverForeground: const Color(0xFFFFA9D8),
+    captionHoverSurface: const Color(0xFF32182A),
+    captionPressedSurface: const Color(0xFF51243F),
+  );
+
   static AppTitleBarVisual _mapVisual(ResourceMapChromeThemeData chrome) =>
       AppTitleBarVisual(
         id: 'resource-map-${chrome.variant.name}',

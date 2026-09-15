@@ -14,6 +14,8 @@ import 'package:bdo_craft_planner_flutter/domain/models/craft_mode.dart';
 import 'package:bdo_craft_planner_flutter/domain/state/planner_state.dart';
 import 'package:bdo_craft_planner_flutter/domain/state/state_copy.dart';
 import 'package:bdo_craft_planner_flutter/features/about/about.dart';
+import 'package:bdo_craft_planner_flutter/features/fishing/fishing.dart';
+import 'package:bdo_craft_planner_flutter/features/gathering/gathering_workspace.dart';
 import 'package:bdo_craft_planner_flutter/features/inventory/inventory.dart';
 import 'package:bdo_craft_planner_flutter/features/planner/planner.dart';
 import 'package:bdo_craft_planner_flutter/features/recipe_book/recipe_book.dart';
@@ -65,6 +67,71 @@ void main() {
       expect(profileGlyph.name, 'profile');
       await tester.pumpWidget(const SizedBox.shrink());
       await tester.runAsync(harness.dispose);
+    },
+  );
+
+  testWidgets(
+    'five public destinations are available and fresh journals stay empty',
+    (tester) async {
+      configureApplicationTestSurface(tester, const Size(1575, 987));
+      final harness = (await tester.runAsync(
+        () => ApplicationTestHarness.create(),
+      ))!;
+      await tester.pumpWidget(
+        BdoCraftPlannerApp(
+          applicationFuture: Future.value(harness.bundle),
+          marketGateway: const EmptyMarketGateway(),
+          enableBetaUpdates: false,
+        ),
+      );
+      await _pumpWorkspace(tester);
+
+      const tabNames = <String>[
+        'planner',
+        'resource-map',
+        'gathering',
+        'fishing',
+        'opportunities',
+      ];
+      for (final name in tabNames) {
+        expect(
+          find.byKey(ValueKey<String>('top-workspace-tab-$name')),
+          findsOneWidget,
+        );
+      }
+
+      await tester.tap(
+        find.byKey(const ValueKey<String>('top-workspace-tab-gathering')),
+      );
+      await _pumpWorkspace(tester);
+      expect(find.byType(GatheringWorkspace), findsOneWidget);
+
+      await tester.tap(
+        find.byKey(const ValueKey<String>('top-workspace-tab-fishing')),
+      );
+      await _pumpWorkspace(tester);
+      expect(find.byType(FishingWorkspace), findsOneWidget);
+
+      final personalRoot =
+          harness.bundle.personalDataLocation.applicationDirectory.path;
+      await tester.runAsync(() async {
+        expect(
+          await File(
+            '$personalRoot${Platform.pathSeparator}gathering'
+            '${Platform.pathSeparator}gathering-state.json',
+          ).exists(),
+          isFalse,
+        );
+        expect(
+          await File(
+            '$personalRoot${Platform.pathSeparator}fishing'
+            '${Platform.pathSeparator}fishing-journal.json',
+          ).exists(),
+          isFalse,
+        );
+      });
+
+      await _disposeWidgetHarness(tester, harness);
     },
   );
 

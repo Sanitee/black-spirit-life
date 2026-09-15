@@ -7,7 +7,13 @@ import '../../visual/visual.dart';
 import '../state/planner_application_controller.dart';
 import '../window/app_title_bar_visual.dart';
 
-enum ApplicationWorkspaceDestination { planner, resourceMap, opportunities }
+enum ApplicationWorkspaceDestination {
+  planner,
+  resourceMap,
+  gathering,
+  fishing,
+  opportunities,
+}
 
 /// Presentation only: never writes a Planner or standalone appearance setting.
 @immutable
@@ -43,6 +49,8 @@ class ApplicationWorkspacePresentation {
         mapStyle == ResourceMapInterfaceStyle.ghostLedger
             ? AppTitleBarVisual.resourceMapGhost
             : AppTitleBarVisual.resourceMap,
+      ApplicationWorkspaceDestination.gathering => AppTitleBarVisual.gathering,
+      ApplicationWorkspaceDestination.fishing => AppTitleBarVisual.fishing,
       ApplicationWorkspaceDestination.opportunities =>
         AppTitleBarVisual.opportunities,
       ApplicationWorkspaceDestination.planner => throw StateError(
@@ -60,6 +68,8 @@ class ApplicationWorkspacePresentation {
         warning: map.warning,
         danger: map.error,
       ),
+      ApplicationWorkspaceDestination.gathering => _palette(visual),
+      ApplicationWorkspaceDestination.fishing => _palette(visual),
       _ => _palette(visual),
     };
     final reading = switch (destination) {
@@ -67,6 +77,16 @@ class ApplicationWorkspacePresentation {
         OpportunitiesVisualSpec.overlay,
       ApplicationWorkspaceDestination.resourceMap => _opaque(
         map.readingSurfaceGradient,
+      ),
+      ApplicationWorkspaceDestination.gathering => LinearGradient(
+        begin: Alignment.topLeft,
+        end: Alignment.bottomRight,
+        colors: [visual.tabHoverSurface, visual.tabSurface],
+      ),
+      ApplicationWorkspaceDestination.fishing => LinearGradient(
+        begin: Alignment.topLeft,
+        end: Alignment.bottomRight,
+        colors: [visual.tabHoverSurface, visual.tabSurface],
       ),
       _ => LinearGradient(
         begin: Alignment.topLeft,

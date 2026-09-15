@@ -41,7 +41,57 @@ void main() {
     expect(await service.locatorFile.exists(), isFalse);
   });
 
+  for (final invalidFeature in <String>[
+    'gathering${Platform.pathSeparator}gathering-state.json',
+    'fishing${Platform.pathSeparator}fishing-journal.json',
+  ]) {
+    test('refuses to move an invalid $invalidFeature document', () async {
+      final featureFile = File(_join(source.path, invalidFeature));
+      await featureFile.parent.create(recursive: true);
+      await featureFile.writeAsString('{}', flush: true);
+      final destination = Directory(
+        _join(temporaryDirectory.path, 'invalid feature destination'),
+      );
+      final service = _service(source: source, control: control);
+
+      await expectLater(
+        service.moveTo(destination.path),
+        throwsA(
+          isA<PersonalDataMoveException>().having(
+            (error) => error.locationSwitched,
+            'locationSwitched',
+            isFalse,
+          ),
+        ),
+      );
+
+      expect(await source.exists(), isTrue);
+      expect(await featureFile.exists(), isTrue);
+      expect(await destination.exists(), isFalse);
+      expect(await service.locatorFile.exists(), isFalse);
+    });
+  }
+
   test('moves, verifies, switches, and removes the old profile', () async {
+    const gatheringJson =
+        '{"version":1,"profile":{"mastery":0,"loadoutNotes":""},"sessions":[]}';
+    const fishingJson = '{"version":1,"loadouts":[],"sessions":[]}';
+    final gathering = File(
+      _join(
+        source.path,
+        'gathering${Platform.pathSeparator}gathering-state.json',
+      ),
+    );
+    await gathering.parent.create(recursive: true);
+    await gathering.writeAsString(gatheringJson, flush: true);
+    final fishing = File(
+      _join(
+        source.path,
+        'fishing${Platform.pathSeparator}fishing-journal.json',
+      ),
+    );
+    await fishing.parent.create(recursive: true);
+    await fishing.writeAsString(fishingJson, flush: true);
     final destination = Directory(
       _join(temporaryDirectory.path, 'Møved profile'),
     );
@@ -61,6 +111,24 @@ void main() {
         _join(destination.path, 'icons/custom icon.png'),
       ).readAsString(),
       'icon bytes',
+    );
+    expect(
+      await File(
+        _join(
+          destination.path,
+          'gathering${Platform.pathSeparator}gathering-state.json',
+        ),
+      ).readAsString(),
+      gatheringJson,
+    );
+    expect(
+      await File(
+        _join(
+          destination.path,
+          'fishing${Platform.pathSeparator}fishing-journal.json',
+        ),
+      ).readAsString(),
+      fishingJson,
     );
     expect(
       await File(

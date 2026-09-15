@@ -2,15 +2,15 @@
 
 Review result: **proportionate source review complete; project-owner
 Workerman community-use decision and accepted residual risk recorded; private
-Beta-only features, personal data, and six source-only research inputs excluded
+Beta integrations, personal data, and six source-only research inputs excluded
 from the public tree**
 
-Release identity: Black Spirit Life `0.1.6+25`, tag `v0.1.6`, package
+Release identity: Black Spirit Life `0.1.7+26`, tag `v0.1.7`, package
 `BlackSpiritLife.App`, channel `win-x64-stable`. The exact source commit and
 artifact hashes are recorded by the release-candidate manifest generated from
 the sanitized public history, which contains no internal Beta history.
 
-Review date: 2026-09-14
+Review date: 2026-09-15
 
 Permanent public/update destination approved by the project owner:
 `https://github.com/Sanitee/black-spirit-life`
@@ -19,26 +19,29 @@ This is the controlling source-by-source gate for the full-feature public
 route. It replaces earlier blanket treatment of every fact or game asset seen
 through a community reference as separately blocked.
 
-## 0.1.6 public-promotion boundary
+## 0.1.7 public-promotion boundary
 
-Version 0.1.6 promotes only the reviewed Planner, Resource Map, shared market,
-Opportunities, and update-notice work from the frozen approved Beta snapshot.
-It does not copy the Beta repository or its history.
+Version 0.1.7 preserves the reviewed Planner, Resource Map, shared market,
+Opportunities, and update-notice work and adds original native Gathering and
+Fishing local-record workspaces. It does not copy the Beta repository or its
+history.
 
 The following remain private and are absent from public source and packages:
 
-- Fish Companion code, FishyStuff cache/data, fishing journals and loadouts;
-- Gathering Companion code, guide media, Bairog-derived data and copied site
-  logos;
+- the private Fish Companion WebView/Python code, FishyStuff cache/data,
+  private icons and bundled fishing journals/loadouts;
+- the standalone Gathering Companion package, guide media, Bairog-derived
+  data, copied site logos and legacy import inbox;
 - Garmoth session-import code, captured catalog/art and all saved sessions;
 - every local user profile, mastery value, inventory, plan, favorite, loadout,
   session, cache, credential, screenshot and machine-specific path.
 
-A fresh install therefore contains no personal profile values. The app loads
-an existing Stable profile only from the locally selected personal-data
-folder. All user-authored planner and Opportunities state is stored beneath
-that folder and read back from there. The folder is shown in the title bar and
-can be changed from the in-app Data page; ordinary updates keep it outside the
+A fresh install therefore contains no personal profile values, loadouts or
+sessions. The app loads an existing Stable profile only from the locally
+selected personal-data folder. All user-authored Planner, Resource Map,
+Gathering, Fishing and Opportunities state is stored beneath that folder and
+read back from there. The folder is shown in the title bar and can be changed
+from the in-app Craft Profile page; ordinary updates keep it outside the
 installation directory and do not replace it.
 
 ## Proportionate review standard
@@ -90,8 +93,9 @@ found.
 
 The retained functionality includes the full current public map presentation,
 worker nodes and gathering locations, vendors, lodging and worker-economics
-tools, planner/recipes, Opportunities, PA artwork, Edania data, installer and
-in-app updating. Beta-only features listed above are deliberately excluded.
+tools, planner/recipes, original local Gathering/Fishing journals,
+Opportunities, PA artwork, Edania data, installer and in-app updating. Private
+Beta integrations listed above are deliberately excluded.
 Credits, source links, correction/takedown route and the ability to replace an
 individual group after a substantiated request remain mandatory.
 
@@ -102,8 +106,8 @@ individual group after a substantiated request remain mandatory.
 | PA-01 | Overall Black Desert fan project | Pearl Abyss fan content | **Satisfied** | Keep the project free, unofficial and noncommercial; retain the exact required notice in README and release notes; keep third-party material outside the code licence |
 | PA-02 | Black Desert item/NPC names, descriptions, recipes, prices, IDs, coordinates, node/vendor facts, 4,486 named embedded icon entries, eight gathering-tool icons and 231 NPC portraits | Pearl Abyss-origin facts and game artwork | **Satisfied** | Retain PA attribution and fan-content notice; BDO Codex/BDOLytics remain credited references or mirrors, not separate owners of these facts/assets |
 | PA-03 | 154 Opportunities item icons and the Resource Map house, material, silver and bare-hands UI textures | Pearl Abyss-origin game artwork extracted from the owner's installed client | **Satisfied** | Ship only decoded artwork plus neutral client-relative provenance, hashes and sizes; no client path, extractor payload or account data is retained |
-| PRIV-01 | Fish Companion journals, loadouts, caches, private node icons and FishyStuff-derived payload | Personal data plus unapproved third-party/private Beta material | **Excluded** | Entire Fish Companion package and integration remain private |
-| PRIV-02 | Gathering Companion guide media, Bairog-derived calculator data and copied site logos | Unapproved third-party/private Beta material | **Excluded** | Entire standalone Gathering Companion package and integration remain private; the independently reviewed Resource Map gathering checklist remains public |
+| PRIV-01 | Private Beta Fish Companion WebView/Python code, bundled journals/loadouts, caches, private node icons and FishyStuff-derived payload | Personal data plus unapproved third-party/private Beta material | **Excluded** | The private package and integration remain private; 0.1.7 uses unrelated original native local-record code with no bundled records or FishyStuff material |
+| PRIV-02 | Standalone Gathering Companion guide media, Bairog-derived calculator data, copied site logos and legacy import inbox | Unapproved third-party/private Beta material | **Excluded** | The standalone Beta package and integration remain private; 0.1.7 uses unrelated original native local-record code, while the independently reviewed Resource Map gathering checklist remains public |
 | PRIV-03 | Garmoth session-import catalog, spot art and saved sessions | Captured service material plus personal activity data | **Excluded** | Session Import and its Windows helper are absent from public source and packages |
 | REF-01 | BDO Codex and BDOLytics URLs, recipe IDs, item IDs and retrieval notes | Research/provenance references | **No blocker** | Retain citations for auditability. The generated runtime scan found no HTML/page markup; source-domain strings are provenance URLs, IDs and project-authored source notes |
 | FACT-01 | App-specific cooking/alchemy data: 178 added alchemy recipes, 461 added cooking recipes, preserved project records and normalized ingredients/yields/variants | Selected PA game facts in project schema | **No blocker** | No raw recipe-page or site database export is tracked or shipped; no site-authored prose or layout is retained |
@@ -123,6 +127,7 @@ individual group after a substantiated request remain mandatory.
 | ART-01 | Sakura art, installer derivatives and project-held app/ledger/scene artwork | Project-authored/project-held expression; no identified community-site source | **No blocker** | Preserve hashes and generation records. Completing older creation notes is good provenance work, not a generalized release block without contrary evidence |
 | API-01 | Official/community market APIs | Runtime services; no response corpus bundled | **No redistribution blocker** | Respect live service limits and keep failures non-blocking/offline-safe |
 | CODE-01 | Original Black Spirit Life source code | Project-owned code | **Cleared** | Root `LICENSE` remains separate and expressly grants no rights in PA artwork, game data or other third-party material |
+| CODE-02 | Original native Gathering and Fishing profile/session/loadout workspaces added for 0.1.7 | Project-owned code plus user-authored local records | **Cleared** | Ship code and empty defaults only; persist records beneath the selected personal-data folder and exclude every generated record from source and packages |
 | VPK-01 | Velopack 1.2.0 | Licensed dependency | **Cleared** | Preserve the bundled licence and pinned checksums |
 | OCR-01 | Black Spirit Hub v0.9.52 storage-grid recognition source and sealed Recipe Book snapshot, commit `6ccbad52d25b54d8b67065ce8a9eb1bcece87d9f` | Shared implementation with project-owner reuse authorization | **Cleared for Black Spirit Life reuse** | Preserve `SOURCE-NOTICE.txt`; do not describe the authorization as a general licence grant to third parties |
 | OCR-02 | PaddleOCR PP-OCRv5 model and ONNX Runtime 1.29.0 | Licensed dependencies | **Cleared** | Preserve the PaddleOCR, model, ONNX Runtime, and complete third-party notices beside the helper payload |
@@ -160,7 +165,8 @@ release.
 
 ### Source-only files that must not enter the clean public snapshot
 
-These are not installer assets, but the current local Git tree tracks them:
+These are not installer assets and are absent from the clean public Git tree.
+They must remain excluded:
 
 - `packages/bdo_map_core/tool/seeds/bdocodex_worldmap_2026_07_29_private_seed.json`
   (619,297 bytes; 1,008 nodes; SHA-256
@@ -179,13 +185,15 @@ they are excluded to maintain a clean public/private research boundary.
 
 ## Authorized release treatment
 
-The project owner authorized the sanitized 0.1.6 promotion on 2026-09-14. The
+The project owner authorized the sanitized 0.1.7 promotion on 2026-09-15. The
 release work must:
 
-1. preserve the reviewed Planner, Resource Map and Opportunities behavior;
+1. preserve the reviewed Planner, Resource Map and Opportunities behavior and
+   include only the original native Gathering/Fishing local-record workspaces;
 2. retain all credits, notices, source links and the correction/takedown route;
-3. exclude the three private Beta feature groups, all personal data and all six
-   private research inputs listed above while keeping internal copies untouched;
+3. exclude the private Beta integrations, all generated personal data and all
+   six private research inputs listed above while keeping internal copies
+   untouched;
 4. keep the code licence separate from PA and other third-party material;
 5. describe the Workerman/Shrddr position accurately as a project-owner
    community-use decision with accepted residual risk, never as separate
@@ -203,11 +211,12 @@ No draft may be sent without a new explicit user instruction.
 
 ## Repository and publication gates unrelated to source classification
 
-The Beta ancestry contains private-machine paths and a historical migration
-fixture with real-looking planner values. The current preparation branch must
-not be pushed with that ancestry. A clean public snapshot or an explicitly
-approved history rewrite is still required, followed by a fresh-clone scan of
-every public ref and tag.
+The private Beta ancestry contains private-machine paths and a historical
+migration fixture with real-looking planner values, so it must never be added
+to this repository. The separate public branch contains only the sanitized
+five-release history through `v0.1.6`; publication of `v0.1.7` must remain the
+single reviewed sixth commit on that history, followed by a fresh-clone scan
+of every public ref and tag.
 
 Publication remains conditional on Stable install/update/uninstall
 verification, the exact clean source commit and tag, final release notes and

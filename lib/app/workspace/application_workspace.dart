@@ -14,6 +14,7 @@ import '../../data/market/shared_market_repository.dart';
 import '../../data/opportunities/opportunity_market_cache_store.dart';
 import '../../data/opportunities/opportunity_market_service.dart';
 import '../../data/persistence/personal_data_location_service.dart';
+import '../../data/persistence/personal_data_write_gate.dart';
 import '../../data/portable/portable_custom_icon_bridge.dart';
 import '../../domain/catalog/temporarily_archived_items.dart';
 import '../../domain/market/market_price_gateway.dart';
@@ -25,6 +26,8 @@ import '../../features/about/about.dart';
 import '../../features/appearance/appearance.dart';
 import '../../features/data/data.dart';
 import '../../features/editor/editor.dart';
+import '../../features/fishing/fishing.dart';
+import '../../features/gathering/gathering_workspace.dart';
 import '../../features/inventory/inventory.dart';
 import '../../features/opportunities/opportunities_controller.dart';
 import '../../features/opportunities/opportunities_item_actions.dart';
@@ -292,6 +295,9 @@ class _ApplicationWorkspaceState extends State<ApplicationWorkspace>
   late final bool _ownsUpdateService;
   bool _retryingSave = false;
   bool _oneClickUpdatePending = false;
+  bool _ordinaryClosePending = false;
+  bool _ordinaryCloseOwnsMutationFreeze = false;
+  Future<void>? _ordinaryClosePreparation;
   bool _restartAndApplyPending = false;
   bool _personalDataMovePending = false;
   bool _personalDataRestartRequired = false;
@@ -307,6 +313,11 @@ class _ApplicationWorkspaceState extends State<ApplicationWorkspace>
   late final ApplicationWorkspacePresentationController _presentation;
   _TopWorkspaceDestination _topWorkspace = _TopWorkspaceDestination.planner;
   Widget? _resourceMapWorkspace;
+  bool _gatheringVisited = false;
+  bool _fishingVisited = false;
+  final PersonalDataWriteGate _gatheringWriteGate = PersonalDataWriteGate();
+  final FishingWorkspaceController _fishingController =
+      FishingWorkspaceController();
 
   PlannerApplicationController get _controller => widget.bundle.controller;
 
@@ -431,8 +442,27 @@ class _ApplicationWorkspaceState extends State<ApplicationWorkspace>
     if (state == AppLifecycleState.detached ||
         state == AppLifecycleState.paused) {
       unawaited(_controller.flush());
+      unawaited(_flushFeatureStateForLifecycleTransition());
       unawaited(_flushSharedMarket());
     }
+  }
+
+  Future<void> _flushFeatureStateForLifecycleTransition() async {
+    Future<void> ignoreFailure(Future<void> Function() flush) async {
+      try {
+        await flush();
+      } on Object {
+        // The ordinary-close and restart paths surface durable-write failures.
+        // A best-effort pause/detach flush must not become an uncaught error.
+      }
+    }
+
+    await Future.wait(<Future<void>>[
+      ignoreFailure(_gatheringWriteGate.flush),
+      ignoreFailure(_fishingController.flush),
+      if (_opportunitiesController case final controller?)
+        ignoreFailure(controller.flush),
+    ]);
   }
 
   void _activeModeChanged() {
@@ -478,13 +508,105 @@ class _ApplicationWorkspaceState extends State<ApplicationWorkspace>
     }
   }
 
-  Future<void> _flushBeforeClose() async {
+  Future<void> _flushBeforeClose() {
+    if (_ordinaryClosePreparation case final preparation?) {
+      return preparation;
+    }
+    final preparation = _prepareOrdinaryClose();
+    _ordinaryClosePreparation = preparation;
+    unawaited(
+      preparation.then<void>(
+        (_) {},
+        onError: (Object _, StackTrace _) {
+          if (identical(_ordinaryClosePreparation, preparation)) {
+            _ordinaryClosePreparation = null;
+          }
+        },
+      ),
+    );
+    return preparation;
+  }
+
+  Future<void> _prepareOrdinaryClose() async {
     if (_personalDataMovePending) {
       throw StateError(
         'Wait for the personal-data move to finish before closing the app.',
       );
     }
-    await _flushStateForRestart();
+    if (_restartAndApplyPending) {
+      throw StateError('Wait for the update restart to finish.');
+    }
+
+    if (mounted) {
+      setState(() => _ordinaryClosePending = true);
+    } else {
+      _ordinaryClosePending = true;
+    }
+
+    final deadline = DateTime.now().add(_ordinaryClosePreparationTimeout);
+    try {
+      FocusManager.instance.primaryFocus?.unfocus();
+      await WidgetsBinding.instance.endOfFrame.timeout(
+        _remainingClosePreparationTime(deadline),
+      );
+      if (!mounted) return;
+
+      _controller.freezeMutationsForRestart();
+      _ordinaryCloseOwnsMutationFreeze = true;
+      final gatheringFlush = _gatheringWriteGate.freezeAndFlush();
+      final fishingFlush = _fishingController.freezeAndFlush();
+      await Future.wait(<Future<void>>[
+        gatheringFlush,
+        fishingFlush,
+        _flushStateForRestart(),
+      ]).timeout(_remainingClosePreparationTime(deadline));
+    } on Object {
+      _resumeAfterOrdinaryCloseFailure();
+      rethrow;
+    }
+  }
+
+  Duration get _ordinaryClosePreparationTimeout {
+    final hostMilliseconds = widget.windowHost.closeFlushTimeout.inMilliseconds;
+    final reserveMilliseconds = hostMilliseconds > 1000
+        ? 250
+        : hostMilliseconds > 4
+        ? hostMilliseconds ~/ 4
+        : 1;
+    final preparationMilliseconds = hostMilliseconds - reserveMilliseconds;
+    return Duration(
+      milliseconds: preparationMilliseconds > 0 ? preparationMilliseconds : 1,
+    );
+  }
+
+  Duration _remainingClosePreparationTime(DateTime deadline) {
+    final remaining = deadline.difference(DateTime.now());
+    return remaining > Duration.zero
+        ? remaining
+        : const Duration(milliseconds: 1);
+  }
+
+  void _handleOrdinaryCloseError(Object error) {
+    _resumeAfterOrdinaryCloseFailure();
+    _showToast(
+      'Close canceled because the latest state could not be saved. $error',
+      error: true,
+    );
+  }
+
+  void _resumeAfterOrdinaryCloseFailure() {
+    if (_ordinaryCloseOwnsMutationFreeze) {
+      _controller.resumeMutationsAfterRestartFailure();
+      _gatheringWriteGate.resumeAfterMoveFailure();
+      _fishingController.resumeAfterFailedSwitch();
+      _ordinaryCloseOwnsMutationFreeze = false;
+    }
+    _ordinaryClosePreparation = null;
+    if (mounted) {
+      setState(() => _ordinaryClosePending = false);
+    } else {
+      _ordinaryClosePending = false;
+    }
   }
 
   Future<void> _flushStateForRestart() async {
@@ -493,6 +615,8 @@ class _ApplicationWorkspaceState extends State<ApplicationWorkspace>
     if (_controller.saveError.value case final error?) {
       throw StateError('The planner state could not be saved: $error');
     }
+    await _gatheringWriteGate.flush();
+    await _fishingController.flush();
     await _opportunitiesController?.flush();
     await _flushSharedMarket();
   }
@@ -568,7 +692,10 @@ class _ApplicationWorkspaceState extends State<ApplicationWorkspace>
   @override
   Widget build(BuildContext context) {
     final active = _controller.activeMode.value;
-    final restartPending = _restartAndApplyPending || _personalDataMovePending;
+    final restartPending =
+        _ordinaryClosePending ||
+        _restartAndApplyPending ||
+        _personalDataMovePending;
     return AppOverlayCoordinatorHost(
       child: ScaffoldMessenger(
         key: _messengerKey,
@@ -580,6 +707,7 @@ class _ApplicationWorkspaceState extends State<ApplicationWorkspace>
               ExcludeFocus(
                 excluding: restartPending,
                 child: AbsorbPointer(
+                  key: const ValueKey<String>('application-mutation-guard'),
                   absorbing: restartPending,
                   child: Column(
                     children: <Widget>[
@@ -595,10 +723,7 @@ class _ApplicationWorkspaceState extends State<ApplicationWorkspace>
                             .applicationDirectory
                             .path,
                         onOpenActivityDataFolder: _openActivityDataFolder,
-                        onCloseError: (error) => _showToast(
-                          'Close canceled because the latest state could not be saved. $error',
-                          error: true,
-                        ),
+                        onCloseError: _handleOrdinaryCloseError,
                       ),
                       Expanded(
                         child: Stack(
@@ -632,6 +757,28 @@ class _ApplicationWorkspaceState extends State<ApplicationWorkspace>
                                     controller: _controller,
                                     child: _resourceMapWorkspace!,
                                   ),
+                                ),
+                              ),
+                            if (_gatheringVisited)
+                              _retainedTopWorkspace(
+                                destination: _TopWorkspaceDestination.gathering,
+                                child: GatheringWorkspace(
+                                  personalDataDirectory: widget
+                                      .bundle
+                                      .personalDataLocation
+                                      .applicationDirectory,
+                                  writeGate: _gatheringWriteGate,
+                                ),
+                              ),
+                            if (_fishingVisited)
+                              _retainedTopWorkspace(
+                                destination: _TopWorkspaceDestination.fishing,
+                                child: FishingWorkspace(
+                                  personalDataDirectory: widget
+                                      .bundle
+                                      .personalDataLocation
+                                      .applicationDirectory,
+                                  controller: _fishingController,
                                 ),
                               ),
                             if (_opportunitiesVisited)
@@ -792,6 +939,12 @@ class _ApplicationWorkspaceState extends State<ApplicationWorkspace>
           break;
         case _TopWorkspaceDestination.resourceMap:
           _ensureResourceMapWorkspace();
+          break;
+        case _TopWorkspaceDestination.gathering:
+          _gatheringVisited = true;
+          break;
+        case _TopWorkspaceDestination.fishing:
+          _fishingVisited = true;
           break;
         case _TopWorkspaceDestination.opportunities:
           _opportunitiesVisited = true;
@@ -1388,7 +1541,9 @@ class _ApplicationWorkspaceState extends State<ApplicationWorkspace>
   Future<void> _updateNow() async {
     if (_oneClickUpdatePending ||
         _updateController.operationPending ||
-        _personalDataMovePending) {
+        _personalDataMovePending ||
+        _ordinaryClosePending ||
+        _ordinaryClosePreparation != null) {
       return;
     }
     _oneClickUpdatePending = true;
@@ -1442,7 +1597,12 @@ class _ApplicationWorkspaceState extends State<ApplicationWorkspace>
   }
 
   Future<void> _restartAndApplyUpdate() async {
-    if (_restartAndApplyPending || _personalDataMovePending) return;
+    if (_restartAndApplyPending ||
+        _personalDataMovePending ||
+        _ordinaryClosePending ||
+        _ordinaryClosePreparation != null) {
+      return;
+    }
     setState(() => _restartAndApplyPending = true);
     var closeIssued = false;
     var mutationsFrozen = false;
@@ -1452,9 +1612,16 @@ class _ApplicationWorkspaceState extends State<ApplicationWorkspace>
       // absorbed while those final drafts enter the document, then freeze the
       // mutation surface before the durable restart flush.
       await WidgetsBinding.instance.endOfFrame;
-      if (!mounted) return;
+      if (!mounted ||
+          _personalDataMovePending ||
+          _ordinaryClosePending ||
+          _ordinaryClosePreparation != null) {
+        return;
+      }
       _controller.freezeMutationsForRestart();
       mutationsFrozen = true;
+      await _gatheringWriteGate.freezeAndFlush();
+      await _fishingController.freezeAndFlush();
       await _flushStateForRestart();
       final prepared = await _updateController.prepareRestart();
       if (!mounted) return;
@@ -1479,6 +1646,8 @@ class _ApplicationWorkspaceState extends State<ApplicationWorkspace>
       if (!closeIssued) {
         if (mutationsFrozen) {
           _controller.resumeMutationsAfterRestartFailure();
+          _gatheringWriteGate.resumeAfterMoveFailure();
+          _fishingController.resumeAfterFailedSwitch();
         }
         if (mounted) {
           setState(() => _restartAndApplyPending = false);
@@ -1492,10 +1661,12 @@ class _ApplicationWorkspaceState extends State<ApplicationWorkspace>
   Future<void> _movePersonalData(String destinationPath) async {
     if (_personalDataMovePending ||
         _restartAndApplyPending ||
+        _ordinaryClosePending ||
+        _ordinaryClosePreparation != null ||
         _updateController.operationPending ||
         _dataSession.profileIoBusy) {
       throw StateError(
-        'Finish the current update, restart, import, or export before moving personal data.',
+        'Finish the current close, update, restart, import, or export before moving personal data.',
       );
     }
     setState(() => _personalDataMovePending = true);
@@ -1506,8 +1677,15 @@ class _ApplicationWorkspaceState extends State<ApplicationWorkspace>
       FocusManager.instance.primaryFocus?.unfocus();
       await WidgetsBinding.instance.endOfFrame;
       if (!mounted) return;
+      if (_ordinaryClosePending || _ordinaryClosePreparation != null) {
+        throw StateError(
+          'Wait for the current close request to finish before moving personal data.',
+        );
+      }
       _controller.freezeMutationsForRestart();
       mutationsFrozen = true;
+      await _gatheringWriteGate.freezeAndFlush();
+      await _fishingController.freezeAndFlush();
       await _flushStateForRestart();
       final result = await widget.bundle.personalDataLocation.moveTo(
         destinationPath,
@@ -1530,6 +1708,8 @@ class _ApplicationWorkspaceState extends State<ApplicationWorkspace>
       if (!closeIssued && !locationSwitched) {
         if (mutationsFrozen) {
           _controller.resumeMutationsAfterRestartFailure();
+          _gatheringWriteGate.resumeAfterMoveFailure();
+          _fishingController.resumeAfterFailedSwitch();
         }
         if (mounted) {
           setState(() => _personalDataMovePending = false);
@@ -1985,6 +2165,20 @@ class _WorkspaceNavigation extends StatelessWidget {
           label: 'Resource Map',
           selected: active == _TopWorkspaceDestination.resourceMap,
           onPressed: () => onChanged(_TopWorkspaceDestination.resourceMap),
+        ),
+        AppTitleTab(
+          tabKey: const ValueKey<String>('top-workspace-tab-gathering'),
+          icon: Icons.eco_rounded,
+          label: 'Gathering',
+          selected: active == _TopWorkspaceDestination.gathering,
+          onPressed: () => onChanged(_TopWorkspaceDestination.gathering),
+        ),
+        AppTitleTab(
+          tabKey: const ValueKey<String>('top-workspace-tab-fishing'),
+          icon: Icons.set_meal_rounded,
+          label: 'Fishing',
+          selected: active == _TopWorkspaceDestination.fishing,
+          onPressed: () => onChanged(_TopWorkspaceDestination.fishing),
         ),
         AppTitleTab(
           tabKey: const ValueKey<String>('top-workspace-tab-opportunities'),

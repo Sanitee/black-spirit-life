@@ -31,8 +31,10 @@ options are available.
   compare lodging and storage-house investments.
 - Review market-aware crafting and exchange opportunities without placing
   orders or sending personal planner data to a third party.
+- Keep local Gathering and Fishing loadouts and session journals without an
+  account or cloud sync.
 - Keep your favorites, progress, profile settings, and appearance choices
-  between sessions.
+  between app sessions.
 
 ## Install
 
@@ -51,10 +53,12 @@ bar inside the app without opening a browser.
 
 ## Your data
 
-Your inventory, mastery, LT, plans, favorites, checklist, Opportunities
-preferences, and settings are kept locally, separate from the application. The
-current folder is visible from the app title bar; open **Craft Planner > Data**
-to review or change it. Normal updates keep that folder in place.
+Your inventory, mastery, Fairy and weight settings, market bonuses, family
+fame, plans, favorites, checklist, Gathering/Fishing loadouts and sessions,
+Opportunities preferences, and settings are kept locally in one folder,
+separate from the application. The current folder is visible from the app
+title bar; open **Craft Planner > Craft Profile** to review or change it.
+Normal updates keep that folder in place.
 
 On first launch, the app loads an existing Stable profile only when one is
 already present in the selected local personal-data folder. With no saved

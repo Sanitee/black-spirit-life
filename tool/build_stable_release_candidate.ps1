@@ -20,17 +20,17 @@ if ($PublicGitHubRepository -cnotmatch
     '^https://github\.com/[A-Za-z0-9](?:[A-Za-z0-9-]{0,38})/[A-Za-z0-9._-]{1,100}$') {
     throw 'The public update source must be the permanent canonical repository base URL: https://github.com/OWNER/REPOSITORY'
 }
-$Version = '0.1.6'
-$BuildNumber = '25'
-$PreviousStableVersion = '0.1.5'
+$Version = '0.1.7'
+$BuildNumber = '26'
+$PreviousStableVersion = '0.1.6'
 $PreviousStableCommit =
-    '8f600b3b6bbece1add1077a40a5fb1c5d56797f8'
+    'bebc1a03815303df25fdfc939edfd840d9cbbe0c'
 $UpdateSource = $PublicGitHubRepository
-$ReleaseNotesRelativePath = 'docs\releases\0.1.6.md'
+$ReleaseNotesRelativePath = 'docs\releases\0.1.7.md'
 $OutputDirectoryName = 'public-stable-candidate'
 $ManifestName = 'public-candidate-manifest.json'
 $RemainingBlockers = @(
-    'verify an installed 0.1.5 updates to 0.1.6 through the in-app update bar with its personal data intact',
+    'verify an installed 0.1.6 updates to 0.1.7 through the in-app update bar with its personal data intact',
     'complete fresh install, repair, and uninstall lifecycle verification',
     'fresh-clone privacy and release-artifact scan'
 )
@@ -51,12 +51,14 @@ $VelopackRuntimeSha256 =
     'C36D8B984639A8AF9D3397088D3FFB8213FE1BD0917F555CF0C6E33F014403EC'
 $VelopackPackageUrl =
     'https://github.com/velopack/velopack/releases/download/1.2.0/vpk.1.2.0.nupkg'
-$PreviousFeedBytes = 10230L
+$PreviousFeedBytes = 14322L
 $PreviousFeedSha256 =
-    '7F9F995660AA450C80EA610DB041C82BD7C51EA35593C1B1B06FFE77FFA91FF0'
-$PreviousFullPackageBytes = 217687337L
+    'A8DD060274DF561F8523D7F34FA2870402CBF5810428D814726957CD47ACC8BF'
+$PreviousFullPackageBytes = 218730095L
 $PreviousFullPackageSha256 =
-    '9C3E9BEB7121B06BA7CE4D482546842866020DDA1C231601C4149B9E31302E28'
+    '956B3E3184894EDBA8EBDE9D8727575542C5402F591C8FF1E3A8178EA50C0042'
+$ForbiddenPackagedArtifactPattern =
+    '(?i)(webview|python|fishy[ _-]*stuff|garmoth|bairog|fish[_ -]?companion|bdo[_ -]?fishing[_ -]?core|bdo[_ -]?gathering[_ -]?companion|session_import|planner-state|personal-data-location|personal-data-move-journal|connection\.json|(?:^|[\\/])[^\\/]*(?:sessions?|journals?|loadouts?|user[ _-]?settings|app[ _-]?settings|opportunities[ _-]?settings|gathering[ _-]?state|fishing[ _-]?state|fishing[ _-]?profiles?|fishing[ _-]?setups?)[^\\/]*\.(?:json|csv|tsv|txt|ya?ml|toml|ini|config|dat|bin|db|sqlite3?)(?:-(?:wal|shm))?|\.(?:db|sqlite3?)(?:-(?:wal|shm))?|\.(?:py|pyc|pyo|pyd)$|\.dmp$|\.log$|\.tmp$|\.bak$|screenshot)'
 
 function Assert-LastExitCode {
     param([Parameter(Mandatory = $true)][string]$Operation)
@@ -117,6 +119,52 @@ function Assert-CleanSource {
     }
 }
 
+function Reset-VerifiedBuildBundle {
+    param(
+        [Parameter(Mandatory = $true)][string]$ProjectRoot,
+        [Parameter(Mandatory = $true)][string]$BundleDirectory
+    )
+    $resolvedRunnerRoot = [System.IO.Path]::GetFullPath(
+        (Join-Path $ProjectRoot 'build\windows\x64\runner')
+    )
+    $expectedBundle = [System.IO.Path]::GetFullPath(
+        (Join-Path $resolvedRunnerRoot 'Release')
+    )
+    $resolvedBundle = [System.IO.Path]::GetFullPath($BundleDirectory)
+    $runnerPrefix = $resolvedRunnerRoot.TrimEnd('\') + '\'
+    if ($resolvedBundle -cne $expectedBundle -or
+        -not $resolvedBundle.StartsWith(
+            $runnerPrefix,
+            [System.StringComparison]::OrdinalIgnoreCase
+        )) {
+        throw 'Refusing to clean an unexpected Flutter build directory.'
+    }
+    $pathToInspect = [System.IO.Path]::GetFullPath(
+        (Join-Path $ProjectRoot 'build')
+    )
+    foreach ($segment in @('windows', 'x64', 'runner', 'Release')) {
+        if (Test-Path -LiteralPath $pathToInspect) {
+            $pathItem = Get-Item -LiteralPath $pathToInspect -Force
+            if (($pathItem.Attributes -band
+                [System.IO.FileAttributes]::ReparsePoint) -ne 0) {
+                throw 'Refusing to clean through a reparse-point Flutter build directory.'
+            }
+        }
+        $pathToInspect = Join-Path $pathToInspect $segment
+    }
+    if (Test-Path -LiteralPath $resolvedBundle) {
+        $bundleItem = Get-Item -LiteralPath $resolvedBundle -Force
+        if (($bundleItem.Attributes -band
+            [System.IO.FileAttributes]::ReparsePoint) -ne 0) {
+            throw 'Refusing to clean a reparse-point Flutter build directory.'
+        }
+        Remove-Item -LiteralPath $resolvedBundle -Recurse -Force
+    }
+    if (Test-Path -LiteralPath $resolvedBundle) {
+        throw 'The previous Flutter release bundle could not be removed.'
+    }
+}
+
 function Assert-PublicSourceBoundary {
     param([Parameter(Mandatory = $true)][string]$ProjectRoot)
 
@@ -137,13 +185,40 @@ function Assert-PublicSourceBoundary {
         }
     }
 
+    foreach ($relativePath in @(
+        'lib\features\gathering',
+        'lib\features\fishing'
+    )) {
+        $featureRoot = Join-Path $ProjectRoot $relativePath
+        if (-not (Test-Path -LiteralPath $featureRoot -PathType Container)) {
+            throw "The public source is missing the required native feature path: $relativePath"
+        }
+        $nonDartFiles = @(Get-ChildItem -LiteralPath $featureRoot -Recurse -File |
+            Where-Object { $_.Extension -cne '.dart' })
+        if ($nonDartFiles.Count -ne 0) {
+            throw "The native feature source contains a bundled runtime, cache, or asset: $($nonDartFiles[0].FullName)"
+        }
+    }
+
     $forbiddenPersonalFiles = @(Get-ChildItem -LiteralPath $ProjectRoot -Recurse -File |
         Where-Object {
             $_.FullName -notlike "$ProjectRoot\.git\*" -and
-            $_.Name -match '(?i)^(fish-journal.*\.sqlite3?|garmoth_spot_catalog\.json|connection\.json|planner-state\.json(?:\..*)?|personal-data-(?:location(?:\.committed)?|move-journal)\.json(?:\..*)?)$'
+            ($_.Name -match '(?i)^(?:planner-state\.json(?:\..*)?|personal-data-(?:location(?:\.committed)?|move-journal)\.json(?:\..*)?|connection\.json(?:\..*)?|[^\\/]*(?:sessions?|journals?|loadouts?|user[ _-]?settings|app[ _-]?settings|opportunities[ _-]?settings|gathering[ _-]?state|fishing[ _-]?state|fishing[ _-]?profiles?|fishing[ _-]?setups?)[^\\/]*\.(?:json|csv|tsv|txt|ya?ml|toml|ini|config|dat|bin|db|sqlite3?)(?:-(?:wal|shm))?)$' -or
+             $_.Name -match '(?i)\.(?:db|sqlite3?)(?:-(?:wal|shm))?$')
         })
     if ($forbiddenPersonalFiles.Count -ne 0) {
         throw "The public source contains an excluded personal or service-data file: $($forbiddenPersonalFiles[0].FullName)"
+    }
+
+    $forbiddenRuntimeFiles = @(Get-ChildItem -LiteralPath $ProjectRoot -Recurse -File |
+        Where-Object {
+            $_.FullName -notlike "$ProjectRoot\.git\*" -and
+            ($_.FullName -match '(?i)(webview|fishy[ _-]*stuff|garmoth|bairog|fish[_ -]?companion|bdo[_ -]?fishing[_ -]?core|bdo[_ -]?gathering[_ -]?companion)' -or
+             $_.Extension -in @('.html', '.css', '.js', '.py', '.pyc', '.pyo', '.pyd') -or
+             $_.Name -match '(?i)^python(?:3(?:\d+)*)?\.(?:exe|dll)$')
+        })
+    if ($forbiddenRuntimeFiles.Count -ne 0) {
+        throw "The public source contains an excluded WebView/Python/FishyStuff/Garmoth/Bairog runtime, cache, or asset: $($forbiddenRuntimeFiles[0].FullName)"
     }
 }
 
@@ -201,7 +276,7 @@ function Assert-VelopackPackage {
             }
         }
         $forbiddenEntries = @($archive.Entries | Where-Object {
-            $_.FullName -match '(?i)(planner-state|personal-data-location|fish-journal|garmoth_spot_catalog|session_import|bdo_fishing_core|bdo_gathering_companion|\.sqlite3?$|\.dmp$|\.log$|\.tmp$|\.bak$|screenshot)'
+            $_.FullName -match $ForbiddenPackagedArtifactPattern
         })
         if ($forbiddenEntries.Count -ne 0) {
             throw "The package contains a personal, diagnostic, or temporary file: $($forbiddenEntries[0].FullName)"
@@ -276,12 +351,15 @@ if ($sourceParentCommit -cne $PreviousStableCommit -or
 }
 $sourceCommitCount = (& git -C $ProjectRoot rev-list --count HEAD).Trim()
 Assert-LastExitCode -Operation 'Git public history count check'
-if ($sourceCommitCount -cne '5') {
-    throw 'The public candidate must contain only the reviewed five-commit public history through sanitized 0.1.6.'
+if ($sourceCommitCount -cne '6') {
+    throw 'The public candidate must contain only the reviewed six-commit public history through sanitized 0.1.7.'
 }
 $sourceTag = $expectedSourceTag
 Assert-CleanSource -ProjectRoot $ProjectRoot -ExpectedCommit $sourceCommit
 Assert-PublicSourceBoundary -ProjectRoot $ProjectRoot
+$productionVerifier = Join-Path $PSScriptRoot 'verify_production_source.ps1'
+$null = Assert-OrdinaryFile -Path $productionVerifier
+& $productionVerifier -ProjectRoot $ProjectRoot
 
 $identity = Get-Content -Raw -LiteralPath $IdentityPath
 $requiredIdentityFragments = @(
@@ -328,7 +406,7 @@ $publishedPreviousFeedHash =
     (Get-FileHash -Algorithm SHA256 -LiteralPath $publishedPreviousFeed).Hash
 if ($publishedPreviousFeedItem.Length -ne $PreviousFeedBytes -or
     $publishedPreviousFeedHash -cne $PreviousFeedSha256) {
-    throw 'The published 0.1.5 feed changed from the reviewed release input.'
+    throw 'The published 0.1.6 feed changed from the reviewed release input.'
 }
 $publishedPreviousFeedJson =
     Get-Content -Raw -LiteralPath $publishedPreviousFeed | ConvertFrom-Json
@@ -340,7 +418,7 @@ $publishedPreviousAssets = @($publishedPreviousFeedJson.Assets | Where-Object {
 })
 if ($publishedPreviousAssets.Count -ne 1 -or
     @($publishedPreviousFeedJson.Assets).Count -ne 3) {
-    throw 'The published 0.1.5 feed does not contain exactly the expected full package and reviewed asset set.'
+    throw 'The published 0.1.6 feed does not contain exactly the expected full package and reviewed asset set.'
 }
 Invoke-WebRequest `
     -Uri $previousPackageUrl `
@@ -352,14 +430,14 @@ $publishedPreviousPackageHash =
     (Get-FileHash -Algorithm SHA256 -LiteralPath $publishedPreviousPackage).Hash
 if ($publishedPreviousPackageItem.Length -ne $PreviousFullPackageBytes -or
     $publishedPreviousPackageHash -cne $PreviousFullPackageSha256) {
-    throw 'The published 0.1.5 full package changed from the reviewed release input.'
+    throw 'The published 0.1.6 full package changed from the reviewed release input.'
 }
 if ([long]$publishedPreviousAssets[0].Size -ne $publishedPreviousPackageItem.Length -or
     -not $publishedPreviousPackageHash.Equals(
         [string]$publishedPreviousAssets[0].SHA256,
         [System.StringComparison]::OrdinalIgnoreCase
     )) {
-    throw 'The published 0.1.5 full package does not match its published feed.'
+    throw 'The published 0.1.6 full package does not match its published feed.'
 }
 Assert-VelopackPackage `
     -PackagePath $publishedPreviousPackage `
@@ -430,6 +508,13 @@ if ($null -eq (Get-Command dotnet -ErrorAction SilentlyContinue)) {
     throw 'The .NET 8 runtime required by Velopack was not found.'
 }
 
+# Flutter's incremental Windows build does not guarantee removal of unrelated
+# files already present at the bundle root. Recreate this exact verified output
+# so no stale local file can be carried into the public full or delta package.
+Reset-VerifiedBuildBundle `
+    -ProjectRoot $ProjectRoot `
+    -BundleDirectory $BundleDirectory
+
 Push-Location -LiteralPath $ProjectRoot
 try {
     & $FlutterPath build windows --release --no-pub `
@@ -470,7 +555,8 @@ if (Test-Path -LiteralPath $appLibrary -PathType Leaf) {
 }
 $forbiddenBundleFiles = @(Get-ChildItem -LiteralPath $BundleDirectory -Recurse -File |
     Where-Object {
-        $_.FullName -match '(?i)(planner-state|personal-data-location|fish-journal|garmoth_spot_catalog|session_import|bdo_fishing_core|bdo_gathering_companion|\.sqlite3?$|\.pdb$|\.dmp$|\.log$|\.tmp$|\.bak$|screenshot)'
+        $_.FullName -match $ForbiddenPackagedArtifactPattern -or
+        $_.Extension -ceq '.pdb'
     })
 if ($forbiddenBundleFiles.Count -ne 0) {
     throw "The application bundle contains a personal, diagnostic, or temporary file: $($forbiddenBundleFiles[0].FullName)"
@@ -530,7 +616,7 @@ $previousFullHash =
     (Get-FileHash -Algorithm SHA256 -LiteralPath $previousFullPackage).Hash
 if ($previousFullItem.Length -ne $PreviousFullPackageBytes -or
     $previousFullHash -cne $PreviousFullPackageSha256) {
-    throw 'Velopack changed the pinned published 0.1.5 full package.'
+    throw 'Velopack changed the pinned published 0.1.6 full package.'
 }
 $feedAssets = @($feed.Assets)
 if ($feedAssets.Count -ne 3) {
@@ -558,10 +644,10 @@ if ($matchingFullAssets.Count -ne 1) {
     throw 'The update feed does not contain exactly one expected full package.'
 }
 if ($matchingDeltaAssets.Count -ne 1) {
-    throw 'The update feed does not contain exactly one 0.1.5 to 0.1.6 delta package.'
+    throw 'The update feed does not contain exactly one 0.1.6 to 0.1.7 delta package.'
 }
 if ($matchingPreviousAssets.Count -ne 1) {
-    throw 'The update feed does not retain exactly one published 0.1.5 full package.'
+    throw 'The update feed does not retain exactly one published 0.1.6 full package.'
 }
 $fullItem = Get-Item -LiteralPath $fullPackage
 $fullHash = (Get-FileHash -Algorithm SHA256 -LiteralPath $fullPackage).Hash
@@ -589,7 +675,7 @@ if ([long]$matchingPreviousAssets[0].Size -ne $previousFullItem.Length -or
         [string]$matchingPreviousAssets[0].SHA256,
         [System.StringComparison]::OrdinalIgnoreCase
     )) {
-    throw 'The updated feed changed the published 0.1.5 full-package identity.'
+    throw 'The updated feed changed the published 0.1.6 full-package identity.'
 }
 
 $setupHash = (Get-FileHash -Algorithm SHA256 -LiteralPath $generatedSetup).Hash
