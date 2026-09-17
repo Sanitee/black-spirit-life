@@ -57,13 +57,22 @@ bool InstallRootLease::AcquireFresh(
   }
   const std::filesystem::path destination(before.normalized_path);
   const auto parent = destination.parent_path();
-  const int parent_status =
-      SHCreateDirectoryExW(nullptr, parent.c_str(), nullptr);
-  if (parent_status != ERROR_SUCCESS && parent_status != ERROR_ALREADY_EXISTS &&
-      parent_status != ERROR_FILE_EXISTS) {
+  const DWORD parent_attributes = GetFileAttributesW(parent.c_str());
+  if (parent_attributes == INVALID_FILE_ATTRIBUTES) {
+    const int parent_status =
+        SHCreateDirectoryExW(nullptr, parent.c_str(), nullptr);
+    if (parent_status != ERROR_SUCCESS &&
+        parent_status != ERROR_ALREADY_EXISTS &&
+        parent_status != ERROR_FILE_EXISTS) {
+      if (error)
+        *error = L"The selected installation folder could not be prepared. "
+                 L"Choose a folder you can write to.";
+      return false;
+    }
+  } else if ((parent_attributes & FILE_ATTRIBUTE_DIRECTORY) == 0 ||
+             (parent_attributes & FILE_ATTRIBUTE_REPARSE_POINT) != 0) {
     if (error)
-      *error = L"The selected installation folder could not be prepared. "
-               L"Choose a folder you can write to.";
+      *error = L"The selected installation folder has an unsafe parent.";
     return false;
   }
   // Unlike checking for absence followed by recursive creation, this atomic

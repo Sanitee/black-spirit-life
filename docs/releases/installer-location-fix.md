@@ -12,7 +12,9 @@ owner; preparing this fix does not replace an existing public release asset.
   for administrator approval to create only that folder, then grants the
   signed-in user inheritable update access and continues the application setup
   under the signed-in account. A denied request or unwritable custom
-  destination reports an error and remains editable.
+  destination reports an error and remains editable. Existing fixed-drive
+  roots such as `C:\` are verified but are never passed to a directory-creation
+  API.
 - A verified existing installation keeps its registered location for update or
   repair. It is not silently relocated to the new suggested destination.
 - A registered destination that is positively absent on a reachable fixed drive
