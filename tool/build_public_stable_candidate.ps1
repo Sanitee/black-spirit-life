@@ -2,6 +2,11 @@
 param(
     [string]$FlutterPath,
     [string]$CMakePath,
+    [string]$ReleaseInputCacheRoot,
+    [string]$PreviousFeedPath,
+    [string]$PreviousPackagePath,
+    [switch]$OfflinePinnedInputs,
+    [ValidateRange(0, [long]::MaxValue)][long]$MinimumFreeBytes = 0,
 
     [Parameter(Mandatory = $true)]
     [string]$PublicGitHubRepository,
@@ -20,6 +25,12 @@ if (-not $ConfirmPublicCandidateOnly.IsPresent) {
 $arguments = @{
     ConfirmPublicCandidateOnly = $true
     PublicGitHubRepository = $PublicGitHubRepository
+    OfflinePinnedInputs = $OfflinePinnedInputs
+    MinimumFreeBytes = $MinimumFreeBytes
+}
+foreach ($name in @('ReleaseInputCacheRoot', 'PreviousFeedPath', 'PreviousPackagePath')) {
+    $value = Get-Variable -Name $name -ValueOnly
+    if (-not [string]::IsNullOrWhiteSpace($value)) { $arguments[$name] = $value }
 }
 if (-not [string]::IsNullOrWhiteSpace($FlutterPath)) {
     $arguments.FlutterPath = $FlutterPath

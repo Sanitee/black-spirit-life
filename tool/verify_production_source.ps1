@@ -5,6 +5,7 @@ param(
 
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
+. (Join-Path $PSScriptRoot 'release\source_inventory.ps1')
 
 if ([string]::IsNullOrWhiteSpace($ProjectRoot)) {
     $project = Split-Path -Parent $PSScriptRoot
@@ -152,16 +153,9 @@ function Test-SqliteFileHeader {
     }
 }
 
-$projectFiles = @(
-    # Old ignored lifecycle-test trees can contain stale junction-like paths.
-    # They are excluded below and must not prevent verification of source files.
-    Get-ChildItem -LiteralPath $project -Recurse -File -Force `
-        -ErrorAction SilentlyContinue |
-        Where-Object {
-            (Get-RelativeProductionPath -FullName $_.FullName) -notmatch
-                $generatedPathPattern
-        }
-)
+$sourceInventory = Get-ReleaseSourceInventory -RootPath $project `
+    -ExcludedPathPattern $generatedPathPattern
+$projectFiles = $sourceInventory.Files
 
 foreach ($file in $projectFiles) {
     $relative = Get-RelativeProductionPath -FullName $file.FullName

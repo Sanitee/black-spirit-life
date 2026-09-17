@@ -2,6 +2,11 @@
 param(
     [string]$FlutterPath,
     [string]$CMakePath,
+    [string]$ReleaseInputCacheRoot,
+    [string]$PreviousFeedPath,
+    [string]$PreviousPackagePath,
+    [switch]$OfflinePinnedInputs,
+    [ValidateRange(0, [long]::MaxValue)][long]$MinimumFreeBytes = 0,
 
     [Parameter(Mandatory = $true)]
     [string]$PublicGitHubRepository,
@@ -12,6 +17,10 @@ param(
 
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
+. (Join-Path $PSScriptRoot 'release\verified_input_cache.ps1')
+. (Join-Path $PSScriptRoot 'release\source_inventory.ps1')
+. (Join-Path $PSScriptRoot 'release\preflight.ps1')
+. (Join-Path $PSScriptRoot 'release\stage_metrics.ps1')
 
 if (-not $ConfirmPublicCandidateOnly.IsPresent) {
     throw 'Supply -ConfirmPublicCandidateOnly. This script prepares artifacts but never publishes them.'
@@ -268,11 +277,12 @@ function Assert-PublicSourceBoundary {
         }
     }
 
-    $forbiddenPersonalFiles = @(Get-ChildItem -LiteralPath $ProjectRoot -Recurse -File `
-        -ErrorAction SilentlyContinue |
+    # Enumerate once, pruning generated directories before descent. Preserve
+    # this gate's narrower exclusions; the independent verifier has its own.
+    $inventory = Get-ReleaseSourceInventory -RootPath $ProjectRoot `
+        -ExcludedPathPattern '(?i)(?:^|/)(?:\.git|\.dart_tool|build|bin|obj)/|(?:^|/)windows/flutter/ephemeral/'
+    $forbiddenPersonalFiles = @($inventory.Files |
         Where-Object {
-            $_.FullName -notmatch '\\(?:\.git|\.dart_tool|build|bin|obj)\\' -and
-            $_.FullName -notmatch '\\windows\\flutter\\ephemeral\\' -and
             ($_.FullName -match $ForbiddenPackagedArtifactPattern -or
              (Test-SqliteFileHeader -Path $_.FullName))
         })
@@ -280,31 +290,22 @@ function Assert-PublicSourceBoundary {
         throw "The public source contains personal state, a database, or a debug symbol: $($forbiddenPersonalFiles[0].FullName)"
     }
 
-    $generatedBrowserState = @(Get-ChildItem -LiteralPath $ProjectRoot -Recurse -Directory -Force `
-        -ErrorAction SilentlyContinue |
+    $generatedBrowserState = @($inventory.Directories |
         Where-Object {
-            $_.FullName -notmatch '\\(?:\.git|\.dart_tool|build|bin|obj)\\' -and
-            $_.FullName -notmatch '\\windows\\flutter\\ephemeral\\' -and
             $_.Name -match '(?i)^(?:webview2|video[ _-]*webview|webview[ _-]*profile|browser[ _-]*profile|user[ _-]*data|cookies?|local[ _-]*storage|BlackSpiritLife\.App\.Removal)$'
         })
     if ($generatedBrowserState.Count -ne 0) {
         throw "The public source contains generated browser-profile state: $($generatedBrowserState[0].FullName)"
     }
-    $sessionImportInboxes = @(Get-ChildItem -LiteralPath $ProjectRoot -Recurse -Directory -Force `
-        -ErrorAction SilentlyContinue |
+    $sessionImportInboxes = @($inventory.Directories |
         Where-Object {
-            $_.FullName -notmatch '\\(?:\.git|\.dart_tool|build|bin|obj)\\' -and
-            $_.FullName -notmatch '\\windows\\flutter\\ephemeral\\' -and
             $_.Name -ieq 'session-import-inbox'
         })
     if ($sessionImportInboxes.Count -ne 0) {
         throw "The public source contains generated Session Import receipts: $($sessionImportInboxes[0].FullName)"
     }
-    $customIcons = @(Get-ChildItem -LiteralPath $ProjectRoot -Recurse -File -Force `
-        -ErrorAction SilentlyContinue |
+    $customIcons = @($inventory.Files |
         Where-Object {
-            $_.FullName -notmatch '\\(?:\.git|\.dart_tool|build|bin|obj)\\' -and
-            $_.FullName -notmatch '\\windows\\flutter\\ephemeral\\' -and
             $_.FullName -match '(?i)[\\/]icons[\\/][0-9a-f]{64}\.png$'
         })
     if ($customIcons.Count -ne 0) {
@@ -544,6 +545,9 @@ function Assert-VelopackPackage {
 }
 
 $ProjectRoot = [System.IO.Path]::GetFullPath((Join-Path $PSScriptRoot '..'))
+if ([string]::IsNullOrWhiteSpace($ReleaseInputCacheRoot)) {
+    $ReleaseInputCacheRoot = Join-Path $ProjectRoot 'build\release-input-cache'
+}
 $IdentityPath = Join-Path $ProjectRoot 'lib\app_identity.dart'
 $PubspecPath = Join-Path $ProjectRoot 'pubspec.yaml'
 $ReleaseNotesPath = Join-Path $ProjectRoot $ReleaseNotesRelativePath
@@ -567,6 +571,29 @@ $previousFullPackageName =
     "$PackageId-$PreviousStableVersion-$UpdateChannel-full.nupkg"
 $setupName = "$PackageId-$UpdateChannel-Setup.exe"
 $feedIndexName = "releases.$UpdateChannel.json"
+
+$metrics = New-ReleaseStageMetrics -RunId $RunId
+$metricsPath = Join-Path $RunRoot 'stage-metrics.json'
+$activeStage = Start-ReleaseStage -Metrics $metrics -Name 'source-preflight'
+try {
+# This is only a conservative floor for historical-input staging. Compilation,
+# new packages and installer outputs need additional room; operators may raise it.
+$effectiveMinimumFreeBytes = [Math]::Max($MinimumFreeBytes,
+    [long](3 * $PreviousFullPackageBytes + 3 * $PreviousFeedBytes))
+$preflight = Invoke-ReleasePreflight -ProjectRoot $ProjectRoot -Version $Version `
+    -BuildNumber $BuildNumber -PublicGitHubRepository $PublicGitHubRepository `
+    -MinimumFreeBytes $effectiveMinimumFreeBytes `
+    -FlutterPath $FlutterPath -CMakePath $CMakePath -RequiredRelativeFiles @(
+        $ReleaseNotesRelativePath, 'lib/app_identity.dart',
+        'windows/runner/resources/app_icon.ico',
+        'tool/build_stable_release_candidate.ps1', 'tool/verify_production_source.ps1',
+        'tool/release/verified_input_cache.ps1', 'tool/release/source_inventory.ps1',
+        'tool/release/preflight.ps1', 'tool/release/stage_metrics.ps1'
+    )
+$FlutterPath = $preflight.FlutterPath
+$CMakePath = $preflight.CMakePath
+$DotnetPath = $preflight.DotnetPath
+$TarPath = $preflight.TarPath
 
 $sourceCommit = (& git -C $ProjectRoot rev-parse HEAD).Trim()
 Assert-LastExitCode -Operation 'Git source identity check'
@@ -599,6 +626,7 @@ Assert-PublicSourceBoundary -ProjectRoot $ProjectRoot
 $productionVerifier = Join-Path $PSScriptRoot 'verify_production_source.ps1'
 $null = Assert-OrdinaryFile -Path $productionVerifier
 & $productionVerifier -ProjectRoot $ProjectRoot
+Assert-LastExitCode -Operation 'Production source verification'
 
 $identity = Get-Content -Raw -LiteralPath $IdentityPath
 $requiredIdentityFragments = @(
@@ -628,9 +656,11 @@ foreach ($required in @($ReleaseNotesPath, $RunnerIcon)) {
 if (Test-Path -LiteralPath $RunRoot) {
     throw "The unique release-candidate output already exists: $RunRoot"
 }
+$null = Assert-ReleaseOrdinaryPath -Path $RunRoot
 New-Item -ItemType Directory -Path $InputPath | Out-Null
 New-Item -ItemType Directory -Path $FeedPath | Out-Null
 New-Item -ItemType Directory -Path $ToolExpanded | Out-Null
+Complete-ReleaseStage -Metrics $metrics -Stage $activeStage -Outcome Passed -CacheState NotApplicable
 
 $previousFeedUrl =
     "$UpdateSource/releases/download/v$PreviousStableVersion/$feedIndexName"
@@ -639,7 +669,26 @@ $previousPackageUrl =
 $publishedPreviousFeed = Join-Path $InputPath $feedIndexName
 $publishedPreviousPackage = Join-Path $InputPath $previousFullPackageName
 $previousFullPackage = Join-Path $FeedPath $previousFullPackageName
-Invoke-WebRequest -Uri $previousFeedUrl -OutFile $publishedPreviousFeed -UseBasicParsing
+$activeStage = Start-ReleaseStage -Metrics $metrics -Name 'previous-feed' -InputBytes $PreviousFeedBytes
+$feedAcquisition = Get-VerifiedReleaseInput `
+    -CacheRoot $ReleaseInputCacheRoot -Repository $UpdateSource `
+    -ReleaseTag $previousSourceTag -Channel $UpdateChannel -Role 'previous-feed' `
+    -ArtifactName $feedIndexName -ExpectedBytes $PreviousFeedBytes `
+    -ExpectedSha256 $PreviousFeedSha256 -Destination $publishedPreviousFeed `
+    -ExistingFile $PreviousFeedPath -Offline:$OfflinePinnedInputs `
+    -ValidateContent {
+        param($Path)
+        $inputFeed = Get-Content -Raw -LiteralPath $Path | ConvertFrom-Json
+        $inputAssets = @($inputFeed.Assets | Where-Object {
+            $_.PackageId -ceq $PackageId -and $_.Version -ceq $PreviousStableVersion -and
+            $_.Type -ceq 'Full' -and $_.FileName -ceq $previousFullPackageName
+        })
+        if (@($inputFeed.Assets).Count -ne 3 -or $inputAssets.Count -ne 1 -or
+            [long]$inputAssets[0].Size -ne $PreviousFullPackageBytes -or
+            -not ([string]$inputAssets[0].SHA256).Equals($PreviousFullPackageSha256, [StringComparison]::OrdinalIgnoreCase)) {
+            throw 'The historical feed does not describe the pinned previous package.'
+        }
+    }
 $publishedPreviousFeedItem = Assert-OrdinaryFile -Path $publishedPreviousFeed
 $publishedPreviousFeedHash =
     (Get-FileHash -Algorithm SHA256 -LiteralPath $publishedPreviousFeed).Hash
@@ -659,10 +708,25 @@ if ($publishedPreviousAssets.Count -ne 1 -or
     @($publishedPreviousFeedJson.Assets).Count -ne 3) {
     throw 'The published 0.1.9 feed does not contain exactly the expected full package and reviewed asset set.'
 }
-Invoke-WebRequest `
-    -Uri $previousPackageUrl `
-    -OutFile $publishedPreviousPackage `
-    -UseBasicParsing
+$cacheState = if ($feedAcquisition.cacheStatus -eq 'hit') { 'Hit' } else { 'Miss' }
+$cacheReason = if ($cacheState -eq 'Miss') { 'not-cached-' + $feedAcquisition.cacheStatus } else { $null }
+Complete-ReleaseStage -Metrics $metrics -Stage $activeStage -Outcome Passed `
+    -OutputBytes $PreviousFeedBytes -TransferredBytes $feedAcquisition.downloadedBytes `
+    -CacheState $cacheState -CacheMissReason $cacheReason
+$activeStage = Start-ReleaseStage -Metrics $metrics -Name 'previous-package' -InputBytes $PreviousFullPackageBytes
+$packageAcquisition = Get-VerifiedReleaseInput `
+    -CacheRoot $ReleaseInputCacheRoot -Repository $UpdateSource `
+    -ReleaseTag $previousSourceTag -Channel $UpdateChannel -Role 'previous-full' `
+    -ArtifactName $previousFullPackageName -ExpectedBytes $PreviousFullPackageBytes `
+    -ExpectedSha256 $PreviousFullPackageSha256 -Destination $publishedPreviousPackage `
+    -ExistingFile $PreviousPackagePath -Offline:$OfflinePinnedInputs `
+    -ValidateContent {
+        param($Path)
+        Assert-VelopackPackage -PackagePath $Path -ExpectedPackageId $PackageId `
+            -ExpectedVersion $PreviousStableVersion -ExpectedChannel $UpdateChannel `
+            -ExpectedTitle $DisplayName -ExpectedExecutable $ExecutableName `
+            -ExpectedUpdater $UpdaterHelperName
+    }
 $publishedPreviousPackageItem =
     Assert-OrdinaryFile -Path $publishedPreviousPackage
 $publishedPreviousPackageHash =
@@ -690,6 +754,12 @@ Copy-Item -LiteralPath $publishedPreviousPackage -Destination $previousFullPacka
 $previousFullItem = Assert-OrdinaryFile -Path $previousFullPackage
 $previousFullHash =
     (Get-FileHash -Algorithm SHA256 -LiteralPath $previousFullPackage).Hash
+$cacheState = if ($packageAcquisition.cacheStatus -eq 'hit') { 'Hit' } else { 'Miss' }
+$cacheReason = if ($cacheState -eq 'Miss') { 'not-cached-' + $packageAcquisition.cacheStatus } else { $null }
+Complete-ReleaseStage -Metrics $metrics -Stage $activeStage -Outcome Passed `
+    -OutputBytes $PreviousFullPackageBytes -TransferredBytes $packageAcquisition.downloadedBytes `
+    -CacheState $cacheState -CacheMissReason $cacheReason
+$activeStage = Start-ReleaseStage -Metrics $metrics -Name 'velopack-tool'
 
 $toolRoot = Join-Path $ProjectRoot "build\release-tools\vpk-$VelopackVersion"
 $toolPackage = Join-Path $toolRoot "vpk.$VelopackVersion.nupkg"
@@ -709,43 +779,13 @@ $toolHash = (Get-FileHash -Algorithm SHA256 -LiteralPath $toolPackage).Hash
 if ($toolHash -cne $VelopackPackageSha256) {
     throw 'The pinned Velopack CLI package failed its SHA-256 check.'
 }
-& tar -xf $toolPackage -C $ToolExpanded
+& $TarPath -xf $toolPackage -C $ToolExpanded
 Assert-LastExitCode -Operation 'Pinned Velopack CLI extraction'
 $vpkDll = Join-Path $ToolExpanded 'tools\net8.0\any\vpk.dll'
 $null = Assert-OrdinaryFile -Path $vpkDll
 
-if ([string]::IsNullOrWhiteSpace($FlutterPath)) {
-    $flutterCommand = Get-Command flutter -ErrorAction SilentlyContinue
-    $FlutterPath = if ($null -ne $flutterCommand) {
-        $flutterCommand.Source
-    }
-    else {
-        Join-Path $env:USERPROFILE 'develop\flutter\bin\flutter.bat'
-    }
-}
-$null = Assert-OrdinaryFile -Path $FlutterPath
-
-if ([string]::IsNullOrWhiteSpace($CMakePath)) {
-    $cmakeCommand = Get-Command cmake -ErrorAction SilentlyContinue
-    if ($null -ne $cmakeCommand) {
-        $CMakePath = $cmakeCommand.Source
-    }
-    else {
-        $cmakeCandidates = @(
-            (Join-Path ${env:ProgramFiles(x86)} 'Microsoft Visual Studio\2022\BuildTools\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\bin\cmake.exe'),
-            (Join-Path $env:ProgramFiles 'Microsoft Visual Studio\2022\Community\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\bin\cmake.exe'),
-            (Join-Path $env:ProgramFiles 'Microsoft Visual Studio\2022\Professional\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\bin\cmake.exe'),
-            (Join-Path $env:ProgramFiles 'Microsoft Visual Studio\2022\Enterprise\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\bin\cmake.exe')
-        )
-        $CMakePath = @($cmakeCandidates | Where-Object {
-            Test-Path -LiteralPath $_ -PathType Leaf
-        }) | Select-Object -First 1
-    }
-}
-$null = Assert-OrdinaryFile -Path $CMakePath
-if ($null -eq (Get-Command dotnet -ErrorAction SilentlyContinue)) {
-    throw 'The .NET 8 runtime required by Velopack was not found.'
-}
+Complete-ReleaseStage -Metrics $metrics -Stage $activeStage -Outcome Passed -CacheState NotApplicable
+$activeStage = Start-ReleaseStage -Metrics $metrics -Name 'application-build'
 
 # Flutter's incremental Windows build does not guarantee removal of unrelated
 # files already present at the bundle root. Recreate this exact verified output
@@ -764,6 +804,8 @@ finally {
     Pop-Location
 }
 Assert-CleanSource -ProjectRoot $ProjectRoot -ExpectedCommit $sourceCommit
+Complete-ReleaseStage -Metrics $metrics -Stage $activeStage -Outcome Passed -CacheState NotApplicable
+$activeStage = Start-ReleaseStage -Metrics $metrics -Name 'payload-verification'
 
 $bundleExecutable = Join-Path $BundleDirectory $ExecutableName
 $bundleUpdater = Join-Path $BundleDirectory $UpdaterHelperName
@@ -860,6 +902,8 @@ $forbiddenBundleFiles = @(Get-ChildItem -LiteralPath $BundleDirectory -Recurse -
 if ($forbiddenBundleFiles.Count -ne 0) {
     throw "The application bundle contains a personal, diagnostic, or temporary file: $($forbiddenBundleFiles[0].FullName)"
 }
+Complete-ReleaseStage -Metrics $metrics -Stage $activeStage -Outcome Passed -CacheState NotApplicable
+$activeStage = Start-ReleaseStage -Metrics $metrics -Name 'full-delta-packaging'
 
 $vpkArguments = @(
     $vpkDll,
@@ -880,12 +924,14 @@ $vpkArguments = @(
 $previousProcessorCount = $env:DOTNET_PROCESSOR_COUNT
 try {
     $env:DOTNET_PROCESSOR_COUNT = '4'
-    & dotnet @vpkArguments
+    & $DotnetPath @vpkArguments
     Assert-LastExitCode -Operation 'Velopack release-candidate package generation'
 }
 finally {
     $env:DOTNET_PROCESSOR_COUNT = $previousProcessorCount
 }
+Complete-ReleaseStage -Metrics $metrics -Stage $activeStage -Outcome Passed -CacheState NotApplicable
+$activeStage = Start-ReleaseStage -Metrics $metrics -Name 'feed-verification'
 
 $fullPackage = Join-Path $FeedPath $fullPackageName
 $deltaPackage = Join-Path $FeedPath $deltaPackageName
@@ -979,6 +1025,9 @@ if ([long]$matchingPreviousAssets[0].Size -ne $previousFullItem.Length -or
 }
 
 $setupHash = (Get-FileHash -Algorithm SHA256 -LiteralPath $generatedSetup).Hash
+Complete-ReleaseStage -Metrics $metrics -Stage $activeStage -Outcome Passed `
+    -OutputBytes ($fullItem.Length + $deltaItem.Length) -CacheState NotApplicable
+$activeStage = Start-ReleaseStage -Metrics $metrics -Name 'installer-build'
 $cmakeConfigure = @(
     '-S', $InstallerSourceDirectory,
     '-B', $InstallerBuildDirectory,
@@ -995,6 +1044,8 @@ $cmakeConfigure = @(
 Assert-LastExitCode -Operation 'Themed installer configuration'
 & $CMakePath --build $InstallerBuildDirectory --config Release --parallel 4
 Assert-LastExitCode -Operation 'Themed installer build'
+Complete-ReleaseStage -Metrics $metrics -Stage $activeStage -Outcome Passed -CacheState NotApplicable
+$activeStage = Start-ReleaseStage -Metrics $metrics -Name 'installer-verification'
 
 $builtInstaller = Join-Path $InstallerBuildDirectory "Release\$BuiltInstallerName"
 $null = Assert-OrdinaryFile -Path $builtInstaller
@@ -1024,6 +1075,8 @@ Assert-NoTextMarker `
     -AllowReviewedVelopackBuildPaths
 Assert-CleanSource -ProjectRoot $ProjectRoot -ExpectedCommit $sourceCommit
 
+Complete-ReleaseStage -Metrics $metrics -Stage $activeStage -Outcome Passed -CacheState NotApplicable
+$activeStage = Start-ReleaseStage -Metrics $metrics -Name 'candidate-manifest'
 $installerRecord = Get-ArtifactRecord `
     -Role 'themed-installer' -Path $candidateInstaller -RelativeTo $RunRoot
 $setupRecord = Get-ArtifactRecord `
@@ -1067,6 +1120,9 @@ $manifest = [ordered]@{
     packageId = $PackageId
     channel = $UpdateChannel
     updateSource = $UpdateSource
+    pinnedInputAcquisition = @($feedAcquisition, $packageAcquisition)
+    preflight = $preflight.Evidence
+    stageMeasurements = 'stage-metrics.json'
     publicSourceHistory = [ordered]@{
         previousTag = $previousSourceTag
         previousCommit = $previousTaggedCommit
@@ -1117,6 +1173,8 @@ $manifestJson = $manifest | ConvertTo-Json -Depth 8
     [System.Text.UTF8Encoding]::new($false)
 )
 $null = Assert-OrdinaryFile -Path $ManifestPath
+Complete-ReleaseStage -Metrics $metrics -Stage $activeStage -Outcome Passed -CacheState NotApplicable
+$activeStage = $null
 
 Write-Host ''
 Write-Host 'Public Black Spirit Life release candidate created. Nothing was published.'
@@ -1127,3 +1185,23 @@ Write-Host "Channel: $UpdateChannel"
 Write-Host "Installer: $candidateInstaller"
 Write-Host "Delta: $deltaPackage"
 Write-Host "Manifest: $ManifestPath"
+}
+catch {
+    if ($null -eq $activeStage -or $activeStage.Outcome -ne 'Running') {
+        $activeStage = Start-ReleaseStage -Metrics $metrics -Name 'candidate-orchestration'
+    }
+    Complete-ReleaseStage -Metrics $metrics -Stage $activeStage -Outcome Failed `
+        -FailureCode 'stage-failed'
+    throw
+}
+finally {
+    # These timing records are deliberately not build-reuse or publication
+    # receipts. A failed prerequisite must remain a failed invocation.
+    try {
+        $null = Assert-ReleaseOrdinaryPath -Path $RunRoot
+        $null = [IO.Directory]::CreateDirectory($RunRoot)
+        Save-ReleaseStageMetrics -Metrics $metrics -Path $metricsPath
+        Write-Host "Stage measurements: $metricsPath"
+    }
+    catch { Write-Warning 'Could not save release stage measurements.' }
+}
