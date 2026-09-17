@@ -53,11 +53,11 @@ void main() {
     expect(builder, contains('https://github.com/OWNER/REPOSITORY'));
     expect(builder, isNot(contains('Sanitee')));
     expect(wrapper, isNot(contains('Sanitee')));
-    expect(builder, contains("\$Version = '0.1.10'"));
-    expect(builder, contains("\$BuildNumber = '29'"));
-    expect(builder, contains("\$PreviousStableVersion = '0.1.9'"));
+    expect(builder, contains("\$Version = '0.1.11'"));
+    expect(builder, contains("\$BuildNumber = '30'"));
+    expect(builder, contains("\$PreviousStableVersion = '0.1.10'"));
     expect(builder, contains("\$UpdateChannel = 'win-x64-stable'"));
-    expect(builder, contains("docs\\releases\\0.1.10.md"));
+    expect(builder, contains("docs\\releases\\0.1.11.md"));
     expect(builder, contains('tag --points-at HEAD'));
     expect(builder, contains('rev-list --count HEAD'));
     expect(builder, contains('previousSourceTag'));
@@ -75,13 +75,13 @@ void main() {
     expect(
       builder,
       contains(
-        '059C5D675E7E9F0B1D9D6C5C63CCF71851CB69FEE76E9BBC7813D0C8B926EE9D',
+        'AD0648B40D08F3C84388587E21A06D98CE74357BE8C662D60F32724AB01705C6',
       ),
     );
     expect(
       builder,
       contains(
-        '21E82798B68AB316E68EB7B698C7A3075B7AA144C5E6780C6BDFB2DD1654564A',
+        'B8BFEE6EDB7A212DDDA7CDE9080FFF346F4232AFDB2DE6822ADF870E43C3926D',
       ),
     );
     expect(builder, contains('deltaPackageName'));

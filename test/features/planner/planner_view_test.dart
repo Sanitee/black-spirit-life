@@ -1028,7 +1028,13 @@ void main() {
         harness.controller.active.state.value.ignoreIngredientInventory,
         isTrue,
       );
-      expect(find.text('Need 40 | Have 0 | Missing 40'), findsOneWidget);
+      _expectNeedValues(
+        tester,
+        harness.controller.active.plan.value.missing.single.key,
+        need: '40',
+        have: '0',
+        missing: '40',
+      );
       await tester.ensureVisible(ownedField());
       await tester.enterText(ownedField(), '12');
       await tester.testTextInput.receiveAction(TextInputAction.done);
@@ -1039,7 +1045,13 @@ void main() {
         harness.controller.active.state.value.ignoreIngredientInventory,
         isFalse,
       );
-      expect(find.text('Need 40 | Have 12 | Missing 28'), findsOneWidget);
+      _expectNeedValues(
+        tester,
+        harness.controller.active.plan.value.missing.single.key,
+        need: '40',
+        have: '12',
+        missing: '28',
+      );
       expect(tester.widget<TextField>(ownedField()).controller!.text, '0');
 
       await tester.enterText(ownedField(), '28');
@@ -1820,7 +1832,13 @@ void main() {
       find.byKey(PlannerActionKeys.row('P20', 'Blue Sunrise Herb')),
       findsOneWidget,
     );
-    expect(find.text('Need 7 | Have 0 | Missing 7'), findsOneWidget);
+    _expectNeedValues(
+      tester,
+      harness.controller.active.plan.value.missing.single.key,
+      need: '7',
+      have: '0',
+      missing: '7',
+    );
     expect(tester.takeException(), isNull);
     await harness.controller.dispose();
   });
@@ -2736,7 +2754,7 @@ void main() {
     },
   );
 
-  testWidgets('wide Standard rows preserve Avalonia grid geometry', (
+  testWidgets('wide Standard rows preserve geometry with quantity badges', (
     tester,
   ) async {
     await setPlannerTestSize(tester, const Size(1500, 940));
@@ -2831,8 +2849,8 @@ void main() {
         ),
       ),
     );
-    expect(queuePerCraft.left - queueSubstitute.right, 6);
-    expect(queueQuality.left - queuePerCraft.right, 6);
+    expect(queuePerCraft.left - queueSubstitute.right, 12);
+    expect(queueQuality.left - queuePerCraft.right, 12);
     expect(
       queueSubstitute.center.dy,
       closeTo(queueIngredientName.center.dy, .01),
@@ -3680,6 +3698,25 @@ void _expectInsideViewport(Rect rect, Size viewport) {
   expect(rect.top, greaterThanOrEqualTo(12));
   expect(rect.right, lessThanOrEqualTo(viewport.width - 12));
   expect(rect.bottom, lessThanOrEqualTo(viewport.height - 12));
+}
+
+void _expectNeedValues(
+  WidgetTester tester,
+  String stableId, {
+  required String need,
+  required String have,
+  required String missing,
+}) {
+  for (final entry in {
+    'Need': need,
+    'Have': have,
+    'Missing': missing,
+  }.entries) {
+    final quantity = find.byKey(
+      ValueKey('planner-need-quantity:$stableId:${entry.key}'),
+    );
+    expect(tester.widget<Text>(quantity).data, entry.value);
+  }
 }
 
 Rect _inputContainerRect(WidgetTester tester, Finder fieldAncestor) {

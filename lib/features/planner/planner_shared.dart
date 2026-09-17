@@ -24,6 +24,7 @@ import '../shared/recipe_variant_selector.dart';
 import 'need_material_order.dart';
 import 'planner_contracts.dart';
 import 'planner_keys.dart';
+import 'planner_quantity_layout.dart';
 
 typedef SelectPlannerTarget = bool Function(String name);
 
@@ -3558,6 +3559,28 @@ class _IngredientRow extends StatelessWidget {
     final quantityRightInset = spec.isSakuraNightGarden
         ? SakuraQueueCornerAsset.authoredSize.width - 8
         : 18.0;
+    final plannerLayout = PlannerQuantityLayout.of(context);
+    final quantityStyle = spec.typography.meta.copyWith(
+      fontSize: 16,
+      fontWeight: FontWeight.w600,
+      color: spec.palette.text,
+      fontStyle: FontStyle.normal,
+      fontFeatures: const [FontFeature.tabularFigures()],
+    );
+    final batchQuantity = Text(
+      formatQuantity(ingredient.need),
+      key: ValueKey<String>(
+        'planner-ingredient-batch-quantity:'
+        '${ingredient.parentName}:${ingredient.original}',
+      ),
+      style: plannerLayout
+          ? quantityStyle
+          : spec.typography.meta.copyWith(
+              color: spec.palette.text,
+              fontSize: 13,
+              fontWeight: FontWeight.w700,
+            ),
+    );
     return _PlannerMapQuickLookupRegion(
       key: PlannerActionKeys.mapLookupRegion('queue:$stableId'),
       materialName: ingredient.name,
@@ -3568,116 +3591,86 @@ class _IngredientRow extends StatelessWidget {
         children: <Widget>[
           ConstrainedBox(
             constraints: BoxConstraints(minHeight: denseLayout ? 42 : 48),
-            child: Row(
-              children: <Widget>[
-                _ItemAcquisitionPopover(
-                  controller: controller,
-                  name: ingredient.name,
-                  stableId: '${ingredient.parentName}:${ingredient.key}',
-                  overlayScope: 'queue',
-                  size: denseLayout ? 40 : 46,
-                  onOpening: () => onChoiceAnchorChanged(null),
-                ),
-                const SizedBox(width: 11),
-                Expanded(
-                  child: Row(
-                    children: <Widget>[
-                      Flexible(
-                        child: hasSubstitutes
-                            ? _SubstituteNameAnchor(
-                                controller: controller,
-                                key: PlannerActionKeys.row('P12', anchor),
-                                nameKey: PlannerActionKeys.row(
-                                  'P11',
-                                  '${ingredient.parentName}:${ingredient.key}',
-                                ),
-                                name: ingredient.name,
-                                currentName: ingredient.baseName,
-                                ingredient: domainIngredient,
-                                fontSize: 17,
-                                color: !spec.isStandard
-                                    ? null
-                                    : ingredient.missing > 0
-                                    ? const Color(0xFFFFE6C8)
-                                    : const Color(0xFFD8FFE2),
-                                isShowing: chooserOpen,
-                                onToggle: () => onChoiceAnchorChanged(
-                                  chooserOpen ? null : anchor,
-                                ),
-                              )
-                            : _CopyNameButton(
-                                key: PlannerActionKeys.row(
-                                  'P11',
-                                  '${ingredient.parentName}:${ingredient.key}',
-                                ),
-                                name: ingredient.name,
-                                fontSize: 17,
-                                color: !spec.isStandard
-                                    ? null
-                                    : ingredient.missing > 0
-                                    ? const Color(0xFFFFE6C8)
-                                    : const Color(0xFFD8FFE2),
-                                semanticPrefix: 'Copy ingredient',
-                                onCopy: externalActions.copyName,
-                              ),
+            child: PlannerIngredientRowLayout(
+              iconWidth: denseLayout ? 40 : 46,
+              totalRightInset: quantityRightInset,
+              total: batchQuantity,
+              icon: _ItemAcquisitionPopover(
+                controller: controller,
+                name: ingredient.name,
+                stableId: '${ingredient.parentName}:${ingredient.key}',
+                overlayScope: 'queue',
+                size: denseLayout ? 40 : 46,
+                onOpening: () => onChoiceAnchorChanged(null),
+              ),
+              identity: PlannerIngredientIdentity(
+                name: hasSubstitutes
+                    ? _SubstituteNameAnchor(
+                        controller: controller,
+                        key: PlannerActionKeys.row('P12', anchor),
+                        nameKey: PlannerActionKeys.row(
+                          'P11',
+                          '${ingredient.parentName}:${ingredient.key}',
+                        ),
+                        name: ingredient.name,
+                        currentName: ingredient.baseName,
+                        ingredient: domainIngredient,
+                        fontSize: 17,
+                        color: !spec.isStandard
+                            ? null
+                            : ingredient.missing > 0
+                            ? const Color(0xFFFFE6C8)
+                            : const Color(0xFFD8FFE2),
+                        isShowing: chooserOpen,
+                        onToggle: () =>
+                            onChoiceAnchorChanged(chooserOpen ? null : anchor),
+                      )
+                    : _CopyNameButton(
+                        key: PlannerActionKeys.row(
+                          'P11',
+                          '${ingredient.parentName}:${ingredient.key}',
+                        ),
+                        name: ingredient.name,
+                        fontSize: 17,
+                        color: !spec.isStandard
+                            ? null
+                            : ingredient.missing > 0
+                            ? const Color(0xFFFFE6C8)
+                            : const Color(0xFFD8FFE2),
+                        semanticPrefix: 'Copy ingredient',
+                        onCopy: externalActions.copyName,
                       ),
-                      if (perCraftQuantity != null) ...<Widget>[
-                        const SizedBox(width: 6),
-                        Tooltip(
-                          message: 'Needed for 1 craft',
+                quantity: perCraftQuantity == null
+                    ? null
+                    : Tooltip(
+                        message: 'Needed for 1 craft',
+                        child: PlannerQuantityBadge(
                           child: Text(
                             'x${formatQuantity(perCraftQuantity)}',
                             key: ValueKey<String>(
                               'planner-ingredient-per-craft-quantity:'
                               '${ingredient.parentName}:${ingredient.original}',
                             ),
-                            style: spec.typography.meta.copyWith(fontSize: 13),
-                          ),
-                        ),
-                      ],
-                      if (_qualityGrades(
-                        controller,
-                        ingredient.parentName,
-                        ingredient.baseName,
-                      ).isNotEmpty) ...<Widget>[
-                        const SizedBox(width: 6),
-                        _QualitySwatches(
-                          controller: controller,
-                          parentName: ingredient.parentName,
-                          ingredientName: ingredient.original,
-                          baseName: ingredient.baseName,
-                        ),
-                      ],
-                    ],
-                  ),
-                ),
-                const SizedBox(width: 10),
-                Tooltip(
-                  message: 'Total needed for this craft step',
-                  child: Padding(
-                    padding: EdgeInsets.only(right: quantityRightInset),
-                    child: SizedBox(
-                      width: 86,
-                      child: FittedBox(
-                        fit: BoxFit.scaleDown,
-                        alignment: Alignment.centerRight,
-                        child: Text(
-                          formatQuantity(ingredient.need),
-                          key: ValueKey<String>(
-                            'planner-ingredient-batch-quantity:'
-                            '${ingredient.parentName}:${ingredient.original}',
-                          ),
-                          style: spec.typography.meta.copyWith(
-                            color: spec.palette.text,
-                            fontSize: 13,
-                            fontWeight: FontWeight.w700,
+                            style: plannerLayout
+                                ? quantityStyle
+                                : spec.typography.meta.copyWith(fontSize: 13),
                           ),
                         ),
                       ),
-                    ),
-                  ),
-                ),
-              ],
+                quality:
+                    _qualityGrades(
+                      controller,
+                      ingredient.parentName,
+                      ingredient.baseName,
+                    ).isEmpty
+                    ? null
+                    : _QualitySwatches(
+                        controller: controller,
+                        parentName: ingredient.parentName,
+                        ingredientName: ingredient.original,
+                        baseName: ingredient.baseName,
+                      ),
+              ),
             ),
           ),
           if (chooserOpen && domainIngredient != null) ...<Widget>[
@@ -4135,118 +4128,115 @@ class _NeedRow extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: <Widget>[
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: <Widget>[
-                SizedBox(
-                  width: denseLayout ? 50 : 54,
-                  child: Align(
-                    alignment: Alignment.center,
-                    child: _ItemAcquisitionPopover(
-                      controller: controller,
-                      name: row.name,
-                      stableId: 'need:${row.key}',
-                      overlayScope: 'need',
-                      size: denseLayout ? 46 : 50,
-                      onOpening: () => onChoiceAnchorChanged(null),
-                    ),
+            PlannerNeedRowLayout(
+              gap: denseLayout ? 8 : 10,
+              reservedWidth: denseLayout ? 228 : 254,
+              icon: SizedBox(
+                width: denseLayout ? 50 : 54,
+                child: Align(
+                  alignment: Alignment.center,
+                  child: _ItemAcquisitionPopover(
+                    controller: controller,
+                    name: row.name,
+                    stableId: 'need:${row.key}',
+                    overlayScope: 'need',
+                    size: denseLayout ? 46 : 50,
+                    onOpening: () => onChoiceAnchorChanged(null),
                   ),
                 ),
-                SizedBox(width: denseLayout ? 8 : 10),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+              ),
+              content: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  Row(
                     children: <Widget>[
-                      Row(
-                        children: <Widget>[
-                          Flexible(
-                            child: hasSubstitutes
-                                ? _SubstituteNameAnchor(
-                                    controller: controller,
-                                    key: PlannerActionKeys.row('P12', anchor),
-                                    nameKey: PlannerActionKeys.row(
-                                      'P20',
-                                      row.name,
-                                    ),
-                                    name: row.name,
-                                    currentName: choice?.baseName ?? row.name,
-                                    ingredient: domainIngredient,
-                                    semanticLabel: choice == null
-                                        ? 'Choose how to get ${row.name}'
-                                        : null,
-                                    tooltip: choice == null
-                                        ? 'Buy or process'
-                                        : null,
-                                    fontSize: denseLayout ? 16.5 : 17.5,
-                                    isShowing: openChoiceAnchor == anchor,
-                                    onToggle: () => onChoiceAnchorChanged(
-                                      openChoiceAnchor == anchor
-                                          ? null
-                                          : anchor,
-                                    ),
-                                  )
-                                : _CopyNameButton(
-                                    key: PlannerActionKeys.row('P20', row.name),
-                                    name: row.name,
-                                    fontSize: denseLayout ? 16.5 : 17.5,
-                                    semanticPrefix: 'Copy Need First item',
-                                    onCopy: externalActions.copyName,
-                                  ),
-                          ),
-                          if (source.hasDetails) ...<Widget>[
-                            const SizedBox(width: 5),
-                            _AnchoredSourceInfoButton(
-                              key: PlannerActionKeys.row('P17', row.name),
-                              controller: controller,
-                              request: source,
-                            ),
-                          ],
-                        ],
+                      Flexible(
+                        child: hasSubstitutes
+                            ? _SubstituteNameAnchor(
+                                controller: controller,
+                                key: PlannerActionKeys.row('P12', anchor),
+                                nameKey: PlannerActionKeys.row('P20', row.name),
+                                name: row.name,
+                                currentName: choice?.baseName ?? row.name,
+                                ingredient: domainIngredient,
+                                semanticLabel: choice == null
+                                    ? 'Choose how to get ${row.name}'
+                                    : null,
+                                tooltip: choice == null
+                                    ? 'Buy or process'
+                                    : null,
+                                fontSize: denseLayout ? 16.5 : 17.5,
+                                isShowing: openChoiceAnchor == anchor,
+                                onToggle: () => onChoiceAnchorChanged(
+                                  openChoiceAnchor == anchor ? null : anchor,
+                                ),
+                              )
+                            : _CopyNameButton(
+                                key: PlannerActionKeys.row('P20', row.name),
+                                name: row.name,
+                                fontSize: denseLayout ? 16.5 : 17.5,
+                                semanticPrefix: 'Copy Need First item',
+                                onCopy: externalActions.copyName,
+                              ),
                       ),
-                      SizedBox(height: denseLayout ? 3 : 6),
-                      Text(
-                        'Need ${formatQuantity(row.need)} | '
-                        'Have ${formatQuantity(row.have)} | '
-                        'Missing ${formatQuantity(row.missing)}',
-                        style: spec.typography.meta.copyWith(
-                          color: denseLayout
-                              ? spec.palette.textMuted
-                              : const Color(0xFFC5D7CF),
-                          fontSize: 13,
-                          fontWeight: FontWeight.w600,
-                          fontStyle: denseLayout ? FontStyle.normal : null,
-                          height: denseLayout ? 1.15 : null,
-                        ),
-                      ),
-                      if (showPrices &&
-                          _hasMarketPills(
-                            row,
-                            suppressCentralMarket: confirmedMarketUnlisted,
-                          )) ...<Widget>[
-                        const SizedBox(height: 5),
-                        _MarketPills(
-                          row: row,
-                          suppressCentralMarket: confirmedMarketUnlisted,
-                        ),
-                      ],
-                      if (showPrices &&
-                          visibleMarketDiagnostics.isNotEmpty) ...<Widget>[
-                        const SizedBox(height: 5),
-                        _MarketDiagnostics(
-                          diagnostics: visibleMarketDiagnostics,
+                      if (source.hasDetails) ...<Widget>[
+                        const SizedBox(width: 5),
+                        _AnchoredSourceInfoButton(
+                          key: PlannerActionKeys.row('P17', row.name),
+                          controller: controller,
+                          request: source,
                         ),
                       ],
                     ],
                   ),
-                ),
-                SizedBox(width: denseLayout ? 8 : 10),
-                _OwnedDraftActions(
-                  key: PlannerActionKeys.row('P18', row.name),
-                  controller: controller,
-                  name: row.name,
-                  textController: draftController,
-                ),
-              ],
+                  SizedBox(height: denseLayout ? 3 : 6),
+                  if (PlannerQuantityLayout.of(context))
+                    PlannerNeedQuantities(
+                      key: ValueKey('planner-need-quantities:${row.key}'),
+                      stableId: row.key,
+                      need: row.need,
+                      have: row.have,
+                      missing: row.missing,
+                    )
+                  else
+                    Text(
+                      'Need ${formatQuantity(row.need)} | '
+                      'Have ${formatQuantity(row.have)} | '
+                      'Missing ${formatQuantity(row.missing)}',
+                      style: spec.typography.meta.copyWith(
+                        color: denseLayout
+                            ? spec.palette.textMuted
+                            : const Color(0xFFC5D7CF),
+                        fontSize: 13,
+                        fontWeight: FontWeight.w600,
+                        fontStyle: denseLayout ? FontStyle.normal : null,
+                        height: denseLayout ? 1.15 : null,
+                      ),
+                    ),
+                  if (showPrices &&
+                      _hasMarketPills(
+                        row,
+                        suppressCentralMarket: confirmedMarketUnlisted,
+                      )) ...<Widget>[
+                    const SizedBox(height: 5),
+                    _MarketPills(
+                      row: row,
+                      suppressCentralMarket: confirmedMarketUnlisted,
+                    ),
+                  ],
+                  if (showPrices &&
+                      visibleMarketDiagnostics.isNotEmpty) ...<Widget>[
+                    const SizedBox(height: 5),
+                    _MarketDiagnostics(diagnostics: visibleMarketDiagnostics),
+                  ],
+                ],
+              ),
+              actions: _OwnedDraftActions(
+                key: PlannerActionKeys.row('P18', row.name),
+                controller: controller,
+                name: row.name,
+                textController: draftController,
+              ),
             ),
             if (openChoiceAnchor == anchor &&
                 domainIngredient != null) ...<Widget>[

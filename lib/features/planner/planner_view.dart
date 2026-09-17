@@ -4,6 +4,7 @@ import '../../app/state/planner_application_controller.dart';
 import '../../visual/visual.dart';
 import 'planner_contracts.dart';
 import 'planner_keys.dart';
+import 'planner_quantity_layout.dart';
 import 'planner_shared.dart';
 
 class PlannerView extends StatelessWidget {
@@ -32,27 +33,29 @@ class PlannerView extends StatelessWidget {
           container: true,
           explicitChildNodes: true,
           label: '${controller.mode.label} Planner',
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: <Widget>[
-              _PlannerCommandBand(
-                controller: controller,
-                externalActions: externalActions,
-              ),
-              SizedBox(height: denseLayout ? 44 : 33),
-              Expanded(
-                child: PlannerPlanColumns(
-                  actionKey: PlannerActionKeys.p21,
+          child: PlannerQuantityLayout(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: <Widget>[
+                _PlannerCommandBand(
                   controller: controller,
-                  plan: plan,
-                  completedPlan: completedPlan,
                   externalActions: externalActions,
-                  allowCompletion: true,
-                  queueTitle: 'Craft Queue',
-                  needTitle: 'Need First',
                 ),
-              ),
-            ],
+                SizedBox(height: denseLayout ? 44 : 33),
+                Expanded(
+                  child: PlannerPlanColumns(
+                    actionKey: PlannerActionKeys.p21,
+                    controller: controller,
+                    plan: plan,
+                    completedPlan: completedPlan,
+                    externalActions: externalActions,
+                    allowCompletion: true,
+                    queueTitle: 'Craft Queue',
+                    needTitle: 'Need First',
+                  ),
+                ),
+              ],
+            ),
           ),
         );
       },
@@ -378,7 +381,7 @@ class _PlannerCommandBand extends StatelessWidget {
                 ),
               );
             }
-            if (constraints.maxWidth >= 1100) {
+            if (constraints.maxWidth >= 1100 && textScale <= 1.5) {
               return Row(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: <Widget>[
