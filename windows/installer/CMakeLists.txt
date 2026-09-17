@@ -77,6 +77,8 @@ add_executable(BlackSpiritLifeInstaller WIN32
   main.cpp
   embedded_payload.cpp
   embedded_payload.h
+  fresh_install_root.cpp
+  fresh_install_root.h
   install_engine.cpp
   install_engine.h
   install_path_policy.cpp
@@ -148,6 +150,8 @@ include(CTest)
 if(BUILD_TESTING)
   add_executable(BlackSpiritLifeInstallerNativeTests EXCLUDE_FROM_ALL
     installer_native_tests.cpp
+    fresh_install_root.cpp
+    fresh_install_root.h
     install_path_policy.cpp
     install_path_policy.h
     install_process_guard.cpp

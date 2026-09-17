@@ -14,6 +14,7 @@
 
 #include "beta_maintenance_gate.h"
 #include "embedded_payload.h"
+#include "fresh_install_root.h"
 #include "install_path_policy.h"
 #include "install_process_guard.h"
 #include "installed_beta_locator.h"
@@ -22,65 +23,6 @@
 
 namespace bsl::installer {
 namespace {
-
-class InstallRootLease final {
-public:
-  InstallRootLease() = default;
-  ~InstallRootLease() {
-    if (handle_ != INVALID_HANDLE_VALUE)
-      CloseHandle(handle_);
-  }
-  InstallRootLease(const InstallRootLease &) = delete;
-  InstallRootLease &operator=(const InstallRootLease &) = delete;
-
-  [[nodiscard]] bool AcquireFresh(const std::wstring &root,
-                                  std::wstring *error) {
-    const InstallPathValidation before = ValidateFreshInstallPath(root);
-    if (!before.valid) {
-      if (error)
-        *error = before.error;
-      return false;
-    }
-    const int created = SHCreateDirectoryExW(nullptr, root.c_str(), nullptr);
-    if (created != ERROR_SUCCESS && created != ERROR_ALREADY_EXISTS &&
-        created != ERROR_FILE_EXISTS) {
-      if (error)
-        *error = L"The selected installation folder could not be prepared.";
-      return false;
-    }
-    const InstallPathValidation after = ValidateFreshInstallPath(root);
-    if (!after.valid) {
-      if (error)
-        *error = after.error;
-      return false;
-    }
-
-    handle_ = CreateFileW(
-        root.c_str(), FILE_READ_ATTRIBUTES, FILE_SHARE_READ | FILE_SHARE_WRITE,
-        nullptr, OPEN_EXISTING,
-        FILE_FLAG_BACKUP_SEMANTICS | FILE_FLAG_OPEN_REPARSE_POINT, nullptr);
-    if (handle_ == INVALID_HANDLE_VALUE) {
-      if (error)
-        *error =
-            L"The installation folder could not be locked for a safe update.";
-      return false;
-    }
-    BY_HANDLE_FILE_INFORMATION information{};
-    if (!GetFileInformationByHandle(handle_, &information) ||
-        (information.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) == 0 ||
-        (information.dwFileAttributes & FILE_ATTRIBUTE_REPARSE_POINT) != 0) {
-      if (error)
-        *error = L"The installation folder is not a regular local directory.";
-      CloseHandle(handle_);
-      handle_ = INVALID_HANDLE_VALUE;
-      return false;
-    }
-    return true;
-  }
-
-private:
-  HANDLE handle_ = INVALID_HANDLE_VALUE;
-};
 
 std::wstring QuoteArgument(const std::wstring &value) {
   std::wstring result = L"\"";
@@ -129,14 +71,14 @@ bool SameOrChildPhysicalPath(const std::wstring &candidate,
       _wcsnicmp(candidate.c_str(), root.c_str(), root.size()) != 0) {
     return false;
   }
-  return candidate.size() == root.size() ||
-         candidate[root.size()] == L'\\' || candidate[root.size()] == L'/';
+  return candidate.size() == root.size() || candidate[root.size()] == L'\\' ||
+         candidate[root.size()] == L'/';
 }
 
 std::wstring CurrentModulePath() {
   std::wstring path(32768, L'\0');
-  const DWORD written = GetModuleFileNameW(
-      nullptr, path.data(), static_cast<DWORD>(path.size()));
+  const DWORD written =
+      GetModuleFileNameW(nullptr, path.data(), static_cast<DWORD>(path.size()));
   if (written == 0 || written >= path.size())
     return {};
   path.resize(written);
@@ -187,8 +129,7 @@ bool VerifyVelopackUpdaterVersion(const std::wstring &path,
   if (!VerQueryValueW(data.data(), L"\\", reinterpret_cast<void **>(&fixed),
                       &fixed_size) ||
       fixed == nullptr || fixed_size < sizeof(VS_FIXEDFILEINFO) ||
-      fixed->dwSignature != 0xFEEF04BD ||
-      HIWORD(fixed->dwFileVersionMS) != 1 ||
+      fixed->dwSignature != 0xFEEF04BD || HIWORD(fixed->dwFileVersionMS) != 1 ||
       LOWORD(fixed->dwFileVersionMS) != 2 ||
       HIWORD(fixed->dwFileVersionLS) != 0 ||
       LOWORD(fixed->dwFileVersionLS) != 0 ||
@@ -220,8 +161,7 @@ bool VerifyVelopackUpdaterVersion(const std::wstring &path,
   for (UINT index = 0; index < translation_count; ++index) {
     wchar_t product_query[96]{};
     wchar_t description_query[96]{};
-    swprintf_s(product_query,
-               L"\\StringFileInfo\\%04x%04x\\ProductName",
+    swprintf_s(product_query, L"\\StringFileInfo\\%04x%04x\\ProductName",
                translations[index].language, translations[index].code_page);
     swprintf_s(description_query,
                L"\\StringFileInfo\\%04x%04x\\FileDescription",
@@ -231,8 +171,7 @@ bool VerifyVelopackUpdaterVersion(const std::wstring &path,
     UINT product_length = 0;
     UINT description_length = 0;
     if (VerQueryValueW(data.data(), product_query,
-                       reinterpret_cast<void **>(&product),
-                       &product_length) &&
+                       reinterpret_cast<void **>(&product), &product_length) &&
         VerQueryValueW(data.data(), description_query,
                        reinterpret_cast<void **>(&description),
                        &description_length) &&
@@ -256,8 +195,7 @@ public:
   operator=(const ExistingInstallLaunchLease &) = delete;
 
   [[nodiscard]] bool Acquire(const InstalledBeta &expected,
-                             bool require_updater,
-                             std::wstring *updater_path,
+                             bool require_updater, std::wstring *updater_path,
                              std::wstring *error) {
     if (error)
       error->clear();
@@ -291,14 +229,13 @@ public:
     }
 
     const std::wstring module_path = CurrentModulePath();
-    HANDLE module =
-        module_path.empty()
-            ? INVALID_HANDLE_VALUE
-            : CreateFileW(module_path.c_str(), FILE_READ_ATTRIBUTES,
-                          FILE_SHARE_READ | FILE_SHARE_WRITE |
-                              FILE_SHARE_DELETE,
-                          nullptr, OPEN_EXISTING, FILE_FLAG_OPEN_REPARSE_POINT,
-                          nullptr);
+    HANDLE module = module_path.empty()
+                        ? INVALID_HANDLE_VALUE
+                        : CreateFileW(module_path.c_str(), FILE_READ_ATTRIBUTES,
+                                      FILE_SHARE_READ | FILE_SHARE_WRITE |
+                                          FILE_SHARE_DELETE,
+                                      nullptr, OPEN_EXISTING,
+                                      FILE_FLAG_OPEN_REPARSE_POINT, nullptr);
     if (module == INVALID_HANDLE_VALUE) {
       if (error)
         *error = L"The themed installer location could not be verified.";
@@ -409,8 +346,7 @@ private:
 };
 
 bool VerifyRegisteredRoot(const InstalledBeta &expected,
-                          std::wstring *registered_path,
-                          std::wstring *error) {
+                          std::wstring *registered_path, std::wstring *error) {
   std::wstring path;
   bool exists = false;
   if (!QueryRegisteredInstallLocation(&path, &exists, error))
@@ -464,8 +400,7 @@ bool UninstallPostconditionSatisfied(const InstalledBeta &expected,
 
   const std::filesystem::path root(expected.root);
   const std::vector<std::filesystem::path> required_files = {
-      root / L"BlackSpiritLife.exe",
-      root / L"current" / L"BlackSpiritLife.exe",
+      root / L"BlackSpiritLife.exe", root / L"current" / L"BlackSpiritLife.exe",
       root / L"current" / L"BlackSpiritLifeUpdater.exe",
       root / L"current" / L"sq.version"};
   for (const auto &path : required_files) {
@@ -547,11 +482,18 @@ void RecordFailure(InstallEngineResult *result, const std::wstring &message,
 
 InstallEngineResult
 RunInstallEngine(const std::wstring &install_root, bool fresh_install,
-                 const InstallEngineProgressCallback &progress_callback) {
+                 const InstallEngineProgressCallback &progress_callback,
+                 const std::wstring &expected_missing_root) {
   InstallEngineResult result;
   bsl::windows::BetaMaintenanceGate maintenance_gate;
   std::wstring root_error;
   if (!maintenance_gate.TryAcquire(&root_error)) {
+    RecordFailure(&result, root_error, install_root, fresh_install, false);
+    return result;
+  }
+  if (fresh_install &&
+      !ValidateFreshInstallRegistration(expected_missing_root, install_root,
+                                        false, &root_error)) {
     RecordFailure(&result, root_error, install_root, fresh_install, false);
     return result;
   }
@@ -566,6 +508,12 @@ RunInstallEngine(const std::wstring &install_root, bool fresh_install,
   ExistingInstallLaunchLease existing_launch_lease;
   std::optional<InstalledBeta> expected_existing;
   if (fresh_install) {
+    if (!ValidateFreshInstallRegistration(expected_missing_root, install_root,
+                                          false, &root_error)) {
+      RecordFailure(&result, root_error, install_root, fresh_install, false);
+      CleanupExtractedPayload(*payload);
+      return result;
+    }
     if (!root_lease.AcquireFresh(install_root, &root_error)) {
       RecordFailure(&result, root_error, install_root, fresh_install, false);
       CleanupExtractedPayload(*payload);
@@ -645,7 +593,14 @@ RunInstallEngine(const std::wstring &install_root, bool fresh_install,
       CleanupExtractedPayload(*payload);
       return result;
     }
-  } else if (!EnsureNoRunningBetaProcess(install_root, &root_error)) {
+  } else if (!ValidateFreshInstallRegistration(
+                 expected_missing_root, install_root, true, &root_error) ||
+             !EnsureNoRunningBetaProcess(install_root, &root_error)) {
+    RecordFailure(&result, root_error, install_root, fresh_install, false);
+    CleanupExtractedPayload(*payload);
+    return result;
+  }
+  if (fresh_install && !root_lease.PrepareForSetup(&root_error)) {
     RecordFailure(&result, root_error, install_root, fresh_install, false);
     CleanupExtractedPayload(*payload);
     return result;
@@ -662,6 +617,9 @@ RunInstallEngine(const std::wstring &install_root, bool fresh_install,
     result.retained_log = RetainLogAndRemoveEngine(*payload);
     return result;
   }
+  // Only pre-launch failures may discard the empty directory this attempt
+  // created. Once Setup starts it owns its output, including partial failures.
+  root_lease.Commit();
   // CreateProcess has opened the verified image. It is now safe to release the
   // deny-write/delete handles that closed the verification-to-launch window.
   existing_launch_lease.Release();
@@ -732,16 +690,16 @@ RunInstallEngine(const std::wstring &install_root, bool fresh_install,
   return result;
 }
 
-InstallEngineResult RunUninstallEngine(
-    const std::wstring &install_root, bool remove_personal_data,
-    const InstallEngineProgressCallback &progress_callback) {
+InstallEngineResult
+RunUninstallEngine(const std::wstring &install_root, bool remove_personal_data,
+                   const InstallEngineProgressCallback &progress_callback) {
   InstallEngineResult result;
   result.personal_data_requested = remove_personal_data;
   bsl::windows::BetaMaintenanceGate maintenance_gate;
   std::wstring error;
   if (!maintenance_gate.TryAcquire(&error)) {
-    result.error = error +
-                   L" No application files or planner settings were changed.";
+    result.error =
+        error + L" No application files or planner settings were changed.";
     return result;
   }
 
@@ -809,20 +767,22 @@ InstallEngineResult RunUninstallEngine(
   if (!VerifyInstalledBetaRoot(expected.root, &immediately_verified, &error) ||
       immediately_verified.root_volume_serial != expected.root_volume_serial ||
       immediately_verified.root_file_id != expected.root_file_id ||
-      CompareSemanticVersions(immediately_verified.version,
-                              expected.version) != 0 ||
+      CompareSemanticVersions(immediately_verified.version, expected.version) !=
+          0 ||
       !VerifyRegisteredRoot(immediately_verified, &registered_immediately,
                             &error) ||
-      _wcsicmp(registered_immediately.c_str(), registered_before.c_str()) != 0) {
-    result.error = L"The installed application changed while uninstall was being "
-                   L"prepared. Nothing was changed.";
+      _wcsicmp(registered_immediately.c_str(), registered_before.c_str()) !=
+          0) {
+    result.error =
+        L"The installed application changed while uninstall was being "
+        L"prepared. Nothing was changed.";
     return result;
   }
   const InstallPathValidation immediate_personal_data_safety =
       ValidateInstallRootPersonalDataSafety(immediately_verified.root);
   if (!immediate_personal_data_safety.valid) {
-    result.error = immediate_personal_data_safety.error +
-                   L" Nothing was changed.";
+    result.error =
+        immediate_personal_data_safety.error + L" Nothing was changed.";
     return result;
   }
   if (!EnsureNoRunningBetaProcess(immediately_verified.root, &error)) {
@@ -867,8 +827,7 @@ InstallEngineResult RunUninstallEngine(
       ++elapsed_seconds;
       Sleep(1000);
     }
-    if (progress_callback && elapsed_seconds > 0 &&
-        elapsed_seconds % 30 == 0) {
+    if (progress_callback && elapsed_seconds > 0 && elapsed_seconds % 30 == 0) {
       progress_callback(L"Windows is still removing the application files.",
                         L"");
     }

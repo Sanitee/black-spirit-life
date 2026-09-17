@@ -14,6 +14,7 @@
 #include <vector>
 
 #include "installer_build_config.h"
+#include "install_path_policy.h"
 
 namespace bsl::installer {
 namespace {
@@ -238,7 +239,7 @@ std::optional<std::wstring> ReadRegistryInstallLocation(std::wstring *error) {
   return value;
 }
 
-std::wstring DefaultInstallRoot() {
+std::wstring LegacyInstallRoot() {
   const DWORD required = GetEnvironmentVariableW(L"LOCALAPPDATA", nullptr, 0);
   if (required == 0)
     return {};
@@ -251,6 +252,128 @@ std::wstring DefaultInstallRoot() {
   return NormalizePath(
       (std::filesystem::path(local) / std::wstring(build_config::kPackageId))
           .wstring());
+}
+
+bool IsMissingError(DWORD error) {
+  return error == ERROR_FILE_NOT_FOUND || error == ERROR_PATH_NOT_FOUND;
+}
+
+bool MissingPathIsReachable(const std::wstring &path) {
+  // Missing is recoverable only when all existing ancestors are regular local
+  // directories. An unavailable drive, denied access or junction is not proof
+  // that a previously installed application has been removed.
+  if (path.size() < 4 || !std::iswalpha(path[0]) || path[1] != L':' ||
+      path[2] != L'\\')
+    return false;
+  const std::wstring drive = path.substr(0, 3);
+  if (GetDriveTypeW(drive.c_str()) != DRIVE_FIXED)
+    return false;
+  bool found_existing = false;
+  auto current = std::filesystem::path(path).parent_path();
+  while (!current.empty()) {
+    const DWORD attributes = GetFileAttributesW(current.c_str());
+    if (attributes == INVALID_FILE_ATTRIBUTES) {
+      if (!IsMissingError(GetLastError()))
+        return false;
+    } else {
+      if ((attributes & FILE_ATTRIBUTE_DIRECTORY) == 0 ||
+          (attributes & FILE_ATTRIBUTE_REPARSE_POINT) != 0)
+        return false;
+      HANDLE handle = CreateFileW(
+          current.c_str(), FILE_READ_ATTRIBUTES,
+          FILE_SHARE_READ | FILE_SHARE_WRITE | FILE_SHARE_DELETE, nullptr,
+          OPEN_EXISTING,
+          FILE_FLAG_BACKUP_SEMANTICS | FILE_FLAG_OPEN_REPARSE_POINT, nullptr);
+      if (handle == INVALID_HANDLE_VALUE)
+        return false;
+      BY_HANDLE_FILE_INFORMATION information{};
+      const bool ordinary = GetFileInformationByHandle(handle, &information) &&
+          (information.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) != 0 &&
+          (information.dwFileAttributes & FILE_ATTRIBUTE_REPARSE_POINT) == 0;
+      CloseHandle(handle);
+      if (!ordinary)
+        return false;
+      found_existing = true;
+    }
+    const auto parent = current.parent_path();
+    if (parent == current)
+      break;
+    current = parent;
+  }
+  return found_existing;
+}
+
+InstalledRootProbe ProbeInstallRoot(const std::wstring &requested) {
+  InstalledRootProbe result;
+  const std::wstring root = NormalizePath(requested);
+  const DWORD attributes = GetFileAttributesW(root.c_str());
+  if (attributes == INVALID_FILE_ATTRIBUTES) {
+    const DWORD failure = GetLastError();
+    if (IsMissingError(failure) && MissingPathIsReachable(root)) {
+      result.state = InstalledRootState::missing;
+    } else {
+      result.error = L"The application location could not be checked safely. "
+                     L"Check that its drive is available and accessible.";
+      if (SamePath(root, DefaultInstallPath())) {
+        const std::wstring drive = root.substr(0, 3);
+        const UINT drive_type = GetDriveTypeW(drive.c_str());
+        const DWORD drive_attributes = GetFileAttributesW(drive.c_str());
+        const bool known_reparse = drive_attributes != INVALID_FILE_ATTRIBUTES &&
+            (drive_attributes & FILE_ATTRIBUTE_REPARSE_POINT) != 0;
+        const bool unavailable_drive = drive_type == DRIVE_NO_ROOT_DIR ||
+                                       drive_type == DRIVE_UNKNOWN;
+        const bool inspection_denied = drive_type == DRIVE_FIXED &&
+            (failure == ERROR_ACCESS_DENIED || failure == ERROR_SHARING_VIOLATION ||
+             failure == ERROR_NOT_READY);
+        if (!known_reparse && (unavailable_drive || inspection_denied))
+          result.state = InstalledRootState::unavailable_preferred;
+      }
+    }
+    return result;
+  }
+  InstalledBeta installation;
+  if (VerifyInstalledBetaRoot(root, &installation, &result.error)) {
+    result.state = InstalledRootState::installed;
+    result.installation = std::move(installation);
+    return result;
+  }
+  if (SamePath(root, DefaultInstallPath()) &&
+      (attributes & FILE_ATTRIBUTE_DIRECTORY) != 0 &&
+      (attributes & FILE_ATTRIBUTE_REPARSE_POINT) == 0 &&
+      MissingPathIsReachable(root)) {
+    WIN32_FIND_DATAW entry{};
+    const auto pattern = std::filesystem::path(root) / L"*";
+    HANDLE search = FindFirstFileW(pattern.c_str(), &entry);
+    if (search == INVALID_HANDLE_VALUE) {
+      const DWORD failure = GetLastError();
+      if (failure == ERROR_ACCESS_DENIED || failure == ERROR_SHARING_VIOLATION ||
+          failure == ERROR_NOT_READY) {
+        result.state = InstalledRootState::unavailable_preferred;
+        return result;
+      }
+    } else {
+      FindClose(search);
+    }
+  }
+  // Fresh-install validation also rejects nonempty, redirected, inaccessible,
+  // protected and personal-data directories. Only a genuinely safe empty
+  // fallback location is unrelated to installed-application discovery.
+  const auto fresh = ValidateFreshInstallPath(root);
+  if (fresh.valid && (attributes & FILE_ATTRIBUTE_DIRECTORY) != 0 &&
+      (attributes & FILE_ATTRIBUTE_REPARSE_POINT) == 0) {
+    result.state = InstalledRootState::empty_directory;
+    result.error.clear();
+  }
+  return result;
+}
+
+InstallerDiscoveryEnvironment ProductionDiscoveryEnvironment() {
+  return {
+      .query_registration = QueryRegisteredInstallLocation,
+      .probe_root = ProbeInstallRoot,
+      .fallback_roots = {DefaultInstallPath(), LegacyInstallRoot()},
+      .preferred_root = DefaultInstallPath(),
+  };
 }
 
 struct SemVersion {
@@ -424,46 +547,76 @@ bool VerifyInstalledBetaRoot(const std::wstring &root,
   return true;
 }
 
-InstalledBetaLookup LocateInstalledBeta() {
+std::wstring DefaultInstallPath() { return L"C:\\Black Spirit Life"; }
+
+InstalledBetaLookup LocateInstalledBetaForTesting(
+    const InstallerDiscoveryEnvironment &environment) {
   InstalledBetaLookup result;
+  if (!environment.query_registration || !environment.probe_root) {
+    result.error = L"Installation discovery could not be initialized.";
+    return result;
+  }
   std::vector<std::wstring> candidates;
+  std::wstring registered;
+  bool registration_exists = false;
   std::wstring registry_error;
-  if (auto registry = ReadRegistryInstallLocation(&registry_error); registry) {
-    if (GetFileAttributesW(registry->c_str()) == INVALID_FILE_ATTRIBUTES) {
-      result.error = L"The registered install location is missing. "
+  if (!environment.query_registration(&registered, &registration_exists,
+                                       &registry_error)) {
+    result.error = registry_error.empty()
+                       ? L"The existing application registration could not be read."
+                       : registry_error;
+    result.error += L" Nothing was changed.";
+    return result;
+  }
+  if (registration_exists) {
+    if (registered.empty()) {
+      result.error = L"The application registration has no valid location. "
                      L"Nothing was changed.";
       return result;
     }
-    candidates.push_back(*registry);
+    candidates.push_back(registered);
   }
-  if (!registry_error.empty()) {
-    result.error = registry_error + L" Nothing was changed.";
-    return result;
-  }
-  const std::wstring default_root = DefaultInstallRoot();
-  if (!default_root.empty())
-    candidates.push_back(default_root);
+  candidates.insert(candidates.end(), environment.fallback_roots.begin(),
+                    environment.fallback_roots.end());
 
   std::vector<InstalledBeta> valid;
   std::set<std::wstring> seen;
   for (const auto &candidate : candidates) {
+    if (candidate.empty())
+      continue;
     std::wstring folded = NormalizePath(candidate);
     std::transform(folded.begin(), folded.end(), folded.begin(), towlower);
     if (!seen.insert(folded).second)
       continue;
-    const DWORD attributes = GetFileAttributesW(candidate.c_str());
-    if (attributes == INVALID_FILE_ATTRIBUTES)
+    const bool is_registered =
+        registration_exists && SamePath(candidate, registered);
+    const InstalledRootProbe probe = environment.probe_root(candidate);
+    if (probe.state == InstalledRootState::unavailable_preferred &&
+        !is_registered && !environment.preferred_root.empty() &&
+        SamePath(candidate, environment.preferred_root))
       continue;
-    InstalledBeta installation;
-    std::wstring verification_error;
-    if (!VerifyInstalledBetaRoot(candidate, &installation,
-                                 &verification_error)) {
+    if (probe.state == InstalledRootState::missing) {
+      if (is_registered)
+        result.missing_registered_root = registered;
+      continue;
+    }
+    if (probe.state == InstalledRootState::empty_directory && !is_registered)
+      continue;
+    if (probe.state != InstalledRootState::installed || !probe.installation) {
       result.error = L"An existing application location was found but could not be "
-                     L"verified. Nothing was changed. " +
-                     verification_error;
+                     L"verified. Nothing was changed.";
+      if (!probe.error.empty())
+        result.error += L" " + probe.error;
+      result.missing_registered_root.clear();
       return result;
     }
-    valid.push_back(std::move(installation));
+    valid.push_back(*probe.installation);
+  }
+  if (!result.missing_registered_root.empty() && !valid.empty()) {
+    result.error = L"The registered location is missing, but another Black "
+                   L"Spirit Life installation was found. Nothing was changed.";
+    result.missing_registered_root.clear();
+    return result;
   }
   if (valid.size() > 1 && !SamePath(valid[0].root, valid[1].root)) {
     result.error = L"More than one Black Spirit Life installation was "
@@ -473,6 +626,92 @@ InstalledBetaLookup LocateInstalledBeta() {
   if (!valid.empty())
     result.installation = std::move(valid.front());
   return result;
+}
+
+InstalledBetaLookup LocateInstalledBeta() {
+  return LocateInstalledBetaForTesting(ProductionDiscoveryEnvironment());
+}
+
+bool ValidateFreshInstallRegistrationForTesting(
+    const std::wstring &expected_missing_root, const std::wstring &chosen_root,
+    bool allow_prepared_root, const InstallerDiscoveryEnvironment &environment,
+    std::wstring *error) {
+  if (error)
+    error->clear();
+  const auto reject = [&](const std::wstring &message) {
+    if (error)
+      *error = message;
+    return false;
+  };
+  if (!environment.query_registration || !environment.probe_root)
+    return reject(L"Installation discovery could not be initialized.");
+  std::wstring registered;
+  bool exists = false;
+  std::wstring registry_error;
+  if (!environment.query_registration(&registered, &exists, &registry_error))
+    return reject(registry_error.empty()
+                      ? L"The application registration could not be read."
+                      : registry_error);
+  if ((expected_missing_root.empty() && exists) ||
+      (!expected_missing_root.empty() &&
+       (!exists || !SamePath(expected_missing_root, registered)))) {
+    return reject(L"The application registration changed while setup was open. "
+                  L"Close and reopen Setup before continuing.");
+  }
+  bool prepared_registered_root = false;
+  if (!expected_missing_root.empty()) {
+    const auto probe = environment.probe_root(expected_missing_root);
+    prepared_registered_root = allow_prepared_root &&
+        SamePath(expected_missing_root, chosen_root) &&
+        probe.state == InstalledRootState::empty_directory;
+    if (probe.state != InstalledRootState::missing && !prepared_registered_root)
+      return reject(L"The previous installation location is no longer safely "
+                    L"missing. Close and reopen Setup before continuing.");
+  }
+
+  // Keep this validation internally consistent with the just-read registration.
+  // The caller invokes it again after acquiring its destination directory lease
+  // and immediately before starting the trusted installation engine.
+  InstallerDiscoveryEnvironment snapshot = environment;
+  snapshot.query_registration =
+      [registered, exists](std::wstring *location, bool *present,
+                            std::wstring *read_error) {
+        if (location)
+          *location = registered;
+        if (present)
+          *present = exists;
+        if (read_error)
+          read_error->clear();
+        return true;
+      };
+  if (prepared_registered_root) {
+    snapshot.probe_root =
+        [&environment, &expected_missing_root](const std::wstring &root) {
+          const auto probe = environment.probe_root(root);
+          if (SamePath(root, expected_missing_root) &&
+              probe.state == InstalledRootState::empty_directory)
+            return InstalledRootProbe{.state = InstalledRootState::missing};
+          return probe;
+        };
+  }
+  const auto lookup = LocateInstalledBetaForTesting(snapshot);
+  if (!lookup.error.empty())
+    return reject(lookup.error);
+  if (lookup.installation)
+    return reject(L"An installed Black Spirit Life application was found. "
+                  L"Close and reopen Setup to update that installation.");
+  if (!expected_missing_root.empty() &&
+      !SamePath(expected_missing_root, lookup.missing_registered_root))
+    return reject(L"The previous installation location could not be rechecked.");
+  return true;
+}
+
+bool ValidateFreshInstallRegistration(
+    const std::wstring &expected_missing_root, const std::wstring &chosen_root,
+    bool allow_prepared_root, std::wstring *error) {
+  return ValidateFreshInstallRegistrationForTesting(
+      expected_missing_root, chosen_root, allow_prepared_root,
+      ProductionDiscoveryEnvironment(), error);
 }
 
 int CompareSemanticVersions(const std::wstring &left,

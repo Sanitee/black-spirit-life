@@ -101,19 +101,6 @@ POINT CenteredWindowOrigin(const RECT &work_area,
           work_area.top + std::max(0, (work_height - metrics.height) / 2)};
 }
 
-std::wstring DefaultInstallPath() {
-  std::wstring result(32768, L'\0');
-  const DWORD length = GetEnvironmentVariableW(
-      L"LOCALAPPDATA", result.data(), static_cast<DWORD>(result.size()));
-  if (length == 0 || length >= result.size()) {
-    return L"C:\\BlackSpiritLife.App";
-  }
-  result.resize(length);
-  return (std::filesystem::path(result) /
-          std::wstring(build_config::kPackageId))
-      .wstring();
-}
-
 bool PointInRect(const D2D1_RECT_F &rect, float x, float y) {
   return x >= rect.left && x < rect.right && y >= rect.top && y < rect.bottom;
 }
@@ -128,27 +115,24 @@ HRESULT RenderBufferedInstaller(WindowState &state, HDC target,
 
   HDC buffer_dc = CreateCompatibleDC(target);
   if (buffer_dc == nullptr) {
-    return state.renderer.Render(target, static_cast<UINT>(width),
-                                 static_cast<UINT>(height),
-                                 static_cast<float>(state.dpi), state.model,
-                                 state.interaction);
+    return state.renderer.Render(
+        target, static_cast<UINT>(width), static_cast<UINT>(height),
+        static_cast<float>(state.dpi), state.model, state.interaction);
   }
   HBITMAP buffer_bitmap = CreateCompatibleBitmap(target, width, height);
   if (buffer_bitmap == nullptr) {
     DeleteDC(buffer_dc);
-    return state.renderer.Render(target, static_cast<UINT>(width),
-                                 static_cast<UINT>(height),
-                                 static_cast<float>(state.dpi), state.model,
-                                 state.interaction);
+    return state.renderer.Render(
+        target, static_cast<UINT>(width), static_cast<UINT>(height),
+        static_cast<float>(state.dpi), state.model, state.interaction);
   }
   HGDIOBJ previous = SelectObject(buffer_dc, buffer_bitmap);
   if (previous == nullptr || previous == HGDI_ERROR) {
     DeleteObject(buffer_bitmap);
     DeleteDC(buffer_dc);
-    return state.renderer.Render(target, static_cast<UINT>(width),
-                                 static_cast<UINT>(height),
-                                 static_cast<float>(state.dpi), state.model,
-                                 state.interaction);
+    return state.renderer.Render(
+        target, static_cast<UINT>(width), static_cast<UINT>(height),
+        static_cast<float>(state.dpi), state.model, state.interaction);
   }
 
   HRESULT result = state.renderer.Render(
@@ -179,8 +163,7 @@ InteractiveElement HitTest(WindowState &state, HWND window, LPARAM lparam) {
   if (state.model.path_editable() && PointInRect(layout.browse, x, y)) {
     return InteractiveElement::browse;
   }
-  if (state.model.secondary_visible() &&
-      PointInRect(layout.secondary, x, y)) {
+  if (state.model.secondary_visible() && PointInRect(layout.secondary, x, y)) {
     return InteractiveElement::secondary;
   }
   if (state.model.personal_data_choice_visible() &&
@@ -292,6 +275,29 @@ void StartInstallation(WindowState &state, HWND window) {
       return;
     }
     install_root = validation.normalized_path;
+    std::wstring registration_error;
+    if (!ValidateFreshInstallRegistration(state.model.missing_registered_root,
+                                          install_root, false,
+                                          &registration_error)) {
+      state.model.phase = InstallerPhase::failed;
+      state.model.message = registration_error;
+      InvalidateRect(window, nullptr, FALSE);
+      return;
+    }
+    if (!state.model.missing_registered_root.empty()) {
+      const std::wstring confirmation =
+          L"The previous installation folder could not be found:\n\n" +
+          state.model.missing_registered_root +
+          L"\n\nReinstall Black Spirit Life in:\n\n" + install_root +
+          L"\n\nSetup will register the new installation. Your saved "
+          L"sessions, inventory, settings and personal-data location will "
+          L"not be deleted.\n\nContinue?";
+      if (MessageBoxW(window, confirmation.c_str(),
+                      L"Reinstall Black Spirit Life",
+                      MB_YESNO | MB_ICONQUESTION | MB_DEFBUTTON2) != IDYES) {
+        return;
+      }
+    }
   } else {
     InstalledBeta installed;
     std::wstring error;
@@ -339,9 +345,12 @@ void StartInstallation(WindowState &state, HWND window) {
   InvalidateRect(window, nullptr, FALSE);
 
   const bool fresh_install = state.model.state == PreviewState::fresh;
+  const std::wstring missing_registered_root =
+      state.model.missing_registered_root;
 
   try {
-    state.install_worker = std::thread([window, install_root, fresh_install]() {
+    state.install_worker = std::thread([window, install_root, fresh_install,
+                                        missing_registered_root]() {
       InstallEngineResult outcome;
       try {
         outcome = RunInstallEngine(
@@ -355,7 +364,8 @@ void StartInstallation(WindowState &state, HWND window) {
                                 reinterpret_cast<LPARAM>(notice))) {
                 delete notice;
               }
-            });
+            },
+            missing_registered_root);
       } catch (...) {
         outcome.error =
             L"Installation stopped unexpectedly. Personal data is stored "
@@ -422,8 +432,9 @@ void RestoreMaintenanceScreen(WindowState &state, HWND window) {
   if (comparison > 0) {
     state.model.state = PreviewState::repair;
     state.model.phase = InstallerPhase::blocked;
-    state.model.message = L"A newer version is already installed. This installer "
-                          L"will not downgrade it.";
+    state.model.message =
+        L"A newer version is already installed. This installer "
+        L"will not downgrade it.";
   } else {
     state.model.state =
         comparison == 0 ? PreviewState::repair : PreviewState::update;
@@ -484,25 +495,24 @@ void StartUninstallation(WindowState &state, HWND window) {
   const std::wstring install_root = cleanup_only ? L"" : installed.root;
   const bool remove_personal_data = state.model.remove_personal_data;
   try {
-    state.install_worker = std::thread(
-        [window, install_root, remove_personal_data, cleanup_only]() {
+    state.install_worker = std::thread([window, install_root,
+                                        remove_personal_data, cleanup_only]() {
       InstallEngineResult outcome;
       try {
-        const auto progress =
-            [window](const std::wstring &message,
-                     const std::wstring &retained_log) {
-              auto *notice = new (std::nothrow)
-                  InstallProgressNotice{message, retained_log};
-              if (notice != nullptr &&
-                  !PostMessageW(window, kInstallProgressMessage, 0,
-                                reinterpret_cast<LPARAM>(notice))) {
-                delete notice;
-              }
-            };
+        const auto progress = [window](const std::wstring &message,
+                                       const std::wstring &retained_log) {
+          auto *notice =
+              new (std::nothrow) InstallProgressNotice{message, retained_log};
+          if (notice != nullptr &&
+              !PostMessageW(window, kInstallProgressMessage, 0,
+                            reinterpret_cast<LPARAM>(notice))) {
+            delete notice;
+          }
+        };
         outcome = cleanup_only
                       ? RunPendingPersonalDataCleanup(progress)
-                      : RunUninstallEngine(install_root,
-                                           remove_personal_data, progress);
+                      : RunUninstallEngine(install_root, remove_personal_data,
+                                           progress);
       } catch (...) {
         outcome.personal_data_requested = remove_personal_data || cleanup_only;
         outcome.personal_data_cleanup_pending = cleanup_only;
@@ -551,10 +561,10 @@ bool OpenInstalledApplication(WindowState &state, HWND window) {
       current_directory / L"BlackSpiritLife.exe";
   STARTUPINFOW startup{sizeof(STARTUPINFOW)};
   PROCESS_INFORMATION process{};
-  const BOOL launched = CreateProcessW(
-      executable.c_str(), nullptr, nullptr, nullptr, FALSE,
-      CREATE_UNICODE_ENVIRONMENT, nullptr, current_directory.c_str(), &startup,
-      &process);
+  const BOOL launched =
+      CreateProcessW(executable.c_str(), nullptr, nullptr, nullptr, FALSE,
+                     CREATE_UNICODE_ENVIRONMENT, nullptr,
+                     current_directory.c_str(), &startup, &process);
   if (launched) {
     CloseHandle(process.hThread);
     CloseHandle(process.hProcess);
@@ -646,8 +656,7 @@ LRESULT CALLBACK WindowProcedure(HWND window, UINT message, WPARAM wparam,
     KillTimer(window, kActivityTimer);
     if (state->install_worker.joinable())
       state->install_worker.join();
-    const bool uninstalling =
-        state->model.intent == InstallerIntent::uninstall;
+    const bool uninstalling = state->model.intent == InstallerIntent::uninstall;
     const bool matching_success =
         result && result->success && result->uninstalled == uninstalling;
     if (matching_success) {
@@ -667,12 +676,11 @@ LRESULT CALLBACK WindowProcedure(HWND window, UINT message, WPARAM wparam,
         state->model.remove_personal_data = true;
       }
       state->model.message =
-          result && !result->error.empty()
-              ? result->error
-              : uninstalling
-                    ? L"Uninstall did not finish. Planner settings were not "
-                      L"changed by this installer."
-                    : L"Installation did not finish.";
+          result && !result->error.empty() ? result->error
+          : uninstalling
+              ? L"Uninstall did not finish. Planner settings were not "
+                L"changed by this installer."
+              : L"Installation did not finish.";
       state->model.retained_log = result ? result->retained_log : L"";
       if (!state->model.retained_log.empty()) {
         state->model.message +=
@@ -707,8 +715,7 @@ LRESULT CALLBACK WindowProcedure(HWND window, UINT message, WPARAM wparam,
     HDC dc = BeginPaint(window, &paint);
     RECT client{};
     GetClientRect(window, &client);
-    const HRESULT render_result =
-        RenderBufferedInstaller(*state, dc, client);
+    const HRESULT render_result = RenderBufferedInstaller(*state, dc, client);
     (void)render_result;
     EndPaint(window, &paint);
     return 0;
@@ -890,7 +897,7 @@ InstallerPhase ParsePreviewPhase(const std::wstring &value) {
 
 InstallerIntent ParsePreviewIntent(const std::wstring &value) {
   return value == L"uninstall" ? InstallerIntent::uninstall
-                                : InstallerIntent::maintain;
+                               : InstallerIntent::maintain;
 }
 
 void ConfigureBuildIdentity(InstallerModel &model) {
@@ -903,6 +910,7 @@ void ConfigureActualInstallation(InstallerModel &model) {
   model.phase = InstallerPhase::ready;
   model.message.clear();
   model.retained_log.clear();
+  model.missing_registered_root.clear();
   model.install_path = DefaultInstallPath();
 
   PersonalDataRemovalPlan pending_removal;
@@ -926,6 +934,7 @@ void ConfigureActualInstallation(InstallerModel &model) {
   }
   if (!lookup.installation) {
     model.state = PreviewState::fresh;
+    model.missing_registered_root = lookup.missing_registered_root;
     if (pending.status == PersonalDataRemovalStatus::prepared ||
         pending.status == PersonalDataRemovalStatus::application_removed ||
         pending.status == PersonalDataRemovalStatus::cleanup_pending ||
@@ -949,8 +958,9 @@ void ConfigureActualInstallation(InstallerModel &model) {
   if (comparison > 0) {
     model.state = PreviewState::repair;
     model.phase = InstallerPhase::blocked;
-    model.message = L"A newer version is already installed. This installer will "
-                    L"not downgrade it.";
+    model.message =
+        L"A newer version is already installed. This installer will "
+        L"not downgrade it.";
   } else {
     model.state = comparison == 0 ? PreviewState::repair : PreviewState::update;
   }
@@ -997,11 +1007,15 @@ int WINAPI wWinMain(HINSTANCE instance, HINSTANCE, PWSTR, int show_command) {
       }
     } else if (argument == L"--preview-phase" && index + 1 < argument_count) {
       state.model.phase = ParsePreviewPhase(arguments[++index]);
-    } else if (argument == L"--preview-intent" &&
-               index + 1 < argument_count) {
+    } else if (argument == L"--preview-intent" && index + 1 < argument_count) {
       state.model.intent = ParsePreviewIntent(arguments[++index]);
     } else if (argument == L"--preview-remove-personal-data") {
       state.model.remove_personal_data = true;
+    } else if (argument == L"--preview-missing-install" &&
+               index + 1 < argument_count) {
+      // Only used by capture-preview: real startup discards preview state and
+      // discovers the current registration without mutating it.
+      state.model.missing_registered_root = arguments[++index];
     } else if (argument == L"--install-path" && index + 1 < argument_count) {
       state.model.install_path = arguments[++index];
     } else if (argument == L"--installed-version" &&
@@ -1090,9 +1104,8 @@ int WINAPI wWinMain(HINSTANCE instance, HINSTANCE, PWSTR, int show_command) {
                    ? InteractiveElement::primary
                : state.model.intent == InstallerIntent::uninstall
                    ? InteractiveElement::secondary
-               : state.model.path_editable()
-                   ? InteractiveElement::install_path
-                   : InteractiveElement::primary);
+               : state.model.path_editable() ? InteractiveElement::install_path
+                                             : InteractiveElement::primary);
 
   MSG message{};
   int exit_code = 0;

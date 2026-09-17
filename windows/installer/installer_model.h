@@ -33,6 +33,9 @@ struct InstallerModel {
   std::wstring installed_version;
   std::wstring channel = L"win-x64-stable";
   std::wstring install_path;
+  // A genuinely missing registered folder is recoverable without deleting
+  // registration or personal state during discovery.
+  std::wstring missing_registered_root;
   std::wstring message;
   std::wstring retained_log;
   bool remove_personal_data = false;
@@ -93,6 +96,8 @@ struct InstallerModel {
     case InstallerPhase::ready:
       break;
     }
+    if (state == PreviewState::fresh && !missing_registered_root.empty())
+      return L"INSTALLATION RECOVERY";
     switch (state) {
     case PreviewState::fresh:
       return L"BLACK SPIRIT LIFE INSTALLATION";
@@ -114,19 +119,17 @@ struct InstallerModel {
       case InstallerPhase::succeeded:
         return L"Black Spirit Life was uninstalled";
       case InstallerPhase::failed:
-        return personal_data_cleanup_pending
-                   ? L"Finish removing planner data"
-                   : L"Uninstall could not finish";
+        return personal_data_cleanup_pending ? L"Finish removing planner data"
+                                             : L"Uninstall could not finish";
       case InstallerPhase::blocked:
         return L"Uninstall cannot continue";
       }
     }
     switch (phase) {
     case InstallerPhase::installing:
-      return state == PreviewState::update ? L"Updating Black Spirit Life"
-             : state == PreviewState::repair
-                 ? L"Repairing Black Spirit Life"
-                 : L"Installing Black Spirit Life";
+      return state == PreviewState::update   ? L"Updating Black Spirit Life"
+             : state == PreviewState::repair ? L"Repairing Black Spirit Life"
+                                             : L"Installing Black Spirit Life";
     case InstallerPhase::succeeded:
       return L"Black Spirit Life is ready";
     case InstallerPhase::failed:
@@ -136,6 +139,8 @@ struct InstallerModel {
     case InstallerPhase::ready:
       break;
     }
+    if (state == PreviewState::fresh && !missing_registered_root.empty())
+      return L"Reinstall Black Spirit Life";
     switch (state) {
     case PreviewState::fresh:
       return L"Install Black Spirit Life";
@@ -184,9 +189,14 @@ struct InstallerModel {
     case InstallerPhase::ready:
       break;
     }
+    if (state == PreviewState::fresh && !missing_registered_root.empty()) {
+      return L"The previous installation folder is missing. Choose where "
+             L"to reinstall. Your saved data will stay on this PC.";
+    }
     switch (state) {
     case PreviewState::fresh:
-      return L"Choose where the application should be installed.";
+      return L"Choose where the application should be installed. Setup "
+             L"will create the folder if needed.";
     case PreviewState::update:
       return L"Version " + installed_version +
              L" is installed. This will update it to " + version + L".";
@@ -200,11 +210,11 @@ struct InstallerModel {
   [[nodiscard]] std::wstring footer() const {
     if (phase == InstallerPhase::installing) {
       return intent == InstallerIntent::uninstall ? L"Uninstalling..."
-                                                   : L"Installing...";
+                                                  : L"Installing...";
     }
     if (phase == InstallerPhase::succeeded) {
       return intent == InstallerIntent::uninstall ? L"Application removed"
-                                                   : L"Ready to open";
+                                                  : L"Ready to open";
     }
     if (phase == InstallerPhase::failed && !retained_log.empty()) {
       return L"A diagnostic log was kept for this attempt.";
@@ -225,8 +235,7 @@ struct InstallerModel {
       case InstallerPhase::succeeded:
         return L"Close";
       case InstallerPhase::failed:
-        return personal_data_cleanup_pending ? L"Finish cleanup"
-                                             : L"Try again";
+        return personal_data_cleanup_pending ? L"Finish cleanup" : L"Try again";
       case InstallerPhase::blocked:
         return L"Close";
       }
@@ -243,6 +252,8 @@ struct InstallerModel {
     case InstallerPhase::ready:
       break;
     }
+    if (state == PreviewState::fresh && !missing_registered_root.empty())
+      return L"Reinstall";
     switch (state) {
     case PreviewState::fresh:
       return L"Install";

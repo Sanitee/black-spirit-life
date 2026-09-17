@@ -6,14 +6,17 @@
 #include <filesystem>
 #include <fstream>
 #include <iostream>
+#include <map>
 #include <string>
 #include <vector>
 
 #include "beta_maintenance_gate.h"
+#include "fresh_install_root.h"
 #include "install_path_policy.h"
 #include "install_process_guard.h"
 #include "installed_beta_locator.h"
 #include "installer_build_config.h"
+#include "installer_model.h"
 #include "personal_data_removal.h"
 
 namespace {
@@ -131,6 +134,283 @@ bool ParkInstalledRemovalFixture(const std::filesystem::path &root) {
       return false;
   }
   return true;
+}
+
+bool RunInstallationDiscoveryTests() {
+  using namespace bsl::installer;
+  bool passed = true;
+  const std::wstring preferred = L"C:\\Fresh Default";
+  const std::wstring legacy = L"C:\\Legacy Default";
+  const std::wstring custom = L"D:\\Existing Custom App";
+  const std::wstring missing = L"C:\\Removed App";
+  bool registration_exists = false;
+  bool registration_readable = true;
+  std::wstring registered;
+  unsigned reads = 0;
+  std::map<std::wstring, InstalledRootProbe> roots;
+  InstallerDiscoveryEnvironment environment{
+      .query_registration =
+          [&](std::wstring *location, bool *exists, std::wstring *error) {
+            ++reads;
+            if (location)
+              *location = registered;
+            if (exists)
+              *exists = registration_exists;
+            if (error)
+              *error = registration_readable ? L"" : L"Simulated registry denial.";
+            return registration_readable;
+          },
+      .probe_root = [&](const std::wstring &root) {
+        const auto found = roots.find(root);
+        return found == roots.end()
+                   ? InstalledRootProbe{.state = InstalledRootState::missing}
+                   : found->second;
+      },
+      .fallback_roots = {preferred, legacy},
+      .preferred_root = preferred,
+  };
+  const auto installed = [](const std::wstring &root) {
+    return InstalledRootProbe{
+        .state = InstalledRootState::installed,
+        .installation = InstalledBeta{.root = root, .version = L"0.1.9"},
+    };
+  };
+  std::wstring error;
+  auto lookup = LocateInstalledBetaForTesting(environment);
+  passed &= Require(DefaultInstallPath() == L"C:\\Black Spirit Life" &&
+                        !lookup.installation && lookup.error.empty() &&
+                        lookup.missing_registered_root.empty() &&
+                        ValidateFreshInstallRegistrationForTesting(
+                            L"", preferred, false, environment, &error),
+                    "A clean profile did not offer the requested fresh default.");
+
+  roots[preferred] = {.state = InstalledRootState::empty_directory};
+  roots[legacy] = {.state = InstalledRootState::empty_directory};
+  lookup = LocateInstalledBetaForTesting(environment);
+  passed &= Require(!lookup.installation && lookup.error.empty(),
+                    "An empty default folder was mistaken for an installation.");
+  roots[preferred] = {.state = InstalledRootState::unavailable_preferred,
+                      .error = L"Suggested drive unavailable"};
+  lookup = LocateInstalledBetaForTesting(environment);
+  passed &= Require(lookup.error.empty() && !lookup.installation &&
+                        ValidateFreshInstallRegistrationForTesting(
+                            L"", custom, false, environment, &error),
+                    "An unavailable suggested default prevented choosing another drive.");
+  registration_exists = true;
+  registered = preferred;
+  passed &= Require(!LocateInstalledBetaForTesting(environment).error.empty(),
+                    "An unavailable registered installation was ignored as a suggestion.");
+  registration_exists = false;
+  registered.clear();
+  roots[legacy] = {.state = InstalledRootState::unavailable_preferred,
+                   .error = L"Legacy location unavailable"};
+  passed &= Require(!LocateInstalledBetaForTesting(environment).error.empty(),
+                    "An unavailable legacy location was silently ignored.");
+  roots[preferred] = {.state = InstalledRootState::empty_directory};
+  roots[legacy] = {.state = InstalledRootState::empty_directory};
+  registration_exists = true;
+  registered = custom;
+  roots[custom] = installed(custom);
+  lookup = LocateInstalledBetaForTesting(environment);
+  passed &= Require(lookup.installation &&
+                        lookup.installation->root == custom &&
+                        lookup.error.empty() &&
+                        lookup.missing_registered_root.empty(),
+                    "An existing custom installation was displaced by the default.");
+  passed &= Require(!ValidateFreshInstallRegistrationForTesting(
+                        L"", preferred, false, environment, &error),
+                    "A newly appeared registration did not prevent fresh install.");
+  roots.erase(custom);
+  registered = legacy;
+  roots[legacy] = installed(legacy);
+  lookup = LocateInstalledBetaForTesting(environment);
+  passed &= Require(lookup.installation &&
+                        lookup.installation->root == legacy && lookup.error.empty(),
+                    "A legacy installation was not retained for update or repair.");
+  roots[legacy] = {.state = InstalledRootState::empty_directory};
+  registered = missing;
+  lookup = LocateInstalledBetaForTesting(environment);
+  passed &= Require(!lookup.installation && lookup.error.empty() &&
+                        lookup.missing_registered_root == missing &&
+                        registered == missing && registration_exists &&
+                        ValidateFreshInstallRegistrationForTesting(
+                            missing, preferred, false, environment, &error),
+                    "A confirmed missing registration was not offered read-only recovery.");
+
+  roots[preferred] = installed(preferred);
+  lookup = LocateInstalledBetaForTesting(environment);
+  passed &= Require(!lookup.error.empty() &&
+                        lookup.missing_registered_root.empty() &&
+                        !ValidateFreshInstallRegistrationForTesting(
+                            missing, custom, false, environment, &error),
+                    "A competing installation was silently displaced by recovery.");
+  roots[preferred] = {.state = InstalledRootState::empty_directory};
+  for (const auto *reason : {L"Access denied", L"Drive unavailable",
+                             L"Reparse path", L"Wrong application identity",
+                             L"Incomplete existing installation"}) {
+    roots[missing] = {.state = InstalledRootState::invalid, .error = reason};
+    lookup = LocateInstalledBetaForTesting(environment);
+    passed &= Require(!lookup.error.empty() &&
+                          lookup.missing_registered_root.empty() &&
+                          !ValidateFreshInstallRegistrationForTesting(
+                              missing, preferred, false, environment, &error),
+                      "An unsafe path failure was treated as an absent installation.");
+  }
+  roots[missing] = {.state = InstalledRootState::empty_directory};
+  lookup = LocateInstalledBetaForTesting(environment);
+  passed &= Require(!lookup.error.empty() &&
+                        lookup.missing_registered_root.empty() &&
+                        !ValidateFreshInstallRegistrationForTesting(
+                            missing, missing, false, environment, &error) &&
+                        !ValidateFreshInstallRegistrationForTesting(
+                            missing, preferred, true, environment, &error) &&
+                        ValidateFreshInstallRegistrationForTesting(
+                            missing, missing, true, environment, &error),
+                    "Prepared-root recovery did not enforce the exact empty destination.");
+  roots[missing] = installed(missing);
+  passed &= Require(!ValidateFreshInstallRegistrationForTesting(
+                        missing, missing, true, environment, &error),
+                    "A reappeared old installation was overwritten by recovery.");
+  roots.erase(missing);
+  registered = custom;
+  passed &= Require(!ValidateFreshInstallRegistrationForTesting(
+                        missing, preferred, false, environment, &error),
+                    "Recovery did not reject a changed registered location.");
+  registration_exists = false;
+  passed &= Require(!ValidateFreshInstallRegistrationForTesting(
+                        missing, preferred, false, environment, &error),
+                    "Recovery did not reject registration removal during setup.");
+  registration_exists = true;
+  registered.clear();
+  passed &= Require(!LocateInstalledBetaForTesting(environment).error.empty(),
+                    "A malformed registration was treated as a fresh installation.");
+  registration_readable = false;
+  passed &= Require(!LocateInstalledBetaForTesting(environment).error.empty() &&
+                        !ValidateFreshInstallRegistrationForTesting(
+                            L"", preferred, false, environment, &error),
+                    "A registry read failure was ignored by fresh installation.");
+  registration_readable = true;
+  registration_exists = false;
+  roots[preferred] = {.state = InstalledRootState::invalid,
+                      .error = L"Unrelated nonempty directory"};
+  passed &= Require(!LocateInstalledBetaForTesting(environment).error.empty(),
+                    "An occupied unrelated default directory was silently ignored.");
+  roots[preferred] = {.state = InstalledRootState::missing};
+  roots[legacy] = installed(legacy);
+  passed &= Require(!ValidateFreshInstallRegistrationForTesting(
+                        L"", preferred, true, environment, &error),
+                    "An unregistered discovered installation did not stop fresh install.");
+  passed &= Require(reads > 0,
+                    "Injected discovery tests did not consult their registry fixture.");
+
+  InstallerModel model;
+  model.install_path = DefaultInstallPath();
+  passed &= Require(model.path_editable() && model.primary_label() == L"Install",
+                    "A fresh installer did not expose location editing.");
+  model.missing_registered_root = missing;
+  passed &= Require(model.path_editable() && model.primary_label() == L"Reinstall",
+                    "Recovery did not expose an editable, explicit Reinstall action.");
+  model.phase = InstallerPhase::failed;
+  passed &= Require(model.path_editable(),
+                    "A failed fresh installation hid destination editing.");
+  model.phase = InstallerPhase::blocked;
+  passed &= Require(!model.path_editable() && model.primary_label() == L"Close",
+                    "An unsafe blocked installation exposed a bypass action.");
+  model.phase = InstallerPhase::ready;
+  model.state = PreviewState::repair;
+  model.missing_registered_root.clear();
+  passed &= Require(!model.path_editable() && model.primary_label() == L"Repair",
+                    "Repair allowed an existing installation to be relocated.");
+  return passed;
+}
+
+bool RunFreshInstallRootTests(const std::filesystem::path &test_root) {
+  using namespace bsl::installer;
+  bool passed = true;
+  std::wstring error;
+  const auto ordinary_setup_open = [](const std::filesystem::path &root) {
+    HANDLE handle = CreateFileW(
+        root.c_str(), FILE_READ_ATTRIBUTES,
+        FILE_SHARE_READ | FILE_SHARE_WRITE, nullptr, OPEN_EXISTING,
+        FILE_FLAG_BACKUP_SEMANTICS | FILE_FLAG_OPEN_REPARSE_POINT, nullptr);
+    if (handle == INVALID_HANDLE_VALUE)
+      return false;
+    CloseHandle(handle);
+    return true;
+  };
+  const auto new_root = test_root / L"Fresh Lease Rollback";
+  {
+    InstallRootLease lease;
+    passed &= Require(lease.AcquireFresh(new_root.wstring(), &error) &&
+                          std::filesystem::is_directory(new_root),
+                      "A new fresh destination was not created and leased.");
+  }
+  passed &= Require(!std::filesystem::exists(new_root),
+                    "A pre-launch failure left its newly-created empty directory behind.");
+  {
+    InstallRootLease retry;
+    passed &= Require(retry.AcquireFresh(new_root.wstring(), &error),
+                      "A safely rolled-back installation could not be retried.");
+  }
+  passed &= Require(!std::filesystem::exists(new_root),
+                    "Retry rollback did not remove its own empty destination.");
+
+  const auto prepared_root = test_root / L"Fresh Lease Prepared Rollback";
+  {
+    InstallRootLease lease;
+    passed &= Require(lease.AcquireFresh(prepared_root.wstring(), &error) &&
+                          lease.PrepareForSetup(&error) &&
+                          ordinary_setup_open(prepared_root),
+                      "A prepared new-root lease blocked an ordinary setup directory open.");
+  }
+  passed &= Require(!std::filesystem::exists(prepared_root),
+                    "Pre-launch failure after setup preparation did not roll back its empty root.");
+  {
+    InstallRootLease retry;
+    passed &= Require(retry.AcquireFresh(prepared_root.wstring(), &error) &&
+                          retry.PrepareForSetup(&error) &&
+                          ordinary_setup_open(prepared_root),
+                      "An installation could not retry after prepared-root rollback.");
+  }
+  passed &= Require(!std::filesystem::exists(prepared_root),
+                    "Retry rollback retained its setup-prepared empty directory.");
+
+  const auto existing = test_root / L"Fresh Lease Existing Empty";
+  std::filesystem::create_directories(existing);
+  {
+    InstallRootLease lease;
+    passed &= Require(lease.AcquireFresh(existing.wstring(), &error) &&
+                          lease.PrepareForSetup(&error) &&
+                          ordinary_setup_open(existing),
+                      "An existing empty destination could not be prepared for ordinary setup opens.");
+  }
+  passed &= Require(std::filesystem::is_directory(existing),
+                    "Rollback removed a pre-existing empty directory.");
+
+  const auto occupied = test_root / L"Fresh Lease Added Sentinel";
+  {
+    InstallRootLease lease;
+    passed &= Require(lease.AcquireFresh(occupied.wstring(), &error) &&
+                          lease.PrepareForSetup(&error) &&
+                          WriteText(occupied / L"keep.txt", "keep this file"),
+                      "The nonempty rollback fixture could not be created.");
+  }
+  passed &= Require(std::filesystem::exists(occupied / L"keep.txt"),
+                    "Rollback removed a directory containing newly-added files.");
+
+  const auto committed = test_root / L"Fresh Lease Committed";
+  {
+    InstallRootLease lease;
+    const bool prepared = lease.AcquireFresh(committed.wstring(), &error) &&
+                          lease.PrepareForSetup(&error) &&
+                          ordinary_setup_open(committed);
+    passed &= Require(prepared, "The committed-root fixture could not be prepared for setup.");
+    if (prepared)
+      lease.Commit();
+  }
+  passed &= Require(std::filesystem::is_directory(committed),
+                    "An engine-owned committed directory was rolled back.");
+  return passed;
 }
 
 bool RunPersonalDataRemovalTests(const std::filesystem::path &test_root) {
@@ -506,6 +786,8 @@ int wmain(int argc, wchar_t **argv) {
   SetEnvironmentVariableW(L"USERPROFILE", user.c_str());
 
   bool passed = true;
+  passed &= RunInstallationDiscoveryTests();
+  passed &= RunFreshInstallRootTests(test_root);
   const std::filesystem::path empty_install = test_root / L"Empty Install";
   std::filesystem::create_directories(empty_install);
   passed &= Require(

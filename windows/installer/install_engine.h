@@ -24,11 +24,12 @@ using InstallEngineProgressCallback = std::function<void(
 
 [[nodiscard]] InstallEngineResult
 RunInstallEngine(const std::wstring &install_root, bool fresh_install,
-                 const InstallEngineProgressCallback &progress_callback = {});
+                 const InstallEngineProgressCallback &progress_callback = {},
+                 const std::wstring &expected_missing_root = {});
 
-[[nodiscard]] InstallEngineResult RunUninstallEngine(
-    const std::wstring &install_root, bool remove_personal_data,
-    const InstallEngineProgressCallback &progress_callback = {});
+[[nodiscard]] InstallEngineResult
+RunUninstallEngine(const std::wstring &install_root, bool remove_personal_data,
+                   const InstallEngineProgressCallback &progress_callback = {});
 
 [[nodiscard]] InstallEngineResult RunPendingPersonalDataCleanup(
     const InstallEngineProgressCallback &progress_callback = {});
