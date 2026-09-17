@@ -29,6 +29,7 @@ for (const record of extract) {
 
 const recipeIds = new Map();
 const requiredNames = new Set();
+const ingredientNames = new Set();
 for (const items of modeItemMaps(catalog)) {
   for (const [key, recipe] of Object.entries(items)) {
     const name = normalizedName(recipe?.name ?? key);
@@ -39,12 +40,13 @@ for (const items of modeItemMaps(catalog)) {
     }
     requiredNames.add(name);
     rememberRecipeId(recipeIds, name, recipe?.marketId);
-    addIngredients(requiredNames, ingredients);
+    addIngredients(requiredNames, ingredients, ingredientNames);
     for (const variant of Array.isArray(recipe?.variants) ? recipe.variants : []) {
-      addIngredients(requiredNames, variant?.ingredients);
+      addIngredients(requiredNames, variant?.ingredients, ingredientNames);
     }
   }
 }
+addMetadataAlternatives(requiredNames, ingredientNames, catalog.meta);
 
 const supportingIds = new Map();
 const supportingIdsFolded = new Map();
@@ -95,14 +97,41 @@ function modeItemMaps(root) {
   return [root.items, root.cooking?.items, root.processing?.items].map((value) => value ?? {});
 }
 
-function addIngredients(names, rawIngredients) {
+function addIngredients(names, rawIngredients, ingredientNames) {
   if (!Array.isArray(rawIngredients)) return;
   for (const ingredient of rawIngredients) {
     const name = normalizedName(ingredient?.name);
-    if (name) names.add(name);
+    if (name) {
+      names.add(name);
+      ingredientNames.add(fold(name));
+    }
     for (const option of Array.isArray(ingredient?.options) ? ingredient.options : []) {
       const optionName = normalizedName(option);
       if (optionName) names.add(optionName);
+    }
+  }
+}
+
+function addMetadataAlternatives(names, ingredientNames, metadata) {
+  // PlannerAssembly hydrates these options before a user selects an ingredient.
+  // A raw-recipe-only scan misses them even though the AFK calculator uses them.
+  const families = [
+    ...Object.values(metadata?.bloodGroups ?? {}).filter(Array.isArray),
+    ...Object.values(metadata?.substituteWorthGroups ?? {}).map((group) =>
+      Object.entries(group ?? {})
+        .filter(([, worth]) => Number.isFinite(Number(worth)) && Number(worth) > 0)
+        .map(([name]) => name)),
+  ];
+  const knownNames = new Set([...names].map(fold));
+  for (const family of families) {
+    const options = family.map(normalizedName).filter(Boolean);
+    if (new Set(options.map(fold)).size <= 1 ||
+        !options.some((name) => ingredientNames.has(fold(name)))) continue;
+    for (const name of options) {
+      // Preserve a direct recipe's spelling (e.g. High-quality Sunrise Herb).
+      if (knownNames.has(fold(name))) continue;
+      knownNames.add(fold(name));
+      names.add(name);
     }
   }
 }

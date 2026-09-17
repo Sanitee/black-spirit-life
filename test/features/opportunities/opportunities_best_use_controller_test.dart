@@ -31,6 +31,42 @@ void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
   test(
+    'Best use keeps profit ordering when Crafting was sorted by EXP',
+    () async {
+      final f = await _Fixture.create();
+      addTearDown(f.dispose);
+      await f.controller.refresh();
+      await f.settle();
+      final c = f.controller;
+      c.preferences
+        ..craftSort = 'exp'
+        ..unknownExpFilter = 'only'
+        ..craftSortAscending['exp'] = true;
+      expect(c.activeCraftSort, 'profit');
+      final descending = c.visibleBestUseQuotes;
+      expect(descending, hasLength(3));
+      expect(descending.every((use) => use.extraProfitPerUnit != null), isTrue);
+      for (var i = 1; i < descending.length; i++) {
+        expect(
+          descending[i].extraProfitPerUnit,
+          lessThanOrEqualTo(descending[i - 1].extraProfitPerUnit!),
+        );
+      }
+      c.selectCraftSort('profit', toggleDirection: true);
+      expect(c.preferences.craftSortAscending['profit'], isTrue);
+      final ascending = c.visibleBestUseQuotes;
+      for (var i = 1; i < ascending.length; i++) {
+        expect(
+          ascending[i].extraProfitPerUnit,
+          greaterThanOrEqualTo(ascending[i - 1].extraProfitPerUnit!),
+        );
+      }
+      expect(c.preferences.unknownExpFilter, 'only');
+      expect(c.preferences.craftSortAscending['exp'], isTrue);
+    },
+  );
+
+  test(
     'suggestions use live definitions in every mode without mutation or requests',
     () async {
       final f = await _Fixture.create();

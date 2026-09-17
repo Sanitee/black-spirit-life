@@ -10,6 +10,17 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
+  test('card financial values never outrank the item name by size', () {
+    expect(OpportunitiesVisualSpec.cardNameFontSize, 20);
+    expect(OpportunitiesVisualSpec.cardPrimaryValueFontSize, 18);
+    expect(
+      OpportunitiesVisualSpec.cardPrimaryValueFontSize,
+      lessThanOrEqualTo(OpportunitiesVisualSpec.cardNameFontSize),
+    );
+    expect(OpportunitiesVisualSpec.cardLabelFontSize, 14);
+    expect(OpportunitiesVisualSpec.cardSecondaryValueFontSize, 15);
+  });
+
   test('feature type uses one family and a clear readable size hierarchy', () {
     const type = OpportunitiesVisualSpec.typography;
     final styles = [
@@ -21,7 +32,7 @@ void main() {
       type.button,
     ];
     expect(styles.map((style) => style.fontFamily).toSet(), {'Segoe UI'});
-    expect(styles.map((style) => style.fontSize), [28, 18, 14, 12, 12, 14]);
+    expect(styles.map((style) => style.fontSize), [28, 18, 16, 13, 14, 16]);
     expect(type.label.fontWeight, FontWeight.w500);
     expect(type.button.fontWeight, FontWeight.w500);
     expect(type.section.fontWeight, FontWeight.w600);
@@ -255,7 +266,7 @@ void main() {
     }
     final context = tester.element(find.byType(OpportunitySurface).first);
     final tooltip = Theme.of(context).tooltipTheme;
-    expect(tooltip.textStyle!.fontSize, 14);
+    expect(tooltip.textStyle!.fontSize, 16);
     expect(
       (tooltip.decoration! as BoxDecoration).gradient,
       OpportunitiesVisualSpec.overlay,
@@ -625,8 +636,8 @@ void main() {
       );
       final field = find.byType(TextField);
       final decoration = tester.widget<TextField>(field).decoration!;
-      expect(decoration.labelStyle!.fontSize, 12);
-      expect(decoration.floatingLabelStyle!.fontSize! * .75, 12);
+      expect(decoration.labelStyle!.fontSize, 14);
+      expect(decoration.floatingLabelStyle!.fontSize! * .75, 14);
       await tester.enterText(field, '12a3');
       expect(controller.text, '123');
       await tester.testTextInput.receiveAction(TextInputAction.done);

@@ -153,7 +153,10 @@ function Test-SqliteFileHeader {
 }
 
 $projectFiles = @(
-    Get-ChildItem -LiteralPath $project -Recurse -File -Force |
+    # Old ignored lifecycle-test trees can contain stale junction-like paths.
+    # They are excluded below and must not prevent verification of source files.
+    Get-ChildItem -LiteralPath $project -Recurse -File -Force `
+        -ErrorAction SilentlyContinue |
         Where-Object {
             (Get-RelativeProductionPath -FullName $_.FullName) -notmatch
                 $generatedPathPattern
@@ -213,4 +216,4 @@ if ($violations.Count -gt 0) {
     exit 1
 }
 
-Write-Output 'Production source verification passed for exact-Beta Stable 0.1.9.'
+Write-Output 'Production source verification passed for exact-Beta Stable 0.1.10.'

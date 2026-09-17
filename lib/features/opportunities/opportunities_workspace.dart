@@ -103,7 +103,6 @@ class _OpportunitiesContent extends StatelessWidget {
               ),
               textStyle: spec.typography.body.copyWith(
                 color: spec.palette.text,
-                fontSize: 14,
               ),
               padding: const EdgeInsets.all(12),
               constraints: const BoxConstraints(maxWidth: 340),
@@ -366,8 +365,6 @@ class _CraftingPane extends StatelessWidget {
                     style: spec.typography.meta,
                   ),
                 ),
-                Text('Main item only', style: spec.typography.meta),
-                const SizedBox(width: 6),
                 _info(context, 'Crafting profit', [
                   'Buy the ingredients shown, then make the recipe. Nothing is crafted further down the chain.',
                   'Profit is the main product’s sale price after tax, minus ingredients. Items you own are still priced as bought.',
@@ -449,6 +446,11 @@ class _CraftCardState extends State<_CraftCard> {
   Widget build(BuildContext context) {
     final spec = context.visualTheme;
     final use = widget.bestUse;
+    final showExperience =
+        use == null && controller.preferences.craftSort == 'exp';
+    final experience = showExperience
+        ? controller.experienceForQuote(quote)
+        : null;
     final total = use == null
         ? quote.profitFor(controller.craftSaleMode)
         : use.extraProfitPerUnit;
@@ -510,7 +512,7 @@ class _CraftCardState extends State<_CraftCard> {
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           Padding(
-                            padding: const EdgeInsets.fromLTRB(16, 10, 10, 6),
+                            padding: const EdgeInsets.fromLTRB(16, 10, 16, 6),
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.stretch,
                               mainAxisSize: MainAxisSize.min,
@@ -525,7 +527,12 @@ class _CraftCardState extends State<_CraftCard> {
                                           OpportunityCopyName(
                                             name: quote.recipeName,
                                             style: spec.typography.section
-                                                .copyWith(fontSize: 16),
+                                                .copyWith(
+                                                  fontSize:
+                                                      OpportunitiesVisualSpec
+                                                          .cardNameFontSize,
+                                                  fontWeight: FontWeight.w700,
+                                                ),
                                           ),
                                           if (scope.isNotEmpty) ...[
                                             const SizedBox(height: 4),
@@ -552,20 +559,46 @@ class _CraftCardState extends State<_CraftCard> {
                                   ],
                                 ),
                                 const SizedBox(height: 7),
-                                _metric(
-                                  context,
-                                  use == null
-                                      ? 'Profit'
-                                      : 'Extra profit / item',
-                                  _estimateValue(_silver(total), estimated),
-                                  large: true,
-                                  valueFontSize: 22,
-                                  labelFontSize: 12,
-                                  color: total == null
-                                      ? spec.palette.textMuted
-                                      : total > 0
-                                      ? spec.palette.success
-                                      : spec.palette.danger,
+                                _MetricColumns(
+                                  children: [
+                                    _metric(
+                                      context,
+                                      use == null
+                                          ? 'Profit'
+                                          : 'Extra profit / item',
+                                      _estimateValue(_silver(total), estimated),
+                                      large: true,
+                                      valueFontSize: OpportunitiesVisualSpec
+                                          .cardPrimaryValueFontSize,
+                                      valueFontWeight: FontWeight.w600,
+                                      labelFontSize: OpportunitiesVisualSpec
+                                          .cardLabelFontSize,
+                                      color: total == null
+                                          ? spec.palette.textMuted
+                                          : total > 0
+                                          ? spec.palette.success
+                                          : spec.palette.danger,
+                                    ),
+                                    if (showExperience)
+                                      experience == null
+                                          ? SizedBox.shrink(
+                                              key: ValueKey(
+                                                'craft-unknown-exp:${quote.recipeName}',
+                                              ),
+                                            )
+                                          : _metric(
+                                              context,
+                                              'EXP',
+                                              '${experience.estimated ? '~' : ''}${_quantity(experience.value)}',
+                                              valueFontSize: 18,
+                                              valueFontWeight: FontWeight.w600,
+                                              labelFontSize:
+                                                  OpportunitiesVisualSpec
+                                                      .cardLabelFontSize,
+                                              color: OpportunitiesVisualSpec
+                                                  .experienceColor,
+                                            ),
+                                  ],
                                 ),
                               ],
                             ),
@@ -589,8 +622,10 @@ class _CraftCardState extends State<_CraftCard> {
                                         ),
                                         controller.clock(),
                                         maxAge: controller.cachedMarketMaxAge,
-                                        valueFontSize: 13,
-                                        labelFontSize: 12,
+                                        valueFontSize: OpportunitiesVisualSpec
+                                            .cardSecondaryValueFontSize,
+                                        labelFontSize: OpportunitiesVisualSpec
+                                            .cardLabelFontSize,
                                       ),
                                       _metric(
                                         context,
@@ -608,8 +643,10 @@ class _CraftCardState extends State<_CraftCard> {
                                           ),
                                           estimated,
                                         ),
-                                        valueFontSize: 13,
-                                        labelFontSize: 12,
+                                        valueFontSize: OpportunitiesVisualSpec
+                                            .cardSecondaryValueFontSize,
+                                        labelFontSize: OpportunitiesVisualSpec
+                                            .cardLabelFontSize,
                                         color: spec.palette.textMuted,
                                       ),
                                     ],
@@ -619,6 +656,8 @@ class _CraftCardState extends State<_CraftCard> {
                                     Text(
                                       note,
                                       style: spec.typography.meta.copyWith(
+                                        fontSize: OpportunitiesVisualSpec
+                                            .cardLabelFontSize,
                                         color: spec.palette.warning,
                                       ),
                                     ),
@@ -1054,8 +1093,9 @@ class _ExchangeCard extends StatelessWidget {
                                     child: OpportunityCopyName(
                                       name: container.name,
                                       style: spec.typography.body.copyWith(
-                                        fontSize: 18,
-                                        fontWeight: FontWeight.w600,
+                                        fontSize: OpportunitiesVisualSpec
+                                            .cardNameFontSize,
+                                        fontWeight: FontWeight.w700,
                                       ),
                                     ),
                                   ),
@@ -1082,8 +1122,9 @@ class _ExchangeCard extends StatelessWidget {
                                       displayLabel:
                                           '${route.rewardContainer != null ? 'Contains ' : ''}${reward.quantity > 1 ? '${_quantity(reward.quantity.toDouble())}× ' : ''}${reward.name}',
                                       style: spec.typography.body.copyWith(
-                                        fontSize: 18,
-                                        fontWeight: FontWeight.w600,
+                                        fontSize: OpportunitiesVisualSpec
+                                            .cardNameFontSize,
+                                        fontWeight: FontWeight.w700,
                                       ),
                                     ),
                                   ),
@@ -1104,13 +1145,20 @@ class _ExchangeCard extends StatelessWidget {
                   ],
                 ),
                 if (route.directVendorSale)
-                  Text('Sell to NPC', style: spec.typography.meta)
+                  Text(
+                    'Sell to NPC',
+                    style: spec.typography.meta.copyWith(
+                      fontSize: OpportunitiesVisualSpec.cardLabelFontSize,
+                    ),
+                  )
                 else
                   OpportunityCopyName(
                     name: quote.currency.item.name,
                     displayLabel:
                         '${_quantity(route.inputCount.toDouble())} ${quote.currency.item.name}',
-                    style: spec.typography.meta,
+                    style: spec.typography.meta.copyWith(
+                      fontSize: OpportunitiesVisualSpec.cardLabelFontSize,
+                    ),
                   ),
                 const SizedBox(height: 14),
                 _MetricColumns(
@@ -1120,6 +1168,10 @@ class _ExchangeCard extends StatelessWidget {
                       quote.isReference ? 'Value' : 'Total value',
                       _silver(display.netProceeds),
                       large: true,
+                      valueFontSize:
+                          OpportunitiesVisualSpec.cardPrimaryValueFontSize,
+                      valueFontWeight: FontWeight.w600,
+                      labelFontSize: OpportunitiesVisualSpec.cardLabelFontSize,
                       color: display.isRankable
                           ? spec.palette.success
                           : spec.palette.textMuted,
@@ -1129,6 +1181,9 @@ class _ExchangeCard extends StatelessWidget {
                       context,
                       _exchangeUnitLabel(quote.currency),
                       _silver(display.valuePerCurrency),
+                      valueFontSize:
+                          OpportunitiesVisualSpec.cardSecondaryValueFontSize,
+                      labelFontSize: OpportunitiesVisualSpec.cardLabelFontSize,
                     ),
                     if (marketReward?.marketable == true)
                       _market(
@@ -1137,6 +1192,10 @@ class _ExchangeCard extends StatelessWidget {
                         controller.clock(),
                         large: true,
                         maxAge: controller.cachedMarketMaxAge,
+                        valueFontSize:
+                            OpportunitiesVisualSpec.cardSecondaryValueFontSize,
+                        labelFontSize:
+                            OpportunitiesVisualSpec.cardLabelFontSize,
                       ),
                   ],
                 ),
@@ -1144,7 +1203,9 @@ class _ExchangeCard extends StatelessWidget {
                   const SizedBox(height: 10),
                   Text(
                     '${display.exchanges} exchange${display.exchanges == 1 ? '' : 's'}',
-                    style: spec.typography.meta,
+                    style: spec.typography.meta.copyWith(
+                      fontSize: OpportunitiesVisualSpec.cardLabelFontSize,
+                    ),
                   ),
                 ],
                 if (note != null) ...[
@@ -1152,6 +1213,7 @@ class _ExchangeCard extends StatelessWidget {
                   Text(
                     note,
                     style: spec.typography.meta.copyWith(
+                      fontSize: OpportunitiesVisualSpec.cardLabelFontSize,
                       color:
                           quote.hasListingEstimate ||
                               quote.availability !=
@@ -1339,6 +1401,7 @@ Widget _metric(
   bool large = false,
   double? valueFontSize,
   double? labelFontSize,
+  FontWeight? valueFontWeight,
   Key? detailsKey,
   String? detailsLabel,
   VoidCallback? onDetails,
@@ -1350,6 +1413,7 @@ Widget _metric(
   large: large,
   valueFontSize: valueFontSize,
   labelFontSize: labelFontSize,
+  valueFontWeight: valueFontWeight,
   detailsKey: detailsKey,
   detailsLabel: detailsLabel,
   onDetails: onDetails,
@@ -1364,6 +1428,7 @@ class _MetricValue extends StatelessWidget {
     this.large = false,
     this.valueFontSize,
     this.labelFontSize,
+    this.valueFontWeight,
     this.detailsKey,
     this.detailsLabel,
     this.onDetails,
@@ -1374,6 +1439,7 @@ class _MetricValue extends StatelessWidget {
   final Color? color;
   final bool large;
   final double? valueFontSize, labelFontSize;
+  final FontWeight? valueFontWeight;
   final Key? detailsKey;
   final String? detailsLabel;
   final VoidCallback? onDetails;
@@ -1382,9 +1448,9 @@ class _MetricValue extends StatelessWidget {
   TextStyle valueStyle(BuildContext context) =>
       context.visualTheme.typography.body.copyWith(
         fontSize: valueFontSize ?? 18,
-        fontWeight: large && label != 'Stock'
-            ? FontWeight.w700
-            : FontWeight.w500,
+        fontWeight:
+            valueFontWeight ??
+            (large && label != 'Stock' ? FontWeight.w700 : FontWeight.w500),
         color: color ?? context.visualTheme.palette.text,
       );
 
@@ -1946,14 +2012,14 @@ Future<void> _dialog(
                             ? Text(
                                 title,
                                 style: spec.typography.section.copyWith(
-                                  fontSize: 24,
+                                  fontSize: 26,
                                 ),
                               )
                             : OpportunityCopyName(
                                 name: copyTitleName,
                                 displayLabel: title,
                                 style: spec.typography.section.copyWith(
-                                  fontSize: 24,
+                                  fontSize: 26,
                                 ),
                               )),
                   ),
@@ -2181,7 +2247,7 @@ Future<void> _craftDetails(
                                 child: OpportunityCopyName(
                                   name: name,
                                   style: context.visualTheme.typography.section
-                                      .copyWith(fontSize: 24),
+                                      .copyWith(fontSize: 26),
                                 ),
                               ),
                             ],

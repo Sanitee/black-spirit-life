@@ -595,7 +595,20 @@ void main() {
           'Intermediate Reagent:Sunrise Herb',
         ),
       );
-      expect(tester.widget<Text>(queuePerAttempt).data, '1');
+      expect(tester.widget<Text>(queuePerAttempt).data, '4');
+      expect(
+        tester
+            .widget<Text>(
+              find.byKey(
+                const ValueKey<String>(
+                  'planner-ingredient-per-craft-quantity:'
+                  'Intermediate Reagent:Sunrise Herb',
+                ),
+              ),
+            )
+            .data,
+        'x1',
+      );
       expect(find.text('0,4 each'), findsNothing);
 
       await tester.tap(
@@ -1498,7 +1511,20 @@ void main() {
         ),
       );
       expect(perAttempt, findsOneWidget);
-      expect(tester.widget<Text>(perAttempt).data, '2');
+      expect(tester.widget<Text>(perAttempt).data, '20');
+      expect(
+        tester
+            .widget<Text>(
+              find.byKey(
+                const ValueKey<String>(
+                  'planner-ingredient-per-craft-quantity:'
+                  'Intermediate Reagent:Sunrise Herb',
+                ),
+              ),
+            )
+            .data,
+        'x2',
+      );
       expect(
         tester.widget<Text>(perAttempt).style?.color,
         StandardSpec.theme.palette.text,
@@ -2797,7 +2823,16 @@ void main() {
     );
     expect(queueIngredientName.left - queueSubstitute.left, 3);
     expect(queueSubstitute.right - queueIngredientName.right, 18);
-    expect(queueQuality.left - queueSubstitute.right, 6);
+    final queuePerCraft = tester.getRect(
+      find.byKey(
+        const ValueKey<String>(
+          'planner-ingredient-per-craft-quantity:'
+          'Intermediate Reagent:Sunrise Herb',
+        ),
+      ),
+    );
+    expect(queuePerCraft.left - queueSubstitute.right, 6);
+    expect(queueQuality.left - queuePerCraft.right, 6);
     expect(
       queueSubstitute.center.dy,
       closeTo(queueIngredientName.center.dy, .01),

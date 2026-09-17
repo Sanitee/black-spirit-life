@@ -1,3 +1,5 @@
+import {currentApeironReference, currentApeironAcquisition} from './apply_twilight_patch_20260917.mjs';
+
 export const EDANIA_PART_II_SOURCE =
   'https://www.naeu.playblackdesert.com/en-US/News/Detail?groupContentNo=10451&countryType=en-US';
 export const EDANIA_PART_II_ASIA_SOURCE =
@@ -733,14 +735,7 @@ export const EDANIA_PART_II_PROCESSING_RECIPES = Object.fromEntries([
       ],
       [
         `Apeiron ${entry.slot}`,
-        fixedProcessingRecipe({
-          method: 'Heating',
-          marketId: entry.apeironId,
-          ingredients: [
-            ingredient(`Twilight of the End - ${entry.slot}`, 10),
-            ...shared,
-          ],
-        }),
+        currentApeironReference({marketId: String(entry.apeironId)}),
       ],
     ];
   }),
@@ -1092,12 +1087,12 @@ export const EDANIA_PART_II_ACQUISITION_INFO = Object.fromEntries([
       ],
       [
         apeiron.name,
-        acquisition(
+        currentApeironAcquisition(acquisition(
           apeiron,
           'monster_drop',
-          `Obtain ${apeiron.name} from Inner Edania bosses and monsters, craft it by Heating, or buy it through the Central Market.`,
-          ['boss-drop', 'monster-drop', 'processing'],
-        ),
+          `Obtain ${apeiron.name} from Inner Edania bosses and monsters, or buy it through the Central Market.`,
+          ['boss-drop', 'monster-drop'],
+        ), entry.slot),
       ],
     ];
   }),

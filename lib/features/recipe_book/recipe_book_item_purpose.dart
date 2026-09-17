@@ -169,19 +169,15 @@ RecipeBookItemPurpose? _edaniaPartIiPurpose(String name, String foldedName) {
       kind: 'Accessory enhancement material',
       description: 'A slot-specific material for enhancing an Ekleta $slot.',
       notes: const <String>[
+        'Heating requires the Shardstone in your inventory.',
         'A failed enhancement reduces Max Durability by 20.',
       ],
     );
   }
   if (foldedName.startsWith('twilight of the end - ')) {
-    final slot = name.split(' - ').last;
-    return RecipeBookItemPurpose(
+    return const RecipeBookItemPurpose(
       kind: 'Edania accessory material',
       description: 'A slot-specific Edania accessory material.',
-      uses: <String>[
-        'Crafts the $slot versions of Causality Shardstone and Apeiron.',
-        'Heat an unenhanced Apeiron $slot to recover 10 of this material.',
-      ],
     );
   }
   if (foldedName.startsWith('apeiron ')) {

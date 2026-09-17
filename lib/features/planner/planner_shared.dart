@@ -1888,7 +1888,6 @@ class _QueueStepCard extends StatelessWidget {
                       child: _IngredientRow(
                         controller: controller,
                         ingredient: step.ingredients[ingredientIndex],
-                        showTotalQuantity: showTotalIngredients,
                         externalActions: externalActions,
                         openChoiceAnchor: openChoiceAnchor,
                         onSubstituteSelected: onSubstituteSelected,
@@ -3514,7 +3513,6 @@ class _IngredientRow extends StatelessWidget {
   const _IngredientRow({
     required this.controller,
     required this.ingredient,
-    required this.showTotalQuantity,
     required this.externalActions,
     required this.openChoiceAnchor,
     required this.onSubstituteSelected,
@@ -3523,7 +3521,6 @@ class _IngredientRow extends StatelessWidget {
 
   final ModeFeatureController controller;
   final PlanStepIngredient ingredient;
-  final bool showTotalQuantity;
   final PlannerExternalActions externalActions;
   final String? openChoiceAnchor;
   final void Function(PlanStepIngredient source, String selection)
@@ -3544,14 +3541,13 @@ class _IngredientRow extends StatelessWidget {
     );
     final hasSubstitutes =
         domainIngredient != null && ingredient.options.length > 1;
-    final displayedQuantity = showTotalQuantity
-        ? ingredient.need
-        : domainIngredient == null
+    final perCraftQuantity = domainIngredient == null
         ? null
         : controller
               .previewIngredientSelection(
                 parentName: ingredient.parentName,
                 ingredient: domainIngredient,
+                selectedIngredient: ingredient,
               )
               .need;
     final chooserOpen = openChoiceAnchor == anchor;
@@ -3625,6 +3621,20 @@ class _IngredientRow extends StatelessWidget {
                                 onCopy: externalActions.copyName,
                               ),
                       ),
+                      if (perCraftQuantity != null) ...<Widget>[
+                        const SizedBox(width: 6),
+                        Tooltip(
+                          message: 'Needed for 1 craft',
+                          child: Text(
+                            'x${formatQuantity(perCraftQuantity)}',
+                            key: ValueKey<String>(
+                              'planner-ingredient-per-craft-quantity:'
+                              '${ingredient.parentName}:${ingredient.original}',
+                            ),
+                            style: spec.typography.meta.copyWith(fontSize: 13),
+                          ),
+                        ),
+                      ],
                       if (_qualityGrades(
                         controller,
                         ingredient.parentName,
@@ -3642,8 +3652,9 @@ class _IngredientRow extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(width: 10),
-                if (displayedQuantity != null) ...<Widget>[
-                  Padding(
+                Tooltip(
+                  message: 'Total needed for this craft step',
+                  child: Padding(
                     padding: EdgeInsets.only(right: quantityRightInset),
                     child: SizedBox(
                       width: 86,
@@ -3651,7 +3662,7 @@ class _IngredientRow extends StatelessWidget {
                         fit: BoxFit.scaleDown,
                         alignment: Alignment.centerRight,
                         child: Text(
-                          formatQuantity(displayedQuantity),
+                          formatQuantity(ingredient.need),
                           key: ValueKey<String>(
                             'planner-ingredient-batch-quantity:'
                             '${ingredient.parentName}:${ingredient.original}',
@@ -3665,7 +3676,7 @@ class _IngredientRow extends StatelessWidget {
                       ),
                     ),
                   ),
-                ],
+                ),
               ],
             ),
           ),

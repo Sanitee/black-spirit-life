@@ -2,6 +2,7 @@ import { createHash } from 'node:crypto';
 import { readFile, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { applyTwilightPatch } from './apply_twilight_patch_20260917.mjs';
 
 const projectRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const catalogPath = path.join(projectRoot, 'assets', 'data', 'app-data.json');
@@ -1395,6 +1396,8 @@ catalog.importedRecipeMeta.weeklyPatchesThrough20260903 = {
   },
 };
 
+// Preserve the later, narrowly reviewed recovery routes and retired formulas.
+applyTwilightPatch(catalog);
 const output = JSON.stringify(catalog, null, 2) + '\n';
 if (checkOnly) {
   if (output !== sourceText) {

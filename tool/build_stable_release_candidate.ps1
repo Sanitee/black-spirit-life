@@ -20,17 +20,17 @@ if ($PublicGitHubRepository -cnotmatch
     '^https://github\.com/[A-Za-z0-9](?:[A-Za-z0-9-]{0,38})/[A-Za-z0-9._-]{1,100}$') {
     throw 'The public update source must be the permanent canonical repository base URL: https://github.com/OWNER/REPOSITORY'
 }
-$Version = '0.1.9'
-$BuildNumber = '28'
-$PreviousStableVersion = '0.1.7'
+$Version = '0.1.10'
+$BuildNumber = '29'
+$PreviousStableVersion = '0.1.9'
 $PreviousStableCommit =
-    '74e9b21887ce84d2c51d2ed82182acee4f8495ec'
+    'd51897bfe378ee37ebec441cc01dfb96cf7154be'
 $UpdateSource = $PublicGitHubRepository
-$ReleaseNotesRelativePath = 'docs\releases\0.1.9.md'
+$ReleaseNotesRelativePath = 'docs\releases\0.1.10.md'
 $OutputDirectoryName = 'public-stable-candidate'
 $ManifestName = 'public-candidate-manifest.json'
 $RemainingBlockers = @(
-    'verify an installed 0.1.7 updates to 0.1.9 through the in-app update bar with its selected personal-data root intact',
+    'verify an installed 0.1.9 updates to 0.1.10 through the in-app update bar with its selected personal-data root intact',
     'complete fresh install, repair, and uninstall lifecycle verification',
     'fresh-clone privacy and release-artifact scan'
 )
@@ -52,12 +52,12 @@ $VelopackRuntimeSha256 =
     'C36D8B984639A8AF9D3397088D3FFB8213FE1BD0917F555CF0C6E33F014403EC'
 $VelopackPackageUrl =
     'https://github.com/velopack/velopack/releases/download/1.2.0/vpk.1.2.0.nupkg'
-$PreviousFeedBytes = 16577L
+$PreviousFeedBytes = 35166L
 $PreviousFeedSha256 =
-    'C37C7B35BCD2F9E95D12FD227A9F2EC0D0365288E32F68605E02629F221B3A44'
-$PreviousFullPackageBytes = 218802840L
+    '059C5D675E7E9F0B1D9D6C5C63CCF71851CB69FEE76E9BBC7813D0C8B926EE9D'
+$PreviousFullPackageBytes = 724092083L
 $PreviousFullPackageSha256 =
-    '6D42ECBF970A4549F2B32DC2C9069F96918250A938CF8CB54ADD1DDDD1AE29E6'
+    '21E82798B68AB316E68EB7B698C7A3075B7AA144C5E6780C6BDFB2DD1654564A'
 $PrivateMachinePathPattern =
     '(?i)[A-Z]:(?:\\{1,2}|/)(?:Users|Codex)(?:\\{1,2}|/)'
 $ForbiddenPackagedArtifactPattern = @(
@@ -268,7 +268,8 @@ function Assert-PublicSourceBoundary {
         }
     }
 
-    $forbiddenPersonalFiles = @(Get-ChildItem -LiteralPath $ProjectRoot -Recurse -File |
+    $forbiddenPersonalFiles = @(Get-ChildItem -LiteralPath $ProjectRoot -Recurse -File `
+        -ErrorAction SilentlyContinue |
         Where-Object {
             $_.FullName -notmatch '\\(?:\.git|\.dart_tool|build|bin|obj)\\' -and
             $_.FullName -notmatch '\\windows\\flutter\\ephemeral\\' -and
@@ -279,7 +280,8 @@ function Assert-PublicSourceBoundary {
         throw "The public source contains personal state, a database, or a debug symbol: $($forbiddenPersonalFiles[0].FullName)"
     }
 
-    $generatedBrowserState = @(Get-ChildItem -LiteralPath $ProjectRoot -Recurse -Directory -Force |
+    $generatedBrowserState = @(Get-ChildItem -LiteralPath $ProjectRoot -Recurse -Directory -Force `
+        -ErrorAction SilentlyContinue |
         Where-Object {
             $_.FullName -notmatch '\\(?:\.git|\.dart_tool|build|bin|obj)\\' -and
             $_.FullName -notmatch '\\windows\\flutter\\ephemeral\\' -and
@@ -288,7 +290,8 @@ function Assert-PublicSourceBoundary {
     if ($generatedBrowserState.Count -ne 0) {
         throw "The public source contains generated browser-profile state: $($generatedBrowserState[0].FullName)"
     }
-    $sessionImportInboxes = @(Get-ChildItem -LiteralPath $ProjectRoot -Recurse -Directory -Force |
+    $sessionImportInboxes = @(Get-ChildItem -LiteralPath $ProjectRoot -Recurse -Directory -Force `
+        -ErrorAction SilentlyContinue |
         Where-Object {
             $_.FullName -notmatch '\\(?:\.git|\.dart_tool|build|bin|obj)\\' -and
             $_.FullName -notmatch '\\windows\\flutter\\ephemeral\\' -and
@@ -297,7 +300,8 @@ function Assert-PublicSourceBoundary {
     if ($sessionImportInboxes.Count -ne 0) {
         throw "The public source contains generated Session Import receipts: $($sessionImportInboxes[0].FullName)"
     }
-    $customIcons = @(Get-ChildItem -LiteralPath $ProjectRoot -Recurse -File -Force |
+    $customIcons = @(Get-ChildItem -LiteralPath $ProjectRoot -Recurse -File -Force `
+        -ErrorAction SilentlyContinue |
         Where-Object {
             $_.FullName -notmatch '\\(?:\.git|\.dart_tool|build|bin|obj)\\' -and
             $_.FullName -notmatch '\\windows\\flutter\\ephemeral\\' -and
@@ -586,8 +590,8 @@ if ($sourceParentCommit -cne $PreviousStableCommit -or
 }
 $sourceCommitCount = (& git -C $ProjectRoot rev-list --count HEAD).Trim()
 Assert-LastExitCode -Operation 'Git public history count check'
-if ($sourceCommitCount -cne '7') {
-    throw 'The public candidate must contain only the reviewed seven-commit public history through exact-Beta Stable 0.1.9.'
+if ($sourceCommitCount -cne '8') {
+    throw 'The public candidate must contain only the reviewed eight-commit public history through exact-Beta Stable 0.1.10.'
 }
 $sourceTag = $expectedSourceTag
 Assert-CleanSource -ProjectRoot $ProjectRoot -ExpectedCommit $sourceCommit
@@ -641,7 +645,7 @@ $publishedPreviousFeedHash =
     (Get-FileHash -Algorithm SHA256 -LiteralPath $publishedPreviousFeed).Hash
 if ($publishedPreviousFeedItem.Length -ne $PreviousFeedBytes -or
     $publishedPreviousFeedHash -cne $PreviousFeedSha256) {
-    throw 'The published 0.1.7 feed changed from the reviewed release input.'
+    throw 'The published 0.1.9 feed changed from the reviewed release input.'
 }
 $publishedPreviousFeedJson =
     Get-Content -Raw -LiteralPath $publishedPreviousFeed | ConvertFrom-Json
@@ -653,7 +657,7 @@ $publishedPreviousAssets = @($publishedPreviousFeedJson.Assets | Where-Object {
 })
 if ($publishedPreviousAssets.Count -ne 1 -or
     @($publishedPreviousFeedJson.Assets).Count -ne 3) {
-    throw 'The published 0.1.7 feed does not contain exactly the expected full package and reviewed asset set.'
+    throw 'The published 0.1.9 feed does not contain exactly the expected full package and reviewed asset set.'
 }
 Invoke-WebRequest `
     -Uri $previousPackageUrl `
@@ -665,14 +669,14 @@ $publishedPreviousPackageHash =
     (Get-FileHash -Algorithm SHA256 -LiteralPath $publishedPreviousPackage).Hash
 if ($publishedPreviousPackageItem.Length -ne $PreviousFullPackageBytes -or
     $publishedPreviousPackageHash -cne $PreviousFullPackageSha256) {
-    throw 'The published 0.1.7 full package changed from the reviewed release input.'
+    throw 'The published 0.1.9 full package changed from the reviewed release input.'
 }
 if ([long]$publishedPreviousAssets[0].Size -ne $publishedPreviousPackageItem.Length -or
     -not $publishedPreviousPackageHash.Equals(
         [string]$publishedPreviousAssets[0].SHA256,
         [System.StringComparison]::OrdinalIgnoreCase
     )) {
-    throw 'The published 0.1.7 full package does not match its published feed.'
+    throw 'The published 0.1.9 full package does not match its published feed.'
 }
 Assert-VelopackPackage `
     -PackagePath $publishedPreviousPackage `
@@ -912,7 +916,7 @@ $previousFullHash =
     (Get-FileHash -Algorithm SHA256 -LiteralPath $previousFullPackage).Hash
 if ($previousFullItem.Length -ne $PreviousFullPackageBytes -or
     $previousFullHash -cne $PreviousFullPackageSha256) {
-    throw 'Velopack changed the pinned published 0.1.7 full package.'
+    throw 'Velopack changed the pinned published 0.1.9 full package.'
 }
 $feedAssets = @($feed.Assets)
 if ($feedAssets.Count -ne 3) {
@@ -940,10 +944,10 @@ if ($matchingFullAssets.Count -ne 1) {
     throw 'The update feed does not contain exactly one expected full package.'
 }
 if ($matchingDeltaAssets.Count -ne 1) {
-    throw 'The update feed does not contain exactly one 0.1.7 to 0.1.9 delta package.'
+    throw 'The update feed does not contain exactly one 0.1.9 to 0.1.10 delta package.'
 }
 if ($matchingPreviousAssets.Count -ne 1) {
-    throw 'The update feed does not retain exactly one published 0.1.7 full package.'
+    throw 'The update feed does not retain exactly one published 0.1.9 full package.'
 }
 $fullItem = Get-Item -LiteralPath $fullPackage
 $fullHash = (Get-FileHash -Algorithm SHA256 -LiteralPath $fullPackage).Hash
@@ -971,7 +975,7 @@ if ([long]$matchingPreviousAssets[0].Size -ne $previousFullItem.Length -or
         [string]$matchingPreviousAssets[0].SHA256,
         [System.StringComparison]::OrdinalIgnoreCase
     )) {
-    throw 'The updated feed changed the published 0.1.7 full-package identity.'
+    throw 'The updated feed changed the published 0.1.9 full-package identity.'
 }
 
 $setupHash = (Get-FileHash -Algorithm SHA256 -LiteralPath $generatedSetup).Hash

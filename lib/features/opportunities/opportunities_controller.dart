@@ -20,6 +20,8 @@ import '../../domain/opportunities/exchange_calculator.dart';
 import '../../domain/opportunities/exchange_models.dart';
 import '../../domain/opportunities/opportunity_best_use.dart';
 import '../../domain/opportunities/opportunity_calculator.dart';
+import '../../domain/opportunities/recipe_effort.dart';
+import '../../domain/opportunities/recipe_experience.dart' as recipe_exp;
 import '../../domain/planner/planner_models.dart' as planning;
 import '../../domain/state/planner_state.dart';
 import '../planner/planner_contracts.dart'
@@ -176,6 +178,10 @@ class OpportunitiesController extends ChangeNotifier {
   List<OpportunityQuote> quotes = [];
   List<OpportunityBestUseQuote> bestUseQuotes = [];
   final Map<CraftMode, _BestUseSource> _bestUseSources = {};
+  final Map<(CraftMode, Recipe, String?), recipe_exp.RecipeExperience?>
+  _recipeExperiences = {};
+  Object? _effortSourceKey;
+  RecipeEffortIndex? _recipeEffortIndex;
   Object? _bestUseCalculationKey;
   Object? _bestUseContextKey;
   Object? _bestUseSuggestionKey;
@@ -918,22 +924,118 @@ class OpportunitiesController extends ChangeNotifier {
   double? _demandFor(OpportunityQuote quote) =>
       _currentDemand(quote.outputMarket, clock(), cachedMarketMaxAge);
 
+  recipe_exp.RecipeExperience? experienceForQuote(OpportunityQuote quote) {
+    final recipe = recipes[quote.recipeName];
+    if (recipe == null) return null;
+    if (quote.selectedVariantId != null &&
+        recipe.variantById(quote.selectedVariantId) == null) {
+      return null;
+    }
+    final key = (preferences.mode, recipe, quote.selectedVariantId);
+    return _recipeExperiences.putIfAbsent(
+      key,
+      () => recipe_exp.experienceFor(
+        recipe.resolveVariant(quote.selectedVariantId),
+        preferences.mode,
+      ),
+    );
+  }
+
+  RecipeEffortIndex get _effortIndex {
+    final sources = [
+      for (final mode in CraftMode.values) _bestUseSourceFor(mode),
+    ];
+    final key = (sources[0], sources[1], sources[2]);
+    if (_effortSourceKey != key) {
+      _recipeEffortIndex = RecipeEffortIndex(
+        {
+          for (var i = 0; i < CraftMode.values.length; i++)
+            CraftMode.values[i]: sources[i].recipes,
+        },
+        legacyUnavailableItems:
+            appController.plannerRules.legacyUnavailableItems,
+      );
+      _effortSourceKey = key;
+    }
+    return _recipeEffortIndex!;
+  }
+
+  String get activeCraftSort =>
+      preferences.section == 'best-use' && preferences.craftSort == 'exp'
+      ? 'profit'
+      : preferences.craftSort;
+
+  void selectCraftSort(String sort, {bool toggleDirection = false}) {
+    if (!preferences.craftSortAscending.containsKey(sort)) return;
+    final previousSort = activeCraftSort;
+    change((p) {
+      if (toggleDirection && previousSort == sort) {
+        p.craftSortAscending[sort] = !(p.craftSortAscending[sort] ?? false);
+      }
+      p.craftSort = sort;
+    });
+  }
+
+  void reverseCraftSort(String sort) {
+    if (!preferences.craftSortAscending.containsKey(sort)) return;
+    change((p) {
+      p.craftSortAscending[sort] = !(p.craftSortAscending[sort] ?? false);
+      p.craftSort = sort;
+    });
+  }
+
+  void setUnknownExpFilter(String filter) {
+    if (!const ['include', 'hide', 'only'].contains(filter)) return;
+    change((p) {
+      p.craftSort = 'exp';
+      p.unknownExpFilter = filter;
+    });
+  }
+
   List<OpportunityQuote> get visibleQuotes {
+    final sortByExperience = preferences.craftSort == 'exp';
     final rows = _demandCandidates
         .where(
           (quote) => !preferences.demandOnly || _demandStockFor(quote) == 0,
         )
+        .where((quote) {
+          if (!sortByExperience || preferences.unknownExpFilter == 'include') {
+            return true;
+          }
+          final known = experienceForQuote(quote) != null;
+          return preferences.unknownExpFilter == 'hide' ? known : !known;
+        })
         .toList();
     double? sortValue(OpportunityQuote quote) =>
         switch (preferences.craftSort) {
           'preorders' => _demandFor(quote),
+          'exp' => experienceForQuote(quote)?.value,
           _ => quote.profitFor(craftSaleMode),
         };
+    // Resolve the dependency graph once, only when unknown rows are visible.
+    RecipeEffortIndex? effortIndex;
+    final efforts = <OpportunityQuote, RecipeEffort>{
+      if (sortByExperience)
+        for (final quote in rows)
+          if (experienceForQuote(quote) == null &&
+              recipes[quote.recipeName] != null)
+            quote: (effortIndex ??= _effortIndex).effortFor(
+              recipes[quote.recipeName]!.resolveVariant(
+                quote.selectedVariantId,
+              ),
+              preferences.mode,
+            ),
+    };
     rows.sort((a, b) {
       final av = sortValue(a), bv = sortValue(b);
       if (av == null && bv != null) return 1;
       if (av != null && bv == null) return -1;
-      final comparison = av == null || bv == null ? 0 : bv.compareTo(av);
+      var comparison = av == null || bv == null ? 0 : av.compareTo(bv);
+      if (sortByExperience && av == null && bv == null) {
+        final ae = efforts[a], be = efforts[b];
+        if (ae != null && be != null) comparison = ae.compareTo(be);
+      }
+      if (!preferences.craftAscending) comparison = -comparison;
       return comparison != 0
           ? comparison
           : a.recipeName.compareTo(b.recipeName);
@@ -1083,18 +1185,23 @@ class OpportunitiesController extends ChangeNotifier {
             .length;
 
   List<OpportunityBestUseQuote> get visibleBestUseQuotes {
+    final sort = preferences.craftSort == 'preorders' ? 'preorders' : 'profit';
+    final ascending = preferences.craftSortAscending[sort] ?? false;
     final rows = _bestUseFilterCandidates
         .where((use) => !preferences.demandOnly || _bestUseStock(use) == 0)
         .toList();
-    double? value(OpportunityBestUseQuote use) =>
-        preferences.craftSort == 'preorders'
+    double? value(OpportunityBestUseQuote use) => sort == 'preorders'
         ? _currentDemand(_bestUseOutput(use), clock(), cachedMarketMaxAge)
         : use.extraProfitPerUnit;
     rows.sort((a, b) {
       final av = value(a), bv = value(b);
       if (av == null && bv != null) return 1;
       if (av != null && bv == null) return -1;
-      final compared = av == null || bv == null ? 0 : bv.compareTo(av);
+      final compared = av == null || bv == null
+          ? 0
+          : ascending
+          ? av.compareTo(bv)
+          : bv.compareTo(av);
       if (compared != 0) return compared;
       final named = a.recipe.name.compareTo(b.recipe.name);
       return named != 0 ? named : a.mode.index.compareTo(b.mode.index);
@@ -1309,6 +1416,7 @@ class OpportunitiesController extends ChangeNotifier {
     _calculationKey = null;
     _needsFullCalculation = true;
     recipes = _assembleRecipes(preferences.mode);
+    _recipeExperiences.clear();
     _assembledSource = (preferences.mode, state);
   }
 

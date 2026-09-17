@@ -51,7 +51,24 @@ class OpportunitiesPreferences {
       'demand',
       'activity',
     ].contains(value['craftSort']);
-    result.craftSort = choice('craftSort', ['profit', 'preorders'], 'profit');
+    result.craftSort = choice('craftSort', [
+      'profit',
+      'preorders',
+      'exp',
+    ], 'profit');
+    result.unknownExpFilter = choice('unknownExpFilter', [
+      'include',
+      'hide',
+      'only',
+    ], 'include');
+    final directions = value['craftSortAscending'];
+    if (directions is Map) {
+      for (final sort in result.craftSortAscending.keys) {
+        if (directions[sort] is bool) {
+          result.craftSortAscending[sort] = directions[sort] as bool;
+        }
+      }
+    }
     result.profitableOnly = value['profitableOnly'] != false;
     result.demandOnly = legacyDemandSort || value['demandOnly'] == true;
     result.readyOnly = value['readyOnly'] == true;
@@ -89,6 +106,13 @@ class OpportunitiesPreferences {
   String craftSale = 'buyers';
   String exchangeSale = 'buyers';
   String craftSort = 'profit';
+  String unknownExpFilter = 'include';
+  final Map<String, bool> craftSortAscending = {
+    'profit': false,
+    'preorders': false,
+    'exp': false,
+  };
+  bool get craftAscending => craftSortAscending[craftSort] ?? false;
   bool profitableOnly = true;
   bool demandOnly = false;
   bool readyOnly = false;
@@ -115,6 +139,8 @@ class OpportunitiesPreferences {
     'craftSale': craftSale,
     'exchangeSale': exchangeSale,
     'craftSort': craftSort,
+    'unknownExpFilter': unknownExpFilter,
+    'craftSortAscending': Map<String, bool>.of(craftSortAscending),
     'profitableOnly': profitableOnly,
     'demandOnly': demandOnly,
     'readyOnly': readyOnly,

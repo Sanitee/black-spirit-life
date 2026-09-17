@@ -5,12 +5,12 @@ third-party/reference-use decisions and accepted residual risk recorded; the
 approved Beta product is retained while personal player/publisher state, four
 privacy-bearing captures, and six source-only research inputs are excluded**
 
-Release identity: Black Spirit Life `0.1.9+28`, tag `v0.1.9`, package
+Release identity: Black Spirit Life `0.1.10+29`, tag `v0.1.10`, package
 `BlackSpiritLife.App`, channel `win-x64-stable`. The exact source commit and
 artifact hashes are recorded by the release-candidate manifest generated from
 the clean public history, which contains no internal Beta ancestry.
 
-Review date: 2026-09-15
+Review date: 2026-09-17
 
 Permanent public/update destination approved by the project owner:
 `https://github.com/Sanitee/black-spirit-life`
@@ -18,6 +18,22 @@ Permanent public/update destination approved by the project owner:
 This is the controlling source-by-source gate for the full-feature public
 route. It replaces earlier blanket treatment of every fact or game asset seen
 through a community reference as separately blocked.
+
+## 0.1.10 current-Beta update boundary
+
+Version 0.1.10 promotes the complete current approved Beta snapshot on top of
+public Stable 0.1.9. The user-visible changes since 0.1.9 are the approved
+Opportunities card typography and EXP sorting/unknown handling, the audited
+recipe EXP registry and effort ordering, corrected planner ingredient/weight
+coverage, and the 17 September Twilight recovery recipes with the obsolete
+base-Apeiron Heating formulas removed.
+
+The complete 0.1.9 product and public-release boundary below remain in force.
+No personal profile, journal, session, loadout, setting, credential, cookie,
+browser state, or machine-specific path is promoted from Beta. The same four
+privacy-bearing Gathering captures and six source-only Resource Map research
+inputs remain excluded. Existing Stable users continue to load and preserve
+their own selected personal-data folder during the update.
 
 ## 0.1.9 exact-Beta public-promotion boundary
 
@@ -223,8 +239,9 @@ they are excluded to maintain a clean public/private research boundary.
 
 ## Authorized release treatment
 
-The project owner authorized the exact-Beta 0.1.9 promotion on 2026-09-15. The
-release work must:
+The project owner authorized the exact current-Beta 0.1.10 promotion and
+publication on 2026-09-17, continuing the 0.1.9 authorization and boundary.
+The release work must:
 
 1. preserve the reviewed Planner, Resource Map, Gathering, Fish Map,
    Opportunities, Session Import/Garmoth behavior, UI, calculations, themes,
@@ -253,10 +270,10 @@ No draft may be sent without a new explicit user instruction.
 
 The private Beta ancestry contains private-machine paths and a historical
 migration fixture with real-looking planner values, so it must never be added
-to this repository. The separate public branch contains only the reviewed
-six-commit history through `v0.1.7`; publication of `v0.1.9` must remain one
-reviewed seventh commit on that history, followed by a fresh-clone scan of
-every public ref and tag.
+to this repository. The separate public branch contains the reviewed public
+history through `v0.1.9`; publication of `v0.1.10` must remain one reviewed
+eighth commit on that history, followed by a fresh-clone scan of every public
+ref and tag.
 
 Publication remains conditional on Stable install/update/uninstall
 verification, the exact clean source commit and tag, final release notes and

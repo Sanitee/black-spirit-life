@@ -12,6 +12,12 @@ abstract final class OpportunitiesVisualSpec {
   static const id = 'opportunities-smoked-glass';
   // Card-only density; never scale the toolbar or the user's text setting.
   static const recipeCardScale = .9;
+  static const cardNameFontSize = 20.0;
+  // Keep financial values at or below the item's name in the card hierarchy.
+  static const cardPrimaryValueFontSize = 18.0;
+  static const cardLabelFontSize = 14.0;
+  static const cardSecondaryValueFontSize = 15.0;
+  static const experienceColor = Color(0xFF8FC8F4);
   static const palette = ThemePalette(
     canvas: Color(0xFF0D1926),
     canvasDeep: Color(0xFF0A1420),
@@ -51,28 +57,28 @@ abstract final class OpportunitiesVisualSpec {
     ),
     body: TextStyle(
       fontFamily: 'Segoe UI',
-      fontSize: 14,
+      fontSize: 16,
       height: 1.3,
       color: Color(0xFFEDF2F7),
       fontFeatures: [FontFeature.tabularFigures()],
     ),
     meta: TextStyle(
       fontFamily: 'Segoe UI',
-      fontSize: 12,
+      fontSize: 13,
       height: 1.25,
       color: Color(0xFFB7C6D5),
       fontFeatures: [FontFeature.tabularFigures()],
     ),
     label: TextStyle(
       fontFamily: 'Segoe UI',
-      fontSize: 12,
+      fontSize: 14,
       fontWeight: FontWeight.w500,
       height: 1.2,
       color: Color(0xFFB7C6D5),
     ),
     button: TextStyle(
       fontFamily: 'Segoe UI',
-      fontSize: 14,
+      fontSize: 16,
       fontWeight: FontWeight.w500,
       height: 1.15,
       color: Color(0xFFEDF2F7),

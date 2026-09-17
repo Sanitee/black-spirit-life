@@ -329,6 +329,56 @@ class _CraftSortControl extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final spec = context.visualTheme;
+    final p = controller.preferences;
+    final activeSort = controller.activeCraftSort;
+    final ascending = p.craftSortAscending[activeSort] ?? false;
+    double textWidth(String text) {
+      final painter = TextPainter(
+        text: TextSpan(text: text, style: spec.typography.button),
+        textScaler: MediaQuery.textScalerOf(context),
+        textDirection: Directionality.of(context),
+      )..layout();
+      final width = painter.width;
+      painter.dispose();
+      return width;
+    }
+
+    final expWidth =
+        textWidth('EXP') +
+        24 +
+        (activeSort == 'exp' ? math.max(32, textWidth('↓') + 16) : 0);
+    ButtonStyle style(bool selected) => ButtonStyle(
+      minimumSize: const WidgetStatePropertyAll(Size(0, 40)),
+      padding: const WidgetStatePropertyAll(
+        EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      ),
+      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+      textStyle: WidgetStatePropertyAll(spec.typography.button),
+      foregroundColor: WidgetStatePropertyAll(
+        selected ? spec.palette.text : spec.palette.textMuted,
+      ),
+      backgroundColor: WidgetStatePropertyAll(
+        selected
+            ? Color.alphaBlend(
+                spec.palette.primary.withAlpha(32),
+                spec.palette.surfaceInset,
+              )
+            : spec.palette.surfaceInset,
+      ),
+      overlayColor: WidgetStatePropertyAll(spec.palette.primary.withAlpha(25)),
+      side: WidgetStateProperty.resolveWith(
+        (states) => BorderSide(
+          color: states.contains(WidgetState.focused)
+              ? spec.palette.primaryBright
+              : selected
+              ? spec.palette.primary.withAlpha(150)
+              : spec.palette.trim.withAlpha(190),
+        ),
+      ),
+      shape: WidgetStatePropertyAll(
+        RoundedRectangleBorder(borderRadius: BorderRadius.circular(7)),
+      ),
+    );
     return Semantics(
       container: true,
       explicitChildNodes: true,
@@ -339,66 +389,127 @@ class _CraftSortControl extends StatelessWidget {
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            for (final (index, option) in const [
-              ('preorders', 'Highest Demand'),
-              ('profit', 'Highest Profit'),
-            ].indexed) ...[
-              if (index > 0) const SizedBox(width: 6),
+            for (final option in const [
+              ('preorders', 'Demand'),
+              ('profit', 'Profit'),
+            ]) ...[
               Flexible(
                 child: MergeSemantics(
                   child: Semantics(
-                    selected: controller.preferences.craftSort == option.$1,
+                    selected: activeSort == option.$1,
                     inMutuallyExclusiveGroup: true,
                     child: TextButton(
                       key: ValueKey('craft-sort-${option.$1}'),
-                      onPressed: () =>
-                          controller.change((p) => p.craftSort = option.$1),
-                      style: ButtonStyle(
-                        minimumSize: const WidgetStatePropertyAll(Size(0, 40)),
-                        padding: const WidgetStatePropertyAll(
-                          EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                        ),
-                        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                        textStyle: WidgetStatePropertyAll(
-                          spec.typography.button,
-                        ),
-                        foregroundColor: WidgetStatePropertyAll(
-                          controller.preferences.craftSort == option.$1
-                              ? spec.palette.text
-                              : spec.palette.textMuted,
-                        ),
-                        backgroundColor: WidgetStatePropertyAll(
-                          controller.preferences.craftSort == option.$1
-                              ? Color.alphaBlend(
-                                  spec.palette.primary.withAlpha(32),
-                                  spec.palette.surfaceInset,
-                                )
-                              : spec.palette.surfaceInset,
-                        ),
-                        overlayColor: WidgetStatePropertyAll(
-                          spec.palette.primary.withAlpha(25),
-                        ),
-                        side: WidgetStateProperty.resolveWith(
-                          (states) => BorderSide(
-                            color: states.contains(WidgetState.focused)
-                                ? spec.palette.primaryBright
-                                : controller.preferences.craftSort == option.$1
-                                ? spec.palette.primary.withAlpha(150)
-                                : spec.palette.trim.withAlpha(190),
-                          ),
-                        ),
-                        shape: WidgetStatePropertyAll(
-                          RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(7),
-                          ),
-                        ),
+                      onPressed: () => controller.selectCraftSort(
+                        option.$1,
+                        toggleDirection: true,
                       ),
-                      child: Text(option.$2, textAlign: TextAlign.center),
+                      style: style(activeSort == option.$1),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Flexible(child: Text(option.$2)),
+                          if (activeSort == option.$1) ...[
+                            const SizedBox(width: 5),
+                            Text(ascending ? '↑' : '↓'),
+                          ],
+                        ],
+                      ),
                     ),
                   ),
                 ),
               ),
+              const SizedBox(width: 6),
             ],
+            if (p.section != 'best-use')
+              Flexible(
+                child: AnchoredPopover(
+                  overlayId: 'craft-exp-filter',
+                  placement: AnchoredPopoverPlacement.beside,
+                  // Beside placement uses the anchor centre; include half its
+                  // measured width so the menu never covers either activation.
+                  gap: expWidth / 2 + 6,
+                  preferredWidth:
+                      224 * (MediaQuery.textScalerOf(context).scale(16) / 16),
+                  maximumHeight: 360,
+                  popoverBuilder: (context, close) => OpportunitySurface(
+                    role: AppSurfaceRole.panel,
+                    padding: const EdgeInsets.all(6),
+                    child: SingleChildScrollView(
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          for (final (index, option) in const [
+                            ('include', 'Include unknown'),
+                            ('hide', 'Hide unknown'),
+                            ('only', 'Only unknown'),
+                          ].indexed) ...[
+                            if (index > 0) const SizedBox(height: 6),
+                            Semantics(
+                              selected: p.unknownExpFilter == option.$1,
+                              inMutuallyExclusiveGroup: true,
+                              child: OpportunityButton(
+                                key: ValueKey('craft-exp-filter-${option.$1}'),
+                                role: AppButtonRole.optionPill,
+                                selected: p.unknownExpFilter == option.$1,
+                                onPressed: () {
+                                  controller.setUnknownExpFilter(option.$1);
+                                  close();
+                                },
+                                child: Align(
+                                  alignment: Alignment.centerLeft,
+                                  child: Text(option.$2),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ],
+                      ),
+                    ),
+                  ),
+                  anchorBuilder: (context, toggle, showing) => Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Flexible(
+                        child: MergeSemantics(
+                          child: Semantics(
+                            selected: activeSort == 'exp',
+                            inMutuallyExclusiveGroup: true,
+                            child: TextButton(
+                              key: const ValueKey('craft-sort-exp'),
+                              style: style(activeSort == 'exp'),
+                              onPressed: () {
+                                controller.selectCraftSort('exp');
+                                toggle();
+                              },
+                              child: const Text('EXP'),
+                            ),
+                          ),
+                        ),
+                      ),
+                      if (activeSort == 'exp')
+                        TextButton(
+                          key: const ValueKey('craft-sort-exp-direction'),
+                          style: style(true).copyWith(
+                            minimumSize: const WidgetStatePropertyAll(
+                              Size(32, 40),
+                            ),
+                            padding: const WidgetStatePropertyAll(
+                              EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+                            ),
+                          ),
+                          onPressed: () => controller.reverseCraftSort('exp'),
+                          child: Semantics(
+                            label:
+                                'Reverse EXP sort, ${ascending ? 'ascending' : 'descending'}',
+                            child: Text(ascending ? '↑' : '↓'),
+                          ),
+                        ),
+                    ],
+                  ),
+                ),
+              ),
           ],
         ),
       ),

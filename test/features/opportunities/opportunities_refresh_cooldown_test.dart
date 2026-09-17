@@ -28,7 +28,7 @@ void main() {
       await controller.calculationSettled;
       final before = fixture.transport.calls;
       final saved = fixture.broker.snapshot('eu');
-      expect(saved.items.length, 1442);
+      expect(saved.items.length, 1438);
       expect(controller.refreshReadiness.wait, const Duration(minutes: 1));
       expect(controller.refreshReadiness.canRefresh, isFalse);
 

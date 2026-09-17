@@ -195,10 +195,14 @@ void main() {
   test('Edania material descriptions do not repeat their Used For lines', () {
     final twilight = purposeFor('Twilight of the End - Earring');
     expect(twilight.description, 'A slot-specific Edania accessory material.');
-    expect(twilight.uses, <String>[
-      'Crafts the Earring versions of Causality Shardstone and Apeiron.',
-      'Heat an unenhanced Apeiron Earring to recover 10 of this material.',
-    ]);
+    // The live Used For section derives Causality recipes from the catalog.
+    expect(twilight.uses, isEmpty);
+
+    final shardstone = purposeFor('Causality Shardstone - Earring');
+    expect(
+      shardstone.notes,
+      contains('Heating requires the Shardstone in your inventory.'),
+    );
 
     final olivine = purposeFor('Magical Olivine Powder');
     expect(olivine.description, 'A refined Edania alchemy material.');

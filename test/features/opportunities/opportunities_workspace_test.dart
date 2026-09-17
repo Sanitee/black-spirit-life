@@ -18,9 +18,11 @@ import 'package:bdo_craft_planner_flutter/domain/opportunities/opportunity_marke
 import 'package:bdo_craft_planner_flutter/domain/state/planner_state.dart';
 import 'package:bdo_craft_planner_flutter/domain/state/state_copy.dart';
 import 'package:bdo_craft_planner_flutter/features/opportunities/opportunities_controller.dart';
+import 'package:bdo_craft_planner_flutter/features/opportunities/opportunities_visuals.dart';
 import 'package:bdo_craft_planner_flutter/features/opportunities/opportunities_workspace.dart';
 import 'package:bdo_craft_planner_flutter/features/shared/mode_item_icon.dart';
 import 'package:bdo_craft_planner_flutter/visual/components/app_button.dart';
+import 'package:bdo_craft_planner_flutter/visual/components/app_surface.dart';
 import 'package:bdo_craft_planner_flutter/visual/foundations/theme_spec.dart';
 import 'package:bdo_craft_planner_flutter/visual/sakura_night_garden/sakura_spec.dart';
 import 'package:flutter/gestures.dart';
@@ -47,6 +49,473 @@ void _glassTestWidgets(
 
 void main() {
   setUpAll(_loadFonts);
+
+  _glassTestWidgets(
+    'estimated EXP uses a tilde without changing silver formatting',
+    (tester) async {
+      configureApplicationTestSurface(tester, const Size(1200, 752));
+      final fixture = (await tester.runAsync(
+        () => _Fixture.create(exchange: false, summaryOnly: true),
+      ))!;
+      try {
+        fixture.controller.change((p) {
+          p.mode = CraftMode.alchemy;
+          p.craftSearch = 'Elixir of Brawn';
+          p.craftSort = 'exp';
+        }, assemble: true);
+        await _settleCalculation(tester, fixture.controller);
+        await tester.pumpWidget(_host(fixture.controller));
+        await _settleImages(tester);
+        final quote = fixture.controller.visibleQuotes.single;
+        final experience = fixture.controller.experienceForQuote(quote)!;
+        expect(experience.estimated, isTrue);
+        final card = find.byKey(const ValueKey('craft-card:Elixir of Brawn'));
+        final expected = '~${formatQuantity(experience.value)}';
+        expect(
+          find.descendant(of: card, matching: find.text(expected)),
+          findsOneWidget,
+        );
+        expect(
+          find.descendant(
+            of: card,
+            matching: find.text('≈ ${formatQuantity(experience.value)}'),
+          ),
+          findsNothing,
+        );
+        await _captureSubstitutes(tester, 'exp-estimated-1200-text100');
+        expect(tester.takeException(), isNull);
+      } finally {
+        await tester.pumpWidget(const SizedBox.shrink());
+        await _settleWork(tester, fixture.dispose());
+      }
+    },
+  );
+
+  for (final view in [
+    (size: const Size(1900, 1080), scale: 1.0),
+    (size: const Size(1200, 940), scale: 1.0),
+    (size: const Size(900, 1100), scale: 2.0),
+  ]) {
+    _glassTestWidgets(
+      'EXP populated and unknown ascending overview ${view.size.width} ${view.scale}',
+      (tester) async {
+        configureApplicationTestSurface(
+          tester,
+          view.size,
+          textScaleFactor: view.scale,
+        );
+        final fixture = (await tester.runAsync(
+          () => _Fixture.create(exchange: false, summaryOnly: true),
+        ))!;
+        try {
+          fixture.controller.change((p) {
+            p.mode = CraftMode.processing;
+            p.craftSort = 'exp';
+          }, assemble: true);
+          await _settleCalculation(tester, fixture.controller);
+          await tester.pumpWidget(_host(fixture.controller));
+          await _settleImages(tester);
+          expect(fixture.controller.visibleQuotes, isNotEmpty);
+          expect(
+            fixture.controller.visibleQuotes.any(
+              (quote) => fixture.controller.experienceForQuote(quote) != null,
+            ),
+            isTrue,
+          );
+          _expectCraftOverviewTypography(tester);
+          final suffix =
+              '${view.size.width.toInt()}-text${(view.scale * 100).toInt()}';
+          await _captureSubstitutes(tester, 'exp-include-$suffix');
+          fixture.controller.setUnknownExpFilter('only');
+          fixture.controller.reverseCraftSort('exp');
+          await _settleImages(tester);
+          expect(fixture.controller.visibleQuotes, isNotEmpty);
+          expect(fixture.controller.preferences.craftAscending, isTrue);
+          expect(
+            fixture.controller.visibleQuotes.every(
+              (quote) => fixture.controller.experienceForQuote(quote) == null,
+            ),
+            isTrue,
+          );
+          final summary = find.byWidgetPredicate(
+            (widget) =>
+                widget.key is ValueKey<String> &&
+                (widget.key! as ValueKey<String>).value.startsWith(
+                  'craft-summary:',
+                ),
+          );
+          expect(summary, findsWidgets);
+          expect(
+            find.descendant(of: summary, matching: find.text('EXP')),
+            findsNothing,
+          );
+          expect(
+            find.descendant(of: summary, matching: find.text('?')),
+            findsNothing,
+          );
+          _expectCraftOverviewTypography(tester);
+          await _captureSubstitutes(tester, 'exp-unknown-ascending-$suffix');
+          expect(tester.takeException(), isNull);
+        } finally {
+          await tester.pumpWidget(const SizedBox.shrink());
+          await _settleWork(tester, fixture.dispose());
+        }
+      },
+    );
+  }
+
+  for (final view in [
+    (size: const Size(1200, 752), scale: 1.0),
+    (size: const Size(900, 900), scale: 2.0),
+  ]) {
+    _glassTestWidgets(
+      'EXP sort menu is beside, split and dismissible at ${view.scale}',
+      (tester) async {
+        configureApplicationTestSurface(
+          tester,
+          view.size,
+          textScaleFactor: view.scale,
+        );
+        final fixture = (await tester.runAsync(
+          () => _Fixture.create(exchange: false, summaryOnly: true),
+        ))!;
+        try {
+          fixture.controller.change((p) => p.craftSearch = 'Beer');
+          await _settleCalculation(tester, fixture.controller);
+          await tester.pumpWidget(_host(fixture.controller));
+          await _settleImages(tester);
+          final exp = find.byKey(const ValueKey('craft-sort-exp'));
+          final menu = find.byKey(const ValueKey('popover:craft-exp-filter'));
+          await tester.tap(exp);
+          await _settleImages(tester);
+          expect(fixture.controller.preferences.craftSort, 'exp');
+          expect(fixture.controller.preferences.craftAscending, isFalse);
+          expect(menu, findsOneWidget);
+          final labels = ['Include unknown', 'Hide unknown', 'Only unknown'];
+          for (final label in labels) {
+            expect(find.text(label), findsOneWidget);
+          }
+          for (var i = 1; i < labels.length; i++) {
+            expect(
+              tester.getRect(find.text(labels[i])).top,
+              greaterThan(tester.getRect(find.text(labels[i - 1])).bottom),
+            );
+          }
+          final menuRect = tester.getRect(menu);
+          final expRect = tester.getRect(exp);
+          final directionRect = tester.getRect(
+            find.byKey(const ValueKey('craft-sort-exp-direction')),
+          );
+          expect(
+            menuRect.right <= expRect.left ||
+                menuRect.left >= directionRect.right,
+            isTrue,
+            reason: 'The menu sits beside the control, never over it.',
+          );
+          if (view.scale == 1) {
+            expect(menuRect.right, lessThanOrEqualTo(expRect.left));
+          }
+          expect(menuRect.left, greaterThanOrEqualTo(0));
+          expect(menuRect.bottom, lessThanOrEqualTo(view.size.height));
+          await _captureSubstitutes(
+            tester,
+            'exp-menu-${view.size.width.toInt()}-text${(view.scale * 100).toInt()}',
+          );
+          await tester.tap(
+            find.byKey(const ValueKey('craft-sort-exp-direction')),
+          );
+          await _settleImages(tester);
+          expect(fixture.controller.preferences.craftAscending, isTrue);
+          expect(fixture.controller.preferences.unknownExpFilter, 'include');
+          expect(menu, findsOneWidget);
+          await tester.tap(exp);
+          await _settleImages(tester);
+          expect(menu, findsNothing);
+          expect(
+            fixture.controller.preferences.craftAscending,
+            isTrue,
+            reason: 'The label toggles only the menu, not sort direction.',
+          );
+          for (final filter in ['hide', 'only', 'include']) {
+            await tester.tap(exp);
+            await _settleImages(tester);
+            await tester.tap(find.byKey(ValueKey('craft-exp-filter-$filter')));
+            await _settleImages(tester);
+            expect(fixture.controller.preferences.unknownExpFilter, filter);
+            expect(menu, findsNothing);
+          }
+          await tester.tap(exp);
+          await _settleImages(tester);
+          await tester.sendKeyEvent(LogicalKeyboardKey.escape);
+          await _settleImages(tester);
+          expect(menu, findsNothing);
+          await tester.tap(exp);
+          await _settleImages(tester);
+          await tester.tapAt(const Offset(30, 30));
+          await _settleImages(tester);
+          expect(menu, findsNothing);
+          await tester.tap(find.byKey(const ValueKey('craft-sort-preorders')));
+          await _settleImages(tester);
+          expect(fixture.controller.preferences.craftSort, 'preorders');
+          expect(fixture.controller.preferences.craftAscending, isFalse);
+          await tester.tap(find.byKey(const ValueKey('craft-sort-preorders')));
+          await _settleImages(tester);
+          expect(fixture.controller.preferences.craftAscending, isTrue);
+          expect(tester.takeException(), isNull);
+        } finally {
+          await tester.pumpWidget(const SizedBox.shrink());
+          await _settleWork(tester, fixture.dispose());
+        }
+      },
+    );
+  }
+
+  _glassTestWidgets(
+    'EXP cards show blue known values and completely blank unknowns',
+    (tester) async {
+      configureApplicationTestSurface(tester, const Size(1200, 752));
+      final fixture = (await tester.runAsync(
+        () => _Fixture.create(exchange: false, summaryOnly: true),
+      ))!;
+      try {
+        fixture.controller.change((p) {
+          p.craftSearch = 'Beer';
+          p.craftSort = 'exp';
+        });
+        await _settleCalculation(tester, fixture.controller);
+        await tester.pumpWidget(_host(fixture.controller));
+        await _settleImages(tester);
+        final card = find.byKey(const ValueKey('craft-card:Beer'));
+        final quote = fixture.controller.visibleQuotes.single;
+        final experience = fixture.controller.experienceForQuote(quote);
+        expect(experience, isNotNull);
+        final expLabel = find.descendant(of: card, matching: find.text('EXP'));
+        expect(expLabel, findsOneWidget);
+        final metric = find
+            .ancestor(of: expLabel, matching: find.byType(Column))
+            .first;
+        final amount = find
+            .descendant(of: metric, matching: find.byType(Text))
+            .last;
+        expect(
+          tester.widget<Text>(amount).data,
+          '${experience!.estimated ? '~' : ''}${formatQuantity(experience.value)}',
+        );
+        expect(tester.widget<Text>(amount).style!.fontSize, 18);
+        expect(
+          tester.widget<Text>(amount).style!.color,
+          OpportunitiesVisualSpec.experienceColor,
+        );
+        final investment = find.descendant(
+          of: card,
+          matching: find.text('Investment'),
+        );
+        expect(
+          tester.getTopLeft(expLabel).dx,
+          closeTo(tester.getTopLeft(investment).dx, .01),
+        );
+        await _captureSubstitutes(tester, 'exp-known-beer-1200-text100');
+        await tester.tap(find.text('Best use'));
+        fixture.controller.selectBestUseItem('Wheat');
+        await _settleCalculation(tester, fixture.controller);
+        await _settleImages(tester);
+        expect(
+          find.descendant(
+            of: find.byKey(const PageStorageKey('best-use-opportunities')),
+            matching: find.text('EXP'),
+          ),
+          findsNothing,
+        );
+        await tester.tap(find.text('Crafting'));
+        fixture.controller.recipes = {
+          ...fixture.controller.recipes,
+          'Beer': _recipeWithIngredients(
+            fixture.controller.recipes['Beer']!,
+            const ['Milk'],
+          ),
+        };
+        fixture.controller.recalculate();
+        await _settleCalculation(tester, fixture.controller);
+        await _settleImages(tester);
+        expect(
+          fixture.controller.experienceForQuote(
+            fixture.controller.visibleQuotes.single,
+          ),
+          isNull,
+        );
+        expect(
+          find.descendant(of: card, matching: find.text('EXP')),
+          findsNothing,
+        );
+        expect(
+          find.descendant(of: card, matching: find.text('?')),
+          findsNothing,
+        );
+        final unknownSlot = find.byKey(
+          const ValueKey('craft-unknown-exp:Beer'),
+        );
+        expect(unknownSlot, findsOneWidget);
+        expect(
+          find.descendant(of: unknownSlot, matching: find.byType(Text)),
+          findsNothing,
+        );
+        expect(
+          find.descendant(of: unknownSlot, matching: find.byType(Tooltip)),
+          findsNothing,
+        );
+        expect(
+          find.descendant(of: card, matching: find.text('Investment')),
+          findsOneWidget,
+        );
+        await _captureSubstitutes(tester, 'exp-unknown-beer-1200-text100');
+        expect(tester.takeException(), isNull);
+      } finally {
+        await tester.pumpWidget(const SizedBox.shrink());
+        await _settleWork(tester, fixture.dispose());
+      }
+    },
+  );
+
+  for (final view in [
+    (size: const Size(1500, 940), scale: 1.0),
+    (size: const Size(1200, 752), scale: 1.0),
+    (size: const Size(900, 900), scale: 2.0),
+  ]) {
+    _glassTestWidgets(
+      'overview typography keeps names primary at ${view.size.width.toInt()} '
+      'pixels and ${(view.scale * 100).toInt()} percent',
+      (tester) async {
+        configureApplicationTestSurface(
+          tester,
+          view.size,
+          textScaleFactor: view.scale,
+        );
+        final fixture = (await tester.runAsync(
+          () => _Fixture.create(exchange: false),
+        ))!;
+        final captureSuffix =
+            '${view.size.width.toInt()}-text${(view.scale * 100).toInt()}';
+        try {
+          await tester.pumpWidget(_host(fixture.controller));
+          await _settleImages(tester);
+          _expectCraftOverviewTypography(tester);
+          expect(find.text('Main item only'), findsNothing);
+          final information = find.byWidgetPredicate(
+            (widget) =>
+                widget is AppButton &&
+                widget.semanticLabel == 'Crafting profit',
+          );
+          expect(information, findsOneWidget);
+          await _captureSubstitutes(
+            tester,
+            'typography-crafting-$captureSuffix',
+          );
+          await tester.tap(information);
+          await _settleImages(tester);
+          expect(find.byType(Dialog), findsOneWidget);
+          expect(
+            find.text(
+              'Profit is the main product’s sale price after tax, minus '
+              'ingredients. Items you own are still priced as bought.',
+            ),
+            findsOneWidget,
+          );
+          await tester.sendKeyEvent(LogicalKeyboardKey.escape);
+          await _settleImages(tester);
+          expect(find.byType(Dialog), findsNothing);
+
+          await tester.enterText(
+            _inlineNumber('craft-search'),
+            'Rainbow Button',
+          );
+          await _settleCalculation(tester, fixture.controller);
+          await _settleImages(tester);
+          expect(fixture.controller.visibleQuotes, hasLength(2));
+          _expectCraftOverviewTypography(tester);
+          await _captureSubstitutes(
+            tester,
+            'typography-long-names-$captureSuffix',
+          );
+
+          await tester.tap(find.text('Best use'));
+          fixture.controller.selectBestUseItem('Trace of Nature');
+          await _settleCalculation(tester, fixture.controller);
+          await _settleWork(tester, fixture.controller.refresh());
+          await _settleCalculation(tester, fixture.controller);
+          await _settleImages(tester);
+          expect(fixture.controller.visibleBestUseQuotes, isNotEmpty);
+          _expectCraftOverviewTypography(tester, bestUse: true);
+          await _captureSubstitutes(
+            tester,
+            'typography-best-use-$captureSuffix',
+          );
+
+          await tester.tap(find.text('Exchanges'));
+          await _settleCalculation(tester, fixture.controller);
+          await _settleImages(tester);
+          final exchangeCards = find.descendant(
+            of: find.byKey(
+              PageStorageKey('exchange-${fixture.controller.currency.id}'),
+            ),
+            matching: find.byWidgetPredicate(
+              (widget) =>
+                  widget is OpportunitySurface &&
+                  widget.role == AppSurfaceRole.card,
+            ),
+          );
+          expect(exchangeCards, findsWidgets);
+          for (
+            var index = 0;
+            index < exchangeCards.evaluate().length;
+            index++
+          ) {
+            final card = exchangeCards.at(index);
+            final name = find
+                .descendant(
+                  of: card,
+                  matching: find.byWidgetPredicate((widget) {
+                    final key = widget.key;
+                    return key is ValueKey<String> &&
+                        key.value.startsWith('opportunity-copy-name:');
+                  }),
+                )
+                .first;
+            _expectOverviewCardTypography(
+              tester,
+              card: card,
+              name: find.descendant(of: name, matching: find.byType(Text)),
+              primaryLabel:
+                  find
+                      .descendant(of: card, matching: find.text('Total value'))
+                      .evaluate()
+                      .isEmpty
+                  ? 'Value'
+                  : 'Total value',
+              secondaryLabels: [
+                'Per coin',
+                if (find
+                    .descendant(of: card, matching: find.text('Stock'))
+                    .evaluate()
+                    .isNotEmpty)
+                  'Stock',
+              ],
+            );
+          }
+          final firstExchange = exchangeCards.first;
+          await tester.ensureVisible(firstExchange);
+          await _settleImages(tester);
+          await _captureSubstitutes(
+            tester,
+            'typography-exchanges-$captureSuffix',
+          );
+          expect(tester.takeException(), isNull);
+        } finally {
+          await tester.pumpWidget(const SizedBox.shrink());
+          await _settleWork(tester, fixture.dispose());
+        }
+      },
+    );
+  }
 
   for (final view in [
     (const Size(1200, 820), 1.0),
@@ -880,13 +1349,19 @@ void main() {
           final stock = _menuFilter('craft-has-demand');
           final available = _menuFilter('craft-ingredients-available');
           for (final label in [
-            'Highest Demand',
-            'Highest Profit',
+            'Demand',
+            'Profit',
             'Out of stock',
             'Ingredients available',
             'Profitable',
           ]) {
-            expect(find.text(label), findsOneWidget);
+            expect(
+              find.descendant(
+                of: find.byKey(const ValueKey('craft-toolbar')),
+                matching: find.text(label),
+              ),
+              findsOneWidget,
+            );
           }
           for (final retired in [
             'Filter & sort',
@@ -2367,7 +2842,13 @@ void main() {
             find.byKey(const ValueKey('craft-sort-options')),
             findsOneWidget,
           );
-          expect(find.text('Demand'), findsNothing);
+          expect(
+            find.descendant(
+              of: find.byKey(const ValueKey('craft-sort-options')),
+              matching: find.text('Demand'),
+            ),
+            findsOneWidget,
+          );
           expect(find.text('Sales'), findsNothing);
           expect(find.text('Time estimate'), findsNothing);
           expect(find.text('Profit / hour'), findsNothing);
@@ -2388,8 +2869,20 @@ void main() {
               tester
                   .getSize(find.byKey(const ValueKey('craft-card:Beer')))
                   .width,
-              greaterThan(scenario.size.width * .85),
-              reason: 'Double-sized text gets a full-width card.',
+              closeTo(
+                (tester
+                            .getSize(
+                              find.byKey(
+                                const PageStorageKey('craft-opportunities'),
+                              ),
+                            )
+                            .width -
+                        5) *
+                    OpportunitiesVisualSpec.recipeCardScale,
+                .01,
+              ),
+              reason:
+                  'Double-sized text uses one column with the established card density.',
             );
           }
         }
@@ -3804,15 +4297,12 @@ void main() {
           );
           expect(
             tester.widget<Text>(amount).style?.fontSize,
-            metric.label == 'Profit' ? 24 : 14,
+            metric.label == 'Profit' ? 18 : 15,
           );
-          expect(
-            tester.widget<Text>(heading).style?.fontSize,
-            metric.label == 'Profit' ? 12 : 13,
-          );
+          expect(tester.widget<Text>(heading).style?.fontSize, 14);
           expect(
             tester.widget<Text>(amount).style?.fontWeight,
-            metric.label == 'Profit' ? FontWeight.w700 : FontWeight.w500,
+            metric.label == 'Profit' ? FontWeight.w600 : FontWeight.w500,
           );
         }
         final profitHeading = find.descendant(
@@ -3867,7 +4357,7 @@ void main() {
               )
               .style
               ?.fontSize,
-          18,
+          20,
         );
         expect(
           tester
@@ -3876,19 +4366,19 @@ void main() {
               )
               .style
               ?.fontWeight,
-          FontWeight.w600,
+          FontWeight.w700,
         );
         final icon = tester.widget<ModeItemIcon>(
           find.descendant(of: card, matching: find.byType(ModeItemIcon)),
         );
-        expect(icon.size, 44);
+        expect(icon.size, 40);
         expect(icon.showFrame, isFalse);
         expect(icon.fit, BoxFit.contain);
         expect(
           tester.getSize(
             find.byKey(ValueKey('craft-artwork-frame:${scenario.name}')),
           ),
-          const Size(64, 64),
+          const Size(58, 58),
         );
         expect(
           find.descendant(
@@ -4835,6 +5325,89 @@ void _expectFullWidthWorkspace(WidgetTester tester) {
   }
 }
 
+void _expectCraftOverviewTypography(
+  WidgetTester tester, {
+  bool bestUse = false,
+}) {
+  final cards = find.descendant(
+    of: find.byKey(
+      PageStorageKey(
+        bestUse ? 'best-use-opportunities' : 'craft-opportunities',
+      ),
+    ),
+    matching: find.byWidgetPredicate((widget) {
+      final key = widget.key;
+      return key is ValueKey<String> && key.value.startsWith('craft-card:');
+    }),
+  );
+  expect(cards, findsWidgets);
+  for (var index = 0; index < cards.evaluate().length; index++) {
+    final card = cards.at(index);
+    final key = tester.widget(card).key! as ValueKey<String>;
+    final name = key.value.substring('craft-card:'.length);
+    _expectOverviewCardTypography(
+      tester,
+      card: card,
+      name: find.descendant(of: card, matching: find.text(name)),
+      primaryLabel: bestUse ? 'Extra profit / item' : 'Profit',
+      secondaryLabels: ['Stock', bestUse ? 'Other costs / item' : 'Investment'],
+    );
+  }
+}
+
+void _expectOverviewCardTypography(
+  WidgetTester tester, {
+  required Finder card,
+  required Finder name,
+  required String primaryLabel,
+  required List<String> secondaryLabels,
+}) {
+  expect(name, findsOneWidget);
+  final nameStyle = tester.widget<Text>(name).style!;
+  expect(nameStyle.fontSize, 20);
+  expect(nameStyle.fontWeight, FontWeight.w700);
+  final nameScale = MediaQuery.textScalerOf(tester.element(name));
+  final bounds = tester.getRect(card);
+  void expectUnclipped(Finder text) {
+    final rect = tester.getRect(text);
+    expect(rect.left, greaterThanOrEqualTo(bounds.left));
+    expect(rect.right, lessThanOrEqualTo(bounds.right));
+    expect(rect.top, greaterThanOrEqualTo(bounds.top));
+    expect(rect.bottom, lessThanOrEqualTo(bounds.bottom));
+    expect(
+      tester.renderObject<RenderParagraph>(text).didExceedMaxLines,
+      isFalse,
+    );
+  }
+
+  expectUnclipped(name);
+  for (final label in [primaryLabel, ...secondaryLabels]) {
+    final heading = find.descendant(of: card, matching: find.text(label));
+    expect(heading, findsOneWidget);
+    expect(tester.widget<Text>(heading).style?.fontSize, 14);
+    final metric = find
+        .ancestor(of: heading, matching: find.byType(Column))
+        .first;
+    final value = find.descendant(of: metric, matching: find.byType(Text)).last;
+    final style = tester.widget<Text>(value).style!;
+    final primary = label == primaryLabel;
+    expect(style.fontSize, primary ? 18 : 15);
+    expect(style.fontWeight, primary ? FontWeight.w600 : FontWeight.w500);
+    expect(style.fontSize, lessThanOrEqualTo(nameStyle.fontSize!));
+    expect(
+      style.fontWeight!.value,
+      lessThanOrEqualTo(nameStyle.fontWeight!.value),
+    );
+    expect(
+      MediaQuery.textScalerOf(tester.element(value)).scale(style.fontSize!),
+      lessThanOrEqualTo(nameScale.scale(nameStyle.fontSize!)),
+      reason: 'Enlarged values must not overtake the item name.',
+    );
+    expectUnclipped(heading);
+    expectUnclipped(value);
+  }
+}
+
 void _expectDirectionBCard(WidgetTester tester, String name) {
   final card = tester.getRect(find.byKey(ValueKey('craft-card:$name')));
   final rail = tester.getRect(find.byKey(ValueKey('craft-artwork-rail:$name')));
@@ -4878,7 +5451,7 @@ void _expectDirectionBCard(WidgetTester tester, String name) {
           .widget<Text>(find.descendant(of: footer, matching: find.text(label)))
           .style
           ?.fontSize,
-      12,
+      14,
     );
   }
   expect(title.left, closeTo(rail.right + 16, .01));

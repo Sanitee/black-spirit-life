@@ -21,8 +21,8 @@ void main() {
     expect(catalog.sourceByteCount, productionCatalogByteCount);
     expect(catalog.sourceSha256, productionCatalogSha256);
     expect(catalog.totalItemCount, 1681);
-    expect(catalog.totalCraftableCount, 962);
-    expect(catalog.totalIngredientRowCount, 2861);
+    expect(catalog.totalCraftableCount, 958);
+    expect(catalog.totalIngredientRowCount, 2849);
     expect(catalog.collisions, hasLength(20));
     expect(catalog.alchemy.iconDataUris, hasLength(444));
     expect(catalog.cooking.iconDataUris, hasLength(612));
@@ -62,8 +62,8 @@ void main() {
         catalog.supportingData['itemWeightIds'] as Map<String, Object?>;
     final itemWeightsLtById =
         catalog.supportingData['itemWeightsLtById'] as Map<String, Object?>;
-    expect(itemWeightIds, hasLength(1741));
-    expect(itemWeightsLtById, hasLength(1740));
+    expect(itemWeightIds, hasLength(1748));
+    expect(itemWeightsLtById, hasLength(1747));
     expect(itemWeightIds['Beer'], '9213');
     expect(itemWeightsLtById['9213'], 0.1);
     expect(itemWeightIds['Acacia Plank'], '4680');
@@ -91,7 +91,7 @@ void main() {
       catalog.alchemy.items['Purified Water']!.role,
       RecipeRole.manualConversion,
     );
-    expect(catalog.processing.plannerCraftableCount, 628);
+    expect(catalog.processing.plannerCraftableCount, 624);
     final endtimes =
         catalog.processing.items['Crystallized Energy of Endtimes'];
     expect(endtimes?.marketId, '821252');
@@ -712,11 +712,38 @@ void main() {
 
       final apeiron = catalog.processing.items['Apeiron $slot']!;
       expect(apeiron.marketId, isNotNull);
-      expect(_ingredientRows(apeiron), <String>[
-        'Twilight of the End - $slot:10.0',
-        'Caphras Stone:10.0',
-        'Magical Shard:10.0',
+      expect(apeiron.role, RecipeRole.manualConversion);
+      expect(apeiron.isCraftable, isFalse);
+      expect(apeiron.ingredients, isEmpty);
+      expect(apeiron.method, isNull);
+      expect(apeiron.outputMinimum, isNull);
+      expect(apeiron.outputMaximum, isNull);
+      expect(apeiron.variants, isEmpty);
+
+      final twilight = catalog.processing.items['Twilight of the End - $slot']!;
+      expect(twilight.role, RecipeRole.manualConversion);
+      expect(twilight.isCraftable, isFalse);
+      expect(twilight.defaultVariantId, 'from-apeiron');
+      expect(twilight.variantRoutes.map((route) => route.label), <String>[
+        'From Apeiron',
+        'From Causality Shardstone',
       ]);
+      final accessoryRecovery = twilight.resolveVariant('from-apeiron');
+      expect(_ingredientRows(accessoryRecovery), <String>['Apeiron $slot:1.0']);
+      expect(accessoryRecovery.outputMinimum, 10);
+      expect(accessoryRecovery.outputMaximum, 10);
+      final shardstoneRecovery = twilight.resolveVariant(
+        'from-causality-shardstone',
+      );
+      expect(_ingredientRows(shardstoneRecovery), <String>[
+        'Causality Shardstone - $slot:1.0',
+      ]);
+      expect(shardstoneRecovery.method, 'Heating');
+      expect(shardstoneRecovery.role, RecipeRole.manualConversion);
+      expect(shardstoneRecovery.isCraftable, isFalse);
+      expect(shardstoneRecovery.baseOutput, 2);
+      expect(shardstoneRecovery.outputMinimum, 5);
+      expect(shardstoneRecovery.outputMaximum, 5);
 
       final ekleta = catalog.processing.items['Ekleta $slot']!;
       expect(ekleta.role, RecipeRole.manualConversion);

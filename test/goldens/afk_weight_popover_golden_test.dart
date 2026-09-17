@@ -8,6 +8,7 @@ import '../features/planner/planner_test_fixture.dart';
 
 void main() {
   testWidgets('AFK Weight keeps its plan readable at a glance', (tester) async {
+    const captureKey = ValueKey<String>('afk-weight-golden-scene');
     await setPlannerTestSize(tester, const Size(1500, 940));
     final harness = PlannerTestHarness(
       supportingDataOverrides: const <String, Object?>{
@@ -31,7 +32,10 @@ void main() {
     );
 
     await tester.pumpWidget(
-      harness.plannerHost(spec: SakuraNightGardenSpec.theme),
+      RepaintBoundary(
+        key: captureKey,
+        child: harness.plannerHost(spec: SakuraNightGardenSpec.theme),
+      ),
     );
     await tester.pumpAndSettle();
     await tester.tap(
@@ -41,12 +45,17 @@ void main() {
     );
     await tester.pumpAndSettle();
 
+    final popover = find.byWidgetPredicate(
+      (widget) =>
+          widget is AppSurface &&
+          widget.semanticLabel == 'AFK Weight plan for Intermediate Reagent',
+    );
+    expect(popover, findsOneWidget);
+    expect(tester.getSize(popover), const Size(736, 416));
+    // Capture the full scene explicitly, including the expanded planner rows.
+    // A descendant finder otherwise depends on incidental repaint boundaries.
     await expectLater(
-      find.byWidgetPredicate(
-        (widget) =>
-            widget is AppSurface &&
-            widget.semanticLabel == 'AFK Weight plan for Intermediate Reagent',
-      ),
+      find.byKey(captureKey),
       matchesGoldenFile('afk_weight_popover_sakura.png'),
     );
     expect(tester.takeException(), isNull);

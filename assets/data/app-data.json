@@ -1199,9 +1199,15 @@
         {
           "name": "Weeds",
           "qty": 1,
-          "options": ["Weeds", "Wild Grass"],
+          "options": [
+            "Weeds",
+            "Wild Grass"
+          ],
           "substituteGroup": "Weeds",
-          "substituteRatios": {"Weeds": 1, "Wild Grass": 1}
+          "substituteRatios": {
+            "Weeds": 1,
+            "Wild Grass": 1
+          }
         }
       ],
       "marketId": "5302",
@@ -1226,9 +1232,15 @@
         {
           "name": "Weeds",
           "qty": 1,
-          "options": ["Weeds", "Wild Grass"],
+          "options": [
+            "Weeds",
+            "Wild Grass"
+          ],
           "substituteGroup": "Weeds",
-          "substituteRatios": {"Weeds": 1, "Wild Grass": 1}
+          "substituteRatios": {
+            "Weeds": 1,
+            "Wild Grass": 1
+          }
         }
       ],
       "marketId": "5301",
@@ -1551,9 +1563,15 @@
         {
           "name": "Weeds",
           "qty": 8,
-          "options": ["Weeds", "Wild Grass"],
+          "options": [
+            "Weeds",
+            "Wild Grass"
+          ],
           "substituteGroup": "Weeds",
-          "substituteRatios": {"Weeds": 1, "Wild Grass": 0.25}
+          "substituteRatios": {
+            "Weeds": 1,
+            "Wild Grass": 0.25
+          }
         }
       ],
       "marketId": "700",
@@ -53869,11 +53887,11 @@
       "canonicalName": "Apeiron Necklace",
       "itemId": 11733,
       "status": "reviewed",
-      "reviewedAt": "2026-08-15",
+      "reviewedAt": "2026-09-17",
       "routes": [
         {
           "kind": "monster_drop",
-          "summary": "Obtain Apeiron Necklace from Inner Edania bosses and monsters, craft it by Heating, or buy it through the Central Market.",
+          "summary": "Obtain Apeiron Necklace from Inner Edania bosses and monsters, or buy it through the Central Market.",
           "availability": "permanent",
           "confidence": "high",
           "sources": [
@@ -53882,8 +53900,7 @@
               "url": "https://www.naeu.playblackdesert.com/en-US/News/Detail?groupContentNo=10451&countryType=en-US",
               "supports": [
                 "boss-drop",
-                "monster-drop",
-                "processing"
+                "monster-drop"
               ]
             },
             {
@@ -53892,6 +53909,13 @@
               "supports": [
                 "identity",
                 "acquisition"
+              ]
+            },
+            {
+              "title": "Official September 17, 2026 update details",
+              "url": "https://blackdesert.pearlabyss.com/Asia/en-US/News/Notice/Detail?_boardNo=19820",
+              "supports": [
+                "removed-heating-recipe"
               ]
             }
           ]
@@ -53934,11 +53958,11 @@
       "canonicalName": "Apeiron Earring",
       "itemId": 11898,
       "status": "reviewed",
-      "reviewedAt": "2026-08-15",
+      "reviewedAt": "2026-09-17",
       "routes": [
         {
           "kind": "monster_drop",
-          "summary": "Obtain Apeiron Earring from Inner Edania bosses and monsters, craft it by Heating, or buy it through the Central Market.",
+          "summary": "Obtain Apeiron Earring from Inner Edania bosses and monsters, or buy it through the Central Market.",
           "availability": "permanent",
           "confidence": "high",
           "sources": [
@@ -53947,8 +53971,7 @@
               "url": "https://www.naeu.playblackdesert.com/en-US/News/Detail?groupContentNo=10451&countryType=en-US",
               "supports": [
                 "boss-drop",
-                "monster-drop",
-                "processing"
+                "monster-drop"
               ]
             },
             {
@@ -53957,6 +53980,13 @@
               "supports": [
                 "identity",
                 "acquisition"
+              ]
+            },
+            {
+              "title": "Official September 17, 2026 update details",
+              "url": "https://blackdesert.pearlabyss.com/Asia/en-US/News/Notice/Detail?_boardNo=19820",
+              "supports": [
+                "removed-heating-recipe"
               ]
             }
           ]
@@ -53999,11 +54029,11 @@
       "canonicalName": "Apeiron Ring",
       "itemId": 12144,
       "status": "reviewed",
-      "reviewedAt": "2026-08-15",
+      "reviewedAt": "2026-09-17",
       "routes": [
         {
           "kind": "monster_drop",
-          "summary": "Obtain Apeiron Ring from Inner Edania bosses and monsters, craft it by Heating, or buy it through the Central Market.",
+          "summary": "Obtain Apeiron Ring from Inner Edania bosses and monsters, or buy it through the Central Market.",
           "availability": "permanent",
           "confidence": "high",
           "sources": [
@@ -54012,8 +54042,7 @@
               "url": "https://www.naeu.playblackdesert.com/en-US/News/Detail?groupContentNo=10451&countryType=en-US",
               "supports": [
                 "boss-drop",
-                "monster-drop",
-                "processing"
+                "monster-drop"
               ]
             },
             {
@@ -54022,6 +54051,13 @@
               "supports": [
                 "identity",
                 "acquisition"
+              ]
+            },
+            {
+              "title": "Official September 17, 2026 update details",
+              "url": "https://blackdesert.pearlabyss.com/Asia/en-US/News/Notice/Detail?_boardNo=19820",
+              "supports": [
+                "removed-heating-recipe"
               ]
             }
           ]
@@ -54064,11 +54100,11 @@
       "canonicalName": "Apeiron Belt",
       "itemId": 12298,
       "status": "reviewed",
-      "reviewedAt": "2026-08-15",
+      "reviewedAt": "2026-09-17",
       "routes": [
         {
           "kind": "monster_drop",
-          "summary": "Obtain Apeiron Belt from Inner Edania bosses and monsters, craft it by Heating, or buy it through the Central Market.",
+          "summary": "Obtain Apeiron Belt from Inner Edania bosses and monsters, or buy it through the Central Market.",
           "availability": "permanent",
           "confidence": "high",
           "sources": [
@@ -54077,8 +54113,7 @@
               "url": "https://www.naeu.playblackdesert.com/en-US/News/Detail?groupContentNo=10451&countryType=en-US",
               "supports": [
                 "boss-drop",
-                "monster-drop",
-                "processing"
+                "monster-drop"
               ]
             },
             {
@@ -54087,6 +54122,13 @@
               "supports": [
                 "identity",
                 "acquisition"
+              ]
+            },
+            {
+              "title": "Official September 17, 2026 update details",
+              "url": "https://blackdesert.pearlabyss.com/Asia/en-US/News/Notice/Detail?_boardNo=19820",
+              "supports": [
+                "removed-heating-recipe"
               ]
             }
           ]
@@ -124204,26 +124246,11 @@
       },
       "Apeiron Necklace": {
         "type": "processing",
-        "baseOutput": 0.4,
-        "group": "Processing - Heating",
-        "method": "Heating",
+        "baseOutput": 1,
+        "group": "Reference - Apeiron Accessories",
         "marketId": "11733",
-        "outputMin": 1,
-        "outputMax": 1,
-        "ingredients": [
-          {
-            "name": "Twilight of the End - Necklace",
-            "qty": 10
-          },
-          {
-            "name": "Caphras Stone",
-            "qty": 10
-          },
-          {
-            "name": "Magical Shard",
-            "qty": 10
-          }
-        ]
+        "ingredients": [],
+        "recipeRole": "manual_conversion"
       },
       "Causality Shardstone - Earring": {
         "type": "processing",
@@ -124314,26 +124341,11 @@
       },
       "Apeiron Earring": {
         "type": "processing",
-        "baseOutput": 0.4,
-        "group": "Processing - Heating",
-        "method": "Heating",
+        "baseOutput": 1,
+        "group": "Reference - Apeiron Accessories",
         "marketId": "11898",
-        "outputMin": 1,
-        "outputMax": 1,
-        "ingredients": [
-          {
-            "name": "Twilight of the End - Earring",
-            "qty": 10
-          },
-          {
-            "name": "Caphras Stone",
-            "qty": 10
-          },
-          {
-            "name": "Magical Shard",
-            "qty": 10
-          }
-        ]
+        "ingredients": [],
+        "recipeRole": "manual_conversion"
       },
       "Causality Shardstone - Ring": {
         "type": "processing",
@@ -124424,26 +124436,11 @@
       },
       "Apeiron Ring": {
         "type": "processing",
-        "baseOutput": 0.4,
-        "group": "Processing - Heating",
-        "method": "Heating",
+        "baseOutput": 1,
+        "group": "Reference - Apeiron Accessories",
         "marketId": "12144",
-        "outputMin": 1,
-        "outputMax": 1,
-        "ingredients": [
-          {
-            "name": "Twilight of the End - Ring",
-            "qty": 10
-          },
-          {
-            "name": "Caphras Stone",
-            "qty": 10
-          },
-          {
-            "name": "Magical Shard",
-            "qty": 10
-          }
-        ]
+        "ingredients": [],
+        "recipeRole": "manual_conversion"
       },
       "Causality Shardstone - Belt": {
         "type": "processing",
@@ -124534,26 +124531,11 @@
       },
       "Apeiron Belt": {
         "type": "processing",
-        "baseOutput": 0.4,
-        "group": "Processing - Heating",
-        "method": "Heating",
+        "baseOutput": 1,
+        "group": "Reference - Apeiron Accessories",
         "marketId": "12298",
-        "outputMin": 1,
-        "outputMax": 1,
-        "ingredients": [
-          {
-            "name": "Twilight of the End - Belt",
-            "qty": 10
-          },
-          {
-            "name": "Caphras Stone",
-            "qty": 10
-          },
-          {
-            "name": "Magical Shard",
-            "qty": 10
-          }
-        ]
+        "ingredients": [],
+        "recipeRole": "manual_conversion"
       },
       "WON Wandering Origin Crystal": {
         "type": "processing",
@@ -126092,7 +126074,41 @@
             "qty": 1
           }
         ],
-        "recipeRole": "manual_conversion"
+        "recipeRole": "manual_conversion",
+        "defaultVariantId": "from-apeiron",
+        "variants": [
+          {
+            "id": "from-apeiron",
+            "label": "From Apeiron",
+            "routeId": "from-apeiron",
+            "batchMultiplier": 1,
+            "baseOutput": 4,
+            "outputMin": 10,
+            "outputMax": 10,
+            "ingredients": [
+              {
+                "name": "Apeiron Necklace",
+                "qty": 1
+              }
+            ]
+          },
+          {
+            "id": "from-causality-shardstone",
+            "label": "From Causality Shardstone",
+            "routeId": "from-causality-shardstone",
+            "batchMultiplier": 1,
+            "baseOutput": 2,
+            "outputMin": 5,
+            "outputMax": 5,
+            "ingredients": [
+              {
+                "name": "Causality Shardstone - Necklace",
+                "qty": 1
+              }
+            ],
+            "sourceUrl": "https://blackdesert.pearlabyss.com/Asia/en-US/News/Notice/Detail?_boardNo=19820"
+          }
+        ]
       },
       "Twilight of the End - Earring": {
         "type": "processing",
@@ -126108,7 +126124,41 @@
             "qty": 1
           }
         ],
-        "recipeRole": "manual_conversion"
+        "recipeRole": "manual_conversion",
+        "defaultVariantId": "from-apeiron",
+        "variants": [
+          {
+            "id": "from-apeiron",
+            "label": "From Apeiron",
+            "routeId": "from-apeiron",
+            "batchMultiplier": 1,
+            "baseOutput": 4,
+            "outputMin": 10,
+            "outputMax": 10,
+            "ingredients": [
+              {
+                "name": "Apeiron Earring",
+                "qty": 1
+              }
+            ]
+          },
+          {
+            "id": "from-causality-shardstone",
+            "label": "From Causality Shardstone",
+            "routeId": "from-causality-shardstone",
+            "batchMultiplier": 1,
+            "baseOutput": 2,
+            "outputMin": 5,
+            "outputMax": 5,
+            "ingredients": [
+              {
+                "name": "Causality Shardstone - Earring",
+                "qty": 1
+              }
+            ],
+            "sourceUrl": "https://blackdesert.pearlabyss.com/Asia/en-US/News/Notice/Detail?_boardNo=19820"
+          }
+        ]
       },
       "Twilight of the End - Ring": {
         "type": "processing",
@@ -126124,7 +126174,41 @@
             "qty": 1
           }
         ],
-        "recipeRole": "manual_conversion"
+        "recipeRole": "manual_conversion",
+        "defaultVariantId": "from-apeiron",
+        "variants": [
+          {
+            "id": "from-apeiron",
+            "label": "From Apeiron",
+            "routeId": "from-apeiron",
+            "batchMultiplier": 1,
+            "baseOutput": 4,
+            "outputMin": 10,
+            "outputMax": 10,
+            "ingredients": [
+              {
+                "name": "Apeiron Ring",
+                "qty": 1
+              }
+            ]
+          },
+          {
+            "id": "from-causality-shardstone",
+            "label": "From Causality Shardstone",
+            "routeId": "from-causality-shardstone",
+            "batchMultiplier": 1,
+            "baseOutput": 2,
+            "outputMin": 5,
+            "outputMax": 5,
+            "ingredients": [
+              {
+                "name": "Causality Shardstone - Ring",
+                "qty": 1
+              }
+            ],
+            "sourceUrl": "https://blackdesert.pearlabyss.com/Asia/en-US/News/Notice/Detail?_boardNo=19820"
+          }
+        ]
       },
       "Twilight of the End - Belt": {
         "type": "processing",
@@ -126140,7 +126224,41 @@
             "qty": 1
           }
         ],
-        "recipeRole": "manual_conversion"
+        "recipeRole": "manual_conversion",
+        "defaultVariantId": "from-apeiron",
+        "variants": [
+          {
+            "id": "from-apeiron",
+            "label": "From Apeiron",
+            "routeId": "from-apeiron",
+            "batchMultiplier": 1,
+            "baseOutput": 4,
+            "outputMin": 10,
+            "outputMax": 10,
+            "ingredients": [
+              {
+                "name": "Apeiron Belt",
+                "qty": 1
+              }
+            ]
+          },
+          {
+            "id": "from-causality-shardstone",
+            "label": "From Causality Shardstone",
+            "routeId": "from-causality-shardstone",
+            "batchMultiplier": 1,
+            "baseOutput": 2,
+            "outputMin": 5,
+            "outputMax": 5,
+            "ingredients": [
+              {
+                "name": "Causality Shardstone - Belt",
+                "qty": 1
+              }
+            ],
+            "sourceUrl": "https://blackdesert.pearlabyss.com/Asia/en-US/News/Notice/Detail?_boardNo=19820"
+          }
+        ]
       },
       "Oquilla Wave Meal": {
         "type": "processing",
@@ -131379,6 +131497,7 @@
     "Barley Flour": "7102",
     "Base Sauce": "9018",
     "Basilisk's Belt": "12230",
+    "Bat Blood": "6219",
     "Bean Sprout Salad": "820811",
     "Bean Sprouts": "9073",
     "Bear Blood": "6213",
@@ -131517,6 +131636,7 @@
     "Cloud Mushroom": "5410",
     "Clown's Blood": "6353",
     "Coal": "4007",
+    "Cobra Blood": "6222",
     "Coconut": "7026",
     "Coconut Cocktail": "9307",
     "Coconut Fried Fish": "9309",
@@ -132158,6 +132278,7 @@
     "Knitting Yarn": "5854",
     "Krogdalo's Origin Stone": "50801",
     "Kuadir Fragment": "820040",
+    "Kuku Bird Blood": "6217",
     "Kuku Bird Meat": "7916",
     "Kydict's Crystal - Adventure": "15851",
     "Kydict's Crystal - Giant": "15852",
@@ -132282,6 +132403,7 @@
     "Mineral Water": "9059",
     "Miraculous Herbal Medicine": "820150",
     "Monk's Branch": "5007",
+    "Monkey Blood": "6211",
     "Monkey Hide": "6011",
     "Moodle Gukbap": "820856",
     "Moon Scale Plywood": "5827",
@@ -132385,6 +132507,7 @@
     "Piece of Edana": "821248",
     "Pig Blood": "6205",
     "Pig Hide": "6005",
+    "Pile of Sunrise Herbs": "5421",
     "Pine Coated Plywood": "4691",
     "Pine Plank": "4657",
     "Pine Plywood": "4658",
@@ -132798,6 +132921,7 @@
     "Tidal Black Stone": "756001",
     "Tidal Draught": "767693",
     "Tide-Dyed Standardized Timber Square": "5810",
+    "Tiger Blood": "6356",
     "Tiger Mushroom": "5412",
     "Tin Ingot": "4061",
     "Tin Ore": "4004",
@@ -132895,6 +133019,7 @@
     "WON Magic Crystal - Viper": "15809",
     "Wool": "5858",
     "Worker's Elixir": "724",
+    "Worm Blood": "6209",
     "Worm Hide": "6009",
     "Worm Meat": "7909",
     "Wrecked Phantom Ship's Debris": "43282",
@@ -133478,6 +133603,7 @@
     "5418": 0.1,
     "5419": 0.1,
     "5420": 0.1,
+    "5421": 0.1,
     "5439": 0.1,
     "5440": 0.1,
     "5441": 0.1,
@@ -133609,15 +133735,20 @@
     "6206": 0.1,
     "6207": 0.1,
     "6208": 0.1,
+    "6209": 0.1,
     "6210": 0.1,
+    "6211": 0.1,
     "6212": 0.1,
     "6213": 0.1,
     "6214": 0.1,
     "6215": 0.1,
     "6216": 0.1,
+    "6217": 0.1,
     "6218": 0.1,
+    "6219": 0.1,
     "6220": 0.1,
     "6221": 0.1,
+    "6222": 0.1,
     "6223": 0.1,
     "6224": 0.1,
     "6225": 0.1,
@@ -133629,6 +133760,7 @@
     "6353": 0.1,
     "6354": 0.1,
     "6355": 0.1,
+    "6356": 0.1,
     "6393": 0.3,
     "6394": 0.1,
     "6395": 0.1,

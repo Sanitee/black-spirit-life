@@ -716,16 +716,43 @@ final class ModeFeatureController {
   /// Resolves one real recipe attempt with the same substitute and quality
   /// rules as the active plan. Presentation code uses this for learning labels
   /// instead of dividing a rounded multi-attempt total back down.
+  /// When a plan row is supplied, keep its actual material and grade: automatic
+  /// selection for one attempt can differ from selection for the full batch.
+  /// These preview-only choices never change the user's saved selections.
   planning.PlanStepIngredient previewIngredientSelection({
     required String parentName,
     required Ingredient ingredient,
-  }) => owner.assembly.engine.previewIngredientSelection(
-    recipes: recipes,
-    state: owner.assembly.plannerState(state.value),
-    parentName: parentName,
-    ingredient: ingredient,
-    rules: owner.plannerRules,
-  );
+    planning.PlanStepIngredient? selectedIngredient,
+  }) {
+    var previewState = state.value;
+    if (selectedIngredient != null) {
+      final engine = owner.assembly.engine;
+      final variantId = selectedRecipeVariantId(parentName);
+      previewState = previewState.copyWith(
+        substituteChoices: <String, String>{
+          ...previewState.substituteChoices,
+          engine.substituteChoiceKey(parentName, ingredient):
+              selectedIngredient.baseName,
+        },
+        ingredientGrades: <String, String>{
+          ...previewState.ingredientGrades,
+          engine.gradeChoiceKey(parentName, ingredient.name):
+              selectedIngredient.grade,
+        },
+        recipeVariantChoices: <String, String>{
+          ...previewState.recipeVariantChoices,
+          parentName: ?variantId,
+        },
+      );
+    }
+    return owner.assembly.engine.previewIngredientSelection(
+      recipes: recipes,
+      state: owner.assembly.plannerState(previewState),
+      parentName: parentName,
+      ingredient: ingredient,
+      rules: owner.plannerRules,
+    );
+  }
 
   String? selectedRecipeVariantId(String name) {
     final recipe = recipeDefinition(name);
