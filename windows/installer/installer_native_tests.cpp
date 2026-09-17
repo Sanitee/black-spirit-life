@@ -177,14 +177,8 @@ bool RunInstallationDiscoveryTests() {
   };
   std::wstring error;
   auto lookup = LocateInstalledBetaForTesting(environment);
-  const std::filesystem::path default_install_path(DefaultInstallPath());
-  passed &= Require(!default_install_path.empty() &&
-                        default_install_path.filename() ==
-                            L"Black Spirit Life" &&
-                        default_install_path.parent_path().filename() ==
-                            L"Programs",
-                    "The fresh default is not the writable per-user Programs "
-                    "folder.");
+  passed &= Require(DefaultInstallPath() == L"C:\\Black Spirit Life",
+                    "The requested C:\\Black Spirit Life default changed.");
   passed &= Require(!lookup.installation && lookup.error.empty() &&
                         lookup.missing_registered_root.empty() &&
                         ValidateFreshInstallRegistrationForTesting(
@@ -393,6 +387,33 @@ bool RunFreshInstallRootTests(const std::filesystem::path &test_root) {
   }
   passed &= Require(std::filesystem::is_directory(existing),
                     "Rollback removed a pre-existing empty directory.");
+
+  const auto elevated = test_root / L"Elevated Fresh Lease Rollback";
+  std::filesystem::create_directories(elevated);
+  {
+    InstallRootLease lease;
+    passed &= Require(
+        lease.AcquireFresh(elevated.wstring(), &error, true) &&
+            lease.PrepareForSetup(&error) && ordinary_setup_open(elevated),
+        "An elevated helper-created destination could not be adopted.");
+  }
+  passed &= Require(
+      !std::filesystem::exists(elevated),
+      "A pre-launch failure retained its elevated helper-created directory.");
+
+  const auto elevated_occupied =
+      test_root / L"Elevated Fresh Lease Added Sentinel";
+  std::filesystem::create_directories(elevated_occupied);
+  {
+    InstallRootLease lease;
+    passed &= Require(
+        lease.AcquireFresh(elevated_occupied.wstring(), &error, true) &&
+            WriteText(elevated_occupied / L"keep.txt", "keep this file"),
+        "The elevated nonempty rollback fixture could not be created.");
+  }
+  passed &= Require(
+      std::filesystem::exists(elevated_occupied / L"keep.txt"),
+      "Rollback removed content from an elevated helper-created directory.");
 
   const auto occupied = test_root / L"Fresh Lease Added Sentinel";
   {

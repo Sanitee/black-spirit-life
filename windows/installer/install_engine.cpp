@@ -14,6 +14,7 @@
 
 #include "beta_maintenance_gate.h"
 #include "embedded_payload.h"
+#include "elevated_default_root.h"
 #include "fresh_install_root.h"
 #include "install_path_policy.h"
 #include "install_process_guard.h"
@@ -514,7 +515,23 @@ RunInstallEngine(const std::wstring &install_root, bool fresh_install,
       CleanupExtractedPayload(*payload);
       return result;
     }
-    if (!root_lease.AcquireFresh(install_root, &root_error)) {
+    bool elevated_root_created = false;
+    if (IsDefaultInstallRootPath(install_root) &&
+        GetFileAttributesW(install_root.c_str()) == INVALID_FILE_ATTRIBUTES) {
+      if (progress_callback) {
+        progress_callback(
+            L"Waiting for Windows permission to create C:\\Black Spirit Life.",
+            L"");
+      }
+      if (!PrepareDefaultInstallRootWithElevation(
+              install_root, &elevated_root_created, &root_error)) {
+        RecordFailure(&result, root_error, install_root, fresh_install, false);
+        CleanupExtractedPayload(*payload);
+        return result;
+      }
+    }
+    if (!root_lease.AcquireFresh(install_root, &root_error,
+                                 elevated_root_created)) {
       RecordFailure(&result, root_error, install_root, fresh_install, false);
       CleanupExtractedPayload(*payload);
       return result;

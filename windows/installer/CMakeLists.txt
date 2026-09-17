@@ -77,6 +77,8 @@ add_executable(BlackSpiritLifeInstaller WIN32
   main.cpp
   embedded_payload.cpp
   embedded_payload.h
+  elevated_default_root.cpp
+  elevated_default_root.h
   fresh_install_root.cpp
   fresh_install_root.h
   install_engine.cpp
@@ -129,6 +131,7 @@ if(MSVC)
 endif()
 
 target_link_libraries(BlackSpiritLifeInstaller PRIVATE
+  advapi32
   d2d1
   dwrite
   dwmapi

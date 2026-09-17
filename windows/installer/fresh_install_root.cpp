@@ -39,8 +39,9 @@ InstallRootLease::~InstallRootLease() {
     CloseHandle(handle_);
 }
 
-bool InstallRootLease::AcquireFresh(const std::wstring &root,
-                                    std::wstring *error) {
+bool InstallRootLease::AcquireFresh(
+    const std::wstring &root, std::wstring *error,
+    bool roll_back_precreated_empty_directory) {
   if (error)
     error->clear();
   if (handle_ != INVALID_HANDLE_VALUE) {
@@ -77,8 +78,9 @@ bool InstallRootLease::AcquireFresh(const std::wstring &root,
       return false;
     }
   }
+  const bool roll_back = created || roll_back_precreated_empty_directory;
   handle_ = CreateFileW(
-      destination.c_str(), FILE_READ_ATTRIBUTES | (created ? DELETE : 0),
+      destination.c_str(), FILE_READ_ATTRIBUTES | (roll_back ? DELETE : 0),
       FILE_SHARE_READ | FILE_SHARE_WRITE, nullptr, OPEN_EXISTING,
       FILE_FLAG_BACKUP_SEMANTICS | FILE_FLAG_OPEN_REPARSE_POINT, nullptr);
   if (handle_ == INVALID_HANDLE_VALUE) {
@@ -102,7 +104,7 @@ bool InstallRootLease::AcquireFresh(const std::wstring &root,
   file_index_high_ = information.nFileIndexHigh;
   file_index_low_ = information.nFileIndexLow;
   root_ = destination.wstring();
-  rollback_new_directory_ = created;
+  rollback_new_directory_ = roll_back;
   // Rollback is armed before revalidation: another process adding a file makes
   // validation fail, and makes nonrecursive directory deletion fail as well.
   const auto after = ValidateFreshInstallPath(destination.wstring());

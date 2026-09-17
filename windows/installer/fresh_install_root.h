@@ -15,8 +15,9 @@ public:
   InstallRootLease(const InstallRootLease &) = delete;
   InstallRootLease &operator=(const InstallRootLease &) = delete;
 
-  [[nodiscard]] bool AcquireFresh(const std::wstring &root,
-                                  std::wstring *error);
+  [[nodiscard]] bool AcquireFresh(
+      const std::wstring &root, std::wstring *error,
+      bool roll_back_precreated_empty_directory = false);
   // Keep the original installer's read-attributes-only lease during Setup:
   // holding DELETE access would require every engine open to share deletion.
   [[nodiscard]] bool PrepareForSetup(std::wstring *error);

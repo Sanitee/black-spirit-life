@@ -15,6 +15,7 @@
 #include <vector>
 
 #include "embedded_payload.h"
+#include "elevated_default_root.h"
 #include "install_engine.h"
 #include "install_path_policy.h"
 #include "installed_beta_locator.h"
@@ -991,6 +992,7 @@ int WINAPI wWinMain(HINSTANCE instance, HINSTANCE, PWSTR, int show_command) {
 
   std::wstring capture_path;
   std::wstring validation_path;
+  std::wstring elevated_default_root_user_sid;
   bool verify_payload = false;
   float preview_height = kPreviewHeight;
   int argument_count = 0;
@@ -1028,10 +1030,21 @@ int WINAPI wWinMain(HINSTANCE instance, HINSTANCE, PWSTR, int show_command) {
     } else if (argument == L"--validate-install-path" &&
                index + 1 < argument_count) {
       validation_path = arguments[++index];
+    } else if (argument == L"--prepare-default-root-for-user" &&
+               index + 1 < argument_count) {
+      elevated_default_root_user_sid = arguments[++index];
     }
   }
   if (arguments != nullptr)
     LocalFree(arguments);
+
+  if (!elevated_default_root_user_sid.empty()) {
+    const int result = RunElevatedDefaultRootPreparation(
+        elevated_default_root_user_sid);
+    if (SUCCEEDED(com_result))
+      CoUninitialize();
+    return result;
+  }
 
   if (verify_payload) {
     std::wstring error;
