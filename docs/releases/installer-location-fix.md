@@ -7,10 +7,12 @@ owner; preparing this fix does not replace an existing public release asset.
 
 ## Behavior
 
-- Fresh installation suggests `C:\Black Spirit Life`. The user can type a
+- Fresh installation suggests the current user's writable
+  `%LOCALAPPDATA%\Programs\Black Spirit Life` folder. The user can type a
   destination or use Browse; setup creates a missing named destination when
   installation begins. An unwritable destination reports an error and remains
-  editable. This does not introduce elevation or Program Files support.
+  editable. This does not introduce elevation or machine-wide Program Files
+  support.
 - A verified existing installation keeps its registered location for update or
   repair. It is not silently relocated to the new suggested destination.
 - A registered destination that is positively absent on a reachable fixed drive

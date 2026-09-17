@@ -239,7 +239,7 @@ std::optional<std::wstring> ReadRegistryInstallLocation(std::wstring *error) {
   return value;
 }
 
-std::wstring LegacyInstallRoot() {
+std::wstring LocalAppDataRoot() {
   const DWORD required = GetEnvironmentVariableW(L"LOCALAPPDATA", nullptr, 0);
   if (required == 0)
     return {};
@@ -249,6 +249,13 @@ std::wstring LegacyInstallRoot() {
   }
   while (!local.empty() && local.back() == L'\0')
     local.pop_back();
+  return NormalizePath(local);
+}
+
+std::wstring LegacyInstallRoot() {
+  const std::wstring local = LocalAppDataRoot();
+  if (local.empty())
+    return {};
   return NormalizePath(
       (std::filesystem::path(local) / std::wstring(build_config::kPackageId))
           .wstring());
@@ -547,7 +554,19 @@ bool VerifyInstalledBetaRoot(const std::wstring &root,
   return true;
 }
 
-std::wstring DefaultInstallPath() { return L"C:\\Black Spirit Life"; }
+std::wstring DefaultInstallPath() {
+  // A root-level C:\ folder cannot be created by a normal per-user process on
+  // a standard Windows installation. Keep the default inside the current
+  // user's writable application area while leaving the field and Browse
+  // button available for an explicitly chosen alternative.
+  const std::wstring local_app_data = LocalAppDataRoot();
+  if (local_app_data.empty())
+    return {};
+  return NormalizePath(
+      (std::filesystem::path(local_app_data) / L"Programs" /
+       L"Black Spirit Life")
+          .wstring());
+}
 
 InstalledBetaLookup LocateInstalledBetaForTesting(
     const InstallerDiscoveryEnvironment &environment) {

@@ -177,12 +177,19 @@ bool RunInstallationDiscoveryTests() {
   };
   std::wstring error;
   auto lookup = LocateInstalledBetaForTesting(environment);
-  passed &= Require(DefaultInstallPath() == L"C:\\Black Spirit Life" &&
-                        !lookup.installation && lookup.error.empty() &&
+  const std::filesystem::path default_install_path(DefaultInstallPath());
+  passed &= Require(!default_install_path.empty() &&
+                        default_install_path.filename() ==
+                            L"Black Spirit Life" &&
+                        default_install_path.parent_path().filename() ==
+                            L"Programs",
+                    "The fresh default is not the writable per-user Programs "
+                    "folder.");
+  passed &= Require(!lookup.installation && lookup.error.empty() &&
                         lookup.missing_registered_root.empty() &&
                         ValidateFreshInstallRegistrationForTesting(
                             L"", preferred, false, environment, &error),
-                    "A clean profile did not offer the requested fresh default.");
+                    "A clean profile did not offer a fresh installation.");
 
   roots[preferred] = {.state = InstalledRootState::empty_directory};
   roots[legacy] = {.state = InstalledRootState::empty_directory};
