@@ -885,12 +885,19 @@ $appLibrary = Join-Path $BundleDirectory 'data\app.so'
 if (Test-Path -LiteralPath $appLibrary -PathType Leaf) {
     Assert-NoTextMarker -Path $appLibrary -Markers $privateMarkers
 }
-$bundleNativePayloads = @(Get-ChildItem -LiteralPath $BundleDirectory -Recurse -File |
-    Where-Object { $_.Extension -in @('.exe', '.dll') })
+# This phase has no payload writers. Enumerate once for all three independent
+# rule sets; the main EXE was explicitly scanned above, including when hidden.
+# This inventory is local to this phase, not reused after packaging/installing.
+$bundlePayloadFiles = @(Get-ChildItem -LiteralPath $BundleDirectory -Recurse -File)
+$bundleNativePayloads = @($bundlePayloadFiles |
+    Where-Object {
+        $_.Extension -in @('.exe', '.dll') -and
+        $_.FullName -ine $bundleExecutable
+    })
 foreach ($payload in $bundleNativePayloads) {
     Assert-NoTextMarker -Path $payload.FullName -Markers $privateMarkers
 }
-$bundleTextPayloads = @(Get-ChildItem -LiteralPath $BundleDirectory -Recurse -File |
+$bundleTextPayloads = @($bundlePayloadFiles |
     Where-Object {
         $_.Length -le 32MB -and
         $_.Extension -in @(
@@ -901,7 +908,7 @@ $bundleTextPayloads = @(Get-ChildItem -LiteralPath $BundleDirectory -Recurse -Fi
 foreach ($payload in $bundleTextPayloads) {
     Assert-NoTextMarker -Path $payload.FullName -Markers $privateMarkers
 }
-$forbiddenBundleFiles = @(Get-ChildItem -LiteralPath $BundleDirectory -Recurse -File |
+$forbiddenBundleFiles = @($bundlePayloadFiles |
     Where-Object {
         $_.FullName -match $ForbiddenPackagedArtifactPattern -or
         $_.Name -match '(?i)\.pdb(?:$|[.-])' -or

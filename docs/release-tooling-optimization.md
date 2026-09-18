@@ -35,13 +35,47 @@ parity and preservation of each user's data. Live Release owns publication.
   the helpers and actual extracted builder validators on PowerShell 5.1 and 7.
   Test logs, a hash-bound test list and outcomes are kept in an ignored unique
   `build/release-tooling-tests` directory.
+- **No duplicate bundle scan work.** One enumeration supplies the same native,
+  text and forbidden-file rules; the main EXE is marker-scanned once. Checks
+  across source, package and installation boundaries remain separate.
+- **Retryable draft uploads.** A separate helper checks the reviewed manifest,
+  local bytes and existing remote identity, reuses digest-verified assets and
+  retries only missing uploads. It uses explicit timeouts, bounded attempts and
+  sanitized attempt logs. It cannot create, publish or delete a release.
 
 These changes do not cache compilation, skip privacy scans, remove the clean
-build/staging boundary, reuse installed checks, alter the updater, or publish
-anything. Timing records are explicitly **not resume receipts or release
+build/staging boundary, reuse installed checks, or alter the updater. The
+candidate builder prepares only; the separate uploader writes only to an
+existing draft after explicit confirmation and never publishes it. Timing
+records are explicitly **not resume receipts or release
 verification**. Existing pinned Velopack caching is retained, not a new feature.
 
 ## Operator workflow
+
+### Keep routine updates small
+
+Do the approved release, not unrelated development. Do not add refactors,
+dependency upgrades, repository cleanup or the optimization backlog to an
+ordinary release. Read the standing playbook's **Routine releases: remove
+unnecessary work** section for the complete operating rule.
+
+Run each distinct required gate against the final inputs, and retain its
+evidence. An upload error does not require another build or another local
+install rehearsal when the verified artifacts have not changed. Retry only
+the failed upload, checking the remote state first. Do not improvise different
+upload formats or replace releases to work around a transient failure.
+
+Keep actual public-route verification separate from local lifecycle checks.
+Replaying the same local fresh-install, repair or stress case in a public-route
+script does not test the public download. Removing such a repeat requires
+checking the exact artifact hashes and earlier passing result, not assuming
+that a previous run passed. Existing lifecycle scripts are unchanged by this
+tooling patch.
+
+The payload verifier now enumerates the unchanged built bundle once for its
+native, text and forbidden-file rules, and scans the main EXE once instead of
+twice. All existing rules remain. The inventory is not reused after packaging
+or installation, where the bytes and verification obligations differ.
 
 1. Read the standing release contract and optimization playbook. Confirm the
    actual current Beta and coordinate with the Live Release owner.
@@ -96,6 +130,51 @@ All local imports must match the reviewed size/hash **and** actual package/feed
 identity. A filename, timestamp or same byte count cannot authorize reuse.
 Historical caching never replaces a fresh current-channel/publication check.
 
+### Upload an already verified candidate without rebuilding it
+
+`tool/release/publish_verified_release.ps1` synchronizes only the four entries in
+the approved candidate manifest's `publicUploadArtifacts` with an **existing
+draft**. It never builds, creates a release/tag, publishes, deletes remote state
+or overwrites a conflicting artifact. A completed upload is not a completed
+release: the owner still performs publication and the distinct public checks.
+
+Use this after reviewing the non-upload acceptance evidence. The generated
+manifest alone (including its historical `remainingBlockers` text) is not proof
+that those checks passed. Pin its reviewed hash and the exact repository, tag
+and commit; do not recalculate an approval hash merely to accept changed files.
+Supply credentials through `GITHUB_TOKEN`, without printing them or putting
+them in a command or log.
+
+```powershell
+.\tool\release\publish_verified_release.ps1 `
+    -ManifestPath 'D:\ApprovedRelease\public-candidate-manifest.json' `
+    -ApprovedManifestSha256 '<reviewed SHA-256>' `
+    -ExpectedRepository 'OWNER/REPOSITORY' `
+    -ExpectedTag 'v<approved version>' `
+    -ExpectedSourceCommit '<reviewed full commit>' `
+    -ConfirmReviewedArtifactReadiness `
+    -ConfirmDraftAssetUpload
+```
+
+Replace the placeholders with reviewed release inputs. Retry the same command
+against the same immutable manifest after a recoverable interruption: matching
+uploaded assets are reused and an uploaded provisional name can be finalized
+without retransmitting its bytes. Missing remote digests, identity changes,
+unexpected assets and byte conflicts stop rather than trigger destructive
+cleanup. Resolve a conflict explicitly; do not change the manifest, rebuild,
+or switch to an upload command that overwrites files to bypass it.
+
+Defaults are three upload attempts, a two-second inspection/retry delay,
+60-second JSON-request timeout and 300-second upload timeout. Override
+`MaxUploadAttempts`, `RetryDelaySeconds`, `JsonTimeoutSeconds` or
+`UploadTimeoutSeconds` only for a concrete transport need. Authentication and
+invalid-request failures stop instead of repeatedly sending the same request.
+Sanitized attempt records are appended to `draft-upload-receipts.jsonl` beside
+the manifest, or to an explicit absolute `ReceiptPath`. These logs explain
+progress; they never substitute for rechecking remote digests on a resumed run.
+An incomplete remote asset without a digest is retained and reported for owner
+review, not silently deleted or treated as a successful upload.
+
 ### Corruption, interruption and concurrent use
 
 - A key-specific exclusive lock rejects competing acquisition. OS handles are
@@ -129,8 +208,25 @@ Do not equate local import timing with cold network-download timing.
 
 See [validation evidence](release-tooling-validation-2026-09-17.md). Only the
 implemented subset above is enabled. The larger playbook still contains work:
-central release metadata, validated build/helper/stage reuse, resumable upload,
-publication orchestration, and patch-churn/lifecycle optimizations.
+central release metadata, validated build/helper/stage reuse, complete
+publication orchestration, and patch-churn/lifecycle optimizations. Draft asset
+retry/reconciliation is now implemented; final publication and public-route
+verification remain separate owner steps.
+
+The 2026-09-18 follow-up passed all six tooling suites on Windows PowerShell
+5.1.26100.9444 and PowerShell 7.6.5. Each run included 12 cache scenarios and
+39 inventory, 80 preflight/metrics, 81 builder-integration, 140 payload-scan and
+63 draft-upload assertions. Combined runs took about 11 seconds per shell;
+these are **tooling test timings**, not predicted release times. Local evidence:
+
+- `build/release-tooling-tests/self-tests-20e9cb69248846df8df7288ce7221374`
+- `build/release-tooling-tests/self-tests-deeed5d2a6354e50be2c8b9c9e40bd52`
+
+Upload tests used mocked requests and disposable synthetic files. No public
+upload, new application build, installer run or saved-data modification was
+performed for this tooling-only change. Actual release-time improvement remains
+to be measured on the next authorized release. No automatic recovery is claimed
+for incomplete digest-less remote assets or conflicting draft state.
 
 Keep the previous tooling revision for rollback. If an optimization fails,
 revert its exact tooling commit in a separate reviewed checkout; never reset

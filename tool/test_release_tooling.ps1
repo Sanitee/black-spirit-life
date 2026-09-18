@@ -11,7 +11,9 @@ $testNames = @(
     'release_input_cache_test.ps1',
     'release_source_inventory_test.ps1',
     'release_preflight_metrics_test.ps1',
-    'release_builder_integration_test.ps1'
+    'release_builder_integration_test.ps1',
+    'release_payload_scan_test.ps1',
+    'publish_verified_release_test.ps1'
 )
 $runId = 'self-tests-' + [Guid]::NewGuid().ToString('N')
 $output = Join-Path $project "build/release-tooling-tests/$runId"
