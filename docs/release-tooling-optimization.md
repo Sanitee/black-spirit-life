@@ -5,6 +5,11 @@ contract remains controlling: promote the complete approved Beta snapshot,
 preserve its behavior, exclude publisher personal state, and verify installed
 parity and preservation of each user's data. Live Release owns publication.
 
+For the latest workflow, prepared-dependency, streaming-scan and optional
+same-candidate retry implementation, see
+[workflow optimizations](release-workflow-optimization.md). The dated adoption
+records below remain historical evidence, not the current feature boundary.
+
 ## Enabled changes
 
 - **Verified historical-input reuse.** The existing candidate builder now caches
@@ -27,10 +32,12 @@ parity and preservation of each user's data. Live Release owns publication.
   metadata, source identity/cleanliness/privacy and release identity. The
   independent verifier's nonzero exit now explicitly stops the builder.
 - **Stage measurements.** Stage starts/ends are printed. A completion or caught
-  failure saves `stage-metrics.json` in that unique candidate run. It records
+  failure saves `stage-metrics.json` in that unique candidate run. Each stage
+  start/completion now also saves atomically, preserving the last known running
+  stage after an abrupt stop. It records
   duration, outcome and known byte/cache data; unavailable measurements are
   null, not fabricated zeroes. Raw exceptions and personal paths are not put in
-  the metrics. An abrupt process termination may prevent the final save.
+  the metrics. An interrupted running stage never counts as passed.
 - **One tooling self-test command.** Maintained positive/negative fixtures test
   the helpers and actual extracted builder validators on PowerShell 5.1 and 7.
   Test logs, a hash-bound test list and outcomes are kept in an ignored unique
@@ -52,7 +59,7 @@ parity and preservation of each user's data. Live Release owns publication.
   previous package identities no longer depend on editing copied constants.
   The exact expected commit/tag and reviewed ancestry remain enforced.
 
-These changes do not cache compilation, remove the clean build/staging boundary,
+These default changes do not cache compilation, remove the clean build/staging boundary,
 waive privacy obligations, or alter the updater. Conditional reuse is limited
 to the explicitly hash-bound evidence described below. The
 candidate builder prepares only; the separate uploader writes only to an
@@ -97,8 +104,12 @@ or installation, where the bytes and verification obligations differ.
    source commit/tag, clean-source, ancestry and privacy checks remain. A plan
    does not authorize publication or make an arbitrary tooling checkout an
    approved application snapshot.
-4. Resolve dependencies in the selected build checkout using the pinned lock
-   and already approved toolchain. The release builder still uses `--no-pub`.
+4. Run `tool/release/prepare_dependencies.ps1` once for each required package
+   root, using the approved Flutter launcher and a new external `ReceiptPath`.
+   It uses `pub get --enforce-lockfile`, rejects lock/pubspec changes and pins
+   the generated configuration, dependency pubspecs and selected SDK. Pass the
+   root receipt/hash to the builder; prepare the Gathering package separately
+   and pass its receipt/hash to lifecycle. Tests/builds use `--no-pub`.
    A fresh Windows checkout may need the established symlink-capable build
    environment; preflight does not silently change Windows settings.
 5. Validate the tooling once for its exact inputs/runtime. Rerun the complete
@@ -133,6 +144,8 @@ The ordinary candidate command automatically enables caching and preflight:
 .\tool\build_public_stable_candidate.ps1 `
     -ReleasePlanPath 'D:\ApprovedRelease\release-plan.json' `
     -ApprovedReleasePlanSha256 '<reviewed SHA-256>' `
+    -DependencyReceiptPath 'D:\ApprovedRelease\root-dependencies.json' `
+    -ApprovedDependencyReceiptSha256 '<reviewed dependency receipt SHA-256>' `
     -ConfirmPublicCandidateOnly `
     -FlutterPath 'D:\Tools\flutter\bin\flutter.bat'
 ```
@@ -240,6 +253,8 @@ $lifecycleInputs = @{
     DisposableBase = 'D:\ReleaseTests\bsl-lifecycle-local-new-run'
     PythonPath = '<resolved Python executable>'
     FlutterPath = '<resolved Flutter launcher>'
+    GatheringDependencyReceiptPath = 'D:\ApprovedRelease\gathering-dependencies.json'
+    ApprovedGatheringDependencyReceiptSha256 = '<reviewed Gathering receipt SHA-256>'
     EdgePath = '<resolved Edge executable>'
 }
 .\tool\release\run_lifecycle_rehearsal.ps1 @lifecycleInputs -Mode LocalFeed -PreflightOnly

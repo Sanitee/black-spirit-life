@@ -5,6 +5,13 @@ param(
     [string]$ReleaseInputCacheRoot,
     [string]$PreviousFeedPath,
     [string]$PreviousPackagePath,
+    [Parameter(Mandatory = $true)][string]$DependencyReceiptPath,
+    [Parameter(Mandatory = $true)][string]$ApprovedDependencyReceiptSha256,
+    [string]$BuildRetryProfilePath,
+    [string]$ApprovedBuildRetryProfileSha256,
+    [string]$ResumeBundleReceiptPath,
+    [string]$ApprovedResumeBundleReceiptSha256,
+    [string]$WorkflowReportPath,
     [switch]$OfflinePinnedInputs,
     [ValidateRange(0, [long]::MaxValue)][long]$MinimumFreeBytes = 0,
 
@@ -25,6 +32,9 @@ $ErrorActionPreference = 'Stop'
 . (Join-Path $PSScriptRoot 'release\preflight.ps1')
 . (Join-Path $PSScriptRoot 'release\stage_metrics.ps1')
 . (Join-Path $PSScriptRoot 'release\release_plan.ps1')
+. (Join-Path $PSScriptRoot 'release\build_checkpoint.ps1')
+. (Join-Path $PSScriptRoot 'release\native_prerequisites.ps1')
+. (Join-Path $PSScriptRoot 'release\streaming_marker_scan.ps1')
 
 if (-not $ConfirmPublicCandidateOnly.IsPresent) {
     throw 'Supply -ConfirmPublicCandidateOnly. This script prepares artifacts but never publishes them.'
@@ -441,36 +451,15 @@ function Assert-NoTextMarker {
         [Parameter(Mandatory = $true)][string[]]$Markers,
         [switch]$AllowReviewedVelopackBuildPaths
     )
-    $bytes = [System.IO.File]::ReadAllBytes($Path)
-    $utf8 = [System.Text.Encoding]::UTF8.GetString($bytes)
-    $utf16 = [System.Text.Encoding]::Unicode.GetString($bytes)
-    foreach ($marker in $Markers) {
-        if ([string]::IsNullOrWhiteSpace($marker)) {
-            continue
-        }
-        if ($utf8.IndexOf($marker, [System.StringComparison]::OrdinalIgnoreCase) -ge 0 -or
-            $utf16.IndexOf($marker, [System.StringComparison]::OrdinalIgnoreCase) -ge 0) {
-            throw "Packaged file contains a private-machine marker '$marker': $Path"
-        }
-    }
-    # The pinned upstream Velopack runtime contains its own Windows compiler
-    # path. Only its exact reviewed hash may bypass this generic path test;
-    # the explicit project/user/private markers above still apply.
-    $isPinnedVelopackRuntime =
-        [System.IO.Path]::GetFileName($Path) -ceq 'velopack_libc.dll' -and
-        (Get-FileHash -Algorithm SHA256 -LiteralPath $Path).Hash -ceq
-            $VelopackRuntimeSha256
-    # The pinned upstream Rust Setup engine retains its public GitHub Actions
-    # .cargo/.rustup roots. Only those two prefixes may be ignored when the
-    # caller opts in; explicit project/user markers above are never exempted.
-    if (-not $isPinnedVelopackRuntime -and
-        ((Test-UnreviewedAbsolutePath `
-            -Text $utf8 `
-            -AllowReviewedVelopackBuildPaths:$AllowReviewedVelopackBuildPaths) -or
-         (Test-UnreviewedAbsolutePath `
-            -Text $utf16 `
-            -AllowReviewedVelopackBuildPaths:$AllowReviewedVelopackBuildPaths))) {
-        throw "Packaged file contains an absolute user/private workspace path: $Path"
+    $result = Assert-NoStreamingTextMarker -Path $Path -Markers $Markers `
+        -PrivateMachinePathPattern $PrivateMachinePathPattern -VelopackRuntimeSha256 $VelopackRuntimeSha256 `
+        -AllowReviewedVelopackBuildPaths:$AllowReviewedVelopackBuildPaths -PassThru
+    $measurementList = Get-Variable -Name ReleaseMarkerScanMeasurements -Scope Script -ErrorAction SilentlyContinue
+    if ($null -ne $measurementList) {
+        $measurementList.Value.Add([ordered]@{
+            fileName = [IO.Path]::GetFileName($Path); bytes = $result.Bytes
+            durationMilliseconds = $result.ElapsedMilliseconds; policy = 'utf8-utf16-marker-v1'
+        })
     }
 }
 
@@ -570,10 +559,29 @@ $previousFullPackageName =
 $setupName = "$PackageId-$UpdateChannel-Setup.exe"
 $feedIndexName = "releases.$UpdateChannel.json"
 
-$metrics = New-ReleaseStageMetrics -RunId $RunId
 $metricsPath = Join-Path $RunRoot 'stage-metrics.json'
-$activeStage = Start-ReleaseStage -Metrics $metrics -Name 'source-preflight'
+if (Test-Path -LiteralPath $RunRoot) { throw 'The unique candidate run already exists.' }
+$null = Assert-ReleaseOrdinaryPath -Path $RunRoot
+$null = [IO.Directory]::CreateDirectory($RunRoot)
+$builderLock = Open-ReleaseSourceBuildLock -ProjectRoot $ProjectRoot
+$metrics = New-ReleaseStageMetrics -RunId $RunId -AutoSavePath $metricsPath
+$checkpoint = $null
+$script:ReleaseMarkerScanMeasurements = [Collections.Generic.List[object]]::new()
+$buildRetryContext = $null
+$buildRetryArguments = $null
+$activeStage = $null
 try {
+$activeStage = Start-ReleaseStage -Metrics $metrics -Name 'source-preflight'
+if (-not [string]::IsNullOrWhiteSpace($WorkflowReportPath)) {
+    $WorkflowReportPath = Assert-ReleaseOrdinaryPath -Path $WorkflowReportPath
+    if (Test-Path -LiteralPath $WorkflowReportPath) { throw 'Workflow report must be a new file.' }
+    if (-not (Test-Path -LiteralPath (Split-Path -Parent $WorkflowReportPath) -PathType Container)) {
+        throw 'Workflow report requires an existing ordinary evidence directory.'
+    }
+    if ($WorkflowReportPath.StartsWith($ProjectRoot.TrimEnd('\') + '\', [StringComparison]::OrdinalIgnoreCase)) {
+        throw 'Workflow report must be outside the frozen source checkout.'
+    }
+}
 # This is only a conservative floor for historical-input staging. Compilation,
 # new packages and installer outputs need additional room; operators may raise it.
 $effectiveMinimumFreeBytes = [Math]::Max($MinimumFreeBytes,
@@ -581,6 +589,7 @@ $effectiveMinimumFreeBytes = [Math]::Max($MinimumFreeBytes,
 $preflight = Invoke-ReleasePreflight -ProjectRoot $ProjectRoot -Version $Version `
     -BuildNumber $BuildNumber -PublicGitHubRepository $UpdateSource `
     -MinimumFreeBytes $effectiveMinimumFreeBytes `
+    -DependencyReceiptPath $DependencyReceiptPath -ApprovedDependencyReceiptSha256 $ApprovedDependencyReceiptSha256 `
     -FlutterPath $FlutterPath -CMakePath $CMakePath -RequiredRelativeFiles @(
         $ReleaseNotesRelativePath, 'lib/app_identity.dart',
         'windows/runner/resources/app_icon.ico',
@@ -593,6 +602,25 @@ $FlutterPath = $preflight.FlutterPath
 $CMakePath = $preflight.CMakePath
 $DotnetPath = $preflight.DotnetPath
 $TarPath = $preflight.TarPath
+$nativePrerequisites = Invoke-ReleaseNativePrerequisiteChecks -ProjectRoot $ProjectRoot
+if ([string]::IsNullOrWhiteSpace($BuildRetryProfilePath) -ne [string]::IsNullOrWhiteSpace($ApprovedBuildRetryProfileSha256) -or
+    [string]::IsNullOrWhiteSpace($ResumeBundleReceiptPath) -ne [string]::IsNullOrWhiteSpace($ApprovedResumeBundleReceiptSha256)) {
+    throw 'Build retry inputs require both reviewed paths and hashes.'
+}
+if (-not [string]::IsNullOrWhiteSpace($ResumeBundleReceiptPath) -and [string]::IsNullOrWhiteSpace($BuildRetryProfilePath)) {
+    throw 'A bundle retry requires the complete reviewed external-input profile.'
+}
+if (-not [string]::IsNullOrWhiteSpace($BuildRetryProfilePath)) {
+    $buildRetryArguments = @{
+        ProjectRoot = $ProjectRoot; ReleasePlanSha256 = $ReleasePlan.Sha256
+        ProfilePath = $BuildRetryProfilePath; ApprovedProfileSha256 = $ApprovedBuildRetryProfileSha256
+        Tools = [ordered]@{ flutter = $FlutterPath; cmake = $CMakePath; dotnet = $DotnetPath; tar = $TarPath; shell = (Get-Process -Id $PID).Path }
+        BuildArguments = @('build', 'windows', '--release', '--no-pub', "--dart-define=$UpdateSourceEnvironmentKey=$UpdateSource")
+        RequiredExternalInputs = $nativePrerequisites.selectedInputPaths
+        NativePrerequisiteEvidence = $nativePrerequisites
+    }
+    $buildRetryContext = Get-ReleaseBuildRetryContext @buildRetryArguments
+}
 
 $sourceCommit = (& git -C $ProjectRoot rev-parse HEAD).Trim()
 Assert-LastExitCode -Operation 'Git source identity check'
@@ -660,9 +688,6 @@ if ($pubspec -notmatch "(?m)^version:\s*$expectedPubspecVersion\s*`$") {
 
 foreach ($required in @($ReleaseNotesPath, $RunnerIcon)) {
     $null = Assert-OrdinaryFile -Path $required
-}
-if (Test-Path -LiteralPath $RunRoot) {
-    throw "The unique release-candidate output already exists: $RunRoot"
 }
 $null = Assert-ReleaseOrdinaryPath -Path $RunRoot
 New-Item -ItemType Directory -Path $InputPath | Out-Null
@@ -775,24 +800,32 @@ $activeStage = Start-ReleaseStage -Metrics $metrics -Name 'velopack-tool'
 
 $toolRoot = Join-Path $ProjectRoot "build\release-tools\vpk-$VelopackVersion"
 $toolPackage = Join-Path $toolRoot "vpk.$VelopackVersion.nupkg"
+$toolPreparation = [ordered]@{ downloadMilliseconds = 0; hashMilliseconds = 0; extractionMilliseconds = 0; downloadedBytes = 0 }
 if (-not (Test-Path -LiteralPath $toolRoot -PathType Container)) {
     New-Item -ItemType Directory -Path $toolRoot | Out-Null
 }
 if (-not (Test-Path -LiteralPath $toolPackage -PathType Leaf)) {
     $downloadPath = Join-Path $toolRoot "vpk.$VelopackVersion.download-$PID.nupkg"
+    $toolTimer = [Diagnostics.Stopwatch]::StartNew()
     Invoke-WebRequest -Uri $VelopackPackageUrl -OutFile $downloadPath -UseBasicParsing
+    $toolTimer.Stop(); $toolPreparation.downloadMilliseconds = $toolTimer.Elapsed.TotalMilliseconds
+    $toolPreparation.downloadedBytes = (Get-Item -LiteralPath $downloadPath).Length
     $downloadHash = (Get-FileHash -Algorithm SHA256 -LiteralPath $downloadPath).Hash
     if ($downloadHash -cne $VelopackPackageSha256) {
         throw "Downloaded Velopack package hash mismatch; retained at $downloadPath"
     }
     Move-Item -LiteralPath $downloadPath -Destination $toolPackage
 }
+$toolTimer = [Diagnostics.Stopwatch]::StartNew()
 $toolHash = (Get-FileHash -Algorithm SHA256 -LiteralPath $toolPackage).Hash
+$toolTimer.Stop(); $toolPreparation.hashMilliseconds = $toolTimer.Elapsed.TotalMilliseconds
 if ($toolHash -cne $VelopackPackageSha256) {
     throw 'The pinned Velopack CLI package failed its SHA-256 check.'
 }
+$toolTimer = [Diagnostics.Stopwatch]::StartNew()
 & $TarPath -xf $toolPackage -C $ToolExpanded
 Assert-LastExitCode -Operation 'Pinned Velopack CLI extraction'
+$toolTimer.Stop(); $toolPreparation.extractionMilliseconds = $toolTimer.Elapsed.TotalMilliseconds
 $vpkDll = Join-Path $ToolExpanded 'tools\net8.0\any\vpk.dll'
 $null = Assert-OrdinaryFile -Path $vpkDll
 
@@ -802,21 +835,24 @@ $activeStage = Start-ReleaseStage -Metrics $metrics -Name 'application-build'
 # Flutter's incremental Windows build does not guarantee removal of unrelated
 # files already present at the bundle root. Recreate this exact verified output
 # so no stale local file can be carried into the public full or delta package.
-Reset-VerifiedWindowsBuildTree `
-    -ProjectRoot $ProjectRoot `
-    -BundleDirectory $BundleDirectory
-
-Push-Location -LiteralPath $ProjectRoot
-try {
-    & $FlutterPath build windows --release --no-pub `
-        "--dart-define=$UpdateSourceEnvironmentKey=$UpdateSource"
-    Assert-LastExitCode -Operation 'Flutter Windows Release build'
+if (-not [string]::IsNullOrWhiteSpace($ResumeBundleReceiptPath)) {
+    $restored = Restore-ReleaseBundleCheckpoint -ReceiptPath $ResumeBundleReceiptPath `
+        -ApprovedReceiptSha256 $ApprovedResumeBundleReceiptSha256 -Context $buildRetryContext `
+        -Destination (Join-Path $RunRoot 'verified-bundle-staging')
+    $BundleDirectory = $restored.Root
 }
-finally {
-    Pop-Location
+else {
+    Reset-VerifiedWindowsBuildTree -ProjectRoot $ProjectRoot -BundleDirectory $BundleDirectory
+    Push-Location -LiteralPath $ProjectRoot
+    try {
+        & $FlutterPath build windows --release --no-pub `
+            "--dart-define=$UpdateSourceEnvironmentKey=$UpdateSource"
+        Assert-LastExitCode -Operation 'Flutter Windows Release build'
+    }
+    finally { Pop-Location }
 }
 Assert-CleanSource -ProjectRoot $ProjectRoot -ExpectedCommit $sourceCommit
-Complete-ReleaseStage -Metrics $metrics -Stage $activeStage -Outcome Passed -CacheState NotApplicable
+Complete-ReleaseStage -Metrics $metrics -Stage $activeStage -Outcome Passed -CacheState $(if ([string]::IsNullOrWhiteSpace($ResumeBundleReceiptPath)) { 'NotApplicable' } else { 'Hit' })
 $activeStage = Start-ReleaseStage -Metrics $metrics -Name 'payload-verification'
 
 $bundleExecutable = Join-Path $BundleDirectory $ExecutableName
@@ -923,6 +959,21 @@ if ($forbiddenBundleFiles.Count -ne 0) {
 }
 Complete-ReleaseStage -Metrics $metrics -Stage $activeStage -Outcome Passed -CacheState NotApplicable
 $activeStage = Start-ReleaseStage -Metrics $metrics -Name 'full-delta-packaging'
+
+if ($null -ne $buildRetryContext) {
+    if ((Get-ReleaseBuildRetryContext @buildRetryArguments).Fingerprint -cne $buildRetryContext.Fingerprint) {
+        throw 'Build inputs changed during compilation/verification; no reusable checkpoint can be accepted.'
+    }
+    if ([string]::IsNullOrWhiteSpace($ResumeBundleReceiptPath)) {
+        $checkpoint = New-ReleaseBundleCheckpoint -BundlePath $BundleDirectory `
+            -OutputRoot (Join-Path $RunRoot 'build-checkpoint') -Context $buildRetryContext -ConfirmPayloadVerified
+        Write-Host "Verified bundle retry receipt: $($checkpoint.Path) SHA256=$($checkpoint.Sha256)"
+        # Keep the retained bundle out of mutable packaging outputs.
+        $staging = Restore-ReleaseBundleCheckpoint -ReceiptPath $checkpoint.Path -ApprovedReceiptSha256 $checkpoint.Sha256 `
+            -Context $buildRetryContext -Destination (Join-Path $RunRoot 'verified-bundle-staging')
+        $BundleDirectory = $staging.Root
+    }
+}
 
 $vpkArguments = @(
     $vpkDll,
@@ -1146,7 +1197,16 @@ $manifest = [ordered]@{
     updateSource = $UpdateSource
     pinnedInputAcquisition = @($feedAcquisition, $packageAcquisition)
     preflight = $preflight.Evidence
+    nativePrerequisites = $nativePrerequisites
+    buildRetry = [ordered]@{
+        enabled = ($null -ne $buildRetryContext)
+        reusedBundle = (-not [string]::IsNullOrWhiteSpace($ResumeBundleReceiptPath))
+        contextFingerprint = if ($null -ne $buildRetryContext) { $buildRetryContext.Fingerprint } else { $null }
+        newCheckpointSha256 = if ($null -ne $checkpoint) { $checkpoint.Sha256 } else { $null }
+    }
     stageMeasurements = 'stage-metrics.json'
+    toolPreparationMeasurements = $toolPreparation
+    markerScanMeasurements = @($script:ReleaseMarkerScanMeasurements.ToArray())
     publicSourceHistory = [ordered]@{
         previousTag = $previousSourceTag
         previousCommit = $previousTaggedCommit
@@ -1197,6 +1257,18 @@ $manifestJson = $manifest | ConvertTo-Json -Depth 8
     [System.Text.UTF8Encoding]::new($false)
 )
 $null = Assert-OrdinaryFile -Path $ManifestPath
+if (-not [string]::IsNullOrWhiteSpace($WorkflowReportPath)) {
+    $workflowSummary = [ordered]@{
+        schemaVersion = 1; purpose = 'candidate-build'; success = $true
+        sourceCommit = $sourceCommit; releasePlanSha256 = $ReleasePlan.Sha256
+        version = $Version; buildNumber = [int]$BuildNumber
+        candidateManifest = [ordered]@{ path = $ManifestPath; sha256 = (Get-FileHash -LiteralPath $ManifestPath -Algorithm SHA256).Hash }
+        isReleaseVerification = $false; published = $false
+    }
+    $partial = $WorkflowReportPath + '.partial-' + [Guid]::NewGuid().ToString('N')
+    [IO.File]::WriteAllText($partial, ($workflowSummary | ConvertTo-Json -Depth 5), [Text.UTF8Encoding]::new($false))
+    [IO.File]::Move($partial, $WorkflowReportPath)
+}
 Complete-ReleaseStage -Metrics $metrics -Stage $activeStage -Outcome Passed -CacheState NotApplicable
 $activeStage = $null
 
@@ -1228,4 +1300,5 @@ finally {
         Write-Host "Stage measurements: $metricsPath"
     }
     catch { Write-Warning 'Could not save release stage measurements.' }
+    finally { if ($null -ne $builderLock) { $builderLock.Dispose() } }
 }

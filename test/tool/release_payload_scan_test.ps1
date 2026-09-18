@@ -4,6 +4,7 @@ param()
 # Execute only the trusted builder's payload-scan AST extent against disposable
 # synthetic files. Never invoke the builder, application, installer, or network.
 Set-StrictMode -Version Latest
+. (Join-Path $PSScriptRoot '../../tool/release/streaming_marker_scan.ps1')
 $ErrorActionPreference = 'Stop'
 $repositoryRoot = [IO.Path]::GetFullPath((Join-Path $PSScriptRoot '..\..'))
 $builderPath = Join-Path $repositoryRoot 'tool/build_stable_release_candidate.ps1'

@@ -314,6 +314,10 @@ $ErrorActionPreference = 'Stop'
     Set-FixtureFile (Join-Path $fixtureTools 'dotnet.cmd') "@echo off`r`nif `"%1`"==`"--list-sdks`" echo 8.0.400 [fixture-sdk]`r`nif `"%1`"==`"--list-runtimes`" echo Microsoft.NETCore.App 8.0.20 [fixture-runtime]`r`nexit /b 0`r`n"
     Set-FixtureFile (Join-Path $fixtureTools 'cache/flutter.version.json') '{"frameworkVersion":"3.44.0","dartSdkVersion":"3.12.2"}'
     $PreviousFeedPath = $validFeed
+    # This bounded fixture tests source-preflight/acquisition ordering only;
+    # prepared-dependency receipt behavior has its own negative fixtures.
+    $DependencyReceiptPath = ''
+    $ApprovedDependencyReceiptSha256 = ''
     $PreviousFeedBytes = (Get-Item -LiteralPath $validFeed).Length
     $PreviousFeedSha256 = (Get-FileHash -LiteralPath $validFeed -Algorithm SHA256).Hash
     $UpdateSource = $PublicGitHubRepository

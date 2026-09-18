@@ -10,6 +10,8 @@ param(
     [Parameter(Mandatory = $true)][string]$DisposableBase,
     [Parameter(Mandatory = $true)][string]$PythonPath,
     [Parameter(Mandatory = $true)][string]$FlutterPath,
+    [Parameter(Mandatory = $true)][string]$GatheringDependencyReceiptPath,
+    [Parameter(Mandatory = $true)][string]$ApprovedGatheringDependencyReceiptSha256,
     [Parameter(Mandatory = $true)][string]$EdgePath,
     [ValidateSet('LocalFeed', 'PublicRoute')][string]$Mode = 'LocalFeed',
     [string]$LocalFeedReceiptPath,
@@ -23,6 +25,7 @@ $ErrorActionPreference = 'Stop'
 $ProgressPreference = 'SilentlyContinue'
 . (Join-Path $PSScriptRoot 'verified_input_cache.ps1')
 . (Join-Path $PSScriptRoot 'release_plan.ps1')
+. (Join-Path $PSScriptRoot 'prepared_dependencies.ps1')
 
 function Get-LifecycleFileSha256([string]$Path) {
     (Get-FileHash -LiteralPath $Path -Algorithm SHA256).Hash.ToUpperInvariant()
@@ -208,6 +211,36 @@ function Test-LifecyclePathOverlap([string]$Left, [string]$Right) {
         $rightFull.StartsWith($leftFull + '\', [StringComparison]::OrdinalIgnoreCase)
 }
 
+function Assert-LifecycleInstalledParityReports($Records, [string]$Directory, [string[]]$Phases,
+    [string]$PackageSha256, [string]$VerifierSha256, [string]$ArchivePolicySha256) {
+    if (@($Records).Count -ne $Phases.Count) { throw 'Lifecycle installed-payload parity reports are incomplete.' }
+    $seen = @{}
+    foreach ($record in @($Records)) {
+        $phase = Get-ReleasePlanStringProperty $record 'phase' 'Installed-payload receipt'
+        if ($phase -cnotin $Phases -or $seen.ContainsKey($phase)) { throw 'Lifecycle installed-payload parity phase is invalid or duplicated.' }
+        $seen[$phase] = $true
+        $relative = Get-ReleasePlanStringProperty $record 'reportPath' 'Installed-payload receipt'
+        if ($relative -cne "installed-payload-$phase.json") { throw 'Lifecycle installed-payload report path is not its exact phase filename.' }
+        $report = Read-LifecycleJsonFile (Join-Path $Directory $relative) $record.reportSha256 'Installed-payload report'
+        if (-not (Test-ReleasePlanJsonInteger $report.schemaVersion) -or $report.schemaVersion -ne 1 -or
+            $report.purpose -cne 'installed-payload-parity' -or $report.success -isnot [bool] -or -not $report.success -or
+            $report.packageSha256 -cne $PackageSha256 -or $report.verifierSha256 -cne $VerifierSha256 -or
+            $report.archiveNamePolicySha256 -cne $ArchivePolicySha256 -or
+            $report.scope -cne 'exhaustive-current-plus-two-exact-relocated-root-tools' -or
+            $report.expectedInventorySha256 -cnotmatch '^[0-9A-F]{64}$' -or
+            $report.expectedInventorySha256 -cne $report.installedInventorySha256 -or
+            @($report.missing).Count -ne 0 -or @($report.unexpected).Count -ne 0 -or @($report.changed).Count -ne 0 -or
+            @($report.excludedCurrentFiles).Count -ne 0 -or
+            -not (Test-ReleasePlanJsonInteger $report.expectedFileCount) -or $report.expectedFileCount -le 0 -or
+            $report.expectedFileCount -ne $report.installedFileCount -or
+            $record.success -isnot [bool] -or -not $record.success -or $record.packageSha256 -cne $report.packageSha256 -or
+            $record.expectedInventorySha256 -cne $report.expectedInventorySha256 -or
+            $record.installedInventorySha256 -cne $report.installedInventorySha256) {
+            throw 'Lifecycle installed-payload report does not prove exact candidate parity.'
+        }
+    }
+}
+
 $ReleasePlan = Read-ReleasePlan $ReleasePlanPath $ApprovedReleasePlanSha256
 $Candidate = Read-LifecycleCandidate $CandidateManifestPath $ApprovedCandidateManifestSha256 $ReleasePlan
 $Repo = Assert-ReleaseOrdinaryPath -Path $ProjectRoot
@@ -244,6 +277,7 @@ $LifecycleRoot = Join-Path $PSScriptRoot 'lifecycle'
 $PersonalVerifier = Join-Path $LifecycleRoot 'verify_personal.py'
 $FreshVerifier = Join-Path $LifecycleRoot 'verify_fresh.py'
 $PackageComparator = Join-Path $LifecycleRoot 'compare_nupkg.py'
+$InstalledPayloadVerifier = Join-Path $LifecycleRoot 'verify_installed_payload.py'
 $PriorSyntheticPlanner = Assert-SyntheticPlannerFixture `
     (Join-Path $LifecycleRoot 'fixtures\planner-state.v1.json') `
     $ReleasePlan.MigrationSourceVersion
@@ -253,15 +287,18 @@ $GatherPackage = Join-Path $Repo 'packages\bdo_gathering_companion'
 $GatherMigrationGate = Join-Path $LifecycleRoot 'gathering_lazy_migration_gate_test.dart'
 foreach ($requiredPath in @(
     $Python, $Flutter, $Edge, $PersonalVerifier, $FreshVerifier,
-    $PackageComparator, $GatherMigrationGate
+    $PackageComparator, $GatherMigrationGate, $InstalledPayloadVerifier
 )) { $null = Get-Item -LiteralPath (Assert-ReleaseOrdinaryPath -Path $requiredPath) -Force -ErrorAction Stop }
 if (-not (Test-Path -LiteralPath $GatherPackage -PathType Container)) { throw 'Gathering package is unavailable.' }
+$GatheringDependencyEvidence = Assert-ReleasePreparedDependencies -PackageRoot $GatherPackage -FlutterPath $Flutter `
+    -ReceiptPath $GatheringDependencyReceiptPath -ApprovedReceiptSha256 $ApprovedGatheringDependencyReceiptSha256
 $LifecycleContext = Get-LifecycleContext @{
     'release-plan-loader' = (Join-Path $PSScriptRoot 'release_plan.ps1')
     'lifecycle-harness' = $MyInvocation.MyCommand.Path
     'personal-verifier' = $PersonalVerifier
     'fresh-verifier' = $FreshVerifier
     'package-comparator' = $PackageComparator
+    'installed-payload-verifier' = $InstalledPayloadVerifier
     'gathering-gate' = $GatherMigrationGate
     'synthetic-planner' = $PriorSyntheticPlanner
     'python-runtime' = $Python
@@ -270,6 +307,8 @@ $LifecycleContext = Get-LifecycleContext @{
     'gathering-migration-source' = (Join-Path $GatherPackage 'lib\src\services\stable_v017_migration.dart')
     'gathering-session-store' = (Join-Path $GatherPackage 'lib\src\services\session_store.dart')
     'gathering-package-lock' = (Join-Path $GatherPackage 'pubspec.lock')
+    'prepared-dependency-validator' = (Join-Path $PSScriptRoot 'prepared_dependencies.ps1')
+    'gathering-dependency-receipt' = $GatheringDependencyReceiptPath
 }
 if ($Candidate.Artifacts['delta-package'].Bytes -ge $Candidate.Artifacts['full-package'].Bytes) {
     throw 'Candidate delta is not smaller than its full package.'
@@ -320,6 +359,9 @@ if ($Mode -ceq 'PublicRoute') {
         @($LocalFeedReceipt.restoration.errors).Count -ne 0) {
         throw 'LocalFeed lifecycle receipt is not a passed result for these exact inputs.'
     }
+    Assert-LifecycleInstalledParityReports $LocalFeedReceipt.installedPayloadParity (Split-Path -Parent $LocalFeedReceiptPath) `
+        @('upgrade', 'fresh', 'repair') $Candidate.Artifacts['full-package'].Sha256 `
+        (Get-LifecycleFileSha256 $InstalledPayloadVerifier) (Get-LifecycleFileSha256 $PackageComparator)
 }
 elseif (-not [string]::IsNullOrWhiteSpace($LocalFeedReceiptPath) -or
     -not [string]::IsNullOrWhiteSpace($ApprovedLocalFeedReceiptSha256)) {
@@ -394,6 +436,7 @@ $Results = [ordered]@{
     localFeedReceiptSha256 = if ($null -eq $LocalFeedReceipt) { $null } else { $ApprovedLocalFeedReceiptSha256.ToUpperInvariant() }
     success = $false
     steps = [System.Collections.Generic.List[string]]::new()
+    installedPayloadParity = [System.Collections.Generic.List[object]]::new()
 }
 $Fatal = $null
 $RestorationErrors = [System.Collections.Generic.List[string]]::new()
@@ -411,6 +454,26 @@ function Assert-True([bool]$Condition, [string]$Message) {
 
 function Get-Sha256([string]$Path) {
     (Get-FileHash -LiteralPath $Path -Algorithm SHA256).Hash.ToLowerInvariant()
+}
+
+function Invoke-LifecycleInstalledPayload([string]$InstallRoot, [ValidateSet('upgrade', 'fresh', 'repair')][string]$Phase) {
+    Wait-Until { @(Get-TestProcessRecords $InstallRoot).Count -eq 0 } 60 "$Phase payload verification requires stopped application/helpers"
+    $relative = "installed-payload-$Phase.json"
+    $output = Join-Path $Evidence $relative
+    & $Python -I -E -B $InstalledPayloadVerifier --package $CandidateFull `
+        --approved-package-sha256 $Candidate.Artifacts['full-package'].Sha256 `
+        --installed-current (Join-Path $InstallRoot 'current') --output $output
+    Assert-True ($LASTEXITCODE -eq 0) "$Phase installed-payload comparison failed."
+    $report = Get-Content -LiteralPath $output -Raw | ConvertFrom-Json
+    $record = [ordered]@{
+        phase = $Phase; reportPath = $relative; reportSha256 = Get-LifecycleFileSha256 $output
+        packageSha256 = $report.packageSha256; expectedInventorySha256 = $report.expectedInventorySha256
+        installedInventorySha256 = $report.installedInventorySha256; success = $report.success
+    }
+    Assert-LifecycleInstalledParityReports @($record) $Evidence @($Phase) $Candidate.Artifacts['full-package'].Sha256 `
+        (Get-LifecycleFileSha256 $InstalledPayloadVerifier) (Get-LifecycleFileSha256 $PackageComparator)
+    $Results.installedPayloadParity.Add($record)
+    Write-Step "INSTALLED_PAYLOAD_PARITY_$($Phase.ToUpperInvariant()) files=$($report.installedFileCount)"
 }
 
 function Write-JsonNoBom([string]$Path, [object]$Value) {
@@ -973,13 +1036,17 @@ try {
     try {
         $env:BSL_GATHERING_GATE_ROOT = Join-Path $CompositePersonalRoot 'gathering'
         $env:BSL_GATHERING_GATE_RESULT = $gatherGateResultPath
-        $gatherArguments = "test `"$GatherMigrationGate`" --reporter expanded"
+        $null = Assert-ReleasePreparedDependencies -PackageRoot $GatherPackage -FlutterPath $Flutter `
+            -ReceiptPath $GatheringDependencyReceiptPath -ApprovedReceiptSha256 $ApprovedGatheringDependencyReceiptSha256
+        $gatherArguments = "test --no-pub `"$GatherMigrationGate`" --reporter expanded"
         $gatherProcess = Start-Process -FilePath $Flutter -ArgumentList $gatherArguments -WorkingDirectory $GatherPackage -PassThru -Wait -WindowStyle Hidden -RedirectStandardOutput $gatherGateStdout -RedirectStandardError $gatherGateStderr
     } finally {
         $env:BSL_GATHERING_GATE_ROOT = $previousGatherRoot
         $env:BSL_GATHERING_GATE_RESULT = $previousGatherResult
     }
     Assert-True ($gatherProcess.ExitCode -eq 0) "Composite Gathering migration service failed; see $gatherGateStderr"
+    $null = Assert-ReleasePreparedDependencies -PackageRoot $GatherPackage -FlutterPath $Flutter `
+        -ReceiptPath $GatheringDependencyReceiptPath -ApprovedReceiptSha256 $ApprovedGatheringDependencyReceiptSha256
     Assert-True (Test-Path -LiteralPath $gatherGateResultPath -PathType Leaf) 'Composite Gathering migration result is missing.'
     $gatherGateResult = Get-Content -LiteralPath $gatherGateResultPath -Raw | ConvertFrom-Json
     Assert-True ($gatherGateResult.migrated -eq $true -and $gatherGateResult.sessions -eq 1) 'Composite Gathering first-open result is invalid.'
@@ -1004,6 +1071,7 @@ try {
     }
     Write-Step 'INSTALLED_FISH_AND_COMPOSITE_LAZY_GATHERING_SEMANTICS_ARCHIVES_VERIFIED'
 
+    Invoke-LifecycleInstalledPayload $UpgradeInstall 'upgrade'
     Invoke-Uninstall $UpgradeInstall 'upgraded-install'
     Assert-True (Test-Path -LiteralPath $SelectedRoot -PathType Container) 'Uninstall removed the selected personal root.'
     Assert-True ((Get-Sha256 $sentinel) -eq $upgradeBaseline.sentinelSha256) 'Uninstall changed the selected personal sentinel.'
@@ -1044,6 +1112,7 @@ try {
     $Results.freshPersonal = Get-Content -LiteralPath $freshVerifyOutput -Raw | ConvertFrom-Json
     Assert-True ((Get-Sha256 $freshSentinel) -eq $freshSentinelHash) 'Fresh app launch changed the personal sentinel.'
     Write-Step "FRESH_V$($ReleasePlan.Version)_PROFILE_NEUTRAL_AND_EMPTY"
+    Invoke-LifecycleInstalledPayload $FreshInstall 'fresh'
 
     $coldCloseRuns = [System.Collections.Generic.List[object]]::new()
     for ($coldIndex = 1; $coldIndex -le 1; $coldIndex++) {
@@ -1145,6 +1214,7 @@ try {
     $Results.repair = [ordered]@{ file = 'current/BlackSpiritLifeUpdater.exe'; restoredSha256 = $managedHash; personalSentinelSha256 = $freshSentinelHash }
     Write-Step "SAME_VERSION_REPAIR_CONVERGED managedSha256=$managedHash"
 
+    Invoke-LifecycleInstalledPayload $FreshInstall 'repair'
     Invoke-Uninstall $FreshInstall 'fresh-repaired-install'
     Assert-True (Test-Path -LiteralPath $FreshPersonalRoot -PathType Container) 'Fresh uninstall removed the personal root.'
     Assert-True ((Get-Sha256 $freshSentinel) -eq $freshSentinelHash) 'Fresh uninstall changed the personal sentinel.'
@@ -1168,6 +1238,9 @@ try {
     Assert-True ($testCrashEvents.Count -eq 0) 'Windows recorded an Application Error/WER/Hang event for a disposable installed app.'
     Write-Step 'NO_INSTALLED_APP_APPLICATION_ERROR_WER_OR_HANG'
 
+    $requiredParityPhases = if ($Mode -ceq 'LocalFeed') { @('upgrade', 'fresh', 'repair') } else { @('upgrade') }
+    Assert-LifecycleInstalledParityReports $Results.installedPayloadParity.ToArray() $Evidence $requiredParityPhases `
+        $Candidate.Artifacts['full-package'].Sha256 (Get-LifecycleFileSha256 $InstalledPayloadVerifier) (Get-LifecycleFileSha256 $PackageComparator)
     $Results.success = $true
     $Results.finishedAtUtc = [DateTime]::UtcNow.ToString('o')
 } catch {

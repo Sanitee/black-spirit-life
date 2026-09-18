@@ -3,10 +3,14 @@
 
 function New-ReleaseStageMetrics {
     [CmdletBinding()]
-    param([Parameter(Mandatory = $true)][ValidatePattern('^[A-Za-z0-9._-]+$')][string]$RunId)
+    param(
+        [Parameter(Mandatory = $true)][ValidatePattern('^[A-Za-z0-9._-]+$')][string]$RunId,
+        [string]$AutoSavePath
+    )
     return [pscustomobject]@{
         SchemaVersion = 1
         RunId = $RunId
+        AutoSavePath = $AutoSavePath
         StartedAtUtc = [DateTime]::UtcNow.ToString('o')
         Stages = [Collections.Generic.List[object]]::new()
     }
@@ -42,6 +46,9 @@ function Start-ReleaseStage {
         Stopwatch = [Diagnostics.Stopwatch]::StartNew()
     }
     $Metrics.Stages.Add($stage)
+    if (-not [string]::IsNullOrWhiteSpace($Metrics.AutoSavePath)) {
+        Save-ReleaseStageMetrics -Metrics $Metrics -Path $Metrics.AutoSavePath
+    }
     Write-Host "Release stage started: $Name (attempt $Attempt)."
     return $stage
 }
@@ -95,6 +102,9 @@ function Complete-ReleaseStage {
     $Stage.CacheMissReason = $CacheMissReason
     $Stage.FailureCode = $FailureCode
     $Stage.Outcome = $Outcome
+    if (-not [string]::IsNullOrWhiteSpace($Metrics.AutoSavePath)) {
+        Save-ReleaseStageMetrics -Metrics $Metrics -Path $Metrics.AutoSavePath
+    }
     Write-Host "Release stage ${Outcome}: $($Stage.Name)."
 }
 

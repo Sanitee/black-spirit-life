@@ -1,0 +1,122 @@
+{
+  "schemaVersion": 1,
+  "phase": "prepare-build",
+  "approvalReference": "SCHEMA EXAMPLE ONLY. Replace every path/hash/context/test list with reviewed current evidence. Pin ALL later lifecycle/publication helpers, runtimes and dependency receipts in context now: acceptance continuation cannot change context. After build, approve an acceptance continuation preserving these exact gates; append artifact-privacy, package-integrity, local-lifecycle, installed-parity (lifecycle-installed projection), ui-parity, themed-installer, upload, publication and public-verification. Builders derive source from their own script location, not workingDirectory: promote the full maintained tooling set into the approved candidate and invoke its wrapper there. No publication authority is granted by this example.",
+  "stateRoot": "D:\\ApprovedRelease\\workflow-state",
+  "releasePlan": {
+    "path": "D:\\ApprovedRelease\\release-plan.json",
+    "sha256": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+  },
+  "promotionEvidence": {
+    "path": "D:\\ApprovedPromotion\\promotion-report.json",
+    "sha256": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+  },
+  "source": {
+    "root": "D:\\ApprovedPromotion\\source",
+    "fingerprintSha256": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+    "generatedDirectories": [
+      { "path": ".git", "reason": "Review exact newly initialized candidate source-control metadata; not a production-content exclusion." },
+      { "path": "build", "reason": "Review exact candidate generated build output; no reference/data/cache exclusion is implicit." },
+      { "path": ".dart_tool", "reason": "Review package resolution/test intermediates; bind the prepared dependency receipt separately." },
+      { "path": "windows/flutter/ephemeral", "reason": "Review exact Flutter-generated Windows intermediates." },
+      { "path": "windows/storage_ocr/BlackSpiritStorageOcr/bin", "reason": "Review exact pinned OCR producer output directory." },
+      { "path": "windows/storage_ocr/BlackSpiritStorageOcr/obj", "reason": "Review exact pinned OCR producer intermediate directory." }
+    ]
+  },
+  "context": {
+    "powershellVersion": "7.6.5",
+    "osVersion": "REPLACE WITH EXACT REVIEWED OS VERSION",
+    "files": [
+      { "path": "D:\\ApprovedTools\\tool\\release\\workflow_state.ps1", "sha256": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" },
+      { "path": "D:\\ApprovedTools\\tool\\release\\run_release_workflow.ps1", "sha256": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" },
+      { "path": "D:\\ApprovedTools\\tool\\release\\source_promotion.ps1", "sha256": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" },
+      { "path": "D:\\ApprovedTools\\tool\\release\\source_inventory.ps1", "sha256": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" },
+      { "path": "D:\\ApprovedTools\\tool\\release\\release_plan.ps1", "sha256": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" },
+      { "path": "D:\\ApprovedTools\\tool\\release\\verified_input_cache.ps1", "sha256": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" },
+      { "path": "D:\\ApprovedTools\\tool\\verify_production_source.ps1", "sha256": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" },
+      { "path": "D:\\ApprovedPromotion\\source\\tool\\build_public_stable_candidate.ps1", "sha256": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" },
+      { "path": "D:\\ApprovedPromotion\\source\\tool\\build_stable_release_candidate.ps1", "sha256": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" },
+      { "path": "D:\\ApprovedTools\\tool\\release\\run_lifecycle_rehearsal.ps1", "sha256": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" },
+      { "path": "D:\\ApprovedTools\\tool\\release\\lifecycle\\verify_personal.py", "sha256": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" },
+      { "path": "D:\\ApprovedTools\\tool\\release\\lifecycle\\verify_fresh.py", "sha256": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" },
+      { "path": "D:\\ApprovedTools\\tool\\release\\lifecycle\\verify_installed_payload.py", "sha256": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" },
+      { "path": "D:\\ApprovedTools\\tool\\release\\lifecycle\\compare_nupkg.py", "sha256": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" },
+      { "path": "D:\\ApprovedTools\\tool\\release\\lifecycle\\gathering_lazy_migration_gate_test.dart", "sha256": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" },
+      { "path": "D:\\ApprovedTools\\tool\\release\\lifecycle\\fixtures\\planner-state.v1.json", "sha256": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" },
+      { "path": "D:\\ApprovedTools\\tool\\release\\publish_verified_release.ps1", "sha256": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" },
+      { "path": "D:\\ApprovedRuntime\\pwsh.exe", "sha256": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" },
+      { "path": "D:\\ApprovedRuntime\\python.exe", "sha256": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" },
+      { "path": "D:\\ApprovedRuntime\\msedge.exe", "sha256": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" },
+      { "path": "D:\\ApprovedFlutter\\bin\\cache\\dart-sdk\\bin\\dart.exe", "sha256": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" },
+      { "path": "D:\\ApprovedFlutter\\bin\\cache\\flutter_tools.snapshot", "sha256": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" },
+      { "path": "D:\\ApprovedRelease\\dependency-receipt.json", "sha256": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" }
+    ],
+    "environment": [
+      { "name": "PATH", "value": "REPLACE WITH EXACT REVIEWED PROCESS PATH" },
+      { "name": "PATHEXT", "value": ".COM;.EXE;.BAT;.CMD" },
+      { "name": "FLUTTER_ROOT", "value": null },
+      { "name": "PUB_CACHE", "value": null }
+    ]
+  },
+  "gates": [
+    {
+      "id": "approved-promotion",
+      "kind": "source-parity",
+      "description": "Revalidate the complete retained approved source and the reviewed file-level Beta promotion report.",
+      "command": null,
+      "testDiscovery": null,
+      "resolvedTests": [],
+      "inputs": [],
+      "validation": { "type": "promotion", "reportPath": null, "checks": [], "package": null }
+    },
+    {
+      "id": "source-privacy",
+      "kind": "source-privacy",
+      "description": "Run the exact maintained source verifier against this promoted root; require exit zero plus its completion marker.",
+      "command": {
+        "executable": { "path": "D:\\ApprovedRuntime\\pwsh.exe", "sha256": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" },
+        "workingDirectory": "D:\\ApprovedPromotion\\source",
+        "arguments": [ "-NoProfile", "-NonInteractive", "-ExecutionPolicy", "Bypass", "-File", "D:\\ApprovedTools\\tool\\verify_production_source.ps1", "-ProjectRoot", "D:\\ApprovedPromotion\\source" ]
+      },
+      "testDiscovery": null,
+      "resolvedTests": [],
+      "inputs": [],
+      "validation": { "type": "source-privacy", "reportPath": "stdout.log", "checks": [], "package": null }
+    },
+    {
+      "id": "full-application-tests",
+      "kind": "application-tests",
+      "description": "Replace the illustration with the complete reviewed discovery. Add distinct gates for package test roots; do not narrow a failed full gate.",
+      "command": {
+        "executable": { "path": "D:\\ApprovedFlutter\\bin\\cache\\dart-sdk\\bin\\dart.exe", "sha256": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" },
+        "workingDirectory": "D:\\ApprovedPromotion\\source",
+        "arguments": [ "D:\\ApprovedFlutter\\bin\\cache\\flutter_tools.snapshot", "test", "--no-pub", "--machine" ]
+      },
+      "testDiscovery": { "root": "D:\\ApprovedPromotion\\source\\test", "suffix": "_test.dart" },
+      "resolvedTests": [
+        { "path": "D:\\ApprovedPromotion\\source\\test\\REPLACE_WITH_COMPLETE_DISCOVERY_test.dart", "sha256": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" }
+      ],
+      "inputs": [],
+      "validation": { "type": "flutter-tests", "reportPath": "stdout.log", "checks": [], "package": null }
+    },
+    {
+      "id": "candidate-build",
+      "kind": "build",
+      "description": "Build only. A verified candidate report does not satisfy artifact privacy, installed parity, lifecycle or public acceptance.",
+      "command": {
+        "executable": { "path": "D:\\ApprovedRuntime\\pwsh.exe", "sha256": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" },
+        "workingDirectory": "D:\\ApprovedPromotion\\source",
+        "arguments": [
+          "-NoProfile", "-NonInteractive", "-ExecutionPolicy", "Bypass", "-File", "D:\\ApprovedPromotion\\source\\tool\\build_public_stable_candidate.ps1",
+          "-ReleasePlanPath", "D:\\ApprovedRelease\\release-plan.json", "-ApprovedReleasePlanSha256", "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+          "-DependencyReceiptPath", "D:\\ApprovedRelease\\dependency-receipt.json", "-ApprovedDependencyReceiptSha256", "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+          "-ConfirmPublicCandidateOnly", "-WorkflowReportPath", "{reportPath}"
+        ]
+      },
+      "testDiscovery": null,
+      "resolvedTests": [],
+      "inputs": [],
+      "validation": { "type": "candidate-build", "reportPath": "candidate-build.json", "checks": [], "package": null }
+    }
+  ]
+}

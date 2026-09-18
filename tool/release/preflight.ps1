@@ -1,5 +1,6 @@
 # Read-only prerequisites for the existing Windows release builder. This does
 # not replace source/parity/privacy gates and never prepares dependencies.
+. (Join-Path $PSScriptRoot 'prepared_dependencies.ps1')
 
 function Assert-ReleaseCommandExit {
     [CmdletBinding()]
@@ -141,6 +142,8 @@ function Invoke-ReleasePreflight {
         [string]$DotnetPath,
         [string]$GitPath,
         [string]$TarPath,
+        [string]$DependencyReceiptPath,
+        [string]$ApprovedDependencyReceiptSha256,
         [string[]]$RequiredRelativeFiles = @(),
         [ValidateRange(0, [long]::MaxValue)][long]$MinimumFreeBytes = 0
     )
@@ -216,6 +219,12 @@ function Invoke-ReleasePreflight {
         TarPath = Resolve-ReleaseToolPath -Name 'tar' -ExplicitPath $TarPath
     }
     $versions = Get-ReleaseToolVersionEvidence -Tools $tools
+    $dependencyEvidence = $null
+    if (-not [string]::IsNullOrWhiteSpace($DependencyReceiptPath) -or
+        -not [string]::IsNullOrWhiteSpace($ApprovedDependencyReceiptSha256)) {
+        $dependencyEvidence = Assert-ReleasePreparedDependencies -PackageRoot $root -FlutterPath $tools.FlutterPath `
+            -ReceiptPath $DependencyReceiptPath -ApprovedReceiptSha256 $ApprovedDependencyReceiptSha256
+    }
     $sdkConstraint = [regex]::Match($pubspec, '(?m)^\s+sdk:\s*\^([0-9]+\.[0-9]+\.[0-9]+)\s*$')
     if ($sdkConstraint.Success) {
         $minimumDart = [version]$sdkConstraint.Groups[1].Value
@@ -238,7 +247,8 @@ function Invoke-ReleasePreflight {
         buildNumber = $BuildNumber
         toolVersions = $versions
         requiredFileCount = $required.Count
-        noPubPrerequisite = 'present-and-parsed'
+        noPubPrerequisite = $(if ($null -eq $dependencyEvidence) { 'present-and-parsed' } else { $dependencyEvidence.noPubPrerequisite })
+        preparedDependencies = $dependencyEvidence
         availableBytes = $availableBytes
         minimumFreeBytes = $MinimumFreeBytes
         isReleaseVerification = $false

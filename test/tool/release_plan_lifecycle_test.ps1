@@ -12,6 +12,7 @@ $comparator = Join-Path $lifecycleRoot 'compare_nupkg.py'
 $personalVerifier = Join-Path $lifecycleRoot 'verify_personal.py'
 $freshVerifier = Join-Path $lifecycleRoot 'verify_fresh.py'
 . $planLoader
+. (Join-Path $repositoryRoot 'tool\release\prepared_dependencies.ps1')
 Add-Type -AssemblyName System.IO.Compression
 Add-Type -AssemblyName System.IO.Compression.FileSystem
 
@@ -99,6 +100,19 @@ try {
     Set-FixtureFile (Join-Path $projectRoot 'packages\bdo_gathering_companion\lib\src\services\stable_v017_migration.dart') '// synthetic migration source'
     Set-FixtureFile (Join-Path $projectRoot 'packages\bdo_gathering_companion\lib\src\services\session_store.dart') '// synthetic session store'
     Set-FixtureFile (Join-Path $projectRoot 'packages\bdo_gathering_companion\pubspec.lock') 'packages: {}'
+    $gatherRoot = Join-Path $projectRoot 'packages\bdo_gathering_companion'
+    Set-FixtureFile (Join-Path $gatherRoot 'pubspec.yaml') 'name: bdo_gathering_companion'
+    Set-FixtureFile (Join-Path $gatherRoot '.dart_tool\package_config.json') '{"configVersion":2,"generator":"pub","generatorVersion":"3.12.2","packages":[{"name":"bdo_gathering_companion","rootUri":"../","packageUri":"lib/"}]}'
+    $flutterPath = Join-Path $fixtureRoot 'sdk\bin\flutter.bat'
+    Set-FixtureFile $flutterPath "@echo off`r`nexit /b 97`r`n"
+    Set-FixtureFile (Join-Path $fixtureRoot 'sdk\bin\cache\flutter.version.json') '{"frameworkVersion":"3.44.0","dartSdkVersion":"3.12.2"}'
+    Set-FixtureFile (Join-Path $fixtureRoot 'sdk\bin\cache\dart-sdk\bin\dart.exe') 'synthetic-dart'
+    Set-FixtureFile (Join-Path $fixtureRoot 'sdk\bin\cache\flutter_tools.snapshot') 'synthetic-tools'
+    $dependencyReceiptPath = Join-Path $fixtureRoot 'synthetic-dependency-receipt.json'
+    $dependencyReceiptHash = Write-JsonFile $dependencyReceiptPath ([ordered]@{
+        schemaVersion = 1; resolutionSucceeded = $true; command = 'flutter pub get --enforce-lockfile'
+        snapshot = (Get-ReleaseDependencySnapshot $gatherRoot $flutterPath)
+    })
 
     $historyRoot = Join-Path $fixtureRoot 'history'
     $previousSetup = Join-Path $historyRoot 'BlackSpiritLifeSetup-0.1.11.exe'
@@ -223,7 +237,9 @@ try {
         EvidenceRoot = $evidenceRoot
         DisposableBase = $disposableRoot
         PythonPath = $script:python
-        FlutterPath = $shellPath
+        FlutterPath = $flutterPath
+        GatheringDependencyReceiptPath = $dependencyReceiptPath
+        ApprovedGatheringDependencyReceiptSha256 = $dependencyReceiptHash
         EdgePath = $shellPath
         Mode = 'LocalFeed'
         PreflightOnly = $true
@@ -232,6 +248,12 @@ try {
     $preflight = $preflightText | ConvertFrom-Json
     Assert-Fixture ($preflight.status -ceq 'preflight-passed' -and $preflight.installExecuted -eq $false) 'LocalFeed preflight passes without executing an install.'
     Assert-Fixture (-not (Test-Path -LiteralPath $evidenceRoot) -and -not (Test-Path -LiteralPath $disposableRoot)) 'Preflight creates no evidence or disposable directories.'
+    Set-FixtureFile (Join-Path $gatherRoot 'pubspec.lock') 'packages: {changed: true}'
+    Assert-Rejected { & $harness @arguments } 'dependency receipt is stale'
+    Set-FixtureFile (Join-Path $gatherRoot 'pubspec.lock') 'packages: {}'
+    $badDependency = $arguments.Clone()
+    $badDependency.ApprovedGatheringDependencyReceiptSha256 = ('0' * 64)
+    Assert-Rejected { & $harness @badDependency } 'dependency receipt SHA-256'
 
     $existingEvidence = Join-Path $fixtureRoot 'outputs\already-exists'
     $null = [IO.Directory]::CreateDirectory($existingEvidence)
@@ -250,6 +272,26 @@ try {
     $publicArguments.EvidenceRoot = Join-Path $fixtureRoot 'outputs\evidence-public'
     $publicArguments.DisposableBase = Join-Path $fixtureRoot 'outputs\bsl-lifecycle-public'
     Assert-Rejected { & $harness @publicArguments } 'requires an approved passed LocalFeed receipt'
+    $parityRecords = @()
+    foreach ($phase in @('upgrade', 'fresh', 'repair')) {
+        $relative = "installed-payload-$phase.json"
+        $syntheticParity = [ordered]@{
+            schemaVersion = 1; purpose = 'installed-payload-parity'; success = $true
+            scope = 'exhaustive-current-plus-two-exact-relocated-root-tools'
+            packageSha256 = (Get-FileHash -LiteralPath $candidateFull -Algorithm SHA256).Hash
+            verifierSha256 = (Get-FileHash -LiteralPath (Join-Path $lifecycleRoot 'verify_installed_payload.py') -Algorithm SHA256).Hash
+            archiveNamePolicySha256 = (Get-FileHash -LiteralPath $comparator -Algorithm SHA256).Hash
+            expectedInventorySha256 = ('E' * 64); installedInventorySha256 = ('E' * 64)
+            expectedFileCount = 6; installedFileCount = 6
+            missing = @(); unexpected = @(); changed = @(); excludedCurrentFiles = @()
+        }
+        $reportHash = Write-JsonFile (Join-Path $fixtureRoot $relative) $syntheticParity
+        $parityRecords += [ordered]@{
+            phase = $phase; reportPath = $relative; reportSha256 = $reportHash
+            packageSha256 = $syntheticParity.packageSha256; expectedInventorySha256 = ('E' * 64)
+            installedInventorySha256 = ('E' * 64); success = $true
+        }
+    }
     $receipt = [ordered]@{
         schemaVersion = 1
         success = $true
@@ -260,6 +302,7 @@ try {
         syntheticFixtureSha256 = $preflight.syntheticFixtureSha256
         lifecycleContextSha256 = $preflight.lifecycleContextSha256
         restoration = [ordered]@{ errors = @() }
+        installedPayloadParity = $parityRecords
     }
     $receiptPath = Join-Path $fixtureRoot 'local-feed-receipt.json'
     $receiptHash = Write-JsonFile $receiptPath $receipt
@@ -268,6 +311,21 @@ try {
     $publicText = @(& $harness @publicArguments) -join "`n"
     $publicPreflight = $publicText | ConvertFrom-Json
     Assert-Fixture ($publicPreflight.localReceiptReused -eq $true -and $publicPreflight.mode -ceq 'PublicRoute') 'PublicRoute accepts only the exact matching passed receipt.'
+    $heldReport = Join-Path $fixtureRoot 'installed-payload-repair.json'
+    [IO.File]::Move($heldReport, ($heldReport + '.held'))
+    Assert-Rejected { & $harness @publicArguments } 'does not exist|cannot find|unavailable'
+    [IO.File]::Move(($heldReport + '.held'), $heldReport)
+    $parityOriginal = [IO.File]::ReadAllText($heldReport)
+    Set-FixtureFile $heldReport ($parityOriginal + ' ')
+    Assert-Rejected { & $harness @publicArguments } 'SHA-256 does not match'
+    Set-FixtureFile $heldReport $parityOriginal
+    $shortReceipt = Copy-JsonObject $receipt
+    $shortReceipt.installedPayloadParity = @($shortReceipt.installedPayloadParity[0])
+    $shortReceiptPath = Join-Path $fixtureRoot 'missing-parity-local.json'
+    $shortHash = Write-JsonFile $shortReceiptPath $shortReceipt
+    $shortArgs = $publicArguments.Clone()
+    $shortArgs.LocalFeedReceiptPath = $shortReceiptPath; $shortArgs.ApprovedLocalFeedReceiptSha256 = $shortHash
+    Assert-Rejected { & $harness @shortArgs } 'parity reports are incomplete'
     $publicArguments.ApprovedLocalFeedReceiptSha256 = ('0' * 64)
     Assert-Rejected { & $harness @publicArguments } 'SHA-256 does not match|SHA-256 mismatch'
     $wrongReceipt = Copy-JsonObject $receipt

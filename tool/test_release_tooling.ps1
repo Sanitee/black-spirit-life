@@ -20,7 +20,14 @@ $testNames = @(
     'publish_verified_release_test.ps1',
     'release_source_promotion_test.ps1',
     'release_plan_lifecycle_test.ps1',
-    'release_git_privacy_scan_test.ps1'
+    'release_git_privacy_scan_test.ps1',
+    'release_build_checkpoint_test.ps1',
+    'release_metrics_durability_test.ps1',
+    'release_dependency_native_test.ps1',
+    'release_streaming_scan_test.ps1',
+    'release_workflow_test.ps1',
+    'release_installed_payload_test.ps1',
+    'release_checkpoint_builder_test.ps1'
 )
 $runId = 'self-tests-' + [Guid]::NewGuid().ToString('N')
 $output = Join-Path $project "build/release-tooling-tests/$runId"
@@ -36,7 +43,7 @@ foreach ($relative in $initialReleasePaths) {
 }
 foreach ($relative in @('tool/test_release_tooling.ps1', 'tool/build_stable_release_candidate.ps1',
     'tool/build_public_stable_candidate.ps1', 'tool/verify_production_source.ps1',
-    'test/tool/test_git_object_privacy.py')) { $toolingInputPaths.Add($relative) }
+    'test/tool/test_git_object_privacy.py', 'test/tool/test_installed_payload.py')) { $toolingInputPaths.Add($relative) }
 foreach ($testName in $testNames) { $toolingInputPaths.Add('test/tool/' + $testName) }
 $toolingInputPaths.Sort([StringComparer]::Ordinal)
 $toolingInputs = @($toolingInputPaths | ForEach-Object {

@@ -5,6 +5,13 @@ param(
     [string]$ReleaseInputCacheRoot,
     [string]$PreviousFeedPath,
     [string]$PreviousPackagePath,
+    [Parameter(Mandatory = $true)][string]$DependencyReceiptPath,
+    [Parameter(Mandatory = $true)][string]$ApprovedDependencyReceiptSha256,
+    [string]$BuildRetryProfilePath,
+    [string]$ApprovedBuildRetryProfileSha256,
+    [string]$ResumeBundleReceiptPath,
+    [string]$ApprovedResumeBundleReceiptSha256,
+    [string]$WorkflowReportPath,
     [switch]$OfflinePinnedInputs,
     [ValidateRange(0, [long]::MaxValue)][long]$MinimumFreeBytes = 0,
 
@@ -31,8 +38,11 @@ $arguments = @{
     ApprovedReleasePlanSha256 = $ApprovedReleasePlanSha256
     OfflinePinnedInputs = $OfflinePinnedInputs
     MinimumFreeBytes = $MinimumFreeBytes
+    DependencyReceiptPath = $DependencyReceiptPath
+    ApprovedDependencyReceiptSha256 = $ApprovedDependencyReceiptSha256
 }
-foreach ($name in @('ReleaseInputCacheRoot', 'PreviousFeedPath', 'PreviousPackagePath')) {
+foreach ($name in @('ReleaseInputCacheRoot', 'PreviousFeedPath', 'PreviousPackagePath',
+    'BuildRetryProfilePath', 'ApprovedBuildRetryProfileSha256', 'ResumeBundleReceiptPath', 'ApprovedResumeBundleReceiptSha256', 'WorkflowReportPath')) {
     $value = Get-Variable -Name $name -ValueOnly
     if (-not [string]::IsNullOrWhiteSpace($value)) { $arguments[$name] = $value }
 }
