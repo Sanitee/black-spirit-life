@@ -45,19 +45,26 @@ void main() {
   ).readAsStringSync();
 
   test('public candidate requires the permanent GitHub stable identity', () {
-    expect(wrapper, contains('[string]\$PublicGitHubRepository'));
+    expect(wrapper, contains('[string]\$ReleasePlanPath'));
     expect(
       wrapper,
-      contains('PublicGitHubRepository = \$PublicGitHubRepository'),
+      contains('ReleasePlanPath = \$ReleasePlanPath'),
     );
-    expect(builder, contains('https://github.com/OWNER/REPOSITORY'));
-    expect(builder, isNot(contains('Sanitee')));
-    expect(wrapper, isNot(contains('Sanitee')));
-    expect(builder, contains("\$Version = '0.1.11'"));
-    expect(builder, contains("\$BuildNumber = '30'"));
-    expect(builder, contains("\$PreviousStableVersion = '0.1.10'"));
-    expect(builder, contains("\$UpdateChannel = 'win-x64-stable'"));
-    expect(builder, contains("docs\\releases\\0.1.11.md"));
+    expect(wrapper, contains('[string]\$ApprovedReleasePlanSha256'));
+    expect(
+      wrapper,
+      contains('ApprovedReleasePlanSha256 = \$ApprovedReleasePlanSha256'),
+    );
+    expect(builder, contains('Read-ReleasePlan'));
+    expect(builder, contains('\$Version = \$ReleasePlan.Version'));
+    expect(builder, contains('\$BuildNumber = [string]\$ReleasePlan.BuildNumber'));
+    expect(
+      builder,
+      contains('\$PreviousStableVersion = \$ReleasePlan.PreviousVersion'),
+    );
+    expect(builder, contains('\$UpdateChannel = \$ReleasePlan.Channel'));
+    expect(builder, contains('\$UpdateSource = \$ReleasePlan.Repository'));
+    expect(builder, contains('\$sourceCommit -cne \$ReleasePlan.ExpectedCommit'));
     expect(builder, contains('tag --points-at HEAD'));
     expect(builder, contains('rev-list --count HEAD'));
     expect(builder, contains('previousSourceTag'));
@@ -72,18 +79,13 @@ void main() {
     );
     expect(builder, contains('publishedPreviousFeed'));
     expect(builder, contains('publishedPreviousAssets'));
-    expect(
-      builder,
-      contains(
-        'AD0648B40D08F3C84388587E21A06D98CE74357BE8C662D60F32724AB01705C6',
-      ),
-    );
-    expect(
-      builder,
-      contains(
-        'B8BFEE6EDB7A212DDDA7CDE9080FFF346F4232AFDB2DE6822ADF870E43C3926D',
-      ),
-    );
+    expect(builder, contains('\$ReleasePlan.PreviousFeedSha256'));
+    expect(builder, contains('\$ReleasePlan.PreviousFullPackageSha256'));
+    expect(builder, contains("'approved-release-plan.json'"));
+    expect(builder, contains('releasePlan = [ordered]@{'));
+    expect(builder, contains('sha256 = \$ReleasePlan.Sha256'));
+    expect(builder, isNot(contains("\$Version = '0.1.")));
+    expect(builder, isNot(contains("\$PreviousStableVersion = '0.1.")));
     expect(builder, contains('deltaPackageName'));
     expect(builder, contains("\$feedAssets.Count -ne 3"));
     expect(builder, contains("\$_.Type -ceq 'Delta'"));
@@ -109,7 +111,12 @@ void main() {
     );
     expect(builder, contains('\$bundleFishHost'));
     expect(builder, contains('-ExpectedPayloads @(\$FishHostHelperName)'));
-    expect(builder, contains('fresh-clone privacy and release-artifact scan'));
+    expect(
+      builder,
+      contains('\$RemainingBlockers = @(\$ReleasePlan.RemainingBlockers)'),
+    );
+    expect(builder, contains("'verify_production_source.ps1'"));
+    expect(builder, contains('& \$productionVerifier -ProjectRoot \$ProjectRoot'));
   });
 
   test('public candidate prepares artifacts but never publishes', () {

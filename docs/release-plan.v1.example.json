@@ -1,0 +1,40 @@
+{
+  "schemaVersion": 1,
+  "publicationAuthorizedByThisFile": false,
+  "identity": {
+    "repository": "https://github.com/OWNER/REPOSITORY",
+    "packageId": "BlackSpiritLife.App",
+    "channel": "win-x64-stable",
+    "version": "1.2.4",
+    "previousPublishedVersion": "1.2.3",
+    "buildNumber": 1,
+    "releaseNotesRelativePath": "docs/releases/1.2.4.md",
+    "outputDirectoryName": "public-stable-candidate",
+    "manifestName": "public-candidate-manifest.json"
+  },
+  "source": {
+    "expectedCommit": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "reviewedParentCommit": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+    "previousPublishedCommit": "cccccccccccccccccccccccccccccccccccccccc",
+    "expectedTag": "v1.2.4",
+    "previousPublishedTag": "v1.2.3"
+  },
+  "historicalInputs": {
+    "previousFeed": { "bytes": 1, "sha256": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" },
+    "previousFullPackage": { "bytes": 1, "sha256": "BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB" }
+  },
+  "lifecycle": {
+    "previousSetup": {
+      "fileName": "BlackSpiritLife.App-win-x64-stable-Setup.exe",
+      "bytes": 1,
+      "sha256": "CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC"
+    },
+    "migrationSourceVersion": "0.1.7",
+    "syntheticFixtureSchemaVersion": 1
+  },
+  "remainingBlockers": [
+    "This is a synthetic schema example, not an approved release plan.",
+    "Replace every example release identity, commit, size and hash with reviewed evidence.",
+    "Complete source parity/privacy, application, artifact, installed-state and public-route gates."
+  ]
+}

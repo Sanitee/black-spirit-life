@@ -2,22 +2,25 @@
 param(
     [Parameter(Mandatory = $true)][string]$PreviousFeedPath,
     [Parameter(Mandatory = $true)][string]$PreviousPackagePath,
-    [Parameter(Mandatory = $true)][string]$PublicGitHubRepository
+    [Parameter(Mandatory = $true)][string]$ReleasePlanPath,
+    [Parameter(Mandatory = $true)][string]$ApprovedReleasePlanSha256
 )
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
 $project = [IO.Path]::GetFullPath((Join-Path $PSScriptRoot '../..'))
 . (Join-Path $project 'tool/release/verified_input_cache.ps1')
+. (Join-Path $project 'tool/release/release_plan.ps1')
+$releasePlan = Read-ReleasePlan `
+    -Path $ReleasePlanPath `
+    -ExpectedSha256 $ApprovedReleasePlanSha256
 $builder = Join-Path $project 'tool/build_stable_release_candidate.ps1'
 $parseErrors = $null
 $ast = [Management.Automation.Language.Parser]::ParseFile($builder, [ref]$null, [ref]$parseErrors)
 if ($parseErrors.Count -ne 0) { throw 'Builder syntax is invalid.' }
 
-# Read only the reviewed constants and validators from the actual builder.
-# Do not execute its build/release flow or weaken its source-provenance gates.
-$constantNames = @('PackageId', 'PreviousStableVersion', 'UpdateChannel',
-    'DisplayName', 'ExecutableName', 'UpdaterHelperName', 'PreviousFeedBytes',
-    'PreviousFeedSha256', 'PreviousFullPackageBytes', 'PreviousFullPackageSha256',
+# Read only policy constants and validators from the actual builder. Release
+# identity and historical hashes come from the same reviewed plan as a build.
+$constantNames = @('DisplayName', 'ExecutableName', 'UpdaterHelperName',
     'ForbiddenPackagedArtifactPattern')
 foreach ($name in $constantNames) {
     $assignment = @($ast.EndBlock.Statements | Where-Object {
@@ -28,6 +31,13 @@ foreach ($name in $constantNames) {
     if ($assignment.Count -ne 1) { throw "Expected exactly one reviewed constant: $name" }
     . ([scriptblock]::Create($assignment[0].Extent.Text))
 }
+$PackageId = $releasePlan.PackageId
+$PreviousStableVersion = $releasePlan.PreviousVersion
+$UpdateChannel = $releasePlan.Channel
+$PreviousFeedBytes = $releasePlan.PreviousFeedBytes
+$PreviousFeedSha256 = $releasePlan.PreviousFeedSha256
+$PreviousFullPackageBytes = $releasePlan.PreviousFullPackageBytes
+$PreviousFullPackageSha256 = $releasePlan.PreviousFullPackageSha256
 $packageFunction = @($ast.EndBlock.Statements | Where-Object {
     $_ -is [Management.Automation.Language.FunctionDefinitionAst] -and $_.Name -ceq 'Assert-VelopackPackage'
 })
@@ -53,8 +63,8 @@ foreach ($phase in @('import', 'warm')) {
     $null = [IO.Directory]::CreateDirectory($destination)
     foreach ($kind in @('feed', 'package')) {
         $argsForInput = @{
-            CacheRoot = $cache; Repository = $PublicGitHubRepository
-            ReleaseTag = "v$PreviousStableVersion"; Channel = $UpdateChannel
+            CacheRoot = $cache; Repository = $releasePlan.Repository
+            ReleaseTag = $releasePlan.PreviousTag; Channel = $UpdateChannel
             Offline = $true; Download = { throw 'Measurement must never download.' }
         }
         if ($kind -eq 'feed') {
@@ -87,6 +97,7 @@ $report = [ordered]@{
     powershell = $PSVersionTable.PSVersion.ToString()
     isReleaseVerification = $false
     builderSha256 = (Get-FileHash -LiteralPath $builder -Algorithm SHA256).Hash
+    releasePlanSha256 = $releasePlan.Sha256
     avoidedWarmDownloadBytes = $PreviousFullPackageBytes + $PreviousFeedBytes
     records = @($records.ToArray())
 }

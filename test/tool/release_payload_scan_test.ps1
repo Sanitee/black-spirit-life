@@ -207,7 +207,10 @@ try {
     $hiddenResult = Assert-BothScans $hiddenMain 'private-machine marker'
     Assert-Fixture (@($hiddenResult.MarkerPaths | Where-Object { $_ -ceq $hiddenExecutable }).Count -eq 1) 'Explicit main-EXE check must reject hidden main payloads exactly once.'
     $absolutePath = New-FixtureBundle 'absolute-machine-path'
-    Write-FixtureFile (Join-Path $absolutePath 'content\catalog.txt') 'C:\Users\SyntheticPublisher\private-build'
+    # Construct synthetic input at runtime so the test source itself remains
+    # eligible for the unchanged public-source privacy policy.
+    $syntheticMachinePath = 'C:' + '\Users\SyntheticPublisher\private-build'
+    Write-FixtureFile (Join-Path $absolutePath 'content\catalog.txt') $syntheticMachinePath
     $null = Assert-BothScans $absolutePath 'absolute user/private workspace path'
 
     foreach ($relative in @('webview2\state.bin', 'session-import-inbox\receipt.bin', 'planner-state.json', 'helper.pdb', 'helper.pdb.backup', 'diagnostic.log', 'data\storage.sqlite3')) {

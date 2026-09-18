@@ -9,7 +9,10 @@ param(
     [ValidateRange(0, [long]::MaxValue)][long]$MinimumFreeBytes = 0,
 
     [Parameter(Mandatory = $true)]
-    [string]$PublicGitHubRepository,
+    [string]$ReleasePlanPath,
+
+    [Parameter(Mandatory = $true)]
+    [string]$ApprovedReleasePlanSha256,
 
     [Parameter(Mandatory = $true)]
     [switch]$ConfirmPublicCandidateOnly
@@ -21,33 +24,27 @@ $ErrorActionPreference = 'Stop'
 . (Join-Path $PSScriptRoot 'release\source_inventory.ps1')
 . (Join-Path $PSScriptRoot 'release\preflight.ps1')
 . (Join-Path $PSScriptRoot 'release\stage_metrics.ps1')
+. (Join-Path $PSScriptRoot 'release\release_plan.ps1')
 
 if (-not $ConfirmPublicCandidateOnly.IsPresent) {
     throw 'Supply -ConfirmPublicCandidateOnly. This script prepares artifacts but never publishes them.'
 }
-if ($PublicGitHubRepository -cnotmatch
-    '^https://github\.com/[A-Za-z0-9](?:[A-Za-z0-9-]{0,38})/[A-Za-z0-9._-]{1,100}$') {
-    throw 'The public update source must be the permanent canonical repository base URL: https://github.com/OWNER/REPOSITORY'
-}
-$Version = '0.1.11'
-$BuildNumber = '30'
-$PreviousStableVersion = '0.1.10'
-$PreviousStableCommit =
-    'af7a4893d7dd811b79d781e47358b7eacd8c0270'
-$ReviewedReleaseParentCommit =
-    'cbc5e391d765d858efda8b332b6b0d6bd5907884'
-$UpdateSource = $PublicGitHubRepository
-$ReleaseNotesRelativePath = 'docs\releases\0.1.11.md'
-$OutputDirectoryName = 'public-stable-candidate'
-$ManifestName = 'public-candidate-manifest.json'
-$RemainingBlockers = @(
-    'verify an installed 0.1.10 updates to 0.1.11 through the in-app update bar with its selected personal-data root intact',
-    'complete fresh install, repair, and uninstall lifecycle verification',
-    'fresh-clone privacy and release-artifact scan'
-)
+$ReleasePlan = Read-ReleasePlan `
+    -Path $ReleasePlanPath `
+    -ExpectedSha256 $ApprovedReleasePlanSha256
+$Version = $ReleasePlan.Version
+$BuildNumber = [string]$ReleasePlan.BuildNumber
+$PreviousStableVersion = $ReleasePlan.PreviousVersion
+$PreviousStableCommit = $ReleasePlan.PreviousCommit
+$ReviewedReleaseParentCommit = $ReleasePlan.ReviewedParentCommit
+$UpdateSource = $ReleasePlan.Repository
+$ReleaseNotesRelativePath = $ReleasePlan.ReleaseNotesRelativePath
+$OutputDirectoryName = $ReleasePlan.OutputDirectoryName
+$ManifestName = $ReleasePlan.ManifestName
+$RemainingBlockers = @($ReleasePlan.RemainingBlockers)
 
-$PackageId = 'BlackSpiritLife.App'
-$UpdateChannel = 'win-x64-stable'
+$PackageId = $ReleasePlan.PackageId
+$UpdateChannel = $ReleasePlan.Channel
 $DisplayName = 'Black Spirit Life'
 $InstallerProductName = 'Black Spirit Life Installer'
 $ExecutableName = 'BlackSpiritLife.exe'
@@ -63,12 +60,10 @@ $VelopackRuntimeSha256 =
     'C36D8B984639A8AF9D3397088D3FFB8213FE1BD0917F555CF0C6E33F014403EC'
 $VelopackPackageUrl =
     'https://github.com/velopack/velopack/releases/download/1.2.0/vpk.1.2.0.nupkg'
-$PreviousFeedBytes = 27226L
-$PreviousFeedSha256 =
-    'AD0648B40D08F3C84388587E21A06D98CE74357BE8C662D60F32724AB01705C6'
-$PreviousFullPackageBytes = 724157031L
-$PreviousFullPackageSha256 =
-    'B8BFEE6EDB7A212DDDA7CDE9080FFF346F4232AFDB2DE6822ADF870E43C3926D'
+$PreviousFeedBytes = $ReleasePlan.PreviousFeedBytes
+$PreviousFeedSha256 = $ReleasePlan.PreviousFeedSha256
+$PreviousFullPackageBytes = $ReleasePlan.PreviousFullPackageBytes
+$PreviousFullPackageSha256 = $ReleasePlan.PreviousFullPackageSha256
 $PrivateMachinePathPattern =
     '(?i)[A-Z]:(?:\\{1,2}|/)(?:Users|Codex)(?:\\{1,2}|/)'
 $ForbiddenPackagedArtifactPattern = @(
@@ -567,6 +562,7 @@ $InstallerBuildDirectory = Join-Path (
     Join-Path $ProjectRoot 'build\rc-i'
 ) "$PID-$([Guid]::NewGuid().ToString('N').Substring(0, 8))"
 $ManifestPath = Join-Path $RunRoot $ManifestName
+$ApprovedPlanCopy = Join-Path $RunRoot 'approved-release-plan.json'
 $fullPackageName = "$PackageId-$Version-$UpdateChannel-full.nupkg"
 $deltaPackageName = "$PackageId-$Version-$UpdateChannel-delta.nupkg"
 $previousFullPackageName =
@@ -583,14 +579,15 @@ try {
 $effectiveMinimumFreeBytes = [Math]::Max($MinimumFreeBytes,
     [long](3 * $PreviousFullPackageBytes + 3 * $PreviousFeedBytes))
 $preflight = Invoke-ReleasePreflight -ProjectRoot $ProjectRoot -Version $Version `
-    -BuildNumber $BuildNumber -PublicGitHubRepository $PublicGitHubRepository `
+    -BuildNumber $BuildNumber -PublicGitHubRepository $UpdateSource `
     -MinimumFreeBytes $effectiveMinimumFreeBytes `
     -FlutterPath $FlutterPath -CMakePath $CMakePath -RequiredRelativeFiles @(
         $ReleaseNotesRelativePath, 'lib/app_identity.dart',
         'windows/runner/resources/app_icon.ico',
         'tool/build_stable_release_candidate.ps1', 'tool/verify_production_source.ps1',
         'tool/release/verified_input_cache.ps1', 'tool/release/source_inventory.ps1',
-        'tool/release/preflight.ps1', 'tool/release/stage_metrics.ps1'
+        'tool/release/preflight.ps1', 'tool/release/stage_metrics.ps1',
+        'tool/release/release_plan.ps1'
     )
 $FlutterPath = $preflight.FlutterPath
 $CMakePath = $preflight.CMakePath
@@ -602,13 +599,16 @@ Assert-LastExitCode -Operation 'Git source identity check'
 if ($sourceCommit -notmatch '^[0-9a-f]{40}$') {
     throw 'The committed source identity is invalid.'
 }
-$expectedSourceTag = "v$Version"
+if ($sourceCommit -cne $ReleasePlan.ExpectedCommit) {
+    throw 'The current source commit does not match the approved release plan.'
+}
+$expectedSourceTag = $ReleasePlan.ExpectedTag
 $sourceTags = @(& git -C $ProjectRoot tag --points-at HEAD)
 Assert-LastExitCode -Operation 'Git source tag check'
 if ($sourceTags.Count -ne 1 -or $sourceTags[0] -cne $expectedSourceTag) {
     throw "The public candidate must be built from the one exact source tag $expectedSourceTag."
 }
-$previousSourceTag = "v$PreviousStableVersion"
+$previousSourceTag = $ReleasePlan.PreviousTag
 $previousTaggedCommit = (& git -C $ProjectRoot rev-parse "$previousSourceTag^{commit}").Trim()
 Assert-LastExitCode -Operation 'Previous public source tag check'
 $sourceParentCommit = (& git -C $ProjectRoot rev-parse 'HEAD^').Trim()
@@ -625,8 +625,8 @@ if ($LASTEXITCODE -ne 0) {
 }
 $sourceCommitCount = (& git -C $ProjectRoot rev-list --count HEAD).Trim()
 Assert-LastExitCode -Operation 'Git public history count check'
-if ($sourceCommitCount -cne '14') {
-    throw 'The public candidate must contain only the reviewed public history through Stable 0.1.11.'
+if ($sourceCommitCount -notmatch '^[1-9][0-9]*$') {
+    throw 'The public candidate history count is invalid.'
 }
 $sourceTag = $expectedSourceTag
 Assert-CleanSource -ProjectRoot $ProjectRoot -ExpectedCommit $sourceCommit
@@ -639,10 +639,10 @@ Assert-LastExitCode -Operation 'Production source verification'
 $identity = Get-Content -Raw -LiteralPath $IdentityPath
 $requiredIdentityFragments = @(
     "static const productName = 'Black Spirit Life';",
-    "static const releaseChannel = 'win-x64-stable';",
+    "static const releaseChannel = '$UpdateChannel';",
     "static const applicationVersion = '$Version';",
     'static const importFormerProfilesOnFirstLaunch = false;',
-    "static const installerPackageId = 'BlackSpiritLife.App';",
+    "static const installerPackageId = '$PackageId';",
     "static const stateDirectoryName = 'Black Spirit Life';",
     "static const windowsExecutableName = 'BlackSpiritLife.exe';",
     "static const windowsUpdaterHelperName = 'BlackSpiritLifeUpdater.exe';"
@@ -668,6 +668,10 @@ $null = Assert-ReleaseOrdinaryPath -Path $RunRoot
 New-Item -ItemType Directory -Path $InputPath | Out-Null
 New-Item -ItemType Directory -Path $FeedPath | Out-Null
 New-Item -ItemType Directory -Path $ToolExpanded | Out-Null
+[IO.File]::Copy($ReleasePlan.Path, $ApprovedPlanCopy, $false)
+if ((Get-FileHash -LiteralPath $ApprovedPlanCopy -Algorithm SHA256).Hash -cne $ReleasePlan.Sha256) {
+    throw 'The frozen release-plan copy does not match the reviewed input.'
+}
 Complete-ReleaseStage -Metrics $metrics -Stage $activeStage -Outcome Passed -CacheState NotApplicable
 
 $previousFeedUrl =
@@ -702,7 +706,7 @@ $publishedPreviousFeedHash =
     (Get-FileHash -Algorithm SHA256 -LiteralPath $publishedPreviousFeed).Hash
 if ($publishedPreviousFeedItem.Length -ne $PreviousFeedBytes -or
     $publishedPreviousFeedHash -cne $PreviousFeedSha256) {
-    throw 'The published 0.1.10 feed changed from the reviewed release input.'
+    throw "The published $PreviousStableVersion feed changed from the reviewed release input."
 }
 $publishedPreviousFeedJson =
     Get-Content -Raw -LiteralPath $publishedPreviousFeed | ConvertFrom-Json
@@ -714,7 +718,7 @@ $publishedPreviousAssets = @($publishedPreviousFeedJson.Assets | Where-Object {
 })
 if ($publishedPreviousAssets.Count -ne 1 -or
     @($publishedPreviousFeedJson.Assets).Count -ne 3) {
-    throw 'The published 0.1.10 feed does not contain exactly the expected full package and reviewed asset set.'
+    throw "The published $PreviousStableVersion feed does not contain exactly the expected full package and reviewed asset set."
 }
 $cacheState = if ($feedAcquisition.cacheStatus -eq 'hit') { 'Hit' } else { 'Miss' }
 $cacheReason = if ($cacheState -eq 'Miss') { 'not-cached-' + $feedAcquisition.cacheStatus } else { $null }
@@ -741,14 +745,14 @@ $publishedPreviousPackageHash =
     (Get-FileHash -Algorithm SHA256 -LiteralPath $publishedPreviousPackage).Hash
 if ($publishedPreviousPackageItem.Length -ne $PreviousFullPackageBytes -or
     $publishedPreviousPackageHash -cne $PreviousFullPackageSha256) {
-    throw 'The published 0.1.10 full package changed from the reviewed release input.'
+    throw "The published $PreviousStableVersion full package changed from the reviewed release input."
 }
 if ([long]$publishedPreviousAssets[0].Size -ne $publishedPreviousPackageItem.Length -or
     -not $publishedPreviousPackageHash.Equals(
         [string]$publishedPreviousAssets[0].SHA256,
         [System.StringComparison]::OrdinalIgnoreCase
     )) {
-    throw 'The published 0.1.10 full package does not match its published feed.'
+    throw "The published $PreviousStableVersion full package does not match its published feed."
 }
 Assert-VelopackPackage `
     -PackagePath $publishedPreviousPackage `
@@ -977,7 +981,7 @@ $previousFullHash =
     (Get-FileHash -Algorithm SHA256 -LiteralPath $previousFullPackage).Hash
 if ($previousFullItem.Length -ne $PreviousFullPackageBytes -or
     $previousFullHash -cne $PreviousFullPackageSha256) {
-    throw 'Velopack changed the pinned published 0.1.10 full package.'
+    throw "Velopack changed the pinned published $PreviousStableVersion full package."
 }
 $feedAssets = @($feed.Assets)
 if ($feedAssets.Count -ne 3) {
@@ -1005,10 +1009,10 @@ if ($matchingFullAssets.Count -ne 1) {
     throw 'The update feed does not contain exactly one expected full package.'
 }
 if ($matchingDeltaAssets.Count -ne 1) {
-    throw 'The update feed does not contain exactly one 0.1.10 to 0.1.11 delta package.'
+    throw "The update feed does not contain exactly one $PreviousStableVersion to $Version delta package."
 }
 if ($matchingPreviousAssets.Count -ne 1) {
-    throw 'The update feed does not retain exactly one published 0.1.10 full package.'
+    throw "The update feed does not retain exactly one published $PreviousStableVersion full package."
 }
 $fullItem = Get-Item -LiteralPath $fullPackage
 $fullHash = (Get-FileHash -Algorithm SHA256 -LiteralPath $fullPackage).Hash
@@ -1036,7 +1040,7 @@ if ([long]$matchingPreviousAssets[0].Size -ne $previousFullItem.Length -or
         [string]$matchingPreviousAssets[0].SHA256,
         [System.StringComparison]::OrdinalIgnoreCase
     )) {
-    throw 'The updated feed changed the published 0.1.10 full-package identity.'
+    throw "The updated feed changed the published $PreviousStableVersion full-package identity."
 }
 
 $setupHash = (Get-FileHash -Algorithm SHA256 -LiteralPath $generatedSetup).Hash
@@ -1132,6 +1136,11 @@ $manifest = [ordered]@{
     buildNumber = [int]$BuildNumber
     sourceCommit = $sourceCommit
     sourceTag = $sourceTag
+    releasePlan = [ordered]@{
+        path = [IO.Path]::GetFileName($ApprovedPlanCopy)
+        sha256 = $ReleasePlan.Sha256
+        schemaVersion = [int]$ReleasePlan.Raw.schemaVersion
+    }
     packageId = $PackageId
     channel = $UpdateChannel
     updateSource = $UpdateSource

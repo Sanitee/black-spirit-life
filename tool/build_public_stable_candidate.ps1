@@ -9,7 +9,10 @@ param(
     [ValidateRange(0, [long]::MaxValue)][long]$MinimumFreeBytes = 0,
 
     [Parameter(Mandatory = $true)]
-    [string]$PublicGitHubRepository,
+    [string]$ReleasePlanPath,
+
+    [Parameter(Mandatory = $true)]
+    [string]$ApprovedReleasePlanSha256,
 
     [Parameter(Mandatory = $true)]
     [switch]$ConfirmPublicCandidateOnly
@@ -24,7 +27,8 @@ if (-not $ConfirmPublicCandidateOnly.IsPresent) {
 
 $arguments = @{
     ConfirmPublicCandidateOnly = $true
-    PublicGitHubRepository = $PublicGitHubRepository
+    ReleasePlanPath = $ReleasePlanPath
+    ApprovedReleasePlanSha256 = $ApprovedReleasePlanSha256
     OfflinePinnedInputs = $OfflinePinnedInputs
     MinimumFreeBytes = $MinimumFreeBytes
 }
