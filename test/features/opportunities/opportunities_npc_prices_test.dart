@@ -64,14 +64,14 @@ void main() {
   test(
     'all existing NPC prices survive mode-local zero-price placeholders',
     () {
-      expect(catalog.npcPurchasePrices, hasLength(12));
+      expect(catalog.npcPurchasePrices, hasLength(13));
       final known = <String, double>{...catalog.npcPurchasePrices};
       for (final entry in rules.vendorInfo.entries) {
         if (entry.value.price > 0) {
           known[entry.key.toLowerCase()] = entry.value.price;
         }
       }
-      expect(known, hasLength(34));
+      expect(known, hasLength(35));
       for (final entry in known.entries) {
         final input = price(name: entry.key, crafts: 3);
         expect(input.npcUnitPrice, entry.value, reason: entry.key);

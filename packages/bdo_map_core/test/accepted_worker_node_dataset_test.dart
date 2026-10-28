@@ -20,16 +20,16 @@ void main() {
 
   group('accepted Stable worker-node dataset', () {
     test('pins the reviewed v17 payload and its public source boundary', () {
-      expect(bundledBytes, hasLength(7544577));
+      expect(bundledBytes, hasLength(7544461));
       expect(
         sha256.convert(bundledBytes).toString(),
-        'be62e56a6b18f14c7a6439521a9ca9ca240974219dbd1e44d85cdec136c94c15',
+        'bf9987338be34d61613418448532eb96f463bb345e0f2a86c40d9653a10b8e52',
         reason:
             'A data refresh must update the source review, accepted counts, '
             'and this checksum deliberately.',
       );
       expect(dataset.manifest.schemaVersion, 1);
-      expect(dataset.manifest.datasetVersion, '2026.09.09-beta-v4');
+      expect(dataset.manifest.datasetVersion, '2026.10.09-beta-v5');
 
       final currentSnapshot = dataset.manifest.provenance.singleWhere(
         (record) =>
@@ -92,8 +92,8 @@ void main() {
           .map((output) => output.resourceId)
           .toSet();
 
-      expect(dataset.workerNodes, hasLength(1052));
-      expect(dataset.workerNodesById, hasLength(1052));
+      expect(dataset.workerNodes, hasLength(1050));
+      expect(dataset.workerNodesById, hasLength(1050));
       expect(
         dataset.workerNodes.every(
           (node) => RegExp(r'^[0-9]+$').hasMatch(node.id),
@@ -110,7 +110,7 @@ void main() {
         2128,
       );
       expect(productionNodes, hasLength(442));
-      expect(explorationNodes, hasLength(610));
+      expect(explorationNodes, hasLength(608));
       expect(resourceNodes, hasLength(366));
       expect(dataset.resources, hasLength(358));
       expect(outputResourceIds, hasLength(285));
@@ -174,7 +174,13 @@ void main() {
 
     test('includes the reviewed Inner Edania node and resource delta', () {
       expect(dataset.workerNodesById['2085']!.name, 'Epeiros Mountains');
-      expect(dataset.workerNodesById['2114']!.name, 'Tiamat Sea');
+      expect(dataset.workerNodesById, isNot(contains('2113')));
+      expect(dataset.workerNodesById, isNot(contains('2114')));
+      final correction = dataset.manifest.provenance.singleWhere(
+        (record) => record.id == 'pearl-abyss-sea-node-correction-2026-10-08',
+      );
+      expect(correction.url.toString(), contains('10678'));
+      expect(correction.permittedUse, contains('Retain all production nodes'));
 
       final olivine = dataset.workerNodesById['2121']!;
       final marble = dataset.workerNodesById['2122']!;

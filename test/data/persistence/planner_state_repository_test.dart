@@ -348,6 +348,24 @@ void main() {
     }
   });
 
+  test('native save and restart retain the Planner content size', () async {
+    final repository = _repository(appDirectory, legacyState);
+    final fresh = await repository.load(_catalog());
+    expect(fresh.state.plannerContentScale, 1);
+    await repository.save(fresh.state.copyWith(plannerContentScale: 1.2));
+
+    final restarted = await _repository(
+      appDirectory,
+      legacyState,
+    ).load(_catalog());
+
+    expect(restarted.origin, PlannerStateLoadOrigin.native);
+    expect(restarted.state.plannerContentScale, 1.2);
+    expect(restarted.state.alchemy.target, fresh.state.alchemy.target);
+    expect(restarted.state.alchemy.inventory, fresh.state.alchemy.inventory);
+    expect(restarted.state.extensions, fresh.state.extensions);
+  });
+
   test('native save and restart retain Sakura for all workstations', () async {
     final repository = _repository(appDirectory, legacyState);
     final fresh = await repository.load(_catalog());

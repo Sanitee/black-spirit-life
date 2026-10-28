@@ -28,7 +28,15 @@ void main() {
       await controller.calculationSettled;
       final before = fixture.transport.calls;
       final saved = fixture.broker.snapshot('eu');
-      expect(saved.items.length, 1438);
+      // Catalogue additions must not weaken the receipt-preservation check or
+      // require a historical hard-coded item count.
+      expect(
+        saved.items.keys.toSet(),
+        fixture.transport.requests
+            .where((request) => !request.book)
+            .expand((request) => request.ids)
+            .toSet(),
+      );
       expect(controller.refreshReadiness.wait, const Duration(minutes: 1));
       expect(controller.refreshReadiness.canRefresh, isFalse);
 

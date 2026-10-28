@@ -19,11 +19,13 @@ import '../../data/portable/portable_custom_icon_bridge.dart';
 import '../../domain/catalog/temporarily_archived_items.dart';
 import '../../domain/market/market_price_gateway.dart';
 import '../../domain/market/market_price_models.dart';
+import '../../domain/models/catalog_models.dart' show Recipe;
 import '../../domain/models/craft_mode.dart';
 import '../../domain/planner/reviewed_acquisition_choices.dart';
 import '../../domain/state/planner_state.dart';
 import '../../features/about/about.dart';
 import '../../features/appearance/appearance.dart';
+import '../../features/appearance/planner_size_title_action.dart';
 import '../../features/data/data.dart';
 import '../../features/editor/editor.dart';
 import '../../features/gathering/gathering_workspace.dart';
@@ -31,12 +33,20 @@ import '../../features/gathering/shared_gathering_market_loader.dart';
 import '../../features/inventory/inventory.dart';
 import '../../features/opportunities/opportunities_controller.dart';
 import '../../features/opportunities/opportunities_item_actions.dart';
+import '../../features/opportunities/opportunities_size_title_action.dart';
 import '../../features/opportunities/opportunities_workspace.dart';
 import '../../features/planner/planner.dart';
+import '../../features/planner/planner_content_viewport.dart';
 import '../../features/recipe_book/recipe_book.dart';
+import '../../features/resource_map/diagnostics/resource_map_frame_capture.dart';
+import '../../features/resource_map/diagnostics/resource_map_redraw_diagnostic.dart';
+import '../../features/resource_map/recipe_worker_catalog.dart';
+import '../../features/resource_map/recipe_worker_controller.dart';
+import '../../features/resource_map/recipe_worker_panel.dart';
 import '../../features/resource_map/resource_map_theme_adapter.dart';
 import '../../features/resource_map/resource_map_workspace.dart';
 import '../../features/shared/custom_icon_store_scope.dart';
+import '../../features/shared/mode_item_icon.dart';
 import '../../features/shell/shell.dart';
 import '../../shared/overlays/anchored_popover.dart';
 import '../../shared/overlays/draggable_overlay_surface.dart';
@@ -54,9 +64,11 @@ import '../window/native_clipboard_image_reader.dart';
 import '../window/native_file_dialog_service.dart';
 import '../window/native_inventory_ocr_service.dart';
 import '../window/window_host_service.dart';
+import 'application_appearance_theme.dart';
 import 'application_copy_toast.dart';
 import 'application_workspace_presentation.dart';
 import 'planner_gather_checklist_bridge.dart';
+import 'retained_workspace_viewport.dart';
 
 typedef _TopWorkspaceDestination = ApplicationWorkspaceDestination;
 
@@ -89,6 +101,7 @@ class ApplicationWorkspace extends StatefulWidget {
     this.fileDialogs = const NativeFileDialogService(),
     this.resourceMapConfiguration = const ResourceMapWorkspaceConfiguration(),
     required this.fishMapWorkspace,
+    this.diagnosticDeferFishPrewarm = false,
     this.gatheringDurabilityController,
     this.gatheringDurabilityParticipant,
     this.fishMapDurabilityParticipant,
@@ -125,6 +138,7 @@ class ApplicationWorkspace extends StatefulWidget {
   final NativeFileDialogService fileDialogs;
   final ResourceMapWorkspaceConfiguration resourceMapConfiguration;
   final Widget fishMapWorkspace;
+  final bool diagnosticDeferFishPrewarm;
   final GatheringDurabilityController? gatheringDurabilityController;
   final ApplicationWorkspaceDurabilityParticipant?
   gatheringDurabilityParticipant;
@@ -294,6 +308,10 @@ class _ApplicationWorkspaceState extends State<ApplicationWorkspace>
   final Map<CraftMode, GlobalKey> _modeKeys = <CraftMode, GlobalKey>{
     for (final mode in CraftMode.values) mode: GlobalKey(),
   };
+  final _opportunitiesMaximum = ValueNotifier<double>(1.25);
+  final Map<CraftMode, ValueNotifier<double>> _plannerMaximums = {
+    for (final mode in CraftMode.values) mode: ValueNotifier<double>(1.25),
+  };
   final Set<CraftMode> _visitedModes = <CraftMode>{};
   final Map<CraftMode, Widget> _modeWorkspaces = <CraftMode, Widget>{};
 
@@ -320,6 +338,8 @@ class _ApplicationWorkspaceState extends State<ApplicationWorkspace>
   late final PortableCustomIconBridge _iconBridge;
   late final BdoResourceMapController _resourceMapController;
   late final ResourceMapDatasetCache _resourceMapDatasetCache;
+  late final RecipeWorkerController _recipeWorkers;
+  final _recipeChecklist = GatheringRecipeChecklistController();
   late final PlannerExternalActions _plannerActions;
   late final PlannerGatherChecklistBridge _gatherChecklistBridge;
   late final InventoryExternalActions _inventoryActions;
@@ -339,16 +359,17 @@ class _ApplicationWorkspaceState extends State<ApplicationWorkspace>
   bool _personalDataCloseRetryPending = false;
   bool _personalDataCloseIssued = false;
   String? _personalDataRestartError;
-  double _updateInsetHeight = 0;
   _ToastRequest? _activeToast;
   int _toastPresentation = 0;
-  int _toastReposition = 0;
   Timer? _copyToastTimer;
   String _copyToastText = '';
   late final ApplicationWorkspacePresentationController _presentation;
+  late final ApplicationAppearanceThemeController _appearanceTheme;
   _TopWorkspaceDestination _topWorkspace = _TopWorkspaceDestination.planner;
+  final List<_TopWorkspaceDestination> _returnTrail = [];
   Widget? _resourceMapWorkspace;
   Widget? _gatheringWorkspace;
+  bool _fishMapVisited = false;
 
   PlannerApplicationController get _controller => widget.bundle.controller;
 
@@ -366,6 +387,7 @@ class _ApplicationWorkspaceState extends State<ApplicationWorkspace>
   void initState() {
     super.initState();
     _presentation = ApplicationWorkspacePresentationController(_controller);
+    _appearanceTheme = ApplicationAppearanceThemeController(_controller);
     WidgetsBinding.instance.addObserver(this);
     _catalogRepository = CatalogRepository(widget.bundle.catalog);
     _gatherChecklistBridge = PlannerGatherChecklistBridge(
@@ -407,6 +429,29 @@ class _ApplicationWorkspaceState extends State<ApplicationWorkspace>
     _iconBridge = PortableCustomIconBridge(iconStore: _iconStore);
     _resourceMapController = BdoResourceMapController();
     _resourceMapDatasetCache = ResourceMapDatasetCache();
+    _recipeWorkers = RecipeWorkerController(
+      catalogBuilder: () {
+        final recipes = <String, Recipe>{};
+        for (final mode in _controller.modes.values) {
+          for (final recipe in mode.recipes.values) {
+            if (recipe.isCraftable ||
+                recipes[recipe.name]?.isCraftable != true) {
+              recipes[recipe.name] = recipe;
+            }
+          }
+        }
+        return RecipeWorkerCatalog(recipes, _controller.plannerRules);
+      },
+      loadMap: _resourceMapDatasetCache.load,
+      loadEconomics: BdoWorkerEconomicsLoader.loadBundled,
+      initial:
+          _controller.resourceMapNodeNetworkPreferences.value.recipeWorkers,
+      onSave: (value) => _controller.setResourceMapNodeNetworkPreferences(
+        _controller.resourceMapNodeNetworkPreferences.value.copyWith(
+          recipeWorkers: value,
+        ),
+      ),
+    );
     _plannerActions = PlannerExternalActions(
       openRecipeBook: _openRecipeBook,
       copyName: _copyName,
@@ -460,7 +505,6 @@ class _ApplicationWorkspaceState extends State<ApplicationWorkspace>
       source: resolvedUpdateSource,
       enabled: widget.enableBetaUpdates,
     );
-    _updateController.addListener(_updateVisibilityChanged);
     _visitedModes.add(_controller.activeMode.value);
     _controller.activeMode.addListener(_activeModeChanged);
     for (final mode in CraftMode.values) {
@@ -480,12 +524,6 @@ class _ApplicationWorkspaceState extends State<ApplicationWorkspace>
         unawaited(_updateController.checkOnce());
       }
     });
-  }
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    _syncUpdateInset();
   }
 
   @override
@@ -520,6 +558,11 @@ class _ApplicationWorkspaceState extends State<ApplicationWorkspace>
     if (!mounted) return;
     for (final key in _modeKeys.values) {
       (key.currentState as _ModeWorkspaceState?)?.closeRecipeBook();
+      final modeContext =
+          (key.currentState as _ModeWorkspaceState?)?.dialogContext;
+      if (modeContext != null) {
+        AppOverlayCoordinatorScope.maybeOf(modeContext)?.dismissTop();
+      }
     }
     setState(() => _visitedModes.add(_controller.activeMode.value));
     _queuePlannerMarketCheck(_controller.active);
@@ -738,38 +781,19 @@ class _ApplicationWorkspaceState extends State<ApplicationWorkspace>
     }
   }
 
-  void _updateVisibilityChanged() => _syncUpdateInset();
-
-  void _syncUpdateInset() {
-    final resolvedHeight = BetaUpdateIndicator.heightFor(context);
-    final insetHeight = _updateController.snapshot.showsIndicator
-        ? resolvedHeight
-        : 0.0;
-    if (insetHeight == _updateInsetHeight) return;
-    _updateInsetHeight = insetHeight;
-    unawaited(widget.windowHost.setBottomInset(insetHeight));
-    if (_activeToast case final toast?) {
-      final reposition = ++_toastReposition;
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (!mounted ||
-            reposition != _toastReposition ||
-            !identical(_activeToast, toast)) {
-          return;
-        }
-        _presentToast(toast, replaceImmediately: true);
-      });
-    }
-  }
-
   @override
   void dispose() {
     _gatherChecklistBridge.dispose();
     WidgetsBinding.instance.removeObserver(this);
     _activeToast = null;
     _toastPresentation += 1;
-    _toastReposition += 1;
     _copyToastTimer?.cancel();
+    _appearanceTheme.dispose();
     _presentation.dispose();
+    for (final maximum in _plannerMaximums.values) {
+      maximum.dispose();
+    }
+    _opportunitiesMaximum.dispose();
     _inventoryOcrService.dispose();
     widget.windowHost.removeCloseRequestHandler();
     _controller.activeMode.removeListener(_activeModeChanged);
@@ -783,13 +807,11 @@ class _ApplicationWorkspaceState extends State<ApplicationWorkspace>
     _dataSession.dispose();
     _iconStore.dispose();
     _resourceMapController.dispose();
+    _recipeWorkers.dispose();
+    _recipeChecklist.dispose();
     _opportunitiesController?.dispose();
     _marketPublication?.cancel();
     unawaited(_marketSubscription?.cancel());
-    _updateController.removeListener(_updateVisibilityChanged);
-    if (_updateInsetHeight > 0) {
-      unawaited(widget.windowHost.setBottomInset(0));
-    }
     _updateController.dispose();
     if (_ownsUpdateService) unawaited(_updateService.dispose());
     if (_ownsSharedMarket) unawaited(_sharedMarket.close());
@@ -821,10 +843,19 @@ class _ApplicationWorkspaceState extends State<ApplicationWorkspace>
                     children: <Widget>[
                       _ApplicationTitleStrip(
                         presentation: _presentation,
+                        controller: _controller,
+                        plannerMaximum: _plannerMaximums[active]!,
+                        opportunitiesMaximum: _opportunitiesMaximum,
+                        opportunitiesController: _opportunitiesController,
+                        updateController: _updateController,
+                        onUpdateNow: _updateNow,
+                        onOpenPlannerSize: _openPlannerSize,
                         windowHost: widget.windowHost,
                         beforeClose: _flushBeforeClose,
                         activeWorkspace: _topWorkspace,
-                        onWorkspaceChanged: _setTopWorkspace,
+                        onWorkspaceChanged: _selectTopWorkspace,
+                        returnDestination: _returnTrail.lastOrNull,
+                        onReturn: _returnToPreviousWorkspace,
                         personalDataPath: widget
                             .bundle
                             .personalDataLocation
@@ -844,7 +875,7 @@ class _ApplicationWorkspaceState extends State<ApplicationWorkspace>
                                 children: <Widget>[
                                   for (final mode in CraftMode.values)
                                     if (_visitedModes.contains(mode))
-                                      Offstage(
+                                      RetainedWorkspaceViewport(
                                         offstage: mode != active,
                                         child: TickerMode(
                                           enabled: mode == active,
@@ -863,7 +894,23 @@ class _ApplicationWorkspaceState extends State<ApplicationWorkspace>
                                   clipBehavior: Clip.hardEdge,
                                   child: ResourceMapThemeBinding(
                                     controller: _controller,
-                                    child: _resourceMapWorkspace!,
+                                    child: resourceFrameCaptureEnabled
+                                        ? ResourceMapFrameCapture(
+                                            active:
+                                                _topWorkspace ==
+                                                _TopWorkspaceDestination
+                                                    .resourceMap,
+                                            child: _resourceMapWorkspace!,
+                                          )
+                                        : resourceRedrawDiagnosticEnabled
+                                        ? ResourceMapRedrawDiagnostic(
+                                            active:
+                                                _topWorkspace ==
+                                                _TopWorkspaceDestination
+                                                    .resourceMap,
+                                            child: _resourceMapWorkspace!,
+                                          )
+                                        : _resourceMapWorkspace!,
                                   ),
                                 ),
                               ),
@@ -877,14 +924,17 @@ class _ApplicationWorkspaceState extends State<ApplicationWorkspace>
                                   child: _gatheringWorkspace!,
                                 ),
                               ),
-                            _retainedTopWorkspace(
-                              destination: _TopWorkspaceDestination.fishMap,
-                              child: ClipRect(
-                                key: ApplicationWorkspace.fishMapContentClipKey,
-                                clipBehavior: Clip.hardEdge,
-                                child: widget.fishMapWorkspace,
+                            if (!widget.diagnosticDeferFishPrewarm ||
+                                _fishMapVisited)
+                              _retainedTopWorkspace(
+                                destination: _TopWorkspaceDestination.fishMap,
+                                child: ClipRect(
+                                  key: ApplicationWorkspace
+                                      .fishMapContentClipKey,
+                                  clipBehavior: Clip.hardEdge,
+                                  child: widget.fishMapWorkspace,
+                                ),
                               ),
-                            ),
                             if (_opportunitiesVisited)
                               _retainedTopWorkspace(
                                 destination:
@@ -895,6 +945,12 @@ class _ApplicationWorkspaceState extends State<ApplicationWorkspace>
                                     externalActions: _plannerActions,
                                     child: OpportunitiesWorkspace(
                                       controller: _opportunitiesController!,
+                                      theme: _appearanceTheme,
+                                      onContentMaximumChanged: (value) {
+                                        if (mounted) {
+                                          _opportunitiesMaximum.value = value;
+                                        }
+                                      },
                                       active:
                                           _topWorkspace ==
                                           _TopWorkspaceDestination
@@ -905,11 +961,6 @@ class _ApplicationWorkspaceState extends State<ApplicationWorkspace>
                               ),
                           ],
                         ),
-                      ),
-                      _ApplicationUpdateStrip(
-                        controller: _controller,
-                        updateController: _updateController,
-                        onUpdateNow: _updateNow,
                       ),
                     ],
                   ),
@@ -953,6 +1004,7 @@ class _ApplicationWorkspaceState extends State<ApplicationWorkspace>
       key: _modeKeys[mode],
       appController: _controller,
       modeController: _controller.modes[mode]!,
+      plannerMaximum: _plannerMaximums[mode]!,
       catalogRepository: _catalogRepository,
       plannerActions: _plannerActions,
       inventoryActions: _inventoryActions,
@@ -979,7 +1031,7 @@ class _ApplicationWorkspaceState extends State<ApplicationWorkspace>
     required Widget child,
   }) {
     final active = _topWorkspace == destination;
-    return Offstage(
+    return RetainedWorkspaceViewport(
       key: ValueKey<_TopWorkspaceDestination>(destination),
       offstage: !active,
       child: ExcludeFocus(
@@ -1031,8 +1083,31 @@ class _ApplicationWorkspaceState extends State<ApplicationWorkspace>
   Future<String?> _pickActiveNodeRecording() =>
       widget.fileDialogs.pickVideoToOpen();
 
+  void _selectTopWorkspace(_TopWorkspaceDestination destination) {
+    // A deliberate tab click starts a new route, including the active tab.
+    if (_returnTrail.isNotEmpty) setState(_returnTrail.clear);
+    _setTopWorkspace(destination);
+  }
+
+  void _jumpToTopWorkspace(_TopWorkspaceDestination destination) {
+    if (_topWorkspace == destination) return;
+    if (_returnTrail.length == 16) _returnTrail.removeAt(0);
+    _returnTrail.add(_topWorkspace);
+    _setTopWorkspace(destination);
+  }
+
+  void _returnToPreviousWorkspace() {
+    if (_returnTrail.isEmpty) return;
+    // Only navigate. Keep the mounted view and any edits made during the visit.
+    _setTopWorkspace(_returnTrail.removeLast());
+  }
+
   void _setTopWorkspace(_TopWorkspaceDestination destination) {
     if (_topWorkspace == destination) return;
+    final modeContext = _modeContext(_controller.activeMode.value);
+    if (modeContext != null) {
+      AppOverlayCoordinatorScope.maybeOf(modeContext)?.dismissTop();
+    }
     FocusManager.instance.primaryFocus?.unfocus();
     setState(() {
       _topWorkspace = destination;
@@ -1048,6 +1123,7 @@ class _ApplicationWorkspaceState extends State<ApplicationWorkspace>
           _ensureGatheringWorkspace();
           break;
         case _TopWorkspaceDestination.fishMap:
+          _fishMapVisited = true;
           break;
         case _TopWorkspaceDestination.opportunities:
           _opportunitiesVisited = true;
@@ -1062,6 +1138,12 @@ class _ApplicationWorkspaceState extends State<ApplicationWorkspace>
     });
   }
 
+  void _openPlannerSize() {
+    (_modeKeys[_controller.activeMode.value]?.currentState
+            as _ModeWorkspaceState?)
+        ?.closeRecipeBook();
+  }
+
   void _ensureResourceMapWorkspace() {
     _resourceMapWorkspace ??= ResourceMapWorkspace(
       fallbackApplicationDirectory:
@@ -1070,6 +1152,11 @@ class _ApplicationWorkspaceState extends State<ApplicationWorkspace>
       catalogRepository: _catalogRepository,
       configuration: widget.resourceMapConfiguration,
       gatherChecklistBridge: _gatherChecklistBridge,
+      recipeWorkers: _recipeWorkers,
+      onOpenRecipeGathering: () {
+        _jumpToTopWorkspace(_TopWorkspaceDestination.gathering);
+        _recipeChecklist.open();
+      },
       controller: _resourceMapController,
       datasetCache: _resourceMapDatasetCache,
       screenshotPicker: _pickResourceMapScreenshot,
@@ -1086,6 +1173,54 @@ class _ApplicationWorkspaceState extends State<ApplicationWorkspace>
 
   void _ensureGatheringWorkspace() {
     _gatheringWorkspace ??= GatheringWorkspace(
+      recipeChecklistController: _recipeChecklist,
+      recipeChecklistBuilder:
+          (context, hasSpot, onSpot, close, showLocations) =>
+              ValueListenableBuilder<ThemeSpec>(
+                valueListenable: _appearanceTheme,
+                builder: (context, spec, _) => ResourceMapThemeAdapter(
+                  spec: spec,
+                  child: RecipeWorkerPanel(
+                    controller: _recipeWorkers,
+                    checklist: true,
+                    onClose: close,
+                    hasSpot: (name) =>
+                        hasSpot(name) ||
+                        _recipeWorkers.pointsFor(name).isNotEmpty,
+                    onSpot: (name) {
+                      if (hasSpot(name)) {
+                        onSpot(name);
+                        return;
+                      }
+                      final points = _recipeWorkers.pointsFor(name);
+                      if (points.isEmpty) return;
+                      showLocations(
+                        GatheringRecipeLocations(
+                          item: name,
+                          sourceNote: _recipeWorkers.pointSourceNote(name),
+                          points: [
+                            for (final point in points)
+                              GatheringRecipePoint(
+                                id: point.id,
+                                x: point.location.x,
+                                z: point.location.z,
+                                label: point.label,
+                              ),
+                          ],
+                        ),
+                      );
+                    },
+                    artwork: (name, size) => ModeItemIcon(
+                      controller: _controller.active,
+                      name: name,
+                      size: size,
+                      catalogRepository: _catalogRepository,
+                      searchAcrossModes: true,
+                    ),
+                  ),
+                ),
+              ),
+      theme: _appearanceTheme,
       durabilityController: widget.gatheringDurabilityController,
       sharedMarketLoader: _gatheringMarketLoader.load,
       sharedMarketUpdates: _gatheringMarketLoader.updates,
@@ -1099,21 +1234,24 @@ class _ApplicationWorkspaceState extends State<ApplicationWorkspace>
   OpportunitiesController? _opportunitiesController;
   bool _opportunitiesVisited = false;
 
-  OpportunitiesController _ensureOpportunitiesController() =>
-      _opportunitiesController ??= OpportunitiesController(
-        autoCheck: widget.enableOpportunityAutoCheck,
-        prefetchAll: true,
-        serviceFactory: widget.opportunityMarketServiceFactory,
-        sharedMarket: widget.opportunityMarketServiceFactory == null
-            ? _sharedMarket
-            : null,
-        appController: _controller,
-        catalog: _catalogRepository,
-        directory: Directory(
-          '${widget.bundle.stateRepository.paths.applicationDirectory.path}'
-          '${Platform.pathSeparator}opportunities',
-        ),
-      );
+  OpportunitiesController _ensureOpportunitiesController() {
+    if (_opportunitiesController case final existing?) return existing;
+    final result = _opportunitiesController = OpportunitiesController(
+      autoCheck: widget.enableOpportunityAutoCheck,
+      prefetchAll: true,
+      serviceFactory: widget.opportunityMarketServiceFactory,
+      sharedMarket: widget.opportunityMarketServiceFactory == null
+          ? _sharedMarket
+          : null,
+      appController: _controller,
+      catalog: _catalogRepository,
+      directory: Directory(
+        '${widget.bundle.stateRepository.paths.applicationDirectory.path}'
+        '${Platform.pathSeparator}opportunities',
+      ),
+    );
+    return result;
+  }
 
   Future<PlannerMapLookupAvailability> _resolvePlannerMapLookup(
     String materialName,
@@ -1150,7 +1288,7 @@ class _ApplicationWorkspaceState extends State<ApplicationWorkspace>
         },
       ),
     );
-    _setTopWorkspace(_TopWorkspaceDestination.resourceMap);
+    _jumpToTopWorkspace(_TopWorkspaceDestination.resourceMap);
   }
 
   void _openPlannerTarget(PlannerTargetRequest request) {
@@ -1175,7 +1313,7 @@ class _ApplicationWorkspaceState extends State<ApplicationWorkspace>
     (_modeKeys[request.mode]?.currentState as _ModeWorkspaceState?)
         ?.closeRecipeBook();
     _controller.switchMode(request.mode);
-    _setTopWorkspace(_TopWorkspaceDestination.planner);
+    _jumpToTopWorkspace(_TopWorkspaceDestination.planner);
   }
 
   void _addPlannerMaterialToGatherChecklist(
@@ -1218,7 +1356,7 @@ class _ApplicationWorkspaceState extends State<ApplicationWorkspace>
       resourceId: resourceId,
       source: BdoResourceMapFocusSource.workerNodePlanner,
     );
-    _setTopWorkspace(_TopWorkspaceDestination.resourceMap);
+    _jumpToTopWorkspace(_TopWorkspaceDestination.resourceMap);
     // Let the map receive the newly persisted preferences before opening the
     // target editor. Otherwise an already mounted offstage map could briefly
     // reuse its previous local count and lower a larger saved target.
@@ -1254,6 +1392,8 @@ class _ApplicationWorkspaceState extends State<ApplicationWorkspace>
     modeController.replaceMarketValues(
       prices: result.prices,
       stock: result.stock,
+      preorderPrices: result.preorderPrices,
+      preorderObservedAt: result.preorderObservedAt,
       tradeMarketIds: result.tradeMarketIds,
       totalTrades: result.totalTrades,
       tradeObservedAt: result.tradeObservedAt,
@@ -1309,12 +1449,12 @@ class _ApplicationWorkspaceState extends State<ApplicationWorkspace>
 
   void _openAfkWeightSettings() {
     _dataSession.showAfkWeightSettings();
-    _setTopWorkspace(_TopWorkspaceDestination.planner);
+    _jumpToTopWorkspace(_TopWorkspaceDestination.planner);
     _controller.active.navigate('data');
   }
 
   void _openActivityDataFolder() {
-    _setTopWorkspace(_TopWorkspaceDestination.planner);
+    _jumpToTopWorkspace(_TopWorkspaceDestination.planner);
     _controller.active.navigate('data');
   }
 
@@ -1415,6 +1555,8 @@ class _ApplicationWorkspaceState extends State<ApplicationWorkspace>
         controller.replaceMarketValues(
           prices: result.prices,
           stock: result.stock,
+          preorderPrices: result.preorderPrices,
+          preorderObservedAt: result.preorderObservedAt,
           tradeMarketIds: result.tradeMarketIds,
           totalTrades: result.totalTrades,
           tradeObservedAt: result.tradeObservedAt,
@@ -1462,7 +1604,7 @@ class _ApplicationWorkspaceState extends State<ApplicationWorkspace>
       assembledRecipes: request.controller.recipes,
       currentMarket: request.controller.state.value.market,
       missingMaterialNames: request.namesForRefresh,
-      forceRefresh: false,
+      forceRefresh: request.forceRefresh,
       cancellationToken: cancellationToken,
       latestMarket: () => request.controller.state.value.market,
     );
@@ -1470,6 +1612,8 @@ class _ApplicationWorkspaceState extends State<ApplicationWorkspace>
       prices: result.prices,
       stock: result.stock,
       unlistedItemNames: result.market.unlistedItemNames,
+      preorderPrices: result.preorderPrices,
+      preorderObservedAt: result.preorderObservedAt,
       fetchedAt: result.fetchedAt,
       summary: result.summary.message,
       region: result.market.region,
@@ -1488,15 +1632,14 @@ class _ApplicationWorkspaceState extends State<ApplicationWorkspace>
   }
 
   void _receiveSharedMarket(SharedMarketReceipt receipt) {
-    if (receipt.part != SharedMarketPart.quote ||
-        receipt.fromCache ||
-        !mounted) {
+    if (receipt.fromCache || !mounted) {
       return;
     }
     _pendingMarketReceipts.putIfAbsent(
-      receipt.key.region,
-      () => {},
-    )[receipt.key.itemId] = receipt.item;
+          receipt.key.region,
+          () => {},
+        )[receipt.key.itemId] =
+        _sharedMarket.cachedItem(receipt.key) ?? receipt.item;
     _marketPublication ??= Timer(
       const Duration(milliseconds: 200),
       _publishSharedMarket,
@@ -1547,6 +1690,8 @@ class _ApplicationWorkspaceState extends State<ApplicationWorkspace>
       controller.replaceMarketValues(
         prices: result.prices,
         stock: result.stock,
+        preorderPrices: result.preorderPrices,
+        preorderObservedAt: result.preorderObservedAt,
         tradeMarketIds: result.tradeMarketIds,
         totalTrades: result.totalTrades,
         tradeObservedAt: result.tradeObservedAt,
@@ -1667,7 +1812,7 @@ class _ApplicationWorkspaceState extends State<ApplicationWorkspace>
         final completed = await _updateController.runTestUpdateDemo();
         if (mounted && completed) {
           _showToast(
-            'Update test complete. Real updates use this same bar and install automatically.',
+            'Update test complete. Real updates use this same title-bar button and install automatically.',
           );
         }
         return;
@@ -1705,7 +1850,7 @@ class _ApplicationWorkspaceState extends State<ApplicationWorkspace>
     );
     _showToast(
       shown
-          ? 'Test update shown. Click the bottom bar to run the safe demo.'
+          ? 'Test update shown. Click Update in the title bar to run the safe demo.'
           : 'A real update is already active. Finish it before testing the bar.',
       error: !shown,
     );
@@ -1883,7 +2028,6 @@ class _ApplicationWorkspaceState extends State<ApplicationWorkspace>
       duration: duration,
     );
     _activeToast = toast;
-    _toastReposition += 1;
     _presentToast(toast);
   }
 
@@ -1903,7 +2047,7 @@ class _ApplicationWorkspaceState extends State<ApplicationWorkspace>
                 ? const Duration(seconds: 4)
                 : const Duration(seconds: 8)),
         behavior: SnackBarBehavior.floating,
-        margin: EdgeInsets.fromLTRB(280, 0, 24, 20 + _updateInsetHeight),
+        margin: EdgeInsets.fromLTRB(280, 0, 24, 20),
         elevation: 0,
         backgroundColor: Colors.transparent,
         padding: EdgeInsets.zero,
@@ -1966,7 +2110,6 @@ class _ApplicationWorkspaceState extends State<ApplicationWorkspace>
       feature.closed.then((_) {
         if (!mounted || presentation != _toastPresentation) return;
         _activeToast = null;
-        _toastReposition += 1;
       }),
     );
   }
@@ -2053,21 +2196,39 @@ class _PersonalDataRestartOverlay extends StatelessWidget {
 class _ApplicationTitleStrip extends StatelessWidget {
   const _ApplicationTitleStrip({
     required this.presentation,
+    required this.controller,
+    required this.plannerMaximum,
+    required this.onOpenPlannerSize,
+    required this.opportunitiesMaximum,
+    required this.opportunitiesController,
+    required this.updateController,
+    required this.onUpdateNow,
     required this.windowHost,
     required this.beforeClose,
     required this.onCloseError,
     required this.activeWorkspace,
     required this.onWorkspaceChanged,
+    required this.returnDestination,
+    required this.onReturn,
     required this.personalDataPath,
     required this.onOpenActivityDataFolder,
   });
 
   final ValueListenable<ApplicationWorkspacePresentation> presentation;
+  final PlannerApplicationController controller;
+  final ValueListenable<double> plannerMaximum;
+  final ValueListenable<double> opportunitiesMaximum;
+  final OpportunitiesController? opportunitiesController;
+  final BetaUpdateController updateController;
+  final Future<void> Function() onUpdateNow;
+  final VoidCallback onOpenPlannerSize;
   final WindowHostService windowHost;
   final Future<void> Function() beforeClose;
   final ValueChanged<Object> onCloseError;
   final _TopWorkspaceDestination activeWorkspace;
   final ValueChanged<_TopWorkspaceDestination> onWorkspaceChanged;
+  final _TopWorkspaceDestination? returnDestination;
+  final VoidCallback onReturn;
   final String personalDataPath;
   final VoidCallback onOpenActivityDataFolder;
 
@@ -2077,6 +2238,34 @@ class _ApplicationTitleStrip extends StatelessWidget {
         valueListenable: presentation,
         builder: (context, presentation, _) {
           final spec = presentation.spec;
+          final workspaceAction =
+              activeWorkspace == _TopWorkspaceDestination.planner
+              ? ValueListenableBuilder<ModeState>(
+                  valueListenable: controller.active.state,
+                  child: PlannerSizeTitleAction(
+                    key: ValueKey(
+                      'planner-size-title-${controller.active.mode.key}',
+                    ),
+                    controller: controller,
+                    maximum: plannerMaximum,
+                    onOpen: onOpenPlannerSize,
+                  ),
+                  builder: (context, state, child) =>
+                      state.view == 'plan' ? child! : const SizedBox.shrink(),
+                )
+              : activeWorkspace == _TopWorkspaceDestination.opportunities &&
+                    opportunitiesController != null
+              ? OpportunitiesSizeTitleAction(
+                  controller: opportunitiesController!,
+                  maximum: opportunitiesMaximum,
+                )
+              : activeWorkspace == _TopWorkspaceDestination.gathering ||
+                    activeWorkspace == _TopWorkspaceDestination.fishMap
+              ? _ActivityDataFolderTitleAction(
+                  personalDataPath: personalDataPath,
+                  onPressed: onOpenActivityDataFolder,
+                )
+              : null;
           final titleBar = ThemeSpecScope(
             spec: spec,
             child: StandardVisualScope(
@@ -2090,15 +2279,19 @@ class _ApplicationTitleStrip extends StatelessWidget {
                   workspaceNavigation: _WorkspaceNavigation(
                     active: activeWorkspace,
                     onChanged: onWorkspaceChanged,
+                    returnDestination: returnDestination,
+                    onReturn: onReturn,
                   ),
-                  trailing:
-                      activeWorkspace == _TopWorkspaceDestination.gathering ||
-                          activeWorkspace == _TopWorkspaceDestination.fishMap
-                      ? _ActivityDataFolderTitleAction(
-                          personalDataPath: personalDataPath,
-                          onPressed: onOpenActivityDataFolder,
-                        )
-                      : null,
+                  trailing: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: <Widget>[
+                      BetaUpdateIndicator(
+                        controller: updateController,
+                        onUpdateNow: onUpdateNow,
+                      ),
+                      ?workspaceAction,
+                    ],
+                  ),
                 ),
               ),
             ),
@@ -2164,83 +2357,13 @@ class _ActivityDataFolderTitleAction extends StatelessWidget {
   }
 }
 
-class _ApplicationUpdateStrip extends StatefulWidget {
-  const _ApplicationUpdateStrip({
-    required this.controller,
-    required this.updateController,
-    required this.onUpdateNow,
-  });
-
-  final PlannerApplicationController controller;
-  final BetaUpdateController updateController;
-  final Future<void> Function() onUpdateNow;
-
-  @override
-  State<_ApplicationUpdateStrip> createState() =>
-      _ApplicationUpdateStripState();
-}
-
-class _ApplicationUpdateStripState extends State<_ApplicationUpdateStrip> {
-  late ModeFeatureController _mode;
-  late AppearanceSettings _appearance;
-
-  @override
-  void initState() {
-    super.initState();
-    _mode = widget.controller.active;
-    _appearance = _mode.state.value.appearance;
-    widget.controller.activeMode.addListener(_modeChanged);
-    _mode.state.addListener(_appearanceChanged);
-  }
-
-  void _modeChanged() {
-    _mode.state.removeListener(_appearanceChanged);
-    _mode = widget.controller.active;
-    _mode.state.addListener(_appearanceChanged);
-    _appearanceChanged(force: true);
-  }
-
-  void _appearanceChanged({bool force = false}) {
-    final next = _mode.state.value.appearance;
-    if (!force && identical(next, _appearance)) return;
-    if (mounted) setState(() => _appearance = next);
-  }
-
-  @override
-  void dispose() {
-    widget.controller.activeMode.removeListener(_modeChanged);
-    _mode.state.removeListener(_appearanceChanged);
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final spec = RetainedThemeRegistry.resolve(
-      backgroundId: _appearance.background,
-    );
-    return ThemeSpecScope(
-      spec: spec,
-      child: StandardVisualScope(
-        settings: StandardVisualSettings(
-          backgroundId: _appearance.background,
-          accentHue: _appearance.accentHue,
-          rainbow: _appearance.rainbow,
-          neon: _appearance.neon,
-        ),
-        child: Theme(
-          data: spec.materialTheme(),
-          child: BetaUpdateIndicator(
-            controller: widget.updateController,
-            onUpdateNow: widget.onUpdateNow,
-          ),
-        ),
-      ),
-    );
-  }
-}
-
 class _WorkspaceNavigation extends StatelessWidget {
-  const _WorkspaceNavigation({required this.active, required this.onChanged});
+  const _WorkspaceNavigation({
+    required this.active,
+    required this.onChanged,
+    required this.returnDestination,
+    required this.onReturn,
+  });
 
   static const plannerKey = ValueKey<String>('top-workspace-tab-planner');
   static const resourceMapKey = ValueKey<String>(
@@ -2251,10 +2374,22 @@ class _WorkspaceNavigation extends StatelessWidget {
 
   final _TopWorkspaceDestination active;
   final ValueChanged<_TopWorkspaceDestination> onChanged;
+  final _TopWorkspaceDestination? returnDestination;
+  final VoidCallback onReturn;
 
   @override
   Widget build(BuildContext context) {
     return AppTitleTabStrip(
+      showAllLabels: active != _TopWorkspaceDestination.planner,
+      returnLabel: switch (returnDestination) {
+        _TopWorkspaceDestination.planner => 'Back to Planner',
+        _TopWorkspaceDestination.opportunities => 'Back to Opportunities',
+        _TopWorkspaceDestination.resourceMap => 'Back to Resource Map',
+        _TopWorkspaceDestination.gathering => 'Back to Gathering',
+        _TopWorkspaceDestination.fishMap => 'Back to Fish Map',
+        null => null,
+      },
+      onReturn: returnDestination == null ? null : onReturn,
       tabs: <AppTitleTab>[
         AppTitleTab(
           tabKey: plannerKey,
@@ -2265,6 +2400,13 @@ class _WorkspaceNavigation extends StatelessWidget {
           label: 'Craft Planner',
           selected: active == _TopWorkspaceDestination.planner,
           onPressed: () => onChanged(_TopWorkspaceDestination.planner),
+        ),
+        AppTitleTab(
+          tabKey: const ValueKey<String>('top-workspace-tab-opportunities'),
+          artworkAssetPath: 'assets/opportunities/items/66771.webp',
+          label: 'Opportunities',
+          selected: active == _TopWorkspaceDestination.opportunities,
+          onPressed: () => onChanged(_TopWorkspaceDestination.opportunities),
         ),
         AppTitleTab(
           tabKey: resourceMapKey,
@@ -2295,13 +2437,6 @@ class _WorkspaceNavigation extends StatelessWidget {
           selected: active == _TopWorkspaceDestination.fishMap,
           onPressed: () => onChanged(_TopWorkspaceDestination.fishMap),
         ),
-        AppTitleTab(
-          tabKey: const ValueKey<String>('top-workspace-tab-opportunities'),
-          artworkAssetPath: 'assets/opportunities/items/66771.webp',
-          label: 'Opportunities',
-          selected: active == _TopWorkspaceDestination.opportunities,
-          onPressed: () => onChanged(_TopWorkspaceDestination.opportunities),
-        ),
       ],
     );
   }
@@ -2311,6 +2446,7 @@ class _ModeWorkspace extends StatefulWidget {
   const _ModeWorkspace({
     required this.appController,
     required this.modeController,
+    required this.plannerMaximum,
     required this.catalogRepository,
     required this.plannerActions,
     required this.inventoryActions,
@@ -2329,6 +2465,7 @@ class _ModeWorkspace extends StatefulWidget {
 
   final PlannerApplicationController appController;
   final ModeFeatureController modeController;
+  final ValueNotifier<double> plannerMaximum;
   final CatalogRepository catalogRepository;
   final PlannerExternalActions plannerActions;
   final InventoryExternalActions inventoryActions;
@@ -2456,6 +2593,7 @@ class _ModeWorkspaceState extends State<_ModeWorkspace> {
 
   void openRecipeBook(RecipeBookRequest request) {
     if (request.controller != widget.modeController) return;
+    AppOverlayCoordinatorScope.maybeOf(context)?.dismissTop();
     if (_recipeBook case final current?) {
       _recipeBookSearch = current.search;
       current.dispose();
@@ -2481,13 +2619,18 @@ class _ModeWorkspaceState extends State<_ModeWorkspace> {
     if (mounted) setState(() {});
   }
 
+  void _selectDestination(ShellDestination destination) {
+    AppOverlayCoordinatorScope.maybeOf(context)?.dismissTop();
+    closeRecipeBook();
+    widget.modeController.navigate(_viewFor(destination));
+  }
+
   @override
   Widget build(BuildContext context) {
     final spec = RetainedThemeRegistry.resolve(
       backgroundId: _appearance.background,
     );
-    final reducedMotion =
-        MediaQuery.maybeOf(context)?.disableAnimations ?? false;
+    final reducedMotion = MediaQuery.maybeDisableAnimationsOf(context) ?? false;
     final shell = WorkspaceShell(
       mode: widget.modeController.mode,
       destination: _destination,
@@ -2499,11 +2642,7 @@ class _ModeWorkspaceState extends State<_ModeWorkspace> {
         AppOverlayCoordinatorScope.maybeOf(context)?.dismissTop();
         widget.appController.switchMode(mode);
       },
-      onDestinationChanged: (destination) {
-        AppOverlayCoordinatorScope.maybeOf(context)?.dismissTop();
-        closeRecipeBook();
-        widget.modeController.navigate(_viewFor(destination));
-      },
+      onDestinationChanged: _selectDestination,
       child: Stack(
         fit: StackFit.expand,
         children: <Widget>[
@@ -2513,7 +2652,7 @@ class _ModeWorkspaceState extends State<_ModeWorkspace> {
                   widget.modeController.mode,
                   showAdvanced: _showAdvancedDestinations,
                 ))
-              Offstage(
+              RetainedWorkspaceViewport(
                 offstage: destination != _destination,
                 child: TickerMode(
                   enabled: destination == _destination,
@@ -2639,9 +2778,16 @@ class _ModeWorkspaceState extends State<_ModeWorkspace> {
       .putIfAbsent(destination, () => _buildFeature(destination));
 
   Widget _buildFeature(ShellDestination destination) => switch (destination) {
-    ShellDestination.planner => PlannerView(
+    ShellDestination.planner => PlannerContentViewport(
+      scale: widget.appController.plannerContentScale,
       controller: widget.modeController,
-      externalActions: widget.plannerActions,
+      onMaximumChanged: (maximum) {
+        if (mounted) widget.plannerMaximum.value = maximum;
+      },
+      child: PlannerView(
+        controller: widget.modeController,
+        externalActions: widget.plannerActions,
+      ),
     ),
     ShellDestination.bonusRecipes => BonusView(
       controller: widget.modeController,

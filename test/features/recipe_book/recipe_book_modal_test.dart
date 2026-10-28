@@ -322,11 +322,15 @@ void main() {
         find.descendant(of: grid, matching: find.byType(RawScrollbar)),
         findsNothing,
       );
-      final lazyCardGrid = tester.widget<GridView>(
-        find.descendant(of: grid, matching: find.byType(GridView)),
+      final lazyCardGrid = tester.widget<CustomScrollView>(
+        find.descendant(of: grid, matching: find.byType(CustomScrollView)),
       );
       expect(
-        lazyCardGrid.childrenDelegate,
+        tester
+            .widget<SliverList>(
+              find.descendant(of: grid, matching: find.byType(SliverList)),
+            )
+            .delegate,
         isA<SliverChildBuilderDelegate>(),
         reason: 'Recipe cards should be built only around visible entries.',
       );
@@ -695,7 +699,10 @@ void main() {
       );
       expect(
         tester.getSize(find.byKey(RecipeBookKeys.card('Clear Liquid Reagent'))),
-        const Size(236, 182),
+        predicate<Size>(
+          (size) =>
+              size.width >= 400 && size.height >= 120 && size.height < 138,
+        ),
       );
       expect(find.text('3 recipes'), findsOneWidget);
       expect(tester.takeException(), isNull);
@@ -745,13 +752,17 @@ void main() {
       expect(book.previewName, 'Clear Liquid Reagent');
       expect(
         tester.getSize(find.byKey(RecipeBookKeys.previewPanel)),
-        const Size(430, 267),
+        predicate<Size>(
+          (size) => size.width == 430 && size.height > 200 && size.height < 360,
+        ),
       );
       final previewRect = tester.getRect(
         find.byKey(RecipeBookKeys.previewPanel),
       );
-      expect(previewRect.left, closeTo(293.8, .2));
-      expect(previewRect.top, closeTo(263.3, .2));
+      expect(previewRect.left, greaterThanOrEqualTo(24));
+      expect(previewRect.top, greaterThanOrEqualTo(24));
+      expect(previewRect.right, lessThanOrEqualTo(1176));
+      expect(previewRect.bottom, lessThanOrEqualTo(728));
       expect(
         tester.getSize(
           find.byKey(RecipeBookKeys.r11Target('Clear Liquid Reagent:preview')),
@@ -1547,7 +1558,7 @@ void main() {
   );
 
   testWidgets(
-    'Illuminated Ledger book uses retained plate, card, action, and preview geometry',
+    'Illuminated Ledger book keeps themed plate and preview with open recipe rows',
     (tester) async {
       await _setSize(tester, const Size(1500, 940));
       final environment = buildRecipeBookTestEnvironment();
@@ -1653,7 +1664,10 @@ void main() {
       );
       expect(
         tester.getSize(find.byKey(RecipeBookKeys.card(adaptation))),
-        const Size(279, 198),
+        predicate<Size>(
+          (size) =>
+              size.width >= 400 && size.height >= 120 && size.height < 138,
+        ),
       );
       final adaptationCard = find.byKey(RecipeBookKeys.card(adaptation));
       final adaptationMethod = find.descendant(
@@ -1664,7 +1678,7 @@ void main() {
       expect(tester.widget<Text>(adaptationMethod).data, 'Simple Alchemy');
       expect(
         tester.getSize(find.byKey(RecipeBookKeys.r11Target(adaptation))),
-        const Size(96, 34),
+        predicate<Size>((size) => size.width < 120 && size.height == 32),
       );
       final cardRect = tester.getRect(
         find.byKey(RecipeBookKeys.card(adaptation)),
@@ -1689,23 +1703,23 @@ void main() {
         AppButtonRole.primary,
       );
       expect(
-        tester
-            .widget<AppButton>(
-              find.byKey(RecipeBookKeys.r13Details(adaptation)),
-            )
-            .role,
-        AppButtonRole.primary,
+        tester.widget(find.byKey(RecipeBookKeys.r13Details(adaptation))),
+        isA<AppTextAction>(),
       );
       expect(
-        tester
-            .widget<AppButton>(find.byKey(RecipeBookKeys.r11Target(adaptation)))
-            .role,
-        AppButtonRole.primary,
+        tester.widget(find.byKey(RecipeBookKeys.r11Target(adaptation))),
+        isA<AppTextAction>(),
       );
 
       await tester.tap(find.byKey(RecipeBookKeys.r13Details(adaptation)));
       await tester.pumpAndSettle();
-      expect(find.text('Crafted / Simple Alchemy'), findsOneWidget);
+      expect(
+        find.descendant(
+          of: find.byKey(RecipeBookKeys.previewPanel),
+          matching: find.text('Simple Alchemy'),
+        ),
+        findsOneWidget,
+      );
       expect(
         tester
             .widget<AppButton>(
@@ -1718,9 +1732,9 @@ void main() {
         find.byKey(
           RecipeBookKeys.previewQuantity(adaptation, 'Elixir of Life'),
         ),
-        findsNothing,
+        findsOneWidget,
       );
-      expect(find.text('Need 30'), findsWidgets);
+      expect(find.text('×30'), findsWidgets);
       expect(
         tester.getSize(
           find.byKey(
@@ -1736,7 +1750,7 @@ void main() {
     },
   );
 
-  testWidgets('Illuminated Ledger keeps four responsive columns at 1200x752', (
+  testWidgets('Illuminated Ledger keeps readable open rows at 1200x752', (
     tester,
   ) async {
     await _setSize(tester, const Size(1200, 752));
@@ -1762,13 +1776,15 @@ void main() {
     );
     expect(
       tester.getSize(find.byKey(RecipeBookKeys.card('Clear Liquid Reagent'))),
-      const Size(251, 198),
+      predicate<Size>(
+        (size) => size.width >= 400 && size.height >= 120 && size.height < 138,
+      ),
     );
     expect(
       tester.getSize(
         find.byKey(RecipeBookKeys.r11Target('Clear Liquid Reagent')),
       ),
-      const Size(96, 34),
+      predicate<Size>((size) => size.width < 120 && size.height == 32),
     );
     expect(
       tester
@@ -2581,7 +2597,8 @@ void main() {
       findsOneWidget,
     );
     expect(find.text('Used For'), findsNothing);
-    expect(tester.getRect(panel).height, lessThan(280));
+    // Larger item artwork and readable section type remain content-sized.
+    expect(tester.getRect(panel).height, lessThan(320));
 
     await tester.pumpWidget(const SizedBox.shrink());
     book.dispose();
@@ -2643,10 +2660,25 @@ void main() {
           findsOneWidget,
         );
       }
-      expect(find.text('Classic · 1× batch'), findsOneWidget);
-      expect(find.text('Classic · 10× batch'), findsOneWidget);
-      expect(find.text('Concentrated · 1× batch'), findsOneWidget);
-      expect(find.text('Concentrated · 10× batch'), findsOneWidget);
+      for (final route in ['Classic', 'Concentrated']) {
+        for (final batch in [1, 10]) {
+          final formula = find.byKey(
+            RecipeBookKeys.itemInfoFormula(
+              name,
+              '${route.toLowerCase()}-${batch}x',
+              batch,
+            ),
+          );
+          expect(
+            find.descendant(of: formula, matching: find.text(route)),
+            findsOneWidget,
+          );
+          expect(
+            find.descendant(of: formula, matching: find.text('$batch× batch')),
+            findsOneWidget,
+          );
+        }
+      }
 
       final firstMaterial = find.byKey(
         RecipeBookKeys.itemInfoMaterial(
@@ -2951,7 +2983,7 @@ void main() {
   });
 
   testWidgets(
-    'Edania references browse without target controls and inferred output is labeled',
+    'reforms stay hidden while Heating references and inferred outputs remain readable',
     (tester) async {
       await _setSize(tester, const Size(1200, 752));
       final environment = buildRecipeBookTestEnvironment(
@@ -2968,8 +3000,8 @@ void main() {
       addTearDown(book.dispose);
       addTearDown(environment.dispose);
       final activations = <RecipeBookActivation>[];
-      const reference = 'Dawnbound Ekleta Necklace';
-      book.setSearch(reference);
+      const reference = 'Twilight of the End - Necklace';
+      book.setSearch('Dawnbound Ekleta Necklace');
 
       await tester.pumpWidget(
         _host(
@@ -2982,6 +3014,12 @@ void main() {
       );
       await tester.pumpAndSettle();
 
+      expect(
+        find.byKey(RecipeBookKeys.card('Dawnbound Ekleta Necklace')),
+        findsNothing,
+      );
+      book.setSearch(reference);
+      await tester.pumpAndSettle();
       expect(find.byKey(RecipeBookKeys.card(reference)), findsOneWidget);
       expect(find.byKey(RecipeBookKeys.r11Target(reference)), findsNothing);
       expect(find.byKey(RecipeBookKeys.r12Favorite(reference)), findsNothing);
@@ -2999,8 +3037,7 @@ void main() {
         find.byKey(RecipeBookKeys.r11Target('$reference:preview')),
         findsNothing,
       );
-      expect(find.text('Ekleta Necklace'), findsOneWidget);
-      expect(find.text('Cup of Destined Dawn'), findsOneWidget);
+      expect(find.text('Causality Shardstone - Necklace'), findsOneWidget);
 
       book.closePreview();
       book.setSearch('Polished Marble');

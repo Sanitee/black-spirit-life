@@ -30,7 +30,7 @@ void main() {
   );
 
   test(
-    'Best use persists its material independently of crafting and exchanges',
+    'Best use codec round-trips legacy material independently of controller session resets',
     () {
       final original = OpportunitiesPreferences()
         ..section = 'best-use'

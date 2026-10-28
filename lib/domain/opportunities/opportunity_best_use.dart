@@ -22,6 +22,8 @@ final class OpportunityBestUseQuote {
     required this.otherInputCost,
     required this.otherIngredientsAvailable,
     required this.isEstimated,
+    this.selectedItemId,
+    this.comparison,
   }) : ingredientChoices = Map.unmodifiable(ingredientChoices);
 
   final Recipe recipe;
@@ -34,7 +36,135 @@ final class OpportunityBestUseQuote {
   final double? otherInputCost;
   final bool otherIngredientsAvailable;
   final bool isEstimated;
+
+  /// Canonical selected-material identity, retained across mode-local aliases.
+  final String? selectedItemId;
+  final OpportunityBestUseComparison? comparison;
 }
+
+/// Compare using the selected material with listing that same consumed material.
+/// Totals refer to [selectedQuantity] raw units, never finished-output units.
+/// Independently known values remain available when another price is missing.
+final class OpportunityBestUseComparison {
+  const OpportunityBestUseComparison._({
+    required this.selectedQuantity,
+    required this.rawIngredientSale,
+    required this.otherInputCost,
+    required this.craftingReturn,
+    required this.isEstimated,
+    required this.otherIngredientsAvailable,
+  });
+
+  final int selectedQuantity;
+
+  /// Listing proceeds after tax for only the selected consumed raw material.
+  final double? rawIngredientSale;
+  final double? otherInputCost;
+
+  /// Output listing proceeds after tax, minus the other ingredients' cost.
+  /// The selected material's purchase price is deliberately not deducted.
+  final double? craftingReturn;
+  final bool isEstimated;
+  final bool otherIngredientsAvailable;
+
+  double? get profitLoss => rawIngredientSale == null || craftingReturn == null
+      ? null
+      : _finiteBestUseValue(craftingReturn! - rawIngredientSale!);
+  double? get profitLossPerUnit => _perUnit(profitLoss);
+  double? get rawSalePerUnit => _perUnit(rawIngredientSale);
+  double? get craftingReturnPerUnit => _perUnit(craftingReturn);
+
+  double? _perUnit(double? value) =>
+      value == null ? null : _finiteBestUseValue(value / selectedQuantity);
+}
+
+/// Reuses an already evaluated quote, including its current formula, crafts,
+/// substitutions and optional custom output price. No price lookup or fill is
+/// performed here. Use the same tax and freshness policy as that quote.
+///
+/// Null means the selected material is absent or has invalid consumption (or an
+/// explicitly supplied ID is invalid), not that a price is unknown. An ID takes
+/// precedence over the name so aliases and duplicate input slots stay unified.
+OpportunityBestUseComparison? calculateOpportunityBestUseComparison({
+  required OpportunityQuote quote,
+  required String itemName,
+  String? selectedItemId,
+  required MarketTax marketTax,
+  required DateTime now,
+  required Duration maxMarketAge,
+}) {
+  final selectedId = selectedItemId == null
+      ? null
+      : normalizeNumericMarketId(selectedItemId);
+  if (selectedItemId != null && selectedId == null) return null;
+  final selectedName = _fold(itemName);
+  if (selectedId == null && selectedName.isEmpty) return null;
+  bool matches(OpportunityIngredientQuote input) => selectedId == null
+      ? _fold(input.name) == selectedName
+      : normalizeNumericMarketId(input.itemId ?? '') == selectedId;
+  final selected = quote.ingredients.where(matches).toList(growable: false);
+  if (selected.isEmpty || selected.any((input) => input.quantity <= 0)) {
+    return null;
+  }
+  final consumed = selected.fold<int>(0, (sum, input) => sum + input.quantity);
+  if (consumed <= 0) return null;
+  final others = quote.ingredients
+      .where((input) => !matches(input))
+      .toList(growable: false);
+  double? otherCost = 0;
+  for (final input in others) {
+    final cost = input.costForCalculation;
+    if (cost == null || !cost.isFinite) {
+      otherCost = null;
+      break;
+    }
+    otherCost = otherCost! + cost;
+  }
+  otherCost = _finiteBestUseValue(otherCost);
+
+  final taxRate = marketNetRate(marketTax);
+  double? directSale = taxRate.isFinite && taxRate > 0 && taxRate <= 1
+      ? 0
+      : null;
+  if (directSale != null) {
+    for (final input in selected) {
+      final item = input.market;
+      final inputId = normalizeNumericMarketId(input.itemId ?? '');
+      if (item == null ||
+          inputId == null ||
+          normalizeNumericMarketId(item.itemId) != inputId ||
+          item.subId != 0 ||
+          item.unlisted ||
+          !item.quoteIsFresh(now, maxMarketAge)) {
+        directSale = null;
+        break;
+      }
+      final gross = input.quantity * item.basePrice!.toDouble();
+      if (!gross.isFinite) {
+        directSale = null;
+        break;
+      }
+      directSale = directSale! + marketNetProceeds(gross, marketTax);
+    }
+  }
+  directSale = _finiteBestUseValue(directSale);
+  final revenue = quote.listingRevenue;
+  return OpportunityBestUseComparison._(
+    selectedQuantity: consumed,
+    rawIngredientSale: directSale,
+    otherInputCost: otherCost,
+    craftingReturn: revenue == null || otherCost == null
+        ? null
+        : _finiteBestUseValue(revenue - otherCost),
+    otherIngredientsAvailable: others.every(
+      (input) => input.quantity > 0 && input.stockCoversRequest,
+    ),
+    isEstimated: others.any((input) => input.estimatedMarketQuantity > 0),
+  );
+}
+
+double? _finiteBestUseValue(double? value) =>
+    value?.isFinite == true ? value : null;
 
 /// Direct input identities only, including every complete variant and accepted
 /// substitute/grade. This neither traverses upstream recipes nor reads prices.
@@ -176,66 +306,33 @@ OpportunityBestUseQuote? evaluateOpportunityBestUse({
     evaluate(discover: true);
     if (choices.isEmpty) continue;
     final quote = evaluate();
-    final selected = quote.ingredients
-        .where((input) => matches(input.name, input.itemId))
-        .toList();
-    final consumed = selected.fold<int>(
-      0,
-      (sum, input) => sum + input.quantity,
+    final comparison = calculateOpportunityBestUseComparison(
+      quote: quote,
+      itemName: selectedName,
+      selectedItemId: selectedId,
+      marketTax: marketTax,
+      now: now,
+      maxMarketAge: maxMarketAge,
     );
-    if (consumed <= 0 ||
+    if (comparison == null ||
         quote.expectedOutput == null ||
         !quote.expectedOutput!.isFinite ||
         quote.expectedOutput! <= 0) {
       continue;
     }
-    final others = quote.ingredients
-        .where((input) => !matches(input.name, input.itemId))
-        .toList();
-    double? otherCost = 0;
-    for (final input in others) {
-      final cost = input.costForCalculation;
-      if (cost == null || !cost.isFinite) {
-        otherCost = null;
-        break;
-      }
-      otherCost = otherCost! + cost;
-    }
-    if (otherCost?.isFinite == false) otherCost = null;
-
-    double? directSale = 0;
-    for (final input in selected) {
-      final item = input.market;
-      if (item == null ||
-          item.unlisted ||
-          !item.quoteIsFresh(now, maxMarketAge)) {
-        directSale = null;
-        break;
-      }
-      directSale =
-          directSale! +
-          marketNetProceeds(
-            input.quantity * item.basePrice!.toDouble(),
-            marketTax,
-          );
-    }
-    final revenue = quote.listingRevenue;
-    final extra = revenue == null || otherCost == null || directSale == null
-        ? null
-        : (revenue - otherCost - directSale) / consumed;
     final result = OpportunityBestUseQuote(
       recipe: recipe,
       mode: mode,
       quote: quote,
       itemName: selectedName,
-      selectedQuantity: consumed,
+      selectedQuantity: comparison.selectedQuantity,
       ingredientChoices: choices,
-      extraProfitPerUnit: extra?.isFinite == true ? extra : null,
-      otherInputCost: otherCost,
-      otherIngredientsAvailable: others.every(
-        (input) => input.quantity > 0 && input.stockCoversRequest,
-      ),
-      isEstimated: others.any((input) => input.estimatedMarketQuantity > 0),
+      extraProfitPerUnit: comparison.profitLossPerUnit,
+      otherInputCost: comparison.otherInputCost,
+      otherIngredientsAvailable: comparison.otherIngredientsAvailable,
+      isEstimated: comparison.isEstimated,
+      selectedItemId: selectedId,
+      comparison: comparison,
     );
     if (best == null || _compare(result, best, preferAvailableInputs) < 0) {
       best = result;

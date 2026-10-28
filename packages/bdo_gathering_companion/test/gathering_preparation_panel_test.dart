@@ -833,7 +833,7 @@ void main() {
         await tester.tap(
           find.descendant(
             of: dialog,
-            matching: find.widgetWithText(TextButton, 'Close'),
+            matching: find.byKey(ValueKey('buff-details-close-${buff.id}')),
           ),
         );
         await tester.pumpAndSettle();

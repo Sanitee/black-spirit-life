@@ -1,4 +1,5 @@
 import 'package:flutter/services.dart';
+import '../ui/visual_palette.dart';
 
 /// Explicit, user-triggered desktop actions. Never captures the game itself.
 abstract final class NativeBridge {
@@ -31,9 +32,11 @@ abstract final class NativeBridge {
 
   static Future<bool> openReferenceWindow({
     required int glassOpacityPercent,
+    CompanionVisualPalette? visualPalette,
   }) async =>
       await _channel.invokeMethod<bool>('openReferenceWindow', {
         'glassOpacityPercent': glassOpacityPercent.clamp(0, 100),
+        if (visualPalette != null) 'visualPalette': visualPalette.encode(),
       }) ??
       false;
 

@@ -8,7 +8,7 @@ void main() {
   for (final useOwned in <bool>[false, true]) {
     test(
       'row preview preserves the batch substitute chosen by '
-      '${useOwned ? 'ownership' : 'market stock'} without saving a choice',
+      '${useOwned ? 'ownership' : 'remaining investment'} without saving a choice',
       () async {
         final formula = Ingredient(
           name: 'Base',
@@ -38,9 +38,9 @@ void main() {
         final documentBefore = controller.documentSnapshot;
         final planBefore = mode.plan.value;
         final row = planBefore.steps.single.ingredients.single;
-        expect(row.name, 'Alternate');
-        expect(row.need, 40);
-        expect(row.missing, useOwned ? 0 : 40);
+        expect(row.name, useOwned ? 'Alternate' : 'Base');
+        expect(row.need, useOwned ? 40 : 20);
+        expect(row.missing, useOwned ? 0 : 20);
 
         final automatic = mode.previewIngredientSelection(
           parentName: 'Target',
@@ -57,7 +57,7 @@ void main() {
         expect(pinned.name, row.name);
         expect(pinned.baseName, row.baseName);
         expect(pinned.grade, row.grade);
-        expect(pinned.need, 4);
+        expect(pinned.need, useOwned ? 4 : 2);
         expect(mode.state.value, same(stateBefore));
         expect(controller.documentSnapshot, same(documentBefore));
         expect(mode.plan.value, same(planBefore));
@@ -80,7 +80,7 @@ void main() {
     final row = mode.plan.value.steps.single.ingredients.single;
     expect(row.name, 'Special Sunrise Herb');
     expect(row.grade, 'special');
-    expect(row.need, 4);
+    expect(row.need, 10);
 
     final preview = mode.previewIngredientSelection(
       parentName: 'Target',

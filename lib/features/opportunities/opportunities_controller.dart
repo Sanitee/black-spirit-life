@@ -20,6 +20,8 @@ import '../../domain/opportunities/exchange_calculator.dart';
 import '../../domain/opportunities/exchange_models.dart';
 import '../../domain/opportunities/opportunity_best_use.dart';
 import '../../domain/opportunities/opportunity_calculator.dart';
+import '../../domain/opportunities/opportunity_card_reading.dart';
+import '../../domain/opportunities/opportunity_recipe_routes.dart';
 import '../../domain/opportunities/recipe_effort.dart';
 import '../../domain/opportunities/recipe_experience.dart' as recipe_exp;
 import '../../domain/planner/planner_models.dart' as planning;
@@ -27,6 +29,7 @@ import '../../domain/state/planner_state.dart';
 import '../planner/planner_contracts.dart'
     show RecipeBookCallingContext, PlannerTargetRequest;
 import '../recipe_book/recipe_book_controller.dart';
+import 'opportunities_content_scale.dart';
 import 'opportunities_preferences.dart';
 
 /// One source formula inspected independently of the selected opportunity.
@@ -174,6 +177,28 @@ class OpportunitiesController extends ChangeNotifier {
   final _calculator = const OpportunityCalculator();
   late final Future<void> ready;
   OpportunitiesPreferences preferences = OpportunitiesPreferences();
+  final ValueNotifier<double> contentScale = ValueNotifier(1);
+
+  /// Live sizing has no calculation, network, or persistence side effects.
+  void previewContentScale(double value) {
+    if (_disposed) return;
+    contentScale.value = normalizeOpportunitiesContentScale(value);
+  }
+
+  void commitContentScale([double? value]) {
+    if (_disposed) return;
+    final next = normalizeOpportunitiesContentScale(
+      value ?? contentScale.value,
+    );
+    contentScale.value = next;
+    if (preferences.contentScale == next) return;
+    preferences.contentScale = next;
+    _preferencesDirty = true;
+    _preferenceRevision++;
+    _saveTimer?.cancel();
+    _saveTimer = Timer(const Duration(milliseconds: 350), _save);
+  }
+
   final Map<String, Map<String, OpportunityMarketItem>> _regionItems = {};
   List<OpportunityQuote> quotes = [];
   List<OpportunityBestUseQuote> bestUseQuotes = [];
@@ -347,6 +372,9 @@ class OpportunitiesController extends ChangeNotifier {
   MarketCancellationController? _cancellation;
   Future<void>? _calculation;
   _CalculationInput? _pendingCalculation;
+  // Invalid or not-yet-priced recipes stay pending until they match the search.
+  // Valid quotes outside the search remain reusable when the search is cleared.
+  final Set<String> _dirtyRecipeNames = {};
   bool _calculating = false;
   int _calculationRevision = 0;
   int _marketRevision = 0;
@@ -378,6 +406,8 @@ class OpportunitiesController extends ChangeNotifier {
   bool _workspaceActive = false;
   Object? _calculationKey;
   Object? _quoteContextKey;
+  // One completed view per mode/region; browsing must not rebuild a warm view.
+  final Map<(CraftMode, String), _CraftingQuoteCache> _craftingQuoteCache = {};
   bool get calculating => _calculating || _calculatingBestUse;
   bool get calculatingBestUse => _calculatingBestUse;
   Future<void> get calculationSettled =>
@@ -437,6 +467,36 @@ class OpportunitiesController extends ChangeNotifier {
       }
     }
     return null;
+  }
+
+  /// All real formulas for the inspected output, including other craft modes.
+  /// Mode order is fixed so Recipe A/B never changes with the entry point.
+  List<OpportunityRecipeRoute> recipeRoutesFor(Recipe inspected) {
+    final name = inspected.name.trim().toLowerCase();
+    final sources = <Recipe>[];
+    for (final mode in [
+      CraftMode.processing,
+      CraftMode.alchemy,
+      CraftMode.cooking,
+    ]) {
+      final source = mode == preferences.mode
+          ? recipes
+          : _inspectionRecipesFor(mode);
+      final recipe = source.values
+          .where((recipe) => recipe.name.trim().toLowerCase() == name)
+          .firstOrNull;
+      if (recipe != null &&
+          recipe.type.trim().toLowerCase() == mode.key &&
+          recipe.isCraftable &&
+          !isTemporarilyArchivedItem(recipe.name, itemId: recipe.marketId)) {
+        sources.add(recipe);
+      }
+    }
+    return opportunityRecipeRoutes(sources);
+  }
+
+  Map<String, Recipe> _inspectionRecipesFor(CraftMode mode) {
+    return _assembleRecipes(mode);
   }
 
   Set<String> get _activeDepthIds => {
@@ -622,7 +682,7 @@ class OpportunitiesController extends ChangeNotifier {
       final source = {
         ...(inspection.sourceMode == preferences.mode
             ? recipes
-            : _assembleRecipes(inspection.sourceMode)),
+            : _inspectionRecipesFor(inspection.sourceMode)),
         inspection.recipe.name: inspection.recipe,
       };
       final validVariant =
@@ -724,9 +784,13 @@ class OpportunitiesController extends ChangeNotifier {
     if (_workspaceActive &&
         preferences.section == 'crafting' &&
         (preferences.craftSort == 'preorders' || preferences.demandOnly)) {
-      // Unknown books must still be requested when Demand hides their
-      // rows. Applying that last filter here would strand them permanently.
       for (final quote in _demandCandidates) {
+        // Out-of-stock hides known stocked outputs: fetching their books
+        // wastes the shared request allowance. Keep unknown/scoped stock in
+        // the scan so hidden, unchecked outputs can still become matches.
+        if (preferences.demandOnly && (_demandStockFor(quote) ?? 0) > 0) {
+          continue;
+        }
         final id = _demandOutputId(quote);
         if (id != null) ids.add(id);
       }
@@ -1010,7 +1074,7 @@ class OpportunitiesController extends ChangeNotifier {
         switch (preferences.craftSort) {
           'preorders' => _demandFor(quote),
           'exp' => experienceForQuote(quote)?.value,
-          _ => quote.profitFor(craftSaleMode),
+          _ => OpportunityPerItemQuote(quote, craftSaleMode).profit,
         };
     // Resolve the dependency graph once, only when unknown rows are visible.
     RecipeEffortIndex? effortIndex;
@@ -1333,6 +1397,13 @@ class OpportunitiesController extends ChangeNotifier {
       preferences = await _preferencesStore.load(
         fallbackRegion: appController.active.state.value.market.region,
       );
+      if (!_disposed) contentScale.value = preferences.contentScale;
+      // Restore filters and balances, but not the previous session's searches.
+      // Tab/category navigation keeps these values on the current controller.
+      preferences
+        ..craftSearch = ''
+        ..exchangeSearch = ''
+        ..bestUseItem = '';
     } on Object {
       notice =
           'Saved settings could not be read. Your file has been left untouched.';
@@ -1411,8 +1482,8 @@ class OpportunitiesController extends ChangeNotifier {
         setEquals(previous.$2.hiddenItems, state.hiddenItems);
   }
 
-  void _assemble({bool force = false}) {
-    if (!force && _assemblyMatches()) return;
+  void _assemble() {
+    if (_assemblyMatches()) return;
     _calculationKey = null;
     _needsFullCalculation = true;
     recipes = _assembleRecipes(preferences.mode);
@@ -1443,20 +1514,30 @@ class OpportunitiesController extends ChangeNotifier {
   }
 
   Map<String, Recipe> _assembleRecipes(CraftMode mode) {
+    final sourceState = appController.modes[mode]!.state.value;
+    final cached = _inspectionRecipes[mode];
+    if (cached != null &&
+        mapEquals(cached.$1.recipeEdits, sourceState.recipeEdits) &&
+        mapEquals(cached.$1.ingredientMeta, sourceState.ingredientMeta) &&
+        setEquals(cached.$1.hiddenItems, sourceState.hiddenItems)) {
+      return cached.$2;
+    }
     final assembled = appController.assembly.assembleRecipes(
       catalog: catalog.snapshot.forMode(mode),
-      state: appController.modes[mode]!.state.value,
+      state: sourceState,
       supportingData: catalog.snapshot.supportingData,
       sharedMetadata: catalog.snapshot.alchemy.metadata,
       mode: mode,
     );
-    return {
+    final result = {
       for (final entry in assembled.entries)
         entry.key: _withMarketId(
           entry.value,
           entry.value.marketId ?? catalog.bundledMarketId(entry.key),
         ),
     };
+    _inspectionRecipes[mode] = (sourceState, result);
+    return result;
   }
 
   Map<String, double> _npcPricesFor(ModeState source) {
@@ -1468,7 +1549,8 @@ class OpportunitiesController extends ChangeNotifier {
     if (excluded.isEmpty) return catalog.npcPurchasePrices;
     return Map.unmodifiable({
       for (final entry in catalog.npcPurchasePrices.entries)
-        if (!excluded.contains(entry.key)) entry.key: entry.value,
+        if (!excluded.contains(entry.key.trim().toLowerCase()))
+          entry.key: entry.value,
     });
   }
 
@@ -1485,25 +1567,15 @@ class OpportunitiesController extends ChangeNotifier {
     double extraCostPerRun = 0,
     double extraCostPerCraft = 0,
     int? customSalePrice,
+    bool? useInventory,
     void Function(String, OpportunityIngredientQuote)? onInputCandidate,
   }) {
     CraftMode modeFor(String type) => CraftMode.values.firstWhere(
       (mode) => mode.key == type.trim().toLowerCase(),
       orElse: () => throw ArgumentError.value(type, 'recipe.type'),
     );
-    Map<String, Recipe> recipesFor(CraftMode mode) {
-      final sourceState = appController.modes[mode]!.state.value;
-      final cached = _inspectionRecipes[mode];
-      if (cached != null && identical(cached.$1, sourceState)) {
-        return cached.$2;
-      }
-      final assembled = _assembleRecipes(mode);
-      _inspectionRecipes[mode] = (sourceState, assembled);
-      return assembled;
-    }
-
     final initialMode = modeFor(recipe.type);
-    final initialRecipes = recipesFor(initialMode);
+    final initialRecipes = _inspectionRecipesFor(initialMode);
     final isCurrentDefinition =
         initialMode == preferences.mode &&
         identical(recipes[recipe.name], recipe);
@@ -1522,7 +1594,9 @@ class OpportunitiesController extends ChangeNotifier {
               );
     // An explicitly invalid ID must reach the calculator, not silently resolve
     // to the default formula. Only an absent choice uses the source default.
-    final displayedVariant = preferences.readyOnly && isCurrentDefinition
+    final displayedVariant =
+        (preferences.readyOnly || preferences.useInventory) &&
+            isCurrentDefinition
         ? quotes
               .where((quote) => quote.recipeName == sourceRecipe.name)
               .firstOrNull
@@ -1535,7 +1609,7 @@ class OpportunitiesController extends ChangeNotifier {
     final formula = sourceRecipe.resolveVariant(variantId);
     final sourceMode = modeFor(formula.type);
     final sourceRecipes = {
-      ...recipesFor(sourceMode),
+      ..._inspectionRecipesFor(sourceMode),
       sourceRecipe.name: sourceRecipe,
     };
     final sourceState = appController.modes[sourceMode]!.state.value;
@@ -1567,6 +1641,8 @@ class OpportunitiesController extends ChangeNotifier {
           customSalePrice: customSalePrice,
           onInputCandidate: onInputCandidate,
           preferAvailableInputs: preferences.readyOnly,
+          useInventory: useInventory ?? preferences.useInventory,
+          nonMarketableIds: reviewedNonMarketableOpportunityIds,
         );
     OpportunityMarketItem? requestedMarket;
     if (rare) {
@@ -1596,6 +1672,21 @@ class OpportunitiesController extends ChangeNotifier {
       },
       isRareOutput: rare,
     );
+  }
+
+  /// Appearance is deliberately outside the calculation/market change path.
+  void selectGlassFinish(String finish) {
+    if (_disposed ||
+        !const ['bronze', 'moon'].contains(finish) ||
+        preferences.glassFinish == finish) {
+      return;
+    }
+    preferences.glassFinish = finish;
+    _preferencesDirty = true;
+    _preferenceRevision++;
+    _saveTimer?.cancel();
+    _saveTimer = Timer(const Duration(milliseconds: 350), _save);
+    notifyListeners();
   }
 
   void change(
@@ -1655,8 +1746,7 @@ class OpportunitiesController extends ChangeNotifier {
     _preferencesDirty = true;
     _preferenceRevision++;
     if (assemble) {
-      quotes = [];
-      _assemble(force: true);
+      _assemble();
     }
     recalculate();
     _updateDemandDepthScope();
@@ -1766,10 +1856,24 @@ class OpportunitiesController extends ChangeNotifier {
     preferences.readyOnly,
     craftSaleMode,
     preferences.region,
+    preferences.useInventory,
+    preferences.useInventory ? _inventoryContext : null,
   );
+
+  final Map<CraftMode, Map<String, double>> _inventoryContexts = {};
+  Object get _inventoryContext {
+    // ModeState copies maps on unrelated edits; retain identity for equal stock.
+    if (!mapEquals(_inventoryContexts[preferences.mode], state.inventory)) {
+      _inventoryContexts[preferences.mode] = state.inventory;
+    }
+    return _inventoryContexts[preferences.mode]!;
+  }
 
   void recalculate({bool marketUpdate = false}) {
     if (_disposed || loading) return;
+    // The destination mode must be assembled even if the old mode has no
+    // recipes matching this search (and therefore starts no calculation).
+    _assemble();
     if (!marketUpdate && _flushDepth == 0) _marketPausedForFlush = false;
     _updateCacheFreshness();
     _recalculateBestUse();
@@ -1780,39 +1884,61 @@ class OpportunitiesController extends ChangeNotifier {
       _needsFullCalculation = true;
       _pendingCalculation = null;
       quotes = [];
+      _restoreCraftingQuotes(contextKey);
     }
+    _dirtyRecipeNames.addAll(_pendingCalculation?.recipeNames ?? const {});
+    _pendingCalculation = null;
     final key = (contextKey, _marketRevision);
     if (key != _calculationKey || _needsFullCalculation) {
       _calculationKey = key;
       _prepareMarketDependencies();
       final changed = _changedMarketIds.remove(preferences.region) ?? const {};
-      final names = <String>{
-        ...?_pendingCalculation?.recipeNames,
-        if (_needsFullCalculation)
-          ..._recipeMarketIds.keys
-        else
+      if (_needsFullCalculation) {
+        _dirtyRecipeNames
+          ..clear()
+          ..addAll(_recipeMarketIds.keys);
+      } else {
+        _dirtyRecipeNames.addAll([
           for (final entry in _recipeMarketIds.entries)
             if (entry.value.any(changed.contains)) entry.key,
-      };
-      _needsFullCalculation = false;
-      if (names.isNotEmpty) {
-        _pendingCalculation = _CalculationInput(
-          revision: _calculationRevision,
-          recipeNames: names,
-          modeKey: preferences.mode.key,
-          recipes: recipes,
-          state: state,
-          rules: appController.plannerRules,
-          tax: appController.marketTax.value,
-          catalogNpcPrices: _npcPricesFor(state),
-          market: market,
-          now: clock(),
-          maxMarketAge: cachedMarketMaxAge,
-          preferAvailableInputs: preferences.readyOnly,
-          saleMode: craftSaleMode,
-        );
-        if (!_calculating) _calculation = _drainCalculations();
+        ]);
       }
+      _needsFullCalculation = false;
+    }
+    final search = preferences.craftSearch.trim().toLowerCase();
+    // Keep visible rows in place during a market refresh, as before. Hidden
+    // invalid rows must be removed because their recalculation is now deferred.
+    if (search.isNotEmpty) {
+      quotes = [
+        for (final quote in quotes)
+          if (!_dirtyRecipeNames.contains(quote.recipeName) ||
+              quote.recipeName.toLowerCase().contains(search))
+            quote,
+      ];
+    }
+    final names = {
+      for (final name in _dirtyRecipeNames)
+        if (search.isEmpty || name.toLowerCase().contains(search)) name,
+    };
+    if (names.isNotEmpty) {
+      _dirtyRecipeNames.removeAll(names);
+      _pendingCalculation = _CalculationInput(
+        revision: _calculationRevision,
+        recipeNames: names,
+        modeKey: preferences.mode.key,
+        recipes: recipes,
+        state: state,
+        rules: appController.plannerRules,
+        tax: appController.marketTax.value,
+        catalogNpcPrices: _npcPricesFor(state),
+        market: market,
+        now: clock(),
+        maxMarketAge: cachedMarketMaxAge,
+        preferAvailableInputs: preferences.readyOnly,
+        saleMode: craftSaleMode,
+        useInventory: preferences.useInventory,
+      );
+      if (!_calculating) _calculation = _drainCalculations();
     }
     notifyListeners();
   }
@@ -1870,6 +1996,51 @@ class OpportunitiesController extends ChangeNotifier {
           });
   }
 
+  void _restoreCraftingQuotes(Object contextKey) {
+    final cached = _craftingQuoteCache[(preferences.mode, preferences.region)];
+    final now = clock();
+    if (cached == null ||
+        cached.contextKey != contextKey ||
+        !cached.validAt(now, cachedMarketMaxAge)) {
+      return;
+    }
+    _prepareMarketDependencies();
+    final current = _regionItems[preferences.region] ?? const {};
+    bool changed(String id) {
+      final item = current[id];
+      return item == null
+          ? cached.market[id] != null
+          : !_sameMarketData(cached.market[id], item);
+    }
+
+    quotes = cached.quotes;
+    _dirtyRecipeNames
+      ..clear()
+      ..addAll(cached.dirtyRecipeNames)
+      ..addAll([
+        for (final entry in _recipeMarketIds.entries)
+          if (entry.value.any(changed)) entry.key,
+      ]);
+    _needsFullCalculation = false;
+  }
+
+  void _rememberCraftingQuotes(_CalculationInput input) {
+    if (_pendingCalculation != null) return;
+    _craftingQuoteCache[(
+      preferences.mode,
+      preferences.region,
+    )] = _CraftingQuoteCache(
+      contextKey: _quoteContextKey!,
+      quotes: quotes,
+      dirtyRecipeNames: {..._dirtyRecipeNames},
+      market: {
+        for (final id in _recipeMarketIds.values.expand((ids) => ids))
+          id: ?input.market.items[id],
+      },
+      calculatedAt: input.now,
+    );
+  }
+
   Future<void> _drainCalculations() async {
     _calculating = true;
     try {
@@ -1889,12 +2060,18 @@ class OpportunitiesController extends ChangeNotifier {
         if (!_disposed && input.revision == _calculationRevision) {
           final merged = {for (final quote in quotes) quote.recipeName: quote};
           for (final quote in next) {
-            merged[quote.recipeName] = quote;
+            // A newer receipt may have invalidated this recipe mid-calculation.
+            if (!_dirtyRecipeNames.contains(quote.recipeName) &&
+                !(_pendingCalculation?.recipeNames.contains(quote.recipeName) ??
+                    false)) {
+              merged[quote.recipeName] = quote;
+            }
           }
           quotes = [
             for (final recipe in recipes.values)
               if (merged[recipe.name] case final OpportunityQuote quote) quote,
           ];
+          _rememberCraftingQuotes(input);
           _updateDemandDepthScope();
           if (_cardMarketInterests.isNotEmpty) _scheduleCardInterestCheck();
           notifyListeners();
@@ -1905,11 +2082,14 @@ class OpportunitiesController extends ChangeNotifier {
     } on Object {
       if (!_disposed) {
         quotes = [];
+        _pendingCalculation = null;
+        _needsFullCalculation = true;
         notice = 'The recipes could not be calculated. Try checking again.';
         notifyListeners();
       }
     } finally {
       _calculating = false;
+      if (!_disposed) notifyListeners();
     }
   }
 
@@ -3025,7 +3205,9 @@ class OpportunitiesController extends ChangeNotifier {
   void _save() {
     if (!_preferencesDirty) return;
     final revision = _preferenceRevision;
-    final snapshot = OpportunitiesPreferences.fromJson(preferences.toJson());
+    final snapshot = OpportunitiesPreferences.fromJson(preferences.toJson())
+      // Best use is a session choice, not a remembered startup search.
+      ..bestUseItem = '';
     _saveTail = _saveTail.then((_) async {
       try {
         await _preferencesStore.save(snapshot);
@@ -3045,6 +3227,7 @@ class OpportunitiesController extends ChangeNotifier {
     _recalculateTimer?.cancel();
     try {
       await ready;
+      commitContentScale();
       _autoCheckTimer?.cancel();
       _selectionRevision++;
       _cancelMarketCalls();
@@ -3073,6 +3256,7 @@ class OpportunitiesController extends ChangeNotifier {
   @override
   void dispose() {
     _disposed = true;
+    contentScale.dispose();
     _itemInfoController?.dispose();
     _autoCheckTimer?.cancel();
     cancel();
@@ -3197,6 +3381,7 @@ OpportunityQuote _unknownRareOutput(
   extraCostPerRun: source.extraCostPerRun,
   extraCostPerCraft: source.extraCostPerCraft,
   customSalePrice: source.customSalePrice,
+  usesInventory: source.usesInventory,
   buyerRevenue: null,
   buyerFilledQuantity: 0,
   marketReady: false,
@@ -3323,6 +3508,32 @@ List<OpportunityBestUseQuote> _calculateBestUses(
       result,
 ];
 
+final class _CraftingQuoteCache {
+  const _CraftingQuoteCache({
+    required this.contextKey,
+    required this.quotes,
+    required this.dirtyRecipeNames,
+    required this.market,
+    required this.calculatedAt,
+  });
+
+  final Object contextKey;
+  final List<OpportunityQuote> quotes;
+  final Set<String> dirtyRecipeNames;
+  final Map<String, OpportunityMarketItem> market;
+  final DateTime calculatedAt;
+
+  bool validAt(DateTime now, Duration maxAge) =>
+      !now.isBefore(calculatedAt) &&
+      market.values.every(
+        (item) =>
+            item.quoteIsFresh(calculatedAt, maxAge) ==
+                item.quoteIsFresh(now, maxAge) &&
+            item.bookIsFresh(calculatedAt, maxAge) ==
+                item.bookIsFresh(now, maxAge),
+      );
+}
+
 class _CalculationInput {
   const _CalculationInput({
     required this.revision,
@@ -3338,6 +3549,7 @@ class _CalculationInput {
     required this.maxMarketAge,
     required this.preferAvailableInputs,
     required this.saleMode,
+    required this.useInventory,
   });
   final int revision;
   final Set<String> recipeNames;
@@ -3352,25 +3564,41 @@ class _CalculationInput {
   final Duration maxMarketAge;
   final bool preferAvailableInputs;
   final OpportunitySaleMode saleMode;
+  final bool useInventory;
 }
 
-List<OpportunityQuote> _calculateRecipes(_CalculationInput input) => [
-  for (final recipe in input.recipes.values)
-    if (input.recipeNames.contains(recipe.name) &&
-        recipe.isCraftable &&
-        recipe.type.toLowerCase() == input.modeKey)
-      OpportunityCalculator(catalogNpcPrices: input.catalogNpcPrices).evaluate(
-        recipe: recipe,
-        recipes: input.recipes,
-        state: input.state,
-        rules: input.rules,
-        marketTax: input.tax,
-        market: input.market,
-        now: input.now,
-        // Overview rows compare one complete craft without hidden global costs.
-        // Detail inspections pass their own quantities and optional costs.
-        preferAvailableInputs: input.preferAvailableInputs,
-        saleMode: input.saleMode,
-        maxMarketAge: input.maxMarketAge,
-      ),
-];
+List<OpportunityQuote> _calculateRecipes(_CalculationInput input) {
+  final calculator = OpportunityCalculator(
+    catalogNpcPrices: input.catalogNpcPrices,
+  );
+  final inventory = input.useInventory
+      ? calculator.prepareInventory(
+          recipes: input.recipes,
+          state: input.state,
+          rules: input.rules,
+        )
+      : null;
+  return [
+    for (final recipe in input.recipes.values)
+      if (input.recipeNames.contains(recipe.name) &&
+          recipe.isCraftable &&
+          recipe.type.toLowerCase() == input.modeKey)
+        calculator.evaluate(
+          recipe: recipe,
+          recipes: input.recipes,
+          state: input.state,
+          rules: input.rules,
+          marketTax: input.tax,
+          market: input.market,
+          now: input.now,
+          // Overview rows compare one complete craft without hidden global costs.
+          // Detail inspections pass their own quantities and optional costs.
+          preferAvailableInputs: input.preferAvailableInputs,
+          saleMode: input.saleMode,
+          useInventory: input.useInventory,
+          preparedInventory: inventory,
+          nonMarketableIds: reviewedNonMarketableOpportunityIds,
+          maxMarketAge: input.maxMarketAge,
+        ),
+  ];
+}

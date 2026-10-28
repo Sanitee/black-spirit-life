@@ -877,18 +877,42 @@ void main() {
       final golden = find.byKey(goldenRoot);
       await _settleImages(tester, root: golden, spec: spec);
 
-      final card = find.byKey(RecipeBookKeys.card(name));
-      final tooltip = find.descendant(
-        of: card,
-        matching: find.byWidgetPredicate(
-          (widget) => widget is Tooltip && widget.richMessage != null,
+      // Item Reform entries are intentionally excluded from recipe selection.
+      // Their real reference card remains available from item details.
+      expect(book.snapshot.entries.any((entry) => entry.name == name), isFalse);
+      final info = book.itemInfoFor(name)!;
+      expect(info.acquisitionFormulas, isNotEmpty);
+      await tester.pumpWidget(
+        RepaintBoundary(
+          key: goldenRoot,
+          child: MaterialApp(
+            debugShowCheckedModeBanner: false,
+            theme: spec.materialTheme(),
+            home: ThemeSpecScope(
+              spec: spec,
+              child: Scaffold(
+                body: Padding(
+                  padding: const EdgeInsets.all(24),
+                  child: Align(
+                    alignment: Alignment.topLeft,
+                    child: ItemReferenceCard(
+                      controller: book,
+                      mode: CraftMode.processing,
+                      name: name,
+                      info: info,
+                      maxWidth: 480,
+                      spec: spec,
+                      onClose: () {},
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
         ),
       );
-      tester.state<TooltipState>(tooltip).ensureTooltipVisible();
-      await tester.pump();
-      await tester.pump(const Duration(milliseconds: 180));
       await _settleImages(tester, root: golden, spec: spec);
-
+      expect(tester.takeException(), isNull);
       await expectLater(
         golden,
         matchesGoldenFile(

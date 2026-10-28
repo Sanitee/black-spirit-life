@@ -1055,6 +1055,9 @@ OpportunityQuote calculate({
   Map<String, String> ingredientChoices = const {},
   Map<String, Map<String, int>> ingredientAllocations = const {},
   void Function(String, OpportunityIngredientQuote)? onInputCandidate,
+  bool useInventory = false,
+  bool preferAvailableInputs = false,
+  Set<String> nonMarketableIds = const {},
 }) {
   final selected = product ?? recipe('Product');
   return calculator.evaluate(
@@ -1086,6 +1089,9 @@ OpportunityQuote calculate({
     ingredientChoices: ingredientChoices,
     ingredientAllocations: ingredientAllocations,
     onInputCandidate: onInputCandidate,
+    useInventory: useInventory,
+    preferAvailableInputs: preferAvailableInputs,
+    nonMarketableIds: nonMarketableIds,
   );
 }
 

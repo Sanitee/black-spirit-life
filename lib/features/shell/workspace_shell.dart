@@ -57,6 +57,29 @@ class WorkspaceShell extends StatelessWidget {
       '${destination.label} is not available in ${mode.label}.',
     );
     final spec = context.visualTheme;
+    Widget sidebar(bool compact) => RepaintBoundary(
+      key: WorkspaceShellKeys.sidebar,
+      child: _WorkspaceSidebar(
+        mode: mode,
+        destination: destination,
+        compact: compact,
+        showAdvancedDestinations: showAdvancedDestinations,
+        onModeChanged: onModeChanged,
+        onDestinationChanged: onDestinationChanged,
+      ),
+    );
+    final compactSidebar = sidebar(true);
+    final regularSidebar = sidebar(false);
+    final content = RepaintBoundary(
+      key: WorkspaceShellKeys.contentHost,
+      child: _ContentTransitionHost(
+        destination: destination,
+        transition: transition,
+        transitionSpeed: transitionSpeed,
+        reduceMotion: reduceMotion,
+        child: child,
+      ),
+    );
 
     return LayoutBuilder(
       builder: (context, constraints) {
@@ -75,31 +98,10 @@ class WorkspaceShell extends StatelessWidget {
                     ? WorkspaceShellKeys.compactLayout
                     : WorkspaceShellKeys.referenceLayout,
                 width: metrics.sidebarWidth,
-                child: RepaintBoundary(
-                  key: WorkspaceShellKeys.sidebar,
-                  child: _WorkspaceSidebar(
-                    mode: mode,
-                    destination: destination,
-                    compact: metrics.compact,
-                    showAdvancedDestinations: showAdvancedDestinations,
-                    onModeChanged: onModeChanged,
-                    onDestinationChanged: onDestinationChanged,
-                  ),
-                ),
+                child: metrics.compact ? compactSidebar : regularSidebar,
               ),
               SizedBox(width: metrics.contentGap),
-              Expanded(
-                child: RepaintBoundary(
-                  key: WorkspaceShellKeys.contentHost,
-                  child: _ContentTransitionHost(
-                    destination: destination,
-                    transition: transition,
-                    transitionSpeed: transitionSpeed,
-                    reduceMotion: reduceMotion,
-                    child: child,
-                  ),
-                ),
-              ),
+              Expanded(child: content),
             ],
           ),
         );

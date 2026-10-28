@@ -6,8 +6,8 @@ import '../../domain/models/catalog_models.dart';
 import '../../domain/models/craft_mode.dart';
 
 const productionCatalogSha256 =
-    '962880c1ed1821066ed6f25a22114de229b734595749094e2bc61851626fa440';
-const productionCatalogByteCount = 16354182;
+    'bdabb262692781fbce524af366896ee0bcbde55249b3f1d034d9f77113b45553';
+const productionCatalogByteCount = 30175970;
 
 class CatalogFormatException implements Exception {
   const CatalogFormatException(this.message);
@@ -362,7 +362,7 @@ class BundledCatalogParser {
       'case collisions': snapshot.collisions.length,
     };
     const expected = <String, int>{
-      'alchemy items': 362,
+      'alchemy items': 363,
       'alchemy craftable': 113,
       'alchemy ingredients': 470,
       'cooking items': 610,
@@ -371,7 +371,7 @@ class BundledCatalogParser {
       'processing items': 709,
       'processing craftable': 673,
       'processing ingredients': 1721,
-      'total items': 1681,
+      'total items': 1682,
       'total ingredients': 2849,
       'case collisions': 20,
     };

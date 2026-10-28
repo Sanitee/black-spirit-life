@@ -110,23 +110,37 @@ void main() {
     expect(result.toJson(), expectedByName['cycle_guard']);
   });
 
-  test('matches protected Avalonia market-material oracle', () {
-    final result = engine.buildPlan(
-      mode: CraftMode.alchemy,
-      recipes: _chainItems,
-      state: PlannerState(
-        target: 'Final Elixir',
-        want: 3,
-        marketPrices: const {'Silver Azalea': 1200},
-        marketStock: const {'Silver Azalea': 5},
-      ),
-      rules: PlannerRules(
-        marketIds: const {'Silver Azalea': '1001'},
-        fallbackMarketPrices: const {'Rough Stone': 250},
-      ),
-    );
-    expect(result.toJson(), expectedByName['market_materials']);
-  });
+  test(
+    'preserves market oracle except the approved full-requirement budget',
+    () {
+      final result = engine.buildPlan(
+        mode: CraftMode.alchemy,
+        recipes: _chainItems,
+        state: PlannerState(
+          target: 'Final Elixir',
+          want: 3,
+          marketPrices: const {'Silver Azalea': 1200},
+          marketStock: const {'Silver Azalea': 5},
+        ),
+        rules: PlannerRules(
+          marketIds: const {'Silver Azalea': '1001'},
+          fallbackMarketPrices: const {'Rough Stone': 250},
+        ),
+      );
+      // Keep the protected historical fixture intact. On 2026-09-24 the user
+      // requested that unavailable units count toward Estimated Cost as well.
+      final expected =
+          jsonDecode(jsonEncode(expectedByName['market_materials']))
+              as Map<String, dynamic>;
+      final row = (expected['missing'] as List)
+          .cast<Map<String, dynamic>>()
+          .singleWhere((row) => row['name'] == 'Silver Azalea');
+      final market = row['market'] as Map<String, dynamic>;
+      expect(market['total'], 6000);
+      market['total'] = 10800; // All 9 missing × 1200, not only 5 in stock.
+      expect(result.toJson(), expected);
+    },
+  );
 
   test('matches protected Avalonia mass-processing scalar boundaries', () {
     final scalarChecks = oracle['scalarChecks']! as Map<String, Object?>;

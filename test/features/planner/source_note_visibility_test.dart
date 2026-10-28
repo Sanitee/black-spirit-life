@@ -232,6 +232,10 @@ Future<void> _expectSourceIconAcrossPlannerAndBonus(
     for (final text in expectedBodyText) {
       expect(find.textContaining(text), findsOneWidget);
     }
+    final body = tester.widget<Text>(
+      find.byKey(const ValueKey('planner-source-info-body')),
+    );
+    expect(body.style!.fontSize, 14);
   }
 
   await tester.pumpWidget(harness.bonusHost());

@@ -3,6 +3,7 @@ import 'package:bdo_craft_planner_flutter/domain/state/inventory_storage.dart';
 import 'package:bdo_craft_planner_flutter/features/opportunities/opportunities_visuals.dart';
 import 'package:bdo_craft_planner_flutter/features/opportunities/opportunity_inventory_input.dart';
 import 'package:bdo_craft_planner_flutter/visual/visual.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -11,7 +12,7 @@ import '../inventory/inventory_test_fixture.dart';
 
 void main() {
   for (final scale in [1.0, 2.0]) {
-    testWidgets('idle Inventory is compact inline side information at $scale', (
+    testWidgets('owned amount is a number-only icon footer at $scale', (
       tester,
     ) async {
       final h = InventoryTestHarness();
@@ -21,28 +22,50 @@ void main() {
       await tester.pumpWidget(_host(h, textScale: scale));
 
       expect(find.byType(TextField), findsNothing);
-      expect(find.text('Inventory'), findsOneWidget);
+      expect(find.text('Inventory'), findsNothing);
       expect(find.text('0'), findsOneWidget);
-      final label = tester.getRect(find.text('Inventory'));
       final amount = tester.getRect(find.text('0'));
+      final icon = tester.getRect(find.byKey(const ValueKey('test-item-icon')));
       final control = tester.getRect(find.byType(OpportunityInventoryInput));
-      expect(amount.left, greaterThan(label.right));
-      expect(amount.center.dy, closeTo(label.center.dy, 1));
-      expect(control.height, lessThanOrEqualTo(30 * scale));
+      expect(amount.top, greaterThanOrEqualTo(icon.bottom));
+      expect(amount.center.dx, closeTo(icon.center.dx, 1));
+      expect(control.height, lessThanOrEqualTo(80 * scale));
+      expect(control.width, closeTo(icon.width, 1));
+      final frame = find.byKey(const ValueKey('inventory-amount-frame'));
+      final emptySize = tester.getSize(frame);
+      await tester.tap(_amountButton);
+      await tester.pump();
+      expect(tester.getSize(frame).height, emptySize.height);
       expect(
-        control.width,
-        lessThanOrEqualTo(label.width + amount.width + 16),
-        reason: 'Idle width follows its text, not a reserved input box.',
+        tester.getSize(frame).width,
+        greaterThanOrEqualTo(emptySize.width),
       );
+      await tester.enterText(find.byType(TextField), '2200');
+      await tester.testTextInput.receiveAction(TextInputAction.done);
+      await tester.pump();
+      expect(tester.getSize(frame).height, emptySize.height);
+      expect(
+        tester.getSize(frame).width,
+        greaterThanOrEqualTo(emptySize.width),
+      );
+      expect(find.text('2.2k'), findsOneWidget);
 
       h.controller.active.commitInventory('Sunrise Herb', '1000000');
       await tester.pump();
       expect(find.byType(TextField), findsNothing);
       expect(find.text('1M'), findsOneWidget);
-      expect(find.byTooltip('1.000.000'), findsOneWidget);
+      _expectAccessibleAmount(tester, '1.000.000');
+      final mouse = await tester.createGesture(kind: PointerDeviceKind.mouse);
+      await mouse.addPointer(location: const Offset(1, 1));
+      await mouse.moveTo(tester.getCenter(_amountButton));
+      await tester.pump(const Duration(milliseconds: 800));
+      await tester.pump(const Duration(milliseconds: 250));
+      expect(find.byType(Tooltip), findsNothing);
+      expect(find.text('1.000.000'), findsNothing);
+      await mouse.removePointer();
       expect(
         tester.getSize(find.byType(OpportunityInventoryInput)).height,
-        lessThanOrEqualTo(30 * scale),
+        lessThanOrEqualTo(80 * scale),
       );
       expect(tester.takeException(), isNull);
       await tester.pumpWidget(const SizedBox());
@@ -82,7 +105,7 @@ void main() {
     await tester.pump();
     expect(field, findsNothing);
     expect(find.text('1M'), findsOneWidget);
-    expect(find.byTooltip('1.000.000'), findsOneWidget);
+    _expectAccessibleAmount(tester, '1.000.000');
     await tester.pumpWidget(const SizedBox());
   });
 
@@ -100,7 +123,7 @@ void main() {
       await tester.pump();
       final field = find.byType(TextField);
       expect(field, findsNothing);
-      expect(find.text('123,5k'), findsOneWidget);
+      expect(find.text('123.4k'), findsOneWidget);
       await tester.tap(_amountButton);
       await tester.pump();
       expect(tester.widget<TextField>(field).controller!.text, '123.456');
@@ -195,6 +218,19 @@ void main() {
 Finder get _amountButton =>
     find.byKey(const ValueKey('inventory-amount-button'));
 
+void _expectAccessibleAmount(WidgetTester tester, String value) {
+  final semantics = find.ancestor(
+    of: _amountButton,
+    matching: find.byWidgetPredicate(
+      (w) => w is Semantics && w.properties.label == 'Sunrise Herb inventory',
+    ),
+  );
+  expect(semantics, findsOneWidget);
+  final properties = tester.widget<Semantics>(semantics).properties;
+  expect(properties.value, value);
+  expect(properties.button, isTrue);
+}
+
 Widget _host(InventoryTestHarness h, {double textScale = 1}) => MaterialApp(
   builder: (context, child) => MediaQuery(
     data: MediaQuery.of(
@@ -209,6 +245,10 @@ Widget _host(InventoryTestHarness h, {double textScale = 1}) => MaterialApp(
         child: OpportunityInventoryInput(
           controller: h.controller.active,
           itemName: 'Sunrise Herb',
+          iconBuilder: (size) => SizedBox.square(
+            key: const ValueKey('test-item-icon'),
+            dimension: size,
+          ),
         ),
       ),
     ),

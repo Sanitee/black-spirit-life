@@ -2,6 +2,7 @@ import 'dart:collection';
 
 import '../models/catalog_models.dart';
 import '../models/craft_mode.dart';
+import 'planner_content_scale.dart';
 
 typedef JsonMap = Map<String, Object?>;
 
@@ -368,9 +369,11 @@ class PlannerState {
     required this.marketTax,
     AfkWeightProfile? afkWeightProfile,
     this.showDeleteTools = false,
+    double plannerContentScale = PlannerContentScale.defaultValue,
     Map<String, Object?> extensions = const {},
   }) : processingYields = _immutableMap(processingYields),
        afkWeightProfile = afkWeightProfile ?? AfkWeightProfile(),
+       plannerContentScale = PlannerContentScale.normalize(plannerContentScale),
        extensions = immutableExtensions(extensions);
 
   final int schemaVersion;
@@ -389,6 +392,7 @@ class PlannerState {
   final MarketTax marketTax;
   final AfkWeightProfile afkWeightProfile;
   final bool showDeleteTools;
+  final double plannerContentScale;
   final Map<String, Object?> extensions;
 
   ModeState forMode(CraftMode mode) => switch (mode) {
@@ -409,6 +413,7 @@ class PlannerState {
     MarketTax? marketTax,
     AfkWeightProfile? afkWeightProfile,
     bool? showDeleteTools,
+    double? plannerContentScale,
     Map<String, Object?>? extensions,
   }) => PlannerState(
     schemaVersion: schemaVersion,
@@ -424,6 +429,7 @@ class PlannerState {
     marketTax: marketTax ?? this.marketTax,
     afkWeightProfile: afkWeightProfile ?? this.afkWeightProfile,
     showDeleteTools: showDeleteTools ?? this.showDeleteTools,
+    plannerContentScale: plannerContentScale ?? this.plannerContentScale,
     extensions: extensions ?? this.extensions,
   );
 
@@ -440,6 +446,7 @@ class PlannerState {
     'marketTax': marketTax.toJson(),
     'afkWeightProfile': afkWeightProfile.toJson(),
     'showDeleteTools': showDeleteTools,
+    'plannerContentScale': plannerContentScale,
     if (extensions.isNotEmpty) 'extensions': extensions,
   };
 }
@@ -725,6 +732,8 @@ class MarketState {
   MarketState({
     Map<String, double> prices = const {},
     Map<String, double> stock = const {},
+    Map<String, double> preorderPrices = const {},
+    Map<String, int> preorderObservedAt = const {},
     Map<String, String> tradeMarketIds = const {},
     Map<String, int> totalTrades = const {},
     Map<String, int> tradeObservedAt = const {},
@@ -741,6 +750,8 @@ class MarketState {
     Map<String, Object?> extensions = const {},
   }) : prices = _immutableMap(prices),
        stock = _immutableMap(stock),
+       preorderPrices = _immutableMap(preorderPrices),
+       preorderObservedAt = _immutableMap(preorderObservedAt),
        tradeMarketIds = _immutableMap(tradeMarketIds),
        totalTrades = _immutableMap(totalTrades),
        tradeObservedAt = _immutableMap(tradeObservedAt),
@@ -756,6 +767,8 @@ class MarketState {
 
   final Map<String, double> prices;
   final Map<String, double> stock;
+  final Map<String, double> preorderPrices;
+  final Map<String, int> preorderObservedAt;
 
   /// Market IDs owning each cumulative-trade snapshot.
   ///
@@ -799,6 +812,8 @@ class MarketState {
   JsonMap toJson() => {
     'prices': prices,
     'stock': stock,
+    if (preorderPrices.isNotEmpty) 'preorderPrices': preorderPrices,
+    if (preorderObservedAt.isNotEmpty) 'preorderObservedAt': preorderObservedAt,
     if (tradeMarketIds.isNotEmpty) 'tradeMarketIds': tradeMarketIds,
     if (totalTrades.isNotEmpty) 'totalTrades': totalTrades,
     if (tradeObservedAt.isNotEmpty) 'tradeObservedAt': tradeObservedAt,

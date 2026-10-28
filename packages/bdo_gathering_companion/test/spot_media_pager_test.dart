@@ -344,7 +344,10 @@ void main() {
           theme: companionTheme(),
           builder: (context, child) => RepaintBoundary(
             key: const ValueKey('related-guide-capture'),
-            child: TickerMode(enabled: false, child: child!),
+            child: MediaQuery(
+              data: MediaQuery.of(context).copyWith(disableAnimations: true),
+              child: TickerMode(enabled: false, child: child!),
+            ),
           ),
           home: Scaffold(
             body: FieldGuide(
@@ -356,8 +359,9 @@ void main() {
         ),
       );
       await tester.pumpAndSettle();
-      await tester.tap(_key('spot-filter-rail-control'));
+      await tester.tap(_key('spot-filter-compact-control'));
       await tester.pumpAndSettle();
+      await tester.ensureVisible(_key('spot-ranking-nostos-821349'));
       await tester.tap(_key('spot-ranking-nostos-821349'));
       await tester.pumpAndSettle();
       await tester.enterText(_key('spot-search'), 'Seoul Thuja');

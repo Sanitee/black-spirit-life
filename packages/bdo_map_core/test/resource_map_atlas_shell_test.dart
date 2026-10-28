@@ -4,8 +4,8 @@ import 'dart:ui' as ui;
 import 'package:bdo_map_core/bdo_map_core.dart';
 import 'package:bdo_map_core/src/lodging/town_house_investment.dart';
 import 'package:bdo_map_core/src/widgets/resource_map_atlas_shell.dart';
+import 'package:bdo_map_core/src/widgets/resource_map_field_desk.dart';
 import 'package:bdo_map_core/src/widgets/resource_map_panel_metrics.dart';
-import 'package:bdo_map_core/src/widgets/resource_map_pill.dart';
 import 'package:bdo_map_core/src/widgets/town_house_panel.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -41,7 +41,7 @@ void main() {
         ),
       );
       await tester.pumpAndSettle();
-      expect(find.byType(BackdropFilter), findsOneWidget);
+      expect(find.byType(BackdropFilter), findsNothing);
       expect(find.byType(ResourceMapPill), findsOneWidget);
       final label = tester.widget<Text>(find.text('Find nodes'));
       expect(label.style!.fontSize, 16);
@@ -579,12 +579,19 @@ void main() {
             await tester.pumpAndSettle();
             void expectOneJourney() {
               final journey = find.byType(ResourceMapJourneySurface);
-              expect(journey, findsOneWidget);
-              final rect = tester.getRect(journey);
-              expect(rect.left, greaterThanOrEqualTo(0));
-              expect(rect.top, greaterThanOrEqualTo(0));
-              expect(rect.right, lessThanOrEqualTo(width));
-              expect(rect.bottom, lessThanOrEqualTo(viewport.height));
+              expect(journey.evaluate().length, lessThanOrEqualTo(1));
+              final desk = find.byType(ResourceMapFieldDesk);
+              expect(desk, findsOneWidget);
+              for (final surface in [
+                desk,
+                if (journey.evaluate().isNotEmpty) journey,
+              ]) {
+                final rect = tester.getRect(surface);
+                expect(rect.left, greaterThanOrEqualTo(0));
+                expect(rect.top, greaterThanOrEqualTo(0));
+                expect(rect.right, lessThanOrEqualTo(width));
+                expect(rect.bottom, lessThanOrEqualTo(viewport.height));
+              }
               expect(find.byType(ResourceMapAtlasNavigator), findsNothing);
               expect(find.byType(ResourceMapAtlasWorkspace), findsNothing);
               expect(find.byType(ResourceMapAtlasInspector), findsNothing);
@@ -600,7 +607,7 @@ void main() {
 
             expectOneJourney();
             final journeyRect = tester.getRect(
-              find.byType(ResourceMapJourneySurface),
+              find.byType(ResourceMapFieldDesk),
             );
             final searchRect = tester.getRect(find.byType(TextField));
             expect(journeyRect.contains(searchRect.topLeft), isTrue);

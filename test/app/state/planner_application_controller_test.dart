@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:bdo_craft_planner_flutter/app/first_run_setup.dart';
 import 'package:bdo_craft_planner_flutter/app/state/planner_application_controller.dart';
+import 'package:bdo_craft_planner_flutter/app/workspace/application_appearance_theme.dart';
 import 'package:bdo_craft_planner_flutter/domain/models/catalog_models.dart';
 import 'package:bdo_craft_planner_flutter/domain/models/craft_mode.dart';
 import 'package:bdo_craft_planner_flutter/domain/state/planner_state.dart';
@@ -20,6 +21,600 @@ import 'package:bdo_map_core/bdo_map_core.dart'
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
+  group('Planner content size', () {
+    test(
+      'live preview and commit leave plans, modes and themes untouched',
+      () async {
+        final saves = <PlannerState>[];
+        final controller = PlannerApplicationController(
+          catalog: _catalog(),
+          initialState: _document(),
+          saveState: (state) async {
+            saves.add(state);
+            return state;
+          },
+          saveDebounce: Duration.zero,
+        );
+        final theme = ApplicationAppearanceThemeController(controller);
+        final initial = controller.documentSnapshot;
+        final plans = {
+          for (final entry in controller.modes.entries)
+            entry.key: entry.value.plan.value,
+        };
+        var modeNotifications = 0;
+        var planNotifications = 0;
+        var themeNotifications = 0;
+        var sizeNotifications = 0;
+        for (final mode in controller.modes.values) {
+          mode.state.addListener(() => modeNotifications++);
+          mode.plan.addListener(() => planNotifications++);
+        }
+        theme.addListener(() => themeNotifications++);
+        controller.plannerContentScale.addListener(() => sizeNotifications++);
+        for (var i = 1; i <= 200; i++) {
+          controller.previewPlannerContentScale(1 + i / 1000);
+        }
+        await controller.flush();
+        expect(controller.plannerContentScale.value, 1.2);
+        expect(sizeNotifications, 200);
+        expect(controller.documentSnapshot, same(initial));
+        expect(saves, isEmpty);
+        controller.commitPlannerContentScale();
+        await controller.flush();
+        expect(saves, hasLength(1));
+        expect(saves.single.plannerContentScale, 1.2);
+        expect(modeNotifications, 0);
+        expect(planNotifications, 0);
+        expect(themeNotifications, 0);
+        for (final entry in controller.modes.entries) {
+          expect(entry.value.state.value, same(initial.forMode(entry.key)));
+          expect(entry.value.plan.value, same(plans[entry.key]));
+        }
+        controller.commitPlannerContentScale();
+        controller.commitPlannerContentScale(1);
+        controller.commitPlannerContentScale(1);
+        await controller.flush();
+        expect(saves, hasLength(2));
+        expect(saves.last.plannerContentScale, 1);
+        expect(controller.plannerContentScale.value, 1);
+        theme.dispose();
+        await controller.dispose();
+      },
+    );
+
+    test(
+      'unrelated autosaves and mode switches never persist a preview',
+      () async {
+        final saves = <PlannerState>[];
+        final controller = PlannerApplicationController(
+          catalog: _catalog(),
+          initialState: _document().copyWith(plannerContentScale: 1.1),
+          saveState: (state) async {
+            saves.add(state);
+            return state;
+          },
+          saveDebounce: Duration.zero,
+        );
+        controller.previewPlannerContentScale(1.24);
+        controller.switchMode(CraftMode.cooking);
+        controller.updateDocument(
+          (state) => state.copyWith(showDeleteTools: true),
+        );
+        await controller.flush();
+        expect(controller.plannerContentScale.value, 1.24);
+        expect(saves, isNotEmpty);
+        expect(
+          saves.every((state) => state.plannerContentScale == 1.1),
+          isTrue,
+        );
+        controller.cancelPlannerContentScalePreview();
+        expect(controller.plannerContentScale.value, 1.1);
+        controller.previewPlannerContentScale(1.2);
+        final savedCount = saves.length;
+        await controller.dispose();
+        expect(saves, hasLength(savedCount));
+      },
+    );
+
+    test(
+      'committed size survives native reload and imported changes notify',
+      () async {
+        final controller = _controller();
+        controller.commitPlannerContentScale(1.2);
+        await controller.flush();
+        const codec = PlannerStateJsonCodec();
+        final saved = codec.decode(codec.encode(controller.documentSnapshot));
+        await controller.dispose();
+        final restored = PlannerApplicationController(
+          catalog: _catalog(),
+          initialState: saved,
+          saveState: (state) async => state,
+        );
+        expect(restored.plannerContentScale.value, 1.2);
+        restored.previewPlannerContentScale(1.25);
+        restored.updateDocument(
+          (state) => state.copyWith(plannerContentScale: 1.15),
+        );
+        expect(restored.plannerContentScale.value, 1.15);
+        expect(restored.documentSnapshot.plannerContentScale, 1.15);
+        await restored.dispose();
+      },
+    );
+
+    test(
+      'mode-change dismissal commits preview without reverting the mode',
+      () async {
+        final saves = <PlannerState>[];
+        final controller = PlannerApplicationController(
+          catalog: _catalog(),
+          initialState: _document(),
+          saveState: (state) async {
+            saves.add(state);
+            return state;
+          },
+          saveDebounce: Duration.zero,
+        );
+        final plans = {
+          for (final entry in controller.modes.entries)
+            entry.key: entry.value.plan.value,
+        };
+        var notifications = 0;
+        controller.activeMode.addListener(() {
+          notifications++;
+          expect(
+            controller.documentSnapshot.activeMode,
+            controller.activeMode.value,
+          );
+          controller.commitPlannerContentScale();
+        });
+        controller.previewPlannerContentScale(1.2);
+        controller.switchMode(CraftMode.cooking);
+        await controller.flush();
+        expect(notifications, 1);
+        expect(controller.activeMode.value, CraftMode.cooking);
+        expect(controller.documentSnapshot.activeMode, CraftMode.cooking);
+        expect(controller.documentSnapshot.plannerContentScale, 1.2);
+        expect(saves, isNotEmpty);
+        expect(
+          saves.every((state) => state.activeMode == CraftMode.cooking),
+          isTrue,
+        );
+        expect(
+          saves.every((state) => state.plannerContentScale == 1.2),
+          isTrue,
+        );
+        for (final entry in controller.modes.entries) {
+          expect(entry.value.plan.value, same(plans[entry.key]));
+        }
+        await controller.dispose();
+      },
+    );
+
+    test(
+      'values are bounded and frozen or disposed controllers reject edits',
+      () async {
+        final controller = _controller();
+        controller.previewPlannerContentScale(8);
+        expect(controller.plannerContentScale.value, 1.25);
+        controller.previewPlannerContentScale(.4);
+        expect(controller.plannerContentScale.value, 1);
+        controller.previewPlannerContentScale(double.nan);
+        expect(controller.plannerContentScale.value, 1);
+        controller.commitPlannerContentScale(double.infinity);
+        expect(controller.documentSnapshot.plannerContentScale, 1);
+        controller.freezeMutationsForRestart();
+        controller.previewPlannerContentScale(1.2);
+        controller.commitPlannerContentScale(1.2);
+        expect(controller.plannerContentScale.value, 1);
+        expect(controller.documentSnapshot.plannerContentScale, 1);
+        controller.resumeMutationsAfterRestartFailure();
+        controller.commitPlannerContentScale(4);
+        expect(controller.documentSnapshot.plannerContentScale, 1.25);
+        await controller.dispose();
+        controller.previewPlannerContentScale(1.1);
+        controller.commitPlannerContentScale(1.1);
+        controller.cancelPlannerContentScalePreview();
+        expect(controller.documentSnapshot.plannerContentScale, 1.25);
+      },
+    );
+
+    test('failed durable import restores the prior reading size', () async {
+      final controller = PlannerApplicationController(
+        catalog: _catalog(),
+        initialState: _document().copyWith(plannerContentScale: 1.1),
+        saveState: (_) async => throw const FileSystemException('disk full'),
+        saveDebounce: Duration.zero,
+      );
+      await expectLater(
+        controller.updateDocumentDurably(
+          (state) => state.copyWith(plannerContentScale: 1.25),
+        ),
+        throwsStateError,
+      );
+      expect(controller.documentSnapshot.plannerContentScale, 1.1);
+      expect(controller.plannerContentScale.value, 1.1);
+      await controller.dispose();
+    });
+  });
+
+  test(
+    'Bonus batches keep their own credits without erasing the main queue',
+    () async {
+      final controller = _controller();
+      final mode = controller.active;
+      mode.updateState(
+        (state) => state.copyWith(
+          bonusTarget: 'Bonus Potion',
+          bonusWant: 80,
+          recipeEdits: {
+            'Bonus Potion': RecipeState(
+              type: 'simple_alchemy',
+              baseOutput: 1,
+              ingredients: [IngredientState(name: 'Base', quantity: 3)],
+            ),
+          },
+        ),
+      );
+      expect(_completeBatch(mode, 20), isTrue);
+      final bonusPlan = controller.assembly.build(
+        catalog: controller.catalog,
+        mode: mode.mode,
+        state: mode.state.value,
+        targetOverride: 'Bonus Potion',
+        wantOverride: 80,
+      );
+      final step = bonusPlan.steps.single;
+      final progress = mode.inventoryBatchProgress(
+        step: step,
+        target: 'Bonus Potion',
+        want: 80,
+        progressKey: AfkCraftProgress.sessionKeyFor(
+          targetName: 'Bonus Potion',
+          recipeName: 'Bonus Potion',
+          bonus: true,
+        ),
+        attemptsPerRound: 30,
+      );
+      expect(
+        mode.completeInventoryBatch(
+          step: step,
+          progress: progress,
+          completedBefore: 0,
+          completedAfter: 30,
+          bonus: true,
+        ),
+        isTrue,
+      );
+      expect(mode.plan.value.steps.single.count, 80);
+      expect(
+        controller.assembly
+            .build(
+              catalog: controller.catalog,
+              mode: mode.mode,
+              state: mode.state.value,
+              targetOverride: 'Bonus Potion',
+              wantOverride: 80,
+            )
+            .steps
+            .single
+            .count,
+        50,
+      );
+      expect(mode.undoCompletion(), isTrue);
+      expect(mode.state.value.inventory['Potion'], 20);
+      expect(mode.plan.value.steps.single.count, 80);
+      expect(mode.undoCompletion(), isTrue);
+      expect(mode.plan.value.steps.single.count, 100);
+      await controller.dispose();
+    },
+  );
+
+  test(
+    'inventory corrections cannot resurrect already removed craft credit',
+    () async {
+      final controller = _controller();
+      final mode = controller.active;
+      _completeBatch(mode, 40);
+      mode.commitInventory('Potion', '0');
+      expect(mode.plan.value.steps.single.count, 100);
+      mode.commitInventory('Potion', '500');
+      expect(mode.plan.value.steps.single.count, 100);
+      await controller.dispose();
+    },
+  );
+
+  test(
+    'batch credits expected output rather than the AFK safety maximum',
+    () async {
+      final controller = _controller();
+      final mode = controller.active;
+      mode.updateState(
+        (state) => state.copyWith(
+          recipeEdits: {
+            'Potion': RecipeState(
+              type: 'alchemy',
+              baseOutput: 1,
+              outputMinimum: 1,
+              outputMaximum: 4,
+              ingredients: [IngredientState(name: 'Base', quantity: 2)],
+            ),
+          },
+        ),
+      );
+      final initial = mode.plan.value.steps.single;
+      final expected = initial.produced / initial.count * 10;
+      expect(_completeBatch(mode, 10), isTrue);
+      expect(mode.state.value.inventory['Potion'], expected);
+      expect(expected, lessThan(40));
+      expect(mode.undoCompletion(), isTrue);
+      expect(mode.plan.value.steps.single.count, initial.count);
+      await controller.dispose();
+    },
+  );
+
+  test(
+    'intermediate batch reduces Need First and undo restores its ingredients',
+    () async {
+      final controller = PlannerApplicationController(
+        catalog: _queueInventoryCatalog(),
+        initialState: _document().copyWith(
+          alchemy: _mode(CraftMode.alchemy, 'Final'),
+        ),
+        saveState: (state) async => state,
+      );
+      final mode = controller.active;
+      double missing(String name) =>
+          mode.plan.value.missing.firstWhere((item) => item.name == name).need;
+      final dustBefore = missing('Ancient Spirit Dust');
+      final stonesBefore = missing('Black Stone');
+      final step = mode.plan.value.steps.first;
+      expect(step.name, 'Caphras Stone');
+      expect(_completeBatch(mode, 40), isTrue);
+      expect(mode.state.value.inventory['Caphras Stone'], 40);
+      expect(missing('Ancient Spirit Dust'), dustBefore - 200);
+      expect(missing('Black Stone'), stonesBefore - 40);
+      expect(mode.undoCompletion(), isTrue);
+      expect(missing('Ancient Spirit Dust'), dustBefore);
+      expect(missing('Black Stone'), stonesBefore);
+      await controller.dispose();
+    },
+  );
+
+  test(
+    'legacy progress-only batches never award historical output on opening',
+    () async {
+      final controller = _controller();
+      final mode = controller.active;
+      final key = AfkCraftProgress.sessionKeyFor(
+        targetName: 'Potion',
+        recipeName: 'Potion',
+      );
+      mode.updateState(
+        (state) => state.copyWith(
+          afkCraftProgress: {
+            key: AfkCraftProgress(
+              stepKey: key,
+              targetName: 'Potion',
+              targetAmount: 100,
+              recipeName: 'Potion',
+              planSignature: mode.afkPlanSignature(
+                mode.plan.value.steps.single,
+              ),
+              totalAttempts: 100,
+              attemptsPerRound: 40,
+              completedAttempts: 40,
+            ),
+          },
+        ),
+      );
+      final before = controller.documentSnapshot;
+      final progress = mode.inventoryBatchProgress(
+        step: mode.plan.value.steps.single,
+        target: 'Potion',
+        want: 100,
+        progressKey: key,
+        attemptsPerRound: 40,
+      );
+      expect(progress.completedAttempts, 0);
+      expect(controller.documentSnapshot, same(before));
+      expect(_completeBatch(mode, 40), isTrue);
+      expect(mode.state.value.inventory['Potion'], 40);
+      expect(mode.undoCompletion(), isTrue);
+      expect(mode.state.value.inventory['Potion'] ?? 0, 0);
+      expect(mode.state.value.afkCraftProgress[key]!.completedAttempts, 40);
+      await controller.dispose();
+    },
+  );
+
+  for (final ignoreOwned in [true, false]) {
+    test(
+      'batch output reduces remaining crafts with ignore owned $ignoreOwned',
+      () async {
+        final controller = _controller();
+        final mode = controller.active;
+        mode.setFullTargetAmount(ignoreOwned);
+        mode.setIgnoreOwnedIngredients(ignoreOwned);
+        mode.commitInventory('Base', '250');
+        expect(_completeBatch(mode, 40), isTrue);
+        expect(mode.state.value.inventory['Potion'], 40);
+        expect(mode.state.value.inventory['Base'], 170);
+        expect(mode.plan.value.steps.single.count, 60);
+        expect(mode.plan.value.steps.single.ingredients.single.need, 120);
+        expect(mode.state.value.ignoreTargetInventory, ignoreOwned);
+        expect(mode.state.value.ignoreIngredientInventory, ignoreOwned);
+        final remaining = mode.plan.value.steps.single;
+        expect(mode.completeStep(remaining), isTrue);
+        expect(mode.state.value.inventory['Potion'], 100);
+        expect(mode.state.value.inventory['Base'], 50);
+        expect(mode.undoCompletion(), isTrue);
+        expect(mode.state.value.inventory['Potion'], 40);
+        expect(mode.plan.value.steps.single.count, 60);
+        expect(mode.undoCompletion(), isTrue);
+        expect(mode.state.value.inventory['Potion'] ?? 0, 0);
+        expect(mode.state.value.inventory['Base'], 250);
+        expect(mode.plan.value.steps.single.count, 100);
+        expect(mode.canUndoCompletion(), isFalse);
+        await controller.dispose();
+      },
+    );
+  }
+
+  test(
+    'Undo never invents inputs when starting inventory was empty or partial',
+    () async {
+      final controller = _controller();
+      final mode = controller.active;
+      for (final quantity in [0, 3]) {
+        mode.commitInventory('Base', '$quantity');
+        expect(mode.completeStep(mode.plan.value.steps.single), isTrue);
+        expect(mode.undoCompletion(), isTrue);
+        expect(mode.state.value.inventory['Base'] ?? 0, quantity);
+        expect(mode.state.value.inventory['Potion'] ?? 0, 0);
+        expect(mode.state.value.completedSteps, isEmpty);
+      }
+      await controller.dispose();
+    },
+  );
+
+  test(
+    'batch undo restores the exact previous load after capacity changes',
+    () async {
+      final controller = _controller();
+      final mode = controller.active;
+      expect(_completeBatch(mode, 40), isTrue);
+      expect(_completeBatch(mode, 30), isTrue);
+      expect(mode.state.value.inventory['Potion'], 70);
+      expect(mode.undoCompletion(), isTrue);
+      expect(mode.state.value.inventory['Potion'], 40);
+      expect(mode.plan.value.steps.single.count, 60);
+      final progress = mode.state.value.afkCraftProgress.values.single;
+      expect(progress.completedAttempts, 40);
+      expect(progress.attemptsPerRound, 40);
+      expect(_completeBatch(mode, 60), isTrue);
+      expect(mode.state.value.inventory['Potion'], 100);
+      expect(mode.plan.value.steps, isEmpty);
+      expect(mode.undoAllInventoryBatches(progress.stepKey), isTrue);
+      expect(mode.state.value.inventory['Potion'] ?? 0, 0);
+      expect(mode.plan.value.steps.single.count, 100);
+      await controller.dispose();
+    },
+  );
+
+  test(
+    'completion receipts survive save/reload and preserve unrelated edits',
+    () async {
+      final first = _controller();
+      first.active.commitInventory('Base', '250');
+      _completeBatch(first.active, 40);
+      _completeBatch(first.active, 30);
+      const codec = PlannerStateJsonCodec();
+      final saved = codec.decode(codec.encode(first.documentSnapshot));
+      await first.dispose();
+      final controller = PlannerApplicationController(
+        catalog: _catalog(),
+        initialState: saved,
+        saveState: (state) async => state,
+      );
+      controller.active.commitInventory('Unrelated', '999');
+      controller.active.toggleFavorite('Potion');
+      expect(controller.active.undoCompletion(), isTrue);
+      expect(controller.active.state.value.inventory['Potion'], 40);
+      expect(controller.active.state.value.inventory['Unrelated'], 999);
+      expect(controller.active.state.value.favoriteRecipes, contains('Potion'));
+      expect(controller.active.undoCompletion(), isTrue);
+      for (final mode in controller.modes.values) {
+        expect(mode.state.value.inventory['Base'], 250);
+        expect(mode.state.value.inventory['Potion'] ?? 0, 0);
+      }
+      await controller.dispose();
+    },
+  );
+
+  test(
+    'Undo refuses to overwrite a subsequent edit of the same item',
+    () async {
+      final controller = _controller();
+      _completeBatch(controller.active, 40);
+      controller.active.commitInventory('Potion', '75');
+      final before = controller.documentSnapshot;
+      expect(controller.active.undoCompletion(), isFalse);
+      expect(controller.documentSnapshot, same(before));
+      expect(controller.active.state.value.inventory['Potion'], 75);
+      await controller.dispose();
+    },
+  );
+
+  test(
+    'stale repeated batch clicks and frozen completions cannot double credit',
+    () async {
+      final controller = _controller();
+      final mode = controller.active;
+      final step = mode.plan.value.steps.single;
+      final progress = mode.inventoryBatchProgress(
+        step: step,
+        target: 'Potion',
+        want: 100,
+        progressKey: AfkCraftProgress.sessionKeyFor(
+          targetName: 'Potion',
+          recipeName: 'Potion',
+        ),
+        attemptsPerRound: 40,
+      );
+      bool click() => mode.completeInventoryBatch(
+        step: step,
+        progress: progress,
+        completedBefore: 0,
+        completedAfter: 40,
+      );
+      controller.freezeMutationsForRestart();
+      expect(click(), isFalse);
+      expect(mode.completeStep(step), isFalse);
+      controller.resumeMutationsAfterRestartFailure();
+      expect(click(), isTrue);
+      expect(click(), isFalse);
+      expect(mode.completeStep(step), isFalse);
+      expect(mode.state.value.inventory['Potion'], 40);
+      controller.freezeMutationsForRestart();
+      expect(mode.undoCompletion(), isFalse);
+      controller.resumeMutationsAfterRestartFailure();
+      expect(mode.undoCompletion(), isTrue);
+      await controller.dispose();
+      expect(click(), isFalse);
+    },
+  );
+
+  test(
+    'full target counts only new crafts without spending pre-existing output',
+    () async {
+      final controller = _controller();
+      final mode = controller.active;
+      mode.commitInventory('Potion', '500');
+      expect(_completeBatch(mode, 40), isTrue);
+      expect(mode.state.value.inventory['Potion'], 540);
+      expect(mode.plan.value.steps.single.count, 60);
+      expect(mode.undoCompletion(), isTrue);
+      expect(mode.state.value.inventory['Potion'], 500);
+      expect(mode.plan.value.steps.single.count, 100);
+      await controller.dispose();
+    },
+  );
+
+  test(
+    'shared inventory completion history undoes in order across modes',
+    () async {
+      final controller = _controller();
+      controller.active.commitInventory('Base', '500');
+      _completeBatch(controller.active, 40);
+      final cooking = controller.modes[CraftMode.cooking]!;
+      _completeBatch(cooking, 20);
+      expect(controller.active.canUndoCompletion(), isFalse);
+      expect(cooking.undoCompletion(), isTrue);
+      expect(controller.active.undoCompletion(), isTrue);
+      expect(controller.active.state.value.inventory['Base'], 500);
+      await controller.dispose();
+    },
+  );
+
   test(
     'map favorites round-trip materials and typed locations without touching inventory',
     () async {
@@ -152,6 +747,126 @@ void main() {
       expect(mode.addMissingAmount(name, 4), isFalse);
     },
   );
+
+  test(
+    'queue inventory sets a shared total and planning flags atomically',
+    () async {
+      final saves = <PlannerState>[];
+      final controller = PlannerApplicationController(
+        catalog: _catalog(),
+        initialState: _document(),
+        saveState: (state) async {
+          saves.add(state);
+          return state;
+        },
+        saveDebounce: const Duration(days: 1),
+      );
+      final mode = controller.active;
+      mode.commitInventory('Base', '100');
+      var notifications = 0;
+      mode.state.addListener(() => notifications++);
+
+      expect(mode.commitQueueInventory('Base', '25.430'), isTrue);
+      expect(notifications, 1);
+      expect(mode.state.value.ignoreIngredientInventory, isFalse);
+      expect(mode.state.value.ignoreTargetInventory, isTrue);
+      for (final craftMode in CraftMode.values) {
+        expect(
+          controller.modes[craftMode]!.state.value.inventory['Base'],
+          25430,
+        );
+      }
+      expect(
+        controller
+            .modes[CraftMode.cooking]!
+            .state
+            .value
+            .ignoreIngredientInventory,
+        isTrue,
+      );
+      await Future<void>.delayed(Duration.zero);
+      expect(
+        saves,
+        isNotEmpty,
+        reason: 'A queue edit saves immediately, not after the debounce.',
+      );
+      expect(saves.last.alchemy.inventory['Base'], 25430);
+
+      expect(mode.commitQueueInventory('potion', '20'), isTrue);
+      expect(mode.state.value.ignoreTargetInventory, isFalse);
+      expect(mode.plan.value.steps.single.net, 80);
+      expect(mode.commitQueueInventory('potion', '0'), isTrue);
+      expect(mode.state.value.inventory.containsKey('potion'), isFalse);
+      expect(mode.plan.value.steps.single.net, 100);
+      await controller.dispose();
+    },
+  );
+
+  test(
+    'queue inventory removes covered intermediates but keeps shared needs',
+    () async {
+      final controller = PlannerApplicationController(
+        catalog: _queueInventoryCatalog(),
+        initialState: _document().copyWith(
+          alchemy: _mode(CraftMode.alchemy, 'Final'),
+        ),
+        saveState: (state) async => state,
+        saveDebounce: Duration.zero,
+      );
+      final mode = controller.active;
+      double missing(String name) => mode.plan.value.missing
+          .where((row) => row.name == name)
+          .fold(0.0, (sum, row) => sum + row.missing);
+      expect(missing('Ancient Spirit Dust'), 1500);
+      expect(missing('Black Stone'), 500);
+
+      expect(mode.commitQueueInventory('Caphras Stone', '150'), isTrue);
+      expect(
+        mode.plan.value.steps
+            .firstWhere((step) => step.name == 'Caphras Stone')
+            .count,
+        150,
+      );
+      expect(missing('Ancient Spirit Dust'), 750);
+      expect(missing('Black Stone'), 350);
+
+      expect(mode.commitQueueInventory('Caphras Stone', '300'), isTrue);
+      expect(
+        mode.plan.value.steps.any((step) => step.name == 'Caphras Stone'),
+        isFalse,
+      );
+      expect(missing('Ancient Spirit Dust'), 0);
+      expect(
+        missing('Black Stone'),
+        200,
+        reason: 'The final recipe still needs its own Black Stones.',
+      );
+
+      expect(mode.commitQueueInventory('Caphras Stone', '0'), isTrue);
+      expect(missing('Ancient Spirit Dust'), 1500);
+      expect(missing('Black Stone'), 500);
+      await controller.dispose();
+    },
+  );
+
+  test('queue inventory rejects invalid, frozen and disposed edits', () async {
+    final controller = _controller();
+    final mode = controller.active;
+    final original = controller.documentSnapshot;
+    for (final text in ['', '-1', 'not a number', 'NaN', 'Infinity']) {
+      expect(mode.commitQueueInventory('Base', text), isFalse);
+      expect(identical(controller.documentSnapshot, original), isTrue);
+    }
+    expect(mode.commitQueueInventory('   ', '10'), isFalse);
+    controller.freezeMutationsForRestart();
+    expect(mode.commitQueueInventory('Base', '10'), isFalse);
+    expect(identical(controller.documentSnapshot, original), isTrue);
+    controller.resumeMutationsAfterRestartFailure();
+    expect(mode.commitQueueInventory('Base', '12,125'), isTrue);
+    expect(mode.state.value.inventory['Base'], 12.125);
+    await controller.dispose();
+    expect(mode.commitQueueInventory('Base', '50'), isFalse);
+  });
 
   test(
     'completing a queue step consumes inputs and adds output once',
@@ -1486,6 +2201,26 @@ PlannerApplicationController _controller() => PlannerApplicationController(
   saveDebounce: Duration.zero,
 );
 
+bool _completeBatch(ModeFeatureController mode, int attempts) {
+  final step = mode.plan.value.steps.first;
+  final progress = mode.inventoryBatchProgress(
+    step: step,
+    target: mode.state.value.target,
+    want: mode.state.value.want,
+    progressKey: AfkCraftProgress.sessionKeyFor(
+      targetName: mode.state.value.target,
+      recipeName: step.name,
+    ),
+    attemptsPerRound: attempts,
+  );
+  return mode.completeInventoryBatch(
+    step: step,
+    progress: progress,
+    completedBefore: progress.completedAttempts,
+    completedAfter: progress.completedAttempts + attempts,
+  );
+}
+
 PlannerState _document() => PlannerState(
   applicationVersion: 'test',
   lastSuccessfulWriteUtc: DateTime.utc(2026),
@@ -1502,6 +2237,42 @@ ModeState _mode(CraftMode mode, String target) => ModeState(
   bonusTarget: target,
   market: MarketState(),
   appearance: AppearanceSettings.defaultsFor(mode),
+);
+
+CatalogSnapshot _queueInventoryCatalog() => CatalogSnapshot(
+  sourceSha256: 'queue-inventory-fixture',
+  sourceByteCount: 1,
+  alchemy: ModeCatalog(
+    mode: CraftMode.alchemy,
+    items: {
+      'Final': _recipe('Final', 'alchemy', [
+        _queueIngredient('Caphras Stone', 3),
+        _queueIngredient('Black Stone', 2),
+      ]),
+      'Caphras Stone': _recipe('Caphras Stone', 'processing', [
+        _queueIngredient('Ancient Spirit Dust', 5),
+        _queueIngredient('Black Stone', 1),
+      ]),
+      'Ancient Spirit Dust': _recipe('Ancient Spirit Dust', 'gathered', []),
+      'Black Stone': _recipe('Black Stone', 'gathered', []),
+    },
+    iconDataUris: const {},
+    defaults: const {},
+    metadata: const {},
+    searchAliases: const {},
+  ),
+  cooking: _modeCatalog(CraftMode.cooking, 'Meal'),
+  processing: _modeCatalog(CraftMode.processing, 'Flour'),
+  supportingData: const {},
+  collisions: const [],
+);
+
+Ingredient _queueIngredient(String name, double quantity) => Ingredient(
+  name: name,
+  quantity: quantity,
+  options: const [],
+  substituteGroup: null,
+  substituteRatios: const {},
 );
 
 CatalogSnapshot _catalog() => CatalogSnapshot(

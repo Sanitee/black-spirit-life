@@ -5,6 +5,327 @@ import 'package:bdo_craft_planner_flutter/domain/state/planner_state.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
+  test(
+    '100 previews repaint only; one commit saves without rebuilding plans',
+    () async {
+      final saves = <PlannerState>[];
+      final controller = _controller(_document({}), (state) async {
+        saves.add(state);
+        return state;
+      }, saveDebounce: Duration.zero);
+      addTearDown(controller.dispose);
+      final initial = controller.documentSnapshot;
+      final plans = {
+        for (final entry in controller.modes.entries)
+          entry.key: entry.value.plan.value,
+      };
+      var modeNotifications = 0;
+      var planNotifications = 0;
+      var activeModeNotifications = 0;
+      var opacityNotifications = 0;
+      for (final mode in controller.modes.values) {
+        mode.state.addListener(() => modeNotifications++);
+        mode.plan.addListener(() => planNotifications++);
+      }
+      controller.activeMode.addListener(() => activeModeNotifications++);
+      controller.resourceMapUiOpacity.addListener(() => opacityNotifications++);
+
+      for (var i = 1; i <= 100; i++) {
+        controller.previewResourceMapUiOpacity(i / 100);
+      }
+      // Let an accidentally scheduled immediate save run. flush() intentionally
+      // commits previews and therefore must not be used to inspect drag state.
+      await Future<void>.delayed(Duration.zero);
+      expect(controller.resourceMapUiOpacity.value, 1);
+      expect(opacityNotifications, 100);
+      expect(controller.documentSnapshot, same(initial));
+      expect(saves, isEmpty);
+      expect(modeNotifications, 0);
+      expect(planNotifications, 0);
+      expect(activeModeNotifications, 0);
+
+      controller.commitResourceMapUiOpacity();
+      await controller.flush();
+      expect(saves, hasLength(1));
+      expect(_storedOpacity(saves.single), 1);
+      expect(controller.activeMode.value, initial.activeMode);
+      expect(modeNotifications, 0);
+      expect(planNotifications, 0);
+      expect(activeModeNotifications, 0);
+      for (final entry in controller.modes.entries) {
+        expect(entry.value.state.value, same(initial.forMode(entry.key)));
+        expect(entry.value.plan.value, same(plans[entry.key]));
+      }
+
+      final committed = controller.documentSnapshot;
+      controller.commitResourceMapUiOpacity();
+      controller.commitResourceMapUiOpacity(1);
+      await controller.flush();
+      expect(controller.documentSnapshot, same(committed));
+      expect(opacityNotifications, 100);
+      expect(saves, hasLength(1));
+    },
+  );
+
+  test(
+    'unrelated document and map saves retain an active opacity preview',
+    () async {
+      final saves = <PlannerState>[];
+      final controller = _controller(
+        _document({
+          'resourceMap': {'uiOpacity': .75},
+        }),
+        (state) async {
+          saves.add(state);
+          return state;
+        },
+        saveDebounce: Duration.zero,
+      );
+      addTearDown(controller.dispose);
+      controller.previewResourceMapUiOpacity(.31);
+      controller.updateDocument(
+        (state) => state.copyWith(showDeleteTools: true),
+      );
+      controller.setResourceMapFavoriteIds({'ash'});
+      await Future<void>.delayed(Duration.zero);
+      expect(controller.resourceMapUiOpacity.value, .31);
+      expect(controller.deleteToolsEnabled.value, isTrue);
+      expect(controller.resourceMapFavoriteIds.value, {'ash'});
+      expect(_storedOpacity(controller.documentSnapshot), .75);
+      expect(saves, hasLength(2));
+      expect(saves.map(_storedOpacity), everyElement(.75));
+
+      controller.commitResourceMapUiOpacity();
+      await controller.flush();
+      expect(saves, hasLength(3));
+      expect(_storedOpacity(saves.last), .31);
+      expect(saves.last.showDeleteTools, isTrue);
+      expect(
+        (saves.last.extensions['resourceMap'] as Map)['favoriteResourceIds'],
+        ['ash'],
+      );
+    },
+  );
+
+  for (final withSibling in [false, true]) {
+    test(
+      'preview zero and reset preserve extension ownership ($withSibling)',
+      () async {
+        final saves = <PlannerState>[];
+        final controller = _controller(
+          _document({
+            if (withSibling)
+              'resourceMap': {
+                'favoriteResourceIds': ['ash'],
+              },
+            'gathering': {'uiOpacity': .8},
+            'future': {'keep': true},
+          }),
+          (state) async {
+            saves.add(state);
+            return state;
+          },
+        );
+        addTearDown(controller.dispose);
+        final initial = controller.documentSnapshot;
+        controller.previewResourceMapUiOpacity(0);
+        expect(controller.documentSnapshot, same(initial));
+        controller.commitResourceMapUiOpacity();
+        await controller.flush();
+        expect(_storedOpacity(saves.single), 0);
+
+        controller.previewResourceMapUiOpacity(.6);
+        expect(_storedOpacity(controller.documentSnapshot), 0);
+        controller.commitResourceMapUiOpacity();
+        await controller.flush();
+        expect(saves, hasLength(2));
+        expect(controller.resourceMapUiOpacity.value, .6);
+        final extensions = saves.last.extensions;
+        if (withSibling) {
+          expect(extensions['resourceMap'], {
+            'favoriteResourceIds': ['ash'],
+          });
+        } else {
+          expect(extensions.containsKey('resourceMap'), isFalse);
+        }
+        expect(extensions['gathering'], initial.extensions['gathering']);
+        expect(extensions['future'], initial.extensions['future']);
+        controller.commitResourceMapUiOpacity(.6);
+        await controller.flush();
+        expect(saves, hasLength(2));
+        final reloaded = _controller(saves.last, (state) async => state);
+        expect(reloaded.resourceMapUiOpacity.value, .6);
+        await reloaded.dispose();
+      },
+    );
+  }
+
+  for (final lifecycle in ['flush', 'dispose']) {
+    for (final opacity in [0.0, .83]) {
+      test(
+        '$lifecycle commits the active preview exactly once ($opacity)',
+        () async {
+          final saves = <PlannerState>[];
+          final controller = _controller(
+            _document({
+              'resourceMap': {'uiOpacity': .75},
+            }),
+            (state) async {
+              saves.add(state);
+              return state;
+            },
+          );
+          addTearDown(controller.dispose);
+          controller.previewResourceMapUiOpacity(opacity);
+          expect(_storedOpacity(controller.documentSnapshot), .75);
+          expect(saves, isEmpty);
+          if (lifecycle == 'flush') {
+            await controller.flush();
+          } else {
+            await controller.dispose();
+          }
+          expect(saves, hasLength(1));
+          expect(_storedOpacity(saves.single), opacity);
+          expect(_storedOpacity(controller.documentSnapshot), opacity);
+          await controller.dispose();
+          final disposed = controller.documentSnapshot;
+          controller.previewResourceMapUiOpacity(.2);
+          controller.commitResourceMapUiOpacity(.2);
+          controller.commitResourceMapUiOpacity();
+          expect(controller.documentSnapshot, same(disposed));
+          expect(saves, hasLength(1));
+        },
+      );
+    }
+  }
+
+  test(
+    'restart freeze commits preview before rejecting all later edits',
+    () async {
+      final saves = <PlannerState>[];
+      final controller = _controller(_document({}), (state) async {
+        saves.add(state);
+        return state;
+      });
+      addTearDown(controller.dispose);
+      controller.previewResourceMapUiOpacity(0);
+      controller.freezeMutationsForRestart();
+      expect(controller.mutationsFrozen, isTrue);
+      expect(_storedOpacity(controller.documentSnapshot), 0);
+      final frozen = controller.documentSnapshot;
+      controller.previewResourceMapUiOpacity(.9);
+      controller.commitResourceMapUiOpacity(.9);
+      controller.setResourceMapUiOpacity(.9);
+      controller.updateDocument(
+        (state) => state.copyWith(showDeleteTools: true),
+      );
+      expect(controller.resourceMapUiOpacity.value, 0);
+      expect(controller.documentSnapshot, same(frozen));
+      await controller.flush();
+      expect(saves, hasLength(1));
+      expect(_storedOpacity(saves.single), 0);
+
+      controller.resumeMutationsAfterRestartFailure();
+      controller.previewResourceMapUiOpacity(.42);
+      controller.commitResourceMapUiOpacity();
+      await controller.flush();
+      expect(controller.mutationsFrozen, isFalse);
+      expect(saves, hasLength(2));
+      expect(_storedOpacity(saves.last), .42);
+    },
+  );
+
+  for (final storedOpacity in <double?>[null, 0, .6, .75]) {
+    test(
+      'durable replacement owns equal stored opacity during preview ($storedOpacity)',
+      () async {
+        final saves = <PlannerState>[];
+        final controller = _controller(
+          _document({
+            'resourceMap': {
+              'uiOpacity': ?storedOpacity,
+              'favoriteResourceIds': ['ash'],
+            },
+          }),
+          (state) async {
+            saves.add(state);
+            return state;
+          },
+        );
+        addTearDown(controller.dispose);
+        controller.previewResourceMapUiOpacity(.8);
+        await controller.updateDocumentDurably(
+          (state) => state.copyWith(
+            showDeleteTools: true,
+            extensions: {
+              'resourceMap': {
+                'uiOpacity': ?storedOpacity,
+                'favoriteResourceIds': ['birch'],
+              },
+            },
+          ),
+        );
+        expect(controller.resourceMapUiOpacity.value, storedOpacity ?? .6);
+        expect(_storedOpacity(controller.documentSnapshot), storedOpacity);
+        expect(controller.resourceMapFavoriteIds.value, {'birch'});
+        expect(controller.deleteToolsEnabled.value, isTrue);
+        expect(saves, hasLength(1));
+        expect(_storedOpacity(saves.single), storedOpacity);
+        expect(saves.single, same(controller.documentSnapshot));
+        await controller.flush();
+        expect(saves, hasLength(1));
+      },
+    );
+  }
+
+  for (final originalOpacity in [0.0, .75]) {
+    test(
+      'failed replacement restores durable opacity after a preview ($originalOpacity)',
+      () async {
+        final saves = <PlannerState>[];
+        var rejectNextSave = true;
+        final controller = _controller(
+          _document({
+            'resourceMap': {
+              'uiOpacity': originalOpacity,
+              'favoriteResourceIds': ['ash'],
+            },
+          }),
+          (state) async {
+            saves.add(state);
+            if (rejectNextSave) {
+              rejectNextSave = false;
+              throw StateError('offline test save failure');
+            }
+            return state;
+          },
+        );
+        addTearDown(controller.dispose);
+        final original = controller.documentSnapshot;
+        controller.previewResourceMapUiOpacity(.31);
+        await expectLater(
+          controller.updateDocumentDurably(
+            (state) => state.copyWith(
+              extensions: {
+                'resourceMap': {'uiOpacity': .9},
+              },
+            ),
+          ),
+          throwsStateError,
+        );
+        expect(controller.documentSnapshot, same(original));
+        expect(controller.resourceMapUiOpacity.value, originalOpacity);
+        expect(controller.resourceMapFavoriteIds.value, {'ash'});
+        expect(saves, hasLength(1));
+        expect(_storedOpacity(saves.single), .9);
+        await controller.flush();
+        expect(saves, hasLength(2));
+        expect(saves.last, same(original));
+        expect(controller.saveError.value, isNull);
+      },
+    );
+  }
+
   test('failed durable replacement restores the opacity notifier', () async {
     final controller = _controller(
       _document({
@@ -48,7 +369,7 @@ void main() {
         saves.add(state);
         return state;
       });
-      expect(controller.resourceMapUiOpacity.value, 1);
+      expect(controller.resourceMapUiOpacity.value, .6);
       controller.setResourceMapUiOpacity(.7);
       expect(controller.resourceMapUiOpacity.value, .7);
       await controller.flush();
@@ -68,7 +389,7 @@ void main() {
       final map = reloaded.documentSnapshot.extensions['resourceMap'] as Map;
       expect(map['futureSetting'], {'keep': true});
       expect(map['interfaceStyle'], 'ghostLedger');
-      reloaded.setResourceMapUiOpacity(1);
+      reloaded.setResourceMapUiOpacity(.6);
       expect(
         (reloaded.documentSnapshot.extensions['resourceMap'] as Map)
             .containsKey('uiOpacity'),
@@ -103,7 +424,7 @@ void main() {
         await controller.flush();
         final document = saves.last;
         final stored = document.extensions['resourceMap'] as Map;
-        if (value == 1) {
+        if (value == .6) {
           expect(stored.containsKey('uiOpacity'), isFalse);
         } else {
           expect(stored['uiOpacity'], value);
@@ -162,9 +483,11 @@ void main() {
         controller.resourceMapUiOpacity.value,
         input == -4
             ? 0
+            : input == 2
+            ? 1
             : input == .8
             ? .8
-            : 1,
+            : .6,
       );
     }
     controller.setResourceMapUiOpacity(-2);
@@ -174,15 +497,16 @@ void main() {
     expect(controller.resourceMapUiOpacity.value, 0);
     controller.resumeMutationsAfterRestartFailure();
     controller.setResourceMapUiOpacity(double.nan);
-    expect(controller.resourceMapUiOpacity.value, 1);
+    expect(controller.resourceMapUiOpacity.value, .6);
     await controller.dispose();
   });
 }
 
 PlannerApplicationController _controller(
   PlannerState state,
-  SavePlannerState save,
-) => PlannerApplicationController(
+  SavePlannerState save, {
+  Duration saveDebounce = const Duration(days: 1),
+}) => PlannerApplicationController(
   catalog: CatalogSnapshot(
     sourceSha256: 'test',
     sourceByteCount: 1,
@@ -194,8 +518,14 @@ PlannerApplicationController _controller(
   ),
   initialState: state,
   saveState: save,
-  saveDebounce: const Duration(days: 1),
+  saveDebounce: saveDebounce,
 );
+
+Object? _storedOpacity(PlannerState state) {
+  final resourceMap = state.extensions['resourceMap'];
+  return resourceMap is Map ? resourceMap['uiOpacity'] : null;
+}
+
 ModeCatalog _catalog(CraftMode mode) => ModeCatalog(
   mode: mode,
   items: const {},

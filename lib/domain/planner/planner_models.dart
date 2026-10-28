@@ -120,6 +120,7 @@ final class PlannerRules {
     Map<String, double> itemWeightsLtById = const <String, double>{},
     Map<String, VendorSourceRule> vendorInfo =
         const <String, VendorSourceRule>{},
+    Map<String, double> npcPurchasePrices = const <String, double>{},
     Map<String, ItemAcquisitionRule> acquisitionInfo =
         const <String, ItemAcquisitionRule>{},
   }) : legacyUnavailableItems = Set.unmodifiable(legacyUnavailableItems),
@@ -149,6 +150,9 @@ final class PlannerRules {
        vendorInfo = UnmodifiableMapView(
          Map<String, VendorSourceRule>.from(vendorInfo),
        ),
+       npcPurchasePrices = UnmodifiableMapView(
+         Map<String, double>.from(npcPurchasePrices),
+       ),
        acquisitionInfo = UnmodifiableMapView(
          Map<String, ItemAcquisitionRule>.from(acquisitionInfo),
        );
@@ -164,6 +168,7 @@ final class PlannerRules {
   final Map<String, String> itemWeightIds;
   final Map<String, double> itemWeightsLtById;
   final Map<String, VendorSourceRule> vendorInfo;
+  final Map<String, double> npcPurchasePrices;
   final Map<String, ItemAcquisitionRule> acquisitionInfo;
 
   String? itemWeightIdFor(String itemName, {String? itemId}) {
@@ -196,6 +201,7 @@ final class PlannerState {
     required this.target,
     this.want = 100,
     Map<String, double> inventory = const <String, double>{},
+    Map<String, double> craftedInventory = const <String, double>{},
     Set<String> completedSteps = const <String>{},
     this.ignoreTargetInventory = true,
     this.ignoreIngredientInventory = true,
@@ -208,7 +214,9 @@ final class PlannerState {
     Map<String, String> recipeVariantChoices = const <String, String>{},
     Map<String, double> marketPrices = const <String, double>{},
     Map<String, double> marketStock = const <String, double>{},
+    Map<String, double> marketPreorderPrices = const <String, double>{},
   }) : inventory = UnmodifiableMapView(Map<String, double>.from(inventory)),
+       craftedInventory = Map.unmodifiable(craftedInventory),
        completedSteps = Set.unmodifiable(completedSteps),
        substituteChoices = UnmodifiableMapView(
          Map<String, String>.from(substituteChoices),
@@ -222,11 +230,13 @@ final class PlannerState {
        marketPrices = UnmodifiableMapView(
          Map<String, double>.from(marketPrices),
        ),
-       marketStock = UnmodifiableMapView(Map<String, double>.from(marketStock));
+       marketStock = UnmodifiableMapView(Map<String, double>.from(marketStock)),
+       marketPreorderPrices = Map.unmodifiable(marketPreorderPrices);
 
   final String target;
   final int want;
   final Map<String, double> inventory;
+  final Map<String, double> craftedInventory;
   final Set<String> completedSteps;
   final bool ignoreTargetInventory;
   final bool ignoreIngredientInventory;
@@ -239,6 +249,7 @@ final class PlannerState {
   final Map<String, String> recipeVariantChoices;
   final Map<String, double> marketPrices;
   final Map<String, double> marketStock;
+  final Map<String, double> marketPreorderPrices;
 }
 
 final class PlanStepIngredient {

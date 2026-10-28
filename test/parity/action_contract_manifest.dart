@@ -282,11 +282,11 @@ const _inventoryGroups = ActionAssertion(
   proves:
       'Owned and per-mode plan filters remain compact and combine or toggle independently as planner targets change.',
 );
-const _inventoryEntryAndRemoval = ActionAssertion(
+const _inventoryRename = ActionAssertion(
   testPath: 'test/features/inventory/inventory_view_test.dart',
   testName: 'search and quantity replace the redundant Add item dialog',
   proves:
-      'Search exposes a catalog item for direct amount entry across every mode, while removal clears it and records an undo offer.',
+      'Searching a catalog item and entering its amount saves it to every mode, while removal clears it and records an undo offer.',
 );
 const _inventoryRows = ActionAssertion(
   testPath: 'test/features/inventory/inventory_view_test.dart',
@@ -1004,15 +1004,15 @@ final List<ActionEvidence> actionEvidenceManifest = <ActionEvidence>[
   ),
   _e(
     'I07',
-    'Searching for a catalog item and entering its amount saves it into the shared inventory.',
-    _inventoryEntryAndRemoval,
+    'Searching a catalog item and entering its quantity saves the amount into the shared inventory.',
+    _inventoryRename,
     ActionStateContract.persisted,
     state: _stateRoundTrip,
   ),
   _e(
     'I08',
     'Removing one manually tracked item clears it from every planner mode and offers undo.',
-    _inventoryEntryAndRemoval,
+    _inventoryRename,
     ActionStateContract.persistedTransaction,
     state: _stateRoundTrip,
   ),

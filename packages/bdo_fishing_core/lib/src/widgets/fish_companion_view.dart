@@ -220,6 +220,10 @@ class _FishCompanionViewState extends State<FishCompanionView>
       );
       await controller.initialize();
       await controller.setCacheDisabled(true);
+      // Bootstrap prewarms this page offstage. Do not start Windows Graphics
+      // Capture merely to size/load it; the mounted Webview enables delivery
+      // only when Fish is actually visible. Page loading remains unchanged.
+      await controller.setFrameDeliveryEnabled(false);
       await controller.setPopupWindowPolicy(WebviewPopupWindowPolicy.allow);
       await controller.setDefaultContextMenusEnabled(true);
       await controller.setBackgroundColor(const Color(0xFF0A0E12));
@@ -415,7 +419,11 @@ class _FishCompanionViewState extends State<FishCompanionView>
         pageStatus: _pageStatus,
         content: ColoredBox(
           color: const Color(0xFF0A0E12),
-          child: Webview(controller, key: const Key('fish-companion-webview')),
+          child: Webview(
+            controller,
+            key: const Key('fish-companion-webview'),
+            pauseFrameDeliveryWhenOffstage: true,
+          ),
         ),
       );
     }

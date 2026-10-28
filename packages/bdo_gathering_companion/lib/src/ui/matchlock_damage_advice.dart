@@ -27,14 +27,18 @@ class MatchlockDamageAdvice extends StatelessWidget {
               context: context,
               builder: (_) => const _DamageDialog(),
             ),
-            icon: const Icon(Icons.info_outline, size: 19, color: muted),
+            icon: Icon(
+              Icons.info_outline,
+              size: 19,
+              color: context.gatheringColors.muted,
+            ),
           ),
         ],
       ),
       const SizedBox(height: 2),
-      const Text(
+      Text(
         'Example crystals',
-        style: TextStyle(color: muted, fontSize: 13),
+        style: TextStyle(color: context.gatheringColors.muted, fontSize: 13),
       ),
       const SizedBox(height: 10),
       Wrap(
@@ -83,14 +87,18 @@ class _CrystalChip extends StatelessWidget {
                 const SizedBox(width: 7),
                 Text(
                   '×${entry.count}',
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.w700,
-                    color: accent,
+                    color: context.gatheringColors.accent,
                   ),
                 ),
                 const SizedBox(width: 8),
-                const Icon(Icons.info_outline, size: 16, color: muted),
+                Icon(
+                  Icons.info_outline,
+                  size: 16,
+                  color: context.gatheringColors.muted,
+                ),
               ],
             ),
           ),
@@ -153,9 +161,13 @@ class _DamageDialog extends StatelessWidget {
                 sources: matchlockAdviceSources,
               ),
               const SizedBox(height: 8),
-              const Text(
+              Text(
                 'Tips only. Your stats and estimates stay unchanged.',
-                style: TextStyle(color: muted, fontSize: 13, height: 1.35),
+                style: TextStyle(
+                  color: context.gatheringColors.muted,
+                  fontSize: 13,
+                  height: 1.35,
+                ),
               ),
             ],
           ),
@@ -193,8 +205,8 @@ class _CrystalDetails extends StatelessWidget {
             const SizedBox(height: 14),
             Text(
               entry.benefit,
-              style: const TextStyle(
-                color: accent,
+              style: TextStyle(
+                color: context.gatheringColors.accent,
                 fontSize: 14,
                 fontWeight: FontWeight.w600,
                 height: 1.35,
@@ -275,8 +287,8 @@ class _AdviceSection extends StatelessWidget {
     children: [
       Text(
         section.title,
-        style: const TextStyle(
-          color: accent,
+        style: TextStyle(
+          color: context.gatheringColors.accent,
           fontSize: 14,
           fontWeight: FontWeight.w700,
         ),

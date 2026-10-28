@@ -18,6 +18,77 @@ void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
   test(
+    'profit ordering and profitable filter use the gain, not cash left',
+    () async {
+      final f = await _Fixture.create();
+      addTearDown(f.dispose);
+      final withStock = recipes.state(inventory: {'Ore': 100});
+      final highCash = recipes.calculate(
+        product: recipes.recipe('Owned expensive inputs'),
+        useInventory: true,
+        state: withStock,
+        input: recipes.marketItem('2', price: 90),
+      );
+      final betterGain = recipes.calculate(
+        product: recipes.recipe('Better gain'),
+        useInventory: true,
+        output: recipes.marketItem('1', price: 70),
+      );
+      final loss = recipes.calculate(
+        product: recipes.recipe('Sell instead'),
+        useInventory: true,
+        state: withStock,
+        input: recipes.marketItem('2', price: 110),
+      );
+      expect(
+        highCash.cashProfitFor(OpportunitySaleMode.listing),
+        greaterThan(betterGain.cashProfitFor(OpportunitySaleMode.listing)!),
+      );
+      f.controller.preferences.useInventory = true;
+      f.controller.preferences.profitableOnly = true;
+      f.controller.quotes = [highCash, betterGain, loss];
+      expect(f.controller.visibleQuotes.map((q) => q.recipeName), [
+        'Better gain',
+        'Owned expensive inputs',
+      ]);
+      f.controller.preferences.craftSortAscending['profit'] = true;
+      expect(f.controller.visibleQuotes.map((q) => q.recipeName), [
+        'Owned expensive inputs',
+        'Better gain',
+      ]);
+      f.controller.preferences.profitableOnly = false;
+      expect(f.controller.visibleQuotes.first.recipeName, 'Sell instead');
+    },
+  );
+
+  test(
+    'inventory toggle recomputes stock filtering and shares edits without network work',
+    () async {
+      final f = await _Fixture.create();
+      addTearDown(f.dispose);
+      await f.toggle(true);
+      expect(f.names, isNot(contains('Unavailable')));
+      final requestCount = f.transport.requests.length;
+      f.controller.modeController.commitInventory('Ore', '5');
+      await f.settle();
+      expect(f.names, isNot(contains('Unavailable')));
+      f.controller.change((p) => p.useInventory = true);
+      await f.settle();
+      expect(f.names, contains('Unavailable'));
+      expect(f.quote('Unavailable').inputCost, 0);
+      expect(f.quote('Unavailable').ownedIngredientSales, isNotNull);
+      f.controller.modeController.commitInventory('Ore', '0');
+      await f.settle();
+      expect(f.names, isNot(contains('Unavailable')));
+      f.controller.change((p) => p.useInventory = false);
+      await f.settle();
+      expect(f.quote('Unavailable').usesInventory, isFalse);
+      expect(f.transport.requests, hasLength(requestCount));
+      await f.controller.flush();
+    },
+  );
+
+  test(
     'cold ingredient summaries qualify without output prices or hidden-row book loading',
     () async {
       final f = await _Fixture.create(seed: false);

@@ -9,6 +9,118 @@ import 'package:bdo_craft_planner_flutter/domain/market/market_price_models.dart
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
+  for (final scenario in [
+    (book: '1300-0-0|1100-0-2|1200-0-1|900-0-20', expected: 1200, fails: false),
+    (book: '1300-0-0|1100-0-0', expected: 0, fails: false),
+    (book: '800-0-2|900-0-1', expected: 900, fails: false),
+    (book: '1300-0-1', expected: null, fails: true),
+  ]) {
+    test(
+      'sold-out quote budgets highest occupied bid ${scenario.expected}',
+      () async {
+        final now = DateTime.utc(2026, 9, 24, 14);
+        final transport = _Transport()
+          ..stock = 0
+          ..book = scenario.book
+          ..bookFails = scenario.fails;
+        final repository = SharedMarketRepository(
+          transport: transport,
+          utcNow: () => now,
+          requestSpacing: Duration.zero,
+        );
+        addTearDown(repository.close);
+        final gateway = SharedMarketPriceGateway(
+          repository: repository,
+          utcNow: () => now,
+        );
+        final result = await gateway.fetchProgressive(const [
+          MarketPriceRequest(name: 'Milk', id: '1'),
+        ], region: 'eu');
+        final row = result.items.single;
+        expect(row.ok, isTrue);
+        expect(
+          row.price,
+          1000,
+          reason: 'Do not replace selling/base quotes with buy orders',
+        );
+        expect(row.stock, 0);
+        expect(row.preorderPrice, scenario.expected);
+        expect(row.fetchedAt, now);
+        expect(transport.bookCalls, 1);
+        if (!scenario.fails) {
+          await gateway.fetchProgressive(const [
+            MarketPriceRequest(name: 'Milk', id: '1'),
+          ], region: 'eu');
+          expect(transport.bookCalls, 1, reason: 'Reuse the shared book cache');
+        }
+      },
+    );
+  }
+
+  test(
+    'bulk sold-out quotes request books, regions stay isolated and restocking stops preorder use',
+    () async {
+      var now = DateTime.utc(2026, 9, 24, 14);
+      final transport = _Transport()..stock = 0;
+      final repository = SharedMarketRepository(
+        transport: transport,
+        utcNow: () => now,
+        requestSpacing: Duration.zero,
+      );
+      addTearDown(repository.close);
+      final gateway = SharedMarketPriceGateway(
+        repository: repository,
+        utcNow: () => now,
+      );
+      const requests = [
+        MarketPriceRequest(name: 'Milk', id: '1'),
+        MarketPriceRequest(name: 'Egg', id: '2'),
+      ];
+      final eu = await gateway.fetchProgressive(requests, region: 'eu');
+      expect(eu.items.map((row) => row.preorderPrice), everyElement(1200));
+      expect(eu.items.map((row) => row.stock), everyElement(0));
+      expect(transport.bookCalls, 2);
+      transport.book = '1500-0-2';
+      final na = await gateway.fetchProgressive(requests, region: 'na');
+      expect(na.items.map((row) => row.preorderPrice), everyElement(1500));
+      expect(transport.bookCalls, 4);
+      now = now.add(const Duration(minutes: 1));
+      transport.stock = 20;
+      final restocked = await gateway.fetchProgressive(
+        [requests.first],
+        region: 'eu',
+        forceRefresh: true,
+      );
+      expect(restocked.items.single.stock, 20);
+      expect(restocked.items.single.preorderPrice, 0);
+      expect(transport.bookCalls, 4);
+    },
+  );
+
+  test('stale and future books do not become preorder prices', () {
+    final now = DateTime.utc(2026, 9, 24, 14);
+    for (final time in [
+      now.subtract(const Duration(minutes: 6)),
+      now.add(const Duration(seconds: 1)),
+    ]) {
+      final row = sharedMarketPriceRow(
+        OpportunityMarketItem(
+          itemId: '1',
+          basePrice: 1000,
+          stock: 0,
+          quoteFetchedAt: now,
+          asks: const [],
+          bids: const [OpportunityMarketLevel(price: 1200, quantity: 1)],
+          bookFetchedAt: time,
+        ),
+        name: 'Milk',
+        now: now,
+      );
+      expect(row.preorderPrice, isNull);
+      expect(row.price, 1000);
+    }
+  });
+
   for (final ageSeconds in [59, 60]) {
     test(
       'Planner minute-policy Refresh at ${ageSeconds}s preserves the true quote age',
@@ -204,6 +316,10 @@ final class _Transport implements OpportunityMarketTransport {
   final Future<void>? hold;
   int calls = 0;
   bool fails = false;
+  int stock = 20;
+  String book = '1200-0-1';
+  bool bookFails = false;
+  int bookCalls = 0;
   final hosts = <String>[];
 
   @override
@@ -214,6 +330,8 @@ final class _Transport implements OpportunityMarketTransport {
     Future<void>? abortTrigger,
   }) async {
     calls++;
+    final isBook = uri.path.endsWith('GetBiddingInfoList');
+    if (isBook) bookCalls++;
     hosts.add(uri.host);
     final data = jsonDecode(body) as Map<String, dynamic>;
     final ids = data.containsKey('searchResult')
@@ -221,12 +339,14 @@ final class _Transport implements OpportunityMarketTransport {
         : ['${data['mainKey']}'];
     if (ids.contains(holdId)) await hold;
     await Future<void>.delayed(Duration.zero);
-    if (fails) {
+    if (fails || (isBook && bookFails)) {
       return OpportunityHttpResponse(statusCode: 503, bytes: Uint8List(0));
     }
-    final message = ids.length > 1
-        ? ids.map((id) => '$id-20-1000-500').join('|')
-        : '${ids.single}-0-0-1000-20-500-1-10000-1000-1788860000';
+    final message = isBook
+        ? book
+        : ids.length > 1
+        ? ids.map((id) => '$id-$stock-1000-500').join('|')
+        : '${ids.single}-0-0-1000-$stock-500-1-10000-1000-1788860000';
     return OpportunityHttpResponse(
       statusCode: 200,
       bytes: Uint8List.fromList(

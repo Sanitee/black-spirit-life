@@ -23,7 +23,72 @@ void main() {
     (const Size(900, 940), 2.0),
   ]) {
     testWidgets(
-      'Demand header shows preorder progress after prices finish and clears on success at ${size.width} / $textScale',
+      'scrolling cards retain geometry through background details at ${size.width} / $textScale',
+      (tester) async {
+        final f = await _openWorkspace(
+          tester,
+          search: '',
+          size: size,
+          textScale: textScale,
+          scrollingRecipes: true,
+        );
+        try {
+          final panes = find.byKey(const ValueKey('opportunities-panes'));
+          final list = find.byKey(const PageStorageKey('craft-opportunities'));
+          final beforePanes = tester.getRect(panes);
+          final beforeList = tester.getRect(list);
+          await _pumpUntil(tester, () => f.transport.held.isCompleted);
+          expect(f.controller.detailStatus.loading, isTrue);
+          expect(_headerProgress(), findsNothing);
+          expect(find.textContaining('Market details ·'), findsNothing);
+          expect(tester.getRect(panes), beforePanes);
+          expect(tester.getRect(list), beforeList);
+
+          await tester.drag(list, const Offset(0, -280));
+          await tester.pump(const Duration(seconds: 1));
+          final scrollable = tester.state<ScrollableState>(
+            find.descendant(of: list, matching: find.byType(Scrollable)).first,
+          );
+          final position = scrollable.position;
+          final offset = position.pixels;
+          expect(offset, greaterThan(0));
+          final visibleCard = find
+              .descendant(
+                of: list,
+                matching: find.byWidgetPredicate(
+                  (w) =>
+                      w.key is ValueKey<String> &&
+                      (w.key! as ValueKey<String>).value.startsWith(
+                        'craft-card:',
+                      ),
+                ),
+              )
+              .hitTestable()
+              .first;
+          final cardKey = tester.widget(visibleCard).key!;
+          final cardBounds = tester.getRect(visibleCard);
+
+          f.transport.release.complete();
+          await _pumpUntil(
+            tester,
+            () => f.controller.detailStatus.complete && !f.controller.scanning,
+          );
+          await _pumpWork(tester, f.controller.calculationSettled);
+          expect(f.controller.market.items['9101']!.bookFetchedAt, isNotNull);
+          expect(tester.getRect(panes), beforePanes);
+          expect(tester.getRect(list), beforeList);
+          expect(position.pixels, closeTo(offset, .01));
+          expect(tester.getRect(find.byKey(cardKey)), cardBounds);
+          expect(_headerProgress(), findsNothing);
+          expect(tester.takeException(), isNull);
+        } finally {
+          await _closeWorkspace(tester, f);
+        }
+      },
+    );
+
+    testWidgets(
+      'Demand checks keep the workspace steady while prices finish at ${size.width} / $textScale',
       (tester) async {
         final f = await _openWorkspace(
           tester,
@@ -31,6 +96,8 @@ void main() {
           textScale: textScale,
         );
         try {
+          final panes = find.byKey(const ValueKey('opportunities-panes'));
+          final before = tester.getRect(panes);
           f.transport.heldPart = _part('9101', true);
           await _selectDemandSort(tester);
           await _pumpUntil(tester, () => f.transport.held.isCompleted);
@@ -38,20 +105,10 @@ void main() {
           expect(f.controller.summaryComplete, isTrue);
           expect(f.controller.summaryStatus.loading, isFalse);
           expect(find.text('Stop check'), findsOneWidget);
-          expect(_headerText('Preorders · 0 / 1'), findsOneWidget);
-          expect(_headerProgress(), findsOneWidget);
-          expect(
-            tester.widget<LinearProgressIndicator>(_headerProgress()).value,
-            0,
-          );
+          expect(_headerText('Preorders · 0 / 1'), findsNothing);
+          expect(_headerProgress(), findsNothing);
+          expect(tester.getRect(panes), before);
           expect(find.byType(Dialog), findsNothing);
-          final header = tester.getRect(
-            find.byKey(const ValueKey('opportunities-market-progress')),
-          );
-          final count = tester.getRect(_headerText('Preorders · 0 / 1'));
-          expect(count.left, greaterThanOrEqualTo(header.left));
-          expect(count.right, lessThanOrEqualTo(header.right));
-          expect(header.right, lessThanOrEqualTo(size.width));
           expect(tester.takeException(), isNull);
 
           f.transport.release.complete();
@@ -63,6 +120,7 @@ void main() {
           expect(_headerText('Preorders · 1 / 1'), findsNothing);
           expect(_headerProgress(), findsNothing);
           expect(find.text('Refresh'), findsOneWidget);
+          expect(tester.getRect(panes), before);
         } finally {
           await _closeWorkspace(tester, f);
         }
@@ -941,10 +999,19 @@ Future<_Fixture> _openWorkspace(
   String search = 'First',
   Size size = const Size(1500, 940),
   double textScale = 1,
+  bool scrollingRecipes = false,
 }) async {
   configureApplicationTestSurface(tester, size);
   final f = (await tester.runAsync(() async {
     final fixture = await _Fixture.create();
+    if (scrollingRecipes) {
+      fixture.controller.recipes = {
+        ...fixture.controller.recipes,
+        for (var i = 0; i < 40; i++)
+          'Example $i': _recipe('Example $i', '9101', input: 'Raw A'),
+      };
+      fixture.transport.heldPart = _part('9101', true);
+    }
     fixture.controller.change((p) {
       p.craftSearch = search;
       p.profitableOnly = false;

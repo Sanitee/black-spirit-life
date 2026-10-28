@@ -6,6 +6,7 @@ import 'package:bdo_craft_planner_flutter/domain/market/market_price_models.dart
 import 'package:bdo_craft_planner_flutter/domain/models/catalog_models.dart';
 import 'package:bdo_craft_planner_flutter/domain/models/craft_mode.dart';
 import 'package:bdo_craft_planner_flutter/domain/state/planner_state.dart';
+import 'package:bdo_craft_planner_flutter/domain/state/state_copy.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -78,6 +79,51 @@ void main() {
     },
   );
 
+  test(
+    'preorders stay separate and book updates do not refresh trade timestamps',
+    () {
+      final bookTime = fresh.add(const Duration(seconds: 30));
+      final first = merge(
+        current(),
+        _row(fresh, preorder: 120, bookTime: bookTime),
+      );
+      expect(first.prices['Wheat'], 100);
+      expect(first.preorderPrices['Wheat'], 120);
+      expect(
+        first.preorderObservedAt['Wheat'],
+        bookTime.millisecondsSinceEpoch,
+      );
+      expect(first.tradeObservedAt['Wheat'], fresh.millisecondsSinceEpoch);
+      final olderBook = merge(
+        first.market,
+        _row(fresh, preorder: 110, bookTime: fresh),
+      );
+      expect(olderBook.preorderPrices['Wheat'], 120);
+      final emptyBook = merge(
+        first.market,
+        _row(
+          fresh,
+          preorder: 0,
+          bookTime: bookTime.add(const Duration(seconds: 1)),
+        ),
+      );
+      expect(emptyBook.preorderPrices['Wheat'], 0);
+      final quoteOnly = merge(
+        first.market,
+        _row(bookTime.add(const Duration(minutes: 1))),
+      );
+      expect(quoteOnly.preorderPrices, isEmpty);
+      final unlisted = merge(first.market, _row(bookTime, unlisted: true));
+      expect(unlisted.preorderPrices, isEmpty);
+      expect(unlisted.preorderObservedAt, isEmpty);
+      final remapped = merge(
+        first.market.copyWith(tradeMarketIds: const {'Wheat': '2'}),
+        _row(old),
+      );
+      expect(remapped.preorderPrices, isEmpty);
+    },
+  );
+
   test('an older unlisted receipt cannot clear newer verified values', () {
     final result = merge(current(), _row(old, unlisted: true));
     expect(result.prices['Wheat'], 999);
@@ -146,12 +192,19 @@ void main() {
   );
 }
 
-MarketPriceRow _row(DateTime time, {bool unlisted = false}) => MarketPriceRow(
+MarketPriceRow _row(
+  DateTime time, {
+  bool unlisted = false,
+  int? preorder,
+  DateTime? bookTime,
+}) => MarketPriceRow(
   name: 'Wheat',
   id: '1',
   ok: !unlisted,
   price: unlisted ? 0 : 100,
   stock: unlisted ? null : 3,
+  preorderPrice: preorder,
+  preorderFetchedAt: bookTime,
   source: MarketPriceSource.pearlAbyssCentralMarket,
   fetchedAt: time,
   diagnosticCode: unlisted

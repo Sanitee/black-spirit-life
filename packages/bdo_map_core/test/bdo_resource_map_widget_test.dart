@@ -3,8 +3,9 @@ import 'dart:math' as math;
 import 'dart:ui' as ui;
 
 import 'package:bdo_map_core/bdo_map_core.dart';
-import 'package:bdo_map_core/src/widgets/resource_map_pill.dart';
 import 'package:bdo_map_core/src/widgets/map_canvas.dart';
+import 'package:bdo_map_core/src/widgets/network_cp_breakdown.dart';
+import 'package:bdo_map_core/src/widgets/network_cp_review.dart';
 import 'package:bdo_map_core/src/widgets/resource_map_atlas_shell.dart';
 import 'package:bdo_map_core/src/widgets/resource_map_menu_artwork.dart';
 import 'package:bdo_map_core/src/widgets/resource_map_panel_metrics.dart';
@@ -161,7 +162,7 @@ void main() {
 
   for (final style in ResourceMapInterfaceStyle.values) {
     testWidgets(
-      '${style.label} keeps search and selected details at one edge',
+      '${style.label} keeps persistent search and a separate inspector',
       (tester) async {
         await tester.binding.setSurfaceSize(const Size(1200, 752));
         addTearDown(() => tester.binding.setSurfaceSize(null));
@@ -195,15 +196,15 @@ void main() {
         );
         final closedSearchRect = tester.getRect(search);
         final dockRect = tester.getRect(
-          find.byKey(const ValueKey<String>('resource-map-atlas-dock')),
+          find.byKey(const ValueKey<String>('resource-map-field-desk')),
         );
-        expect(dockRect.left, closeTo(16, 1));
-        expect(dockRect.top, closeTo(16, 1));
+        expect(dockRect.left, closeTo(12, 1));
+        expect(dockRect.top, closeTo(12, 1));
         expect(closedSearchRect.top, greaterThan(dockRect.top));
         expect(closedSearchRect.height, greaterThanOrEqualTo(30));
         expect(
           tester.getSize(find.byType(ResourceMapAtlasSearch)).height,
-          greaterThanOrEqualTo(40),
+          greaterThanOrEqualTo(30),
         );
         expect(closedSearchRect.left, greaterThan(dockRect.left));
         expect(closedSearchRect.right, lessThan(dockRect.right));
@@ -214,7 +215,7 @@ void main() {
           expect(find.text('Materials'), findsOneWidget);
         } else {
           expect(find.text('Materials'), findsOneWidget);
-          expect(find.text('Income'), findsOneWidget);
+          expect(find.text('Workers'), findsOneWidget);
           expect(find.text('Saved'), findsOneWidget);
         }
 
@@ -239,7 +240,8 @@ void main() {
         expect(inspector, findsOneWidget);
         final searchRect = tester.getRect(search);
         final inspectorRect = tester.getRect(inspector);
-        expect(inspectorRect.top, greaterThan(searchRect.bottom));
+        expect(inspectorRect.left, greaterThan(searchRect.right));
+        expect(inspectorRect.right, lessThanOrEqualTo(1112));
         expect(find.byType(Scrollbar), findsNothing);
         expect(find.byType(RawScrollbar), findsNothing);
         expect(tester.takeException(), isNull);
@@ -503,7 +505,10 @@ void main() {
           await _openWorkerNetwork(tester);
           final panel = find.byKey(const ValueKey('resource-map-atlas-dock'));
           final position = tester.getRect(panel);
-          expect(position.left, closeTo(16, .1));
+          final rail = tester.getRect(
+            find.byKey(const ValueKey('resource-map-field-desk')),
+          );
+          expect(position.left, closeTo(rail.right + 16, .1));
           expect(position.top, 16);
           expect(position.width, lessThanOrEqualTo(440));
           if (scale == 1) {
@@ -2282,7 +2287,7 @@ void main() {
     );
     await tester.pump(const Duration(milliseconds: 250));
     await _openNodePlanner(tester);
-    final journey = find.byKey(const ValueKey('resource-map-atlas-dock'));
+    final journey = find.byKey(const ValueKey('resource-map-field-desk'));
     expect(journey, findsOneWidget);
     expect(
       find.byKey(const ValueKey('resource-map-home-plan-materials')),
@@ -2315,7 +2320,7 @@ void main() {
     await _openNodeMaterialTargets(tester);
     expect(
       find.byKey(const ValueKey('resource-map-home-plan-materials')),
-      findsNothing,
+      findsOneWidget,
     );
     expect(
       find.byKey(const ValueKey('resource-map-network-workbench')),
@@ -2362,7 +2367,7 @@ void main() {
     final workbench = find.byKey(
       const ValueKey('resource-map-network-workbench'),
     );
-    final journey = find.byKey(const ValueKey('resource-map-atlas-dock'));
+    final journey = find.byKey(const ValueKey('resource-map-field-desk'));
     expect(workbench, findsNothing);
     expect(journey, findsOneWidget);
     await _openNodePlanner(tester);
@@ -2375,7 +2380,7 @@ void main() {
     expect(workbench, findsOneWidget);
     expect(
       find.byKey(const ValueKey('resource-map-home-find-material')),
-      findsNothing,
+      findsOneWidget,
     );
     expect(journey, findsOneWidget);
     await _goMapHome(tester);
@@ -2583,7 +2588,11 @@ void main() {
         findsNothing,
       );
       expect(workbench.hitTestable(), findsNothing);
-      expect(workspace, findsOneWidget);
+      expect(workspace, findsNothing);
+      expect(
+        find.byKey(const ValueKey('resource-map-field-desk')),
+        findsOneWidget,
+      );
       expect(tester.takeException(), isNull);
     },
   );
@@ -2682,107 +2691,108 @@ void main() {
   );
 
   for (final style in ResourceMapInterfaceStyle.values) {
-    testWidgets('${style.label} keeps material planning compact below search', (
-      tester,
-    ) async {
-      await tester.binding.setSurfaceSize(const Size(1200, 752));
-      addTearDown(() => tester.binding.setSurfaceSize(null));
-      final updates = <BdoNodeNetworkPreferences>[];
-      await tester.pumpWidget(
-        MaterialApp(
-          home: ResourceMapChromeTheme(
-            data: style == ResourceMapInterfaceStyle.glassDock
-                ? ResourceMapChromeThemeData.glassDock
-                : ResourceMapChromeThemeData.ghostLedger,
-            child: MediaQuery(
-              data: const MediaQueryData(disableAnimations: true),
-              child: BdoResourceMap(
-                dataset: dataset,
-                cacheDirectory: cacheDirectory,
-                tileSource: tileSource,
-                tileHttpClient: tileClient,
-                showSourceNotice: false,
-                interfaceStyle: style,
-                onNodeNetworkPreferencesChanged: updates.add,
+    testWidgets(
+      '${style.label} keeps material planning compact beside search',
+      (tester) async {
+        await tester.binding.setSurfaceSize(const Size(1200, 752));
+        addTearDown(() => tester.binding.setSurfaceSize(null));
+        final updates = <BdoNodeNetworkPreferences>[];
+        await tester.pumpWidget(
+          MaterialApp(
+            home: ResourceMapChromeTheme(
+              data: style == ResourceMapInterfaceStyle.glassDock
+                  ? ResourceMapChromeThemeData.glassDock
+                  : ResourceMapChromeThemeData.ghostLedger,
+              child: MediaQuery(
+                data: const MediaQueryData(disableAnimations: true),
+                child: BdoResourceMap(
+                  dataset: dataset,
+                  cacheDirectory: cacheDirectory,
+                  tileSource: tileSource,
+                  tileHttpClient: tileClient,
+                  showSourceNotice: false,
+                  interfaceStyle: style,
+                  onNodeNetworkPreferencesChanged: updates.add,
+                ),
               ),
             ),
           ),
-        ),
-      );
-      await tester.pump(const Duration(milliseconds: 250));
-      await _openNodeMaterialTargets(tester);
-      final workspace = find.byKey(
-        const ValueKey<String>('resource-map-atlas-dock'),
-      );
-      final initialRect = tester.getRect(workspace);
-      expect(initialRect.left, 16);
-      expect(initialRect.top, 16);
-      expect(initialRect.width, lessThanOrEqualTo(480));
-      final viewportRect = tester.getRect(find.byType(BdoResourceMap));
-      expect(
-        initialRect.height,
-        lessThanOrEqualTo(viewportRect.bottom - 16 - initialRect.top),
-      );
-      expect(initialRect.bottom, lessThanOrEqualTo(viewportRect.bottom - 16));
-      for (final label in ['All', 'Selected', 'My setup', 'Saved']) {
-        expect(
-          find.descendant(of: workspace, matching: find.text(label)),
-          findsOneWidget,
         );
-      }
-      expect(
-        tester
-            .getSize(
-              find.byKey(
-                const ValueKey<String>('resource-map-node-target-view-all'),
-              ),
-            )
-            .width,
-        lessThan(72),
-      );
-      expect(find.text('CP available'), findsOneWidget);
-      final targetSearch = find.byKey(
-        const ValueKey<String>('resource-map-node-target-search'),
-      );
-      expect(
-        tester.widget<TextField>(targetSearch).decoration!.filled,
-        isFalse,
-      );
-      await tester.enterText(targetSearch, 'Ash Timber');
-      await tester.pumpAndSettle();
-      final filteredRect = tester.getRect(workspace);
-      expect(filteredRect.height, lessThan(initialRect.height - 100));
-      expect(filteredRect.topLeft, initialRect.topLeft);
-      final budget = find.byKey(
-        const ValueKey<String>('resource-map-node-cp-budget'),
-      );
-      await tester.enterText(budget, '240');
-      await tester.tap(
-        find.byKey(const ValueKey<String>('resource-map-node-apply-cp')),
-      );
-      await tester.pump();
-      expect(updates.last.contributionPointBudget, 240);
-      await tester.tap(
-        find.byKey(
-          const ValueKey<String>('resource-map-atlas-workspace-minimize'),
-        ),
-      );
-      await tester.pumpAndSettle();
-      final chip = find.byKey(
-        const ValueKey<String>('resource-map-atlas-task-chip'),
-      );
-      expect(tester.getTopLeft(chip), initialRect.topLeft);
-      await tester.tap(
-        find.byKey(const ValueKey<String>('resource-map-atlas-task-restore')),
-      );
-      await tester.pumpAndSettle();
-      expect(tester.getTopLeft(workspace), initialRect.topLeft);
-      expect(
-        tester.widget<TextField>(targetSearch).controller!.text,
-        'Ash Timber',
-      );
-      expect(tester.takeException(), isNull);
-    });
+        await tester.pump(const Duration(milliseconds: 250));
+        await _openNodeMaterialTargets(tester);
+        final workspace = find.byKey(
+          const ValueKey<String>('resource-map-atlas-dock'),
+        );
+        final initialRect = tester.getRect(workspace);
+        expect(initialRect.left, 228);
+        expect(initialRect.top, 16);
+        expect(initialRect.width, lessThanOrEqualTo(480));
+        final viewportRect = tester.getRect(find.byType(BdoResourceMap));
+        expect(
+          initialRect.height,
+          lessThanOrEqualTo(viewportRect.bottom - 16 - initialRect.top),
+        );
+        expect(initialRect.bottom, lessThanOrEqualTo(viewportRect.bottom - 16));
+        for (final label in ['All', 'Selected', 'My setup', 'Saved']) {
+          expect(
+            find.descendant(of: workspace, matching: find.text(label)),
+            findsOneWidget,
+          );
+        }
+        expect(
+          tester
+              .getSize(
+                find.byKey(
+                  const ValueKey<String>('resource-map-node-target-view-all'),
+                ),
+              )
+              .width,
+          lessThan(72),
+        );
+        expect(find.text('CP available'), findsOneWidget);
+        final targetSearch = find.byKey(
+          const ValueKey<String>('resource-map-node-target-search'),
+        );
+        expect(
+          tester.widget<TextField>(targetSearch).decoration!.filled,
+          isFalse,
+        );
+        await tester.enterText(targetSearch, 'Ash Timber');
+        await tester.pumpAndSettle();
+        final filteredRect = tester.getRect(workspace);
+        expect(filteredRect.height, lessThan(initialRect.height - 100));
+        expect(filteredRect.topLeft, initialRect.topLeft);
+        final budget = find.byKey(
+          const ValueKey<String>('resource-map-node-cp-budget'),
+        );
+        await tester.enterText(budget, '240');
+        await tester.tap(
+          find.byKey(const ValueKey<String>('resource-map-node-apply-cp')),
+        );
+        await tester.pump();
+        expect(updates.last.contributionPointBudget, 240);
+        await tester.tap(
+          find.byKey(
+            const ValueKey<String>('resource-map-atlas-workspace-minimize'),
+          ),
+        );
+        await tester.pumpAndSettle();
+        final chip = find.byKey(
+          const ValueKey<String>('resource-map-atlas-task-chip'),
+        );
+        expect(tester.getTopLeft(chip), initialRect.topLeft);
+        await tester.tap(
+          find.byKey(const ValueKey<String>('resource-map-atlas-task-restore')),
+        );
+        await tester.pumpAndSettle();
+        expect(tester.getTopLeft(workspace), initialRect.topLeft);
+        expect(
+          tester.widget<TextField>(targetSearch).controller!.text,
+          'Ash Timber',
+        );
+        expect(tester.takeException(), isNull);
+      },
+    );
   }
 
   testWidgets('desktop workbench stays scrollable at 200 percent text', (
@@ -3210,8 +3220,37 @@ void main() {
     await _settleNodeNetworkCalculation(tester);
 
     expect(find.text('Review network'), findsOneWidget);
-    expect(find.textContaining('/ 250'), findsOneWidget);
-    expect(find.text('Apply'), findsOneWidget);
+    expect(find.byType(NetworkCpReview), findsOneWidget);
+    final reviewCosts = tester.widget<NetworkCpBreakdown>(
+      find.byType(NetworkCpBreakdown),
+    );
+    expect(
+      tester
+          .widget<Text>(
+            find.byKey(const ValueKey('resource-map-review-total-cp')),
+          )
+          .data,
+      '${reviewCosts.used} CP',
+    );
+    expect(
+      find.descendant(
+        of: find.byType(NetworkCpReview),
+        matching: find.byKey(const ValueKey('resource-map-node-cp-budget')),
+      ),
+      findsOneWidget,
+    );
+    expect(
+      find.descendant(
+        of: find.byType(NetworkReviewActionShelf),
+        matching: find.text('Save as current'),
+      ),
+      findsOneWidget,
+    );
+    expect(
+      tester.widget<NetworkCpBreakdown>(find.byType(NetworkCpBreakdown)).limit,
+      250,
+    );
+    expect(find.text('Save as current'), findsOneWidget);
     expect(
       find.byKey(
         const ValueKey<String>('resource-map-network-workbench-leading'),
@@ -3299,6 +3338,125 @@ void main() {
     );
     expect(tester.takeException(), isNull);
   });
+
+  for (final scale in [1.0, 2.0]) {
+    testWidgets('inline review edits CP and saves the real route at ${scale}x', (
+      tester,
+    ) async {
+      final size = Size(1200, scale == 1 ? 752 : 900);
+      await tester.binding.setSurfaceSize(size);
+      addTearDown(() => tester.binding.setSurfaceSize(null));
+      final updates = <BdoNodeNetworkPreferences>[];
+      const targets = <String, int>{'x': 1, 'y': 1};
+      await tester.pumpWidget(
+        MaterialApp(
+          home: MediaQuery(
+            data: MediaQueryData(
+              size: size,
+              disableAnimations: true,
+              textScaler: TextScaler.linear(scale),
+            ),
+            child: BdoResourceMap(
+              dataset: _rerouteNetworkDataset(),
+              cacheDirectory: cacheDirectory,
+              tileSource: tileSource,
+              showSourceNotice: false,
+              tileHttpClient: tileClient,
+              nodeNetworkPreferences: BdoNodeNetworkPreferences(
+                contributionPointBudget: 20,
+                desiredResourceNodeCounts: targets,
+                rootNodeIds: const {'root'},
+              ),
+              onNodeNetworkPreferencesChanged: updates.add,
+            ),
+          ),
+        ),
+      );
+      await tester.pump(const Duration(milliseconds: 200));
+      await _openNodeMaterialTargets(tester);
+      final build = find.byKey(
+        const ValueKey('resource-map-build-node-network'),
+      );
+      await tester.ensureVisible(build);
+      await tester.tap(build);
+      await tester.pump();
+      final budget = find.byKey(const ValueKey('resource-map-node-cp-budget'));
+      final apply = find.byKey(const ValueKey('resource-map-node-apply-cp'));
+      final save = find.byKey(
+        const ValueKey('resource-map-save-current-node-network'),
+      );
+      expect(find.byType(NetworkCpReview), findsOneWidget);
+      expect(tester.widget<TextField>(budget).controller!.text, '20');
+      expect(find.byType(NetworkCpBreakdown), findsNothing);
+      expect(find.text('— CP'), findsOneWidget);
+      expect(save, findsNothing);
+      await _settleNodeNetworkCalculation(tester);
+      var costs = tester.widget<NetworkCpBreakdown>(
+        find.byType(NetworkCpBreakdown),
+      );
+      expect(costs.used, 5);
+      expect(
+        tester
+            .widget<Text>(
+              find.byKey(const ValueKey('resource-map-review-total-cp')),
+            )
+            .data,
+        '5 CP',
+      );
+      expect(costs.remaining, 15);
+      expect(
+        updates,
+        isEmpty,
+        reason: 'Reviewing unchanged initial preferences must not save them.',
+      );
+
+      // A real over-budget recalculation retains the proposed route but blocks
+      // saving it. The inline CP editor must let the user repair it in place.
+      await tester.ensureVisible(budget);
+      await tester.enterText(budget, '1');
+      await tester.tap(apply);
+      await _settleNodeNetworkCalculation(tester);
+      expect(find.byType(NetworkCpReview), findsOneWidget);
+      costs = tester.widget<NetworkCpBreakdown>(
+        find.byType(NetworkCpBreakdown),
+      );
+      expect(costs.used, 5);
+      expect(costs.remaining, -4);
+      expect(tester.widget<TextField>(budget).controller!.text, '1');
+      expect(tester.widget<FilledButton>(save).onPressed, isNull);
+      expect(updates, isNotEmpty);
+      expect(updates.last.contributionPointBudget, 1);
+      expect(updates.last.desiredResourceNodeCounts, targets);
+      expect(updates.last.currentNodeIds, isEmpty);
+      expect(tester.takeException(), isNull);
+
+      await tester.ensureVisible(budget);
+      await tester.enterText(budget, '25');
+      await tester.tap(apply);
+      await _settleNodeNetworkCalculation(tester);
+      costs = tester.widget<NetworkCpBreakdown>(
+        find.byType(NetworkCpBreakdown),
+      );
+      expect(costs.limit, 25);
+      expect(costs.used, 5);
+      expect(costs.remaining, 20);
+      expect(updates.last.desiredResourceNodeCounts, targets);
+      expect(updates.last.currentNodeIds, isEmpty);
+      expect(tester.widget<FilledButton>(save).onPressed, isNotNull);
+      await tester.ensureVisible(save);
+      await tester.tap(save);
+      await _settleNodeNetworkCalculation(tester);
+      expect(updates.last.contributionPointBudget, 25);
+      expect(updates.last.desiredResourceNodeCounts, targets);
+      expect(updates.last.currentNodeIds, {'shared', 'x-shared', 'y-shared'});
+      costs = tester.widget<NetworkCpBreakdown>(
+        find.byType(NetworkCpBreakdown),
+      );
+      expect(costs.keptNodes, 5);
+      expect(costs.newNodes, 0);
+      expect(tester.takeException(), isNull);
+    });
+  }
 
   testWidgets(
     'planned materials show live CP shortage and current setup summary',
@@ -3992,12 +4150,30 @@ void main() {
         const ValueKey<String>('resource-map-node-review-worker-capacity'),
       );
       expect(
-        find.textContaining('CP 10 / 20'),
+        find.descendant(
+          of: find.byKey(const ValueKey('resource-map-route-cp-breakdown')),
+          matching: find.text('10 CP'),
+        ),
         findsOneWidget,
+        reason: '20 CP limit minus the 10 CP route leaves 10 CP remaining.',
+      );
+      expect(
+        tester
+            .widget<Text>(
+              find.byKey(const ValueKey('resource-map-review-total-cp')),
+            )
+            .data,
+        '10 CP',
         reason:
             'The route total must include the 1 CP lodging house required '
             'for its three worker jobs.',
       );
+      final cpBreakdown = tester.widget<NetworkCpBreakdown>(
+        find.byKey(const ValueKey('resource-map-route-cp-breakdown')),
+      );
+      expect(cpBreakdown.used, 10);
+      expect(cpBreakdown.lodgingHouses, 1);
+      expect(cpBreakdown.keptNodes + cpBreakdown.newNodes, 9);
       await tester.scrollUntilVisible(
         workerCapacityAction,
         120,
@@ -4054,10 +4230,26 @@ void main() {
       await tester.drag(reviewScrollable, const Offset(0, 1000));
       await tester.pumpAndSettle();
       expect(
-        find.textContaining('CP 6 / 20'),
+        find.descendant(
+          of: find.byKey(const ValueKey('resource-map-route-cp-breakdown')),
+          matching: find.text('14 CP'),
+        ),
         findsOneWidget,
         reason: 'Recomputed totals must continue to include lodging CP.',
       );
+      expect(
+        tester
+            .widget<Text>(
+              find.byKey(const ValueKey('resource-map-review-total-cp')),
+            )
+            .data,
+        '6 CP',
+      );
+      final recomputedCosts = tester.widget<NetworkCpBreakdown>(
+        find.byKey(const ValueKey('resource-map-route-cp-breakdown')),
+      );
+      expect(recomputedCosts.used, 6);
+      expect(recomputedCosts.lodgingHouses, 1);
       await tester.scrollUntilVisible(
         workerCapacityAction,
         120,
@@ -4088,10 +4280,7 @@ void main() {
       });
       await tester.drag(reviewScrollable, const Offset(0, 1000));
       await tester.pumpAndSettle();
-      expect(
-        find.textContaining('CP 3 / 20', skipOffstage: false),
-        findsOneWidget,
-      );
+      expect(find.text('17 CP', skipOffstage: false), findsOneWidget);
       await tester.scrollUntilVisible(
         workerCapacityAction,
         120,
@@ -4238,6 +4427,13 @@ void main() {
           .widget<BdoMapCanvas>(find.byType(BdoMapCanvas))
           .cameraController;
       final cameraBeforeHouseSelection = cameraController.camera;
+      await tester.ensureVisible(
+        find.byKey(
+          const ValueKey<String>(
+            'resource-map-planned-lodging-house-house:9001',
+          ),
+        ),
+      );
       await tester.tap(
         find.byKey(
           const ValueKey<String>(
@@ -4381,8 +4577,9 @@ void main() {
       expect(find.text('Recommended route'), findsNothing);
       expect(find.textContaining('Online time only.'), findsNothing);
       expect(find.text('Show route'), findsOneWidget);
-      expect(find.text('Save'), findsOneWidget);
+      expect(find.text('Update network'), findsOneWidget);
       expect(find.text('Workers'), findsOneWidget);
+      expect(find.text('Extra lodging'), findsOneWidget);
       expect(find.textContaining('connection line'), findsNothing);
       final incomeSurface = find.byKey(
         const ValueKey<String>('resource-map-network-workbench'),
@@ -4403,7 +4600,7 @@ void main() {
         closeTo(workspaceRect.center.dx, 16),
         reason: 'The income surface stays inside the anchored map tool window.',
       );
-      expect(workspaceRect.left, closeTo(mapRect.left + 16, 1));
+      expect(workspaceRect.left, closeTo(mapRect.left + 228, 1));
       expect(incomeSurfaceRect.top, greaterThan(workspaceRect.top));
       expect(incomeSurfaceRect.bottom, lessThanOrEqualTo(workspaceRect.bottom));
       expect(
@@ -4456,6 +4653,7 @@ void main() {
       expect(incomeSurface, findsOneWidget);
       expect(incomeSurface.hitTestable(), findsOneWidget);
       expect(tester.getRect(incomeSurface), incomeSurfaceRect);
+      await tester.pumpAndSettle();
       if (Platform.environment['MAP_MENU_CAPTURE_DIR'] == null) {
         await expectLater(
           find.byType(BdoResourceMap),
@@ -4557,7 +4755,13 @@ void main() {
       await tester.pumpAndSettle();
       await tester.tap(workerCapacityButton);
       await tester.pumpAndSettle();
-      expect(find.text('Workers by town'), findsOneWidget);
+      expect(find.text('Extra lodging'), findsWidgets);
+      await tester.tap(find.text('Existing workers').hitTestable());
+      await tester.pumpAndSettle();
+      expect(
+        find.byKey(const ValueKey('resource-map-existing-workers-dialog')),
+        findsOneWidget,
+      );
       expect(
         find.byKey(const ValueKey<String>('resource-map-worker-town-add')),
         findsOneWidget,
@@ -4571,6 +4775,8 @@ void main() {
       expect(find.textContaining('bonus lodging'), findsNothing);
       expect(find.text('Hired workers'), findsOneWidget);
       expect(find.text('Bonus lodging slots'), findsOneWidget);
+      await tester.tap(find.text('Cancel').hitTestable());
+      await tester.pumpAndSettle();
       await tester.tap(find.text('Cancel'));
       await tester.pumpAndSettle();
 
@@ -4836,7 +5042,12 @@ void main() {
       await tester.tap(workerCapacity);
       await tester.pumpAndSettle();
 
-      expect(find.text('Workers by town'), findsOneWidget);
+      await tester.tap(find.text('Existing workers').hitTestable());
+      await tester.pumpAndSettle();
+      expect(
+        find.byKey(const ValueKey('resource-map-existing-workers-dialog')),
+        findsOneWidget,
+      );
       expect(find.text('Hired workers'), findsOneWidget);
       expect(find.text('Bonus lodging slots'), findsOneWidget);
       await tester.enterText(
@@ -4857,12 +5068,18 @@ void main() {
       );
       await tester.tap(
         find.descendant(
-          of: find.byType(AlertDialog),
+          of: find.byKey(
+            const ValueKey('resource-map-existing-workers-dialog'),
+          ),
           matching: find.widgetWithText(FilledButton, 'Save'),
         ),
       );
+      await tester.pumpAndSettle();
+      expect(preferenceUpdates, isEmpty);
+      await tester.tap(
+        find.byKey(const ValueKey('resource-map-town-lodging-save')),
+      );
       await tester.pump();
-
       final savedCapacity =
           preferenceUpdates.last.townWorkerCapacitiesByNodeId['root']!;
       expect(savedCapacity.hiredWorkerCount, 4);
@@ -4870,6 +5087,36 @@ void main() {
       expect(savedCapacity.availableWorkerCount, 4);
       expect(savedCapacity.freeLodgingSlotCount, 5);
       await tester.pumpAndSettle();
+
+      await tester.ensureVisible(workerCapacity);
+      await tester.tap(workerCapacity);
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Existing workers').hitTestable());
+      await tester.pumpAndSettle();
+      await tester.tap(
+        find.byKey(const ValueKey('resource-map-clear-workers-root')),
+      );
+      await tester.pumpAndSettle();
+      final updatesBeforeClear = preferenceUpdates.length;
+      await tester.tap(
+        find.descendant(
+          of: find.byKey(
+            const ValueKey('resource-map-existing-workers-dialog'),
+          ),
+          matching: find.widgetWithText(FilledButton, 'Save'),
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(preferenceUpdates.length, updatesBeforeClear);
+      await tester.tap(
+        find.byKey(const ValueKey('resource-map-town-lodging-save')),
+      );
+      await tester.pumpAndSettle();
+      final cleared =
+          preferenceUpdates.last.townWorkerCapacitiesByNodeId['root']!;
+      expect(cleared.hiredWorkerCount, 0);
+      expect(cleared.bonusLodgingSlotCount, 8);
+      expect(cleared.freeLodgingSlotCount, 9);
       expect(tester.takeException(), isNull);
     },
   );
@@ -4888,6 +5135,7 @@ void main() {
               key: const ValueKey('configuration-dialog-capture'),
               child: MediaQuery(
                 data: MediaQuery.of(context).copyWith(
+                  size: const Size(1200, 752),
                   textScaler: TextScaler.linear(scale),
                   disableAnimations: true,
                 ),
@@ -4943,6 +5191,24 @@ void main() {
         final hours = find.byKey(
           const ValueKey('resource-map-online-hours-input'),
         );
+        final availability = find.byKey(
+          const ValueKey('resource-map-availability-input'),
+        );
+        final hoursBounds = tester.getRect(hours);
+        final availabilityBounds = tester.getRect(availability);
+        if (scale == 1) {
+          expect(availabilityBounds.top, hoursBounds.top);
+          expect(availabilityBounds.left, greaterThan(hoursBounds.right));
+          expect(availabilityBounds.width, hoursBounds.width);
+        } else {
+          expect(availabilityBounds.top, greaterThan(hoursBounds.bottom));
+          expect(availabilityBounds.left, hoursBounds.left);
+        }
+        expect(tester.widget<TextField>(hours).decoration!.prefixIcon, isNull);
+        expect(
+          tester.widget<TextField>(availability).decoration!.prefixIcon,
+          isNull,
+        );
         await tester.ensureVisible(hours);
         await tester.enterText(hours, '0');
         await tester.tap(
@@ -4953,14 +5219,61 @@ void main() {
         expect(updates, isEmpty);
         await tester.tap(find.widgetWithText(TextButton, 'Cancel'));
         await tester.pumpAndSettle();
+        await tester.ensureVisible(settings);
+        await tester.tap(settings);
+        await tester.pumpAndSettle();
+        expect(tester.widget<TextField>(hours).controller!.text, '8');
+        expect(tester.widget<TextField>(availability).controller!.text, '100');
+        await tester.enterText(hours, '6.5');
+        await tester.ensureVisible(availability);
+        await tester.enterText(availability, '75');
+        final slowSellers = find.widgetWithText(
+          SwitchListTile,
+          'Avoid slow sellers',
+        );
+        await tester.ensureVisible(slowSellers);
+        await tester.tap(slowSellers);
+        await tester.pumpAndSettle();
+        expect(updates, isEmpty);
+        await tester.tap(
+          find.byKey(const ValueKey('resource-map-save-income-settings')),
+        );
+        await tester.pumpAndSettle();
+        expect(updates, hasLength(1));
+        expect(updates.single.onlineHoursPerDay, 6.5);
+        expect(updates.single.resourceAvailabilityPercent, 75);
+        expect(updates.single.useObservedTradeVolume, isTrue);
+        await tester.ensureVisible(settings);
+        await tester.tap(settings);
+        await tester.pumpAndSettle();
+        expect(tester.widget<TextField>(hours).controller!.text, '6.5');
+        expect(tester.widget<TextField>(availability).controller!.text, '75');
+        expect(tester.widget<SwitchListTile>(slowSellers).value, isTrue);
+        await tester.tap(find.widgetWithText(TextButton, 'Cancel'));
+        await tester.pumpAndSettle();
+        expect(updates, hasLength(1));
+        updates.clear();
         final capacity = find.byKey(
           const ValueKey('resource-map-worker-capacity-settings'),
         );
         await tester.ensureVisible(capacity);
         await tester.tap(capacity);
         await tester.pumpAndSettle();
+        await captureMapMenu(
+          tester,
+          boundary: find.byKey(const ValueKey('configuration-dialog-capture')),
+          name: 'extra-lodging-dialog-text${(scale * 100).round()}',
+        );
+        await tester.tap(find.text('Existing workers').hitTestable());
+        await tester.pumpAndSettle();
         expect(
-          tester.widget<AlertDialog>(find.byType(AlertDialog)).scrollable,
+          tester
+              .widget<AlertDialog>(
+                find.byKey(
+                  const ValueKey('resource-map-existing-workers-dialog'),
+                ),
+              )
+              .scrollable,
           isTrue,
         );
         expect(
@@ -4979,7 +5292,9 @@ void main() {
         await tester.enterText(hired, '-1');
         await tester.tap(
           find.descendant(
-            of: find.byType(AlertDialog),
+            of: find.byKey(
+              const ValueKey('resource-map-existing-workers-dialog'),
+            ),
             matching: find.widgetWithText(FilledButton, 'Save'),
           ),
         );
@@ -5008,9 +5323,16 @@ void main() {
         );
         await tester.tap(
           find.descendant(
-            of: find.byType(AlertDialog),
+            of: find.byKey(
+              const ValueKey('resource-map-existing-workers-dialog'),
+            ),
             matching: find.widgetWithText(FilledButton, 'Save'),
           ),
+        );
+        await tester.pumpAndSettle();
+        expect(updates, isEmpty);
+        await tester.tap(
+          find.byKey(const ValueKey('resource-map-town-lodging-save')),
         );
         await tester.pumpAndSettle();
         expect(
@@ -5310,7 +5632,7 @@ void main() {
       expect(owned, findsOneWidget);
       expect(tester.getSemantics(update).label, contains('Update'));
       expect(tester.widget<IconButton>(adjust).tooltip, 'Estimate settings');
-      expect(tester.getSemantics(owned).label, contains('Workers'));
+      expect(tester.getSemantics(owned).label, contains('Extra lodging'));
 
       final detailsToggle = find.byKey(
         const ValueKey<String>('resource-map-toggle-market-node-details'),
@@ -5347,6 +5669,11 @@ void main() {
 
       await tester.ensureVisible(owned);
       await tester.tap(owned);
+      await tester.pumpAndSettle();
+      expect(find.text('Purchased slots'), findsOneWidget);
+      await tester.tap(
+        find.byKey(const ValueKey('resource-map-town-lodging-workers')),
+      );
       await tester.pumpAndSettle();
       final townSelector = find.byKey(
         const ValueKey<String>('resource-map-worker-town-add'),
@@ -5607,74 +5934,84 @@ void main() {
     },
   );
 
-  testWidgets(
-    'recommended raw-sale network adds its union without replacing saved nodes',
-    (tester) async {
-      await tester.binding.setSurfaceSize(const Size(1200, 820));
-      addTearDown(() => tester.binding.setSurfaceSize(null));
-      final updates = <BdoNodeNetworkPreferences>[];
+  for (final viewport in [const Size(1200, 820), const Size(640, 900)]) {
+    testWidgets(
+      'recommended raw-sale network adds its union without replacing saved nodes at ${viewport.width}',
+      (tester) async {
+        await tester.binding.setSurfaceSize(viewport);
+        addTearDown(() => tester.binding.setSurfaceSize(null));
+        final updates = <BdoNodeNetworkPreferences>[];
 
-      await tester.pumpWidget(
-        MaterialApp(
-          home: BdoResourceMap(
-            dataset: _rerouteNetworkDataset(),
-            cacheDirectory: cacheDirectory,
-            tileSource: tileSource,
-            showSourceNotice: false,
-            tileHttpClient: tileClient,
-            nodeNetworkPreferences: BdoNodeNetworkPreferences(
-              contributionPointBudget: 8,
-              currentNodeIds: const <String>{'x-direct'},
-              rootNodeIds: const <String>{'root'},
+        await tester.pumpWidget(
+          MaterialApp(
+            home: BdoResourceMap(
+              dataset: _rerouteNetworkDataset(),
+              cacheDirectory: cacheDirectory,
+              tileSource: tileSource,
+              showSourceNotice: false,
+              tileHttpClient: tileClient,
+              nodeNetworkPreferences: BdoNodeNetworkPreferences(
+                contributionPointBudget: 8,
+                currentNodeIds: const <String>{'x-direct'},
+                rootNodeIds: const <String>{'root'},
+              ),
+              onNodeNetworkPreferencesChanged: updates.add,
+              marketOutputEvidenceByResourceId:
+                  const <String, MarketValueOutputInput>{
+                    'x': MarketValueOutputInput(
+                      outputId: 'x',
+                      outputName: 'X Material',
+                      isMarketable: true,
+                      currentUnitPrice: 100,
+                      listedStock: 0,
+                    ),
+                    'y': MarketValueOutputInput(
+                      outputId: 'y',
+                      outputName: 'Y Material',
+                      isMarketable: true,
+                      currentUnitPrice: 90,
+                      listedStock: 0,
+                    ),
+                  },
+              marketNetRate: 1,
             ),
-            onNodeNetworkPreferencesChanged: updates.add,
-            marketOutputEvidenceByResourceId:
-                const <String, MarketValueOutputInput>{
-                  'x': MarketValueOutputInput(
-                    outputId: 'x',
-                    outputName: 'X Material',
-                    isMarketable: true,
-                    currentUnitPrice: 100,
-                    listedStock: 0,
-                  ),
-                  'y': MarketValueOutputInput(
-                    outputId: 'y',
-                    outputName: 'Y Material',
-                    isMarketable: true,
-                    currentUnitPrice: 90,
-                    listedStock: 0,
-                  ),
-                },
-            marketNetRate: 1,
           ),
-        ),
-      );
-      await tester.pump(const Duration(milliseconds: 250));
-      await _openNodePlanner(tester);
-      await _openWorkerPlanSectionIfDesktop(tester);
-      await _openWorkerIncome(tester);
+        );
+        await tester.pump(const Duration(milliseconds: 250));
+        await _openNodePlanner(tester);
+        await _openWorkerPlanSectionIfDesktop(tester);
+        await _openWorkerIncome(tester);
 
-      expect(find.text('Recommended value network'), findsNothing);
-      final useRecommendedNetwork = find.byKey(
-        const ValueKey<String>('resource-map-add-recommended-value-network'),
-      );
-      await tester.ensureVisible(useRecommendedNetwork);
-      await tester.pumpAndSettle();
-      await tester.tap(useRecommendedNetwork);
-      await tester.pumpAndSettle();
+        expect(find.text('Recommended value network'), findsNothing);
+        final useRecommendedNetwork = find.byKey(
+          const ValueKey<String>('resource-map-add-recommended-value-network'),
+        );
+        await tester.ensureVisible(useRecommendedNetwork);
+        await tester.pumpAndSettle();
+        expect(
+          find.descendant(
+            of: useRecommendedNetwork,
+            matching: find.text('Update network'),
+          ),
+          findsOneWidget,
+        );
+        expect(useRecommendedNetwork.hitTestable(), findsOneWidget);
+        await tester.tap(useRecommendedNetwork);
+        await tester.pumpAndSettle();
 
-      expect(updates, isNotEmpty);
-      expect(updates.last.currentNodeIds, contains('x-direct'));
-      expect(updates.last.currentNodeIds.length, greaterThan(1));
-      expect(
-        updates.last.currentNodeIds,
-        isNot(contains('root')),
-        reason: 'Free worker-town roots are not invested nodes.',
-      );
-      expect(find.textContaining('Nothing was changed in BDO'), findsNothing);
-      expect(tester.takeException(), isNull);
-    },
-  );
+        expect(updates, isNotEmpty);
+        expect(updates.last.currentNodeIds, contains('x-direct'));
+        expect(updates.last.currentNodeIds.length, greaterThan(1));
+        expect(
+          updates.last.currentNodeIds,
+          isNot(contains('root')),
+          reason: 'Free worker-town roots are not invested nodes.',
+        );
+        expect(find.textContaining('Nothing was changed in BDO'), findsNothing);
+        expect(tester.takeException(), isNull);
+      },
+    );
+  }
 
   testWidgets(
     'price-only market recommendations stay usable at 200 percent text',
@@ -5735,6 +6072,12 @@ void main() {
       );
       expect(page, findsOneWidget);
       expect(find.text('Recommended value network'), findsNothing);
+      await _expectReadableMapAction(
+        tester,
+        'resource-map-add-recommended-value-network',
+        'Update network',
+        900,
+      );
       final explicitFontSizes = tester
           .widgetList<Text>(
             find.descendant(of: page, matching: find.byType(Text)),
@@ -5861,7 +6204,21 @@ void main() {
           containsPair(nodeId, BdoNodeNetworkChangeKind.disconnect),
         );
       }
-      expect(find.textContaining('CP 2 / 20'), findsOneWidget);
+      expect(
+        find.descendant(
+          of: find.byKey(const ValueKey('resource-map-route-cp-breakdown')),
+          matching: find.text('18 CP'),
+        ),
+        findsOneWidget,
+      );
+      expect(
+        tester
+            .widget<Text>(
+              find.byKey(const ValueKey('resource-map-review-total-cp')),
+            )
+            .data,
+        '2 CP',
+      );
       expect(tester.takeException(), isNull);
     },
   );
@@ -6420,7 +6777,7 @@ void main() {
     await _openNodePlanner(tester);
     for (final action in const <(String, String)>[
       ('resource-map-home-plan-materials', 'Plan materials'),
-      ('resource-map-home-worker-income', 'Income'),
+      ('resource-map-home-worker-income', 'Workers'),
       ('resource-map-home-browse-nodes', 'Browse worker nodes'),
       ('resource-map-home-setup', 'Your setup'),
     ]) {
@@ -6582,11 +6939,14 @@ void main() {
       final details = find.byKey(
         const ValueKey<String>('resource-map-vendor-details-$davidId'),
       );
-      final portrait = find.byKey(
-        const ValueKey<String>('test-vendor-portrait-$davidId'),
+      final portrait = find.descendant(
+        of: details,
+        matching: find.byKey(
+          const ValueKey<String>('test-vendor-portrait-$davidId'),
+        ),
       );
       expect(portrait, findsOneWidget);
-      expect(tester.getSize(portrait), const Size.square(30));
+      expect(tester.getSize(portrait), const Size.square(40));
       expect(
         find.descendant(
           of: details,
@@ -6596,7 +6956,7 @@ void main() {
       );
       expect(
         find.byKey(const ValueKey<String>('test-vendor-item-art')),
-        findsNWidgets(2),
+        findsOneWidget,
       );
 
       await tester.tap(
@@ -6934,7 +7294,7 @@ void main() {
       const ValueKey<String>('test-vendor-portrait-$secondId'),
     );
     expect(selectedPortrait, findsOneWidget);
-    expect(tester.getSize(selectedPortrait), const Size.square(30));
+    expect(tester.getSize(selectedPortrait), const Size.square(40));
     expect(find.text('Material Vendor'), findsNothing);
     expect(tester.takeException(), isNull);
   });
@@ -6991,7 +7351,7 @@ void main() {
     final marker = find.byKey(
       const ValueKey<String>('resource-map-vendor-marker-$davidId'),
     );
-    expect(tester.getSize(marker), const Size(48, 48));
+    expect(tester.getSize(marker), const Size(56, 56));
     await tester.tap(
       find.descendant(of: marker, matching: find.byType(InkResponse)),
     );
@@ -7582,7 +7942,7 @@ void main() {
       await tester.pump(const Duration(milliseconds: 300));
 
       expect(
-        find.byKey(const ValueKey<String>('resource-map-atlas-dock')),
+        find.byKey(const ValueKey<String>('resource-map-field-desk')),
         findsOneWidget,
       );
 
@@ -7763,7 +8123,7 @@ void main() {
     );
     await tester.pump(const Duration(milliseconds: 300));
     for (final entry in const [
-      ('resource-map-home-worker-income', 'Income'),
+      ('resource-map-home-worker-income', 'Workers'),
       ('resource-map-home-houses', 'Houses'),
       ('resource-map-home-saved', 'Saved'),
     ]) {
@@ -11521,9 +11881,8 @@ void main() {
     final taskRect = tester.getRect(find.byType(ResourceMapJourneySurface));
     expect(resultsRect.left, closeTo(taskRect.left, 2));
     expect(resultsRect.right, closeTo(taskRect.right, 2));
-    expect(searchRect.left, greaterThanOrEqualTo(resultsRect.left));
-    expect(searchRect.right, lessThanOrEqualTo(resultsRect.right));
-    expect(resultsRect.right, lessThan(mapRect.center.dx));
+    expect(searchRect.right, lessThan(resultsRect.left));
+    expect(resultsRect.right, lessThan(mapRect.right - 100));
     expect(resultsRect.width, lessThanOrEqualTo(720));
     expect(
       tester.widget<TextField>(searchField).controller!.text,
@@ -13026,6 +13385,14 @@ Future<void> _expectAtlasProductTools(
 }
 
 Future<void> _goMapHome(WidgetTester tester) async {
+  final fieldDeskHome = find.byKey(
+    const ValueKey('resource-map-field-desk-home'),
+  );
+  if (fieldDeskHome.evaluate().isNotEmpty) {
+    await tester.tap(fieldDeskHome);
+    await tester.pumpAndSettle();
+    return;
+  }
   if (find
       .byKey(const ValueKey('resource-map-home-find-material'))
       .evaluate()

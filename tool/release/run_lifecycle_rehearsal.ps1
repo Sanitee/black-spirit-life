@@ -465,7 +465,7 @@ function Invoke-LifecycleInstalledPayload([string]$InstallRoot, [ValidateSet('up
         --installed-current (Join-Path $InstallRoot 'current') --output $output
     Assert-True ($LASTEXITCODE -eq 0) "$Phase installed-payload comparison failed."
     $report = Get-Content -LiteralPath $output -Raw | ConvertFrom-Json
-    $record = [ordered]@{
+    $record = [pscustomobject][ordered]@{
         phase = $Phase; reportPath = $relative; reportSha256 = Get-LifecycleFileSha256 $output
         packageSha256 = $report.packageSha256; expectedInventorySha256 = $report.expectedInventorySha256
         installedInventorySha256 = $report.installedInventorySha256; success = $report.success

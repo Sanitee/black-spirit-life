@@ -63,8 +63,8 @@ void main() {
   test(
     'catalog IDs, names, positive whole quantities and route IDs are unique',
     () {
-      expect(exchangeCatalog, hasLength(22));
-      expect(exchangeCatalog.map((item) => item.id).toSet(), hasLength(22));
+      expect(exchangeCatalog, hasLength(27));
+      expect(exchangeCatalog.map((item) => item.id).toSet(), hasLength(27));
       final routeIds = <String>{};
       for (final currency in exchangeCatalog) {
         expect(currency.sources, isNotEmpty);
@@ -79,7 +79,298 @@ void main() {
           }
         }
       }
-      expect(routeIds, hasLength(158));
+      expect(routeIds, hasLength(237));
+    },
+  );
+
+  test('full reward lists retain the 24 selected consumable choices', () {
+    final expected = <String, List<(int, int, int, int?)>>{
+      'mornings-gratitude-token': [
+        for (final id in [821143, 821141, 821145, 821137, 821139])
+          (30000, id, 1, null),
+      ],
+      'seal-of-solare': [
+        (15, 734, 1, null),
+        (15, 748, 1, null),
+        (15, 771, 1, null),
+        (2, 732, 1, null),
+        (1, 575, 3, null),
+        (35, 1178, 3, 3),
+        (20, 733, 5, 2),
+        (20, 576, 25, 1),
+      ],
+      'energy-of-lakiaro': [(1, 735, 1, null), (10, 750490, 1, 5)],
+      'medal-of-glory': [
+        (1, 734, 1, null),
+        (1, 771, 1, null),
+        (10, 1178, 10, 1),
+        (3, 576, 30, 1),
+        (2, 733, 10, 1),
+      ],
+      'battlefield-token': [
+        (3, 734, 1, 10),
+        (3, 771, 1, 10),
+        (1, 576, 5, 5),
+        (1, 733, 2, 5),
+      ],
+    };
+    expect(exchangeCatalog.skip(22).map((c) => c.id), expected.keys);
+    expect(exchangeCatalog.skip(22).map((c) => c.item.id), [
+      761321,
+      65396,
+      42497,
+      767325,
+      890002,
+    ]);
+    for (final entry in expected.entries) {
+      final current = currency(entry.key);
+      expect(current.item.marketable, isFalse);
+      expect(current.item.vendorSellPrice, isNull);
+      expect(current.legacy, isFalse);
+      expect(
+        current.routes.map(
+          (r) => (
+            r.inputCount,
+            r.rewards.single.item!.id,
+            r.rewards.single.quantity,
+            r.limit.maximum,
+          ),
+        ),
+        containsAll(entry.value),
+        reason: entry.key,
+      );
+      for (final r in current.routes) {
+        expect(r.directVendorSale, isFalse);
+        expect(r.requirements, isEmpty);
+        expect(r.sources, isNotEmpty);
+        expect(
+          r.location,
+          entry.key == 'mornings-gratitude-token'
+              ? 'Heo Seungwon · Yukjo Street'
+              : 'Manage Currency',
+        );
+      }
+    }
+    expect(exchangeCatalog.any((c) => c.id.contains('agris')), isFalse);
+  });
+
+  test('all selected rewards keep reviewed quantities and limits', () {
+    const repeat = ExchangeLimitKind.repeatable;
+    const week = ExchangeLimitKind.weekly;
+    const day = ExchangeLimitKind.daily;
+    const family = ExchangeLimitKind.oncePerFamily;
+    final additional = <String, List<(int, int, int, ExchangeLimitKind, int?)>>{
+      'seal-of-solare': [
+        for (final id in [320009, 320011, 320010]) (5000, id, 1, family, 1),
+        (150, 890001, 1, week, 3),
+        (30, 820022, 3, week, 5),
+        (30, 45912, 1, week, 3),
+        (30, 761018, 10, week, 5),
+        (20, 17572, 3, week, 3),
+        (20, 45162, 30, week, 3),
+        (20, 768160, 10, week, 10),
+        for (final id in [59858, 59859, 59860]) (5, id, 1, week, 10),
+        for (final id in [45107, 45105]) (20, id, 1, day, 1),
+        (10, 4, 1, repeat, null),
+        (5, 45026, 1, repeat, null),
+        (1, 3, 1, repeat, null),
+      ],
+      'energy-of-lakiaro': [
+        (500, 820152, 1, family, 1),
+        (100, 11017, 1, family, 1),
+        (60, 752825, 1, week, 1),
+        (30, 757004, 50, week, 1),
+        (5, 757010, 1, week, 1),
+        (10, 59861, 1, repeat, null),
+        (4, 4917, 1, repeat, null),
+        for (final id in [50815, 50816, 50817]) (2, id, 1, repeat, null),
+        (1, 44195, 1, repeat, null),
+      ],
+      'medal-of-glory': [
+        (500, 607185, 1, family, 1),
+        (250, 289250, 1, family, 1),
+        (150, 289200, 1, family, 1),
+        (85, 289150, 1, family, 1),
+        (50, 289100, 1, family, 1),
+        for (final id in [1000509, 1000510, 1000511, 1000512, 1000513])
+          (10, id, 1, family, 1),
+        (30, 16080, 500, week, 2),
+        (10, 45026, 50, week, 1),
+        (10, 820022, 10, week, 1),
+        (5, 17572, 5, week, 1),
+        (10, 45124, 1, repeat, null),
+      ],
+      'battlefield-token': [
+        (50, 890003, 1, week, 3),
+        (3, 721003, 30, week, 7),
+        (3, 820022, 1, week, 10),
+        (3, 768160, 10, week, 10),
+        (2, 45026, 5, week, 10),
+        (1, 8042, 5, week, 1),
+        for (final id in [59858, 59859, 59860]) (1, id, 1, week, 10),
+        (50, 4989, 1, repeat, null),
+        (1, 4, 1, repeat, null),
+      ],
+    };
+    expect(exchangeCatalog.skip(22).map((c) => c.routes.length), [
+      5,
+      26,
+      13,
+      20,
+      15,
+    ]);
+    for (final entry in additional.entries) {
+      expect(
+        currency(entry.key).routes.map(
+          (r) => (
+            r.inputCount,
+            r.rewards.single.item!.id,
+            r.rewards.single.quantity,
+            r.limit.kind,
+            r.limit.maximum,
+          ),
+        ),
+        containsAll(entry.value),
+        reason: entry.key,
+      );
+    }
+    expect(const ExchangeLimit.daily(1).label, 'Up to 1 per day');
+    expect(
+      currency('energy-of-lakiaro').routes.any(
+        (r) =>
+            r.rewards.any((reward) => reward.name.contains('Vitality Tonic')),
+      ),
+      isFalse,
+    );
+    for (final id in [890001, 890003, 45124]) {
+      expect(exchangeItems[id]!.marketable, isFalse);
+      expect(
+        exchangeItems[id]!.vendorSellPrice,
+        isNull,
+        reason: 'Random gold box contents do not have an invented average.',
+      );
+    }
+  });
+
+  test(
+    'Morning token foods are alternatives, not a bundle or partial exchange',
+    () {
+      final market = OpportunityMarketSnapshot(
+        region: 'eu',
+        items: {
+          for (final id in [821143, 821141, 821145, 821137, 821139])
+            '$id': marketItem(id),
+        },
+      );
+      for (final balance in [29999, 30000, 60001]) {
+        final quotes = evaluate(
+          'mornings-gratitude-token',
+          owned: balance,
+          market: market,
+        );
+        expect(quotes, hasLength(5));
+        for (final quote in quotes) {
+          expect(quote.exchanges, balance ~/ 30000);
+          expect(quote.rewardQuotes.single.quantity, balance ~/ 30000);
+          expect(quote.remainder, balance % 30000);
+        }
+      }
+    },
+  );
+
+  test('selected daily weekly and family allowances stay independent', () {
+    final market = OpportunityMarketSnapshot(
+      region: 'eu',
+      items: {
+        for (final id
+            in exchangeItems.values.where((i) => i.marketable).map((i) => i.id))
+          '$id': marketItem(id),
+      },
+    );
+    for (final id in [
+      'seal-of-solare',
+      'energy-of-lakiaro',
+      'medal-of-glory',
+      'battlefield-token',
+    ]) {
+      final limited = currency(id).routes.where((r) => !r.limit.isRepeatable);
+      final unset = evaluate(id, owned: 1000000, market: market);
+      final capped = evaluate(
+        id,
+        owned: 1000000,
+        market: market,
+        limits: {for (final r in limited) r.id: 1000},
+      );
+      for (final r in limited) {
+        expect(
+          route(unset, r.id).availability,
+          ExchangeAvailability.confirmationNeeded,
+        );
+        expect(route(unset, r.id).exchanges, 0);
+        expect(route(capped, r.id).exchanges, r.limit.maximum);
+        expect(
+          route(capped, r.id).rewardQuotes.single.quantity,
+          r.limit.maximum! * r.rewards.single.quantity,
+        );
+        final exhausted = evaluate(
+          id,
+          owned: 1000000,
+          market: market,
+          limits: {
+            for (final other in limited)
+              other.id: other.id == r.id ? 0 : other.limit.maximum!,
+          },
+        );
+        expect(
+          route(exhausted, r.id).availability,
+          ExchangeAvailability.limitReached,
+        );
+        for (final other in limited.where((other) => other.id != r.id)) {
+          expect(route(exhausted, other.id).exchanges, other.limit.maximum);
+        }
+      }
+    }
+  });
+
+  test(
+    'Solare box values only three real potions; bound tea has no sale income',
+    () {
+      final box = route(
+        evaluate(
+          'seal-of-solare',
+          owned: 2,
+          market: OpportunityMarketSnapshot(
+            region: 'eu',
+            items: {
+              '575': marketItem(575, price: 100000),
+              '65401': marketItem(65401, price: 999999999),
+            },
+          ),
+        ),
+        'solare-potion-box',
+      );
+      expect(box.route.rewardContainer!.id, 65401);
+      expect(box.route.rewardContainer!.marketable, isFalse);
+      expect(box.rewardQuotes.single.reward.item!.id, 575);
+      expect(box.rewardQuotes.single.quantity, 6);
+      expect(box.netProceeds, closeTo(600000 * .845, .001));
+      final tea = route(
+        evaluate(
+          'energy-of-lakiaro',
+          owned: 50,
+          limits: {'lakiaro-tea': 5},
+          market: OpportunityMarketSnapshot(
+            region: 'eu',
+            items: {'750490': marketItem(750490, price: 999999999)},
+          ),
+        ),
+        'lakiaro-tea',
+      );
+      expect(tea.exchanges, 5);
+      expect(tea.rewardQuotes.single.quantity, 5);
+      expect(tea.rewardQuotes.single.reward.item!.marketable, isFalse);
+      expect(tea.hasUnpricedRewards, isTrue);
+      expect(tea.netProceeds, isNull);
     },
   );
 

@@ -212,6 +212,12 @@ final class SharedMarketRepository {
         items: _regions[_region(region)] ?? const {},
       );
 
+  /// Read one immutable merged item without copying the entire regional cache.
+  OpportunityMarketItem? cachedItem(SharedMarketKey key) {
+    final item = _regions[key.region]?[key.itemId];
+    return item?.subId == key.subId ? item : null;
+  }
+
   bool _quoteBatchCanAppend(int count, int characters, String id) =>
       count < quoteBatchSize &&
       characters + (count == 0 ? 0 : 1) + id.length <=

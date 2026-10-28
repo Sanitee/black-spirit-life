@@ -11,6 +11,31 @@ void main() {
     _join(packageRoot.path, 'assets', 'fish_companion'),
   );
 
+  test(
+    'fish item wells use a single quality outline, without an inset frame',
+    () {
+      final css = File(
+        _join(payloadRoot.path, 'static', 'app.css'),
+      ).readAsStringSync();
+      final frame = RegExp(
+        r'\.grade-frame \{([^}]+)\}',
+      ).firstMatch(css)!.group(1)!;
+      expect(frame, contains('border: 1.2px solid var(--grade-frame-color)'));
+      expect(frame, contains('border-radius: 6px'));
+      expect(frame, contains('box-shadow: none;'));
+      expect(frame, isNot(contains('inset')));
+      expect(css, isNot(contains('--grade-frame-glow')));
+      expect(css, contains('rgba(246,194,50,.82)'));
+      expect(css, contains('rgba(4,179,241,.82)'));
+      expect(css, contains('rgba(95,243,105,.82)'));
+      // Prize-catch red is a fish category; keep that existing meaning.
+      expect(
+        css,
+        contains('.grade-frame.grade-prize { --grade-frame-color: #fa416d; }'),
+      );
+    },
+  );
+
   test('runtime install marker tracks the pinned payload manifest', () {
     final integrity =
         jsonDecode(
@@ -53,7 +78,7 @@ void main() {
     );
     expect(
       html,
-      contains('<strong>Fish Map</strong><small>Black Desert Online</small>'),
+      contains('<strong>Fish Map</strong><small>Fishing atlas</small>'),
     );
     expect(html, isNot(contains('<strong>Fish Companion</strong>')));
     expect(

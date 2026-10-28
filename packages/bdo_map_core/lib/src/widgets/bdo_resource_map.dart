@@ -3,7 +3,7 @@ import 'dart:io';
 import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart'
-    show compute, mapEquals, setEquals, visibleForTesting;
+    show ValueListenable, compute, mapEquals, setEquals, visibleForTesting;
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -51,10 +51,14 @@ import 'camera_flow_overlay.dart';
 import 'draggable_dialog_surface.dart';
 import 'gathering_tool_icon.dart';
 import 'map_canvas.dart';
+import 'network_cp_breakdown.dart';
+import 'network_cp_review.dart';
 import 'readable_select_controls.dart';
 import 'resource_map_chrome_theme.dart';
+import 'resource_map_annotation_clip.dart';
 import 'resource_map_atlas_shell.dart';
 import 'resource_map_discovery_home.dart';
+import 'resource_map_field_desk.dart';
 import 'resource_map_controller.dart';
 import 'resource_map_desktop_shell.dart';
 import 'resource_map_menu_artwork.dart';
@@ -65,6 +69,7 @@ import 'resource_map_steward_menu.dart';
 import 'resource_map_zoom_dock.dart';
 import 'royal_workshop_manager.dart';
 import 'shop_lodging_setup_dialog.dart';
+import 'town_shop_lodging_dialog.dart';
 import 'town_house_panel.dart';
 import 'setup_screenshot_import_dialog.dart';
 import 'worker_activity_style.dart';
@@ -229,8 +234,10 @@ class BdoResourceMap extends StatefulWidget {
     this.locationGuideImageBuilder,
     this.interfaceStyle = ResourceMapInterfaceStyle.glassDock,
     this.onInterfaceStyleChanged,
-    this.uiOpacity = 1,
+    this.uiOpacity = ResourceMapUiOpacity.defaultValue,
+    this.uiOpacityListenable,
     this.onUiOpacityChanged,
+    this.onUiOpacityChangeEnd,
     this.favoriteResourceIds = const <String>{},
     this.onFavoriteResourceIdsChanged,
     this.gatherChecklist,
@@ -254,9 +261,20 @@ class BdoResourceMap extends StatefulWidget {
     this.activeNodeRecordingScanner,
     this.controller,
     this.debugOnSelectedHouseSnapshotBuilt,
+    this.recipeWorkerBuilder,
+    this.recipeWorkerPlan,
+    this.recipeWorkerTitle,
+    this.recipePlanArtwork,
+    this.onRecipeWorkerBack,
   });
 
   final BdoResourceMapDataset dataset;
+  final Widget Function(BuildContext, VoidCallback, ValueChanged<String>)?
+  recipeWorkerBuilder;
+  final BdoNodeNetworkPlan? recipeWorkerPlan;
+  final String? recipeWorkerTitle;
+  final Widget? recipePlanArtwork;
+  final bool Function()? onRecipeWorkerBack;
   final BdoWorkerEconomicsDataset? workerEconomics;
   final LodgingDataset? lodgingDataset;
   final Directory cacheDirectory;
@@ -276,7 +294,9 @@ class BdoResourceMap extends StatefulWidget {
   final ResourceMapInterfaceStyle interfaceStyle;
   final ValueChanged<ResourceMapInterfaceStyle>? onInterfaceStyleChanged;
   final double uiOpacity;
+  final ValueListenable<double>? uiOpacityListenable;
   final ValueChanged<double>? onUiOpacityChanged;
+  final ValueChanged<double>? onUiOpacityChangeEnd;
 
   /// Existing material IDs plus [BdoSearchResult.favoriteKey] for map entries.
   /// The legacy field name keeps profile and integration compatibility.
@@ -318,6 +338,7 @@ class BdoResourceMap extends StatefulWidget {
 }
 
 class _BdoResourceMapState extends State<BdoResourceMap> {
+  double? _lastBuiltOpacity;
   double get _compactDetailsBottomInset =>
       _compactDetailsBottom + (widget.onUiOpacityChanged == null ? 0 : 48);
 
@@ -422,7 +443,6 @@ class _BdoResourceMapState extends State<BdoResourceMap> {
   String? _selectedSpotId;
   String? _selectedPointId;
   String? _selectedRouteId;
-  BdoMapHit? _lastMapDetailHit;
   Set<String> _explicitWorkerEmphasisNodeIds = <String>{};
   int _workerEmphasisRevision = 0;
   Set<String> _screenshotImportedHouseIds = <String>{};
@@ -596,6 +616,12 @@ class _BdoResourceMapState extends State<BdoResourceMap> {
       !_compactLayout &&
       _nodeNetworkPlannerOpen &&
       _nodeNetworkPlannerPage != _NodeNetworkPlannerPage.home;
+
+  bool get _recipeWorkerPlanVisible =>
+      widget.recipeWorkerBuilder != null &&
+      widget.recipeWorkerPlan != null &&
+      _nodeNetworkPlannerOpen &&
+      _nodeNetworkPlannerPage == _NodeNetworkPlannerPage.home;
 
   bool get _desktopPlannedNetworkTargetsVisible =>
       !_compactLayout &&
@@ -1466,6 +1492,12 @@ class _BdoResourceMapState extends State<BdoResourceMap> {
   }
 
   List<BdoWorkerNode> get _visibleWorkerNodes {
+    if (_recipeWorkerPlanVisible) {
+      final ids = widget.recipeWorkerPlan!.selectedNodeIds.toSet();
+      return widget.dataset.workerNodes
+          .where((node) => ids.contains(node.id))
+          .toList();
+    }
     if (_nodeNetworkPlannerOpen) {
       final includedIds = switch (_nodeNetworkPlannerPage) {
         _NodeNetworkPlannerPage.home => _markedNodeNetworkDisplayIds(
@@ -1718,6 +1750,9 @@ class _BdoResourceMapState extends State<BdoResourceMap> {
   }
 
   Set<String> get _plannedWorkerOutputNodeIds {
+    if (_recipeWorkerPlanVisible) {
+      return widget.recipeWorkerPlan!.selectedProductionNodeIds.toSet();
+    }
     final quickCandidate = _selectedQuickNodePath;
     if (!_desktopNetworkWorkbenchVisible &&
         quickCandidate != null &&
@@ -1745,6 +1780,9 @@ class _BdoResourceMapState extends State<BdoResourceMap> {
   }
 
   List<BdoNodeNetworkEdgeChange> get _visibleNodeNetworkEdgeChanges {
+    if (_recipeWorkerPlanVisible) {
+      return widget.recipeWorkerPlan!.changeSet.edges;
+    }
     final quickCandidate = _selectedQuickNodePath;
     final quickPath =
         !_desktopNetworkWorkbenchVisible &&
@@ -1825,6 +1863,12 @@ class _BdoResourceMapState extends State<BdoResourceMap> {
   }
 
   Map<String, BdoNodeNetworkChangeKind> get _visibleNodeNetworkChangeKinds {
+    if (_recipeWorkerPlanVisible) {
+      return {
+        for (final id in widget.recipeWorkerPlan!.selectedNodeIds)
+          id: BdoNodeNetworkChangeKind.connect,
+      };
+    }
     final quickCandidate = _selectedQuickNodePath;
     final quickPath =
         !_desktopNetworkWorkbenchVisible &&
@@ -4572,6 +4616,10 @@ class _BdoResourceMapState extends State<BdoResourceMap> {
   }
 
   void _openMarketValueRecommendations() {
+    if (widget.recipeWorkerBuilder != null) {
+      _openNodeNetworkPlanner();
+      return;
+    }
     setState(() {
       _nodeNetworkPlannerPage = _NodeNetworkPlannerPage.marketValue;
       _showConnections = true;
@@ -5215,9 +5263,38 @@ class _BdoResourceMapState extends State<BdoResourceMap> {
   }
 
   Future<void> _openWorkerCapacitySettings() async {
+    final knownSlots = <String, int>{
+      for (final town in widget.lodgingDataset?.towns ?? <LodgingTown>[])
+        town.townNodeId:
+            town.baseWorkerSlots + _ownedLodgingCapacityForTown(town),
+    };
+    final result = await showDialog<Map<String, BdoTownWorkerCapacity>>(
+      context: context,
+      builder: (context) => _MapDialogScope(
+        child: TownShopLodgingDialog(
+          initialValues: _nodeNetworkPreferences.townWorkerCapacitiesByNodeId,
+          knownSlotCountsByTownNodeId: knownSlots,
+          onOpenExistingWorkers: widget.workerEconomics == null
+              ? null
+              : _editExistingWorkers,
+        ),
+      ),
+    );
+    if (!mounted || result == null) {
+      return;
+    }
+    _replaceNodeNetworkPreferences(
+      _nodeNetworkPreferences.copyWith(townWorkerCapacitiesByNodeId: result),
+      rebuildPlan: false,
+    );
+  }
+
+  Future<Map<String, BdoTownWorkerCapacity>?> _editExistingWorkers(
+    Map<String, BdoTownWorkerCapacity> initialValues,
+  ) async {
     final economics = widget.workerEconomics;
     if (economics == null) {
-      return;
+      return null;
     }
     final towns =
         <BdoWorkerNode>[
@@ -5240,22 +5317,15 @@ class _BdoResourceMapState extends State<BdoResourceMap> {
         activeOwnedLodgingSlotCount: _ownedLodgingCapacityForTown(lodgingTown),
       );
     }
-    final result = await showDialog<Map<String, BdoTownWorkerCapacity>>(
+    return showDialog<Map<String, BdoTownWorkerCapacity>>(
       context: context,
       builder: (context) => _MapDialogScope(
         child: _WorkerCapacityDialog(
           towns: towns,
-          initialValues: _nodeNetworkPreferences.townWorkerCapacitiesByNodeId,
+          initialValues: initialValues,
           lodgingContextByTownNodeId: lodgingContextByTownNodeId,
         ),
       ),
-    );
-    if (!mounted || result == null) {
-      return;
-    }
-    _replaceNodeNetworkPreferences(
-      _nodeNetworkPreferences.copyWith(townWorkerCapacitiesByNodeId: result),
-      rebuildPlan: false,
     );
   }
 
@@ -6297,7 +6367,6 @@ class _BdoResourceMapState extends State<BdoResourceMap> {
   }
 
   void _handleMapHit(BdoMapHit hit) {
-    _lastMapDetailHit = hit;
     if (_vendorLookupItemName != null || _selectedVendorId != null) {
       setState(() {
         _vendorLookupItemName = null;
@@ -7094,52 +7163,57 @@ class _BdoResourceMapState extends State<BdoResourceMap> {
   @override
   Widget build(BuildContext context) {
     final mapTheme = _buildMapTheme(context);
-    return CallbackShortcuts(
-      bindings: <ShortcutActivator, VoidCallback>{
-        const SingleActivator(LogicalKeyboardKey.escape):
-            _dismissTransientMapUi,
-        const SingleActivator(LogicalKeyboardKey.keyF, control: true):
-            _openMapSearch,
-      },
-      child: Focus(
-        focusNode: _mapKeyboardFocus,
-        autofocus: true,
-        child: AnimatedTheme(
-          data: mapTheme,
-          duration: MediaQuery.disableAnimationsOf(context)
-              ? Duration.zero
-              : ResourceMapAtlasMotion.settle,
-          curve: ResourceMapAtlasMotion.curve,
-          child: Builder(
-            builder: (context) {
-              return LayoutBuilder(
-                builder: (context, constraints) {
-                  final compact =
-                      constraints.maxWidth < _resourceMapCompactBreakpoint;
-                  _compactLayout = compact;
-                  return Material(
-                    color: context.mapChrome.canvas,
-                    child: Stack(
-                      children: <Widget>[
-                        Positioned.fill(
-                          child: ExcludeFocus(
-                            excluding: _showSourceNotice,
-                            child: IgnorePointer(
-                              ignoring: _showSourceNotice,
-                              child: compact
-                                  ? _buildCompactLayout(context, constraints)
-                                  : _buildDesktopLayout(context, constraints),
+    final opacity = context.mapChrome.uiOpacity;
+    final opacityChanged = _lastBuiltOpacity != opacity;
+    _lastBuiltOpacity = opacity;
+    return ResourceMapAnnotationScope(
+      child: CallbackShortcuts(
+        bindings: <ShortcutActivator, VoidCallback>{
+          const SingleActivator(LogicalKeyboardKey.escape):
+              _dismissTransientMapUi,
+          const SingleActivator(LogicalKeyboardKey.keyF, control: true):
+              _openMapSearch,
+        },
+        child: Focus(
+          focusNode: _mapKeyboardFocus,
+          autofocus: true,
+          child: AnimatedTheme(
+            data: mapTheme,
+            duration: opacityChanged || MediaQuery.disableAnimationsOf(context)
+                ? Duration.zero
+                : ResourceMapAtlasMotion.settle,
+            curve: ResourceMapAtlasMotion.curve,
+            child: Builder(
+              builder: (context) {
+                return LayoutBuilder(
+                  builder: (context, constraints) {
+                    final compact =
+                        constraints.maxWidth < _resourceMapCompactBreakpoint;
+                    _compactLayout = compact;
+                    return Material(
+                      color: context.mapChrome.canvas,
+                      child: Stack(
+                        children: <Widget>[
+                          Positioned.fill(
+                            child: ExcludeFocus(
+                              excluding: _showSourceNotice,
+                              child: IgnorePointer(
+                                ignoring: _showSourceNotice,
+                                child: compact
+                                    ? _buildCompactLayout(context, constraints)
+                                    : _buildDesktopLayout(context, constraints),
+                              ),
                             ),
                           ),
-                        ),
-                        if (_showSourceNotice)
-                          Positioned.fill(child: _buildSourceNotice(context)),
-                      ],
-                    ),
-                  );
-                },
-              );
-            },
+                          if (_showSourceNotice)
+                            Positioned.fill(child: _buildSourceNotice(context)),
+                        ],
+                      ),
+                    );
+                  },
+                );
+              },
+            ),
           ),
         ),
       ),
@@ -7159,34 +7233,6 @@ class _BdoResourceMapState extends State<BdoResourceMap> {
       ResourceMapJourneySurface.headerHeight(context) +
       ResourceMapPanelMetrics.searchHeight(context) +
       8;
-
-  BdoMapPoint? get _selectedDetailAnchor {
-    if (_selectedVendor case final vendor?) return vendor.location.mapPoint;
-    final hit = _lastMapDetailHit;
-    if (hit?.mapPoint != null &&
-        ((hit!.kind == BdoMapHitKind.workerNode && hit.id == _selectedNodeId) ||
-            (hit.kind == BdoMapHitKind.gatheringSpot &&
-                hit.id == _selectedSpotId) ||
-            (hit.kind == BdoMapHitKind.gatheringPoint &&
-                hit.id == _selectedPointId) ||
-            (hit.kind == BdoMapHitKind.gatheringRoute &&
-                hit.id == _selectedRouteId))) {
-      return hit.mapPoint;
-    }
-    if (_selectedNodeId case final id?) {
-      return widget.dataset.workerNodesById[id]?.location.mapPoint;
-    }
-    if (_selectedPointId case final id?) {
-      return widget.dataset.gatheringPointsById[id]?.location.mapPoint;
-    }
-    if (_selectedSpotId case final id?) {
-      return widget.dataset.gatheringSpotsById[id]?.location.mapPoint;
-    }
-    if (_selectedRouteId case final id?) {
-      return widget.dataset.gatheringRoutesById[id]?.bounds.center;
-    }
-    return null;
-  }
 
   Widget _buildAtlasDesktopLayout(
     BuildContext context,
@@ -7210,8 +7256,6 @@ class _BdoResourceMapState extends State<BdoResourceMap> {
         !_gatherPlanShortlistOpen &&
         !resultsOpen &&
         !_plannedLodgingSummaryVisible;
-    final detailAnchor = inspectorOpen ? _selectedDetailAnchor : null;
-    final anchoredDetails = detailAnchor != null;
     final home =
         !resultsOpen &&
         !inspectorOpen &&
@@ -7224,22 +7268,9 @@ class _BdoResourceMapState extends State<BdoResourceMap> {
     final minimized = _desktopTaskSurfaceCollapsed && !home && !resultsOpen;
     final setupOpen = _desktopWorkerMenuVisible;
     final materialsOpen = _materialCatalogOpen || _desktopGatherMenuVisible;
-    final optionListOpen =
-        resultsOpen ||
-        home ||
-        _browseFavorites ||
-        setupOpen ||
-        (!focusedTask && _selectedResourceSection == null && materialsOpen) ||
-        _selectedResourceSection != null ||
-        _gatherChecklistOpen ||
-        _gatherPlanShortlistOpen ||
-        _browseAllWorkerNodes ||
-        (_housingDirectoryOpen && _selectedHousingTown == null) ||
-        (_nodeNetworkPlannerOpen &&
-            (_nodeNetworkPlannerPage == _NodeNetworkPlannerPage.home ||
-                _nodeNetworkPlannerPage == _NodeNetworkPlannerPage.targets ||
-                _nodeNetworkPlannerPage ==
-                    _NodeNetworkPlannerPage.marketValue));
+    final railWidth = (200.0 * MediaQuery.textScalerOf(context).scale(14) / 14)
+        .clamp(200.0, 270.0);
+    final taskLeft = railWidth + 28;
     final width = math
         .min(
           inspectorOpen
@@ -7257,7 +7288,7 @@ class _BdoResourceMapState extends State<BdoResourceMap> {
                   allowance: 82,
                 )
               : _atlasWorkspaceContentWidth(context),
-          constraints.maxWidth - 96,
+          constraints.maxWidth - taskLeft - 32,
         )
         .toDouble();
     final height = math.max(0.0, constraints.maxHeight - 32);
@@ -7291,40 +7322,58 @@ class _BdoResourceMapState extends State<BdoResourceMap> {
       }
     }
 
+    // Rail actions are independent destinations, now reachable from every task.
+    // Clear the previous presentation before invoking its existing entry point.
+    // Preferences, saved plans and the map controller remain in this State.
+    void openRailTask(VoidCallback open) {
+      _openMapHome();
+      open();
+    }
+
+    Widget navigation() => ResourceMapDiscoveryHome(
+      planArtwork: widget.recipePlanArtwork,
+      selectedAction: resultsOpen
+          ? null
+          : _housingDirectoryOpen
+          ? 'houses'
+          : _browseFavorites
+          ? 'saved'
+          : _gatherChecklistOpen
+          ? 'checklist'
+          : _nodeNetworkPlannerOpen
+          ? 'worker-income'
+          : materialsOpen || _selectedResourceSection != null
+          ? 'find-material'
+          : null,
+      onFindMaterial: () => openRailTask(_openMaterialDiscovery),
+      onWorkerIncome: () => openRailTask(_openWorkerIncomePlanner),
+      onHouses: widget.lodgingDataset == null
+          ? null
+          : () => openRailTask(_openHousingDirectory),
+      onSaved: () => openRailTask(_openFavorites),
+      onTodoList: () => openRailTask(_openGatherChecklist),
+      onPlanMaterials: () => openRailTask(_openWorkerMaterialPlanner),
+      onPlannerNeeds:
+          widget.plannerNeeds.any(
+                (need) =>
+                    need.missingQuantity.isFinite && need.missingQuantity > 0,
+              ) ||
+              widget.plannerNeedGroups.any(
+                (group) => group.materials.any(
+                  (material) =>
+                      material.need.missingQuantity.isFinite &&
+                      material.need.missingQuantity > 0,
+                ),
+              )
+          ? () => openRailTask(_openWorkerRecipePlanner)
+          : null,
+      onBrowseWorkerNodes: () => openRailTask(_openWorkerOverview),
+      onSetup: () => openRailTask(_openWorkerHub),
+    );
+
     Widget content() {
       if (resultsOpen) {
         return _buildSearchResults(context, constrained: false);
-      }
-      if (home) {
-        return SingleChildScrollView(
-          child: ResourceMapDiscoveryHome(
-            onFindMaterial: _openMaterialDiscovery,
-            onWorkerIncome: _openWorkerIncomePlanner,
-            onHouses: widget.lodgingDataset == null
-                ? null
-                : _openHousingDirectory,
-            onSaved: _openFavorites,
-            onTodoList: _openGatherChecklist,
-            onPlanMaterials: _openWorkerMaterialPlanner,
-            onPlannerNeeds:
-                widget.plannerNeeds.any(
-                      (need) =>
-                          need.missingQuantity.isFinite &&
-                          need.missingQuantity > 0,
-                    ) ||
-                    widget.plannerNeedGroups.any(
-                      (group) => group.materials.any(
-                        (material) =>
-                            material.need.missingQuantity.isFinite &&
-                            material.need.missingQuantity > 0,
-                      ),
-                    )
-                ? _openWorkerRecipePlanner
-                : null,
-            onBrowseWorkerNodes: _openWorkerOverview,
-            onSetup: _openWorkerHub,
-          ),
-        );
       }
       if (inspectorOpen) {
         return KeyedSubtree(
@@ -7384,9 +7433,42 @@ class _BdoResourceMapState extends State<BdoResourceMap> {
       child: Stack(
         children: [
           Positioned.fill(child: _buildMapSurface(context, compact: false)),
+          Positioned(
+            key: const ValueKey('resource-map-field-desk-position'),
+            left: 12,
+            top: 12,
+            width: railWidth,
+            child: ConstrainedBox(
+              constraints: BoxConstraints(
+                maxHeight: constraints.maxHeight - 24,
+              ),
+              child: ResourceMapFieldDesk(
+                key: const ValueKey('resource-map-field-desk'),
+                onHome: _openMapHome,
+                controls: _buildPanelOpacityControl(context),
+                search: ResourceMapAtlasSearch(
+                  controller: _searchController,
+                  focusNode: _searchFocus,
+                  hintText: 'Search the map',
+                  onChanged: _searchWholeMap,
+                  onSubmitted: (_) => _submitSearch(),
+                  onTap: () {
+                    if (_searchController.text.trim().isNotEmpty) {
+                      _searchWholeMap(
+                        _searchController.text,
+                        showResults: true,
+                      );
+                    }
+                  },
+                  onClear: _clearSearchQuery,
+                ),
+                navigation: navigation(),
+              ),
+            ),
+          ),
           if (minimized)
             Positioned(
-              left: 16,
+              left: taskLeft,
               top: 16,
               child: SizedBox(
                 width: ResourceMapPanelMetrics.menuWidth,
@@ -7401,88 +7483,90 @@ class _BdoResourceMapState extends State<BdoResourceMap> {
                       onRestore: () => _setDesktopSheetExpanded(true),
                       onClose: _openMapHome,
                     ),
-                    if (widget.onUiOpacityChanged != null) ...[
-                      const SizedBox(height: 6),
-                      _buildPanelOpacityControl(context)!,
-                    ],
                   ],
                 ),
               ),
             )
-          else
+          else if (!home &&
+              !(_vendorLookupItemName != null &&
+                  !inspectorOpen &&
+                  !focusedTask &&
+                  !resultsOpen))
             Positioned(
               key: const ValueKey('resource-map-workspace-position'),
-              left: 16,
+              left: inspectorOpen ? null : taskLeft,
+              right: inspectorOpen ? 88 : null,
               top: 16,
               width: width,
               child: ConstrainedBox(
                 constraints: BoxConstraints(maxHeight: height),
                 child: ResourceMapJourneySurface(
                   key: const ValueKey('resource-map-atlas-dock'),
-                  unframed: home,
-                  framedBody:
-                      !anchoredDetails && (inspectorOpen || !optionListOpen),
+                  framedBody: true,
                   title: title,
                   onBack: home ? null : back,
-                  onHome: home ? null : _openMapHome,
-                  onMinimize: home ? null : _collapseDesktopTaskSurface,
-                  controls: _buildPanelOpacityControl(context),
-                  search: ResourceMapAtlasSearch(
-                    controller: _searchController,
-                    focusNode: _searchFocus,
-                    hintText: 'Search the map',
-                    onChanged: _searchWholeMap,
-                    onSubmitted: (_) => _submitSearch(),
-                    onTap: () {
-                      if (_searchController.text.trim().isNotEmpty) {
-                        _searchWholeMap(
-                          _searchController.text,
-                          showResults: true,
-                        );
-                      }
-                    },
-                    onClear: _clearSearchQuery,
+                  onHome: widget.recipeWorkerBuilder != null || home
+                      ? null
+                      : _openMapHome,
+                  onMinimize: widget.recipeWorkerBuilder != null || home
+                      ? null
+                      : _collapseDesktopTaskSurface,
+                  child: AnimatedSwitcher(
+                    duration: duration,
+                    transitionBuilder: (child, animation) =>
+                        FadeTransition(opacity: animation, child: child),
+                    child: KeyedSubtree(
+                      key: ValueKey(
+                        resultsOpen
+                            ? 'search'
+                            : home
+                            ? 'home'
+                            : inspectorOpen
+                            ? 'detail-$_selectedFieldSourceId-$_selectedResourceId-'
+                                  '$_selectedNodeId-$_selectedSpotId-$_selectedPointId-'
+                                  '$_selectedRouteId-$_selectedVendorId'
+                            : _nodeNetworkPlannerOpen &&
+                                  widget.recipeWorkerBuilder != null
+                            ? 'recipe-workers'
+                            : title,
+                      ),
+                      child: content(),
+                    ),
                   ),
-                  child: anchoredDetails
-                      ? const SizedBox.shrink()
-                      : AnimatedSwitcher(
-                          duration: duration,
-                          transitionBuilder: (child, animation) =>
-                              FadeTransition(opacity: animation, child: child),
-                          child: KeyedSubtree(
-                            key: ValueKey(
-                              resultsOpen
-                                  ? 'search'
-                                  : home
-                                  ? 'home'
-                                  : inspectorOpen
-                                  ? 'detail-$_selectedFieldSourceId-$_selectedResourceId-'
-                                        '$_selectedNodeId-$_selectedSpotId-$_selectedPointId-'
-                                        '$_selectedRouteId-$_selectedVendorId'
-                                  : title,
-                            ),
-                            child: content(),
-                          ),
-                        ),
                 ),
               ),
             ),
-          if (anchoredDetails && !minimized)
+          // Transient map tools must paint above the persistent desk and task
+          // surface. They remain separate from the camera/marker render layers.
+          Positioned.fill(
+            child: _buildPlannedLodgingSummaryOverlay(
+              Size(constraints.maxWidth, constraints.maxHeight),
+            ),
+          ),
+          if (_desktopTaskSurfaceCollapsed)
             Positioned.fill(
-              child: AnimatedBuilder(
-                animation: _cameraController,
-                child: content(),
-                builder: (context, child) => ResourceMapAnchoredDetails(
-                  key: const ValueKey('resource-map-anchored-details'),
-                  anchor: _cameraController.worldToScreen(
-                    detailAnchor,
-                    Size(constraints.maxWidth, constraints.maxHeight),
-                  ),
-                  width: width,
-                  child: child!,
-                ),
+              child: _buildSelectedHouseOverlay(
+                Size(constraints.maxWidth, constraints.maxHeight),
               ),
             ),
+          if (_vendorLookupItemName != null && !inspectorOpen)
+            Positioned(
+              left: taskLeft,
+              top: 16,
+              width: math.min(430, constraints.maxWidth - taskLeft - 88),
+              child: _buildVendorLookupBanner(context),
+            ),
+          if (_investNodeMode)
+            Positioned(
+              right: 88,
+              bottom: 12,
+              child: _buildInvestModeBanner(context),
+            ),
+          Positioned.fill(
+            child: _buildVendorClusterPickerOverlay(
+              Size(constraints.maxWidth, constraints.maxHeight),
+            ),
+          ),
         ],
       ),
     );
@@ -7669,7 +7753,8 @@ class _BdoResourceMapState extends State<BdoResourceMap> {
     if (_royalWorkshopVisible) return 'Royal Workshop';
     if (_nodeNetworkPlannerOpen) {
       return switch (_nodeNetworkPlannerPage) {
-        _NodeNetworkPlannerPage.home => 'Plan a worker network',
+        _NodeNetworkPlannerPage.home =>
+          widget.recipeWorkerTitle ?? 'Plan a worker network',
         _NodeNetworkPlannerPage.editCurrent => 'Current network',
         _NodeNetworkPlannerPage.targets => 'Choose materials',
         _NodeNetworkPlannerPage.review => 'Review network',
@@ -7719,7 +7804,7 @@ class _BdoResourceMapState extends State<BdoResourceMap> {
             _NodeNetworkPlannerPage.marketValue:
           _leaveNodePlannerGoal();
         case _NodeNetworkPlannerPage.home:
-          _navigateBack();
+          if (widget.onRecipeWorkerBack?.call() != true) _navigateBack();
       }
       return;
     }
@@ -7786,7 +7871,8 @@ class _BdoResourceMapState extends State<BdoResourceMap> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: <Widget>[
               if (page != _NodeNetworkPlannerPage.targets &&
-                  page != _NodeNetworkPlannerPage.editCurrent) ...<Widget>[
+                  page != _NodeNetworkPlannerPage.editCurrent &&
+                  page != _NodeNetworkPlannerPage.review) ...<Widget>[
                 _buildNetworkWorkbenchHeader(context),
                 Divider(
                   height: 6,
@@ -7823,51 +7909,64 @@ class _BdoResourceMapState extends State<BdoResourceMap> {
         : () => _commitNodeBudget(
             rebuildPlan: page == _NodeNetworkPlannerPage.review,
           );
+    final settings = market && widget.workerEconomics != null
+        ? IconButton(
+            key: const ValueKey<String>('resource-map-worker-income-settings'),
+            tooltip: 'Estimate settings',
+            onPressed: _openWorkerIncomeSettings,
+            icon: const Icon(Icons.tune_rounded, size: 18),
+          )
+        : null;
+    final budget = TextField(
+      key: market
+          ? const ValueKey<String>('resource-map-market-value-cp-budget')
+          : const ValueKey<String>('resource-map-node-cp-budget'),
+      controller: _nodeBudgetController,
+      keyboardType: TextInputType.number,
+      inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+      onSubmitted: (_) => commitBudget(),
+      onTapOutside: (_) {
+        FocusScope.of(context).unfocus();
+        commitBudget();
+      },
+      decoration: const InputDecoration(
+        labelText: 'Network CP limit',
+        isDense: true,
+      ),
+    );
+    final apply = FilledButton(
+      key: market
+          ? const ValueKey<String>('resource-map-market-value-apply-cp')
+          : const ValueKey<String>('resource-map-node-apply-cp'),
+      onPressed: commitBudget,
+      child: const Text('Update'),
+    );
+    final largeText = MediaQuery.textScalerOf(context).scale(14) > 19;
     final header = Padding(
       key: ValueKey<String>('resource-map-node-planner-header-${page.name}'),
       padding: const EdgeInsets.symmetric(vertical: 4),
-      child: Row(
-        children: [
-          if (market && widget.workerEconomics != null)
-            IconButton(
-              key: const ValueKey<String>(
-                'resource-map-worker-income-settings',
-              ),
-              tooltip: 'Estimate settings',
-              onPressed: _openWorkerIncomeSettings,
-              icon: const Icon(Icons.tune_rounded, size: 18),
+      child: largeText
+          ? Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Row(
+                  children: [
+                    ?settings,
+                    Expanded(child: budget),
+                  ],
+                ),
+                const SizedBox(height: 6),
+                Align(alignment: Alignment.centerRight, child: apply),
+              ],
+            )
+          : Row(
+              children: [
+                ?settings,
+                Expanded(child: budget),
+                const SizedBox(width: 6),
+                apply,
+              ],
             ),
-          Expanded(
-            child: TextField(
-              key: market
-                  ? const ValueKey<String>(
-                      'resource-map-market-value-cp-budget',
-                    )
-                  : const ValueKey<String>('resource-map-node-cp-budget'),
-              controller: _nodeBudgetController,
-              keyboardType: TextInputType.number,
-              inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-              onSubmitted: (_) => commitBudget(),
-              onTapOutside: (_) {
-                FocusScope.of(context).unfocus();
-                commitBudget();
-              },
-              decoration: const InputDecoration(
-                labelText: 'CP budget',
-                isDense: true,
-              ),
-            ),
-          ),
-          const SizedBox(width: 6),
-          FilledButton(
-            key: market
-                ? const ValueKey<String>('resource-map-market-value-apply-cp')
-                : const ValueKey<String>('resource-map-node-apply-cp'),
-            onPressed: commitBudget,
-            child: const Text('Update'),
-          ),
-        ],
-      ),
     );
     return market
         ? ResourceMapPill(padding: const EdgeInsets.all(8), child: header)
@@ -8346,7 +8445,8 @@ class _BdoResourceMapState extends State<BdoResourceMap> {
                       ),
                     ],
                   ),
-                  if (page != _NodeNetworkPlannerPage.editCurrent) ...<Widget>[
+                  if (page != _NodeNetworkPlannerPage.editCurrent &&
+                      page != _NodeNetworkPlannerPage.review) ...<Widget>[
                     const SizedBox(height: 8),
                     Row(
                       children: <Widget>[
@@ -8918,22 +9018,12 @@ class _BdoResourceMapState extends State<BdoResourceMap> {
                 ),
               ),
               Positioned.fill(
-                child: _buildManagerMarkerOverlay(
-                  Size(constraints.maxWidth, constraints.maxHeight),
+                child: ResourceMapAnnotationClip(
+                  child: _buildManagerMarkerOverlay(
+                    Size(constraints.maxWidth, constraints.maxHeight),
+                  ),
                 ),
               ),
-              if (!_compactLayout)
-                Positioned.fill(
-                  child: _buildPlannedLodgingSummaryOverlay(
-                    Size(constraints.maxWidth, constraints.maxHeight),
-                  ),
-                ),
-              if (!_compactLayout && _desktopTaskSurfaceCollapsed)
-                Positioned.fill(
-                  child: _buildSelectedHouseOverlay(
-                    Size(constraints.maxWidth, constraints.maxHeight),
-                  ),
-                ),
               Positioned(
                 right: shortCompactPlanner ? 72 : desktopRightPanelInset,
                 top: zoomControlTop,
@@ -8973,12 +9063,13 @@ class _BdoResourceMapState extends State<BdoResourceMap> {
                     children: [
                       if (compact && widget.onUiOpacityChanged != null)
                         _buildPanelOpacityControl(context)!,
-                      if (!shortCompactPlanner)
+                      if (!shortCompactPlanner &&
+                          widget.recipeWorkerBuilder == null)
                         _buildStatusBar(context, compact: true),
                     ],
                   ),
                 ),
-              if (_vendorLookupItemName != null)
+              if (compact && _vendorLookupItemName != null)
                 Positioned(
                   left: 12,
                   top: compact
@@ -8988,7 +9079,7 @@ class _BdoResourceMapState extends State<BdoResourceMap> {
                   width: math.min(430, math.max(0, constraints.maxWidth - 96)),
                   child: _buildVendorLookupBanner(context),
                 ),
-              if (_investNodeMode)
+              if (compact && _investNodeMode)
                 Positioned(
                   left: !compact && _activeDesktopLeftAvoidanceWidth > 0
                       ? _activeDesktopLeftAvoidanceWidth + 12
@@ -8999,11 +9090,12 @@ class _BdoResourceMapState extends State<BdoResourceMap> {
                   bottom: compact ? _compactDetailsBottomInset + 8 : null,
                   child: _buildInvestModeBanner(context),
                 ),
-              Positioned.fill(
-                child: _buildVendorClusterPickerOverlay(
-                  Size(constraints.maxWidth, constraints.maxHeight),
+              if (compact)
+                Positioned.fill(
+                  child: _buildVendorClusterPickerOverlay(
+                    Size(constraints.maxWidth, constraints.maxHeight),
+                  ),
                 ),
-              ),
               if (_compactLayout)
                 Positioned.fill(
                   child: _buildSelectedVendorOverlay(
@@ -9590,17 +9682,7 @@ class _BdoResourceMapState extends State<BdoResourceMap> {
     final maximumHeight = math
         .max(120.0, math.min(330.0, viewport.height - 96))
         .toDouble();
-    final initialLeft = math
-        .max(
-          14.0,
-          math.min(
-            viewport.width - width - 78,
-            _activeDesktopLeftAvoidanceWidth > 0
-                ? _activeDesktopLeftAvoidanceWidth + 16
-                : 20,
-          ),
-        )
-        .toDouble();
+    final initialLeft = math.max(14.0, viewport.width - width - 88);
     final initialTop = math.min(
       _compactLayout ? 84.0 : _atlasPanelTop(context, viewport.width),
       math.max(12.0, viewport.height - 90),
@@ -10948,8 +11030,62 @@ class _BdoResourceMapState extends State<BdoResourceMap> {
   Widget? _buildPanelOpacityControl(BuildContext context) {
     final onChanged = widget.onUiOpacityChanged;
     if (onChanged == null) return null;
+    final liveOpacity = widget.uiOpacityListenable;
+    if (liveOpacity != null) {
+      return ValueListenableBuilder<double>(
+        valueListenable: liveOpacity,
+        builder: (context, value, _) =>
+            _buildOpacitySlider(context, value, onChanged),
+      );
+    }
+    return _buildOpacitySlider(context, widget.uiOpacity, onChanged);
+  }
+
+  Widget _buildOpacitySlider(
+    BuildContext context,
+    double opacity,
+    ValueChanged<double> onChanged,
+  ) {
     final chrome = context.mapChrome;
-    final value = ResourceMapUiOpacity.normalize(widget.uiOpacity);
+    final value = ResourceMapUiOpacity.normalize(opacity);
+    final label = Tooltip(
+      message: 'Panel backgrounds only. Text and item artwork stay clear.',
+      child: Text(
+        'Opacity',
+        style: TextStyle(
+          color: chrome.ink,
+          fontSize: ResourceMapPanelMetrics.secondary,
+        ),
+      ),
+    );
+    final percentage = Text(
+      '${(value * 100).round()}%',
+      style: TextStyle(
+        color: chrome.muted,
+        fontSize: ResourceMapPanelMetrics.secondary,
+      ),
+    );
+    final slider = SizedBox(
+      height: 24,
+      child: SliderTheme(
+        data: SliderTheme.of(context).copyWith(
+          trackHeight: 2,
+          thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 5),
+          overlayShape: const RoundSliderOverlayShape(overlayRadius: 12),
+        ),
+        child: Slider(
+          key: const ValueKey('resource-map-ui-opacity-slider'),
+          value: value,
+          min: ResourceMapUiOpacity.minimum,
+          max: 1,
+          label: '${(value * 100).round()}%',
+          semanticFormatterCallback: (value) =>
+              '${(value * 100).round()} percent panel opacity',
+          onChanged: onChanged,
+          onChangeEnd: widget.onUiOpacityChangeEnd,
+        ),
+      ),
+    );
     return Material(
       key: const ValueKey('resource-map-ui-opacity-control'),
       color: Colors.transparent,
@@ -10960,54 +11096,32 @@ class _BdoResourceMapState extends State<BdoResourceMap> {
         ),
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 2),
-          child: Row(
-            children: [
-              Tooltip(
-                message:
-                    'Panel backgrounds only. Text and item artwork stay clear.',
-                child: Text(
-                  'Opacity',
-                  style: TextStyle(
-                    color: chrome.ink,
-                    fontSize: ResourceMapPanelMetrics.secondary,
-                  ),
-                ),
-              ),
-              Expanded(
-                child: SizedBox(
-                  height: 24,
-                  child: SliderTheme(
-                    data: SliderTheme.of(context).copyWith(
-                      trackHeight: 2,
-                      thumbShape: const RoundSliderThumbShape(
-                        enabledThumbRadius: 5,
-                      ),
-                      overlayShape: const RoundSliderOverlayShape(
-                        overlayRadius: 12,
-                      ),
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              final textScale = MediaQuery.textScalerOf(context).scale(1);
+              if (constraints.maxWidth < 160 * textScale) {
+                return Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Wrap(
+                      alignment: WrapAlignment.spaceBetween,
+                      spacing: 8,
+                      runSpacing: 4,
+                      children: [label, percentage],
                     ),
-                    child: Slider(
-                      key: const ValueKey('resource-map-ui-opacity-slider'),
-                      value: value,
-                      min: ResourceMapUiOpacity.minimum,
-                      max: 1,
-                      divisions: 100,
-                      label: '${(value * 100).round()}%',
-                      semanticFormatterCallback: (value) =>
-                          '${(value * 100).round()} percent panel opacity',
-                      onChanged: onChanged,
-                    ),
-                  ),
-                ),
-              ),
-              Text(
-                '${(value * 100).round()}%',
-                style: TextStyle(
-                  color: chrome.muted,
-                  fontSize: ResourceMapPanelMetrics.secondary,
-                ),
-              ),
-            ],
+                    slider,
+                  ],
+                );
+              }
+              return Row(
+                children: [
+                  label,
+                  Expanded(child: slider),
+                  percentage,
+                ],
+              );
+            },
           ),
         ),
       ),
@@ -11171,11 +11285,13 @@ class _BdoResourceMapState extends State<BdoResourceMap> {
 
   void _openWorkerIncomePlanner() {
     _openNodeNetworkPlanner();
+    if (widget.recipeWorkerBuilder != null) return;
     _openMarketValueRecommendations();
   }
 
   Future<void> _openWorkerRecipePlanner() async {
     _openNodeNetworkPlanner();
+    if (widget.recipeWorkerBuilder != null) return;
     if (widget.plannerNeedGroups.isNotEmpty) {
       final applied = await _openGroupedRecipeGoals();
       if (!applied && mounted) {
@@ -11628,12 +11744,14 @@ class _BdoResourceMapState extends State<BdoResourceMap> {
       actions: setupOnly
           ? const []
           : <ResourceMapAtlasCommandAction>[
-              if (hasRecipeNeeds)
+              if (hasRecipeNeeds || widget.recipeWorkerBuilder != null)
                 ResourceMapAtlasCommandAction(
                   key: const ValueKey<String>(
                     'resource-map-recommend-current-recipe',
                   ),
-                  label: 'Needed for your plan',
+                  label: widget.recipeWorkerBuilder == null
+                      ? 'Needed for your plan'
+                      : 'Recipe',
                   icon: const ResourceMapMenuArtwork(
                     kind: ResourceMapMenuArtworkKind.plan,
                   ),
@@ -11651,17 +11769,18 @@ class _BdoResourceMapState extends State<BdoResourceMap> {
                 semanticHint: 'Choose materials and target node counts.',
                 onPressed: _openWorkerMaterialPlanner,
               ),
-              ResourceMapAtlasCommandAction(
-                key: const ValueKey<String>(
-                  'resource-map-open-market-value-recommendations',
+              if (widget.recipeWorkerBuilder == null)
+                ResourceMapAtlasCommandAction(
+                  key: const ValueKey<String>(
+                    'resource-map-open-market-value-recommendations',
+                  ),
+                  label: 'Best income',
+                  icon: const ResourceMapMenuArtwork(
+                    kind: ResourceMapMenuArtworkKind.income,
+                  ),
+                  semanticHint: 'Compare worker-node income.',
+                  onPressed: _openWorkerIncomePlanner,
                 ),
-                label: 'Best income',
-                icon: const ResourceMapMenuArtwork(
-                  kind: ResourceMapMenuArtworkKind.income,
-                ),
-                semanticHint: 'Compare worker-node income.',
-                onPressed: _openWorkerIncomePlanner,
-              ),
               ResourceMapAtlasCommandAction(
                 key: const ValueKey<String>(
                   'resource-map-worker-browse-action',
@@ -12744,6 +12863,7 @@ class _BdoResourceMapState extends State<BdoResourceMap> {
     required Widget favoriteButton,
   }) {
     return _buildSidebarRowIsland(
+      artworkWidth: 48,
       child: Material(
         color: Colors.transparent,
         child: InkWell(
@@ -12758,8 +12878,8 @@ class _BdoResourceMapState extends State<BdoResourceMap> {
               padding: const EdgeInsets.fromLTRB(6, 4, 2, 4),
               child: Row(
                 children: [
-                  SizedBox.square(
-                    dimension: ResourceMapPanelMetrics.optionArtwork,
+                  ResourceMapArtworkMount(
+                    size: ResourceMapPanelMetrics.optionArtwork,
                     child: artwork,
                   ),
                   const SizedBox(width: 10),
@@ -12825,10 +12945,15 @@ class _BdoResourceMapState extends State<BdoResourceMap> {
     Key? key,
     required Widget child,
     bool selected = false,
+    double? artworkWidth,
   }) => Padding(
     key: key,
     padding: const EdgeInsets.only(bottom: ResourceMapPanelMetrics.optionGap),
-    child: ResourceMapPill(selected: selected, child: child),
+    child: ResourceMapPill(
+      selected: selected,
+      leadingWidth: artworkWidth,
+      child: child,
+    ),
   );
 
   Widget _buildInlineNavigationRow({
@@ -13122,6 +13247,16 @@ class _BdoResourceMapState extends State<BdoResourceMap> {
   }
 
   Widget _buildNodePlannerHomePage(BuildContext context) {
+    if (widget.recipeWorkerBuilder case final builder?) {
+      return builder(context, () => unawaited(_openWorkerCapacitySettings()), (
+        id,
+      ) {
+        final node = widget.dataset.workerNodesById[id];
+        if (node != null && !_viewport.isEmpty) {
+          _showPointAvoidingDetails(node.location);
+        }
+      });
+    }
     final hasGroupedRecipeNeeds = widget.plannerNeedGroups.any(
       (group) => group.materials.any(
         (material) =>
@@ -13831,6 +13966,13 @@ class _BdoResourceMapState extends State<BdoResourceMap> {
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: <Widget>[
+        if (plan == null || _nodeNetworkCalculating) ...[
+          NetworkCpReview(
+            budgetController: _nodeBudgetController,
+            onCommitBudget: () => _commitNodeBudget(rebuildPlan: true),
+          ),
+          const SizedBox(height: 8),
+        ],
         if (_nodeNetworkCalculating)
           const Padding(
             padding: EdgeInsets.all(12),
@@ -13909,7 +14051,7 @@ class _BdoResourceMapState extends State<BdoResourceMap> {
                           : Icons.bed_outlined,
                       size: 16,
                     ),
-                    label: const Text('Workers and lodging'),
+                    label: const Text('Extra lodging'),
                   ),
                   if (lodgingResult != null && lodgingPlan == null)
                     _NodePlannerInlineStatus(
@@ -13969,13 +14111,18 @@ class _BdoResourceMapState extends State<BdoResourceMap> {
             ),
           ),
           const SizedBox(height: 4),
-          FilledButton.icon(
-            key: const ValueKey<String>(
-              'resource-map-save-current-node-network',
+          NetworkReviewActionShelf(
+            key: const ValueKey('resource-map-review-action-shelf'),
+            child: FilledButton.icon(
+              key: const ValueKey<String>(
+                'resource-map-save-current-node-network',
+              ),
+              onPressed: withinCombinedBudget ? _saveProposedNodeNetwork : null,
+              icon: const Icon(Icons.bookmark_added_outlined, size: 18),
+              label: Text(
+                withinCombinedBudget ? 'Save as current' : 'Increase CP limit',
+              ),
             ),
-            onPressed: withinCombinedBudget ? _saveProposedNodeNetwork : null,
-            icon: const Icon(Icons.bookmark_added_outlined, size: 18),
-            label: Text(withinCombinedBudget ? 'Apply' : 'Increase CP budget'),
           ),
         ],
       ],
@@ -14026,23 +14173,37 @@ class _BdoResourceMapState extends State<BdoResourceMap> {
                     label: 'Updating worker income',
                     child: const LinearProgressIndicator(minHeight: 2),
                   ),
-                Tooltip(
-                  message:
-                      'Estimated net silver per online hour. Node sales include market tax; Royal Workshops use your recorded net values.'
-                      '${_rawSaleWorkerCapacity == null ? '' : '\nWorker capacity is included in the route calculation.'}',
-                  child: Text(
-                    '${_formatMarketValueSignal(hourly)} / hour',
-                    key: const ValueKey<String>(
-                      'resource-map-worker-income-total-hourly',
+                Row(
+                  children: [
+                    const ResourceMapArtworkMount(
+                      size: 40,
+                      child: ResourceMapMenuArtwork(
+                        kind: ResourceMapMenuArtworkKind.income,
+                        size: 36,
+                      ),
                     ),
-                    style: TextStyle(
-                      color: context.mapChrome.ink,
-                      fontSize: ResourceMapPanelMetrics.primary,
-                      fontWeight: FontWeight.w600,
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: Tooltip(
+                        message:
+                            'Estimated net silver per online hour. Node sales include market tax; Royal Workshops use your recorded net values.'
+                            '${_rawSaleWorkerCapacity == null ? '' : '\nWorker capacity is included in the route calculation.'}',
+                        child: Text(
+                          '${_formatMarketValueSignal(hourly)} / hour',
+                          key: const ValueKey<String>(
+                            'resource-map-worker-income-total-hourly',
+                          ),
+                          style: TextStyle(
+                            color: context.mapChrome.ink,
+                            fontSize: 22,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                      ),
                     ),
-                  ),
+                  ],
                 ),
-                const SizedBox(height: 8),
+                Divider(height: 16, color: context.mapChrome.softOutline),
                 Wrap(
                   spacing: 6,
                   runSpacing: 6,
@@ -14066,7 +14227,7 @@ class _BdoResourceMapState extends State<BdoResourceMap> {
                             ? null
                             : _addRecommendedRawSaleNetwork,
                         icon: const Icon(Icons.bookmark_add_outlined, size: 18),
-                        label: const Text('Save'),
+                        label: const Text('Update network'),
                       ),
                     ],
                     TextButton.icon(
@@ -14075,7 +14236,7 @@ class _BdoResourceMapState extends State<BdoResourceMap> {
                       ),
                       onPressed: _openWorkerCapacitySettings,
                       icon: const Icon(Icons.home_work_outlined, size: 18),
-                      label: const Text('Workers'),
+                      label: const Text('Extra lodging'),
                     ),
                     if (_royalWorkshopEnabled &&
                         _nodeNetworkPreferences
@@ -14530,7 +14691,7 @@ class _BdoResourceMapState extends State<BdoResourceMap> {
                         ? null
                         : _addRecommendedRawSaleNetwork,
                     icon: const Icon(Icons.bookmark_add_outlined, size: 18),
-                    label: const Text('Save'),
+                    label: const Text('Update network'),
                   ),
                 ],
                 if (_selectedMarketValuePath != null) ...[
@@ -14669,17 +14830,21 @@ class _BdoResourceMapState extends State<BdoResourceMap> {
   }
 
   Widget _buildNodePlanSummary(BdoNodeNetworkPlan plan) {
-    final used = _nodePlanCombinedContributionPoints(plan);
-    final overBudget = used > plan.contributionPointBudget;
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4),
-      child: Text(
-        'CP $used / ${plan.contributionPointBudget}',
-        style: TextStyle(
-          color: overBudget ? context.mapChrome.error : context.mapChrome.ink,
-          fontSize: ResourceMapPanelMetrics.primary,
-          fontWeight: FontWeight.w500,
-        ),
+    final keptCp = _contributionPointsForNodeIds(
+      plan.changeSet.retainedNodeIds,
+    );
+    return NetworkCpReview(
+      budgetController: _nodeBudgetController,
+      onCommitBudget: () => _commitNodeBudget(rebuildPlan: true),
+      breakdown: NetworkCpBreakdown(
+        key: const ValueKey<String>('resource-map-route-cp-breakdown'),
+        limit: plan.contributionPointBudget,
+        keptNodes: keptCp,
+        newNodes: plan.totalContributionPoints - keptCp,
+        lodgingHouses:
+            _nodeNetworkLodgingPlan?.plan?.totalIncrementalContributionPoints ??
+            0,
+        royalWorkshops: _activeRoyalWorkshopReservedContributionPoints,
       ),
     );
   }
@@ -16479,55 +16644,67 @@ class _BdoResourceMapState extends State<BdoResourceMap> {
     String? value,
     List<Widget> actions = const <Widget>[],
   }) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: <Widget>[
-        Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
+    final chrome = context.mapChrome;
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        // Short icon-only toolbars can share the identity row. Larger text and
+        // labelled actions keep a separate wrapping row; no controls shrink.
+        final inlineActions =
+            actions.isNotEmpty &&
+            actions.length <= 2 &&
+            actions.every(
+              (action) =>
+                  action is IconButton || action is ResourceMapFavoriteButton,
+            ) &&
+            constraints.maxWidth >= 280 &&
+            MediaQuery.textScalerOf(context).scale(18) <= 23;
+        return Column(
+          key: const ValueKey('resource-map-inspector-identity'),
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: <Widget>[
-            SizedBox.square(
-              dimension: artworkSize,
-              child: Center(child: artwork),
-            ),
-            const SizedBox(width: 10),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: <Widget>[
-                  Tooltip(
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: <Widget>[
+                ResourceMapArtworkMount(size: artworkSize + 6, child: artwork),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Tooltip(
                     message: [
                       eyebrow,
                       ?meta,
                     ].where((value) => value.trim().isNotEmpty).join(' · '),
                     child: Text(
                       title,
-                      style: TextStyle(
-                        color: context.mapChrome.ink,
-                        fontSize: ResourceMapPanelMetrics.heading,
-                        height: 1.08,
-                        fontWeight: FontWeight.w600,
-                        letterSpacing: -.3,
-                      ),
+                      style: chrome
+                          .headingStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.w700,
+                          )
+                          .copyWith(height: 1.12, letterSpacing: -.25),
                     ),
                   ),
-                ],
+                ),
+                if (inlineActions) ...[const SizedBox(width: 4), ...actions],
+              ],
+            ),
+            if (value != null) ...[
+              const SizedBox(height: 4),
+              Text(
+                value,
+                style: TextStyle(
+                  color: chrome.text,
+                  fontSize: ResourceMapPanelMetrics.secondary,
+                ),
               ),
-            ),
+            ],
+            if (actions.isNotEmpty && !inlineActions) ...<Widget>[
+              const SizedBox(height: 6),
+              Wrap(spacing: 8, runSpacing: 4, children: actions),
+            ],
+            const SizedBox(height: 8),
           ],
-        ),
-        if (value != null)
-          Text(
-            value,
-            style: TextStyle(
-              color: context.mapChrome.text,
-              fontSize: ResourceMapPanelMetrics.secondary,
-            ),
-          ),
-        if (actions.isNotEmpty) ...<Widget>[
-          const SizedBox(height: 8),
-          Wrap(spacing: 8, runSpacing: 4, children: actions),
-        ],
-      ],
+        );
+      },
     );
   }
 
@@ -16540,13 +16717,29 @@ class _BdoResourceMapState extends State<BdoResourceMap> {
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Text(
-          title,
-          style: TextStyle(
-            color: context.mapChrome.ink,
-            fontSize: ResourceMapPanelMetrics.primary,
-            fontWeight: FontWeight.w600,
-          ),
+        Row(
+          children: [
+            Flexible(
+              child: Text(
+                title,
+                style: TextStyle(
+                  color: context.mapChrome.ink,
+                  fontSize: ResourceMapPanelMetrics.secondary,
+                  fontWeight: FontWeight.w700,
+                  letterSpacing: .25,
+                ),
+              ),
+            ),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Divider(
+                height: 1,
+                color: context.mapChrome.readingOutline.withValues(
+                  alpha: .30 * context.mapChrome.materialOpacity,
+                ),
+              ),
+            ),
+          ],
         ),
         const SizedBox(height: 4),
         ...children,
@@ -16567,23 +16760,25 @@ class _BdoResourceMapState extends State<BdoResourceMap> {
   }) {
     return _buildSidebarRowIsland(
       selected: selected,
+      artworkWidth:
+          (leadingWidth ?? ResourceMapPanelMetrics.optionArtwork) + 12,
       child: Material(
         key: key,
         color: Colors.transparent,
         child: InkWell(
           onTap: onTap,
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 7),
+            padding: const EdgeInsets.fromLTRB(6, 7, 8, 7),
             child: Row(
               children: <Widget>[
                 if (leadingWidth == null)
-                  SizedBox.square(
-                    dimension: ResourceMapPanelMetrics.optionArtwork,
+                  ResourceMapArtworkMount(
+                    size: ResourceMapPanelMetrics.optionArtwork,
                     child: leading,
                   )
                 else
                   SizedBox(width: leadingWidth, child: leading),
-                const SizedBox(width: 9),
+                const SizedBox(width: 11),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -18858,10 +19053,11 @@ class _MappedPlannerNeed {
 }
 
 ThemeData _buildWorkerIncomeAtlasTheme(BuildContext context) {
-  final base = ThemeData.dark(useMaterial3: true);
   final chrome = context.mapChrome;
+  final base = ThemeData(brightness: chrome.brightness, useMaterial3: true);
   final headingFamily = chrome.headingFontFamily ?? 'Segoe UI';
-  final scheme = ColorScheme.dark(
+  final scheme = ColorScheme(
+    brightness: chrome.brightness,
     primary: chrome.primary,
     onPrimary: chrome.onPrimary,
     primaryContainer: chrome.deepAccent,
@@ -20488,11 +20684,49 @@ class _WorkerIncomeSettingsDialogState
     );
   }
 
+  Widget _numberField({
+    required String label,
+    required String inputKey,
+    required TextEditingController controller,
+    required double width,
+  }) => SizedBox(
+    width: width,
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        ExcludeSemantics(
+          child: Text(
+            label,
+            style: TextStyle(
+              color: context.mapChrome.muted,
+              fontSize: ResourceMapPanelMetrics.secondary,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ),
+        const SizedBox(height: 6),
+        Semantics(
+          label: label,
+          child: TextField(
+            key: ValueKey<String>(inputKey),
+            controller: controller,
+            keyboardType: const TextInputType.numberWithOptions(decimal: true),
+            decoration: const InputDecoration(),
+          ),
+        ),
+      ],
+    ),
+  );
+
   @override
   Widget build(BuildContext context) {
+    final fieldWidth = MediaQuery.textScalerOf(context).scale(150) <= 154
+        ? 154.0
+        : 320.0;
     return DraggableAlertDialog(
       identity: 'worker-income-settings',
-      estimatedSize: const Size(380, 330),
+      estimatedSize: const Size(380, 280),
       scrollable: true,
       title: const _AtlasDialogTitle(
         icon: Icons.tune_rounded,
@@ -20505,28 +20739,24 @@ class _WorkerIncomeSettingsDialogState
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: <Widget>[
-            TextField(
-              key: const ValueKey<String>('resource-map-online-hours-input'),
-              controller: _onlineHoursController,
-              keyboardType: const TextInputType.numberWithOptions(
-                decimal: true,
-              ),
-              decoration: const InputDecoration(
-                labelText: 'Online hours/day',
-                prefixIcon: Icon(Icons.schedule_rounded),
-              ),
-            ),
-            const SizedBox(height: 12),
-            TextField(
-              key: const ValueKey<String>('resource-map-availability-input'),
-              controller: _availabilityController,
-              keyboardType: const TextInputType.numberWithOptions(
-                decimal: true,
-              ),
-              decoration: const InputDecoration(
-                labelText: 'Node resources (%)',
-                prefixIcon: Icon(Icons.eco_outlined),
-              ),
+            Wrap(
+              key: const ValueKey('resource-map-income-numeric-fields'),
+              spacing: 12,
+              runSpacing: 12,
+              children: [
+                _numberField(
+                  label: 'Online hours/day',
+                  inputKey: 'resource-map-online-hours-input',
+                  controller: _onlineHoursController,
+                  width: fieldWidth,
+                ),
+                _numberField(
+                  label: 'Node resources (%)',
+                  inputKey: 'resource-map-availability-input',
+                  controller: _availabilityController,
+                  width: fieldWidth,
+                ),
+              ],
             ),
             const SizedBox(height: 12),
             Divider(height: 1),
@@ -20691,6 +20921,12 @@ class _WorkerCapacityDialogState extends State<_WorkerCapacityDialog> {
 
   void _removeTown(String id) {
     setState(() {
+      final draft = _drafts[id];
+      if (draft != null && draft.hasLodgingToPreserve) {
+        draft.hiredWorkers.text = '0';
+        _error = null;
+        return;
+      }
       _drafts.remove(id)?.dispose();
       _townToAdd ??= _availableTowns().firstOrNull?.id;
       _error = null;
@@ -20701,7 +20937,7 @@ class _WorkerCapacityDialogState extends State<_WorkerCapacityDialog> {
     final values = <String, BdoTownWorkerCapacity>{..._unknownInitialValues};
     for (final entry in _drafts.entries) {
       final draft = entry.value;
-      if (draft.preservesLegacyValue) {
+      if (draft.isUnchanged) {
         values[entry.key] = draft.originalValue;
         continue;
       }
@@ -20799,12 +21035,13 @@ class _WorkerCapacityDialogState extends State<_WorkerCapacityDialog> {
     final fieldWidth = stackControls ? contentWidth : (contentWidth - 10) / 2;
     return DraggableAlertDialog(
       identity: 'worker-capacity',
+      dialogKey: const ValueKey('resource-map-existing-workers-dialog'),
       estimatedSize: const Size(390, 400),
       scrollable: true,
       title: const _AtlasDialogTitle(
         icon: Icons.groups_2_outlined,
-        title: 'Workers by town',
-        subtitle: 'Hired workers and bonus lodging outside the house map.',
+        title: 'Existing workers',
+        subtitle: 'Hired workers and saved lodging outside the house map.',
       ),
       content: SizedBox(
         width: contentWidth,
@@ -20871,9 +21108,16 @@ class _WorkerCapacityDialogState extends State<_WorkerCapacityDialog> {
                                 ),
                               ),
                               TextButton.icon(
+                                key: ValueKey(
+                                  'resource-map-clear-workers-${entry.key}',
+                                ),
                                 onPressed: () => _removeTown(entry.key),
                                 icon: const Icon(Icons.close_rounded, size: 16),
-                                label: const Text('Remove'),
+                                label: Text(
+                                  entry.value.hasLodgingToPreserve
+                                      ? 'Clear workers'
+                                      : 'Remove',
+                                ),
                               ),
                             ],
                           ),
@@ -20979,10 +21223,15 @@ final class _TownCapacityDraft {
   final TextEditingController hiredWorkers;
   final TextEditingController bonusLodgingSlots;
 
-  bool get preservesLegacyValue =>
-      !originalValue.usesKnownTownLodging &&
+  bool get isUnchanged =>
       hiredWorkers.text.trim() == _initialHiredText &&
       bonusLodgingSlots.text.trim() == _initialBonusText;
+
+  bool get hasLodgingToPreserve =>
+      (int.tryParse(_initialBonusText) ?? 0) > 0 ||
+      (int.tryParse(bonusLodgingSlots.text.trim()) ??
+              originalValue.effectiveBonusLodgingSlotCount) >
+          0;
 
   static int _initialBonusLodging(
     BdoTownWorkerCapacity value,
@@ -24193,6 +24442,8 @@ class _MapDialogScope extends StatelessWidget {
   @override
   Widget build(BuildContext context) => ResourceMapChromeTheme(
     data: context.mapChrome.withUiOpacity(1),
+    liveData: ResourceMapChromeTheme.liveDataOf(context),
+    opacityOverride: 1,
     child: Builder(
       builder: (context) => Theme(data: _buildMapTheme(context), child: child),
     ),
@@ -24200,10 +24451,11 @@ class _MapDialogScope extends StatelessWidget {
 }
 
 ThemeData _buildMapTheme(BuildContext context) {
-  final base = ThemeData.dark(useMaterial3: true);
   final chrome = context.mapChrome;
+  final base = ThemeData(brightness: chrome.brightness, useMaterial3: true);
   final headingFamily = chrome.headingFontFamily ?? 'Segoe UI';
-  final scheme = ColorScheme.dark(
+  final scheme = ColorScheme(
+    brightness: chrome.brightness,
     primary: chrome.primary,
     onPrimary: chrome.onPrimary,
     primaryContainer: chrome.deepAccent,
@@ -24222,7 +24474,7 @@ ThemeData _buildMapTheme(BuildContext context) {
     onErrorContainer: chrome.ink,
     surface: chrome.chromeRaised,
     onSurface: chrome.ink,
-    surfaceContainerLowest: chrome.canvas,
+    surfaceContainerLowest: chrome.controlInset,
     surfaceContainerLow: chrome.chromeBase,
     surfaceContainer: chrome.chromeRaised,
     surfaceContainerHigh: chrome.chromeHighlight,

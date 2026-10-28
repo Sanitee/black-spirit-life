@@ -6,9 +6,12 @@ import 'package:flutter/material.dart';
 
 import 'app.dart';
 import 'application_bootstrap.dart';
+import 'application_launch_options.dart';
 import 'window/window_host_service.dart';
 
-void runBdoCraftPlanner() {
+void runBdoCraftPlanner({
+  ApplicationLaunchOptions launchOptions = const ApplicationLaunchOptions(),
+}) {
   WidgetsFlutterBinding.ensureInitialized();
   installStartupWindowCloseHandler();
   FlutterError.onError = FlutterError.presentError;
@@ -18,6 +21,10 @@ void runBdoCraftPlanner() {
   };
   runZonedGuarded(() {
     final applicationDirectory = Completer<Directory>();
+    if (launchOptions.diagnosticDeferFishPrewarm) {
+      // Startup already reports this error; deferred Fish may never await it.
+      applicationDirectory.future.ignore();
+    }
     final applicationFuture = const ApplicationBootstrapService().load(
       onApplicationDirectoryResolved: (directory) {
         if (!applicationDirectory.isCompleted) {
@@ -51,11 +58,14 @@ void runBdoCraftPlanner() {
     installStartupWindowCloseHandler(
       beforeClose: fishCompanionRuntimeHost.freezeAndFlushForApplicationExit,
     );
-    unawaited(fishCompanionRuntimeHost.prewarm());
+    if (!launchOptions.diagnosticDeferFishPrewarm) {
+      unawaited(fishCompanionRuntimeHost.prewarm());
+    }
     runApp(
       BdoCraftPlannerApp(
         applicationFuture: applicationFuture,
         fishCompanionRuntimeHost: fishCompanionRuntimeHost,
+        diagnosticDeferFishPrewarm: launchOptions.diagnosticDeferFishPrewarm,
       ),
     );
   }, (error, stack) => debugPrint('Uncaught zone error: $error\n$stack'));

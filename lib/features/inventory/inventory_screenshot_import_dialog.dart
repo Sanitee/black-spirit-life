@@ -405,6 +405,26 @@ class _InventoryScreenshotImportDialogState
             continue;
           }
         }
+        // These two oils share their exact artwork with water bottles. Apply
+        // the requested singleton default even when OCR already chose water;
+        // a source suggestion is not a manual confirmation. Multiple stacks
+        // still use ordering, and a user's explicit water choice always wins.
+        if (!row.selectionFixed &&
+            !row.suppressAutoFill &&
+            orderFamily != null &&
+            orderFamily.startsWith('artwork:') &&
+            screenshotRows
+                    .where(
+                      (candidate) =>
+                          _itemIdOrderFamily(candidate) == orderFamily,
+                    )
+                    .length ==
+                1) {
+          final preferredOil = _preferredSharedBottleOil(row, orderFamily);
+          if (preferredOil != null) {
+            row.select(preferredOil.name, fixed: false, inferred: true);
+          }
+        }
         var selected = row.selectedName;
         if (selected != null &&
             useItemOrder &&
@@ -707,6 +727,30 @@ class _InventoryScreenshotImportDialogState
       row.select(choice, fixed: false, inferred: !preservesSource);
       usedOutsideRuns.add(_fold(choice));
     }
+  }
+
+  InventoryItemMatch? _preferredSharedBottleOil(
+    _ReviewRow row,
+    String artworkFamily,
+  ) {
+    final candidates = row.source.matches
+        .where((match) => _artworkFamilyForMatch(match) == artworkFamily)
+        .toList(growable: false);
+    for (final pair in const <(int, int)>[(6601, 6655), (6602, 6654)]) {
+      final oil = candidates
+          .where((match) => match.itemId == pair.$1)
+          .firstOrNull;
+      final water = candidates
+          .where((match) => match.itemId == pair.$2)
+          .firstOrNull;
+      if (oil != null &&
+          water != null &&
+          (oil.confidence - water.confidence).abs() <=
+              _automaticVisualAlternativeWindow) {
+        return oil;
+      }
+    }
+    return null;
   }
 
   InventoryItemMatch? _primaryIngredientChoice(

@@ -1,7 +1,9 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
 import 'package:bdo_craft_planner_flutter/app/state/planner_application_controller.dart';
+import 'package:bdo_craft_planner_flutter/app/window/native_folder_service.dart';
 import 'package:bdo_craft_planner_flutter/data/portable/portable_v4_codec.dart';
 import 'package:bdo_craft_planner_flutter/domain/models/catalog_models.dart';
 import 'package:bdo_craft_planner_flutter/domain/models/craft_mode.dart';
@@ -9,6 +11,7 @@ import 'package:bdo_craft_planner_flutter/domain/state/planner_state.dart';
 import 'package:bdo_craft_planner_flutter/domain/state/planner_state_json_codec.dart';
 import 'package:bdo_craft_planner_flutter/domain/state/state_copy.dart';
 import 'package:bdo_craft_planner_flutter/features/data/data_view.dart';
+import 'package:bdo_craft_planner_flutter/features/shared/profile_game_icon.dart';
 import 'package:bdo_craft_planner_flutter/visual/visual.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -106,7 +109,7 @@ void main() {
     expect(editor.left, craft.left);
     expect(editor.width, craft.width);
     expect(afkLoad.left, craft.left);
-    expect(afkLoad.width, lessThanOrEqualTo(540));
+    expect(afkLoad.width, closeTo(craft.width, 1));
     expect(afkLoad.top - craft.bottom, 14);
     expect(editor.top - afkLoad.bottom, 14);
 
@@ -159,7 +162,7 @@ void main() {
   });
 
   testWidgets(
-    'Personal data explains local ownership and browses before move confirmation',
+    'Personal data shows the active folder and confirms a selected move',
     (tester) async {
       const channel = MethodChannel('com.bdocraftplanner.flutter/window');
       final messenger =
@@ -171,11 +174,17 @@ void main() {
       addTearDown(() => messenger.setMockMethodCallHandler(channel, null));
       final controller = _controller();
       String? movedTo;
+      String? opened;
       await _pump(
         tester,
         controller,
         size: const Size(1200, 752),
         personalDataPath: r'C:\Current planner data',
+        folderService: NativeFolderService(
+          isWindows: true,
+          directoryExists: (_) async => true,
+          launch: (_, arguments) async => opened = arguments.single,
+        ),
         onMovePersonalData: (path) async => movedTo = path,
       );
 
@@ -185,27 +194,35 @@ void main() {
       await tester.ensureVisible(card);
       await tester.pumpAndSettle();
       expect(card, findsOneWidget);
+      expect(find.text('Character & mastery'), findsOneWidget);
+      expect(find.text('Favourites'), findsOneWidget);
       expect(
         find.textContaining('They are not included in the installer.'),
-        findsOneWidget,
+        findsNothing,
       );
-      final pathField = find.descendant(
-        of: find.byKey(const ValueKey<String>('data-personal-data-path')),
-        matching: find.byType(TextField),
-      );
+      final pathField = find.byKey(const ValueKey('data-personal-data-path'));
       expect(
-        tester.widget<TextField>(pathField).controller?.text,
+        tester.widget<SelectableText>(pathField).data,
         r'C:\Current planner data',
       );
+      await tester.tap(find.byKey(const ValueKey('data-personal-data-open')));
+      await tester.pumpAndSettle();
+      expect(opened, r'C:\Current planner data');
+      expect(movedTo, isNull);
 
       await tester.tap(
         find.byKey(const ValueKey<String>('data-personal-data-browse')),
       );
       await tester.pumpAndSettle();
+      expect(find.text('Move personal data?'), findsOneWidget);
+      expect(movedTo, isNull);
       expect(
-        tester.widget<TextField>(pathField).controller?.text,
-        r'D:\Planner data',
+        tester.widget<SelectableText>(pathField).data,
+        r'C:\Current planner data',
       );
+      await tester.tap(find.text('Keep current folder'));
+      await tester.pumpAndSettle();
+      expect(movedTo, isNull);
 
       messenger.setMockMethodCallHandler(channel, (call) async {
         if (call.method == 'pickDirectory') {
@@ -222,8 +239,13 @@ void main() {
       await tester.pump();
       expect(find.text('Folder picker unavailable.'), findsOneWidget);
 
+      messenger.setMockMethodCallHandler(
+        channel,
+        (call) async =>
+            call.method == 'pickDirectory' ? r'D:\Planner data' : null,
+      );
       await tester.tap(
-        find.byKey(const ValueKey<String>('data-personal-data-move')),
+        find.byKey(const ValueKey<String>('data-personal-data-browse')),
       );
       await tester.pumpAndSettle();
       expect(find.text('Move personal data?'), findsOneWidget);
@@ -238,6 +260,110 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(movedTo, r'D:\Planner data');
+      expect(
+        tester.widget<SelectableText>(pathField).data,
+        r'C:\Current planner data',
+      );
+      expect(tester.takeException(), isNull);
+      await controller.dispose();
+    },
+  );
+
+  testWidgets(
+    'cancelled folder picker and unavailable folder never move data',
+    (tester) async {
+      const channel = MethodChannel('com.bdocraftplanner.flutter/window');
+      final messenger =
+          TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger;
+      messenger.setMockMethodCallHandler(channel, (_) async => null);
+      addTearDown(() => messenger.setMockMethodCallHandler(channel, null));
+      final controller = _controller();
+      var moved = false;
+      await _pump(
+        tester,
+        controller,
+        folderService: NativeFolderService(
+          isWindows: true,
+          directoryExists: (_) async => false,
+        ),
+        onMovePersonalData: (_) async => moved = true,
+      );
+      await tester.ensureVisible(
+        find.byKey(const ValueKey('data-personal-data-card')),
+      );
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const ValueKey('data-personal-data-browse')));
+      await tester.pumpAndSettle();
+      expect(find.byType(Dialog), findsNothing);
+      expect(moved, isFalse);
+      await tester.tap(find.byKey(const ValueKey('data-personal-data-open')));
+      await tester.pumpAndSettle();
+      expect(find.textContaining('could not be opened'), findsOneWidget);
+      expect(moved, isFalse);
+      await controller.dispose();
+    },
+  );
+
+  testWidgets(
+    'folder actions are disabled while moving and recover after failure',
+    (tester) async {
+      const channel = MethodChannel('com.bdocraftplanner.flutter/window');
+      final messenger =
+          TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger;
+      messenger.setMockMethodCallHandler(
+        channel,
+        (_) async => r'D:\Destination',
+      );
+      addTearDown(() => messenger.setMockMethodCallHandler(channel, null));
+      final controller = _controller();
+      final moving = Completer<void>();
+      await _pump(tester, controller, onMovePersonalData: (_) => moving.future);
+      await tester.ensureVisible(
+        find.byKey(const ValueKey('data-personal-data-card')),
+      );
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const ValueKey('data-personal-data-browse')));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Move and restart'));
+      await tester.pumpAndSettle();
+      expect(
+        tester
+            .widget<TextButton>(
+              find.byKey(const ValueKey('data-personal-data-browse')),
+            )
+            .onPressed,
+        isNull,
+      );
+      expect(
+        tester
+            .widget<AppButton>(
+              find.byKey(const ValueKey('data-personal-data-open')),
+            )
+            .onPressed,
+        isNull,
+      );
+      moving.completeError(StateError('Move failed; source preserved.'));
+      await tester.pumpAndSettle();
+      expect(
+        find.textContaining('Move failed; source preserved.'),
+        findsOneWidget,
+      );
+      expect(
+        tester
+            .widget<TextButton>(
+              find.byKey(const ValueKey('data-personal-data-browse')),
+            )
+            .onPressed,
+        isNotNull,
+      );
+      expect(
+        tester
+            .widget<SelectableText>(
+              find.byKey(const ValueKey('data-personal-data-path')),
+            )
+            .data,
+        r'C:\Test personal data',
+      );
       await controller.dispose();
     },
   );
@@ -286,7 +412,24 @@ void main() {
           );
           final cardInset = variant.$2.usesDenseSplitLayout ? 13.0 : 15.0;
 
-          expect(massProcessing.left - craft.left, closeTo(cardInset, 1));
+          final processingOutput = tester.getRect(
+            find.byKey(const ValueKey('profile-output:processing')),
+          );
+          final processingValue = tester.getRect(
+            find.byKey(const ValueKey('profile-result:processing')),
+          );
+          expect(processingOutput.contains(massProcessing.center), isTrue);
+          expect(
+            massProcessing.top,
+            greaterThanOrEqualTo(processingValue.bottom),
+          );
+          final processingNumber = tester.getRect(
+            find.descendant(
+              of: find.byKey(const ValueKey('profile-result:processing')),
+              matching: find.byType(Text),
+            ),
+          );
+          expect(massProcessing.left, closeTo(processingNumber.left, 1));
           expect(massProcessing.width, lessThan(craft.width - cardInset * 2));
           expect(deleteTools.left - editor.left, closeTo(cardInset, 1));
           expect(
@@ -354,7 +497,7 @@ void main() {
     ('Illuminated Ledger', RetainedThemeRegistry.illuminatedLedger),
   ]) {
     testWidgets(
-      '${variant.$1} Craft Output fields fill and align in wide and compact layouts',
+      '${variant.$1} skill cards keep compact aligned mastery fields',
       (tester) async {
         final controller = _controller();
 
@@ -368,6 +511,128 @@ void main() {
           _expectCraftOutputFieldGeometry(tester);
         }
 
+        await _pump(
+          tester,
+          controller,
+          size: const Size(900, 752),
+          spec: variant.$2,
+          textScale: 2,
+        );
+        _expectCraftOutputFieldGeometry(tester);
+        expect(tester.takeException(), isNull);
+
+        await controller.dispose();
+      },
+    );
+  }
+
+  for (final spec in [
+    StandardSpec.theme,
+    IlluminatedLedgerSpec.theme,
+    SakuraNightGardenSpec.theme,
+  ]) {
+    testWidgets(
+      'profile hierarchy and result alignment remain clear in ${spec.id}',
+      (tester) async {
+        final controller = _controller();
+        await _pump(
+          tester,
+          controller,
+          size: const Size(1425, 940),
+          spec: spec,
+        );
+        final secondary = Color.lerp(
+          spec.palette.textMuted,
+          spec.palette.text,
+          .18,
+        );
+
+        void expectTextStyle(Finder finder, double size, Color? color) {
+          expect(finder, findsWidgets);
+          for (final text in tester.widgetList<Text>(finder)) {
+            expect(text.style?.fontSize, size);
+            expect(text.style?.color, color);
+            expect(text.style?.letterSpacing, 0);
+          }
+        }
+
+        for (final title in ['Mastery & Output', 'AFK Weight']) {
+          expectTextStyle(find.text(title), 19, spec.palette.text);
+        }
+        for (final group in ['Alchemy', 'Cooking', 'Processing']) {
+          expectTextStyle(
+            find.descendant(
+              of: find.byKey(ValueKey('craft-skill:$group')),
+              matching: find.text(group),
+            ),
+            15,
+            spec.palette.text,
+          );
+        }
+        expectTextStyle(find.text('Feathery Steps'), 15, spec.palette.text);
+        for (final label in [
+          'Mastery',
+          'Expected output',
+          'Mass batch',
+          'Maximum weight',
+          'Current weight',
+          'Keep free',
+          'Room for ingredients',
+          'Maximum you can carry',
+        ]) {
+          expectTextStyle(find.text(label), 12, secondary);
+        }
+        for (final key in [
+          'D01',
+          'D02',
+          'D03',
+          'data-afk-maximum-weight',
+          'data-afk-current-weight',
+          'data-afk-safety-buffer',
+        ]) {
+          final field = tester.widget<TextField>(
+            find.descendant(
+              of: find.byKey(ValueKey(key)),
+              matching: find.byType(TextField),
+            ),
+          );
+          expect(field.style?.fontSize, 16);
+          expect(field.style?.color, spec.palette.text);
+        }
+        for (final artwork in [
+          ProfileArtwork.alchemy,
+          ProfileArtwork.processing,
+        ]) {
+          final row = find.byKey(ValueKey('profile-result:${artwork.name}'));
+          final value = find.descendant(of: row, matching: find.byType(Text));
+          final icon = find.descendant(
+            of: row,
+            matching: find.byType(ProfileIcon),
+          );
+          expectTextStyle(value, 26, spec.palette.text);
+          expect(
+            tester.getRect(icon).center.dy,
+            closeTo(tester.getRect(value).center.dy, .01),
+            reason: 'Result artwork aligns with the number, not its caption.',
+          );
+        }
+        expectTextStyle(
+          find.byKey(const ValueKey('profile-afk-room-value')),
+          26,
+          spec.palette.text,
+        );
+        expectTextStyle(
+          find.byKey(const ValueKey('profile-afk-limit-value')),
+          14,
+          spec.palette.text,
+        );
+        expect(
+          find.byKey(const ValueKey('profile-output:cooking')),
+          findsNothing,
+        );
+        expect(find.text('Expected output'), findsOneWidget);
+        expect(find.text('Mass batch'), findsOneWidget);
+        expect(tester.takeException(), isNull);
         await controller.dispose();
       },
     );
@@ -476,6 +741,7 @@ void main() {
     final testUpdate = find.byKey(const ValueKey<String>('data-test-update'));
     expect(testUpdate, findsOneWidget);
     await tester.ensureVisible(testUpdate);
+    await tester.pumpAndSettle();
     await tester.tap(testUpdate);
     await tester.pump();
     expect(testUpdateCalls, 1);
@@ -723,23 +989,23 @@ void main() {
   });
 
   testWidgets(
-    'AFK Weight profile stays compact and saves all character inputs',
+    'AFK Weight stays open with compact fields and saves every rank and input',
     (tester) async {
       final controller = _controller();
       await _pump(tester, controller);
 
       final toggle = find.byKey(const ValueKey<String>('data-afk-load-toggle'));
-      expect(toggle, findsOneWidget);
-      expect(find.text('Set your character weight once'), findsOneWidget);
+      expect(toggle, findsNothing);
+      expect(find.text('Done'), findsNothing);
       expect(
         find.byKey(const ValueKey<String>('data-afk-maximum-weight')),
-        findsNothing,
+        findsOneWidget,
       );
-
-      await tester.ensureVisible(toggle);
-      await tester.tap(toggle);
-      await tester.pumpAndSettle();
-      expect(find.text('KEEP FREE'), findsOneWidget);
+      final maximumField = find.byKey(
+        const ValueKey('data-afk-maximum-weight'),
+      );
+      await tester.ensureVisible(maximumField);
+      expect(find.text('Keep free'), findsOneWidget);
       expect(find.text('LEAVE UNUSED'), findsNothing);
 
       Future<void> commit(String key, String value) async {
@@ -755,11 +1021,29 @@ void main() {
       await commit('data-afk-maximum-weight', '1600');
       await commit('data-afk-current-weight', '125');
       await commit('data-afk-safety-buffer', '25');
-      final feathery = tester.widget<AppSelect<int>>(
-        find.byKey(const ValueKey<String>('data-afk-feathery-steps')),
+      expect(tester.getSize(maximumField).width, greaterThanOrEqualTo(124));
+      expect(
+        tester.getSize(maximumField).width,
+        lessThan(
+          tester
+                  .getSize(find.byKey(const ValueKey('data-afk-load-card')))
+                  .width *
+              .4,
+        ),
+        reason:
+            'Five-digit fields stay content-sized, including under Ahem test metrics.',
       );
-      feathery.onChanged!(5);
-      await tester.pumpAndSettle();
+      for (var level = 0; level <= 5; level++) {
+        final rank = find.byKey(ValueKey('data-afk-feathery-steps:$level'));
+        await tester.ensureVisible(rank);
+        await tester.tap(rank);
+        await tester.pumpAndSettle();
+        expect(
+          controller.documentSnapshot.afkWeightProfile.featheryStepsLevel,
+          level,
+        );
+        expect(tester.widget<AppButton>(rank).selected, isTrue);
+      }
 
       final profile = controller.documentSnapshot.afkWeightProfile;
       expect(profile.maximumWeightLt, 1600);
@@ -770,19 +1054,133 @@ void main() {
       expect(profile.safeLimitLt, 1850);
       expect(find.text('1.850 LT'), findsOneWidget);
       expect(find.text('1.975 LT'), findsOneWidget);
-      expect(find.text('ROOM FOR INGREDIENTS'), findsOneWidget);
-      expect(find.text('MAXIMUM YOU CAN CARRY'), findsOneWidget);
+      expect(find.text('Room for ingredients'), findsOneWidget);
+      expect(find.text('Maximum you can carry'), findsOneWidget);
 
-      await tester.tap(toggle);
-      await tester.pumpAndSettle();
       expect(
         find.byKey(const ValueKey<String>('data-afk-maximum-weight')),
-        findsNothing,
+        findsOneWidget,
       );
-      expect(find.textContaining('1.850 LT for ingredients'), findsOneWidget);
+      await commit('data-afk-maximum-weight', '123.456,75');
+      expect(
+        controller.documentSnapshot.afkWeightProfile.maximumWeightLt,
+        123456.75,
+        reason: 'Compact presentation must not impose a five-digit limit.',
+      );
+      await commit('data-afk-current-weight', '-1');
+      expect(
+        controller.documentSnapshot.afkWeightProfile.currentCarriedWeightLt,
+        125,
+      );
+      expect(find.byType(ProfileIcon), findsNWidgets(7));
+      expect(find.byIcon(Icons.scale_outlined), findsNothing);
+      expect(tester.takeException(), isNull);
       await controller.dispose();
     },
   );
+
+  for (final spec in [
+    StandardSpec.theme,
+    IlluminatedLedgerSpec.theme,
+    SakuraNightGardenSpec.theme,
+  ]) {
+    for (final scale in [1.0, 1.5, 2.0]) {
+      testWidgets(
+        'open weight controls fit a compact column in ${spec.id} at ${scale}x',
+        (tester) async {
+          final controller = _controller();
+          await _pump(
+            tester,
+            controller,
+            size: const Size(560, 940),
+            spec: spec,
+            textScale: scale,
+          );
+          final maximum = find.byKey(const ValueKey('data-afk-maximum-weight'));
+          await tester.ensureVisible(maximum);
+          await tester.pumpAndSettle();
+          final card = tester.getRect(
+            find.byKey(const ValueKey('data-afk-load-card')),
+          );
+          for (final key in [
+            'data-afk-maximum-weight',
+            'data-afk-current-weight',
+            'data-afk-safety-buffer',
+          ]) {
+            final bounds = tester.getRect(find.byKey(ValueKey(key)));
+            expect(bounds.left, greaterThanOrEqualTo(card.left));
+            expect(bounds.right, lessThanOrEqualTo(card.right));
+          }
+          final maximumBounds = tester.getRect(maximum);
+          for (final key in [
+            'data-afk-current-weight',
+            'data-afk-safety-buffer',
+          ]) {
+            expect(
+              tester.getSize(find.byKey(ValueKey(key))).width,
+              closeTo(maximumBounds.width, .01),
+              reason: 'All three weight inputs use equal readable columns.',
+            );
+          }
+          final weightBay = tester.getRect(
+            find.byKey(const ValueKey('profile-inlay:weight')),
+          );
+          final weightInput = tester.getRect(
+            find.descendant(of: maximum, matching: find.byType(TextField)),
+          );
+          expect(weightBay.width, closeTo(52, .001));
+          expect(weightBay.height, closeTo(52, .001));
+          expect(weightBay.center.dy, closeTo(weightInput.center.dy, .01));
+          final fairyBay = tester.getRect(
+            find.byKey(const ValueKey('profile-inlay:featherySteps')),
+          );
+          final fairyRanks = tester.getRect(
+            find.byKey(const ValueKey('profile-afk-rank-track')),
+          );
+          expect(fairyBay.width, closeTo(52, .001));
+          expect(fairyBay.height, closeTo(52, .001));
+          expect(fairyBay.center.dy, closeTo(fairyRanks.center.dy, .01));
+          for (var level = 0; level <= 5; level++) {
+            expect(
+              find.byKey(ValueKey('data-afk-feathery-steps:$level')),
+              findsOneWidget,
+            );
+          }
+          expect(tester.takeException(), isNull);
+          await controller.dispose();
+        },
+      );
+    }
+  }
+
+  testWidgets('AFK settings link scrolls to the permanently open fields', (
+    tester,
+  ) async {
+    final controller = _controller();
+    final session = DataSessionController();
+    await _pump(
+      tester,
+      controller,
+      size: const Size(560, 752),
+      sessionController: session,
+    );
+    final list = tester.widget<ListView>(
+      find.byKey(const ValueKey('data-scroll')),
+    );
+    list.controller!.jumpTo(list.controller!.position.maxScrollExtent);
+    await tester.pumpAndSettle();
+    session.showAfkWeightSettings();
+    await tester.pumpAndSettle();
+    final maximum = tester.getRect(
+      find.byKey(const ValueKey('data-afk-maximum-weight')),
+    );
+    expect(maximum.top, greaterThanOrEqualTo(0));
+    expect(maximum.bottom, lessThanOrEqualTo(752));
+    expect(tester.takeException(), isNull);
+    await tester.pumpWidget(const SizedBox.shrink());
+    session.dispose();
+    await controller.dispose();
+  });
 
   testWidgets('delete-tools option rebuilds from the global notifier', (
     tester,
@@ -808,6 +1206,8 @@ void main() {
       findsOneWidget,
     );
 
+    await tester.ensureVisible(option);
+    await tester.pumpAndSettle();
     await tester.tap(option);
     await tester.pump();
 
@@ -1099,9 +1499,14 @@ void _expectCraftOutputFieldGeometry(WidgetTester tester) {
   final craft = find.byKey(const ValueKey<String>('data-craft-output-card'));
   final craftRect = tester.getRect(craft);
   const fields = <String, String>{
-    'D03': 'PROCESSING MASTERY',
-    'D01': 'ALCHEMY MASTERY',
-    'D02': 'COOKING MASTERY',
+    'D03': 'Processing',
+    'D01': 'Alchemy',
+    'D02': 'Cooking',
+  };
+  const artworkForField = {
+    'D01': ProfileArtwork.alchemy,
+    'D02': ProfileArtwork.cooking,
+    'D03': ProfileArtwork.processing,
   };
 
   for (final entry in fields.entries) {
@@ -1115,12 +1520,15 @@ void _expectCraftOutputFieldGeometry(WidgetTester tester) {
       matching: find.byType(InputDecorator),
     );
     final label = find.descendant(
-      of: fieldGroup,
-      matching: find.text(entry.value),
+      of: find.byKey(ValueKey('craft-skill:${entry.value}')),
+      matching: find.text('Mastery'),
     );
     final inputRect = tester.getRect(input);
     final decoratorRect = tester.getRect(decorator);
     final labelRect = tester.getRect(label);
+    final iconBay = tester.getRect(
+      find.byKey(ValueKey('profile-inlay:${artworkForField[entry.key]!.name}')),
+    );
     expect(
       tester.widget<TextField>(input).textAlignVertical,
       TextAlignVertical.center,
@@ -1129,11 +1537,20 @@ void _expectCraftOutputFieldGeometry(WidgetTester tester) {
     expect(
       inputRect.left,
       closeTo(labelRect.left, .01),
-      reason: '${entry.value} input starts directly under its header',
+      reason: '${entry.value} input starts directly under its mastery header',
     );
     expect(inputRect.left, greaterThan(craftRect.left));
     expect(inputRect.right, lessThan(craftRect.right));
-    expect(inputRect.width, greaterThanOrEqualTo(150));
+    final scale = MediaQuery.textScalerOf(tester.element(fieldGroup)).scale(1);
+    expect(inputRect.width, inInclusiveRange(100 * scale, 124.01 * scale));
+    expect(iconBay.width, closeTo(52, .001));
+    expect(iconBay.height, closeTo(52, .001));
+    expect(
+      iconBay.center.dy,
+      closeTo(inputRect.center.dy, .01),
+      reason:
+          'The game icon follows the input, not the title-plus-input block.',
+    );
     expect(
       inputRect.height,
       greaterThanOrEqualTo(42),
@@ -1175,10 +1592,12 @@ Future<void> _pump(
   VoidCallback? onTestUpdate,
   String personalDataPath = r'C:\Test personal data',
   Future<void> Function(String destinationPath)? onMovePersonalData,
+  NativeFolderService folderService = const NativeFolderService(),
+  double textScale = 1,
 }) async {
   tester.view.physicalSize = size;
   tester.view.devicePixelRatio = 1;
-  tester.platformDispatcher.textScaleFactorTestValue = 1;
+  tester.platformDispatcher.textScaleFactorTestValue = textScale;
   addTearDown(tester.view.resetPhysicalSize);
   addTearDown(tester.view.resetDevicePixelRatio);
   addTearDown(tester.platformDispatcher.clearTextScaleFactorTestValue);
@@ -1195,6 +1614,7 @@ Future<void> _pump(
             onTestUpdate: onTestUpdate,
             personalDataPath: personalDataPath,
             onMovePersonalData: onMovePersonalData,
+            folderService: folderService,
           ),
         ),
       ),

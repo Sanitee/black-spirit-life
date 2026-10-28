@@ -171,7 +171,7 @@ Future<void> _copyTree(Directory source, Directory destination) async {
 }
 
 Future<int> _availablePort() async {
-  for (var port = 18865; port <= 18895; port++) {
+  for (var port = 18925; port <= 18955; port++) {
     try {
       final socket = await ServerSocket.bind(
         InternetAddress.loopbackIPv4,

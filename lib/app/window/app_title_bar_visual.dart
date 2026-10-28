@@ -7,9 +7,8 @@ import '../../features/opportunities/opportunities_visuals.dart';
 ///
 /// Planner deliberately does not use one of these overrides: its title strip
 /// continues to resolve from the user's selected Planner appearance. The
-/// Resource Map, Gathering, and Fish Map use the same color roles as their
-/// accepted surfaces so switching the top-level destination does not carry a
-/// Planner theme over an otherwise 1:1 embedded application.
+/// Resource Map, Gathering, and Fish Map use the experimental field-desk roles
+/// so their shared navigation matches the destination beneath it.
 @immutable
 class AppTitleBarVisual {
   const AppTitleBarVisual({
@@ -88,86 +87,84 @@ class AppTitleBarVisual {
         captionPressedSurface: chrome.deepAccent,
       );
 
-  static final opportunities = AppTitleBarVisual(
-    id: OpportunitiesVisualSpec.id,
-    titleGradient: LinearGradient(
-      begin: Alignment.centerLeft,
-      end: Alignment.centerRight,
-      colors: [
-        OpportunitiesVisualSpec.palette.canvasDeep,
-        OpportunitiesVisualSpec.palette.canvas,
-        OpportunitiesVisualSpec.palette.surfaceInset,
-      ],
-      stops: [0, .58, 1],
-    ),
-    titleDivider: OpportunitiesVisualSpec.palette.trim,
-    foreground: OpportunitiesVisualSpec.palette.text,
-    iconBorder: OpportunitiesVisualSpec.palette.trimBright,
-    tabAccent: OpportunitiesVisualSpec.palette.primary,
-    tabSurface: OpportunitiesVisualSpec.palette.surfaceInset,
-    tabSelectedSurface: OpportunitiesVisualSpec.palette.surfaceRaised,
-    tabHoverSurface: OpportunitiesVisualSpec.palette.surface,
-    tabPressedSurface: OpportunitiesVisualSpec.palette.canvasDeep,
-    tabDivider: OpportunitiesVisualSpec.palette.trim,
-    tabForeground: OpportunitiesVisualSpec.palette.textMuted,
-    tabSelectedForeground: OpportunitiesVisualSpec.palette.text,
-    tabHoverForeground: OpportunitiesVisualSpec.palette.primaryBright,
-    captionHoverSurface: OpportunitiesVisualSpec.palette.surface,
-    captionPressedSurface: OpportunitiesVisualSpec.palette.surfaceInset,
-  );
+  static final opportunities = opportunitiesFinish('bronze');
+  static final _opportunityFinishes = <String, AppTitleBarVisual>{};
+  static AppTitleBarVisual opportunitiesFinish(String finish) =>
+      _opportunityFinishes.putIfAbsent(finish, () {
+        final spec = OpportunitiesVisualSpec.forFinish(finish);
+        final palette = spec.palette;
+        return AppTitleBarVisual(
+          id: spec.id,
+          titleGradient: LinearGradient(
+            begin: Alignment.centerLeft,
+            end: Alignment.centerRight,
+            colors: [palette.canvasDeep, palette.canvas, palette.surfaceInset],
+            stops: [0, .58, 1],
+          ),
+          titleDivider: palette.trim,
+          foreground: palette.text,
+          iconBorder: palette.trimBright,
+          tabAccent: palette.primary,
+          tabSurface: palette.surfaceInset,
+          tabSelectedSurface: palette.surfaceRaised,
+          tabHoverSurface: palette.surface,
+          tabPressedSurface: palette.canvasDeep,
+          tabDivider: palette.trim,
+          tabForeground: palette.textMuted,
+          tabSelectedForeground: palette.text,
+          tabHoverForeground: palette.primaryBright,
+          captionHoverSurface: palette.surface,
+          captionPressedSurface: palette.surfaceInset,
+        );
+      });
 
-  /// Continues the Gathering field-journal's midnight and luminous teal roles.
+  /// Experimental field-desk chrome; Planner never receives this override.
   static const gathering = AppTitleBarVisual(
     id: 'gathering',
     titleGradient: LinearGradient(
       begin: Alignment.centerLeft,
       end: Alignment.centerRight,
-      colors: <Color>[Color(0xFF0C151D), Color(0xFF1B2D38), Color(0xFF11252C)],
-      stops: <double>[0, .58, 1],
+      colors: [Color(0xFF141218), Color(0xFF342B32), Color(0xFF1D1920)],
+      stops: [0, .58, 1],
     ),
-    titleDivider: Color(0xA6638695),
-    foreground: Color(0xFFF1F3ED),
-    iconBorder: Color(0xFF638695),
-    tabAccent: Color(0xFF7DE0D3),
-    tabSurface: Color(0xFF14232E),
-    tabSelectedSurface: Color(0xFF214A4D),
-    tabHoverSurface: Color(0xFF2A424E),
-    tabPressedSurface: Color(0xFF102A31),
-    tabDivider: Color(0xFF638695),
-    tabForeground: Color(0xFFB3C2C5),
-    tabSelectedForeground: Color(0xFFF1F3ED),
-    tabHoverForeground: Color(0xFFD8F2EE),
-    captionHoverSurface: Color(0xFF2A424E),
-    captionPressedSurface: Color(0xFF102A31),
+    titleDivider: Color(0x668D7274),
+    foreground: Color(0xFFF1E8D8),
+    iconBorder: Color(0xFF8D7274),
+    tabAccent: Color(0xFFC88D91),
+    tabSurface: Color(0xFF211C24),
+    tabSelectedSurface: Color(0xFF51343D),
+    tabHoverSurface: Color(0xFF46333D),
+    tabPressedSurface: Color(0xFF241C26),
+    tabDivider: Color(0xFF8D7274),
+    tabForeground: Color(0xFFB9ABB1),
+    tabSelectedForeground: Color(0xFFF1E8D8),
+    tabHoverForeground: Color(0xFFF2DCC0),
+    captionHoverSurface: Color(0xFF46333D),
+    captionPressedSurface: Color(0xFF241C26),
   );
 
-  /// Dark navy from the Fish Companion shell with its prize-fish burgundy.
-  ///
-  /// The burgundy is confined to the title strip and selection state; the
-  /// embedded Fish Companion remains byte-for-byte owned by its standalone
-  /// source and is never recolored by this wrapper.
   static const fishMap = AppTitleBarVisual(
     id: 'fish-map',
     titleGradient: LinearGradient(
       begin: Alignment.centerLeft,
       end: Alignment.centerRight,
-      colors: <Color>[Color(0xFF0A0E12), Color(0xFF111A22), Color(0xFF24131A)],
-      stops: <double>[0, .58, 1],
+      colors: [Color(0xFF141218), Color(0xFF342B32), Color(0xFF1D1920)],
+      stops: [0, .58, 1],
     ),
-    titleDivider: Color(0xA6FA6384),
-    foreground: Color(0xFFF2F5F7),
-    iconBorder: Color(0xFF8A4658),
-    tabAccent: Color(0xFFFA6384),
-    tabSurface: Color(0xFF111A22),
-    tabSelectedSurface: Color(0xFF3A1D28),
-    tabHoverSurface: Color(0xFF28202A),
-    tabPressedSurface: Color(0xFF0A0E12),
-    tabDivider: Color(0xFF714052),
-    tabForeground: Color(0xFFB8C7CE),
-    tabSelectedForeground: Color(0xFFFFE6EC),
-    tabHoverForeground: Color(0xFFFFD2DC),
-    captionHoverSurface: Color(0xFF28202A),
-    captionPressedSurface: Color(0xFF3A1D28),
+    titleDivider: Color(0x668D7274),
+    foreground: Color(0xFFF1E8D8),
+    iconBorder: Color(0xFF8D7274),
+    tabAccent: Color(0xFFC88D91),
+    tabSurface: Color(0xFF211C24),
+    tabSelectedSurface: Color(0xFF51343D),
+    tabHoverSurface: Color(0xFF46333D),
+    tabPressedSurface: Color(0xFF241C26),
+    tabDivider: Color(0xFF8D7274),
+    tabForeground: Color(0xFFB9ABB1),
+    tabSelectedForeground: Color(0xFFF1E8D8),
+    tabHoverForeground: Color(0xFFF2DCC0),
+    captionHoverSurface: Color(0xFF46333D),
+    captionPressedSurface: Color(0xFF241C26),
   );
 }
 

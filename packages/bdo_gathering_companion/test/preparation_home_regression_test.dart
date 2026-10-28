@@ -342,7 +342,7 @@ void main() {
       expect(store.pending, hasLength(2));
       expect(
         find.byWidgetPredicate(
-          (w) => w is IconButton && w.tooltip == 'Pause timer',
+          (w) => w is Tooltip && w.message == 'Pause timer',
           skipOffstage: false,
         ),
         findsNothing,
@@ -352,11 +352,15 @@ void main() {
       await tester.pump();
       expect(panel(tester).selectedBuffIds, {'buff-9691', 'buff-890'});
       final pause = find.byWidgetPredicate(
-        (w) => w is IconButton && w.tooltip == 'Pause timer',
+        (w) => w is Tooltip && w.message == 'Pause timer',
         skipOffstage: false,
       );
       expect(pause, findsOneWidget);
-      tester.widget<IconButton>(pause).onPressed!();
+      tester
+          .widget<OutlinedButton>(
+            find.descendant(of: pause, matching: find.byType(OutlinedButton)),
+          )
+          .onPressed!();
       await tester.pumpAndSettle();
     },
   );
@@ -378,10 +382,14 @@ void main() {
       );
       await tester.pump();
       final pause = find.byWidgetPredicate(
-        (w) => w is IconButton && w.tooltip == 'Pause timer',
+        (w) => w is Tooltip && w.message == 'Pause timer',
         skipOffstage: false,
       );
-      tester.widget<IconButton>(pause).onPressed!();
+      tester
+          .widget<OutlinedButton>(
+            find.descendant(of: pause, matching: find.byType(OutlinedButton)),
+          )
+          .onPressed!();
       await tester.pumpAndSettle();
       guide(tester).onUse(wolves);
       await tester.pumpAndSettle();

@@ -163,6 +163,18 @@ String formatMarketFetchedAt(
   );
 }
 
+/// Time-only counterpart to [formatMarketFetchedAt], using the same UTC basis.
+/// An unchecked market has no time to display.
+String formatMarketFetchedTime(int millisecondsSinceEpoch) {
+  if (millisecondsSinceEpoch <= 0) return '';
+  final utc = DateTime.fromMillisecondsSinceEpoch(
+    millisecondsSinceEpoch,
+    isUtc: true,
+  );
+  return '${utc.hour.toString().padLeft(2, '0')}:'
+      '${utc.minute.toString().padLeft(2, '0')}';
+}
+
 bool _isCloseToInteger(double value) =>
     (value - value.roundToDouble()).abs() < .001;
 

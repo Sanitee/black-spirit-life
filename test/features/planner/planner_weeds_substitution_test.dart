@@ -69,7 +69,7 @@ void main() {
             marketChecks++;
             return const PlannerMarketRefresh(
               prices: {'Weeds': 100, 'Wild Grass': 200},
-              stock: {'Weeds': 0, 'Wild Grass': 100},
+              stock: {'Weeds': 5, 'Wild Grass': 100},
               unlistedItemNames: {},
               fetchedAt: 1789351200000,
               summary: 'Market checked.',
@@ -103,7 +103,7 @@ void main() {
         await tester.pumpAndSettle();
         await tester.tap(find.byKey(PlannerActionKeys.p15));
         await tester.pumpAndSettle();
-        expect(find.text('Stock 0'), findsOneWidget);
+        expect(find.text('Stock 5'), findsOneWidget);
         expect(marketChecks, 1);
 
         final anchor = find.byKey(
@@ -130,11 +130,11 @@ void main() {
           'recipe:${fixture.name}:Weeds': 'Wild Grass',
         });
         expect(find.text('Stock 100'), findsOneWidget);
-        expect(find.text('Stock 0'), findsNothing);
+        expect(find.text('Stock 5'), findsNothing);
         expect(
           marketChecks,
-          1,
-          reason: 'Changing a choice must not request prices.',
+          2,
+          reason: 'Changing a choice refreshes the selected material.',
         );
 
         await tester.tap(

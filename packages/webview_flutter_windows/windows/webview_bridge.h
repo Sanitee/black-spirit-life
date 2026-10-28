@@ -7,6 +7,7 @@
 
 #include <memory>
 
+#include "frame_delivery_policy.h"
 #include "graphics_context.h"
 #include "texture_bridge.h"
 #include "webview.h"
@@ -35,11 +36,13 @@ class WebviewBridge {
 
   flutter::TextureRegistrar* texture_registrar_;
   int64_t texture_id_;
+  webview_capture::FrameDeliveryPolicy frame_delivery_policy_;
 
   void HandleMethodCall(
       const flutter::MethodCall<flutter::EncodableValue>& method_call,
       std::unique_ptr<flutter::MethodResult<flutter::EncodableValue>> result);
   void RegisterEventHandlers();
+  void UpdateFrameDelivery();
 
   template <typename T>
   void EmitEvent(const T& value) {

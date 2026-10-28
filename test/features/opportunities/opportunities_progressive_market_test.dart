@@ -8,6 +8,7 @@ import 'package:bdo_craft_planner_flutter/data/opportunities/opportunity_market_
 import 'package:bdo_craft_planner_flutter/data/opportunities/opportunity_market_service.dart';
 import 'package:bdo_craft_planner_flutter/domain/market/market_calculations.dart';
 import 'package:bdo_craft_planner_flutter/domain/models/catalog_models.dart';
+import 'package:bdo_craft_planner_flutter/domain/models/craft_mode.dart';
 import 'package:bdo_craft_planner_flutter/domain/opportunities/opportunity_calculator.dart';
 import 'package:bdo_craft_planner_flutter/domain/state/planner_state.dart';
 import 'package:bdo_craft_planner_flutter/domain/state/state_copy.dart';
@@ -22,8 +23,406 @@ import '../../support/application_test_harness.dart';
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
+  test(
+    'visited crafting modes restore immediately without recalculation',
+    () async {
+      final fixture = await _Fixture.create(useCatalog: true);
+      addTearDown(fixture.dispose);
+      final controller = fixture.controller;
+      controller.change((p) => p.profitableOnly = false);
+      final saved = <CraftMode, List<OpportunityQuote>>{};
+      for (final mode in CraftMode.values) {
+        controller.change((p) => p.mode = mode, assemble: true);
+        await controller.calculationSettled;
+        expect(controller.quotes, isNotEmpty);
+        saved[mode] = controller.quotes;
+      }
+      for (final mode in [...CraftMode.values.reversed, ...CraftMode.values]) {
+        controller.change((p) => p.mode = mode, assemble: true);
+        expect(controller.quotes, same(saved[mode]));
+        expect(controller.calculating, isFalse);
+        expect(controller.visibleQuotes, isNotEmpty);
+      }
+      expect(fixture.transport.requests, 0);
+    },
+  );
+
+  test(
+    'mode changes assemble the destination even with no old-mode matches',
+    () async {
+      final fixture = await _Fixture.create();
+      addTearDown(fixture.dispose);
+      final controller = fixture.controller;
+      controller.change((p) {
+        p.mode = CraftMode.processing;
+        p.craftSearch = 'Copper Ingot';
+        p.profitableOnly = false;
+      });
+      await controller.calculationSettled;
+      expect(controller.recipes['Copper Ingot'], isNotNull);
+      expect(
+        controller.visibleQuotes.map((q) => q.recipeName),
+        contains('Copper Ingot'),
+      );
+      expect(controller.calculating, isFalse);
+      expect(fixture.transport.requests, 0);
+    },
+  );
+
   testWidgets(
-    'audited non-market output explains its missing price without hiding the recipe',
+    'warm Opportunities mode buttons never blank the cards or show a spinner',
+    (tester) async {
+      configureApplicationTestSurface(tester, const Size(1500, 940));
+      final fixture = (await tester.runAsync(
+        () => _Fixture.create(useCatalog: true),
+      ))!;
+      final controller = fixture.controller;
+      await tester.runAsync(() async {
+        controller.change((p) => p.profitableOnly = false);
+        for (final mode in CraftMode.values) {
+          controller.change((p) => p.mode = mode, assemble: true);
+          await controller.calculationSettled;
+        }
+      });
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(body: OpportunitiesWorkspace(controller: controller)),
+        ),
+      );
+      for (final mode in [...CraftMode.values, ...CraftMode.values.reversed]) {
+        await tester.tap(find.byKey(ValueKey('craft-mode-${mode.name}')));
+        // Inspect the first frame, not pumpAndSettle after the old work completes.
+        await tester.pump();
+        expect(controller.preferences.mode, mode);
+        expect(controller.calculating, isFalse);
+        expect(controller.visibleQuotes, isNotEmpty);
+        expect(find.byType(CircularProgressIndicator), findsNothing);
+        expect(tester.takeException(), isNull);
+      }
+      expect(fixture.transport.requests, 0);
+      await tester.pumpWidget(const SizedBox.shrink());
+      await tester.runAsync(fixture.dispose);
+    },
+  );
+
+  test(
+    'market updates received in another mode refresh only dependent cached rows',
+    () async {
+      final fixture = await _Fixture.create(useCatalog: true);
+      addTearDown(fixture.dispose);
+      final controller = fixture.controller;
+      controller.change((p) {
+        p.mode = CraftMode.cooking;
+        p.profitableOnly = false;
+      });
+      final id = controller.recipes['Beer']!.marketId!;
+      await fixture.broker.fetch(
+        quoteKeys: [SharedMarketKey(region: 'eu', itemId: id)],
+      );
+      await Future<void>.delayed(const Duration(milliseconds: 280));
+      await controller.calculationSettled;
+      final beer = fixture.quote('Beer');
+      final other = fixture.quote('Vinegar');
+      expect(beer.listingRevenue, isNotNull);
+      controller.change((p) => p.mode = CraftMode.alchemy, assemble: true);
+      await controller.calculationSettled;
+      fixture.now = fixture.now.add(const Duration(minutes: 1));
+      fixture.transport.price = 2000;
+      await fixture.broker.fetch(
+        quoteKeys: [SharedMarketKey(region: 'eu', itemId: id)],
+        forceRefresh: true,
+      );
+      await Future<void>.delayed(const Duration(milliseconds: 280));
+      await controller.calculationSettled;
+      final requests = fixture.transport.requests;
+      controller.change((p) => p.mode = CraftMode.cooking, assemble: true);
+      expect(fixture.quote('Beer'), same(beer));
+      expect(fixture.quote('Vinegar'), same(other));
+      await controller.calculationSettled;
+      expect(fixture.quote('Beer').listingRevenue, beer.listingRevenue! * 2);
+      expect(fixture.quote('Vinegar'), same(other));
+      expect(fixture.transport.requests, requests);
+    },
+  );
+
+  for (final backwards in [false, true]) {
+    test(
+      '${backwards ? 'clock rollback' : 'expiry'} cannot restore an invalid market valuation',
+      () async {
+        final fixture = await _Fixture.create(useCatalog: true);
+        addTearDown(fixture.dispose);
+        final controller = fixture.controller;
+        controller.change((p) => p.profitableOnly = false);
+        final id = controller.recipes['Beer']!.marketId!;
+        await fixture.broker.fetch(
+          quoteKeys: [SharedMarketKey(region: 'eu', itemId: id)],
+        );
+        await Future<void>.delayed(const Duration(milliseconds: 280));
+        await controller.calculationSettled;
+        expect(fixture.quote('Beer').listingRevenue, isNotNull);
+        controller.change((p) => p.mode = CraftMode.alchemy, assemble: true);
+        await controller.calculationSettled;
+        fixture.now = backwards
+            ? fixture.now.subtract(const Duration(seconds: 1))
+            : fixture.now.add(const Duration(hours: 3, milliseconds: 1));
+        controller.change((p) => p.mode = CraftMode.cooking, assemble: true);
+        expect(controller.quotes, isEmpty);
+        await controller.calculationSettled;
+        expect(fixture.quote('Beer').listingRevenue, isNull);
+      },
+    );
+  }
+
+  test('editing a hidden category invalidates its cached recipes', () async {
+    final fixture = await _Fixture.create(useCatalog: true);
+    addTearDown(fixture.dispose);
+    final controller = fixture.controller;
+    controller.change((p) => p.profitableOnly = false);
+    expect(controller.recipes, contains('Beer'));
+    controller.change((p) => p.mode = CraftMode.alchemy, assemble: true);
+    await controller.calculationSettled;
+    final cooking = controller.appController.modes[CraftMode.cooking]!;
+    cooking.state.value = cooking.state.value.copyWith(
+      recipeEdits: {...cooking.state.value.recipeEdits, 'Beer': null},
+    );
+    controller.change((p) => p.mode = CraftMode.cooking, assemble: true);
+    expect(controller.quotes, isEmpty);
+    await controller.calculationSettled;
+    // Assembly may keep the ingredient/reference stub, but not its formula.
+    expect(controller.recipes['Beer']?.isCraftable ?? false, isFalse);
+    expect(
+      controller.quotes.any((quote) => quote.recipeName == 'Beer'),
+      isFalse,
+    );
+  });
+
+  for (final change in ['mastery', 'inventory', 'tax']) {
+    test('$change changes invalidate a cached category valuation', () async {
+      final fixture = await _Fixture.create(useCatalog: true);
+      addTearDown(fixture.dispose);
+      final controller = fixture.controller;
+      controller.change((p) => p.useInventory = true);
+      await controller.calculationSettled;
+      controller.change((p) => p.mode = CraftMode.alchemy, assemble: true);
+      await controller.calculationSettled;
+      final cooking = controller.appController.modes[CraftMode.cooking]!;
+      switch (change) {
+        case 'mastery':
+          cooking.state.value = cooking.state.value.copyWith(
+            cookingMastery: 1700,
+          );
+        case 'inventory':
+          cooking.state.value = cooking.state.value.copyWith(
+            inventory: {'Corn': 200},
+          );
+        case 'tax':
+          controller.appController.marketTax.value = MarketTax(
+            enabled: false,
+            valuePack: false,
+            merchantRing: false,
+          );
+      }
+      controller.change((p) => p.mode = CraftMode.cooking, assemble: true);
+      expect(controller.quotes, isEmpty);
+      await controller.calculationSettled;
+      expect(controller.quotes, isNotEmpty);
+    });
+  }
+
+  test(
+    'a warm return during another category calculation keeps the destination results',
+    () async {
+      final fixture = await _Fixture.create(useCatalog: true);
+      addTearDown(fixture.dispose);
+      final controller = fixture.controller;
+      final cooking = controller.quotes;
+      controller.change((p) => p.mode = CraftMode.processing, assemble: true);
+      expect(controller.calculating, isTrue);
+      controller.change((p) => p.mode = CraftMode.cooking, assemble: true);
+      expect(controller.quotes, same(cooking));
+      await controller.calculationSettled;
+      expect(controller.quotes, same(cooking));
+    },
+  );
+
+  test(
+    'equal inventory survives mode switching and unrelated planner market edits',
+    () async {
+      final fixture = await _Fixture.create(useCatalog: true);
+      addTearDown(fixture.dispose);
+      final controller = fixture.controller;
+      final cooking = controller.appController.modes[CraftMode.cooking]!;
+      cooking.state.value = cooking.state.value.copyWith(
+        inventory: {'Corn': 200},
+      );
+      controller.change((p) => p.useInventory = true);
+      await controller.calculationSettled;
+      final saved = controller.quotes;
+      controller.change((p) => p.mode = CraftMode.alchemy, assemble: true);
+      await controller.calculationSettled;
+      cooking.state.value = cooking.state.value.copyWith(
+        market: cooking.state.value.market.copyWith(prices: {'Corn': 9999}),
+      );
+      controller.change((p) => p.mode = CraftMode.cooking, assemble: true);
+      expect(controller.quotes, same(saved));
+      expect(controller.calculating, isFalse);
+    },
+  );
+
+  test(
+    'regions keep separate valuations and warm returns restore the correct one',
+    () async {
+      final fixture = await _Fixture.create(useCatalog: true);
+      addTearDown(fixture.dispose);
+      final controller = fixture.controller;
+      final id = controller.recipes['Beer']!.marketId!;
+      await fixture.broker.fetch(
+        quoteKeys: [SharedMarketKey(region: 'eu', itemId: id)],
+      );
+      await Future<void>.delayed(const Duration(milliseconds: 280));
+      await controller.calculationSettled;
+      final eu = controller.quotes;
+      expect(fixture.quote('Beer').listingRevenue, isNotNull);
+      controller.change((p) => p.region = 'na');
+      expect(controller.quotes, isEmpty);
+      await controller.calculationSettled;
+      final na = controller.quotes;
+      expect(fixture.quote('Beer').listingRevenue, isNull);
+      controller.change((p) => p.region = 'eu');
+      expect(controller.quotes, same(eu));
+      expect(controller.calculating, isFalse);
+      controller.change((p) => p.region = 'na');
+      expect(controller.quotes, same(na));
+      expect(controller.calculating, isFalse);
+    },
+  );
+
+  test(
+    'partly searched categories retain known matches and fill missing rows on return',
+    () async {
+      final fixture = await _Fixture.create(useCatalog: true);
+      addTearDown(fixture.dispose);
+      final controller = fixture.controller;
+      controller.change((p) {
+        p.craftSearch = 'Beer';
+        p.profitableOnly = false;
+        p.useInventory = true;
+      });
+      await controller.calculationSettled;
+      final beer = fixture.quote('Beer');
+      controller.change((p) => p.mode = CraftMode.alchemy, assemble: true);
+      await controller.calculationSettled;
+      controller.change((p) {
+        p.mode = CraftMode.cooking;
+        p.craftSearch = '';
+      }, assemble: true);
+      expect(fixture.quote('Beer'), same(beer));
+      await controller.calculationSettled;
+      expect(controller.quotes.length, greaterThan(2));
+      expect(fixture.quote('Beer'), same(beer));
+    },
+  );
+
+  test(
+    'search prices only missing matches and reuses valid cached quotes',
+    () async {
+      final fixture = await _Fixture.create();
+      addTearDown(fixture.dispose);
+      final controller = fixture.controller;
+      // Searches are session-local; begin a fresh, filtered calculation after
+      // startup instead of relying on a persisted search from an older run.
+      controller.change((p) {
+        p.craftSearch = 'First';
+        p.useInventory = true;
+      });
+      await controller.calculationSettled;
+      expect(controller.quotes.map((q) => q.recipeName), ['First']);
+      final notifications = <bool>[];
+      controller.addListener(() => notifications.add(controller.calculating));
+
+      // Start new economics, then change the search while the isolate is active.
+      controller.change((p) => p.useInventory = false);
+      expect(controller.calculating, isTrue);
+      controller.change((p) => p.craftSearch = 'Second');
+      controller.change((p) => p.craftSearch = 'First');
+      await controller.calculationSettled;
+      expect(controller.visibleQuotes.map((q) => q.recipeName), ['First']);
+      expect(controller.quotes.map((q) => q.recipeName), ['First']);
+      expect(notifications.last, isFalse);
+      final first = fixture.quote('First');
+
+      controller.change((p) => p.craftSearch = ' Second ');
+      await controller.calculationSettled;
+      expect(controller.visibleQuotes.map((q) => q.recipeName), ['Second']);
+      expect(fixture.quote('First'), same(first));
+      final second = fixture.quote('Second');
+      controller.change((p) => p.craftSearch = '');
+      expect(controller.calculating, isFalse);
+      expect(fixture.quote('First'), same(first));
+      expect(fixture.quote('Second'), same(second));
+      expect(fixture.transport.requests, 0);
+    },
+  );
+
+  test(
+    'hidden stale quotes are recalculated when the search is cleared',
+    () async {
+      final fixture = await _Fixture.create();
+      addTearDown(fixture.dispose);
+      await fixture.loadDepth();
+      final controller = fixture.controller;
+      final first = fixture.quote('First');
+      controller.change((p) => p.craftSearch = 'First');
+      fixture.now = fixture.now.add(const Duration(minutes: 1));
+      fixture.transport.price = 2000;
+      await fixture.broker.fetch(
+        quoteKeys: [SharedMarketKey(region: 'eu', itemId: '9102')],
+        forceRefresh: true,
+      );
+      await Future<void>.delayed(const Duration(milliseconds: 280));
+      await controller.calculationSettled;
+      expect(fixture.quote('First'), same(first));
+      expect(controller.quotes.map((q) => q.recipeName), ['First']);
+      final requests = fixture.transport.requests;
+      controller.change((p) => p.craftSearch = '');
+      await controller.calculationSettled;
+      expect(fixture.quote('First'), same(first));
+      expect(
+        fixture.quote('Second').listingRevenue,
+        4000 * marketNetRate(controller.appController.marketTax.value),
+      );
+      expect(fixture.transport.requests, requests);
+    },
+  );
+
+  testWidgets('empty search result stops showing the calculation spinner', (
+    tester,
+  ) async {
+    configureApplicationTestSurface(tester, const Size(1500, 940));
+    final fixture = (await tester.runAsync(_Fixture.create))!;
+    final controller = fixture.controller;
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(body: OpportunitiesWorkspace(controller: controller)),
+      ),
+    );
+    await tester.runAsync(() async {
+      controller.change((p) => p.useInventory = true);
+      controller.change((p) => p.craftSearch = 'no matching recipe');
+      expect(controller.calculating, isTrue);
+      await controller.calculationSettled;
+    });
+    await tester.pumpAndSettle();
+    expect(controller.calculating, isFalse);
+    expect(controller.visibleQuotes, isEmpty);
+    expect(find.byType(CircularProgressIndicator), findsNothing);
+    expect(tester.takeException(), isNull);
+    await tester.pumpWidget(const SizedBox.shrink());
+    await tester.runAsync(fixture.dispose);
+  });
+
+  testWidgets(
+    'nonmarket output stays visible without redundant market explanations',
     (tester) async {
       configureApplicationTestSurface(tester, const Size(1500, 940));
       final fixture = (await tester.runAsync(_Fixture.create))!;
@@ -49,7 +448,7 @@ void main() {
         find.byKey(const ValueKey('craft-card:Bound output')),
         findsOneWidget,
       );
-      expect(find.text('Not sold on the market'), findsOneWidget);
+      expect(find.text('Not sold on the market'), findsNothing);
       expect(find.text('Check prices'), findsNothing);
       expect(fixture.controller.quotes.single, same(before));
       expect(tester.takeException(), isNull);
@@ -360,6 +759,7 @@ final class _Fixture {
   static Future<_Fixture> create({
     String? holdBook,
     bool autoCheck = false,
+    bool useCatalog = false,
     OpportunitiesPreferences? savedPreferences,
   }) async {
     final fixture = _Fixture(await ApplicationTestHarness.create());
@@ -390,9 +790,11 @@ final class _Fixture {
     );
     await fixture.controller.ready;
     fixture.requestsAtReady = fixture.transport.requests;
-    fixture.controller.recipes = _recipes();
-    fixture.controller.recalculate();
-    await fixture.controller.calculationSettled;
+    if (!useCatalog) {
+      fixture.controller.recipes = _recipes();
+      fixture.controller.recalculate();
+      await fixture.controller.calculationSettled;
+    }
     return fixture;
   }
 

@@ -2,9 +2,10 @@ import 'package:flutter/material.dart';
 
 import '../domain/models.dart';
 import '../widgets/spot_map.dart';
+import 'field_desk_materials.dart';
 import 'theme.dart';
 
-/// Reveals a changed stage without replacing its stateful editor or map.
+/// A brief heading reveal; never wrap the map or a stateful editor in this.
 class GatheringStageReveal extends StatefulWidget {
   const GatheringStageReveal({
     super.key,
@@ -60,7 +61,7 @@ class _GatheringStageRevealState extends State<GatheringStageReveal>
     opacity: Tween<double>(begin: .55, end: 1).animate(_reveal),
     child: SlideTransition(
       position: Tween<Offset>(
-        begin: const Offset(0, .012),
+        begin: const Offset(.015, 0),
         end: Offset.zero,
       ).animate(_reveal),
       child: widget.child,
@@ -100,20 +101,15 @@ class GatheringSpotBanner extends StatelessWidget {
       final identity = Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Container(
-            padding: const EdgeInsets.all(5),
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(17),
-              border: Border.all(color: gold.withValues(alpha: .4)),
-              color: const Color(0xCC101C25),
-              boxShadow: const [
-                BoxShadow(color: Color(0x33000000), blurRadius: 12),
-              ],
-            ),
-            child: GameIcon(
-              artwork,
-              size: compact ? 44 : 56,
-              backgroundColor: Colors.transparent,
+          GlassArtworkWell(
+            radius: 12,
+            child: Padding(
+              padding: const EdgeInsets.all(5),
+              child: GameIcon(
+                artwork,
+                size: compact ? 44 : 56,
+                backgroundColor: Colors.transparent,
+              ),
             ),
           ),
           const SizedBox(width: 16),
@@ -125,10 +121,10 @@ class GatheringSpotBanner extends StatelessWidget {
                 if (region.isNotEmpty) ...[
                   Text(
                     region.toUpperCase(),
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 10,
                       letterSpacing: 1.8,
-                      color: gold,
+                      color: context.gatheringColors.gold,
                       fontWeight: FontWeight.w700,
                     ),
                   ),
@@ -137,14 +133,15 @@ class GatheringSpotBanner extends StatelessWidget {
                 Text(
                   location?.displayName ?? customName,
                   style: TextStyle(
-                    fontSize: compact ? 24 : 30,
+                    fontFamily: 'Georgia',
+                    fontSize: compact ? 22 : 25,
                     height: 1.15,
                     letterSpacing: -.7,
-                    color: ink,
+                    color: context.gatheringColors.ink,
                     fontWeight: FontWeight.w700,
                   ),
                 ),
-                const SizedBox(height: 12),
+                const SizedBox(height: 8),
                 Row(
                   children: [
                     GlassArtworkWell(
@@ -161,7 +158,10 @@ class GatheringSpotBanner extends StatelessWidget {
                         location?.nodeName.isNotEmpty == true
                             ? '${method.label} · ${location!.nodeName}'
                             : method.label,
-                        style: const TextStyle(fontSize: 13, color: ink),
+                        style: TextStyle(
+                          fontSize: 13,
+                          color: context.gatheringColors.ink,
+                        ),
                       ),
                     ),
                   ],
@@ -194,88 +194,61 @@ class GatheringSpotBanner extends StatelessWidget {
             ),
         ],
       );
-      return DecoratedBox(
+      return ClipRRect(
         key: const ValueKey('chosen-spot-banner'),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(18),
-          boxShadow: context.glass.panelShadows,
-        ),
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(18),
-          child: Stack(
-            children: [
-              Positioned.fill(
-                child: ColoredBox(color: const Color(0xFF1B3943)),
-              ),
-              if (location?.mapped == true && active)
-                Positioned(
-                  top: 0,
-                  bottom: 0,
-                  right: 0,
-                  width: compact ? constraints.maxWidth : 460,
-                  child: ShaderMask(
-                    blendMode: BlendMode.dstIn,
-                    shaderCallback: (bounds) => const LinearGradient(
-                      colors: [Colors.transparent, Colors.white],
-                      stops: [0, .3],
-                    ).createShader(bounds),
-                    child: ExcludeSemantics(
-                      child: IgnorePointer(
-                        child: SpotMap(
-                          key: const ValueKey('chosen-spot-atmosphere'),
-                          spots: [location!],
-                          selected: location,
-                          methods: methods,
-                          onSelect: (_) => onMap(),
-                          preview: true,
-                        ),
+        borderRadius: BorderRadius.circular(10),
+        child: Stack(
+          children: [
+            if (location?.mapped == true && active)
+              Positioned(
+                top: 0,
+                bottom: 0,
+                right: 0,
+                width: compact ? constraints.maxWidth : 460,
+                child: ShaderMask(
+                  blendMode: BlendMode.dstIn,
+                  shaderCallback: (bounds) => const LinearGradient(
+                    colors: [Colors.transparent, Colors.white],
+                    stops: [0, .3],
+                  ).createShader(bounds),
+                  child: ExcludeSemantics(
+                    child: IgnorePointer(
+                      child: SpotMap(
+                        key: const ValueKey('chosen-spot-atmosphere'),
+                        spots: [location!],
+                        selected: location,
+                        methods: methods,
+                        onSelect: (_) => onMap(),
+                        preview: true,
                       ),
                     ),
                   ),
                 ),
-              const Positioned.fill(
-                child: DecoratedBox(
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      colors: [
-                        Color(0xFA142631),
-                        Color(0xE3142731),
-                        Color(0x70304A50),
+              ),
+            FieldDeskPanel(
+              radius: 10,
+              leadingWidth: compact ? 80 : 92,
+              leadingHeight: compact ? 100 : null,
+              trailingWidth: compact
+                  ? 0
+                  : location == null
+                  ? 72
+                  : 128,
+              padding: EdgeInsets.all(16),
+              child: compact
+                  ? Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [identity, const SizedBox(height: 16), actions],
+                    )
+                  : Row(
+                      children: [
+                        Expanded(child: identity),
+                        const SizedBox(width: 24),
+                        actions,
                       ],
-                      stops: [0, .52, 1],
                     ),
-                  ),
-                ),
-              ),
-              Positioned.fill(
-                child: DecoratedBox(
-                  decoration: BoxDecoration(
-                    border: Border.all(color: gold.withValues(alpha: .24)),
-                    borderRadius: BorderRadius.circular(18),
-                  ),
-                ),
-              ),
-              Padding(
-                padding: EdgeInsets.all(compact ? 18 : 24),
-                child: compact
-                    ? Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          identity,
-                          const SizedBox(height: 16),
-                          actions,
-                        ],
-                      )
-                    : Row(
-                        children: [
-                          Expanded(child: identity),
-                          const SizedBox(width: 24),
-                          actions,
-                        ],
-                      ),
-              ),
-            ],
-          ),
+            ),
+          ],
         ),
       );
     },

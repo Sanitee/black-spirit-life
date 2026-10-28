@@ -6,7 +6,7 @@
   <meta name="color-scheme" content="dark">
   <title>BDO Fish Map</title>
   <link rel="icon" href="/fishystuff.png">
-  <link rel="stylesheet" href="/app.css?v=1.0.54">
+  <link rel="stylesheet" href="/app.css?v=codex-depth-instruments-2">
 </head>
 <body>
   <div id="boot" class="boot" role="status" aria-live="polite">
@@ -22,7 +22,7 @@
           <img src="/fishystuff.png" alt="">
         </a>
         <button class="brand" data-go="map" aria-label="Open fish map">
-          <span><strong>Fish Map</strong><small>Black Desert Online</small></span>
+          <span><strong>Fish Map</strong><small>Fishing atlas</small></span>
         </button>
       </div>
 
@@ -72,6 +72,8 @@
             </button>
           </div>
 
+          <details class="atlas-filter-details">
+          <summary>Refine waters</summary>
           <div class="filter-grid">
             <label><span class="filter-label-row"><span>Sort by</span><small id="mapRankExperimental" class="experimental-pill" hidden>Experimental</small></span><select id="mapRank"><option value="red" title="Number of different red fish listed">Number of red fish</option><option value="value" title="Highest listed base fish value, not expected profit">Highest fish value</option><option value="consistent" title="Experimental modeled 25th percentile across 100 source-profile catches">Consistent money</option><option value="name">Name</option></select></label>
             <label><span>Water type</span><select id="mapDepth"><option value="all">Any</option><option value="inland">Inland</option><option value="coast">Coastal</option><option value="open-sea">Open sea</option><option value="depth-1">Depth 1</option><option value="depth-2">Depth 2</option><option value="depth-3">Depth 3</option><option value="depth-4">Depth 4</option><option value="depth-5">Depth 5</option></select></label>
@@ -79,6 +81,7 @@
           <p id="mapMoneyExplainer" class="map-money-explainer" title="Modeled from source-supplied loot weights and the source-selected calculator profile. Trade bonuses, resources and catch speed are excluded." hidden>100 catches · source profile · data may be incomplete</p>
 
           <label class="check-row" title="Source omissions are possible; this does not prove relics cannot drop."><input id="mapNoRelic" type="checkbox"><span class="check-box"></span><span>No relics listed</span></label>
+          </details>
 
           <div class="map-tool-footer">
             <span id="mapResultCount" class="result-count">Loading fishing spots…</span>
@@ -154,13 +157,13 @@
       <section id="page-capture" class="page content-page" aria-label="Add a fishing haul">
         <div class="desktop-content">
         <div class="content-heading">
-          <div><p class="eyebrow">Private journal</p><h1 id="haulPageTitle">Add a haul</h1><p id="haulPageDescription">Choose the setup, scan the tank, and check the recognized fish before saving.</p></div>
+          <div><p class="eyebrow">Catch record</p><h1 id="haulPageTitle">Add a haul</h1><p id="haulPageDescription" class="supporting-copy">Choose the setup, scan the tank, and check the recognized fish before saving.</p></div>
           <div class="capture-heading-actions"><button id="cancelHaulEdit" type="button" class="quiet-button is-hidden">Cancel editing</button><div class="privacy-chip"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 10V8a5 5 0 0 1 10 0v2h2v11H5V10h2Zm2 0h6V8a3 3 0 0 0-6 0v2Zm3 4a2 2 0 0 0-1 3.7V19h2v-1.3A2 2 0 0 0 12 14Z"/></svg>Images stay on this computer</div></div>
         </div>
 
         <div class="capture-layout">
           <form id="haulForm" class="surface setup-card" autocomplete="off">
-            <div class="section-title"><span>1</span><div><strong>Fishing setup</strong><small>Saved with this haul</small></div></div>
+            <div class="section-title"><span>1</span><div><strong>Fishing setup</strong></div></div>
 
             <div class="method-switch large" data-method-switch="capture" aria-label="Fishing method">
               <button type="button" class="method-button is-active" data-method="rod"><img src="/icon/16141.webp" alt=""><span>Fishing</span></button>
@@ -258,12 +261,12 @@
 
           <div class="capture-workflow">
           <div class="surface scan-card">
-            <div class="section-title"><span>2</span><div><strong>Scan the Fish Tank</strong><small>Use overlapping screenshots when the tank scrolls</small></div></div>
+            <div class="section-title" title="Use overlapping screenshots when the tank scrolls"><span>2</span><div><strong>Scan the Fish Tank</strong></div></div>
             <label id="dropZone" class="drop-zone">
               <input id="tankFiles" type="file" accept="image/png,image/jpeg,image/webp" multiple>
               <div class="drop-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 7 8h4v6h2V8h4l-5-5ZM5 13v6h14v-6h2v8H3v-8h2Z"/></svg></div>
-              <strong>Choose, drop, or paste screenshots</strong>
-              <span>PNG, JPG or WebP · Ctrl+V works with Lightshot</span>
+              <strong>Drop screenshots</strong>
+              <span>Browse or paste · PNG, JPG, WebP</span>
             </label>
             <div class="scan-actions">
               <div id="fileList" class="file-list"><span>No screenshots selected</span></div>
@@ -272,15 +275,15 @@
                 Recognize fish
               </button>
             </div>
-            <p class="privacy-note">Processed in memory and discarded after recognition.</p>
+            <p class="privacy-note" title="Processed in memory and discarded after recognition.">Local recognition</p>
           </div>
 
           <div id="reviewCard" class="surface review-card">
-            <div class="section-title"><span>3</span><div><strong>Review & save</strong><small>Nothing is saved until you confirm</small></div></div>
+            <div class="section-title" title="Nothing is saved until you confirm"><span>3</span><div><strong>Review & save</strong></div></div>
             <div id="reviewEmpty" class="empty-state compact">
               <div class="empty-stack"><span></span><span></span><span></span></div>
-              <strong>Your recognized fish will appear here</strong>
-              <p>You can correct every count before it enters the journal.</p>
+              <strong>Ready for your catch</strong>
+              <p>Scan a tank to review the fish.</p>
             </div>
             <div id="reviewContent" class="is-hidden">
               <div class="scan-summary"><div><strong id="reviewCount">0</strong><span>retained fish</span></div><div><strong id="reviewValue">—</strong><span>fish tank value</span></div><div><strong id="reviewCoverage">—</strong><span>tank coverage</span></div><div><strong id="reviewConfidence">—</strong><span>recognition</span></div></div>
@@ -300,7 +303,7 @@
       <section id="page-journal" class="page content-page" aria-label="Fishing journal">
         <div class="desktop-content">
         <div class="content-heading journal-heading">
-          <div><p class="eyebrow">Stored locally</p><h1>Fishing journal</h1></div>
+          <div><p class="eyebrow">Catch record</p><h1>Fishing journal</h1></div>
           <div class="journal-heading-actions">
             <button class="primary-button small" data-go="capture">+ Add haul</button>
           </div>
@@ -323,7 +326,7 @@
       <section id="page-stats" class="page content-page" aria-label="Personal fishing statistics">
         <div class="desktop-content">
         <div class="content-heading stats-heading">
-          <div><p class="eyebrow">Your saved catches</p><h1>Personal statistics</h1><p>Every average is calculated from retained fish, whether a tank was full or not.</p></div>
+          <div title="Averages use retained fish, whether a tank was full or not."><p class="eyebrow">Your waters</p><h1>Fishing statistics</h1></div>
           <div class="method-switch" data-method-switch="stats" aria-label="Statistics fishing method">
             <button class="method-button is-active" data-method="rod"><img src="/icon/16141.webp" alt=""><span>Fishing</span></button>
             <button class="method-button" data-method="harpoon"><img src="/icon/16154.webp" alt=""><span>Harpooning</span></button>
@@ -373,7 +376,7 @@
     <div id="profileModal" class="profile-backdrop is-hidden" aria-hidden="true">
       <section class="profile-modal surface" role="dialog" aria-modal="true" aria-labelledby="profileModalTitle">
         <header class="profile-modal-header">
-          <div><p class="eyebrow">Stored locally</p><h2 id="profileModalTitle">Fishing profiles</h2></div>
+          <div><h2 id="profileModalTitle">Fishing profiles</h2></div>
           <div class="profile-modal-header-actions"><span>Local only</span><button id="profileClose" type="button" aria-label="Close profiles"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6.7 5.3 5.3 5.3 5.3-5.3 1.4 1.4-5.3 5.3 5.3 5.3-1.4 1.4-5.3-5.3-5.3 5.3-1.4-1.4 5.3-5.3-5.3-5.3 1.4-1.4Z"/></svg></button></div>
         </header>
         <div class="profile-workspace">

@@ -12,12 +12,16 @@ import 'package:bdo_gathering_companion/src/services/host_services.dart';
 import 'package:bdo_gathering_companion/src/ui/buff_picker.dart';
 import 'package:bdo_gathering_companion/src/ui/loot_panel.dart';
 import 'package:bdo_gathering_companion/src/ui/theme.dart';
+import 'package:bdo_gathering_companion/src/ui/visual_palette.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 const _captureSession = bool.fromEnvironment('CAPTURE_GATHERING_SESSION');
+final _capturePalette = CompanionVisualPalette.decode(
+  const String.fromEnvironment('GATHERING_VISUAL_PALETTE'),
+);
 const _captureDirectory = String.fromEnvironment(
   'SESSION_CAPTURE_DIRECTORY',
   defaultValue: 'build/gathering-clarity-evidence',
@@ -246,7 +250,10 @@ void main() {
     key: capture,
     child: MaterialApp(
       debugShowCheckedModeBanner: false,
-      theme: companionTheme(opacityPercent: opacity),
+      theme: companionTheme(
+        opacityPercent: opacity,
+        visualPalette: _capturePalette,
+      ),
       builder: (context, child) => MediaQuery(
         data: MediaQuery.of(
           context,
@@ -438,7 +445,91 @@ void main() {
     },
   );
 
+  testWidgets('finder glass remains readable over close terrain', (
+    tester,
+  ) async {
+    tester.view.devicePixelRatio = 1;
+    tester.view.physicalSize = const Size(1563, 950);
+    addTearDown(tester.view.reset);
+    final oldShadows = debugDisableShadows;
+    if (_captureSession) debugDisableShadows = false;
+    final oldHttp = HttpOverrides.current;
+    final tileHttp = _captureSession ? _TileReadOverrides() : null;
+    if (tileHttp != null) HttpOverrides.global = tileHttp;
+    try {
+      final capture = GlobalKey();
+      for (final opacity in [25.0, 60.0, 100.0]) {
+        await tester.pumpWidget(session(capture, opacity: opacity));
+        // Let real HTTP progress before pumpAndSettle advances the test clock
+        // through the loading animation and its network timeout.
+        if (_captureSession) await _settleRealTiles(tester);
+        await tester.pumpAndSettle();
+        final search = find.byKey(const ValueKey('spot-search'));
+        if (opacity == 25) {
+          await tester.enterText(search, 'Wolf');
+          await tester.pumpAndSettle();
+          // Move the coast under the finder so this is a real busy-terrain
+          // contrast check, not translucent controls above an empty sea.
+          await tester.dragFrom(
+            tester
+                    .getRect(find.byKey(const ValueKey('spot-map-viewport')))
+                    .centerRight -
+                const Offset(100, 0),
+            const Offset(-600, 0),
+          );
+          await tester.pumpAndSettle();
+        }
+        if (_captureSession) {
+          await _settleRealTiles(tester);
+          await _capture(
+            tester,
+            capture,
+            'finder-terrain-opacity${opacity.toInt()}',
+          );
+        }
+        await tester.tap(
+          find.byKey(const ValueKey('spot-filter-compact-control')),
+        );
+        await tester.pumpAndSettle();
+        if (_captureSession) {
+          await _capture(
+            tester,
+            capture,
+            'finder-terrain-filters-opacity${opacity.toInt()}',
+          );
+        }
+        expect(
+          find.byKey(const ValueKey('spot-search')).hitTestable(),
+          findsOneWidget,
+        );
+        expect(tester.takeException(), isNull);
+        await tester.tap(
+          find.byKey(const ValueKey('spot-filter-compact-control')),
+        );
+        await tester.pumpAndSettle();
+      }
+      await tester.pumpWidget(const SizedBox.shrink());
+      await tester.pump();
+    } finally {
+      tileHttp?.close();
+      if (tileHttp != null) HttpOverrides.global = oldHttp;
+      debugDisableShadows = oldShadows;
+    }
+  });
+
   final scenarios = [
+    for (final viewport in const [
+      (size: Size(1563, 950), textScale: 1.0, opacity: 25.0),
+      (size: Size(1500, 950), textScale: 1.25, opacity: 60.0),
+      (size: Size(1800, 1100), textScale: 1.5, opacity: 60.0),
+    ])
+      (
+        size: viewport.size,
+        textScale: viewport.textScale,
+        opacity: viewport.opacity,
+        chosenSpot: true,
+        confirmedStats: false,
+      ),
     for (final size in const [Size(1563, 950), Size(1000, 800), Size(700, 900)])
       for (final textScale in [1.0, 2.0])
         (
@@ -505,15 +596,24 @@ void main() {
         );
         if (_captureSession) await _settleRealTiles(tester);
         await tester.pumpAndSettle();
-        expect(find.byKey(const ValueKey('workflow-tabs')), findsOneWidget);
-        expect(find.byKey(const ValueKey('workflow-rail')), findsNothing);
+        final hasRail =
+            scenario.size.width >= 1100 * scenario.textScale &&
+            scenario.size.height >= 540 * scenario.textScale;
+        expect(
+          find.byKey(const ValueKey('workflow-tabs')),
+          hasRail ? findsNothing : findsOneWidget,
+        );
+        expect(
+          find.byKey(const ValueKey('gathering-field-rail')),
+          hasRail ? findsOneWidget : findsNothing,
+        );
         final sessions = find.byKey(const ValueKey('workflow-history'));
         expect(
-          find.descendant(of: sessions, matching: find.text('Sessions')),
+          find.descendant(of: sessions, matching: find.text('Journal')),
           findsOneWidget,
         );
         expect(find.text('History'), findsNothing);
-        if (scenario.size.width >= 1100 * scenario.textScale) {
+        if (hasRail) {
           final first = tester.getRect(
             find.byKey(const ValueKey('workflow-spots')),
           );
@@ -524,8 +624,8 @@ void main() {
             'workflow-history',
           ]) {
             final next = tester.getRect(find.byKey(ValueKey(key)));
-            expect(next.top, moreOrLessEquals(first.top, epsilon: 1));
-            expect(next.left, greaterThanOrEqualTo(previous.right));
+            expect(next.left, moreOrLessEquals(first.left, epsilon: 1));
+            expect(next.top, greaterThanOrEqualTo(previous.bottom));
             previous = next;
           }
         }
@@ -753,7 +853,7 @@ void main() {
         await tester.ensureVisible(find.text('Save session'));
         await tester.pumpAndSettle();
         expect(find.text('Save session').hitTestable(), findsOneWidget);
-        if (extraDesktopEvidence) {
+        if (scenario.confirmedStats) {
           // An isolated, in-memory session fixture exercises real History UI.
           // No existing user sessions or disk-backed profile are read/written.
           final duration = find.byKey(const ValueKey('time-30'));
@@ -776,7 +876,58 @@ void main() {
           await tester.pumpAndSettle();
           expect(find.byKey(const ValueKey('history-filters')), findsOneWidget);
           expect(opacityControls, findsNothing);
-          await _capture(tester, capture, 'sessions-$suffix');
+          if (_captureSession) {
+            await _capture(tester, capture, 'sessions-$suffix');
+          }
+          final savedTitle = find.byWidgetPredicate(
+            (widget) =>
+                widget is Text &&
+                widget.key is ValueKey<String> &&
+                (widget.key! as ValueKey<String>).value.startsWith(
+                  'history-target-',
+                ),
+          );
+          await Scrollable.ensureVisible(
+            tester.element(savedTitle.first),
+            alignment: .25,
+          );
+          await tester.pumpAndSettle();
+          if (_captureSession && scenario.textScale > 1) {
+            await _capture(tester, capture, 'sessions-entry-$suffix');
+          }
+          if (_captureSession) {
+            final mouse = await tester.createGesture(
+              kind: ui.PointerDeviceKind.mouse,
+            );
+            await mouse.addPointer(location: Offset.zero);
+            await mouse.moveTo(tester.getCenter(savedTitle.first));
+            await tester.pumpAndSettle();
+            await _capture(tester, capture, 'sessions-hover-$suffix');
+            await mouse.removePointer();
+            await tester.pumpAndSettle();
+          }
+          final entryTotal = find.byWidgetPredicate(
+            (widget) =>
+                widget is Text &&
+                widget.key is ValueKey<String> &&
+                (widget.key! as ValueKey<String>).value.startsWith(
+                  'history-entry-total-',
+                ),
+          );
+          expect(tester.widget<Text>(entryTotal).data, '1,200');
+          expect(
+            tester.renderObject<RenderParagraph>(entryTotal).didExceedMaxLines,
+            isFalse,
+          );
+          expect(savedTitle.first.hitTestable(), findsOneWidget);
+          await tester.tap(savedTitle.first);
+          await tester.pumpAndSettle();
+          expect(find.byType(AlertDialog), findsOneWidget);
+          if (_captureSession) {
+            await _capture(tester, capture, 'session-detail-$suffix');
+          }
+          await tester.tap(find.text('Close').last);
+          await tester.pumpAndSettle();
         }
         expect(tester.takeException(), isNull);
         await tester.pumpWidget(const SizedBox.shrink());
@@ -884,6 +1035,10 @@ Future<void> _loadNativeFonts() async {
   final fonts = <String, List<String>>{
     'Segoe UI': [
       for (final name in ['segoeui.ttf', 'seguisb.ttf', 'segoeuib.ttf'])
+        '$windowsRoot/Fonts/$name',
+    ],
+    'Georgia': [
+      for (final name in ['georgia.ttf', 'georgiab.ttf'])
         '$windowsRoot/Fonts/$name',
     ],
     'Roboto': [

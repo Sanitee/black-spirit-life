@@ -14,6 +14,7 @@ import '../model/resource_map_data.dart';
 import '../model/tile_source.dart';
 import '../network/node_network_models.dart';
 import 'resource_map_chrome_theme.dart';
+import 'resource_map_annotation_clip.dart';
 import 'worker_activity_style.dart';
 
 const double _gatheringPointMinimumZoom = 4.15;
@@ -147,8 +148,7 @@ class BdoMapCanvas extends StatefulWidget {
 }
 
 class _BdoMapCanvasState extends State<BdoMapCanvas>
-    with TickerProviderStateMixin {
-  late final AnimationController _tileFade;
+    with SingleTickerProviderStateMixin {
   late final AnimationController _searchEmphasisPulse;
   late final FocusNode _focusNode;
   BdoMapCamera? _gestureStartCamera;
@@ -172,11 +172,6 @@ class _BdoMapCanvasState extends State<BdoMapCanvas>
   @override
   void initState() {
     super.initState();
-    _tileFade = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 180),
-      value: 1,
-    );
     _searchEmphasisPulse = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 1500),
@@ -184,9 +179,6 @@ class _BdoMapCanvasState extends State<BdoMapCanvas>
     );
     _lastDecodedTileRevision = widget.tileManager.decodedTileRevision;
     _lastDecodedTileCount = widget.tileManager.decodedTileCount;
-    if (_lastDecodedTileRevision > 0) {
-      _tileFade.forward(from: 0);
-    }
     _focusNode = FocusNode(debugLabel: 'BDO resource map');
     _lastUiZoom = widget.cameraController.camera.zoom;
     widget.cameraController.addListener(_handleCameraChanged);
@@ -208,17 +200,19 @@ class _BdoMapCanvasState extends State<BdoMapCanvas>
   void didUpdateWidget(BdoMapCanvas oldWidget) {
     super.didUpdateWidget(oldWidget);
     var engineChanged = false;
+    // Parent paint changes may rebuild equal immutable selection collections.
+    // Keep geographic layout and hit testing until their contents change.
     final overlaysChanged =
-        !identical(oldWidget.workerNodes, widget.workerNodes) ||
-        !identical(oldWidget.workerNodesById, widget.workerNodesById) ||
-        !identical(oldWidget.gatheringSpots, widget.gatheringSpots) ||
-        !identical(oldWidget.gatheringPoints, widget.gatheringPoints) ||
-        !identical(oldWidget.gatheringRoutes, widget.gatheringRoutes) ||
-        !identical(
+        !listEquals(oldWidget.workerNodes, widget.workerNodes) ||
+        !mapEquals(oldWidget.workerNodesById, widget.workerNodesById) ||
+        !listEquals(oldWidget.gatheringSpots, widget.gatheringSpots) ||
+        !listEquals(oldWidget.gatheringPoints, widget.gatheringPoints) ||
+        !listEquals(oldWidget.gatheringRoutes, widget.gatheringRoutes) ||
+        !listEquals(
           oldWidget.nodeNetworkEdgeChanges,
           widget.nodeNetworkEdgeChanges,
         ) ||
-        !identical(
+        !mapEquals(
           oldWidget.nodeNetworkChangeKinds,
           widget.nodeNetworkChangeKinds,
         ) ||
@@ -237,9 +231,6 @@ class _BdoMapCanvasState extends State<BdoMapCanvas>
       widget.tileManager.addListener(_handleTilesChanged);
       _lastDecodedTileRevision = widget.tileManager.decodedTileRevision;
       _lastDecodedTileCount = widget.tileManager.decodedTileCount;
-      if (_lastDecodedTileRevision > 0) {
-        _tileFade.forward(from: 0);
-      }
       engineChanged = true;
     }
     if (engineChanged || overlaysChanged) {
@@ -280,7 +271,6 @@ class _BdoMapCanvasState extends State<BdoMapCanvas>
   void dispose() {
     widget.cameraController.removeListener(_handleCameraChanged);
     widget.tileManager.removeListener(_handleTilesChanged);
-    _tileFade.dispose();
     _searchEmphasisPulse.dispose();
     _tilePaintRevision.dispose();
     _focusNode.dispose();
@@ -377,14 +367,11 @@ class _BdoMapCanvasState extends State<BdoMapCanvas>
         revision != _lastDecodedTileRevision ||
         decodedTileCount != _lastDecodedTileCount;
     _lastDecodedTileCount = decodedTileCount;
-    if (revision != _lastDecodedTileRevision) {
-      _lastDecodedTileRevision = revision;
-      _tileFade.forward(from: 0);
-    }
+    _lastDecodedTileRevision = revision;
     if (decodedTilesChanged && mounted) {
-      // A decoded tile only needs a repaint. Keeping this out of setState
-      // preserves the painter's retained dense-route geometry and avoids a
-      // widget rebuild on every image arrival/fade tick.
+      // Present decoded images once at their settled opacity. A tile-arrival
+      // ticker darkened cold tiles and repainted the map for prefetched images
+      // too. Keep this out of setState to retain dense-route geometry.
       _tilePaintRevision.value += 1;
     }
   }
@@ -545,6 +532,7 @@ class _BdoMapCanvasState extends State<BdoMapCanvas>
   }
 
   void _handleTapUp(TapUpDetails details) {
+    if (_annotationCovered(details.localPosition)) return;
     final target = _hitTargetAt(details.localPosition);
     if (target != null) {
       final hit = target.hit;
@@ -584,7 +572,17 @@ class _BdoMapCanvasState extends State<BdoMapCanvas>
   }
 
   BdoMapHitTarget? _hitTargetAt(Offset position) {
+    if (_annotationCovered(position)) return null;
     return _overlayLayoutForCurrentViewport().hitTest(position);
+  }
+
+  bool _annotationCovered(Offset position) {
+    final occlusion = ResourceMapAnnotationScope.of(context);
+    if (occlusion == null) return false;
+    final box = context.findRenderObject() as RenderBox;
+    return !occlusion
+        .visiblePath(box.localToGlobal(Offset.zero), _viewport)
+        .contains(position);
   }
 
   BdoMapOverlayLayout _overlayLayoutForCurrentViewport() {
@@ -635,6 +633,7 @@ class _BdoMapCanvasState extends State<BdoMapCanvas>
 
   @override
   Widget build(BuildContext context) {
+    final annotationOcclusion = ResourceMapAnnotationScope.of(context);
     return LayoutBuilder(
       builder: (context, constraints) {
         final nextViewport = Size(constraints.maxWidth, constraints.maxHeight);
@@ -707,9 +706,22 @@ class _BdoMapCanvasState extends State<BdoMapCanvas>
                                   painter: BdoMapPainter(
                                     repaint: Listenable.merge(<Listenable>[
                                       widget.cameraController,
-                                      _tileFade,
                                       _tilePaintRevision,
+                                      ?annotationOcclusion,
                                     ]),
+                                    annotationClip: annotationOcclusion == null
+                                        ? null
+                                        : (canvas, size) {
+                                            final box =
+                                                context.findRenderObject()
+                                                    as RenderBox;
+                                            canvas.clipPath(
+                                              annotationOcclusion.visiblePath(
+                                                box.localToGlobal(Offset.zero),
+                                                size,
+                                              ),
+                                            );
+                                          },
                                     cameraController: widget.cameraController,
                                     tileManager: widget.tileManager,
                                     workerNodes: widget.workerNodes,
@@ -747,7 +759,6 @@ class _BdoMapCanvasState extends State<BdoMapCanvas>
                                     tilePaintRevision: _tilePaintRevision.value,
                                     tilePaintRevisionListenable:
                                         _tilePaintRevision,
-                                    tileFadeProgress: _tileFade.value,
                                   ),
                                   size: Size.infinite,
                                 ),
@@ -757,28 +768,30 @@ class _BdoMapCanvasState extends State<BdoMapCanvas>
                                   key: const ValueKey<String>(
                                     'bdo-map-search-emphasis-boundary',
                                   ),
-                                  child: IgnorePointer(
-                                    child: AnimatedBuilder(
-                                      animation: _searchEmphasisPulse,
-                                      builder: (context, child) {
-                                        return CustomPaint(
-                                          key: const ValueKey<String>(
-                                            'bdo-map-search-emphasis-paint',
-                                          ),
-                                          painter: BdoMapSearchEmphasisPainter(
-                                            overlayLayoutProvider:
-                                                _overlayLayoutForCurrentViewport,
-                                            emphasizedNodeIds:
-                                                widget.emphasizedNodeIds,
-                                            selectedNodeId:
-                                                widget.selectedNodeId,
-                                            pulse: _searchEmphasisPulse.value,
-                                            chromeTheme: widget.chromeTheme,
-                                            repaint: widget.cameraController,
-                                          ),
-                                          size: Size.infinite,
-                                        );
-                                      },
+                                  child: ResourceMapAnnotationClip(
+                                    child: IgnorePointer(
+                                      child: AnimatedBuilder(
+                                        animation: _searchEmphasisPulse,
+                                        builder: (context, child) {
+                                          return CustomPaint(
+                                            key: const ValueKey<String>(
+                                              'bdo-map-search-emphasis-paint',
+                                            ),
+                                            painter: BdoMapSearchEmphasisPainter(
+                                              overlayLayoutProvider:
+                                                  _overlayLayoutForCurrentViewport,
+                                              emphasizedNodeIds:
+                                                  widget.emphasizedNodeIds,
+                                              selectedNodeId:
+                                                  widget.selectedNodeId,
+                                              pulse: _searchEmphasisPulse.value,
+                                              chromeTheme: widget.chromeTheme,
+                                              repaint: widget.cameraController,
+                                            ),
+                                            size: Size.infinite,
+                                          );
+                                        },
+                                      ),
                                     ),
                                   ),
                                 ),
@@ -793,7 +806,14 @@ class _BdoMapCanvasState extends State<BdoMapCanvas>
                           ),
                         ),
                       ),
-                      ...widget.markerOverlays,
+                      Positioned.fill(
+                        child: ResourceMapAnnotationClip(
+                          child: Stack(
+                            fit: StackFit.expand,
+                            children: widget.markerOverlays,
+                          ),
+                        ),
+                      ),
                     ],
                   ),
                 ),
@@ -1516,6 +1536,7 @@ class BdoMapHitTarget {
 class BdoMapPainter extends CustomPainter {
   BdoMapPainter({
     super.repaint,
+    this.annotationClip,
     required this.cameraController,
     required this.tileManager,
     required this.workerNodes,
@@ -1544,11 +1565,11 @@ class BdoMapPainter extends CustomPainter {
     this.overlayLayoutProvider,
     this.tilePaintRevision = 0,
     this.tilePaintRevisionListenable,
-    this.tileFadeProgress = 1,
   }) : cameraSnapshot = cameraController.camera,
        tileSourceSnapshot = cameraController.tileSource;
 
   final BdoMapCameraController cameraController;
+  final void Function(Canvas, Size)? annotationClip;
   final BdoTileManager tileManager;
   final List<BdoWorkerNode> workerNodes;
   final Map<String, BdoWorkerNode> workerNodesById;
@@ -1576,7 +1597,6 @@ class BdoMapPainter extends CustomPainter {
   final BdoMapOverlayLayout Function()? overlayLayoutProvider;
   final int tilePaintRevision;
   final ValueListenable<int>? tilePaintRevisionListenable;
-  final double tileFadeProgress;
   final BdoMapCamera cameraSnapshot;
   final BdoTileSource tileSourceSnapshot;
 
@@ -1663,6 +1683,7 @@ class BdoMapPainter extends CustomPainter {
       canvas.drawRect(Offset.zero & size, Paint()..color = chromeTheme.canvas);
       _paintTiles(canvas, size);
       _paintMapShade(canvas, size);
+      annotationClip?.call(canvas, size);
       // Paint each edge only in its strongest applicable tier. This keeps
       // relevant and planned routes crisp instead of stacking translucent
       // neutral strokes beneath them.
@@ -1712,17 +1733,17 @@ class BdoMapPainter extends CustomPainter {
     for (final coordinate in coordinates) {
       final destination = _screenRectForTile(coordinate, size);
       final exact = tileManager.tile(coordinate);
+      // Keep ancestor cache promotion consistent while exact tiles are visible.
       final ancestor = tileManager.nearestAncestor(coordinate);
       if (exact == null) {
         if (ancestor != null) {
-          _drawAncestor(canvas, ancestor, coordinate, destination, 1);
+          _drawAncestor(canvas, ancestor, coordinate, destination);
         }
         continue;
       }
-      final tileOpacity = _tileOpacity(exact);
-      if (ancestor != null && tileOpacity < 1) {
-        _drawAncestor(canvas, ancestor, coordinate, destination, 1);
-      }
+      // Cold and retained tiles must have the same first-paint brightness.
+      // Partial alpha over the canvas also double-blends overlapping tile
+      // edges. Replace any ancestor directly once the exact image is ready.
       canvas.drawImageRect(
         exact.image,
         Rect.fromLTWH(
@@ -1734,17 +1755,9 @@ class BdoMapPainter extends CustomPainter {
         destination.inflate(0.35),
         Paint()
           ..filterQuality = FilterQuality.low
-          ..color = Color.fromRGBO(255, 255, 255, tileOpacity)
           ..colorFilter = _basemapColorFilter,
       );
     }
-  }
-
-  double _tileOpacity(BdoDecodedTile tile) {
-    const fadeDuration = Duration(milliseconds: 180);
-    final elapsed = DateTime.now().difference(tile.loadedAt);
-    final progress = elapsed.inMicroseconds / fadeDuration.inMicroseconds;
-    return Curves.easeOut.transform(progress.clamp(0.0, 1.0));
   }
 
   void _drawAncestor(
@@ -1752,7 +1765,6 @@ class BdoMapPainter extends CustomPainter {
     BdoDecodedTile ancestor,
     BdoTileCoordinate target,
     Rect destination,
-    double opacity,
   ) {
     final difference = target.zoom - ancestor.coordinate.zoom;
     final factor = 1 << difference;
@@ -1772,7 +1784,6 @@ class BdoMapPainter extends CustomPainter {
       destination.inflate(0.5),
       Paint()
         ..filterQuality = FilterQuality.low
-        ..color = Color.fromRGBO(255, 255, 255, opacity)
         ..colorFilter = _basemapColorFilter,
     );
   }
@@ -3284,12 +3295,12 @@ class BdoMapPainter extends CustomPainter {
   @override
   bool shouldRepaint(covariant BdoMapPainter oldDelegate) {
     return oldDelegate.cameraController != cameraController ||
+        oldDelegate.annotationClip != annotationClip ||
         oldDelegate.cameraSnapshot.center != cameraSnapshot.center ||
         oldDelegate.cameraSnapshot.zoom != cameraSnapshot.zoom ||
         oldDelegate.tileSourceSnapshot != tileSourceSnapshot ||
         oldDelegate.tileManager != tileManager ||
         oldDelegate.tilePaintRevision != tilePaintRevision ||
-        oldDelegate.tileFadeProgress != tileFadeProgress ||
         !identical(oldDelegate.overlayLayout, overlayLayout) ||
         oldDelegate.overlayLayoutProvider != overlayLayoutProvider ||
         !identical(oldDelegate.workerNodes, workerNodes) ||

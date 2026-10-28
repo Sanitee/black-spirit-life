@@ -244,15 +244,12 @@ void main() {
     }, assemble: true);
     await _completeIo(tester, fixture.controller.calculationSettled);
     await _settle(tester);
-    await tester.tap(
-      find.byKey(const ValueKey('craft-card:Concentrated Magical Black Gem')),
-    );
-    await _settle(tester);
+    await _inspectCard(tester, 'Concentrated Magical Black Gem');
     await tester.ensureVisible(_region('ingredient:Black Gem'));
     await tester.tap(find.byKey(const ValueKey('ingredient-recipe-Black Gem')));
     await _settle(tester);
     expect(_region('opportunity-title:Black Gem'), findsOneWidget);
-    await tester.tap(find.text('Standard · 10×'));
+    await tester.tap(find.byKey(const ValueKey('opportunity-recipe-batch:10')));
     await _settle(tester);
     expect(_region('ingredient:Black Stone Powder'), findsOneWidget);
     await _menu(tester, 'opportunity-title:Black Gem');
@@ -327,8 +324,7 @@ void main() {
       }, assemble: true);
       await _completeIo(tester, fixture.controller.calculationSettled);
       await _settle(tester);
-      await tester.tap(find.byKey(const ValueKey('craft-card:Fruit Pudding')));
-      await _settle(tester);
+      await _inspectCard(tester, 'Fruit Pudding');
       await _menu(tester, 'ingredient:Cream');
       await tester.tap(find.text('Set planner target'));
       await _settle(tester);
@@ -352,8 +348,9 @@ bool? _selected(WidgetTester tester, String name) =>
 String _search(WidgetTester tester) => tester
     .widget<TextField>(
       find.descendant(
-        of: find.byKey(const ValueKey('craft-search')),
-        matching: find.byType(TextField),
+        of: find.byKey(const ValueKey('craft-search'), skipOffstage: false),
+        matching: find.byType(TextField, skipOffstage: false),
+        skipOffstage: false,
       ),
     )
     .controller!
@@ -391,9 +388,21 @@ Future<void> _openButter(
   }, assemble: true);
   await _completeIo(tester, controller.calculationSettled);
   await _settle(tester);
-  await tester.tap(find.byKey(const ValueKey('craft-card:Butter')));
-  await _settle(tester);
+  await _inspectCard(tester, 'Butter');
   expect(_region('ingredient:Cream'), findsOneWidget);
+}
+
+Future<void> _inspectCard(WidgetTester tester, String name) async {
+  await tester.tap(find.byKey(ValueKey('craft-expand-button:$name')));
+  await _settle(tester);
+  expect(find.byType(Dialog), findsNothing);
+  final header = find.byKey(ValueKey('craft-expand:$name'));
+  await tester.ensureVisible(header);
+  await _settle(tester);
+  await tester.tapAt(tester.getCenter(header), buttons: kSecondaryMouseButton);
+  await _settle(tester);
+  await tester.tap(find.text('View recipe'));
+  await _settle(tester);
 }
 
 Future<_Fixture> _mount(

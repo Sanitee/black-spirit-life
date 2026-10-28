@@ -283,6 +283,66 @@ void main() {
   );
 
   test(
+    'cross-mode NPC prices skip the gateway without rewriting caches',
+    () async {
+      const catalyst = 'Concentrated Spellbound Catalyst';
+      final recipes = {catalyst: _recipe(catalyst)};
+      final gateway = _FakeGateway(
+        (_, _) async => throw StateError('No fetch'),
+      );
+      final coordinator = MarketRefreshCoordinator(
+        gateway: gateway,
+        catalogRepository: _repository(
+          recipes: recipes,
+          processingRecipes: {catalyst: _recipe(catalyst, npcPrice: 10000000)},
+        ),
+      );
+      final market = _market(
+        prices: const {catalyst: 1},
+        stock: const {catalyst: 4},
+        fetchedAt: 44,
+      );
+      final result = await coordinator.refresh(
+        mode: CraftMode.alchemy,
+        assembledRecipes: recipes,
+        currentMarket: market,
+        missingMaterialNames: const [catalyst],
+      );
+      expect(result.status, MarketRefreshStatus.npcPricesOnly);
+      expect(result.diagnostics, isEmpty);
+      expect(gateway.calls, isEmpty);
+      expect(result.prices, market.prices);
+      expect(result.stock, market.stock);
+      expect(result.fetchedAt, 44);
+    },
+  );
+
+  test('conflicting NPC records remain unresolved rather than free', () async {
+    const name = 'Conflicting item';
+    final gateway = _FakeGateway((_, _) async => throw StateError('No fetch'));
+    final coordinator = MarketRefreshCoordinator(
+      gateway: gateway,
+      catalogRepository: _repository(
+        recipes: {name: _recipe(name, npcPrice: 10)},
+        processingRecipes: {name: _recipe(name, npcPrice: 20)},
+      ),
+    );
+    final result = await coordinator.refresh(
+      mode: CraftMode.cooking,
+      assembledRecipes: {name: _recipe(name)},
+      currentMarket: _market(),
+      missingMaterialNames: const [name],
+    );
+    expect(result.status, MarketRefreshStatus.noResolvableItems);
+    expect(
+      result.diagnostics.single.code,
+      MarketRefreshDiagnosticCode.unresolvedMarketId,
+    );
+    expect(result.diagnostics.single.message, 'Price unavailable.');
+    expect(gateway.calls, isEmpty);
+  });
+
+  test(
     'uses exact recipe, alias, then normalized catalog ID precedence',
     () async {
       final recipes = <String, Recipe>{
@@ -880,7 +940,7 @@ void main() {
   );
 
   test(
-    'unresolved and malformed IDs are skipped with actionable diagnostics',
+    'unresolved and malformed IDs keep internal codes but plain price copy',
     () async {
       final recipes = <String, Recipe>{
         'Missing': _recipe('Missing'),
@@ -900,6 +960,13 @@ void main() {
       expect(result.status, MarketRefreshStatus.noResolvableItems);
       expect(gateway.calls, isEmpty);
       expect(result.summary.unresolvedMaterialCount, 3);
+      expect(result.summary.message, 'Price unavailable.');
+      expect(
+        result.diagnostics
+            .where((item) => item.materialName != null)
+            .map((item) => item.message),
+        everyElement('Price unavailable.'),
+      );
       expect(
         result.diagnostics.map((diagnostic) => diagnostic.code),
         containsAll(<MarketRefreshDiagnosticCode>[
@@ -1074,6 +1141,7 @@ MarketRefreshCoordinator _coordinator(
 
 CatalogRepository _repository({
   required Map<String, Recipe> recipes,
+  Map<String, Recipe> processingRecipes = const {},
   Map<String, Object?> supportingData = const {},
 }) => CatalogRepository(
   CatalogSnapshot(
@@ -1081,7 +1149,7 @@ CatalogRepository _repository({
     sourceByteCount: 1,
     alchemy: _modeCatalog(CraftMode.alchemy, recipes),
     cooking: _modeCatalog(CraftMode.cooking, const {}),
-    processing: _modeCatalog(CraftMode.processing, const {}),
+    processing: _modeCatalog(CraftMode.processing, processingRecipes),
     supportingData: supportingData,
     collisions: const [],
   ),
@@ -1097,7 +1165,7 @@ ModeCatalog _modeCatalog(CraftMode mode, Map<String, Recipe> recipes) =>
       searchAliases: const {},
     );
 
-Recipe _recipe(String name, {String? marketId}) => Recipe(
+Recipe _recipe(String name, {String? marketId, double npcPrice = 0}) => Recipe(
   name: name,
   type: 'gathered',
   baseOutput: 1,
@@ -1108,7 +1176,7 @@ Recipe _recipe(String name, {String? marketId}) => Recipe(
   sourceNote: null,
   vendor: null,
   location: null,
-  npcPrice: 0,
+  npcPrice: npcPrice,
   qualityBase: null,
   qualityGrade: null,
   outputMinimum: null,

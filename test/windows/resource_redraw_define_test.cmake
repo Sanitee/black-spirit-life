@@ -1,0 +1,91 @@
+cmake_minimum_required(VERSION 3.14)
+
+if(NOT DEFINED BSL_REPO_ROOT)
+  get_filename_component(BSL_REPO_ROOT "${CMAKE_CURRENT_LIST_DIR}/../.." ABSOLUTE)
+endif()
+include("${BSL_REPO_ROOT}/windows/runner/resource_redraw_diagnostic.cmake")
+
+set(REDRAW_TRUE "QlNMX0RJQUdOT1NUSUNfUkVTT1VSQ0VfUkVEUkFXPXRydWU=")
+set(REDRAW_FALSE "QlNMX0RJQUdOT1NUSUNfUkVTT1VSQ0VfUkVEUkFXPWZhbHNl")
+set(CAPTURE_TRUE "QlNMX0RJQUdOT1NUSUNfUkVTT1VSQ0VfRlJBTUVfQ0FQVFVSRT10cnVl")
+set(CAPTURE_FALSE "QlNMX0RJQUdOT1NUSUNfUkVTT1VSQ0VfRlJBTUVfQ0FQVFVSRT1mYWxzZQ==")
+set(OTHER_DEFINE "RkxVVFRFUl9WRVJTSU9OPTMuNDQuOQ==")
+
+function(expect_flag DEFINES EXPECTED LABEL)
+  # A previous configure/result must not make an absent or false flag sticky.
+  set(ACTUAL 1)
+  bsl_resource_redraw_flag("${DEFINES}" ACTUAL)
+  if(NOT "${ACTUAL}" STREQUAL "${EXPECTED}")
+    message(FATAL_ERROR "${LABEL}: expected ${EXPECTED}, got '${ACTUAL}'.")
+  endif()
+endfunction()
+
+if(MODE STREQUAL "raw_capture")
+  bsl_resource_redraw_flag("${REDRAW_TRUE},${CAPTURE_TRUE}" RESULT)
+  message(FATAL_ERROR "Rejection missing: redraw with F8 capture was accepted.")
+elseif(MODE STREQUAL "raw_conflict")
+  bsl_resource_redraw_flag("${REDRAW_FALSE},${OTHER_DEFINE},${REDRAW_TRUE}" RESULT)
+  message(FATAL_ERROR "Rejection missing: conflicting true/false was accepted.")
+elseif(MODE STREQUAL "reject_capture" OR MODE STREQUAL "reject_conflict")
+  string(REPLACE "reject_" "raw_" CHILD_MODE "${MODE}")
+  execute_process(
+    COMMAND "${CMAKE_COMMAND}" "-DBSL_REPO_ROOT=${BSL_REPO_ROOT}"
+      "-DMODE=${CHILD_MODE}" -P "${CMAKE_CURRENT_LIST_FILE}"
+    RESULT_VARIABLE CHILD_RESULT
+    OUTPUT_VARIABLE CHILD_OUTPUT
+    ERROR_VARIABLE CHILD_ERROR
+    TIMEOUT 10)
+  if("${CHILD_RESULT}" STREQUAL "0")
+    message(FATAL_ERROR "${MODE}: invalid combination unexpectedly succeeded.")
+  endif()
+  if(NOT "${CHILD_OUTPUT}${CHILD_ERROR}" MATCHES
+      "Resource redraw requires one unambiguous define and no F8 capture define")
+    message(FATAL_ERROR "${MODE}: failed for an unexpected reason: ${CHILD_RESULT}\n${CHILD_OUTPUT}${CHILD_ERROR}")
+  endif()
+  message(STATUS "${MODE}: expected exact helper rejection verified.")
+else()
+  expect_flag("" 0 "absent define defaults off")
+  expect_flag("${OTHER_DEFINE}" 0 "unrelated define stays off")
+  expect_flag("${REDRAW_FALSE}" 0 "explicit false stays off")
+  expect_flag("${CAPTURE_TRUE}" 0 "capture alone does not enable redraw")
+  expect_flag("${REDRAW_TRUE}" 1 "exact true token enables")
+  expect_flag("${OTHER_DEFINE},${REDRAW_TRUE}" 1 "true token at end")
+  expect_flag("${REDRAW_TRUE},${OTHER_DEFINE}" 1 "true token at beginning")
+  expect_flag("${OTHER_DEFINE},${REDRAW_TRUE},${CAPTURE_FALSE}" 1
+    "exact true amid unrelated and disabled capture")
+  expect_flag("${REDRAW_TRUE},${REDRAW_TRUE}" 1
+    "identical duplicated true tokens remain unambiguous")
+  expect_flag("BSL_DIAGNOSTIC_RESOURCE_REDRAW=true" 0 "raw text is not encoded token")
+  expect_flag("prefix${REDRAW_TRUE}" 0 "prefixed near match stays off")
+  expect_flag("${REDRAW_TRUE}suffix" 0 "suffixed near match stays off")
+  expect_flag(" ${REDRAW_TRUE}" 0 "leading space is not exact token")
+  expect_flag("${REDRAW_TRUE} " 0 "trailing space is not exact token")
+  string(LENGTH "${REDRAW_TRUE}" TRUE_LENGTH)
+  math(EXPR UNPADDED_LENGTH "${TRUE_LENGTH} - 1")
+  string(SUBSTRING "${REDRAW_TRUE}" 0 ${UNPADDED_LENGTH} UNPADDED_TRUE)
+  expect_flag("${UNPADDED_TRUE}" 0 "missing base64 padding stays off")
+  expect_flag("${REDRAW_TRUE},${CAPTURE_TRUE}suffix" 1
+    "near capture token is not mistaken for enabled capture")
+  expect_flag("${REDRAW_TRUE},prefix${REDRAW_FALSE}" 1
+    "near false token is not mistaken for conflict")
+
+  set(STATE 1)
+  bsl_resource_redraw_flag("" STATE)
+  if(NOT STATE EQUAL 0)
+    message(FATAL_ERROR "Previously enabled output did not reset on absent define.")
+  endif()
+  bsl_resource_redraw_flag("${REDRAW_TRUE}" STATE)
+  if(NOT STATE EQUAL 1)
+    message(FATAL_ERROR "Exact true did not enable after reset.")
+  endif()
+  bsl_resource_redraw_flag("${REDRAW_FALSE}" STATE)
+  if(NOT STATE EQUAL 0)
+    message(FATAL_ERROR "Explicit false did not reset prior enabled output.")
+  endif()
+  bsl_resource_redraw_flag("${REDRAW_TRUE}" STATE)
+  bsl_resource_redraw_flag("${OTHER_DEFINE}" STATE)
+  if(NOT STATE EQUAL 0)
+    message(FATAL_ERROR "Unrelated defines did not reset prior enabled output.")
+  endif()
+  message(STATUS "Resource redraw exact-token/default/reset checks passed.")
+endif()

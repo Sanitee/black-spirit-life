@@ -178,6 +178,34 @@ void main() {
       );
     });
 
+    test('profile reset allowance is exact and native-bootstrap-only', () {
+      const reset =
+          '::SetEnvironmentVariableW(L"WEBVIEW2_USER_DATA_FOLDER", nullptr);';
+      expect(
+        _removeApprovedGeneratedPluginReferences(
+          'windows/runner/main.cpp',
+          reset,
+        ),
+        isEmpty,
+      );
+      expect(
+        _removeApprovedGeneratedPluginReferences(
+          'windows/runner/flutter_window.cpp',
+          reset,
+        ),
+        reset,
+      );
+      const otherOperation =
+          '::SetEnvironmentVariableW(L"WEBVIEW2_USER_DATA_FOLDER", L"other");';
+      expect(
+        _removeApprovedGeneratedPluginReferences(
+          'windows/runner/main.cpp',
+          '$reset\n$otherOperation\nWebViewController controller;',
+        ),
+        '$otherOperation\nWebViewController controller;',
+      );
+    });
+
     test('shipped assets and platform roots contain no browser code', () {
       final pubspec = File(_join(project.path, 'pubspec.yaml'));
       final assetFiles = <File>{};
@@ -295,6 +323,18 @@ String _removeApprovedGeneratedPluginReferences(
   String source,
 ) {
   final normalized = relativePath.replaceAll('\\', '/').toLowerCase();
+  if (normalized == 'windows/runner/main.cpp') {
+    // This exact bootstrap operation removes an inherited profile override;
+    // it does not create a web surface. Keep scanning all other source lines.
+    return const LineSplitter()
+        .convert(source)
+        .where(
+          (line) =>
+              line.trim() !=
+              '::SetEnvironmentVariableW(L"WEBVIEW2_USER_DATA_FOLDER", nullptr);',
+        )
+        .join('\n');
+  }
   if (!const <String>{
     'windows/flutter/generated_plugin_registrant.cc',
     'windows/flutter/generated_plugin_registrant.h',

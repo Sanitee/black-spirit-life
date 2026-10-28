@@ -9,9 +9,11 @@ import 'package:bdo_craft_planner_flutter/data/opportunities/market_eligibility.
 import 'package:bdo_craft_planner_flutter/data/opportunities/opportunity_market_cache_store.dart';
 import 'package:bdo_craft_planner_flutter/data/opportunities/opportunity_market_service.dart';
 import 'package:bdo_craft_planner_flutter/domain/models/craft_mode.dart';
+import 'package:bdo_craft_planner_flutter/domain/opportunities/opportunity_card_reading.dart';
 import 'package:bdo_craft_planner_flutter/features/opportunities/opportunities_controller.dart';
 import 'package:bdo_craft_planner_flutter/features/opportunities/opportunities_preferences.dart';
 import 'package:bdo_craft_planner_flutter/features/opportunities/opportunities_workspace.dart';
+import 'package:bdo_craft_planner_flutter/features/opportunities/opportunity_craft_card_material.dart';
 import 'package:bdo_craft_planner_flutter/visual/visual.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -26,8 +28,12 @@ const _captureKey = ValueKey('card-market-capture');
 Finder _key(String value) => find.byKey(ValueKey(value));
 Finder _card(String name) => _key('craft-card:$name');
 Finder _summary(String name) => _key('craft-summary:$name');
-Finder _stock(String name, String text) =>
-    find.descendant(of: _summary(name), matching: find.text(text));
+Finder _stock(String name, String text) => find.descendant(
+  of: _summary(name),
+  matching: find.text(
+    text.startsWith('−') ? 'Preorders ${text.substring(1)}' : 'Stock $text',
+  ),
+);
 
 void main() {
   setUpAll(_fonts);
@@ -43,12 +49,14 @@ void main() {
           expect(find.text('Profit'), findsWidgets);
           expect(_card(name), findsOneWidget);
           expect(_stock(name, '0'), findsOneWidget);
-          final palette = tester.element(_card(name)).visualTheme.palette;
           expect(
             tester.widget<Text>(_stock(name, '0')).style?.color,
-            palette.textMuted,
+            OpportunityCraftCardMaterial.forSpec(
+              tester.element(_card(name)).visualTheme,
+              OpportunityStockTone.outOfStock,
+            ).badgeInk,
           );
-          expect(_stockTooltip(name), contains('Preorders: Not checked'));
+          expect(_stockDescription(name), contains('Preorders: not checked'));
           expect(find.byType(Dialog), findsNothing);
           expect(_key('root-recipe-page'), findsNothing);
           expect(f.transport.quotes, isEmpty);
@@ -62,10 +70,13 @@ void main() {
           );
           expect(
             tester.widget<Text>(_stock(name, negative)).style?.color,
-            palette.danger,
+            OpportunityCraftCardMaterial.forSpec(
+              tester.element(_card(name)).visualTheme,
+              OpportunityStockTone.outOfStock,
+            ).badgeInk,
           );
           expect(
-            _stockTooltip(name),
+            _stockDescription(name),
             contains(name == _whale ? 'Preorders: 20.691' : 'Preorders: 249'),
           );
           expect(f.controller.market.items[id]!.quoteFetchedAt, quoteTime);
@@ -82,7 +93,7 @@ void main() {
     );
   }
 
-  testWidgets('known zero visible book remains neutral on the unopened card', (
+  testWidgets('known zero visible book is out of stock on the unopened card', (
     tester,
   ) async {
     final f = await _fixture(tester, search: _whale);
@@ -95,9 +106,12 @@ void main() {
       expect(_stock(_whale, '0'), findsOneWidget);
       expect(
         tester.widget<Text>(_stock(_whale, '0')).style?.color,
-        tester.element(_card(_whale)).visualTheme.palette.textMuted,
+        OpportunityCraftCardMaterial.forSpec(
+          tester.element(_card(_whale)).visualTheme,
+          OpportunityStockTone.outOfStock,
+        ).badgeInk,
       );
-      expect(_stockTooltip(_whale), contains('Preorders: 0'));
+      expect(_stockDescription(_whale), contains('Preorders: 0'));
       expect(find.byType(Dialog), findsNothing);
     } finally {
       await _dispose(tester, f);
@@ -120,9 +134,12 @@ void main() {
       expect(_stock(_whale, '0'), findsOneWidget);
       expect(
         tester.widget<Text>(_stock(_whale, '0')).style?.color,
-        tester.element(_card(_whale)).visualTheme.palette.textMuted,
+        OpportunityCraftCardMaterial.forSpec(
+          tester.element(_card(_whale)).visualTheme,
+          OpportunityStockTone.outOfStock,
+        ).badgeInk,
       );
-      expect(_stockTooltip(_whale), contains('Preorders: Not checked'));
+      expect(_stockDescription(_whale), contains('Preorders: not checked'));
       expect(f.controller.market.items[id]!.preorderCount, isNull);
       expect(find.byType(Dialog), findsNothing);
     } finally {
@@ -295,11 +312,13 @@ Future<void> _search(WidgetTester tester, String value) => tester.enterText(
   value,
 );
 
-String _stockTooltip(String name) => find
-    .descendant(of: _summary(name), matching: find.byType(Tooltip))
-    .evaluate()
-    .map((element) => (element.widget as Tooltip).message ?? '')
-    .firstWhere((message) => message.startsWith('Stock:'));
+String _stockDescription(String name) {
+  return find
+      .descendant(of: _summary(name), matching: find.byType(Semantics))
+      .evaluate()
+      .map((element) => (element.widget as Semantics).properties.label ?? '')
+      .firstWhere((label) => label.startsWith('Stock:'));
+}
 
 Widget _host(_Fixture f, {bool active = true}) => RepaintBoundary(
   key: _captureKey,
@@ -370,7 +389,6 @@ Future<_Fixture> _fixture(WidgetTester tester, {String search = ''}) async {
     });
     final preferences = OpportunitiesPreferences()
       ..mode = CraftMode.processing
-      ..craftSearch = search
       ..craftSort = 'profit'
       ..profitableOnly = false;
     await OpportunitiesPreferenceStore(directory).save(preferences);
@@ -394,6 +412,8 @@ Future<_Fixture> _fixture(WidgetTester tester, {String search = ''}) async {
       autoCheck: false,
     );
     await controller.ready;
+    // Model typing in this session, not restoring a search after a restart.
+    controller.change((p) => p.craftSearch = search);
     await controller.calculationSettled;
     return _Fixture(harness, controller, broker, transport);
   }))!;
@@ -533,6 +553,7 @@ Future<void> _fonts() async {
     sdk = sdk.parent;
   }
   for (final entry in <String, List<String>>{
+    'Georgia': ['$win/Fonts/georgia.ttf', '$win/Fonts/georgiab.ttf'],
     'Segoe UI': [
       '$win/Fonts/segoeui.ttf',
       '$win/Fonts/seguisb.ttf',

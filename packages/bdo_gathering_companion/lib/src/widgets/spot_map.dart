@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import '../assets.dart';
 import '../domain/models.dart';
 import '../domain/world_map.dart';
+import '../recipe_checklist.dart';
 import '../ui/theme.dart';
 
 /// Source-recorded world nodes and area anchors, using world X / -Z tiles.
@@ -17,16 +18,18 @@ class SpotMap extends StatefulWidget {
     required this.spots,
     required this.selected,
     required this.methods,
-    required this.onSelect,
+    this.onSelect,
     this.nodes = const [],
     this.overview = false,
     this.onExpand,
     this.preview = false,
+    this.viewInsets = EdgeInsets.zero,
+    this.locationPoints = const [],
   });
   final List<Spot> spots;
   final Spot? selected;
   final List<Method> methods;
-  final ValueChanged<Spot> onSelect;
+  final ValueChanged<Spot>? onSelect;
   final List<WorldNode> nodes;
   final bool overview;
   final VoidCallback? onExpand;
@@ -34,6 +37,11 @@ class SpotMap extends StatefulWidget {
   /// Passive location artwork for the chosen-spot header. No map controls,
   /// labels, or interactive markers are painted in this mode.
   final bool preview;
+
+  /// Floating map tools may cover an edge without shrinking the actual map.
+  /// Fit, focus and button zoom use the remaining visible area as their anchor.
+  final EdgeInsets viewInsets;
+  final List<GatheringRecipePoint> locationPoints;
   @override
   State<SpotMap> createState() => _SpotMapState();
 }
@@ -49,7 +57,28 @@ class _SpotMapState extends State<SpotMap> {
   final _client = HttpClient()..connectionTimeout = const Duration(seconds: 12);
   int _active = 0, _bytes = 0;
   double get _scale => 256 / 3276800 * math.pow(2, _zoom);
-  Offset get _middle => Offset(_size.width / 2, _size.height / 2);
+  Rect get _usableBounds {
+    final left = widget.viewInsets.left
+        .clamp(0.0, math.max(0.0, _size.width - 1))
+        .toDouble();
+    final top = widget.viewInsets.top
+        .clamp(0.0, math.max(0.0, _size.height - 1))
+        .toDouble();
+    return Rect.fromLTRB(
+      left,
+      top,
+      (_size.width - widget.viewInsets.right).clamp(
+        left + 1,
+        math.max(left + 1, _size.width),
+      ),
+      (_size.height - widget.viewInsets.bottom).clamp(
+        top + 1,
+        math.max(top + 1, _size.height),
+      ),
+    );
+  }
+
+  Offset get _middle => _usableBounds.center;
   Offset _screen(double x, double z) =>
       _middle + (Offset(x, -z) - _center) * _scale;
   bool _visible(Offset p, double margin) =>
@@ -67,12 +96,18 @@ class _SpotMapState extends State<SpotMap> {
   @override
   void didUpdateWidget(SpotMap oldWidget) {
     super.didUpdateWidget(oldWidget);
+    if (oldWidget.locationPoints != widget.locationPoints) {
+      _needsFit = _autoFit = true;
+    }
     if (oldWidget.selected?.id != widget.selected?.id) {
       _focus();
     } else if (widget.overview &&
         oldWidget.spots.map((s) => s.id).join('|') !=
             widget.spots.map((s) => s.id).join('|')) {
       _needsFit = _autoFit = true;
+    }
+    if (oldWidget.viewInsets != widget.viewInsets && _autoFit) {
+      _needsFit = true;
     }
   }
 
@@ -89,25 +124,31 @@ class _SpotMapState extends State<SpotMap> {
 
   void _fit() {
     _needsFit = false;
-    final points = widget.spots.where((s) => s.mapped).toList();
+    final points = widget.locationPoints.isNotEmpty
+        ? widget.locationPoints.map((p) => (x: p.x, z: p.z)).toList()
+        : widget.spots
+              .where((s) => s.mapped)
+              .map((s) => (x: s.x!, z: s.z!))
+              .toList();
     if (points.isEmpty) {
       _center = Offset.zero;
       _zoom = 3;
       return;
     }
-    final left = points.map((s) => s.x!).reduce(math.min),
-        right = points.map((s) => s.x!).reduce(math.max);
-    final top = points.map((s) => -s.z!).reduce(math.min),
-        bottom = points.map((s) => -s.z!).reduce(math.max);
+    final left = points.map((s) => s.x).reduce(math.min),
+        right = points.map((s) => s.x).reduce(math.max);
+    final top = points.map((s) => -s.z).reduce(math.min),
+        bottom = points.map((s) => -s.z).reduce(math.max);
     _center = Offset((left + right) / 2, (top + bottom) / 2);
     if (right - left < 1 && bottom - top < 1) {
       _zoom = 6.1;
       return;
     }
-    final padding = math.min(68.0, _size.shortestSide * .24);
+    final usable = _usableBounds;
+    final padding = math.min(68.0, usable.shortestSide * .24);
     final scale = math.min(
-      math.max(1.0, _size.width - 2 * padding) / math.max(1.0, right - left),
-      math.max(1.0, _size.height - 2 * padding) / math.max(1.0, bottom - top),
+      math.max(1.0, usable.width - 2 * padding) / math.max(1.0, right - left),
+      math.max(1.0, usable.height - 2 * padding) / math.max(1.0, bottom - top),
     );
     _zoom = (math.log(scale * 3276800 / 256) / math.ln2).clamp(-1.0, 7.0);
   }
@@ -227,9 +268,27 @@ class _SpotMapState extends State<SpotMap> {
           if (_needsFit || (_autoFit && resized)) _fit();
           final groups = _groups();
           final occupied = <Rect>[
+            if (widget.viewInsets.left > 0)
+              Rect.fromLTWH(0, 0, widget.viewInsets.left, _size.height),
+            if (widget.viewInsets.top > 0)
+              Rect.fromLTWH(0, 0, _size.width, widget.viewInsets.top),
+            if (widget.viewInsets.right > 0)
+              Rect.fromLTWH(
+                _usableBounds.right,
+                0,
+                widget.viewInsets.right,
+                _size.height,
+              ),
+            if (widget.viewInsets.bottom > 0)
+              Rect.fromLTWH(
+                0,
+                _usableBounds.bottom,
+                _size.width,
+                widget.viewInsets.bottom,
+              ),
             Rect.fromLTWH(
-              _size.width - 52,
-              0,
+              _usableBounds.right - 52,
+              _usableBounds.top,
               52,
               widget.onExpand == null ? 124 : 160,
             ),
@@ -244,6 +303,47 @@ class _SpotMapState extends State<SpotMap> {
                   widget.selected!,
                   _screen(group.first.x!, group.first.z!),
                 ),
+          ];
+          final annotations = <Widget>[
+            if (!widget.preview && _zoom >= 5.4)
+              Positioned.fill(
+                child: IgnorePointer(
+                  child: CustomPaint(
+                    painter: _NodeConnections(
+                      widget.nodes,
+                      _center,
+                      _scale,
+                      _middle,
+                    ),
+                  ),
+                ),
+              ),
+            if (!widget.preview) ..._nodeWidgets(occupied),
+            if (!widget.preview)
+              for (final group in groups) ..._markers(group),
+            if (!widget.preview)
+              for (final point in widget.locationPoints)
+                if (_visible(_screen(point.x, point.z), 8))
+                  Positioned(
+                    left: _screen(point.x, point.z).dx - 5,
+                    top: _screen(point.x, point.z).dy - 5,
+                    child: Tooltip(
+                      message: point.label,
+                      child: Container(
+                        key: ValueKey('recipe-location-${point.id}'),
+                        width: 10,
+                        height: 10,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: const Color(0xFFF1D295),
+                          border: Border.all(
+                            color: const Color(0xFF332622),
+                            width: 2,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
           ];
           return GestureDetector(
             behavior: HitTestBehavior.opaque,
@@ -260,25 +360,27 @@ class _SpotMapState extends State<SpotMap> {
                       : const ColoredBox(color: Color(0xFF304448)),
                 ),
                 ..._tiles(),
-                if (!widget.preview && _zoom >= 5.4)
+                if (widget.viewInsets == EdgeInsets.zero)
+                  ...annotations
+                else if (!widget.preview)
                   Positioned.fill(
-                    child: IgnorePointer(
-                      child: CustomPaint(
-                        painter: _NodeConnections(
-                          widget.nodes,
-                          _center,
-                          _scale,
-                        ),
+                    // Only annotations are clipped. Terrain remains visible
+                    // beneath the floating glass, without symbols competing
+                    // with its text or accepting taps through the reading lane.
+                    child: ClipRect(
+                      key: const ValueKey('spot-map-annotation-clip'),
+                      clipper: _MapAnnotationClipper(_usableBounds),
+                      clipBehavior: Clip.hardEdge,
+                      child: Stack(
+                        clipBehavior: Clip.none,
+                        children: annotations,
                       ),
                     ),
                   ),
-                if (!widget.preview) ..._nodeWidgets(occupied),
-                if (!widget.preview)
-                  for (final group in groups) ..._markers(group),
                 if (!widget.preview)
                   Positioned(
-                    top: 9,
-                    right: 9,
+                    top: _usableBounds.top + 9,
+                    right: _size.width - _usableBounds.right + 9,
                     child: Column(
                       children: [
                         _control(
@@ -314,10 +416,10 @@ class _SpotMapState extends State<SpotMap> {
                     ),
                   ),
                 if (!widget.preview && _images.isEmpty && _active > 0)
-                  const Positioned(
-                    left: 12,
-                    top: 12,
-                    child: SizedBox.square(
+                  Positioned(
+                    left: _usableBounds.left + 12,
+                    top: _usableBounds.top + 12,
+                    child: const SizedBox.square(
                       dimension: 15,
                       child: CircularProgressIndicator(strokeWidth: 1.5),
                     ),
@@ -334,9 +436,9 @@ class _SpotMapState extends State<SpotMap> {
     final level = _zoom.floor().clamp(0, 7), needed = <String>[];
     final span = 3276800 / math.pow(2, level),
         pixels = 3276800 / math.pow(2, level) * _scale;
-    final topLeft = _center - Offset(_size.width, _size.height) / (_scale * 2);
+    final topLeft = _center - _middle / _scale;
     final bottomRight =
-        _center + Offset(_size.width, _size.height) / (_scale * 2);
+        _center + (Offset(_size.width, _size.height) - _middle) / _scale;
     final tiles = <Widget>[];
     for (
       var x = (topLeft.dx / span).floor();
@@ -494,7 +596,10 @@ class _SpotMapState extends State<SpotMap> {
         height: 1.2,
         letterSpacing: 0,
         fontWeight: node.isSettlement ? FontWeight.w600 : FontWeight.w500,
-        color: const Color(0xFFF4F0DF),
+        color: context.glass.adapt(
+          const Color(0xFFF4F0DF),
+          context.gatheringColors.ink,
+        ),
       );
       final text = TextPainter(
         text: TextSpan(text: node.name, style: style),
@@ -574,20 +679,20 @@ class _SpotMapState extends State<SpotMap> {
                 ?.icon ??
             '';
 
-  static const _spotTitleStyle = TextStyle(
+  TextStyle get _spotTitleStyle => TextStyle(
     inherit: false,
     fontFamily: 'Segoe UI',
     fontSize: 14,
     height: 1.2,
     fontWeight: FontWeight.w600,
-    color: ink,
+    color: context.gatheringColors.ink,
   );
-  static const _spotNodeStyle = TextStyle(
+  TextStyle get _spotNodeStyle => TextStyle(
     inherit: false,
     fontFamily: 'Segoe UI',
     fontSize: 12,
     height: 1.2,
-    color: muted,
+    color: context.gatheringColors.muted,
   );
 
   Rect _selectedLabelRect(Spot spot, Offset point) {
@@ -652,8 +757,9 @@ class _SpotMapState extends State<SpotMap> {
             elevation: selected ? 5 : 3,
             child: InkWell(
               borderRadius: BorderRadius.circular(11),
-              onTap: () =>
-                  group.length == 1 ? widget.onSelect(spot) : _choose(group),
+              onTap: () => group.length == 1
+                  ? widget.onSelect?.call(spot)
+                  : _choose(group),
               child: Container(
                 width: dimension,
                 height: dimension,
@@ -661,7 +767,9 @@ class _SpotMapState extends State<SpotMap> {
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(11),
                   border: Border.all(
-                    color: selected ? gold : const Color(0xFFC1C4AE),
+                    color: selected
+                        ? context.gatheringColors.gold
+                        : const Color(0xFFC1C4AE),
                     width: selected ? 2 : 1,
                   ),
                 ),
@@ -681,13 +789,18 @@ class _SpotMapState extends State<SpotMap> {
                             vertical: 2,
                           ),
                           decoration: BoxDecoration(
-                            color: gold,
+                            color: context.gatheringColors.gold,
                             borderRadius: BorderRadius.circular(12),
                           ),
                           child: Text(
                             '${group.length}',
-                            style: const TextStyle(
-                              color: Color(0xFF192625),
+                            style: TextStyle(
+                              color:
+                                  context.gatheringColors.gold
+                                          .computeLuminance() >
+                                      .3
+                                  ? const Color(0xFF192625)
+                                  : const Color(0xFFFFFCF4),
                               fontSize: 11,
                               fontWeight: FontWeight.bold,
                             ),
@@ -768,7 +881,10 @@ class _SpotMapState extends State<SpotMap> {
                           ),
                           Text(
                             spot.nodeName,
-                            style: const TextStyle(color: muted, fontSize: 12),
+                            style: TextStyle(
+                              color: context.gatheringColors.muted,
+                              fontSize: 12,
+                            ),
                           ),
                         ],
                       ),
@@ -780,7 +896,7 @@ class _SpotMapState extends State<SpotMap> {
             .toList(),
       ),
     );
-    if (mounted && choice != null) widget.onSelect(choice);
+    if (mounted && choice != null) widget.onSelect?.call(choice);
   }
 
   Widget _control(String key, IconData icon, String tip, VoidCallback action) =>
@@ -801,16 +917,28 @@ class _SpotMapState extends State<SpotMap> {
       );
 }
 
+class _MapAnnotationClipper extends CustomClipper<Rect> {
+  const _MapAnnotationClipper(this.bounds);
+  final Rect bounds;
+
+  @override
+  Rect getClip(Size size) => bounds.intersect(Offset.zero & size);
+
+  @override
+  bool shouldReclip(_MapAnnotationClipper oldClipper) =>
+      oldClipper.bounds != bounds;
+}
+
 class _NodeConnections extends CustomPainter {
-  _NodeConnections(this.nodes, this.center, this.scale);
+  _NodeConnections(this.nodes, this.center, this.scale, this.middle);
   final List<WorldNode> nodes;
   final Offset center;
   final double scale;
+  final Offset middle;
   @override
   void paint(Canvas canvas, Size size) {
     final byId = {for (final node in nodes) node.id: node}, drawn = <String>{};
-    final middle = Offset(size.width / 2, size.height / 2),
-        visible = Offset.zero & size;
+    final visible = Offset.zero & size;
     Offset screen(WorldNode n) => middle + (Offset(n.x, -n.z) - center) * scale;
     final paint = Paint()
       ..color = const Color(0x788FA49F)
@@ -833,5 +961,8 @@ class _NodeConnections extends CustomPainter {
 
   @override
   bool shouldRepaint(_NodeConnections old) =>
-      old.nodes != nodes || old.center != center || old.scale != scale;
+      old.nodes != nodes ||
+      old.center != center ||
+      old.scale != scale ||
+      old.middle != middle;
 }

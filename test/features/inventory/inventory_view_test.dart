@@ -126,7 +126,7 @@ void main() {
     final harness = InventoryTestHarness();
     await pumpInventory(tester, harness, size: const Size(1500, 940));
 
-    expect(find.text('Owned'), findsOneWidget);
+    expect(find.byKey(InventoryActionKeys.filter('owned')), findsOneWidget);
     expect(find.text('Alchemy plan'), findsOneWidget);
     expect(find.text('Cooking plan'), findsOneWidget);
     expect(find.text('Processing plan'), findsOneWidget);
@@ -251,6 +251,8 @@ void main() {
         250,
       );
     }
+    await tester.tap(find.byKey(const ValueKey('inventory-more:Salt')));
+    await tester.pumpAndSettle();
     await tester.tap(find.byKey(InventoryActionKeys.row('I15', 'Salt')));
     await tester.pumpAndSettle();
     for (final mode in CraftMode.values) {
@@ -552,7 +554,7 @@ void main() {
     );
     final remove = tester.getRect(
       find.byKey(
-        InventoryActionKeys.row('I15', 'Special Volcanic Umbrella Mushroom'),
+        const ValueKey('inventory-more:Special Volcanic Umbrella Mushroom'),
       ),
     );
     final nameBounds = tester.getRect(longName);
@@ -564,11 +566,11 @@ void main() {
         matching: find.byType(ModeItemIcon),
       ),
     );
-    expect(longRow.height, lessThan(104));
+    expect(longRow.height, lessThan(150));
     expect(amount.top, greaterThanOrEqualTo(nameBounds.bottom + 6));
     expect(remove.left - amount.right, greaterThanOrEqualTo(8));
     expect((icon.center.dy - longRow.center.dy).abs(), lessThan(1));
-    expect((amount.center.dy - remove.center.dy).abs(), lessThan(4));
+    expect((amount.center.dy - remove.center.dy).abs(), lessThan(16));
     expect(longRow.contains(amount.center), isTrue);
     expect(longRow.contains(remove.center), isTrue);
 
@@ -587,16 +589,16 @@ void main() {
       find.byKey(InventoryActionKeys.row('I10', 'Sunrise Herb')),
     );
     final shortRemove = tester.getRect(
-      find.byKey(InventoryActionKeys.row('I15', 'Sunrise Herb')),
+      find.byKey(const ValueKey('inventory-more:Sunrise Herb')),
     );
     final shortIcon = tester.getRect(
       find.descendant(of: shortRowFinder, matching: find.byType(ModeItemIcon)),
     );
-    expect(shortRow.height, lessThan(80));
+    expect(shortRow.height, lessThan(112));
     expect(shortAmount.left - shortNameBounds.right, greaterThanOrEqualTo(12));
     expect(shortRemove.left - shortAmount.right, greaterThanOrEqualTo(8));
     expect((shortIcon.center.dy - shortRow.center.dy).abs(), lessThan(1));
-    expect((shortAmount.center.dy - shortRemove.center.dy).abs(), lessThan(4));
+    expect((shortAmount.center.dy - shortRemove.center.dy).abs(), lessThan(16));
     expect(tester.takeException(), isNull);
   });
 

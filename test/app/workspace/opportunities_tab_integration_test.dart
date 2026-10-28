@@ -101,7 +101,7 @@ void main() {
   }
 
   testWidgets(
-    'fifth tab mounts lazily, retains both panes and leaves the planner intact',
+    'second tab is Opportunities, mounts lazily and leaves the planner intact',
     (tester) async {
       configureApplicationTestSurface(tester, const Size(1500, 940));
       final harness = await _createHarness(tester);
@@ -118,10 +118,10 @@ void main() {
 
       final topTabs = [
         'planner',
+        'opportunities',
         'resource-map',
         'gathering',
         'fish-map',
-        'opportunities',
       ];
       for (final tab in topTabs) {
         expect(_topTab(tab), findsOneWidget);
@@ -160,9 +160,12 @@ void main() {
       await tester.tap(find.byKey(const ValueKey('craft-sort-preorders')));
       expect(controller.preferences.demandOnly, isFalse);
       await tester.tap(find.byKey(const ValueKey('craft-has-demand')));
+      await tester.tap(find.byKey(const ValueKey('craft-ingredients-menu')));
+      await tester.pump();
       await tester.tap(
         find.byKey(const ValueKey('craft-ingredients-available')),
       );
+      await tester.sendKeyEvent(LogicalKeyboardKey.escape);
       await tester.pump();
       await _completeIo(tester, controller.calculationSettled);
       expect(controller.preferences.craftSearch, 'Beer');
@@ -175,8 +178,15 @@ void main() {
 
       await tester.tap(_withinOpportunities('Exchanges'));
       await tester.pump();
+      await tester.tap(find.byKey(const ValueKey('exchange-choose-item')));
+      await tester.pumpAndSettle();
       await tester.enterText(_input('exchange-search'), 'Sangpyeong');
       await tester.pump();
+      await tester.tap(
+        find.byKey(const ValueKey('exchange-currency-sangpyeong')),
+      );
+      await tester.pumpAndSettle();
+      expect(controller.currency.id, 'sangpyeong');
       await tester.enterText(_input('You have'), '1234');
       await tester.pump();
       expect(_withinOpportunities('List for sale'), findsNothing);
@@ -194,14 +204,8 @@ void main() {
             .selected,
         isTrue,
       );
-      expect(
-        tester
-            .widget<FilterChip>(
-              find.byKey(const ValueKey('craft-ingredients-available')),
-            )
-            .selected,
-        isTrue,
-      );
+      expect(controller.preferences.readyOnly, isTrue);
+      expect(find.text('Ingredients · available'), findsOneWidget);
       expect(controller.preferences.craftSort, 'preorders');
       expect(find.byType(Dialog), findsNothing);
       expect(controller.craftSaleMode, OpportunitySaleMode.listing);
@@ -232,17 +236,15 @@ void main() {
             .selected,
         isTrue,
       );
-      expect(
-        tester
-            .widget<FilterChip>(
-              find.byKey(const ValueKey('craft-ingredients-available')),
-            )
-            .selected,
-        isTrue,
-      );
+      expect(controller.preferences.readyOnly, isTrue);
+      expect(find.text('Ingredients · available'), findsOneWidget);
       await tester.tap(_withinOpportunities('Exchanges'));
       await tester.pump();
+      await tester.tap(find.byKey(const ValueKey('exchange-choose-item')));
+      await tester.pumpAndSettle();
       expect(_inputText(tester, 'exchange-search'), 'Sangpyeong');
+      await tester.sendKeyEvent(LogicalKeyboardKey.escape);
+      await tester.pumpAndSettle();
       expect(_inputText(tester, 'You have'), '1234');
       expect(controller.exchangeSaleMode, ExchangeSaleMode.listing);
       expect(planner.documentSnapshot, same(plannerBefore));
@@ -294,7 +296,7 @@ void main() {
         final planner = harness.bundle.controller;
         expect(
           find.byKey(const ValueKey('opportunities-sidebar')),
-          findsNothing,
+          findsOneWidget,
         );
         expect(
           find.byKey(const ValueKey('opportunities-sections')),

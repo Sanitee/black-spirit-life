@@ -3,7 +3,7 @@ import '../state/planner_state.dart';
 import 'opportunity_calculator.dart';
 
 /// Listing proceeds for the exact consumed inputs, not profit or an instant
-/// sale. Owned amounts and supplier purchase costs never change this value.
+/// sale. Supplier purchase costs never change this value.
 final class RawIngredientSales {
   const RawIngredientSales({
     required this.afterTax,
@@ -22,6 +22,7 @@ RawIngredientSales calculateRawIngredientSales({
   required DateTime now,
   required Duration maxAge,
   required bool Function(String itemId) isMarketable,
+  bool ownedOnly = false,
 }) {
   var gross = 0.0;
   var count = 0;
@@ -29,6 +30,8 @@ RawIngredientSales calculateRawIngredientSales({
   final unpriced = <String>[];
   for (final input in ingredients) {
     count++;
+    final quantity = ownedOnly ? input.ownedQuantity : input.quantity;
+    if (ownedOnly && quantity == 0) continue;
     final id = input.itemId;
     if (id != null && !isMarketable(id)) {
       excluded.add(input.name);
@@ -36,7 +39,7 @@ RawIngredientSales calculateRawIngredientSales({
     }
     final market = input.market;
     if (id == null ||
-        input.quantity <= 0 ||
+        quantity <= 0 ||
         market == null ||
         market.itemId != id ||
         market.subId != 0 ||
@@ -47,7 +50,7 @@ RawIngredientSales calculateRawIngredientSales({
     }
     // Use the same fresh listing-price basis as crafted output. Empty stock
     // or no buyers does not invalidate a hypothetical listing value.
-    gross += input.quantity * market.basePrice!;
+    gross += quantity * market.basePrice!;
   }
   final net = marketNetProceeds(gross, tax);
   return RawIngredientSales(

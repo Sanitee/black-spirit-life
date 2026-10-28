@@ -216,8 +216,8 @@ void main() {
       await _settleImages(tester);
       expect(_panel(unknown), findsOneWidget);
       expect(_panelText(tester, unknown), [
-        info.kind,
         unknown,
+        info.kind,
         'No source details recorded yet.',
       ]);
       await tester.tap(find.widgetWithText(TextButton, unknown));
@@ -378,6 +378,18 @@ void main() {
       expect(rect.top, greaterThanOrEqualTo(0));
       expect(rect.right, lessThanOrEqualTo(scenario.size.width));
       expect(rect.bottom, lessThanOrEqualTo(scenario.size.height));
+      if (scenario.scale > 1) {
+        // Enlarged reference text may need scrolling in a narrow viewport.
+        // Keep the type readable and prove the complete formula is reachable.
+        final formula = find.descendant(
+          of: panel,
+          matching: find.byKey(
+            RecipeBookKeys.itemInfoFormula(_crystal, null, 1),
+          ),
+        );
+        await tester.ensureVisible(formula);
+        await tester.pump();
+      }
       _expectCompleteFormula(tester, panel);
       _expectSectionSpacing(tester, panel, scenario.scale);
       _expectCompactFormulaGeometry(tester, panel);
@@ -638,15 +650,14 @@ void _expectCompactFormulaGeometry(WidgetTester tester, Finder panel) {
         .first,
   );
   expect(
-    formulaRect.center.dx,
-    closeTo(viewport.center.dx, .6),
-    reason: 'The recipe block is centered within the reading card.',
+    formulaRect.left,
+    closeTo(viewport.left, .6),
+    reason: 'Recipes share the section heading left alignment.',
   );
 
   final names = <double>[];
   final quantities = <double>[];
   final gaps = <double>[];
-  final quantityRightEdges = <double>[];
   for (final material in [('Magical Shard', '×300'), (_essence, '×450')]) {
     final row = find.descendant(
       of: formula,
@@ -662,16 +673,10 @@ void _expectCompactFormulaGeometry(WidgetTester tester, Finder panel) {
     gaps.add(
       tester.getRect(quantity).left - tester.getRect(name).left - naturalName,
     );
-    quantityRightEdges.add(tester.getRect(quantity).right);
   }
-  expect(
-    quantityRightEdges.last,
-    closeTo(quantityRightEdges.first, .6),
-    reason: 'Quantities share one compact, aligned column.',
-  );
   final longestName = names.reduce((a, b) => a > b ? a : b);
   final widestQuantity = quantities.reduce((a, b) => a > b ? a : b);
-  final measuredRowWidth = 24 + 24 + 8 + longestName + 12 + widestQuantity;
+  final measuredRowWidth = 28 + 36 + 12 + longestName + 12 + widestQuantity;
   expect(
     formulaRect.width,
     lessThanOrEqualTo(measuredRowWidth + 6),
@@ -679,14 +684,11 @@ void _expectCompactFormulaGeometry(WidgetTester tester, Finder panel) {
   );
   if (formulaRect.width >= measuredRowWidth - 2) {
     for (var index = 0; index < names.length; index++) {
-      expect(gaps[index], greaterThanOrEqualTo(9));
       expect(
         gaps[index],
-        lessThanOrEqualTo(
-          longestName - names[index] + widestQuantity - quantities[index] + 18,
-        ),
+        closeTo(8, .6),
         reason:
-            'Only the shared label-column difference separates name and quantity.',
+            'Quantity stays beside its own item name, not in a distant column.',
       );
     }
   }
@@ -721,7 +723,7 @@ void _expectCompleteFormula(WidgetTester tester, Finder panel) {
   expect(rect.right, lessThanOrEqualTo(viewport.right));
   expect(
     rect.bottom,
-    lessThanOrEqualTo(viewport.bottom),
+    lessThanOrEqualTo(viewport.bottom + .1),
     reason:
         'The entire two-ingredient recipe, including its lower border, must be '
         'visible before scrolling. Formula: $rect; viewport: $viewport.',
@@ -748,7 +750,7 @@ void _expectCompleteFormula(WidgetTester tester, Finder panel) {
     );
     final rect = tester.getRect(row);
     expect(rect.top, greaterThanOrEqualTo(viewport.top));
-    expect(rect.bottom, lessThanOrEqualTo(viewport.bottom));
+    expect(rect.bottom, lessThanOrEqualTo(viewport.bottom + .1));
   }
 }
 

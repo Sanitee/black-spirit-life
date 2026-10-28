@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:bdo_craft_planner_flutter/app/app.dart';
 import 'package:bdo_craft_planner_flutter/app/appearance/appearance_actions.dart';
 import 'package:bdo_craft_planner_flutter/app/application_bootstrap.dart';
+import 'package:bdo_craft_planner_flutter/app/first_run_setup_view.dart';
 import 'package:bdo_craft_planner_flutter/app/window/app_title_bar.dart';
 import 'package:bdo_craft_planner_flutter/app/window/app_title_bar_visual.dart';
 import 'package:bdo_craft_planner_flutter/app/workspace/application_workspace.dart';
@@ -17,8 +18,12 @@ import 'package:bdo_craft_planner_flutter/domain/state/planner_state.dart';
 import 'package:bdo_craft_planner_flutter/features/fishing/fish_map_workspace.dart';
 import 'package:bdo_craft_planner_flutter/features/gathering/gathering_workspace.dart';
 import 'package:bdo_craft_planner_flutter/features/planner/planner.dart';
+import 'package:bdo_craft_planner_flutter/features/resource_map/diagnostics/resource_map_frame_capture.dart';
+import 'package:bdo_craft_planner_flutter/features/resource_map/diagnostics/resource_map_redraw_diagnostic.dart';
 import 'package:bdo_craft_planner_flutter/features/resource_map/resource_map_workspace.dart';
 import 'package:bdo_craft_planner_flutter/features/shared/mode_item_icon.dart';
+import 'package:bdo_craft_planner_flutter/visual/illuminated_ledger/ledger_spec.dart';
+import 'package:bdo_craft_planner_flutter/visual/sakura_night_garden/sakura_spec.dart';
 import 'package:bdo_fishing_core/bdo_fishing_core.dart';
 import 'package:bdo_map_core/bdo_map_core.dart';
 import 'package:flutter/gestures.dart';
@@ -32,41 +37,283 @@ import '../../../packages/bdo_map_core/test/support/map_menu_capture.dart';
 import '../../support/application_test_harness.dart';
 
 void main() {
-  test('public identity uses the Stable state target', () {
-    const acceptedStateDirectory = 'BDO Craft Planner Flutter';
-    const appDataRoot = r'C:\Users\Test\AppData\Roaming';
-    final policy = PlannerStatePathPolicy.fromEnvironment(const {
-      'APPDATA': appDataRoot,
-    });
+  test(
+    'public identity uses the Stable state target',
+    () {
+      const acceptedStateDirectory = 'BDO Craft Planner Flutter';
+      const appDataRoot = r'C:\Users\Test\AppData\Roaming';
+      final policy = PlannerStatePathPolicy.fromEnvironment(const {
+        'APPDATA': appDataRoot,
+      });
 
-    expect(AppIdentity.displayName, 'Black Spirit Life');
-    expect(AppIdentity.releaseChannel, 'win-x64-stable');
-    expect(
-      AppIdentity.installerPackageId,
-      isNot(AppIdentity.localCacheDirectoryName),
-    );
-    expect(AppIdentity.stateDirectoryName, isNot(acceptedStateDirectory));
-    expect(
-      AppIdentity.stateDirectoryName,
-      isNot(AppIdentity.formerStateDirectoryName),
-    );
-    expect(
-      AppIdentity.stateDirectoryName,
-      AppIdentity.stableStateDirectoryName,
-    );
-    expect(
-      policy.applicationDirectory.path,
-      '$appDataRoot${Platform.pathSeparator}'
-      '${AppIdentity.stateDirectoryName}',
-    );
-    expect(
-      policy.applicationDirectory.path,
-      isNot('$appDataRoot${Platform.pathSeparator}$acceptedStateDirectory'),
-    );
-    expect(policy.formerNativeApplicationDirectory, isNull);
-    expect(policy.allowLegacyMigration, isFalse);
-    expect(AppIdentity.importFormerProfilesOnFirstLaunch, isFalse);
-  });
+      expect(AppIdentity.displayName, 'Black Spirit Life');
+      expect(AppIdentity.releaseChannel, 'win-x64-stable');
+      expect(
+        AppIdentity.installerPackageId,
+        isNot(AppIdentity.localCacheDirectoryName),
+      );
+      expect(AppIdentity.stateDirectoryName, isNot(acceptedStateDirectory));
+      expect(
+        AppIdentity.stateDirectoryName,
+        isNot(AppIdentity.formerStateDirectoryName),
+      );
+      expect(
+        AppIdentity.stateDirectoryName,
+        AppIdentity.stableStateDirectoryName,
+      );
+      expect(
+        policy.applicationDirectory.path,
+        '$appDataRoot${Platform.pathSeparator}'
+        '${AppIdentity.stateDirectoryName}',
+      );
+      expect(
+        policy.applicationDirectory.path,
+        isNot('$appDataRoot${Platform.pathSeparator}$acceptedStateDirectory'),
+      );
+      expect(policy.formerNativeApplicationDirectory, isNull);
+      expect(policy.allowLegacyMigration, isFalse);
+      expect(AppIdentity.importFormerProfilesOnFirstLaunch, isFalse);
+    },
+  );
+
+  testWidgets(
+    'deferred Fish diagnostic mounts no page during loading or startup failure',
+    (tester) async {
+      configureApplicationTestSurface(tester, const Size(1500, 940));
+      final pendingApplication = Completer<ApplicationBundle>();
+      final fishService = _FakeFishCompanionServiceHandle();
+      var serviceStarts = 0;
+      var readinessChecks = 0;
+      final runtimeHost = FishCompanionRuntimeHost.withStarter((_) async {
+        serviceStarts += 1;
+        return fishService;
+      });
+
+      await tester.pumpWidget(
+        BdoCraftPlannerApp(
+          diagnosticDeferFishPrewarm: true,
+          enableOpportunityAutoCheck: false,
+          applicationFuture: pendingApplication.future,
+          marketGateway: const EmptyMarketGateway(),
+          fishCompanionRuntimeHost: runtimeHost,
+          fishCompanionPageReadinessOverride: () async {
+            readinessChecks += 1;
+            await runtimeHost.ready();
+            return FishCompanionPageStatus.ready;
+          },
+        ),
+      );
+      await _pumpWorkspace(tester);
+      expect(find.text('Preparing your planner'), findsOneWidget);
+      _expectNoMountedFish();
+      expect(serviceStarts, 0);
+      expect(readinessChecks, 0);
+
+      pendingApplication.completeError(
+        StateError('diagnostic fixture failure'),
+      );
+      await _pumpWorkspace(tester);
+      expect(
+        find.text('${AppIdentity.displayName} could not start.'),
+        findsOneWidget,
+      );
+      expect(find.textContaining('diagnostic fixture failure'), findsOneWidget);
+      _expectNoMountedFish();
+      expect(serviceStarts, 0);
+      expect(readinessChecks, 0);
+      expect(tester.takeException(), isNull);
+
+      await tester.pumpWidget(const SizedBox.shrink());
+      await expectLater(runtimeHost.ready(), throwsStateError);
+      expect(serviceStarts, 0);
+      expect(fishService.disposeCount, 0);
+    },
+  );
+
+  testWidgets(
+    'deferred Fish diagnostic stays unmounted through first-run setup',
+    (tester) async {
+      configureApplicationTestSurface(tester, const Size(1500, 940));
+      final harness = await _createHarness(tester, setupCompleted: false);
+      final fishService = _FakeFishCompanionServiceHandle();
+      var serviceStarts = 0;
+      var readinessChecks = 0;
+
+      await tester.pumpWidget(
+        BdoCraftPlannerApp(
+          diagnosticDeferFishPrewarm: true,
+          enableOpportunityAutoCheck: false,
+          applicationFuture: Future.value(harness.bundle),
+          marketGateway: const EmptyMarketGateway(),
+          fishCompanionRuntimeStarter: (_) async {
+            serviceStarts += 1;
+            return fishService;
+          },
+          fishCompanionPageReadinessOverride: () async {
+            readinessChecks += 1;
+            return FishCompanionPageStatus.ready;
+          },
+        ),
+      );
+      await _pumpWorkspace(tester);
+
+      expect(find.byType(FirstRunSetupView), findsOneWidget);
+      expect(
+        find.byType(ApplicationWorkspace, skipOffstage: false),
+        findsNothing,
+      );
+      _expectNoMountedFish();
+      expect(serviceStarts, 0);
+      expect(readinessChecks, 0);
+
+      final skip = find.byKey(const ValueKey('first-run-setup-skip'));
+      await tester.ensureVisible(skip);
+      await tester.tap(skip);
+      await _pumpWorkspace(tester);
+      expect(find.byType(FirstRunSetupView), findsNothing);
+      expect(find.byType(ApplicationWorkspace), findsOneWidget);
+      expect(find.byType(PlannerView), findsOneWidget);
+      expect(
+        tester
+            .widget<ApplicationWorkspace>(find.byType(ApplicationWorkspace))
+            .diagnosticDeferFishPrewarm,
+        isTrue,
+      );
+      _expectNoMountedFish();
+      expect(serviceStarts, 0);
+      expect(readinessChecks, 0);
+      expect(tester.takeException(), isNull);
+
+      await _disposeWidgetHarness(tester, harness);
+      expect(fishService.disposeCount, 0);
+    },
+  );
+
+  testWidgets(
+    'deferred Fish diagnostic stays unmounted for Resource first then retains Fish',
+    (tester) async {
+      configureApplicationTestSurface(tester, const Size(1500, 940));
+      final harness = await _createHarness(tester);
+      final tileClient = _localFailureTileClient();
+      addTearDown(tileClient.close);
+      final fishService = _FakeFishCompanionServiceHandle();
+      final pageTerminal = Completer<FishCompanionPageStatus>();
+      var serviceStarts = 0;
+      var readinessChecks = 0;
+      final runtimeHost = FishCompanionRuntimeHost.withStarter((_) async {
+        serviceStarts += 1;
+        return fishService;
+      });
+
+      await tester.pumpWidget(
+        BdoCraftPlannerApp(
+          diagnosticDeferFishPrewarm: true,
+          enableOpportunityAutoCheck: false,
+          applicationFuture: Future.value(harness.bundle),
+          marketGateway: const EmptyMarketGateway(),
+          resourceMapConfiguration: _testMapConfiguration(harness, tileClient),
+          fishCompanionRuntimeHost: runtimeHost,
+          fishCompanionPageReadinessOverride: () async {
+            readinessChecks += 1;
+            // FLUTTER_TEST skips native WebView/runtime initialization.
+            // Exercise the real injected host from this readiness seam.
+            await runtimeHost.ready();
+            return pageTerminal.future;
+          },
+        ),
+      );
+      await _pumpWorkspace(tester);
+      expect(find.byType(PlannerView), findsOneWidget);
+      _expectNoMountedFish();
+      expect(serviceStarts, 0);
+      expect(readinessChecks, 0);
+      final plannerElement = tester.element(find.byType(PlannerView));
+
+      await tester.tap(_workspaceTab('Resource Map'));
+      await _pumpUntilMapIsReady(tester);
+      _expectNoMountedFish();
+      expect(serviceStarts, 0);
+      expect(readinessChecks, 0);
+      final mapElement = tester.element(find.byType(BdoResourceMap));
+      final mapState = tester.state(find.byType(BdoResourceMap));
+
+      await tester.tap(_workspaceTab('Craft Planner'));
+      await _pumpWorkspace(tester);
+      expect(tester.element(find.byType(PlannerView)), same(plannerElement));
+      await tester.tap(_workspaceTab('Resource Map'));
+      await _pumpWorkspace(tester);
+      expect(tester.element(find.byType(BdoResourceMap)), same(mapElement));
+      expect(tester.state(find.byType(BdoResourceMap)), same(mapState));
+      _expectNoMountedFish();
+      expect(serviceStarts, 0);
+      expect(readinessChecks, 0);
+
+      await tester.tap(_workspaceTab('Fish Map'));
+      await _pumpWorkspace(tester);
+      expect(_isSelected(tester, _workspaceTab('Fish Map')), isTrue);
+      expect(find.byType(FishMapWorkspace), findsOneWidget);
+      expect(find.byKey(const Key('fish-companion-starting')), findsOneWidget);
+      expect(serviceStarts, 1);
+      expect(readinessChecks, 1);
+      final fishElement = tester.element(find.byType(FishMapWorkspace));
+      final fishWidget = tester.widget<FishMapWorkspace>(
+        find.byType(FishMapWorkspace),
+      );
+      final fishState = tester.state(find.byType(FishCompanionView));
+      expect(_topWorkspaceTickerEnabled(tester, 'fishMap'), isTrue);
+
+      // Leaving while initialization is pending must not cancel/recreate Fish.
+      await tester.tap(_workspaceTab('Resource Map'));
+      await _pumpWorkspace(tester);
+      expect(find.byType(FishMapWorkspace), findsNothing);
+      expect(
+        tester.element(find.byType(FishMapWorkspace, skipOffstage: false)),
+        same(fishElement),
+      );
+      expect(_topWorkspaceTickerEnabled(tester, 'fishMap'), isFalse);
+      expect(
+        tester
+            .widget<ExcludeFocus>(
+              find.byKey(
+                ApplicationWorkspace.focusGateKey('fishMap'),
+                skipOffstage: false,
+              ),
+            )
+            .excluding,
+        isTrue,
+      );
+      pageTerminal.complete(FishCompanionPageStatus.ready);
+      await _pumpWorkspace(tester);
+
+      for (var visit = 0; visit < 2; visit++) {
+        await tester.tap(_workspaceTab('Fish Map'));
+        await _pumpWorkspace(tester);
+        expect(
+          tester.element(find.byType(FishMapWorkspace)),
+          same(fishElement),
+        );
+        expect(
+          tester.widget<FishMapWorkspace>(find.byType(FishMapWorkspace)),
+          same(fishWidget),
+        );
+        expect(tester.state(find.byType(FishCompanionView)), same(fishState));
+        // FLUTTER_TEST never creates the native controller, so its placeholder
+        // remains even after readiness completes. Check lifecycle, not native UI.
+        expect(_topWorkspaceTickerEnabled(tester, 'fishMap'), isTrue);
+        expect(serviceStarts, 1);
+        expect(readinessChecks, 1);
+        expect(fishService.disposeCount, 0);
+        await tester.tap(_workspaceTab('Resource Map'));
+        await _pumpWorkspace(tester);
+        expect(tester.element(find.byType(BdoResourceMap)), same(mapElement));
+        expect(tester.state(find.byType(BdoResourceMap)), same(mapState));
+      }
+      expect(tester.takeException(), isNull);
+
+      await _disposeWidgetHarness(tester, harness);
+      expect(fishService.disposeCount, 1);
+    },
+  );
 
   testWidgets(
     'Fish page mounts before bootstrap resolves and survives its workspace handoff',
@@ -495,9 +742,68 @@ void main() {
     final plannerElement = tester.element(find.byType(PlannerView));
     final plannerWidget = tester.widget<PlannerView>(find.byType(PlannerView));
     final plannerTarget = harness.bundle.controller.active.state.value.target;
+    expect(
+      find.byType(ResourceMapFrameCapture, skipOffstage: false),
+      findsNothing,
+      reason: 'No diagnostic mounts or captures before Resource is visited.',
+    );
+    expect(
+      find.byType(ResourceMapRedrawDiagnostic, skipOffstage: false),
+      findsNothing,
+    );
 
     await tester.tap(mapTab);
     await _pumpUntilMapIsReady(tester);
+
+    final frameCapture = find.byType(ResourceMapFrameCapture);
+    final redrawDiagnostic = find.byType(ResourceMapRedrawDiagnostic);
+    expect(
+      redrawDiagnostic,
+      resourceRedrawDiagnosticEnabled ? findsOneWidget : findsNothing,
+    );
+    if (resourceRedrawDiagnosticEnabled) {
+      expect(
+        tester.widget<ResourceMapRedrawDiagnostic>(redrawDiagnostic).active,
+        isTrue,
+      );
+      expect(
+        find.descendant(
+          of: redrawDiagnostic,
+          matching: find.byType(BdoResourceMap),
+        ),
+        findsOneWidget,
+      );
+      expect(
+        find.descendant(
+          of: redrawDiagnostic,
+          matching: find.byType(AppTitleBar),
+        ),
+        findsNothing,
+      );
+    }
+    expect(
+      frameCapture,
+      resourceFrameCaptureEnabled ? findsOneWidget : findsNothing,
+      reason: 'Ordinary builds must retain the exact unwrapped Resource tree.',
+    );
+    if (resourceFrameCaptureEnabled) {
+      expect(
+        tester.widget<ResourceMapFrameCapture>(frameCapture).active,
+        isTrue,
+      );
+      expect(
+        find.descendant(
+          of: frameCapture,
+          matching: find.byType(BdoResourceMap),
+        ),
+        findsOneWidget,
+      );
+      expect(
+        find.descendant(of: frameCapture, matching: find.byType(AppTitleBar)),
+        findsNothing,
+        reason: 'The title and other tabs are outside the capture boundary.',
+      );
+    }
 
     expect(_isSelected(tester, plannerTab), isFalse);
     expect(_isSelected(tester, mapTab), isTrue);
@@ -525,10 +831,8 @@ void main() {
     expect(outputArtwork, isA<ModeItemIcon>());
     expect(
       (outputArtwork as ModeItemIcon).showFrame,
-      isFalse,
-      reason:
-          'Map artwork must keep the item image own border without adding '
-          'a second theme frame.',
+      isTrue,
+      reason: 'Map artwork retains the current shared item-quality frame.',
     );
     expect(
       outputArtwork.fallbackIcon,
@@ -743,7 +1047,7 @@ void main() {
   });
 
   testWidgets(
-    'Planner theme changes leave the retained Resource Map skin independent',
+    'Appearance changes recolour the retained Resource Map without changing its structure',
     (tester) async {
       configureApplicationTestSurface(tester, const Size(1500, 940));
       final harness = await _createHarness(tester);
@@ -772,6 +1076,10 @@ void main() {
       final mapFinder = find.byType(BdoResourceMap);
       final retainedMapState = tester.state(mapFinder);
       expect(
+        tester.element(mapFinder).mapChrome.primary,
+        SakuraNightGardenSpec.theme.palette.primary,
+      );
+      expect(
         ResourceMapChromeTheme.of(tester.element(mapFinder)).variant,
         ResourceMapChromeThemeVariant.fieldAtlas,
       );
@@ -793,6 +1101,11 @@ void main() {
         reason: 'planner appearance must not recreate the map workspace',
       );
       expect(
+        tester.element(mapFinder).mapChrome.primary,
+        IlluminatedLedgerSpec.theme.palette.primary,
+      );
+      expect(tester.element(mapFinder).mapChrome.brightness, Brightness.light);
+      expect(
         ResourceMapChromeTheme.of(tester.element(mapFinder)).variant,
         ResourceMapChromeThemeVariant.fieldAtlas,
       );
@@ -808,6 +1121,10 @@ void main() {
 
       expect(tester.state(mapFinder), same(retainedMapState));
       expect(
+        tester.element(mapFinder).mapChrome.primary,
+        SakuraNightGardenSpec.theme.palette.primary,
+      );
+      expect(
         ResourceMapChromeTheme.of(tester.element(mapFinder)).variant,
         ResourceMapChromeThemeVariant.fieldAtlas,
       );
@@ -817,60 +1134,65 @@ void main() {
     },
   );
 
-  testWidgets(
-    'each top workspace owns its title strip without changing Planner appearance',
-    (tester) async {
-      configureApplicationTestSurface(tester, const Size(1500, 940));
-      final harness = await _createHarness(tester);
-      final tileClient = _localFailureTileClient();
-      final fishService = _FakeFishCompanionServiceHandle();
-      addTearDown(tileClient.close);
-      harness.bundle.controller.updateDocument(
-        (document) => AppearanceActions.selectSharedBackground(
-          document,
-          'sakura-night-garden',
-        ),
-        immediate: true,
-      );
-      final plannerAppearance =
-          harness.bundle.controller.documentSnapshot.alchemy.appearance;
+  testWidgets('all title strips follow Appearance except independent Fish', (
+    tester,
+  ) async {
+    configureApplicationTestSurface(tester, const Size(1500, 940));
+    final harness = await _createHarness(tester);
+    final tileClient = _localFailureTileClient();
+    final fishService = _FakeFishCompanionServiceHandle();
+    addTearDown(tileClient.close);
+    harness.bundle.controller.updateDocument(
+      (document) => AppearanceActions.selectSharedBackground(
+        document,
+        'sakura-night-garden',
+      ),
+      immediate: true,
+    );
+    final plannerAppearance =
+        harness.bundle.controller.documentSnapshot.alchemy.appearance;
 
-      await tester.pumpWidget(
-        BdoCraftPlannerApp(
-          enableOpportunityAutoCheck: false,
-          applicationFuture: Future.value(harness.bundle),
-          marketGateway: const EmptyMarketGateway(),
-          resourceMapConfiguration: _testMapConfiguration(harness, tileClient),
-          fishCompanionRuntimeStarter: (_) async => fishService,
-          fishCompanionPageReadinessOverride: () async =>
-              FishCompanionPageStatus.ready,
-        ),
-      );
-      await _pumpWorkspace(tester);
+    await tester.pumpWidget(
+      BdoCraftPlannerApp(
+        enableOpportunityAutoCheck: false,
+        applicationFuture: Future.value(harness.bundle),
+        marketGateway: const EmptyMarketGateway(),
+        resourceMapConfiguration: _testMapConfiguration(harness, tileClient),
+        fishCompanionRuntimeStarter: (_) async => fishService,
+        fishCompanionPageReadinessOverride: () async =>
+            FishCompanionPageStatus.ready,
+      ),
+    );
+    await _pumpWorkspace(tester);
 
-      BoxDecoration titleDecoration() =>
-          tester
-                  .widget<DecoratedBox>(find.byKey(AppTitleBar.materialKey))
-                  .decoration
-              as BoxDecoration;
+    BoxDecoration titleDecoration() =>
+        tester
+                .widget<DecoratedBox>(find.byKey(AppTitleBar.materialKey))
+                .decoration
+            as BoxDecoration;
 
-      final plannerDecoration = titleDecoration();
-      expect(find.byType(AppTitleBarVisualScope), findsNothing);
-      expect(plannerDecoration.image, isNotNull);
-      expect(
-        (plannerDecoration.image!.image as AssetImage).assetName,
-        'assets/sakura/materials/blackened-cedar.png',
-      );
+    final plannerDecoration = titleDecoration();
+    expect(find.byType(AppTitleBarVisualScope), findsNothing);
+    expect(plannerDecoration.image, isNotNull);
+    expect(
+      (plannerDecoration.image!.image as AssetImage).assetName,
+      'assets/sakura/materials/blackened-cedar.png',
+    );
 
-      Future<void> expectWorkspaceTitle(
-        String label,
-        AppTitleBarVisual expected,
-      ) async {
-        await tester.tap(_workspaceTab(label));
-        for (var attempt = 0; attempt < 6; attempt++) {
-          await tester.pump(const Duration(milliseconds: 80));
-          if (_isSelected(tester, _workspaceTab(label)) == true) break;
-        }
+    Future<void> expectWorkspaceTitle(
+      String label,
+      AppTitleBarVisual? expected,
+    ) async {
+      await tester.tap(_workspaceTab(label));
+      for (var attempt = 0; attempt < 6; attempt++) {
+        await tester.pump(const Duration(milliseconds: 80));
+        if (_isSelected(tester, _workspaceTab(label)) == true) break;
+      }
+      if (expected == null) {
+        expect(find.byType(AppTitleBarVisualScope), findsNothing);
+        expect(titleDecoration().gradient, plannerDecoration.gradient);
+        expect(titleDecoration().image, plannerDecoration.image);
+      } else {
         final scope = tester.widget<AppTitleBarVisualScope>(
           find.byType(AppTitleBarVisualScope),
         );
@@ -884,39 +1206,33 @@ void main() {
                     .decoration
                 as BoxDecoration;
         expect(selectedTabDecoration.color, expected.tabSelectedSurface);
-        expect(
-          harness.bundle.controller.documentSnapshot.alchemy.appearance,
-          same(plannerAppearance),
-          reason: 'top-level navigation must not write Planner appearance',
-        );
       }
-
-      await expectWorkspaceTitle('Resource Map', AppTitleBarVisual.resourceMap);
-      await expectWorkspaceTitle('Gathering', AppTitleBarVisual.gathering);
-      await expectWorkspaceTitle('Fish Map', AppTitleBarVisual.fishMap);
-
-      expect(<Color>{
-        AppTitleBarVisual.resourceMap.tabAccent,
-        AppTitleBarVisual.gathering.tabAccent,
-        AppTitleBarVisual.fishMap.tabAccent,
-      }, hasLength(3));
-
-      await tester.tap(_workspaceTab('Craft Planner'));
-      await tester.pump(const Duration(milliseconds: 160));
-      expect(find.byType(AppTitleBarVisualScope), findsNothing);
-      final restoredPlannerDecoration = titleDecoration();
-      expect(restoredPlannerDecoration.gradient, plannerDecoration.gradient);
-      expect(restoredPlannerDecoration.image, plannerDecoration.image);
       expect(
         harness.bundle.controller.documentSnapshot.alchemy.appearance,
         same(plannerAppearance),
+        reason: 'top-level navigation must not write Planner appearance',
       );
-      expect(tester.takeException(), isNull);
+    }
 
-      await _disposeWidgetHarness(tester, harness);
-      expect(fishService.disposeCount, 1);
-    },
-  );
+    await expectWorkspaceTitle('Resource Map', null);
+    await expectWorkspaceTitle('Gathering', null);
+    await expectWorkspaceTitle('Fish Map', AppTitleBarVisual.fishMap);
+
+    await tester.tap(_workspaceTab('Craft Planner'));
+    await tester.pump(const Duration(milliseconds: 160));
+    expect(find.byType(AppTitleBarVisualScope), findsNothing);
+    final restoredPlannerDecoration = titleDecoration();
+    expect(restoredPlannerDecoration.gradient, plannerDecoration.gradient);
+    expect(restoredPlannerDecoration.image, plannerDecoration.image);
+    expect(
+      harness.bundle.controller.documentSnapshot.alchemy.appearance,
+      same(plannerAppearance),
+    );
+    expect(tester.takeException(), isNull);
+
+    await _disposeWidgetHarness(tester, harness);
+    expect(fishService.disposeCount, 1);
+  });
 
   testWidgets(
     'map projects active-plan shortages, stock, and catalog artwork',
@@ -955,6 +1271,10 @@ void main() {
       await tester.tap(_workspaceTab('Resource Map'));
       await _pumpUntilMapIsReady(tester);
       await tester.pump();
+      expect(
+        find.byKey(const ValueKey('resource-map-field-desk')),
+        findsOneWidget,
+      );
       await tester.tap(
         find.byKey(const ValueKey<String>('resource-map-home-find-material')),
       );
@@ -1210,6 +1530,10 @@ void main() {
       );
       expect(harness.bundle.controller.resourceMapFavoriteIds.value, isEmpty);
 
+      expect(
+        find.byKey(const ValueKey('resource-map-field-desk')),
+        findsOneWidget,
+      );
       await tester.tap(
         find.byKey(const ValueKey<String>('resource-map-home-find-material')),
       );
@@ -1789,6 +2113,10 @@ void main() {
 
       await tester.tap(_workspaceTab('Resource Map'));
       await _pumpUntilMapIsReady(tester);
+      expect(
+        find.byKey(const ValueKey('resource-map-field-desk')),
+        findsOneWidget,
+      );
       await tester.tap(find.text('To-do list'));
       await tester.pumpAndSettle();
       expect(find.text('Needed'), findsOneWidget);
@@ -2120,28 +2448,20 @@ void main() {
       );
       expectPersistentTabs(mapSelected: true);
 
-      final minimizeDetails = find.byKey(
-        const ValueKey<String>('resource-map-atlas-workspace-minimize'),
-      );
-      expect(minimizeDetails, findsOneWidget);
-      await tester.tap(minimizeDetails);
-      await tester.pump(const Duration(milliseconds: 260));
+      // Hosted task headers now have one back action; the user removed Home
+      // and panel-minimize. Native window controls and standalone are unchanged.
       expect(
-        find.byKey(const ValueKey<String>('resource-map-sidebar-details')),
+        find.byKey(
+          const ValueKey<String>('resource-map-atlas-workspace-minimize'),
+        ),
         findsNothing,
       );
-      expectPersistentTabs(mapSelected: true);
-      await tester.tap(
-        find.byKey(const ValueKey<String>('resource-map-atlas-task-restore')),
-      );
-      await tester.pump(const Duration(milliseconds: 260));
       expect(
-        find.byKey(const ValueKey<String>('resource-map-sidebar-details')),
-        findsOneWidget,
-      );
-      expectPersistentTabs(mapSelected: true);
-      await tester.tap(
         find.byKey(const ValueKey<String>('resource-map-home-button')),
+        findsNothing,
+      );
+      await tester.tap(
+        find.byKey(const ValueKey<String>('resource-map-task-back')),
       );
       await tester.pump(const Duration(milliseconds: 260));
       expect(
@@ -2169,6 +2489,10 @@ void main() {
 
       final gatherCommand = find.byKey(
         const ValueKey<String>('resource-map-home-find-material'),
+      );
+      expect(
+        find.byKey(const ValueKey('resource-map-field-desk')),
+        findsOneWidget,
       );
       await tester.tap(gatherCommand);
       await tester.pump(const Duration(milliseconds: 260));
@@ -2200,12 +2524,13 @@ void main() {
       }
       expect(
         find.byKey(const ValueKey<String>('resource-map-atlas-dock')),
-        findsOneWidget,
+        findsNothing,
+        reason: 'Home has no open workbench.',
       );
       expect(
-        find.byKey(const ValueKey<String>('resource-map-home-find-material')),
+        find.byKey(const ValueKey<String>('resource-map-field-desk')),
         findsOneWidget,
-        reason: 'The retained map session should stay on its clean map home.',
+        reason: 'The retained Codex Atlas rail remains available on home.',
       );
       expect(
         find.byKey(const ValueKey<String>('resource-map-sidebar-details')),
@@ -2360,14 +2685,28 @@ ResourceMapWorkspaceConfiguration _testMapConfiguration(
   );
 }
 
-Future<ApplicationTestHarness> _createHarness(WidgetTester tester) async {
-  var harness = (await tester.runAsync(() => ApplicationTestHarness.create()))!;
+Future<ApplicationTestHarness> _createHarness(
+  WidgetTester tester, {
+  bool setupCompleted = true,
+}) async {
+  var harness = (await tester.runAsync(
+    () => ApplicationTestHarness.create(setupCompleted: setupCompleted),
+  ))!;
   await tester.runAsync(harness.disposeControllerOnly);
   await tester.runAsync(BdoResourceMapLoader.loadBundled);
   await tester.runAsync(BdoWorkerEconomicsLoader.loadBundled);
   await tester.runAsync(LodgingDataLoader.loadBundled);
   harness = harness.rebindControllerInCurrentZone();
   return harness;
+}
+
+void _expectNoMountedFish() {
+  expect(find.byType(FishMapWorkspace, skipOffstage: false), findsNothing);
+  expect(find.byType(FishCompanionView, skipOffstage: false), findsNothing);
+  expect(
+    find.byKey(ApplicationWorkspace.fishMapContentClipKey, skipOffstage: false),
+    findsNothing,
+  );
 }
 
 Future<void> _pumpWorkspace(WidgetTester tester) async {

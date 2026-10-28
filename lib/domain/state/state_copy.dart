@@ -305,6 +305,8 @@ extension MarketStateCopy on MarketState {
   MarketState copyWith({
     Map<String, double>? prices,
     Map<String, double>? stock,
+    Map<String, double>? preorderPrices,
+    Map<String, int>? preorderObservedAt,
     Map<String, String>? tradeMarketIds,
     Map<String, int>? totalTrades,
     Map<String, int>? tradeObservedAt,
@@ -322,6 +324,8 @@ extension MarketStateCopy on MarketState {
   }) => MarketState(
     prices: prices ?? this.prices,
     stock: stock ?? this.stock,
+    preorderPrices: preorderPrices ?? this.preorderPrices,
+    preorderObservedAt: preorderObservedAt ?? this.preorderObservedAt,
     tradeMarketIds: tradeMarketIds ?? this.tradeMarketIds,
     totalTrades: totalTrades ?? this.totalTrades,
     tradeObservedAt: tradeObservedAt ?? this.tradeObservedAt,

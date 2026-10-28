@@ -1,0 +1,16 @@
+# Match whole base64-encoded dart-define tokens, never a substring or a cached
+# CMake option. Keep this function independent so default-off cases are tested.
+function(bsl_resource_redraw_flag ENCODED_DEFINES OUTPUT_VARIABLE)
+  string(REPLACE "," ";" TOKENS "${ENCODED_DEFINES}")
+  list(FIND TOKENS "QlNMX0RJQUdOT1NUSUNfUkVTT1VSQ0VfUkVEUkFXPXRydWU=" ENABLED)
+  list(FIND TOKENS "QlNMX0RJQUdOT1NUSUNfUkVTT1VSQ0VfUkVEUkFXPWZhbHNl" DISABLED)
+  list(FIND TOKENS "QlNMX0RJQUdOT1NUSUNfUkVTT1VSQ0VfRlJBTUVfQ0FQVFVSRT10cnVl" CAPTURE)
+  set(RESULT 0)
+  if(NOT ENABLED EQUAL -1)
+    if(NOT DISABLED EQUAL -1 OR NOT CAPTURE EQUAL -1)
+      message(FATAL_ERROR "Resource redraw requires one unambiguous define and no F8 capture define.")
+    endif()
+    set(RESULT 1)
+  endif()
+  set(${OUTPUT_VARIABLE} ${RESULT} PARENT_SCOPE)
+endfunction()

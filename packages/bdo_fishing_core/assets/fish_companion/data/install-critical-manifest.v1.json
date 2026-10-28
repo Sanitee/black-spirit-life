@@ -8,8 +8,8 @@
     },
     {
       "path": "static/app.css",
-      "byteCount": 173232,
-      "sha256": "b0af198d1ff00f405084aaf8f02f9aafaa207ed8d7ab68ac4955b87c1c99d251"
+      "byteCount": 199996,
+      "sha256": "e37b025313153257a324c66a5f356a1f8de621b7959a42fd45ea2e5cbcdb6a1b"
     },
     {
       "path": "static/app.js",
@@ -18,8 +18,8 @@
     },
     {
       "path": "static/index.html",
-      "byteCount": 40575,
-      "sha256": "aee4831039334c685845e91ec313d39936e64bed39f272345a12d054da23f787"
+      "byteCount": 40561,
+      "sha256": "90f83aaa779eec419692252d11aceffe0555c635e034f5980835963379422a4b"
     }
   ],
   "snapshotFiles": [

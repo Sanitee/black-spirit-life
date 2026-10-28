@@ -1,6 +1,8 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import '../model/map_ui_opacity.dart';
+import 'resource_map_annotation_clip.dart';
 
 /// The two complete Resource Map interface systems available to the user.
 ///
@@ -48,9 +50,12 @@ enum ResourceMapChromeThemeVariant {
 @immutable
 class ResourceMapChromeThemeData {
   const ResourceMapChromeThemeData({
-    this.uiOpacity = ResourceMapUiOpacity.defaultValue,
+    // Palette constants describe full-strength material. User opacity is
+    // applied by withUiOpacity, including the translucent default.
+    this.uiOpacity = 1,
     required this.variant,
     required this.canvas,
+    this.inputInset,
     required this.paper,
     required this.paperRaised,
     required this.ink,
@@ -62,6 +67,7 @@ class ResourceMapChromeThemeData {
     required this.deepAccent,
     required this.onPrimary,
     required this.accent,
+    this.materialAccent,
     required this.positive,
     required this.warning,
     required this.error,
@@ -110,6 +116,10 @@ class ResourceMapChromeThemeData {
   final ResourceMapChromeThemeVariant variant;
   final double uiOpacity;
   final Color canvas;
+  final Color? inputInset;
+
+  /// Input wells are not the basemap's empty-area colour in a light palette.
+  Color get controlInset => inputInset ?? canvas;
   final Color paper;
   final Color paperRaised;
   final Color ink;
@@ -122,6 +132,10 @@ class ResourceMapChromeThemeData {
   final Color deepAccent;
   final Color onPrimary;
   final Color accent;
+
+  /// Bright finish accent; selection retains its separate primary role.
+  final Color? materialAccent;
+  Color get finishAccent => materialAccent ?? primary;
   final Color positive;
   final Color warning;
   final Color error;
@@ -179,14 +193,158 @@ class ResourceMapChromeThemeData {
   final double compactRadius;
   final double surfaceRadius;
 
-  double get materialOpacity => ResourceMapUiOpacity.material(uiOpacity);
+  /// A satin reading plane keeps its colour at intermediate slider settings.
+  /// The saved value is untouched; zero retains the existing two-percent floor.
+  double get materialOpacity => materialDensity(uiOpacity);
+
+  static double materialDensity(Object? value) {
+    final opacity = ResourceMapUiOpacity.material(value);
+    const floor = ResourceMapUiOpacity.minimumMaterial;
+    final remaining = (1 - opacity) / (1 - floor);
+    return floor + (1 - floor) * (1 - remaining * remaining);
+  }
+
+  Brightness get brightness => chromeRaised.computeLuminance() > .45
+      ? Brightness.light
+      : Brightness.dark;
+
+  /// Recolours the existing map material without changing its shape, alpha,
+  /// typography or layout. The embedding application supplies semantic colours;
+  /// the map package does not need to know about its appearance settings.
+  ResourceMapChromeThemeData withPalette({
+    required Color canvas,
+    required Color surface,
+    required Color raised,
+    required Color inset,
+    required Color foreground,
+    required Color secondaryForeground,
+    required Color primary,
+    required Color primaryBright,
+    required Color trim,
+    required Color trimBright,
+    required Color positive,
+    required Color warning,
+    required Color error,
+    required Color shadow,
+  }) {
+    Color tint(Color base, Color accent, double amount) =>
+        Color.lerp(base, accent, amount)!;
+    Color alpha(Color colour, Color original) =>
+        colour.withValues(alpha: original.a);
+    LinearGradient gradient(LinearGradient original, Color top, Color bottom) =>
+        LinearGradient(
+          begin: original.begin,
+          end: original.end,
+          colors: [
+            for (var i = 0; i < original.colors.length; i++)
+              alpha(
+                tint(top, bottom, i / (original.colors.length - 1)),
+                original.colors[i],
+              ),
+          ],
+          stops: original.stops,
+          tileMode: original.tileMode,
+          transform: original.transform,
+        );
+    BoxShadow recolourShadow(BoxShadow original, Color colour) =>
+        original.copyWith(color: alpha(colour, original.color));
+    final highlight = tint(raised, primaryBright, .16);
+    final selection = tint(raised, primary, .22);
+    final selectedEnd = tint(surface, primary, .14);
+    const darkInk = Color(0xFF151515);
+    const lightInk = Color(0xFFF8F5EF);
+    final primaryLight = primary.computeLuminance() + .05;
+    final darkContrast = primaryLight / (darkInk.computeLuminance() + .05);
+    final lightContrast = (lightInk.computeLuminance() + .05) / primaryLight;
+    return ResourceMapChromeThemeData(
+      uiOpacity: uiOpacity,
+      variant: variant,
+      canvas: canvas,
+      inputInset: alpha(inset, controlInset),
+      paper: alpha(surface, paper),
+      paperRaised: alpha(raised, paperRaised),
+      ink: foreground,
+      text: foreground,
+      muted: secondaryForeground,
+      warmOutline: alpha(trimBright, warmOutline),
+      softOutline: alpha(trim, softOutline),
+      primary: primary,
+      deepAccent: selectedEnd,
+      onPrimary: darkContrast >= lightContrast ? darkInk : lightInk,
+      accent: trimBright,
+      materialAccent: primaryBright,
+      positive: positive,
+      warning: warning,
+      error: error,
+      chromeBase: alpha(surface, chromeBase),
+      chromeRaised: alpha(raised, chromeRaised),
+      chromeHighlight: alpha(highlight, chromeHighlight),
+      modeStripFadeColor: alpha(surface, modeStripFadeColor),
+      trimDeep: alpha(tint(surface, trim, .22), trimDeep),
+      trimLine: trimBright,
+      trimWash: alpha(trimBright, trimWash),
+      idleControlGradient: gradient(idleControlGradient, raised, surface),
+      idleCompactGradient: gradient(idleCompactGradient, raised, surface),
+      hoverControlGradient: gradient(hoverControlGradient, highlight, surface),
+      selectedControlGradient: gradient(
+        selectedControlGradient,
+        selection,
+        selectedEnd,
+      ),
+      selectedModeGradient: gradient(
+        selectedModeGradient,
+        selection,
+        selectedEnd,
+      ),
+      selectedCompactGradient: gradient(
+        selectedCompactGradient,
+        selection,
+        selectedEnd,
+      ),
+      selectedInlineGradient: gradient(
+        selectedInlineGradient,
+        selection,
+        selectedEnd,
+      ),
+      idleInlineGradient: gradient(idleInlineGradient, raised, surface),
+      idleSearchGradient: gradient(idleSearchGradient, inset, surface),
+      focusedSearchGradient: gradient(focusedSearchGradient, highlight, inset),
+      surfaceGradient: gradient(surfaceGradient, raised, surface),
+      subtleSurfaceGradient: gradient(subtleSurfaceGradient, raised, surface),
+      taskStripGradient: gradient(taskStripGradient, raised, surface),
+      readingSurfaceGradient: gradient(readingSurfaceGradient, raised, surface),
+      edgeFadeGradient: gradient(edgeFadeGradient, surface, surface),
+      contourColor: alpha(trimBright, contourColor),
+      fleckColor: alpha(foreground, fleckColor),
+      readingInk: foreground,
+      readingMuted: secondaryForeground,
+      readingOutline: alpha(trim, readingOutline),
+      idleShadow: recolourShadow(idleShadow, shadow),
+      selectedShadow: recolourShadow(selectedShadow, primary),
+      hoverShadow: recolourShadow(hoverShadow, primaryBright),
+      surfaceShadows: [
+        for (final value in surfaceShadows) recolourShadow(value, shadow),
+      ],
+      subtleSurfaceShadows: [
+        for (final value in subtleSurfaceShadows) recolourShadow(value, shadow),
+      ],
+      headingFontFamily: headingFontFamily,
+      commandRadius: commandRadius,
+      controlRadius: controlRadius,
+      toolRadius: toolRadius,
+      inlineRadius: inlineRadius,
+      keycapRadius: keycapRadius,
+      compactRadius: compactRadius,
+      surfaceRadius: surfaceRadius,
+    );
+  }
 
   /// Multiplies material fills and their shadows. Foreground colours, icons,
   /// geometry and the basemap canvas are deliberately retained verbatim.
   ResourceMapChromeThemeData withUiOpacity(Object? value) {
     final opacity = ResourceMapUiOpacity.normalize(value);
     if (opacity == uiOpacity) return this;
-    final multiplier = ResourceMapUiOpacity.material(opacity) / materialOpacity;
+    final multiplier = materialDensity(opacity) / materialOpacity;
     Color fade(Color color) => color.withValues(alpha: color.a * multiplier);
     BoxShadow fadeShadow(BoxShadow shadow) =>
         shadow.copyWith(color: fade(shadow.color));
@@ -202,6 +360,7 @@ class ResourceMapChromeThemeData {
       uiOpacity: opacity,
       variant: variant,
       canvas: canvas,
+      inputInset: inputInset == null ? null : fade(controlInset),
       paper: fade(paper),
       paperRaised: fade(paperRaised),
       ink: ink,
@@ -213,6 +372,7 @@ class ResourceMapChromeThemeData {
       deepAccent: deepAccent,
       onPrimary: onPrimary,
       accent: accent,
+      materialAccent: materialAccent,
       positive: positive,
       warning: warning,
       error: error,
@@ -278,107 +438,104 @@ class ResourceMapChromeThemeData {
     letterSpacing: headingFontFamily == null ? .05 : .12,
   );
 
-  /// Neutral, map-native chrome used by the application map workspace.
-  ///
-  /// It deliberately does not inherit the decorative identity of either
-  /// planner theme. Surfaces are compact graphite tools with cool location
-  /// accents, letting the basemap and familiar game artwork carry the view.
+  /// Beta by Codex field desk: charcoal and plum reading planes, ivory type
+  /// and a quiet brass rim. Static material leaves the map free to move.
   static const fieldAtlas = ResourceMapChromeThemeData(
     variant: ResourceMapChromeThemeVariant.fieldAtlas,
-    canvas: Color(0xFF0C1C2D),
-    paper: Color(0xFF142A40),
-    paperRaised: Color(0xFF1C344B),
-    ink: Color(0xFFF0F4FA),
-    text: Color(0xFFE7EFF7),
-    muted: Color(0xFFC0CFDF),
-    warmOutline: Color(0x996689A0),
-    softOutline: Color(0x8847647C),
-    primary: Color(0xFF80D6D5),
-    deepAccent: Color(0xFF1C4559),
-    onPrimary: Color(0xFF071221),
-    accent: Color(0xFFACCFDF),
-    positive: Color(0xFF9CDEB7),
-    warning: Color(0xFFEDC38C),
-    error: Color(0xFFF2A39A),
-    chromeBase: Color(0xFF102338),
-    chromeRaised: Color(0xFF193249),
-    chromeHighlight: Color(0xFF26445B),
-    modeStripFadeColor: Color(0xF0102338),
-    trimDeep: Color(0xFF365D77),
-    trimLine: Color(0xFF80D6D5),
-    trimWash: Color(0x2480D6D5),
+    canvas: Color(0xFF141218),
+    paper: Color(0xFF25212A),
+    paperRaised: Color(0xFF342B32),
+    ink: Color(0xFFF1E8D8),
+    text: Color(0xFFE3D7D2),
+    muted: Color(0xFFB9ABB1),
+    warmOutline: Color(0x99C6A06B),
+    softOutline: Color(0x886E5965),
+    primary: Color(0xFFC88D91),
+    deepAccent: Color(0xFF49313F),
+    onPrimary: Color(0xFF141218),
+    accent: Color(0xFFC6A06B),
+    positive: Color(0xFF8EB79C),
+    warning: Color(0xFFE1B880),
+    error: Color(0xFFEB978A),
+    chromeBase: Color(0xFF1D1921),
+    chromeRaised: Color(0xFF2C252E),
+    chromeHighlight: Color(0xFF44323E),
+    modeStripFadeColor: Color(0xF01D1921),
+    trimDeep: Color(0xFF705846),
+    trimLine: Color(0xFFC6A06B),
+    trimWash: Color(0x24C6A06B),
     idleControlGradient: LinearGradient(
       begin: Alignment.topLeft,
       end: Alignment.bottomRight,
-      colors: <Color>[Color(0xF02B495F), Color(0xF51A3048)],
+      colors: <Color>[Color(0xF03A3039), Color(0xF5242029)],
     ),
     idleCompactGradient: LinearGradient(
-      colors: <Color>[Color(0xF0233F55), Color(0xF0152B42)],
+      colors: <Color>[Color(0xF0342B32), Color(0xF0211C25)],
     ),
     hoverControlGradient: LinearGradient(
-      colors: <Color>[Color(0xFF345A70), Color(0xFF223B59)],
+      colors: <Color>[Color(0xFF58404B), Color(0xFF392B37)],
     ),
     selectedControlGradient: LinearGradient(
-      colors: <Color>[Color(0xFF2E6372), Color(0xFF214958)],
+      colors: <Color>[Color(0xFF654551), Color(0xFF422E3C)],
     ),
     selectedModeGradient: LinearGradient(
-      colors: <Color>[Color(0xFF2E6372), Color(0xFF214958)],
+      colors: <Color>[Color(0xFF654551), Color(0xFF422E3C)],
     ),
     selectedCompactGradient: LinearGradient(
-      colors: <Color>[Color(0xFF2E6372), Color(0xFF214958)],
+      colors: <Color>[Color(0xFF654551), Color(0xFF422E3C)],
     ),
     selectedInlineGradient: LinearGradient(
-      colors: <Color>[Color(0xFF285366), Color(0xFF1B3C53)],
+      colors: <Color>[Color(0xFF503844), Color(0xFF332733)],
     ),
     idleInlineGradient: LinearGradient(
-      colors: <Color>[Color(0xFF1E3C53), Color(0xFF162B43)],
+      colors: <Color>[Color(0xFF302731), Color(0xFF221D26)],
     ),
     idleSearchGradient: LinearGradient(
-      colors: <Color>[Color(0xFF102338), Color(0xFF102338)],
+      colors: <Color>[Color(0xFF17141B), Color(0xFF201A23)],
     ),
     focusedSearchGradient: LinearGradient(
-      colors: <Color>[Color(0xFF193B50), Color(0xFF102338)],
+      colors: <Color>[Color(0xFF3D2E3B), Color(0xFF221B25)],
     ),
     surfaceGradient: LinearGradient(
       begin: Alignment.topLeft,
       end: Alignment.bottomRight,
-      colors: <Color>[Color(0xF0213C51), Color(0xF5102036)],
+      colors: <Color>[Color(0xE0322932), Color(0xED1B171F)],
     ),
     subtleSurfaceGradient: LinearGradient(
-      colors: <Color>[Color(0xEA1C354D), Color(0xED12263E)],
+      colors: <Color>[Color(0xF0312832), Color(0xF51D1921)],
     ),
     taskStripGradient: LinearGradient(
-      colors: <Color>[Color(0xE318324A), Color(0xED172D45)],
+      colors: <Color>[Color(0xF0382B35), Color(0xF5231D27)],
     ),
     readingSurfaceGradient: LinearGradient(
       begin: Alignment.topLeft,
       end: Alignment.bottomRight,
-      colors: <Color>[Color(0xED18324A), Color(0xF0172D45), Color(0xF511203A)],
+      colors: <Color>[Color(0xE6322932), Color(0xED29222D), Color(0xF01C1821)],
       stops: <double>[0, .48, 1],
     ),
     edgeFadeGradient: LinearGradient(
       begin: Alignment.centerLeft,
       end: Alignment.centerRight,
-      colors: <Color>[Color(0xFA0E141A), Color(0xE60E141A), Color(0x000E141A)],
+      colors: <Color>[Color(0xFA1D1921), Color(0xE61D1921), Color(0x001D1921)],
       stops: <double>[0, .72, 1],
     ),
     contourColor: Color(0x00000000),
     fleckColor: Color(0x00000000),
-    readingInk: Color(0xFFF0F4FA),
-    readingMuted: Color(0xFFC0CFDF),
-    readingOutline: Color(0x996689A0),
+    readingInk: Color(0xFFF1E8D8),
+    readingMuted: Color(0xFFB9ABB1),
+    readingOutline: Color(0x99C6A06B),
     idleShadow: BoxShadow(
       color: Color(0x59000000),
       blurRadius: 10,
       offset: Offset(0, 4),
     ),
     selectedShadow: BoxShadow(
-      color: Color(0x336CB7C8),
+      color: Color(0x33C88D91),
       blurRadius: 12,
       offset: Offset(0, 4),
     ),
     hoverShadow: BoxShadow(
-      color: Color(0x1F6CB7C8),
+      color: Color(0x1FC6A06B),
       blurRadius: 9,
       offset: Offset(0, 3),
     ),
@@ -398,145 +555,126 @@ class ResourceMapChromeThemeData {
     surfaceRadius: 14,
   );
 
-  /// Compact cyan smoked glass over the map.
+  /// Compact field-desk material over the map.
   ///
   /// The geometry and material treatment live in the interface primitives;
   /// these roles also restyle every dialog, form, notice and data surface that
   /// can be opened from the map.
   static const glassDock = fieldAtlas;
 
-  /// The saved alternate palette keeps its cool green tint, with the same
-  /// legible reading planes and shared navigation as the default glass.
+  /// The saved alternate layout retains its ID and feathered control geometry
+  /// while participating in the experiment's common field-desk palette.
   static const ghostLedger = ResourceMapChromeThemeData(
     variant: ResourceMapChromeThemeVariant.ghostLedger,
-    canvas: Color(0xFF071014),
-    paper: Color(0xE80A151A),
-    paperRaised: Color(0xEE0D1B21),
-    ink: Color(0xFFF1F7F6),
-    text: Color(0xFFE8F0F0),
-    muted: Color(0xFFCEDCD9),
-    warmOutline: Color(0x3667E3D0),
-    softOutline: Color(0x243D6967),
-    primary: Color(0xFF74E7D3),
-    deepAccent: Color(0xFF123D3B),
-    onPrimary: Color(0xFF04100F),
-    accent: Color(0xFFE8C278),
-    positive: Color(0xFF72D5A9),
-    warning: Color(0xFFE6B36C),
-    error: Color(0xFFF2A39A),
-    chromeBase: Color(0xD9081318),
-    chromeRaised: Color(0xE80B191F),
-    chromeHighlight: Color(0xD914292E),
-    modeStripFadeColor: Color(0xC9061116),
-    trimDeep: Color(0xFF1F5A55),
-    trimLine: Color(0xFF74E7D3),
-    trimWash: Color(0x1F74E7D3),
+    canvas: Color(0xFF141218),
+    paper: Color(0xFF25212A),
+    paperRaised: Color(0xFF342B32),
+    ink: Color(0xFFF1E8D8),
+    text: Color(0xFFE3D7D2),
+    muted: Color(0xFFB9ABB1),
+    warmOutline: Color(0x99C6A06B),
+    softOutline: Color(0x886E5965),
+    primary: Color(0xFFC88D91),
+    deepAccent: Color(0xFF49313F),
+    onPrimary: Color(0xFF141218),
+    accent: Color(0xFFC6A06B),
+    positive: Color(0xFF8EB79C),
+    warning: Color(0xFFE1B880),
+    error: Color(0xFFEB978A),
+    chromeBase: Color(0xFF1D1921),
+    chromeRaised: Color(0xFF2C252E),
+    chromeHighlight: Color(0xFF44323E),
+    modeStripFadeColor: Color(0xF01D1921),
+    trimDeep: Color(0xFF705846),
+    trimLine: Color(0xFFC6A06B),
+    trimWash: Color(0x24C6A06B),
     idleControlGradient: LinearGradient(
-      begin: Alignment.centerLeft,
-      end: Alignment.centerRight,
-      colors: <Color>[Color(0xB309161B), Color(0x7009161B), Color(0x0009161B)],
-      stops: <double>[0, .72, 1],
+      begin: Alignment.topLeft,
+      end: Alignment.bottomRight,
+      colors: <Color>[Color(0xF03A3039), Color(0xF5242029)],
     ),
     idleCompactGradient: LinearGradient(
-      colors: <Color>[Color(0xA80A171C), Color(0x700A171C)],
+      colors: <Color>[Color(0xF0342B32), Color(0xF0211C25)],
     ),
     hoverControlGradient: LinearGradient(
-      begin: Alignment.centerLeft,
-      end: Alignment.centerRight,
-      colors: <Color>[Color(0xC4142B30), Color(0x70142B30), Color(0x00142B30)],
-      stops: <double>[0, .72, 1],
+      colors: <Color>[Color(0xFF58404B), Color(0xFF392B37)],
     ),
     selectedControlGradient: LinearGradient(
-      begin: Alignment.centerLeft,
-      end: Alignment.centerRight,
-      colors: <Color>[Color(0xC31B3E3C), Color(0x76142D2D), Color(0x00142D2D)],
-      stops: <double>[0, .76, 1],
+      colors: <Color>[Color(0xFF654551), Color(0xFF422E3C)],
     ),
     selectedModeGradient: LinearGradient(
-      begin: Alignment.centerLeft,
-      end: Alignment.centerRight,
-      colors: <Color>[Color(0xB71B3E3C), Color(0x00142D2D)],
+      colors: <Color>[Color(0xFF654551), Color(0xFF422E3C)],
     ),
     selectedCompactGradient: LinearGradient(
-      colors: <Color>[Color(0xB71B3E3C), Color(0x76142D2D)],
+      colors: <Color>[Color(0xFF654551), Color(0xFF422E3C)],
     ),
     selectedInlineGradient: LinearGradient(
-      begin: Alignment.centerLeft,
-      end: Alignment.centerRight,
-      colors: <Color>[Color(0xA61B3E3C), Color(0x00142D2D)],
+      colors: <Color>[Color(0xFF503844), Color(0xFF332733)],
     ),
     idleInlineGradient: LinearGradient(
-      begin: Alignment.centerLeft,
-      end: Alignment.centerRight,
-      colors: <Color>[Color(0x8A0A171C), Color(0x000A171C)],
+      colors: <Color>[Color(0xFF302731), Color(0xFF221D26)],
     ),
     idleSearchGradient: LinearGradient(
-      begin: Alignment.centerLeft,
-      end: Alignment.centerRight,
-      colors: <Color>[Color(0xE609171C), Color(0xDA09171C), Color(0xC909171C)],
-      stops: <double>[0, .9, 1],
+      colors: <Color>[Color(0xFF17141B), Color(0xFF201A23)],
     ),
     focusedSearchGradient: LinearGradient(
-      begin: Alignment.centerLeft,
-      end: Alignment.centerRight,
-      colors: <Color>[Color(0xED0B2024), Color(0xE00B2024), Color(0xCD0B2024)],
-      stops: <double>[0, .9, 1],
+      colors: <Color>[Color(0xFF3D2E3B), Color(0xFF221B25)],
     ),
     surfaceGradient: LinearGradient(
       begin: Alignment.topLeft,
       end: Alignment.bottomRight,
-      colors: <Color>[Color(0xF0193B42), Color(0xF1122D37), Color(0xF510202C)],
-      stops: <double>[0, .48, 1],
+      colors: <Color>[Color(0xE0322932), Color(0xED1B171F)],
     ),
     subtleSurfaceGradient: LinearGradient(
-      begin: Alignment.centerLeft,
-      end: Alignment.centerRight,
-      colors: <Color>[Color(0xED14343B), Color(0xED102B34), Color(0xF010202C)],
-      stops: <double>[0, .72, 1],
+      colors: <Color>[Color(0xF0312832), Color(0xF51D1921)],
     ),
     taskStripGradient: LinearGradient(
-      begin: Alignment.centerLeft,
-      end: Alignment.centerRight,
-      colors: <Color>[Color(0xED16393E), Color(0xF0132D34), Color(0xF010202C)],
-      stops: <double>[0, .9, 1],
+      colors: <Color>[Color(0xF0382B35), Color(0xF5231D27)],
     ),
     readingSurfaceGradient: LinearGradient(
       begin: Alignment.topLeft,
       end: Alignment.bottomRight,
-      colors: <Color>[Color(0xED16343D), Color(0xF0122B35), Color(0xF510202C)],
+      colors: <Color>[Color(0xE6322932), Color(0xED29222D), Color(0xF01C1821)],
       stops: <double>[0, .48, 1],
     ),
     edgeFadeGradient: LinearGradient(
       begin: Alignment.centerLeft,
       end: Alignment.centerRight,
-      colors: <Color>[
-        Color(0xF2081318),
-        Color(0xD9081318),
-        Color(0x78081318),
-        Color(0x00081318),
-      ],
-      stops: <double>[0, .68, .88, 1],
+      colors: <Color>[Color(0xFA1D1921), Color(0xE61D1921), Color(0x001D1921)],
+      stops: <double>[0, .72, 1],
     ),
     contourColor: Color(0x00000000),
     fleckColor: Color(0x00000000),
-    readingInk: Color(0xFFF1F7F6),
-    readingMuted: Color(0xFFCEDCD9),
-    readingOutline: Color(0x3674E7D3),
-    idleShadow: BoxShadow(color: Color(0x26000000), blurRadius: 12),
-    selectedShadow: BoxShadow(color: Color(0x2E74E7D3), blurRadius: 18),
-    hoverShadow: BoxShadow(color: Color(0x1F74E7D3), blurRadius: 14),
+    readingInk: Color(0xFFF1E8D8),
+    readingMuted: Color(0xFFB9ABB1),
+    readingOutline: Color(0x99C6A06B),
+    idleShadow: BoxShadow(
+      color: Color(0x59000000),
+      blurRadius: 10,
+      offset: Offset(0, 4),
+    ),
+    selectedShadow: BoxShadow(
+      color: Color(0x33C88D91),
+      blurRadius: 12,
+      offset: Offset(0, 4),
+    ),
+    hoverShadow: BoxShadow(
+      color: Color(0x1FC6A06B),
+      blurRadius: 9,
+      offset: Offset(0, 3),
+    ),
     surfaceShadows: <BoxShadow>[
-      BoxShadow(color: Color(0x3D000000), blurRadius: 24, offset: Offset(0, 8)),
+      BoxShadow(color: Color(0x66000000), blurRadius: 14, offset: Offset(0, 6)),
     ],
     subtleSurfaceShadows: <BoxShadow>[
-      BoxShadow(color: Color(0x26000000), blurRadius: 14, offset: Offset(0, 5)),
+      BoxShadow(color: Color(0x4D000000), blurRadius: 8, offset: Offset(0, 3)),
     ],
     headingFontFamily: 'Segoe UI',
     commandRadius: 10,
     controlRadius: 9,
     toolRadius: 9,
     inlineRadius: 8,
-    keycapRadius: 2,
+    keycapRadius: 4,
     compactRadius: 8,
     surfaceRadius: 14,
   );
@@ -848,10 +986,22 @@ class ResourceMapChromeTheme extends InheritedTheme {
   const ResourceMapChromeTheme({
     required this.data,
     required super.child,
+    this.liveData,
+    this.opacityOverride,
     super.key,
   });
 
   final ResourceMapChromeThemeData data;
+  // Captured popup themes subscribe to the same source as the retained map.
+  // Dialog scopes can retain their opaque reading material independently.
+  final ValueListenable<ResourceMapChromeThemeData>? liveData;
+  final double? opacityOverride;
+
+  static ValueListenable<ResourceMapChromeThemeData>? liveDataOf(
+    BuildContext context,
+  ) => context
+      .dependOnInheritedWidgetOfExactType<ResourceMapChromeTheme>()
+      ?.liveData;
 
   static ResourceMapChromeThemeData of(BuildContext context) =>
       context
@@ -865,11 +1015,50 @@ class ResourceMapChromeTheme extends InheritedTheme {
 
   @override
   bool updateShouldNotify(ResourceMapChromeTheme oldWidget) =>
-      data != oldWidget.data;
+      data != oldWidget.data ||
+      liveData != oldWidget.liveData ||
+      opacityOverride != oldWidget.opacityOverride;
 
   @override
-  Widget wrap(BuildContext context, Widget child) =>
-      ResourceMapChromeTheme(data: data, child: child);
+  Widget wrap(BuildContext context, Widget child) {
+    final source = liveData;
+    if (source == null) {
+      return ResourceMapChromeTheme(data: data, child: child);
+    }
+    return ValueListenableBuilder<ResourceMapChromeThemeData>(
+      valueListenable: source,
+      child: child,
+      builder: (context, current, child) => ResourceMapChromeTheme(
+        data: opacityOverride == null
+            ? current
+            : current.withUiOpacity(opacityOverride),
+        liveData: source,
+        opacityOverride: opacityOverride,
+        child: child!,
+      ),
+    );
+  }
+}
+
+/// Identifies an existing glass backing so nested options do not stack a
+/// second full-strength pane over it. Content itself remains fully opaque.
+class ResourceMapReadingPlane extends StatelessWidget {
+  const ResourceMapReadingPlane({required this.child, super.key});
+  final Widget child;
+
+  static bool contains(BuildContext context) =>
+      context.dependOnInheritedWidgetOfExactType<_ReadingPlaneScope>() != null;
+
+  @override
+  Widget build(BuildContext context) =>
+      ResourceMapAnnotationPlane(child: _ReadingPlaneScope(child: child));
+}
+
+class _ReadingPlaneScope extends InheritedWidget {
+  const _ReadingPlaneScope({required super.child});
+
+  @override
+  bool updateShouldNotify(_ReadingPlaneScope oldWidget) => false;
 }
 
 extension ResourceMapChromeBuildContext on BuildContext {

@@ -34,18 +34,18 @@ Future<Uint8List> _loadCustomIconBytes(
 ) => store.readValidatedBytesAsync(reference);
 
 /// Shared mode-aware item artwork used by planner, inventory, and Recipe Book.
-/// Resolution is content-only: retained themes still own the frame materials.
+/// Original artwork and a single quality frame, shared by every item surface.
 class ModeItemIcon extends StatefulWidget {
   const ModeItemIcon({
     required this.controller,
     required this.name,
     required this.size,
     this.catalogRepository,
-    this.searchAcrossModes = false,
+    this.searchAcrossModes = true,
     this.aliases = const <String>[],
     this.fallbackIcon,
     this.showFrame = true,
-    this.fit = BoxFit.cover,
+    this.fit = BoxFit.contain,
     this.customIconLoader = _loadCustomIconBytes,
     super.key,
   });
@@ -168,7 +168,17 @@ class _ModeItemIconState extends State<ModeItemIcon> {
 
   @override
   Widget build(BuildContext context) {
-    final spec = context.visualTheme;
+    final catalog =
+        widget.catalogRepository ??
+        _CatalogRepositories.instance.resolve(widget.controller.owner.catalog);
+    final savedAlias = _foldedEntry(
+      widget.controller.state.value.iconAliases,
+      widget.name,
+    )?.value;
+    final grade = catalog.itemIconGrade(
+      widget.name,
+      aliases: [?savedAlias, ...widget.aliases],
+    );
     final content = switch (_resolution) {
       _ResolvedIcon(:final bytes) => Image.memory(
         bytes,
@@ -195,43 +205,18 @@ class _ModeItemIconState extends State<ModeItemIcon> {
         fallbackIcon: widget.fallbackIcon,
       ),
     };
-    final image = !widget.showFrame
-        ? SizedBox.square(dimension: widget.size, child: content)
-        : switch (spec.family) {
-            RetainedVisualFamily.standard => SizedBox.square(
-              dimension: widget.size,
-              child: content,
-            ),
-            RetainedVisualFamily.illuminatedLedger => Container(
-              width: widget.size,
-              height: widget.size,
-              clipBehavior: Clip.antiAlias,
-              decoration: BoxDecoration(
-                color: spec.palette.surfaceInset,
-                borderRadius: BorderRadius.circular(spec.geometry.fieldRadius),
-                border: Border.all(
-                  color: spec.palette.trimBright.withAlpha(126),
-                ),
-              ),
-              child: content,
-            ),
-            RetainedVisualFamily.sakuraNightGarden => Container(
-              width: widget.size,
-              height: widget.size,
-              clipBehavior: Clip.antiAlias,
-              decoration: BoxDecoration(
-                color: spec.palette.surfaceInset,
-                gradient: spec.materials.surfaceRaised,
-                borderRadius: BorderRadius.circular(spec.geometry.fieldRadius),
-                border: Border.all(
-                  color: spec.palette.trimBright.withAlpha(176),
-                  width: 1.1,
-                ),
-                boxShadow: spec.materials.lowShadow,
-              ),
-              child: Padding(padding: const EdgeInsets.all(1), child: content),
-            ),
-          };
+    // Two retired event records shipped only an empty framed square. Keep
+    // their source bytes for provenance, but do not paint a frame inside ours.
+    // A user's custom replacement always wins, including for these records.
+    final artwork =
+        _resolution is _ResolvedIcon &&
+            _request is _ImmediateIconRequest &&
+            catalog.isEmptyIconArtwork(widget.name)
+        ? const SizedBox.shrink()
+        : content;
+    final image = widget.showFrame
+        ? ItemIconFrame(size: widget.size, grade: grade, child: artwork)
+        : SizedBox.square(dimension: widget.size, child: artwork);
     return Semantics(
       image: true,
       label: _resolution.semanticLabel,
@@ -410,8 +395,14 @@ _IconRequest _resolveRequest({
           controller.mode,
           name,
           aliases: aliases,
+          preferCleanArtwork: true,
         )
-      : catalogRepository.iconDataUri(controller.mode, name, aliases: aliases);
+      : catalogRepository.iconDataUri(
+          controller.mode,
+          name,
+          aliases: aliases,
+          preferCleanArtwork: true,
+        );
   final signature =
       '${controller.mode.key}\u0000${searchAcrossModes ? 'all' : 'mode'}'
       '\u0000${name.toLowerCase()}\u0000${aliases.join('|').toLowerCase()}';

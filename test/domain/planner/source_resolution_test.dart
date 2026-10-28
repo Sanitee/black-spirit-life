@@ -93,6 +93,63 @@ void main() {
     expect(aliasOnly.vendor, 'Alias Vendor');
     expect(aliasOnly.npcPrice, 700);
   });
+
+  test('verified cross-mode NPC price is the last price fallback', () {
+    final rules = PlannerRules(
+      npcPurchasePrices: const {'catalyst': 10000000},
+      marketNameAliases: const {'Concentrated catalyst': 'Catalyst'},
+    );
+    for (final name in ['Catalyst', ' CATALYST ', 'Concentrated catalyst']) {
+      expect(
+        resolveSourceInfo(
+          name: name,
+          recipe: _leaf(name),
+          rules: rules,
+        ).npcPrice,
+        10000000,
+      );
+    }
+    expect(
+      resolveSourceInfo(
+        name: 'Catalyst',
+        recipe: _leaf('Catalyst', npcPrice: 9000000),
+        rules: rules,
+      ).npcPrice,
+      9000000,
+    );
+    expect(
+      resolveSourceInfo(
+        name: 'Catalyst',
+        recipe: _leaf('Catalyst'),
+        rules: PlannerRules(
+          npcPurchasePrices: rules.npcPurchasePrices,
+          vendorInfo: const {'Catalyst': VendorSourceRule(price: 8000000)},
+        ),
+      ).npcPrice,
+      8000000,
+    );
+  });
+
+  test('invalid prices do not turn unknown items into NPC purchases', () {
+    for (final price in [0.0, -1.0, double.nan, double.infinity]) {
+      final unknown = resolveSourceInfo(
+        name: 'Unknown',
+        recipe: _leaf('Unknown', npcPrice: price),
+        rules: PlannerRules(
+          vendorInfo: {'Unknown': VendorSourceRule(price: price)},
+          npcPurchasePrices: {'unknown': price},
+          fallbackMarketPrices: const {'Unknown': 100},
+        ),
+      );
+      expect(unknown.npcPrice, 0);
+      final known = resolveSourceInfo(
+        name: 'Known',
+        recipe: _leaf('Known', npcPrice: price),
+        rules: PlannerRules(npcPurchasePrices: const {'known': 500}),
+      );
+      expect(known.npcPrice, 500);
+    }
+  });
 }
 
 Recipe _leaf(

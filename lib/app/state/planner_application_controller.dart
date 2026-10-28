@@ -8,6 +8,7 @@ import 'package:bdo_map_core/bdo_map_core.dart'
         ResourceMapInterfaceStyle;
 import 'package:flutter/foundation.dart';
 
+import '../../data/catalog/catalog_repository.dart';
 import '../../domain/formatting/planner_formatters.dart';
 import '../../domain/models/catalog_models.dart';
 import '../../domain/models/craft_mode.dart';
@@ -17,7 +18,9 @@ import '../../domain/planner/planner_models.dart' as planning;
 import '../../domain/planner/recipe_route_economics.dart';
 import '../../domain/planner/reviewed_acquisition_choices.dart';
 import '../../domain/planner/source_resolution.dart';
+import '../../domain/state/craft_completion.dart';
 import '../../domain/state/inventory_storage.dart';
+import '../../domain/state/planner_content_scale.dart';
 import '../../domain/state/planner_state.dart';
 import '../../domain/state/state_copy.dart';
 import '../../domain/state/user_source_notes.dart';
@@ -48,6 +51,7 @@ final class PlannerApplicationController {
        deleteToolsEnabled = ValueNotifier(initialState.showDeleteTools),
        marketTax = ValueNotifier(initialState.marketTax),
        afkWeightProfile = ValueNotifier(initialState.afkWeightProfile),
+       plannerContentScale = ValueNotifier(initialState.plannerContentScale),
        resourceMapFavoriteIds = ValueNotifier(
          _resourceMapFavoriteIdsFrom(initialState),
        ),
@@ -77,6 +81,7 @@ final class PlannerApplicationController {
   final PlannerAssembly assembly;
   late final planning.PlannerRules plannerRules = assembly.plannerRules(
     catalog.supportingData,
+    npcPurchasePrices: CatalogRepository.cached(catalog).npcPurchasePrices,
   );
   final Duration saveDebounce;
   final SavePlannerState saveState;
@@ -84,6 +89,7 @@ final class PlannerApplicationController {
   final ValueNotifier<bool> deleteToolsEnabled;
   final ValueNotifier<MarketTax> marketTax;
   final ValueNotifier<AfkWeightProfile> afkWeightProfile;
+  final ValueNotifier<double> plannerContentScale;
   final ValueNotifier<Set<String>> resourceMapFavoriteIds;
   final ValueNotifier<BdoNodeNetworkPreferences>
   resourceMapNodeNetworkPreferences;
@@ -111,6 +117,7 @@ final class PlannerApplicationController {
   /// process to close. Existing pending state can still be flushed safely.
   void freezeMutationsForRestart() {
     if (_disposed) throw StateError('The planner controller is disposed.');
+    commitResourceMapUiOpacity();
     _mutationsFrozen = true;
   }
 
@@ -131,8 +138,10 @@ final class PlannerApplicationController {
       );
       _document = _withMode(_document, mode, controller.state.value);
     }
-    activeMode.value = mode;
     _document = _document.copyWith(activeMode: mode);
+    // Listeners may commit a pending display preference while closing a panel.
+    // Give those reentrant document edits the newly selected mode as well.
+    activeMode.value = mode;
     _scheduleSave(immediate: true);
   }
 
@@ -142,7 +151,12 @@ final class PlannerApplicationController {
   }) {
     if (_disposed || _mutationsFrozen) return;
     final previous = _document;
-    final next = update(previous);
+    var next = update(previous);
+    for (final mode in CraftMode.values) {
+      final source = next.forMode(mode);
+      final capped = capCraftCreditsToInventory(source);
+      if (!identical(source, capped)) next = _withMode(next, mode, capped);
+    }
     _document = next;
     if (next.activeMode != activeMode.value) {
       activeMode.value = next.activeMode;
@@ -156,11 +170,18 @@ final class PlannerApplicationController {
     if (!identical(next.afkWeightProfile, afkWeightProfile.value)) {
       afkWeightProfile.value = next.afkWeightProfile;
     }
+    // An unrelated save must not cancel an in-progress reading-size preview.
+    if (previous.plannerContentScale != next.plannerContentScale) {
+      plannerContentScale.value = next.plannerContentScale;
+    }
     _syncResourceMapFavoriteIds(next);
     _syncResourceMapNodeNetworkPreferences(next);
     _syncResourceMapGatherChecklist(next);
     _syncResourceMapInterfaceStyle(next);
-    _syncResourceMapUiOpacity(next);
+    if (_resourceMapUiOpacityFrom(previous) !=
+        _resourceMapUiOpacityFrom(next)) {
+      _syncResourceMapUiOpacity(next);
+    }
     final planningGlobalsChanged = !identical(
       previous.processingYields,
       next.processingYields,
@@ -173,6 +194,32 @@ final class PlannerApplicationController {
       }
     }
     _scheduleSave(immediate: immediate);
+  }
+
+  /// Updates only the Planner's reading surface while the slider is moving.
+  /// The durable document and all mode/plan notifiers remain unchanged.
+  void previewPlannerContentScale(double value) {
+    if (_disposed || _mutationsFrozen) return;
+    plannerContentScale.value = PlannerContentScale.normalize(value);
+  }
+
+  /// Commits one completed drag, keyboard edit, or reset without recalculation.
+  void commitPlannerContentScale([double? value]) {
+    if (_disposed || _mutationsFrozen) return;
+    final scale = PlannerContentScale.normalize(
+      value ?? plannerContentScale.value,
+    );
+    plannerContentScale.value = scale;
+    if (_document.plannerContentScale == scale) return;
+    updateDocument(
+      (document) => document.copyWith(plannerContentScale: scale),
+      immediate: true,
+    );
+  }
+
+  void cancelPlannerContentScalePreview() {
+    if (_disposed) return;
+    plannerContentScale.value = _document.plannerContentScale;
   }
 
   void setResourceMapFavoriteIds(Set<String> favoriteIds) {
@@ -282,13 +329,20 @@ final class PlannerApplicationController {
     }, immediate: true);
   }
 
+  /// A drag updates presentation only, without rewriting the plan document.
+  void previewResourceMapUiOpacity(double value) {
+    if (_disposed || _mutationsFrozen) return;
+    resourceMapUiOpacity.value = ResourceMapUiOpacity.normalize(value);
+  }
+
+  void commitResourceMapUiOpacity([double? value]) =>
+      setResourceMapUiOpacity(value ?? resourceMapUiOpacity.value);
+
   void setResourceMapUiOpacity(double value) {
+    if (_disposed || _mutationsFrozen) return;
     final opacity = ResourceMapUiOpacity.normalize(value);
-    if (_disposed ||
-        _mutationsFrozen ||
-        resourceMapUiOpacity.value == opacity) {
-      return;
-    }
+    resourceMapUiOpacity.value = opacity;
+    if (_resourceMapUiOpacityFrom(_document) == opacity) return;
     updateDocument((document) {
       final extensions = Map<String, Object?>.of(document.extensions);
       final existing = extensions[_resourceMapExtensionKey];
@@ -325,6 +379,9 @@ final class PlannerApplicationController {
     }
     final previous = _document;
     updateDocument(update, immediate: true);
+    // Imports replace preferences even when the imported value matches the
+    // stored one but a drag is still previewing a different value.
+    _syncResourceMapUiOpacity(_document);
     await flush();
     final error = saveError.value;
     if (error == null) return;
@@ -374,6 +431,7 @@ final class PlannerApplicationController {
 
   Future<void> flush() async {
     if (_disposed) return;
+    commitResourceMapUiOpacity();
     _saveTimer?.cancel();
     _saveTimer = null;
     _enqueuePendingSave();
@@ -383,6 +441,7 @@ final class PlannerApplicationController {
 
   void _replaceMode(CraftMode mode, ModeState next, {bool immediate = false}) {
     if (_disposed || _mutationsFrozen) return;
+    next = capCraftCreditsToInventory(next);
     _document = _withMode(_document, mode, next);
     modes[mode]!._replaceState(next, persist: false);
     _scheduleSave(immediate: immediate);
@@ -402,6 +461,7 @@ final class PlannerApplicationController {
     if (!identical(afkWeightProfile.value, state.afkWeightProfile)) {
       afkWeightProfile.value = state.afkWeightProfile;
     }
+    plannerContentScale.value = state.plannerContentScale;
     _syncResourceMapFavoriteIds(state);
     _syncResourceMapNodeNetworkPreferences(state);
     _syncResourceMapGatherChecklist(state);
@@ -498,6 +558,7 @@ final class PlannerApplicationController {
     deleteToolsEnabled.dispose();
     marketTax.dispose();
     afkWeightProfile.dispose();
+    plannerContentScale.dispose();
     resourceMapFavoriteIds.dispose();
     resourceMapNodeNetworkPreferences.dispose();
     resourceMapGatherChecklist.dispose();
@@ -706,12 +767,30 @@ final class ModeFeatureController {
     );
   }
 
-  Iterable<String> recipeRouteMarketNamesForPlan(planning.PlanResult value) =>
-      <String>{
-        for (final selection in value.routeSelections.values)
-          for (final option in selection.options)
-            if (!option.npcBuyable) option.ingredientName,
-      };
+  Iterable<String> recipeRouteMarketNamesForPlan(
+    planning.PlanResult value,
+  ) => <String>{
+    for (final selection in value.routeSelections.values)
+      for (final option in selection.options)
+        if (!option.npcBuyable) option.ingredientName,
+    // Automatic selection needs prices/stock for every supported quality,
+    // including tiers not currently displayed in Need First.
+    for (final step in value.steps)
+      for (final ingredient in step.ingredients)
+        for (final base in {ingredient.baseName, ...ingredient.options}) ...{
+          base,
+          if (qualityProfile(
+                parentName: step.name,
+                selectedName: base,
+              ).family !=
+              IngredientQualityFamily.none)
+            for (final quality in ingredientQualityAlternatives(
+              rules: owner.plannerRules,
+              ingredientName: base,
+            ))
+              quality.name,
+        },
+  };
 
   /// Resolves one real recipe attempt with the same substitute and quality
   /// rules as the active plan. Presentation code uses this for learning labels
@@ -950,7 +1029,12 @@ final class ModeFeatureController {
   );
 
   void resetCompleted() => _commit(
-    state.value.copyWith(completedSteps: const <String>{}),
+    state.value.copyWith(
+      completedSteps: const <String>{},
+      afkCraftProgress: const {},
+      extensions: Map<String, Object?>.of(state.value.extensions)
+        ..remove(craftCreditsKey),
+    ),
     immediate: true,
   );
 
@@ -968,32 +1052,168 @@ final class ModeFeatureController {
   /// Finishes a queue step once, consumes its selected direct ingredients,
   /// adds the produced item, and mirrors the result into shared Inventory.
   bool completeStep(planning.PlanStep step) {
+    if (owner._disposed || owner._mutationsFrozen) return false;
     if (_foldedIn(state.value.completedSteps, step.name) != null) return false;
+    // Reject a stale click from a card showing an older quantity/formula.
+    if (!plan.value.steps.contains(step)) return false;
+    owner.updateDocument(
+      (document) => recordCraftCompletion(
+        document: document,
+        mode: mode,
+        step: step,
+        target: state.value.target,
+        want: state.value.want,
+        markComplete: true,
+      ),
+      immediate: true,
+    );
+    return true;
+  }
 
-    final deltas = <String, double>{};
-    void addDelta(String name, double delta) {
-      if (name.trim().isEmpty || !delta.isFinite || delta == 0) return;
-      final existingKey = _exactOrFolded(deltas, name);
-      final key = existingKey ?? name.trim();
-      deltas[key] = (deltas[key] ?? 0) + delta;
+  String? get lastCompletionName =>
+      latestCraftCompletion(owner.documentSnapshot, mode)?['recipe'] as String?;
+
+  bool canUndoCompletion({String? progressKey}) {
+    final receipt = latestCraftCompletion(owner.documentSnapshot, mode);
+    return receipt != null &&
+        (progressKey == null || receipt['progressKey'] == progressKey);
+  }
+
+  bool undoCompletion({String? progressKey}) {
+    if (owner._disposed ||
+        owner._mutationsFrozen ||
+        !canUndoCompletion(progressKey: progressKey)) {
+      return false;
     }
+    final restored = undoCraftCompletion(owner.documentSnapshot, mode);
+    if (restored == null) return false;
+    owner.updateDocument((_) => restored, immediate: true);
+    return true;
+  }
 
-    for (final ingredient in step.ingredients) {
-      if (ingredient.need > 0) addDelta(ingredient.name, -ingredient.need);
+  String afkPlanSignature(planning.PlanStep step) {
+    final recipe = selectedRecipe(step.name)!;
+    return [
+      recipe.name,
+      selectedRecipeVariantId(recipe.name) ?? '',
+      recipe.type,
+      recipe.method ?? '',
+      step.batchSize,
+      (step.produced / step.count).toStringAsFixed(8),
+      for (final item in recipe.ingredients)
+        '${item.name}:${item.quantity.toStringAsFixed(8)}',
+      for (final item in step.ingredients)
+        '${item.key}:${item.name}:${item.grade}',
+    ].join('|');
+  }
+
+  AfkCraftProgress inventoryBatchProgress({
+    required planning.PlanStep step,
+    required String target,
+    required int want,
+    required String progressKey,
+    required int attemptsPerRound,
+  }) {
+    final signature = afkPlanSignature(step);
+    final saved = state.value.afkCraftProgress[progressKey];
+    // Historical progress-only ticks never silently create inventory.
+    final compatible =
+        saved != null &&
+        saved.extensions[inventoryBatchVersionKey] == 1 &&
+        saved.targetName == target &&
+        saved.targetAmount == want &&
+        saved.planSignature == signature;
+    final completed = compatible ? saved.completedAttempts : 0;
+    return AfkCraftProgress(
+      stepKey: progressKey,
+      targetName: target,
+      targetAmount: want,
+      recipeName: step.name,
+      planSignature: signature,
+      totalAttempts: step.count.ceil() + completed,
+      completedAttempts: completed,
+      attemptsPerRound: attemptsPerRound,
+      extensions: const {inventoryBatchVersionKey: 1},
+    );
+  }
+
+  bool completeInventoryBatch({
+    required planning.PlanStep step,
+    required AfkCraftProgress progress,
+    required int completedBefore,
+    required int completedAfter,
+    bool bonus = false,
+  }) {
+    if (owner._disposed || owner._mutationsFrozen) return false;
+    final currentPlan = bonus
+        ? owner.assembly.build(
+            catalog: owner.catalog,
+            mode: mode,
+            state: state.value.copyWith(completedSteps: const {}),
+            targetOverride: progress.targetName,
+            wantOverride: progress.targetAmount,
+          )
+        : plan.value;
+    final current = currentPlan.steps
+        .where((item) => item.name == step.name)
+        .firstOrNull;
+    if (current == null ||
+        current.count != step.count ||
+        afkPlanSignature(current) != progress.planSignature ||
+        currentPlan.target != progress.targetName ||
+        currentPlan.want != progress.targetAmount) {
+      return false;
     }
-    if (step.produced > 0) addDelta(step.name, step.produced);
+    final expected = inventoryBatchProgress(
+      step: current,
+      target: progress.targetName,
+      want: progress.targetAmount,
+      progressKey: progress.stepKey,
+      attemptsPerRound: progress.attemptsPerRound,
+    );
+    final attempts = completedAfter - completedBefore;
+    if (expected.completedAttempts != completedBefore ||
+        attempts <= 0 ||
+        attempts > current.count ||
+        attempts > progress.attemptsPerRound) {
+      return false;
+    }
+    final nextProgress = expected.copyWith(completedAttempts: completedAfter);
+    owner.updateDocument(
+      (document) => recordCraftCompletion(
+        document: document,
+        mode: mode,
+        step: scaleCraftStep(current, attempts.toDouble()),
+        target: progress.targetName,
+        want: progress.targetAmount,
+        markComplete: !bonus && attempts == current.count,
+        roundIngredients: true,
+        progress: nextProgress,
+      ),
+      immediate: true,
+    );
+    return true;
+  }
 
-    owner.updateDocument((document) {
-      final adjusted = applySharedInventoryDeltas(document, deltas);
-      final modeState = adjusted.forMode(mode);
-      final completed = Set<String>.of(modeState.completedSteps)
-        ..add(step.name);
-      return _withMode(
-        adjusted,
-        mode,
-        modeState.copyWith(completedSteps: completed),
-      );
-    }, immediate: true);
+  bool undoAllInventoryBatches(String progressKey) {
+    if (owner._disposed || owner._mutationsFrozen) return false;
+    var next = owner.documentSnapshot;
+    while (next
+                .forMode(mode)
+                .afkCraftProgress[progressKey]
+                ?.extensions[inventoryBatchVersionKey] ==
+            1 &&
+        (next.forMode(mode).afkCraftProgress[progressKey]?.completedAttempts ??
+                0) >
+            0) {
+      if (latestCraftCompletion(next, mode)?['progressKey'] != progressKey) {
+        return false;
+      }
+      final restored = undoCraftCompletion(next, mode);
+      if (restored == null) return false;
+      next = restored;
+    }
+    owner.updateDocument((_) => next, immediate: true);
     return true;
   }
 
@@ -1077,14 +1297,171 @@ final class ModeFeatureController {
     required String parentName,
     required String ingredientName,
     required String grade,
+    String? selectedName,
   }) {
-    if (recipeHasAuthoritativeQualityVariants(parentName)) return;
-    const allowed = {'normal', 'high', 'special', 'blue'};
+    _commit(
+      _withIngredientGrade(
+        state.value,
+        parentName,
+        ingredientName,
+        grade,
+        selectedName: selectedName,
+      ),
+      immediate: true,
+    );
+  }
+
+  /// Need First combines demand from several recipes. Edit every contributing
+  /// compatible ingredient together, without an intermediate partial plan.
+  void selectNeededIngredientGrade(
+    Iterable<planning.PlanStepIngredient> ingredients,
+    String grade,
+  ) {
+    var next = state.value;
+    for (final ingredient in ingredients) {
+      if (grade != 'auto' &&
+          !availableIngredientGrades(
+            parentName: ingredient.parentName,
+            selectedName: ingredient.baseName,
+          ).contains(grade)) {
+        continue;
+      }
+      next = _withIngredientGrade(
+        next,
+        ingredient.parentName,
+        ingredient.original,
+        grade,
+        selectedName: ingredient.baseName,
+      );
+    }
+    _commit(next, immediate: true);
+  }
+
+  bool hasManualIngredientChoice({
+    required String parentName,
+    required String ingredientName,
+    required String selectedName,
+  }) {
+    final ingredient = selectedRecipe(parentName)?.ingredients
+        .where((value) => _fold(value.name) == _fold(ingredientName))
+        .firstOrNull;
+    final substitute = _foldedValue(
+      state.value.substituteChoices,
+      'recipe:$parentName:${ingredient?.substituteGroup ?? ingredientName}',
+    );
+    final grade =
+        _foldedValue(
+          state.value.ingredientGrades,
+          'recipe:$parentName:$ingredientName',
+        ) ??
+        _foldedValue(state.value.ingredientGrades, selectedName);
+    return substitute != null || (grade != null && grade != 'auto');
+  }
+
+  ModeState _withIngredientGrade(
+    ModeState source,
+    String parentName,
+    String ingredientName,
+    String grade, {
+    String? selectedName,
+  }) {
+    if (recipeHasAuthoritativeQualityVariants(parentName)) return source;
+    const allowed = {'normal', 'high', 'special', 'blue', 'auto'};
     final normalized = grade.trim().toLowerCase();
-    if (!allowed.contains(normalized)) return;
-    final grades = Map<String, String>.of(state.value.ingredientGrades);
-    grades['recipe:$parentName:$ingredientName'] = normalized;
-    _commit(state.value.copyWith(ingredientGrades: grades), immediate: true);
+    if (!allowed.contains(normalized)) return source;
+    final key = 'recipe:$parentName:$ingredientName';
+    final grades = Map<String, String>.of(source.ingredientGrades)
+      ..removeWhere((name, _) => _fold(name) == _fold(key));
+    // Explicit Auto masks old global quality preferences for this slot only.
+    grades[key] = normalized;
+    final ingredient = selectedRecipe(parentName)?.ingredients
+        .where((value) => _fold(value.name) == _fold(ingredientName))
+        .firstOrNull;
+    final choiceKey =
+        'recipe:$parentName:${ingredient?.substituteGroup ?? ingredientName}';
+    final choices = Map<String, String>.of(source.substituteChoices);
+    final declaredPair = declaredBlueIngredientPair(
+      parentName: parentName,
+      ingredientName: ingredientName,
+    );
+    if (normalized == 'auto') {
+      choices.removeWhere((name, _) => _fold(name) == _fold(choiceKey));
+    } else if (declaredPair != null &&
+        (normalized == 'normal' || normalized == 'blue')) {
+      // This formula already declares the rare item's complete 3:1 ratio.
+      // Select its option without applying a second quality conversion.
+      grades[key] = 'normal';
+      choices.removeWhere((name, _) => _fold(name) == _fold(choiceKey));
+      choices[choiceKey] = normalized == 'blue'
+          ? declaredPair.blue
+          : declaredPair.normal;
+    } else if (selectedName != null &&
+        ingredient != null &&
+        ingredient.options.any((name) => _fold(name) == _fold(selectedName))) {
+      choices.removeWhere((name, _) => _fold(name) == _fold(choiceKey));
+      choices[choiceKey] = selectedName;
+    }
+    return source.copyWith(
+      ingredientGrades: grades,
+      substituteChoices: choices,
+    );
+  }
+
+  /// Recognizes a declared two-option elixir pair without changing its formula.
+  /// Other substitutes retain their full chooser, including custom ratios.
+  ({String normal, String blue})? declaredBlueIngredientPair({
+    required String parentName,
+    String? ingredientName,
+    String? selectedName,
+  }) {
+    final parent = selectedRecipe(parentName);
+    if (parent == null ||
+        parent.type.trim().toLowerCase() == 'processing' ||
+        recipeHasAuthoritativeQualityVariants(parentName)) {
+      return null;
+    }
+    final catalog = CatalogRepository.cached(owner.catalog);
+    for (final ingredient in parent.ingredients) {
+      if (ingredientName != null &&
+          _fold(ingredient.name) != _fold(ingredientName)) {
+        continue;
+      }
+      if (selectedName != null &&
+          !ingredient.options.any(
+            (name) => _fold(name) == _fold(selectedName),
+          )) {
+        continue;
+      }
+      final options = {
+        for (final name in ingredient.options) _fold(name): name,
+      };
+      final normal = options[_fold(ingredient.name)];
+      if (normal == null || options.length != 2) continue;
+      final blue = options.entries
+          .firstWhere((entry) => entry.key != _fold(normal))
+          .value;
+      if (recipeDefinition(normal)?.type.trim().toLowerCase() != 'alchemy' ||
+          catalog.itemIconGrade(normal) != 1 ||
+          catalog.itemIconGrade(blue) != 2 ||
+          ingredientQualityProfile(
+                rules: owner.plannerRules,
+                parentIsProcessing: false,
+                ingredientName: normal,
+              ).family !=
+              IngredientQualityFamily.none) {
+        continue;
+      }
+      final normalRatio = _foldedValue(ingredient.substituteRatios, normal);
+      final blueRatio = _foldedValue(ingredient.substituteRatios, blue);
+      if (normalRatio == null ||
+          blueRatio == null ||
+          (normalRatio - 1).abs() > 0.000001 ||
+          (blueRatio - 1 / 3).abs() > 0.000001) {
+        continue;
+      }
+      return (normal: normal, blue: blue);
+    }
+    return null;
   }
 
   IngredientQualityProfile qualityProfile({
@@ -1093,6 +1470,13 @@ final class ModeFeatureController {
   }) {
     if (recipeHasAuthoritativeQualityVariants(parentName)) {
       return IngredientQualityProfile.none;
+    }
+    if (declaredBlueIngredientPair(
+          parentName: parentName,
+          selectedName: selectedName,
+        ) !=
+        null) {
+      return IngredientQualityProfile.blue;
     }
     final parent = selectedRecipe(parentName);
     return ingredientQualityProfile(
@@ -1114,6 +1498,23 @@ final class ModeFeatureController {
     required String selectedName,
   }) {
     if (recipeHasAuthoritativeQualityVariants(parentName)) return 'normal';
+    final pair = declaredBlueIngredientPair(
+      parentName: parentName,
+      ingredientName: ingredientName,
+      selectedName: selectedName,
+    );
+    if (pair != null) {
+      final ingredient = selectedRecipe(parentName)!.ingredients.firstWhere(
+        (value) => _fold(value.name) == _fold(ingredientName),
+      );
+      final selected = _foldedValue(
+        state.value.substituteChoices,
+        'recipe:$parentName:${ingredient.substituteGroup ?? ingredientName}',
+      );
+      return _fold(selected ?? selectedName) == _fold(pair.blue)
+          ? 'blue'
+          : 'normal';
+    }
     final parent = selectedRecipe(parentName);
     return selectedIngredientQualityGrade(
       rules: owner.plannerRules,
@@ -1132,6 +1533,34 @@ final class ModeFeatureController {
       (document) =>
           setSharedInventoryAmounts(document, <String, double>{name: value}),
     );
+    return true;
+  }
+
+  /// Sets the owned total from a queue card and immediately uses it in this
+  /// plan. Inventory is shared, but the planning toggles remain mode-local.
+  bool commitQueueInventory(String name, String text) {
+    if (owner._disposed || owner._mutationsFrozen || name.trim().isEmpty) {
+      return false;
+    }
+    final value = parsePlannerNumber(text);
+    if (value == null || !value.isFinite || value < 0) return false;
+    owner.updateDocument((document) {
+      final withInventory = setSharedInventoryAmounts(
+        document,
+        <String, double>{name: value},
+      );
+      final activeState = withInventory.forMode(mode);
+      return _withMode(
+        withInventory,
+        mode,
+        activeState.copyWith(
+          ignoreIngredientInventory: false,
+          ignoreTargetInventory: _fold(name) == _fold(activeState.target)
+              ? false
+              : activeState.ignoreTargetInventory,
+        ),
+      );
+    }, immediate: true);
     return true;
   }
 
@@ -1254,9 +1683,43 @@ final class ModeFeatureController {
     _commit(next.applyTo(state.value), immediate: true);
   }
 
+  /// Prices and demand observations belong to one region; user inputs do not.
+  bool setMarketRegion(String region) {
+    final nextRegion = region.trim().toLowerCase();
+    if (owner._disposed ||
+        owner._mutationsFrozen ||
+        !const {'na', 'eu'}.contains(nextRegion) ||
+        state.value.market.region == nextRegion) {
+      return false;
+    }
+    _commit(
+      state.value.copyWith(
+        market: state.value.market.copyWith(
+          region: nextRegion,
+          prices: const {},
+          stock: const {},
+          preorderPrices: const {},
+          preorderObservedAt: const {},
+          tradeMarketIds: const {},
+          totalTrades: const {},
+          tradeObservedAt: const {},
+          observedDailyTrades: const {},
+          tradeObservationHours: const {},
+          lastSoldAtEpochSeconds: const {},
+          unlistedItemNames: const {},
+          fetchedAt: 0,
+        ),
+      ),
+      immediate: true,
+    );
+    return true;
+  }
+
   void replaceMarketValues({
     required Map<String, double> prices,
     required Map<String, double> stock,
+    Map<String, double>? preorderPrices,
+    Map<String, int>? preorderObservedAt,
     required Iterable<String> unlistedItemNames,
     required int fetchedAt,
     Map<String, String>? tradeMarketIds,
@@ -1271,6 +1734,8 @@ final class ModeFeatureController {
       market: state.value.market.copyWith(
         prices: prices,
         stock: stock,
+        preorderPrices: preorderPrices,
+        preorderObservedAt: preorderObservedAt,
         tradeMarketIds: tradeMarketIds,
         totalTrades: totalTrades,
         tradeObservedAt: tradeObservedAt,
@@ -1414,12 +1879,14 @@ final class _PlanProjection {
       source.processingMastery == next.processingMastery &&
       source.useMassProcessing == next.useMassProcessing &&
       mapEquals(source.inventory, next.inventory) &&
+      mapEquals(craftCredits(source), craftCredits(next)) &&
       (ignoreCompleted ||
           setEquals(source.completedSteps, next.completedSteps)) &&
       mapEquals(source.substituteChoices, next.substituteChoices) &&
       mapEquals(source.ingredientGrades, next.ingredientGrades) &&
       mapEquals(source.recipeVariantChoices, next.recipeVariantChoices) &&
       mapEquals(source.market.prices, next.market.prices) &&
+      mapEquals(source.market.preorderPrices, next.market.preorderPrices) &&
       mapEquals(source.market.stock, next.market.stock);
 }
 

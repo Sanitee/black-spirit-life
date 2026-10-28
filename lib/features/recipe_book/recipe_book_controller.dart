@@ -18,6 +18,7 @@ import '../../domain/state/transactions/state_transactions.dart';
 import '../planner/planner_contracts.dart';
 import 'recipe_book_item_info.dart';
 import 'recipe_book_models.dart';
+import 'recipe_book_preview_routes.dart';
 import 'recipe_book_usage.dart';
 
 final Expando<Map<String, List<String>>> _processingConsumerIndexes =
@@ -106,6 +107,145 @@ final class RecipeBookController extends ChangeNotifier {
   final Map<(String, CraftMode, bool), RecipeBookItemInfo?> _itemInfoCache = {};
   final Map<CraftMode, Map<String, Recipe>> _itemInfoRecipeSources = {};
   static const _itemInfoCacheLimit = 512;
+  final Map<CraftMode, RecipeBookController> _routeControllers = {};
+  RecipeBookController? _routeHost;
+  CraftMode? _previewMode;
+  final Map<String, String> _previewVariantOverrides = {};
+  RecipeBookActivation? _lastRouteActivation;
+  bool? _searchByIngredientOverride;
+  bool? _favoritesOnlyOverride;
+
+  RecipeBookActivation? get lastRouteActivation => _lastRouteActivation;
+  RecipeBookController get previewController =>
+      controllerForMode(_previewMode ?? modeController.mode);
+
+  List<RecipeBookPreviewRoute> previewRoutesFor(String name) =>
+      recipeBookPreviewRoutes([
+        for (final mode in CraftMode.values)
+          ...recipeBookFormulas(
+            _foldedEntry(
+              modeController.owner.modes[mode]!.recipes,
+              name,
+            )?.value,
+            mode: mode,
+          ).where(canActivateFormula),
+      ]);
+
+  /// Keep calculations and user choices owned by the recipe's real category.
+  RecipeBookController controllerForMode(CraftMode mode) {
+    if (mode == modeController.mode) return this;
+    if (_routeHost != null) return _routeHost!.controllerForMode(mode);
+    final child = _routeControllers.putIfAbsent(mode, () {
+      final destination = modeController.owner.modes[mode]!;
+      return RecipeBookController(
+        modeController: destination,
+        catalogRepository: catalogRepository,
+        callingContext: callingContext,
+        allowedTargets: destination.craftableNames,
+        checkPrices: checkPrices,
+      ).._routeHost = this;
+    });
+    if (child._search != _search ||
+        child._searchByIngredientOverride != searchByIngredient) {
+      child._clearManualSearchSelections();
+    }
+    child
+      .._search = _search
+      .._searchByIngredientOverride = searchByIngredient
+      .._favoritesOnlyOverride = favoritesOnly
+      .._density = _density
+      .._group = _group
+      .._marketChecked = _marketChecked
+      .._outOfStockOnly = _outOfStockOnly
+      .._profitableOnly = _profitableOnly
+      .._marketSort = _marketSort;
+    return child;
+  }
+
+  bool get _searchesAllModes =>
+      _routeHost == null &&
+      callingContext == RecipeBookCallingContext.planner &&
+      _search.trim().isNotEmpty &&
+      !showHidden &&
+      !deleteSelectionMode;
+
+  RecipeBookActivation? activateInMode(String name, CraftMode mode) {
+    if (_activationSuppressed) return null;
+    if (callingContext == RecipeBookCallingContext.bonus &&
+        mode != modeController.mode) {
+      return null;
+    }
+    final activation = controllerForMode(mode).activate(name);
+    if (activation == null) return null;
+    if (mode != modeController.mode) {
+      modeController.owner.modes[mode]!.navigate('plan');
+      modeController.owner.switchMode(mode);
+    }
+    return activation;
+  }
+
+  bool canActivateFormula(RecipeBookFormula formula) {
+    final mode = formula.mode;
+    if (mode == null || _activationSuppressed) return false;
+    final destination = modeController.owner.modes[mode]!;
+    final recipe = _foldedEntry(destination.recipes, formula.outputName)?.value;
+    if (recipe == null ||
+        !recipe.isCraftable ||
+        isTemporarilyArchivedItem(recipe.name, itemId: recipe.marketId)) {
+      return false;
+    }
+    if (callingContext == RecipeBookCallingContext.bonus &&
+        (mode != modeController.mode || _poolExactName(recipe.name) == null)) {
+      return false;
+    }
+    if (recipe.variants.isNotEmpty &&
+        recipe.variantById(formula.variantId) == null) {
+      return false;
+    }
+    final selected = recipe.resolveVariant(formula.variantId);
+    return selected.ingredients.every(
+      (ingredient) =>
+          <String>{
+            ingredient.name,
+            ...ingredient.options,
+            ...ingredient.substituteRatios.keys,
+          }.any(
+            (name) => !isTemporarilyArchivedItem(
+              name,
+              itemId: _foldedEntry(destination.recipes, name)?.value.marketId,
+            ),
+          ),
+    );
+  }
+
+  RecipeBookActivation? activateFormula(RecipeBookFormula formula) {
+    if (!canActivateFormula(formula)) return null;
+    final mode = formula.mode!;
+    final destination = modeController.owner.modes[mode]!;
+    if (!destination.selectTargetVariant(
+      formula.outputName,
+      variantId: formula.variantId,
+      bonus: callingContext == RecipeBookCallingContext.bonus,
+    )) {
+      return null;
+    }
+    if (callingContext == RecipeBookCallingContext.planner) {
+      destination.navigate('plan');
+    }
+    final activation = RecipeBookActivation(
+      exactName: formula.outputName,
+      context: callingContext,
+      mode: mode,
+      variantId: formula.variantId,
+    );
+    final host = _routeHost ?? this;
+    host._lastRouteActivation = activation;
+    host.notifyListeners();
+    if (modeController.owner.activeMode.value != mode) {
+      modeController.owner.switchMode(mode);
+    }
+    return activation;
+  }
 
   String get search => _search;
   RecipeBookDensity get density => _density;
@@ -156,8 +296,10 @@ final class RecipeBookController extends ChangeNotifier {
       modeController.mode == CraftMode.processing &&
       callingContext == RecipeBookCallingContext.planner;
 
-  bool get favoritesOnly => modeController.state.value.bookFavoritesOnly;
+  bool get favoritesOnly =>
+      _favoritesOnlyOverride ?? modeController.state.value.bookFavoritesOnly;
   bool get searchByIngredient =>
+      _searchByIngredientOverride ??
       modeController.state.value.bookSearchIngredients;
 
   String get searchHint {
@@ -172,6 +314,57 @@ final class RecipeBookController extends ChangeNotifier {
   }
 
   RecipeBookSnapshot get snapshot {
+    final local = _localSnapshot;
+    if (!_searchesAllModes) return local;
+    final snapshots = <RecipeBookSnapshot>[
+      local,
+      for (final mode in CraftMode.values)
+        if (mode != modeController.mode) controllerForMode(mode)._localSnapshot,
+    ];
+    final entries = snapshots.expand((value) => value.entries).toList();
+    entries.sort((a, b) {
+      if (_marketSort != RecipeBookMarketSort.none && marketControlsVisible) {
+        final compared = _compareOptionalNumber(
+          _marketSort.sortsProfit
+              ? a.profitability?.profitPerPiece
+              : a.marketStock,
+          _marketSort.sortsProfit
+              ? b.profitability?.profitPerPiece
+              : b.marketStock,
+          ascending:
+              _marketSort == RecipeBookMarketSort.stockLowToHigh ||
+              _marketSort == RecipeBookMarketSort.profitLowToHigh,
+        );
+        if (compared != 0) return compared;
+      }
+      final nameOrder = _compareExactNames(a.name, b.name);
+      if (nameOrder != 0) return nameOrder;
+      return (a.mode!.index - b.mode!.index);
+    });
+    return RecipeBookSnapshot(
+      entries: List.unmodifiable(entries),
+      filteredCount: entries.length,
+      poolCount: snapshots.fold(0, (total, value) => total + value.poolCount),
+      page: 0,
+      pageCount: 1,
+      groupCounts: [
+        for (final group in ProcessingRecipeGroup.values)
+          RecipeBookGroupCount(
+            group: group,
+            count: snapshots.fold(
+              0,
+              (total, value) =>
+                  total +
+                  value.groupCounts
+                      .where((entry) => entry.group == group)
+                      .fold(0, (sum, entry) => sum + entry.count),
+            ),
+          ),
+      ],
+    );
+  }
+
+  RecipeBookSnapshot get _localSnapshot {
     final visibleRecipes = modeController.recipes;
     final hiddenRecipes = _hiddenRecipeMap();
     final hiddenNames = hiddenRecipes.keys.map(_fold).toSet();
@@ -188,9 +381,7 @@ final class RecipeBookController extends ChangeNotifier {
             _search.trim().isNotEmpty
         ? _processingConsumers(recipes)
         : const <String, List<String>>{};
-    final processingGroups = usesProcessingPaging
-        ? _processingGroups(recipes)
-        : const <String, ProcessingRecipeGroup>{};
+    final processingGroups = _processingGroups(recipes);
     final favorites = modeController.state.value.favoriteRecipes
         .map(_fold)
         .toSet();
@@ -213,7 +404,8 @@ final class RecipeBookController extends ChangeNotifier {
       if (!hidden && favoritesOnly && !favorites.contains(_fold(name))) {
         continue;
       }
-      if (usesProcessingPaging &&
+      if ((usesProcessingPaging ||
+              (_routeHost?.usesProcessingPaging ?? false)) &&
           _group != ProcessingRecipeGroup.all &&
           processingGroups[name] != _group) {
         continue;
@@ -255,6 +447,7 @@ final class RecipeBookController extends ChangeNotifier {
           final recipe = recipes[name]!;
           final isHidden = hiddenNames.contains(_fold(name));
           return RecipeBookEntry(
+            mode: modeController.mode,
             name: name,
             recipe: recipe,
             favorite: favorites.contains(_fold(name)),
@@ -305,7 +498,12 @@ final class RecipeBookController extends ChangeNotifier {
     if (recipe == null) return null;
     final contextualVariant = _ingredientSearchMatch(name, recipe)?.variantId;
     return recipe.resolveVariant(
-      contextualVariant ??
+      _previewVariantOverrides[_fold(name)] ??
+          contextualVariant ??
+          _methodSearchVariantId(recipe) ??
+          _gradeSearchEntry(
+            name,
+          )?.preferredVariantId(_savedRecipeVariantId(recipe)) ??
           modeController.selectedRecipeVariantId(name) ??
           _savedRecipeVariantId(recipe),
     );
@@ -314,7 +512,12 @@ final class RecipeBookController extends ChangeNotifier {
   String? selectedRecipeVariantId(String name) {
     final recipe = recipeDefinitionFor(name);
     if (recipe == null) return null;
-    return _ingredientSearchMatch(name, recipe)?.variantId ??
+    return _previewVariantOverrides[_fold(name)] ??
+        _ingredientSearchMatch(name, recipe)?.variantId ??
+        _methodSearchVariantId(recipe) ??
+        _gradeSearchEntry(
+          name,
+        )?.preferredVariantId(_savedRecipeVariantId(recipe)) ??
         modeController.selectedRecipeVariantId(name) ??
         recipe.resolvedVariantId(_savedRecipeVariantId(recipe));
   }
@@ -429,11 +632,14 @@ final class RecipeBookController extends ChangeNotifier {
 
   bool selectRecipeVariant(String name, String variantId) {
     _clearUndo();
+    final removedPreviewOverride =
+        _previewVariantOverrides.remove(_fold(name)) != null;
     final changed = modeController.selectRecipeVariant(
       recipeName: name,
       variantId: variantId,
     );
     if (changed) _manualSearchVariantNames.add(_fold(name));
+    if (removedPreviewOverride && !changed) notifyListeners();
     return changed;
   }
 
@@ -509,9 +715,36 @@ final class RecipeBookController extends ChangeNotifier {
       consumerRecipes: consumerRecipes,
     );
     if (info == null) return null;
+    final allFormulas = <RecipeBookFormula>[
+      for (final sourceMode in <CraftMode>[
+        preferredMode,
+        ...CraftMode.values.where((mode) => mode != preferredMode),
+      ])
+        ...recipeBookFormulas(
+          _foldedEntry(recipesByMode[sourceMode]!, resolvedName)?.value,
+          mode: sourceMode,
+        ),
+    ];
+    final completeInfo = info.copyWith(
+      acquisitionFormulas: allFormulas.isEmpty
+          ? info.acquisitionFormulas
+          : allFormulas,
+      craftUses: [
+        for (final use in info.craftUses)
+          use.copyWith(
+            formulas: [
+              for (final sourceMode in CraftMode.values)
+                ...recipeBookFormulas(
+                  _foldedEntry(recipesByMode[sourceMode]!, use.output)?.value,
+                  mode: sourceMode,
+                ),
+            ],
+          ),
+      ],
+    );
     final researched = withResearchedAcquisition(
       withVisibleRecipeBookFormulas(
-        info,
+        completeInfo,
         itemIdFor: (candidate) =>
             _foldedEntry(
               resolvedController.recipes,
@@ -577,10 +810,11 @@ final class RecipeBookController extends ChangeNotifier {
   String? iconDataUriForMode(CraftMode mode, String name) {
     final aliases = modeController.owner.modes[mode]!.state.value.iconAliases;
     final alias = _foldedValue(aliases, name);
-    return catalogRepository.iconDataUri(
+    return catalogRepository.iconDataUriAcrossModes(
       mode,
       name,
       aliases: alias == null ? const <String>[] : <String>[alias],
+      preferCleanArtwork: true,
     );
   }
 
@@ -759,8 +993,16 @@ final class RecipeBookController extends ChangeNotifier {
       notifyListeners();
       return;
     }
-    final names = _marketRefreshNames();
-    if (names.isEmpty) {
+    final requests = <ModeFeatureController, List<String>>{
+      modeController: _marketRefreshNames(),
+      if (_searchesAllModes)
+        for (final mode in CraftMode.values)
+          if (mode != modeController.mode)
+            modeController.owner.modes[mode]!: controllerForMode(
+              mode,
+            )._marketRefreshNames(),
+    }..removeWhere((_, names) => names.isEmpty);
+    if (requests.isEmpty) {
       _marketChecked = true;
       _marketMessage =
           'No market-listed recipe results are visible for this search.';
@@ -775,27 +1017,32 @@ final class RecipeBookController extends ChangeNotifier {
       // Give Flutter enough time to paint the loading controls before a large
       // catalog is resolved and hundreds of market rows begin refreshing.
       await Future<void>.delayed(_marketLoadingLeadIn);
-      final result = await refresh(
-        PlannerMarketRequest(
-          controller: modeController,
-          materials: const [],
-          materialNames: names,
-        ),
+      final summaries = await Future.wait(
+        requests.entries.map((request) async {
+          final result = await refresh(
+            PlannerMarketRequest(
+              controller: request.key,
+              materials: const [],
+              materialNames: request.value,
+            ),
+          );
+          request.key.replaceMarketValues(
+            prices: result.prices,
+            stock: result.stock,
+            tradeMarketIds: result.tradeMarketIds,
+            totalTrades: result.totalTrades,
+            tradeObservedAt: result.tradeObservedAt,
+            observedDailyTrades: result.observedDailyTrades,
+            tradeObservationHours: result.tradeObservationHours,
+            lastSoldAtEpochSeconds: result.lastSoldAtEpochSeconds,
+            unlistedItemNames: result.unlistedItemNames,
+            fetchedAt: result.fetchedAt,
+            region: result.region,
+          );
+          return result.summary;
+        }),
       );
-      modeController.replaceMarketValues(
-        prices: result.prices,
-        stock: result.stock,
-        tradeMarketIds: result.tradeMarketIds,
-        totalTrades: result.totalTrades,
-        tradeObservedAt: result.tradeObservedAt,
-        observedDailyTrades: result.observedDailyTrades,
-        tradeObservationHours: result.tradeObservationHours,
-        lastSoldAtEpochSeconds: result.lastSoldAtEpochSeconds,
-        unlistedItemNames: result.unlistedItemNames,
-        fetchedAt: result.fetchedAt,
-        region: result.region,
-      );
-      _marketMessage = result.summary;
+      _marketMessage = summaries.toSet().join(' ');
     } on Object catch (error) {
       _marketMessage =
           'Market check failed. Cached stock is still available. $error';
@@ -823,16 +1070,62 @@ final class RecipeBookController extends ChangeNotifier {
     _scrollOffset = value;
   }
 
-  void openPreview(String name) {
-    final exact = _poolExactName(name);
-    if (exact == null || _previewName == exact) return;
+  void openPreview(String name, {CraftMode? mode}) {
+    final requestedMode = mode ?? modeController.mode;
+    final route = previewRoutesFor(name)
+        .where((route) => route.equivalentModes.contains(requestedMode))
+        .firstOrNull;
+    final destination = route?.mode ?? requestedMode;
+    final exact = controllerForMode(destination)._poolExactName(name);
+    if (exact == null ||
+        (_previewName == exact && _previewMode == destination)) {
+      return;
+    }
+    if (_previewName != null) {
+      previewController._previewVariantOverrides.remove(_fold(_previewName!));
+    }
+    _previewMode = destination;
     _previewName = exact;
+    if (destination != requestedMode && route != null) {
+      final source = controllerForMode(requestedMode);
+      final selected = source.selectedRecipeVariantId(exact);
+      final formula = recipeBookFormulas(
+        source.recipeDefinitionFor(exact),
+        mode: requestedMode,
+      ).where((formula) => formula.variantId == selected).firstOrNull;
+      if (formula != null) {
+        final matching = route.formulas
+            .where(
+              (candidate) =>
+                  recipeBookPreviewFormulaIdentity(candidate) ==
+                  recipeBookPreviewFormulaIdentity(formula),
+            )
+            .firstOrNull;
+        if (matching?.variantId != null) {
+          controllerForMode(
+            destination,
+          )._previewVariantOverrides[_fold(exact)] = matching!.variantId!;
+        }
+      }
+    }
+    if (destination != modeController.mode) {
+      controllerForMode(destination)._previewName = exact;
+    }
     notifyListeners();
   }
 
   void closePreview() {
+    if (_routeHost != null) {
+      _routeHost!.closePreview();
+      return;
+    }
     if (_previewName == null) return;
+    previewController._previewVariantOverrides.remove(_fold(_previewName!));
+    if (_previewMode != null && _previewMode != modeController.mode) {
+      _routeControllers[_previewMode]?._previewName = null;
+    }
     _previewName = null;
+    _previewMode = null;
     notifyListeners();
   }
 
@@ -845,10 +1138,16 @@ final class RecipeBookController extends ChangeNotifier {
     final recipe = recipeDefinitionFor(exact);
     if (recipe == null || !recipe.isCraftable) return null;
     final context = _ingredientSearchMatch(exact, recipe);
+    final gradeMatch = context == null ? _gradeSearchEntry(exact) : null;
+    final previewVariant = _previewVariantOverrides[_fold(exact)];
+    if (gradeMatch != null) {
+      return activateUsedIn(gradeMatch, variantId: previewVariant);
+    }
+    final methodVariant = previewVariant ?? _methodSearchVariantId(recipe);
     final ingredientSelections = context == null
         ? const <RecipeTargetIngredientSelection>[]
         : _targetIngredientSelections(exact, recipe, context);
-    final changed = context == null
+    final changed = context == null && methodVariant == null
         ? switch (callingContext) {
             RecipeBookCallingContext.planner => modeController.selectTarget(
               exact,
@@ -857,7 +1156,7 @@ final class RecipeBookController extends ChangeNotifier {
           }
         : modeController.selectTargetVariant(
             exact,
-            variantId: context.variantId,
+            variantId: previewVariant ?? context?.variantId ?? methodVariant,
             bonus: callingContext == RecipeBookCallingContext.bonus,
             ingredientSelections: ingredientSelections,
           );
@@ -1201,6 +1500,8 @@ final class RecipeBookController extends ChangeNotifier {
       'Fallen God',
       'Blackstar',
       'Sovereign',
+      'Causality Shardstone',
+      'Twilight of the End',
     ])) {
       return ProcessingRecipeGroup.enhancement;
     }
@@ -1285,6 +1586,10 @@ final class RecipeBookController extends ChangeNotifier {
   @override
   void dispose() {
     _disposed = true;
+    for (final child in _routeControllers.values) {
+      child.dispose();
+    }
+    _routeControllers.clear();
     _itemInfoCache.clear();
     _itemInfoRecipeSources.clear();
     for (final controller in modeController.owner.modes.values) {
@@ -1439,6 +1744,11 @@ final class RecipeBookController extends ChangeNotifier {
       final entry = _foldedEntry(recipes, allowed);
       if (entry == null ||
           isTemporarilyArchivedItem(entry.key, itemId: entry.value.marketId) ||
+          // Keep acquisition facts available to item info, not as recipes.
+          const {
+            'item reform',
+            'quest exchange',
+          }.contains(_fold(entry.value.method ?? '')) ||
           (!entry.value.isCraftable &&
               !isBrowsableRecipeBookReference(entry.value))) {
         continue;
@@ -1482,6 +1792,52 @@ final class RecipeBookController extends ChangeNotifier {
     recipe,
     const <String, List<String>>{},
   ).ingredientContext;
+
+  RecipeBookUseEntry? _gradeSearchEntry(String name) {
+    if (!searchByIngredient ||
+        _search.trim().isEmpty ||
+        _manualSearchVariantNames.contains(_fold(name))) {
+      return null;
+    }
+    for (final entry in usedInFor(_search.trim()).entries) {
+      if (entry.mode == modeController.mode &&
+          _sameName(entry.name, name) &&
+          !entry.hidden &&
+          entry.kinds.contains(RecipeBookUseKind.qualitySubstitute)) {
+        return entry;
+      }
+    }
+    return null;
+  }
+
+  String? _methodSearchVariantId(Recipe recipe) {
+    final query = _fold(_search);
+    if (searchByIngredient ||
+        query.isEmpty ||
+        _manualSearchVariantNames.contains(_fold(recipe.name))) {
+      return null;
+    }
+    final matches = recipe.variants
+        .where(
+          (variant) => <String>[
+            variant.method ?? '',
+            variant.label,
+            _typeLabel(variant.type),
+          ].any((value) => _fold(value).contains(query)),
+        )
+        .toList();
+    if (matches.isEmpty) return null;
+    final preferred = recipe.variantById(
+      modeController.selectedRecipeVariantId(recipe.name),
+    );
+    if (preferred != null && matches.contains(preferred)) return preferred.id;
+    for (final variant in matches) {
+      if (variant.batchMultiplier == (preferred?.batchMultiplier ?? 1)) {
+        return variant.id;
+      }
+    }
+    return matches.first.id;
+  }
 
   _RecipeIngredientSearchMatch? _concreteIngredientSearchMatch(
     String name,
@@ -1638,12 +1994,22 @@ final class RecipeBookController extends ChangeNotifier {
       recipe.group ?? '',
       recipe.method ?? '',
       _typeLabel(recipe.type),
+      if (!searchByIngredient)
+        for (final variant in recipe.variants) ...[
+          variant.method ?? '',
+          variant.label,
+          _typeLabel(variant.type),
+        ],
     ];
     if (direct.any((value) => _fold(value).contains(query))) {
       return const _RecipeSearchEvaluation(matches: true);
     }
     if (modeController.mode == CraftMode.processing &&
-        _processingTermsMatch(_processingSearchTerms(name), query)) {
+        _processingTermsMatch(
+          _processingSearchTerms(name),
+          query,
+          requireAllTokens: searchByIngredient,
+        )) {
       return const _RecipeSearchEvaluation(matches: true);
     }
     if (searchByIngredient) {
@@ -1671,14 +2037,19 @@ final class RecipeBookController extends ChangeNotifier {
         }
         if (modeController.mode == CraftMode.processing &&
             values.any(
-              (value) =>
-                  _processingTermsMatch(_processingSearchTerms(value), query),
+              (value) => _processingTermsMatch(
+                _processingSearchTerms(value),
+                query,
+                requireAllTokens: true,
+              ),
             )) {
           ingredientVisible = true;
         }
       }
       if (!ingredientVisible) {
-        return const _RecipeSearchEvaluation(matches: false);
+        return _RecipeSearchEvaluation(
+          matches: _gradeSearchEntry(name) != null,
+        );
       }
       return _RecipeSearchEvaluation(
         matches: true,
@@ -1708,9 +2079,7 @@ final class RecipeBookController extends ChangeNotifier {
             _search.trim().isNotEmpty
         ? _processingConsumers(recipes)
         : const <String, List<String>>{};
-    final processingGroups = usesProcessingPaging
-        ? _processingGroups(recipes)
-        : const <String, ProcessingRecipeGroup>{};
+    final processingGroups = _processingGroups(recipes);
     final favorites = modeController.state.value.favoriteRecipes
         .map(_fold)
         .toSet();
@@ -1719,7 +2088,8 @@ final class RecipeBookController extends ChangeNotifier {
       final recipe = recipes[name]!;
       if (!_hasMarketId(name, recipe)) continue;
       if (favoritesOnly && !favorites.contains(_fold(name))) continue;
-      if (usesProcessingPaging &&
+      if ((usesProcessingPaging ||
+              (_routeHost?.usesProcessingPaging ?? false)) &&
           _group != ProcessingRecipeGroup.all &&
           processingGroups[name] != _group) {
         continue;
@@ -1886,11 +2256,26 @@ final class RecipeBookController extends ChangeNotifier {
       _foldedValue(catalogRepository.snapshot.processing.searchAliases, name) ??
       '';
 
-  bool _processingTermsMatch(Iterable<String> terms, String query) {
+  bool _processingTermsMatch(
+    Iterable<String> terms,
+    String query, {
+    bool requireAllTokens = false,
+  }) {
     final tokens = query
         .split(RegExp(r'[\s\-_/:;,\.\[\]\(\)\\]+'))
         .where((token) => token.length >= 2)
         .toList(growable: false);
+    if (requireAllTokens) {
+      final aliases = terms
+          .map(_fold)
+          .where((term) => term.isNotEmpty)
+          .toList();
+      return aliases.any((term) => term.contains(query)) ||
+          (tokens.isNotEmpty &&
+              tokens.every(
+                (token) => aliases.any((term) => term.contains(token)),
+              ));
+    }
     return terms.any((term) {
       final folded = term.trim().toLowerCase();
       if (folded.isEmpty) return false;
@@ -1939,7 +2324,7 @@ final class RecipeBookController extends ChangeNotifier {
       _synchronizeDocumentSettings();
       final exactPreview = _previewName == null
           ? null
-          : _poolExactName(_previewName!);
+          : previewController._poolExactName(_previewName!);
       if (_previewName != null && exactPreview == null) _previewName = null;
       notifyListeners();
     });

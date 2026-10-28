@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 
 import 'domain/models.dart';
 import 'gathering_companion_home.dart';
+import 'recipe_checklist.dart';
 import 'services/gathering_durability_controller.dart';
 import 'services/native_bridge.dart';
 import 'services/session_store.dart';
@@ -12,6 +13,7 @@ import 'services/session_import_inbox.dart';
 import 'services/shared_market_loader.dart';
 import 'services/stable_v017_migration.dart';
 import 'ui/theme.dart';
+import 'ui/visual_palette.dart';
 import 'widgets/spot_video_player.dart';
 
 class GatheringCompanionFeature extends StatefulWidget {
@@ -23,6 +25,9 @@ class GatheringCompanionFeature extends StatefulWidget {
     this.sharedMarketLoader,
     this.sharedMarketUpdates,
     this.marketFreshFor = const Duration(minutes: 2),
+    this.visualPalette,
+    this.recipeChecklistBuilder,
+    this.recipeChecklistController,
   });
 
   final Directory? dataDirectory;
@@ -31,6 +36,9 @@ class GatheringCompanionFeature extends StatefulWidget {
   final GatheringSharedMarketLoader? sharedMarketLoader;
   final Stream<GatheringMarketReceipt>? sharedMarketUpdates;
   final Duration marketFreshFor;
+  final CompanionVisualPalette? visualPalette;
+  final GatheringRecipeChecklistBuilder? recipeChecklistBuilder;
+  final GatheringRecipeChecklistController? recipeChecklistController;
 
   @override
   State<GatheringCompanionFeature> createState() =>
@@ -163,7 +171,10 @@ class _GatheringCompanionFeatureState extends State<GatheringCompanionFeature> {
     return MaterialApp(
       title: 'BDO Gathering Companion',
       debugShowCheckedModeBanner: false,
-      theme: companionTheme(opacityPercent: _glassOpacityPercent),
+      theme: companionTheme(
+        opacityPercent: _glassOpacityPercent,
+        visualPalette: widget.visualPalette,
+      ),
       builder: companionBackdropBuilder,
       scrollBehavior: const MaterialScrollBehavior().copyWith(
         scrollbars: false,
@@ -174,6 +185,8 @@ class _GatheringCompanionFeatureState extends State<GatheringCompanionFeature> {
           final store = _store;
           if (catalog != null && store != null) {
             return CompanionHome(
+              recipeChecklistBuilder: widget.recipeChecklistBuilder,
+              recipeChecklistController: widget.recipeChecklistController,
               catalog: catalog,
               store: store,
               glassOpacityPercent: _glassOpacityPercent,

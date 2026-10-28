@@ -3,6 +3,8 @@ import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 
+import '../../visual/components/item_icon_frame.dart';
+
 enum MarketBonusArtwork { valuePack, richMerchantsRing }
 
 /// Bundled in-game item artwork for the two Central Market collection bonuses.
@@ -24,14 +26,15 @@ class MarketBonusIcon extends StatelessWidget {
     return Semantics(
       image: true,
       label: label,
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(4),
+      child: ItemIconFrame(
+        size: size,
+        grade: 3, // Client items 17583 and 12034 are both yellow-grade.
         child: Image.memory(
           _bytesFor(artwork),
           key: ValueKey<String>('market-bonus:${artwork.name}'),
           width: size,
           height: size,
-          fit: BoxFit.cover,
+          fit: BoxFit.contain,
           filterQuality: FilterQuality.medium,
           gaplessPlayback: true,
           excludeFromSemantics: true,

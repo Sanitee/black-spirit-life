@@ -24,6 +24,85 @@ void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
   test(
+    'Tenacity routes inspect the proper source without changing saved choices',
+    () async {
+      final fixture = await _Fixture.create();
+      addTearDown(fixture.dispose);
+      final controller = fixture.controller;
+      final document = fixture.app.documentSnapshot;
+      final preferences = jsonEncode(controller.preferences.toJson());
+      final processing = fixture.recipe(
+        CraftMode.processing,
+        'Perfume of Tenacity',
+      );
+      final alchemy = fixture.recipe(CraftMode.alchemy, 'Perfume of Tenacity');
+      final routes = controller.recipeRoutesFor(processing);
+      expect(routes, hasLength(2));
+      expect(
+        controller
+            .recipeRoutesFor(alchemy)
+            .map((r) => r.formulas.first.identity),
+        routes.map((r) => r.formulas.first.identity),
+      );
+      final coral = routes.last.selectBatch(10);
+      final inspection = controller.inspectRecipe(
+        recipe: coral.recipe,
+        selectedVariantId: coral.variantId,
+        crafts: 3,
+        useInventory: true,
+        customSalePrice: 25000,
+      );
+      expect(inspection.sourceMode, CraftMode.alchemy);
+      expect(inspection.mastery, 1900);
+      expect(inspection.quote.batchMultiplier, 1);
+      expect(inspection.quote.crafts, 3);
+      expect(
+        inspection.quote.ingredients.map((i) => i.name),
+        contains("Rusalka's Coral"),
+      );
+      expect(
+        inspection.quote.ingredients.map((i) => i.name),
+        isNot(contains('Perfume of Deep Sea')),
+      );
+      expect(
+        inspection.quote.ingredients
+            .singleWhere((i) => i.name == "Rusalka's Coral")
+            .quantity,
+        90,
+      );
+      expect(inspection.quote.totalCost, 0);
+      expect(inspection.quote.customSalePrice, 25000);
+      expect(fixture.app.documentSnapshot, same(document));
+      expect(jsonEncode(controller.preferences.toJson()), preferences);
+      expect(fixture.transportCalls, 0);
+    },
+  );
+
+  test(
+    'route discovery observes deleted formulas and source-state cache changes',
+    () async {
+      final fixture = await _Fixture.create();
+      addTearDown(fixture.dispose);
+      const name = 'Perfume of Tenacity';
+      final recipe = fixture.recipe(CraftMode.processing, name);
+      expect(fixture.controller.recipeRoutesFor(recipe), hasLength(2));
+      fixture.app.modes[CraftMode.alchemy]!.updateState(
+        (state) =>
+            state.copyWith(recipeEdits: {...state.recipeEdits, name: null}),
+      );
+      final remaining = fixture.controller.recipeRoutesFor(recipe);
+      expect(remaining, hasLength(1));
+      expect(remaining.single.formulas.first.resolved.type, 'processing');
+      fixture.app.modes[CraftMode.alchemy]!.updateState(
+        (state) => state.copyWith(
+          recipeEdits: Map.of(state.recipeEdits)..remove(name),
+        ),
+      );
+      expect(fixture.controller.recipeRoutesFor(recipe), hasLength(2));
+    },
+  );
+
+  test(
     'custom price uses source mastery and tax without market or saved edits',
     () async {
       final fixture = await _Fixture.create();

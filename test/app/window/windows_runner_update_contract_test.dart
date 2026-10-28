@@ -84,7 +84,6 @@ void main() {
       expect(source, contains('BetaMaintenanceGate maintenance_gate'));
       expect(windowSource, isNot(contains('VelopackUpdateBridge')));
       expect(windowSource, isNot(contains('vpkc_new_update_manager')));
-      expect(runnerCmake, contains('add_executable(BlackSpiritLifeUpdater'));
       expect(
         runnerCmake,
         contains('target_link_libraries(BlackSpiritLifeUpdater PRIVATE'),

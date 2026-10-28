@@ -5,8 +5,10 @@ import 'package:flutter/services.dart';
 
 import '../../app/state/planner_application_controller.dart';
 import '../../domain/formatting/planner_formatters.dart';
+import '../../visual/components/app_interaction_frame.dart';
 import '../../visual/visual.dart';
 import '../shared/mode_item_icon.dart';
+import '../shared/workshop_presentation.dart';
 import 'inventory_action_keys.dart';
 import 'inventory_amount_input_formatter.dart';
 import 'inventory_projection.dart';
@@ -153,17 +155,17 @@ class _InventoryStorageItemRowState extends State<InventoryStorageItemRow> {
           child: GestureDetector(
             behavior: HitTestBehavior.translucent,
             onTap: () => widget.onSelected(widget.item.name),
-            child: AppSurface(
-              role: AppSurfaceRole.row,
-              tone: widget.amount > 0
-                  ? AppSurfaceTone.success
-                  : AppSurfaceTone.neutral,
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-              child: LayoutBuilder(
-                builder: (context, constraints) => _buildContents(
-                  context: context,
-                  spec: spec,
-                  availableWidth: constraints.maxWidth,
+            child: AppInteractionFrame(
+              selected: widget.selected,
+              radius: 8,
+              child: AppSoftTile(
+                selected: widget.selected,
+                child: LayoutBuilder(
+                  builder: (context, constraints) => _buildContents(
+                    context: context,
+                    spec: spec,
+                    availableWidth: constraints.maxWidth,
+                  ),
                 ),
               ),
             ),
@@ -178,16 +180,18 @@ class _InventoryStorageItemRowState extends State<InventoryStorageItemRow> {
     required ThemeSpec spec,
     required double availableWidth,
   }) {
-    final icon = ModeItemIcon(
-      controller: widget.controller,
-      name: widget.item.name,
-      size: 44,
-      searchAcrossModes: true,
-      aliases: <String>[?widget.item.recipe?.qualityBase],
+    final icon = WorkshopItemMount(
+      child: ModeItemIcon(
+        controller: widget.controller,
+        name: widget.item.name,
+        size: 48,
+        searchAcrossModes: true,
+        aliases: <String>[?widget.item.recipe?.qualityBase],
+      ),
     );
     final nameStyle = spec.typography.body.copyWith(
-      fontSize: 15,
-      height: 1.12,
+      fontSize: 17,
+      height: 1.2,
       fontWeight: FontWeight.w700,
     );
     final name = Tooltip(
@@ -213,23 +217,31 @@ class _InventoryStorageItemRowState extends State<InventoryStorageItemRow> {
     );
     final amount = SizedBox(
       width: 100,
-      child: AppTextField(
-        key: InventoryActionKeys.row('I10', widget.item.name),
-        controller: _amount,
-        focusNode: _amountFocus,
-        semanticLabel: 'Owned amount for ${widget.item.name}',
-        keyboardType: const TextInputType.numberWithOptions(decimal: true),
-        inputFormatters: const <TextInputFormatter>[
-          InventoryAmountInputFormatter(),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text('Owned', style: spec.typography.meta),
+          const SizedBox(height: 4),
+          AppTextField(
+            key: InventoryActionKeys.row('I10', widget.item.name),
+            controller: _amount,
+            focusNode: _amountFocus,
+            semanticLabel: 'Owned amount for ${widget.item.name}',
+            keyboardType: const TextInputType.numberWithOptions(decimal: true),
+            inputFormatters: const <TextInputFormatter>[
+              InventoryAmountInputFormatter(),
+            ],
+            textAlign: TextAlign.right,
+            onSubmitted: _commit,
+            suffixIcon: _error == null
+                ? null
+                : Tooltip(
+                    message: _error!,
+                    child: const Icon(Icons.error_outline, size: 17),
+                  ),
+          ),
         ],
-        textAlign: TextAlign.right,
-        onSubmitted: _commit,
-        suffixIcon: _error == null
-            ? null
-            : Tooltip(
-                message: _error!,
-                child: const Icon(Icons.error_outline, size: 17),
-              ),
       ),
     );
     final edit = widget.onEdit == null
@@ -247,24 +259,30 @@ class _InventoryStorageItemRowState extends State<InventoryStorageItemRow> {
               child: const AppVectorGlyph('edit', size: 17),
             ),
           );
-    final remove = SizedBox.square(
-      dimension: 38,
-      child: AppButton(
-        key: InventoryActionKeys.row('I15', widget.item.name),
-        role: AppButtonRole.icon,
+    final remove = PopupMenuButton<String>(
+      key: ValueKey('inventory-more:${widget.item.name}'),
+      tooltip: 'Actions for ${widget.item.name}',
+      icon: Icon(Icons.more_horiz, color: spec.palette.textMuted, size: 22),
+      color: spec.palette.surfaceRaised,
+      onSelected: (_) => widget.onRemove?.call(),
+      itemBuilder: (_) => [
+        PopupMenuItem<String>(
+          key: InventoryActionKeys.row('I15', widget.item.name),
+          value: 'remove',
+          enabled: widget.onRemove != null,
+          child: Text('Remove from Inventory', style: spec.typography.body),
+        ),
+      ],
+      constraints: const BoxConstraints(minWidth: 190),
+      padding: const EdgeInsets.all(6),
+      style: IconButton.styleFrom(
         minimumSize: const Size.square(38),
-        padding: const EdgeInsets.all(8),
-        semanticLabel: 'Remove ${widget.item.name} from Inventory',
-        tooltip: widget.onRemove == null
-            ? 'No saved amount'
-            : 'Remove from Inventory',
-        onPressed: widget.onRemove,
-        child: const AppVectorGlyph('trash', size: 17),
+        maximumSize: const Size.square(38),
       ),
     );
 
     final inlineNameWidth =
-        availableWidth - 44 - 10 - 14 - 100 - (edit == null ? 0 : 48) - 10 - 38;
+        availableWidth - 48 - 10 - 14 - 100 - (edit == null ? 0 : 48) - 10 - 38;
     var stackControls = availableWidth < 350 || inlineNameWidth <= 0;
     if (!stackControls) {
       final inlineName = TextPainter(

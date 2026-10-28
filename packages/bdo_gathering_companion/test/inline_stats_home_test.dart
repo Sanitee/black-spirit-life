@@ -283,6 +283,8 @@ void main() {
       await open(tester, store, prepare: false);
       await tester.enterText(find.byKey(const ValueKey('spot-search')), 'Wolf');
       await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const ValueKey('spot-filter-compact-control')));
+      await tester.pumpAndSettle();
       final rank = find.byKey(const ValueKey('spot-ranking-caphras'));
       await tester.ensureVisible(rank);
       await tester.tap(rank);

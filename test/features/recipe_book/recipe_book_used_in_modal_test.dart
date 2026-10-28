@@ -6,6 +6,7 @@ import 'package:bdo_craft_planner_flutter/domain/state/planner_state.dart';
 import 'package:bdo_craft_planner_flutter/features/planner/planner_contracts.dart';
 import 'package:bdo_craft_planner_flutter/features/recipe_book/recipe_book.dart';
 import 'package:bdo_craft_planner_flutter/features/recipe_book/recipe_book_used_in_panel.dart';
+import 'package:bdo_craft_planner_flutter/features/recipe_book/recipe_ingredient_line.dart';
 import 'package:bdo_craft_planner_flutter/features/shared/mode_item_icon.dart';
 import 'package:bdo_craft_planner_flutter/features/shared/recipe_variant_selector.dart';
 import 'package:bdo_craft_planner_flutter/visual/visual.dart';
@@ -62,25 +63,23 @@ void main() {
         expect(card, findsOneWidget);
         _expectContained(tester.getRect(card), tester.getRect(action));
 
-        final expectedRole = theme.spec.isIlluminatedLedger
-            ? AppButtonRole.primary
-            : theme.spec.isSakuraNightGarden
-            ? AppButtonRole.secondary
-            : AppButtonRole.optionPill;
-        expect(tester.widget<AppButton>(action).role, expectedRole);
+        final textAction = tester.widget<AppTextAction>(action);
+        expect(textAction.onPressed, isNotNull);
+        expect(textAction.selected, isFalse);
+        expect(textAction.tooltip, 'Used in 21 recipe paths');
 
         await tester.tap(action);
         await tester.pump();
 
         final panel = find.byKey(RecipeBookKeys.usedInPanel(_source));
         expect(panel, findsOneWidget);
+        expect(tester.widget<AppTextAction>(action).selected, isTrue);
         final panelRect = tester.getRect(panel);
         expect(panelRect.left, greaterThanOrEqualTo(12));
         expect(panelRect.top, greaterThanOrEqualTo(12));
         expect(panelRect.right, lessThanOrEqualTo(size.width - 12));
         expect(panelRect.bottom, lessThanOrEqualTo(size.height - 12));
-        expect(find.text('Used In'), findsOneWidget);
-        expect(find.textContaining('21 recipe paths'), findsOneWidget);
+        expect(find.text('Used in 21 recipes'), findsOneWidget);
         expect(tester.takeException(), isNull);
       });
     }
@@ -174,6 +173,21 @@ void main() {
           _crossModeResult,
         ),
       );
+      final ingredientLines = find.descendant(
+        of: expandedResult,
+        matching: find.byType(RecipeIngredientLine),
+      );
+      expect(ingredientLines, findsWidgets);
+      expect(
+        find.descendant(
+          of: ingredientLines,
+          matching: find.byWidgetPredicate(
+            (widget) =>
+                widget is AppSurface && widget.role == AppSurfaceRole.row,
+          ),
+        ),
+        findsNothing,
+      );
       expect(
         find.descendant(
           of: expandedResult,
@@ -182,14 +196,11 @@ void main() {
         findsOneWidget,
       );
       expect(
-        find.descendant(of: expandedResult, matching: find.text('Need 2')),
+        find.descendant(of: expandedResult, matching: find.text('×2')),
         findsOneWidget,
       );
       expect(
-        find.descendant(
-          of: expandedResult,
-          matching: find.text('Makes 10 Cross-Mode Feast'),
-        ),
+        find.descendant(of: expandedResult, matching: find.text('Output ×10')),
         findsOneWidget,
       );
       expect(
@@ -301,8 +312,8 @@ void main() {
     expect(panel, findsOneWidget);
     final size = tester.getSize(panel);
     expect(size.width, 570);
-    expect(size.height, inInclusiveRange(230, 390));
-    expect(find.text('1 recipe path'), findsOneWidget);
+    expect(size.height, inInclusiveRange(190, 280));
+    expect(find.text('Used in 1 recipe'), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
 
@@ -341,6 +352,9 @@ void main() {
         ),
       );
       await tester.scrollUntilVisible(expand, 180, scrollable: scrollable);
+      await tester.pumpAndSettle();
+      await tester.ensureVisible(expand);
+      await tester.pumpAndSettle();
       await tester.tap(expand);
       await tester.pumpAndSettle();
 
@@ -406,11 +420,11 @@ void main() {
       expect(_appButton(tester, catalyst).selected, isTrue);
       expect(_appButton(tester, ten).selected, isTrue);
       expect(
-        find.descendant(of: result, matching: find.text('Need 2')),
+        find.descendant(of: result, matching: find.text('×2')),
         findsOneWidget,
       );
       expect(
-        find.descendant(of: result, matching: find.text('Need 30')),
+        find.descendant(of: result, matching: find.text('×30')),
         findsNothing,
       );
 
@@ -423,7 +437,7 @@ void main() {
       expect(_appButton(tester, alternate).selected, isTrue);
       expect(_appButton(tester, ten).selected, isTrue);
       expect(
-        find.descendant(of: result, matching: find.text('Need 30')),
+        find.descendant(of: result, matching: find.text('×30')),
         findsOneWidget,
       );
       expect(
@@ -431,7 +445,7 @@ void main() {
         findsOneWidget,
       );
       expect(
-        find.descendant(of: result, matching: find.text('Need 2')),
+        find.descendant(of: result, matching: find.text('×2')),
         findsNothing,
       );
 
@@ -444,11 +458,11 @@ void main() {
       expect(_appButton(tester, alternate).selected, isTrue);
       expect(_appButton(tester, single).selected, isTrue);
       expect(
-        find.descendant(of: result, matching: find.text('Need 3')),
+        find.descendant(of: result, matching: find.text('×3')),
         findsOneWidget,
       );
       expect(
-        find.descendant(of: result, matching: find.text('Need 30')),
+        find.descendant(of: result, matching: find.text('×30')),
         findsNothing,
       );
 
@@ -465,7 +479,7 @@ void main() {
         findsNothing,
       );
       expect(
-        find.descendant(of: result, matching: find.text('Need 1')),
+        find.descendant(of: result, matching: find.text('×1')),
         findsOneWidget,
       );
 
@@ -545,6 +559,9 @@ void main() {
         ),
       );
       await tester.scrollUntilVisible(expand, 180, scrollable: scrollable);
+      await tester.pumpAndSettle();
+      await tester.ensureVisible(expand);
+      await tester.pumpAndSettle();
       await tester.tap(expand);
       await tester.pumpAndSettle();
 
@@ -627,6 +644,8 @@ void main() {
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 180));
 
+      await tester.ensureVisible(outputAnchor);
+      await tester.pumpAndSettle();
       await tester.tap(outputAnchor);
       await tester.pump();
       final pinnedOutput = find.byKey(
@@ -691,7 +710,9 @@ void main() {
             RecipeBookKeys.itemInfoMaterial(_source, null, 'Base Dust'),
           ),
         ),
-        findsNothing,
+        findsOneWidget,
+        reason:
+            'Item details include other workstations without losing the preferred Cooking route.',
       );
       expect(panel, findsOneWidget);
       Tooltip.dismissAllToolTips();
@@ -733,6 +754,9 @@ void main() {
         180,
         scrollable: reopenedScroll,
       );
+      await tester.pumpAndSettle();
+      await tester.ensureVisible(reopenedOutputAnchor);
+      await tester.pumpAndSettle();
       await tester.tap(reopenedOutputAnchor);
       await tester.pump();
       expect(pinnedOutput, findsOneWidget);
@@ -902,27 +926,30 @@ void main() {
         ]) {
           _expectContained(cardRect, actionRect);
         }
-        expect(detailsRect.right, lessThanOrEqualTo(usedInRect.left));
+        // Quiet text actions keep their reading order and may wrap at the
+        // compact density; none returns to a boxed corner button.
+        for (final pair in <(Rect, Rect)>[
+          (targetRect, detailsRect),
+          (detailsRect, usedInRect),
+        ]) {
+          if ((pair.$1.top - pair.$2.top).abs() < 1) {
+            expect(pair.$1.right, lessThanOrEqualTo(pair.$2.left));
+          } else {
+            expect(pair.$1.bottom, lessThanOrEqualTo(pair.$2.top));
+          }
+        }
         expect(favoriteRect.bottom, lessThanOrEqualTo(usedInRect.top));
-        expect(
-          (usedInRect.right - favoriteRect.right).abs(),
-          lessThanOrEqualTo(1),
-        );
-        expect(
-          (detailsRect.center.dy - targetRect.center.dy).abs(),
-          lessThanOrEqualTo(1),
-        );
-        expect(
-          (usedInRect.center.dy - targetRect.center.dy).abs(),
-          lessThanOrEqualTo(1),
-        );
-        expect(tester.getSize(usedIn), const Size.square(26));
+        for (final action in [target, details, usedIn]) {
+          expect(tester.widget<AppTextAction>(action).onPressed, isNotNull);
+          expect(tester.getSize(action).height, greaterThanOrEqualTo(32));
+        }
 
         final stockText = find.descendant(
           of: card,
           matching: find.text('Stock 125'),
         );
         expect(stockText, findsOneWidget);
+        expect(tester.getRect(stockText).top, greaterThan(usedInRect.bottom));
         expect(
           tester.renderObject<RenderParagraph>(stockText).didExceedMaxLines,
           isFalse,

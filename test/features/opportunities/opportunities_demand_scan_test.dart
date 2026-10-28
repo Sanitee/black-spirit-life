@@ -16,6 +16,113 @@ void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
   test(
+    'out-of-stock scan checks 81 relevant outputs, not all 322 candidates',
+    () async {
+      final f = await _Fixture.create(
+        count: 322,
+        limit: 98,
+        window: const Duration(milliseconds: 60020),
+        outputStocks: {for (var i = 0; i < 80; i++) i: 0},
+        unseededOutputs: {321},
+      );
+      addTearDown(f.dispose);
+      // An unchecked output must still be checked, even when it later proves
+      // stocked. The other 241 stocked outputs are already known non-matches.
+      f.transport.bookStocks[f.ids.last] = 10;
+      f.controller.change((p) => p.demandOnly = true);
+      expect(f.controller.visibleQuotes, hasLength(80));
+      expect(f.controller.demandPendingCount, 1);
+      f.controller.setWorkspaceActive(true);
+      expect(f.controller.detailStatus.total, 81);
+      await _until(
+        () => !f.controller.scanning && f.controller.detailStatus.complete,
+      );
+      await f.settle();
+      expect(f.transport.books.toSet(), {...f.ids.take(80), f.ids.last});
+      expect(f.transport.books, hasLength(81));
+      expect(f.controller.visibleQuotes, hasLength(80));
+      expect(f.controller.demandPendingCount, 0);
+      expect(f.controller.detailStatus.failed, 0);
+      expect(f.broker.diagnostics.queuedParts, 0);
+      expect(f.controller.activeDispatchWait, Duration.zero);
+      expect(f.transport.requests, lessThan(98));
+    },
+  );
+
+  test(
+    'enabling out-of-stock releases stocked queued books without stopping retained work',
+    () async {
+      final f = await _Fixture.create(
+        count: 4,
+        concurrency: 1,
+        outputStocks: {0: 0, 1: 0},
+      );
+      addTearDown(f.dispose);
+      f.transport.heldId = f.ids.first;
+      f.startDemand();
+      await _until(() => f.transport.books.length == 1);
+      expect(f.controller.detailStatus.total, 4);
+      f.controller.change((p) => p.demandOnly = true);
+      expect(f.controller.detailStatus.total, 2);
+      f.transport.release.complete();
+      await _until(
+        () => !f.controller.scanning && f.controller.detailStatus.complete,
+      );
+      expect(f.transport.books, f.ids.take(2).toList());
+      expect(f.transport.aborted, isEmpty);
+      expect(f.controller.failedItems, 0);
+    },
+  );
+
+  for (final manual in [false, true]) {
+    test(
+      '${manual ? 'manual refresh' : 'shared receipt'} adds a newly sold-out book without checking stocked outputs',
+      () async {
+        final f = await _Fixture.create();
+        addTearDown(f.dispose);
+        f.controller.change((p) => p.demandOnly = true);
+        f.controller.setWorkspaceActive(true);
+        await f.settle();
+        expect(f.transport.books, isEmpty);
+        expect(f.controller.detailStatus.requested, isFalse);
+        f.now = f.now.add(const Duration(seconds: 61));
+        f.transport.quoteStocks[f.ids[1]] = 0;
+        if (manual) {
+          await f.controller.refresh();
+        } else {
+          await f.broker.fetch(
+            quoteKeys: [f.key(f.ids[1])],
+            forceRefresh: true,
+          );
+        }
+        await _until(() => f.transport.books.isNotEmpty);
+        await _until(
+          () => !f.controller.scanning && f.controller.detailStatus.complete,
+        );
+        await f.settle();
+        expect(f.transport.books, [f.ids[1]]);
+        expect(f.controller.visibleQuotes.single.recipeName, 'Recipe 001');
+      },
+    );
+  }
+
+  test(
+    'out-of-stock filtering preserves explicitly requested market details',
+    () async {
+      final f = await _Fixture.create();
+      addTearDown(f.dispose);
+      f.controller.change((p) => p.demandOnly = true);
+      f.controller.setWorkspaceActive(true);
+      f.transport.bookStocks[f.ids.last] = 25;
+      await f.controller.ensureMarketDepth([f.ids.last]);
+      expect(f.transport.books, [f.ids.last]);
+      expect(f.controller.visibleQuotes, isEmpty);
+      expect(f.controller.detailStatus.complete, isTrue);
+      expect(f.controller.market.items[f.ids.last]!.preorderCount, 3);
+    },
+  );
+
+  test(
     '116 of 123 resumes after the shared window without duplicate books',
     () async {
       final f = await _Fixture.create(
@@ -120,7 +227,7 @@ void main() {
   test(
     'malformed final book ends the scan without pretending it has zero demand',
     () async {
-      final f = await _Fixture.create();
+      final f = await _Fixture.create(outputStocks: {0: 0, 1: 0, 2: 0});
       addTearDown(f.dispose);
       f.transport.malformedIds.add(f.ids.last);
       f.now = f.now.add(const Duration(milliseconds: 1));
@@ -133,9 +240,10 @@ void main() {
       expect(
         f.controller.demandPendingCount,
         0,
-        reason: 'The failed book does not erase the known stocked quote.',
+        reason: 'The failed book does not erase known zero stock.',
       );
-      expect(f.controller.visibleQuotes, hasLength(2));
+      expect(f.controller.visibleQuotes, hasLength(3));
+      expect(f.controller.market.items[f.ids.last]!.preorderCount, isNull);
       expect(f.controller.detailStatus.loading, isFalse);
       final count = f.transport.books.length;
       f.controller.recalculate();
@@ -207,7 +315,10 @@ void main() {
   test(
     'Demand excludes stocked bids and includes zero without bids in Profit order',
     () async {
-      final f = await _Fixture.create(count: 4);
+      final f = await _Fixture.create(
+        count: 4,
+        outputStocks: {0: 0, 1: 0, 2: 0, 3: 0},
+      );
       addTearDown(f.dispose);
       f.transport.demands[f.ids[0]] = 100;
       f.transport.demands[f.ids[1]] = 1;
@@ -220,7 +331,7 @@ void main() {
         p.readyOnly = true;
       });
       await f.controller.calculationSettled;
-      expect(f.controller.visibleQuotes, isEmpty);
+      expect(f.controller.visibleQuotes, hasLength(4));
       expect(f.controller.demandPendingCount, 0);
       f.controller.setWorkspaceActive(true);
       await _until(
@@ -339,8 +450,11 @@ void main() {
       expect(f.controller.demandPendingCount, 1);
 
       f.now = f.now.add(const Duration(milliseconds: 1));
-      await f.broker.fetch(bookKeys: [f.key(id)]);
-      await Future<void>.delayed(Duration.zero);
+      f.controller.setWorkspaceActive(true);
+      await _until(() => f.transport.books.contains(id));
+      await _until(
+        () => !f.controller.scanning && f.controller.detailStatus.complete,
+      );
       expect(f.controller.visibleQuotes, hasLength(1));
       final bookAt = f.now;
       f.now = f.now.add(const Duration(milliseconds: 1));
@@ -363,7 +477,7 @@ void main() {
   test(
     'search and available-input filters bound demand loading before strict filtering',
     () async {
-      final f = await _Fixture.create();
+      final f = await _Fixture.create(outputStocks: {1: 0});
       addTearDown(f.dispose);
       f.now = f.now.add(const Duration(milliseconds: 1));
       f.controller.change((p) {
@@ -497,6 +611,8 @@ final class _Fixture {
     Duration timeout = const Duration(seconds: 5),
     int concurrency = 20,
     bool seedOutputQuotes = true,
+    Map<int, int> outputStocks = const {},
+    Set<int> unseededOutputs = const {},
   }) async {
     final f = _Fixture(await ApplicationTestHarness.create(), [
       // Deliberately unknown ordinary IDs: do not borrow the enhancement
@@ -504,6 +620,9 @@ final class _Fixture {
       for (var i = 0; i < count; i++) '${990001 + i}',
     ]);
     f.transport = _Transport(() => f.now);
+    for (final entry in outputStocks.entries) {
+      f.transport.quoteStocks[f.ids[entry.key]] = entry.value;
+    }
     f.broker = SharedMarketRepository(
       transport: f.transport,
       utcNow: () => f.now,
@@ -542,7 +661,10 @@ final class _Fixture {
     await f.controller.calculationSettled;
     await f.broker.fetch(
       quoteKeys: [
-        for (final id in [if (seedOutputQuotes) ...f.ids, '20001']) f.key(id),
+        if (seedOutputQuotes)
+          for (var i = 0; i < f.ids.length; i++)
+            if (!unseededOutputs.contains(i)) f.key(f.ids[i]),
+        f.key('20001'),
       ],
     );
     await f.settle();
@@ -613,6 +735,7 @@ final class _Transport implements OpportunityMarketTransport {
   final Map<String, int> demands = {};
   final Map<String, int> quoteStocks = {};
   final Map<String, int> bookStocks = {};
+  int requests = 0;
   String? heldId;
   final release = Completer<void>();
 
@@ -623,6 +746,7 @@ final class _Transport implements OpportunityMarketTransport {
     required String body,
     Future<void>? abortTrigger,
   }) async {
+    requests++;
     final payload = jsonDecode(body) as Map;
     final ids = payload['searchResult'] is String
         ? (payload['searchResult'] as String).split(',')

@@ -8,6 +8,9 @@ import 'package:bdo_craft_planner_flutter/domain/state/planner_state.dart';
 import 'package:bdo_craft_planner_flutter/features/data/market_bonus_icon.dart';
 import 'package:bdo_craft_planner_flutter/features/opportunities/opportunities_controller.dart';
 import 'package:bdo_craft_planner_flutter/features/opportunities/opportunities_workspace.dart';
+import 'package:bdo_craft_planner_flutter/visual/foundations/application_theme.dart';
+import 'package:bdo_craft_planner_flutter/visual/visual.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
@@ -139,6 +142,125 @@ void main() {
       },
     );
   }
+
+  for (final background in [
+    'sakura-night-garden',
+    'illuminated-ledger',
+    'plain-cobalt',
+  ]) {
+    for (final scale in [1.0, 2.0]) {
+      _glassTestWidgets(
+        'Family Fame label stays outside the field in $background at $scale',
+        (tester) async {
+          configureApplicationTestSurface(
+            tester,
+            scale == 1 ? const Size(1280, 820) : const Size(1000, 1000),
+            textScaleFactor: scale,
+          );
+          final fixture = (await tester.runAsync(
+            () => _Fixture.create(backgroundId: background),
+          ))!;
+          try {
+            await tester.pumpWidget(
+              RepaintBoundary(
+                key: const ValueKey('market-settings-capture'),
+                child: MaterialApp(
+                  debugShowCheckedModeBanner: false,
+                  home: ThemeSpecScope(
+                    spec: applicationThemeForAppearance(
+                      fixture.controller.modeController.state.value.appearance,
+                    ),
+                    child: Scaffold(
+                      body: OpportunitiesWorkspace(
+                        controller: fixture.controller,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            );
+            await _settle(tester);
+            await tester.ensureVisible(find.text('Market · EU'));
+            await tester.tap(find.text('Market · EU'));
+            await _settle(tester);
+            final fame = find.descendant(
+              of: find.byKey(const ValueKey('Family Fame %')),
+              matching: find.byType(TextField),
+            );
+            await tester.ensureVisible(fame);
+            await _settle(tester);
+            void expectSeparated() {
+              final label = tester.getRect(find.text('Family Fame %'));
+              final field = tester.getRect(fame);
+              expect(
+                tester.widget<TextField>(fame).decoration!.labelText,
+                isNull,
+              );
+              expect(label.bottom + 5, lessThanOrEqualTo(field.top + .01));
+              expect(label.left, greaterThanOrEqualTo(field.left));
+              expect(label.right, lessThanOrEqualTo(field.right));
+              expect(field.height, greaterThanOrEqualTo(42));
+              expect(tester.takeException(), isNull);
+            }
+
+            expectSeparated();
+            final idleRect = tester.getRect(fame);
+            final mouse = await tester.createGesture(
+              kind: PointerDeviceKind.mouse,
+            );
+            await mouse.addPointer(location: Offset.zero);
+            await mouse.moveTo(tester.getCenter(fame));
+            await tester.pump(const Duration(milliseconds: 180));
+            expectSeparated();
+            expect(tester.getRect(fame), idleRect);
+            final output = Platform.environment['MARKET_SETTINGS_CAPTURE_DIR'];
+            if (output != null) {
+              await _capture(
+                tester,
+                '$output/family-fame-$background-text${(scale * 100).round()}-hover.png',
+              );
+            }
+
+            final focus = tester.widget<TextField>(fame).focusNode!;
+            for (var step = 0; step < 20 && !focus.hasFocus; step++) {
+              await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+              await tester.pump();
+            }
+            expect(focus.hasFocus, isTrue);
+            await tester.pump(const Duration(milliseconds: 180));
+            expectSeparated();
+            expect(tester.getRect(fame), idleRect);
+            await tester.enterText(fame, '1.5');
+            await _settle(tester);
+            expectSeparated();
+            expect(
+              fixture.harness.bundle.controller.marketTax.value.familyFameBonus,
+              .015,
+            );
+            if (output != null) {
+              await _capture(
+                tester,
+                '$output/family-fame-$background-text${(scale * 100).round()}-focused.png',
+              );
+            }
+            await tester.enterText(fame, '2');
+            await _settle(tester);
+            expect(find.text('Use 0–1,5'), findsOneWidget);
+            expectSeparated();
+            FocusManager.instance.primaryFocus?.unfocus();
+            await _settle(tester);
+            expect(tester.widget<TextField>(fame).controller!.text, '1.5');
+            expect(find.text('Use 0–1,5'), findsNothing);
+            expect(fixture.requests, 0);
+            await mouse.removePointer();
+          } finally {
+            await tester.pumpWidget(const SizedBox.shrink());
+            await _finish(tester, fixture.dispose());
+          }
+        },
+      );
+    }
+  }
 }
 
 final class _Fixture {
@@ -148,8 +270,10 @@ final class _Fixture {
   final int Function() requestCount;
   int get requests => requestCount();
 
-  static Future<_Fixture> create() async {
-    final harness = await ApplicationTestHarness.create();
+  static Future<_Fixture> create({String backgroundId = 'plain-cobalt'}) async {
+    final harness = await ApplicationTestHarness.create(
+      backgroundId: backgroundId,
+    );
     harness.bundle.controller.updateDocument(
       (state) => state.copyWith(
         marketTax: MarketTax(enabled: false, extensions: {'preserve': 'yes'}),
@@ -239,6 +363,7 @@ Future<void> _loadFonts() async {
     sdk = sdk.parent;
   }
   for (final family in <String, List<String>>{
+    'Georgia': ['$win/Fonts/georgia.ttf', '$win/Fonts/georgiab.ttf'],
     'Segoe UI': [
       '$win/Fonts/segoeui.ttf',
       '$win/Fonts/seguisb.ttf',

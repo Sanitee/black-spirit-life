@@ -93,7 +93,7 @@ void main() {
     },
   );
 
-  test('identity keeps in-process updates off and helper updates on', () {
+  test('experiment identity keeps all automatic updates off', () {
     expect(AppIdentity.inProcessBetaUpdatesEnabled, isFalse);
     expect(AppIdentity.outOfProcessBetaUpdatesEnabled, isTrue);
     expect(

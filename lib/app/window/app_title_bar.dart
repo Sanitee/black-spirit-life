@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/semantics.dart';
 
 import '../../app_identity.dart';
+import '../../visual/components/app_interaction_frame.dart';
 import '../../visual/foundations/theme_spec.dart';
 import '../../visual/sakura_night_garden/sakura_botanical_assets.dart';
 import '../../visual/sakura_night_garden/sakura_material_painters.dart';
@@ -45,14 +46,26 @@ class AppTitleTab {
 
 /// Browser-style application destinations hosted in the app-owned title bar.
 ///
-/// The active destination expands to its icon and name while inactive
-/// destinations collapse to full-size icon controls. If the title bar becomes
-/// too narrow, every destination uses its icon. Tooltips, semantics, and hit
-/// targets always retain the complete destination name.
+/// Non-Planner workspaces expose every destination name when space permits.
+/// Planner retains its approved active-label presentation. Narrow windows
+/// progressively collapse labels while preserving tooltips and hit targets.
 class AppTitleTabStrip extends StatelessWidget {
-  const AppTitleTabStrip({required this.tabs, super.key});
+  const AppTitleTabStrip({
+    required this.tabs,
+    this.returnLabel,
+    this.onReturn,
+    this.showAllLabels,
+    super.key,
+  }) : assert((returnLabel == null) == (onReturn == null));
 
   final List<AppTitleTab> tabs;
+  final String? returnLabel;
+  final VoidCallback? onReturn;
+
+  /// Layout policy is independent from the selected colour/material theme.
+  final bool? showAllLabels;
+
+  static const returnButtonKey = ValueKey('app-title-return');
 
   static const Key semanticsKey = ValueKey<String>(
     'app-title-tab-strip-semantics',
@@ -83,8 +96,31 @@ class AppTitleTabStrip extends StatelessWidget {
           Directionality.of(context),
         ),
     ];
+    Widget tabRow(_TitleTabPresentation presentation) => Row(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.end,
+      children: <Widget>[
+        for (var index = 0; index < tabs.length; index++) ...<Widget>[
+          if (index > 0) const SizedBox(width: tabGap),
+          _AppTitleTabButton(
+            tab: tabs[index],
+            ordinal: index.toDouble(),
+            showLabel:
+                presentation == _TitleTabPresentation.allLabels ||
+                (presentation == _TitleTabPresentation.activeLabel &&
+                    tabs[index].selected),
+            width:
+                presentation == _TitleTabPresentation.allLabels ||
+                    (presentation == _TitleTabPresentation.activeLabel &&
+                        tabs[index].selected)
+                ? expandedWidths[index]
+                : compactWidth,
+          ),
+        ],
+      ],
+    );
 
-    return LayoutBuilder(
+    final strip = LayoutBuilder(
       builder: (context, constraints) {
         final gaps = tabs.length <= 1 ? 0.0 : (tabs.length - 1) * tabGap;
         final activeOnlyWidth =
@@ -97,12 +133,22 @@ class AppTitleTabStrip extends StatelessWidget {
         final availableWidth = constraints.hasBoundedWidth
             ? constraints.maxWidth
             : activeOnlyWidth;
-        final presentation = availableWidth >= activeOnlyWidth
+        final allLabelWidth =
+            expandedWidths.fold<double>(0, (sum, width) => sum + width) + gaps;
+        // Keep the approved Planner strip unchanged. Other workspaces show
+        // destination names whenever they fit, so navigation is discoverable.
+        final presentation =
+            (showAllLabels ?? (visual != null)) &&
+                availableWidth >= allLabelWidth
+            ? _TitleTabPresentation.allLabels
+            : availableWidth >= activeOnlyWidth
             ? _TitleTabPresentation.activeLabel
             : _TitleTabPresentation.iconsOnly;
-        final intendedWidth = presentation == _TitleTabPresentation.activeLabel
-            ? activeOnlyWidth
-            : tabs.length * compactWidth + gaps;
+        final intendedWidth = switch (presentation) {
+          _TitleTabPresentation.allLabels => allLabelWidth,
+          _TitleTabPresentation.activeLabel => activeOnlyWidth,
+          _TitleTabPresentation.iconsOnly => tabs.length * compactWidth + gaps,
+        };
         final stripWidth = constraints.hasBoundedWidth
             ? intendedWidth.clamp(0, availableWidth).toDouble()
             : intendedWidth;
@@ -126,39 +172,83 @@ class AppTitleTabStrip extends StatelessWidget {
                   maxWidth: double.infinity,
                   minHeight: 40,
                   maxHeight: 40,
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    children: <Widget>[
-                      for (
-                        var index = 0;
-                        index < tabs.length;
-                        index++
-                      ) ...<Widget>[
-                        if (index > 0) const SizedBox(width: tabGap),
-                        _AppTitleTabButton(
-                          tab: tabs[index],
-                          ordinal: index.toDouble(),
-                          showLabel:
-                              presentation ==
-                                  _TitleTabPresentation.activeLabel &&
-                              tabs[index].selected,
-                          width:
-                              presentation ==
-                                      _TitleTabPresentation.activeLabel &&
-                                  tabs[index].selected
-                              ? expandedWidths[index]
-                              : compactWidth,
-                        ),
-                      ],
-                    ],
-                  ),
+                  child: tabRow(presentation),
                 ),
               ),
             ),
           ),
         );
       },
+    );
+
+    final foreground = _tabForeground(
+      spec,
+      visual: visual,
+      selected: true,
+      hovered: false,
+    );
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        AnimatedContainer(
+          duration: animationDuration,
+          curve: Curves.easeOutCubic,
+          width: onReturn == null ? 0 : 40,
+          height: 40,
+          child: ClipRect(
+            child: OverflowBox(
+              alignment: Alignment.centerLeft,
+              minWidth: 40,
+              maxWidth: 40,
+              minHeight: 40,
+              maxHeight: 40,
+              child: onReturn == null
+                  ? const SizedBox(width: 0, height: 40)
+                  : Material(
+                      color: Colors.transparent,
+                      child: IconButton(
+                        key: returnButtonKey,
+                        tooltip: returnLabel,
+                        onPressed: onReturn,
+                        style: ButtonStyle(
+                          fixedSize: const WidgetStatePropertyAll(Size(40, 40)),
+                          minimumSize: const WidgetStatePropertyAll(Size.zero),
+                          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                          padding: const WidgetStatePropertyAll(
+                            EdgeInsets.zero,
+                          ),
+                          backgroundColor: const WidgetStatePropertyAll(
+                            Colors.transparent,
+                          ),
+                          foregroundColor: WidgetStatePropertyAll(foreground),
+                          shape: WidgetStatePropertyAll(
+                            RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(4),
+                            ),
+                          ),
+                          overlayColor: WidgetStateProperty.resolveWith((
+                            states,
+                          ) {
+                            if (states.contains(WidgetState.pressed)) {
+                              return visual?.captionPressedSurface ??
+                                  foreground.withAlpha(38);
+                            }
+                            if (states.contains(WidgetState.hovered) ||
+                                states.contains(WidgetState.focused)) {
+                              return visual?.captionHoverSurface ??
+                                  foreground.withAlpha(24);
+                            }
+                            return Colors.transparent;
+                          }),
+                        ),
+                        icon: const Icon(Icons.arrow_back_rounded, size: 20),
+                      ),
+                    ),
+            ),
+          ),
+        ),
+        Flexible(child: strip),
+      ],
     );
   }
 
@@ -174,11 +264,13 @@ class AppTitleTabStrip extends StatelessWidget {
       textScaler: textScaler,
       textDirection: textDirection,
     )..layout();
-    return (painter.width + 72).clamp(148, 400);
+    final width = (painter.width + 72).clamp(148.0, 400.0);
+    painter.dispose();
+    return width;
   }
 }
 
-enum _TitleTabPresentation { activeLabel, iconsOnly }
+enum _TitleTabPresentation { allLabels, activeLabel, iconsOnly }
 
 class _AppTitleTabButton extends StatefulWidget {
   const _AppTitleTabButton({
@@ -235,10 +327,12 @@ class _AppTitleTabButtonState extends State<_AppTitleTabButton> {
       selected: selected,
       hovered: _hovered,
     );
-    final duration = MediaQuery.disableAnimationsOf(context)
+    final duration =
+        MediaQuery.disableAnimationsOf(context) ||
+            MediaQuery.accessibleNavigationOf(context)
         ? Duration.zero
         : spec.motion.interactionDuration;
-    return Tooltip(
+    final result = Tooltip(
       message: widget.tab.label,
       excludeFromSemantics: true,
       child: Semantics(
@@ -349,6 +443,12 @@ class _AppTitleTabButtonState extends State<_AppTitleTabButton> {
           ),
         ),
       ),
+    );
+    return AppInteractionFrame(
+      radius: visual?.tabRadius ?? spec.geometry.navigationRadius,
+      accent: visual?.tabAccent ?? spec.palette.primaryBright,
+      selected: selected,
+      child: result,
     );
   }
 }
@@ -795,35 +895,42 @@ class _AppTitleBarState extends State<AppTitleBar> {
                                     ),
                                   ),
                                   const SizedBox(width: 10),
-                                  Text(
-                                    AppIdentity.displayName,
-                                    style: TextStyle(
-                                      color: foreground,
-                                      fontFamily:
-                                          visual?.fontFamily ??
-                                          (family ==
+                                  Flexible(
+                                    child: Tooltip(
+                                      message: AppIdentity.displayName,
+                                      child: Text(
+                                        AppIdentity.displayName,
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: TextStyle(
+                                          color: foreground,
+                                          fontFamily:
+                                              visual?.fontFamily ??
+                                              (family ==
+                                                      RetainedVisualFamily
+                                                          .sakuraNightGarden
+                                                  ? 'Georgia'
+                                                  : 'Segoe UI'),
+                                          fontSize:
+                                              family ==
                                                   RetainedVisualFamily
                                                       .sakuraNightGarden
-                                              ? 'Georgia'
-                                              : 'Segoe UI'),
-                                      fontSize:
-                                          family ==
-                                              RetainedVisualFamily
-                                                  .sakuraNightGarden
-                                          ? 15
-                                          : 14,
-                                      fontWeight:
-                                          family ==
-                                              RetainedVisualFamily
-                                                  .sakuraNightGarden
-                                          ? FontWeight.w600
-                                          : FontWeight.w700,
-                                      letterSpacing:
-                                          family ==
-                                              RetainedVisualFamily
-                                                  .sakuraNightGarden
-                                          ? .1
-                                          : 0,
+                                              ? 15
+                                              : 14,
+                                          fontWeight:
+                                              family ==
+                                                  RetainedVisualFamily
+                                                      .sakuraNightGarden
+                                              ? FontWeight.w600
+                                              : FontWeight.w700,
+                                          letterSpacing:
+                                              family ==
+                                                  RetainedVisualFamily
+                                                      .sakuraNightGarden
+                                              ? .1
+                                              : 0,
+                                        ),
+                                      ),
                                     ),
                                   ),
                                 ],
@@ -1009,8 +1116,11 @@ class _CaptionButtonState extends State<_CaptionButton> {
                 : null,
             child: AnimatedContainer(
               duration:
-                  spec?.motion.interactionDuration ??
-                  const Duration(milliseconds: 90),
+                  MediaQuery.disableAnimationsOf(context) ||
+                      MediaQuery.accessibleNavigationOf(context)
+                  ? Duration.zero
+                  : spec?.motion.interactionDuration ??
+                        const Duration(milliseconds: 90),
               decoration: decoration,
               child: IconButton(
                 style: ButtonStyle(

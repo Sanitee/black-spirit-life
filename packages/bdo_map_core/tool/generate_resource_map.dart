@@ -3,6 +3,8 @@ import 'dart:io';
 
 import 'package:crypto/crypto.dart';
 
+import 'reviewed_node_corrections.dart';
+
 const _sourceCommit = '289c833d34851dc84f3a647a2d9cf604eda9c93a';
 const _sourceUri =
     'https://raw.githubusercontent.com/fffam/'
@@ -149,8 +151,8 @@ const _truffleOfficialOverviewUrls = <String, String>{
       'https://s1.playblackdesert.com/web/CONSOLE/Upload/News/'
       '98c6f1e565a20221123051215139.jpg',
 };
-const _datasetVersion = '2026.09.09-beta-v4';
-const _datasetGeneratedAt = '2026-09-09T02:30:00Z';
+const _datasetVersion = '2026.10.09-beta-v5';
+const _datasetGeneratedAt = '2026-10-09T08:00:00Z';
 const _expectedResourceSectionCounts = <String, int>{
   'plantsWood': 123,
   'oresMinerals': 58,
@@ -1371,6 +1373,7 @@ Future<void> main(List<String> arguments) async {
       'generatedAt': _datasetGeneratedAt,
       'coordinateReference': 'Black Desert game-world X/Z; render Y = -Z',
       'provenance': <Map<String, Object?>>[
+        octoberSeaNodeCorrection,
         <String, Object?>{
           'id': _currentNodeProvenanceId,
           'title':
@@ -3038,7 +3041,7 @@ List<Map<String, Object?>> _buildCurrentWorkerNodes(
       'Current worker-node build did not preserve the pinned node boundary.',
     );
   }
-  return result;
+  return applyReviewedSeaNodeCorrection(result);
 }
 
 void _addEdaniaResources(

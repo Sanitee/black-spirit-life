@@ -128,6 +128,10 @@ void main() {
       final before = _canvas(tester).cameraController.camera;
       await _dragFrom(tester, tester.getCenter(label));
       _expectPannedWithoutSelection(tester, before);
+      expect(
+        find.byKey(const ValueKey('resource-map-home-find-material')),
+        findsOneWidget,
+      );
       expect(preferenceChanges, isEmpty);
 
       // A label remains clickable after dragging. Zoom in to separate Velia's
@@ -138,6 +142,14 @@ void main() {
       final beforeClick = _canvas(tester).cameraController.camera;
       await _mouseClick(tester, clickStart, jitter: const Offset(.25, .25));
       expect(_canvas(tester).selectedNodeId, town.id);
+      expect(
+        find.byKey(const ValueKey('resource-map-home-find-material')),
+        findsOneWidget,
+      );
+      expect(
+        find.byKey(const ValueKey('resource-map-sidebar-details')),
+        findsOneWidget,
+      );
       expect(
         _canvas(tester).cameraController.camera.center,
         beforeClick.center,

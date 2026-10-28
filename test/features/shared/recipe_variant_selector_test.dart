@@ -1,6 +1,5 @@
 import 'package:bdo_craft_planner_flutter/domain/models/catalog_models.dart';
 import 'package:bdo_craft_planner_flutter/features/shared/recipe_variant_selector.dart';
-import 'package:bdo_craft_planner_flutter/visual/components/app_button.dart';
 import 'package:bdo_craft_planner_flutter/visual/components/app_form_controls.dart';
 import 'package:bdo_craft_planner_flutter/visual/foundations/theme_spec.dart';
 import 'package:bdo_craft_planner_flutter/visual/standard/standard_spec.dart';
@@ -62,15 +61,10 @@ void main() {
         await tester.pumpAndSettle();
         expect(selectedId, 'b-1x');
 
-        final unsupported = tester.widget<AppButton>(
-          find.descendant(
-            of: find.byKey(
-              RecipeVariantSelector.batchChoiceKey(recipe.name, 100),
-            ),
-            matching: find.byType(AppButton),
-          ),
+        expect(
+          find.byKey(RecipeVariantSelector.batchChoiceKey(recipe.name, 100)),
+          findsNothing,
         );
-        expect(unsupported.onPressed, isNull);
 
         await tester.tap(
           find.byKey(RecipeVariantSelector.batchChoiceKey(recipe.name, 10)),
@@ -85,6 +79,10 @@ void main() {
         );
         await tester.pumpAndSettle();
         expect(selectedId, 'a-10x');
+        expect(
+          find.byKey(RecipeVariantSelector.batchChoiceKey(recipe.name, 100)),
+          findsOneWidget,
+        );
         expect(tester.takeException(), isNull);
       },
     );
@@ -178,64 +176,52 @@ void main() {
     },
   );
 
-  testWidgets(
-    'filtered route and batch axes disable unavailable combinations',
-    (tester) async {
-      final recipe = _matrixRecipe();
-      const namespace = 'used-in:missing-combination';
-      var selectedId = 'a-1x';
+  testWidgets('filtered route and batch axes hide unavailable combinations', (
+    tester,
+  ) async {
+    final recipe = _matrixRecipe();
+    const namespace = 'used-in:missing-combination';
+    var selectedId = 'a-1x';
 
-      await tester.pumpWidget(
-        _host(
-          StatefulBuilder(
-            builder: (context, setState) => RecipeVariantSelector(
-              recipe: recipe,
-              selectedVariantId: selectedId,
-              allowedVariantIds: const <String>{'a-1x', 'b-10x'},
-              keyNamespace: namespace,
-              onSelected: (value) => setState(() => selectedId = value),
-            ),
+    await tester.pumpWidget(
+      _host(
+        StatefulBuilder(
+          builder: (context, setState) => RecipeVariantSelector(
+            recipe: recipe,
+            selectedVariantId: selectedId,
+            allowedVariantIds: const <String>{'a-1x', 'b-10x'},
+            keyNamespace: namespace,
+            onSelected: (value) => setState(() => selectedId = value),
           ),
         ),
-      );
+      ),
+    );
 
-      Finder batch(int multiplier) => find.byKey(
-        RecipeVariantSelector.batchChoiceKey(
+    Finder batch(int multiplier) => find.byKey(
+      RecipeVariantSelector.batchChoiceKey(
+        recipe.name,
+        multiplier,
+        keyNamespace: namespace,
+      ),
+    );
+    expect(batch(10), findsNothing);
+
+    await tester.tap(
+      find.byKey(
+        RecipeVariantSelector.routeChoiceKey(
           recipe.name,
-          multiplier,
+          'route-b',
           keyNamespace: namespace,
         ),
-      );
-      AppButton button(Finder owner) => tester.widget<AppButton>(
-        find.descendant(of: owner, matching: find.byType(AppButton)),
-      );
+      ),
+    );
+    await tester.pumpAndSettle();
 
-      expect(button(batch(10)).onPressed, isNull);
-      expect(
-        tester
-            .widget<Tooltip>(
-              find.descendant(of: batch(10), matching: find.byType(Tooltip)),
-            )
-            .message,
-        contains('No matching 10× formula'),
-      );
-
-      await tester.tap(
-        find.byKey(
-          RecipeVariantSelector.routeChoiceKey(
-            recipe.name,
-            'route-b',
-            keyNamespace: namespace,
-          ),
-        ),
-      );
-      await tester.pumpAndSettle();
-
-      expect(selectedId, 'b-10x');
-      expect(button(batch(1)).onPressed, isNull);
-      expect(button(batch(10)).onPressed, isNotNull);
-    },
-  );
+    expect(selectedId, 'b-10x');
+    expect(batch(1), findsNothing);
+    expect(batch(10), findsNothing);
+    expect(find.text('BATCH'), findsNothing);
+  });
 
   testWidgets('batch-only recipes do not show a redundant route control', (
     tester,

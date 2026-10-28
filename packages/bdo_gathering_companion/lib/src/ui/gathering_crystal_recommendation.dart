@@ -25,9 +25,9 @@ class GatheringCrystalRecommendation extends StatelessWidget {
       runSpacing: 6,
       crossAxisAlignment: WrapCrossAlignment.center,
       children: [
-        const Text(
+        Text(
           'Recommended crystals',
-          style: TextStyle(fontSize: 13, color: muted),
+          style: TextStyle(fontSize: 13, color: context.gatheringColors.muted),
         ),
         HoverPinnedDetails(
           hoverKey: const ValueKey('gathering-crystal-hover-card'),
@@ -55,14 +55,18 @@ class GatheringCrystalRecommendation extends StatelessWidget {
                       const SizedBox(width: 7),
                       Text(
                         '×${crystal.maxCount}',
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 14,
                           fontWeight: FontWeight.w700,
-                          color: accent,
+                          color: context.gatheringColors.accent,
                         ),
                       ),
                       const SizedBox(width: 8),
-                      const Icon(Icons.info_outline, size: 16, color: muted),
+                      Icon(
+                        Icons.info_outline,
+                        size: 16,
+                        color: context.gatheringColors.muted,
+                      ),
                     ],
                   ),
                 ),
@@ -106,8 +110,8 @@ class _CrystalDetails extends StatelessWidget {
                   Expanded(
                     child: Text(
                       crystal.name,
-                      style: const TextStyle(
-                        color: gold,
+                      style: TextStyle(
+                        color: context.gatheringColors.gold,
                         fontSize: 16,
                         fontWeight: FontWeight.w600,
                       ),
@@ -135,9 +139,9 @@ class _CrystalDetails extends StatelessWidget {
               const SizedBox(height: 5),
               Text(
                 crystal.calculatorNote,
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 12,
-                  color: muted,
+                  color: context.gatheringColors.muted,
                   height: 1.25,
                 ),
               ),
@@ -148,23 +152,31 @@ class _CrystalDetails extends StatelessWidget {
     );
   }
 
-  Widget _heading(String text) => Padding(
-    padding: const EdgeInsets.only(bottom: 6),
-    child: Text(
-      text,
-      style: const TextStyle(
-        fontSize: 13,
-        color: accent,
-        fontWeight: FontWeight.w700,
+  Widget _heading(String text) => Builder(
+    builder: (context) => Padding(
+      padding: const EdgeInsets.only(bottom: 6),
+      child: Text(
+        text,
+        style: TextStyle(
+          fontSize: 13,
+          color: context.gatheringColors.accent,
+          fontWeight: FontWeight.w700,
+        ),
       ),
     ),
   );
 
-  Widget _line(String text) => Padding(
-    padding: const EdgeInsets.only(bottom: 5),
-    child: Text(
-      text,
-      style: const TextStyle(fontSize: 13.5, color: ink, height: 1.25),
+  Widget _line(String text) => Builder(
+    builder: (context) => Padding(
+      padding: const EdgeInsets.only(bottom: 5),
+      child: Text(
+        text,
+        style: TextStyle(
+          fontSize: 13.5,
+          color: context.gatheringColors.ink,
+          height: 1.25,
+        ),
+      ),
     ),
   );
 }

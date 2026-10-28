@@ -49,7 +49,7 @@ class _AppRevealTransitionState extends State<AppRevealTransition>
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    _reduceMotion = MediaQuery.maybeOf(context)?.disableAnimations ?? false;
+    _reduceMotion = MediaQuery.maybeDisableAnimationsOf(context) ?? false;
     _syncDuration();
     if (_reduceMotion) {
       _controller.value = widget.visible ? 1 : 0;

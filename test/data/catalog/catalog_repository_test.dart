@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:bdo_craft_planner_flutter/data/catalog/bundled_catalog_parser.dart';
 import 'package:bdo_craft_planner_flutter/data/catalog/catalog_repository.dart';
+import 'package:bdo_craft_planner_flutter/domain/models/catalog_models.dart';
 import 'package:bdo_craft_planner_flutter/domain/models/craft_mode.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -66,4 +67,67 @@ void main() {
       repository.iconDataUri(CraftMode.cooking, 'High-Quality Grape'),
     );
   });
+
+  test(
+    'NPC fallback excludes conflicting names, identities and invalid prices',
+    () {
+      final alchemy = {
+        'Same price': _priced('Same price', 100, id: '1'),
+        'Price conflict': _priced('Price conflict', 100),
+        'Identity conflict': _priced('Identity conflict', 100, id: '2'),
+        'Invalid': _priced('Invalid', double.infinity),
+        'Zero': _priced('Zero', 0),
+      };
+      final processing = {
+        'same price': _priced('same price', 100, id: '1'),
+        'price conflict': _priced('price conflict', 200),
+        'identity conflict': _priced('identity conflict', 100, id: '3'),
+      };
+      final fixture = CatalogRepository(
+        CatalogSnapshot(
+          sourceSha256: 'npc-fixture',
+          sourceByteCount: 1,
+          alchemy: _mode(CraftMode.alchemy, alchemy),
+          cooking: _mode(CraftMode.cooking, const {}),
+          processing: _mode(CraftMode.processing, processing),
+          supportingData: const {
+            'fallbackMarketPrices': {'Unknown': 500},
+          },
+          collisions: const [],
+        ),
+      );
+      expect(fixture.npcPurchasePrices, {'same price': 100});
+      expect(
+        () => fixture.npcPurchasePrices['Unknown'] = 1,
+        throwsUnsupportedError,
+      );
+    },
+  );
 }
+
+ModeCatalog _mode(CraftMode mode, Map<String, Recipe> items) => ModeCatalog(
+  mode: mode,
+  items: items,
+  iconDataUris: const {},
+  defaults: const {},
+  metadata: const {},
+  searchAliases: const {},
+);
+
+Recipe _priced(String name, double npcPrice, {String? id}) => Recipe(
+  name: name,
+  type: 'gathered',
+  baseOutput: 1,
+  group: null,
+  method: null,
+  ingredients: const [],
+  marketId: id,
+  sourceNote: null,
+  vendor: null,
+  location: null,
+  npcPrice: npcPrice,
+  qualityBase: null,
+  qualityGrade: null,
+  outputMinimum: null,
+  outputMaximum: null,
+);

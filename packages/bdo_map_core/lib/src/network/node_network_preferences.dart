@@ -1,4 +1,5 @@
 import 'worker_capacity_assessment.dart';
+import 'recipe_worker_preferences.dart';
 import '../model/map_visual_style.dart';
 import '../royal_workshop/royal_workshop_models.dart';
 
@@ -27,6 +28,7 @@ class BdoNodeNetworkPreferences {
     Map<String, BdoTownWorkerCapacity> townWorkerCapacitiesByNodeId =
         const <String, BdoTownWorkerCapacity>{},
     BdoRoyalWorkshopPlan? royalWorkshopPlan,
+    BdoRecipeWorkerPreferences? recipeWorkers,
   }) : desiredResourceNodeCounts = Map<String, int>.unmodifiable(
          _normalizedCounts(desiredResourceNodeCounts),
        ),
@@ -53,7 +55,8 @@ class BdoNodeNetworkPreferences {
            Map<String, BdoTownWorkerCapacity>.unmodifiable(
              _normalizedTownWorkerCapacities(townWorkerCapacitiesByNodeId),
            ),
-       royalWorkshopPlan = royalWorkshopPlan ?? BdoRoyalWorkshopPlan();
+       royalWorkshopPlan = royalWorkshopPlan ?? BdoRoyalWorkshopPlan(),
+       recipeWorkers = recipeWorkers ?? BdoRecipeWorkerPreferences();
 
   static const int schemaVersion = 10;
   static const int defaultContributionPointBudget = 400;
@@ -67,6 +70,7 @@ class BdoNodeNetworkPreferences {
   static const bool defaultShowWorkerOutputIcons = false;
 
   final int contributionPointBudget;
+  final BdoRecipeWorkerPreferences recipeWorkers;
 
   /// Desired number of distinct production nodes for each canonical resource.
   final Map<String, int> desiredResourceNodeCounts;
@@ -145,6 +149,7 @@ class BdoNodeNetworkPreferences {
   final BdoRoyalWorkshopPlan royalWorkshopPlan;
 
   bool get isDefault =>
+      recipeWorkers.sameValuesAs(BdoRecipeWorkerPreferences()) &&
       contributionPointBudget == defaultContributionPointBudget &&
       desiredResourceNodeCounts.isEmpty &&
       currentNodeIds.isEmpty &&
@@ -182,6 +187,7 @@ class BdoNodeNetworkPreferences {
     BdoMapVisualStyle? mapVisualStyle,
     Map<String, BdoTownWorkerCapacity>? townWorkerCapacitiesByNodeId,
     BdoRoyalWorkshopPlan? royalWorkshopPlan,
+    BdoRecipeWorkerPreferences? recipeWorkers,
   }) {
     return BdoNodeNetworkPreferences(
       contributionPointBudget:
@@ -209,10 +215,13 @@ class BdoNodeNetworkPreferences {
       townWorkerCapacitiesByNodeId:
           townWorkerCapacitiesByNodeId ?? this.townWorkerCapacitiesByNodeId,
       royalWorkshopPlan: royalWorkshopPlan ?? this.royalWorkshopPlan,
+      recipeWorkers: recipeWorkers ?? this.recipeWorkers,
     );
   }
 
   Map<String, Object?> toJson() => <String, Object?>{
+    if (!recipeWorkers.sameValuesAs(BdoRecipeWorkerPreferences()))
+      'recipeWorkers': recipeWorkers.toJson(),
     'schemaVersion': schemaVersion,
     'contributionPointBudget': contributionPointBudget,
     'onlineHoursPerDay': onlineHoursPerDay,
@@ -353,6 +362,7 @@ class BdoNodeNetworkPreferences {
           ? budget
           : defaultContributionPointBudget,
       desiredResourceNodeCounts: counts,
+      recipeWorkers: BdoRecipeWorkerPreferences.fromJson(json['recipeWorkers']),
       currentNodeIds: _idsFromJson(json['currentNodeIds']),
       currentOwnedHouseIds: _idsFromJson(json['currentOwnedHouseIds']),
       currentHouseUsageTypeIds: houseUsages,
@@ -404,7 +414,8 @@ class BdoNodeNetworkPreferences {
   }
 
   bool sameValuesAs(BdoNodeNetworkPreferences other) {
-    return contributionPointBudget == other.contributionPointBudget &&
+    return recipeWorkers.sameValuesAs(other.recipeWorkers) &&
+        contributionPointBudget == other.contributionPointBudget &&
         _mapsEqual(
           desiredResourceNodeCounts,
           other.desiredResourceNodeCounts,

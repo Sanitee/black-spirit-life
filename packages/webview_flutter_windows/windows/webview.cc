@@ -5,6 +5,7 @@
 #include <format>
 #include <iostream>
 
+#include "frame_delivery_policy.h"
 #include "util/composition.desktop.interop.h"
 #include "util/string_converter.h"
 #include "webview_host.h"
@@ -463,32 +464,33 @@ void Webview::RegisterEventHandlers() {
   }
 }
 
-void Webview::SetSurfaceSize(size_t width, size_t height, float scale_factor) {
-  if (!IsValid()) {
-    return;
+bool Webview::SetSurfaceSize(size_t width, size_t height, float scale_factor) {
+  if (!IsValid() || !surface_ ||
+      !webview_capture::IsUsableSurfaceSize(
+          static_cast<double>(width), static_cast<double>(height),
+          scale_factor)) {
+    return false;
   }
 
-  if (surface_ && width > 0 && height > 0) {
-    scale_factor_ = scale_factor;
-    auto scaled_width = width * scale_factor;
-    auto scaled_height = height * scale_factor;
+  const auto scaled_width = width * scale_factor;
+  const auto scaled_height = height * scale_factor;
+  RECT bounds;
+  bounds.left = 0;
+  bounds.top = 0;
+  bounds.right = static_cast<LONG>(scaled_width);
+  bounds.bottom = static_cast<LONG>(scaled_height);
 
-    RECT bounds;
-    bounds.left = 0;
-    bounds.top = 0;
-    bounds.right = static_cast<LONG>(scaled_width);
-    bounds.bottom = static_cast<LONG>(scaled_height);
-
-    surface_->put_Size({scaled_width, scaled_height});
-    webview_controller_->put_RasterizationScale(scale_factor);
-    if (webview_controller_->put_Bounds(bounds) != S_OK) {
-      std::cerr << "Setting webview bounds failed." << std::endl;
-    }
-
-    if (surface_size_changed_callback_) {
-      surface_size_changed_callback_(width, height);
-    }
+  if (FAILED(surface_->put_Size({scaled_width, scaled_height})) ||
+      FAILED(webview_controller_->put_RasterizationScale(scale_factor)) ||
+      FAILED(webview_controller_->put_Bounds(bounds))) {
+    std::cerr << "Setting webview size failed." << std::endl;
+    return false;
   }
+  scale_factor_ = scale_factor;
+  if (surface_size_changed_callback_) {
+    surface_size_changed_callback_(width, height);
+  }
+  return true;
 }
 
 bool Webview::OpenDevTools() {

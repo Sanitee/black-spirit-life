@@ -38,6 +38,8 @@ final class MarketPriceRow {
     required this.price,
     required this.stock,
     this.aggregateStock,
+    this.preorderPrice,
+    this.preorderFetchedAt,
     required this.source,
     required this.fetchedAt,
     required this.diagnosticCode,
@@ -57,6 +59,11 @@ final class MarketPriceRow {
   final String id;
   final bool ok;
   final int price;
+
+  /// Highest occupied buy-order price, separate from the market's base quote.
+  /// Zero with a timestamp means the checked book has no usable preorders.
+  final int? preorderPrice;
+  final DateTime? preorderFetchedAt;
 
   /// Null means the source did not assert stock. Zero is known out-of-stock.
   final int? stock;

@@ -284,6 +284,16 @@ CatalogSnapshot buildRecipeBookCatalog({
   }
   if (includeEdaniaReferenceFixture) {
     processing.addAll(<String, Recipe>{
+      'Twilight of the End - Necklace': _recipe(
+        'Twilight of the End - Necklace',
+        CraftMode.processing,
+        group: 'Reference - Recovery',
+        method: 'Heating',
+        role: RecipeRole.manualConversion,
+        ingredients: <Ingredient>[
+          _ingredient('Causality Shardstone - Necklace', 1),
+        ],
+      ),
       'Dawnbound Ekleta Necklace': _recipe(
         'Dawnbound Ekleta Necklace',
         CraftMode.processing,

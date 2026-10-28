@@ -244,7 +244,10 @@ class _SpotMediaGalleryState extends State<SpotMediaGallery> {
                         Text(
                           _label(selected),
                           key: const ValueKey('spot-media-type'),
-                          style: const TextStyle(fontSize: 12.5, color: muted),
+                          style: TextStyle(
+                            fontSize: 12.5,
+                            color: context.gatheringColors.muted,
+                          ),
                         ),
                       Text(
                         selected.title.isEmpty ? 'Reference' : selected.title,
@@ -379,7 +382,10 @@ class _MediaPager extends StatelessWidget {
           '${index + 1}/$count',
           key: ValueKey('${prefix}spot-reference-position'),
           semanticsLabel: 'Reference ${index + 1} of $count',
-          style: const TextStyle(fontSize: 12.5, color: muted),
+          style: TextStyle(
+            fontSize: 12.5,
+            color: context.gatheringColors.muted,
+          ),
         ),
         IconButton(
           key: ValueKey('${prefix}next-spot-reference'),
@@ -588,7 +594,11 @@ class _MediaReferencePicker extends StatelessWidget {
               padding: const EdgeInsets.fromLTRB(12, 10, 12, 4),
               child: Row(
                 children: [
-                  const Icon(Icons.play_circle_outline, size: 18, color: muted),
+                  Icon(
+                    Icons.play_circle_outline,
+                    size: 18,
+                    color: context.gatheringColors.muted,
+                  ),
                   const SizedBox(width: 10),
                   Expanded(
                     child: Text(
@@ -599,7 +609,10 @@ class _MediaReferencePicker extends StatelessWidget {
                         if (_publishedLabel(group.first).isNotEmpty)
                           _publishedLabel(group.first),
                       ].join(' · '),
-                      style: const TextStyle(fontSize: 12, color: muted),
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: context.gatheringColors.muted,
+                      ),
                     ),
                   ),
                 ],
@@ -673,22 +686,22 @@ class _ChapterOption extends StatelessWidget {
           children: [
             Text(
               _chapterTime(seconds),
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 13,
                 height: 1.45,
                 fontWeight: FontWeight.w600,
-                color: accent,
+                color: context.gatheringColors.accent,
               ),
             ),
             const SizedBox(width: 10),
             Expanded(
               child: Text(
                 title.isEmpty ? 'Video' : title,
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 14,
                   height: 1.35,
                   fontWeight: FontWeight.w500,
-                  color: ink,
+                  color: context.gatheringColors.ink,
                 ),
               ),
             ),
@@ -696,7 +709,11 @@ class _ChapterOption extends StatelessWidget {
             SizedBox(
               width: 18,
               child: selected
-                  ? const Icon(Icons.check, size: 18, color: accent)
+                  ? Icon(
+                      Icons.check,
+                      size: 18,
+                      color: context.gatheringColors.accent,
+                    )
                   : null,
             ),
           ],
@@ -731,7 +748,9 @@ class _ReferenceOption extends StatelessWidget {
                 ? Icons.play_circle_outline
                 : Icons.image_outlined,
             size: 18,
-            color: selected ? accent : muted,
+            color: selected
+                ? context.gatheringColors.accent
+                : context.gatheringColors.muted,
           ),
           const SizedBox(width: 10),
           Expanded(
@@ -741,18 +760,21 @@ class _ReferenceOption extends StatelessWidget {
               children: [
                 Text(
                   media.title.isEmpty ? fallback : media.title,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 14,
                     height: 1.35,
                     fontWeight: FontWeight.w600,
-                    color: ink,
+                    color: context.gatheringColors.ink,
                   ),
                 ),
                 if (details.isNotEmpty) ...[
                   const SizedBox(height: 3),
                   Text(
                     details,
-                    style: const TextStyle(fontSize: 12, color: muted),
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: context.gatheringColors.muted,
+                    ),
                   ),
                 ],
               ],
@@ -762,7 +784,11 @@ class _ReferenceOption extends StatelessWidget {
           SizedBox(
             width: 18,
             child: selected
-                ? const Icon(Icons.check, size: 18, color: accent)
+                ? Icon(
+                    Icons.check,
+                    size: 18,
+                    color: context.gatheringColors.accent,
+                  )
                 : null,
           ),
         ],
@@ -786,7 +812,7 @@ class _MediaPublishedDate extends StatelessWidget {
         key: ValueKey('spot-${media.type}-published-date'),
         maxLines: 1,
         overflow: TextOverflow.ellipsis,
-        style: const TextStyle(fontSize: 13, color: muted),
+        style: TextStyle(fontSize: 13, color: context.gatheringColors.muted),
       ),
     );
   }
@@ -821,7 +847,10 @@ class _MediaCreditsState extends State<_MediaCredits> {
         Expanded(
           child: Text(
             _error ?? widget.media.author,
-            style: const TextStyle(fontSize: 12, color: muted),
+            style: TextStyle(
+              fontSize: 12,
+              color: context.gatheringColors.muted,
+            ),
           ),
         ),
         if (widget.media.sourceUrl.isNotEmpty)
@@ -906,7 +935,10 @@ class _RotationImageState extends State<_RotationImage> {
             Expanded(
               child: Text(
                 _error ?? widget.media.author,
-                style: const TextStyle(fontSize: 12, color: muted),
+                style: TextStyle(
+                  fontSize: 12,
+                  color: context.gatheringColors.muted,
+                ),
               ),
             ),
             if (widget.media.sourceUrl.isNotEmpty)

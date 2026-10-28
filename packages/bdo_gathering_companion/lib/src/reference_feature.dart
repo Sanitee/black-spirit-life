@@ -2,8 +2,19 @@ import 'package:flutter/material.dart';
 
 import 'ui/reference_window.dart';
 import 'ui/theme.dart';
+import 'ui/visual_palette.dart';
 
-bool isGatheringReferenceMode(List<String> args) => args.contains('--reference');
+CompanionVisualPalette? gatheringReferenceVisualPalette(List<String> args) {
+  final argument = args
+      .where((value) => value.startsWith('--gathering-theme='))
+      .firstOrNull;
+  return CompanionVisualPalette.decode(
+    argument?.substring('--gathering-theme='.length),
+  );
+}
+
+bool isGatheringReferenceMode(List<String> args) =>
+    args.contains('--reference');
 
 int gatheringReferenceGlassOpacity(List<String> args) {
   final argument = args
@@ -25,6 +36,7 @@ void runGatheringReferenceMode(List<String> args) {
       debugShowCheckedModeBanner: false,
       theme: companionTheme(
         opacityPercent: gatheringReferenceGlassOpacity(args),
+        visualPalette: gatheringReferenceVisualPalette(args),
       ),
       builder: companionBackdropBuilder,
       home: const ReferenceWindow(),

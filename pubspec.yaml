@@ -1,7 +1,7 @@
 name: bdo_craft_planner_flutter
 description: Free unofficial Windows-first Black Spirit Life companion
 publish_to: none
-version: 0.1.11+30
+version: 0.1.12+31
 
 environment:
   sdk: ^3.12.2

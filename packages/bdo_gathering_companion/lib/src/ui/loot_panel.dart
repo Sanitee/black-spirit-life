@@ -7,6 +7,7 @@ import 'package:flutter/services.dart';
 import '../domain/models.dart';
 import '../services/loot_recognizer.dart';
 import '../services/native_bridge.dart';
+import 'field_desk_materials.dart';
 import 'theme.dart';
 
 const _maximumAmount = 999999999999;
@@ -447,49 +448,44 @@ class _LootPanelState extends State<LootPanel> {
   @override
   Widget build(BuildContext context) {
     final items = _items;
-    final header = Wrap(
-      alignment: WrapAlignment.spaceBetween,
-      crossAxisAlignment: WrapCrossAlignment.center,
-      spacing: 12,
-      runSpacing: 6,
-      children: [
-        Text('Loot', style: Theme.of(context).textTheme.titleMedium),
-        Wrap(
-          crossAxisAlignment: WrapCrossAlignment.center,
-          spacing: 4,
-          runSpacing: 4,
-          children: [
-            TextButton.icon(
-              key: const ValueKey('paste-screenshot'),
-              onPressed: _busy ? null : () => _readImage(clipboard: true),
-              style: TextButton.styleFrom(
-                padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 8),
-                minimumSize: const Size(0, 36),
-                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-              ),
-              icon: const Icon(Icons.content_paste, size: 16),
-              label: Text(
-                _busy ? 'Checking…' : 'Paste screenshot',
-                style: const TextStyle(fontSize: 14),
-              ),
+    final header = FieldDeskSectionHeading(
+      title: 'Loot',
+      prominent: true,
+      action: Wrap(
+        crossAxisAlignment: WrapCrossAlignment.center,
+        spacing: 4,
+        runSpacing: 4,
+        children: [
+          TextButton.icon(
+            key: const ValueKey('paste-screenshot'),
+            onPressed: _busy ? null : () => _readImage(clipboard: true),
+            style: TextButton.styleFrom(
+              padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 8),
+              minimumSize: const Size(0, 36),
+              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
             ),
-            TextButton.icon(
-              key: const ValueKey('open-screenshot'),
-              onPressed: _busy ? null : () => _readImage(clipboard: false),
-              style: TextButton.styleFrom(
-                padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 8),
-                minimumSize: const Size(0, 36),
-                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-              ),
-              icon: const Icon(Icons.image_outlined, size: 19),
-              label: const Text(
-                'Open screenshot',
-                style: TextStyle(fontSize: 14),
-              ),
+            icon: const Icon(Icons.content_paste, size: 16),
+            label: Text(
+              _busy ? 'Checking…' : 'Paste screenshot',
+              style: const TextStyle(fontSize: 14),
             ),
-          ],
-        ),
-      ],
+          ),
+          TextButton.icon(
+            key: const ValueKey('open-screenshot'),
+            onPressed: _busy ? null : () => _readImage(clipboard: false),
+            style: TextButton.styleFrom(
+              padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 8),
+              minimumSize: const Size(0, 36),
+              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+            ),
+            icon: const Icon(Icons.image_outlined, size: 19),
+            label: const Text(
+              'Open screenshot',
+              style: TextStyle(fontSize: 14),
+            ),
+          ),
+        ],
+      ),
     );
     final body = Column(
       mainAxisSize: MainAxisSize.min,
@@ -586,7 +582,10 @@ class _LootPanelState extends State<LootPanel> {
                       isDense: true,
                       isExpanded: true,
                       iconSize: 16,
-                      style: const TextStyle(fontSize: 14, color: ink),
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: context.gatheringColors.ink,
+                      ),
                       items: const [
                         DropdownMenuItem(
                           value: false,
@@ -655,11 +654,14 @@ class _LootPanelState extends State<LootPanel> {
         if (_showOther &&
             !_setTotal &&
             widget.entries[_manualItem?.id]?.overrideTotal != null)
-          const Padding(
+          Padding(
             padding: EdgeInsets.only(top: 6),
             child: Text(
               'Included in your overall total; used when you import inventory.',
-              style: TextStyle(fontSize: 12, color: muted),
+              style: TextStyle(
+                fontSize: 12,
+                color: context.gatheringColors.muted,
+              ),
             ),
           ),
         if (_busy) ...[
@@ -705,103 +707,129 @@ class _LootPanelState extends State<LootPanel> {
     final help = entry?.overrideTotal != null
         ? 'Total gathered for the whole session. Clearing it restores recorded inventory and maid deposits.'
         : '${countText(entry?.remaining ?? 0)} in bag − ${countText(entry?.start ?? 0)} starting + ${countText(entry?.sentAway ?? 0)} maid deposits. Type the whole total gathered to replace this calculation.';
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Tooltip(message: item.name, child: GameIcon(item.icon, size: 40)),
-              const SizedBox(width: 8),
-              Expanded(
-                child: Tooltip(
+    return DecoratedBox(
+      key: ValueKey('loot-row-${item.id}'),
+      decoration: context.glass.segmentedDecoration(
+        BoxDecoration(
+          gradient: context.glass.controlGradient,
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(color: context.glass.line),
+        ),
+        leadingWidth: 44,
+        leadingHeight: 56,
+        trailingWidth: 138,
+      ),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 4),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Tooltip(
                   message: item.name,
-                  child: Text(
-                    item.name,
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(fontSize: 14),
+                  child: Padding(
+                    padding: const EdgeInsets.only(left: 2),
+                    child: GlassArtworkWell(
+                      child: GameIcon(item.icon, size: 40),
+                    ),
                   ),
                 ),
-              ),
-              const SizedBox(width: 8),
-              Tooltip(
-                message: help,
-                child: SizedBox(
-                  width: 106,
-                  child: TextField(
-                    key: ValueKey('loot-total-${item.id}'),
-                    controller: _totals[item.id],
+                const SizedBox(width: 6),
+                Expanded(
+                  child: Tooltip(
+                    message: item.name,
+                    child: Text(
+                      item.name,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(fontSize: 14),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Tooltip(
+                  message: help,
+                  child: SizedBox(
+                    width: 106,
+                    child: TextField(
+                      key: ValueKey('loot-total-${item.id}'),
+                      controller: _totals[item.id],
+                      enabled: !_busy,
+                      keyboardType: TextInputType.number,
+                      textInputAction: TextInputAction.next,
+                      textAlign: TextAlign.end,
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                        fontFeatures: const [FontFeature.tabularFigures()],
+                        color: negative
+                            ? Theme.of(context).colorScheme.error
+                            : context.gatheringColors.ink,
+                      ),
+                      onChanged: (text) => _changeTotal(item, text),
+                      decoration: InputDecoration(
+                        hintText: 'Total',
+                        hintStyle: TextStyle(
+                          fontSize: 13,
+                          color: context.gatheringColors.muted,
+                        ),
+                        prefixText: entry?.isApproximate == true ? '≈ ' : null,
+                        isDense: true,
+                        errorText: invalid ? 'Whole number' : null,
+                        errorStyle: const TextStyle(fontSize: 10),
+                        contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 9,
+                          vertical: 11,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+                SizedBox(
+                  width: 30,
+                  child: PopupMenuButton<String>(
+                    key: ValueKey('loot-actions-${item.id}'),
+                    tooltip: 'Options for ${item.name}',
                     enabled: !_busy,
-                    keyboardType: TextInputType.number,
-                    textInputAction: TextInputAction.next,
-                    textAlign: TextAlign.end,
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: negative
-                          ? Theme.of(context).colorScheme.error
-                          : ink,
-                    ),
-                    onChanged: (text) => _changeTotal(item, text),
-                    decoration: InputDecoration(
-                      hintText: 'Total',
-                      hintStyle: const TextStyle(fontSize: 13, color: muted),
-                      prefixText: entry?.isApproximate == true ? '≈ ' : null,
-                      isDense: true,
-                      errorText: invalid ? 'Whole number' : null,
-                      errorStyle: const TextStyle(fontSize: 10),
-                      contentPadding: const EdgeInsets.symmetric(
-                        horizontal: 9,
-                        vertical: 11,
+                    padding: EdgeInsets.zero,
+                    iconSize: 18,
+                    onSelected: (action) {
+                      if (action == 'maid') _maidDeposit(item);
+                      if (action == 'edit' && entry != null) _edit(entry);
+                    },
+                    itemBuilder: (_) => [
+                      PopupMenuItem(
+                        value: 'maid',
+                        enabled: !invalid,
+                        child: const Tooltip(
+                          message: _batchHelp,
+                          child: Text('Add maid deposit'),
+                        ),
                       ),
-                    ),
+                      if (entry != null)
+                        const PopupMenuItem(
+                          value: 'edit',
+                          child: Text('Inventory details'),
+                        ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            if (negative)
+              Padding(
+                padding: const EdgeInsets.only(top: 4),
+                child: Text(
+                  'Starting stock exceeds recorded loot. Check amounts.',
+                  style: TextStyle(
+                    fontSize: 11,
+                    color: Theme.of(context).colorScheme.error,
                   ),
                 ),
               ),
-              SizedBox(
-                width: 30,
-                child: PopupMenuButton<String>(
-                  key: ValueKey('loot-actions-${item.id}'),
-                  tooltip: 'Options for ${item.name}',
-                  enabled: !_busy,
-                  padding: EdgeInsets.zero,
-                  iconSize: 18,
-                  onSelected: (action) {
-                    if (action == 'maid') _maidDeposit(item);
-                    if (action == 'edit' && entry != null) _edit(entry);
-                  },
-                  itemBuilder: (_) => [
-                    PopupMenuItem(
-                      value: 'maid',
-                      enabled: !invalid,
-                      child: const Tooltip(
-                        message: _batchHelp,
-                        child: Text('Add maid deposit'),
-                      ),
-                    ),
-                    if (entry != null)
-                      const PopupMenuItem(
-                        value: 'edit',
-                        child: Text('Inventory details'),
-                      ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-          if (negative)
-            Padding(
-              padding: const EdgeInsets.only(top: 4),
-              child: Text(
-                'Starting stock exceeds recorded loot. Check amounts.',
-                style: TextStyle(
-                  fontSize: 11,
-                  color: Theme.of(context).colorScheme.error,
-                ),
-              ),
-            ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -907,15 +935,24 @@ class _Notice extends StatelessWidget {
     width: double.infinity,
     padding: const EdgeInsets.all(12),
     decoration: BoxDecoration(
-      color: warning ? gold.withValues(alpha: .10) : context.glass.inset,
+      color: warning
+          ? context.gatheringColors.gold.withValues(alpha: .10)
+          : context.glass.inset,
       borderRadius: BorderRadius.circular(8),
       border: Border.all(
-        color: warning ? gold.withValues(alpha: .5) : context.glass.line,
+        color: warning
+            ? context.gatheringColors.gold.withValues(alpha: .5)
+            : context.glass.line,
       ),
     ),
     child: Text(
       text,
-      style: TextStyle(fontSize: 14, color: warning ? gold : muted),
+      style: TextStyle(
+        fontSize: 14,
+        color: warning
+            ? context.gatheringColors.gold
+            : context.gatheringColors.muted,
+      ),
     ),
   );
 }
@@ -989,9 +1026,12 @@ class _MaidDepositDialogState extends State<_MaidDepositDialog> {
           ),
           if (widget.entry?.overrideTotal != null) ...[
             const SizedBox(height: 12),
-            const Text(
+            Text(
               'Included in your overall total; used when you import inventory.',
-              style: TextStyle(fontSize: 12, color: muted),
+              style: TextStyle(
+                fontSize: 12,
+                color: context.gatheringColors.muted,
+              ),
             ),
           ],
         ],
@@ -1200,9 +1240,12 @@ class _ReviewDialogState extends State<_ReviewDialog> {
                 const SizedBox(height: 8),
                 ExpansionTile(
                   tilePadding: EdgeInsets.zero,
-                  title: const Text(
+                  title: Text(
                     'Reader notes',
-                    style: TextStyle(fontSize: 12, color: muted),
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: context.gatheringColors.muted,
+                    ),
                   ),
                   children: [
                     for (final note in widget.result.warnings)
@@ -1212,7 +1255,10 @@ class _ReviewDialogState extends State<_ReviewDialog> {
                           alignment: Alignment.centerLeft,
                           child: Text(
                             note,
-                            style: const TextStyle(fontSize: 12, color: muted),
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: context.gatheringColors.muted,
+                            ),
                           ),
                         ),
                       ),
@@ -1248,9 +1294,12 @@ class _ReviewDialogState extends State<_ReviewDialog> {
                 _row(_rows[i], i),
               ],
               const SizedBox(height: 12),
-              const Text(
+              Text(
                 'The image is held only while this review is open. No screenshot file is saved.',
-                style: TextStyle(color: muted, fontSize: 12),
+                style: TextStyle(
+                  color: context.gatheringColors.muted,
+                  fontSize: 12,
+                ),
               ),
             ],
           ),
@@ -1267,7 +1316,9 @@ class _ReviewDialogState extends State<_ReviewDialog> {
         color: row.excluded ? context.glass.inset : context.glass.panel,
         borderRadius: BorderRadius.circular(10),
         border: Border.all(
-          color: incomplete ? gold.withValues(alpha: .7) : context.glass.line,
+          color: incomplete
+              ? context.gatheringColors.gold.withValues(alpha: .7)
+              : context.glass.line,
         ),
       ),
       child: Column(
@@ -1282,14 +1333,19 @@ class _ReviewDialogState extends State<_ReviewDialog> {
                   children: [
                     Text(
                       'Slot ${index + 1}',
-                      style: const TextStyle(fontSize: 11, color: muted),
+                      style: TextStyle(
+                        fontSize: 11,
+                        color: context.gatheringColors.muted,
+                      ),
                     ),
                     if (row.needsReview && !row.excluded)
                       Text(
                         row.checked ? 'Checked' : 'Check item and amount',
                         style: TextStyle(
                           fontSize: 11,
-                          color: row.checked ? accent : gold,
+                          color: row.checked
+                              ? context.gatheringColors.accent
+                              : context.gatheringColors.gold,
                         ),
                       ),
                   ],
@@ -1304,7 +1360,7 @@ class _ReviewDialogState extends State<_ReviewDialog> {
           if (row.excluded)
             Text(
               '${row.item?.name ?? row.originalName} · excluded',
-              style: const TextStyle(color: muted),
+              style: TextStyle(color: context.gatheringColors.muted),
             )
           else ...[
             LayoutBuilder(
@@ -1325,9 +1381,12 @@ class _ReviewDialogState extends State<_ReviewDialog> {
                         ),
                       ),
                       const SizedBox(width: 6),
-                      const Text(
+                      Text(
                         'Change',
-                        style: TextStyle(fontSize: 11, color: muted),
+                        style: TextStyle(
+                          fontSize: 11,
+                          color: context.gatheringColors.muted,
+                        ),
                       ),
                     ],
                   ),
@@ -1358,15 +1417,21 @@ class _ReviewDialogState extends State<_ReviewDialog> {
                 padding: const EdgeInsets.only(top: 8),
                 child: Text(
                   note,
-                  style: const TextStyle(fontSize: 11, color: muted),
+                  style: TextStyle(
+                    fontSize: 11,
+                    color: context.gatheringColors.muted,
+                  ),
                 ),
               ),
             if (row.isApproximate)
-              const Padding(
+              Padding(
                 padding: EdgeInsets.only(top: 6),
                 child: Text(
                   '≈ Minimum amount. Enter an exact count if you know it.',
-                  style: TextStyle(fontSize: 11, color: gold),
+                  style: TextStyle(
+                    fontSize: 11,
+                    color: context.gatheringColors.gold,
+                  ),
                 ),
               ),
             if (row.needsReview)
@@ -1421,7 +1486,10 @@ class _DialogFrame extends StatelessWidget {
               const SizedBox(height: 5),
               Text(
                 subtitle!,
-                style: const TextStyle(color: muted, fontSize: 12),
+                style: TextStyle(
+                  color: context.gatheringColors.muted,
+                  fontSize: 12,
+                ),
               ),
             ],
             const SizedBox(height: 16),
@@ -1620,7 +1688,13 @@ class _EditDialogState extends State<_EditDialog> {
           const SizedBox(height: 12),
           _field('Maid deposits / sent away', _sent, enabled: !_override),
           const SizedBox(height: 8),
-          const Text(_batchHelp, style: TextStyle(color: muted, fontSize: 12)),
+          Text(
+            _batchHelp,
+            style: TextStyle(
+              color: context.gatheringColors.muted,
+              fontSize: 12,
+            ),
+          ),
           const SizedBox(height: 12),
           SwitchListTile(
             value: _override,
@@ -1651,7 +1725,9 @@ class _EditDialogState extends State<_EditDialog> {
             style: TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.w600,
-              color: _result < 0 ? Theme.of(context).colorScheme.error : accent,
+              color: _result < 0
+                  ? Theme.of(context).colorScheme.error
+                  : context.gatheringColors.accent,
             ),
           ),
           if (_result < 0) ...[

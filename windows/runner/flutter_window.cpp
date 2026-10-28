@@ -222,6 +222,9 @@ constexpr UINT kDeferredCloseRetryInitialDelayMilliseconds = 25;
 constexpr UINT kDeferredCloseRetryMaximumDelayMilliseconds = 200;
 constexpr unsigned int kDeferredCloseRetryLimit = 80;
 constexpr UINT kApplyBottomInsetMessage = WM_APP + 0x51;
+#if BSL_DIAGNOSTIC_RESOURCE_REDRAW
+constexpr UINT_PTR kResourceRedrawTimer = 0x42534C52;
+#endif
 
 bool IsCornerResize(WPARAM edge) {
   return edge == WMSZ_TOPLEFT || edge == WMSZ_TOPRIGHT ||
@@ -548,7 +551,75 @@ FlutterWindow::FlutterWindow(const flutter::DartProject& project,
   native_close_allowed_ = reference_mode;
 }
 
-FlutterWindow::~FlutterWindow() {}
+FlutterWindow::~FlutterWindow() {
+  flutter_view_teardown_guard_.BeginTeardown();
+#if BSL_DIAGNOSTIC_RESOURCE_REDRAW
+  StopResourceRedraw("cancelled");
+#endif
+}
+
+#if BSL_DIAGNOSTIC_RESOURCE_REDRAW
+void FlutterWindow::StartResourceRedraw(
+    std::unique_ptr<flutter::MethodResult<flutter::EncodableValue>> result) {
+  const HWND window = GetHandle();
+  if (reference_mode_ || resource_redraw_budget_.used() ||
+      flutter_controller_ == nullptr || window == nullptr ||
+      !IsWindowVisible(window) || IsIconic(window) ||
+      GetForegroundWindow() != window) {
+    result->Success(flutter::EncodableValue(flutter::EncodableMap{
+        {flutter::EncodableValue("status"), flutter::EncodableValue("unavailable")},
+        {flutter::EncodableValue("redrawRequests"), flutter::EncodableValue(0)},
+    }));
+    return;
+  }
+  resource_redraw_budget_.Start(GetTickCount64());
+  resource_redraw_result_ = std::move(result);
+  resource_redraw_timer_ = SetTimer(window, kResourceRedrawTimer, 16, nullptr);
+  if (resource_redraw_timer_ == 0) {
+    StopResourceRedraw("unavailable");
+    return;
+  }
+  TickResourceRedraw();
+}
+
+void FlutterWindow::TickResourceRedraw() {
+  if (!resource_redraw_budget_.active() || resource_redraw_timer_ == 0) return;
+  const HWND window = GetHandle();
+  if (flutter_controller_ == nullptr || window == nullptr ||
+      !IsWindowVisible(window) || IsIconic(window) ||
+      GetForegroundWindow() != window) {
+    StopResourceRedraw("cancelled");
+    return;
+  }
+  // Check the deadline immediately before each request. Delayed timer messages
+  // never catch up, and no new request is issued at/after 1000 milliseconds.
+  if (!resource_redraw_budget_.TakeRequest(GetTickCount64())) {
+    StopResourceRedraw("completed");
+    return;
+  }
+  flutter_controller_->ForceRedraw();
+  if (resource_redraw_budget_.requests() >=
+      ResourceRedrawBudget::kMaximumRequests) {
+    StopResourceRedraw("completed");
+  }
+}
+
+void FlutterWindow::StopResourceRedraw(const char* status) {
+  // Disable first: already-queued WM_TIMER messages cannot restart the burst.
+  resource_redraw_budget_.Stop();
+  const UINT_PTR timer = resource_redraw_timer_;
+  resource_redraw_timer_ = 0;
+  if (timer != 0 && GetHandle() != nullptr) KillTimer(GetHandle(), timer);
+  auto result = std::move(resource_redraw_result_);
+  if (result != nullptr) {
+    result->Success(flutter::EncodableValue(flutter::EncodableMap{
+        {flutter::EncodableValue("status"), flutter::EncodableValue(status)},
+        {flutter::EncodableValue("redrawRequests"),
+         flutter::EncodableValue(resource_redraw_budget_.requests())},
+    }));
+  }
+}
+#endif
 
 void FlutterWindow::CancelDeferredCloseRetry() {
   const HWND window = GetHandle();
@@ -764,6 +835,17 @@ bool FlutterWindow::OnCreate() {
           result->Error("window_unavailable", "The native window is closed.");
           return;
         }
+#if BSL_DIAGNOSTIC_RESOURCE_REDRAW
+        if (call.method_name() == "diagnosticResourceRedrawStart") {
+          StartResourceRedraw(std::move(result));
+          return;
+        }
+        if (call.method_name() == "diagnosticResourceRedrawCancel") {
+          StopResourceRedraw("cancelled");
+          result->Success();
+          return;
+        }
+#endif
         if (call.method_name() == "beginDrag") {
           ReleaseCapture();
           SendMessage(window, WM_NCLBUTTONDOWN, HTCAPTION, 0);
@@ -1012,6 +1094,7 @@ bool FlutterWindow::OnCreate() {
   // was already sent too early and received MissingPlugin.
   ReplayDeferredCloseRequest();
   flutter_view_window_ = flutter_controller_->view()->GetNativeWindow();
+  if (!flutter_view_teardown_guard_.Attach(flutter_view_window_)) return false;
   SetChildContent(flutter_view_window_);
   if (SetWindowSubclass(flutter_view_window_, FlutterViewResizeSubclassProc,
                         kFlutterViewResizeSubclassId,
@@ -1053,6 +1136,21 @@ LRESULT
 FlutterWindow::MessageHandler(HWND hwnd, UINT const message,
                               WPARAM const wparam,
                                LPARAM const lparam) noexcept {
+#if BSL_DIAGNOSTIC_RESOURCE_REDRAW
+  if (message == WM_TIMER && wparam == kResourceRedrawTimer) {
+    TickResourceRedraw();
+    return 0;
+  }
+  // Cancel before plugin dispatch or any close/geometry/lifecycle work.
+  if ((message == WM_ACTIVATEAPP && !wparam) ||
+      (message == WM_ACTIVATE && LOWORD(wparam) == WA_INACTIVE) ||
+      (message == WM_SHOWWINDOW && !wparam) || message == WM_CLOSE ||
+      message == WM_SIZE || message == WM_MOVE || message == WM_DPICHANGED ||
+      message == WM_ENTERSIZEMOVE || message == WM_DESTROY ||
+      message == WM_NCDESTROY) {
+    StopResourceRedraw("cancelled");
+  }
+#endif
   if (!reference_mode_ && message == WM_DPICHANGED) {
     const UINT next_dpi = HIWORD(wparam);
     bottom_inset_physical_ = static_cast<int>(std::lround(

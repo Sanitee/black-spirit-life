@@ -361,6 +361,78 @@ void main() {
     },
   );
 
+  test(
+    'current clean Olivine Ore and Tiger Blood artwork supplements the old atlas',
+    () {
+      final source = const BundledCatalogParser().parse(
+        File('assets/data/app-data.json').readAsStringSync(),
+      );
+      final catalog = InventoryOcrMaterialCatalog.fromRecipeBookJson(
+        catalog: source,
+        recipeBookJson: File(
+          'windows/storage_ocr/BlackSpiritStorageOcr/Assets/RecipeBook/recipes.json',
+        ).readAsStringSync(),
+      );
+      final artwork = source.supportingData['itemIconArtwork']! as Map;
+      for (final item in const <(String, int)>[
+        ('Olivine Ore', 4415),
+        ('Tiger Blood', 6356),
+      ]) {
+        final uri = artwork[_foldTest(item.$1)]! as String;
+        final bytes = base64Decode(uri.substring(uri.indexOf(',') + 1));
+        final decoded = image.decodeImage(bytes)!;
+        final screenshot = image.Image(
+          width: decoded.width,
+          height: decoded.height,
+          numChannels: 4,
+        );
+        image.fill(screenshot, color: image.ColorRgba8(22, 23, 27, 255));
+        image.compositeImage(screenshot, decoded);
+        final screenshotPng = Uint8List.fromList(image.encodePng(screenshot));
+        final slot = _slot(id: 'r0c0', column: 0, icon: '', quantity: 45)
+          ..['box'] = <String, Object?>{
+            'x': 0,
+            'y': 0,
+            'width': decoded.width,
+            'height': decoded.height,
+          }
+          ..['iconCandidates'] = <Object?>[]
+          ..['iconMaterialEligible'] = null
+          ..['iconMaterialConfidence'] = 0
+          ..['iconMaterialMargin'] = 0
+          ..['borderGradeConfidence'] = 0;
+        final row = const InventoryScreenshotResultSanitizer()
+            .sanitize(
+              rawResult: <String, Object?>{
+                'imageFingerprint': _digest('a'),
+                'width': decoded.width,
+                'height': decoded.height,
+                'grid': <String, Object?>{
+                  'columns': 1,
+                  'rows': 1,
+                  'confidence': .99,
+                },
+                'slots': <Object?>[slot],
+                'warnings': <Object?>[],
+              },
+              screenshotBytes: screenshotPng,
+              catalog: catalog,
+            )
+            .rows
+            .single;
+        expect(
+          row.matches,
+          isNotEmpty,
+          reason: '${item.$1} must have a usable visual template',
+        );
+        expect(row.matches.first.name, item.$1);
+        expect(row.matches.first.itemId, item.$2);
+        expect(row.selectedName, item.$1);
+        expect(row.quantity, 45);
+      }
+    },
+  );
+
   test('structured planner recipe evidence admits a null-flag helper item but '
       'not an explicit non-material trophy', () {
     final recipeBook = jsonDecode(_recipeBookJson()) as Map<String, Object?>;

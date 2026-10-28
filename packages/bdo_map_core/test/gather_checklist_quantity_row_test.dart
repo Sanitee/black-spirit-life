@@ -2,7 +2,6 @@ import 'dart:async';
 
 import 'package:bdo_map_core/bdo_map_core.dart';
 import 'package:bdo_map_core/src/widgets/gather_checklist_quantity_row.dart';
-import 'package:bdo_map_core/src/widgets/resource_map_pill.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 

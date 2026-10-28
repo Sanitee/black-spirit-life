@@ -834,7 +834,7 @@ void main() {
       const colors = ColorScheme.dark();
       BdoMapPainter painter({
         String? selectedPointId,
-        double tileFadeProgress = 1,
+        int tilePaintRevision = 0,
         BdoMapVisualStyle visualStyle = BdoMapVisualStyle.standard,
         ResourceMapChromeThemeData chromeTheme =
             ResourceMapChromeThemeData.sakuraCartographer,
@@ -853,7 +853,7 @@ void main() {
           selectedPointId: selectedPointId,
           selectedRouteId: null,
           colorScheme: colors,
-          tileFadeProgress: tileFadeProgress,
+          tilePaintRevision: tilePaintRevision,
           visualStyle: visualStyle,
           chromeTheme: chromeTheme,
         );
@@ -863,7 +863,7 @@ void main() {
 
       expect(painter().shouldRepaint(original), isFalse);
       expect(painter(selectedPointId: 'point').shouldRepaint(original), isTrue);
-      expect(painter(tileFadeProgress: 0.5).shouldRepaint(original), isTrue);
+      expect(painter(tilePaintRevision: 1).shouldRepaint(original), isTrue);
       expect(
         painter(visualStyle: BdoMapVisualStyle.vivid).shouldRepaint(original),
         isTrue,

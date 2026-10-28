@@ -167,14 +167,11 @@ void main() {
             label: 'Minigame Helper',
             path: _minigame,
           ),
-          (key: 'open-garmoth-upload', label: 'Garmoth Upload', path: _garmoth),
         ]) {
           final button = find.byKey(ValueKey(action.key));
           expect(button.hitTestable(), findsOneWidget);
-          expect(
-            tester.widget(button),
-            variant.width >= 1400 ? isA<TextButton>() : isA<IconButton>(),
-          );
+          expect(tester.widget(button), isA<IconButton>());
+          expect(tester.widget<IconButton>(button).onPressed, isNotNull);
           final imageFinder = find.descendant(
             of: button,
             matching: find.byType(Image),
@@ -197,20 +194,12 @@ void main() {
           expect(bounds.right, lessThanOrEqualTo(variant.width));
           expect(bounds.top, greaterThanOrEqualTo(0));
           expect(bounds.bottom, lessThanOrEqualTo(752));
-          if (variant.width < 1400) {
-            expect(find.byTooltip(action.label), findsOneWidget);
-          } else {
-            final label = find.descendant(
-              of: button,
-              matching: find.text(action.label),
-            );
-            expect(label, findsOneWidget);
-            expect(
-              tester.renderObject<RenderParagraph>(label).didExceedMaxLines,
-              isFalse,
-            );
-          }
+          expect(find.byTooltip(action.label), findsOneWidget);
         }
+        expect(find.byKey(const ValueKey('open-garmoth-upload')), findsNothing);
+        expect(find.text('Garmoth Upload'), findsNothing);
+        expect(find.byTooltip('Garmoth Upload'), findsNothing);
+        expect(find.byTooltip('Help'), findsOneWidget);
         expect(calls, isEmpty);
         expect(tester.takeException(), isNull);
 
@@ -247,16 +236,10 @@ void main() {
         }
         await tester.tap(find.byKey(const ValueKey('open-minigame-helper')));
         await tester.pump();
-        await tester.tap(find.byKey(const ValueKey('open-garmoth-upload')));
-        await tester.pump();
-        expect(calls.map((call) => call.method), [
-          'openReferenceWindow',
-          'openSessionImport',
-        ]);
+        expect(calls.map((call) => call.method), ['openReferenceWindow']);
         expect(calls.first.arguments, {
           'glassOpacityPercent': defaultGlassOpacityPercent,
         });
-        expect(calls.last.arguments, {'receiptDirectory': _receiptDirectory});
         expect(tester.takeException(), isNull);
         debugDisableShadows = shadows;
       },

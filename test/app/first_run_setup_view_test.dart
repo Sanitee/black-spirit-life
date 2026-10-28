@@ -107,10 +107,10 @@ void main() {
       find.byKey(const ValueKey<String>('setup-mass-processing')),
     );
     await tester.ensureVisible(
-      find.byKey(const ValueKey<String>('first-run-setup-next')),
+      find.byKey(const ValueKey<String>('setup-section-afkLoad')),
     );
     await tester.tap(
-      find.byKey(const ValueKey<String>('first-run-setup-next')),
+      find.byKey(const ValueKey<String>('setup-section-afkLoad')),
     );
     await tester.pumpAndSettle();
 
@@ -122,23 +122,21 @@ void main() {
     expect(find.text('Keep free'), findsOneWidget);
     expect(find.text('Leave unused'), findsNothing);
     expect(find.text('Feathery Steps'), findsOneWidget);
-    expect(find.text('None · 100%'), findsOneWidget);
+    expect(find.text('None'), findsOneWidget);
     await _enterField(tester, 'setup-current-carried-weight-lt', '-10');
     _expectFieldValue(tester, 'setup-current-carried-weight-lt', '0');
     await _enterField(tester, 'setup-maximum-weight-lt', '1850,5');
     await _enterField(tester, 'setup-current-carried-weight-lt', '125.25');
     await _enterField(tester, 'setup-safety-buffer-lt', '30');
-    final feathery = tester.widget<AppSelect<int>>(
-      find.byKey(const ValueKey<String>('setup-feathery-steps')),
+    await tester.tap(
+      find.byKey(const ValueKey<String>('setup-feathery-steps-4')),
     );
-    expect(feathery.value, 0);
-    feathery.onChanged!(4);
     await tester.pump();
     await tester.ensureVisible(
-      find.byKey(const ValueKey<String>('first-run-setup-next')),
+      find.byKey(const ValueKey<String>('setup-section-marketSales')),
     );
     await tester.tap(
-      find.byKey(const ValueKey<String>('first-run-setup-next')),
+      find.byKey(const ValueKey<String>('setup-section-marketSales')),
     );
     await tester.pumpAndSettle();
 
@@ -147,7 +145,7 @@ void main() {
     _expectSmallerThanSetupHeading(tester, 'Market sales');
     expect(
       find.byKey(const ValueKey<String>('market-bonus:valuePack')),
-      findsOneWidget,
+      findsNWidgets(2),
     );
     expect(
       find.byKey(const ValueKey<String>('market-bonus:richMerchantsRing')),
@@ -177,11 +175,8 @@ void main() {
           .value,
       0,
     );
-    expect(find.text('Below 1,000 - +0%'), findsOneWidget);
-    expect(
-      find.text('Estimated silver received: 65% of the sale price.'),
-      findsOneWidget,
-    );
+    expect(find.text('Below 1,000 · None'), findsOneWidget);
+    expect(find.text('65%'), findsOneWidget);
     await tester.tap(find.byKey(const ValueKey<String>('setup-value-pack')));
     await tester.ensureVisible(
       find.byKey(const ValueKey<String>('first-run-setup-finish')),
@@ -419,14 +414,21 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.byType(FirstRunSetupView), findsOneWidget);
-      expect(find.text('Step 1 of 1'), findsOneWidget);
+      expect(find.textContaining('Step 1'), findsNothing);
       expect(find.text('AFK Weight'), findsOneWidget);
       expect(find.text('Mastery'), findsNothing);
       expect(find.text('Market sales'), findsNothing);
       _expectFieldValue(tester, 'setup-maximum-weight-lt', '1750');
       _expectFieldValue(tester, 'setup-current-carried-weight-lt', '80');
       _expectFieldValue(tester, 'setup-safety-buffer-lt', '25');
-      expect(find.text('II · 110%'), findsOneWidget);
+      expect(
+        tester
+            .widget<AppButton>(
+              find.byKey(const ValueKey('setup-feathery-steps-2')),
+            )
+            .selected,
+        isTrue,
+      );
 
       await _enterField(tester, 'setup-maximum-weight-lt', '2100.5');
       await tester.tap(
@@ -582,16 +584,8 @@ void _expectSmallerThanSetupHeading(WidgetTester tester, String text) {
 }
 
 Future<void> _goToMarketAndSave(WidgetTester tester) async {
-  await tester.ensureVisible(
-    find.byKey(const ValueKey<String>('first-run-setup-next')),
-  );
-  await tester.tap(find.byKey(const ValueKey<String>('first-run-setup-next')));
-  await tester.pumpAndSettle();
-  await tester.ensureVisible(
-    find.byKey(const ValueKey<String>('first-run-setup-next')),
-  );
-  await tester.tap(find.byKey(const ValueKey<String>('first-run-setup-next')));
-  await tester.pumpAndSettle();
+  await _enterMastery(tester, 'setup-alchemy-mastery', '100');
+  await tester.pump();
   await tester.ensureVisible(
     find.byKey(const ValueKey<String>('first-run-setup-finish')),
   );

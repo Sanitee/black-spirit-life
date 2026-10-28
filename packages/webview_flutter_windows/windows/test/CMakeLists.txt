@@ -11,6 +11,23 @@ cmake_minimum_required(VERSION 3.20)
 
 project(webview_windows_native_tests LANGUAGES CXX)
 
+enable_testing()
+add_executable(video_navigation_policy_test video_navigation_policy_test.cc)
+target_compile_features(video_navigation_policy_test PRIVATE cxx_std_17)
+add_test(NAME video_navigation_policy COMMAND video_navigation_policy_test)
+
+add_executable(frame_delivery_policy_test frame_delivery_policy_test.cc)
+target_compile_features(frame_delivery_policy_test PRIVATE cxx_std_17)
+add_test(NAME frame_delivery_policy COMMAND frame_delivery_policy_test)
+
+# These pure policies have no WebView, NuGet, GoogleTest or network dependency.
+# Either focused option keeps the native policy regressions fully offline.
+option(WEBVIEW_NAVIGATION_POLICY_ONLY "Build only the companion URL policy test" OFF)
+option(WEBVIEW_FRAME_DELIVERY_POLICY_ONLY "Build only independent native policy tests" OFF)
+if(WEBVIEW_NAVIGATION_POLICY_ONLY OR WEBVIEW_FRAME_DELIVERY_POLICY_ONLY)
+  return()
+endif()
+
 set(WIL_VERSION "1.0.260126.7")
 set(WEBVIEW_VERSION "1.0.3967.48")
 

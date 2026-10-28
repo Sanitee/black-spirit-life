@@ -1,18 +1,24 @@
 import 'dart:async';
 import 'dart:math' as math;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/semantics.dart';
 import 'package:flutter/services.dart';
 
 import '../../data/opportunities/exchange_catalog.dart';
+import '../../data/opportunities/exchange_item_details.dart';
 import '../../data/opportunities/market_eligibility.dart';
 import '../../domain/formatting/planner_formatters.dart';
 import '../../domain/market/market_calculations.dart';
+import '../../domain/market/market_price_models.dart'
+    show normalizeNumericMarketId;
 import '../../domain/models/catalog_models.dart';
 import '../../domain/models/craft_mode.dart';
 import '../../domain/opportunities/exchange_models.dart';
 import '../../domain/opportunities/opportunity_best_use.dart';
 import '../../domain/opportunities/opportunity_calculator.dart';
+import '../../domain/opportunities/opportunity_card_reading.dart';
 import '../../domain/opportunities/opportunity_market_models.dart';
 import '../../domain/opportunities/raw_ingredient_sales.dart';
 import '../../domain/planner/ingredient_quality.dart';
@@ -26,28 +32,44 @@ import '../planner/planner_contracts.dart'
     show PlannerTargetRequest, PlannerGatherDemand;
 import '../planner/planner_shared.dart'
     show PlannerTargetChooser, PlannerCommandTarget;
+import '../recipe_book/recipe_book_item_info.dart';
 import '../recipe_book/recipe_book_item_info_view.dart';
 import '../shared/mode_item_icon.dart';
+import '../shared/profile_game_icon.dart';
+import 'opportunities_content_viewport.dart';
 import 'opportunities_controller.dart';
 import 'opportunities_item_actions.dart';
 import 'opportunities_theme.dart';
 import 'opportunities_visuals.dart';
+import 'opportunity_craft_card_material.dart';
+import 'opportunity_glass_finish.dart';
 import 'opportunity_inventory_input.dart';
+import 'opportunity_market_progress.dart';
+import 'opportunity_recipe_controls.dart';
 import 'opportunity_refresh_control.dart';
+import 'opportunity_silver_amount.dart';
 
 part 'opportunity_substitutes.dart';
 part 'opportunity_detail_inputs.dart';
 part 'opportunity_crafting_toolbar.dart';
 part 'opportunity_best_use_pane.dart';
+part 'opportunity_best_use_details.dart';
+part 'opportunity_exchange_items.dart';
+part 'opportunity_content_fit.dart';
+part 'opportunity_expanding_card.dart';
 
 class OpportunitiesWorkspace extends StatefulWidget {
   const OpportunitiesWorkspace({
     required this.controller,
     this.active = true,
+    this.theme,
+    this.onContentMaximumChanged,
     super.key,
   });
   final OpportunitiesController controller;
   final bool active;
+  final ValueListenable<ThemeSpec>? theme;
+  final ValueChanged<double>? onContentMaximumChanged;
 
   @override
   State<OpportunitiesWorkspace> createState() => _OpportunitiesWorkspaceState();
@@ -71,57 +93,63 @@ class _OpportunitiesWorkspaceState extends State<OpportunitiesWorkspace> {
   }
 
   @override
-  Widget build(BuildContext context) => AppOverlayCoordinatorHost(
-    onEscapeUnhandled: () => _navigator.currentState?.maybePop(),
-    child: Navigator(
-      key: _navigator,
-      onGenerateRoute: (settings) => MaterialPageRoute<void>(
-        settings: settings,
-        builder: (_) => _OpportunitiesContent(controller: widget.controller),
+  Widget build(BuildContext context) => OpportunitiesTheme(
+    theme: widget.theme,
+    child: AppOverlayCoordinatorHost(
+      onEscapeUnhandled: () => _navigator.currentState?.maybePop(),
+      child: Navigator(
+        key: _navigator,
+        onGenerateRoute: (settings) => MaterialPageRoute<void>(
+          settings: settings,
+          builder: (_) => _OpportunitiesContent(
+            controller: widget.controller,
+            onContentMaximumChanged: widget.onContentMaximumChanged,
+          ),
+        ),
       ),
     ),
   );
 }
 
 class _OpportunitiesContent extends StatelessWidget {
-  const _OpportunitiesContent({required this.controller});
+  const _OpportunitiesContent({
+    required this.controller,
+    this.onContentMaximumChanged,
+  });
   final OpportunitiesController controller;
+  final ValueChanged<double>? onContentMaximumChanged;
 
   @override
   Widget build(BuildContext context) => AnimatedBuilder(
     animation: controller,
-    builder: (context, _) => OpportunitiesTheme(
-      child: Builder(
-        builder: (context) {
-          final spec = context.visualTheme;
-          return TooltipTheme(
-            data: TooltipThemeData(
-              decoration: BoxDecoration(
-                gradient: OpportunitiesVisualSpec.overlay,
-                borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: spec.palette.trim),
-              ),
-              textStyle: spec.typography.body.copyWith(
-                color: spec.palette.text,
-              ),
-              padding: const EdgeInsets.all(12),
-              constraints: const BoxConstraints(maxWidth: 340),
-              waitDuration: const Duration(milliseconds: 450),
-            ),
-            child: ScrollConfiguration(
-              behavior: const AppScrollBehavior(),
-              child: _OpportunityBody(controller: controller),
-            ),
-          );
-        },
+    builder: (context, _) => ScrollConfiguration(
+      behavior: const AppScrollBehavior(),
+      child: _OpportunityBody(
+        controller: controller,
+        onContentMaximumChanged: onContentMaximumChanged,
       ),
     ),
   );
 }
 
-class _OpportunityBody extends StatelessWidget {
-  const _OpportunityBody({required this.controller});
+class _OpportunityBody extends StatefulWidget {
+  const _OpportunityBody({
+    required this.controller,
+    this.onContentMaximumChanged,
+  });
   final OpportunitiesController controller;
+  final ValueChanged<double>? onContentMaximumChanged;
+
+  @override
+  State<_OpportunityBody> createState() => _OpportunityBodyState();
+}
+
+class _OpportunityBodyState extends State<_OpportunityBody> {
+  // Reparent the same live panes at the rail breakpoint: keep search focus,
+  // scroll positions and the lazy market-interest owners intact on resize.
+  final _panes = GlobalKey();
+  final _contentFitCache = _OpportunityFitCache();
+  OpportunitiesController get controller => widget.controller;
 
   @override
   Widget build(BuildContext context) {
@@ -130,22 +158,65 @@ class _OpportunityBody extends StatelessWidget {
     }
     final p = controller.preferences;
     final spec = context.visualTheme;
-    return Padding(
-      padding: const EdgeInsets.all(24),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Wrap(
-            key: const ValueKey('opportunities-header'),
-            alignment: WrapAlignment.spaceBetween,
-            crossAxisAlignment: WrapCrossAlignment.center,
-            spacing: 24,
-            runSpacing: 12,
+    final choices = <(String, bool, VoidCallback)>[
+      (
+        'Crafting',
+        p.section == 'crafting',
+        () => controller.change((p) => p.section = 'crafting'),
+      ),
+      (
+        'Exchanges',
+        p.section == 'exchanges',
+        () => controller.change((p) => p.section = 'exchanges'),
+      ),
+      (
+        'Best use',
+        p.section == 'best-use',
+        () => controller.change((p) => p.section = 'best-use'),
+      ),
+    ];
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final scale = MediaQuery.textScalerOf(context).scale(14) / 14;
+        final rail = constraints.maxWidth >= 1120 * scale;
+        final content = KeyedSubtree(
+          key: _panes,
+          child: OpportunitiesContentViewport(
+            scale: controller.contentScale,
+            onMaximumChanged: widget.onContentMaximumChanged,
+            maximumFor: (size) => _opportunitiesMaximum(
+              context,
+              controller,
+              size,
+              _contentFitCache,
+              rail: rail,
+            ),
+            child: IndexedStack(
+              key: const ValueKey('opportunities-panes'),
+              index: switch (p.section) {
+                'exchanges' => 1,
+                'best-use' => 2,
+                _ => 0,
+              },
+              children: [
+                _CraftingPane(controller: controller, showModeTabs: !rail),
+                _ExchangePane(controller: controller),
+                _BestUsePane(controller: controller, showSortControl: !rail),
+              ],
+            ),
+          ),
+        );
+        return Padding(
+          padding: const EdgeInsets.fromLTRB(20, 18, 20, 12),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               Wrap(
+                key: const ValueKey('opportunities-header'),
+                alignment: WrapAlignment.spaceBetween,
                 crossAxisAlignment: WrapCrossAlignment.center,
-                spacing: 32,
-                runSpacing: 8,
+                spacing: 20,
+                runSpacing: 10,
                 children: [
                   Row(
                     mainAxisSize: MainAxisSize.min,
@@ -153,40 +224,16 @@ class _OpportunityBody extends StatelessWidget {
                       Image.asset(
                         'assets/opportunities/items/66771.webp',
                         key: const ValueKey('opportunities-brand-icon'),
-                        width: 32,
-                        height: 32,
+                        width: 30,
+                        height: 30,
                         filterQuality: FilterQuality.high,
                       ),
-                      const SizedBox(width: 12),
+                      const SizedBox(width: 10),
                       Text('Opportunities', style: spec.typography.display),
                     ],
                   ),
-                  _DeskTabs(
-                    choices: [
-                      (
-                        'Crafting',
-                        p.section == 'crafting',
-                        () => controller.change((p) => p.section = 'crafting'),
-                      ),
-                      (
-                        'Exchanges',
-                        p.section == 'exchanges',
-                        () => controller.change((p) => p.section = 'exchanges'),
-                      ),
-                      (
-                        'Best use',
-                        p.section == 'best-use',
-                        () => controller.change((p) => p.section = 'best-use'),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
                   Wrap(
-                    spacing: 12,
+                    spacing: 10,
                     runSpacing: 8,
                     crossAxisAlignment: WrapCrossAlignment.center,
                     children: [
@@ -197,7 +244,7 @@ class _OpportunityBody extends StatelessWidget {
                         key: const ValueKey('opportunities-market'),
                         minimumSize: const Size(0, 40),
                         padding: const EdgeInsets.symmetric(
-                          horizontal: 12,
+                          horizontal: 10,
                           vertical: 6,
                         ),
                         onPressed: () => _taxDialog(context, controller),
@@ -205,109 +252,152 @@ class _OpportunityBody extends StatelessWidget {
                       OpportunityRefreshControl(controller: controller),
                     ],
                   ),
-                  const SizedBox(height: 8),
-                  _marketTimestamp(context, controller),
                 ],
               ),
-            ],
-          ),
-          Column(
-            key: const ValueKey('opportunities-market-progress'),
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              _marketLoadProgress(
-                context,
-                controller.summaryStatus,
-                label: controller.summaryStatus.loading
-                    ? 'Loading prices'
-                    : 'Prices',
-              ),
-              _marketLoadProgress(
-                context,
-                controller.detailStatus,
-                label:
-                    p.section != 'exchanges' &&
-                        (p.craftSort == 'preorders' || p.demandOnly)
-                    ? 'Preorders'
-                    : 'Market details',
-              ),
-              for (final message in <String?>[
-                controller.saveError,
-                controller.notice,
-              ].whereType<String>().toSet())
-                Padding(
-                  padding: const EdgeInsets.only(top: 8),
-                  child: Semantics(
-                    liveRegion: true,
-                    child: Text(
-                      message,
-                      style: spec.typography.meta.copyWith(
-                        color: spec.palette.warning,
+              Padding(
+                padding: const EdgeInsets.only(top: 8, bottom: 12),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Divider(
+                        height: 1,
+                        color: spec.palette.trim.withAlpha(100),
                       ),
                     ),
-                  ),
+                    const SizedBox(width: 12),
+                    _marketTimestamp(context, controller),
+                  ],
                 ),
+              ),
+              Column(
+                key: const ValueKey('opportunities-market-progress'),
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  OpportunityMarketProgress(
+                    status: controller.summaryStatus,
+                    showLoading: false,
+                    label: controller.summaryStatus.loading
+                        ? 'Loading prices'
+                        : 'Prices',
+                  ),
+                  OpportunityMarketProgress(
+                    status: controller.detailStatus,
+                    showLoading: false,
+                    label:
+                        p.section != 'exchanges' &&
+                            (p.craftSort == 'preorders' || p.demandOnly)
+                        ? 'Preorders'
+                        : 'Market details',
+                  ),
+                  for (final message in <String?>[
+                    controller.saveError,
+                    controller.notice,
+                  ].whereType<String>().toSet())
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 8),
+                      child: Semantics(
+                        liveRegion: true,
+                        child: Text(
+                          message,
+                          style: spec.typography.meta.copyWith(
+                            color: spec.palette.warning,
+                          ),
+                        ),
+                      ),
+                    ),
+                ],
+              ),
+              Expanded(
+                child: rail
+                    ? Row(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          SizedBox(
+                            key: const ValueKey('opportunities-sidebar'),
+                            width: 134 * scale,
+                            child: SingleChildScrollView(
+                              child: _WorkbenchNavigation(
+                                choices: choices,
+                                controller: controller,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 22),
+                          Expanded(child: content),
+                        ],
+                      )
+                    : Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          _DeskTabs(choices: choices),
+                          const SizedBox(height: 12),
+                          Expanded(child: content),
+                        ],
+                      ),
+              ),
             ],
           ),
-          SizedBox(height: p.section != 'exchanges' ? 16 : 24),
-          Expanded(
-            // A single layout at every width preserves both panes and their
-            // editing/scroll state when the header wraps.
-            child: IndexedStack(
-              key: const ValueKey('opportunities-panes'),
-              index: switch (p.section) {
-                'exchanges' => 1,
-                'best-use' => 2,
-                _ => 0,
-              },
-              children: [
-                _CraftingPane(controller: controller),
-                _ExchangePane(controller: controller),
-                _BestUsePane(controller: controller),
-              ],
-            ),
-          ),
-        ],
-      ),
+        );
+      },
     );
   }
 }
 
-Widget _marketLoadProgress(
-  BuildContext context,
-  OpportunityMarketLoadStatus status, {
-  required String label,
-}) {
-  if (!status.loading && status.failed == 0 && !status.blocked) {
-    return const SizedBox.shrink();
-  }
-  final spec = context.visualTheme;
-  return Padding(
-    padding: const EdgeInsets.only(top: 8),
-    child: Column(
+class _WorkbenchNavigation extends StatelessWidget {
+  const _WorkbenchNavigation({required this.choices, required this.controller});
+  final List<(String, bool, VoidCallback)> choices;
+  final OpportunitiesController controller;
+
+  @override
+  Widget build(BuildContext context) {
+    final spec = context.visualTheme;
+    return Column(
+      key: const ValueKey('opportunities-sections'),
+      mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Text(
-          '$label · ${status.loaded} / ${status.total}'
-          '${status.failed > 0 ? ' · ${status.failed} failed' : ''}',
-          style: spec.typography.meta.copyWith(
-            color: status.failed > 0 || status.blocked
-                ? spec.palette.warning
-                : null,
-          ),
-        ),
-        if (status.loading) ...[
-          const SizedBox(height: 4),
-          LinearProgressIndicator(
-            value: status.total == 0 ? null : status.loaded / status.total,
-            minHeight: 2,
-            semanticsLabel:
-                '$label: ${status.loaded} of ${status.total} loaded',
+        for (final (index, choice) in choices.indexed) ...[
+          if (index > 0) const SizedBox(height: 8),
+          OpportunityButton(
+            key: ValueKey('opportunities-section-${choice.$1.toLowerCase()}'),
+            role: AppButtonRole.infoChip,
+            selected: choice.$2,
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+            onPressed: choice.$3,
+            child: Row(
+              children: [
+                Icon(
+                  switch (index) {
+                    0 => Icons.auto_awesome_outlined,
+                    1 => Icons.swap_horiz_rounded,
+                    _ => Icons.diamond_outlined,
+                  },
+                  size: 19,
+                  color: choice.$2
+                      ? spec.palette.primary
+                      : spec.palette.textMuted,
+                ),
+                const SizedBox(width: 10),
+                Expanded(child: Text(choice.$1)),
+              ],
+            ),
           ),
         ],
+        if (controller.preferences.section == 'crafting') ...[
+          const SizedBox(height: 20),
+          Divider(height: 1, color: spec.palette.trim.withAlpha(90)),
+          const SizedBox(height: 12),
+          _CraftModeTabs(controller: controller, vertical: true),
+        ],
+        if (controller.preferences.section != 'exchanges') ...[
+          const SizedBox(height: 20),
+          Divider(height: 1, color: spec.palette.trim.withAlpha(90)),
+          const SizedBox(height: 12),
+          _CraftSortControl(controller: controller, vertical: true),
+        ],
       ],
-    ),
-  );
+    );
+  }
 }
 
 class _DeskTabs extends StatelessWidget {
@@ -334,9 +424,18 @@ class _DeskTabs extends StatelessWidget {
   );
 }
 
-class _CraftingPane extends StatelessWidget {
-  const _CraftingPane({required this.controller});
+class _CraftingPane extends StatefulWidget {
+  const _CraftingPane({required this.controller, required this.showModeTabs});
   final OpportunitiesController controller;
+  final bool showModeTabs;
+  @override
+  State<_CraftingPane> createState() => _CraftingPaneState();
+}
+
+class _CraftingPaneState extends State<_CraftingPane> {
+  (CraftMode, String)? _expanded;
+  OpportunitiesController get controller => widget.controller;
+
   @override
   Widget build(BuildContext context) {
     final p = controller.preferences;
@@ -346,15 +445,20 @@ class _CraftingPane extends StatelessWidget {
       context,
       count: rows.length,
       keyName: 'craft-opportunities',
-      minimumCardWidth: 400,
-      maximumCardWidth: rows.length <= 2 ? 480 : 560,
-      maximumColumns: 4,
+      minimumCardWidth: OpportunityCraftCardLayout.minimumWidth,
+      maximumCardWidth: OpportunityCraftCardLayout.maximumWidth,
+      maximumColumns: OpportunityCraftCardLayout.maximumColumns,
+      independentColumns: true,
       header: Padding(
         padding: const EdgeInsets.only(bottom: 8),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            _CraftingToolbar(controller: controller),
+            _CraftingToolbar(
+              controller: controller,
+              showModeTabs: widget.showModeTabs,
+              showSortControl: widget.showModeTabs,
+            ),
             const SizedBox(height: 8),
             Row(
               children: [
@@ -367,7 +471,10 @@ class _CraftingPane extends StatelessWidget {
                 ),
                 _info(context, 'Crafting profit', [
                   'Buy the ingredients shown, then make the recipe. Nothing is crafted further down the chain.',
-                  'Profit is the main product’s sale price after tax, minus ingredients. Items you own are still priced as bought.',
+                  p.useInventory
+                      ? 'Profit from crafting compares crafting and selling with selling the owned ingredients instead. Only the ingredients used for this craft count.'
+                      : 'Profit is the main product’s sale price after tax, minus the cost of buying the ingredients.',
+                  'Card amounts are per expected main item, using the selected recipe’s average output. Costs include entered extra expenses and, with inventory, the sale value of owned ingredients consumed.',
                   'Rare results, byproducts, tool and buff costs are not included.',
                   'Check the recipe’s level and knowledge requirements in game. The estimate assumes successful crafts.',
                   'A high price does not guarantee a sale.',
@@ -391,8 +498,16 @@ class _CraftingPane extends StatelessWidget {
           ],
         ),
       ),
-      builder: (index) =>
-          _CraftCard(controller: controller, quote: rows[index]),
+      builder: (index) => _CraftCard(
+        key: ValueKey('craft:${p.mode.name}:${rows[index].recipeName}'),
+        controller: controller,
+        quote: rows[index],
+        expanded: _expanded == (p.mode, rows[index].recipeName),
+        onToggle: () => setState(() {
+          final selection = (p.mode, rows[index].recipeName);
+          _expanded = _expanded == selection ? null : selection;
+        }),
+      ),
     );
   }
 }
@@ -402,10 +517,15 @@ class _CraftCard extends StatefulWidget {
     required this.controller,
     required this.quote,
     this.bestUse,
+    this.expanded = false,
+    this.onToggle,
+    super.key,
   });
   final OpportunitiesController controller;
   final OpportunityQuote quote;
   final OpportunityBestUseQuote? bestUse;
+  final bool expanded;
+  final VoidCallback? onToggle;
 
   @override
   State<_CraftCard> createState() => _CraftCardState();
@@ -414,6 +534,7 @@ class _CraftCard extends StatefulWidget {
 class _CraftCardState extends State<_CraftCard> {
   OpportunitiesController get controller => widget.controller;
   OpportunityQuote get quote => widget.quote;
+  bool _bestUseExpanded = false;
 
   @override
   void initState() {
@@ -424,6 +545,11 @@ class _CraftCardState extends State<_CraftCard> {
   @override
   void didUpdateWidget(covariant _CraftCard oldWidget) {
     super.didUpdateWidget(oldWidget);
+    if (oldWidget.quote.recipeName != quote.recipeName ||
+        oldWidget.bestUse?.quote.selectedVariantId !=
+            widget.bestUse?.quote.selectedVariantId) {
+      _bestUseExpanded = false;
+    }
     if (oldWidget.controller != controller) {
       oldWidget.controller.releaseCardMarketInterest(this);
     }
@@ -444,28 +570,26 @@ class _CraftCardState extends State<_CraftCard> {
 
   @override
   Widget build(BuildContext context) {
+    if (widget.bestUse == null) {
+      return _ExpandingCraftCard(
+        controller: controller,
+        quote: quote,
+        expanded: widget.expanded,
+        onToggle: widget.onToggle!,
+      );
+    }
     final spec = context.visualTheme;
     final use = widget.bestUse;
-    final showExperience =
-        use == null && controller.preferences.craftSort == 'exp';
-    final experience = showExperience
-        ? controller.experienceForQuote(quote)
-        : null;
-    final total = use == null
-        ? quote.profitFor(controller.craftSaleMode)
-        : use.extraProfitPerUnit;
-    final estimated = use?.isEstimated ?? quote.hasEstimatedInputs;
-    final note = use != null && total == null
-        ? 'Some prices are missing'
-        : _craftCardNote(controller, quote, recipe: use?.recipe);
-    final scope = _craftScope(controller, quote, recipe: use?.recipe);
-    const artworkRailWidth = 76.0;
-    void open() => _craftDetails(context, controller, quote, bestUse: use);
+    final resolvedUse = use!;
+    void open() =>
+        _craftDetails(context, controller, quote, bestUse: resolvedUse);
+    void toggleCalculation() =>
+        setState(() => _bestUseExpanded = !_bestUseExpanded);
     return OpportunityItemRegion(
       controller: controller,
       name: quote.recipeName,
       stableId: 'craft-card:${quote.recipeName}',
-      plannerMode: use?.mode ?? controller.preferences.mode,
+      plannerMode: use.mode,
       plannerVariantId: quote.selectedVariantId,
       onViewRecipe: open,
       childHandlesFocus: true,
@@ -474,203 +598,25 @@ class _CraftCardState extends State<_CraftCard> {
           key: ValueKey('craft-card:${quote.recipeName}'),
           role: AppSurfaceRole.card,
           padding: EdgeInsets.zero,
-          decoration: OpportunitiesVisualSpec.recipeCard,
-          child: InkWell(
-            onTap: open,
-            borderRadius: BorderRadius.circular(12),
-            hoverColor: spec.palette.primary.withAlpha(12),
-            focusColor: spec.palette.primary.withAlpha(28),
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(12),
-              child: Stack(
-                children: [
-                  Positioned.fill(
-                    right: null,
-                    child: SizedBox(
-                      key: ValueKey('craft-artwork-rail:${quote.recipeName}'),
-                      width: artworkRailWidth,
-                      child: DecoratedBox(
-                        decoration: OpportunitiesVisualSpec.recipeArtworkRail,
-                        child: Center(
-                          child: _itemIcon(
-                            controller,
-                            quote.recipeName,
-                            40,
-                            framed: true,
-                            mode: use?.mode,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.only(left: artworkRailWidth),
-                    child: KeyedSubtree(
-                      key: ValueKey('craft-summary:${quote.recipeName}'),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Padding(
-                            padding: const EdgeInsets.fromLTRB(16, 10, 16, 6),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.stretch,
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Row(
-                                  children: [
-                                    Expanded(
-                                      child: Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        children: [
-                                          OpportunityCopyName(
-                                            name: quote.recipeName,
-                                            style: spec.typography.section
-                                                .copyWith(
-                                                  fontSize:
-                                                      OpportunitiesVisualSpec
-                                                          .cardNameFontSize,
-                                                  fontWeight: FontWeight.w700,
-                                                ),
-                                          ),
-                                          if (scope.isNotEmpty) ...[
-                                            const SizedBox(height: 4),
-                                            Text(
-                                              scope,
-                                              style: spec.typography.meta,
-                                            ),
-                                          ],
-                                        ],
-                                      ),
-                                    ),
-                                    const SizedBox(width: 8),
-                                    ExcludeFocus(
-                                      child: OpportunityButton.icon(
-                                        icon: const Icon(
-                                          Icons.arrow_forward,
-                                          size: 18,
-                                        ),
-                                        semanticLabel:
-                                            'Calculation for ${quote.recipeName}',
-                                        onPressed: open,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                                const SizedBox(height: 7),
-                                _MetricColumns(
-                                  children: [
-                                    _metric(
-                                      context,
-                                      use == null
-                                          ? 'Profit'
-                                          : 'Extra profit / item',
-                                      _estimateValue(_silver(total), estimated),
-                                      large: true,
-                                      valueFontSize: OpportunitiesVisualSpec
-                                          .cardPrimaryValueFontSize,
-                                      valueFontWeight: FontWeight.w600,
-                                      labelFontSize: OpportunitiesVisualSpec
-                                          .cardLabelFontSize,
-                                      color: total == null
-                                          ? spec.palette.textMuted
-                                          : total > 0
-                                          ? spec.palette.success
-                                          : spec.palette.danger,
-                                    ),
-                                    if (showExperience)
-                                      experience == null
-                                          ? SizedBox.shrink(
-                                              key: ValueKey(
-                                                'craft-unknown-exp:${quote.recipeName}',
-                                              ),
-                                            )
-                                          : _metric(
-                                              context,
-                                              'EXP',
-                                              '${experience.estimated ? '~' : ''}${_quantity(experience.value)}',
-                                              valueFontSize: 18,
-                                              valueFontWeight: FontWeight.w600,
-                                              labelFontSize:
-                                                  OpportunitiesVisualSpec
-                                                      .cardLabelFontSize,
-                                              color: OpportunitiesVisualSpec
-                                                  .experienceColor,
-                                            ),
-                                  ],
-                                ),
-                              ],
-                            ),
-                          ),
-                          DecoratedBox(
-                            key: ValueKey('craft-footer:${quote.recipeName}'),
-                            decoration: OpportunitiesVisualSpec.recipeFooter,
-                            child: Padding(
-                              padding: const EdgeInsets.fromLTRB(16, 7, 16, 10),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.stretch,
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  _MetricColumns(
-                                    children: [
-                                      _market(
-                                        context,
-                                        controller.outputMarketFor(
-                                          quote.recipeName,
-                                          mode: use?.mode,
-                                        ),
-                                        controller.clock(),
-                                        maxAge: controller.cachedMarketMaxAge,
-                                        valueFontSize: OpportunitiesVisualSpec
-                                            .cardSecondaryValueFontSize,
-                                        labelFontSize: OpportunitiesVisualSpec
-                                            .cardLabelFontSize,
-                                      ),
-                                      _metric(
-                                        context,
-                                        use == null
-                                            ? 'Investment'
-                                            : 'Other costs / item',
-                                        _estimateValue(
-                                          _silver(
-                                            use == null
-                                                ? quote.totalCost
-                                                : use.otherInputCost == null
-                                                ? null
-                                                : use.otherInputCost! /
-                                                      use.selectedQuantity,
-                                          ),
-                                          estimated,
-                                        ),
-                                        valueFontSize: OpportunitiesVisualSpec
-                                            .cardSecondaryValueFontSize,
-                                        labelFontSize: OpportunitiesVisualSpec
-                                            .cardLabelFontSize,
-                                        color: spec.palette.textMuted,
-                                      ),
-                                    ],
-                                  ),
-                                  if (note != null) ...[
-                                    const SizedBox(height: 12),
-                                    Text(
-                                      note,
-                                      style: spec.typography.meta.copyWith(
-                                        fontSize: OpportunitiesVisualSpec
-                                            .cardLabelFontSize,
-                                        color: spec.palette.warning,
-                                      ),
-                                    ),
-                                  ],
-                                ],
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ],
+          decoration: OpportunityGlassFinish.of(context).card,
+          child: OpportunityCraftCardFinish(
+            artworkRail: false,
+            child: InkWell(
+              onTap: toggleCalculation,
+              borderRadius: BorderRadius.circular(8),
+              hoverColor: spec.palette.primary.withAlpha(12),
+              focusColor: spec.palette.primary.withAlpha(28),
+              child: Padding(
+                padding: const EdgeInsets.all(
+                  OpportunitiesVisualSpec.craftCardPadding,
+                ),
+                child: _bestUseCardContent(
+                  context,
+                  controller,
+                  resolvedUse,
+                  expanded: _bestUseExpanded,
+                  onToggle: toggleCalculation,
+                ),
               ),
             ),
           ),
@@ -689,55 +635,6 @@ double? _craftRevenue(
     ? quote.listingRevenue
     : quote.buyerRevenue;
 
-String _craftScope(
-  OpportunitiesController controller,
-  OpportunityQuote quote, {
-  Recipe? recipe,
-}) {
-  final formula = (recipe ?? controller.recipes[quote.recipeName])
-      ?.resolveVariant(quote.selectedVariantId);
-  final batch = quote.batchMultiplier > 1 || (formula?.baseOutput ?? 1) > 1;
-  final output = quote.expectedOutput == null
-      ? '—'
-      : _quantity(quote.expectedOutput!);
-  if (quote.crafts > 1) {
-    return '${quote.crafts} ${batch ? 'batches' : 'crafts'} · $output items';
-  }
-  return batch ? '$output items per batch' : '';
-}
-
-String? _craftCardNote(
-  OpportunitiesController controller,
-  OpportunityQuote quote, {
-  Recipe? recipe,
-}) {
-  final outputId =
-      recipe?.marketId ??
-      controller.recipes[quote.recipeName]?.marketId ??
-      controller.catalog.bundledMarketId(quote.recipeName);
-  if (outputId != null && !isOpportunityMarketRequestEligible(outputId)) {
-    return 'Not sold on the market';
-  }
-  if (quote.profitFor(controller.craftSaleMode) == null) {
-    if (quote.issues.contains(OpportunityIssue.invalidSalePrice)) return null;
-    if (quote.issues.contains(OpportunityIssue.outputUnlisted)) {
-      return 'Cannot list this item';
-    }
-    if (quote.ingredients.any((item) => item.costForCalculation == null)) {
-      if (quote.ingredients.any(
-        (item) =>
-            item.costForCalculation == null && _ingredientIsNonMarket(item),
-      )) {
-        return 'Some ingredients are not sold on the market';
-      }
-      return 'Some prices are missing';
-    }
-    return 'Check prices';
-  }
-
-  return null;
-}
-
 Widget _craftSummary(
   BuildContext context,
   OpportunitiesController controller,
@@ -747,81 +644,111 @@ Widget _craftSummary(
   OpportunityRecipeInspection? inspection,
 }) {
   final palette = context.visualTheme.palette;
-  final total = quote.profitFor(controller.craftSaleMode);
+  final total = quote.cashProfitFor(controller.craftSaleMode);
   return KeyedSubtree(
     key: key,
-    child: _MetricColumns(
+    child: Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        _metric(
-          context,
-          'Profit',
-          _estimateValue(_silver(total), quote.hasEstimatedInputs),
-          estimateExplanation: _quoteEstimateExplanation(quote),
-          color: total == null
-              ? palette.textMuted
-              : total > 0
-              ? palette.success
-              : palette.danger,
-          large: true,
-          detailsKey: const ValueKey('craft-calculation-info'),
-          detailsLabel: 'About this calculation',
-          onDetails: showDetails
-              ? () => _craftAbout(
+        ...[
+          Row(
+            children: [
+              Expanded(
+                child: Text(
+                  'Craft & sell',
+                  style: context.visualTheme.typography.body.copyWith(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+              OpportunityButton.icon(
+                key: const ValueKey('craft-calculation-info'),
+                icon: const Icon(Icons.info_outline, size: 17),
+                semanticLabel: 'About this calculation',
+                onPressed: () => _craftAbout(
                   context,
                   controller,
                   quote,
                   inspection: inspection,
-                )
-              : null,
-        ),
-        _market(
-          context,
-          inspection == null
-              ? controller.outputMarketFor(quote.recipeName)
-              : quote.outputMarket,
-          controller.clock(),
-          large: true,
-          maxAge: controller.cachedMarketMaxAge,
-          onDetails: showDetails
-              ? () => _withMarketDepth(
-                  controller,
-                  [
-                    ?(inspection == null
-                            ? controller.outputMarketFor(quote.recipeName)
-                            : quote.outputMarket)
-                        ?.itemId,
-                  ],
-                  () => _dialog(
-                    context,
-                    'Market details',
-                    (context) => AnimatedBuilder(
-                      animation: controller,
-                      builder: (context, _) => Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          _marketDepthStatus(context, controller),
-                          _bookDetails(
-                            context,
-                            inspection == null
+                ),
+              ),
+            ],
+          ),
+          Text(
+            'After tax and investment',
+            style: context.visualTheme.typography.meta,
+          ),
+          const SizedBox(height: 8),
+        ],
+        _MetricColumns(
+          children: [
+            _metric(
+              context,
+              '',
+              _estimateValue(_silver(total), quote.hasEstimatedInputs),
+              silverAmount: total,
+              estimateExplanation: _quoteEstimateExplanation(quote),
+              color: total == null
+                  ? palette.textMuted
+                  : total > 0
+                  ? palette.success
+                  : palette.danger,
+              large: true,
+              valueFontSize: 18,
+            ),
+            _market(
+              context,
+              inspection == null
+                  ? controller.outputMarketFor(quote.recipeName)
+                  : quote.outputMarket,
+              controller.clock(),
+              maxAge: controller.cachedMarketMaxAge,
+              onDetails: showDetails
+                  ? () => _withMarketDepth(
+                      controller,
+                      [
+                        ?(inspection == null
                                 ? controller.outputMarketFor(quote.recipeName)
-                                : controller
-                                      .inspectRecipe(
-                                        recipe: inspection.recipe,
-                                        itemName: inspection.itemName,
-                                        selectedVariantId:
-                                            quote.selectedVariantId,
+                                : quote.outputMarket)
+                            ?.itemId,
+                      ],
+                      () => _dialog(
+                        context,
+                        'Market details',
+                        (context) => AnimatedBuilder(
+                          animation: controller,
+                          builder: (context, _) => Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              _marketDepthStatus(context, controller),
+                              _bookDetails(
+                                context,
+                                inspection == null
+                                    ? controller.outputMarketFor(
+                                        quote.recipeName,
                                       )
-                                      .quote
-                                      .outputMarket,
-                            controller.clock(),
-                            maxAge: controller.cachedMarketMaxAge,
+                                    : controller
+                                          .inspectRecipe(
+                                            recipe: inspection.recipe,
+                                            itemName: inspection.itemName,
+                                            selectedVariantId:
+                                                quote.selectedVariantId,
+                                          )
+                                          .quote
+                                          .outputMarket,
+                                controller.clock(),
+                                maxAge: controller.cachedMarketMaxAge,
+                              ),
+                            ],
                           ),
-                        ],
+                        ),
                       ),
-                    ),
-                  ),
-                )
-              : null,
+                    )
+                  : null,
+            ),
+          ],
         ),
       ],
     ),
@@ -833,16 +760,8 @@ class _ExchangePane extends StatelessWidget {
   final OpportunitiesController controller;
   @override
   Widget build(BuildContext context) {
-    final p = controller.preferences;
     final spec = context.visualTheme;
     final currency = controller.currency;
-    final search = p.exchangeSearch.trim().toLowerCase();
-    final currencies = exchangeCatalog
-        .where(
-          (item) =>
-              search.isEmpty || item.item.name.toLowerCase().contains(search),
-        )
-        .toList();
     final quotes = controller.exchangeQuotes;
     final repeatable =
         quotes.where((quote) => quote.route.limit.isRepeatable).toList()..sort(
@@ -863,7 +782,7 @@ class _ExchangePane extends StatelessWidget {
               controller: controller,
               name: currency.item.name,
               stableId: 'exchange-selected:${currency.id}',
-              child: _exchangeIcon(currency.item, 48),
+              child: _exchangeIcon(controller, currency.item, 48),
             ),
             const SizedBox(width: 12),
             Expanded(
@@ -893,7 +812,7 @@ class _ExchangePane extends StatelessWidget {
           controller.owned.toDouble(),
           (value) =>
               controller.change((p) => p.owned[currency.id] = value.toInt()),
-          width: 150,
+          width: 150 * MediaQuery.textScalerOf(context).scale(14) / 14,
           integer: true,
         );
         if (constraints.maxWidth >=
@@ -912,41 +831,6 @@ class _ExchangePane extends StatelessWidget {
         );
       },
     );
-    final currencyPicker = Wrap(
-      key: const ValueKey('exchange-currency-picker'),
-      spacing: 8,
-      runSpacing: 8,
-      children: [
-        for (final item in currencies)
-          Tooltip(
-            message: item.item.name,
-            child: SizedBox.square(
-              dimension: 68,
-              child: OpportunityButton(
-                key: ValueKey('exchange-currency-${item.id}'),
-                selected: item.id == currency.id,
-                role: AppButtonRole.optionPill,
-                semanticLabel: item.item.name,
-                padding: const EdgeInsets.all(4),
-                onPressed: () =>
-                    controller.change((p) => p.currencyId = item.id),
-                child: _exchangeIcon(item.item, 56),
-              ),
-            ),
-          ),
-      ],
-    );
-    final searchField = SizedBox(
-      width: 230,
-      child: _TextInput(
-        key: const ValueKey('exchange-search'),
-        label: 'Find an exchange item',
-        value: p.exchangeSearch,
-        onChanged: (value) =>
-            controller.change((p) => p.exchangeSearch = value),
-        prefix: const Icon(Icons.search, size: 18),
-      ),
-    );
     return ListView(
       key: PageStorageKey('exchange-${currency.id}'),
       children: [
@@ -954,36 +838,20 @@ class _ExchangePane extends StatelessWidget {
           key: const ValueKey('exchange-toolbar'),
           role: AppSurfaceRole.panel,
           padding: const EdgeInsets.all(14),
-          child: LayoutBuilder(
-            builder: (context, constraints) {
-              if (constraints.maxWidth < 1060) {
-                return Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    searchField,
-                    const SizedBox(height: 14),
-                    currencyPicker,
-                  ],
-                );
-              }
-              return Row(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  searchField,
-                  const SizedBox(width: 14),
-                  Expanded(child: currencyPicker),
-                ],
-              );
-            },
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              identity,
+              const SizedBox(height: 10),
+              Align(
+                alignment: Alignment.centerLeft,
+                child: _ExchangeCurrencyChooser(controller: controller),
+              ),
+            ],
           ),
         ),
-        const SizedBox(height: 12),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 12),
-          child: identity,
-        ),
-        const SizedBox(height: 24),
+        const SizedBox(height: 20),
         _DeskSection(
           title: 'Repeatable',
           meta: '${repeatable.length}',
@@ -993,7 +861,6 @@ class _ExchangePane extends StatelessWidget {
             'Values are per item. Enter a balance only if you want totals.',
             'Only whole exchanges count. Leftover items stay in your balance.',
             'Market rewards use the listing price after tax. NPC rewards use their shop value.',
-            'Some rewards cannot be sold. They stay visible, without an invented silver value.',
             'Limited exchanges need you to confirm how many are still available. The app cannot read your account.',
           ]),
         ),
@@ -1029,6 +896,99 @@ class _ExchangePane extends StatelessWidget {
   }
 }
 
+class _ExchangeCurrencyChooser extends StatelessWidget {
+  const _ExchangeCurrencyChooser({required this.controller});
+  final OpportunitiesController controller;
+
+  @override
+  Widget build(BuildContext context) => AnchoredPopover(
+    overlayId: 'exchange-currency',
+    preferredWidth: 440,
+    maximumHeight: 510,
+    popoverBuilder: (context, close) => AnimatedBuilder(
+      animation: controller,
+      builder: (context, _) {
+        final search = controller.preferences.exchangeSearch
+            .trim()
+            .toLowerCase();
+        final items = exchangeCatalog
+            .where(
+              (currency) =>
+                  search.isEmpty ||
+                  currency.item.name.toLowerCase().contains(search),
+            )
+            .toList();
+        return OpportunitySurface(
+          role: AppSurfaceRole.popup,
+          padding: const EdgeInsets.all(10),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              _TextInput(
+                key: const ValueKey('exchange-search'),
+                label: 'Find an exchange item',
+                value: controller.preferences.exchangeSearch,
+                onChanged: (value) =>
+                    controller.change((p) => p.exchangeSearch = value),
+                prefix: const Icon(Icons.search, size: 18),
+              ),
+              const SizedBox(height: 10),
+              Flexible(
+                child: ListView.separated(
+                  key: const ValueKey('exchange-currency-picker'),
+                  shrinkWrap: true,
+                  itemCount: items.length,
+                  separatorBuilder: (_, _) => const SizedBox(height: 4),
+                  itemBuilder: (context, index) {
+                    final currency = items[index];
+                    return OpportunityButton(
+                      key: ValueKey('exchange-currency-${currency.id}'),
+                      role: AppButtonRole.infoChip,
+                      selected: currency.id == controller.currency.id,
+                      semanticLabel: currency.item.name,
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 10,
+                        vertical: 8,
+                      ),
+                      onPressed: () {
+                        controller.change((p) => p.currencyId = currency.id);
+                        close();
+                      },
+                      child: Row(
+                        children: [
+                          _exchangeIcon(controller, currency.item, 36),
+                          const SizedBox(width: 12),
+                          Expanded(child: Text(currency.item.name)),
+                          if (currency.id == controller.currency.id)
+                            const Icon(Icons.check, size: 18),
+                        ],
+                      ),
+                    );
+                  },
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    ),
+    anchorBuilder: (context, toggle, showing) => OpportunityButton(
+      key: const ValueKey('exchange-choose-item'),
+      role: AppButtonRole.infoChip,
+      selected: showing,
+      onPressed: toggle,
+      child: const Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text('Change item'),
+          SizedBox(width: 8),
+          Icon(Icons.expand_more, size: 18),
+        ],
+      ),
+    ),
+  );
+}
+
 class _DeskSection extends StatelessWidget {
   const _DeskSection({required this.title, required this.meta, this.trailing});
   final String title;
@@ -1059,10 +1019,21 @@ class _ExchangeCard extends StatelessWidget {
         ? route.rewards.single.item
         : null;
     final note = _exchangeCardNote(quote);
+    final hasValue = _showExchangeValue(quote);
+    final hasStock =
+        marketReward?.marketable == true &&
+        controller.market.items['${marketReward!.id}']?.stockFor(
+              controller.clock(),
+              controller.cachedMarketMaxAge,
+            ) !=
+            null;
     void open() => _exchangeDetails(context, controller, quote);
     return OpportunityCardMotion(
       child: OpportunitySurface(
         role: AppSurfaceRole.card,
+        decoration: OpportunityGlassFinish.of(
+          context,
+        ).card.copyWith(boxShadow: const []),
         padding: EdgeInsets.zero,
         child: InkWell(
           onTap: open,
@@ -1087,11 +1058,19 @@ class _ExchangeCard extends StatelessWidget {
                               padding: const EdgeInsets.only(bottom: 10),
                               child: Row(
                                 children: [
-                                  _exchangeIcon(container, 48),
-                                  const SizedBox(width: 14),
+                                  OpportunityItemMount(
+                                    size: 56,
+                                    child: _exchangeIcon(
+                                      controller,
+                                      container,
+                                      48,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 10),
                                   Expanded(
-                                    child: OpportunityCopyName(
-                                      name: container.name,
+                                    child: _exchangeName(
+                                      controller,
+                                      container,
                                       style: spec.typography.body.copyWith(
                                         fontSize: OpportunitiesVisualSpec
                                             .cardNameFontSize,
@@ -1108,25 +1087,37 @@ class _ExchangeCard extends StatelessWidget {
                               child: Row(
                                 children: [
                                   if (reward.item case final item?)
-                                    _exchangeIcon(item, 48)
+                                    OpportunityItemMount(
+                                      size: 56,
+                                      child: _exchangeIcon(
+                                        controller,
+                                        item,
+                                        48,
+                                      ),
+                                    )
                                   else
                                     Icon(
                                       Icons.auto_awesome_outlined,
                                       size: 30,
                                       color: spec.palette.textMuted,
                                     ),
-                                  const SizedBox(width: 14),
+                                  const SizedBox(width: 10),
                                   Expanded(
-                                    child: OpportunityCopyName(
-                                      name: reward.name,
-                                      displayLabel:
-                                          '${route.rewardContainer != null ? 'Contains ' : ''}${reward.quantity > 1 ? '${_quantity(reward.quantity.toDouble())}× ' : ''}${reward.name}',
-                                      style: spec.typography.body.copyWith(
-                                        fontSize: OpportunitiesVisualSpec
-                                            .cardNameFontSize,
-                                        fontWeight: FontWeight.w700,
-                                      ),
-                                    ),
+                                    child: reward.item == null
+                                        ? OpportunityCopyName(name: reward.name)
+                                        : _exchangeName(
+                                            controller,
+                                            reward.item!,
+                                            displayLabel:
+                                                '${route.rewardContainer != null ? 'Contains ' : ''}${reward.quantity > 1 ? '${_quantity(reward.quantity.toDouble())}× ' : ''}${reward.name}',
+                                            style: spec.typography.body
+                                                .copyWith(
+                                                  fontSize:
+                                                      OpportunitiesVisualSpec
+                                                          .cardNameFontSize,
+                                                  fontWeight: FontWeight.w700,
+                                                ),
+                                          ),
                                   ),
                                 ],
                               ),
@@ -1152,53 +1143,55 @@ class _ExchangeCard extends StatelessWidget {
                     ),
                   )
                 else
-                  OpportunityCopyName(
-                    name: quote.currency.item.name,
+                  _exchangeName(
+                    controller,
+                    quote.currency.item,
                     displayLabel:
                         '${_quantity(route.inputCount.toDouble())} ${quote.currency.item.name}',
                     style: spec.typography.meta.copyWith(
                       fontSize: OpportunitiesVisualSpec.cardLabelFontSize,
                     ),
                   ),
-                const SizedBox(height: 14),
-                _MetricColumns(
-                  children: [
-                    _metric(
-                      context,
-                      quote.isReference ? 'Value' : 'Total value',
-                      _silver(display.netProceeds),
-                      large: true,
-                      valueFontSize:
-                          OpportunitiesVisualSpec.cardPrimaryValueFontSize,
-                      valueFontWeight: FontWeight.w600,
-                      labelFontSize: OpportunitiesVisualSpec.cardLabelFontSize,
-                      color: display.isRankable
-                          ? spec.palette.success
-                          : spec.palette.textMuted,
-                      estimateExplanation: _exchangeValueHelp(quote),
-                    ),
-                    _metric(
-                      context,
-                      _exchangeUnitLabel(quote.currency),
-                      _silver(display.valuePerCurrency),
-                      valueFontSize:
-                          OpportunitiesVisualSpec.cardSecondaryValueFontSize,
-                      labelFontSize: OpportunitiesVisualSpec.cardLabelFontSize,
-                    ),
-                    if (marketReward?.marketable == true)
-                      _market(
-                        context,
-                        controller.market.items['${marketReward!.id}'],
-                        controller.clock(),
-                        large: true,
-                        maxAge: controller.cachedMarketMaxAge,
-                        valueFontSize:
-                            OpportunitiesVisualSpec.cardSecondaryValueFontSize,
-                        labelFontSize:
-                            OpportunitiesVisualSpec.cardLabelFontSize,
-                      ),
-                  ],
-                ),
+                if (hasValue || hasStock) ...[
+                  const SizedBox(height: 14),
+                  _MetricColumns(
+                    children: [
+                      if (hasValue)
+                        _metric(
+                          context,
+                          quote.isReference ? 'Value' : 'Total value',
+                          _silver(display.netProceeds),
+                          large: true,
+                          valueFontSize:
+                              OpportunitiesVisualSpec.cardPrimaryValueFontSize,
+                          valueFontWeight: FontWeight.w600,
+                          labelFontSize:
+                              OpportunitiesVisualSpec.cardLabelFontSize,
+                          color: display.isRankable
+                              ? spec.palette.success
+                              : spec.palette.textMuted,
+                          estimateExplanation: _exchangeValueHelp(quote),
+                        ),
+                      if (hasValue)
+                        _metric(
+                          context,
+                          _exchangeUnitLabel(quote.currency),
+                          _silver(display.valuePerCurrency),
+                          valueFontSize: OpportunitiesVisualSpec
+                              .cardSecondaryValueFontSize,
+                          labelFontSize:
+                              OpportunitiesVisualSpec.cardLabelFontSize,
+                        ),
+                      if (hasStock)
+                        _market(
+                          context,
+                          controller.market.items['${marketReward.id}'],
+                          controller.clock(),
+                          maxAge: controller.cachedMarketMaxAge,
+                        ),
+                    ],
+                  ),
+                ],
                 if (!quote.isReference) ...[
                   const SizedBox(height: 10),
                   Text(
@@ -1245,12 +1238,11 @@ class _ExchangeCard extends StatelessWidget {
 String? _exchangeCardNote(ExchangeQuote quote) {
   if (quote.hasListingEstimate) return null;
   return switch (quote.availability) {
-    ExchangeAvailability.available =>
-      quote.hasUnpricedRewards ? 'Silver value unavailable' : null,
+    ExchangeAvailability.available => null,
     ExchangeAvailability.confirmationNeeded => null,
     ExchangeAvailability.limitReached => 'None remaining',
     ExchangeAvailability.notEnoughCurrency => 'Not enough items',
-    ExchangeAvailability.marketUnknown => 'Check prices',
+    ExchangeAvailability.marketUnknown => null,
     ExchangeAvailability.notEnoughBuyers => 'Would need to be listed',
   };
 }
@@ -1332,32 +1324,48 @@ Widget _itemIcon(
     name: name,
     size: size,
     searchAcrossModes: true,
-    showFrame: false,
-    fit: framed ? BoxFit.contain : BoxFit.cover,
+    fit: BoxFit.contain,
   );
-  return RecipeBookItemInfoHover(
+  final preview = RecipeBookItemInfoHover(
     controller: controller.itemInfoController,
     name: name,
     mode: mode ?? controller.modeController.mode,
-    child: framed
-        ? DecoratedBox(
-            key: ValueKey('craft-artwork-frame:$name'),
-            decoration: BoxDecoration(
-              color: OpportunitiesVisualSpec.palette.surfaceInset,
-              borderRadius: BorderRadius.circular(9),
-            ),
-            child: Padding(padding: const EdgeInsets.all(9), child: artwork),
-          )
-        : artwork,
+    child: artwork,
   );
+  return framed
+      ? Padding(
+          key: ValueKey('craft-artwork-frame:$name'),
+          padding: const EdgeInsets.all(9),
+          child: preview,
+        )
+      : preview;
 }
 
-Widget _exchangeIcon(ExchangeItem item, double size) => Image.asset(
-  item.iconAsset,
-  width: size,
-  height: size,
-  filterQuality: FilterQuality.high,
-  semanticLabel: item.name,
+Widget _exchangeIcon(
+  OpportunitiesController controller,
+  ExchangeItem item,
+  double size,
+) => _exchangeItemRegion(
+  controller,
+  item,
+  child: _exchangeArtwork(controller, item, size),
+);
+
+Widget _exchangeArtwork(
+  OpportunitiesController controller,
+  ExchangeItem item,
+  double size,
+) => ItemIconFrame(
+  size: size,
+  grade:
+      controller.catalog.itemIconGradeById(item.id) ??
+      controller.catalog.itemIconGrade(item.name),
+  child: Image.asset(
+    item.iconAsset,
+    fit: BoxFit.contain,
+    filterQuality: FilterQuality.high,
+    semanticLabel: item.name,
+  ),
 );
 
 String _quantity(num value) => formatQuantity(value.toDouble());
@@ -1391,7 +1399,11 @@ String? _quoteEstimateExplanation(OpportunityQuote quote) =>
 String? _inputEstimateExplanation(OpportunityIngredientQuote ingredient) =>
     ingredient.estimatedMarketQuantity <= 0
     ? null
-    : '${_quantity(ingredient.estimatedMarketQuantity)} estimated at ${_quantity(ingredient.estimatedUnitPrice!)} silver each. ${ingredient.estimateKind == OpportunityInputEstimateKind.uncheckedDepth ? 'Available sell orders have not been checked.' : 'There is not enough stock for this quantity.'}';
+    : '${_quantity(ingredient.estimatedMarketQuantity)} estimated at ${_quantity(ingredient.estimatedUnitPrice!)} silver each. ${ingredient.estimatedFromPreorder
+          ? 'Highest current preorder; waiting for sellers.'
+          : ingredient.estimateKind == OpportunityInputEstimateKind.uncheckedDepth
+          ? 'Available sell orders have not been checked.'
+          : 'There is not enough stock for this quantity.'}';
 
 Widget _metric(
   BuildContext context,
@@ -1406,9 +1418,13 @@ Widget _metric(
   String? detailsLabel,
   VoidCallback? onDetails,
   String? estimateExplanation,
+  double? silverAmount,
 }) => _MetricValue(
   label: label,
-  value: value,
+  value: silverAmount == null
+      ? value
+      : '${value.startsWith('≈ ') ? '≈ ' : ''}${formatCompactOpportunitySilver(silverAmount)}',
+  silverAmount: silverAmount,
   color: color,
   large: large,
   valueFontSize: valueFontSize,
@@ -1433,6 +1449,7 @@ class _MetricValue extends StatelessWidget {
     this.detailsLabel,
     this.onDetails,
     this.estimateExplanation,
+    this.silverAmount,
   });
   final String label;
   final String value;
@@ -1444,6 +1461,7 @@ class _MetricValue extends StatelessWidget {
   final String? detailsLabel;
   final VoidCallback? onDetails;
   final String? estimateExplanation;
+  final double? silverAmount;
 
   TextStyle valueStyle(BuildContext context) =>
       context.visualTheme.typography.body.copyWith(
@@ -1451,7 +1469,12 @@ class _MetricValue extends StatelessWidget {
         fontWeight:
             valueFontWeight ??
             (large && label != 'Stock' ? FontWeight.w700 : FontWeight.w500),
-        color: color ?? context.visualTheme.palette.text,
+        color: color == null
+            ? context.visualTheme.palette.text
+            : OpportunitiesVisualSpec.readableValueColor(
+                context.visualTheme,
+                color!,
+              ),
       );
 
   double minimumWidth(BuildContext context) {
@@ -1470,23 +1493,22 @@ class _MetricValue extends StatelessWidget {
     mainAxisSize: MainAxisSize.min,
     crossAxisAlignment: CrossAxisAlignment.start,
     children: [
-      Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Flexible(
-            child: Text(
-              label,
-              style: context.visualTheme.typography.body.copyWith(
-                fontSize: labelFontSize,
-                color: context.visualTheme.palette.textMuted,
+      if (label.isNotEmpty)
+        Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Flexible(
+              child: Text(
+                label,
+                style: context.visualTheme.typography.body.copyWith(
+                  fontSize: labelFontSize,
+                  color: context.visualTheme.palette.textMuted,
+                ),
               ),
             ),
-          ),
-          if (onDetails != null) ...[
-            const SizedBox(width: 6),
-            Tooltip(
-              message: detailsLabel ?? label,
-              child: Semantics(
+            if (onDetails != null) ...[
+              const SizedBox(width: 6),
+              Semantics(
                 button: true,
                 label: detailsLabel ?? label,
                 child: InkResponse(
@@ -1499,18 +1521,20 @@ class _MetricValue extends StatelessWidget {
                   ),
                 ),
               ),
-            ),
+            ],
           ],
-        ],
+        ),
+      if (label.isNotEmpty) const SizedBox(height: 3),
+      _estimateHint(
+        value == '—' ? null : estimateExplanation,
+        silverAmount != null
+            ? OpportunitySilverAmount(
+                value: silverAmount,
+                estimated: value.startsWith('≈ '),
+                style: valueStyle(context),
+              )
+            : Text(value, style: valueStyle(context)),
       ),
-      const SizedBox(height: 3),
-      if (estimateExplanation != null && value != '—')
-        Tooltip(
-          message: estimateExplanation!,
-          child: Text(value, style: valueStyle(context)),
-        )
-      else
-        Text(value, style: valueStyle(context)),
     ],
   );
 }
@@ -1523,9 +1547,11 @@ class _MetricColumns extends StatelessWidget {
   Widget build(BuildContext context) => LayoutBuilder(
     builder: (context, constraints) {
       var minimumWidth = MediaQuery.textScalerOf(context).scale(90);
-      for (final child in children) {
-        final value = child is Tooltip ? child.child : child;
+      for (final value in children) {
         if (value is _MetricValue) {
+          minimumWidth = math.max(minimumWidth, value.minimumWidth(context));
+        }
+        if (value is _MarketStockBadge) {
           minimumWidth = math.max(minimumWidth, value.minimumWidth(context));
         }
       }
@@ -1570,7 +1596,7 @@ Widget _ingredientGrid(BuildContext context, List<Widget> cards) =>
   final bids = item?.bookIsFresh(now, maxAge) == true
       ? item?.preorderCount
       : null;
-  final negative = (stock == null || stock == 0) && bids != null && bids > 0;
+  final negative = stock == 0 && bids != null && bids > 0;
   final text = negative
       ? '−${_quantity(bids)}'
       : stock == null
@@ -1579,14 +1605,10 @@ Widget _ingredientGrid(BuildContext context, List<Widget> cards) =>
   return (text, negative);
 }
 
-Widget _market(
+_MarketStockBadge _market(
   BuildContext context,
   OpportunityMarketItem? item,
   DateTime now, {
-  bool large = false,
-  bool compact = false,
-  double? valueFontSize,
-  double? labelFontSize,
   VoidCallback? onDetails,
   Duration maxAge = OpportunitiesController.maxMarketAge,
 }) {
@@ -1596,35 +1618,109 @@ Widget _market(
   final preorders = item?.bookIsFresh(now, maxAge) == true
       ? item?.preorderCount
       : null;
-  return Tooltip(
-    message:
+  return _MarketStockBadge(
+    text: text,
+    color: negative
+        ? spec.palette.danger
+        : stock != null && stock > 0
+        ? spec.palette.success
+        : spec.palette.textMuted,
+    semanticDescription:
         'Stock: ${stock == null ? 'Not checked' : _quantity(stock)}\nPreorders: ${preorders == null ? 'Not checked' : _quantity(preorders)}${negative ? '\nThe red negative count shows preorders when nothing is listed.' : ''}',
-    child: compact
-        ? Semantics(
-            label: 'Stock: $text',
-            excludeSemantics: true,
-            child: Text(
-              text,
-              style: spec.typography.body.copyWith(
-                fontSize: 18,
-                fontWeight: FontWeight.w600,
-                color: negative ? spec.palette.danger : spec.palette.textMuted,
-              ),
-            ),
-          )
-        : _metric(
-            context,
-            'Stock',
-            text,
-            color: negative ? spec.palette.danger : spec.palette.textMuted,
-            large: large,
-            valueFontSize: valueFontSize,
-            labelFontSize: labelFontSize,
-            detailsKey: const ValueKey('craft-market-details'),
-            detailsLabel: 'Market details',
-            onDetails: onDetails,
-          ),
+    onDetails: onDetails,
   );
+}
+
+// One content-sized stock treatment for outputs, ingredients and substitutes.
+class _MarketStockBadge extends StatelessWidget {
+  const _MarketStockBadge({
+    required this.text,
+    required this.color,
+    required this.semanticDescription,
+    this.textKey,
+    this.onDetails,
+  });
+  final String text;
+  final Color color;
+  final String semanticDescription;
+  final Key? textKey;
+  final VoidCallback? onDetails;
+  TextStyle _valueStyle(BuildContext context) =>
+      context.visualTheme.typography.body.copyWith(
+        fontSize: 16,
+        fontWeight: FontWeight.w700,
+        color: OpportunitiesVisualSpec.readableValueColor(
+          context.visualTheme,
+          color,
+        ),
+      );
+  double minimumWidth(BuildContext context) {
+    final painter = TextPainter(
+      text: TextSpan(text: 'Stock $text', style: _valueStyle(context)),
+      textScaler: MediaQuery.textScalerOf(context),
+      textDirection: Directionality.of(context),
+    )..layout();
+    final width =
+        painter.width.ceilToDouble() + 18 + (onDetails == null ? 0 : 27);
+    painter.dispose();
+    return width;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Align(
+      alignment: Alignment.centerLeft,
+      widthFactor: 1,
+      child: DecoratedBox(
+        key: const ValueKey('market-stock-badge'),
+        decoration: BoxDecoration(
+          color: color.withAlpha(25),
+          border: Border.all(color: color.withAlpha(95)),
+          borderRadius: BorderRadius.circular(5),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+          child: Wrap(
+            spacing: 4,
+            runSpacing: 2,
+            crossAxisAlignment: WrapCrossAlignment.center,
+            children: [
+              Semantics(
+                label: semanticDescription,
+                excludeSemantics: true,
+                child: Text(
+                  'Stock $text',
+                  key: textKey,
+                  style: _valueStyle(context),
+                ),
+              ),
+              if (onDetails != null)
+                Semantics(
+                  button: true,
+                  label: 'Market details',
+                  child: InkResponse(
+                    key: const ValueKey('craft-market-details'),
+                    onTap: onDetails,
+                    radius: 16,
+                    child: Padding(
+                      padding: const EdgeInsets.all(3),
+                      child: Icon(
+                        Icons.info_outline,
+                        size: 17,
+                        color: OpportunitiesVisualSpec.readableValueColor(
+                          context.visualTheme,
+                          color,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
 }
 
 Widget _sales(BuildContext context, OpportunityMarketItem? item, DateTime now) {
@@ -1675,6 +1771,7 @@ Widget _cardList(
   double minimumCardWidth = 420,
   double maximumCardWidth = 560,
   int maximumColumns = 3,
+  bool independentColumns = false,
 }) => LayoutBuilder(
   builder: (context, constraints) {
     final scale = MediaQuery.textScalerOf(context).scale(16) / 16;
@@ -1696,44 +1793,86 @@ Widget _cardList(
     final gridWidth =
         gridColumns * cardWidth + math.max(0, gridColumns - 1) * 14;
     final sidePadding = math.max(0.0, (constraints.maxWidth - gridWidth) / 2);
-    return CustomScrollView(
-      key: PageStorageKey(keyName),
-      slivers: [
-        SliverToBoxAdapter(child: header),
-        SliverPadding(
-          padding: EdgeInsets.fromLTRB(sidePadding, 1, sidePadding, 20),
-          sliver: SliverList(
-            delegate: SliverChildBuilderDelegate(
-              (context, row) => Padding(
-                padding: const EdgeInsets.only(bottom: 14),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    for (var column = 0; column < gridColumns; column++) ...[
-                      if (column > 0) const SizedBox(width: 14),
-                      SizedBox(
-                        width: cardWidth,
-                        child: row * columns + column < count
-                            ? Align(
-                                alignment: Alignment.topLeft,
-                                child: ConstrainedBox(
-                                  constraints: BoxConstraints(
-                                    maxWidth: maximumCardWidth * scale,
+    return FocusTraversalGroup(
+      policy: OrderedTraversalPolicy(),
+      child: CustomScrollView(
+        key: PageStorageKey(keyName),
+        slivers: [
+          SliverToBoxAdapter(child: header),
+          SliverPadding(
+            padding: EdgeInsets.fromLTRB(sidePadding, 1, sidePadding, 20),
+            sliver: independentColumns && gridColumns > 0
+                ? SliverCrossAxisGroup(
+                    slivers: [
+                      for (var column = 0; column < gridColumns; column++) ...[
+                        if (column > 0)
+                          const SliverConstrainedCrossAxis(
+                            maxExtent: 14,
+                            sliver: SliverToBoxAdapter(
+                              child: SizedBox.shrink(),
+                            ),
+                          ),
+                        SliverCrossAxisExpanded(
+                          flex: 1,
+                          sliver: SliverList.builder(
+                            itemCount: ((count - column) / columns).ceil(),
+                            itemBuilder: (context, row) {
+                              final index = row * columns + column;
+                              return Padding(
+                                padding: const EdgeInsets.only(bottom: 14),
+                                child: Semantics(
+                                  sortKey: OrdinalSortKey(index.toDouble()),
+                                  child: FocusTraversalOrder(
+                                    order: NumericFocusOrder(index.toDouble()),
+                                    child: builder(index),
                                   ),
-                                  child: builder(row * columns + column),
                                 ),
-                              )
-                            : const SizedBox.shrink(),
-                      ),
+                              );
+                            },
+                          ),
+                        ),
+                      ],
                     ],
-                  ],
-                ),
-              ),
-              childCount: (count / columns).ceil(),
-            ),
+                  )
+                : SliverList(
+                    delegate: SliverChildBuilderDelegate(
+                      (context, row) => Padding(
+                        padding: const EdgeInsets.only(bottom: 14),
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            for (
+                              var column = 0;
+                              column < gridColumns;
+                              column++
+                            ) ...[
+                              if (column > 0) const SizedBox(width: 14),
+                              SizedBox(
+                                width: cardWidth,
+                                child: row * columns + column < count
+                                    ? Align(
+                                        alignment: Alignment.topLeft,
+                                        child: ConstrainedBox(
+                                          constraints: BoxConstraints(
+                                            maxWidth: maximumCardWidth * scale,
+                                          ),
+                                          child: builder(
+                                            row * columns + column,
+                                          ),
+                                        ),
+                                      )
+                                    : const SizedBox.shrink(),
+                              ),
+                            ],
+                          ],
+                        ),
+                      ),
+                      childCount: (count / columns).ceil(),
+                    ),
+                  ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   },
 );
@@ -1863,27 +2002,30 @@ class _TextInputState extends State<_TextInput> {
     mainAxisSize: MainAxisSize.min,
     crossAxisAlignment: CrossAxisAlignment.start,
     children: [
-      OpportunityTextField(
-        controller: text,
-        focusNode: focus,
-        label: widget.numeric ? widget.label : null,
-        hintText: !widget.numeric && !focus.hasFocus ? widget.label : null,
-        semanticLabel: widget.label,
-        flat: !widget.numeric,
-        prefixIcon: widget.prefix,
-        onChanged: _changed,
-        keyboardType: widget.numeric
-            ? TextInputType.number
-            : TextInputType.text,
-        inputFormatters: widget.numeric
-            ? [
-                FilteringTextInputFormatter.allow(
-                  RegExp(widget.integer ? r'[0-9]' : r'[0-9.,]'),
-                ),
-              ]
-            : null,
-        minimumHeight: 40,
-      ),
+      if (widget.numeric)
+        _OpportunityNumberInput(
+          label: widget.label,
+          controller: text,
+          focusNode: focus,
+          onChanged: _changed,
+          inputFormatters: [
+            FilteringTextInputFormatter.allow(
+              RegExp(widget.integer ? r'[0-9]' : r'[0-9.,]'),
+            ),
+          ],
+        )
+      else
+        OpportunityTextField(
+          controller: text,
+          focusNode: focus,
+          hintText: !focus.hasFocus ? widget.label : null,
+          semanticLabel: widget.label,
+          flat: true,
+          prefixIcon: widget.prefix,
+          onChanged: _changed,
+          keyboardType: TextInputType.text,
+          minimumHeight: 40,
+        ),
       if (invalid)
         Padding(
           padding: const EdgeInsets.only(top: 4),
@@ -2009,18 +2151,11 @@ Future<void> _dialog(
                     child:
                         titleBuilder?.call(context) ??
                         (copyTitleName == null
-                            ? Text(
-                                title,
-                                style: spec.typography.section.copyWith(
-                                  fontSize: 26,
-                                ),
-                              )
+                            ? Text(title, style: ItemDetailStyle.title(spec))
                             : OpportunityCopyName(
                                 name: copyTitleName,
                                 displayLabel: title,
-                                style: spec.typography.section.copyWith(
-                                  fontSize: 26,
-                                ),
+                                style: ItemDetailStyle.title(spec),
                               )),
                   ),
                   OpportunityButton.icon(
@@ -2030,7 +2165,7 @@ Future<void> _dialog(
                   ),
                 ],
               ),
-              const SizedBox(height: 18),
+              const SizedBox(height: ItemDetailStyle.sectionGap),
               Flexible(
                 child: scrollBody
                     ? SingleChildScrollView(child: body(context))
@@ -2058,16 +2193,22 @@ Future<void> _craftDetails(
   OpportunitiesController controller,
   OpportunityQuote initial, {
   OpportunityBestUseQuote? bestUse,
+  Recipe? rootRecipe,
+  bool rareOutput = false,
 }) async {
   final pages = ValueNotifier<List<_IngredientRecipe>>([]);
+  final edits = ValueNotifier<int>(0);
   final rootPage = _IngredientRecipe(
     initial.recipeName,
-    bestUse?.recipe ?? controller.recipes[initial.recipeName]!,
+    bestUse?.recipe ?? rootRecipe ?? controller.recipes[initial.recipeName]!,
     root: true,
+    rare: rareOutput,
     bestUse: bestUse,
   );
-  if (bestUse != null) {
+  if (bestUse != null || rootRecipe != null) {
     rootPage.variantId = initial.selectedVariantId;
+  }
+  if (bestUse != null) {
     rootPage.choices.addAll(bestUse.ingredientChoices);
   }
   final scrollPositions = PageStorageBucket();
@@ -2094,7 +2235,9 @@ Future<void> _craftDetails(
       controller.setInspectedRecipe(
         rootPage.recipe,
         itemName: initial.recipeName,
-        selectedVariantId: rootPage.variantId ?? quote.selectedVariantId,
+        selectedVariantId: rootPage.formulaChosen
+            ? rootPage.variantId
+            : rootPage.variantId ?? quote.selectedVariantId,
       );
     }
   }
@@ -2167,6 +2310,9 @@ Future<void> _craftDetails(
                   controller: controller,
                   selected: selected ?? rootPage,
                   onOpen: openRecipe,
+                  edits: edits,
+                  allowInventory: bestUse == null,
+                  compact: bestUse != null,
                 ),
               ),
             );
@@ -2174,101 +2320,123 @@ Future<void> _craftDetails(
         ),
       ),
       scrollBody: false,
-      maxWidth: 1120,
+      maxWidth: bestUse == null ? 1280 : 1000,
       onBack: goBack,
       titleBuilder: (context) =>
           ValueListenableBuilder<List<_IngredientRecipe>>(
             valueListenable: pages,
-            builder: (context, history, _) {
-              final selected = history.lastOrNull;
-              final name = selected?.itemName ?? initial.recipeName;
-              return Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  Row(
-                    children: [
-                      if (selected != null) ...[
-                        OpportunityButton.icon(
-                          key: const ValueKey('ingredient-recipe-back'),
-                          icon: const Icon(Icons.arrow_back, size: 22),
-                          semanticLabel: 'Back to previous recipe',
-                          tooltip: 'Back · Left arrow',
-                          onPressed: goBack,
-                        ),
-                        const SizedBox(width: 8),
-                      ],
-                      Expanded(
-                        child: OpportunityItemRegion(
-                          controller: controller,
-                          name: name,
-                          stableId: 'opportunity-title:$name',
-                          resolvePlannerTarget: () {
-                            if (selected != null) {
-                              return _ingredientPlannerTarget(
-                                controller,
-                                selected,
-                              );
-                            }
-                            if (bestUse != null) {
-                              return _ingredientPlannerTarget(
-                                controller,
-                                rootPage,
-                              );
-                            }
-                            final current = controller.quotes
-                                .where(
-                                  (quote) =>
-                                      quote.recipeName == initial.recipeName,
-                                )
-                                .firstOrNull;
-                            if (current == null) return null;
-                            return controller.plannerTargetFor(
-                              name,
-                              mode: controller.preferences.mode,
-                              variantId:
-                                  rootPage.variantId ??
-                                  current.selectedVariantId,
-                            );
-                          },
-                          child: Row(
-                            children: [
-                              _itemIcon(
-                                controller,
-                                name,
-                                48,
-                                mode: bestUse == null
-                                    ? null
-                                    : _recipeMode(
-                                        selected?.recipe ?? rootPage.recipe,
-                                      ),
+            builder: (context, history, _) => AnimatedBuilder(
+              animation: edits,
+              builder: (context, _) {
+                final page = history.lastOrNull ?? rootPage;
+                final spec = context.visualTheme;
+                final scale = MediaQuery.textScalerOf(context).scale(14) / 14;
+                final title = Row(
+                  children: [
+                    if (history.isNotEmpty) ...[
+                      OpportunityButton.icon(
+                        key: const ValueKey('ingredient-recipe-back'),
+                        icon: const Icon(Icons.arrow_back, size: 22),
+                        semanticLabel: 'Back to previous recipe',
+                        tooltip: 'Back · Left arrow',
+                        onPressed: goBack,
+                      ),
+                      const SizedBox(width: 8),
+                    ],
+                    Expanded(
+                      child: OpportunityItemRegion(
+                        controller: controller,
+                        name: page.itemName,
+                        stableId: 'opportunity-title:${page.itemName}',
+                        resolvePlannerTarget: () =>
+                            _ingredientPlannerTarget(controller, page),
+                        child: Row(
+                          children: [
+                            _itemIcon(
+                              controller,
+                              page.itemName,
+                              48,
+                              mode: _recipeMode(page.recipe),
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: OpportunityCopyName(
+                                name: page.itemName,
+                                style: ItemDetailStyle.title(spec),
                               ),
-                              const SizedBox(width: 12),
-                              Expanded(
-                                child: OpportunityCopyName(
-                                  name: name,
-                                  style: context.visualTheme.typography.section
-                                      .copyWith(fontSize: 26),
-                                ),
-                              ),
-                            ],
-                          ),
+                            ),
+                          ],
                         ),
                       ),
-                    ],
-                  ),
-                  if (history.isNotEmpty) ...[
-                    const SizedBox(height: 12),
-                    _RecipeTrail(
-                      names: [
-                        initial.recipeName,
-                        ...history.map((p) => p.itemName),
-                      ],
-                      onJump: goTo,
                     ),
                   ],
-                ],
-              );
-            },
+                );
+                final controls = Wrap(
+                  key: ValueKey('recipe-detail-inputs:${page.itemName}'),
+                  spacing: 10,
+                  runSpacing: 8,
+                  crossAxisAlignment: WrapCrossAlignment.start,
+                  children: [
+                    _OpportunityCraftAmount(
+                      value: page.crafts ?? 1,
+                      onChanged: (value) {
+                        page.crafts = value;
+                        page.allocations.clear();
+                        edits.value++;
+                      },
+                    ),
+                    if (!page.rare)
+                      _OpportunityCustomSalePrice(
+                        value: page.customSalePrice,
+                        onChanged: (value) {
+                          page.customSalePrice = value;
+                          edits.value++;
+                        },
+                      ),
+                  ],
+                );
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    LayoutBuilder(
+                      builder: (context, constraints) {
+                        if (constraints.maxWidth >= 800 * scale) {
+                          return Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Expanded(child: title),
+                              const SizedBox(width: 20),
+                              controls,
+                            ],
+                          );
+                        }
+                        return Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            title,
+                            const SizedBox(height: 12),
+                            Align(
+                              alignment: Alignment.centerRight,
+                              child: controls,
+                            ),
+                          ],
+                        );
+                      },
+                    ),
+                    if (history.isNotEmpty) ...[
+                      const SizedBox(height: 12),
+                      _RecipeTrail(
+                        names: [
+                          initial.recipeName,
+                          ...history.map((p) => p.itemName),
+                        ],
+                        onJump: goTo,
+                      ),
+                    ],
+                  ],
+                );
+              },
+            ),
           ),
     );
   } finally {
@@ -2276,6 +2444,7 @@ Future<void> _craftDetails(
     controller.removeListener(queueInspectionUpdate);
     controller.setInspectedRecipe(null);
     pages.dispose();
+    edits.dispose();
   }
 }
 
@@ -2342,33 +2511,70 @@ Widget _craftCalculationBody(
   OpportunityRecipeInspection? inspection,
   Set<String> substituteGroups = const {},
   ValueChanged<OpportunityIngredientQuote>? onSubstitutes,
+  bool allowInventory = true,
+  bool compact = false,
+  OpportunityBestUseQuote? bestUse,
 }) {
   final spec = context.visualTheme;
   final revenue = _craftRevenue(controller, quote);
-  final note = inspection?.isRareOutput == true
+  final comparison = bestUse == null
       ? null
-      : _craftCardNote(controller, quote, recipe: inspection?.recipe);
+      : calculateOpportunityBestUseComparison(
+          quote: quote,
+          itemName: bestUse.itemName,
+          selectedItemId: bestUse.selectedItemId,
+          marketTax: controller.appController.marketTax.value,
+          now: controller.clock(),
+          maxMarketAge: controller.cachedMarketMaxAge,
+        );
+  final selectedMarketId = normalizeNumericMarketId(
+    bestUse?.selectedItemId ?? '',
+  );
+  bool selectedMaterial(OpportunityIngredientQuote ingredient) =>
+      bestUse != null &&
+      (bestUse.selectedItemId == null
+          ? ingredient.name.trim().toLowerCase() ==
+                bestUse.itemName.trim().toLowerCase()
+          : selectedMarketId != null &&
+                normalizeNumericMarketId(ingredient.itemId ?? '') ==
+                    selectedMarketId);
   final ingredients = Column(
     crossAxisAlignment: CrossAxisAlignment.stretch,
     children: [
-      Text(
-        quote.ingredients.any(
-              (item) =>
-                  !_ingredientHasMarket(item) && item.npcUnitPrice == null,
-            )
-            ? 'Ingredients'
-            : 'Buy these ingredients',
-        style: spec.typography.body.copyWith(
-          fontWeight: FontWeight.w700,
-          fontSize: 18,
-        ),
+      Wrap(
+        alignment: WrapAlignment.spaceBetween,
+        crossAxisAlignment: WrapCrossAlignment.center,
+        spacing: 12,
+        runSpacing: 6,
+        children: [
+          Text(
+            'Ingredients',
+            style: spec.typography.body.copyWith(
+              fontWeight: FontWeight.w700,
+              fontSize: 18,
+            ),
+          ),
+          if (allowInventory)
+            _InventoryMenuChoice(
+              key: const ValueKey('detail-use-inventory'),
+              label: 'Use inventory',
+              selected: controller.preferences.useInventory,
+              onPressed: () =>
+                  controller.change((p) => p.useInventory = !p.useInventory),
+            ),
+        ],
       ),
       const SizedBox(height: 10),
       _ingredientGrid(context, [
         for (final ingredient in quote.ingredients)
           OpportunitySurface(
             role: AppSurfaceRole.row,
-            padding: const EdgeInsets.all(10),
+            padding: EdgeInsets.all(compact ? 12 : 14),
+            decoration: BoxDecoration(
+              border: Border(
+                bottom: BorderSide(color: spec.palette.trim.withAlpha(90)),
+              ),
+            ),
             child: _ingredientRecipeLink(
               controller,
               ingredient.name,
@@ -2377,32 +2583,47 @@ Widget _craftCalculationBody(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      _itemIcon(
-                        controller,
-                        ingredient.name,
-                        48,
-                        mode: inspection?.sourceMode,
+                      OpportunityInventoryInput(
+                        key: ValueKey(
+                          'ingredient-inventory:${ingredient.name}',
+                        ),
+                        controller:
+                            controller.appController.modes[inspection
+                                    ?.sourceMode ??
+                                controller.preferences.mode]!,
+                        itemName: ingredient.name,
+                        iconBuilder: (size) => _itemIcon(
+                          controller,
+                          ingredient.name,
+                          size,
+                          mode: inspection?.sourceMode,
+                        ),
                       ),
                       const SizedBox(width: 10),
                       Expanded(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Row(
+                            Wrap(
+                              spacing: 6,
+                              runSpacing: 3,
+                              crossAxisAlignment: WrapCrossAlignment.center,
                               children: [
-                                Flexible(
-                                  child: Align(
-                                    alignment: Alignment.centerLeft,
-                                    widthFactor: 1,
-                                    child: OpportunityCopyName(
-                                      name: ingredient.name,
-                                      style: spec.typography.body.copyWith(
-                                        fontSize: 18,
-                                        fontWeight: FontWeight.w600,
-                                      ),
-                                    ),
+                                OpportunityCopyName(
+                                  name: ingredient.name,
+                                  style: spec.typography.body.copyWith(
+                                    fontSize: compact ? 16 : 18,
+                                    fontWeight: FontWeight.w600,
                                   ),
+                                ),
+                                Text(
+                                  '×${_quantity(ingredient.quantityPerCraft)}',
+                                  key: ValueKey(
+                                    'ingredient-per-craft:${ingredient.name}',
+                                  ),
+                                  style: spec.typography.meta,
                                 ),
                                 if (onSubstitutes != null &&
                                     ingredient.originalNames.any(
@@ -2419,113 +2640,146 @@ Widget _craftCalculationBody(
                                     ),
                                     semanticLabel:
                                         'Substitutes for ${ingredient.name}',
-                                    tooltip: 'Substitutes',
                                     onPressed: () => onSubstitutes(ingredient),
                                   ),
                                 ],
                               ],
                             ),
                             const SizedBox(height: 3),
-                            Text(
-                              _ingredientQuantityLabel(ingredient),
-                              key: ValueKey(
-                                'ingredient-quantity:${ingredient.name}',
-                              ),
-                              style: spec.typography.meta.copyWith(
-                                color:
-                                    _ingredientStockShortage(
-                                      controller,
-                                      ingredient,
-                                    )
-                                    ? spec.palette.danger
-                                    : spec.typography.meta.color,
-                              ),
+                            Wrap(
+                              spacing: 5,
+                              runSpacing: 3,
+                              children: [
+                                Text(
+                                  _ingredientQuantityLabel(ingredient),
+                                  key: ValueKey(
+                                    'ingredient-quantity:${ingredient.name}',
+                                  ),
+                                  style: spec.typography.meta,
+                                ),
+                                if (_ingredientHasMarket(ingredient))
+                                  Text(
+                                    '· Marketplace',
+                                    style: spec.typography.meta.copyWith(
+                                      color:
+                                          OpportunitiesVisualSpec.informationColor(
+                                            spec,
+                                          ),
+                                    ),
+                                  ),
+                              ],
                             ),
+                            if (_ingredientHasMarket(ingredient)) ...[
+                              SizedBox(height: compact ? 6 : 8),
+                              _ingredientStockBadge(
+                                context,
+                                controller,
+                                ingredient,
+                              ),
+                            ],
                           ],
                         ),
                       ),
-                      const SizedBox(width: 10),
-                      OpportunityInventoryInput(
-                        key: ValueKey(
-                          'ingredient-inventory:${ingredient.name}',
-                        ),
-                        controller: controller.modeController,
-                        itemName: ingredient.name,
-                      ),
                     ],
                   ),
-                  const SizedBox(height: 10),
                   if (!_ingredientIsNonMarket(ingredient) ||
-                      ingredient.npcUnitPrice != null)
-                    _MetricColumns(
-                      children: [
-                        _metric(
-                          context,
-                          'Cost',
-                          ingredient.costForCalculation == null
-                              ? '—'
-                              : _estimateValue(
-                                  _quantity(ingredient.costForCalculation!),
-                                  ingredient.estimatedMarketQuantity > 0,
-                                ),
-                          estimateExplanation: _inputEstimateExplanation(
-                            ingredient,
-                          ),
-                        ),
-                        if (ingredient.npcUnitPrice != null)
-                          _metric(
-                            context,
-                            'NPC each',
-                            _quantity(ingredient.npcUnitPrice!),
-                          )
-                        else if (ingredient.buyCost != null)
-                          _metric(
-                            context,
-                            'Avg. each',
-                            _quantity(
-                              ingredient.buyCost! / ingredient.quantity,
-                            ),
-                          ),
-                        if (ingredient.npcUnitPrice != null &&
-                            _ingredientHasMarket(ingredient))
-                          _metric(
-                            context,
-                            'Market each',
-                            ingredient.marketUnitPrice == null
-                                ? '—'
-                                : _estimateValue(
-                                    _quantity(ingredient.marketUnitPrice!),
-                                    ingredient.marketUnitPriceEstimated,
-                                  ),
-                            estimateExplanation:
-                                ingredient.marketUnitPriceEstimated
-                                ? 'Current market price. Available stock may sell at a different price.'
-                                : 'Lowest listed price. Stock at this price can be limited.',
-                          ),
-                        if (_ingredientHasMarket(ingredient))
-                          _market(
-                            context,
-                            ingredient.market,
-                            controller.clock(),
-                            maxAge: controller.cachedMarketMaxAge,
-                          ),
-                      ],
-                    ),
-                  if (_ingredientIsNonMarket(ingredient) &&
-                      ingredient.npcUnitPrice == null)
-                    Text('Not sold on the market', style: spec.typography.meta),
-                  if (_ingredientHasMarket(ingredient) &&
-                      ingredient.npcUnitPrice == null &&
-                      !ingredient.coversRequest &&
-                      ingredient.estimatedMarketQuantity == 0)
-                    Text(
-                      ingredient.depthKnown
-                          ? 'Not in stock'
-                          : 'Stock needs checking',
-                      style: spec.typography.meta.copyWith(
-                        color: spec.palette.warning,
+                      ingredient.npcUnitPrice != null) ...[
+                    Padding(
+                      padding: EdgeInsets.symmetric(vertical: compact ? 8 : 12),
+                      child: Divider(
+                        height: 1,
+                        color: spec.palette.trim.withAlpha(120),
                       ),
                     ),
+                    Wrap(
+                      spacing: 16,
+                      runSpacing: 8,
+                      crossAxisAlignment: WrapCrossAlignment.center,
+                      children: [
+                        if (selectedMaterial(ingredient)) ...[
+                          KeyedSubtree(
+                            key: ValueKey(
+                              'best-use-selected-input:${ingredient.name}',
+                            ),
+                            child: _ingredientPrice(
+                              context,
+                              'Raw sale',
+                              _silver(
+                                comparison?.rawSalePerUnit == null
+                                    ? null
+                                    : comparison!.rawSalePerUnit! *
+                                          ingredient.quantity,
+                              ),
+                              silverAmount: comparison?.rawSalePerUnit == null
+                                  ? null
+                                  : comparison!.rawSalePerUnit! *
+                                        ingredient.quantity,
+                              primary: true,
+                            ),
+                          ),
+                          _ingredientPrice(
+                            context,
+                            'Each after tax',
+                            _silver(comparison?.rawSalePerUnit),
+                            silverAmount: comparison?.rawSalePerUnit,
+                          ),
+                        ] else ...[
+                          _ingredientPrice(
+                            context,
+                            'Cost',
+                            ingredient.costForCalculation == null
+                                ? '—'
+                                : _estimateValue(
+                                    _quantity(ingredient.costForCalculation!),
+                                    ingredient.estimatedMarketQuantity > 0,
+                                  ),
+                            estimateExplanation: _inputEstimateExplanation(
+                              ingredient,
+                            ),
+                            silverAmount: ingredient.costForCalculation,
+                            primary: true,
+                          ),
+                          if (ingredient.npcUnitPrice != null)
+                            _ingredientPrice(
+                              context,
+                              'NPC each',
+                              _quantity(ingredient.npcUnitPrice!),
+                              silverAmount: ingredient.npcUnitPrice,
+                            )
+                          else if (ingredient.buyCost != null &&
+                              ingredient.purchaseQuantity > 0)
+                            _ingredientPrice(
+                              context,
+                              'Avg. each',
+                              _quantity(
+                                ingredient.buyCost! /
+                                    ingredient.purchaseQuantity,
+                              ),
+                              silverAmount:
+                                  ingredient.buyCost! /
+                                  ingredient.purchaseQuantity,
+                            ),
+                          if (ingredient.npcUnitPrice != null &&
+                              _ingredientHasMarket(ingredient))
+                            _ingredientPrice(
+                              context,
+                              'Market each',
+                              ingredient.marketUnitPrice == null
+                                  ? '—'
+                                  : _estimateValue(
+                                      _quantity(ingredient.marketUnitPrice!),
+                                      ingredient.marketUnitPriceEstimated,
+                                    ),
+                              estimateExplanation:
+                                  ingredient.marketUnitPriceEstimated
+                                  ? 'Current market price. Available stock may sell at a different price.'
+                                  : 'Lowest listed price. Stock at this price can be limited.',
+                              silverAmount: ingredient.marketUnitPrice,
+                            ),
+                        ],
+                      ],
+                    ),
+                  ],
                 ],
               ),
               preferredMode: inspection?.sourceMode,
@@ -2541,96 +2795,182 @@ Widget _craftCalculationBody(
       ]),
     ],
   );
-  return LayoutBuilder(
-    builder: (context, constraints) {
-      final scale = MediaQuery.textScalerOf(context).scale(14) / 14;
-      final wide = constraints.maxWidth >= 1020 * scale;
-      final summary = OpportunitySurface(
-        key: const ValueKey('craft-money-summary'),
-        role: AppSurfaceRole.card,
-        padding: const EdgeInsets.all(14),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            _marketDepthStatus(context, controller),
-            _craftSummary(
-              context,
-              controller,
-              quote,
-              key: ValueKey('craft-result:${quote.recipeName}'),
-              showDetails: true,
-              inspection: inspection,
-            ),
-            if (note != null) ...[
-              const SizedBox(height: 10),
-              Text(
-                note,
-                style: spec.typography.meta.copyWith(
-                  color: spec.palette.warning,
+  return Column(
+    key: const ValueKey('craft-reader-columns'),
+    crossAxisAlignment: CrossAxisAlignment.stretch,
+    children: [
+      if (bestUse != null && inspection != null)
+        _BestUseDetailsSummary(
+          controller: controller,
+          inspection: inspection,
+          itemName: bestUse.itemName,
+          comparison: comparison,
+        )
+      else
+        LayoutBuilder(
+          builder: (context, constraints) {
+            final scale = MediaQuery.textScalerOf(context).scale(14) / 14;
+            final available = constraints.maxWidth;
+            return Align(
+              alignment: Alignment.centerLeft,
+              child: ConstrainedBox(
+                constraints: BoxConstraints(
+                  maxWidth: math.min(
+                    available,
+                    (quote.usesInventory ? 1230 : 900) * scale,
+                  ),
+                ),
+                child: OpportunitySurface(
+                  key: const ValueKey('craft-money-summary'),
+                  role: AppSurfaceRole.panel,
+                  padding: const EdgeInsets.all(16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      _marketDepthStatus(context, controller),
+                      Wrap(
+                        spacing: 28,
+                        runSpacing: 18,
+                        crossAxisAlignment: WrapCrossAlignment.center,
+                        children: [
+                          SizedBox(
+                            width: math.min(310 * scale, available - 32),
+                            child: _craftSummary(
+                              context,
+                              controller,
+                              quote,
+                              key: ValueKey('craft-result:${quote.recipeName}'),
+                              showDetails: true,
+                              inspection: inspection,
+                            ),
+                          ),
+                          SizedBox(
+                            width: math.min(170 * scale, available - 32),
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                _mathLine(
+                                  context,
+                                  'Sale after tax',
+                                  revenue,
+                                  stacked: true,
+                                ),
+                                const SizedBox(height: 8),
+                                _mathLine(
+                                  context,
+                                  'Investment',
+                                  quote.totalCost,
+                                  minus: true,
+                                  stacked: true,
+                                  estimateExplanation:
+                                      _quoteEstimateExplanation(quote),
+                                ),
+                              ],
+                            ),
+                          ),
+                          for (final choice in _saleChoices(
+                            context,
+                            controller,
+                            quote,
+                          ))
+                            SizedBox(
+                              width: math.min(250 * scale, available - 32),
+                              child: choice,
+                            ),
+                        ],
+                      ),
+                    ],
+                  ),
                 ),
               ),
-            ],
-            Padding(
-              padding: const EdgeInsets.symmetric(vertical: 14),
-              child: Divider(
-                height: 1,
-                color: spec.palette.trim.withAlpha(140),
+            );
+          },
+        ),
+      SizedBox(height: compact ? 14 : 22),
+      ingredients,
+    ],
+  );
+}
+
+List<Widget> _saleChoices(
+  BuildContext context,
+  OpportunitiesController controller,
+  OpportunityQuote quote,
+) {
+  final spec = context.visualTheme;
+  final difference = quote.profitFor(controller.craftSaleMode);
+  return [
+    _rawIngredientSalesSummary(context, controller, quote),
+    if (quote.usesInventory) ...[
+      OpportunitySurface(
+        key: const ValueKey('crafting-difference'),
+        role: AppSurfaceRole.card,
+        padding: const EdgeInsets.all(14),
+        decoration: BoxDecoration(
+          color:
+              (difference == null || difference == 0
+                      ? spec.palette.surfaceRaised
+                      : difference > 0
+                      ? spec.palette.success
+                      : spec.palette.danger)
+                  .withAlpha(18),
+          border: Border.all(
+            color:
+                (difference == null || difference == 0
+                        ? spec.palette.trim
+                        : difference > 0
+                        ? spec.palette.success
+                        : spec.palette.danger)
+                    .withAlpha(140),
+          ),
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Profit from crafting',
+              style: spec.typography.body.copyWith(
+                fontSize: 18,
+                fontWeight: FontWeight.w600,
               ),
             ),
-            _mathLine(context, 'Sale after tax', revenue, stacked: wide),
+            const SizedBox(height: 8),
+            OpportunitySilverAmount(
+              value: difference,
+              estimated: quote.hasEstimatedInputs,
+              showPlus: true,
+              silverSuffix: true,
+              textKey: const ValueKey('crafting-difference-value'),
+              style: spec.typography.body.copyWith(
+                fontSize: 18,
+                fontWeight: FontWeight.w600,
+                color: difference == null || difference == 0
+                    ? spec.palette.textMuted
+                    : difference > 0
+                    ? spec.palette.success
+                    : spec.palette.danger,
+              ),
+            ),
             const SizedBox(height: 6),
-            _mathLine(
-              context,
-              quote.extraCost > 0 ? 'Ingredients + extras' : 'Ingredients',
-              quote.totalCost,
-              minus: true,
-              stacked: wide,
-              estimateExplanation: _quoteEstimateExplanation(quote),
+            Text(
+              difference == null
+                  ? 'Compared to selling ingredients'
+                  : difference > 0
+                  ? 'More than selling ingredients'
+                  : difference < 0
+                  ? 'Less than selling ingredients'
+                  : 'Same as selling ingredients',
+              style: spec.typography.meta,
             ),
           ],
         ),
-      );
-      if (wide) {
-        return Row(
-          key: const ValueKey('craft-reader-columns'),
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            SizedBox(
-              width: 260,
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  summary,
-                  const SizedBox(height: 12),
-                  _rawIngredientSalesSummary(context, controller, quote),
-                ],
-              ),
-            ),
-            const SizedBox(width: 14),
-            Expanded(child: ingredients),
-          ],
-        );
-      }
-      return Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          summary,
-          const SizedBox(height: 12),
-          Align(
-            alignment: Alignment.centerLeft,
-            child: ConstrainedBox(
-              constraints: BoxConstraints(maxWidth: 350 * scale),
-              child: _rawIngredientSalesSummary(context, controller, quote),
-            ),
-          ),
-          const SizedBox(height: 16),
-          ingredients,
-        ],
-      );
-    },
-  );
+      ),
+    ],
+  ];
 }
 
 Widget _rawIngredientSalesSummary(
@@ -2645,30 +2985,33 @@ Widget _rawIngredientSalesSummary(
     now: controller.clock(),
     maxAge: controller.cachedMarketMaxAge,
     isMarketable: isOpportunityMarketRequestEligible,
+    ownedOnly: quote.usesInventory,
   );
   return OpportunitySurface(
     key: const ValueKey('raw-ingredient-sales'),
-    role: AppSurfaceRole.card,
-    padding: const EdgeInsets.all(14),
+    role: AppSurfaceRole.layout,
+    padding: EdgeInsets.zero,
     child: Column(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         Text(
-          'Raw ingredient sales',
+          quote.usesInventory
+              ? 'Sell owned ingredients'
+              : 'Raw ingredient sales',
           style: spec.typography.body.copyWith(
-            fontSize: 16,
+            fontSize: 18,
             fontWeight: FontWeight.w600,
           ),
         ),
         const SizedBox(height: 6),
-        Text('After tax · same batch', style: spec.typography.meta),
+        Text('After tax', style: spec.typography.meta),
         const SizedBox(height: 4),
-        Text(
-          sales.afterTax == null
-              ? '—'
-              : '≈ ${_quantity(sales.afterTax!)} silver',
-          key: const ValueKey('raw-ingredient-sales-value'),
+        OpportunitySilverAmount(
+          value: sales.afterTax,
+          estimated: true,
+          silverSuffix: true,
+          textKey: const ValueKey('raw-ingredient-sales-value'),
           style: spec.typography.body.copyWith(
             fontSize: 18,
             fontWeight: FontWeight.w600,
@@ -2681,15 +3024,76 @@ Widget _rawIngredientSalesSummary(
             style: spec.typography.meta.copyWith(color: spec.palette.warning),
           ),
         ],
-        if (sales.excludedNames.isNotEmpty) ...[
-          const SizedBox(height: 8),
-          Text(
-            'Not market-sellable: ${sales.excludedNames.join(', ')}',
-            style: spec.typography.meta,
-          ),
-        ],
       ],
     ),
+  );
+}
+
+Widget _ingredientPrice(
+  BuildContext context,
+  String label,
+  String value, {
+  double? silverAmount,
+  String? estimateExplanation,
+  bool primary = false,
+}) {
+  final spec = context.visualTheme;
+  final style = spec.typography.body.copyWith(
+    fontSize: primary ? 16 : 13,
+    fontWeight: primary ? FontWeight.w700 : FontWeight.w400,
+    color: primary ? spec.palette.text : spec.palette.textMuted,
+  );
+  final content = Wrap(
+    spacing: 5,
+    crossAxisAlignment: WrapCrossAlignment.center,
+    children: [
+      Text(label, style: style),
+      if (silverAmount != null)
+        OpportunitySilverAmount(
+          value: silverAmount,
+          estimated: value.startsWith('≈ '),
+          style: style,
+        )
+      else
+        Text(value, style: style),
+    ],
+  );
+  return _estimateHint(estimateExplanation, content);
+}
+
+Widget _ingredientStockBadge(
+  BuildContext context,
+  OpportunitiesController controller,
+  OpportunityIngredientQuote ingredient,
+) {
+  final spec = context.visualTheme;
+  final now = controller.clock();
+  final stock = ingredient.market?.stockFor(now, controller.cachedMarketMaxAge);
+  final (text, negative) = _marketReading(
+    ingredient.market,
+    now,
+    controller.cachedMarketMaxAge,
+  );
+  final color = negative
+      ? spec.palette.danger
+      : stock == null
+      ? spec.palette.textMuted
+      : stock == 0
+      ? spec.palette.danger
+      : _ingredientStockShortage(controller, ingredient)
+      ? spec.palette.warning
+      : spec.palette.success;
+  final preorders =
+      ingredient.market?.bookIsFresh(now, controller.cachedMarketMaxAge) == true
+      ? ingredient.market?.preorderCount
+      : null;
+  return _MarketStockBadge(
+    text: text,
+    color: color,
+    textKey: ValueKey('ingredient-stock:${ingredient.name}'),
+    semanticDescription: stock == null
+        ? 'Current stock has not been checked.'
+        : 'Stock: ${_quantity(stock)}${preorders == null ? '' : '\nPreorders: ${_quantity(preorders)}'}',
   );
 }
 
@@ -2698,7 +3102,7 @@ bool _ingredientStockShortage(
   OpportunityIngredientQuote ingredient,
 ) {
   if (!_ingredientHasMarket(ingredient)) return false;
-  final marketNeeded = ingredient.quantity - ingredient.npcQuantity;
+  final marketNeeded = ingredient.purchaseQuantity - ingredient.npcQuantity;
   if (marketNeeded <= 0) return false;
   final stock = ingredient.market?.stockFor(
     controller.clock(),
@@ -2715,15 +3119,19 @@ bool _ingredientIsNonMarket(OpportunityIngredientQuote ingredient) =>
     reviewedNonMarketableOpportunityIds.contains(ingredient.itemId);
 
 String _ingredientQuantityLabel(OpportunityIngredientQuote ingredient) {
-  final needed = '${_quantity(ingredient.quantity)} needed';
+  final needed = 'Need ${_quantity(ingredient.quantity)}';
+  if (ingredient.ownedQuantity > 0) {
+    return ingredient.purchaseQuantity == 0
+        ? '$needed · Covered'
+        : '$needed · Buy ${_quantity(ingredient.purchaseQuantity)}';
+  }
   if (ingredient.npcQuantity == ingredient.quantity) return '$needed · NPC';
   if (_ingredientHasMarket(ingredient) &&
       ingredient.marketQuantity == ingredient.quantity) {
-    return '$needed · Market';
+    return needed;
   }
   return '$needed'
-      '${ingredient.npcQuantity > 0 ? ' · ${_quantity(ingredient.npcQuantity)} from NPC' : ''}'
-      '${_ingredientHasMarket(ingredient) && ingredient.marketQuantity > 0 ? ' · ${_quantity(ingredient.marketQuantity)} from market' : ''}';
+      '${ingredient.npcQuantity > 0 ? ' · ${_quantity(ingredient.npcQuantity)} from NPC' : ''}';
 }
 
 Future<void> _craftAbout(
@@ -2771,7 +3179,9 @@ Future<void> _craftAbout(
           'Rare results and byproducts are not included.',
         if (quote.extraCost > 0)
           '${_quantity(quote.extraCost)} silver in extra costs is included.',
-        'All ingredients are priced as bought, even if you already have them.',
+        quote.usesInventory
+            ? 'Investment covers only missing ingredients. Profit from crafting also subtracts what the owned ingredients used here would sell for after tax.'
+            : 'All ingredients are priced as bought, even if you already have them.',
         'Crafts are assumed to succeed. Check the required level and knowledge in game.',
         if (quote.hasUncheckedInputDepth)
           '≈ uses current prices where available sell orders have not been checked. Every ingredient is included.',
@@ -2804,11 +3214,12 @@ final class _IngredientRecipe {
     this.bestUse,
   });
   final String itemName;
-  final Recipe recipe;
+  Recipe recipe;
   final bool rare;
   final bool root;
   final OpportunityBestUseQuote? bestUse;
   String? variantId;
+  bool formulaChosen = false;
   int? crafts;
   int? customSalePrice;
   final choices = <String, String>{};
@@ -2895,8 +3306,9 @@ Widget _ingredientRecipeLink(
     onViewRecipe: hasRecipe ? () => onOpen(name) : null,
     child: !hasRecipe
         ? child
-        : Tooltip(
-            message: 'View recipe',
+        : Semantics(
+            button: true,
+            label: 'View recipe for $name',
             child: InkWell(
               key: ValueKey('ingredient-recipe-$name'),
               onTap: () => onOpen(name),
@@ -2935,11 +3347,17 @@ class _IngredientRecipeView extends StatefulWidget {
     required this.controller,
     required this.selected,
     required this.onOpen,
+    required this.edits,
+    required this.allowInventory,
+    this.compact = false,
     super.key,
   });
   final OpportunitiesController controller;
   final _IngredientRecipe selected;
   final ValueChanged<String> onOpen;
+  final ValueNotifier<int> edits;
+  final bool allowInventory;
+  final bool compact;
 
   @override
   State<_IngredientRecipeView> createState() => _IngredientRecipeViewState();
@@ -2948,7 +3366,7 @@ class _IngredientRecipeView extends StatefulWidget {
 class _IngredientRecipeViewState extends State<_IngredientRecipeView> {
   @override
   Widget build(BuildContext context) => AnimatedBuilder(
-    animation: widget.controller,
+    animation: Listenable.merge([widget.controller, widget.edits]),
     builder: (context, _) {
       final selected = widget.selected;
       final current = selected.root
@@ -2967,7 +3385,9 @@ class _IngredientRecipeViewState extends State<_IngredientRecipeView> {
                       )
                       .firstOrNull
           : null;
-      if (selected.root && current == null) {
+      if (selected.root &&
+          current == null &&
+          widget.controller.liveRecipeFor(selected.recipe.name) == null) {
         return Text(
           widget.controller.calculating
               ? 'Updating calculation…'
@@ -2978,9 +3398,13 @@ class _IngredientRecipeViewState extends State<_IngredientRecipeView> {
       final inspection = widget.controller.inspectRecipe(
         recipe: selected.recipe,
         itemName: selected.itemName,
-        selectedVariantId: selected.variantId ?? current?.selectedVariantId,
+        selectedVariantId: selected.formulaChosen
+            ? selected.variantId
+            : selected.variantId ?? current?.selectedVariantId,
         crafts: selected.crafts ?? current?.crafts ?? 1,
         customSalePrice: selected.customSalePrice,
+        useInventory:
+            widget.allowInventory && widget.controller.preferences.useInventory,
         ingredientChoices: selected.choices,
         ingredientAllocations: selected.allocations,
         extraCostPerRun: current?.extraCostPerRun ?? 0,
@@ -2996,54 +3420,39 @@ class _IngredientRecipeViewState extends State<_IngredientRecipeView> {
         ),
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Wrap(
-            spacing: 8,
-            runSpacing: 8,
-            crossAxisAlignment: WrapCrossAlignment.end,
-            children: [
-              if (recipe.variants.length > 1)
-                for (final variant in recipe.variants)
-                  OpportunityButton.label(
-                    '${variant.label}${variant.batchMultiplier > 1 ? ' · ${variant.batchMultiplier}×' : ''}',
-                    selected: inspection.quote.selectedVariantId == variant.id,
-                    onPressed: () {
-                      setState(() {
-                        selected.variantId = variant.id;
-                        selected.choices.clear();
-                        selected.allocations.clear();
-                      });
-                      widget.controller.setInspectedRecipe(
-                        recipe,
-                        itemName: selected.itemName,
-                        selectedVariantId: variant.id,
-                      );
-                    },
-                  ),
-              _OpportunityCraftAmount(
-                value: inspection.quote.crafts,
-                onChanged: (value) => setState(() {
-                  selected.crafts = value;
-                  selected.allocations.clear();
-                }),
-              ),
-              if (!inspection.isRareOutput)
-                _OpportunityCustomSalePrice(
-                  value: selected.customSalePrice,
-                  onChanged: (value) => setState(() {
-                    selected.customSalePrice = value;
-                  }),
-                ),
-            ],
+          OpportunityRecipeControls(
+            routes: widget.controller.recipeRoutesFor(selected.recipe),
+            recipe: recipe,
+            variantId: inspection.quote.selectedVariantId,
+            onSelected: (formula) {
+              if (formula.recipe.type == selected.recipe.type &&
+                  formula.variantId == inspection.quote.selectedVariantId) {
+                return;
+              }
+              setState(() {
+                selected.recipe = formula.recipe;
+                selected.variantId = formula.variantId;
+                selected.formulaChosen = true;
+                selected.choices.clear();
+                selected.allocations.clear();
+              });
+              widget.edits.value++;
+              widget.controller.setInspectedRecipe(
+                selected.recipe,
+                itemName: selected.itemName,
+                selectedVariantId: selected.variantId,
+              );
+            },
           ),
-          const SizedBox(height: 12),
           _craftCalculationBody(
             context,
             widget.controller,
             inspection.quote,
             widget.onOpen,
-            inspection: selected.root && selected.bestUse == null
-                ? null
-                : inspection,
+            inspection: inspection,
+            allowInventory: widget.allowInventory,
+            compact: widget.compact,
+            bestUse: selected.bestUse,
             substituteGroups: candidates.entries
                 .where((entry) => entry.value.length > 1)
                 .map((entry) => entry.key)
@@ -3060,7 +3469,10 @@ class _IngredientRecipeViewState extends State<_IngredientRecipeView> {
                   original,
                   candidates[original]!.values.toList(),
                 );
-                if (changed && mounted) setState(() {});
+                if (changed && mounted) {
+                  widget.edits.value++;
+                  setState(() {});
+                }
                 break;
               }
             },
@@ -3090,13 +3502,10 @@ Widget _mathLine(
             const SizedBox(height: 4),
             _estimateHint(
               estimateExplanation,
-              Text(
-                value == null
-                    ? '—'
-                    : _estimateValue(
-                        '${minus ? '−' : ''}${_quantity(value)} silver',
-                        estimateExplanation != null,
-                      ),
+              OpportunitySilverAmount(
+                value: value == null ? null : (minus ? -value : value),
+                estimated: estimateExplanation != null,
+                silverSuffix: true,
                 style: context.visualTheme.typography.body.copyWith(
                   fontSize: 18,
                   fontWeight: FontWeight.w600,
@@ -3124,18 +3533,17 @@ Widget _mathLine(
                       ),
                     ),
             ),
-            _estimateHint(
-              estimateExplanation,
-              Text(
-                value == null
-                    ? '—'
-                    : _estimateValue(
-                        '${minus ? '−' : ''}${_quantity(value)} silver',
-                        estimateExplanation != null,
-                      ),
-                style: context.visualTheme.typography.body.copyWith(
-                  fontSize: 18,
-                  fontWeight: bold ? FontWeight.w700 : FontWeight.w500,
+            Flexible(
+              child: _estimateHint(
+                estimateExplanation,
+                OpportunitySilverAmount(
+                  value: value == null ? null : (minus ? -value : value),
+                  estimated: estimateExplanation != null,
+                  silverSuffix: true,
+                  style: context.visualTheme.typography.body.copyWith(
+                    fontSize: 18,
+                    fontWeight: bold ? FontWeight.w700 : FontWeight.w500,
+                  ),
                 ),
               ),
             ),
@@ -3144,7 +3552,7 @@ Widget _mathLine(
 );
 
 Widget _estimateHint(String? explanation, Widget child) =>
-    explanation == null ? child : Tooltip(message: explanation, child: child);
+    explanation == null ? child : Semantics(hint: explanation, child: child);
 
 Future<void> _withMarketDepth(
   OpportunitiesController controller,
@@ -3207,7 +3615,14 @@ Widget _bookDetails(
             item.quoteIsFresh(now, maxAge) ? 'Price' : 'Earlier price',
             item.basePrice == null ? '—' : _quantity(item.basePrice!),
           ),
-          _metric(context, 'Stock', stock == null ? '—' : _quantity(stock)),
+          _MarketStockBadge(
+            text: stock == null ? '—' : _quantity(stock),
+            color: stock != null && stock > 0
+                ? spec.palette.success
+                : spec.palette.textMuted,
+            semanticDescription:
+                'Listed stock: ${stock == null ? 'Not checked' : _quantity(stock)}',
+          ),
           _metric(
             context,
             'Preorders',
@@ -3446,22 +3861,43 @@ Future<void> _exchangeDetails(
             ? route.rewards.single.item
             : null;
         final spec = context.visualTheme;
+        final hasValue = _showExchangeValue(quote);
+        final hasStock =
+            marketReward?.marketable == true &&
+            controller.market.items['${marketReward!.id}']?.stockFor(
+                  controller.clock(),
+                  controller.cachedMarketMaxAge,
+                ) !=
+                null;
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             _marketDepthStatus(context, controller),
+            Text(
+              route.directVendorSale ? 'Sell' : 'Give',
+              style: ItemDetailStyle.section(spec),
+            ),
+            const SizedBox(height: 10),
             Row(
               children: [
-                _exchangeIcon(quote.currency.item, 32),
+                _exchangeIcon(
+                  controller,
+                  quote.currency.item,
+                  ItemDetailStyle.ingredientIcon,
+                ),
                 const SizedBox(width: 10),
                 Expanded(
                   child: route.directVendorSale
-                      ? Text('Sell to NPC', style: spec.typography.body)
-                      : OpportunityCopyName(
-                          name: quote.currency.item.name,
+                      ? Text(
+                          'Sell to NPC',
+                          style: ItemDetailStyle.ingredient(spec),
+                        )
+                      : _exchangeName(
+                          controller,
+                          quote.currency.item,
                           displayLabel:
-                              '${_quantity(route.inputCount)} ${quote.currency.item.name}',
-                          style: spec.typography.body,
+                              '${quote.currency.item.name} ×${_quantity(route.inputCount)}',
+                          style: ItemDetailStyle.ingredient(spec),
                         ),
                 ),
               ],
@@ -3476,20 +3912,36 @@ Future<void> _exchangeDetails(
               ),
             ],
             if (route.rewardContainer != null || route.rewards.length > 1) ...[
-              const SizedBox(height: 16),
+              const SizedBox(height: ItemDetailStyle.sectionGap),
+              Text('Receive', style: ItemDetailStyle.section(spec)),
+              const SizedBox(height: 10),
               for (final reward in route.rewards)
                 Padding(
                   padding: const EdgeInsets.only(bottom: 8),
                   child: Row(
                     children: [
-                      if (reward.item case final item?) _exchangeIcon(item, 40),
+                      if (reward.item case final item?)
+                        _exchangeIcon(
+                          controller,
+                          item,
+                          ItemDetailStyle.recipeIcon,
+                        ),
                       const SizedBox(width: 10),
                       Expanded(
-                        child: OpportunityCopyName(
-                          name: reward.name,
-                          displayLabel:
-                              '${_quantity(reward.quantity)}× ${reward.name}',
-                        ),
+                        child: reward.item == null
+                            ? OpportunityCopyName(
+                                name: reward.name,
+                                displayLabel:
+                                    '${reward.name} ×${_quantity(reward.quantity)}',
+                                style: ItemDetailStyle.recipe(spec),
+                              )
+                            : _exchangeName(
+                                controller,
+                                reward.item!,
+                                displayLabel:
+                                    '${reward.name} ×${_quantity(reward.quantity)}',
+                                style: ItemDetailStyle.recipe(spec),
+                              ),
                       ),
                     ],
                   ),
@@ -3499,9 +3951,9 @@ Future<void> _exchangeDetails(
               const SizedBox(height: 18),
               Text(
                 'Remaining exchanges · ${route.limit.label}',
-                style: spec.typography.body.copyWith(
-                  fontWeight: FontWeight.w700,
-                ),
+                style: ItemDetailStyle.ingredient(
+                  spec,
+                ).copyWith(fontWeight: FontWeight.w700),
               ),
               const SizedBox(height: 8),
               Wrap(
@@ -3546,41 +3998,45 @@ Future<void> _exchangeDetails(
                 ),
               ),
             ],
-            const SizedBox(height: 20),
-            OpportunitySurface(
-              key: const ValueKey('exchange-detail-summary'),
-              role: AppSurfaceRole.card,
-              padding: const EdgeInsets.all(16),
-              child: _MetricColumns(
-                children: [
-                  _metric(
-                    context,
-                    quote.isReference ? 'Value' : 'Total value',
-                    _silver(display.netProceeds),
-                    large: true,
-                    color: display.isRankable
-                        ? spec.palette.success
-                        : spec.palette.textMuted,
-                    estimateExplanation: _exchangeValueHelp(quote),
-                  ),
-                  _metric(
-                    context,
-                    _exchangeUnitLabel(quote.currency),
-                    _silver(display.valuePerCurrency),
-                  ),
-                  if (marketReward?.marketable == true)
-                    _market(
-                      context,
-                      controller.market.items['${marketReward!.id}'],
-                      controller.clock(),
-                      large: true,
-                      maxAge: controller.cachedMarketMaxAge,
-                    ),
-                ],
+            if (hasValue || hasStock) ...[
+              const SizedBox(height: 20),
+              OpportunitySurface(
+                key: const ValueKey('exchange-detail-summary'),
+                role: AppSurfaceRole.card,
+                padding: const EdgeInsets.all(16),
+                child: _MetricColumns(
+                  children: [
+                    if (hasValue)
+                      _metric(
+                        context,
+                        quote.isReference ? 'Value' : 'Total value',
+                        _silver(display.netProceeds),
+                        large: true,
+                        color: display.isRankable
+                            ? spec.palette.success
+                            : spec.palette.textMuted,
+                        estimateExplanation: _exchangeValueHelp(quote),
+                      ),
+                    if (hasValue)
+                      _metric(
+                        context,
+                        _exchangeUnitLabel(quote.currency),
+                        _silver(display.valuePerCurrency),
+                      ),
+                    if (hasStock)
+                      _market(
+                        context,
+                        controller.market.items['${marketReward.id}'],
+                        controller.clock(),
+                        maxAge: controller.cachedMarketMaxAge,
+                      ),
+                  ],
+                ),
               ),
-            ),
+            ],
             for (final reward in route.rewards)
-              if (reward.item?.marketable == true)
+              if (reward.item?.marketable == true &&
+                  _hasExchangePreorders(controller, reward.item!))
                 Padding(
                   padding: const EdgeInsets.only(top: 20),
                   child: Column(
@@ -3589,9 +4045,9 @@ Future<void> _exchangeDetails(
                       if (route.rewards.length > 1) ...[
                         OpportunityCopyName(
                           name: reward.name,
-                          style: spec.typography.body.copyWith(
-                            fontWeight: FontWeight.w700,
-                          ),
+                          style: ItemDetailStyle.ingredient(
+                            spec,
+                          ).copyWith(fontWeight: FontWeight.w700),
                         ),
                         const SizedBox(height: 8),
                       ],
@@ -3604,6 +4060,7 @@ Future<void> _exchangeDetails(
                     ],
                   ),
                 ),
+            _ExchangeReferenceDetails(controller: controller, quote: quote),
           ],
         );
       },
@@ -3615,10 +4072,18 @@ Future<void> _exchangeDetails(
             ? initial.route.rewards.single.name
             : null),
     icon: initial.route.rewardContainer != null
-        ? _exchangeIcon(initial.route.rewardContainer!, 52)
+        ? _exchangeIcon(
+            controller,
+            initial.route.rewardContainer!,
+            ItemDetailStyle.headerIcon,
+          )
         : initial.route.rewards.length == 1 &&
               initial.route.rewards.single.item != null
-        ? _exchangeIcon(initial.route.rewards.single.item!, 52)
+        ? _exchangeIcon(
+            controller,
+            initial.route.rewards.single.item!,
+            ItemDetailStyle.headerIcon,
+          )
         : null,
   ),
 );

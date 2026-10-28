@@ -49,6 +49,27 @@ void main() {
     );
   });
 
+  test('map mirror excludes the two erroneous sea nodes', () async {
+    final map = objectMap(
+      jsonDecode(
+        await rootBundle.loadString(
+          'packages/bdo_gathering_companion/assets/data/map_nodes.json',
+        ),
+      ),
+    );
+    final nodes = objectList(map['nodes']).map(objectMap).toList();
+    expect(map['datasetVersion'], '2026.10.09-beta-v5');
+    expect(nodes, hasLength(608));
+    expect(nodes.any((node) => ['2113', '2114'].contains(node['id'])), isFalse);
+    expect(nodes.any((node) => node['name'] == 'Epeiros Mountains'), isTrue);
+    final ids = nodes.map((node) => node['id']).toSet();
+    for (final node in nodes) {
+      for (final link in node['links'] as List) {
+        expect(ids, contains(link), reason: '${node['id']} -> $link');
+      }
+    }
+  });
+
   test('spot identities use material art or original hunting portraits', () {
     final expected = {
       'stillcoral-rusalka-mining': 'assets/icons/items/821255.webp',

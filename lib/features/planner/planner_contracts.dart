@@ -50,11 +50,15 @@ final class PlannerMarketRequest {
     required this.controller,
     required this.materials,
     this.materialNames = const <String>[],
+    this.forceRefresh = false,
+    this.includeAlternatives = true,
   });
 
   final ModeFeatureController controller;
   final List<MissingMaterial> materials;
   final List<String> materialNames;
+  final bool forceRefresh;
+  final bool includeAlternatives;
 
   /// The retained application refreshes every currently visible material and
   /// every substitute that can replace it. Refreshing only the selected name
@@ -65,7 +69,7 @@ final class PlannerMarketRequest {
     for (final material in materials) {
       yield material.name;
       final choice = material.choice;
-      if (choice != null) yield* choice.options;
+      if (includeAlternatives && choice != null) yield* choice.options;
     }
   }
 }
@@ -74,6 +78,8 @@ final class PlannerMarketRefresh {
   const PlannerMarketRefresh({
     required this.prices,
     required this.stock,
+    this.preorderPrices = const <String, double>{},
+    this.preorderObservedAt = const <String, int>{},
     required this.unlistedItemNames,
     required this.fetchedAt,
     required this.summary,
@@ -89,6 +95,8 @@ final class PlannerMarketRefresh {
 
   final Map<String, double> prices;
   final Map<String, double> stock;
+  final Map<String, double> preorderPrices;
+  final Map<String, int> preorderObservedAt;
   final Set<String> unlistedItemNames;
   final int fetchedAt;
   final String summary;

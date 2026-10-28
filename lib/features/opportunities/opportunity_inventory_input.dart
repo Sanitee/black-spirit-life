@@ -8,17 +8,21 @@ import '../../app/state/planner_application_controller.dart';
 import '../../domain/formatting/planner_formatters.dart';
 import '../../visual/visual.dart';
 import '../inventory/inventory_amount_input_formatter.dart';
+import '../planner/planner_inventory_input.dart'
+    show formatPlannerInventoryAmount;
 
 /// Edits the Planner's shared Inventory without treating owned inputs as free.
 class OpportunityInventoryInput extends StatefulWidget {
   const OpportunityInventoryInput({
     required this.controller,
     required this.itemName,
+    required this.iconBuilder,
     super.key,
   });
 
   final ModeFeatureController controller;
   final String itemName;
+  final Widget Function(double size) iconBuilder;
 
   @override
   State<OpportunityInventoryInput> createState() =>
@@ -43,11 +47,7 @@ class _OpportunityInventoryInputState extends State<OpportunityInventoryInput> {
     return 0;
   }
 
-  static String _compact(double value) {
-    if (value >= 1000000) return '${formatQuantity(value / 1000000)}M';
-    if (value >= 1000) return '${formatQuantity(value / 1000)}k';
-    return formatGroupedEditableQuantity(value);
-  }
+  static String _compact(double value) => formatPlannerInventoryAmount(value);
 
   @override
   void initState() {
@@ -159,10 +159,20 @@ class _OpportunityInventoryInputState extends State<OpportunityInventoryInput> {
     final scale = scaler.scale(13) / 13;
     final amountStyle = spec.typography.meta.copyWith(
       fontSize: 13,
-      fontWeight: FontWeight.w500,
+      height: 1.3,
+      color: spec.palette.text,
+      fontWeight: FontWeight.w600,
       fontFeatures: const [FontFeature.tabularFigures()],
     );
     final full = formatGroupedEditableQuantity(_owned);
+    final compactMeasurement = TextPainter(
+      text: TextSpan(text: _compact(_owned), style: amountStyle),
+      textDirection: Directionality.of(context),
+      textScaler: scaler,
+      maxLines: 1,
+    )..layout();
+    final iconExtent = math.max(48.0, compactMeasurement.width + 10);
+    compactMeasurement.dispose();
     final measurement = TextPainter(
       text: TextSpan(text: _text.text, style: amountStyle),
       textDirection: Directionality.of(context),
@@ -171,72 +181,85 @@ class _OpportunityInventoryInputState extends State<OpportunityInventoryInput> {
     )..layout();
     final editWidth = math
         .max(28 * scale, measurement.width + 12 * scale)
-        .clamp(28 * scale, 126 * scale);
+        .clamp(28 * scale, 168 * scale);
     measurement.dispose();
+    final fieldHeight = math.max(24.0, scaler.scale(13) * 1.3 + 8);
     return Column(
       mainAxisSize: MainAxisSize.min,
-      crossAxisAlignment: CrossAxisAlignment.end,
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(
-              'Inventory',
-              style: spec.typography.meta.copyWith(fontSize: 13),
+        widget.iconBuilder(iconExtent),
+        Container(
+          key: const ValueKey('inventory-amount-frame'),
+          width: _editing ? math.max(iconExtent, editWidth) : iconExtent,
+          height: fieldHeight,
+          decoration: BoxDecoration(
+            color: spec.palette.surfaceRaised,
+            border: Border.all(color: spec.palette.trimBright),
+            borderRadius: const BorderRadius.vertical(
+              bottom: Radius.circular(4),
             ),
-            const SizedBox(width: 6),
-            if (_editing)
-              SizedBox(
-                width: editWidth,
-                child: Focus(
-                  onKeyEvent: (_, event) {
-                    if (event is KeyDownEvent &&
-                        event.logicalKey == LogicalKeyboardKey.escape) {
-                      _cancelEdit();
-                      return KeyEventResult.handled;
-                    }
-                    return KeyEventResult.ignored;
-                  },
-                  child: Semantics(
-                    label: '${widget.itemName} inventory',
-                    child: TextField(
-                      controller: _text,
-                      focusNode: _focus,
-                      scrollController: _editScroll,
-                      keyboardType: const TextInputType.numberWithOptions(
-                        decimal: true,
-                      ),
-                      inputFormatters: const [InventoryAmountInputFormatter()],
-                      textAlign: TextAlign.right,
-                      style: amountStyle,
-                      cursorColor: spec.palette.primary,
-                      decoration: InputDecoration(
-                        isDense: true,
-                        contentPadding: const EdgeInsets.symmetric(
-                          horizontal: 4,
-                          vertical: 4,
+          ),
+          child: _editing
+              ? SizedBox(
+                  width: editWidth,
+                  child: Focus(
+                    onKeyEvent: (_, event) {
+                      if (event is KeyDownEvent &&
+                          event.logicalKey == LogicalKeyboardKey.escape) {
+                        _cancelEdit();
+                        return KeyEventResult.handled;
+                      }
+                      return KeyEventResult.ignored;
+                    },
+                    child: Semantics(
+                      label: '${widget.itemName} inventory',
+                      child: TextField(
+                        controller: _text,
+                        focusNode: _focus,
+                        scrollController: _editScroll,
+                        keyboardType: const TextInputType.numberWithOptions(
+                          decimal: true,
                         ),
-                        border: const UnderlineInputBorder(),
-                        focusedBorder: UnderlineInputBorder(
-                          borderSide: BorderSide(color: spec.palette.primary),
+                        inputFormatters: const [
+                          InventoryAmountInputFormatter(),
+                        ],
+                        textAlign: TextAlign.center,
+                        textAlignVertical: TextAlignVertical.center,
+                        strutStyle: const StrutStyle(
+                          fontSize: 13,
+                          height: 1.3,
+                          forceStrutHeight: true,
                         ),
+                        style: amountStyle,
+                        cursorColor: spec.palette.primary,
+                        decoration: InputDecoration(
+                          isDense: true,
+                          isCollapsed: true,
+                          filled: false,
+                          contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 4,
+                            vertical: 3,
+                          ),
+                          border: InputBorder.none,
+                          enabledBorder: InputBorder.none,
+                          focusedBorder: UnderlineInputBorder(
+                            borderSide: BorderSide(color: spec.palette.primary),
+                          ),
+                        ),
+                        onChanged: (_) => setState(() {
+                          _dirty = true;
+                          _error = null;
+                        }),
+                        onSubmitted: (_) {
+                          if (_commit()) _focus.unfocus();
+                        },
+                        onTapOutside: (_) => _focus.unfocus(),
                       ),
-                      onChanged: (_) => setState(() {
-                        _dirty = true;
-                        _error = null;
-                      }),
-                      onSubmitted: (_) {
-                        if (_commit()) _focus.unfocus();
-                      },
-                      onTapOutside: (_) => _focus.unfocus(),
                     ),
                   ),
-                ),
-              )
-            else
-              Tooltip(
-                message: full,
-                child: Semantics(
+                )
+              : Semantics(
                   label: '${widget.itemName} inventory',
                   value: full,
                   button: true,
@@ -244,17 +267,15 @@ class _OpportunityInventoryInputState extends State<OpportunityInventoryInput> {
                     key: const ValueKey('inventory-amount-button'),
                     onTap: _beginEdit,
                     borderRadius: BorderRadius.circular(3),
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 2,
-                        vertical: 4,
+                    child: Center(
+                      child: Text(
+                        _compact(_owned),
+                        style: amountStyle,
+                        textAlign: TextAlign.center,
                       ),
-                      child: Text(_compact(_owned), style: amountStyle),
                     ),
                   ),
                 ),
-              ),
-          ],
         ),
         if (_error != null) ...[
           const SizedBox(height: 3),

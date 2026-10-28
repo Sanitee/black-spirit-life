@@ -25,7 +25,7 @@ void main() {
           );
 
           expect(find.text('Materials'), findsOneWidget);
-          expect(find.text('Income'), findsOneWidget);
+          expect(find.text('Workers'), findsOneWidget);
           expect(find.text('Houses'), findsOneWidget);
           expect(find.text('Gather it yourself or use workers'), findsNothing);
           expect(find.text('Find nodes worth connecting'), findsNothing);
@@ -46,7 +46,7 @@ void main() {
           expect(home.width, width);
           expect(home.height.isFinite, isTrue);
           if (width == 420 && scale == 1) {
-            expect(home.height, lessThanOrEqualTo(320));
+            expect(home.height, lessThanOrEqualTo(350));
           }
           for (final artwork in tester.widgetList<ResourceMapMenuArtwork>(
             find.byType(ResourceMapMenuArtwork),

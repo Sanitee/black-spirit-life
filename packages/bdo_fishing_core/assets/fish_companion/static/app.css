@@ -731,17 +731,17 @@ option { background: #1c1e22; color: var(--text); }
 .grade-badge.other { background: rgba(139,144,150,.15); color: #c4c8cc; }
 .grade-frame {
   --grade-frame-color: #6f7479;
-  --grade-frame-glow: rgba(111,116,121,.16);
-  border: 2px solid var(--grade-frame-color) !important;
+  border: 1.2px solid var(--grade-frame-color) !important;
+  border-radius: 6px !important;
   background: linear-gradient(145deg,#24282d,#111316);
-  box-shadow: inset 0 0 0 1px rgba(0,0,0,.52), 0 0 10px var(--grade-frame-glow);
+  box-shadow: none;
   overflow: hidden;
 }
-.grade-frame.grade-prize { --grade-frame-color: #fa416d; --grade-frame-glow: rgba(250,65,109,.24); }
-.grade-frame.grade-rare { --grade-frame-color: #e9ad2f; --grade-frame-glow: rgba(233,173,47,.22); }
-.grade-frame.grade-high-quality { --grade-frame-color: #4d92f4; --grade-frame-glow: rgba(77,146,244,.22); }
-.grade-frame.grade-general { --grade-frame-color: #32b98b; --grade-frame-glow: rgba(50,185,139,.2); }
-.grade-frame.grade-unknown { --grade-frame-color: #5e6369; --grade-frame-glow: rgba(94,99,105,.12); }
+.grade-frame.grade-prize { --grade-frame-color: #fa416d; }
+.grade-frame.grade-rare { --grade-frame-color: rgba(246,194,50,.82); }
+.grade-frame.grade-high-quality { --grade-frame-color: rgba(4,179,241,.82); }
+.grade-frame.grade-general { --grade-frame-color: rgba(95,243,105,.82); }
+.grade-frame.grade-unknown { --grade-frame-color: #5e6369; }
 .loot-heading small { color: #aeb3b2; font-size: 11px; font-weight: 700; }
 .loot-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr)); gap: 8px; }
 .loot-item { min-width: 0; display: grid; grid-template-columns: 56px minmax(0,1fr) auto; gap: 10px; align-items: center; min-height: 70px; padding: 7px; border-radius: 10px; background: #1b1e22; border: 1px solid rgba(255,255,255,.065); }
@@ -2165,3 +2165,430 @@ option { background: #101820; }
 .tile-layer,
 .region-layer,
 .zone-highlight-layer { backdrop-filter: none; }
+
+/* Beta by Codex — field desk. The map and catch data remain the work surface.
+   Static materials only: no backdrop blur, fog animation or scaled-down type. */
+:root {
+  --bg: #141218;
+  --bg-soft: #1d1921;
+  --surface: #25212a;
+  --surface-2: #342b32;
+  --surface-3: #40343c;
+  --text: #f1e8d8;
+  --muted: #b9abb1;
+  --muted-2: #aa9aa3;
+  --gold: #c6a06b;
+  --gold-soft: #e2c89f;
+  --teal: #c88d91;
+  --teal-dark: #4b303c;
+  --line: rgba(198,160,107,var(--ui-border-opacity));
+  --line-strong: rgba(198,160,107,var(--ui-border-strong-opacity));
+  --glass-surface: linear-gradient(150deg,rgba(52,43,50,var(--ui-surface-opacity)),rgba(31,26,35,var(--ui-soft-opacity)) 72%);
+  --glass-soft: linear-gradient(145deg,rgba(46,38,46,var(--ui-soft-opacity)),rgba(26,23,31,var(--ui-soft-opacity)));
+  --glass-control: linear-gradient(180deg,rgba(56,45,53,var(--ui-control-opacity)),rgba(32,27,35,var(--ui-control-opacity)));
+  --glass-hover: linear-gradient(145deg,rgba(74,52,61,var(--ui-hover-opacity)),rgba(43,32,42,var(--ui-hover-strong-opacity)));
+  --glass-selected: linear-gradient(135deg,rgba(91,60,66,var(--ui-selected-opacity)),rgba(52,35,46,var(--ui-selected-strong-opacity)));
+  --glass-highlight: inset 0 1px 0 rgba(241,232,216,.1);
+  --radius: 10px;
+  font-size: 14px;
+}
+/* Override the earlier per-panel thin bars without changing scroll behavior. */
+* { scrollbar-width: none !important; }
+*::-webkit-scrollbar { display: none !important; }
+button, input, select { font: inherit; }
+button { transition: color 120ms ease, border-color 120ms ease, background-color 120ms ease; }
+button:focus-visible, a:focus-visible, summary:focus-visible { outline: 2px solid var(--gold); outline-offset: 3px; }
+.app-header, .glass-panel, .drawer-header, .profile-backdrop, .sale-backdrop, .time-picker-backdrop,
+#page-map .map-tools, #page-map .spot-drawer { backdrop-filter: none !important; }
+.map-viewport::before, .map-viewport::after { animation: none; will-change: auto; }
+.fishing-spot-point::before { animation: none; opacity: .45; }
+.map-pin::before, .map-pin::after { animation: none; }
+.map-pin::before { transform: scale(.72); opacity: .7; }
+.map-pin::after { opacity: 0; }
+.boot { background: radial-gradient(ellipse at 40% 25%,#342b32,#141218 65%); }
+.boot-mark { border-color: var(--gold); }
+#app .app-header {
+  width: 100%; zoom: 1; min-height: 64px; padding: 8px 18px;
+  grid-template-columns: max-content minmax(0,1fr) minmax(190px,260px); gap: 24px;
+  background: linear-gradient(180deg,#342b32,#211c25); border-bottom: 1px solid rgba(198,160,107,.34);
+  box-shadow: inset 0 1px rgba(241,232,216,.1),0 3px 14px #0005;
+}
+#app .app-header .primary-nav { justify-self: start; align-items: center; gap: 6px; }
+#app .app-header .nav-button { min-width: 0; min-height: 40px; padding: 0 14px; gap: 8px; border: 1px solid transparent; border-radius: 7px; }
+.nav-button span { font-size: 14px; }
+.nav-button::after { display: none; }
+.nav-button.is-active { color: var(--text); background: var(--glass-selected); border-color: rgba(198,160,107,.5) !important; box-shadow: var(--glass-highlight); }
+.nav-button:hover { background: #c88d9112; }
+.brand strong { font: 700 21px Georgia,serif; letter-spacing: -.02em; }
+.brand small { font-size: 10px; color: var(--gold); letter-spacing: .12em; }
+.profile-button { border-radius: 7px; min-height: 44px; }
+.profile-button-copy small { font-size: 10px; letter-spacing: .025em; text-transform: none; }
+.profile-button-copy strong { font-size: 13px; }
+.content-page { background: radial-gradient(ellipse at 5% 0,#3e2c362d,transparent 60%),#141218; }
+#app .desktop-content { width: 100%; max-width: 1740px; margin: 0 auto; padding: 22px 26px; zoom: 1; }
+.content-heading { margin-bottom: 18px; padding: 0; }
+.content-heading h1 { font: 700 30px Georgia,serif; letter-spacing: -.025em; }
+.content-heading .eyebrow { color: var(--gold); font-size: 10px; letter-spacing: .15em; margin-bottom: 6px; }
+.supporting-copy { display: none; }
+.surface { border-radius: 10px; }
+option { background: #25212a; }
+.primary-button, .time-picker-actions button:last-child { color: #231b23; background: linear-gradient(180deg,#dfbe8d,#bb9461); border-color: #e8d0a5; box-shadow: inset 0 1px #fff6,0 3px 9px #0004; }
+.primary-button:hover:not(:disabled) { filter: brightness(1.08); }
+.quiet-button:hover, .profile-button:hover, .gear-option:hover, .profile-equipment-option:hover { border-color: #c88d9180; }
+.method-button.is-active, .style-option.is-active, .time-mode-option.is-active,
+.journal-view-switch button.is-active, .stats-choice.is-active, .profile-method-switch button.is-active { color: var(--text); box-shadow: inset 0 0 0 1px #c6a06b70; }
+.style-option.is-active svg, .time-mode-option.is-active svg, .stats-choice.is-active > svg { color: var(--gold-soft); }
+.search-field:focus-within, select:focus, input:focus, .profile-form input:focus { border-color: var(--gold); box-shadow: 0 0 0 2px #c6a06b20; }
+.location-suggestions { background: #25212a; }
+.section-title > span { background: #c6a06b18; color: var(--gold-soft); border: 1px solid #c6a06b55; border-radius: 50%; }
+.section-title strong { color: var(--text); font-size: 17px; }
+.privacy-chip { font-size: 11px; background: transparent; border: 0; color: var(--muted); padding: 0; }
+
+/* Atlas: floating, content-sized instruments instead of full-height drawers. */
+@media (min-width: 821px) {
+  #page-map.is-active, #page-map.map-expanded {
+    grid-template-columns: 288px minmax(0,1fr) 352px;
+    grid-template-areas: "finder map details"; grid-template-rows: minmax(0,1fr);
+    padding: 16px; gap: 16px;
+  }
+  #page-map.is-active:has(.spot-drawer.is-closed), #page-map.map-expanded:has(.spot-drawer.is-closed) { grid-template-columns: 288px minmax(0,1fr); grid-template-areas: "finder map"; }
+  #page-map .map-stage { position: absolute; inset: 0; }
+  #page-map .map-tools, #page-map .spot-drawer {
+    align-self: start; max-height: 100%; border: 1px solid rgba(198,160,107,.4); border-radius: 10px;
+    background: linear-gradient(145deg,rgba(52,43,50,var(--ui-surface-opacity)),rgba(25,22,30,var(--ui-soft-opacity)));
+    box-shadow: inset 0 1px #f1e8d81f,0 7px 20px #0008;
+  }
+  #page-map .map-tools { padding: 16px 14px 12px; }
+  #page-map .map-results { flex: 0 1 auto; min-height: 0; max-height: calc(100vh - 345px); }
+  #page-map .map-tools:has(.atlas-filter-details[open]) .map-results { max-height: calc(100vh - 515px); }
+  #page-map.map-expanded { grid-template-columns: 246px minmax(0,1fr) 300px; }
+  #page-map.map-expanded:has(.spot-drawer.is-closed) { grid-template-columns: 246px minmax(0,1fr); }
+}
+#page-map .map-finder-title { font: 700 22px Georgia,serif; margin-bottom: 12px; }
+#page-map .search-field { height: 42px; background: #17141cdc; }
+#page-map .method-switch { min-height: 44px; }
+#page-map .method-button { font-size: 13px; }
+#page-map .method-button img { width: 30px; height: 30px; }
+.atlas-filter-details { margin-top: 12px; border-bottom: 1px solid var(--line); }
+#page-map .atlas-filter-details > summary { padding: 5px 2px 11px; color: var(--gold-soft); font-size: 13px; }
+#page-map .filter-grid { margin-top: 0; gap: 9px; }
+#page-map .check-row { margin: 12px 0; }
+#page-map .map-tool-footer { margin-top: 5px; padding-top: 4px; }
+#page-map .map-result { border-radius: 7px; min-height: 56px; padding: 7px; background: rgba(20,18,24,.45); border: 1px solid rgba(198,160,107,.1); }
+#page-map .map-results.has-results { gap: 6px; }
+#page-map .map-result > strong { font-size: 14px; }
+#page-map .map-result.is-selected { background: #c88d9126; border-color: #c88d9180; box-shadow: inset 3px 0 var(--gold); }
+#page-map .map-result:hover { background: #c88d911c; border-color: #c6a06b66; }
+#page-map .map-region-controls, #page-map .zoom-controls, #page-map .map-towns-toggle, #page-map .fishystuff-credit, #page-map #mapExpand { background: #25212af2; border-color: #c6a06b66; }
+#page-map .drawer-header { background: #302831f5; padding: 16px; box-shadow: none; }
+#page-map .drawer-header h2 { font: 700 21px Georgia,serif; }
+#page-map .drawer-method { color: var(--gold); }
+#page-map .drawer-source-details > summary { color: var(--muted); }
+#page-map .loot-content { padding: 14px; }
+#page-map .loot-item { background: #19151dcc; border: 1px solid rgba(198,160,107,.13); }
+#page-map .loot-rate-details > summary, #page-map .loot-rate-option > span { color: var(--gold-soft); }
+#page-map .region-opacity-control { background: #201a24; }
+#page-map .ui-opacity-control { font-size: 11px; }
+#page-map #uiOpacityValue { color: var(--muted); }
+
+/* Catch workbench: setup at left, useful review space at right. */
+#app .desktop-content .capture-layout { grid-template-columns: minmax(320px,370px) minmax(0,1fr); padding: 0; gap: 18px; border: 0; border-radius: 0; background: none; box-shadow: none; }
+#app .desktop-content .setup-card { padding: 18px; grid-template-columns: minmax(0,1fr); gap: 14px; }
+#app .desktop-content .setup-card > * { grid-column: 1; }
+#app .desktop-content .setup-card .method-switch.large, #app .desktop-content .setup-card .saved-setup-field { grid-column: 1; }
+#app .desktop-content .setup-card .location-control { grid-template-columns: minmax(0,1fr) 42px; }
+#app .desktop-content .setup-card .location-choose-map { width: 42px; padding: 0; }
+#app .desktop-content .setup-card .location-choose-map > span { display: none; }
+#app .desktop-content .setup-card .time-choice-row, #app .desktop-content .setup-card .range-entry-panel { grid-template-columns: minmax(0,1fr); }
+#app .desktop-content .setup-card .time-away-row { grid-column: 1; }
+#app .desktop-content .scan-card { padding: 20px; grid-template-columns: minmax(0,1fr) minmax(175px,.6fr); column-gap: 20px; }
+#app .desktop-content .drop-zone { min-height: 156px; border-radius: 8px; border-color: #c6a06b66; background: #c6a06b08; }
+.drop-icon { background: #c6a06b18; color: var(--gold); }
+#app .desktop-content .scan-actions { gap: 10px; }
+#app .desktop-content .privacy-note { margin: 8px 0 0; font-size: 11px; color: var(--muted); }
+#app .desktop-content .review-card { padding: 20px; }
+#app .desktop-content .review-footer { grid-template-columns: minmax(200px,1fr) minmax(130px,.6fr) auto; gap: 12px; }
+#app .desktop-content .recognized-fish { max-height: max(220px,calc(100vh - 515px)); }
+.recognized-row { border-radius: 7px; }
+.scan-summary { border: 0; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); border-radius: 0; background: none; box-shadow: none; }
+.empty-state.compact { min-height: 156px; padding: 24px; }
+
+/* Journal: filters stay in a narrow margin; records own the canvas. */
+#page-journal .desktop-content { display: grid; grid-template-columns: 214px minmax(0,1fr); grid-template-areas: "heading heading" "filters summary" "filters entries"; align-items: start; column-gap: 22px; }
+#page-journal .journal-heading { grid-area: heading; width: 100%; }
+#app #page-journal .journal-filter-bar { grid-area: filters; grid-template-columns: minmax(0,1fr); gap: 15px; padding: 16px; margin: 0; position: sticky; top: 20px; }
+#page-journal .journal-view-switch { height: auto; display: grid; gap: 3px; padding: 3px; }
+#page-journal .journal-view-switch button { min-height: 37px; }
+#page-journal .summary-strip { grid-area: summary; width: 100%; margin-bottom: 16px; gap: 0; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+#page-journal .summary-card { padding: 14px; border: 0; border-right: 1px solid var(--line); border-radius: 0; background: none; box-shadow: none; }
+#page-journal .summary-card:last-child { border-right: 0; }
+#page-journal .journal-list { grid-area: entries; min-width: 0; width: 100%; }
+#app #page-journal .journal-row { grid-template-columns: minmax(200px,1fr) minmax(220px,auto); grid-template-areas: "journal-info journal-values" "journal-fish journal-actions"; gap: 12px 20px; padding: 17px 18px; border-radius: 8px; background: linear-gradient(110deg,#30262e,#211c26 55%); }
+#page-journal .journal-row:hover { border-color: #c6a06b70; }
+#page-journal .journal-actions { justify-self: end; }
+#page-journal .fish-peek { min-width: 0; }
+#page-journal .journal-values { display: flex; justify-content: flex-end; gap: 20px; }
+.summary-card strong, .journal-value strong { font-variant-numeric: tabular-nums; }
+
+/* Statistics and dialogs use the same restrained reading hierarchy. */
+#app .desktop-content .stats-filter-bar { padding: 16px; gap: 12px; }
+#app .desktop-content .stats-columns { grid-template-columns: minmax(0,1fr) 320px; }
+#app .desktop-content .stats-list-head, #app .desktop-content .stats-row { grid-template-columns: minmax(145px,.9fr) minmax(200px,1.3fr) minmax(170px,.9fr); }
+.stats-value-metric strong { font-size: 20px; }
+.profile-backdrop, .sale-backdrop, .time-picker-backdrop { background: #100d14b8; }
+.profile-modal, .sale-modal, .time-picker { background: #25212a; border-color: #c6a06b66; border-radius: 12px; }
+.profile-modal-header, .sale-modal-header, .time-picker-header { background: linear-gradient(110deg,#3a2c34,#25212a); }
+.profile-modal-header h2, .sale-modal-header h2 { font: 700 25px Georgia,serif; }
+.profile-sidebar, .sale-record-panel, .sale-overview, .sale-offers, .time-picker-readout { background: #1e1922; }
+.profile-section, .profile-form-actions { background: #29212b; }
+.profile-section-icon { color: var(--gold); background: #c6a06b14; border-color: #c6a06b50; }
+.profile-list-item.is-selected { background: #c88d9120; border-color: #c88d9160; }
+.profile-derived-value, .sale-chosen-summary { background: #c6a06b0e; }
+.profile-derived-value strong, .sale-chosen-summary strong, .stats-value strong, .stats-value-metric strong, .detail-total strong { color: #d5c1a3; }
+.sale-grid-corner, .sale-destination-card, .sale-total-label, .sale-total-cell { background: #312631; }
+.sale-destination-card.is-selected { background: #4b3540; }
+.time-picker-dial { background: radial-gradient(circle,#3d2e3b,#211a26 72%); border-color: #c6a06b40; }
+.time-picker-number.is-selected { color: #211a26; }
+.toast { background: #e2c89f; color: #211a26; }
+@media (max-width: 1350px) {
+  #app .app-header { gap: 16px; }
+  #app .app-header .nav-button { padding: 0 10px; }
+  #app .desktop-content { padding: 18px; }
+  #app .desktop-content .stats-columns { grid-template-columns: minmax(0,1fr); }
+  #app .desktop-content .stats-detail { position: static; }
+  #page-map.is-active, #page-map.map-expanded { grid-template-columns: 264px minmax(0,1fr) 310px; gap: 12px; padding: 12px; }
+  #page-map.is-active:has(.spot-drawer.is-closed) { grid-template-columns: 264px minmax(0,1fr); }
+}
+@media (max-width: 1050px) {
+  #app .app-header { grid-template-columns: max-content 1fr auto; gap: 12px; padding: 8px 12px; }
+  #app .app-header .nav-button { padding: 0 9px; }
+  #app .app-header .nav-button svg { display: none; }
+  .profile-button { width: auto; grid-template-columns: 34px 14px !important; padding-right: 8px; }
+  .profile-button-copy { display: none; }
+  #app .desktop-content .review-footer { grid-template-columns: minmax(0,1fr) auto; }
+  #app .desktop-content .manual-add { grid-column: 1 / -1; }
+  #app .desktop-content .scan-card { grid-template-columns: minmax(0,1fr); grid-template-areas: "scan-title" "scan-drop" "scan-actions" "scan-privacy"; row-gap: 12px; }
+  #app .desktop-content .scan-actions { grid-template-columns: 1fr auto; align-items: center; }
+  #app .desktop-content .stats-filter-bar { grid-template-columns: repeat(6,minmax(0,1fr)); grid-template-areas: "location location location location location location" "profile profile mastery mastery resources resources" "style style style tool tool tool"; }
+}
+@media (max-width: 820px) {
+  #app .app-header { grid-template-columns: 1fr auto; }
+  #app .app-header .primary-nav { grid-row: 2; grid-column: 1 / -1; }
+  #app .app-header .header-actions { grid-row: 1; grid-column: 2; }
+  #app .desktop-content .capture-layout { grid-template-columns: minmax(0,1fr); }
+  #page-journal .desktop-content { grid-template-columns: minmax(0,1fr); grid-template-areas: "heading" "filters" "summary" "entries"; }
+  #app #page-journal .journal-filter-bar { position: static; grid-template-columns: repeat(2,minmax(0,1fr)); margin-bottom: 16px; }
+  #page-map.is-active, #page-map.map-expanded { padding: 0; gap: 0; }
+  #page-map.is-active, #page-map.map-expanded { grid-template-columns: 220px minmax(0,1fr); grid-template-areas: "finder map" "finder details"; }
+  #page-map.is-active:has(.spot-drawer.is-closed), #page-map.map-expanded:has(.spot-drawer.is-closed) { grid-template-columns: 220px minmax(0,1fr); grid-template-areas: "finder map"; }
+  #app .desktop-content .review-footer { grid-template-columns: minmax(0,1fr); }
+  #app .desktop-content .stats-list-head { display: none; }
+  #app .desktop-content .stats-row { grid-template-columns: minmax(0,1fr); }
+  #app .desktop-content .stats-filter-bar { grid-template-columns: 1fr; grid-template-areas: "location" "profile" "mastery" "resources" "style" "tool"; }
+}
+@media (max-width: 620px) {
+  #page-map.is-active, #page-map.map-expanded { grid-template-columns: minmax(0,1fr); grid-template-areas: "finder" "map" "details"; grid-template-rows: max-content 440px max-content; }
+  #page-map.is-active:has(.spot-drawer.is-closed), #page-map.map-expanded:has(.spot-drawer.is-closed) { grid-template-columns: minmax(0,1fr); grid-template-areas: "finder" "map"; grid-template-rows: max-content 440px; }
+}
+@media (prefers-reduced-motion: reduce) { *, *::before, *::after { transition: none !important; animation: none !important; } }
+
+/* Codex all-tabs trial — tide instruments. Presentation only: the accepted
+   atlas geometry, opacity controls, data and interaction targets stay intact. */
+:root {
+  --instrument-rim: rgba(226,200,159,.28);
+  --instrument-rim-active: rgba(226,200,159,.64);
+  --instrument-light: inset 0 1px 0 rgba(255,237,211,.16);
+  --instrument-contact: inset 0 -1px 0 rgba(0,0,0,.24),0 2px 3px rgba(0,0,0,.22);
+  --instrument-selected: inset 3px 0 0 var(--gold),inset 0 1px 0 rgba(255,237,211,.14);
+}
+
+/* The header reads as one instrument rail, not a second content panel. */
+#app .app-header {
+  background: linear-gradient(180deg,#42343e 0,#2d242e 52%,#211c25 100%);
+  border-bottom-color: var(--instrument-rim);
+  box-shadow: inset 0 1px rgba(255,237,211,.16),inset 0 -1px #120f17,0 3px 10px #0005;
+}
+.brand strong { text-shadow: 0 1px 1px #0008; }
+#app .app-header .nav-button {
+  background: transparent;
+  box-shadow: inset 0 1px 0 transparent,inset 0 -1px 0 transparent;
+}
+#app .app-header .nav-button.is-active {
+  color: var(--text);
+  background: linear-gradient(180deg,#62444d,#3d2c39);
+  border-color: var(--instrument-rim-active) !important;
+  box-shadow: var(--instrument-light),var(--instrument-contact);
+}
+.profile-button { box-shadow: var(--instrument-light),var(--instrument-contact); }
+
+/* Static directional light gives content depth without tinting the map. */
+.content-page {
+  background: radial-gradient(ellipse at 0 0,#67414c2b,transparent 48%),
+    radial-gradient(ellipse at 100% 100%,#c6a06b09,transparent 48%),#141218;
+}
+.content-heading h1 { color: var(--text); text-shadow: 0 2px 2px #0006; }
+.setup-card, .scan-card, .review-card, .stats-filter-bar, .stats-detail,
+#app #page-journal .journal-filter-bar {
+  background: linear-gradient(135deg,
+    rgba(67,51,60,var(--ui-soft-opacity)),
+    rgba(37,31,41,var(--ui-soft-opacity)) 46%,
+    rgba(23,19,28,var(--ui-soft-opacity)));
+  border-color: var(--instrument-rim);
+  border-top-color: rgba(241,220,190,.40);
+  border-left-color: rgba(241,220,190,.24);
+  border-right-color: rgba(15,11,20,.70);
+  border-bottom-color: rgba(15,11,20,.85);
+  box-shadow: inset 0 1px #fff1,inset 0 -1px #0006,0 2px 3px #0005,0 5px 10px #0003;
+}
+.section-title > span { box-shadow: inset 0 1px #f1e8d81f,0 1px 2px #0004; }
+
+/* Records sit on the desk; inset totals read as part of their parent record. */
+#app #page-journal .journal-row {
+  background: linear-gradient(125deg,#40323b,#2b232e 43%,#1d1922);
+  border-top-color: rgba(241,220,190,.33);
+  border-left-color: rgba(241,220,190,.22);
+  border-right-color: #17111d;
+  border-bottom-color: #100d16;
+  box-shadow: inset 0 1px #fff1,inset 0 -1px #0005,0 2px 3px #0005;
+}
+#app #page-journal .journal-row:hover { border-color: var(--instrument-rim-active); }
+#page-journal .summary-strip {
+  background: linear-gradient(180deg,#100e16,#201a24);
+  border-top-color: #08070c;
+  border-bottom-color: rgba(241,220,190,.18);
+  box-shadow: inset 0 2px 3px #0005;
+}
+.detail-total, .profile-derived-value, .sale-chosen-summary {
+  background: linear-gradient(180deg,#17131d,#251d29);
+  border-top-color: #0c0911;
+  border-bottom-color: rgba(241,220,190,.20);
+  box-shadow: inset 0 1px 3px #0005,inset 0 -1px #fff1;
+}
+#page-capture .recognized-row {
+  background: linear-gradient(135deg,#382d37,#211b27);
+  border-top-color: rgba(241,220,190,.25);
+  border-bottom-color: #120e18;
+  box-shadow: inset 0 1px #fff1,0 1px 2px #0004;
+}
+#page-map .map-result {
+  background: linear-gradient(135deg,rgba(53,40,49,.45),rgba(20,18,24,.45));
+  border-top-color: rgba(241,220,190,.20);
+  border-bottom-color: rgba(0,0,0,.40);
+  box-shadow: inset 0 1px #fff1,0 1px 2px #0004;
+}
+.profile-modal, .sale-modal, .time-picker {
+  border-color: var(--instrument-rim-active);
+  box-shadow: var(--instrument-light),0 18px 42px #0008;
+}
+.profile-modal-header, .sale-modal-header, .time-picker-header {
+  background: linear-gradient(120deg,#49333f,#2b222e 68%);
+  box-shadow: inset 0 1px #f1e8d81f,inset 0 -1px #0005;
+}
+
+/* Recessed input wells and raised actions have distinct silhouettes. */
+.search-field, select, input[type="number"], input[type="date"],
+input[type="datetime-local"], .form-field input, .manual-add input,
+.profile-form input[type="text"], .profile-form input[type="number"],
+.profile-form select, .time-clock-button {
+  box-shadow: inset 0 2px 3px #0005,inset 0 -1px #f1e8d812;
+}
+.search-field:focus-within, select:focus, input:focus,
+.profile-form input:focus, .profile-form select:focus {
+  border-color: var(--gold-soft);
+  box-shadow: inset 0 2px 3px #0004,0 0 0 2px #c6a06b24;
+}
+.quiet-button, .location-choose-map, .gear-option,
+.profile-equipment-option, .setup-delete {
+  box-shadow: var(--instrument-light),var(--instrument-contact);
+}
+.method-switch, .style-switch, .time-mode-switch, .journal-view-switch,
+.stats-choice-row, .tool-filter .stats-choice-row, .profile-method-switch {
+  background: rgba(20,16,24,var(--ui-surface-opacity));
+  box-shadow: inset 0 1px 3px #0005,inset 0 -1px #f1e8d80c;
+}
+.method-button.is-active, .style-option.is-active, .time-mode-option.is-active,
+.journal-view-switch button.is-active, .stats-choice.is-active,
+.profile-method-switch button.is-active, .gear-option.is-active,
+.profile-equipment-option.is-active {
+  color: var(--text);
+  background: var(--glass-selected);
+  border-color: var(--instrument-rim-active);
+  box-shadow: var(--instrument-light),inset 0 0 0 1px #c6a06b55,0 2px 3px #0005;
+}
+.primary-button, .time-picker-actions button:last-child {
+  background: linear-gradient(180deg,#ead1aa,#c8a16c 72%,#b68d58);
+  border-color: #efd9b6;
+  box-shadow: inset 0 1px #fff8,inset 0 -1px #573c3455,0 2px 4px #0005;
+}
+.primary-button:hover:not(:disabled) { filter: none; }
+
+/* Selection stays unmistakable after the pointer leaves. No grade-frame edits. */
+#page-map .map-result.is-selected, .profile-list-item.is-selected,
+.stats-row.is-active {
+  border-color: var(--instrument-rim-active);
+  background: var(--glass-selected);
+  box-shadow: var(--instrument-selected);
+}
+.gear-option.is-active, .profile-equipment-option.is-active,
+.quiet-button[aria-pressed="true"], .time-clock-button.has-value {
+  border-color: var(--instrument-rim-active);
+}
+#page-map #regionToggle[aria-pressed="true"] {
+  color: var(--gold-soft); background: #c6a06b1c;
+}
+.profile-list-item em { color: var(--gold-soft); background: #c6a06b18; }
+.location-suggestion.is-active, .location-suggestion:hover,
+.sale-quote-cell.is-selected, .sale-total-cell.is-selected {
+  background: #c88d911c;
+}
+.sale-destination-card.is-selected { box-shadow: inset 0 2px var(--gold); }
+.time-picker-hand i { background: #3d2c39; }
+.check-row input:checked + .check-box { box-shadow: inset 0 0 0 4px #30222e; }
+.drop-zone.is-over { border-color: var(--gold-soft); background: #c6a06b14; }
+.file-pill { color: var(--text); background: #c88d9118; }
+
+/* Feedback is finite and local: no element movement, new timers or idle layers. */
+.nav-button, .profile-button, .quiet-button, .primary-button, .method-button,
+.style-option, .time-mode-option, .journal-view-switch button, .stats-choice,
+.profile-method-switch button, .gear-option, .profile-equipment-option,
+.location-choose-map, .profile-list-item, .stats-row, #page-map .map-result,
+.drop-zone, .time-picker-actions button {
+  transition: border-color 140ms ease,background-color 140ms ease,
+    box-shadow 140ms ease,color 140ms ease;
+}
+@media (hover: hover) and (pointer: fine) {
+  #app .app-header .nav-button:hover:not(:disabled),
+  .profile-button:hover:not(:disabled), .quiet-button:hover:not(:disabled),
+  .location-choose-map:hover:not(:disabled), .method-button:hover:not(:disabled),
+  .style-option:hover:not(:disabled), .time-mode-option:hover:not(:disabled),
+  .journal-view-switch button:hover:not(:disabled), .stats-choice:hover:not(:disabled),
+  .profile-method-switch button:hover:not(:disabled), .gear-option:hover:not(:disabled),
+  .profile-equipment-option:hover:not(:disabled) {
+    border-color: var(--instrument-rim-active);
+    box-shadow: inset 0 1px #f4d5b34d,inset 0 -1px #0004,0 0 0 1px #c6a06b16;
+  }
+  #page-map .map-result:hover:not(:disabled), .profile-list-item:hover:not(:disabled),
+  .stats-row:hover:not(:disabled) {
+    border-color: var(--instrument-rim-active);
+    box-shadow: inset 0 1px #f4d5b333,inset 3px 0 var(--gold);
+  }
+  .primary-button:hover:not(:disabled), .time-picker-actions button:last-child:hover:not(:disabled) {
+    box-shadow: inset 0 1px #fffa,0 0 0 1px #e2c89f40,0 2px 5px #0005;
+  }
+  .drop-zone:hover { border-color: var(--gold-soft); background: #c6a06b14; }
+  .sale-total-cell:hover { background: #c88d911c; }
+}
+.nav-button:active:not(:disabled), .profile-button:active:not(:disabled),
+.quiet-button:active:not(:disabled), .primary-button:active:not(:disabled),
+.method-button:active:not(:disabled), .style-option:active:not(:disabled),
+.time-mode-option:active:not(:disabled), .stats-choice:active:not(:disabled),
+.gear-option:active:not(:disabled), .profile-equipment-option:active:not(:disabled),
+.location-choose-map:active:not(:disabled), .time-picker-actions button:active:not(:disabled) {
+  box-shadow: inset 0 2px 4px #0006,inset 0 -1px #f1e8d81a;
+}
+button:focus-visible, a:focus-visible, summary:focus-visible {
+  outline-color: var(--gold-soft);
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { transition: none !important; animation: none !important; }
+}

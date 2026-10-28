@@ -299,21 +299,16 @@ void main() {
         ),
       );
       final decoration = fallbackTile.decoration! as BoxDecoration;
-      final gradient = decoration.gradient! as LinearGradient;
-      expect(gradient.colors, const <Color>[
-        Color(0xFF174D7E),
-        Color(0xFF0A2744),
-      ]);
-      expect(decoration.border!.top.color, const Color(0xFFC3A04B));
-      expect(decoration.border!.top.width, 1.3);
-      expect(decoration.borderRadius, BorderRadius.circular(1));
-      expect(decoration.boxShadow, const <BoxShadow>[
-        BoxShadow(
-          color: Color(0x44352516),
-          blurRadius: 5,
-          offset: Offset(0, 2),
-        ),
-      ]);
+      final frame = fallbackTile.foregroundDecoration! as BoxDecoration;
+      expect(decoration.color, IlluminatedLedgerSpec.palette.canvasDeep);
+      expect(decoration.gradient, isNull);
+      expect(decoration.border, isNull); // One foreground frame, not two.
+      expect(
+        frame.border!.top.color,
+        IlluminatedLedgerSpec.palette.trimBright.withAlpha(140),
+      );
+      expect(frame.border!.top.width, 1.2);
+      expect(frame.borderRadius, BorderRadius.circular(54 * .12));
       expect(
         tester
             .widget<Text>(

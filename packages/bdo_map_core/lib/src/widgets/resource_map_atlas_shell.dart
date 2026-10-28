@@ -1,9 +1,9 @@
-import 'dart:ui';
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 
 import 'resource_map_chrome_theme.dart';
+import 'resource_map_field_desk.dart';
 import 'resource_map_panel_metrics.dart';
 import 'resource_map_pill.dart';
 
@@ -454,11 +454,7 @@ class ResourceMapAtlasDock extends StatelessWidget {
           label: 'Map tools',
           child: ClipRRect(
             borderRadius: radius,
-            child: BackdropFilter(
-              filter: ImageFilter.blur(
-                sigmaX: 18 * math.min(1, chrome.materialOpacity / .6),
-                sigmaY: 18 * math.min(1, chrome.materialOpacity / .6),
-              ),
+            child: ResourceMapReadingPlane(
               child: DecoratedBox(
                 decoration: BoxDecoration(
                   gradient: chrome.taskStripGradient,
@@ -518,13 +514,14 @@ class _AtlasDockButton extends StatefulWidget {
 
 class _AtlasDockButtonState extends State<_AtlasDockButton> {
   bool _hovered = false;
+  bool _focused = false;
 
   @override
   Widget build(BuildContext context) {
     final action = widget.action;
     final chrome = context.mapChrome;
     final ghost = _ghostLedger(context);
-    final active = action.selected || _hovered;
+    final active = action.selected || _hovered || _focused;
     final label = ghost ? action.label.toUpperCase() : action.label;
     final labelStyle = TextStyle(
       color: chrome.ink,
@@ -561,6 +558,7 @@ class _AtlasDockButtonState extends State<_AtlasDockButton> {
             color: Colors.transparent,
             child: InkWell(
               onTap: action.onPressed,
+              onFocusChange: (value) => setState(() => _focused = value),
               borderRadius: BorderRadius.circular(ghost ? 0 : 4),
               child: SizedBox(
                 width: buttonWidth,
@@ -577,12 +575,15 @@ class _AtlasDockButtonState extends State<_AtlasDockButton> {
                       width: buttonWidth - 4,
                       height: 46,
                       decoration: BoxDecoration(
-                        color: _hovered
+                        color: _hovered || _focused
                             ? chrome.primary.withValues(
                                 alpha: ghost ? .055 : .1,
                               )
                             : Colors.transparent,
                         borderRadius: BorderRadius.circular(ghost ? 0 : 4),
+                        border: Border.all(
+                          color: _focused ? chrome.primary : Colors.transparent,
+                        ),
                       ),
                     ),
                     Row(
@@ -880,6 +881,7 @@ class _AtlasCommandRowState extends State<_AtlasCommandRow> {
           ),
           child: ResourceMapPill(
             selected: action.selected,
+            leadingWidth: 52,
             child: Material(
               key: action.key,
               color: Colors.transparent,
@@ -892,9 +894,9 @@ class _AtlasCommandRowState extends State<_AtlasCommandRow> {
                   ),
                   child: Row(
                     children: <Widget>[
-                      const SizedBox(width: 10),
-                      SizedBox.square(
-                        dimension: ResourceMapAtlasCommandMenu.artworkSize,
+                      const SizedBox(width: 8),
+                      ResourceMapArtworkMount(
+                        size: ResourceMapAtlasCommandMenu.artworkSize,
                         child: IconTheme(
                           data: IconThemeData(
                             size: ResourceMapAtlasCommandMenu.artworkSize,
@@ -903,7 +905,7 @@ class _AtlasCommandRowState extends State<_AtlasCommandRow> {
                           child: action.icon,
                         ),
                       ),
-                      SizedBox(width: ghost ? 10 : 10),
+                      const SizedBox(width: 12),
                       Expanded(
                         child: Text(
                           action.label,
@@ -954,62 +956,109 @@ class ResourceMapAtlasSearch extends StatelessWidget {
   Widget build(BuildContext context) {
     final chrome = context.mapChrome;
     final ghost = _ghostLedger(context);
-    return Row(
-      children: <Widget>[
-        SizedBox(width: ghost ? 4 : 3),
-        ?scopeControl,
-        if (scopeControl != null)
-          Container(
-            width: 1,
-            height: ghost ? 18 : 24,
-            color: chrome.softOutline.withValues(alpha: ghost ? .4 : .68),
-          ),
-        const SizedBox(width: 10),
-        Expanded(
-          child: TextField(
-            key: const ValueKey<String>('resource-map-atlas-search-field'),
-            controller: controller,
-            focusNode: focusNode,
-            textInputAction: TextInputAction.search,
-            onChanged: onChanged,
-            onSubmitted: onSubmitted,
-            onTap: onTap,
-            onTapAlwaysCalled: true,
-            style: TextStyle(
-              color: chrome.ink,
-              fontSize: ResourceMapPanelMetrics.primary,
-              height: 1.2,
-              fontWeight: FontWeight.w400,
-            ),
-            decoration: InputDecoration(
-              hintText: hintText,
-              hintStyle: TextStyle(
-                color: chrome.text,
-                fontSize: ResourceMapPanelMetrics.primary,
-                fontWeight: FontWeight.w500,
-              ),
-              border: InputBorder.none,
-              filled: false,
-              fillColor: Colors.transparent,
-              enabledBorder: InputBorder.none,
-              focusedBorder: InputBorder.none,
-              isDense: true,
-              contentPadding: const EdgeInsets.symmetric(vertical: 9),
-            ),
-          ),
+    return AnimatedBuilder(
+      animation: focusNode,
+      builder: (context, child) => TweenAnimationBuilder<double>(
+        key: const ValueKey('resource-map-search-focus-finish'),
+        tween: Tween(begin: 0, end: focusNode.hasFocus ? 1 : 0),
+        duration: ResourceMapAtlasMotion.resolve(
+          context,
+          ResourceMapAtlasMotion.quick,
         ),
-        if (controller.text.isNotEmpty)
-          _AtlasCompactButton(
-            tooltip: 'Clear search',
-            onPressed: onClear,
-            icon: Icons.close_rounded,
+        curve: Curves.easeOutCubic,
+        builder: (context, emphasis, child) => CustomPaint(
+          foregroundPainter: _AtlasSearchFocusEdge(chrome.primary, emphasis),
+          child: child,
+        ),
+        child: child,
+      ),
+      child: Row(
+        children: <Widget>[
+          SizedBox(width: ghost ? 4 : 3),
+          ?scopeControl,
+          if (scopeControl != null)
+            Container(
+              width: 1,
+              height: ghost ? 18 : 24,
+              color: chrome.softOutline.withValues(alpha: ghost ? .4 : .68),
+            ),
+          const SizedBox(width: 10),
+          Expanded(
+            child: TextField(
+              key: const ValueKey<String>('resource-map-atlas-search-field'),
+              controller: controller,
+              focusNode: focusNode,
+              textInputAction: TextInputAction.search,
+              onChanged: onChanged,
+              onSubmitted: onSubmitted,
+              onTap: onTap,
+              onTapAlwaysCalled: true,
+              style: TextStyle(
+                color: chrome.ink,
+                fontSize: ResourceMapPanelMetrics.primary,
+                height: 1.2,
+                fontWeight: FontWeight.w400,
+              ),
+              decoration: InputDecoration(
+                hintText: hintText,
+                hintStyle: TextStyle(
+                  color: chrome.text,
+                  fontSize: ResourceMapPanelMetrics.primary,
+                  fontWeight: FontWeight.w500,
+                ),
+                border: InputBorder.none,
+                filled: false,
+                fillColor: Colors.transparent,
+                enabledBorder: InputBorder.none,
+                focusedBorder: InputBorder.none,
+                isDense: true,
+                contentPadding: const EdgeInsets.symmetric(vertical: 9),
+              ),
+            ),
           ),
-        const SizedBox(width: 4),
-        Icon(Icons.search_rounded, size: 22, color: chrome.text),
-        const SizedBox(width: 11),
-      ],
+          if (controller.text.isNotEmpty)
+            _AtlasCompactButton(
+              tooltip: 'Clear search',
+              onPressed: onClear,
+              icon: Icons.close_rounded,
+            ),
+          const SizedBox(width: 4),
+          Icon(Icons.search_rounded, size: 22, color: chrome.text),
+          const SizedBox(width: 11),
+        ],
+      ),
     );
   }
+}
+
+/// Paints inside the existing search well without shifting its text or changing
+/// the controller's subtree. The foreground never intercepts map/panel input.
+class _AtlasSearchFocusEdge extends CustomPainter {
+  const _AtlasSearchFocusEdge(this.color, this.emphasis);
+  final Color color;
+  final double emphasis;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    if (emphasis <= 0 || size.width < 4 || size.height < 4) return;
+    canvas.drawRRect(
+      RRect.fromRectAndRadius(
+        (Offset.zero & size).deflate(1),
+        const Radius.circular(8),
+      ),
+      Paint()
+        ..color = color.withValues(alpha: emphasis)
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 1.5,
+    );
+  }
+
+  @override
+  bool? hitTest(Offset position) => false;
+
+  @override
+  bool shouldRepaint(_AtlasSearchFocusEdge oldDelegate) =>
+      color != oldDelegate.color || emphasis != oldDelegate.emphasis;
 }
 
 /// A restrained top search instrument. Results open directly beneath the
@@ -1470,7 +1519,7 @@ class _AtlasCalloutBorder extends ShapeBorder {
       _AtlasCalloutBorder(tailOnLeft: tailOnLeft, side: side.scale(t));
 }
 
-class _AtlasCompactButton extends StatelessWidget {
+class _AtlasCompactButton extends StatefulWidget {
   const _AtlasCompactButton({
     super.key,
     required this.tooltip,
@@ -1483,20 +1532,47 @@ class _AtlasCompactButton extends StatelessWidget {
   final IconData icon;
 
   @override
+  State<_AtlasCompactButton> createState() => _AtlasCompactButtonState();
+}
+
+class _AtlasCompactButtonState extends State<_AtlasCompactButton> {
+  bool _hovered = false;
+  bool _focused = false;
+  bool _pressed = false;
+
+  @override
   Widget build(BuildContext context) {
     final chrome = context.mapChrome;
     return Tooltip(
-      message: tooltip,
+      message: widget.tooltip,
       child: Material(
         color: Colors.transparent,
         borderRadius: BorderRadius.circular(8),
         clipBehavior: Clip.antiAlias,
         child: InkWell(
-          onTap: onPressed,
-          child: SizedBox.square(
-            dimension: ResourceMapPanelMetrics.controlTarget,
+          onTap: widget.onPressed,
+          onHover: (value) => setState(() => _hovered = value),
+          onFocusChange: (value) => setState(() => _focused = value),
+          onHighlightChanged: (value) => setState(() => _pressed = value),
+          child: AnimatedContainer(
+            duration: ResourceMapAtlasMotion.resolve(
+              context,
+              ResourceMapAtlasMotion.quick,
+            ),
+            curve: Curves.easeOutCubic,
+            width: ResourceMapPanelMetrics.controlTarget,
+            height: ResourceMapPanelMetrics.controlTarget,
+            decoration: BoxDecoration(
+              color: chrome.primary.withValues(
+                alpha: _pressed ? .2 : (_hovered || _focused ? .1 : 0),
+              ),
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(
+                color: _focused ? chrome.primary : Colors.transparent,
+              ),
+            ),
             child: Icon(
-              icon,
+              widget.icon,
               size: ResourceMapPanelMetrics.controlGlyph,
               color: chrome.ink,
             ),
@@ -1530,24 +1606,28 @@ class _AtlasGlass extends StatelessWidget {
       ),
       child: ClipRRect(
         borderRadius: borderRadius,
-        child: BackdropFilter(
-          filter: ImageFilter.blur(
-            sigmaX: 18 * math.min(1, chrome.materialOpacity / .6),
-            sigmaY: 18 * math.min(1, chrome.materialOpacity / .6),
-          ),
+        child: ResourceMapReadingPlane(
           child: Material(
             color: Colors.transparent,
             surfaceTintColor: Colors.transparent,
             child: DecoratedBox(
               decoration: BoxDecoration(
-                gradient: chrome.readingSurfaceGradient,
+                gradient: resourceMapRaisedSurfaceGradient(
+                  chrome,
+                  chrome.readingSurfaceGradient,
+                ),
                 borderRadius: borderRadius,
               ),
               child: CustomPaint(
+                painter: _MapGlassFace(
+                  shade: chrome.chromeBase,
+                  opacity: chrome.materialOpacity,
+                ),
                 foregroundPainter: _MapGlassLight(
                   radius: radius,
-                  light: chrome.primary,
+                  light: chrome.accent,
                   opacity: chrome.materialOpacity,
+                  lightSurface: chrome.chromeRaised.computeLuminance() > .45,
                 ),
                 child: Theme(
                   data: Theme.of(context).copyWith(
@@ -1575,82 +1655,107 @@ class _AtlasGlass extends StatelessWidget {
   }
 }
 
-/// One illuminated rim with a quiet six-pixel reflection. It never paints
-/// across the item artwork or text, and it introduces no animation work.
-class _MapGlassLight extends CustomPainter {
-  const _MapGlassLight({
-    required this.radius,
-    required this.light,
-    this.opacity = 1,
-  });
-  final double radius;
-  final Color light;
+/// A short lower lip anchors the polished face. Broad reflected light is baked
+/// into the reading gradient's RGB without adding another transparent layer.
+class _MapGlassFace extends CustomPainter {
+  const _MapGlassFace({required this.shade, required this.opacity});
+
+  final Color shade;
   final double opacity;
 
   @override
   void paint(Canvas canvas, Size size) {
     if (size.width < 16 || size.height < 16) return;
-    final rect = (Offset.zero & size).deflate(.6);
-    final shape = RRect.fromRectAndRadius(rect, Radius.circular(radius));
-    // A dark lower edge and a second inset reflection give the pane thickness
-    // without laying texture over its reading area.
-    canvas.drawRRect(
-      shape.deflate(1.2).shift(const Offset(0, .6)),
+    final lowerLip = Rect.fromLTWH(0, size.height - 5, size.width, 5);
+    canvas.drawRect(
+      lowerLip,
       Paint()
-        ..style = PaintingStyle.stroke
-        ..strokeWidth = 1.4
         ..shader = LinearGradient(
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
           colors: [
-            const Color(0x00FFFFFF),
-            const Color(0x00000000),
-            const Color(0xA0000813).withValues(alpha: .63 * opacity),
+            shade.withValues(alpha: 0),
+            Color.lerp(
+              shade,
+              Colors.black,
+              .65,
+            )!.withValues(alpha: .42 * opacity),
           ],
-          stops: [0, .7, 1],
-        ).createShader(rect),
+        ).createShader(lowerLip),
     );
+  }
+
+  @override
+  bool? hitTest(Offset position) => false;
+
+  @override
+  bool shouldRepaint(covariant _MapGlassFace oldDelegate) =>
+      shade != oldDelegate.shade || opacity != oldDelegate.opacity;
+}
+
+/// Polished outer bevel, inset reflection and shaded lower cut. All detail is
+/// confined to the edge; there is no texture over text or animated lighting.
+class _MapGlassLight extends CustomPainter {
+  const _MapGlassLight({
+    required this.radius,
+    required this.light,
+    this.opacity = 1,
+    this.lightSurface = false,
+  });
+  final double radius;
+  final Color light;
+  final double opacity;
+  final bool lightSurface;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    if (size.width < 16 || size.height < 16) return;
+    final rect = (Offset.zero & size).deflate(.75);
+    final shape = RRect.fromRectAndRadius(
+      rect,
+      Radius.circular(math.max(0, radius - .75)),
+    );
+    // A continuous cut and a reversed inner reflection describe thickness.
+    // Two rounded strokes replace a layered rim/path mask; both stay inside
+    // the existing clip and leave the entire reading centre untouched.
     canvas.drawRRect(
       shape,
       Paint()
         ..style = PaintingStyle.stroke
-        ..strokeWidth = 1
+        ..strokeWidth = 1.5
         ..shader = LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
           colors: [
-            Color.lerp(
-              light,
-              Colors.white,
-              .45,
-            )!.withValues(alpha: .48 * opacity),
-            light.withValues(alpha: .12 * opacity),
-            light.withValues(alpha: .18 * opacity),
+            light.withValues(alpha: (lightSurface ? .94 : .90) * opacity),
+            light.withValues(alpha: .28 * opacity),
+            Colors.black.withValues(
+              alpha: (lightSurface ? .43 : .72) * opacity,
+            ),
           ],
+          stops: const [0, .16, 1],
         ).createShader(rect),
-    );
-    canvas.save();
-    canvas.clipPath(
-      Path.combine(
-        PathOperation.difference,
-        Path()..addRRect(shape),
-        Path()..addRRect(shape.deflate(6)),
-      ),
     );
     canvas.drawRRect(
-      shape,
+      shape.deflate(1.75),
       Paint()
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 1
         ..shader = LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
           colors: [
-            light.withValues(alpha: .06 * opacity),
+            Colors.white.withValues(
+              alpha: (lightSurface ? .48 : .30) * opacity,
+            ),
             light.withValues(alpha: 0),
+            Colors.black.withValues(
+              alpha: (lightSurface ? .20 : .38) * opacity,
+            ),
           ],
-          stops: const [0, .25],
+          stops: const [0, .28, 1],
         ).createShader(rect),
     );
-    canvas.restore();
   }
 
   @override
@@ -1660,5 +1765,6 @@ class _MapGlassLight extends CustomPainter {
   bool shouldRepaint(covariant _MapGlassLight oldDelegate) =>
       radius != oldDelegate.radius ||
       light != oldDelegate.light ||
-      opacity != oldDelegate.opacity;
+      opacity != oldDelegate.opacity ||
+      lightSurface != oldDelegate.lightSurface;
 }

@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:math' as math;
 import 'dart:ui' show PointerDeviceKind;
 
 import 'package:flutter/material.dart';
@@ -7,12 +6,16 @@ import 'package:flutter/material.dart';
 import '../../domain/formatting/planner_formatters.dart';
 import '../../domain/models/craft_mode.dart';
 import '../../shared/overlays/anchored_popover.dart';
+import '../../visual/components/app_interaction_frame.dart';
 import '../../visual/visual.dart';
 import '../shared/recipe_variant_selector.dart';
+import '../shared/workshop_presentation.dart';
 import 'recipe_book_controller.dart';
 import 'recipe_book_item_info_view.dart';
 import 'recipe_book_keys.dart';
+import 'recipe_book_preview_routes.dart';
 import 'recipe_book_usage.dart';
+import 'recipe_ingredient_line.dart';
 
 class RecipeBookUsedInPanel extends StatefulWidget {
   const RecipeBookUsedInPanel({
@@ -58,37 +61,26 @@ class _RecipeBookUsedInPanelState extends State<RecipeBookUsedInPanel> {
         builder: (context, constraints) {
           final height = constraints.maxHeight.isFinite
               ? constraints.maxHeight
-              : 610.0;
-          return SizedBox(
+              : itemReferenceCardHeight(context);
+          return ConstrainedBox(
             key: RecipeBookKeys.usedInPanel(widget.sourceName),
-            height: _desiredHeight(height, visibleEntries),
+            constraints: BoxConstraints(maxHeight: height),
             child: AppSurface(
               role: AppSurfaceRole.modal,
-              padding: const EdgeInsets.all(14),
+              padding: const EdgeInsets.all(16),
               clipBehavior: Clip.antiAlias,
               semanticLabel: '${widget.sourceName} used in recipes',
               child: Column(
+                mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: <Widget>[
                   _header(context, spec),
-                  const SizedBox(height: 12),
-                  if (widget.snapshot.modeCounts.isNotEmpty) ...<Widget>[
-                    Wrap(
-                      spacing: 6,
-                      runSpacing: 6,
-                      children: <Widget>[
-                        for (final mode in CraftMode.values)
-                          if (widget.snapshot.modeCounts[mode]
-                              case final count?)
-                            _UseBadge(
-                              label: '${mode.label} $count',
-                              emphasized:
-                                  mode == widget.controller.modeController.mode,
-                            ),
-                      ],
+                  const Padding(
+                    padding: EdgeInsets.symmetric(
+                      vertical: (ItemDetailStyle.sectionGap - 1) / 2,
                     ),
-                    const SizedBox(height: 10),
-                  ],
+                    child: WorkshopSectionRule(emphasis: true),
+                  ),
                   if (widget.snapshot.entries.length >= 12) ...<Widget>[
                     SizedBox(
                       height: 40,
@@ -115,29 +107,24 @@ class _RecipeBookUsedInPanelState extends State<RecipeBookUsedInPanel> {
                     ),
                     const SizedBox(height: 10),
                   ],
-                  Divider(
-                    height: 1,
-                    thickness: 1,
-                    color: spec.palette.trim.withAlpha(116),
-                  ),
-                  const SizedBox(height: 10),
-                  Expanded(
+                  Flexible(
                     child: visibleEntries.isEmpty
                         ? _empty(context, filtered: _search.text.isNotEmpty)
                         : ScrollConfiguration(
                             behavior: const _UsedInScrollBehavior(),
                             child: ListView.separated(
+                              shrinkWrap: true,
                               key: RecipeBookKeys.usedInScroll(
                                 widget.sourceName,
                               ),
                               controller: _scroll,
-                              padding: const EdgeInsets.only(
-                                right: 10,
-                                bottom: 4,
-                              ),
+                              padding: EdgeInsets.zero,
                               itemCount: visibleEntries.length,
-                              separatorBuilder: (_, _) =>
-                                  const SizedBox(height: 8),
+                              separatorBuilder: (_, _) => Divider(
+                                height: 25,
+                                thickness: 1,
+                                color: spec.palette.trim.withAlpha(90),
+                              ),
                               itemBuilder: (context, index) {
                                 final entry = visibleEntries[index];
                                 final entryKey = _entryKey(entry);
@@ -150,6 +137,14 @@ class _RecipeBookUsedInPanelState extends State<RecipeBookUsedInPanel> {
                                   controller: widget.controller,
                                   sourceName: widget.sourceName,
                                   entry: entry,
+                                  showWorkstation:
+                                      widget.snapshot.entries
+                                          .where(
+                                            (candidate) =>
+                                                candidate.name == entry.name,
+                                          )
+                                          .length >
+                                      1,
                                   expanded: _expanded.contains(entryKey),
                                   selectedVariantId: _selectedVariantFor(entry),
                                   onToggleExpanded: () => setState(() {
@@ -182,44 +177,25 @@ class _RecipeBookUsedInPanelState extends State<RecipeBookUsedInPanel> {
   Widget _header(BuildContext context, ThemeSpec spec) => Row(
     crossAxisAlignment: CrossAxisAlignment.start,
     children: <Widget>[
-      RecipeBookItemIcon(
-        controller: widget.controller,
-        name: widget.sourceName,
-        size: 48,
-        anchorId: 'used-in:${widget.sourceName}:header',
+      WorkshopItemMount(
+        child: RecipeBookItemIcon(
+          controller: widget.controller,
+          name: widget.sourceName,
+          size: ItemDetailStyle.headerIcon,
+          anchorId: 'used-in:${widget.sourceName}:header',
+        ),
       ),
-      const SizedBox(width: 11),
+      const SizedBox(width: ItemDetailStyle.itemGap),
       Expanded(
         child: AnchoredPopoverDragRegion(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
-              Text(
-                'Used In',
-                style: spec.typography.meta.copyWith(
-                  color: spec.palette.warning,
-                  fontSize: 11,
-                  fontWeight: FontWeight.w800,
-                  letterSpacing: .55,
-                ),
-              ),
-              const SizedBox(height: 2),
-              Text(
-                widget.sourceName,
-                style: spec.typography.section.copyWith(
-                  fontSize: 19,
-                  height: 1.05,
-                ),
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-              ),
+              Text(widget.sourceName, style: ItemDetailStyle.title(spec)),
               const SizedBox(height: 5),
               Text(
                 _resultSummary(widget.snapshot),
-                style: spec.typography.body.copyWith(
-                  color: spec.palette.textMuted,
-                  fontSize: 11.5,
-                ),
+                style: ItemDetailStyle.meta(spec),
               ),
             ],
           ),
@@ -228,10 +204,8 @@ class _RecipeBookUsedInPanelState extends State<RecipeBookUsedInPanel> {
       const SizedBox(width: 8),
       AppButton(
         key: RecipeBookKeys.closeUsedIn(widget.sourceName),
-        role: spec.isIlluminatedLedger
-            ? AppButtonRole.primary
-            : AppButtonRole.optionPill,
-        minimumSize: const Size.square(32),
+        role: AppButtonRole.optionPill,
+        minimumSize: const Size.square(30),
         padding: EdgeInsets.zero,
         semanticLabel: 'Close Used In for ${widget.sourceName}',
         tooltip: 'Close',
@@ -303,32 +277,6 @@ class _RecipeBookUsedInPanelState extends State<RecipeBookUsedInPanel> {
         .preferredRoute(destination.selectedRecipeVariantId(entry.name))
         ?.variantId;
   }
-
-  double _desiredHeight(
-    double maximumHeight,
-    List<RecipeBookUseEntry> visibleEntries,
-  ) {
-    var desired = 28.0 + 68 + 12 + 25 + 10 + 1 + 10;
-    if (widget.snapshot.entries.length >= 12) desired += 50;
-    if (visibleEntries.isEmpty) {
-      desired += 118;
-    } else {
-      for (final entry in visibleEntries) {
-        desired += entry.routes.length > 1 ? 102 : 88;
-        if (_expanded.contains(_entryKey(entry))) {
-          final ingredientCount = entry.routes.fold<int>(
-            1,
-            (maximum, route) => math.max(maximum, route.ingredients.length),
-          );
-          desired += 42 + ingredientCount * 58;
-          if (_showsVariantSelector(entry)) desired += 36;
-        }
-      }
-      desired += math.max(0, visibleEntries.length - 1) * 8;
-    }
-    final minimumHeight = math.min(230.0, maximumHeight);
-    return desired.clamp(minimumHeight, maximumHeight).toDouble();
-  }
 }
 
 class _UsedInResultCard extends StatelessWidget {
@@ -336,6 +284,7 @@ class _UsedInResultCard extends StatelessWidget {
     required this.controller,
     required this.sourceName,
     required this.entry,
+    required this.showWorkstation,
     required this.expanded,
     required this.selectedVariantId,
     required this.onToggleExpanded,
@@ -347,6 +296,7 @@ class _UsedInResultCard extends StatelessWidget {
   final RecipeBookController controller;
   final String sourceName;
   final RecipeBookUseEntry entry;
+  final bool showWorkstation;
   final bool expanded;
   final String? selectedVariantId;
   final VoidCallback onToggleExpanded;
@@ -369,170 +319,194 @@ class _UsedInResultCard extends StatelessWidget {
     final canActivate = controller.canActivateUsedIn(entry);
     final method = _entryMethod(entry);
     final selectedRoute = _selectedRoute;
-    return AppSurface(
-      role: AppSurfaceRole.card,
-      tone: entry.hidden ? AppSurfaceTone.warning : AppSurfaceTone.neutral,
-      padding: const EdgeInsets.all(10),
-      clipBehavior: Clip.antiAlias,
-      semanticLabel:
-          '${entry.name}, ${entry.mode.label}, used in recipe result',
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: <Widget>[
-          Row(
+    final identity = Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        RecipeBookItemIcon(
+          controller: controller,
+          mode: entry.mode,
+          name: entry.name,
+          size: ItemDetailStyle.recipeIcon,
+          anchorId:
+              'used-in:$sourceName:${entry.mode.key}:${entry.name}:output',
+        ),
+        const SizedBox(width: ItemDetailStyle.itemGap),
+        Expanded(
+          child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
-            children: <Widget>[
-              RecipeBookItemIcon(
-                controller: controller,
-                mode: entry.mode,
-                name: entry.name,
-                size: 40,
-                anchorId:
-                    'used-in:$sourceName:${entry.mode.key}:'
-                    '${entry.name}:output',
-              ),
-              const SizedBox(width: 10),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: <Widget>[
+            children: [
+              Text(entry.name, style: ItemDetailStyle.recipe(spec)),
+              const SizedBox(height: 6),
+              Wrap(
+                spacing: 12,
+                runSpacing: 4,
+                children: [
+                  if (method.isNotEmpty)
+                    Text(method, style: ItemDetailStyle.meta(spec)),
+                  if (showWorkstation)
                     Text(
-                      entry.name,
-                      style: spec.typography.label.copyWith(
-                        fontSize: 13,
-                        fontWeight: FontWeight.w800,
-                        height: 1.1,
-                      ),
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
+                      '${entry.mode.label} recipes',
+                      style: ItemDetailStyle.meta(spec),
                     ),
-                    const SizedBox(height: 5),
-                    Wrap(
-                      spacing: 5,
-                      runSpacing: 5,
-                      children: <Widget>[
-                        _UseBadge(label: entry.mode.label, emphasized: true),
-                        if (method.isNotEmpty) _UseBadge(label: method),
-                        for (final kind in _sortedKinds(entry.kinds))
-                          _UseBadge(label: kind.label),
-                        if (entry.hidden)
-                          const _UseBadge(label: 'Hidden', warning: true),
-                      ],
+                  for (final kind in _sortedKinds(entry.kinds))
+                    if (kind != RecipeBookUseKind.requiredIngredient)
+                      Text(kind.label, style: ItemDetailStyle.meta(spec)),
+                  if (entry.hidden)
+                    Text(
+                      'Hidden',
+                      style: ItemDetailStyle.meta(
+                        spec,
+                      ).copyWith(color: spec.palette.warning),
                     ),
-                  ],
-                ),
-              ),
-              const SizedBox(width: 8),
-              Row(
-                mainAxisSize: MainAxisSize.min,
-                children: <Widget>[
-                  Tooltip(
-                    message: _targetTooltip(controller, entry),
-                    child: SizedBox(
-                      width: 88,
-                      height: 34,
-                      child: AppButton(
-                        key: RecipeBookKeys.targetUsedInResult(
-                          sourceName,
-                          entry.mode.key,
-                          entry.name,
-                        ),
-                        role: entry.hidden
-                            ? AppButtonRole.secondary
-                            : AppButtonRole.primary,
-                        minimumSize: Size.zero,
-                        padding: const EdgeInsets.symmetric(horizontal: 7),
-                        onPressed: entry.hidden
-                            ? controller.restoringHiddenName == null
-                                  ? () => unawaited(
-                                      controller.restoreHiddenItem(
-                                        entry.name,
-                                        mode: entry.mode,
-                                      ),
-                                    )
-                                  : null
-                            : canActivate
-                            ? () => onActivate(selectedVariantId)
-                            : null,
-                        child: FittedBox(
-                          fit: BoxFit.scaleDown,
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: <Widget>[
-                              AppVectorGlyph(
-                                entry.hidden ? 'reset' : 'target',
-                                size: 12,
-                              ),
-                              const SizedBox(width: 5),
-                              Text(entry.hidden ? 'Restore' : 'Target'),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 6),
-                  AppButton(
-                    key: RecipeBookKeys.expandUsedInResult(
-                      sourceName,
-                      entry.mode.key,
-                      entry.name,
-                    ),
-                    role: expanded
-                        ? AppButtonRole.primary
-                        : AppButtonRole.optionPill,
-                    selected: expanded,
-                    minimumSize: const Size.square(34),
-                    padding: EdgeInsets.zero,
-                    semanticLabel:
-                        '${expanded ? 'Hide' : 'Show'} ${entry.name} ingredients',
-                    tooltip: expanded
-                        ? 'Hide ingredients'
-                        : 'Preview ingredients',
-                    onPressed: onToggleExpanded,
-                    child: AppVectorGlyph(
-                      expanded ? 'chevron-up' : 'book',
-                      size: 13,
-                    ),
-                  ),
                 ],
               ),
             ],
           ),
-          if (expanded) ...<Widget>[
-            const SizedBox(height: 10),
-            Divider(
-              height: 1,
-              thickness: 1,
-              color: spec.palette.trim.withAlpha(105),
-            ),
-            const SizedBox(height: 9),
-            if (_showsVariantSelector(entry)) ...<Widget>[
-              RecipeVariantSelector(
-                recipe: entry.recipe,
-                selectedVariantId: selectedVariantId,
-                onSelected: onSelectVariant,
-                compact: true,
-                allowedVariantIds: entry.routes
-                    .map((route) => route.variantId)
-                    .whereType<String>()
-                    .toSet(),
-                showSingleAllowedIdentity: true,
-                keyNamespace: _selectorNamespace(sourceName, entry),
+        ),
+      ],
+    );
+    final actions = Wrap(
+      spacing: 12,
+      runSpacing: 8,
+      crossAxisAlignment: WrapCrossAlignment.center,
+      children: [
+        AppButton(
+          key: RecipeBookKeys.targetUsedInResult(
+            sourceName,
+            entry.mode.key,
+            entry.name,
+          ),
+          role: AppButtonRole.optionPill,
+          minimumSize: const Size(0, 34),
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+          tooltip: _targetTooltip(controller, entry),
+          onPressed: entry.hidden
+              ? controller.restoringHiddenName == null
+                    ? () => unawaited(
+                        controller.restoreHiddenItem(
+                          entry.name,
+                          mode: entry.mode,
+                        ),
+                      )
+                    : null
+              : canActivate
+              ? () => onActivate(selectedVariantId)
+              : null,
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              AppVectorGlyph(entry.hidden ? 'reset' : 'target', size: 14),
+              const SizedBox(width: 6),
+              Text(
+                entry.hidden ? 'Restore' : 'Target',
+                style: ItemDetailStyle.body(spec),
               ),
-              const SizedBox(height: 9),
             ],
-            if (selectedRoute != null)
-              _FormulaRoute(
-                controller: controller,
-                sourceName: sourceName,
-                mode: entry.mode,
-                outputName: entry.name,
-                route: selectedRoute,
-                showMethod: method == 'Multiple methods',
+          ),
+        ),
+        AppTextAction(
+          key: RecipeBookKeys.expandUsedInResult(
+            sourceName,
+            entry.mode.key,
+            entry.name,
+          ),
+          semanticLabel:
+              '${expanded ? 'Hide' : 'Show'} ${entry.name} ingredients',
+          tooltip: expanded ? 'Hide ingredients' : 'Preview ingredients',
+          onPressed: onToggleExpanded,
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text('Ingredients', style: ItemDetailStyle.meta(spec)),
+              const SizedBox(width: 6),
+              AppVectorGlyph(
+                expanded ? 'chevron-up' : 'chevron-down',
+                size: 12,
               ),
-          ],
-        ],
+            ],
+          ),
+        ),
+      ],
+    );
+    return Semantics(
+      container: true,
+      explicitChildNodes: true,
+      label: '${entry.name}, ${entry.mode.label}, used in recipe result',
+      child: AppInteractionFrame(
+        selected: expanded,
+        radius: 6,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 4),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              LayoutBuilder(
+                builder: (context, constraints) {
+                  final scale = MediaQuery.textScalerOf(context).scale(14) / 14;
+                  if (constraints.maxWidth >= 580 * scale) {
+                    return Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Expanded(child: identity),
+                        const SizedBox(width: 16),
+                        actions,
+                      ],
+                    );
+                  }
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      identity,
+                      const SizedBox(height: 12),
+                      Padding(
+                        padding: const EdgeInsets.only(
+                          left:
+                              ItemDetailStyle.recipeIcon +
+                              ItemDetailStyle.itemGap,
+                        ),
+                        child: actions,
+                      ),
+                    ],
+                  );
+                },
+              ),
+              if (expanded) ...[
+                const SizedBox(height: 16),
+                ItemDetailGroup(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      if (_showsVariantSelector(entry)) ...[
+                        RecipeVariantSelector(
+                          recipe: entry.recipe,
+                          selectedVariantId: selectedVariantId,
+                          onSelected: onSelectVariant,
+                          compact: true,
+                          allowedVariantIds: entry.routes
+                              .map((route) => route.variantId)
+                              .whereType<String>()
+                              .toSet(),
+                          showSingleAllowedIdentity: true,
+                          keyNamespace: _selectorNamespace(sourceName, entry),
+                        ),
+                        const SizedBox(height: 12),
+                      ],
+                      if (selectedRoute != null)
+                        _FormulaRoute(
+                          controller: controller,
+                          sourceName: sourceName,
+                          mode: entry.mode,
+                          outputName: entry.name,
+                          route: selectedRoute,
+                          showMethod: method == 'Multiple methods',
+                        ),
+                    ],
+                  ),
+                ),
+              ],
+            ],
+          ),
+        ),
       ),
     );
   }
@@ -562,23 +536,16 @@ class _FormulaRoute extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
         if (showMethod && _routeMethod(route).isNotEmpty) ...<Widget>[
-          Wrap(
-            crossAxisAlignment: WrapCrossAlignment.center,
-            spacing: 5,
-            runSpacing: 5,
-            children: <Widget>[_UseBadge(label: _routeMethod(route))],
-          ),
+          Text(_routeMethod(route), style: ItemDetailStyle.meta(spec)),
           const SizedBox(height: 6),
         ],
         Text(
-          'Makes ${_routeOutput(route)} $outputName',
-          style: spec.typography.meta.copyWith(
-            color: spec.palette.textMuted,
-            fontSize: 10.5,
-            fontWeight: FontWeight.w700,
-          ),
+          'Output ×${_routeOutput(route)}',
+          style: ItemDetailStyle.meta(
+            spec,
+          ).copyWith(color: ItemDetailStyle.accent(spec)),
         ),
-        const SizedBox(height: 7),
+        const SizedBox(height: 20),
         for (
           var ingredientIndex = 0;
           ingredientIndex < route.ingredients.length;
@@ -593,7 +560,11 @@ class _FormulaRoute extends StatelessWidget {
             ingredientIndex: ingredientIndex,
           ),
           if (ingredientIndex + 1 < route.ingredients.length)
-            const SizedBox(height: 6),
+            Divider(
+              height: 12,
+              thickness: 1,
+              color: spec.palette.trim.withValues(alpha: .2),
+            ),
         ],
       ],
     );
@@ -619,7 +590,6 @@ class _FormulaIngredientRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final spec = context.visualTheme;
     final ingredient = route.ingredients[ingredientIndex];
     RecipeBookUseMatch? match;
     for (final candidate in route.matches) {
@@ -634,94 +604,18 @@ class _FormulaIngredientRow extends StatelessWidget {
         match != null && match.kind != RecipeBookUseKind.requiredIngredient
         ? ', substitutes for ${match.ingredientName}'
         : '';
-    return AppSurface(
-      role: AppSurfaceRole.row,
-      padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 8),
+    return RecipeIngredientLine(
       semanticLabel: '$name, Need ${formatQuantity(quantity)}$substitution',
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: <Widget>[
-          SizedBox(
-            width: 38,
-            child: Align(
-              child: RecipeBookItemIcon(
-                controller: controller,
-                mode: mode,
-                name: name,
-                size: 34,
-                anchorId:
-                    'used-in:$sourceName:${mode.key}:$outputName:'
-                    '${route.id}:ingredient:$ingredientIndex:$name',
-              ),
-            ),
-          ),
-          const SizedBox(width: 10),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
-              children: <Widget>[
-                Text(
-                  name,
-                  style: spec.typography.label.copyWith(fontSize: 13),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                const SizedBox(height: 3),
-                Text(
-                  'Need ${formatQuantity(quantity)}',
-                  style: spec.typography.meta.copyWith(
-                    fontSize: 11,
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _UseBadge extends StatelessWidget {
-  const _UseBadge({
-    required this.label,
-    this.emphasized = false,
-    this.warning = false,
-  });
-
-  final String label;
-  final bool emphasized;
-  final bool warning;
-
-  @override
-  Widget build(BuildContext context) {
-    final spec = context.visualTheme;
-    final color = warning
-        ? spec.palette.warning
-        : emphasized
-        ? spec.palette.primary
-        : spec.palette.trim;
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        color: color.withAlpha(emphasized ? 70 : 38),
-        borderRadius: BorderRadius.circular(spec.isIlluminatedLedger ? 1 : 999),
-        border: Border.all(color: color.withAlpha(150)),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
-        child: Text(
-          label,
-          style: spec.typography.meta.copyWith(
-            color: spec.palette.text,
-            fontSize: 9.5,
-            fontWeight: FontWeight.w800,
-            height: 1,
-          ),
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-        ),
+      name: name,
+      quantity: quantity,
+      icon: RecipeBookItemIcon(
+        controller: controller,
+        mode: mode,
+        name: name,
+        size: ItemDetailStyle.ingredientIcon,
+        anchorId:
+            'used-in:$sourceName:${mode.key}:$outputName:'
+            '${route.id}:ingredient:$ingredientIndex:$name',
       ),
     );
   }
@@ -750,14 +644,7 @@ bool _showsVariantSelector(RecipeBookUseEntry entry) {
 }
 
 String _resultSummary(RecipeBookUseSnapshot snapshot) {
-  final recipes =
-      '${snapshot.recipeCount} recipe ${snapshot.recipeCount == 1 ? 'path' : 'paths'}';
-  final routes = snapshot.entries.fold<int>(
-    0,
-    (sum, entry) => sum + entry.routes.length,
-  );
-  if (routes <= snapshot.recipeCount) return recipes;
-  return '$recipes · $routes formula routes';
+  return 'Used in ${snapshot.recipeCount} ${snapshot.recipeCount == 1 ? 'recipe' : 'recipes'}';
 }
 
 List<RecipeBookUseKind> _sortedKinds(Set<RecipeBookUseKind> kinds) =>
@@ -766,7 +653,9 @@ List<RecipeBookUseKind> _sortedKinds(Set<RecipeBookUseKind> kinds) =>
 String _routeMethod(RecipeBookUseRoute? route) {
   if (route == null) return '';
   final method = route.method?.trim() ?? '';
-  return method.isNotEmpty ? method : _typeLabel(route.type);
+  return recipeBookPreviewMethodLabel(
+    method.isNotEmpty ? method : _typeLabel(route.type),
+  );
 }
 
 String _entryMethod(RecipeBookUseEntry entry) {

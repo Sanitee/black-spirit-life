@@ -91,7 +91,7 @@ final class PlannerEngine {
 final class PreparedIngredientPreview {
   PreparedIngredientPreview._(this._recipes, PlannerState state, this._rules)
     : _variants = state.recipeVariantChoices,
-      _items = _RecipeIndex(_recipes, state, _rules);
+      _items = _RecipeIndex(_recipes, state, _rules, resolveLazily: true);
 
   final Map<String, Recipe> _recipes;
   final Map<String, String> _variants;
@@ -145,6 +145,9 @@ final class _PlannerContext {
   final PlannerState state;
   final PlannerRules rules;
 
+  final Map<(String, Ingredient), _IngredientPick> _resolvedIngredients = {};
+  final Map<String, double> _selectionCraftCounts = {};
+
   PlanResult buildPlan({String? targetOverride, int? wantOverride}) {
     final craftables = items.names.where(_isCraftable).toList()
       ..sort(_compareNames);
@@ -178,7 +181,7 @@ final class _PlannerContext {
       final gross = demand.value(name);
       final have = _isSameName(name, target)
           ? state.ignoreTargetInventory
-                ? 0.0
+                ? _numberFor(state.craftedInventory, name)
                 : _numberFor(state.inventory, name)
           : _haveFor(name);
       final completed = _setContains(state.completedSteps, name);
@@ -200,8 +203,15 @@ final class _PlannerContext {
         continue;
       }
 
+      _selectionCraftCounts[folded] = count;
       for (final ingredient in recipe.ingredients) {
-        final selected = _ingredientSelection(name, ingredient, count);
+        final selected = _ingredientSelection(
+          name,
+          ingredient,
+          count,
+          allocated: demand,
+        );
+        _resolvedIngredients[(folded, ingredient)] = selected;
         if (selected.options.length > 1 && selected.quantity > 0) {
           optionMeta[_fold(selected.key)] = ChoiceMeta(
             parentName: name,
@@ -220,7 +230,7 @@ final class _PlannerContext {
       final gross = demand.value(name);
       final have = _isSameName(name, target)
           ? state.ignoreTargetInventory
-                ? 0.0
+                ? _numberFor(state.craftedInventory, name)
                 : _numberFor(state.inventory, name)
           : _haveFor(name);
       final net = _setContains(state.completedSteps, name)
@@ -340,7 +350,11 @@ final class _PlannerContext {
     final count = crafts[folded] ?? 0;
     final recipe = items[name]!;
     final ingredients = recipe.ingredients.map((ingredient) {
-      final selected = _ingredientSelection(name, ingredient, count);
+      final selected =
+          (_selectionCraftCounts[folded] == count
+              ? _resolvedIngredients[(folded, ingredient)]
+              : null) ??
+          _ingredientSelection(name, ingredient, count);
       final have = _haveFor(selected.key);
       return PlanStepIngredient(
         key: selected.key,
@@ -396,8 +410,11 @@ final class _PlannerContext {
       final recipe = items[name];
       if (recipe != null && _isCraftable(name)) {
         for (final ingredient in recipe.ingredients) {
-          final selected = _ingredientSelection(name, ingredient, 1);
-          visit(selected.key, level + 1);
+          // Batch ownership and costs may select a different material from a
+          // one-craft preview. Include its dependencies before propagating need.
+          for (final candidate in _ingredientCandidates(name, ingredient, 1)) {
+            visit(candidate.key, level + 1);
+          }
         }
         // Equivalent routes exchange only leaf inputs. Include every candidate
         // before the demand pass so a price/ownership choice cannot leave the
@@ -421,145 +438,166 @@ final class _PlannerContext {
   _IngredientPick _ingredientSelection(
     String parentName,
     Ingredient ingredient,
-    double multiplier,
-  ) {
-    final substitute = _preferredSubstitute(parentName, ingredient, multiplier);
-    final ratio = _substituteRatio(ingredient, substitute);
-    final quality = _qualitySelection(
-      parentName: parentName,
-      name: substitute,
-      quantity: ingredient.quantity * multiplier * ratio,
-      originalName: ingredient.name,
+    double multiplier, {
+    _NameTotals? allocated,
+  }) {
+    final candidates = _ingredientCandidates(
+      parentName,
+      ingredient,
+      multiplier,
     );
-    return _IngredientPick(
-      key: quality.name,
-      name: quality.name,
-      quantity: quality.quantity,
-      original: ingredient.name,
-      baseName: substitute,
-      grade: quality.grade,
-      options: _substituteOptions(ingredient),
+    final savedBase = _stringFor(
+      state.substituteChoices,
+      'recipe:$parentName:${ingredient.substituteGroup ?? ingredient.name}',
     );
+    final hasPreference =
+        savedBase != null ||
+        candidates.any(
+          (pick) =>
+              _savedGrade(parentName, ingredient.name, pick.baseName) != null,
+        );
+    if (hasPreference) {
+      final preferred = candidates.where((pick) {
+        final grade = _savedGrade(parentName, ingredient.name, pick.baseName);
+        return (savedBase == null || _isSameName(savedBase, pick.baseName)) &&
+            (grade == null || grade == pick.grade);
+      }).toList();
+      if (preferred.isNotEmpty) {
+        // A deliberate choice remains inspectable even when sold out. Only
+        // automatic selection should replace it with a stocked alternative.
+        // Restrict the candidates before resolving stock and prices. Explicit
+        // previews (including Opportunities' option comparisons) need only the
+        // chosen candidates, not a full pricing pass over every substitute.
+        return _bestIngredient([
+          for (final pick in preferred)
+            _evaluateIngredient(pick, allocated: allocated),
+        ]).pick;
+      }
+    }
+    return _bestIngredient([
+      for (final pick in candidates)
+        _evaluateIngredient(pick, allocated: allocated),
+    ]).pick;
   }
 
-  String _preferredSubstitute(
+  List<_IngredientPick> _ingredientCandidates(
     String parentName,
     Ingredient ingredient,
     double multiplier,
   ) {
     final options = _substituteOptions(ingredient);
-    if (options.isEmpty) {
-      return ingredient.name;
-    }
-
-    final choiceKey =
-        'recipe:$parentName:${ingredient.substituteGroup ?? ingredient.name}';
-    final saved = _stringFor(state.substituteChoices, choiceKey);
-    if (saved != null && _containsName(options, saved)) {
-      return _matchingName(options, saved)!;
-    }
-
-    final evaluated = options
-        .map((option) {
-          final selected = _qualitySelection(
-            parentName: parentName,
-            name: option,
-            quantity:
-                ingredient.quantity *
-                multiplier *
-                _substituteRatio(ingredient, option),
-            originalName: ingredient.name,
-          );
-          final price = _priceFor(selected.name);
-          final have = _haveFor(selected.name);
-          final missing = selected.quantity > have
-              ? selected.quantity - have
-              : 0.0;
-          return _EvaluatedOption(
-            name: option,
-            have: have,
-            need: selected.quantity,
-            missing: missing,
-            price: price,
-            stockKnown: _mapContains(state.marketStock, selected.name),
-            stock: _stockFor(selected.name),
-            total: price > 0 ? price * missing : double.infinity,
-          );
-        })
-        .toList(growable: false);
-
-    for (final option in evaluated) {
-      if (option.need > 0 && option.have >= option.need) {
-        return option.name;
+    final bases = options.isEmpty ? [ingredient.name] : options;
+    final parentIsProcessing =
+        items[parentName]?.type.trim().toLowerCase() == 'processing';
+    final picks = <_IngredientPick>[];
+    for (final base in bases) {
+      final perCraft = _nonNegative(
+        ingredient.quantity * _substituteRatio(ingredient, base),
+      );
+      final quantity = perCraft * multiplier;
+      void add(String name, String grade, double amount) {
+        if (grade != 'normal' &&
+            (_isTemporarilyArchived(name) ||
+                _containsName(rules.legacyUnavailableItems, name))) {
+          return;
+        }
+        picks.add(
+          _IngredientPick(
+            key: name,
+            name: name,
+            quantity: amount,
+            original: ingredient.name,
+            baseName: base,
+            grade: grade,
+            options: options,
+          ),
+        );
       }
-    }
 
-    _EvaluatedOption? cheapestFullyStocked;
-    for (final option in evaluated) {
-      if (option.price <= 0 ||
-          !option.stockKnown ||
-          option.stock < option.missing) {
+      add(base, 'normal', quantity);
+      if (recipeHasAuthoritativeQualityVariants(parentName) ||
+          ingredientQualityProfile(
+                rules: rules,
+                parentIsProcessing: parentIsProcessing,
+                ingredientName: base,
+              ).family ==
+              IngredientQualityFamily.none) {
         continue;
       }
-      if (cheapestFullyStocked == null ||
-          option.total < cheapestFullyStocked.total) {
-        cheapestFullyStocked = option;
+      for (final alternative in ingredientQualityAlternatives(
+        rules: rules,
+        ingredientName: base,
+      )) {
+        add(
+          alternative.name,
+          alternative.grade,
+          alternative.requiredQuantityFor(perCraft) * multiplier,
+        );
       }
     }
-    if (cheapestFullyStocked != null) {
-      return cheapestFullyStocked.name;
-    }
+    return picks;
+  }
 
-    _EvaluatedOption? cheapestUnknownStock;
-    for (final option in evaluated) {
-      if (option.price <= 0 || option.stockKnown) {
-        continue;
-      }
-      if (cheapestUnknownStock == null ||
-          option.total < cheapestUnknownStock.total) {
-        cheapestUnknownStock = option;
-      }
-    }
-    if (cheapestUnknownStock != null) {
-      return cheapestUnknownStock.name;
-    }
+  String? _savedGrade(String parentName, String originalName, String baseName) {
+    if (recipeHasAuthoritativeQualityVariants(parentName)) return null;
+    final grade =
+        _stringFor(
+          state.ingredientGrades,
+          'recipe:$parentName:$originalName',
+        ) ??
+        _stringFor(state.ingredientGrades, baseName);
+    if (grade == null || grade.trim().toLowerCase() == 'auto') return null;
+    // Unsupported grades cannot match this base's enumerated candidates.
+    // They must not make unrelated normal-grade substitutes look preferred.
+    return normalizeIngredientQualityGrade(grade);
+  }
 
-    _EvaluatedOption? bestPartialStock;
-    for (final option in evaluated) {
-      if (option.price <= 0 ||
-          !option.stockKnown ||
-          option.stock <= 0 ||
-          option.missing <= 0) {
-        continue;
-      }
-      if (bestPartialStock == null ||
-          option.stockCoverage > bestPartialStock.stockCoverage ||
-          (option.stockCoverage == bestPartialStock.stockCoverage &&
-              option.total < bestPartialStock.total)) {
-        bestPartialStock = option;
-      }
-    }
-    if (bestPartialStock != null) {
-      return bestPartialStock.name;
-    }
+  _EvaluatedOption _evaluateIngredient(
+    _IngredientPick pick, {
+    _NameTotals? allocated,
+  }) {
+    final have = _nonNegative(
+      _haveFor(pick.name) - (allocated?.value(pick.name) ?? 0),
+    );
+    final missing = _nonNegative(pick.quantity - have);
+    final market = _materialMarketState(pick.name, missing);
+    final available = have > 0 || market.buyable > 0;
+    final unknown =
+        (market.marketable && !market.stockKnown) || _isCraftable(pick.name);
+    return _EvaluatedOption(
+      pick: pick,
+      have: have,
+      missing: missing,
+      availability: missing <= 0
+          ? 0
+          : available
+          ? 1
+          : unknown
+          ? 2
+          : 3,
+      // Compare the complete remaining investment, never just the few units
+      // listed for sale. Otherwise zero stock misleadingly looks free.
+      total: missing <= 0
+          ? 0
+          : market.price > 0
+          ? market.price * missing
+          : double.infinity,
+    );
+  }
 
-    _EvaluatedOption? mostOwned;
-    for (final option in evaluated) {
-      if (option.have <= 0 || option.need <= 0) {
-        continue;
-      }
-      if (mostOwned == null ||
-          option.ownedCoverage > mostOwned.ownedCoverage ||
-          (option.ownedCoverage == mostOwned.ownedCoverage &&
-              option.missing < mostOwned.missing)) {
-        mostOwned = option;
+  _EvaluatedOption _bestIngredient(List<_EvaluatedOption> options) {
+    var best = options.first;
+    for (final option in options.skip(1)) {
+      final availability = option.availability.compareTo(best.availability);
+      final cost = option.total.compareTo(best.total);
+      if (availability < 0 ||
+          (availability == 0 &&
+              (cost < 0 ||
+                  (cost == 0 && option.ownedCoverage > best.ownedCoverage)))) {
+        best = option;
       }
     }
-    if (mostOwned != null) {
-      return mostOwned.name;
-    }
-
-    return _matchingName(options, ingredient.name) ?? options.first;
+    return best;
   }
 
   List<String> _substituteOptions(Ingredient ingredient) {
@@ -587,45 +625,6 @@ final class _PlannerContext {
     return value < 0.0001 ? 0.0001 : value;
   }
 
-  _QualityPick _qualitySelection({
-    required String parentName,
-    required String name,
-    required double quantity,
-    required String originalName,
-  }) {
-    final grade = _selectedGrade(parentName, name, originalName);
-    final amount = _nonNegative(quantity);
-
-    for (final alternative in ingredientQualityAlternatives(
-      rules: rules,
-      ingredientName: name,
-    )) {
-      if (alternative.grade == grade) {
-        return _QualityPick(
-          name: alternative.name,
-          quantity: alternative.requiredQuantityFor(amount),
-          grade: alternative.grade,
-        );
-      }
-    }
-    return _QualityPick(name: name, quantity: amount, grade: 'normal');
-  }
-
-  String _selectedGrade(String parentName, String name, String originalName) {
-    if (recipeHasAuthoritativeQualityVariants(parentName)) {
-      return 'normal';
-    }
-    final parent = items[parentName];
-    return selectedIngredientQualityGrade(
-      rules: rules,
-      parentIsProcessing: parent?.type.trim().toLowerCase() == 'processing',
-      parentName: parentName,
-      originalIngredientName: originalName,
-      selectedIngredientName: name,
-      savedGrades: state.ingredientGrades,
-    );
-  }
-
   double _outputPerCraft(Recipe recipe) =>
       const PlannerEngine().outputPerCraft(recipe: recipe, state: state);
 
@@ -634,8 +633,9 @@ final class _PlannerContext {
     return recipe?.isCraftable ?? false;
   }
 
-  double _haveFor(String name) =>
-      state.ignoreIngredientInventory ? 0 : _numberFor(state.inventory, name);
+  double _haveFor(String name) => state.ignoreIngredientInventory
+      ? _numberFor(state.craftedInventory, name)
+      : _numberFor(state.inventory, name);
 
   String _categoryOf(String name) {
     final recipe = items[name];
@@ -696,8 +696,11 @@ final class _PlannerContext {
         : npcBuyable
         ? missing
         : 0.0;
+    final preorderPrice = _numberFor(state.marketPreorderPrices, name);
     final price = npcBuyable
         ? npcPrice
+        : marketable && stockKnown && stock == 0 && preorderPrice > 0
+        ? preorderPrice
         : marketable
         ? _priceFor(name)
         : 0.0;
@@ -709,9 +712,6 @@ final class _PlannerContext {
     final unavailable = marketable && stockKnown
         ? _nonNegative(missing - stock)
         : 0.0;
-    final pricedUnits = npcBuyable || (marketable && !stockKnown)
-        ? missing
-        : buyable;
     final status = missing <= 0
         ? 'covered'
         : npcBuyable
@@ -733,7 +733,9 @@ final class _PlannerContext {
       price: price,
       buyable: buyable,
       unavailable: marketable ? unavailable : 0,
-      total: pricedUnits * price,
+      // Budget the whole remaining requirement, including unfilled preorders.
+      // Stock still controls availability, not how much crafting will cost.
+      total: missing * price,
       status: status,
       hasSourceInfo: hasSource,
       stockKnown: !marketable || stockKnown,
@@ -742,8 +744,12 @@ final class _PlannerContext {
 }
 
 final class _RecipeIndex {
-  _RecipeIndex(Map<String, Recipe> recipes, this.state, this.rules)
-    : definitions = recipes {
+  _RecipeIndex(
+    Map<String, Recipe> recipes,
+    this.state,
+    this.rules, {
+    bool resolveLazily = false,
+  }) : definitions = recipes {
     for (final entry in recipes.entries) {
       final folded = _fold(entry.key);
       final existing = _names[folded];
@@ -753,9 +759,13 @@ final class _RecipeIndex {
         );
       }
       _names[folded] = entry.key;
-      _recipes[folded] = entry.value.resolveVariant(
-        _stringFor(state.recipeVariantChoices, entry.key),
-      );
+      // A direct ingredient preview touches only a handful of definitions.
+      // Full plans retain eager resolution and their independent route state.
+      if (!resolveLazily) {
+        _recipes[folded] = entry.value.resolveVariant(
+          _stringFor(state.recipeVariantChoices, entry.key),
+        );
+      }
     }
   }
 
@@ -789,9 +799,18 @@ final class _RecipeIndex {
 
   Iterable<String> get names => _names.values;
 
-  bool contains(String name) => _recipes.containsKey(_fold(name));
+  bool contains(String name) => _names.containsKey(_fold(name));
 
-  Recipe? operator [](String name) => _recipes[_fold(name)];
+  Recipe? operator [](String name) {
+    final folded = _fold(name);
+    final cached = _recipes[folded];
+    if (cached != null) return cached;
+    final canonical = _names[folded];
+    if (canonical == null) return null;
+    return _recipes[folded] = definitions[canonical]!.resolveVariant(
+      _stringFor(state.recipeVariantChoices, canonical),
+    );
+  }
 }
 
 final class _NameTotals {
@@ -848,42 +867,22 @@ final class _IngredientPick {
   final List<String> options;
 }
 
-final class _QualityPick {
-  const _QualityPick({
-    required this.name,
-    required this.quantity,
-    required this.grade,
-  });
-
-  final String name;
-  final double quantity;
-  final String grade;
-}
-
 final class _EvaluatedOption {
   const _EvaluatedOption({
-    required this.name,
+    required this.pick,
     required this.have,
-    required this.need,
     required this.missing,
-    required this.price,
-    required this.stockKnown,
-    required this.stock,
+    required this.availability,
     required this.total,
   });
-
-  final String name;
+  final _IngredientPick pick;
   final double have;
-  final double need;
   final double missing;
-  final double price;
-  final bool stockKnown;
-  final double stock;
+  final int availability;
   final double total;
-
-  double get ownedCoverage => have / need;
-
-  double get stockCoverage => stock / missing;
+  double get ownedCoverage => pick.quantity <= 0
+      ? 0
+      : (have >= pick.quantity ? 1 : have / pick.quantity);
 }
 
 String _fold(String value) => value.toLowerCase();
@@ -899,15 +898,6 @@ int _compareNames(String left, String right) {
 
 bool _containsName(Iterable<String> values, String name) =>
     values.any((value) => _isSameName(value, name));
-
-String? _matchingName(Iterable<String> values, String name) {
-  for (final value in values) {
-    if (_isSameName(value, name)) {
-      return value;
-    }
-  }
-  return null;
-}
 
 bool _setContains(Set<String> values, String key) =>
     values.any((value) => _isSameName(value, key));

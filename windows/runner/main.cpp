@@ -15,6 +15,10 @@
 int APIENTRY wWinMain(_In_ HINSTANCE instance, _In_opt_ HINSTANCE prev,
                       _In_ wchar_t *command_line, _In_ int show_command) {
   std::vector<std::string> command_line_arguments = GetCommandLineArguments();
+  // An inherited browser-profile override must not redirect this application.
+  // Each embedded surface chooses its
+  // own isolated profile; this changes only the current process environment.
+  ::SetEnvironmentVariableW(L"WEBVIEW2_USER_DATA_FOLDER", nullptr);
   const bool reference_mode =
       std::find(command_line_arguments.begin(), command_line_arguments.end(),
                 "--reference") != command_line_arguments.end();

@@ -20,14 +20,14 @@ void main() {
 
     expect(catalog.sourceByteCount, productionCatalogByteCount);
     expect(catalog.sourceSha256, productionCatalogSha256);
-    expect(catalog.totalItemCount, 1681);
+    expect(catalog.totalItemCount, 1682);
     expect(catalog.totalCraftableCount, 958);
     expect(catalog.totalIngredientRowCount, 2849);
     expect(catalog.collisions, hasLength(20));
     expect(catalog.alchemy.iconDataUris, hasLength(444));
     expect(catalog.cooking.iconDataUris, hasLength(612));
     expect(catalog.processing.iconDataUris, hasLength(3461));
-    expect(catalog.processing.searchAliases, hasLength(160));
+    expect(catalog.processing.searchAliases, hasLength(164));
     final bloodGroups =
         catalog.alchemy.metadata['bloodGroups'] as Map<String, Object?>;
     expect(bloodGroups['Group 3'], contains('Monkey Blood'));

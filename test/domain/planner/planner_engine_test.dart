@@ -291,7 +291,7 @@ void main() {
     },
   );
 
-  test('substitute pricing prefers an option that covers the full demand', () {
+  test('substitute pricing accepts cheaper partial stock over full supply', () {
     final result = engine.buildPlan(
       mode: CraftMode.processing,
       recipes: <String, Recipe>{
@@ -326,7 +326,7 @@ void main() {
 
     expect(
       result.firstWhereStep('Target').ingredients.single.name,
-      'Fully stocked',
+      'Cheap but scarce',
     );
   });
 
@@ -442,11 +442,11 @@ void main() {
 
     expect(
       result.firstWhereStep('Target').ingredients.single.name,
-      'Fully stocked',
+      'Ignored inventory',
     );
   });
 
-  test('substitute pricing chooses the greatest coverage when all stock is '
+  test('substitute pricing chooses the cheapest investment when all stock is '
       'partial', () {
     final result = engine.buildPlan(
       mode: CraftMode.processing,
@@ -482,7 +482,7 @@ void main() {
 
     expect(
       result.firstWhereStep('Target').ingredients.single.name,
-      'Better supplied',
+      'Cheaper partial',
     );
   });
 
@@ -581,12 +581,12 @@ void main() {
         marketIds: const <String, String>{'Worth one': '1', 'Worth two': '2'},
       ),
     );
-    final chosenWorthOne = understockedWorthTwo
+    final chosenPartial = understockedWorthTwo
         .firstWhereStep('Target')
         .ingredients
         .single;
-    expect(chosenWorthOne.name, 'Worth one');
-    expect(chosenWorthOne.need, 70);
+    expect(chosenPartial.name, 'Worth two');
+    expect(chosenPartial.need, 40);
   });
 
   test('owned substitute fallback compares useful coverage, not raw units', () {
@@ -854,6 +854,64 @@ void main() {
     expect(market.buyable, 0);
     expect(market.total, 900);
   });
+
+  for (final stock in [0.0, 2.0, 100.0]) {
+    for (final owned in [0.0, 4.0]) {
+      test('full remaining budget with stock $stock and owned $owned', () {
+        final result = engine.buildPlan(
+          mode: CraftMode.alchemy,
+          recipes: _simpleCatalog(),
+          state: PlannerState(
+            target: 'Target',
+            want: 5,
+            ignoreIngredientInventory: false,
+            inventory: {'Raw': owned},
+            marketPrices: const {'Raw': 100},
+            marketPreorderPrices: const {'Raw': 120},
+            marketStock: {'Raw': stock},
+          ),
+          rules: PlannerRules(marketIds: const {'Raw': '101'}),
+        );
+        final row = result.missing.single;
+        final missing = 9 - owned;
+        expect(row.missing, missing);
+        expect(row.market.price, stock == 0 ? 120 : 100);
+        expect(row.market.total, missing * (stock == 0 ? 120 : 100));
+        expect(row.market.buyable, stock < missing ? stock : missing);
+        expect(row.market.unavailable, stock < missing ? missing - stock : 0);
+        expect(
+          row.market.status,
+          stock == 0
+              ? 'none'
+              : stock < missing
+              ? 'partial'
+              : 'ready',
+        );
+      });
+    }
+  }
+
+  for (final bid in <double?>[null, 0, 80]) {
+    test('sold out fallback or actual preorder $bid, not allowed maximum', () {
+      final result = engine.buildPlan(
+        mode: CraftMode.alchemy,
+        recipes: _simpleCatalog(),
+        state: PlannerState(
+          target: 'Target',
+          want: 5,
+          marketPrices: const {'Raw': 100},
+          marketStock: const {'Raw': 0},
+          marketPreorderPrices: {'Raw': ?bid},
+        ),
+        rules: PlannerRules(marketIds: const {'Raw': '101'}),
+      );
+      expect(
+        result.missing.single.market.total,
+        9 * ((bid ?? 0) > 0 ? bid! : 100),
+      );
+      expect(result.missing.single.market.buyable, 0);
+    });
+  }
 }
 
 extension on PlanResult {

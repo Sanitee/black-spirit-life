@@ -2368,6 +2368,24 @@ Map<String, List<String>> _catalogIconDataUris(CatalogSnapshot catalog) {
     }
     if (preferred.isNotEmpty) result[entry.key] = preferred;
   }
+  // Clean current-client artwork is stored separately from the historical
+  // framed mode icons. Keep both as recognition evidence: newer materials
+  // (including Olivine Ore and Tiger Blood) need not exist in the native atlas.
+  final cleanArtwork = catalog.supportingData['itemIconArtwork'];
+  if (cleanArtwork is Map<Object?, Object?>) {
+    for (final entry in cleanArtwork.entries) {
+      if (entry.key is! String || entry.value is! String) continue;
+      final dataUri = (entry.value! as String).trim();
+      final bytes = _decodeImageDataUri(dataUri);
+      final header = bytes == null ? null : _decodeImageHeader(bytes);
+      if (header == null || header.width <= 0 || header.height <= 0) continue;
+      final values = result.putIfAbsent(
+        _fold(entry.key! as String),
+        () => <String>[],
+      );
+      if (!values.contains(dataUri)) values.add(dataUri);
+    }
+  }
   return result;
 }
 

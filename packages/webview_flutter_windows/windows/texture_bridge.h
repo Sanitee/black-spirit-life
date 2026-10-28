@@ -63,9 +63,11 @@ class TextureBridge {
 
   EventRegistrationToken on_closed_token_ = {};
   EventRegistrationToken on_frame_arrived_token_ = {};
+  bool frame_arrived_registered_ = false;
 
   virtual void StopInternal();
-  void OnFrameArrived();
+  void OnFrameArrived(
+      ABI::Windows::Graphics::Capture::IDirect3D11CaptureFramePool* source_pool);
   bool ShouldDropFrame();
 
   // corresponds to DXGI_FORMAT_B8G8R8A8_UNORM

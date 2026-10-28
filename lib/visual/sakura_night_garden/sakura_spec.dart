@@ -30,6 +30,8 @@ abstract final class SakuraNightGardenSpec {
   static const ThemePalette palette = ThemePalette(
     canvas: nightCedar,
     canvasDeep: canvasDeep,
+    // Retain the earlier map backdrop tested without physical display dimming.
+    resourceMapCanvas: Color(0xFF141218),
     surface: charcoalPlum,
     surfaceRaised: raisedPlum,
     surfaceInset: insetPlum,

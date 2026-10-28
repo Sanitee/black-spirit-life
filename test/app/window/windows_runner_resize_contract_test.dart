@@ -3,6 +3,41 @@ import 'dart:io';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
+  test('child accessibility guard outlives native view destruction', () {
+    final source = File(
+      'windows/runner/flutter_window.cpp',
+    ).readAsStringSync().replaceAll('\r\n', '\n');
+    final header = File('windows/runner/flutter_window.h').readAsStringSync();
+    final destruction = source.substring(
+      source.indexOf('void FlutterWindow::OnDestroy()'),
+      source.indexOf('FlutterWindow::MessageHandler'),
+    );
+    expect(
+      destruction.indexOf('flutter_view_teardown_guard_.BeginTeardown();'),
+      lessThan(destruction.indexOf('flutter_controller_ = nullptr;')),
+    );
+    expect(
+      header.indexOf('FlutterViewTeardownGuard flutter_view_teardown_guard_;'),
+      lessThan(
+        header.indexOf('std::unique_ptr<flutter::FlutterViewController>'),
+      ),
+      reason: 'The guard must outlive implicit controller member destruction.',
+    );
+    expect(
+      source,
+      contains(
+        'FlutterWindow::~FlutterWindow() {\n'
+        '  flutter_view_teardown_guard_.BeginTeardown();',
+      ),
+    );
+    expect(
+      source.indexOf(
+        'flutter_view_teardown_guard_.Attach(flutter_view_window_)',
+      ),
+      lessThan(source.indexOf('SetChildContent(flutter_view_window_)')),
+    );
+  });
+
   test(
     'native helper frame policy exists before Windows creates its frame',
     () {

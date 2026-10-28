@@ -576,7 +576,7 @@ void main() {
 }
 
 Finder _filterControl() {
-  final rail = find.byKey(const ValueKey('spot-filter-rail-control'));
+  final rail = find.byKey(const ValueKey('spot-filter-compact-control'));
   return rail.evaluate().isNotEmpty
       ? rail
       : find.byKey(const ValueKey('spot-filter-compact-control'));

@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 
 import '../../app/state/planner_application_controller.dart';
 import '../../app/window/native_file_dialog_service.dart';
+import '../../app/window/native_folder_service.dart';
 import '../../data/portable/portable_custom_icon_bridge.dart';
 import '../../data/portable/portable_file_service.dart';
 import '../../data/portable/portable_v4_codec.dart';
@@ -16,7 +17,12 @@ import '../../domain/state/planner_state.dart';
 import '../../domain/state/state_copy.dart';
 import '../../domain/state/transactions/state_transactions.dart';
 import '../../visual/visual.dart';
+import '../shared/workshop_presentation.dart';
 import 'market_bonus_icon.dart';
+import 'personal_data_panel.dart';
+import 'profile_afk_controls.dart';
+import 'profile_mastery_controls.dart';
+import 'profile_presentation.dart';
 
 /// Window-owned, document-independent state for the Craft Profile workspace.
 ///
@@ -31,12 +37,14 @@ final class DataSessionController extends ChangeNotifier {
   final TextEditingController _json = TextEditingController();
   final TextEditingController _personalDataPath = TextEditingController();
   bool _jsonVisible = false;
-  bool _afkWeightExpanded = false;
+  int _afkWeightFocusRequest = 0;
   bool _editorSettingsUnlocked = false;
   int _editorUnlockTaps = 0;
   DateTime? _editorUnlockStartedAt;
   bool _busy = false;
   bool _movingPersonalData = false;
+  bool _choosingPersonalData = false;
+  bool _openingPersonalData = false;
   String? _status;
   bool _statusError = false;
 
@@ -45,10 +53,9 @@ final class DataSessionController extends ChangeNotifier {
     notifyListeners();
   }
 
-  /// Reveals the shared AFK Weight profile when another workspace links here.
+  /// Brings the permanently open weight controls into view from another tool.
   void showAfkWeightSettings() {
-    if (_afkWeightExpanded) return;
-    _update(() => _afkWeightExpanded = true);
+    _update(() => _afkWeightFocusRequest += 1);
   }
 
   bool get editorSettingsUnlocked => _editorSettingsUnlocked;
@@ -95,6 +102,7 @@ class DataView extends StatefulWidget {
     this.sessionController,
     this.codec = const PortableV4Codec(),
     this.fileDialogs = const NativeFileDialogService(),
+    this.folderService = const NativeFolderService(),
     this.fileService = const PortableFileService(),
     this.iconBridge,
     this.iconExporter,
@@ -110,6 +118,7 @@ class DataView extends StatefulWidget {
   final DataSessionController? sessionController;
   final PortableV4Codec codec;
   final NativeFileDialogService fileDialogs;
+  final NativeFolderService folderService;
   final PortableFileService fileService;
   final PortableCustomIconBridge? iconBridge;
   final PortableIconExporter? iconExporter;
@@ -128,6 +137,8 @@ class DataView extends StatefulWidget {
 
 class _DataViewState extends State<DataView> {
   final ScrollController _scroll = ScrollController();
+  final GlobalKey _weightAnchor = GlobalKey();
+  int _seenWeightFocusRequest = 0;
   late final DataSessionController _session;
   late final bool _ownsSession;
   late final Listenable _changes;
@@ -137,6 +148,8 @@ class _DataViewState extends State<DataView> {
     super.initState();
     _ownsSession = widget.sessionController == null;
     _session = widget.sessionController ?? DataSessionController();
+    _session.addListener(_revealRequestedWeightSettings);
+    _revealRequestedWeightSettings();
     final personalDataPath = widget.personalDataPath?.trim();
     if (_session._personalDataPath.text.isEmpty &&
         personalDataPath != null &&
@@ -155,9 +168,21 @@ class _DataViewState extends State<DataView> {
 
   @override
   void dispose() {
+    _session.removeListener(_revealRequestedWeightSettings);
     _scroll.dispose();
     if (_ownsSession) _session.dispose();
     super.dispose();
+  }
+
+  void _revealRequestedWeightSettings() {
+    if (_seenWeightFocusRequest == _session._afkWeightFocusRequest) return;
+    _seenWeightFocusRequest = _session._afkWeightFocusRequest;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      final target = _weightAnchor.currentContext;
+      if (target == null) return;
+      Scrollable.ensureVisible(target, alignment: .1);
+    });
   }
 
   void _setStatus(String message, {bool error = false}) {
@@ -306,21 +331,60 @@ class _DataViewState extends State<DataView> {
   }
 
   Future<void> _browsePersonalDataPath() async {
-    if (_session._movingPersonalData || _session._busy) return;
+    if (_session._movingPersonalData ||
+        _session._choosingPersonalData ||
+        _session._busy ||
+        widget.onMovePersonalData == null) {
+      return;
+    }
+    _session._update(() => _session._choosingPersonalData = true);
     try {
       final selected = await widget.fileDialogs.pickDirectory(
-        initialPath: _session._personalDataPath.text,
+        initialPath: widget.personalDataPath,
       );
       if (selected == null || !mounted) return;
       _session._personalDataPath.value = TextEditingValue(
         text: selected,
         selection: TextSelection.collapsed(offset: selected.length),
       );
+      await _movePersonalData();
     } on PlatformException catch (error) {
-      _setStatus(
-        error.message ?? 'The Windows folder picker could not be opened.',
-        error: true,
-      );
+      if (mounted) {
+        _setStatus(
+          error.message ?? 'The Windows folder picker could not be opened.',
+          error: true,
+        );
+      }
+    } finally {
+      if (mounted) {
+        _session._update(() => _session._choosingPersonalData = false);
+      }
+    }
+  }
+
+  Future<void> _openPersonalDataFolder() async {
+    final path = widget.personalDataPath?.trim();
+    if (path == null ||
+        path.isEmpty ||
+        _session._busy ||
+        _session._movingPersonalData ||
+        _session._openingPersonalData) {
+      return;
+    }
+    _session._update(() => _session._openingPersonalData = true);
+    try {
+      await widget.folderService.open(path);
+    } on Object {
+      if (mounted) {
+        _setStatus(
+          'The personal data folder could not be opened. Check that the location is available.',
+          error: true,
+        );
+      }
+    } finally {
+      if (mounted) {
+        _session._update(() => _session._openingPersonalData = false);
+      }
     }
   }
 
@@ -356,14 +420,15 @@ class _DataViewState extends State<DataView> {
                     const SizedBox(height: 10),
                     SelectableText(destination),
                     const SizedBox(height: 18),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.end,
+                    Wrap(
+                      alignment: WrapAlignment.end,
+                      spacing: 8,
+                      runSpacing: 8,
                       children: <Widget>[
                         AppButton.label(
                           'Keep current folder',
                           onPressed: () => Navigator.pop(dialogContext, false),
                         ),
-                        const SizedBox(width: 8),
                         AppButton.label(
                           'Move and restart',
                           role: AppButtonRole.primary,
@@ -421,9 +486,10 @@ class _DataViewState extends State<DataView> {
                     builder: (context, constraints) {
                       final craftOutput = _craftOutput();
                       final afkLoad = Align(
+                        key: _weightAnchor,
                         alignment: Alignment.topLeft,
-                        child: ConstrainedBox(
-                          constraints: const BoxConstraints(maxWidth: 540),
+                        child: SizedBox(
+                          width: double.infinity,
                           child: _afkLoad(),
                         ),
                       );
@@ -519,133 +585,48 @@ class _DataViewState extends State<DataView> {
   Widget _craftOutput() {
     final document = widget.controller.documentSnapshot;
     final processing = document.processing;
-    final massBatch = massProcessingBatchSize(processing.processingMastery);
     return _DataEditorCard(
       key: const ValueKey<String>('data-craft-output-card'),
       title: 'Mastery & Output',
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: <Widget>[
-          LayoutBuilder(
-            builder: (context, constraints) {
-              const gap = 10.0;
-              final columns = constraints.maxWidth >= 520
-                  ? 3
-                  : constraints.maxWidth >= 350
-                  ? 2
-                  : 1;
-              final fieldWidth =
-                  (constraints.maxWidth - gap * (columns - 1)) / columns;
-              return Wrap(
-                spacing: gap,
-                runSpacing: 10,
-                children: <Widget>[
-                  SizedBox(
-                    width: fieldWidth,
-                    child: FocusTraversalOrder(
-                      order: const NumericFocusOrder(1),
-                      child: _CommitNumberField(
-                        key: const ValueKey<String>('D01'),
-                        label: 'Alchemy mastery',
-                        value: formatQuantity(
-                          document.alchemy.alchemyMastery.toDouble(),
-                        ),
-                        onCommit: (value) =>
-                            _commitMastery(CraftMode.alchemy, value),
-                      ),
-                    ),
-                  ),
-                  SizedBox(
-                    width: fieldWidth,
-                    child: FocusTraversalOrder(
-                      order: const NumericFocusOrder(2),
-                      child: _CommitNumberField(
-                        key: const ValueKey<String>('D02'),
-                        label: 'Cooking mastery',
-                        value: formatQuantity(
-                          document.cooking.cookingMastery.toDouble(),
-                        ),
-                        onCommit: (value) =>
-                            _commitMastery(CraftMode.cooking, value),
-                      ),
-                    ),
-                  ),
-                  SizedBox(
-                    width: fieldWidth,
-                    child: FocusTraversalOrder(
-                      order: const NumericFocusOrder(3),
-                      child: _CommitNumberField(
-                        key: const ValueKey<String>('D03'),
-                        label: 'Processing mastery',
-                        value: formatQuantity(
-                          processing.processingMastery.toDouble(),
-                        ),
-                        onCommit: (value) =>
-                            _commitMastery(CraftMode.processing, value),
-                      ),
-                    ),
-                  ),
-                ],
-              );
-            },
-          ),
-          const SizedBox(height: 12),
-          Align(
-            alignment: Alignment.centerLeft,
-            child: IntrinsicWidth(
-              child: FocusTraversalOrder(
-                order: const NumericFocusOrder(4),
-                child: _DataOptionPill(
-                  key: const ValueKey<String>('D05'),
-                  label: 'Mass processing stone',
-                  value: processing.useMassProcessing,
-                  onChanged: (value) => widget
-                      .controller
-                      .modes[CraftMode.processing]!
-                      .updateState(
-                        (state) => state.copyWith(useMassProcessing: value),
-                        immediate: true,
-                      ),
-                ),
+      refinedProfile: true,
+      child: ProfileMasteryControls(
+        alchemyMastery: formatQuantity(
+          document.alchemy.alchemyMastery.toDouble(),
+        ),
+        cookingMastery: formatQuantity(
+          document.cooking.cookingMastery.toDouble(),
+        ),
+        processingMastery: formatQuantity(
+          processing.processingMastery.toDouble(),
+        ),
+        alchemyYield: formatQuantity(
+          document.alchemy.compatibility.alchemyYield,
+        ),
+        massBatch: massProcessingBatchSize(processing.processingMastery),
+        useMassProcessing: processing.useMassProcessing,
+        onMassProcessingChanged: () =>
+            widget.controller.modes[CraftMode.processing]!.updateState(
+              (state) => state.copyWith(
+                useMassProcessing: !processing.useMassProcessing,
               ),
+              immediate: true,
             ),
-          ),
-          const SizedBox(height: 12),
-          LayoutBuilder(
-            builder: (context, constraints) {
-              const gap = 10.0;
-              final cardWidth = constraints.maxWidth >= 360
-                  ? (constraints.maxWidth - gap) / 2
-                  : constraints.maxWidth;
-              return Wrap(
-                spacing: gap,
-                runSpacing: 10,
-                children: <Widget>[
-                  SizedBox(
-                    width: cardWidth,
-                    child: _DataStatCard(
-                      label: 'Alchemy result',
-                      value: formatQuantity(
-                        document.alchemy.compatibility.alchemyYield,
-                      ),
-                      detail: '${document.alchemy.alchemyMastery} mastery',
-                    ),
-                  ),
-                  SizedBox(
-                    width: cardWidth,
-                    child: _DataStatCard(
-                      label: 'Mass batch',
-                      value: processing.useMassProcessing
-                          ? '$massBatch recipes'
-                          : 'Off',
-                      detail: '${processing.processingMastery} mastery',
-                    ),
-                  ),
-                ],
-              );
-            },
-          ),
-        ],
+        fieldBuilder: (mode, value) => _CommitNumberField(
+          key: ValueKey<String>(switch (mode) {
+            CraftMode.alchemy => 'D01',
+            CraftMode.cooking => 'D02',
+            CraftMode.processing => 'D03',
+          }),
+          label: switch (mode) {
+            CraftMode.alchemy => 'Alchemy mastery',
+            CraftMode.cooking => 'Cooking mastery',
+            CraftMode.processing => 'Processing mastery',
+          },
+          value: value,
+          inputOnly: true,
+          refined: true,
+          onCommit: (value) => _commitMastery(mode, value),
+        ),
       ),
     );
   }
@@ -655,12 +636,24 @@ class _DataViewState extends State<DataView> {
     return _DataEditorCard(
       key: const ValueKey<String>('data-afk-load-card'),
       title: 'AFK Weight',
-      child: _AfkWeightProfileEditor(
+      refinedProfile: true,
+      child: ProfileAfkControls(
+        fieldBuilder:
+            ({
+              required fieldKey,
+              required label,
+              required value,
+              required onCommit,
+            }) => _CommitNumberField(
+              key: fieldKey,
+              label: label,
+              value: value,
+              onCommit: onCommit,
+              suffixText: 'LT',
+              inputOnly: true,
+              refined: true,
+            ),
         profile: afkWeight,
-        expanded: _session._afkWeightExpanded,
-        onToggle: () => _session._update(
-          () => _session._afkWeightExpanded = !_session._afkWeightExpanded,
-        ),
         onMaximumWeightCommitted: (source) => _commitAfkWeightNumber(
           source,
           (current, value) => current.copyWith(maximumWeightLt: value),
@@ -705,7 +698,8 @@ class _DataViewState extends State<DataView> {
       title: 'Market Sales',
       child: LayoutBuilder(
         builder: (context, constraints) {
-          final wide = constraints.maxWidth >= 500;
+          final textScale = MediaQuery.textScalerOf(context).scale(1);
+          final wide = constraints.maxWidth >= 500 * textScale;
           final options = Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: <Widget>[
@@ -795,68 +789,23 @@ class _DataViewState extends State<DataView> {
   Widget _personalDataSettings(BuildContext context) => _DataEditorCard(
     key: const ValueKey<String>('data-personal-data-card'),
     title: 'Personal data',
-    child: Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: <Widget>[
-        Text(
-          'Favorites, checklist items, custom recipes, icons, and planner settings are stored only on this PC. They are not included in the installer.',
-          style: context.visualTheme.typography.body,
-        ),
-        const SizedBox(height: 12),
-        _DataField(
-          label: 'Personal data folder',
-          stretchChild: true,
-          child: Row(
-            children: <Widget>[
-              Expanded(
-                child: SizedBox(
-                  height: 42,
-                  child: AppTextField(
-                    key: const ValueKey<String>('data-personal-data-path'),
-                    controller: _session._personalDataPath,
-                    semanticLabel: 'Personal data folder path',
-                    maxLines: 1,
-                    enabled:
-                        widget.onMovePersonalData != null &&
-                        !_session._movingPersonalData &&
-                        !_session._busy,
-                  ),
-                ),
-              ),
-              const SizedBox(width: 8),
-              AppButton(
-                key: const ValueKey<String>('data-personal-data-browse'),
-                role: AppButtonRole.secondary,
-                semanticLabel: 'Browse for personal data folder',
-                tooltip: 'Browse for folder',
-                minimumSize: const Size(42, 42),
-                padding: const EdgeInsets.all(8),
-                onPressed:
-                    widget.onMovePersonalData == null ||
-                        _session._movingPersonalData ||
-                        _session._busy
-                    ? null
-                    : _browsePersonalDataPath,
-                child: const Icon(Icons.folder_open_outlined, size: 20),
-              ),
-            ],
-          ),
-        ),
-        if (widget.onMovePersonalData != null) ...<Widget>[
-          const SizedBox(height: 12),
-          Align(
-            alignment: Alignment.centerRight,
-            child: AppButton.label(
-              _session._movingPersonalData ? 'Moving...' : 'Move and restart',
-              key: const ValueKey<String>('data-personal-data-move'),
-              role: AppButtonRole.primary,
-              onPressed: _session._movingPersonalData || _session._busy
-                  ? null
-                  : _movePersonalData,
-            ),
-          ),
-        ],
-      ],
+    refinedProfile: true,
+    child: PersonalDataPanel(
+      activePath: widget.personalDataPath,
+      moving: _session._movingPersonalData,
+      onOpenFolder:
+          _session._busy ||
+              _session._openingPersonalData ||
+              _session._choosingPersonalData
+          ? null
+          : _openPersonalDataFolder,
+      onChangeLocation:
+          widget.onMovePersonalData == null ||
+              _session._busy ||
+              _session._choosingPersonalData ||
+              _session._openingPersonalData
+          ? null
+          : _browsePersonalDataPath,
     ),
   );
 
@@ -1097,289 +1046,17 @@ class _DataViewState extends State<DataView> {
   );
 }
 
-class _AfkWeightProfileEditor extends StatelessWidget {
-  const _AfkWeightProfileEditor({
-    required this.profile,
-    required this.expanded,
-    required this.onToggle,
-    required this.onMaximumWeightCommitted,
-    required this.onCurrentWeightCommitted,
-    required this.onSafetyBufferCommitted,
-    required this.onFeatheryStepsChanged,
-  });
-
-  final AfkWeightProfile profile;
-  final bool expanded;
-  final VoidCallback onToggle;
-  final ValueChanged<String> onMaximumWeightCommitted;
-  final ValueChanged<String> onCurrentWeightCommitted;
-  final ValueChanged<String> onSafetyBufferCommitted;
-  final ValueChanged<int> onFeatheryStepsChanged;
-
-  static const _featheryLevels = <int>[0, 1, 2, 3, 4, 5];
-
-  String _featheryLabel(int level) => switch (level) {
-    1 => 'I · 105%',
-    2 => 'II · 110%',
-    3 => 'III · 115%',
-    4 => 'IV · 120%',
-    5 => 'V · 125%',
-    _ => 'None · 100%',
-  };
-
-  @override
-  Widget build(BuildContext context) {
-    final spec = context.visualTheme;
-    final summary = profile.isConfigured
-        ? '${formatQuantity(profile.safeLimitLt)} LT for ingredients'
-        : 'Set your character weight once';
-    final safeStop = (profile.penaltyThresholdLt - profile.safetyBufferLt)
-        .clamp(0, double.infinity)
-        .toDouble();
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: <Widget>[
-        Row(
-          children: <Widget>[
-            Container(
-              width: 40,
-              height: 40,
-              decoration: BoxDecoration(
-                color: spec.palette.primary.withAlpha(28),
-                borderRadius: BorderRadius.circular(spec.geometry.fieldRadius),
-                border: Border.all(color: spec.palette.trim.withAlpha(150)),
-              ),
-              alignment: Alignment.center,
-              child: Icon(
-                Icons.scale_outlined,
-                size: 21,
-                color: spec.palette.primaryBright,
-              ),
-            ),
-            const SizedBox(width: 11),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: <Widget>[
-                  Text(
-                    'Character weight',
-                    maxLines: 1,
-                    style: spec.typography.body.copyWith(
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                  const SizedBox(height: 2),
-                  Text(
-                    summary,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: spec.typography.meta.copyWith(
-                      color: profile.isConfigured
-                          ? spec.palette.success
-                          : spec.palette.textMuted,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(width: 10),
-            AppButton.label(
-              expanded
-                  ? 'Done'
-                  : profile.isConfigured
-                  ? 'Edit'
-                  : 'Set up',
-              key: const ValueKey<String>('data-afk-load-toggle'),
-              onPressed: onToggle,
-              role: expanded ? AppButtonRole.primary : AppButtonRole.secondary,
-              minimumSize: const Size(74, 38),
-              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-              semanticLabel:
-                  'AFK Weight character settings, '
-                  '${expanded ? 'expanded' : 'collapsed'}',
-            ),
-          ],
-        ),
-        AnimatedSize(
-          duration: spec.motion.interactionDuration,
-          curve: Curves.easeOutCubic,
-          alignment: Alignment.topCenter,
-          child: expanded
-              ? Padding(
-                  padding: const EdgeInsets.only(top: 14),
-                  child: LayoutBuilder(
-                    builder: (context, constraints) {
-                      final fieldWidth = constraints.maxWidth >= 420
-                          ? (constraints.maxWidth - 10) / 2
-                          : constraints.maxWidth;
-                      return Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: <Widget>[
-                          Wrap(
-                            spacing: 10,
-                            runSpacing: 10,
-                            children: <Widget>[
-                              SizedBox(
-                                width: fieldWidth,
-                                child: _CommitNumberField(
-                                  key: const ValueKey<String>(
-                                    'data-afk-maximum-weight',
-                                  ),
-                                  label: 'Maximum weight',
-                                  value: formatQuantity(
-                                    profile.maximumWeightLt,
-                                  ),
-                                  onCommit: onMaximumWeightCommitted,
-                                  suffixText: 'LT',
-                                ),
-                              ),
-                              SizedBox(
-                                width: fieldWidth,
-                                child: _CommitNumberField(
-                                  key: const ValueKey<String>(
-                                    'data-afk-current-weight',
-                                  ),
-                                  label: 'Current weight',
-                                  value: formatQuantity(
-                                    profile.currentCarriedWeightLt,
-                                  ),
-                                  onCommit: onCurrentWeightCommitted,
-                                  suffixText: 'LT',
-                                ),
-                              ),
-                              SizedBox(
-                                width: fieldWidth,
-                                child: _CommitNumberField(
-                                  key: const ValueKey<String>(
-                                    'data-afk-safety-buffer',
-                                  ),
-                                  label: 'Keep free',
-                                  value: formatQuantity(profile.safetyBufferLt),
-                                  onCommit: onSafetyBufferCommitted,
-                                  suffixText: 'LT',
-                                ),
-                              ),
-                              SizedBox(
-                                width: fieldWidth,
-                                child: _DataField(
-                                  label: 'Feathery Steps',
-                                  stretchChild: true,
-                                  child: SizedBox(
-                                    height: 42,
-                                    child: AppSelect<int>(
-                                      key: const ValueKey<String>(
-                                        'data-afk-feathery-steps',
-                                      ),
-                                      value: profile.featheryStepsLevel,
-                                      items: _featheryLevels,
-                                      labelFor: _featheryLabel,
-                                      semanticLabel:
-                                          'Feathery Steps weight threshold',
-                                      onChanged: (value) {
-                                        if (value != null) {
-                                          onFeatheryStepsChanged(value);
-                                        }
-                                      },
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 12),
-                          Container(
-                            padding: const EdgeInsets.only(top: 11),
-                            decoration: BoxDecoration(
-                              border: Border(
-                                top: BorderSide(
-                                  color: spec.palette.trim.withAlpha(105),
-                                ),
-                              ),
-                            ),
-                            child: Wrap(
-                              spacing: 18,
-                              runSpacing: 6,
-                              alignment: WrapAlignment.spaceBetween,
-                              children: <Widget>[
-                                _AfkWeightMetric(
-                                  label: 'ROOM FOR INGREDIENTS',
-                                  value: profile.isConfigured
-                                      ? '${formatQuantity(profile.safeLimitLt)} LT'
-                                      : 'Enter Max LT',
-                                  emphasized: profile.isConfigured,
-                                ),
-                                _AfkWeightMetric(
-                                  label: 'MAXIMUM YOU CAN CARRY',
-                                  value: profile.isConfigured
-                                      ? '${formatQuantity(safeStop)} LT'
-                                      : 'Not calculated',
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
-                      );
-                    },
-                  ),
-                )
-              : const SizedBox.shrink(),
-        ),
-      ],
-    );
-  }
-}
-
-class _AfkWeightMetric extends StatelessWidget {
-  const _AfkWeightMetric({
-    required this.label,
-    required this.value,
-    this.emphasized = false,
-  });
-
-  final String label;
-  final String value;
-  final bool emphasized;
-
-  @override
-  Widget build(BuildContext context) {
-    final spec = context.visualTheme;
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      mainAxisSize: MainAxisSize.min,
-      children: <Widget>[
-        Text(
-          label,
-          style: spec.typography.label.copyWith(
-            color: _dataFieldLabelColor(spec),
-            fontSize: 10,
-            fontWeight: FontWeight.w800,
-            height: 1.15,
-          ),
-        ),
-        const SizedBox(height: 3),
-        Text(
-          value,
-          style: spec.typography.body.copyWith(
-            color: emphasized ? spec.palette.success : spec.palette.text,
-            fontSize: emphasized ? 18 : 15,
-            fontWeight: FontWeight.w800,
-            height: 1.15,
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-/// The local semantic card used by the original profile workspace. Its role is
-/// deliberately expressed through [AppSurface] so retained themes can restyle
-/// the material without changing the profile screen's composition or behavior.
 class _DataEditorCard extends StatelessWidget {
-  const _DataEditorCard({required this.title, required this.child, super.key});
+  const _DataEditorCard({
+    required this.title,
+    required this.child,
+    this.refinedProfile = false,
+    super.key,
+  });
 
   final String title;
   final Widget child;
+  final bool refinedProfile;
 
   @override
   Widget build(BuildContext context) {
@@ -1396,14 +1073,19 @@ class _DataEditorCard extends StatelessWidget {
           children: <Widget>[
             Text(
               title,
-              style: spec.typography.body.copyWith(
-                color: _dataTitleColor(spec),
-                fontSize: 17,
-                fontWeight: FontWeight.w700,
-                height: 1.2,
-              ),
+              style: refinedProfile
+                  ? ProfileTypography.section(context)
+                  : spec.typography.body.copyWith(
+                      color: _dataTitleColor(spec),
+                      fontSize: 17,
+                      fontWeight: FontWeight.w700,
+                      height: 1.2,
+                    ),
             ),
-            const SizedBox(height: 10),
+            Padding(
+              padding: EdgeInsets.only(top: 4, bottom: refinedProfile ? 14 : 5),
+              child: const WorkshopSectionRule(emphasis: true),
+            ),
             child,
           ],
         ),
@@ -1540,62 +1222,6 @@ class _DataOptionPill extends StatelessWidget {
   }
 }
 
-class _DataStatCard extends StatelessWidget {
-  const _DataStatCard({
-    required this.label,
-    required this.value,
-    required this.detail,
-  });
-
-  final String label;
-  final String value;
-  final String detail;
-
-  @override
-  Widget build(BuildContext context) {
-    final spec = context.visualTheme;
-    return AppSurface(
-      role: AppSurfaceRole.panel,
-      padding: const EdgeInsets.all(11),
-      semanticLabel: '$label, $value, $detail',
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: <Widget>[
-          Text(
-            label.toUpperCase(),
-            style: spec.typography.label.copyWith(
-              color: _dataStatLabelColor(spec),
-              fontSize: 11,
-              fontWeight: FontWeight.w700,
-              height: 1.2,
-            ),
-          ),
-          const SizedBox(height: 3),
-          Text(
-            value,
-            style: spec.typography.body.copyWith(
-              color: spec.palette.text,
-              fontSize: 18,
-              fontWeight: FontWeight.w700,
-              height: 1.2,
-            ),
-          ),
-          const SizedBox(height: 3),
-          Text(
-            detail,
-            style: spec.typography.meta.copyWith(
-              color: _dataStatDetailColor(spec),
-              fontSize: 11,
-              fontWeight: FontWeight.w600,
-              height: 1.2,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
 class _MarketReturnSummary extends StatelessWidget {
   const _MarketReturnSummary({required this.tax});
 
@@ -1690,6 +1316,8 @@ class _CommitNumberField extends StatefulWidget {
     required this.value,
     required this.onCommit,
     this.suffixText,
+    this.inputOnly = false,
+    this.refined = false,
     super.key,
   });
 
@@ -1697,6 +1325,8 @@ class _CommitNumberField extends StatefulWidget {
   final String value;
   final ValueChanged<String> onCommit;
   final String? suffixText;
+  final bool inputOnly;
+  final bool refined;
 
   @override
   State<_CommitNumberField> createState() => _CommitNumberFieldState();
@@ -1729,16 +1359,20 @@ class _CommitNumberFieldState extends State<_CommitNumberField> {
   }
 
   @override
-  Widget build(BuildContext context) => _DataField(
-    label: widget.label,
-    stretchChild: true,
-    child: _DataNumberTextField(
-      controller: _controller,
-      focusNode: _focus,
-      onSubmitted: widget.onCommit,
-      suffixText: widget.suffixText,
-    ),
-  );
+  Widget build(BuildContext context) {
+    final input = Semantics(
+      label: widget.label,
+      child: _DataNumberTextField(
+        controller: _controller,
+        focusNode: _focus,
+        onSubmitted: widget.onCommit,
+        suffixText: widget.suffixText,
+        refined: widget.refined,
+      ),
+    );
+    if (widget.inputOnly) return input;
+    return _DataField(label: widget.label, stretchChild: true, child: input);
+  }
 }
 
 /// A consistently sized numeric field for the Craft Profile cards.
@@ -1748,12 +1382,14 @@ class _DataNumberTextField extends StatelessWidget {
     required this.focusNode,
     required this.onSubmitted,
     this.suffixText,
+    this.refined = false,
   });
 
   final TextEditingController controller;
   final FocusNode focusNode;
   final ValueChanged<String> onSubmitted;
   final String? suffixText;
+  final bool refined;
 
   @override
   Widget build(BuildContext context) {
@@ -1787,18 +1423,20 @@ class _DataNumberTextField extends StatelessWidget {
       textAlign: TextAlign.right,
       textAlignVertical: TextAlignVertical.center,
       cursorColor: spec.palette.primaryBright,
-      style: spec.typography.body.copyWith(
-        fontWeight: FontWeight.w700,
-        height: denseLayout ? 1.15 : spec.typography.body.height,
-        leadingDistribution: denseLayout
-            ? TextLeadingDistribution.even
-            : spec.typography.body.leadingDistribution,
-      ),
+      style: refined
+          ? ProfileTypography.input(context)
+          : spec.typography.body.copyWith(
+              fontSize: 17,
+              fontWeight: FontWeight.w700,
+              height: denseLayout ? 1.15 : spec.typography.body.height,
+              leadingDistribution: denseLayout
+                  ? TextLeadingDistribution.even
+                  : spec.typography.body.leadingDistribution,
+            ),
       decoration: InputDecoration(
-        // The Ledger control is clamped to its authored desktop height below;
-        // using the non-dense single-line template keeps Georgia's baseline
-        // centered instead of pinning it to the top edge.
-        isDense: !denseLayout,
+        // Keep the painted field and baseline consistent across themes;
+        // the host below grows with accessibility text size.
+        isDense: false,
         filled: ledger || sakura,
         fillColor: ledger
             ? spec.palette.surfaceRaised.withAlpha(212)
@@ -1807,10 +1445,12 @@ class _DataNumberTextField extends StatelessWidget {
             : null,
         contentPadding: const EdgeInsets.symmetric(horizontal: 12),
         suffixText: suffixText,
-        suffixStyle: spec.typography.meta.copyWith(
-          color: spec.palette.textMuted,
-          fontWeight: FontWeight.w700,
-        ),
+        suffixStyle: refined
+            ? ProfileTypography.label(context)
+            : spec.typography.meta.copyWith(
+                color: spec.palette.textMuted,
+                fontWeight: FontWeight.w700,
+              ),
         border: border,
         enabledBorder: border,
         focusedBorder: border.copyWith(
@@ -1843,12 +1483,13 @@ class _DataNumberTextField extends StatelessWidget {
       );
     }
     final textScale = MediaQuery.textScalerOf(context).scale(1);
-    final lineHeight =
-        (spec.typography.body.fontSize ?? 14) *
-        (denseLayout ? 1.15 : (spec.typography.body.height ?? 1)) *
-        textScale;
+    final lineHeight = refined
+        ? 22 * textScale
+        : 17 *
+              (denseLayout ? 1.15 : (spec.typography.body.height ?? 1)) *
+              textScale;
     return SizedBox(
-      height: (lineHeight + 16).clamp(42.0, 46.0).toDouble(),
+      height: (lineHeight + 16).clamp(42.0, double.infinity).toDouble(),
       child: field,
     );
   }

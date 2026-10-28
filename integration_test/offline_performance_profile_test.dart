@@ -236,6 +236,36 @@ void main() {
           _host(OpportunitiesWorkspace(controller: opportunities)),
         );
         await _warmFrames(tester);
+        final modeSwitches = <Map<String, Object?>>[];
+        for (var cycle = 0; cycle < 3; cycle++) {
+          for (final mode in [
+            CraftMode.cooking,
+            CraftMode.alchemy,
+            CraftMode.processing,
+          ]) {
+            final watch = Stopwatch()..start();
+            opportunities.change((p) => p.mode = mode);
+            await tester.pump();
+            final firstFrame = watch.elapsedMicroseconds;
+            await opportunities.calculationSettled;
+            await tester.pump();
+            watch.stop();
+            modeSwitches.add({
+              'mode': mode.key,
+              'cycle': cycle,
+              'firstFrameUs': firstFrame,
+              'settledUs': watch.elapsedMicroseconds,
+              'visibleRecipes': opportunities.visibleQuotes.length,
+            });
+            expect(
+              watch.elapsedMilliseconds,
+              lessThan(5000),
+              reason: 'A fully cached category must not block for 5 seconds.',
+            );
+            await _warmFrames(tester);
+          }
+        }
+        operations['category_switches'] = modeSwitches;
         await binding.watchPerformance(() async {
           for (var i = 0; i < 100; i++) {
             // Same public fields/notifier used by production progress callbacks.

@@ -11,6 +11,46 @@ import '../../support/application_test_harness.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
+  test('glass finish migrates safely and persists separately from recipes', () {
+    for (final value in [null, 'removed', 4]) {
+      expect(
+        OpportunitiesPreferences.fromJson({
+          'version': 1,
+          'glassFinish': value,
+        }).glassFinish,
+        'bronze',
+      );
+    }
+    final original = _preferences()..glassFinish = 'moon';
+    final restored = OpportunitiesPreferences.fromJson(
+      jsonDecode(jsonEncode(original.toJson())),
+    );
+    expect(restored.glassFinish, 'moon');
+    expect(restored.toJson(), original.toJson());
+  });
+
+  test('inventory comparison defaults off and persists independently', () {
+    final legacy = OpportunitiesPreferences.fromJson({
+      'version': 1,
+      'owned': {'fairy-breath': 4},
+    });
+    expect(legacy.useInventory, isFalse);
+    legacy.useInventory = true;
+    legacy.readyOnly = false;
+    final restored = OpportunitiesPreferences.fromJson(
+      jsonDecode(jsonEncode(legacy.toJson())),
+    );
+    expect(restored.useInventory, isTrue);
+    expect(restored.readyOnly, isFalse);
+    expect(restored.owned, {'fairy-breath': 4});
+    expect(
+      OpportunitiesPreferences.fromJson({
+        'version': 1,
+        'useInventory': 'true',
+      }).useInventory,
+      isFalse,
+    );
+  });
 
   test('the former Sales sort becomes Demand filtered by profit', () {
     final saved = _preferences().toJson()..['craftSort'] = 'activity';
@@ -235,6 +275,7 @@ void main() {
         p.craftSale = 'listing';
         p.exchangeSale = 'buyers';
         p.craftSort = 'preorders';
+        p.bestUseItem = 'Milk';
         p.demandOnly = true;
         p.owned['sangpyeong'] = 10001;
         p.owned['fairy-breath'] = 37;
@@ -242,19 +283,24 @@ void main() {
         p.confirmedRequirements.add('quest-reward');
       });
       final firstFlush = controller.flush();
+      controller.selectGlassFinish('moon');
       controller.change((p) {
         p.craftSearch = 'Vinegar';
+        p.bestUseItem = 'Aloe';
         p.owned['sangpyeong'] = 10007;
       });
       await Future.wait([firstFlush, controller.flush()]);
       expect(harness.bundle.controller.documentSnapshot, same(plannerBefore));
       final restored = await OpportunitiesPreferenceStore(directory).load();
+      expect(restored.glassFinish, 'moon');
       expect(restored.section, 'exchanges');
       expect(restored.craftSearch, 'Vinegar');
       expect(restored.exchangeSearch, 'Fairy');
       expect(restored.craftSale, 'listing');
       expect(restored.exchangeSale, 'buyers');
       expect(restored.craftSort, 'preorders');
+      expect(restored.bestUseItem, isEmpty);
+      expect(controller.preferences.bestUseItem, 'Aloe');
       expect(restored.demandOnly, isTrue);
       expect(restored.owned, {'sangpyeong': 10007, 'fairy-breath': 37});
       expect(restored.remainingLimits, isEmpty);
@@ -273,6 +319,88 @@ void main() {
             .isEmpty,
         isTrue,
       );
+    },
+  );
+
+  test(
+    'searches reset on restart while Best use stays session-only through navigation and saves',
+    () async {
+      final harness = await ApplicationTestHarness.create();
+      addTearDown(harness.dispose);
+      final directory = Directory(
+        '${harness.temporaryDirectory.path}/opportunities',
+      );
+      final saved = _preferences()
+        ..section = 'best-use'
+        ..useInventory = true
+        ..bestUseItem = 'Milk';
+      await OpportunitiesPreferenceStore(directory).save(saved);
+      final fileBefore = await _settingsFile(directory).readAsBytes();
+      final plannerBefore = harness.bundle.controller.documentSnapshot;
+      final expected = saved.toJson()
+        ..['craftSearch'] = ''
+        ..['exchangeSearch'] = ''
+        ..['bestUseItem'] = '';
+
+      final first = _controller(harness, directory);
+      try {
+        await first.ready;
+        expect(first.preferences.toJson(), expected);
+        // Startup must not rewrite the user's file just to clear visible search.
+        expect(await _settingsFile(directory).readAsBytes(), fileBefore);
+        await first.flush();
+        expect(await _settingsFile(directory).readAsBytes(), fileBefore);
+        first.selectBestUseItem('Aloe');
+        first.change((p) {
+          p.section = 'best-use';
+          p.craftSearch = 'Vinegar';
+          p.exchangeSearch = 'Milk';
+        });
+        await first.calculationSettled;
+        expect(first.preferences.bestUseItem, 'Aloe');
+        for (final mode in CraftMode.values) {
+          first.change((p) {
+            p.section = 'crafting';
+            p.mode = mode;
+          }, assemble: true);
+          await first.calculationSettled;
+          expect(first.preferences.craftSearch, 'Vinegar');
+          expect(first.preferences.exchangeSearch, 'Milk');
+          expect(first.preferences.bestUseItem, 'Aloe');
+        }
+        first.change((p) => p.section = 'exchanges');
+        expect(first.preferences.bestUseItem, 'Aloe');
+        first.change((p) => p.section = 'best-use');
+        await first.flush();
+        expect(first.preferences.craftSearch, 'Vinegar');
+        expect(first.preferences.exchangeSearch, 'Milk');
+        expect(first.preferences.bestUseItem, 'Aloe');
+        final disk = await OpportunitiesPreferenceStore(directory).load();
+        expect(
+          disk.toJson(),
+          first.preferences.toJson()..['bestUseItem'] = '',
+          reason:
+              'Saving removes only the session selection from the snapshot.',
+        );
+        expect(
+          (jsonDecode(await _settingsFile(directory).readAsString())
+              as Map<String, dynamic>)['bestUseItem'],
+          isEmpty,
+        );
+      } finally {
+        first.dispose();
+      }
+
+      final restarted = _controller(harness, directory);
+      try {
+        await restarted.ready;
+        expect(restarted.preferences.toJson(), expected);
+        expect(harness.bundle.controller.documentSnapshot, same(plannerBefore));
+        expect(restarted.notice, isNull);
+      } finally {
+        await restarted.flush();
+        restarted.dispose();
+      }
     },
   );
 

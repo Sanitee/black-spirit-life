@@ -27,6 +27,171 @@ void main() {
     }
   });
 
+  testWidgets(
+    'direct reference icon opens the same rich hover card without a menu',
+    (tester) async {
+      final fixture = await _fixture(tester);
+      const name = 'Iridescent Maehwa Liquor';
+      final info = fixture.controller.itemInfoController.itemInfoFor(name)!;
+      expect(info.summary, isNotEmpty);
+      final before = fixture.harness.bundle.controller.documentSnapshot;
+      var mapLookups = 0;
+      var surroundingCardOpens = 0;
+      final copied = <String>[];
+      const artwork = SizedBox(
+        key: ValueKey('direct-reference-artwork'),
+        width: 36,
+        height: 36,
+      );
+      await tester.pumpWidget(
+        _host(
+          fixture,
+          OpportunityItemActionsScope(
+            externalActions: _actions(
+              copy: (value) async => copied.add(value),
+              resolve: (_) async {
+                mapLookups++;
+                throw StateError(
+                  'Opening reference facts does not need a lookup.',
+                );
+              },
+            ),
+            child: InkWell(
+              onTap: () => surroundingCardOpens++,
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  _region(
+                    fixture,
+                    name: name,
+                    primaryOpensItemInfo: true,
+                    itemInfo: info,
+                    itemInfoIcon: artwork,
+                    child: RecipeBookItemInfoHover(
+                      controller: fixture.controller.itemInfoController,
+                      name: name,
+                      info: info,
+                      referenceIcon: artwork,
+                      interactivePreview: false,
+                      child: const SizedBox.square(dimension: 44),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  const OpportunityCopyName(name: name),
+                  const SizedBox(width: 12),
+                  const SizedBox(
+                    key: ValueKey('surrounding-detail-action'),
+                    width: 44,
+                    height: 44,
+                    child: ColoredBox(color: Colors.transparent),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      );
+      final hover = find.byWidgetPredicate(
+        (widget) => widget is Tooltip && widget.richMessage != null,
+      );
+      tester.state<TooltipState>(hover).ensureTooltipVisible();
+      await tester.pumpAndSettle();
+      expect(
+        tester.widget<ItemReferenceCard>(find.byType(ItemReferenceCard)).info,
+        same(info),
+      );
+
+      await tester.tap(find.byKey(const ValueKey('opportunity-item:test')));
+      await tester.pumpAndSettle();
+      expect(find.text('Item info'), findsNothing);
+      final card = tester.widget<ItemReferenceCard>(
+        find.byType(ItemReferenceCard),
+      );
+      expect(card.info, same(info));
+      expect(card.icon, same(artwork));
+      expect(card.controller, same(fixture.controller.itemInfoController));
+      expect(card.onClose, isNotNull);
+      expect(find.text(info.summary), findsOneWidget);
+      expect(find.text('No source details recorded yet.'), findsNothing);
+      expect(mapLookups, 0);
+      expect(surroundingCardOpens, 0);
+      expect(fixture.harness.bundle.controller.documentSnapshot, same(before));
+
+      await tester.tap(
+        find.byKey(const ValueKey('item-reference-copy:$name')).first,
+      );
+      await tester.pumpAndSettle();
+      expect(copied, [name]);
+      await tester.tap(find.bySemanticsLabel('Close $name information'));
+      await tester.pumpAndSettle();
+      expect(find.byType(ItemReferenceCard), findsNothing);
+      await tester.tap(
+        find.byKey(const ValueKey('opportunity-copy-name:$name')),
+      );
+      await tester.pumpAndSettle();
+      expect(copied, [name, name]);
+      expect(surroundingCardOpens, 0);
+      await tester.tap(find.byKey(const ValueKey('surrounding-detail-action')));
+      expect(surroundingCardOpens, 1);
+      expect(tester.takeException(), isNull);
+      await _dispose(tester, fixture);
+    },
+  );
+
+  for (final activationKey in [
+    LogicalKeyboardKey.enter,
+    LogicalKeyboardKey.space,
+  ]) {
+    testWidgets(
+      'direct reference icon supports ${activationKey.keyLabel} and restores focus',
+      (tester) async {
+        final fixture = await _fixture(tester);
+        final semantics = tester.ensureSemantics();
+        await tester.pumpWidget(
+          _host(
+            fixture,
+            _region(fixture, name: 'Paprika', primaryOpensItemInfo: true),
+          ),
+        );
+        final region = find.byKey(const ValueKey('opportunity-item:test'));
+        final detector = find
+            .ancestor(
+              of: region,
+              matching: find.byType(FocusableActionDetector),
+            )
+            .first;
+        final focus = tester
+            .widget<FocusableActionDetector>(detector)
+            .focusNode!;
+        focus.requestFocus();
+        await tester.pump();
+        expect(focus.hasPrimaryFocus, isTrue);
+        final node = tester.getSemantics(region);
+        expect(node.label, contains('Show Paprika information'));
+        expect(node.getSemanticsData().hasAction(SemanticsAction.tap), isTrue);
+        await tester.sendKeyEvent(activationKey);
+        await tester.pumpAndSettle();
+        expect(find.byType(ItemReferenceCard), findsOneWidget);
+        expect(find.text('Item info'), findsNothing);
+        await tester.sendKeyEvent(LogicalKeyboardKey.escape);
+        await tester.pumpAndSettle();
+        expect(find.byType(ItemReferenceCard), findsNothing);
+        expect(focus.hasPrimaryFocus, isTrue);
+        await tester.sendKeyEvent(LogicalKeyboardKey.contextMenu);
+        await tester.pumpAndSettle();
+        expect(find.text('Item info'), findsOneWidget);
+        expect(find.text('Copy name'), findsOneWidget);
+        expect(find.byType(ItemReferenceCard), findsNothing);
+        await tester.sendKeyEvent(LogicalKeyboardKey.escape);
+        await tester.pumpAndSettle();
+        expect(focus.hasPrimaryFocus, isTrue);
+        expect(tester.takeException(), isNull);
+        semantics.dispose();
+        await _dispose(tester, fixture);
+      },
+    );
+  }
+
   for (final name in const ['Essence of Dawn - Accuracy', 'Magical Shard']) {
     testWidgets(
       'shared item dialog fits, scrolls, copies and dismisses at 1200: $name',
@@ -224,7 +389,7 @@ void main() {
           find.descendant(of: row, matching: find.byType(ModeItemIcon)),
         );
         expect(icon.name, ingredient.name);
-        expect(icon.size, 24);
+        expect(icon.size, 36);
         expect(icon.searchAcrossModes, isTrue);
       }
       for (final formula in info.acquisitionFormulas) {
@@ -896,12 +1061,18 @@ Widget _region(
   Widget? child,
   VoidCallback? onViewRecipe,
   bool childHandlesFocus = false,
+  bool primaryOpensItemInfo = false,
+  RecipeBookItemInfo? itemInfo,
+  Widget? itemInfoIcon,
 }) => OpportunityItemRegion(
   controller: fixture.controller,
   name: name,
   stableId: 'test',
   onViewRecipe: onViewRecipe,
   childHandlesFocus: childHandlesFocus,
+  primaryOpensItemInfo: primaryOpensItemInfo,
+  itemInfo: itemInfo,
+  itemInfoIcon: itemInfoIcon,
   child:
       child ??
       const Padding(padding: EdgeInsets.all(28), child: Text('Material')),

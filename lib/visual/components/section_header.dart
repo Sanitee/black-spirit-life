@@ -13,6 +13,7 @@ class SectionHeader extends StatelessWidget {
     this.leading,
     this.trailing,
     this.padding = EdgeInsets.zero,
+    this.prioritizeTitle = false,
     super.key,
   });
 
@@ -22,6 +23,7 @@ class SectionHeader extends StatelessWidget {
   final Widget? leading;
   final Widget? trailing;
   final EdgeInsetsGeometry padding;
+  final bool prioritizeTitle;
 
   static const Key titleKey = ValueKey<String>('section-header-title');
   static const Key ruleKey = ValueKey<String>('section-header-rule');
@@ -44,7 +46,7 @@ class SectionHeader extends StatelessWidget {
         sectionFontSize;
     final enlargedText = textScale > 1.25;
 
-    Widget titleLabel() => Text(
+    Text titleLabel() => Text(
       displayTitle,
       key: titleKey,
       // Avalonia's Ledger TextBlock is a single no-wrap row. Retain a second
@@ -239,6 +241,28 @@ class SectionHeader extends StatelessWidget {
       height: 18,
       child: const SakuraSectionRuleAsset(),
     );
+    final prioritizedSakuraTitle = LayoutBuilder(
+      builder: (context, constraints) {
+        final label = titleLabel();
+        final measure = TextPainter(
+          text: TextSpan(text: displayTitle, style: label.style),
+          textDirection: Directionality.of(context),
+          textScaler: MediaQuery.textScalerOf(context),
+          maxLines: 1,
+        )..layout();
+        final titleWidth = measure.width.ceilToDouble() + 1;
+        measure.dispose();
+        // Give real text priority; the ornament uses only genuine spare room.
+        if (constraints.maxWidth < titleWidth + 24) return label;
+        return Row(
+          children: [
+            SizedBox(width: titleWidth, child: label),
+            const SizedBox(width: 10),
+            Expanded(child: sakuraRule),
+          ],
+        );
+      },
+    );
     final sakuraHeader = ConstrainedBox(
       key: coreKey,
       constraints: const BoxConstraints(minHeight: 36),
@@ -288,9 +312,13 @@ class SectionHeader extends StatelessWidget {
                 // 1500px acceptance size. The previous 3:5 split made the
                 // decorative branch win a few pixels over the real heading,
                 // causing a visible ellipsis even though the row had room.
-                Flexible(flex: 4, fit: FlexFit.loose, child: titleLabel()),
-                const SizedBox(width: 10),
-                Expanded(flex: 5, child: sakuraRule),
+                if (prioritizeTitle)
+                  Expanded(child: prioritizedSakuraTitle)
+                else ...[
+                  Flexible(flex: 4, fit: FlexFit.loose, child: titleLabel()),
+                  const SizedBox(width: 10),
+                  Expanded(flex: 5, child: sakuraRule),
+                ],
                 if (meta case final value?) ...<Widget>[
                   const SizedBox(width: 12),
                   metaLabel(value),

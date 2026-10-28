@@ -41,6 +41,19 @@ void main() {
         '${harness.bundle.personalDataLocation.applicationDirectory.path}'
         '${Platform.pathSeparator}gathering',
       );
+      final gatheringElement = tester.element(find.byType(GatheringWorkspace));
+      await tester.tap(shortcut);
+      await tester.pump();
+      expect(find.byTooltip('Back to Gathering'), findsOneWidget);
+      await tester.pump(const Duration(milliseconds: 250));
+      await tester.tap(find.byKey(AppTitleTabStrip.returnButtonKey));
+      await tester.pump();
+      expect(_selectedWorkspaceTab(tester, 'Gathering'), isTrue);
+      expect(
+        tester.element(find.byType(GatheringWorkspace)),
+        same(gatheringElement),
+      );
+      expect(find.byKey(AppTitleTabStrip.returnButtonKey), findsNothing);
       expect(tester.takeException(), isNull);
 
       await _disposeWidgetHarness(tester, harness);
@@ -54,8 +67,14 @@ void main() {
       final harness = await _createHarness(tester);
       await _pumpApplication(tester, harness);
 
+      final back = find.byKey(AppTitleTabStrip.returnButtonKey);
+      expect(back, findsNothing);
       await tester.tap(_workspaceTab('Fish Map'));
       await tester.pump();
+      expect(back, findsNothing);
+      final fishElement = tester.element(
+        find.byKey(const ValueKey('test-fish-map-workspace')),
+      );
 
       final path =
           harness.bundle.personalDataLocation.applicationDirectory.path;
@@ -76,6 +95,24 @@ void main() {
       expect(find.byType(DataView), findsOneWidget);
       expect(find.text('Personal data'), findsOneWidget);
       expect(shortcut, findsNothing);
+      expect(find.byTooltip('Back to Fish Map'), findsOneWidget);
+      await tester.pump(const Duration(milliseconds: 250));
+      await tester.tap(back);
+      await tester.pump();
+      expect(_selectedWorkspaceTab(tester, 'Fish Map'), isTrue);
+      expect(
+        tester.element(find.byKey(const ValueKey('test-fish-map-workspace'))),
+        same(fishElement),
+      );
+      expect(back, findsNothing);
+
+      // Clicking even the active tab clears the shortcut trail.
+      await tester.tap(shortcut);
+      await tester.pump();
+      expect(back, findsOneWidget);
+      await tester.tap(_workspaceTab('Craft Planner'));
+      await tester.pump();
+      expect(back, findsNothing);
       expect(tester.takeException(), isNull);
 
       await _disposeWidgetHarness(tester, harness);

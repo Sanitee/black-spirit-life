@@ -55,6 +55,7 @@ Future<BairogCalculatorSettings?> showGatheringSetupDialog({
   required Catalog catalog,
   required BairogCalculatorSettings initial,
   ValueChanged<BairogCalculatorSettings>? onPreview,
+  String preparationLabel = 'Prepare',
 }) => showDialog<BairogCalculatorSettings>(
   context: context,
   barrierDismissible: false,
@@ -62,6 +63,7 @@ Future<BairogCalculatorSettings?> showGatheringSetupDialog({
     catalog: catalog,
     initial: initial,
     onPreview: onPreview,
+    preparationLabel: preparationLabel,
   ),
 );
 
@@ -79,6 +81,7 @@ class _GatheringSetupDialog extends StatefulWidget {
     this.contextId,
     this.advancedRequest = 0,
     this.onAdvancedExpandedChanged,
+    this.preparationLabel = 'Prepare',
   });
 
   final Catalog catalog;
@@ -91,6 +94,7 @@ class _GatheringSetupDialog extends StatefulWidget {
   final Object? contextId;
   final int advancedRequest;
   final ValueChanged<bool>? onAdvancedExpandedChanged;
+  final String preparationLabel;
 
   @override
   State<_GatheringSetupDialog> createState() => _GatheringSetupDialogState();
@@ -398,8 +402,8 @@ class _GatheringSetupDialogState extends State<_GatheringSetupDialog> {
                         padding: const EdgeInsets.only(bottom: 7),
                         child: Text(
                           message,
-                          style: const TextStyle(
-                            color: Color(0xFFFFB4A3),
+                          style: TextStyle(
+                            color: context.gatheringColors.danger,
                             fontSize: 13,
                           ),
                         ),
@@ -472,7 +476,11 @@ class _GatheringSetupDialogState extends State<_GatheringSetupDialog> {
                 ],
               ),
             ),
-            icon: const Icon(Icons.info_outline, size: 17, color: muted),
+            icon: Icon(
+              Icons.info_outline,
+              size: 17,
+              color: context.gatheringColors.muted,
+            ),
           ),
           if (_validDraft == null)
             IconButton(
@@ -498,18 +506,22 @@ class _GatheringSetupDialogState extends State<_GatheringSetupDialog> {
           runSpacing: 4,
           crossAxisAlignment: WrapCrossAlignment.center,
           children: [
-            const Text(
+            Text(
               'With selected buffs',
-              style: TextStyle(fontSize: 13, color: muted),
+              style: TextStyle(
+                fontSize: 13,
+                color: context.gatheringColors.muted,
+              ),
             ),
             ValueChangePulse(
               value: widget.effectiveSettings!.mastery,
               child: Text(
                 '${countText(widget.effectiveSettings!.mastery)} Mastery',
                 key: const ValueKey('preparation-effective-mastery'),
-                style: Theme.of(
-                  context,
-                ).textTheme.titleMedium?.copyWith(fontSize: 16, color: accent),
+                style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                  fontSize: 16,
+                  color: context.gatheringColors.accent,
+                ),
               ),
             ),
             ValueChangePulse(
@@ -517,9 +529,10 @@ class _GatheringSetupDialogState extends State<_GatheringSetupDialog> {
               child: Text(
                 '${numberText(widget.effectiveSettings!.gatheringDropRatePercent)}% Drop rate',
                 key: const ValueKey('preparation-effective-drop-rate'),
-                style: Theme.of(
-                  context,
-                ).textTheme.titleMedium?.copyWith(fontSize: 16, color: accent),
+                style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                  fontSize: 16,
+                  color: context.gatheringColors.accent,
+                ),
               ),
             ),
           ],
@@ -556,10 +569,14 @@ class _GatheringSetupDialogState extends State<_GatheringSetupDialog> {
     crossAxisAlignment: CrossAxisAlignment.stretch,
     children: [
       if (!widget.inline)
-        const Text(
-          'Include your gear, artifacts and crystals.\nLeave out the buffs selected in Prepare.',
+        Text(
+          'Include your gear, artifacts and crystals.\nLeave out the buffs selected in ${widget.preparationLabel}.',
           key: ValueKey('gathering-base-stats-note'),
-          style: TextStyle(fontSize: 14, color: muted, height: 1.45),
+          style: TextStyle(
+            fontSize: 14,
+            color: context.gatheringColors.muted,
+            height: 1.45,
+          ),
         ),
       if (!widget.inline) const SizedBox(height: 20),
       _compactFields(
@@ -613,9 +630,10 @@ class _GatheringSetupDialogState extends State<_GatheringSetupDialog> {
         childrenPadding: const EdgeInsets.only(top: 16, bottom: 10),
         title: Text(
           'Advanced options',
-          style: Theme.of(
-            context,
-          ).textTheme.bodyMedium?.copyWith(fontSize: 14.5, color: muted),
+          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+            fontSize: 14.5,
+            color: context.gatheringColors.muted,
+          ),
         ),
         children: [
           Wrap(
@@ -733,10 +751,14 @@ class _GatheringSetupDialogState extends State<_GatheringSetupDialog> {
         ],
       ),
       const SizedBox(height: 10),
-      const Text(
+      Text(
         'Rare drops use long-term averages. Your actual hour can be higher or lower.',
         key: ValueKey('loot-options-average-note'),
-        style: TextStyle(fontSize: 12.5, color: muted, height: 1.4),
+        style: TextStyle(
+          fontSize: 12.5,
+          color: context.gatheringColors.muted,
+          height: 1.4,
+        ),
       ),
     ],
   );
@@ -747,9 +769,13 @@ class _GatheringSetupDialogState extends State<_GatheringSetupDialog> {
     children: [
       _sectionHeader('ENERGY RECOVERY'),
       const SizedBox(height: 10),
-      const Text(
+      Text(
         'Energy use assumes Gathering Professional 3+.',
-        style: TextStyle(fontSize: 13, color: muted, height: 1.4),
+        style: TextStyle(
+          fontSize: 13,
+          color: context.gatheringColors.muted,
+          height: 1.4,
+        ),
       ),
       const SizedBox(height: 16),
       _compactFields(
@@ -783,11 +809,11 @@ class _GatheringSetupDialogState extends State<_GatheringSetupDialog> {
       Flexible(
         child: Text(
           label,
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 12,
             fontWeight: FontWeight.w600,
             letterSpacing: 1.2,
-            color: accent,
+            color: context.gatheringColors.accent,
           ),
         ),
       ),
@@ -869,15 +895,18 @@ class _GatheringSetupDialogState extends State<_GatheringSetupDialog> {
       labelText: label,
       hintText: hint,
       suffixIcon: help,
-      labelStyle: Theme.of(
-        context,
-      ).textTheme.bodyMedium?.copyWith(fontSize: 14, color: muted),
-      floatingLabelStyle: Theme.of(
-        context,
-      ).textTheme.bodyMedium?.copyWith(fontSize: 14, color: muted),
-      hintStyle: Theme.of(
-        context,
-      ).textTheme.bodyMedium?.copyWith(fontSize: 14, color: muted),
+      labelStyle: Theme.of(context).textTheme.bodyMedium?.copyWith(
+        fontSize: 14,
+        color: context.gatheringColors.muted,
+      ),
+      floatingLabelStyle: Theme.of(context).textTheme.bodyMedium?.copyWith(
+        fontSize: 14,
+        color: context.gatheringColors.muted,
+      ),
+      hintStyle: Theme.of(context).textTheme.bodyMedium?.copyWith(
+        fontSize: 14,
+        color: context.gatheringColors.muted,
+      ),
       errorText: widget.inline ? _fieldError(controller) : null,
       errorMaxLines: 2,
       isDense: true,
@@ -928,15 +957,19 @@ class _GatheringSetupDialogState extends State<_GatheringSetupDialog> {
           ],
         ),
       ),
-      icon: const Icon(Icons.info_outline_rounded, size: 18, color: muted),
+      icon: Icon(
+        Icons.info_outline_rounded,
+        size: 18,
+        color: context.gatheringColors.muted,
+      ),
     ),
   );
 
   Widget _fieldLabel(String label) => Text(
     label,
-    style: const TextStyle(
+    style: TextStyle(
       fontSize: 14,
-      color: ink,
+      color: context.gatheringColors.ink,
       fontWeight: FontWeight.w600,
     ),
   );
@@ -960,7 +993,7 @@ class _GatheringSetupDialogState extends State<_GatheringSetupDialog> {
           style: TextStyle(
             fontSize: 14,
             fontWeight: selected ? FontWeight.w700 : FontWeight.w600,
-            color: ink,
+            color: context.gatheringColors.ink,
           ),
         ),
       ),
@@ -989,15 +1022,19 @@ class _GatheringSetupDialogState extends State<_GatheringSetupDialog> {
           labelStyle: Theme.of(context).textTheme.labelLarge?.copyWith(
             fontSize: 14,
             fontWeight: FontWeight.w600,
-            color: ink,
+            color: context.gatheringColors.ink,
           ),
           label: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
               Flexible(child: Text(label)),
               const SizedBox(width: 4),
-              const ExcludeSemantics(
-                child: Icon(Icons.info_outline, size: 13, color: muted),
+              ExcludeSemantics(
+                child: Icon(
+                  Icons.info_outline,
+                  size: 13,
+                  color: context.gatheringColors.muted,
+                ),
               ),
             ],
           ),
@@ -1053,7 +1090,10 @@ class _GatheringSetupDialogState extends State<_GatheringSetupDialog> {
                       expense.usesPerHour != null
                           ? '${_plainNumber(expense.usesPerHour!)} uses/hour'
                           : '${_plainNumber(expense.durationHours!)} hour duration',
-                      style: const TextStyle(fontSize: 12.5, color: muted),
+                      style: TextStyle(
+                        fontSize: 12.5,
+                        color: context.gatheringColors.muted,
+                      ),
                     ),
                   ],
                 ),
@@ -1068,7 +1108,11 @@ class _GatheringSetupDialogState extends State<_GatheringSetupDialog> {
                     minWidth: 34,
                     minHeight: 34,
                   ),
-                  icon: const Icon(Icons.info_outline, size: 17, color: muted),
+                  icon: Icon(
+                    Icons.info_outline,
+                    size: 17,
+                    color: context.gatheringColors.muted,
+                  ),
                 ),
               Checkbox(
                 value: selected,

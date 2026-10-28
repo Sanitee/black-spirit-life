@@ -2,6 +2,8 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'assets.dart';
+import 'recipe_checklist.dart';
+import 'widgets/spot_map.dart';
 import 'domain/bairog_benchmarks.dart';
 import 'domain/bairog_calculator.dart';
 import 'domain/gathering_preparation.dart';
@@ -12,6 +14,7 @@ import 'services/session_store.dart';
 import 'services/shared_market_loader.dart';
 import 'services/stable_v017_migration.dart';
 import 'ui/buff_picker.dart';
+import 'ui/field_desk_materials.dart';
 import 'ui/field_guide.dart';
 import 'ui/gathering_setup_dialog.dart';
 import 'ui/gathering_preparation_panel.dart';
@@ -33,6 +36,8 @@ class CompanionHome extends StatefulWidget {
     this.sessionImportReceiptDirectory,
     this.sessionImportError,
     this.onRetrySessionImport,
+    this.recipeChecklistBuilder,
+    this.recipeChecklistController,
   });
   final Catalog catalog;
   final SessionStore store;
@@ -44,12 +49,49 @@ class CompanionHome extends StatefulWidget {
   final String? sessionImportReceiptDirectory;
   final String? sessionImportError;
   final VoidCallback? onRetrySessionImport;
+  final GatheringRecipeChecklistBuilder? recipeChecklistBuilder;
+  final GatheringRecipeChecklistController? recipeChecklistController;
   @override
   State<CompanionHome> createState() => _CompanionHomeState();
 }
 
 class _CompanionHomeState extends State<CompanionHome> {
+  bool _recipeChecklistOpen = false;
+  bool _returnToRecipeChecklist = false;
+  GatheringRecipeLocations? _recipeLocations;
+  void _restoreRecipeChecklist() => setState(() {
+    _recipeChecklistOpen = true;
+    _recipeLocations = null;
+    _returnToRecipeChecklist = false;
+  });
+  void _checkRecipeRequest() {
+    if (!mounted || widget.recipeChecklistController?.pending != true) return;
+    widget.recipeChecklistController!.pending = false;
+    setState(() => _recipeChecklistOpen = true);
+  }
+
+  Spot? _recipeSpot(String name) => catalog.spots
+      .where(
+        (spot) =>
+            spot.mapped &&
+            spot.methodIds.any(
+              (method) => catalog
+                  .lootForSpot(spot, method)
+                  .any((item) => item.name.toLowerCase() == name.toLowerCase()),
+            ),
+      )
+      .firstOrNull;
   int _page = 2;
+  final _fieldDeskRevision = ValueNotifier<int>(0);
+  String? _buffMethodId;
+  String? _buffSpotId;
+  bool get _hostedFieldDesk => context.glass.visualPalette != null;
+  String get _recommendationMethod => _buffMethodId ?? _methodId;
+  String get _recommendationLabel => switch (_recommendationMethod) {
+    'hunting' => 'Matchlock',
+    'sniper' => 'Sniper',
+    _ => 'Gathering',
+  };
   GlobalKey _lootPanelKey = GlobalKey(debugLabel: 'draft-loot');
   final _entryScroll = ScrollController();
   late String _methodId;
@@ -74,6 +116,7 @@ class _CompanionHomeState extends State<CompanionHome> {
   Set<String> get _buffIds => _preparation.activeBuffIds(catalog).toSet();
   Set<String> get _petIds => _preparation.petIds;
   List<PetRecommendation> _petCatalog = const [];
+  bool _petCatalogRequested = false;
   bool _petsEdited = true;
   Map<String, LootEntry> _loot = {};
   final _minutes = TextEditingController(text: '30');
@@ -154,6 +197,8 @@ class _CompanionHomeState extends State<CompanionHome> {
   @override
   void initState() {
     super.initState();
+    widget.recipeChecklistController?.addListener(_checkRecipeRequest);
+    WidgetsBinding.instance.addPostFrameCallback((_) => _checkRecipeRequest());
     try {
       _preparation = GatheringPreparation.fromPreferences(
         widget.store.preferences,
@@ -174,10 +219,11 @@ class _CompanionHomeState extends State<CompanionHome> {
     )) {
       _spotId = lastSpot.toString();
     }
+    _buffMethodId = _methodId;
+    _buffSpotId = _spotId;
     for (final c in [_minutes, _customSpot]) {
       c.addListener(_refresh);
     }
-    unawaited(_loadPets());
     if (widget.store.recoveredBackup) {
       WidgetsBinding.instance.addPostFrameCallback(
         (_) => _message(
@@ -187,12 +233,38 @@ class _CompanionHomeState extends State<CompanionHome> {
     }
   }
 
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // The cached catalog can complete synchronously. Hosted applicability
+    // depends on the inherited theme, which is not available during initState.
+    if (!_petCatalogRequested) {
+      _petCatalogRequested = true;
+      unawaited(_loadPets());
+    }
+  }
+
   void _refresh() {
     if (mounted) setState(() {});
   }
 
   @override
+  void didUpdateWidget(covariant CompanionHome oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.recipeChecklistController !=
+        widget.recipeChecklistController) {
+      oldWidget.recipeChecklistController?.removeListener(_checkRecipeRequest);
+      widget.recipeChecklistController?.addListener(_checkRecipeRequest);
+      WidgetsBinding.instance.addPostFrameCallback(
+        (_) => _checkRecipeRequest(),
+      );
+    }
+  }
+
+  @override
   void dispose() {
+    widget.recipeChecklistController?.removeListener(_checkRecipeRequest);
+    _fieldDeskRevision.dispose();
     _tick?.cancel();
     _entryScroll.dispose();
     for (final c in [_minutes, _notes, _customSpot, _historySearch]) {
@@ -227,6 +299,7 @@ class _CompanionHomeState extends State<CompanionHome> {
       context: context,
       catalog: catalog,
       initial: previous.baseSettings,
+      preparationLabel: _hostedFieldDesk ? 'Buffs' : 'Prepare',
       onPreview: (draft) {
         if (mounted) {
           setState(() {
@@ -274,10 +347,15 @@ class _CompanionHomeState extends State<CompanionHome> {
       _petsEdited = _petsEdited || petsChanged;
       _notice = null;
     });
+    _fieldDeskRevision.value++;
     // Editing an old run changes that run only, never the current saved kit.
     if (_editing != null) return;
-    final preparedMethodId = method.id;
-    final preparedSpotId = spot?.id ?? '';
+    final preparedMethodId = _hostedFieldDesk
+        ? _recommendationMethod
+        : method.id;
+    final preparedSpotId = _hostedFieldDesk
+        ? _buffSpotId ?? ''
+        : spot?.id ?? '';
     final revision = ++_preparationWriteRevision;
     setState(() => _estimateSetupSaving = true);
     _preparationWrites = _preparationWrites.then((_) async {
@@ -300,6 +378,7 @@ class _CompanionHomeState extends State<CompanionHome> {
         widget.store.preferences = previousPreferences;
         if (mounted && revision == _preparationWriteRevision) {
           setState(() => _preparation = _persistedPreparation);
+          _fieldDeskRevision.value++;
           _message('Could not save your preparation. $error');
         }
       } finally {
@@ -402,6 +481,374 @@ class _CompanionHomeState extends State<CompanionHome> {
     ),
   );
 
+  void _browseContext(Spot? selected, String? methodId) {
+    if (!_hostedFieldDesk) return;
+    final next = methodId == null || methodId == 'all'
+        ? _recommendationMethod
+        : methodId;
+    if (_buffMethodId == next && _buffSpotId == selected?.id) return;
+    setState(() {
+      _buffMethodId = next;
+      _buffSpotId = selected?.id;
+    });
+  }
+
+  Future<void> _openGarmothApp() async {
+    try {
+      if (await NativeBridge.openExternal('https://garmoth.com/app')) return;
+      _message('Could not open Garmoth App.');
+    } catch (_) {
+      _message('Could not open Garmoth App.');
+    }
+  }
+
+  Future<void> _showRecommendedBuffs() async {
+    await showDialog<void>(
+      context: context,
+      builder: (dialogContext) => ValueListenableBuilder<int>(
+        valueListenable: _fieldDeskRevision,
+        builder: (context, revision, _) => Dialog(
+          key: const ValueKey('gathering-buffs-dialog'),
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+          insetPadding: const EdgeInsets.all(18),
+          child: ConstrainedBox(
+            constraints: BoxConstraints(
+              maxWidth: 480,
+              maxHeight: MediaQuery.sizeOf(context).height - 36,
+            ),
+            child: GlassSurface(
+              elevated: true,
+              padding: const EdgeInsets.all(18),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Row(
+                    children: [
+                      const GameIcon(
+                        'assets/icons/buffs/791.webp',
+                        size: 38,
+                        recessed: true,
+                      ),
+                      const SizedBox(width: 11),
+                      Expanded(
+                        child: Text(
+                          'Recommended buffs',
+                          style: TextStyle(
+                            fontFamily: 'Georgia',
+                            fontSize: 21,
+                            fontWeight: FontWeight.w700,
+                            color: context.gatheringColors.ink,
+                          ),
+                        ),
+                      ),
+                      IconButton(
+                        key: const ValueKey('close-gathering-buffs'),
+                        tooltip: 'Close',
+                        onPressed: () => Navigator.pop(dialogContext),
+                        icon: const Icon(Icons.close, size: 20),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 14),
+                  Wrap(
+                    spacing: 6,
+                    runSpacing: 6,
+                    children: [
+                      for (final entry in [
+                        ('butcher', 'Gathering'),
+                        ('hunting', 'Matchlock'),
+                        ('sniper', 'Sniper'),
+                      ])
+                        ChoiceChip(
+                          key: ValueKey('buff-method-${entry.$1}'),
+                          label: Text(entry.$2),
+                          selected: entry.$2 == _recommendationLabel,
+                          onSelected: (_) {
+                            setState(() {
+                              _buffMethodId = entry.$1;
+                              _buffSpotId = null;
+                            });
+                            _fieldDeskRevision.value++;
+                          },
+                        ),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+                  Flexible(
+                    child: SingleChildScrollView(
+                      key: const ValueKey('gathering-buffs-scroll'),
+                      child: GatheringPreparationPanel(
+                        compactRecommendations: true,
+                        catalog: catalog,
+                        methodId: _recommendationMethod,
+                        spotId: _buffSpotId,
+                        selectedBuffIds: _buffIds,
+                        selectedPetIds: _petIds,
+                        pets: _petCatalog,
+                        baseSettings: _preparation.baseSettings,
+                        effectiveSettings: _estimateSetup,
+                        statsConfirmed: _preparation.statsConfirmed,
+                        onToggleBuff: _toggleBuff,
+                        onTogglePet: _togglePet,
+                        onPreset: _preset,
+                        onClearBuffs: _clearBuffs,
+                        onClearPets: _clearPets,
+                        onStatsChanged: _changeInlineStats,
+                        onStatsValidityChanged: _setInlineStatsValidity,
+                        onEditStats: () {
+                          Navigator.pop(dialogContext);
+                          _showEstimateSetup();
+                        },
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _fieldDeskAction({
+    required String keyName,
+    required String title,
+    required String detail,
+    required String artwork,
+    required VoidCallback? onTap,
+  }) => GlassControl(
+    radius: 8,
+    leadingWidth: 49,
+    copperInlay: true,
+    child: InkWell(
+      key: ValueKey(keyName),
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(8),
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(minHeight: 60),
+        child: Row(
+          children: [
+            SizedBox(
+              width: 49,
+              child: Center(child: GameIcon(artwork, size: 32, recessed: true)),
+            ),
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(10, 9, 8, 11),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      title,
+                      style: const TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                    const SizedBox(height: 3),
+                    Text(
+                      detail,
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: context.gatheringColors.muted,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    ),
+  );
+
+  Widget _fieldDeskExternal({required bool garmoth}) => Semantics(
+    link: true,
+    child: TextButton(
+      key: ValueKey(garmoth ? 'open-garmoth-app' : 'open-bairog-source'),
+      onPressed: garmoth ? _openGarmothApp : _openBairogSource,
+      style: TextButton.styleFrom(
+        padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 7),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          GameIcon(
+            garmoth
+                ? 'assets/icons/sources/garmoth_icon.png'
+                : 'assets/icons/sources/bdoworkshop_logo.png',
+            size: 28,
+            backgroundColor: Colors.transparent,
+          ),
+          const SizedBox(width: 9),
+          Flexible(child: Text(garmoth ? 'Garmoth App' : 'Bairog')),
+          const SizedBox(width: 7),
+          Icon(
+            Icons.north_east,
+            size: 14,
+            color: context.gatheringColors.muted,
+          ),
+        ],
+      ),
+    ),
+  );
+
+  Widget _fieldDeskRail() => SingleChildScrollView(
+    key: const ValueKey('gathering-field-rail-scroll'),
+    padding: const EdgeInsets.fromLTRB(10, 12, 4, 12),
+    child: GlassSurface(
+      key: const ValueKey('gathering-field-rail'),
+      padding: const EdgeInsets.fromLTRB(12, 18, 12, 12),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Text(
+            'Gathering',
+            style: TextStyle(
+              fontFamily: 'Georgia',
+              fontSize: 24,
+              fontWeight: FontWeight.w700,
+              color: context.gatheringColors.ink,
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 17),
+            child: Divider(height: 1, color: context.glass.strongLine),
+          ),
+          _fieldDeskAction(
+            keyName: 'open-gathering-setup',
+            title: 'Your stats',
+            detail: 'Edit character',
+            artwork: 'assets/icons/items/735353.webp',
+            onTap: _estimateSetupSaving ? null : _showEstimateSetup,
+          ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(10, 12, 10, 16),
+            child: Column(
+              children: [
+                _fieldDeskStat(
+                  'Mastery',
+                  _preparation.statsConfirmed
+                      ? countText(_preparation.baseSettings.mastery)
+                      : '—',
+                ),
+                const SizedBox(height: 6),
+                _fieldDeskStat(
+                  'Drop rate',
+                  _preparation.statsConfirmed
+                      ? '${numberText(_preparation.baseSettings.gatheringDropRatePercent)}%'
+                      : '—',
+                ),
+                const SizedBox(height: 8),
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: Text(
+                    'Before buffs',
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: context.gatheringColors.muted,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          _fieldDeskAction(
+            keyName: 'open-gathering-buffs',
+            title: 'Buffs',
+            detail: '$_recommendationLabel · ${_buffIds.length} selected',
+            artwork: 'assets/icons/buffs/791.webp',
+            onTap: _showRecommendedBuffs,
+          ),
+          if (widget.recipeChecklistBuilder != null) ...[
+            const SizedBox(height: 10),
+            TextButton.icon(
+              key: const ValueKey('gathering-recipe-checklist'),
+              onPressed: () =>
+                  setState(() => _recipeChecklistOpen = !_recipeChecklistOpen),
+              icon: const Icon(Icons.checklist_rounded),
+              label: const Text('Checklist'),
+            ),
+          ],
+          const SizedBox(height: 18),
+          Text(
+            'Guides & tracking',
+            style: TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.w600,
+              color: context.gatheringColors.muted,
+            ),
+          ),
+          const SizedBox(height: 5),
+          Align(
+            alignment: Alignment.centerLeft,
+            child: _fieldDeskExternal(garmoth: false),
+          ),
+          Align(
+            alignment: Alignment.centerLeft,
+            child: _fieldDeskExternal(garmoth: true),
+          ),
+          Padding(
+            padding: const EdgeInsets.only(top: 10, bottom: 5),
+            child: Divider(height: 1, color: context.glass.line),
+          ),
+          Wrap(spacing: 1, runSpacing: 3, children: _workspaceUtilities()),
+        ],
+      ),
+    ),
+  );
+
+  Widget _fieldDeskStat(String label, String value) => Row(
+    children: [
+      Expanded(
+        child: Text(
+          label,
+          style: TextStyle(
+            fontSize: 12.5,
+            color: context.gatheringColors.muted,
+          ),
+        ),
+      ),
+      const SizedBox(width: 6),
+      Text(
+        value,
+        style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
+      ),
+    ],
+  );
+
+  Widget _fieldDeskToolbar() => Padding(
+    padding: const EdgeInsets.fromLTRB(14, 0, 14, 10),
+    child: Wrap(
+      spacing: 8,
+      runSpacing: 8,
+      crossAxisAlignment: WrapCrossAlignment.center,
+      children: [
+        _estimateSetupButton(),
+        if (widget.recipeChecklistBuilder != null)
+          TextButton.icon(
+            key: const ValueKey('gathering-recipe-checklist'),
+            onPressed: () =>
+                setState(() => _recipeChecklistOpen = !_recipeChecklistOpen),
+            icon: const Icon(Icons.checklist_rounded),
+            label: const Text('Checklist'),
+          ),
+        TextButton.icon(
+          key: const ValueKey('open-gathering-buffs'),
+          onPressed: _showRecommendedBuffs,
+          icon: const GameIcon('assets/icons/buffs/791.webp', size: 26),
+          label: const Text('Buffs'),
+        ),
+        _fieldDeskExternal(garmoth: false),
+        _fieldDeskExternal(garmoth: true),
+      ],
+    ),
+  );
+
   Future<void> _persistGlassOpacity(int value) async {
     if (_opacitySaving || _estimateSetupSaving || _saving) return;
     final normalized = normalizeGlassOpacity(value);
@@ -434,7 +881,13 @@ class _CompanionHomeState extends State<CompanionHome> {
       mainAxisSize: MainAxisSize.min,
       children: [
         if (!dialog)
-          const Text('Opacity', style: TextStyle(color: muted, fontSize: 12)),
+          Text(
+            'Opacity',
+            style: TextStyle(
+              color: context.gatheringColors.muted,
+              fontSize: 12,
+            ),
+          ),
         if (!dialog) const SizedBox(width: 5),
         SizedBox(
           width: dialog ? 190 : 104,
@@ -470,8 +923,8 @@ class _CompanionHomeState extends State<CompanionHome> {
               dialog ? 'glass-opacity-dialog-value' : 'glass-opacity-value',
             ),
             textAlign: TextAlign.right,
-            style: const TextStyle(
-              color: ink,
+            style: TextStyle(
+              color: context.gatheringColors.ink,
               fontSize: 12,
               fontFeatures: [FontFeature.tabularFigures()],
             ),
@@ -536,10 +989,16 @@ class _CompanionHomeState extends State<CompanionHome> {
     final pets = await PetCatalog.load();
     if (!mounted) return;
     setState(() => _petCatalog = pets);
+    _fieldDeskRevision.value++;
     if (_petsEdited) _reconcilePets();
   }
 
   void _reconcilePets() {
+    // The hosted desk browses recommendations, not a session being recorded.
+    // Visibility is filtered by method/spot in PetRecommendations; inspecting
+    // another method must not remove a saved pet or clear its chosen tier.
+    // Standalone session recording retains its original applicability checks.
+    if (_hostedFieldDesk) return;
     if (_petCatalog.isEmpty ||
         (_editing != null && !_petsEdited) ||
         _timerStart != null ||
@@ -966,28 +1425,12 @@ class _CompanionHomeState extends State<CompanionHome> {
     try {
       if (!await NativeBridge.openReferenceWindow(
         glassOpacityPercent: widget.glassOpacityPercent,
+        visualPalette: context.glass.visualPalette,
       )) {
         _message('Could not open Minigame Helper.');
       }
     } catch (error) {
       _message('Could not open Minigame Helper. $error');
-    }
-  }
-
-  Future<void> _garmothUpload() async {
-    try {
-      final receiptDirectory = widget.sessionImportReceiptDirectory;
-      if (receiptDirectory == null) {
-        _message('Could not open Garmoth Upload. Personal data is not ready.');
-        return;
-      }
-      if (!await NativeBridge.openSessionImport(
-        receiptDirectory: receiptDirectory,
-      )) {
-        _message('Could not open Garmoth Upload.');
-      }
-    } catch (error) {
-      _message('Could not open Garmoth Upload. $error');
     }
   }
 
@@ -1026,99 +1469,351 @@ class _CompanionHomeState extends State<CompanionHome> {
     return '${local.day.toString().padLeft(2, '0')}.${local.month.toString().padLeft(2, '0')}.${local.year}';
   }
 
-  List<Widget> _navigationButtons() => [
+  List<Widget> _navigationButtons({bool rail = false}) => [
     for (final p in [
-      (2, '1 Spot'),
-      (3, '2 Prepare'),
-      (0, '3 Gather'),
-      (1, 'Sessions'),
+      (2, 'Spots'),
+      (3, 'Prepare'),
+      (0, 'Gather'),
+      (1, 'Journal'),
     ])
-      GlassControl(
-        selected: _page == p.$1,
-        radius: 10,
-        child: _navigationButton(p.$1, p.$2),
+      Padding(
+        padding: EdgeInsets.only(bottom: rail ? 6 : 0),
+        child: FieldDeskSelection(
+          selected: _page == p.$1,
+          child: GlassControl(
+            selected: _page == p.$1,
+            radius: 7,
+            child: _navigationButton(p.$1, p.$2, rail: rail),
+          ),
+        ),
       ),
   ];
 
-  Widget _navigationButton(int page, String label) => TextButton(
-    key: ValueKey(switch (page) {
-      2 => 'workflow-spots',
-      3 => 'workflow-prepare',
-      0 => 'workflow-gather',
-      _ => 'workflow-history',
-    }),
-    style: TextButton.styleFrom(
-      foregroundColor: _page == page ? ink : muted,
+  Widget _navigationButton(int page, String label, {bool rail = false}) =>
+      TextButton(
+        key: ValueKey(switch (page) {
+          2 => 'workflow-spots',
+          3 => 'workflow-prepare',
+          0 => 'workflow-gather',
+          _ => 'workflow-history',
+        }),
+        style: TextButton.styleFrom(
+          foregroundColor: _page == page
+              ? context.gatheringColors.ink
+              : context.gatheringColors.muted,
+          alignment: Alignment.centerLeft,
+          padding: EdgeInsets.symmetric(
+            horizontal: 12,
+            vertical: rail ? 15 : 11,
+          ),
+          textStyle: Theme.of(context).textTheme.labelLarge!.copyWith(
+            fontSize: 15,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+        onPressed:
+            ((page == 3 || page == 0) && spot == null && _spotId != 'custom') ||
+                (page == 0 && !_inlineStatsValid)
+            ? null
+            : () => _goToStage(page),
+        child: Row(
+          mainAxisSize: rail ? MainAxisSize.max : MainAxisSize.min,
+          children: [
+            Icon(
+              switch (page) {
+                2 => Icons.explore_outlined,
+                3 => Icons.backpack_outlined,
+                0 => Icons.timelapse_rounded,
+                _ => Icons.history_rounded,
+              },
+              size: 20,
+              color: _page == page
+                  ? context.gatheringColors.accent
+                  : context.gatheringColors.muted,
+            ),
+            const SizedBox(width: 11),
+            Flexible(child: Text(label)),
+          ],
+        ),
+      );
+
+  Widget _workflowBar() => Padding(
+    key: const ValueKey('workflow-toolbar'),
+    padding: const EdgeInsets.fromLTRB(14, 0, 14, 8),
+    child: Align(
       alignment: Alignment.centerLeft,
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 11),
-      textStyle: Theme.of(context).textTheme.labelLarge!.copyWith(
-        fontSize: 15,
-        fontWeight: FontWeight.w600,
+      child: Wrap(
+        key: const ValueKey('workflow-tabs'),
+        spacing: 6,
+        runSpacing: 6,
+        children: _navigationButtons(),
       ),
     ),
-    onPressed:
-        ((page == 3 || page == 0) && spot == null && _spotId != 'custom') ||
-            (page == 0 && !_inlineStatsValid)
-        ? null
-        : () => _goToStage(page),
-    child: Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Icon(
-          switch (page) {
-            2 => Icons.explore_outlined,
-            3 => Icons.backpack_outlined,
-            0 => Icons.timelapse_rounded,
-            _ => Icons.history_rounded,
-          },
-          size: 19,
-          color: _page == page ? accent : muted,
+  );
+
+  Widget _workflowRail() => Align(
+    alignment: Alignment.topCenter,
+    child: Container(
+      key: const ValueKey('gathering-field-rail'),
+      decoration: BoxDecoration(
+        gradient: _page == 2 && context.glass.visualPalette == null
+            ? LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [
+                  for (final color in context.glass.headerGradient.colors)
+                    color.withValues(
+                      alpha: (color.a * color.a * color.a).clamp(.02, 1.0),
+                    ),
+                ],
+              )
+            : context.glass.headerGradient,
+        border: Border(
+          right: BorderSide(color: context.glass.line),
+          bottom: BorderSide(color: context.glass.line),
         ),
-        const SizedBox(width: 8),
-        Flexible(child: Text(label)),
+        borderRadius: const BorderRadius.only(bottomRight: Radius.circular(10)),
+      ),
+      padding: const EdgeInsets.fromLTRB(12, 22, 12, 12),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Padding(
+            padding: EdgeInsets.only(left: 5, bottom: 14),
+            child: Text(
+              'Gathering',
+              style: TextStyle(
+                fontFamily: 'Georgia',
+                fontSize: 22,
+                fontWeight: FontWeight.w700,
+                color: context.gatheringColors.ink,
+              ),
+            ),
+          ),
+          Align(
+            alignment: Alignment.centerLeft,
+            child: Container(
+              margin: const EdgeInsets.only(left: 5, bottom: 24),
+              width: 34,
+              height: 2,
+              color: context.gatheringColors.gold,
+            ),
+          ),
+          ..._navigationButtons(rail: true),
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 10),
+            child: Divider(height: 1, color: context.glass.line),
+          ),
+          Wrap(
+            spacing: 4,
+            runSpacing: 4,
+            crossAxisAlignment: WrapCrossAlignment.center,
+            children: [_bairogSourceButton(), ..._workspaceUtilities()],
+          ),
+        ],
+      ),
+    ),
+  );
+
+  List<Widget> _workspaceUtilities() => [
+    if (_page == 2)
+      IconButton(
+        key: const ValueKey('open-glass-opacity'),
+        onPressed: _showGlassOpacity,
+        tooltip: 'Glass opacity',
+        icon: const Icon(Icons.opacity, size: 20),
+      ),
+    IconButton(
+      key: const ValueKey('open-minigame-helper'),
+      onPressed: _reference,
+      tooltip: 'Minigame Helper',
+      icon: _headerActionArtwork('assets/icons/sources/minigame_helper.png'),
+    ),
+    IconButton(
+      onPressed: _help,
+      tooltip: 'Help',
+      icon: Icon(
+        Icons.help_outline,
+        size: 20,
+        color: context.gatheringColors.muted,
+      ),
+    ),
+  ];
+
+  Widget _workspaceHeader({required bool rail}) => Padding(
+    key: const ValueKey('gathering-workspace-heading'),
+    padding: const EdgeInsets.fromLTRB(18, 12, 12, 10),
+    child: Row(
+      children: [
+        if (!rail && !_hostedFieldDesk) ...[
+          _bairogSourceButton(),
+          const SizedBox(width: 10),
+        ],
+        Expanded(
+          child: GatheringStageReveal(
+            key: const ValueKey('workflow-stage-reveal'),
+            stage: _page,
+            child: Text(
+              switch (_page) {
+                2 => 'Find a spot',
+                3 => 'Preparation',
+                0 => 'Gathering session',
+                _ => 'Journal',
+              },
+              style: TextStyle(
+                fontFamily: 'Georgia',
+                fontSize: 24,
+                fontWeight: FontWeight.w700,
+                color: context.gatheringColors.ink,
+              ),
+            ),
+          ),
+        ),
+        if (rail && _page == 2 && !_hostedFieldDesk) ...[
+          const SizedBox(width: 12),
+          Flexible(flex: 2, child: _spotSetupSummary()),
+          const SizedBox(width: 8),
+        ],
+        if (!rail) ..._workspaceUtilities(),
       ],
     ),
   );
 
-  Widget _workflowBar() => Padding(
-    key: const ValueKey('workflow-toolbar'),
-    padding: const EdgeInsets.fromLTRB(14, 8, 14, 8),
-    child: LayoutBuilder(
-      builder: (context, constraints) {
-        final navigation = Wrap(
-          key: const ValueKey('workflow-tabs'),
-          spacing: 6,
-          runSpacing: 6,
-          children: _navigationButtons(),
-        );
-        if (_page != 2) {
-          return Align(alignment: Alignment.centerLeft, child: navigation);
-        }
-        final singleRow =
-            constraints.maxWidth >=
-            1050 * MediaQuery.textScalerOf(context).scale(1);
-        if (singleRow) {
-          return Row(
+  Widget _stageBody() => Theme(
+    key: const ValueKey('gathering-retained-stages'),
+    data: companionTheme(
+      opacityPercent: _page == 2 ? widget.glassOpacityPercent : 90,
+      visualPalette: context.glass.visualPalette,
+    ),
+    // Only the stage heading animates. The retained map/editor is never faded
+    // into an offscreen layer or translated during navigation.
+    child: _hostedFieldDesk
+        ? _spotGuide()
+        : IndexedStack(
+            index: _page,
             children: [
-              navigation,
-              const SizedBox(width: 14),
-              Expanded(
-                child: Align(
-                  alignment: Alignment.centerRight,
-                  child: _spotSetupSummary(),
-                ),
-              ),
+              _entryPage(),
+              _historyPage(),
+              _guideVisited ? _spotGuide() : const SizedBox.shrink(),
+              _preparePage(),
             ],
-          );
+          ),
+  );
+
+  Widget _spotGuide() => Stack(
+    children: [
+      Positioned.fill(child: _spotGuideMap()),
+      if (_recipeLocations case final locations?) ...[
+        Positioned.fill(
+          child: SpotMap(
+            key: ValueKey('recipe-locations-${locations.item}'),
+            spots: const [],
+            selected: null,
+            methods: catalog.methods,
+            nodes: catalog.mapNodes,
+            overview: true,
+            locationPoints: locations.points,
+            viewInsets: const EdgeInsets.only(top: 68),
+          ),
+        ),
+        Positioned(
+          top: 8,
+          left: 12,
+          right: 60,
+          child: GlassSurface(
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+            child: Row(
+              children: [
+                IconButton(
+                  tooltip: 'Back to checklist',
+                  onPressed: _restoreRecipeChecklist,
+                  icon: const Icon(Icons.arrow_back),
+                ),
+                Expanded(child: Text(locations.item)),
+                Tooltip(
+                  message: locations.sourceNote,
+                  child: const Padding(
+                    padding: EdgeInsets.all(8),
+                    child: Icon(Icons.history, size: 20),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ],
+      if (_recipeChecklistOpen && widget.recipeChecklistBuilder != null)
+        Positioned(
+          top: 8,
+          bottom: 12,
+          left: 12,
+          child: SizedBox(
+            width: (MediaQuery.sizeOf(context).width - 40)
+                .clamp(0, 430)
+                .toDouble(),
+            child: GlassSurface(
+              padding: const EdgeInsets.all(12),
+              child: widget.recipeChecklistBuilder!(
+                context,
+                (name) => _recipeSpot(name) != null,
+                (name) {
+                  final selected = _recipeSpot(name);
+                  if (selected == null) return;
+                  setState(() {
+                    _guideSpot = selected;
+                    _guideRevision++;
+                    _recipeChecklistOpen = false;
+                    _returnToRecipeChecklist = true;
+                    _recipeLocations = null;
+                  });
+                },
+                () => setState(() => _recipeChecklistOpen = false),
+                (locations) => setState(() {
+                  _recipeLocations = locations;
+                  _recipeChecklistOpen = false;
+                }),
+              ),
+            ),
+          ),
+        ),
+    ],
+  );
+
+  Widget _spotGuideMap() => TickerMode(
+    enabled: _page == 2,
+    child: FieldGuide(
+      key: const ValueKey('gathering-spot-guide'),
+      catalog: catalog,
+      sharedMarketLoader: widget.sharedMarketLoader,
+      sharedMarketUpdates: widget.sharedMarketUpdates,
+      marketFreshFor: widget.marketFreshFor,
+      sessions: widget.store.sessions,
+      bairogCalculatorData: catalog.bairogCalculatorData,
+      bairogSettings: _estimateSetup,
+      initialSpot: _guideSpot,
+      navigationRequest: _guideRevision,
+      onReturnToChecklist: _returnToRecipeChecklist
+          ? _restoreRecipeChecklist
+          : null,
+      initialFiltersExpanded: false,
+      useLabel: _hostedFieldDesk ? 'Buffs' : 'Prepare here',
+      onBrowseContextChanged: _hostedFieldDesk ? _browseContext : null,
+      onUse: (chosen) {
+        if (_hostedFieldDesk) {
+          _browseContext(chosen, chosen.methodIds.first);
+          _showRecommendedBuffs();
+        } else {
+          _useSpot(chosen);
         }
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            navigation,
-            const SizedBox(height: 8),
-            Align(alignment: Alignment.centerRight, child: _spotSetupSummary()),
-          ],
-        );
+      },
+      onUseWithMethod: (chosen, methodId) {
+        if (_hostedFieldDesk) {
+          _browseContext(chosen, methodId);
+          _showRecommendedBuffs();
+        } else {
+          _useSpot(chosen, methodId: methodId);
+        }
       },
     ),
   );
@@ -1126,150 +1821,72 @@ class _CompanionHomeState extends State<CompanionHome> {
   @override
   Widget build(BuildContext context) => Scaffold(
     body: SafeArea(
-      child: Column(
-        children: [
-          GlassSurface(
-            radius: 0,
-            elevated: false,
-            gradient: context.glass.headerGradient,
-            padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
-            child: Row(
-              children: [
-                _bairogSourceButton(),
-                if (MediaQuery.sizeOf(context).width >= 580) ...[
-                  const SizedBox(width: 10),
-                  const Text(
-                    'Gathering',
-                    style: TextStyle(
-                      fontSize: 22,
-                      fontWeight: FontWeight.w700,
-                      letterSpacing: -.5,
-                    ),
-                  ),
-                ],
-                const SizedBox(width: 12),
-                const Spacer(),
-                if (_page == 2 && MediaQuery.sizeOf(context).width >= 1400) ...[
-                  _glassOpacitySlider(),
-                  const SizedBox(width: 8),
-                ] else if (_page == 2)
-                  IconButton(
-                    key: const ValueKey('open-glass-opacity'),
-                    onPressed: _showGlassOpacity,
-                    tooltip: 'Glass opacity',
-                    icon: const Icon(Icons.opacity, size: 21),
-                  ),
-                if (MediaQuery.sizeOf(context).width >= 1400)
-                  TextButton.icon(
-                    key: const ValueKey('open-minigame-helper'),
-                    onPressed: _reference,
-                    icon: _headerActionArtwork(
-                      'assets/icons/sources/minigame_helper.png',
-                    ),
-                    label: const Text('Minigame Helper'),
-                  )
-                else
-                  IconButton(
-                    key: const ValueKey('open-minigame-helper'),
-                    onPressed: _reference,
-                    tooltip: 'Minigame Helper',
-                    icon: _headerActionArtwork(
-                      'assets/icons/sources/minigame_helper.png',
-                    ),
-                  ),
-                if (MediaQuery.sizeOf(context).width >= 1400)
-                  TextButton.icon(
-                    key: const ValueKey('open-garmoth-upload'),
-                    onPressed: _garmothUpload,
-                    icon: _headerActionArtwork(
-                      'assets/icons/sources/garmoth_icon.png',
-                    ),
-                    label: const Text('Garmoth Upload'),
-                  )
-                else
-                  IconButton(
-                    key: const ValueKey('open-garmoth-upload'),
-                    onPressed: _garmothUpload,
-                    tooltip: 'Garmoth Upload',
-                    icon: _headerActionArtwork(
-                      'assets/icons/sources/garmoth_icon.png',
-                    ),
-                  ),
-                IconButton(
-                  onPressed: _help,
-                  tooltip: 'Help',
-                  icon: const Icon(Icons.help_outline, size: 21, color: muted),
-                ),
-              ],
-            ),
-          ),
-          const Divider(height: 1),
-          _workflowBar(),
-          if (_notice case final notice?)
-            Container(
-              key: const ValueKey('app-notice'),
-              color: context.glass.row,
-              padding: const EdgeInsets.fromLTRB(18, 4, 8, 4),
-              child: Row(
-                children: [
-                  const Icon(Icons.info_outline, color: gold, size: 20),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    child: Text(notice, style: const TextStyle(fontSize: 14)),
-                  ),
-                  IconButton(
-                    onPressed: () => setState(() => _notice = null),
-                    tooltip: 'Dismiss',
-                    icon: const Icon(Icons.close, size: 18),
-                  ),
-                ],
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          final textScale = MediaQuery.textScalerOf(context).scale(1);
+          final rail =
+              constraints.maxWidth >= 1100 * textScale &&
+              constraints.maxHeight >= 540 * textScale;
+          // The row and retained stage slot never move when a window crosses
+          // the rail breakpoint. Resizing must not recreate the map or draft.
+          return Row(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              SizedBox(
+                width: rail ? (_hostedFieldDesk ? 212 : 160) * textScale : 0,
+                child: rail
+                    ? (_hostedFieldDesk ? _fieldDeskRail() : _workflowRail())
+                    : const SizedBox.shrink(),
               ),
-            ),
-          Expanded(
-            child: Theme(
-              data: companionTheme(
-                opacityPercent: _page == 2 ? widget.glassOpacityPercent : 90,
-              ),
-              child: GatheringStageReveal(
-                key: const ValueKey('workflow-stage-reveal'),
-                stage: _page,
-                child: IndexedStack(
-                  index: _page,
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    _entryPage(),
-                    _historyPage(),
-                    _guideVisited
-                        ? TickerMode(
-                            enabled: _page == 2,
-                            child: FieldGuide(
-                              key: const ValueKey('gathering-spot-guide'),
-                              catalog: catalog,
-                              sharedMarketLoader: widget.sharedMarketLoader,
-                              sharedMarketUpdates: widget.sharedMarketUpdates,
-                              marketFreshFor: widget.marketFreshFor,
-                              sessions: widget.store.sessions,
-                              bairogCalculatorData:
-                                  catalog.bairogCalculatorData,
-                              bairogSettings: _estimateSetup,
-                              initialSpot: _guideSpot,
-                              navigationRequest: _guideRevision,
-                              initialFiltersExpanded:
-                                  MediaQuery.sizeOf(context).width >= 900,
-                              useLabel: 'Prepare here',
-                              onUse: _useSpot,
-                              onUseWithMethod: (chosen, methodId) {
-                                _useSpot(chosen, methodId: methodId);
-                              },
+                    _workspaceHeader(rail: rail),
+                    if (!rail)
+                      _hostedFieldDesk ? _fieldDeskToolbar() : _workflowBar(),
+                    if (_page == 2 && !rail && !_hostedFieldDesk)
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(14, 0, 14, 10),
+                        child: _spotSetupSummary(),
+                      ),
+                    if (_notice case final notice?)
+                      Container(
+                        key: const ValueKey('app-notice'),
+                        color: context.glass.row,
+                        padding: const EdgeInsets.fromLTRB(18, 4, 8, 4),
+                        child: Row(
+                          children: [
+                            Icon(
+                              Icons.info_outline,
+                              color: context.gatheringColors.gold,
+                              size: 20,
                             ),
-                          )
-                        : const SizedBox.shrink(),
-                    _preparePage(),
+                            const SizedBox(width: 10),
+                            Expanded(
+                              child: Text(
+                                notice,
+                                style: const TextStyle(fontSize: 14),
+                              ),
+                            ),
+                            IconButton(
+                              onPressed: () => setState(() => _notice = null),
+                              tooltip: 'Dismiss',
+                              icon: const Icon(Icons.close, size: 18),
+                            ),
+                          ],
+                        ),
+                      ),
+                    Expanded(
+                      key: const ValueKey('gathering-retained-workspace'),
+                      child: _stageBody(),
+                    ),
                   ],
                 ),
               ),
-            ),
-          ),
-        ],
+            ],
+          );
+        },
       ),
     ),
   );
@@ -1277,7 +1894,7 @@ class _CompanionHomeState extends State<CompanionHome> {
   Widget _panel(
     Widget child, {
     EdgeInsets padding = const EdgeInsets.all(14),
-  }) => GlassSurface(padding: padding, child: child);
+  }) => FieldDeskPanel(padding: padding, child: child);
 
   Widget _entryPage() {
     if (spot == null && _spotId != 'custom') return _emptyStage();
@@ -1300,9 +1917,9 @@ class _CompanionHomeState extends State<CompanionHome> {
                     Wrap(
                       spacing: 16,
                       runSpacing: 12,
-                      crossAxisAlignment: WrapCrossAlignment.center,
+                      crossAxisAlignment: WrapCrossAlignment.start,
                       children: [
-                        SizedBox(width: 300, child: _timeChoices()),
+                        SizedBox(width: 340, child: _timeChoices()),
                         TextButton.icon(
                           key: const ValueKey('edit-preparation'),
                           onPressed: () => _goToStage(3),
@@ -1337,8 +1954,9 @@ class _CompanionHomeState extends State<CompanionHome> {
                       ],
                     ),
                     const SizedBox(height: 18),
-                    _panel(
-                      LootPanel(
+                    Padding(
+                      padding: const EdgeInsets.all(14),
+                      child: LootPanel(
                         key: _lootPanelKey,
                         catalog: catalog,
                         scrollable: false,
@@ -1353,16 +1971,6 @@ class _CompanionHomeState extends State<CompanionHome> {
                       ),
                     ),
                   ],
-                ),
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
-              child: Align(
-                alignment: Alignment.centerRight,
-                child: ConstrainedBox(
-                  constraints: const BoxConstraints(maxWidth: 420),
-                  child: _saveBar(),
                 ),
               ),
             ),
@@ -1536,11 +2144,14 @@ class _CompanionHomeState extends State<CompanionHome> {
       children: [
         _estimateSetupButton(),
         if (!_preparation.statsConfirmed)
-          const Tooltip(
+          Tooltip(
             message: 'Enter your stats for personal estimates.',
             child: Text(
               'Example stats',
-              style: TextStyle(color: gold, fontSize: 13),
+              style: TextStyle(
+                color: context.gatheringColors.gold,
+                fontSize: 13,
+              ),
             ),
           ),
         Text('${countText(_estimateSetup.mastery)} mastery'),
@@ -1624,10 +2235,10 @@ class _CompanionHomeState extends State<CompanionHome> {
                                 },
                                 key: ValueKey('method-label-${m.id}'),
                                 textAlign: TextAlign.center,
-                                style: const TextStyle(
+                                style: TextStyle(
                                   fontSize: 13,
                                   fontWeight: FontWeight.w600,
-                                  color: ink,
+                                  color: context.gatheringColors.ink,
                                 ),
                               ),
                               const SizedBox(height: 5),
@@ -1636,7 +2247,7 @@ class _CompanionHomeState extends State<CompanionHome> {
                                 height: 3,
                                 decoration: BoxDecoration(
                                   color: m.id == _methodId
-                                      ? accent
+                                      ? context.gatheringColors.accent
                                       : Colors.transparent,
                                   borderRadius: BorderRadius.circular(2),
                                 ),
@@ -1662,135 +2273,295 @@ class _CompanionHomeState extends State<CompanionHome> {
     _minutes.text = '$minutes';
   });
 
-  Widget _timeChoices() => _panel(
-    Column(
+  Widget _timeChoices() => FieldDeskPanel(
+    key: const ValueKey('session-inline-panel'),
+    child: Column(
       mainAxisSize: MainAxisSize.min,
-      crossAxisAlignment: CrossAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            if (_timerStart != null) ...[
-              const Icon(Icons.circle, size: 7, color: accent),
-              const SizedBox(width: 8),
-            ],
-            Text(
-              _timerStart != null ? 'Gathering' : 'Duration',
-              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
-            ),
-          ],
-        ),
-        const SizedBox(height: 12),
-        if (_timerStart != null || ![1800, 3600].contains(seconds))
-          Padding(
-            padding: const EdgeInsets.only(bottom: 8),
-            child: Text(
-              durationText(seconds),
-              style: const TextStyle(
-                fontSize: 30,
-                height: 1.2,
-                fontFeatures: [FontFeature.tabularFigures()],
-                fontWeight: FontWeight.w700,
-                color: accent,
-              ),
-            ),
-          ),
-        Row(
-          children: [
-            for (final minutes in [30, 60]) ...[
+        Padding(
+          key: const ValueKey('session-inline-heading'),
+          padding: const EdgeInsets.fromLTRB(14, 12, 14, 12),
+          child: Row(
+            children: [
               Expanded(
-                child: GlassControl(
-                  selected: _timerStart == null && seconds == minutes * 60,
-                  radius: 10,
-                  child: OutlinedButton(
-                    key: ValueKey('time-$minutes'),
-                    onPressed: _timerStart == null
-                        ? () => _setMinutes(minutes)
-                        : null,
-                    style: OutlinedButton.styleFrom(
-                      backgroundColor: Colors.transparent,
-                      side: BorderSide.none,
-                      padding: const EdgeInsets.symmetric(vertical: 15),
-                      textStyle: Theme.of(context).textTheme.labelLarge!
-                          .copyWith(fontSize: 15, fontWeight: FontWeight.w600),
+                child: Text(
+                  _editing == null ? 'New session' : 'Edit session',
+                  style: Theme.of(context).textTheme.titleLarge,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Icon(
+                Icons.edit_note_outlined,
+                size: 21,
+                color: context.gatheringColors.muted,
+              ),
+            ],
+          ),
+        ),
+        Container(
+          key: const ValueKey('session-inline-body'),
+          padding: const EdgeInsets.all(14),
+          decoration: BoxDecoration(
+            color: context.glass.inset,
+            border: Border(top: BorderSide(color: context.glass.line)),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              SizedBox(
+                width: double.infinity,
+                child: Wrap(
+                  key: const ValueKey('session-duration-header'),
+                  alignment: WrapAlignment.spaceBetween,
+                  crossAxisAlignment: WrapCrossAlignment.center,
+                  spacing: 8,
+                  runSpacing: 4,
+                  children: [
+                    Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        if (_timerStart != null) ...[
+                          Icon(
+                            Icons.circle,
+                            size: 7,
+                            color: context.gatheringColors.accent,
+                          ),
+                          const SizedBox(width: 8),
+                        ],
+                        Text(
+                          _timerStart != null ? 'Gathering' : 'Duration',
+                          style: const TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ],
                     ),
-                    child: Text('$minutes min'),
+                    TextButton.icon(
+                      key: const ValueKey('session-edit-details'),
+                      onPressed: _saving ? null : _options,
+                      icon: const Icon(Icons.edit_outlined, size: 18),
+                      label: const Text('Edit details'),
+                      style: TextButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 2,
+                          vertical: 6,
+                        ),
+                        minimumSize: const Size(0, 34),
+                        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                        textStyle: Theme.of(context).textTheme.labelLarge!
+                            .copyWith(
+                              fontSize: 13,
+                              fontWeight: FontWeight.w600,
+                            ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 8),
+              Semantics(
+                label: durationText(seconds),
+                child: ExcludeSemantics(
+                  child: Text(
+                    _sessionClock,
+                    key: const ValueKey('session-duration-value'),
+                    style: TextStyle(
+                      fontSize: 28,
+                      height: 1.2,
+                      fontFeatures: [FontFeature.tabularFigures()],
+                      fontWeight: FontWeight.w600,
+                      color: context.gatheringColors.ink,
+                    ),
                   ),
                 ),
               ),
-              const SizedBox(width: 6),
-            ],
-            IconButton(
-              onPressed: _timer,
-              tooltip: _timerStart != null
-                  ? 'Pause timer'
-                  : _timerAccumulated > 0
-                  ? 'Resume timer'
-                  : 'Start timer',
-              icon: Icon(
-                _timerStart != null
-                    ? Icons.pause_circle_outline
-                    : Icons.play_circle_outline,
-                size: 28,
-                color: accent,
+              const SizedBox(height: 12),
+              Wrap(
+                key: const ValueKey('session-timer-controls'),
+                crossAxisAlignment: WrapCrossAlignment.center,
+                spacing: 6,
+                runSpacing: 8,
+                children: [
+                  for (final minutes in [30, 60])
+                    GlassControl(
+                      selected: _timerStart == null && seconds == minutes * 60,
+                      radius: 8,
+                      child: OutlinedButton(
+                        key: ValueKey('time-$minutes'),
+                        onPressed: _timerStart == null
+                            ? () => _setMinutes(minutes)
+                            : null,
+                        style: OutlinedButton.styleFrom(
+                          backgroundColor: Colors.transparent,
+                          side: BorderSide.none,
+                          minimumSize: const Size(0, 38),
+                          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 10,
+                            vertical: 10,
+                          ),
+                          textStyle: Theme.of(context).textTheme.labelLarge!
+                              .copyWith(
+                                fontSize: 13,
+                                fontWeight: FontWeight.w600,
+                              ),
+                        ),
+                        child: Text('$minutes min'),
+                      ),
+                    ),
+                  Tooltip(
+                    message: _timerStart != null
+                        ? 'Pause timer'
+                        : _timerAccumulated > 0
+                        ? 'Resume timer'
+                        : 'Start timer',
+                    child: OutlinedButton.icon(
+                      key: const ValueKey('session-timer-action'),
+                      onPressed: _timer,
+                      icon: Icon(
+                        _timerStart != null
+                            ? Icons.pause_rounded
+                            : Icons.play_arrow_rounded,
+                        size: 18,
+                      ),
+                      label: Text(
+                        _timerStart != null
+                            ? 'Pause timer'
+                            : _timerAccumulated > 0
+                            ? 'Resume timer'
+                            : 'Start timer',
+                      ),
+                      style: OutlinedButton.styleFrom(
+                        backgroundColor: context.glass.group,
+                        foregroundColor: context.gatheringColors.ink,
+                        side: BorderSide(color: context.glass.strongLine),
+                        minimumSize: const Size(0, 38),
+                        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 10,
+                          vertical: 10,
+                        ),
+                        textStyle: Theme.of(context).textTheme.labelLarge!
+                            .copyWith(
+                              fontSize: 13,
+                              fontWeight: FontWeight.w600,
+                            ),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
               ),
-              constraints: const BoxConstraints(minWidth: 38, minHeight: 48),
-              padding: EdgeInsets.zero,
-            ),
-          ],
+              const SizedBox(height: 14),
+              Divider(height: 1, color: context.glass.line),
+              const SizedBox(height: 10),
+              _sessionSummaryRow('Date', _dateText(_date)),
+              ValueListenableBuilder<TextEditingValue>(
+                valueListenable: _notes,
+                builder: (context, value, _) => value.text.trim().isEmpty
+                    ? const SizedBox.shrink()
+                    : Padding(
+                        padding: const EdgeInsets.only(top: 8),
+                        child: _sessionSummaryRow('Notes', value.text.trim()),
+                      ),
+              ),
+            ],
+          ),
+        ),
+        Container(
+          key: const ValueKey('session-inline-actions'),
+          padding: const EdgeInsets.fromLTRB(12, 10, 12, 10),
+          decoration: BoxDecoration(
+            color: context.glass.group,
+            border: Border(top: BorderSide(color: context.glass.line)),
+          ),
+          child: _saveBar(),
         ),
       ],
     ),
   );
 
-  Widget _saveBar() => _panel(
-    Wrap(
-      alignment: WrapAlignment.end,
-      crossAxisAlignment: WrapCrossAlignment.center,
-      spacing: 6,
-      runSpacing: 8,
-      children: [
-        FilledButton(
-          onPressed:
-              _saving ||
-                  _opacitySaving ||
-                  _estimateSetupSaving ||
-                  !_lootInputValid ||
-                  !_inlineStatsValid
-              ? null
-              : _save,
-          style: FilledButton.styleFrom(
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 15),
-          ),
-          child: Text(
-            _saving
-                ? 'Saving…'
-                : _editing == null
-                ? 'Save session'
-                : 'Save changes',
-            style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
-          ),
+  String get _sessionClock {
+    final value = seconds < 0 ? 0 : seconds;
+    final hours = value ~/ 3600;
+    final minutes = (value % 3600 ~/ 60).toString().padLeft(2, '0');
+    final remaining = (value % 60).toString().padLeft(2, '0');
+    return hours == 0 ? '$minutes:$remaining' : '$hours:$minutes:$remaining';
+  }
+
+  Widget _sessionSummaryRow(String label, String value) => Row(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      Text(
+        label,
+        style: TextStyle(fontSize: 13, color: context.gatheringColors.muted),
+      ),
+      const SizedBox(width: 14),
+      Expanded(
+        child: Text(
+          value,
+          key: ValueKey('session-summary-${label.toLowerCase()}'),
+          textAlign: TextAlign.right,
+          maxLines: 2,
+          overflow: TextOverflow.ellipsis,
+          style: TextStyle(fontSize: 13, color: context.gatheringColors.ink),
         ),
-        TextButton(
-          onPressed: _saving ? null : _options,
-          child: const Text('Details'),
+      ),
+    ],
+  );
+
+  Widget _saveBar() => Wrap(
+    key: const ValueKey('session-save-actions'),
+    alignment: WrapAlignment.end,
+    crossAxisAlignment: WrapCrossAlignment.center,
+    spacing: 6,
+    runSpacing: 8,
+    children: [
+      FilledButton(
+        onPressed:
+            _saving ||
+                _opacitySaving ||
+                _estimateSetupSaving ||
+                !_lootInputValid ||
+                !_inlineStatsValid
+            ? null
+            : _save,
+        style: FilledButton.styleFrom(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
         ),
-        IconButton(
-          onPressed: _saving || _opacitySaving || _estimateSetupSaving
-              ? null
-              : _newDraft,
-          tooltip: 'New session',
-          icon: const Icon(Icons.restart_alt, size: 22, color: muted),
+        child: Text(
+          _saving
+              ? 'Saving…'
+              : _editing == null
+              ? 'Save session'
+              : 'Save changes',
+          style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
         ),
-      ],
-    ),
-    padding: const EdgeInsets.all(10),
+      ),
+      IconButton(
+        onPressed: _saving || _opacitySaving || _estimateSetupSaving
+            ? null
+            : _newDraft,
+        tooltip: 'New session',
+        icon: Icon(
+          Icons.restart_alt,
+          size: 22,
+          color: context.gatheringColors.muted,
+        ),
+      ),
+    ],
   );
 
   void _options() => showDialog<void>(
     context: context,
     builder: (c) => StatefulBuilder(
       builder: (c, refreshDialog) => AlertDialog(
+        key: const ValueKey('session-details-dialog'),
         title: const Text('Session details'),
         content: SizedBox(
           width: 430,
@@ -1802,6 +2573,7 @@ class _CompanionHomeState extends State<CompanionHome> {
                 Align(
                   alignment: Alignment.centerLeft,
                   child: TextButton.icon(
+                    key: const ValueKey('session-details-date'),
                     onPressed: () async {
                       await _pickDate();
                       if (c.mounted) refreshDialog(() {});
@@ -1812,6 +2584,7 @@ class _CompanionHomeState extends State<CompanionHome> {
                 ),
                 const SizedBox(height: 14),
                 TextField(
+                  key: const ValueKey('session-details-duration'),
                   controller: _minutes,
                   enabled: _timerStart == null,
                   keyboardType: const TextInputType.numberWithOptions(
@@ -1827,6 +2600,7 @@ class _CompanionHomeState extends State<CompanionHome> {
                 ),
                 const SizedBox(height: 18),
                 CheckboxListTile(
+                  key: const ValueKey('session-details-custom-location'),
                   contentPadding: EdgeInsets.zero,
                   title: const Text('Custom location'),
                   value: _spotId == 'custom',
@@ -1839,6 +2613,7 @@ class _CompanionHomeState extends State<CompanionHome> {
                   _methods(onChanged: () => refreshDialog(() {})),
                   const SizedBox(height: 14),
                   TextField(
+                    key: const ValueKey('session-details-location-name'),
                     controller: _customSpot,
                     maxLength: 100,
                     decoration: const InputDecoration(
@@ -1850,6 +2625,7 @@ class _CompanionHomeState extends State<CompanionHome> {
                 ],
                 const SizedBox(height: 8),
                 TextField(
+                  key: const ValueKey('session-details-notes'),
                   controller: _notes,
                   maxLines: 3,
                   maxLength: 2000,
@@ -1864,6 +2640,7 @@ class _CompanionHomeState extends State<CompanionHome> {
         ),
         actions: [
           TextButton(
+            key: const ValueKey('session-details-done'),
             onPressed: () => Navigator.pop(c),
             child: const Text('Done'),
           ),
@@ -1971,7 +2748,10 @@ class _CompanionHomeState extends State<CompanionHome> {
                       const SizedBox(height: 4),
                       Text(
                         '${widget.store.sessions.length} saved ${widget.store.sessions.length == 1 ? 'session' : 'sessions'}',
-                        style: const TextStyle(color: muted, fontSize: 13),
+                        style: TextStyle(
+                          color: context.gatheringColors.muted,
+                          fontSize: 13,
+                        ),
                       ),
                     ],
                   ),
@@ -2007,10 +2787,9 @@ class _CompanionHomeState extends State<CompanionHome> {
                   ],
                 ),
               ),
-            Container(
+            FieldDeskPanel(
               key: const ValueKey('history-filters'),
               padding: const EdgeInsets.all(12),
-              decoration: glassPanelDecoration(glass: context.glass),
               child: LayoutBuilder(
                 builder: (context, constraints) {
                   final search = TextField(
@@ -2154,13 +2933,16 @@ class _CompanionHomeState extends State<CompanionHome> {
                 child: Text(
                   '${sessions.length} matching sessions',
                   key: const ValueKey('history-match-count'),
-                  style: const TextStyle(color: muted, fontSize: 13),
+                  style: TextStyle(
+                    color: context.gatheringColors.muted,
+                    fontSize: 13,
+                  ),
                 ),
               ),
             if (sessions.isEmpty)
-              Container(
+              FieldDeskPanel(
                 padding: const EdgeInsets.all(24),
-                decoration: glassPanelDecoration(glass: context.glass),
+                leadingWidth: 78,
                 child: Row(
                   children: [
                     GlassArtworkWell(
@@ -2197,34 +2979,40 @@ class _CompanionHomeState extends State<CompanionHome> {
   }
 
   Widget _historyStat(String id, String label, String value, double width) =>
-      Container(
+      SizedBox(
         width: width,
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-        decoration: BoxDecoration(
-          gradient: context.glass.controlGradient,
-          border: Border.all(color: context.glass.line),
-          borderRadius: BorderRadius.circular(11),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(label, style: const TextStyle(color: muted, fontSize: 13)),
-            const SizedBox(height: 5),
-            Tooltip(
-              message: value,
-              child: Text(
-                value,
-                key: ValueKey('history-summary-$id'),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
+        child: FieldDeskPanel(
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                label,
                 style: TextStyle(
-                  fontSize: 23,
-                  fontWeight: FontWeight.w600,
-                  color: id == 'items' ? gold : ink,
+                  color: context.gatheringColors.muted,
+                  fontSize: 13,
                 ),
               ),
-            ),
-          ],
+              const SizedBox(height: 7),
+              Tooltip(
+                message: value,
+                child: Text(
+                  value,
+                  key: ValueKey('history-summary-$id'),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    fontFamily: 'Georgia',
+                    fontSize: 25,
+                    fontWeight: FontWeight.w700,
+                    color: id == 'items'
+                        ? context.gatheringColors.accent
+                        : context.gatheringColors.ink,
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
       );
 
@@ -2277,6 +3065,7 @@ class _CompanionHomeState extends State<CompanionHome> {
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
                 style: const TextStyle(
+                  fontFamily: 'Georgia',
                   fontSize: 18,
                   fontWeight: FontWeight.w600,
                 ),
@@ -2287,10 +3076,19 @@ class _CompanionHomeState extends State<CompanionHome> {
                   key: ValueKey('history-node-${session.id}'),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(color: muted, fontSize: 14),
+                  style: TextStyle(
+                    color: context.gatheringColors.muted,
+                    fontSize: 14,
+                  ),
                 ),
               const SizedBox(height: 3),
-              Text(date, style: const TextStyle(color: muted, fontSize: 13)),
+              Text(
+                date,
+                style: TextStyle(
+                  color: context.gatheringColors.muted,
+                  fontSize: 13,
+                ),
+              ),
               const SizedBox(height: 8),
               if (stableV017Location != null) ...[
                 Container(
@@ -2327,7 +3125,10 @@ class _CompanionHomeState extends State<CompanionHome> {
                         ),
                         child: Text(
                           value,
-                          style: const TextStyle(color: muted, fontSize: 13),
+                          style: TextStyle(
+                            color: context.gatheringColors.muted,
+                            fontSize: 13,
+                          ),
                         ),
                       ),
                     )
@@ -2364,7 +3165,11 @@ class _CompanionHomeState extends State<CompanionHome> {
           key: ValueKey('delete-session-${session.id}'),
           onPressed: () => _delete(session),
           tooltip: 'Delete session',
-          icon: const Icon(Icons.delete_outline, size: 20, color: muted),
+          icon: Icon(
+            Icons.delete_outline,
+            size: 20,
+            color: context.gatheringColors.muted,
+          ),
         ),
       ],
     );
@@ -2372,40 +3177,63 @@ class _CompanionHomeState extends State<CompanionHome> {
       padding: const EdgeInsets.only(bottom: 10),
       child: Card(
         key: ValueKey('history-session-${session.id}'),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(14),
-          side: BorderSide(color: context.glass.line),
-        ),
-        child: InkWell(
-          onTap: () => _showSession(session),
-          borderRadius: BorderRadius.circular(14),
-          child: Padding(
-            padding: const EdgeInsets.all(14),
-            child: LayoutBuilder(
-              builder: (context, constraints) {
-                if (constraints.maxWidth >= 920) {
-                  return Row(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      Expanded(flex: 4, child: info),
-                      const SizedBox(width: 18),
-                      Expanded(flex: 5, child: _historyLoot(session)),
-                      const SizedBox(width: 10),
-                      SizedBox(width: 145, child: actions),
-                    ],
-                  );
-                }
-                return Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    info,
-                    const SizedBox(height: 12),
-                    _historyLoot(session),
-                    const SizedBox(height: 6),
-                    actions,
-                  ],
-                );
-              },
+        color: Colors.transparent,
+        elevation: 0,
+        margin: EdgeInsets.zero,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+        child: LayoutBuilder(
+          builder: (context, bounds) => FieldDeskPanel(
+            radius: 14,
+            interactive: true,
+            leadingWidth: 64,
+            // Match the content's existing wide branch after its border/padding.
+            // Stacked loot totals need the ordinary reading face below the art.
+            leadingHeight: bounds.maxWidth - 30 >= 920 ? null : 72,
+            child: InkWell(
+              onTap: () => _showSession(session),
+              borderRadius: BorderRadius.circular(14),
+              child: Padding(
+                padding: const EdgeInsets.all(14),
+                child: LayoutBuilder(
+                  builder: (context, constraints) {
+                    if (constraints.maxWidth >= 920) {
+                      return Row(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          Expanded(flex: 4, child: info),
+                          const SizedBox(width: 18),
+                          Expanded(
+                            flex: 5,
+                            child: DecoratedBox(
+                              decoration: BoxDecoration(
+                                border: Border(
+                                  left: BorderSide(color: context.glass.line),
+                                ),
+                              ),
+                              child: Padding(
+                                padding: const EdgeInsets.only(left: 16),
+                                child: _historyLoot(session),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 10),
+                          SizedBox(width: 145, child: actions),
+                        ],
+                      );
+                    }
+                    return Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        info,
+                        const SizedBox(height: 12),
+                        _historyLoot(session),
+                        const SizedBox(height: 6),
+                        actions,
+                      ],
+                    );
+                  },
+                ),
+              ),
             ),
           ),
         ),
@@ -2418,11 +3246,12 @@ class _CompanionHomeState extends State<CompanionHome> {
     final loot = session.loot.where((entry) => entry.total > 0).toList()
       ..sort((a, b) => b.total.compareTo(a.total));
     final approximate = session.loot.any((entry) => entry.isApproximate);
+    final textScale = MediaQuery.textScalerOf(context).scale(1);
     return Row(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         SizedBox(
-          width: 78,
+          width: 78 * textScale,
           child: Column(
             children: [
               Tooltip(
@@ -2433,10 +3262,11 @@ class _CompanionHomeState extends State<CompanionHome> {
                   stableV017
                       ? '—'
                       : '${approximate ? '≈ ' : ''}${countText(session.totalItems)}',
+                  key: ValueKey('history-entry-total-${session.id}'),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(
-                    color: gold,
+                  style: TextStyle(
+                    color: context.gatheringColors.accent,
                     fontSize: 20,
                     fontWeight: FontWeight.w600,
                   ),
@@ -2444,7 +3274,10 @@ class _CompanionHomeState extends State<CompanionHome> {
               ),
               Text(
                 stableV017 ? 'not recorded' : 'items',
-                style: const TextStyle(color: muted, fontSize: 12),
+                style: TextStyle(
+                  color: context.gatheringColors.muted,
+                  fontSize: 12,
+                ),
               ),
             ],
           ),
@@ -2461,7 +3294,7 @@ class _CompanionHomeState extends State<CompanionHome> {
                   message:
                       '${item.name} · ${item.isApproximate ? '≈ ' : ''}${countText(item.total)}',
                   child: SizedBox(
-                    width: 66,
+                    width: 66 * textScale,
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
@@ -2483,14 +3316,20 @@ class _CompanionHomeState extends State<CompanionHome> {
               if (loot.length > 4)
                 Text(
                   '+${loot.length - 4}',
-                  style: const TextStyle(color: muted, fontSize: 14),
+                  style: TextStyle(
+                    color: context.gatheringColors.muted,
+                    fontSize: 14,
+                  ),
                 ),
               if (loot.isEmpty)
                 Text(
                   stableV017
                       ? 'v0.1.7 did not store gathered item totals'
                       : 'No gathered items recorded',
-                  style: TextStyle(color: muted, fontSize: 13),
+                  style: TextStyle(
+                    color: context.gatheringColors.muted,
+                    fontSize: 13,
+                  ),
                 ),
             ],
           ),
@@ -2568,7 +3407,10 @@ class _CompanionHomeState extends State<CompanionHome> {
                   if (node.isNotEmpty)
                     Text(
                       node,
-                      style: const TextStyle(color: muted, fontSize: 14),
+                      style: TextStyle(
+                        color: context.gatheringColors.muted,
+                        fontSize: 14,
+                      ),
                     ),
                 ],
               ),
@@ -2587,15 +3429,24 @@ class _CompanionHomeState extends State<CompanionHome> {
                   children: [
                     Text(
                       s.methodLabel,
-                      style: const TextStyle(color: muted, fontSize: 14),
+                      style: TextStyle(
+                        color: context.gatheringColors.muted,
+                        fontSize: 14,
+                      ),
                     ),
                     Text(
                       _dateText(s.createdAt),
-                      style: const TextStyle(color: muted, fontSize: 14),
+                      style: TextStyle(
+                        color: context.gatheringColors.muted,
+                        fontSize: 14,
+                      ),
                     ),
                     Text(
                       durationText(s.durationSeconds),
-                      style: const TextStyle(color: accent, fontSize: 14),
+                      style: TextStyle(
+                        color: context.gatheringColors.accent,
+                        fontSize: 14,
+                      ),
                     ),
                   ],
                 ),
@@ -2638,15 +3489,15 @@ class _CompanionHomeState extends State<CompanionHome> {
                             Text(
                               (e.isApproximate ? '≈ ' : '') +
                                   countText(e.total),
-                              style: const TextStyle(
-                                color: accent,
+                              style: TextStyle(
+                                color: context.gatheringColors.accent,
                                 fontWeight: FontWeight.w600,
                               ),
                             ),
                             Text(
                               '${e.isApproximate ? '≈ ' : ''}${s.durationSeconds > 0 ? countText(e.total * 3600 / s.durationSeconds) : '—'} / hour',
-                              style: const TextStyle(
-                                color: muted,
+                              style: TextStyle(
+                                color: context.gatheringColors.muted,
                                 fontSize: 14,
                               ),
                             ),
@@ -2657,11 +3508,14 @@ class _CompanionHomeState extends State<CompanionHome> {
                   ),
                 ),
                 if (s.loot.any((e) => e.isApproximate))
-                  const Padding(
+                  Padding(
                     padding: EdgeInsets.only(top: 8),
                     child: Text(
                       '≈ includes shortened K/M amounts. Correct them with exact totals if available.',
-                      style: TextStyle(color: gold, fontSize: 14),
+                      style: TextStyle(
+                        color: context.gatheringColors.gold,
+                        fontSize: 14,
+                      ),
                     ),
                   ),
                 if (s.buffs.isNotEmpty || s.pets.isNotEmpty)
@@ -2698,7 +3552,10 @@ class _CompanionHomeState extends State<CompanionHome> {
                   const SizedBox(height: 8),
                   Text(
                     'Effects frozen from the ${s.catalogDate} catalog.',
-                    style: const TextStyle(color: muted, fontSize: 14),
+                    style: TextStyle(
+                      color: context.gatheringColors.muted,
+                      fontSize: 14,
+                    ),
                   ),
                 ],
                 if (s.pets.isNotEmpty) ...[
@@ -2767,13 +3624,17 @@ class _CompanionHomeState extends State<CompanionHome> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text(
-                '1 Spot: compare locations and choose Prepare here.\n\n2 Prepare: enter your stats and select the kit you will use.\n\n3 Gather: start the timer, or record a completed run. Add your loot and save it to Sessions.',
+              Text(
+                _hostedFieldDesk
+                    ? 'Compare spots on the map. Enter your base stats in Your stats and choose Buffs for Gathering, Matchlock or Sniper. Garmoth App opens external session tracking.'
+                    : '1 Spot: compare locations and choose Prepare here.\n\n2 Prepare: enter your stats and select the kit you will use.\n\n3 Gather: start the timer, or record a completed run. Add your loot and save it to Sessions.',
               ),
-              const SizedBox(height: 15),
-              const Text(
-                'For items sent away by maid, add that batch separately. Only add a batch if it will not also appear in the final inventory. If you already know the overall amount, set the total directly.',
-              ),
+              if (!_hostedFieldDesk) ...[
+                const SizedBox(height: 15),
+                const Text(
+                  'For items sent away by maid, add that batch separately. Only add a batch if it will not also appear in the final inventory. If you already know the overall amount, set the total directly.',
+                ),
+              ],
               const SizedBox(height: 15),
               const Text(
                 'Minigame Helper opens in its own movable window. Paste with Ctrl+V, resize or zoom, and replace the image for the next minigame. It does not capture the game or press keys for you.',
@@ -2794,7 +3655,10 @@ class _CompanionHomeState extends State<CompanionHome> {
               const SizedBox(height: 8),
               SelectableText(
                 widget.store.directory.path,
-                style: const TextStyle(color: accent, fontSize: 12),
+                style: TextStyle(
+                  color: context.gatheringColors.accent,
+                  fontSize: 12,
+                ),
               ),
               const SizedBox(height: 20),
               const Text(
@@ -2812,7 +3676,10 @@ class _CompanionHomeState extends State<CompanionHome> {
                   padding: const EdgeInsets.only(top: 9),
                   child: Text(
                     '• $s',
-                    style: const TextStyle(color: muted, fontSize: 12),
+                    style: TextStyle(
+                      color: context.gatheringColors.muted,
+                      fontSize: 12,
+                    ),
                   ),
                 ),
               ),
@@ -2821,7 +3688,10 @@ class _CompanionHomeState extends State<CompanionHome> {
                   padding: const EdgeInsets.only(top: 9),
                   child: Text(
                     '• $s',
-                    style: const TextStyle(color: muted, fontSize: 12),
+                    style: TextStyle(
+                      color: context.gatheringColors.muted,
+                      fontSize: 12,
+                    ),
                   ),
                 ),
               ),

@@ -8,12 +8,15 @@ import '../../data/catalog/catalog_repository.dart';
 import '../../domain/formatting/planner_formatters.dart';
 import '../../domain/market/recipe_profitability.dart';
 import '../../domain/models/catalog_models.dart';
+import '../../domain/models/craft_mode.dart';
 import '../../shared/overlays/anchored_popover.dart';
 import '../../shared/overlays/draggable_overlay_surface.dart';
+import '../../visual/components/app_interaction_frame.dart';
 import '../../visual/visual.dart';
 import '../planner/planner_contracts.dart';
 import '../planner/planner_map_quick_lookup.dart';
 import '../shared/recipe_variant_selector.dart';
+import '../shared/workshop_presentation.dart';
 import 'recipe_book_controller.dart';
 import 'recipe_book_item_info.dart';
 import 'recipe_book_item_info_view.dart';
@@ -21,6 +24,7 @@ import 'recipe_book_keys.dart';
 import 'recipe_book_models.dart';
 import 'recipe_book_usage.dart';
 import 'recipe_book_used_in_panel.dart';
+import 'recipe_ingredient_line.dart';
 
 Future<RecipeBookActivation?> showRecipeBookModal({
   required BuildContext context,
@@ -102,6 +106,7 @@ class _RecipeBookModalState extends State<RecipeBookModal> {
   int _scrollResetRevision = 0;
   String? _lastPreviewName;
   Offset? _previewAnchorGlobal;
+  RecipeBookActivation? _handledRouteActivation;
 
   @override
   void initState() {
@@ -146,6 +151,13 @@ class _RecipeBookModalState extends State<RecipeBookModal> {
 
   void _controllerChanged() {
     if (!mounted) return;
+    final activation = widget.controller.lastRouteActivation;
+    if (activation != null && !identical(activation, _handledRouteActivation)) {
+      _handledRouteActivation = activation;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) widget.onActivated(activation);
+      });
+    }
     final reset = widget.controller.scrollResetRevision;
     if (reset != _scrollResetRevision) {
       _scrollResetRevision = reset;
@@ -188,8 +200,8 @@ class _RecipeBookModalState extends State<RecipeBookModal> {
     _closeBook();
   }
 
-  void _activate(String name) {
-    final activation = widget.controller.activate(name);
+  void _activate(String name, CraftMode mode) {
+    final activation = widget.controller.activateInMode(name, mode);
     if (activation != null) widget.onActivated(activation);
   }
 
@@ -203,9 +215,9 @@ class _RecipeBookModalState extends State<RecipeBookModal> {
     return true;
   }
 
-  void _openPreview(String name, Offset anchorGlobal) {
+  void _openPreview(String name, Offset anchorGlobal, CraftMode mode) {
     _previewAnchorGlobal = anchorGlobal;
-    widget.controller.openPreview(name);
+    widget.controller.openPreview(name, mode: mode);
   }
 
   @override
@@ -301,12 +313,25 @@ class _RecipeBookModalState extends State<RecipeBookModal> {
                             : KeyedSubtree(
                                 key: RecipeBookKeys.o01PreviewEscape,
                                 child: _RecipePreviewOverlay(
-                                  controller: widget.controller,
+                                  controller:
+                                      widget.controller.previewController,
                                   externalActions: widget.externalActions,
                                   recipeName: widget.controller.previewName!,
                                   anchorGlobal: _previewAnchorGlobal,
                                   closeFocus: _previewCloseFocus,
-                                  onActivate: _activate,
+                                  onActivate: (name) => _activate(
+                                    name,
+                                    widget
+                                        .controller
+                                        .previewController
+                                        .modeController
+                                        .mode,
+                                  ),
+                                  onMethodChanged: (mode) =>
+                                      widget.controller.openPreview(
+                                        widget.controller.previewName!,
+                                        mode: mode,
+                                      ),
                                 ),
                               ),
                       ),
@@ -347,9 +372,10 @@ class _RecipeBookBody extends StatelessWidget {
   final FocusNode searchFocus;
   final ScrollController scrollController;
   final VoidCallback onClose;
-  final ValueChanged<String> onActivate;
+  final void Function(String, CraftMode) onActivate;
   final bool Function(RecipeBookUseEntry, String?) onActivateUsedIn;
-  final void Function(String name, Offset anchorGlobal) onPreview;
+  final void Function(String name, Offset anchorGlobal, CraftMode mode)
+  onPreview;
 
   @override
   Widget build(BuildContext context) {
@@ -1173,64 +1199,91 @@ class _RecipeGrid extends StatelessWidget {
   final RecipeBookController controller;
   final RecipeBookSnapshot snapshot;
   final ScrollController scrollController;
-  final ValueChanged<String> onActivate;
+  final void Function(String, CraftMode) onActivate;
   final bool Function(RecipeBookUseEntry, String?) onActivateUsedIn;
-  final void Function(String name, Offset anchorGlobal) onPreview;
+  final void Function(String name, Offset anchorGlobal, CraftMode mode)
+  onPreview;
 
   @override
   Widget build(BuildContext context) => LayoutBuilder(
     builder: (context, constraints) {
-      final spec = context.visualTheme;
-      final denseLayout = spec.usesDenseSplitLayout;
-      final metrics = _RecipeCardMetrics.resolve(
-        processing: controller.usesProcessingPaging,
-        denseLayout: denseLayout,
-        density: controller.density,
-      );
       final compactBonus =
           controller.callingContext == RecipeBookCallingContext.bonus &&
           snapshot.poolCount <= 6;
-      final fittedMetrics = denseLayout && !compactBonus
-          ? metrics.fitDenseWidth(
-              availableWidth: constraints.maxWidth,
-              columns: controller.density.columns,
-            )
-          : metrics;
-      final outerCardWidth = fittedMetrics.cardWidth + fittedMetrics.margin * 2;
-      final columns = (constraints.maxWidth / outerCardWidth)
+      final textScale = MediaQuery.textScalerOf(context).scale(16) / 16;
+      final preferredWidth = switch (controller.density) {
+        RecipeBookDensity.sixByFive => 320.0,
+        RecipeBookDensity.fiveByFour => 370.0,
+        RecipeBookDensity.fourByThree => 410.0,
+      };
+      final columns = (constraints.maxWidth / (preferredWidth * textScale))
           .floor()
-          .clamp(1, controller.density.columns)
-          .toInt();
-      final rowExtent = fittedMetrics.cardHeight + fittedMetrics.margin * 2;
-      final scrollView = GridView.builder(
+          .clamp(1, controller.density.columns);
+      final fittedMetrics = _RecipeCardMetrics(
+        cardWidth: (constraints.maxWidth / columns - 12).clamp(0, 560),
+      );
+      final scrollView = CustomScrollView(
         controller: scrollController,
         keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: columns,
-          mainAxisExtent: rowExtent,
-        ),
-        itemCount: snapshot.entries.length,
         semanticChildCount: snapshot.entries.length,
-        scrollCacheExtent: ScrollCacheExtent.pixels(rowExtent * 2),
-        itemBuilder: (context, index) => Align(
-          alignment: compactBonus ? Alignment.topCenter : Alignment.topLeft,
-          child: Padding(
-            padding: EdgeInsets.all(fittedMetrics.margin),
-            child: SizedBox(
-              width: fittedMetrics.cardWidth,
-              height: fittedMetrics.cardHeight,
-              child: _RecipeCard(
-                key: RecipeBookKeys.card(snapshot.entries[index].name),
-                controller: controller,
-                entry: snapshot.entries[index],
-                metrics: fittedMetrics,
-                onActivate: onActivate,
-                onActivateUsedIn: onActivateUsedIn,
-                onPreview: onPreview,
-              ),
+        scrollCacheExtent: ScrollCacheExtent.pixels(360 * textScale),
+        slivers: [
+          SliverList.builder(
+            itemCount: (snapshot.entries.length + columns - 1) ~/ columns,
+            addSemanticIndexes: false,
+            itemBuilder: (context, row) => Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                for (var column = 0; column < columns; column++)
+                  Expanded(
+                    child: row * columns + column >= snapshot.entries.length
+                        ? const SizedBox.shrink()
+                        : Builder(
+                            builder: (context) {
+                              final index = row * columns + column;
+                              final entry = snapshot.entries[index];
+                              final mode =
+                                  entry.mode ?? controller.modeController.mode;
+                              return IndexedSemantics(
+                                index: index,
+                                child: Padding(
+                                  padding: EdgeInsets.all(fittedMetrics.margin),
+                                  child: Align(
+                                    alignment: compactBonus
+                                        ? Alignment.topCenter
+                                        : Alignment.topLeft,
+                                    heightFactor: 1,
+                                    child: SizedBox(
+                                      width: fittedMetrics.cardWidth,
+                                      child: _RecipeCard(
+                                        key:
+                                            entry.mode ==
+                                                controller.modeController.mode
+                                            ? RecipeBookKeys.card(entry.name)
+                                            : ValueKey(
+                                                'recipe-card:${entry.mode?.key}:${entry.name}',
+                                              ),
+                                        controller: controller
+                                            .controllerForMode(mode),
+                                        entry: entry,
+                                        metrics: fittedMetrics,
+                                        onActivate: (name) =>
+                                            onActivate(name, mode),
+                                        onActivateUsedIn: onActivateUsedIn,
+                                        onPreview: (name, anchor) =>
+                                            onPreview(name, anchor, mode),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              );
+                            },
+                          ),
+                  ),
+              ],
             ),
           ),
-        ),
+        ],
       );
       return Listener(
         key: RecipeBookKeys.r10CardScroll,
@@ -1283,28 +1336,62 @@ class _RecipeCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final spec = context.visualTheme;
-    final ledger = spec.isIlluminatedLedger;
-    final sakura = spec.isSakuraNightGarden;
-    final denseLayout = spec.usesDenseSplitLayout;
-    final compactDensity = controller.density == RecipeBookDensity.sixByFive;
-    final compactProcessing =
-        controller.usesProcessingPaging &&
-        controller.density != RecipeBookDensity.fourByThree;
-    final compactProcessingSix =
-        controller.usesProcessingPaging && compactDensity;
+    final reference = isBrowsableRecipeBookReference(entry.recipe);
+    final deleteMode = controller.deleteSelectionMode;
     final displayedRecipe = controller.recipeFor(entry.name) ?? entry.recipe;
-    final productionMethod = _recipeProductionMethodLabel(displayedRecipe);
-    final actionSize = compactProcessingSix
-        ? 26.0
-        : compactProcessing
-        ? 30.0
-        : 34.0;
     final activeName =
         controller.callingContext == RecipeBookCallingContext.bonus
         ? controller.modeController.state.value.bonusTarget
         : controller.modeController.state.value.target;
     final active = !entry.hidden && _sameRecipeName(entry.name, activeName);
-    final deleteMode = controller.deleteSelectionMode;
+    final actionLabel = entry.hidden
+        ? controller.restoringHiddenName == entry.name
+              ? 'Restoring...'
+              : 'Restore'
+        : deleteMode
+        ? entry.selectedForDeletion
+              ? 'Selected'
+              : 'Select'
+        : 'Target';
+    final target = reference
+        ? Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 8),
+            child: Text('Reference', style: spec.typography.meta),
+          )
+        : AppTextAction(
+            fontSize: 14,
+            key: entry.hidden
+                ? RecipeBookKeys.r27RestoreHidden(entry.name)
+                : deleteMode
+                ? RecipeBookKeys.r19DeleteSelection(entry.name)
+                : RecipeBookKeys.r11Target(entry.name),
+            selected: active || entry.selectedForDeletion,
+            semanticLabel: entry.hidden
+                ? 'Restore ${entry.name}'
+                : '$actionLabel ${entry.name}',
+            onPressed: entry.hidden && controller.restoringHiddenName != null
+                ? null
+                : entry.hidden
+                ? () => controller.restoreHiddenItem(entry.name)
+                : _cardAction,
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                AppVectorGlyph(
+                  entry.hidden
+                      ? 'reset'
+                      : deleteMode
+                      ? entry.selectedForDeletion
+                            ? 'check'
+                            : 'add'
+                      : 'target',
+                  size: 14,
+                ),
+                const SizedBox(width: 4),
+                Text(actionLabel),
+              ],
+            ),
+          );
     return Semantics(
       container: true,
       selected: entry.selectedForDeletion,
@@ -1314,470 +1401,258 @@ class _RecipeCard extends StatelessWidget {
       child: GestureDetector(
         behavior: HitTestBehavior.opaque,
         onTap: entry.hidden ? null : _cardAction,
-        child: DecoratedBox(
-          position: DecorationPosition.foreground,
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(
-              ledger
-                  ? 2
-                  : sakura
-                  ? spec.geometry.cardRadius
-                  : 0,
+        child: AppInteractionFrame(
+          enabled: !entry.hidden || controller.restoringHiddenName == null,
+          selected: active || entry.selectedForDeletion,
+          radius: 7,
+          child: DecoratedBox(
+            key: ValueKey('recipe-soft-card:${entry.name}'),
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [
+                  Color.lerp(
+                    spec.palette.surface,
+                    active ? spec.palette.trim : spec.palette.surfaceRaised,
+                    active ? .18 : .12,
+                  )!,
+                  Color.lerp(
+                    spec.palette.surface,
+                    spec.palette.surfaceInset,
+                    .3,
+                  )!,
+                ],
+              ),
+              borderRadius: BorderRadius.circular(7),
+              border: entry.selectedForDeletion || entry.hidden
+                  ? Border.all(
+                      color: entry.selectedForDeletion
+                          ? spec.palette.danger
+                          : spec.palette.warning,
+                    )
+                  : null,
+              boxShadow: [
+                BoxShadow(
+                  color: spec.palette.shadow.withValues(alpha: .12),
+                  blurRadius: 4,
+                  offset: const Offset(0, 2),
+                ),
+              ],
             ),
-            border: ledger || sakura
-                ? Border.all(
-                    color: entry.selectedForDeletion
-                        ? spec.palette.danger
-                        : entry.hidden
-                        ? spec.palette.warning
-                        : active
-                        ? spec.palette.trimBright
-                        : spec.palette.trim.withAlpha(142),
-                  )
-                : null,
-          ),
-          child: AppSurface(
-            role: AppSurfaceRole.card,
-            tone: entry.selectedForDeletion
-                ? AppSurfaceTone.danger
-                : entry.hidden
-                ? AppSurfaceTone.warning
-                : AppSurfaceTone.neutral,
-            padding:
-                compactDensity &&
-                    (controller.usesProcessingPaging || !denseLayout)
-                ? EdgeInsets.symmetric(horizontal: metrics.padding, vertical: 5)
-                : EdgeInsets.all(metrics.padding),
-            clipBehavior: Clip.antiAlias,
-            child: LayoutBuilder(
-              builder: (context, constraints) {
-                final stock = entry.marketStock;
-                final showMarketStock =
-                    !entry.hidden && controller.showsMarketStockFor(entry.name);
-                final profitability = entry.profitability;
-                final targetRole = entry.hidden
-                    ? AppButtonRole.secondary
-                    : controller.deleteSelectionMode
-                    ? ledger
-                          ? entry.selectedForDeletion
-                                ? AppButtonRole.primary
-                                : AppButtonRole.secondary
-                          : AppButtonRole.danger
-                    : ledger
-                    ? AppButtonRole.primary
-                    : active
-                    ? AppButtonRole.primary
-                    : AppButtonRole.secondary;
-                final targetButton =
-                    isBrowsableRecipeBookReference(entry.recipe)
-                    ? Semantics(
-                        label: '${entry.name} reference information',
-                        child: ExcludeSemantics(
-                          child: Center(
-                            child: FittedBox(
-                              fit: BoxFit.scaleDown,
-                              child: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: <Widget>[
-                                  const AppVectorGlyph('book', size: 13),
-                                  if (!compactDensity) ...<Widget>[
-                                    const SizedBox(width: 5),
-                                    Text(
-                                      'Reference',
-                                      style: spec.typography.label.copyWith(
-                                        color: spec.palette.textMuted,
-                                      ),
-                                    ),
-                                  ],
-                                ],
-                              ),
-                            ),
-                          ),
-                        ),
-                      )
-                    : AppButton(
-                        key: entry.hidden
-                            ? RecipeBookKeys.r27RestoreHidden(entry.name)
-                            : controller.deleteSelectionMode
-                            ? RecipeBookKeys.r19DeleteSelection(entry.name)
-                            : RecipeBookKeys.r11Target(entry.name),
-                        role: targetRole,
-                        selected: entry.selectedForDeletion,
-                        minimumSize: denseLayout
-                            ? Size.zero
-                            : Size.fromHeight(metrics.buttonHeight),
-                        padding: EdgeInsets.symmetric(
-                          horizontal: denseLayout ? 2 : 8,
-                          vertical: 2,
-                        ),
-                        semanticLabel: entry.hidden
-                            ? 'Restore ${entry.name}'
-                            : null,
-                        onPressed:
-                            entry.hidden &&
-                                controller.restoringHiddenName != null
-                            ? null
-                            : entry.hidden
-                            ? () => controller.restoreHiddenItem(entry.name)
-                            : _cardAction,
-                        child: FittedBox(
-                          fit: BoxFit.scaleDown,
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: <Widget>[
-                              AppVectorGlyph(
-                                entry.hidden
-                                    ? 'reset'
-                                    : controller.deleteSelectionMode
-                                    ? entry.selectedForDeletion
-                                          ? 'check'
-                                          : 'add'
-                                    : 'target',
-                                size: 13,
-                              ),
-                              if (!compactDensity) ...<Widget>[
-                                const SizedBox(width: 5),
-                                Text(
-                                  entry.hidden
-                                      ? controller.restoringHiddenName ==
-                                                entry.name
-                                            ? 'Restoring...'
-                                            : 'Restore'
-                                      : controller.deleteSelectionMode
-                                      ? entry.selectedForDeletion
-                                            ? 'Selected'
-                                            : 'Select'
-                                      : 'Target',
-                                ),
-                              ],
-                            ],
-                          ),
-                        ),
-                      );
-                final title = _RecipeCardTitle(
-                  name: entry.name,
-                  productionMethod: productionMethod,
-                  nameSize: metrics.nameSize,
-                  compact: compactDensity,
-                );
-                return Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: <Widget>[
-                    Row(
-                      children: <Widget>[
-                        RecipeBookItemIcon(
+            child: Padding(
+              padding: metrics.padding,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      WorkshopItemMount(
+                        child: RecipeBookItemIcon(
+                          key: ValueKey('recipe-card-icon:${entry.name}'),
                           controller: controller,
                           name: entry.name,
                           size: metrics.iconSize,
                           anchorId: 'card:${entry.name}',
                         ),
-                        if (entry.hidden)
-                          const Expanded(
-                            child: Padding(
-                              padding: EdgeInsets.symmetric(horizontal: 7),
-                              child: Align(
-                                alignment: Alignment.centerLeft,
-                                child: _HiddenRecipePill(),
-                              ),
-                            ),
-                          )
-                        else if (profitability != null)
-                          Expanded(
-                            child: Padding(
-                              padding: EdgeInsets.only(
-                                left: compactProcessing ? 5 : 7,
-                              ),
-                              child: Align(
-                                alignment: Alignment.centerLeft,
-                                child: _RecipeBookProfitabilityPill(
-                                  key: RecipeBookKeys.profitPill(entry.name),
-                                  quote: profitability,
-                                  compact: compactProcessing,
-                                ),
-                              ),
-                            ),
-                          )
-                        else if (showMarketStock)
-                          if (compactProcessingSix)
-                            const Spacer()
-                          else
-                            Expanded(
-                              child: Padding(
-                                padding: EdgeInsets.only(
-                                  left: compactProcessing ? 5 : 7,
-                                ),
-                                child: Align(
-                                  alignment: Alignment.centerLeft,
-                                  child: _RecipeBookStockPill(stock: stock),
-                                ),
-                              ),
-                            )
-                        else
-                          const Spacer(),
-                        if (!entry.hidden &&
-                            !isBrowsableRecipeBookReference(entry.recipe))
-                          Tooltip(
-                            message: entry.name,
-                            waitDuration: const Duration(milliseconds: 450),
-                            child: AppButton(
-                              key: RecipeBookKeys.r12Favorite(entry.name),
-                              role: AppButtonRole.optionPill,
-                              selected: deleteMode
-                                  ? entry.selectedForDeletion
-                                  : entry.favorite,
-                              minimumSize: Size.square(actionSize),
-                              padding: EdgeInsets.zero,
-                              semanticLabel: deleteMode
-                                  ? '${entry.selectedForDeletion ? 'Deselect' : 'Select'} ${entry.name} for deletion'
-                                  : '${entry.favorite ? 'Remove' : 'Add'} ${entry.name} favorite',
-                              onPressed: deleteMode
-                                  ? () => controller.toggleDeleteSelection(
-                                      entry.name,
-                                    )
-                                  : () => controller.toggleFavorite(entry.name),
-                              child: AppVectorGlyph(
-                                deleteMode && entry.selectedForDeletion
-                                    ? 'check'
-                                    : deleteMode
-                                    ? 'add'
-                                    : 'star',
-                                size: compactProcessing ? 12 : 15,
-                                color: !deleteMode && entry.favorite
-                                    ? spec.palette.warning
-                                    : null,
-                              ),
-                            ),
-                          ),
-                      ],
-                    ),
-                    SizedBox(height: metrics.rowSpacing),
-                    Expanded(
-                      child:
-                          (profitability != null || compactProcessingSix) &&
-                              showMarketStock
-                          ? Row(
+                      ),
+                      const SizedBox(width: 16),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Row(
                               crossAxisAlignment: CrossAxisAlignment.start,
-                              children: <Widget>[
-                                Expanded(child: title),
-                                const SizedBox(width: 4),
-                                _RecipeBookStockPill(
-                                  stock: stock,
-                                  compact: compactProcessingSix,
+                              children: [
+                                Expanded(
+                                  child: Column(
+                                    mainAxisSize: MainAxisSize.min,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Tooltip(
+                                        message: entry.name,
+                                        child: Text(
+                                          entry.name,
+                                          maxLines: 2,
+                                          overflow: TextOverflow.ellipsis,
+                                          style: spec.typography.label.copyWith(
+                                            fontSize: metrics.nameSize,
+                                            fontWeight: FontWeight.w700,
+                                            height: 1.25,
+                                          ),
+                                        ),
+                                      ),
+                                      const SizedBox(height: 4),
+                                      Text(
+                                        _recipeProductionMethodLabel(
+                                          displayedRecipe,
+                                        ),
+                                        key: RecipeBookKeys.productionMethod(
+                                          entry.name,
+                                        ),
+                                        maxLines: 2,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: spec.typography.meta.copyWith(
+                                          fontSize: 14,
+                                          fontWeight: FontWeight.w400,
+                                          height: 1.4,
+                                          color: spec.palette.textMuted,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
                                 ),
+                                if (!entry.hidden && !reference)
+                                  AppTextAction(
+                                    key: RecipeBookKeys.r12Favorite(entry.name),
+                                    selected: deleteMode
+                                        ? entry.selectedForDeletion
+                                        : entry.favorite,
+                                    color: !deleteMode && entry.favorite
+                                        ? spec.palette.warning
+                                        : null,
+                                    semanticLabel: deleteMode
+                                        ? '${entry.selectedForDeletion ? 'Deselect' : 'Select'} ${entry.name} for deletion'
+                                        : '${entry.favorite ? 'Remove' : 'Add'} ${entry.name} favorite',
+                                    tooltip: deleteMode
+                                        ? 'Select for deletion'
+                                        : 'Favorite',
+                                    onPressed: deleteMode
+                                        ? () => controller
+                                              .toggleDeleteSelection(entry.name)
+                                        : () => controller.toggleFavorite(
+                                            entry.name,
+                                          ),
+                                    child: AppVectorGlyph(
+                                      deleteMode
+                                          ? entry.selectedForDeletion
+                                                ? 'check'
+                                                : 'add'
+                                          : 'star',
+                                      size: 18,
+                                    ),
+                                  ),
                               ],
-                            )
-                          : Align(alignment: Alignment.topLeft, child: title),
-                    ),
-                    SizedBox(height: metrics.rowSpacing),
-                    Row(
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: <Widget>[
-                        SizedBox(
-                          width: compactDensity ? 34 : 96,
-                          height: actionSize,
-                          child: targetButton,
+                            ),
+                            const Padding(
+                              padding: EdgeInsets.only(top: 9, bottom: 8),
+                              child: WorkshopSectionRule(),
+                            ),
+                            Transform.translate(
+                              offset: const Offset(-5, 0),
+                              child: Wrap(
+                                key: ValueKey('recipe-actions:${entry.name}'),
+                                spacing: 14,
+                                runSpacing: 10,
+                                children: [
+                                  target,
+                                  if (!deleteMode)
+                                    Builder(
+                                      builder: (buttonContext) => AppTextAction(
+                                        fontSize: 14,
+                                        key: RecipeBookKeys.r13Details(
+                                          entry.name,
+                                        ),
+                                        semanticLabel: 'Preview ${entry.name}',
+                                        tooltip: 'Preview ingredients',
+                                        onPressed: () {
+                                          final box = buttonContext
+                                              .findRenderObject();
+                                          final anchor = box is RenderBox
+                                              ? box.localToGlobal(
+                                                  box.size.center(Offset.zero),
+                                                )
+                                              : Offset.zero;
+                                          onPreview(entry.name, anchor);
+                                        },
+                                        child: const Text('Details'),
+                                      ),
+                                    ),
+                                  if (!deleteMode && entry.usedInCount > 0)
+                                    AnchoredPopover(
+                                      overlayId:
+                                          'recipe-book-used-in:${entry.name}',
+                                      preferredWidth: 570,
+                                      maximumHeight: itemReferenceCardHeight(
+                                        context,
+                                      ),
+                                      alignEnd: true,
+                                      placement:
+                                          AnchoredPopoverPlacement.beside,
+                                      consumeOutsideTap: true,
+                                      anchorBuilder:
+                                          (
+                                            context,
+                                            toggle,
+                                            isShowing,
+                                          ) => AppTextAction(
+                                            fontSize: 14,
+                                            key: RecipeBookKeys.usedIn(
+                                              entry.name,
+                                            ),
+                                            selected: isShowing,
+                                            semanticLabel:
+                                                '${entry.name} is used in ${entry.usedInCount} recipe ${entry.usedInCount == 1 ? 'path' : 'paths'}',
+                                            tooltip:
+                                                'Used in ${entry.usedInCount} recipe ${entry.usedInCount == 1 ? 'path' : 'paths'}',
+                                            onPressed: toggle,
+                                            child: Text(
+                                              'Used for ${entry.usedInCount}',
+                                            ),
+                                          ),
+                                      popoverBuilder: (context, close) =>
+                                          RecipeBookUsedInPanel(
+                                            controller: controller,
+                                            sourceName: entry.name,
+                                            snapshot: controller.usedInFor(
+                                              entry.name,
+                                            ),
+                                            onClose: close,
+                                            onActivate: onActivateUsedIn,
+                                          ),
+                                    ),
+                                ],
+                              ),
+                            ),
+                          ],
                         ),
-                        const Spacer(),
-                        if (!deleteMode)
-                          Builder(
-                            builder: (buttonContext) => AppButton(
-                              key: RecipeBookKeys.r13Details(entry.name),
-                              role: ledger
-                                  ? AppButtonRole.primary
-                                  : sakura
-                                  ? AppButtonRole.secondary
-                                  : AppButtonRole.optionPill,
-                              minimumSize: Size.square(actionSize),
-                              padding: EdgeInsets.zero,
-                              semanticLabel: 'Preview ${entry.name}',
-                              tooltip: 'Preview ingredients',
-                              onPressed: () {
-                                final box = buttonContext.findRenderObject();
-                                final anchor = box is RenderBox
-                                    ? box.localToGlobal(
-                                        box.size.center(Offset.zero),
-                                      )
-                                    : Offset.zero;
-                                onPreview(entry.name, anchor);
-                              },
-                              child: AppVectorGlyph(
-                                'book',
-                                size: compactProcessing ? 12 : 14,
-                              ),
+                      ),
+                    ],
+                  ),
+                  if (entry.hidden ||
+                      entry.profitability != null ||
+                      controller.showsMarketStockFor(entry.name)) ...[
+                    const SizedBox(height: 10),
+                    Padding(
+                      padding: EdgeInsets.only(left: metrics.iconSize + 16),
+                      child: Wrap(
+                        spacing: 8,
+                        runSpacing: 4,
+                        children: [
+                          if (entry.hidden) const _HiddenRecipePill(),
+                          if (!entry.hidden && entry.profitability != null)
+                            _RecipeBookProfitabilityPill(
+                              key: RecipeBookKeys.profitPill(entry.name),
+                              quote: entry.profitability!,
+                              compact: false,
                             ),
-                          ),
-                        if (!deleteMode && entry.usedInCount > 0) ...<Widget>[
-                          SizedBox(width: compactProcessing ? 3 : 6),
-                          AnchoredPopover(
-                            overlayId: 'recipe-book-used-in:${entry.name}',
-                            preferredWidth: 570,
-                            maximumHeight: 610,
-                            alignEnd: true,
-                            placement: AnchoredPopoverPlacement.beside,
-                            consumeOutsideTap: true,
-                            anchorBuilder: (context, toggle, isShowing) => AppButton(
-                              key: RecipeBookKeys.usedIn(entry.name),
-                              role: isShowing
-                                  ? AppButtonRole.primary
-                                  : ledger
-                                  ? AppButtonRole.primary
-                                  : sakura
-                                  ? AppButtonRole.secondary
-                                  : AppButtonRole.optionPill,
-                              selected: isShowing,
-                              minimumSize: Size.square(actionSize),
-                              padding: EdgeInsets.zero,
-                              semanticLabel:
-                                  '${entry.name} is used in ${entry.usedInCount} recipe ${entry.usedInCount == 1 ? 'path' : 'paths'}',
-                              tooltip:
-                                  'Used in ${entry.usedInCount} recipe ${entry.usedInCount == 1 ? 'path' : 'paths'}',
-                              onPressed: toggle,
-                              child: _UsedInActionGlyph(
-                                count: entry.usedInCount,
-                                compact: compactProcessing,
-                              ),
-                            ),
-                            popoverBuilder: (context, close) =>
-                                RecipeBookUsedInPanel(
-                                  controller: controller,
-                                  sourceName: entry.name,
-                                  snapshot: controller.usedInFor(entry.name),
-                                  onClose: close,
-                                  onActivate: onActivateUsedIn,
-                                ),
-                          ),
+                          if (!entry.hidden &&
+                              controller.showsMarketStockFor(entry.name))
+                            _RecipeBookStockPill(stock: entry.marketStock),
                         ],
-                      ],
+                      ),
                     ),
                   ],
-                );
-              },
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _RecipeCardTitle extends StatelessWidget {
-  const _RecipeCardTitle({
-    required this.name,
-    required this.productionMethod,
-    required this.nameSize,
-    required this.compact,
-  });
-
-  final String name;
-  final String productionMethod;
-  final double nameSize;
-  final bool compact;
-
-  @override
-  Widget build(BuildContext context) {
-    final spec = context.visualTheme;
-    final methodSize = (nameSize - (compact ? 2.3 : 2.8))
-        .clamp(9.5, 12.5)
-        .toDouble();
-    final name = Text(
-      this.name,
-      style: spec.typography.label.copyWith(
-        fontSize: nameSize,
-        fontWeight: FontWeight.w700,
-        height: compact ? 1 : 1.06,
-      ),
-      maxLines: compact ? 2 : 3,
-      overflow: TextOverflow.ellipsis,
-    );
-    final method = Text(
-      productionMethod,
-      key: RecipeBookKeys.productionMethod(this.name),
-      style: spec.typography.meta.copyWith(
-        color: spec.palette.textMuted,
-        fontSize: methodSize,
-        fontWeight: FontWeight.w600,
-        letterSpacing: .15,
-        height: compact ? .92 : 1,
-      ),
-      maxLines: 2,
-      overflow: TextOverflow.ellipsis,
-    );
-
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        if (!constraints.maxHeight.isFinite) {
-          return Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: <Widget>[
-              name,
-              if (!compact) const SizedBox(height: 1),
-              method,
-            ],
-          );
-        }
-        return SizedBox(
-          height: constraints.maxHeight,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: <Widget>[
-              Flexible(child: name),
-              if (!compact) const SizedBox(height: 1),
-              method,
-            ],
-          ),
-        );
-      },
-    );
-  }
-}
-
-class _UsedInActionGlyph extends StatelessWidget {
-  const _UsedInActionGlyph({required this.count, required this.compact});
-
-  final int count;
-  final bool compact;
-
-  @override
-  Widget build(BuildContext context) {
-    final spec = context.visualTheme;
-    final badgeSize = compact ? 12.0 : 15.0;
-    return Stack(
-      clipBehavior: Clip.none,
-      alignment: Alignment.center,
-      children: <Widget>[
-        AppVectorGlyph('branch', size: compact ? 12 : 15),
-        Positioned(
-          right: compact ? -5 : -6,
-          top: compact ? -5 : -6,
-          child: Container(
-            width: badgeSize,
-            height: badgeSize,
-            alignment: Alignment.center,
-            decoration: BoxDecoration(
-              color: spec.palette.primary,
-              shape: BoxShape.circle,
-              border: Border.all(color: spec.palette.surfaceRaised, width: 1),
-            ),
-            child: FittedBox(
-              fit: BoxFit.scaleDown,
-              child: Padding(
-                padding: const EdgeInsets.all(1),
-                child: Text(
-                  count > 99 ? '99+' : '$count',
-                  style: spec.typography.meta.copyWith(
-                    color: spec.palette.text,
-                    fontSize: compact ? 7 : 8,
-                    fontWeight: FontWeight.w900,
-                    height: 1,
-                  ),
-                ),
+                ],
               ),
             ),
           ),
         ),
-      ],
+      ),
     );
   }
 }
@@ -1888,11 +1763,9 @@ class _RecipeBookProfitabilityPill extends StatelessWidget {
 }
 
 class _RecipeBookStockPill extends StatelessWidget {
-  const _RecipeBookStockPill({required this.stock, this.compact = false});
+  const _RecipeBookStockPill({required this.stock});
 
   final double? stock;
-  final bool compact;
-
   @override
   Widget build(BuildContext context) {
     final spec = context.visualTheme;
@@ -1907,15 +1780,12 @@ class _RecipeBookStockPill extends StatelessWidget {
           border: Border.all(color: spec.palette.textMuted.withAlpha(165)),
         ),
         child: Padding(
-          padding: EdgeInsets.symmetric(
-            horizontal: compact ? 5 : 7,
-            vertical: 3,
-          ),
+          padding: EdgeInsets.symmetric(horizontal: 7, vertical: 3),
           child: Text(
             stock == null ? 'Stock —' : 'Stock ${formatQuantity(stock!)}',
             style: spec.typography.meta.copyWith(
               color: spec.palette.text,
-              fontSize: compact ? 9.5 : 10.5,
+              fontSize: 10.5,
               fontWeight: FontWeight.w800,
               height: 1,
             ),
@@ -1930,155 +1800,15 @@ class _RecipeBookStockPill extends StatelessWidget {
 
 @immutable
 class _RecipeCardMetrics {
-  const _RecipeCardMetrics({
-    required this.cardWidth,
-    required this.cardHeight,
-    required this.iconSize,
-    required this.margin,
-    required this.padding,
-    required this.nameSize,
-    required this.buttonHeight,
-    required this.rowSpacing,
-  });
-
+  const _RecipeCardMetrics({required this.cardWidth});
   final double cardWidth;
-  final double cardHeight;
-  final double iconSize;
-  final double margin;
-  final double padding;
-  final double nameSize;
-  final double buttonHeight;
-  final double rowSpacing;
-
-  _RecipeCardMetrics fitDenseWidth({
-    required double availableWidth,
-    required int columns,
-  }) {
-    if (columns <= 0 || !availableWidth.isFinite) return this;
-    // Avalonia reserves 32 px inside the already padded modal for the themed
-    // scrollbar and frame gutter before distributing the requested columns.
-    final fittedWidth = (((availableWidth - 32) / columns) - margin * 2)
-        .clamp(120.0, cardWidth)
-        .ceilToDouble();
-    if (fittedWidth >= cardWidth) return this;
-    return _RecipeCardMetrics(
-      cardWidth: fittedWidth,
-      cardHeight: cardHeight,
-      iconSize: iconSize,
-      margin: margin,
-      padding: padding,
-      nameSize: nameSize,
-      buttonHeight: buttonHeight,
-      rowSpacing: rowSpacing,
-    );
-  }
-
-  static _RecipeCardMetrics resolve({
-    required bool processing,
-    required bool denseLayout,
-    required RecipeBookDensity density,
-  }) {
-    if (processing) {
-      return switch (density) {
-        RecipeBookDensity.sixByFive => const _RecipeCardMetrics(
-          cardWidth: 190,
-          cardHeight: 108,
-          iconSize: 30,
-          margin: 3,
-          padding: 8,
-          nameSize: 11,
-          buttonHeight: 22,
-          rowSpacing: 3,
-        ),
-        RecipeBookDensity.fiveByFour => const _RecipeCardMetrics(
-          cardWidth: 228,
-          cardHeight: 136,
-          iconSize: 38,
-          margin: 4,
-          padding: 9,
-          nameSize: 13,
-          buttonHeight: 26,
-          rowSpacing: 6,
-        ),
-        RecipeBookDensity.fourByThree => const _RecipeCardMetrics(
-          cardWidth: 276,
-          cardHeight: 170,
-          iconSize: 50,
-          margin: 5,
-          padding: 12,
-          nameSize: 15.5,
-          buttonHeight: 30,
-          rowSpacing: 8,
-        ),
-      };
-    }
-    if (denseLayout) {
-      return switch (density) {
-        RecipeBookDensity.sixByFive => const _RecipeCardMetrics(
-          cardWidth: 194,
-          cardHeight: 134,
-          iconSize: 34,
-          margin: 3,
-          padding: 8,
-          nameSize: 11.5,
-          buttonHeight: 24,
-          rowSpacing: 6,
-        ),
-        RecipeBookDensity.fiveByFour => const _RecipeCardMetrics(
-          cardWidth: 230,
-          cardHeight: 154,
-          iconSize: 42,
-          margin: 4,
-          padding: 10,
-          nameSize: 13.5,
-          buttonHeight: 28,
-          rowSpacing: 8,
-        ),
-        RecipeBookDensity.fourByThree => const _RecipeCardMetrics(
-          cardWidth: 290,
-          cardHeight: 198,
-          iconSize: 54,
-          margin: 5,
-          padding: 12,
-          nameSize: 15.5,
-          buttonHeight: 32,
-          rowSpacing: 9,
-        ),
-      };
-    }
-    return switch (density) {
-      RecipeBookDensity.sixByFive => const _RecipeCardMetrics(
-        cardWidth: 166,
-        cardHeight: 120,
-        iconSize: 30,
-        margin: 3,
-        padding: 8,
-        nameSize: 11,
-        buttonHeight: 22,
-        rowSpacing: 5,
-      ),
-      RecipeBookDensity.fiveByFour => const _RecipeCardMetrics(
-        cardWidth: 196,
-        cardHeight: 148,
-        iconSize: 40,
-        margin: 4,
-        padding: 9,
-        nameSize: 13,
-        buttonHeight: 26,
-        rowSpacing: 8,
-      ),
-      RecipeBookDensity.fourByThree => const _RecipeCardMetrics(
-        cardWidth: 236,
-        cardHeight: 182,
-        iconSize: 50,
-        margin: 5,
-        padding: 11,
-        nameSize: 15.5,
-        buttonHeight: 30,
-        rowSpacing: 8,
-      ),
-    };
-  }
+  final double iconSize = 50;
+  final double margin = 6;
+  final EdgeInsets padding = const EdgeInsets.symmetric(
+    horizontal: 15,
+    vertical: 17,
+  );
+  final double nameSize = 18;
 }
 
 bool _sameRecipeName(String left, String right) =>
@@ -2125,6 +1855,7 @@ class _RecipePreviewOverlay extends StatelessWidget {
     required this.anchorGlobal,
     required this.closeFocus,
     required this.onActivate,
+    required this.onMethodChanged,
   });
 
   final RecipeBookController controller;
@@ -2133,6 +1864,7 @@ class _RecipePreviewOverlay extends StatelessWidget {
   final Offset? anchorGlobal;
   final FocusNode closeFocus;
   final ValueChanged<String> onActivate;
+  final ValueChanged<CraftMode> onMethodChanged;
 
   @override
   Widget build(BuildContext context) {
@@ -2140,6 +1872,66 @@ class _RecipePreviewOverlay extends StatelessWidget {
     final recipe = controller.recipeFor(recipeName);
     if (recipe == null) return const SizedBox.shrink();
     final hidden = controller.isHiddenRecipe(recipeName);
+    final methods = {
+      for (final route in controller.previewRoutesFor(recipeName))
+        route.mode: route.label,
+    };
+    final previewAction = isBrowsableRecipeBookReference(recipe)
+        ? Semantics(
+            label: '$recipeName reference information',
+            child: ExcludeSemantics(
+              child: SizedBox(
+                width: 95,
+                height: 38,
+                child: Center(
+                  child: FittedBox(
+                    fit: BoxFit.scaleDown,
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: <Widget>[
+                        const AppVectorGlyph('book', size: 13),
+                        const SizedBox(width: 5),
+                        Text(
+                          'Reference',
+                          style: spec.typography.label.copyWith(
+                            color: spec.palette.textMuted,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          )
+        : SizedBox(
+            key: hidden
+                ? RecipeBookKeys.r27RestoreHidden('$recipeName:preview')
+                : RecipeBookKeys.r11Target('$recipeName:preview'),
+            width: 95,
+            height: 38,
+            child: AppButton(
+              role: hidden ? AppButtonRole.secondary : AppButtonRole.primary,
+              minimumSize: Size.zero,
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+              onPressed: hidden && controller.restoringHiddenName != null
+                  ? null
+                  : hidden
+                  ? () => controller.restoreHiddenItem(recipeName)
+                  : () => onActivate(recipeName),
+              child: FittedBox(
+                fit: BoxFit.scaleDown,
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: <Widget>[
+                    AppVectorGlyph(hidden ? 'reset' : 'target', size: 13),
+                    const SizedBox(width: 5),
+                    Text(hidden ? 'Restore' : 'Target'),
+                  ],
+                ),
+              ),
+            ),
+          );
     final ledger = spec.isIlluminatedLedger;
     final sakura = spec.isSakuraNightGarden;
     return LayoutBuilder(
@@ -2153,15 +1945,26 @@ class _RecipePreviewOverlay extends StatelessWidget {
         final contentWidth = modalWidth - 32;
         final contentHeight = modalHeight - 32;
         final panelWidth = _previewPanelWidth(context, recipe, contentWidth);
-        final availableHeight = contentHeight.clamp(260.0, 650.0);
+        // Reading previews can outgrow the book beneath them. Keep their
+        // content-sized layout, but use the viewport before adding scrolling.
+        final availableHeight = (constraints.maxHeight - 32).clamp(
+          0.0,
+          double.infinity,
+        );
         final panelHeight =
             (123 +
+                    (methods.length > 1
+                        ? 48 *
+                              MediaQuery.textScalerOf(
+                                context,
+                              ).scale(1).clamp(1, 2)
+                        : 0) +
                     (recipe.hasRecipeVariants ? 39 : 0) +
                     (recipe.ingredients.isEmpty
                             ? 1
                             : recipe.ingredients.length) *
                         72)
-                .clamp(195.0, availableHeight)
+                .clamp(0.0, availableHeight)
                 .toDouble();
         final overlayBox = context.findRenderObject();
         final anchor = anchorGlobal == null
@@ -2212,221 +2015,192 @@ class _RecipePreviewOverlay extends StatelessWidget {
               margin: 12,
               child: SizedBox(
                 width: panelWidth,
-                height: panelHeight,
-                child: GestureDetector(
-                  key: RecipeBookKeys.previewPanel,
-                  behavior: HitTestBehavior.opaque,
-                  onTap: () => FocusScope.of(context).requestFocus(),
-                  child: AppSurface(
-                    role: AppSurfaceRole.modal,
-                    padding: const EdgeInsets.all(14),
-                    clipBehavior: Clip.antiAlias,
-                    semanticLabel: '$recipeName recipe preview',
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: <Widget>[
-                        Row(
-                          children: <Widget>[
-                            RecipeBookItemIcon(
-                              controller: controller,
-                              name: recipeName,
-                              size: 48,
-                              anchorId: 'preview:$recipeName',
-                            ),
-                            const SizedBox(width: 10),
-                            Expanded(
-                              child: DraggableOverlayDragRegion(
-                                key: RecipeBookKeys.previewDragRegion,
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: <Widget>[
-                                    Text(
-                                      recipeName,
-                                      style: spec.typography.section.copyWith(
-                                        fontSize: 18,
-                                        height: 1,
-                                      ),
-                                      maxLines: 2,
-                                      overflow: TextOverflow.ellipsis,
-                                    ),
-                                    const SizedBox(height: 3),
-                                    Text(
-                                      _previewMeta(recipe),
-                                      style: spec.typography.meta.copyWith(
-                                        fontSize: 11,
-                                        fontWeight: FontWeight.w700,
-                                        height: 1,
-                                      ),
-                                    ),
-                                    Text(
-                                      '${controller.isEstimatedOutput(recipe.name) ? 'Estimated output' : 'Output'} ${_previewOutput(recipe)}',
-                                      style: spec.typography.label.copyWith(
-                                        color: spec.palette.warning,
-                                        fontSize: 11,
-                                        height: 1,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ),
-                            if (hidden) ...<Widget>[
-                              const _HiddenRecipePill(),
-                              const SizedBox(width: 8),
-                            ],
-                            AppButton(
-                              key: RecipeBookKeys.r14ClosePreview(recipeName),
-                              focusNode: closeFocus,
-                              role: ledger
-                                  ? AppButtonRole.primary
-                                  : AppButtonRole.optionPill,
-                              minimumSize: const Size.square(30),
-                              padding: EdgeInsets.zero,
-                              semanticLabel: 'Close $recipeName preview',
-                              tooltip: 'Close preview',
-                              onPressed: controller.closePreview,
-                              child: const AppVectorGlyph('close', size: 11),
-                            ),
-                          ],
-                        ),
-                        if (recipe.hasRecipeVariants) ...<Widget>[
-                          const SizedBox(height: 10),
-                          Align(
-                            alignment: Alignment.centerLeft,
-                            child: RecipeVariantSelector(
-                              recipe: recipe,
-                              selectedVariantId: controller
-                                  .selectedRecipeVariantId(recipeName),
-                              compact: true,
-                              onSelected: hidden
-                                  ? null
-                                  : (variantId) =>
-                                        controller.selectRecipeVariant(
-                                          recipeName,
-                                          variantId,
-                                        ),
-                            ),
+                child: RepaintBoundary(
+                  key: const ValueKey('recipe-preview-render'),
+                  child: GestureDetector(
+                    key: RecipeBookKeys.previewPanel,
+                    behavior: HitTestBehavior.opaque,
+                    onTap: () => FocusScope.of(context).requestFocus(),
+                    child: AppSurface(
+                      role: AppSurfaceRole.modal,
+                      padding: const EdgeInsets.all(14),
+                      clipBehavior: Clip.antiAlias,
+                      semanticLabel: '$recipeName recipe preview',
+                      child: ConstrainedBox(
+                        constraints: BoxConstraints(
+                          maxHeight: (availableHeight - 28).clamp(
+                            0.0,
+                            double.infinity,
                           ),
-                        ],
-                        const SizedBox(height: 12),
-                        Row(
+                        ),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
                           children: <Widget>[
-                            Expanded(
-                              child: Text(
-                                '${recipe.ingredients.length} ${recipe.ingredients.length == 1 ? 'ingredient' : 'ingredients'}',
-                                style: spec.typography.label.copyWith(
-                                  fontSize: 12,
+                            Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: <Widget>[
+                                RecipeBookItemIcon(
+                                  controller: controller,
+                                  name: recipeName,
+                                  size: ItemDetailStyle.headerIcon,
+                                  anchorId: 'preview:$recipeName',
                                 ),
-                              ),
-                            ),
-                            if (isBrowsableRecipeBookReference(recipe))
-                              Semantics(
-                                label: '$recipeName reference information',
-                                child: ExcludeSemantics(
-                                  child: SizedBox(
-                                    width: 95,
-                                    height: 38,
-                                    child: Center(
-                                      child: FittedBox(
-                                        fit: BoxFit.scaleDown,
-                                        child: Row(
-                                          mainAxisSize: MainAxisSize.min,
-                                          children: <Widget>[
-                                            const AppVectorGlyph(
-                                              'book',
-                                              size: 13,
-                                            ),
-                                            const SizedBox(width: 5),
+                                const SizedBox(width: ItemDetailStyle.itemGap),
+                                Expanded(
+                                  child: DraggableOverlayDragRegion(
+                                    key: RecipeBookKeys.previewDragRegion,
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: <Widget>[
+                                        Text(
+                                          recipeName,
+                                          style: ItemDetailStyle.title(spec),
+                                        ),
+                                        const SizedBox(height: 6),
+                                        Wrap(
+                                          spacing: 8,
+                                          runSpacing: 4,
+                                          crossAxisAlignment:
+                                              WrapCrossAlignment.center,
+                                          children: [
                                             Text(
-                                              'Reference',
-                                              style: spec.typography.label
+                                              _recipeProductionMethodLabel(
+                                                recipe,
+                                              ),
+                                              style: ItemDetailStyle.meta(spec),
+                                            ),
+                                            Text(
+                                              '${controller.isEstimatedOutput(recipe.name) ? 'Estimated output' : 'Output'} ${_previewOutput(recipe)}',
+                                              style: ItemDetailStyle.meta(spec)
                                                   .copyWith(
                                                     color:
-                                                        spec.palette.textMuted,
+                                                        ItemDetailStyle.accent(
+                                                          spec,
+                                                        ),
                                                   ),
                                             ),
                                           ],
                                         ),
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              )
-                            else
-                              SizedBox(
-                                key: hidden
-                                    ? RecipeBookKeys.r27RestoreHidden(
-                                        '$recipeName:preview',
-                                      )
-                                    : RecipeBookKeys.r11Target(
-                                        '$recipeName:preview',
-                                      ),
-                                width: 95,
-                                height: 38,
-                                child: AppButton(
-                                  role: hidden
-                                      ? AppButtonRole.secondary
-                                      : AppButtonRole.primary,
-                                  minimumSize: Size.zero,
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 8,
-                                    vertical: 3,
-                                  ),
-                                  onPressed:
-                                      hidden &&
-                                          controller.restoringHiddenName != null
-                                      ? null
-                                      : hidden
-                                      ? () => controller.restoreHiddenItem(
-                                          recipeName,
-                                        )
-                                      : () => onActivate(recipeName),
-                                  child: FittedBox(
-                                    fit: BoxFit.scaleDown,
-                                    child: Row(
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: <Widget>[
-                                        AppVectorGlyph(
-                                          hidden ? 'reset' : 'target',
-                                          size: 13,
-                                        ),
-                                        const SizedBox(width: 5),
-                                        Text(hidden ? 'Restore' : 'Target'),
                                       ],
                                     ),
                                   ),
                                 ),
+                                if (hidden) ...<Widget>[
+                                  const _HiddenRecipePill(),
+                                  const SizedBox(width: 8),
+                                ],
+                                Column(
+                                  crossAxisAlignment: CrossAxisAlignment.end,
+                                  children: [
+                                    AppButton(
+                                      key: RecipeBookKeys.r14ClosePreview(
+                                        recipeName,
+                                      ),
+                                      focusNode: closeFocus,
+                                      role: ledger
+                                          ? AppButtonRole.primary
+                                          : AppButtonRole.optionPill,
+                                      minimumSize: const Size.square(30),
+                                      padding: EdgeInsets.zero,
+                                      semanticLabel:
+                                          'Close $recipeName preview',
+                                      tooltip: 'Close preview',
+                                      onPressed: controller.closePreview,
+                                      child: const AppVectorGlyph(
+                                        'close',
+                                        size: 11,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 10),
+                                    previewAction,
+                                  ],
+                                ),
+                              ],
+                            ),
+                            if (methods.length > 1) ...<Widget>[
+                              const SizedBox(height: 10),
+                              Wrap(
+                                spacing: 6,
+                                runSpacing: 6,
+                                children: [
+                                  for (final entry in methods.entries)
+                                    AppFilterButton(
+                                      key: ValueKey(
+                                        'recipe-method:${entry.key.key}:$recipeName',
+                                      ),
+                                      label: entry.value,
+                                      selected:
+                                          entry.key ==
+                                          controller.modeController.mode,
+                                      onChanged: (_) =>
+                                          onMethodChanged(entry.key),
+                                    ),
+                                ],
                               ),
+                            ],
+                            if (recipe.hasRecipeVariants) ...<Widget>[
+                              const SizedBox(height: 10),
+                              Align(
+                                alignment: Alignment.centerLeft,
+                                child: RecipeVariantSelector(
+                                  recipe: recipe,
+                                  selectedVariantId: controller
+                                      .selectedRecipeVariantId(recipeName),
+                                  compact: true,
+                                  onSelected: hidden
+                                      ? null
+                                      : (variantId) =>
+                                            controller.selectRecipeVariant(
+                                              recipeName,
+                                              variantId,
+                                            ),
+                                ),
+                              ),
+                            ],
+                            const SizedBox(height: 24),
+                            Text(
+                              'Ingredients',
+                              key: const ValueKey(
+                                'recipe-preview-ingredients-heading',
+                              ),
+                              style: ItemDetailStyle.section(spec),
+                            ),
+                            const SizedBox(height: 12),
+                            Flexible(
+                              child: recipe.ingredients.isEmpty
+                                  ? Center(
+                                      child: Text(
+                                        'No recipe ingredients recorded.',
+                                        style: spec.typography.body,
+                                      ),
+                                    )
+                                  : ListView.separated(
+                                      shrinkWrap: true,
+                                      padding: const EdgeInsets.only(bottom: 4),
+                                      itemCount: recipe.ingredients.length,
+                                      separatorBuilder: (_, _) => Divider(
+                                        height: 12,
+                                        thickness: 1,
+                                        color: spec.palette.trim.withValues(
+                                          alpha: .2,
+                                        ),
+                                      ),
+                                      itemBuilder: (context, index) =>
+                                          _PreviewIngredientRow(
+                                            controller: controller,
+                                            externalActions: externalActions,
+                                            parentName: recipeName,
+                                            ingredient:
+                                                recipe.ingredients[index],
+                                            ingredientIndex: index,
+                                          ),
+                                    ),
+                            ),
                           ],
                         ),
-                        const SizedBox(height: 12),
-                        Expanded(
-                          child: recipe.ingredients.isEmpty
-                              ? Center(
-                                  child: Text(
-                                    'No recipe ingredients recorded.',
-                                    style: spec.typography.body,
-                                  ),
-                                )
-                              : ListView.separated(
-                                  padding: const EdgeInsets.only(
-                                    right: 8,
-                                    bottom: 10,
-                                  ),
-                                  itemCount: recipe.ingredients.length,
-                                  separatorBuilder: (_, _) =>
-                                      const SizedBox(height: 8),
-                                  itemBuilder: (context, index) =>
-                                      _PreviewIngredientRow(
-                                        controller: controller,
-                                        externalActions: externalActions,
-                                        parentName: recipeName,
-                                        ingredient: recipe.ingredients[index],
-                                        ingredientIndex: index,
-                                      ),
-                                ),
-                        ),
-                      ],
+                      ),
                     ),
                   ),
                 ),
@@ -2436,14 +2210,6 @@ class _RecipePreviewOverlay extends StatelessWidget {
         );
       },
     );
-  }
-
-  String _previewMeta(Recipe recipe) {
-    final category = switch (recipe.group?.trim()) {
-      final group? when group.isNotEmpty => group,
-      _ => recipe.hasRecordedRecipe ? 'Crafted' : 'Base Items',
-    };
-    return '$category / ${_recipeTypeLabel(recipe.type)}';
   }
 
   String _previewOutput(Recipe recipe) {
@@ -2512,7 +2278,6 @@ class _PreviewIngredientRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final spec = context.visualTheme;
     final options = controller.substituteOptions(ingredient);
     final selected = controller.selectedSubstitute(parentName, ingredient);
     final ratio = controller.substituteRatio(ingredient, selected);
@@ -2526,103 +2291,51 @@ class _PreviewIngredientRow extends StatelessWidget {
       ingredient: ingredient,
       selectedName: selected,
     );
-    final row = AppSurface(
-      role: AppSurfaceRole.row,
+    final row = RecipeIngredientLine(
       semanticLabel: '$selected preview ingredient',
-      padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 8),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: <Widget>[
-          SizedBox(
-            width: 38,
-            child: Align(
-              child: RecipeBookItemIcon(
-                controller: controller,
-                name: selected,
-                size: 34,
-                anchorId:
-                    'preview:$parentName:ingredient:$ingredientIndex:$selected',
-              ),
-            ),
-          ),
-          const SizedBox(width: 10),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
-              children: <Widget>[
-                Row(
-                  children: <Widget>[
-                    if (options.length > 1)
-                      Expanded(
-                        key: RecipeBookKeys.r15Substitute(
-                          parentName,
-                          ingredient.name,
-                        ),
-                        child: SizedBox(
-                          height: 28,
-                          child: AppSelect<String>(
-                            value: selected,
-                            items: options,
-                            labelFor: (value) => value,
-                            semanticLabel:
-                                'Substitute for ${ingredient.name} in $parentName',
-                            onChanged: (value) {
-                              if (value == null) return;
-                              controller.selectSubstitute(
-                                parentName: parentName,
-                                ingredient: ingredient,
-                                selection: value,
-                              );
-                            },
-                          ),
-                        ),
-                      )
-                    else
-                      Expanded(
-                        child: Text(
-                          selected,
-                          style: spec.typography.label.copyWith(fontSize: 13),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ),
-                    if (grades.isNotEmpty) ...<Widget>[
-                      const SizedBox(width: 7),
-                      for (final grade in grades) ...<Widget>[
-                        _PreviewQualitySwatch(
-                          key: RecipeBookKeys.r16Quality(
-                            parentName,
-                            ingredient.name,
-                            grade,
-                          ),
-                          grade: grade,
-                          normalIsBlueFamily: grades.contains('blue'),
-                          selected: selectedGrade == grade,
-                          onPressed: () => controller.selectQuality(
-                            parentName: parentName,
-                            ingredient: ingredient,
-                            grade: grade,
-                          ),
-                        ),
-                        if (grade != grades.last) const SizedBox(width: 4),
-                      ],
-                    ],
-                  ],
-                ),
-                const SizedBox(height: 3),
-                Text(
-                  'Need ${formatQuantity(ingredient.quantity * ratio)}',
-                  style: spec.typography.meta.copyWith(
-                    fontSize: 11,
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
+      name: selected,
+      quantity: ingredient.quantity * ratio,
+      quantityKey: RecipeBookKeys.previewQuantity(parentName, ingredient.name),
+      icon: RecipeBookItemIcon(
+        controller: controller,
+        name: selected,
+        size: ItemDetailStyle.ingredientIcon,
+        anchorId: 'preview:$parentName:ingredient:$ingredientIndex:$selected',
       ),
+      nameControl: options.length > 1
+          ? AppSelect<String>(
+              key: RecipeBookKeys.r15Substitute(parentName, ingredient.name),
+              inline: true,
+              value: selected,
+              items: options,
+              labelFor: (value) => value,
+              semanticLabel: 'Substitute for ${ingredient.name} in $parentName',
+              onChanged: (value) {
+                if (value == null) return;
+                controller.selectSubstitute(
+                  parentName: parentName,
+                  ingredient: ingredient,
+                  selection: value,
+                );
+              },
+            )
+          : null,
+      controls: [
+        for (final grade in grades) ...<Widget>[
+          _PreviewQualitySwatch(
+            key: RecipeBookKeys.r16Quality(parentName, ingredient.name, grade),
+            grade: grade,
+            normalIsBlueFamily: grades.contains('blue'),
+            selected: selectedGrade == grade,
+            onPressed: () => controller.selectQuality(
+              parentName: parentName,
+              ingredient: ingredient,
+              grade: grade,
+            ),
+          ),
+          if (grade != grades.last) const SizedBox(width: 4),
+        ],
+      ],
     );
     final actions = externalActions;
     if (actions == null) return row;

@@ -1,0 +1,3087 @@
+{
+  "schemaVersion": 1,
+  "clientFactsSha256": "8998f94aa44a5dd86dc5f67f4cfa73ef1523e3b051b58d8f0f9dc42e592912e5",
+  "note": "Original bundled references retained byte-for-byte. Display files are unmodified decoded client art.",
+  "records": [
+    {
+      "original": "assets/icons/items/1.webp",
+      "artwork": "assets/icons/item_artwork/1.webp",
+      "id": 1,
+      "name": "Silver",
+      "grade": 0,
+      "clientIcon": "New_Icon/00000001_Special.dds",
+      "sha256": "95318db34d9dbe609f187ff68e0c6c4af878b1d10d7663403fd6064c7a36663f",
+      "referenceSha256": "95318db34d9dbe609f187ff68e0c6c4af878b1d10d7663403fd6064c7a36663f"
+    },
+    {
+      "original": "assets/icons/items/15256.webp",
+      "artwork": "assets/icons/item_artwork/15256.webp",
+      "id": 15256,
+      "name": "Crystal of Brutal Decimation",
+      "grade": 4,
+      "clientIcon": "New_Icon/03_ETC/11_Enchant_Material/00015238_1.dds",
+      "sha256": "707faaeed2e2d78ef4d96ed08b90bc5b8031d57ad0aac99f35635a379ec25aed",
+      "referenceSha256": "aa68e3c542b6129d7a2c0cf3d066f9586eb6ae6835fe19662778a727a5044f31"
+    },
+    {
+      "original": "assets/icons/items/15257.webp",
+      "artwork": "assets/icons/item_artwork/15257.webp",
+      "id": 15257,
+      "name": "Crystal of Precise Destruction",
+      "grade": 4,
+      "clientIcon": "New_Icon/03_ETC/11_Enchant_Material/00015257_1.dds",
+      "sha256": "2d1a9c5b57e8184a481963dc51ad50ef1cb0f417e66fe7e0acb5b41c2265c5f0",
+      "referenceSha256": "8e5f76fa7b837d597c2e458ed9d6cff57ef7139608f4cede87f71f2efbcf736b"
+    },
+    {
+      "original": "assets/icons/items/15277.webp",
+      "artwork": "assets/icons/item_artwork/15277.webp",
+      "id": 15277,
+      "name": "BON Dawn Crystal - Life EXP",
+      "grade": 0,
+      "clientIcon": "new_icon/09_cash/03_product/00015277.dds",
+      "sha256": "0f485921dc22f71517c59b679587571d95bd1d0efeda11a92a3d1352d8cd3b43",
+      "referenceSha256": "96ad495ce52c208e6d111b66a5bbd062a6103e055817bf2672d74e1c396f7b41"
+    },
+    {
+      "original": "assets/icons/items/15278.webp",
+      "artwork": "assets/icons/item_artwork/15278.webp",
+      "id": 15278,
+      "name": "WON Dawn Crystal - Life EXP",
+      "grade": 0,
+      "clientIcon": "new_icon/09_cash/03_product/00015278.dds",
+      "sha256": "7c152d5ebd515de155d0426388b5b1ac9c073c3986361275eaeec23a3828d591",
+      "referenceSha256": "bfdff966a94e77b5d874a1bd398fdf43921e6808c840b09ed9b79f14b212d8c0"
+    },
+    {
+      "original": "assets/icons/items/15288.webp",
+      "artwork": "assets/icons/item_artwork/15288.webp",
+      "id": 15288,
+      "name": "Crystal of Breathing Verdure",
+      "grade": 3,
+      "clientIcon": "New_Icon/03_ETC/11_Enchant_Material/00015288_1.dds",
+      "sha256": "c9fd93b63dfa533d3875fcf99c343cc072959e43fb69c0161d7ac15232feedca",
+      "referenceSha256": "592e5c76223e5ca1bed1a277fe33c2bfd9f36c45fc6f4c00097a25042eba5f2b"
+    },
+    {
+      "original": "assets/icons/items/15672.webp",
+      "artwork": "assets/icons/item_artwork/15672.webp",
+      "id": 15672,
+      "name": "Corrupted Magic Crystal",
+      "grade": 4,
+      "clientIcon": "New_Icon/03_ETC/11_Enchant_Material/00015673.dds",
+      "sha256": "3db215c36e2ee2aff8794cdda14ff018b0a955a0cee5d56f4c592fb60cf2a49e",
+      "referenceSha256": "16ad111ec79c5ff6219b1cd7075dfb25b7f90569245e62fc0f6771d17cb54ed0"
+    },
+    {
+      "original": "assets/icons/items/15690.webp",
+      "artwork": "assets/icons/item_artwork/15690.webp",
+      "id": 15690,
+      "name": "Glorious Crystal of Gallantry - Ah'krad",
+      "grade": 4,
+      "clientIcon": "New_Icon/03_ETC/11_Enchant_Material/00015691.dds",
+      "sha256": "f9a2c9940352eb4eeb2699d9bf8b4fdeec9742e0249f0825686c5cb65226a69c",
+      "referenceSha256": "253d2e17b3eeed58d33374ff2e972efd8a51f0850679d95d5a982d294828d936"
+    },
+    {
+      "original": "assets/icons/items/15736.webp",
+      "artwork": "assets/icons/item_artwork/15736.webp",
+      "id": 15736,
+      "name": "Girin's Tear",
+      "grade": 4,
+      "clientIcon": "New_Icon/03_ETC/11_Enchant_Material/00015239_3.dds",
+      "sha256": "388e1418084d300019d02f7f66866e6e9f64017702de660eb2d4afcc20281e6a",
+      "referenceSha256": "2dbd94e5862d71f5e2ea4510c0c344f38775e3f79b99e021c0f070f1b502ed36"
+    },
+    {
+      "original": "assets/icons/items/16001.webp",
+      "artwork": "assets/icons/item_artwork/16001.webp",
+      "id": 16001,
+      "name": "Black Stone",
+      "grade": 4,
+      "clientIcon": "New_Icon/03_ETC/11_Enchant_Material/00000008.dds",
+      "sha256": "5b5bdc731f68ca09742c783f9d5b794e0eb907892e9c94a85b8b16b243828dff",
+      "referenceSha256": "092c80f42dac85cb53fa03d174fb008e1331181fa313d09e4c8101da90530b4c"
+    },
+    {
+      "original": "assets/icons/items/25197.webp",
+      "artwork": "assets/icons/item_artwork/25197.webp",
+      "id": 25197,
+      "name": "Stuffed Boar Head",
+      "grade": 2,
+      "clientIcon": "New_Icon/03_ETC/06_Housing/Mansion_DPF_Ori_boar_01.dds",
+      "sha256": "ffc633f6d01e7e722abbe7f5af0aada7ff6aee7d937dd7bd9f80862990be029b",
+      "referenceSha256": "ffc633f6d01e7e722abbe7f5af0aada7ff6aee7d937dd7bd9f80862990be029b"
+    },
+    {
+      "original": "assets/icons/items/25198.webp",
+      "artwork": "assets/icons/item_artwork/25198.webp",
+      "id": 25198,
+      "name": "[Manor] Stuffed Tiger",
+      "grade": 2,
+      "clientIcon": "New_Icon/03_ETC/06_Housing/Mansion_DPF_Ori_Sangun_01.dds",
+      "sha256": "88ac7ee5ff7cea01ac8a0c7c4e9a743f0705012b7c4576764fb7c417b16c3aeb",
+      "referenceSha256": "88ac7ee5ff7cea01ac8a0c7c4e9a743f0705012b7c4576764fb7c417b16c3aeb"
+    },
+    {
+      "original": "assets/icons/items/25199.webp",
+      "artwork": "assets/icons/item_artwork/25199.webp",
+      "id": 25199,
+      "name": "Sensitive Stuffed Bear Head",
+      "grade": 2,
+      "clientIcon": "New_Icon/03_ETC/06_Housing/Mansion_DPF_Ori_Bear_01.dds",
+      "sha256": "975c07fe99f2d296ce99d6be1548453455dfdcd4e6c72391b6a64978fe3177b9",
+      "referenceSha256": "975c07fe99f2d296ce99d6be1548453455dfdcd4e6c72391b6a64978fe3177b9"
+    },
+    {
+      "original": "assets/icons/items/25200.webp",
+      "artwork": "assets/icons/item_artwork/25200.webp",
+      "id": 25200,
+      "name": "[Manor] Stuffed Hawk",
+      "grade": 2,
+      "clientIcon": "New_Icon/03_ETC/06_Housing/Mansion_DPF_Ori_Hawk_01.dds",
+      "sha256": "9b237e099d080d092a891ac8ad685408930243993a4616442106a2452a1a05c1",
+      "referenceSha256": "9b237e099d080d092a891ac8ad685408930243993a4616442106a2452a1a05c1"
+    },
+    {
+      "original": "assets/icons/items/25201.webp",
+      "artwork": "assets/icons/item_artwork/25201.webp",
+      "id": 25201,
+      "name": "Stuffed Ferocious Boar Head",
+      "grade": 2,
+      "clientIcon": "New_Icon/03_ETC/06_Housing/Mansion_DPF_Ori_boar_03.dds",
+      "sha256": "7a0fc9355f53451fe9db832c2dd1f1ed0fa45d1706744c0b94c92594f0ac41c9",
+      "referenceSha256": "7a0fc9355f53451fe9db832c2dd1f1ed0fa45d1706744c0b94c92594f0ac41c9"
+    },
+    {
+      "original": "assets/icons/items/25202.webp",
+      "artwork": "assets/icons/item_artwork/25202.webp",
+      "id": 25202,
+      "name": "Stuffed Ferocious Bear Head",
+      "grade": 2,
+      "clientIcon": "New_Icon/03_ETC/06_Housing/Mansion_DPF_Ori_Bear_03.dds",
+      "sha256": "d711ee41ecdd9c0c05aae09c4dd0964b46e3fb19cfc7942b81918bfffde6783f",
+      "referenceSha256": "d711ee41ecdd9c0c05aae09c4dd0964b46e3fb19cfc7942b81918bfffde6783f"
+    },
+    {
+      "original": "assets/icons/items/25221.webp",
+      "artwork": "assets/icons/item_artwork/25221.webp",
+      "id": 25221,
+      "name": "Stuffed Rock Elephant Head",
+      "grade": 2,
+      "clientIcon": "New_Icon/03_ETC/06_Housing/InHouse_Z_Booty_Devil_ElephantDeco_01.dds",
+      "sha256": "eddc9e8a0dce7ef16c14ba9479cebb3b34370e7028a43548e418ac44c4f0b32e",
+      "referenceSha256": "eddc9e8a0dce7ef16c14ba9479cebb3b34370e7028a43548e418ac44c4f0b32e"
+    },
+    {
+      "original": "assets/icons/items/25222.webp",
+      "artwork": "assets/icons/item_artwork/25222.webp",
+      "id": 25222,
+      "name": "Stuffed Golden Leaf Snake Head",
+      "grade": 2,
+      "clientIcon": "New_Icon/03_ETC/06_Housing/InHouse_Z_Booty_Devil_SnakeDeco_01.dds",
+      "sha256": "a9236c3213097d97c489fc59d5c8d308cded806fb721acb6695245790f00b914",
+      "referenceSha256": "a9236c3213097d97c489fc59d5c8d308cded806fb721acb6695245790f00b914"
+    },
+    {
+      "original": "assets/icons/items/25223.webp",
+      "artwork": "assets/icons/item_artwork/25223.webp",
+      "id": 25223,
+      "name": "Stuffed Cliffside Mountain Sheep Head",
+      "grade": 2,
+      "clientIcon": "New_Icon/03_ETC/06_Housing/InHouse_Z_Booty_Devil_GoatDeco_01.dds",
+      "sha256": "0e7dc97ce1a86442ed4f0a12bb7dcf165a97b3e3fa13e39e602a692d3077ffe6",
+      "referenceSha256": "0e7dc97ce1a86442ed4f0a12bb7dcf165a97b3e3fa13e39e602a692d3077ffe6"
+    },
+    {
+      "original": "assets/icons/items/25224.webp",
+      "artwork": "assets/icons/item_artwork/25224.webp",
+      "id": 25224,
+      "name": "[Manor] Stuffed Rock Elephant",
+      "grade": 2,
+      "clientIcon": "New_Icon/03_ETC/06_Housing/Mansion_DPF_Booty_Devil_TempleElephant_01.dds",
+      "sha256": "aad1da238041ddf506f1329437e0a0c629bbdff2b028c5830fe6c65579b134ad",
+      "referenceSha256": "aad1da238041ddf506f1329437e0a0c629bbdff2b028c5830fe6c65579b134ad"
+    },
+    {
+      "original": "assets/icons/items/25225.webp",
+      "artwork": "assets/icons/item_artwork/25225.webp",
+      "id": 25225,
+      "name": "[Manor] Stuffed Golden Leaf Snake",
+      "grade": 2,
+      "clientIcon": "New_Icon/03_ETC/06_Housing/Mansion_DPF_Booty_Devil_Snake_01.dds",
+      "sha256": "0854c4d600d3645329838fa3d243323df8f78d31ee2ee1808fb0a7e1c16fbf71",
+      "referenceSha256": "0854c4d600d3645329838fa3d243323df8f78d31ee2ee1808fb0a7e1c16fbf71"
+    },
+    {
+      "original": "assets/icons/items/25226.webp",
+      "artwork": "assets/icons/item_artwork/25226.webp",
+      "id": 25226,
+      "name": "[Manor] Stuffed Cliffside Mountain Sheep",
+      "grade": 2,
+      "clientIcon": "New_Icon/03_ETC/06_Housing/Mansion_DPF_Booty_Devil_Goat_01.dds",
+      "sha256": "58471a8bd2ce54ee04844719f7571ff6c021d910f24d6b929e06b4aded2599be",
+      "referenceSha256": "58471a8bd2ce54ee04844719f7571ff6c021d910f24d6b929e06b4aded2599be"
+    },
+    {
+      "original": "assets/icons/items/25227.webp",
+      "artwork": "assets/icons/item_artwork/25227.webp",
+      "id": 25227,
+      "name": "[Manor] Stuffed Coral Stoneback Crab",
+      "grade": 2,
+      "clientIcon": "New_Icon/03_ETC/06_Housing/Mansion_DPF_Booty_Devil_Landspider_01.dds",
+      "sha256": "370947b0d15448564390020c39ea4dcda213e1defe4f05ccf9c8b55f9221e1a1",
+      "referenceSha256": "370947b0d15448564390020c39ea4dcda213e1defe4f05ccf9c8b55f9221e1a1"
+    },
+    {
+      "original": "assets/icons/items/3054.webp",
+      "artwork": "assets/icons/item_artwork/3054.webp",
+      "id": 3054,
+      "name": "Stuffed Elk Head",
+      "grade": 1,
+      "clientIcon": "New_Icon/03_ETC/06_Housing/InHouse_Z_Booty_Deer_01.dds",
+      "sha256": "3295d4c213a2356ac152d7fb6570d854216f137a0d1b1c3feed7b56879d94c9e",
+      "referenceSha256": "3295d4c213a2356ac152d7fb6570d854216f137a0d1b1c3feed7b56879d94c9e"
+    },
+    {
+      "original": "assets/icons/items/3540.webp",
+      "artwork": "assets/icons/item_artwork/3540.webp",
+      "id": 3540,
+      "name": "Stuffed Grass Rhino Head",
+      "grade": 1,
+      "clientIcon": "New_Icon/03_ETC/06_Housing/InHouse_Z_Booty_RhinoHead_01.dds",
+      "sha256": "dd921e7f2efd7812771b0f64cc414353ea85c37efc14c7407c11b4d23d76d6a3",
+      "referenceSha256": "dd921e7f2efd7812771b0f64cc414353ea85c37efc14c7407c11b4d23d76d6a3"
+    },
+    {
+      "original": "assets/icons/items/3541.webp",
+      "artwork": "assets/icons/item_artwork/3541.webp",
+      "id": 3541,
+      "name": "Stuffed Verdure Buck",
+      "grade": 1,
+      "clientIcon": "New_Icon/03_ETC/06_Housing/InHouse_Z_Booty_MaleDeer_01.dds",
+      "sha256": "69d807e372a74a852163f03ca38ba5f3ac0f0d7df64ce25c612169cf057054e3",
+      "referenceSha256": "69d807e372a74a852163f03ca38ba5f3ac0f0d7df64ce25c612169cf057054e3"
+    },
+    {
+      "original": "assets/icons/items/3542.webp",
+      "artwork": "assets/icons/item_artwork/3542.webp",
+      "id": 3542,
+      "name": "Stuffed Verdure Doe",
+      "grade": 1,
+      "clientIcon": "New_Icon/03_ETC/06_Housing/InHouse_Z_Booty_FemaleDeer_01.dds",
+      "sha256": "f19441337f0d4f52d031c74055576476b5d93c75e2745c678fda3f622f1d5bb4",
+      "referenceSha256": "f19441337f0d4f52d031c74055576476b5d93c75e2745c678fda3f622f1d5bb4"
+    },
+    {
+      "original": "assets/icons/items/3543.webp",
+      "artwork": "assets/icons/item_artwork/3543.webp",
+      "id": 3543,
+      "name": "Stuffed Shadow Wolf Head",
+      "grade": 1,
+      "clientIcon": "New_Icon/03_ETC/06_Housing/InHouse_Z_Booty_BlacknessWolfHead_01.dds",
+      "sha256": "1a6fe29d82e449549e8a5df2e189ee74abfdc490ec5616cada7cb8c2a736a589",
+      "referenceSha256": "1a6fe29d82e449549e8a5df2e189ee74abfdc490ec5616cada7cb8c2a736a589"
+    },
+    {
+      "original": "assets/icons/items/3544.webp",
+      "artwork": "assets/icons/item_artwork/3544.webp",
+      "id": 3544,
+      "name": "Stuffed Shadow Lion Head",
+      "grade": 1,
+      "clientIcon": "New_Icon/03_ETC/06_Housing/InHouse_Z_Booty_BlacknessLeopardHead_01.dds",
+      "sha256": "f5b357de45decabd04adadcbc24b2c6e6352108dd063e7cfd114842fb23de5a4",
+      "referenceSha256": "f5b357de45decabd04adadcbc24b2c6e6352108dd063e7cfd114842fb23de5a4"
+    },
+    {
+      "original": "assets/icons/items/4001.webp",
+      "artwork": "assets/icons/item_artwork/4001.webp",
+      "id": 4001,
+      "name": "Iron Ore",
+      "grade": 0,
+      "clientIcon": "New_Icon/03_ETC/07_ProductMaterial/00004001.dds",
+      "sha256": "6207738e0b7f7cbe870872a237ec00e58f4bc420f738c601599447dda268cd36",
+      "referenceSha256": "4ad42c127f052051d343d06f28ec6edb89b1c75053b0e413c22af0280ad6592a"
+    },
+    {
+      "original": "assets/icons/items/4002.webp",
+      "artwork": "assets/icons/item_artwork/4002.webp",
+      "id": 4002,
+      "name": "Lead Ore",
+      "grade": 0,
+      "clientIcon": "New_Icon/03_ETC/07_ProductMaterial/00004002.dds",
+      "sha256": "4e105dacc718aba6661be475062c7a64d9df9f0db042965e0c948fe1c1655094",
+      "referenceSha256": "80253d740a565119e006980f5c27f98ccb67c8232d0cf235833a8c760f6d278c"
+    },
+    {
+      "original": "assets/icons/items/4003.webp",
+      "artwork": "assets/icons/item_artwork/4003.webp",
+      "id": 4003,
+      "name": "Copper Ore",
+      "grade": 0,
+      "clientIcon": "New_Icon/03_ETC/07_ProductMaterial/00004003.dds",
+      "sha256": "41f72ce7a08da9d2981bc2ac0624021a7d5ad43e407da538aa096606d3ae709e",
+      "referenceSha256": "5e03b87ab0f883d16b6acc394149a2f9b2760367bdb726b5a5dc3b3a6e8e184e"
+    },
+    {
+      "original": "assets/icons/items/4004.webp",
+      "artwork": "assets/icons/item_artwork/4004.webp",
+      "id": 4004,
+      "name": "Tin Ore",
+      "grade": 0,
+      "clientIcon": "New_Icon/03_ETC/07_ProductMaterial/00004004.dds",
+      "sha256": "634662cde30f01c1002ca2104e7ea3b25051b7cc1a04a637407e7fbf81f6c984",
+      "referenceSha256": "5cc6e02e38cae5758855faac45781344fcf78d9686fe3679980d5d868d8d1dc9"
+    },
+    {
+      "original": "assets/icons/items/4005.webp",
+      "artwork": "assets/icons/item_artwork/4005.webp",
+      "id": 4005,
+      "name": "Zinc Ore",
+      "grade": 0,
+      "clientIcon": "New_Icon/03_ETC/07_ProductMaterial/00004005.dds",
+      "sha256": "97aa04f2184c09b9fc49240ee2b7ac229585e8cde74272505a56798578a1b4dc",
+      "referenceSha256": "2bf8f481ae258d5151b40e02d0954ee3184c122fd1a50ca240e7aa77bdfb34f7"
+    },
+    {
+      "original": "assets/icons/items/4006.webp",
+      "artwork": "assets/icons/item_artwork/4006.webp",
+      "id": 4006,
+      "name": "Rough Stone",
+      "grade": 0,
+      "clientIcon": "New_Icon/03_ETC/07_ProductMaterial/00004006.dds",
+      "sha256": "0060f7511ae702bc863f2189ce03b3222a72c72e38d7fa81843fbb22e78c396d",
+      "referenceSha256": "6acf0655d44e762e1940b4872b9929bcf4ae260430c202665631e520ce6b991a"
+    },
+    {
+      "original": "assets/icons/items/4007.webp",
+      "artwork": "assets/icons/item_artwork/4007.webp",
+      "id": 4007,
+      "name": "Coal",
+      "grade": 0,
+      "clientIcon": "New_Icon/03_ETC/07_ProductMaterial/00004007.dds",
+      "sha256": "2dbd1075edb7e84516e98fe3d852b3fd285a0bec2bea8a6af91eeeeaacfbb51b",
+      "referenceSha256": "2dbd1075edb7e84516e98fe3d852b3fd285a0bec2bea8a6af91eeeeaacfbb51b"
+    },
+    {
+      "original": "assets/icons/items/4008.webp",
+      "artwork": "assets/icons/item_artwork/4008.webp",
+      "id": 4008,
+      "name": "Vanadium Ore",
+      "grade": 0,
+      "clientIcon": "New_Icon/03_ETC/07_ProductMaterial/00004008.dds",
+      "sha256": "4c5f7d03e2823c6323e2188146ed46c916fab44f9c2dc3234a35da796f9baee1",
+      "referenceSha256": "b5f06443aae0fa4e7689ffee99fdc0eab663945541e41ee9398167ab79584644"
+    },
+    {
+      "original": "assets/icons/items/4009.webp",
+      "artwork": "assets/icons/item_artwork/4009.webp",
+      "id": 4009,
+      "name": "Titanium Ore",
+      "grade": 0,
+      "clientIcon": "New_Icon/03_ETC/07_ProductMaterial/00004009.dds",
+      "sha256": "c4322826151a65cffc1989f376c614386954f1680570d8bc110e9540d1f92cdb",
+      "referenceSha256": "ab53cdd3f382b1755933adee5255c6c2283639b3f048d1c887b1623c472148da"
+    },
+    {
+      "original": "assets/icons/items/4016.webp",
+      "artwork": "assets/icons/item_artwork/4016.webp",
+      "id": 4016,
+      "name": "Rough Marble",
+      "grade": 0,
+      "clientIcon": "New_Icon/03_ETC/07_ProductMaterial/00004016.dds",
+      "sha256": "ba967b1cfa982b43a4d32f0ec4c12f244f42257ebf66fbd5325c70d502f84b0b",
+      "referenceSha256": "f34de6b43f48aee469f19c1c50b4248d157db55202a7c6a6f371e2c8d7ecb94d"
+    },
+    {
+      "original": "assets/icons/items/4017.webp",
+      "artwork": "assets/icons/item_artwork/4017.webp",
+      "id": 4017,
+      "name": "Magnetite Ore",
+      "grade": 0,
+      "clientIcon": "New_Icon/03_ETC/07_ProductMaterial/00004017.dds",
+      "sha256": "cacf37db99fcaff801ab172205e814fcbde35f80bffc52607c5f52842e9a1eaf",
+      "referenceSha256": "b0394fb318630fcb7359f76c6adb40fc82394e4d8b54ba40492b43927f2a14a8"
+    },
+    {
+      "original": "assets/icons/items/4051.webp",
+      "artwork": "assets/icons/item_artwork/4051.webp",
+      "id": 4051,
+      "name": "Melted Iron Shard",
+      "grade": 0,
+      "clientIcon": "New_Icon/03_ETC/07_ProductMaterial/00004051.dds",
+      "sha256": "5cee63f35cb152b7ab5a0091588747f165f939cd6e55b94cda7e6ff8185f3fde",
+      "referenceSha256": "5cee63f35cb152b7ab5a0091588747f165f939cd6e55b94cda7e6ff8185f3fde"
+    },
+    {
+      "original": "assets/icons/items/4057.webp",
+      "artwork": "assets/icons/item_artwork/4057.webp",
+      "id": 4057,
+      "name": "Melted Copper Shard",
+      "grade": 0,
+      "clientIcon": "New_Icon/03_ETC/07_ProductMaterial/00004057.dds",
+      "sha256": "d7d23713f01915b311365a993d15b79add8f8b21839d5b1ee17b6934a6a26349",
+      "referenceSha256": "d7d23713f01915b311365a993d15b79add8f8b21839d5b1ee17b6934a6a26349"
+    },
+    {
+      "original": "assets/icons/items/4063.webp",
+      "artwork": "assets/icons/item_artwork/4063.webp",
+      "id": 4063,
+      "name": "Melted Zinc Shard",
+      "grade": 0,
+      "clientIcon": "New_Icon/03_ETC/07_ProductMaterial/00004063.dds",
+      "sha256": "ba623e88ec6ea04d45e5e7191b0c1fc649cc4c8372f3b2c0dcc022e2da1c99cc",
+      "referenceSha256": "ba623e88ec6ea04d45e5e7191b0c1fc649cc4c8372f3b2c0dcc022e2da1c99cc"
+    },
+    {
+      "original": "assets/icons/items/4201.webp",
+      "artwork": "assets/icons/item_artwork/4201.webp",
+      "id": 4201,
+      "name": "Silver Ore",
+      "grade": 0,
+      "clientIcon": "New_Icon/03_ETC/07_ProductMaterial/00004201.dds",
+      "sha256": "ffba0995b8517853f20bf146081155f7fab09afbc75cad21030ed2cd9bd648d9",
+      "referenceSha256": "2f7a29eb2ea52ef7dd8f03e19fb3c3fa6e561dcef62a3083a4743337544ecf17"
+    },
+    {
+      "original": "assets/icons/items/4202.webp",
+      "artwork": "assets/icons/item_artwork/4202.webp",
+      "id": 4202,
+      "name": "Gold Ore",
+      "grade": 0,
+      "clientIcon": "New_Icon/03_ETC/07_ProductMaterial/00004202.dds",
+      "sha256": "fef8a096d44080bfc89b0b04e1a1b76dcfebd828a76f3072c3d96aaa7b9486ce",
+      "referenceSha256": "c9ef55e1770bcc68e05e60d8311111b530f026cc87a59bb1fc73e3ec67a79d66"
+    },
+    {
+      "original": "assets/icons/items/4203.webp",
+      "artwork": "assets/icons/item_artwork/4203.webp",
+      "id": 4203,
+      "name": "Platinum Ore",
+      "grade": 0,
+      "clientIcon": "New_Icon/03_ETC/07_ProductMaterial/00004203.dds",
+      "sha256": "436c7d6c9c33e9a5e383caff48869edfa0006df60909c1744398eb5ba39fec9f",
+      "referenceSha256": "8034759597918a234e2f9fe942db2ed6b6deeaa1b1c11b7e878df1f28c5c2085"
+    },
+    {
+      "original": "assets/icons/items/4204.webp",
+      "artwork": "assets/icons/item_artwork/4204.webp",
+      "id": 4204,
+      "name": "Rough Opal",
+      "grade": 0,
+      "clientIcon": "New_Icon/03_ETC/07_ProductMaterial/00004204.dds",
+      "sha256": "2c87dcff97e054058cbd0514a7f4bbb9e17ba70c3898675c8fd3fb3409abfa52",
+      "referenceSha256": "e1f92d7fa350bbb9fea151e53571b27f9e9bd2ef0fb7055f426fd60369a077ac"
+    },
+    {
+      "original": "assets/icons/items/4401.webp",
+      "artwork": "assets/icons/item_artwork/4401.webp",
+      "id": 4401,
+      "name": "Rough Ruby",
+      "grade": 0,
+      "clientIcon": "New_Icon/03_ETC/07_ProductMaterial/00004401.dds",
+      "sha256": "87283c5e17e1a5ffdcd8e899a5b364799bd72ab307c1247f731f05013fd17ce2",
+      "referenceSha256": "87283c5e17e1a5ffdcd8e899a5b364799bd72ab307c1247f731f05013fd17ce2"
+    },
+    {
+      "original": "assets/icons/items/4402.webp",
+      "artwork": "assets/icons/item_artwork/4402.webp",
+      "id": 4402,
+      "name": "Rough Sapphire",
+      "grade": 0,
+      "clientIcon": "New_Icon/03_ETC/07_ProductMaterial/00004402.dds",
+      "sha256": "be85131a77d6de4d29e4f37efa09bdb78faf5cf706d7f25d7c9cd58a2a2fd238",
+      "referenceSha256": "be85131a77d6de4d29e4f37efa09bdb78faf5cf706d7f25d7c9cd58a2a2fd238"
+    },
+    {
+      "original": "assets/icons/items/4403.webp",
+      "artwork": "assets/icons/item_artwork/4403.webp",
+      "id": 4403,
+      "name": "Rough Topaz",
+      "grade": 0,
+      "clientIcon": "New_Icon/03_ETC/07_ProductMaterial/00004403.dds",
+      "sha256": "624057dc1bd7087e4d2ec14db8c232561301223771a3897abad402fc57bccf4c",
+      "referenceSha256": "624057dc1bd7087e4d2ec14db8c232561301223771a3897abad402fc57bccf4c"
+    },
+    {
+      "original": "assets/icons/items/4404.webp",
+      "artwork": "assets/icons/item_artwork/4404.webp",
+      "id": 4404,
+      "name": "Rough Emerald",
+      "grade": 0,
+      "clientIcon": "New_Icon/03_ETC/07_ProductMaterial/00004404.dds",
+      "sha256": "7b4c4bd31161f736b972d56bbc0caab49f9197d11d3b8bc78a3a33720d21f103",
+      "referenceSha256": "7b4c4bd31161f736b972d56bbc0caab49f9197d11d3b8bc78a3a33720d21f103"
+    },
+    {
+      "original": "assets/icons/items/4405.webp",
+      "artwork": "assets/icons/item_artwork/4405.webp",
+      "id": 4405,
+      "name": "Rough Diamond",
+      "grade": 0,
+      "clientIcon": "New_Icon/03_ETC/07_ProductMaterial/00004405.dds",
+      "sha256": "484258bee77f850fd3b79c6ebec9334f55133f282862927725b6f134c3945933",
+      "referenceSha256": "484258bee77f850fd3b79c6ebec9334f55133f282862927725b6f134c3945933"
+    },
+    {
+      "original": "assets/icons/items/4406.webp",
+      "artwork": "assets/icons/item_artwork/4406.webp",
+      "id": 4406,
+      "name": "Rough Translucent Crystal",
+      "grade": 0,
+      "clientIcon": "New_Icon/03_ETC/07_ProductMaterial/00004406.dds",
+      "sha256": "3e5d7a393b5751cf898483c2e23572a216e1346cd5087147e77536fd87e1c27d",
+      "referenceSha256": "3e5d7a393b5751cf898483c2e23572a216e1346cd5087147e77536fd87e1c27d"
+    },
+    {
+      "original": "assets/icons/items/4411.webp",
+      "artwork": "assets/icons/item_artwork/4411.webp",
+      "id": 4411,
+      "name": "Rough Blue Crystal",
+      "grade": 0,
+      "clientIcon": "New_Icon/03_ETC/07_ProductMaterial/00004411.dds",
+      "sha256": "73b2f82ed01352b731aa809f72bc4e981cb7d41ff3dcb252864a7f9a124bf707",
+      "referenceSha256": "73b2f82ed01352b731aa809f72bc4e981cb7d41ff3dcb252864a7f9a124bf707"
+    },
+    {
+      "original": "assets/icons/items/44164.webp",
+      "artwork": "assets/icons/item_artwork/44164.webp",
+      "id": 44164,
+      "name": "Gold Key",
+      "grade": 1,
+      "clientIcon": "New_Icon/03_ETC/04_DropItem/00044164.dds",
+      "sha256": "c53629226e1b4696404d869aa4c0d205dd7f1434ac11249fdba35676bb2b7e2b",
+      "referenceSha256": "a04769a49d9af683ab80f73440ea6cb16ceb7175f6725191b59d08291310e0ed"
+    },
+    {
+      "original": "assets/icons/items/44236.webp",
+      "artwork": "assets/icons/item_artwork/44236.webp",
+      "id": 44236,
+      "name": "Broken Ivory",
+      "grade": 0,
+      "clientIcon": "New_Icon/03_ETC/04_DropItem/00044236.dds",
+      "sha256": "0ab7087e55f3afbcc273df45d4e76110204fb691b0410fe61db8a3e205272ba6",
+      "referenceSha256": "0ab7087e55f3afbcc273df45d4e76110204fb691b0410fe61db8a3e205272ba6"
+    },
+    {
+      "original": "assets/icons/items/4601.webp",
+      "artwork": "assets/icons/item_artwork/4601.webp",
+      "id": 4601,
+      "name": "Ash Timber",
+      "grade": 0,
+      "clientIcon": "New_Icon/03_ETC/07_ProductMaterial/00004601.dds",
+      "sha256": "822f58e2a42e2b5a13100d1353ee2fd2d625fc462765cb2eb3ad939f6e6b7334",
+      "referenceSha256": "6097615919eb4ba6a78f8302147b2cbb5f9f771c2635ec82be1975d70b51601a"
+    },
+    {
+      "original": "assets/icons/items/4602.webp",
+      "artwork": "assets/icons/item_artwork/4602.webp",
+      "id": 4602,
+      "name": "Maple Timber",
+      "grade": 0,
+      "clientIcon": "New_Icon/03_ETC/07_ProductMaterial/00004602.dds",
+      "sha256": "8c1722a488720386dfcebcffd8807c23d8dab418e15eb8c6292a8ffd0d9d3ea8",
+      "referenceSha256": "b44b7a1905188f7411af8c3565dd10ebf4810f2be3e7a6b81de33336c11534ec"
+    },
+    {
+      "original": "assets/icons/items/4603.webp",
+      "artwork": "assets/icons/item_artwork/4603.webp",
+      "id": 4603,
+      "name": "Pine Timber",
+      "grade": 0,
+      "clientIcon": "New_Icon/03_ETC/07_ProductMaterial/00004603.dds",
+      "sha256": "177808bd26c391203634071b9690777e4123747ad1d6552c64ee1a78075d0a03",
+      "referenceSha256": "7f19ccc7d6047599094c00e649c0b74cf6c16923907bba20ee131100ef9e2851"
+    },
+    {
+      "original": "assets/icons/items/4604.webp",
+      "artwork": "assets/icons/item_artwork/4604.webp",
+      "id": 4604,
+      "name": "Birch Timber",
+      "grade": 0,
+      "clientIcon": "New_Icon/03_ETC/07_ProductMaterial/00004604.dds",
+      "sha256": "2f45a03f95f55e0ce2ecbc76361b591a0b2b5eb37675792902818d1664ce7f5c",
+      "referenceSha256": "52280dc32ff3832afeaf7465b4c0bdd889e4b1972a6832d051dea4d36bb4023b"
+    },
+    {
+      "original": "assets/icons/items/4605.webp",
+      "artwork": "assets/icons/item_artwork/4605.webp",
+      "id": 4605,
+      "name": "Log",
+      "grade": 0,
+      "clientIcon": "New_Icon/03_ETC/07_ProductMaterial/00004605.dds",
+      "sha256": "532a36a2e80192903da82f598a1bd6fdec19150ebaa9a2c67f34bfb1f1057337",
+      "referenceSha256": "72141ea24d24e8b27f4f74acf2cf769bdb43ff7cb8e902cb100589292d8f720f"
+    },
+    {
+      "original": "assets/icons/items/4606.webp",
+      "artwork": "assets/icons/item_artwork/4606.webp",
+      "id": 4606,
+      "name": "Fir Timber",
+      "grade": 0,
+      "clientIcon": "New_Icon/03_ETC/07_ProductMaterial/00004606.dds",
+      "sha256": "b6eff5863e9265407b6b6f0b20460fcd0eb7bd6ee6ec9768b8dc05a6edfe9a08",
+      "referenceSha256": "c0f1e77cb5406298a1c77f6eb51ec18f74796acf2b370d7b0489e0c7e0c00718"
+    },
+    {
+      "original": "assets/icons/items/4607.webp",
+      "artwork": "assets/icons/item_artwork/4607.webp",
+      "id": 4607,
+      "name": "Cedar Timber",
+      "grade": 0,
+      "clientIcon": "New_Icon/03_ETC/07_ProductMaterial/00004607.dds",
+      "sha256": "238d18126efdb644c8b1ee8abfab8d8f10bf9e4549cc874706638cad19c2b3db",
+      "referenceSha256": "ef73b00f09f2b92cd928fa92ae42c77ca328cd39ac3c79ab1938114bb0560385"
+    },
+    {
+      "original": "assets/icons/items/4613.webp",
+      "artwork": "assets/icons/item_artwork/4613.webp",
+      "id": 4613,
+      "name": "Old Tree Branch",
+      "grade": 0,
+      "clientIcon": "New_Icon/03_ETC/07_ProductMaterial/00004613.dds",
+      "sha256": "ea9e18161a1d524e719301427d0d042ab7d1d95f99c3efc0c3f96fbcf11f99e0",
+      "referenceSha256": "ea9e18161a1d524e719301427d0d042ab7d1d95f99c3efc0c3f96fbcf11f99e0"
+    },
+    {
+      "original": "assets/icons/items/4616.webp",
+      "artwork": "assets/icons/item_artwork/4616.webp",
+      "id": 4616,
+      "name": "Thuja Timber",
+      "grade": 0,
+      "clientIcon": "New_Icon/03_ETC/07_ProductMaterial/00004616.dds",
+      "sha256": "a956d72305e8eba81e5952979b14bf098a4812996ed3c78767319fc904987aa9",
+      "referenceSha256": "a956d72305e8eba81e5952979b14bf098a4812996ed3c78767319fc904987aa9"
+    },
+    {
+      "original": "assets/icons/items/4621.webp",
+      "artwork": "assets/icons/item_artwork/4621.webp",
+      "id": 4621,
+      "name": "Snowfield Cedar Timber",
+      "grade": 0,
+      "clientIcon": "New_Icon/03_ETC/07_ProductMaterial/00004621.dds",
+      "sha256": "4c30a2fdcf6db699248ef6d3ef802743e96cbe64d0489ab1a3949c6ff2b62bbf",
+      "referenceSha256": "4c30a2fdcf6db699248ef6d3ef802743e96cbe64d0489ab1a3949c6ff2b62bbf"
+    },
+    {
+      "original": "assets/icons/items/4624.webp",
+      "artwork": "assets/icons/item_artwork/4624.webp",
+      "id": 4624,
+      "name": "Caphras Tree Timber",
+      "grade": 0,
+      "clientIcon": "New_Icon/03_ETC/07_ProductMaterial/00821116.dds",
+      "sha256": "50d213f81c596c6e99d4f72f67d6d5120df5b44b6f3b6bc1afa56df57c4f31f6",
+      "referenceSha256": "50d213f81c596c6e99d4f72f67d6d5120df5b44b6f3b6bc1afa56df57c4f31f6"
+    },
+    {
+      "original": "assets/icons/items/4657.webp",
+      "artwork": "assets/icons/item_artwork/4657.webp",
+      "id": 4657,
+      "name": "Pine Plank",
+      "grade": 0,
+      "clientIcon": "New_Icon/03_ETC/07_ProductMaterial/00004657.dds",
+      "sha256": "3f5de4c143ba4e07195401930002fb38c8effb251e8674b6088a996588072435",
+      "referenceSha256": "3f5de4c143ba4e07195401930002fb38c8effb251e8674b6088a996588072435"
+    },
+    {
+      "original": "assets/icons/items/4663.webp",
+      "artwork": "assets/icons/item_artwork/4663.webp",
+      "id": 4663,
+      "name": "Fir Plank",
+      "grade": 0,
+      "clientIcon": "New_Icon/03_ETC/07_ProductMaterial/00004663.dds",
+      "sha256": "60c3bb7735ed93ef1fb74ba66f5c5ba380400856aa9cefa2654a2588d43cc042",
+      "referenceSha256": "60c3bb7735ed93ef1fb74ba66f5c5ba380400856aa9cefa2654a2588d43cc042"
+    },
+    {
+      "original": "assets/icons/items/4666.webp",
+      "artwork": "assets/icons/item_artwork/4666.webp",
+      "id": 4666,
+      "name": "Cedar Plank",
+      "grade": 0,
+      "clientIcon": "New_Icon/03_ETC/07_ProductMaterial/00004666.dds",
+      "sha256": "bdbfb262e05502d41ebd846b780057fc2254c3b046aeca8a9aab66d263a3369c",
+      "referenceSha256": "bdbfb262e05502d41ebd846b780057fc2254c3b046aeca8a9aab66d263a3369c"
+    },
+    {
+      "original": "assets/icons/items/4721.webp",
+      "artwork": "assets/icons/item_artwork/4721.webp",
+      "id": 4721,
+      "name": "Snowfield Cedar Plank",
+      "grade": 0,
+      "clientIcon": "New_Icon/03_ETC/07_ProductMaterial/00004721.dds",
+      "sha256": "09edf5b1ab1d4ec063cf804f973e401225b4cb414e9c89c5700e3d6070f83bbf",
+      "referenceSha256": "09edf5b1ab1d4ec063cf804f973e401225b4cb414e9c89c5700e3d6070f83bbf"
+    },
+    {
+      "original": "assets/icons/items/4724.webp",
+      "artwork": "assets/icons/item_artwork/4724.webp",
+      "id": 4724,
+      "name": "Caphras Tree Plank",
+      "grade": 0,
+      "clientIcon": "New_Icon/03_ETC/07_ProductMaterial/00004724.dds",
+      "sha256": "60b372febcef43497d3e68e6dc463e94fd90efdde0a5b5f653747d78e2444414",
+      "referenceSha256": "60b372febcef43497d3e68e6dc463e94fd90efdde0a5b5f653747d78e2444414"
+    },
+    {
+      "original": "assets/icons/items/4987.webp",
+      "artwork": "assets/icons/item_artwork/4987.webp",
+      "id": 4987,
+      "name": "Concentrated Magical Black Gem",
+      "grade": 4,
+      "clientIcon": "New_Icon/03_ETC/07_ProductMaterial/00004987.dds",
+      "sha256": "6a544d6fed4f5d20dcc996ff51bced1fc8f1eaf4ee3ecd6990908b09d027a7dd",
+      "referenceSha256": "9098dcd140c5b4fd61ed5bcd3d788434c6c972df893a4e485aa10ebb2f10d7e5"
+    },
+    {
+      "original": "assets/icons/items/4997.webp",
+      "artwork": "assets/icons/item_artwork/4997.webp",
+      "id": 4997,
+      "name": "Hard Black Crystal Shard",
+      "grade": 2,
+      "clientIcon": "New_Icon/03_ETC/07_ProductMaterial/00004997.dds",
+      "sha256": "07ebb126ed51f8474057ef3107c6466151252f408de6a41ddcde853a12e18d00",
+      "referenceSha256": "5849f071552fb051ed95858720a4c66f23fe6dc17f8cd6fe66270e0a8fc3a9d2"
+    },
+    {
+      "original": "assets/icons/items/4998.webp",
+      "artwork": "assets/icons/item_artwork/4998.webp",
+      "id": 4998,
+      "name": "Sharp Black Crystal Shard",
+      "grade": 2,
+      "clientIcon": "New_Icon/03_ETC/07_ProductMaterial/00004998.dds",
+      "sha256": "1e7fa636cda73179138448273860c8e911d5e65abd2ab45409f56a475693b6c6",
+      "referenceSha256": "666cb1019ce05f29c307eb554f549c77db652b7cd66c4a46ba887b5abd8b4b23"
+    },
+    {
+      "original": "assets/icons/items/4999.webp",
+      "artwork": "assets/icons/item_artwork/4999.webp",
+      "id": 4999,
+      "name": "Black Gem Fragment",
+      "grade": 2,
+      "clientIcon": "New_Icon/03_ETC/07_ProductMaterial/00004999.dds",
+      "sha256": "2107bbfeb72ec5c15c25ab45b6514cd115a92a2ee8dc95c11f8abb02570e850d",
+      "referenceSha256": "7a7f3d8666a810c9d7b397083aff1369b4b824b0fd9104d3041c73d83a2ead58"
+    },
+    {
+      "original": "assets/icons/items/5000.webp",
+      "artwork": "assets/icons/item_artwork/5000.webp",
+      "id": 5000,
+      "name": "Black Gem",
+      "grade": 3,
+      "clientIcon": "New_Icon/03_ETC/07_ProductMaterial/00005000.dds",
+      "sha256": "658c400f9c2e24629528850ee2378b3b920f7decd131f1f022d2893d7cfff9a2",
+      "referenceSha256": "c90075a313074b3f7d06c5e55af256bd72e9e0738b5898e70c3f9fa188fe072f"
+    },
+    {
+      "original": "assets/icons/items/5001.webp",
+      "artwork": "assets/icons/item_artwork/5001.webp",
+      "id": 5001,
+      "name": "Ash Sap",
+      "grade": 0,
+      "clientIcon": "New_Icon/03_ETC/07_ProductMaterial/00005001.dds",
+      "sha256": "1625385c3c2d2431a84c42cd6c6cba839e9355b773d1977b51e0a02f488c9cb3",
+      "referenceSha256": "ae290200a8ba90f4d0041288689613ba1549a9f24dae90508512b9d32892e2ff"
+    },
+    {
+      "original": "assets/icons/items/5002.webp",
+      "artwork": "assets/icons/item_artwork/5002.webp",
+      "id": 5002,
+      "name": "Maple Sap",
+      "grade": 0,
+      "clientIcon": "New_Icon/03_ETC/07_ProductMaterial/00005002.dds",
+      "sha256": "081f9b7ca3dc8cf04f40aa8a2d7a2ccfe16eb0262d771a36d2ccaa820c49598d",
+      "referenceSha256": "9a8ec4bf0eba3858fa1366fff0c45e463a7d467a9d62d760a80c065d2109ee52"
+    },
+    {
+      "original": "assets/icons/items/5003.webp",
+      "artwork": "assets/icons/item_artwork/5003.webp",
+      "id": 5003,
+      "name": "Pine Sap",
+      "grade": 0,
+      "clientIcon": "New_Icon/03_ETC/07_ProductMaterial/00005003.dds",
+      "sha256": "da867c6c6c1703290b7956b03671a493091e8d7297498b11a174600b4b9e4364",
+      "referenceSha256": "5d23de5c27bb59554faf5ff64010e2dd868d5d0a7294f3be21c6e507f6a2c875"
+    },
+    {
+      "original": "assets/icons/items/5004.webp",
+      "artwork": "assets/icons/item_artwork/5004.webp",
+      "id": 5004,
+      "name": "Birch Sap",
+      "grade": 0,
+      "clientIcon": "New_Icon/03_ETC/07_ProductMaterial/00005004.dds",
+      "sha256": "c5bc48a49ac446278d7a612f5182d716e8b4c71cd71c4137c44ef9714a0b219a",
+      "referenceSha256": "86a45a5a7c3855be1cedc2ecf84483be066aaf3c1d689974581e053db8e30e2a"
+    },
+    {
+      "original": "assets/icons/items/5005.webp",
+      "artwork": "assets/icons/item_artwork/5005.webp",
+      "id": 5005,
+      "name": "Bloody Tree Knot",
+      "grade": 0,
+      "clientIcon": "New_Icon/03_ETC/07_ProductMaterial/00005005.dds",
+      "sha256": "1b41d9bd0471d7f5ad7998a274255b11c2023daa5aa6a0905d8dc0f6f8d329e4",
+      "referenceSha256": "1b41d9bd0471d7f5ad7998a274255b11c2023daa5aa6a0905d8dc0f6f8d329e4"
+    },
+    {
+      "original": "assets/icons/items/5006.webp",
+      "artwork": "assets/icons/item_artwork/5006.webp",
+      "id": 5006,
+      "name": "Spirit's Leaf",
+      "grade": 0,
+      "clientIcon": "New_Icon/03_ETC/07_ProductMaterial/00005006.dds",
+      "sha256": "e91e99e21b4ff5d82622a98b4edd0892a11b3c086f372c1c34ec07bc6282c131",
+      "referenceSha256": "e91e99e21b4ff5d82622a98b4edd0892a11b3c086f372c1c34ec07bc6282c131"
+    },
+    {
+      "original": "assets/icons/items/5007.webp",
+      "artwork": "assets/icons/item_artwork/5007.webp",
+      "id": 5007,
+      "name": "Monk's Branch",
+      "grade": 0,
+      "clientIcon": "New_Icon/03_ETC/07_ProductMaterial/00005007.dds",
+      "sha256": "4db7f0ee75ff2c8bc269e4925f68aa1634d718a81afa536151e707c8ef4cb3f3",
+      "referenceSha256": "3992c462ffed1dc455d581cfbd51c0da2a56a75682f191c996d8f4db1ff63533"
+    },
+    {
+      "original": "assets/icons/items/5008.webp",
+      "artwork": "assets/icons/item_artwork/5008.webp",
+      "id": 5008,
+      "name": "Old Tree Bark",
+      "grade": 0,
+      "clientIcon": "New_Icon/03_ETC/07_ProductMaterial/00005008.dds",
+      "sha256": "23f702c2cea45a512dc9b9cc61b43b426b26400a38bb1e33329151bbfa0c948c",
+      "referenceSha256": "23f702c2cea45a512dc9b9cc61b43b426b26400a38bb1e33329151bbfa0c948c"
+    },
+    {
+      "original": "assets/icons/items/5009.webp",
+      "artwork": "assets/icons/item_artwork/5009.webp",
+      "id": 5009,
+      "name": "Fir Sap",
+      "grade": 0,
+      "clientIcon": "New_Icon/03_ETC/07_ProductMaterial/00005009.dds",
+      "sha256": "bc7142163d50a23d3888a06ff68ec54fe2e93ac5ea8159c2fa8f738fad286d7f",
+      "referenceSha256": "9aa3c2d5cac9ee75e4fd7307018bfe3305e101db845b153f3e35e08db970dfc1"
+    },
+    {
+      "original": "assets/icons/items/5010.webp",
+      "artwork": "assets/icons/item_artwork/5010.webp",
+      "id": 5010,
+      "name": "Cedar Sap",
+      "grade": 0,
+      "clientIcon": "New_Icon/03_ETC/07_ProductMaterial/00005010.dds",
+      "sha256": "33caabdd1ad96487ee5b7f967c3961ccdc99c8d16244259c6635c0336e05ecb3",
+      "referenceSha256": "6d5deb026058d0691d049d0f2bc8f198af8629e8cdb23142d61c12779cdfdfc4"
+    },
+    {
+      "original": "assets/icons/items/5011.webp",
+      "artwork": "assets/icons/item_artwork/5011.webp",
+      "id": 5011,
+      "name": "Red Tree Lump",
+      "grade": 0,
+      "clientIcon": "New_Icon/03_ETC/07_ProductMaterial/00005011.dds",
+      "sha256": "34fe9b6d3f94e9898f2f8e9e429f7ac87dad5b21242902d6036425d3a301d312",
+      "referenceSha256": "34fe9b6d3f94e9898f2f8e9e429f7ac87dad5b21242902d6036425d3a301d312"
+    },
+    {
+      "original": "assets/icons/items/5012.webp",
+      "artwork": "assets/icons/item_artwork/5012.webp",
+      "id": 5012,
+      "name": "White Cedar Sap",
+      "grade": 0,
+      "clientIcon": "New_Icon/03_ETC/07_ProductMaterial/00005012.dds",
+      "sha256": "f8f4186bbeeedcb212043607da9986f055ba52b2955f232f51a25c7ab12afd5f",
+      "referenceSha256": "073af2f630f45e27a41d65608fa7af84e39aa05cf6f2696631b642deb3aca517"
+    },
+    {
+      "original": "assets/icons/items/5013.webp",
+      "artwork": "assets/icons/item_artwork/5013.webp",
+      "id": 5013,
+      "name": "Acacia Sap",
+      "grade": 0,
+      "clientIcon": "New_Icon/03_ETC/07_ProductMaterial/00005013.dds",
+      "sha256": "c1d3a33726cf6f75ced841492a438366abd396fb51ec9171b51ddd06e9a29dd2",
+      "referenceSha256": "b35222675e672a0414fcdddd8f4b85a43f319bce3a9ff9f96017307b783ee7be"
+    },
+    {
+      "original": "assets/icons/items/5018.webp",
+      "artwork": "assets/icons/item_artwork/5018.webp",
+      "id": 5018,
+      "name": "Loopy Tree Sap",
+      "grade": 0,
+      "clientIcon": "New_Icon/03_ETC/07_ProductMaterial/00005018.dds",
+      "sha256": "8dcbe3510a5a5dd5a169363e186eec3fbbfce5e7af1697b46666cffe6977ced5",
+      "referenceSha256": "8dcbe3510a5a5dd5a169363e186eec3fbbfce5e7af1697b46666cffe6977ced5"
+    },
+    {
+      "original": "assets/icons/items/5019.webp",
+      "artwork": "assets/icons/item_artwork/5019.webp",
+      "id": 5019,
+      "name": "Dead Tree Essence",
+      "grade": 0,
+      "clientIcon": "New_Icon/03_ETC/07_ProductMaterial/00005019.dds",
+      "sha256": "0eedcce32611a90c4084a7fd7615b4b2dbf3ce249cfc52aff343b200921c756d",
+      "referenceSha256": "0eedcce32611a90c4084a7fd7615b4b2dbf3ce249cfc52aff343b200921c756d"
+    },
+    {
+      "original": "assets/icons/items/5020.webp",
+      "artwork": "assets/icons/item_artwork/5020.webp",
+      "id": 5020,
+      "name": "Thuja Sap",
+      "grade": 0,
+      "clientIcon": "New_Icon/03_ETC/07_ProductMaterial/00005020.dds",
+      "sha256": "9532854621f71ae333aac4a292347628aec95fa03032724232a28e808cb27cba",
+      "referenceSha256": "9532854621f71ae333aac4a292347628aec95fa03032724232a28e808cb27cba"
+    },
+    {
+      "original": "assets/icons/items/5023.webp",
+      "artwork": "assets/icons/item_artwork/5023.webp",
+      "id": 5023,
+      "name": "Thornwood Sap",
+      "grade": 0,
+      "clientIcon": "New_Icon/03_ETC/07_ProductMaterial/00005023.dds",
+      "sha256": "0f396dc05e41c05fd0a29912a8ef1c9df0e83c2d688b0bf560245f654081c141",
+      "referenceSha256": "edd62bc7d05547b631f6529fdeedf324bbfae6474f62f39c2940666e7aa2c866"
+    },
+    {
+      "original": "assets/icons/items/5024.webp",
+      "artwork": "assets/icons/item_artwork/5024.webp",
+      "id": 5024,
+      "name": "Snowfield Cedar Sap",
+      "grade": 0,
+      "clientIcon": "New_Icon/03_ETC/07_ProductMaterial/00005024.dds",
+      "sha256": "819bc3d4aff12f1dcbd794d428ba27f6651d6c5915b52ec8d233eecd3a35e644",
+      "referenceSha256": "819bc3d4aff12f1dcbd794d428ba27f6651d6c5915b52ec8d233eecd3a35e644"
+    },
+    {
+      "original": "assets/icons/items/5025.webp",
+      "artwork": "assets/icons/item_artwork/5025.webp",
+      "id": 5025,
+      "name": "Caphras Tree Sap",
+      "grade": 0,
+      "clientIcon": "New_Icon/03_ETC/07_ProductMaterial/00005025.dds",
+      "sha256": "5cc1470f6cfa4dc154d48a24f9aba3103417388f266543a8a6e176db332a2532",
+      "referenceSha256": "5cc1470f6cfa4dc154d48a24f9aba3103417388f266543a8a6e176db332a2532"
+    },
+    {
+      "original": "assets/icons/items/50810.webp",
+      "artwork": "assets/icons/item_artwork/50810.webp",
+      "id": 50810,
+      "name": "Deep Blue Hoof Root",
+      "grade": 1,
+      "clientIcon": "New_Icon/03_ETC/09_PetItem/00050810.dds",
+      "sha256": "ad3c46e1462c4c2a4aafb3889f36c1d281cd27e309e30d342fcb561893eb064b",
+      "referenceSha256": "ad3c46e1462c4c2a4aafb3889f36c1d281cd27e309e30d342fcb561893eb064b"
+    },
+    {
+      "original": "assets/icons/items/5205.webp",
+      "artwork": "assets/icons/item_artwork/5205.webp",
+      "id": 5205,
+      "name": "Fruit of Nature",
+      "grade": 0,
+      "clientIcon": "New_Icon/03_ETC/07_ProductMaterial/00005205.dds",
+      "sha256": "84f9b8b27225e2fa5172cf64a39883226cfac712e561de462fac3e586855406c",
+      "referenceSha256": "6124e4faa9453e075ec448382f2407197ba9fe57b0bef7f196e569ab8aa21e2e"
+    },
+    {
+      "original": "assets/icons/items/5401.webp",
+      "artwork": "assets/icons/item_artwork/5401.webp",
+      "id": 5401,
+      "name": "Sunrise Herb",
+      "grade": 0,
+      "clientIcon": "New_Icon/03_ETC/07_ProductMaterial/00005401.dds",
+      "sha256": "5489a2109eec316c40fde07a34d8335b6e2371bc1efb40144ed47076ff1fdc63",
+      "referenceSha256": "a2cf3d61bf8fc2e3f6eacba09e30506ec41efc522d49f4eaa22155c3832eee53"
+    },
+    {
+      "original": "assets/icons/items/5402.webp",
+      "artwork": "assets/icons/item_artwork/5402.webp",
+      "id": 5402,
+      "name": "Silver Azalea",
+      "grade": 0,
+      "clientIcon": "New_Icon/03_ETC/07_ProductMaterial/00005402.dds",
+      "sha256": "fcba95945c8e3c7337945034c9eb874a91da7153686b250fa10ecfc211bc0809",
+      "referenceSha256": "3ef8e6050dd9e10c21b1a18e5a878d872185df5b6c93a016ba351d92d4670450"
+    },
+    {
+      "original": "assets/icons/items/5403.webp",
+      "artwork": "assets/icons/item_artwork/5403.webp",
+      "id": 5403,
+      "name": "Fire Flake Flower",
+      "grade": 0,
+      "clientIcon": "New_Icon/03_ETC/07_ProductMaterial/00005403.dds",
+      "sha256": "396d623b1e749188edc23014cc334113427ea129e34f2fa5f36ff053bd28515f",
+      "referenceSha256": "21c1c996cd5100bbe44e18adbb43d99174dc7eeae72de9794b83aac06493c3af"
+    },
+    {
+      "original": "assets/icons/items/54031.webp",
+      "artwork": "assets/icons/item_artwork/54031.webp",
+      "id": 54031,
+      "name": "Laila's Petal",
+      "grade": 2,
+      "clientIcon": "New_Icon/03_ETC/09_PetItem/00054031.dds",
+      "sha256": "d78acd53689200cbe3270207fa2cd23ad1cdf300eb3a911239beeb82c895dd4f",
+      "referenceSha256": "d78acd53689200cbe3270207fa2cd23ad1cdf300eb3a911239beeb82c895dd4f"
+    },
+    {
+      "original": "assets/icons/items/5404.webp",
+      "artwork": "assets/icons/item_artwork/5404.webp",
+      "id": 5404,
+      "name": "Dry Mane Grass",
+      "grade": 0,
+      "clientIcon": "New_Icon/03_ETC/07_ProductMaterial/00005404.dds",
+      "sha256": "4c4a9427f7857845ef218696ef60ce58d1de63f3a17f91eecdaebd6b23ae24b3",
+      "referenceSha256": "703343359f8a70dc3c0eeeb648f5abc3c11606d24bd4f02191560042cf348048"
+    },
+    {
+      "original": "assets/icons/items/5405.webp",
+      "artwork": "assets/icons/item_artwork/5405.webp",
+      "id": 5405,
+      "name": "Silk Honey Grass",
+      "grade": 0,
+      "clientIcon": "New_Icon/03_ETC/07_ProductMaterial/00005405.dds",
+      "sha256": "253bc39038b04dee6cc40c1e94568220b22c10fcee92b4dd01ae61d7a15073e0",
+      "referenceSha256": "e0fceec9ccc47fc2f994980d6df62e3184dd6008ef1d383890a0ff38249e063e"
+    },
+    {
+      "original": "assets/icons/items/5406.webp",
+      "artwork": "assets/icons/item_artwork/5406.webp",
+      "id": 5406,
+      "name": "Everlasting Herb",
+      "grade": 0,
+      "clientIcon": "New_Icon/03_ETC/07_ProductMaterial/00005406.dds",
+      "sha256": "7dc8f3eb90715429f9d4ea19c637c7f76bce440c10e20645a988b64175d7e3e2",
+      "referenceSha256": "6aabfbb227e391ecf1059b3e419f6bbf149d9ee6af7ea637b1df9c4de795f019"
+    },
+    {
+      "original": "assets/icons/items/5408.webp",
+      "artwork": "assets/icons/item_artwork/5408.webp",
+      "id": 5408,
+      "name": "Arrow Mushroom",
+      "grade": 0,
+      "clientIcon": "New_Icon/03_ETC/07_ProductMaterial/00005408.dds",
+      "sha256": "6eae0043ade458ac4bac371a4cceb4f38eeae4da72bb43e192eba1f3a6467ebe",
+      "referenceSha256": "89457ecf22e320e5e98393ee20111437c707acb2fbe3e6e644be8ee373c1a83a"
+    },
+    {
+      "original": "assets/icons/items/5409.webp",
+      "artwork": "assets/icons/item_artwork/5409.webp",
+      "id": 5409,
+      "name": "Dwarf Mushroom",
+      "grade": 0,
+      "clientIcon": "New_Icon/03_ETC/07_ProductMaterial/00005409.dds",
+      "sha256": "0125e5ce6bda4791d251a76a9cd4e1009eb4a30ca17a6cb57330e40f70227e1a",
+      "referenceSha256": "d26cf3fe8ee5a8c19a9630fa8023ae65e6e46ddf7dc5d49bca59c8c02f32f63a"
+    },
+    {
+      "original": "assets/icons/items/5410.webp",
+      "artwork": "assets/icons/item_artwork/5410.webp",
+      "id": 5410,
+      "name": "Cloud Mushroom",
+      "grade": 0,
+      "clientIcon": "New_Icon/03_ETC/07_ProductMaterial/00005410.dds",
+      "sha256": "08d40aa63ab6a2237bb60f053b0282209804e500b8b254a0cf34340dad1588db",
+      "referenceSha256": "c5c19a6e4b0887fef6cffcbf6ae41256932ae3556c42ffeb5c038b48013962b2"
+    },
+    {
+      "original": "assets/icons/items/5412.webp",
+      "artwork": "assets/icons/item_artwork/5412.webp",
+      "id": 5412,
+      "name": "Tiger Mushroom",
+      "grade": 0,
+      "clientIcon": "New_Icon/03_ETC/07_ProductMaterial/00005412.dds",
+      "sha256": "0847f2627204de92a93270018aabb34819f66d87ad84ecd063091bdd2b8b7293",
+      "referenceSha256": "61ac3da845c89d1edf0a3d1e60ced6ea52979951f04b234fd62b298df6059abe"
+    },
+    {
+      "original": "assets/icons/items/5419.webp",
+      "artwork": "assets/icons/item_artwork/5419.webp",
+      "id": 5419,
+      "name": "Amanita Mushroom",
+      "grade": 0,
+      "clientIcon": "New_Icon/03_ETC/07_ProductMaterial/00005419.dds",
+      "sha256": "631473149c96720593b049119003662ff47a8c633f38d8d67ee860cb360ae601",
+      "referenceSha256": "0b0820b78630213bca0b8faec4bc9b682bb4fc2e516a8e2b98720e28ff711ea6"
+    },
+    {
+      "original": "assets/icons/items/5420.webp",
+      "artwork": "assets/icons/item_artwork/5420.webp",
+      "id": 5420,
+      "name": "Truffle Mushroom",
+      "grade": 0,
+      "clientIcon": "New_Icon/03_ETC/07_ProductMaterial/00005420.dds",
+      "sha256": "78109a9f8b6c31751645b4f6a4d33d50ad9c2bf3a4a83f1f6eddeb92a7b03fe8",
+      "referenceSha256": "96a0b1642feb29a2e0b88b2fe1491b1a273d0ba192d7733b568777a894ee8863"
+    },
+    {
+      "original": "assets/icons/items/5439.webp",
+      "artwork": "assets/icons/item_artwork/5439.webp",
+      "id": 5439,
+      "name": "Wild Grass",
+      "grade": 0,
+      "clientIcon": "New_Icon/03_ETC/07_ProductMaterial/00005439.dds",
+      "sha256": "2ee43b454422c7b88c72c448ebec602a9a3b0fadaa83b8adfe0da84d4dbed2e6",
+      "referenceSha256": "6a10dd10d05199b4c00d551ba1b07d27957e8d78b2a09a10eea1bd4a29a3c4cb"
+    },
+    {
+      "original": "assets/icons/items/5524.webp",
+      "artwork": "assets/icons/item_artwork/5524.webp",
+      "id": 5524,
+      "name": "Yellow Flower",
+      "grade": 0,
+      "clientIcon": "New_Icon/03_ETC/07_ProductMaterial/00005524.dds",
+      "sha256": "c6b6265816c327d91a37711c9576f362060a29b50c6f4266eba098f23a2d8589",
+      "referenceSha256": "c6b6265816c327d91a37711c9576f362060a29b50c6f4266eba098f23a2d8589"
+    },
+    {
+      "original": "assets/icons/items/5525.webp",
+      "artwork": "assets/icons/item_artwork/5525.webp",
+      "id": 5525,
+      "name": "Sky Blue Flower",
+      "grade": 0,
+      "clientIcon": "New_Icon/03_ETC/07_ProductMaterial/00005525.dds",
+      "sha256": "4109045eff40a9b07a5b3c3ab26aa9292a705ef1f685d33f6d83976ce9b87259",
+      "referenceSha256": "4109045eff40a9b07a5b3c3ab26aa9292a705ef1f685d33f6d83976ce9b87259"
+    },
+    {
+      "original": "assets/icons/items/5526.webp",
+      "artwork": "assets/icons/item_artwork/5526.webp",
+      "id": 5526,
+      "name": "Violet Flower",
+      "grade": 0,
+      "clientIcon": "New_Icon/03_ETC/07_ProductMaterial/00005526.dds",
+      "sha256": "663aa9c5a541bb9559e46e1da8c0ea8529468826bea5603e2323c2f382d7b865",
+      "referenceSha256": "663aa9c5a541bb9559e46e1da8c0ea8529468826bea5603e2323c2f382d7b865"
+    },
+    {
+      "original": "assets/icons/items/5527.webp",
+      "artwork": "assets/icons/item_artwork/5527.webp",
+      "id": 5527,
+      "name": "Blue Flower",
+      "grade": 0,
+      "clientIcon": "New_Icon/03_ETC/07_ProductMaterial/00005527.dds",
+      "sha256": "860d29598987853ef15e0871f47a2544586ea6d89ce27c7f14463bdcc9c82cc9",
+      "referenceSha256": "860d29598987853ef15e0871f47a2544586ea6d89ce27c7f14463bdcc9c82cc9"
+    },
+    {
+      "original": "assets/icons/items/5532.webp",
+      "artwork": "assets/icons/item_artwork/5532.webp",
+      "id": 5532,
+      "name": "Bracken",
+      "grade": 0,
+      "clientIcon": "New_Icon/03_ETC/07_ProductMaterial/00005532.dds",
+      "sha256": "7cf6de55fa5e1c2dcd8e8a7e8f8a53bae68f5bc777d5470191e83cb864f3c871",
+      "referenceSha256": "21e5ce1450fb334ec82534b63bbef36bee210a4224507ff91aa906e4dc4c0d5b"
+    },
+    {
+      "original": "assets/icons/items/5538.webp",
+      "artwork": "assets/icons/item_artwork/5538.webp",
+      "id": 5538,
+      "name": "Delotia",
+      "grade": 0,
+      "clientIcon": "New_Icon/03_ETC/07_ProductMaterial/00005538.dds",
+      "sha256": "dcbf99c296aa446aeaad0e38f7f1f1f9e95b2b7cdacb2cce2066812547b9ba47",
+      "referenceSha256": "c0439ae118e78619301709f0c44ab190c4ec7939bd6f000cc6c910c8434eb32a"
+    },
+    {
+      "original": "assets/icons/items/5544.webp",
+      "artwork": "assets/icons/item_artwork/5544.webp",
+      "id": 5544,
+      "name": "Chanterelle",
+      "grade": 0,
+      "clientIcon": "New_Icon/03_ETC/07_ProductMaterial/00005544_1.dds",
+      "sha256": "96e7f96c2e14355ca7662581936a4d9270e2e46b073447e0410caa8093b85364",
+      "referenceSha256": "bfaa7c02ddedafe6d65ada6610e794e98b54953f2836f096ff0d4c6731a697df"
+    },
+    {
+      "original": "assets/icons/items/5600.webp",
+      "artwork": "assets/icons/item_artwork/5600.webp",
+      "id": 5600,
+      "name": "Weeds",
+      "grade": 0,
+      "clientIcon": "New_Icon/03_ETC/07_ProductMaterial/00005600.dds",
+      "sha256": "b9933e2aea19340df7965ac71c793b43b8c4bb54b13da5ca879b17ba2783f1ac",
+      "referenceSha256": "b538f84da0dc71dd40a168cbbadcd4c710617e8597aaa72b3fe44d230b680d50"
+    },
+    {
+      "original": "assets/icons/items/56221.webp",
+      "artwork": "assets/icons/item_artwork/56221.webp",
+      "id": 56221,
+      "name": "Breath of Narcion",
+      "grade": 2,
+      "clientIcon": "New_Icon/03_ETC/04_DropItem/00056221_1.dds",
+      "sha256": "cc02d7277f4679834e0d001b532e0c240ec6e4be2f246f0e855ab4aa7077de55",
+      "referenceSha256": "cc02d7277f4679834e0d001b532e0c240ec6e4be2f246f0e855ab4aa7077de55"
+    },
+    {
+      "original": "assets/icons/items/56259.webp",
+      "artwork": "assets/icons/item_artwork/56259.webp",
+      "id": 56259,
+      "name": "Breath of the Morning",
+      "grade": 2,
+      "clientIcon": "New_Icon/03_ETC/04_DropItem/00065266.dds",
+      "sha256": "8f029b7f8fbd78cf42cecdf39484d134c92603690bcca333266ea96004d379d4",
+      "referenceSha256": "46d2c97f659b82193b28b7988b0021b3803f7fbdf575de33eddd71eab4b8b33e"
+    },
+    {
+      "original": "assets/icons/items/5651.webp",
+      "artwork": "assets/icons/item_artwork/5651.webp",
+      "id": 5651,
+      "name": "Fairy Powder",
+      "grade": 0,
+      "clientIcon": "New_Icon/03_ETC/07_ProductMaterial/00005651.dds",
+      "sha256": "3e617fc573ea9b1fde85e6ed1ffdd45c0cd2c1368f2b167df248cd7db6903f93",
+      "referenceSha256": "9c58fb65fdeb73fa631c34bf26a3323a1159e78130750f6a61bacca5a7d94db0"
+    },
+    {
+      "original": "assets/icons/items/5960.webp",
+      "artwork": "assets/icons/item_artwork/5960.webp",
+      "id": 5960,
+      "name": "Trace of Nature",
+      "grade": 0,
+      "clientIcon": "New_Icon/03_ETC/07_ProductMaterial/00005960.dds",
+      "sha256": "ea57f0493c261f2de6851a03605c724bd2eb85a1b88a9e3f8253e71a3193f5fa",
+      "referenceSha256": "612a47bf1df150112fefe0a8d6c4d3a5821c9fec2c0c3cf6c557e6da1ac7b4c1"
+    },
+    {
+      "original": "assets/icons/items/6001.webp",
+      "artwork": "assets/icons/item_artwork/6001.webp",
+      "id": 6001,
+      "name": "Deer Hide",
+      "grade": 0,
+      "clientIcon": "New_Icon/03_ETC/07_ProductMaterial/00006001.dds",
+      "sha256": "7df340c18a3a3d19db96f6132df30dec34a229cdd4e2c4959596bb836e157ea5",
+      "referenceSha256": "00bd91bd44a2476d3ad27bbe1d1eef23ccca6bde470e46d9773ac339f4f9b964"
+    },
+    {
+      "original": "assets/icons/items/6002.webp",
+      "artwork": "assets/icons/item_artwork/6002.webp",
+      "id": 6002,
+      "name": "Sheep Hide",
+      "grade": 0,
+      "clientIcon": "New_Icon/03_ETC/07_ProductMaterial/00006002.dds",
+      "sha256": "e2e48702f8c4fecacc546b03d8b355293e3cc18b0f41704ef72bae605d9575ee",
+      "referenceSha256": "71ed2472f5824067eb22ae764851500de8b252e32a34989bdc2bdc11793a6a30"
+    },
+    {
+      "original": "assets/icons/items/6003.webp",
+      "artwork": "assets/icons/item_artwork/6003.webp",
+      "id": 6003,
+      "name": "Fox Hide",
+      "grade": 0,
+      "clientIcon": "New_Icon/03_ETC/07_ProductMaterial/00006003.dds",
+      "sha256": "15a06d47ce046601afc69712d2e9a3b7616d518aae42946601795de7cbf0d298",
+      "referenceSha256": "15a06d47ce046601afc69712d2e9a3b7616d518aae42946601795de7cbf0d298"
+    },
+    {
+      "original": "assets/icons/items/6004.webp",
+      "artwork": "assets/icons/item_artwork/6004.webp",
+      "id": 6004,
+      "name": "Rhino Hide",
+      "grade": 0,
+      "clientIcon": "New_Icon/03_ETC/07_ProductMaterial/00006004.dds",
+      "sha256": "1cca81f290256791e23f485650f08ab52cc36492ea88cd48293545d45b305dc8",
+      "referenceSha256": "1cca81f290256791e23f485650f08ab52cc36492ea88cd48293545d45b305dc8"
+    },
+    {
+      "original": "assets/icons/items/6005.webp",
+      "artwork": "assets/icons/item_artwork/6005.webp",
+      "id": 6005,
+      "name": "Pig Hide",
+      "grade": 0,
+      "clientIcon": "New_Icon/03_ETC/07_ProductMaterial/00006005.dds",
+      "sha256": "3427b23c06ddf5aca97624ca38c23b6b979835b9b103af29baf61a4fcb5aeade",
+      "referenceSha256": "b4caefc594674757fcb0042314ac010b1324105f974e8679c570343ee5c30cc7"
+    },
+    {
+      "original": "assets/icons/items/6006.webp",
+      "artwork": "assets/icons/item_artwork/6006.webp",
+      "id": 6006,
+      "name": "Ox Hide",
+      "grade": 0,
+      "clientIcon": "New_Icon/03_ETC/07_ProductMaterial/00006006.dds",
+      "sha256": "8529ee1e7a42d6638391b0c1696a3bc2e64876f40668d920e60e8199405103ac",
+      "referenceSha256": "8529ee1e7a42d6638391b0c1696a3bc2e64876f40668d920e60e8199405103ac"
+    },
+    {
+      "original": "assets/icons/items/6008.webp",
+      "artwork": "assets/icons/item_artwork/6008.webp",
+      "id": 6008,
+      "name": "Lizard Hide",
+      "grade": 0,
+      "clientIcon": "New_Icon/03_ETC/07_ProductMaterial/00006008.dds",
+      "sha256": "75ccb0b2fabc4fd720d0bbe7d06c8bf02e634e5cfaf4422084cbe1eac9da40bd",
+      "referenceSha256": "75ccb0b2fabc4fd720d0bbe7d06c8bf02e634e5cfaf4422084cbe1eac9da40bd"
+    },
+    {
+      "original": "assets/icons/items/6013.webp",
+      "artwork": "assets/icons/item_artwork/6013.webp",
+      "id": 6013,
+      "name": "Bear Hide",
+      "grade": 0,
+      "clientIcon": "New_Icon/03_ETC/07_ProductMaterial/00006013.dds",
+      "sha256": "2e2308686e44b311803a833d4d64eb3c25815645e581906e06ab2908d0c06e3d",
+      "referenceSha256": "c24cef0b5c6faed10508bad0f1d6695baa8fd1f5ae6d5304c2aad4b68cf78936"
+    },
+    {
+      "original": "assets/icons/items/6014.webp",
+      "artwork": "assets/icons/item_artwork/6014.webp",
+      "id": 6014,
+      "name": "Wolf Hide",
+      "grade": 0,
+      "clientIcon": "New_Icon/03_ETC/07_ProductMaterial/00006014.dds",
+      "sha256": "1021beb49f4203208f59e9978de7314ebb419d931b2daa83a020ceaec479c671",
+      "referenceSha256": "a778fc1c13515f718148e896b830dd0c749edc52e83a2c37a8b28182240b3ca3"
+    },
+    {
+      "original": "assets/icons/items/6019.webp",
+      "artwork": "assets/icons/item_artwork/6019.webp",
+      "id": 6019,
+      "name": "Snake Skin",
+      "grade": 0,
+      "clientIcon": "New_Icon/03_ETC/07_ProductMaterial/00006019.dds",
+      "sha256": "23022e958c3966c802184eeb898882bc46b8639694d749d0020b7a482ba07994",
+      "referenceSha256": "23022e958c3966c802184eeb898882bc46b8639694d749d0020b7a482ba07994"
+    },
+    {
+      "original": "assets/icons/items/6020.webp",
+      "artwork": "assets/icons/item_artwork/6020.webp",
+      "id": 6020,
+      "name": "Lion Hide",
+      "grade": 0,
+      "clientIcon": "New_Icon/03_ETC/07_ProductMaterial/00006020.dds",
+      "sha256": "64561b1666c3cc9dc13b9311518b4a9206c9074093a84ac29fdb4b1d3e190814",
+      "referenceSha256": "1f01e2c123a09c4bdef291f7d073d939ebf44a62d17ef6b5dcc2d7fff52992fe"
+    },
+    {
+      "original": "assets/icons/items/6026.webp",
+      "artwork": "assets/icons/item_artwork/6026.webp",
+      "id": 6026,
+      "name": "Elephant Hide",
+      "grade": 0,
+      "clientIcon": "New_Icon/03_ETC/07_ProductMaterial/00006004.dds",
+      "sha256": "1cca81f290256791e23f485650f08ab52cc36492ea88cd48293545d45b305dc8",
+      "referenceSha256": "1cca81f290256791e23f485650f08ab52cc36492ea88cd48293545d45b305dc8"
+    },
+    {
+      "original": "assets/icons/items/6039.webp",
+      "artwork": "assets/icons/item_artwork/6039.webp",
+      "id": 6039,
+      "name": "Tiger Hide",
+      "grade": 0,
+      "clientIcon": "New_Icon/03_ETC/07_ProductMaterial/00006039_1.dds",
+      "sha256": "10b909db26869466e758b7612c903c6d091d92fd743596f267e16cbd3cec3097",
+      "referenceSha256": "10b909db26869466e758b7612c903c6d091d92fd743596f267e16cbd3cec3097"
+    },
+    {
+      "original": "assets/icons/items/6151.webp",
+      "artwork": "assets/icons/item_artwork/6151.webp",
+      "id": 6151,
+      "name": "Soft Hide",
+      "grade": 0,
+      "clientIcon": "New_Icon/03_ETC/07_ProductMaterial/00006151.dds",
+      "sha256": "30eaca79e735a8a4d41d364b365421a2a735f890839a99f5ed427267c0aca3d5",
+      "referenceSha256": "30eaca79e735a8a4d41d364b365421a2a735f890839a99f5ed427267c0aca3d5"
+    },
+    {
+      "original": "assets/icons/items/6152.webp",
+      "artwork": "assets/icons/item_artwork/6152.webp",
+      "id": 6152,
+      "name": "Tough Hide",
+      "grade": 0,
+      "clientIcon": "New_Icon/03_ETC/07_ProductMaterial/00006152.dds",
+      "sha256": "30d7bcd9d2698d80bea9200330315ca830037fbac5ccafbc1c8043a2b4643a57",
+      "referenceSha256": "30d7bcd9d2698d80bea9200330315ca830037fbac5ccafbc1c8043a2b4643a57"
+    },
+    {
+      "original": "assets/icons/items/6153.webp",
+      "artwork": "assets/icons/item_artwork/6153.webp",
+      "id": 6153,
+      "name": "Hard Hide",
+      "grade": 0,
+      "clientIcon": "New_Icon/03_ETC/07_ProductMaterial/00006153.dds",
+      "sha256": "809e2ccadd2b9c024dbdfe450d66547f90adecec3054feaba0b48f744b2566cb",
+      "referenceSha256": "809e2ccadd2b9c024dbdfe450d66547f90adecec3054feaba0b48f744b2566cb"
+    },
+    {
+      "original": "assets/icons/items/6155.webp",
+      "artwork": "assets/icons/item_artwork/6155.webp",
+      "id": 6155,
+      "name": "Thick Fur",
+      "grade": 0,
+      "clientIcon": "New_Icon/03_ETC/07_ProductMaterial/00006155.dds",
+      "sha256": "485bf0767c8b62dbf7013cb012ed45e49e02e23dc053409fc1bc2565aee57047",
+      "referenceSha256": "485bf0767c8b62dbf7013cb012ed45e49e02e23dc053409fc1bc2565aee57047"
+    },
+    {
+      "original": "assets/icons/items/616409.webp",
+      "artwork": "assets/icons/item_artwork/616409.webp",
+      "id": 616409,
+      "name": "Ancient Book of Life (7 Days)",
+      "grade": 4,
+      "clientIcon": "New_Icon/09_Cash/00616408.dds",
+      "sha256": "c86a555af4813f6f6d51ed173e80cb417336c16ceb315e1876f964550b992fac",
+      "referenceSha256": "c86a555af4813f6f6d51ed173e80cb417336c16ceb315e1876f964550b992fac"
+    },
+    {
+      "original": "assets/icons/items/6185.webp",
+      "artwork": "assets/icons/item_artwork/6185.webp",
+      "id": 6185,
+      "name": "Fire Horn",
+      "grade": 0,
+      "clientIcon": "New_Icon/03_ETC/07_ProductMaterial/00006185.dds",
+      "sha256": "6987191f6b24546ab7912fbbae633a63f9ed5de66002db892eb8723d56e64094",
+      "referenceSha256": "f020c85334654571337fa9d7cdf36644887d25b4160eae02b896a78b23e052a0"
+    },
+    {
+      "original": "assets/icons/items/6201.webp",
+      "artwork": "assets/icons/item_artwork/6201.webp",
+      "id": 6201,
+      "name": "Deer Blood",
+      "grade": 0,
+      "clientIcon": "New_Icon/03_ETC/07_ProductMaterial/00006201.dds",
+      "sha256": "e0f09dcac00289462d6e779ccf6e4ade31420886614069f28b2f1b4bc83a7124",
+      "referenceSha256": "37bbfa006af0128eb041211e893cca5a2ae937adad2786eac4ab98408715b74e"
+    },
+    {
+      "original": "assets/icons/items/6202.webp",
+      "artwork": "assets/icons/item_artwork/6202.webp",
+      "id": 6202,
+      "name": "Sheep Blood",
+      "grade": 0,
+      "clientIcon": "New_Icon/03_ETC/07_ProductMaterial/00006201.dds",
+      "sha256": "e0f09dcac00289462d6e779ccf6e4ade31420886614069f28b2f1b4bc83a7124",
+      "referenceSha256": "37bbfa006af0128eb041211e893cca5a2ae937adad2786eac4ab98408715b74e"
+    },
+    {
+      "original": "assets/icons/items/6203.webp",
+      "artwork": "assets/icons/item_artwork/6203.webp",
+      "id": 6203,
+      "name": "Fox Blood",
+      "grade": 0,
+      "clientIcon": "New_Icon/03_ETC/07_ProductMaterial/00006210.dds",
+      "sha256": "2781dd8a6f89681163d4539046924ff17a1813e8aa5f02cbb48c2353d6896bef",
+      "referenceSha256": "2e5e0a99b3d7a2406585a91637c006c697771a50dc4c21d7d4a9f781bc21d650"
+    },
+    {
+      "original": "assets/icons/items/6204.webp",
+      "artwork": "assets/icons/item_artwork/6204.webp",
+      "id": 6204,
+      "name": "Rhino Blood",
+      "grade": 0,
+      "clientIcon": "New_Icon/03_ETC/07_ProductMaterial/00006226.dds",
+      "sha256": "b4422463596dad58f13fcc00cb33d15a2b81e5f184cbd105694ed041ba841aca",
+      "referenceSha256": "b4422463596dad58f13fcc00cb33d15a2b81e5f184cbd105694ed041ba841aca"
+    },
+    {
+      "original": "assets/icons/items/6205.webp",
+      "artwork": "assets/icons/item_artwork/6205.webp",
+      "id": 6205,
+      "name": "Pig Blood",
+      "grade": 0,
+      "clientIcon": "New_Icon/03_ETC/07_ProductMaterial/00006201.dds",
+      "sha256": "e0f09dcac00289462d6e779ccf6e4ade31420886614069f28b2f1b4bc83a7124",
+      "referenceSha256": "37bbfa006af0128eb041211e893cca5a2ae937adad2786eac4ab98408715b74e"
+    },
+    {
+      "original": "assets/icons/items/6206.webp",
+      "artwork": "assets/icons/item_artwork/6206.webp",
+      "id": 6206,
+      "name": "Ox Blood",
+      "grade": 0,
+      "clientIcon": "New_Icon/03_ETC/07_ProductMaterial/00006201.dds",
+      "sha256": "e0f09dcac00289462d6e779ccf6e4ade31420886614069f28b2f1b4bc83a7124",
+      "referenceSha256": "e0f09dcac00289462d6e779ccf6e4ade31420886614069f28b2f1b4bc83a7124"
+    },
+    {
+      "original": "assets/icons/items/6208.webp",
+      "artwork": "assets/icons/item_artwork/6208.webp",
+      "id": 6208,
+      "name": "Lizard Blood",
+      "grade": 0,
+      "clientIcon": "New_Icon/03_ETC/07_ProductMaterial/00006217.dds",
+      "sha256": "36858acc8b130b703935a78c37336800730ed12cc54fd4158174410d479c83a0",
+      "referenceSha256": "36858acc8b130b703935a78c37336800730ed12cc54fd4158174410d479c83a0"
+    },
+    {
+      "original": "assets/icons/items/6213.webp",
+      "artwork": "assets/icons/item_artwork/6213.webp",
+      "id": 6213,
+      "name": "Bear Blood",
+      "grade": 0,
+      "clientIcon": "New_Icon/03_ETC/07_ProductMaterial/00006207.dds",
+      "sha256": "6ca423fb88fc4b362ab6a8a4c2a2ea9cad5f973ec31c1712cb3bee029fc863de",
+      "referenceSha256": "0eb332d73942a88e043b9f62f59d82cdd176382d60b16d9f9ae919f8132d3ead"
+    },
+    {
+      "original": "assets/icons/items/6214.webp",
+      "artwork": "assets/icons/item_artwork/6214.webp",
+      "id": 6214,
+      "name": "Wolf Blood",
+      "grade": 0,
+      "clientIcon": "New_Icon/03_ETC/07_ProductMaterial/00006226.dds",
+      "sha256": "b4422463596dad58f13fcc00cb33d15a2b81e5f184cbd105694ed041ba841aca",
+      "referenceSha256": "7133a3c458cef7d13205e504ff12d2fa4466d1d5ad0d8eed200d152cb375b6b0"
+    },
+    {
+      "original": "assets/icons/items/6220.webp",
+      "artwork": "assets/icons/item_artwork/6220.webp",
+      "id": 6220,
+      "name": "Troll Blood",
+      "grade": 0,
+      "clientIcon": "New_Icon/03_ETC/07_ProductMaterial/00006207.dds",
+      "sha256": "6ca423fb88fc4b362ab6a8a4c2a2ea9cad5f973ec31c1712cb3bee029fc863de",
+      "referenceSha256": "0eb332d73942a88e043b9f62f59d82cdd176382d60b16d9f9ae919f8132d3ead"
+    },
+    {
+      "original": "assets/icons/items/6222.webp",
+      "artwork": "assets/icons/item_artwork/6222.webp",
+      "id": 6222,
+      "name": "Cobra Blood",
+      "grade": 0,
+      "clientIcon": "New_Icon/03_ETC/07_ProductMaterial/00006217.dds",
+      "sha256": "36858acc8b130b703935a78c37336800730ed12cc54fd4158174410d479c83a0",
+      "referenceSha256": "3eb1bd6c49ccd3346263b413cc4a1b58b76ab9a0efda9a9fc2962694c2800903"
+    },
+    {
+      "original": "assets/icons/items/6223.webp",
+      "artwork": "assets/icons/item_artwork/6223.webp",
+      "id": 6223,
+      "name": "Lion Blood",
+      "grade": 0,
+      "clientIcon": "New_Icon/03_ETC/07_ProductMaterial/00006207.dds",
+      "sha256": "6ca423fb88fc4b362ab6a8a4c2a2ea9cad5f973ec31c1712cb3bee029fc863de",
+      "referenceSha256": "0eb332d73942a88e043b9f62f59d82cdd176382d60b16d9f9ae919f8132d3ead"
+    },
+    {
+      "original": "assets/icons/items/6356.webp",
+      "artwork": "assets/icons/item_artwork/6356.webp",
+      "id": 6356,
+      "name": "Tiger Blood",
+      "grade": 0,
+      "clientIcon": "New_Icon/03_ETC/07_ProductMaterial/00006356.dds",
+      "sha256": "83c4c8ba46ef6382d4a6bb5a5afdaf5482366452ee23dffeb974f6e4ba48cf88",
+      "referenceSha256": "83c4c8ba46ef6382d4a6bb5a5afdaf5482366452ee23dffeb974f6e4ba48cf88"
+    },
+    {
+      "original": "assets/icons/items/6359.webp",
+      "artwork": "assets/icons/item_artwork/6359.webp",
+      "id": 6359,
+      "name": "Rock Elephant Blood",
+      "grade": 0,
+      "clientIcon": "New_Icon/03_ETC/07_ProductMaterial/00006207.dds",
+      "sha256": "6ca423fb88fc4b362ab6a8a4c2a2ea9cad5f973ec31c1712cb3bee029fc863de",
+      "referenceSha256": "6ca423fb88fc4b362ab6a8a4c2a2ea9cad5f973ec31c1712cb3bee029fc863de"
+    },
+    {
+      "original": "assets/icons/items/6501.webp",
+      "artwork": "assets/icons/item_artwork/6501.webp",
+      "id": 6501,
+      "name": "Coral Piece",
+      "grade": 0,
+      "clientIcon": "New_Icon/03_ETC/07_ProductMaterial/00006501.dds",
+      "sha256": "c5c09ea3b48779fd293adbfaf6b8a9bda37370204acdb576a2c63d5ce84b7361",
+      "referenceSha256": "c5c09ea3b48779fd293adbfaf6b8a9bda37370204acdb576a2c63d5ce84b7361"
+    },
+    {
+      "original": "assets/icons/items/6533.webp",
+      "artwork": "assets/icons/item_artwork/6533.webp",
+      "id": 6533,
+      "name": "Coral Crystal",
+      "grade": 2,
+      "clientIcon": "New_Icon/03_ETC/07_ProductMaterial/00006533.dds",
+      "sha256": "e8075083dc049dee7e92663b55f943c7a646c340dcfe2faf87da1ec42b9bb979",
+      "referenceSha256": "e8075083dc049dee7e92663b55f943c7a646c340dcfe2faf87da1ec42b9bb979"
+    },
+    {
+      "original": "assets/icons/items/66191.webp",
+      "artwork": "assets/icons/item_artwork/66191.webp",
+      "id": 66191,
+      "name": "Powder of Ascension",
+      "grade": 3,
+      "clientIcon": "New_Icon/03_ETC/03_Quest_Item/00750903.dds",
+      "sha256": "1d1a1ab317235ae5a94ab12983c687de5ff593ef68ab14bd8f834fde2ffc10de",
+      "referenceSha256": "1d1a1ab317235ae5a94ab12983c687de5ff593ef68ab14bd8f834fde2ffc10de"
+    },
+    {
+      "original": "assets/icons/items/6901.webp",
+      "artwork": "assets/icons/item_artwork/6901.webp",
+      "id": 6901,
+      "name": "Sunrise Herb Seed",
+      "grade": 0,
+      "clientIcon": "New_Icon/03_ETC/07_ProductMaterial/00006901.dds",
+      "sha256": "9ca80a4ba88c9716dfa3bd5a921fabded58cbde08b80b40e3a676b986e6c4134",
+      "referenceSha256": "9ca80a4ba88c9716dfa3bd5a921fabded58cbde08b80b40e3a676b986e6c4134"
+    },
+    {
+      "original": "assets/icons/items/6902.webp",
+      "artwork": "assets/icons/item_artwork/6902.webp",
+      "id": 6902,
+      "name": "Silver Azalea Seed",
+      "grade": 0,
+      "clientIcon": "New_Icon/03_ETC/07_ProductMaterial/00006902.dds",
+      "sha256": "322958012e1329f497f065e7a87dd67b06cdba44171d9e91c973adb6f1f8c36e",
+      "referenceSha256": "322958012e1329f497f065e7a87dd67b06cdba44171d9e91c973adb6f1f8c36e"
+    },
+    {
+      "original": "assets/icons/items/6903.webp",
+      "artwork": "assets/icons/item_artwork/6903.webp",
+      "id": 6903,
+      "name": "Fire Flake Flower Seed",
+      "grade": 0,
+      "clientIcon": "New_Icon/03_ETC/07_ProductMaterial/00006903.dds",
+      "sha256": "32a23e70ee7968abf06b7f5342a8d0ef54de60d834413744dfa3bc2457cc5752",
+      "referenceSha256": "32a23e70ee7968abf06b7f5342a8d0ef54de60d834413744dfa3bc2457cc5752"
+    },
+    {
+      "original": "assets/icons/items/6904.webp",
+      "artwork": "assets/icons/item_artwork/6904.webp",
+      "id": 6904,
+      "name": "Dry Mane Grass Seed",
+      "grade": 0,
+      "clientIcon": "New_Icon/03_ETC/07_ProductMaterial/00006904.dds",
+      "sha256": "982caba8158f446532e809295012da0fa2dffc146f48fe71a75b91545ce23ccc",
+      "referenceSha256": "982caba8158f446532e809295012da0fa2dffc146f48fe71a75b91545ce23ccc"
+    },
+    {
+      "original": "assets/icons/items/721002.webp",
+      "artwork": "assets/icons/item_artwork/721002.webp",
+      "id": 721002,
+      "name": "Ancient Spirit Dust",
+      "grade": 1,
+      "clientIcon": "New_Icon/03_ETC/00721002.dds",
+      "sha256": "69d53451e7350a6e440dbff079dbfc81346882fd06c6141bf621af0ef7d062f8",
+      "referenceSha256": "ded688f4af01d969d7cef2f5187f7d7b816d3e087a97d49ed90c48aa42163dee"
+    },
+    {
+      "original": "assets/icons/items/721003.webp",
+      "artwork": "assets/icons/item_artwork/721003.webp",
+      "id": 721003,
+      "name": "Caphras Stone",
+      "grade": 2,
+      "clientIcon": "New_Icon/03_ETC/00721003.dds",
+      "sha256": "323ab13e18c3245667bc187ebf9d0696bcb7e618bf3e7d7940782b7791a08cdd",
+      "referenceSha256": "d9fd4c53826e110f905bdcf267e2a1c4231e8727765742622de937f9f2b395d6"
+    },
+    {
+      "original": "assets/icons/items/735351.webp",
+      "artwork": "assets/icons/item_artwork/735351.webp",
+      "id": 735351,
+      "name": "Sethra's Artifact - Life EXP",
+      "grade": 3,
+      "clientIcon": "New_Icon/06_PC_EquipItem/00_Common/00_ETC/00735351_1.dds",
+      "sha256": "442e3d1a9a29b9b5f322b206483bc757e746a7103980be64e49296bd0d81c452",
+      "referenceSha256": "442e3d1a9a29b9b5f322b206483bc757e746a7103980be64e49296bd0d81c452"
+    },
+    {
+      "original": "assets/icons/items/735352.webp",
+      "artwork": "assets/icons/item_artwork/735352.webp",
+      "id": 735352,
+      "name": "Sethra's Artifact - Life Skill Mastery",
+      "grade": 3,
+      "clientIcon": "New_Icon/06_PC_EquipItem/00_Common/00_ETC/00735352_1.dds",
+      "sha256": "f86ea8e6232168173237b22553eff59b23caeb978455b046d3df05cbbb591855",
+      "referenceSha256": "f86ea8e6232168173237b22553eff59b23caeb978455b046d3df05cbbb591855"
+    },
+    {
+      "original": "assets/icons/items/735353.webp",
+      "artwork": "assets/icons/item_artwork/735353.webp",
+      "id": 735353,
+      "name": "Sethra's Artifact - Gathering Item Drop Rate",
+      "grade": 3,
+      "clientIcon": "New_Icon/06_PC_EquipItem/00_Common/00_ETC/00735353_1.dds",
+      "sha256": "fbd76b004f1e5adb1cecc4b3e6a48631cf7de20fb47bf93d286695c901ed763c",
+      "referenceSha256": "fbd76b004f1e5adb1cecc4b3e6a48631cf7de20fb47bf93d286695c901ed763c"
+    },
+    {
+      "original": "assets/icons/items/735356.webp",
+      "artwork": "assets/icons/item_artwork/735356.webp",
+      "id": 735356,
+      "name": "Sethra's Artifact - Gathering EXP",
+      "grade": 3,
+      "clientIcon": "New_Icon/06_PC_EquipItem/00_Common/00_ETC/00735356_1.dds",
+      "sha256": "3ad53833da92c2adbb9a149d8a01b31e39f53344f5670c9f8f2910599ebf53bf",
+      "referenceSha256": "3ad53833da92c2adbb9a149d8a01b31e39f53344f5670c9f8f2910599ebf53bf"
+    },
+    {
+      "original": "assets/icons/items/735358.webp",
+      "artwork": "assets/icons/item_artwork/735358.webp",
+      "id": 735358,
+      "name": "Sethra's Artifact - Hunting EXP",
+      "grade": 3,
+      "clientIcon": "New_Icon/06_PC_EquipItem/00_Common/00_ETC/00735358_1.dds",
+      "sha256": "237a71567b730b68e8faf3f4ee1e6115c9f13d54d2661cb444917e92440457c8",
+      "referenceSha256": "237a71567b730b68e8faf3f4ee1e6115c9f13d54d2661cb444917e92440457c8"
+    },
+    {
+      "original": "assets/icons/items/735367.webp",
+      "artwork": "assets/icons/item_artwork/735367.webp",
+      "id": 735367,
+      "name": "Sethra's Artifact - Gathering Mastery",
+      "grade": 3,
+      "clientIcon": "New_Icon/06_PC_EquipItem/00_Common/00_ETC/00735367_1.dds",
+      "sha256": "f699b087d60281ee6c743857cf960be8c66ae1800690f18fd71ec9771b8deb24",
+      "referenceSha256": "f699b087d60281ee6c743857cf960be8c66ae1800690f18fd71ec9771b8deb24"
+    },
+    {
+      "original": "assets/icons/items/735369.webp",
+      "artwork": "assets/icons/item_artwork/735369.webp",
+      "id": 735369,
+      "name": "Sethra's Artifact - Hunting Mastery",
+      "grade": 3,
+      "clientIcon": "New_Icon/06_PC_EquipItem/00_Common/00_ETC/00735369_1.dds",
+      "sha256": "01d0a8798747f5200e752a6b5a080b3f6edc5657e723f9772b4aadc827909c49",
+      "referenceSha256": "01d0a8798747f5200e752a6b5a080b3f6edc5657e723f9772b4aadc827909c49"
+    },
+    {
+      "original": "assets/icons/items/752023.webp",
+      "artwork": "assets/icons/item_artwork/752023.webp",
+      "id": 752023,
+      "name": "Mass of Pure Magic",
+      "grade": 3,
+      "clientIcon": "New_Icon/03_ETC/00752023.dds",
+      "sha256": "4644a5684aec0368345fb808bb7b5778d555f4e7da98e614146c18a065039e63",
+      "referenceSha256": "4644a5684aec0368345fb808bb7b5778d555f4e7da98e614146c18a065039e63"
+    },
+    {
+      "original": "assets/icons/items/764001.webp",
+      "artwork": "assets/icons/item_artwork/764001.webp",
+      "id": 764001,
+      "name": "Lightstone of Flora: Wildlife",
+      "grade": 2,
+      "clientIcon": "New_Icon/03_ETC/00760005.dds",
+      "sha256": "e53e2507d1ddfa538aa46fb9be247d174ba26a2145845a8c4df395a544921459",
+      "referenceSha256": "e53e2507d1ddfa538aa46fb9be247d174ba26a2145845a8c4df395a544921459"
+    },
+    {
+      "original": "assets/icons/items/764002.webp",
+      "artwork": "assets/icons/item_artwork/764002.webp",
+      "id": 764002,
+      "name": "Lightstone of Flora: Paradise",
+      "grade": 2,
+      "clientIcon": "New_Icon/03_ETC/00760005.dds",
+      "sha256": "e53e2507d1ddfa538aa46fb9be247d174ba26a2145845a8c4df395a544921459",
+      "referenceSha256": "e53e2507d1ddfa538aa46fb9be247d174ba26a2145845a8c4df395a544921459"
+    },
+    {
+      "original": "assets/icons/items/764003.webp",
+      "artwork": "assets/icons/item_artwork/764003.webp",
+      "id": 764003,
+      "name": "Lightstone of Flora: Forest",
+      "grade": 2,
+      "clientIcon": "New_Icon/03_ETC/00760005.dds",
+      "sha256": "e53e2507d1ddfa538aa46fb9be247d174ba26a2145845a8c4df395a544921459",
+      "referenceSha256": "e53e2507d1ddfa538aa46fb9be247d174ba26a2145845a8c4df395a544921459"
+    },
+    {
+      "original": "assets/icons/items/764011.webp",
+      "artwork": "assets/icons/item_artwork/764011.webp",
+      "id": 764011,
+      "name": "Lightstone of Flora: Plains",
+      "grade": 2,
+      "clientIcon": "New_Icon/03_ETC/00760005.dds",
+      "sha256": "e53e2507d1ddfa538aa46fb9be247d174ba26a2145845a8c4df395a544921459",
+      "referenceSha256": "e53e2507d1ddfa538aa46fb9be247d174ba26a2145845a8c4df395a544921459"
+    },
+    {
+      "original": "assets/icons/items/766101.webp",
+      "artwork": "assets/icons/item_artwork/766101.webp",
+      "id": 766101,
+      "name": "Iridescent Lightstone",
+      "grade": 3,
+      "clientIcon": "New_Icon/03_ETC/00766101.dds",
+      "sha256": "abffc90d710427c8a6efb28b0fe292b69a686cfadb43c9ab65ddac46839b4d40",
+      "referenceSha256": "abffc90d710427c8a6efb28b0fe292b69a686cfadb43c9ab65ddac46839b4d40"
+    },
+    {
+      "original": "assets/icons/items/766107.webp",
+      "artwork": "assets/icons/item_artwork/766107.webp",
+      "id": 766107,
+      "name": "Imperfect Lightstone of Flora",
+      "grade": 2,
+      "clientIcon": "New_Icon/03_ETC/00766107.dds",
+      "sha256": "cb70b27f8c7c536edbbf195f7f1fafaca964ef35adb369648d425964b3c52507",
+      "referenceSha256": "cb70b27f8c7c536edbbf195f7f1fafaca964ef35adb369648d425964b3c52507"
+    },
+    {
+      "original": "assets/icons/items/767254.webp",
+      "artwork": "assets/icons/item_artwork/767254.webp",
+      "id": 767254,
+      "name": "Cliffside Mountain Sheep Horn",
+      "grade": 3,
+      "clientIcon": "New_Icon/03_ETC/04_DropItem/00767254.dds",
+      "sha256": "b62112a2c09e5f00c0d48537a018ac542db2a0b5f8a31118ee6df6e7b4e9c9e5",
+      "referenceSha256": "b62112a2c09e5f00c0d48537a018ac542db2a0b5f8a31118ee6df6e7b4e9c9e5"
+    },
+    {
+      "original": "assets/icons/items/767255.webp",
+      "artwork": "assets/icons/item_artwork/767255.webp",
+      "id": 767255,
+      "name": "Golden Leaf Snake Scale",
+      "grade": 3,
+      "clientIcon": "New_Icon/03_ETC/04_DropItem/00767255.dds",
+      "sha256": "32ab1610c5dc161f263436d3160fbe0dc9d6ce5585c48ec9113dca7ba4e0159a",
+      "referenceSha256": "32ab1610c5dc161f263436d3160fbe0dc9d6ce5585c48ec9113dca7ba4e0159a"
+    },
+    {
+      "original": "assets/icons/items/767256.webp",
+      "artwork": "assets/icons/item_artwork/767256.webp",
+      "id": 767256,
+      "name": "Rock Elephant Tusk",
+      "grade": 3,
+      "clientIcon": "New_Icon/03_ETC/04_DropItem/00767256.dds",
+      "sha256": "4a421e66eabcb6d2d08c2f43c8ac4c9d0fcdd2c6c069cfaa0132e94deb668fe1",
+      "referenceSha256": "4a421e66eabcb6d2d08c2f43c8ac4c9d0fcdd2c6c069cfaa0132e94deb668fe1"
+    },
+    {
+      "original": "assets/icons/items/767257.webp",
+      "artwork": "assets/icons/item_artwork/767257.webp",
+      "id": 767257,
+      "name": "Breath of the Endtimes",
+      "grade": 2,
+      "clientIcon": "New_Icon/03_ETC/04_DropItem/00767257_2.dds",
+      "sha256": "0fef07762ff0896da3a2f091fad8e67d4ea88736d280c7c9dec08b7d123c622d",
+      "referenceSha256": "0fef07762ff0896da3a2f091fad8e67d4ea88736d280c7c9dec08b7d123c622d"
+    },
+    {
+      "original": "assets/icons/items/7701.webp",
+      "artwork": "assets/icons/item_artwork/7701.webp",
+      "id": 7701,
+      "name": "Wild Beehive",
+      "grade": 0,
+      "clientIcon": "New_Icon/03_ETC/07_ProductMaterial/00007701.dds",
+      "sha256": "467bea202c9b9bde5afa453bbfc77a7174f310e2b2cef917d7ed9a9067bee2c9",
+      "referenceSha256": "846678ba6a19b08e8ec766451e773efbeb16d5360c701892af4443b6751458b6"
+    },
+    {
+      "original": "assets/icons/items/7751.webp",
+      "artwork": "assets/icons/item_artwork/7751.webp",
+      "id": 7751,
+      "name": "Damaged Hide",
+      "grade": 1,
+      "clientIcon": "New_Icon/07_ProductMaterial/00007751.dds",
+      "sha256": "40dc7e1d2d372a83436823d33c2b8fcddd222dbeeab0743da8bee429bea38bd8",
+      "referenceSha256": "97ddd0bb817aa961250d6b0ce3e192bba28f7f6cb31eae58a06138fcaf7f2bd2"
+    },
+    {
+      "original": "assets/icons/items/7752.webp",
+      "artwork": "assets/icons/item_artwork/7752.webp",
+      "id": 7752,
+      "name": "Usable Hide",
+      "grade": 2,
+      "clientIcon": "New_Icon/07_ProductMaterial/00007752.dds",
+      "sha256": "3e12e0a397e2e42afd58873794c8dbe6c2cfbe6189f3f6adb2082e4f001c173b",
+      "referenceSha256": "3f46df4b0b7c6cbd557fcd0df53124b206ec8b88627f2e606a882f69b08c3ff6"
+    },
+    {
+      "original": "assets/icons/items/7753.webp",
+      "artwork": "assets/icons/item_artwork/7753.webp",
+      "id": 7753,
+      "name": "Supreme Hide",
+      "grade": 3,
+      "clientIcon": "New_Icon/07_ProductMaterial/00007753.dds",
+      "sha256": "e5566592c9ecb973f1b40fba9a2fbb6e884f15d70f2b6126f37ca172dcdcf07c",
+      "referenceSha256": "8430497bc8628574281a58ebe7101270db725afdf0a7912781cc0888cd83fc5c"
+    },
+    {
+      "original": "assets/icons/items/7757.webp",
+      "artwork": "assets/icons/item_artwork/7757.webp",
+      "id": 7757,
+      "name": "Cracked Horn",
+      "grade": 1,
+      "clientIcon": "New_Icon/07_ProductMaterial/00007757.dds",
+      "sha256": "3756237737a3bfa5715d9b5350a61e386a0b4b136daeb7951843e5fae01f2fb1",
+      "referenceSha256": "f3b38b9c7943859332219890009bf64c713be6608c30bc2ab2646e6ca3d05cde"
+    },
+    {
+      "original": "assets/icons/items/7758.webp",
+      "artwork": "assets/icons/item_artwork/7758.webp",
+      "id": 7758,
+      "name": "Intact Horn",
+      "grade": 2,
+      "clientIcon": "New_Icon/07_ProductMaterial/00007758.dds",
+      "sha256": "dd92a73718c7493f1d949ef9df55ce9350bcd79f0bbac56bfdd39f53bab7387b",
+      "referenceSha256": "d16f1c83b76c5a648e0b951fe63d12e29aaf350ebd6360ee1530d163f1641b96"
+    },
+    {
+      "original": "assets/icons/items/7759.webp",
+      "artwork": "assets/icons/item_artwork/7759.webp",
+      "id": 7759,
+      "name": "Sharp Horn",
+      "grade": 3,
+      "clientIcon": "New_Icon/07_ProductMaterial/00007759.dds",
+      "sha256": "016b6c0c0c36d3c269fc9c83f274c70f217916b6b8a9021e424e07ff404dcc9c",
+      "referenceSha256": "10807cdc371a9cd8d699b2f33b954e3d9dc6a4d4e75f1aa2585e885a3a411496"
+    },
+    {
+      "original": "assets/icons/items/7760.webp",
+      "artwork": "assets/icons/item_artwork/7760.webp",
+      "id": 7760,
+      "name": "Cracked Tooth",
+      "grade": 1,
+      "clientIcon": "New_Icon/07_ProductMaterial/00007760.dds",
+      "sha256": "0f318db14040cba180c3159ab46b0354a3423cc176248781632bd5dd263b6a01",
+      "referenceSha256": "0f318db14040cba180c3159ab46b0354a3423cc176248781632bd5dd263b6a01"
+    },
+    {
+      "original": "assets/icons/items/7761.webp",
+      "artwork": "assets/icons/item_artwork/7761.webp",
+      "id": 7761,
+      "name": "Intact Tooth",
+      "grade": 2,
+      "clientIcon": "New_Icon/07_ProductMaterial/00007761.dds",
+      "sha256": "437198a3d98c8264275b886c1b7132e0f6e8c9e6b4ce6b696e09d9c16dc50706",
+      "referenceSha256": "437198a3d98c8264275b886c1b7132e0f6e8c9e6b4ce6b696e09d9c16dc50706"
+    },
+    {
+      "original": "assets/icons/items/7762.webp",
+      "artwork": "assets/icons/item_artwork/7762.webp",
+      "id": 7762,
+      "name": "Sharp Tooth",
+      "grade": 3,
+      "clientIcon": "New_Icon/07_ProductMaterial/00007762.dds",
+      "sha256": "ed6257075dc522a5b0f77ee63405752f27c007ab368ee64fbcd73edfad7cf759",
+      "referenceSha256": "ed6257075dc522a5b0f77ee63405752f27c007ab368ee64fbcd73edfad7cf759"
+    },
+    {
+      "original": "assets/icons/items/7901.webp",
+      "artwork": "assets/icons/item_artwork/7901.webp",
+      "id": 7901,
+      "name": "Deer Meat",
+      "grade": 0,
+      "clientIcon": "New_Icon/03_ETC/07_ProductMaterial/00007901.dds",
+      "sha256": "2c413e4f9b73cf0e69da8ac0d022a1f42a647c490a888a588ae67b88e5594a51",
+      "referenceSha256": "ef4665a1c1b884038cc11c42f32a0c264bafcd288b80b5876e714f73bde3e384"
+    },
+    {
+      "original": "assets/icons/items/7902.webp",
+      "artwork": "assets/icons/item_artwork/7902.webp",
+      "id": 7902,
+      "name": "Lamb Meat",
+      "grade": 0,
+      "clientIcon": "New_Icon/03_ETC/07_ProductMaterial/00007901.dds",
+      "sha256": "2c413e4f9b73cf0e69da8ac0d022a1f42a647c490a888a588ae67b88e5594a51",
+      "referenceSha256": "ef4665a1c1b884038cc11c42f32a0c264bafcd288b80b5876e714f73bde3e384"
+    },
+    {
+      "original": "assets/icons/items/7903.webp",
+      "artwork": "assets/icons/item_artwork/7903.webp",
+      "id": 7903,
+      "name": "Fox Meat",
+      "grade": 0,
+      "clientIcon": "New_Icon/03_ETC/07_ProductMaterial/00007901.dds",
+      "sha256": "2c413e4f9b73cf0e69da8ac0d022a1f42a647c490a888a588ae67b88e5594a51",
+      "referenceSha256": "ef4665a1c1b884038cc11c42f32a0c264bafcd288b80b5876e714f73bde3e384"
+    },
+    {
+      "original": "assets/icons/items/7904.webp",
+      "artwork": "assets/icons/item_artwork/7904.webp",
+      "id": 7904,
+      "name": "Rhino Meat",
+      "grade": 0,
+      "clientIcon": "New_Icon/03_ETC/07_ProductMaterial/00007901.dds",
+      "sha256": "2c413e4f9b73cf0e69da8ac0d022a1f42a647c490a888a588ae67b88e5594a51",
+      "referenceSha256": "2c413e4f9b73cf0e69da8ac0d022a1f42a647c490a888a588ae67b88e5594a51"
+    },
+    {
+      "original": "assets/icons/items/7905.webp",
+      "artwork": "assets/icons/item_artwork/7905.webp",
+      "id": 7905,
+      "name": "Pork",
+      "grade": 0,
+      "clientIcon": "New_Icon/03_ETC/07_ProductMaterial/00007901.dds",
+      "sha256": "2c413e4f9b73cf0e69da8ac0d022a1f42a647c490a888a588ae67b88e5594a51",
+      "referenceSha256": "ef4665a1c1b884038cc11c42f32a0c264bafcd288b80b5876e714f73bde3e384"
+    },
+    {
+      "original": "assets/icons/items/7906.webp",
+      "artwork": "assets/icons/item_artwork/7906.webp",
+      "id": 7906,
+      "name": "Beef",
+      "grade": 0,
+      "clientIcon": "New_Icon/03_ETC/07_ProductMaterial/00007901.dds",
+      "sha256": "2c413e4f9b73cf0e69da8ac0d022a1f42a647c490a888a588ae67b88e5594a51",
+      "referenceSha256": "ef4665a1c1b884038cc11c42f32a0c264bafcd288b80b5876e714f73bde3e384"
+    },
+    {
+      "original": "assets/icons/items/7908.webp",
+      "artwork": "assets/icons/item_artwork/7908.webp",
+      "id": 7908,
+      "name": "Lizard Meat",
+      "grade": 0,
+      "clientIcon": "New_Icon/03_ETC/07_ProductMaterial/00007907.dds",
+      "sha256": "b4d567fc91950419b5809cdb064d41f519902e7d22134d0595236eb7a98febb6",
+      "referenceSha256": "b4d567fc91950419b5809cdb064d41f519902e7d22134d0595236eb7a98febb6"
+    },
+    {
+      "original": "assets/icons/items/7912.webp",
+      "artwork": "assets/icons/item_artwork/7912.webp",
+      "id": 7912,
+      "name": "Bear Meat",
+      "grade": 0,
+      "clientIcon": "New_Icon/03_ETC/07_ProductMaterial/00007901.dds",
+      "sha256": "2c413e4f9b73cf0e69da8ac0d022a1f42a647c490a888a588ae67b88e5594a51",
+      "referenceSha256": "ef4665a1c1b884038cc11c42f32a0c264bafcd288b80b5876e714f73bde3e384"
+    },
+    {
+      "original": "assets/icons/items/7913.webp",
+      "artwork": "assets/icons/item_artwork/7913.webp",
+      "id": 7913,
+      "name": "Wolf Meat",
+      "grade": 0,
+      "clientIcon": "New_Icon/03_ETC/07_ProductMaterial/00007901.dds",
+      "sha256": "2c413e4f9b73cf0e69da8ac0d022a1f42a647c490a888a588ae67b88e5594a51",
+      "referenceSha256": "ef4665a1c1b884038cc11c42f32a0c264bafcd288b80b5876e714f73bde3e384"
+    },
+    {
+      "original": "assets/icons/items/7921.webp",
+      "artwork": "assets/icons/item_artwork/7921.webp",
+      "id": 7921,
+      "name": "Chicken Meat",
+      "grade": 0,
+      "clientIcon": "New_Icon/03_ETC/07_ProductMaterial/00007916.dds",
+      "sha256": "5af431ced95ab9361bd4b447da4742a830e4488b7969f874c1906da8b0e87523",
+      "referenceSha256": "e3b0ad08fed6b98d51c480060785084230b03807c32927aeefc1f3268da3e58f"
+    },
+    {
+      "original": "assets/icons/items/7922.webp",
+      "artwork": "assets/icons/item_artwork/7922.webp",
+      "id": 7922,
+      "name": "Snake Meat",
+      "grade": 0,
+      "clientIcon": "New_Icon/03_ETC/07_ProductMaterial/00007922.dds",
+      "sha256": "c02ad24843b992aebbd116fa954cc6fc8c51879f506c0dbff3cb171b4c8d0cc0",
+      "referenceSha256": "a3f0b34ee4d18ce08da7fb4227b4cf3833b537f037dc33c951125971bacb1219"
+    },
+    {
+      "original": "assets/icons/items/7923.webp",
+      "artwork": "assets/icons/item_artwork/7923.webp",
+      "id": 7923,
+      "name": "Lion Meat",
+      "grade": 0,
+      "clientIcon": "New_Icon/03_ETC/07_ProductMaterial/00007923.dds",
+      "sha256": "e066962217f72655ac3cdc07d53003cbaf4db3858dfbd75e702de117ce9b9812",
+      "referenceSha256": "cbd3e8c00801612fef9db623d80b8054dc895fc6f6ad1756a7ca18b5d931e7be"
+    },
+    {
+      "original": "assets/icons/items/7924.webp",
+      "artwork": "assets/icons/item_artwork/7924.webp",
+      "id": 7924,
+      "name": "Scorpion Meat",
+      "grade": 0,
+      "clientIcon": "New_Icon/03_ETC/07_ProductMaterial/00007924.dds",
+      "sha256": "ba4ebf57fa6bfa07e24124bd7ff7a47782a4cc15397c1fe74f97e5c0ac5c80a0",
+      "referenceSha256": "476049a916071c819675161af6043ff7c96ff89178be9a59ad4c2c5b20ed0dbc"
+    },
+    {
+      "original": "assets/icons/items/7925.webp",
+      "artwork": "assets/icons/item_artwork/7925.webp",
+      "id": 7925,
+      "name": "Gazelle Meat",
+      "grade": 0,
+      "clientIcon": "New_Icon/03_ETC/07_ProductMaterial/00007901.dds",
+      "sha256": "2c413e4f9b73cf0e69da8ac0d022a1f42a647c490a888a588ae67b88e5594a51",
+      "referenceSha256": "ef4665a1c1b884038cc11c42f32a0c264bafcd288b80b5876e714f73bde3e384"
+    },
+    {
+      "original": "assets/icons/items/7953.webp",
+      "artwork": "assets/icons/item_artwork/7953.webp",
+      "id": 7953,
+      "name": "Bird Meat",
+      "grade": 0,
+      "clientIcon": "New_Icon/03_ETC/07_ProductMaterial/00007916.dds",
+      "sha256": "5af431ced95ab9361bd4b447da4742a830e4488b7969f874c1906da8b0e87523",
+      "referenceSha256": "5af431ced95ab9361bd4b447da4742a830e4488b7969f874c1906da8b0e87523"
+    },
+    {
+      "original": "assets/icons/items/7954.webp",
+      "artwork": "assets/icons/item_artwork/7954.webp",
+      "id": 7954,
+      "name": "Yak Meat",
+      "grade": 0,
+      "clientIcon": "New_Icon/03_ETC/07_ProductMaterial/00007954.dds",
+      "sha256": "1cd3a71e1af9d401ce62561efbd75dfb5ddc3cfbe331f17ba094895922602117",
+      "referenceSha256": "3822115ecc4ddad478921f28127bfdf38aac1ac020651a4fadea88945a765037"
+    },
+    {
+      "original": "assets/icons/items/7959.webp",
+      "artwork": "assets/icons/item_artwork/7959.webp",
+      "id": 7959,
+      "name": "Tiger Meat",
+      "grade": 0,
+      "clientIcon": "New_Icon/03_ETC/07_ProductMaterial/00007959.dds",
+      "sha256": "0938f3279403fa83adb46cefb0e43dd697f27319a72348c615746053d3022ea2",
+      "referenceSha256": "b62d3e51dab5b0cbb363d3e1c55b904f7df9b5ddd420ad3db5c7baa2f532b80f"
+    },
+    {
+      "original": "assets/icons/items/7962.webp",
+      "artwork": "assets/icons/item_artwork/7962.webp",
+      "id": 7962,
+      "name": "Rock Elephant Meat",
+      "grade": 0,
+      "clientIcon": "New_Icon/03_ETC/07_ProductMaterial/00007901.dds",
+      "sha256": "2c413e4f9b73cf0e69da8ac0d022a1f42a647c490a888a588ae67b88e5594a51",
+      "referenceSha256": "ef4665a1c1b884038cc11c42f32a0c264bafcd288b80b5876e714f73bde3e384"
+    },
+    {
+      "original": "assets/icons/items/820036.webp",
+      "artwork": "assets/icons/item_artwork/820036.webp",
+      "id": 820036,
+      "name": "Forest Crystal",
+      "grade": 3,
+      "clientIcon": "New_Icon/03_ETC/07_ProductMaterial/000820033_1.dds",
+      "sha256": "766eccd4284e6619c1330c38a3a16935395e7170991ff94be220531d3c81f291",
+      "referenceSha256": "766eccd4284e6619c1330c38a3a16935395e7170991ff94be220531d3c81f291"
+    },
+    {
+      "original": "assets/icons/items/820037.webp",
+      "artwork": "assets/icons/item_artwork/820037.webp",
+      "id": 820037,
+      "name": "Crystal of Darkness",
+      "grade": 3,
+      "clientIcon": "New_Icon/03_ETC/07_ProductMaterial/00008422.dds",
+      "sha256": "e7419a1f939aec02f2aa08de7af837532f9becc0fa5aabe7870a40f3a9bbe2da",
+      "referenceSha256": "e7419a1f939aec02f2aa08de7af837532f9becc0fa5aabe7870a40f3a9bbe2da"
+    },
+    {
+      "original": "assets/icons/items/820038.webp",
+      "artwork": "assets/icons/item_artwork/820038.webp",
+      "id": 820038,
+      "name": "Crystal of Bitterness",
+      "grade": 3,
+      "clientIcon": "New_Icon/03_ETC/07_ProductMaterial/00008423.dds",
+      "sha256": "543afe89296ac2c7fb5d52a2a32517df33d6def1cfc7cd7ed69ba3249eeed564",
+      "referenceSha256": "543afe89296ac2c7fb5d52a2a32517df33d6def1cfc7cd7ed69ba3249eeed564"
+    },
+    {
+      "original": "assets/icons/items/820039.webp",
+      "artwork": "assets/icons/item_artwork/820039.webp",
+      "id": 820039,
+      "name": "Crystal of Decimation",
+      "grade": 3,
+      "clientIcon": "New_Icon/03_ETC/07_ProductMaterial/00008426.dds",
+      "sha256": "6b306c753594caeaca840b3231090001e1985d193ad562c74fb46ec00370e1fa",
+      "referenceSha256": "6b306c753594caeaca840b3231090001e1985d193ad562c74fb46ec00370e1fa"
+    },
+    {
+      "original": "assets/icons/items/820138.webp",
+      "artwork": "assets/icons/item_artwork/820138.webp",
+      "id": 820138,
+      "name": "Mysterious Powder",
+      "grade": 0,
+      "clientIcon": "New_Icon/03_ETC/07_ProductMaterial/00820138.dds",
+      "sha256": "adf7705e9a1396e0392e702b3692a67ef1f869997e047987d1f874d3d46c5b22",
+      "referenceSha256": "ec9454ab780e8f47680c4036e0ef62a1bbf4f0813b1a085b7c91f95be191e9d5"
+    },
+    {
+      "original": "assets/icons/items/820139.webp",
+      "artwork": "assets/icons/item_artwork/820139.webp",
+      "id": 820139,
+      "name": "Live Meat",
+      "grade": 3,
+      "clientIcon": "New_Icon/03_ETC/07_ProductMaterial/00820139.dds",
+      "sha256": "0fb06458921f7ec003dee420a9a785ad0815e51d1e64bcc1d4006f0db71706eb",
+      "referenceSha256": "0fb06458921f7ec003dee420a9a785ad0815e51d1e64bcc1d4006f0db71706eb"
+    },
+    {
+      "original": "assets/icons/items/820143.webp",
+      "artwork": "assets/icons/item_artwork/820143.webp",
+      "id": 820143,
+      "name": "Strange and Beautiful Herb",
+      "grade": 3,
+      "clientIcon": "New_Icon/03_ETC/07_ProductMaterial/00820143.dds",
+      "sha256": "ded7b8c192539c0b47aa3f5ff76413039a8a052f8a509554b310d429bd927ba1",
+      "referenceSha256": "cd570171492922d8a7c42b2e0842ff745675c15fe43a592d201b17464ee315b8"
+    },
+    {
+      "original": "assets/icons/items/820157.webp",
+      "artwork": "assets/icons/item_artwork/820157.webp",
+      "id": 820157,
+      "name": "Supreme Boar Hide",
+      "grade": 1,
+      "clientIcon": "New_Icon/03_ETC/07_ProductMaterial/00820157.dds",
+      "sha256": "de99e98a8343231735f3375365521a7bbd3ac74542b4842d52a4ccbca50a0f78",
+      "referenceSha256": "75f3ba41a1d4bc576b24233560ec3450802bcc5953fbcab24c8338f3cbeb5966"
+    },
+    {
+      "original": "assets/icons/items/820158.webp",
+      "artwork": "assets/icons/item_artwork/820158.webp",
+      "id": 820158,
+      "name": "Supreme Bear Hide",
+      "grade": 1,
+      "clientIcon": "New_Icon/03_ETC/07_ProductMaterial/00820158.dds",
+      "sha256": "0dde8e5d122c63da767024cd355aa5da2ee09ef7314545f36dbc33a43d484195",
+      "referenceSha256": "01fe55080dd96a41f35eefc25b85ed38f7f52d292e8ce10838edb2dd7ba2b308"
+    },
+    {
+      "original": "assets/icons/items/820159.webp",
+      "artwork": "assets/icons/item_artwork/820159.webp",
+      "id": 820159,
+      "name": "Supreme Hawk Hide",
+      "grade": 1,
+      "clientIcon": "New_Icon/03_ETC/07_ProductMaterial/00820159.dds",
+      "sha256": "6ef9650e07c5e4c9306bdce647c4d3d2929df4b2eb670a1209be832326d69f72",
+      "referenceSha256": "5b59aa7efc1869927c15e7b3ec8d55a1c72694d0da510857f29dedd088684980"
+    },
+    {
+      "original": "assets/icons/items/820160.webp",
+      "artwork": "assets/icons/item_artwork/820160.webp",
+      "id": 820160,
+      "name": "Supreme Tiger Hide",
+      "grade": 1,
+      "clientIcon": "New_Icon/03_ETC/07_ProductMaterial/00820160.dds",
+      "sha256": "1719d1f7ce29708ead69471cb06604554362edbb318508d64fd934ea94a73fa8",
+      "referenceSha256": "7b282b7d6ccb8b5a801890277c7a5e359f609ebc9d1ae5dab73a232748d8d82b"
+    },
+    {
+      "original": "assets/icons/items/821255.webp",
+      "artwork": "assets/icons/item_artwork/821255.webp",
+      "id": 821255,
+      "name": "Rusalka's Coral",
+      "grade": 0,
+      "clientIcon": "New_Icon/03_ETC/07_ProductMaterial/00821255.dds",
+      "sha256": "1d210f3f5af300857c4fcc30152fb265e5f01ad8ed265044261ba2a74ef1e463",
+      "referenceSha256": "1d210f3f5af300857c4fcc30152fb265e5f01ad8ed265044261ba2a74ef1e463"
+    },
+    {
+      "original": "assets/icons/items/821259.webp",
+      "artwork": "assets/icons/item_artwork/821259.webp",
+      "id": 821259,
+      "name": "Caphras Essence",
+      "grade": 0,
+      "clientIcon": "New_Icon/03_ETC/07_ProductMaterial/00821271.dds",
+      "sha256": "f814bb4507625430aa3f98e672b26e43e59a4386833f09106b7906c43b3cee7b",
+      "referenceSha256": "f814bb4507625430aa3f98e672b26e43e59a4386833f09106b7906c43b3cee7b"
+    },
+    {
+      "original": "assets/icons/items/821345.webp",
+      "artwork": "assets/icons/item_artwork/821345.webp",
+      "id": 821345,
+      "name": "Gilded Leaf",
+      "grade": 3,
+      "clientIcon": "New_Icon/03_ETC/07_ProductMaterial/00821345.dds",
+      "sha256": "aa48459045cef61b1ade7d0a37ab5599792154ad5700a675be89bcbb3557260a",
+      "referenceSha256": "aa48459045cef61b1ade7d0a37ab5599792154ad5700a675be89bcbb3557260a"
+    },
+    {
+      "original": "assets/icons/items/821346.webp",
+      "artwork": "assets/icons/item_artwork/821346.webp",
+      "id": 821346,
+      "name": "Nymphamaré's Song",
+      "grade": 3,
+      "clientIcon": "New_Icon/03_ETC/07_ProductMaterial/00821346.dds",
+      "sha256": "d44fd6ae43f32f2dfe8c18cad3f10df5fa7446c6e88e102d700d88305aa57372",
+      "referenceSha256": "d44fd6ae43f32f2dfe8c18cad3f10df5fa7446c6e88e102d700d88305aa57372"
+    },
+    {
+      "original": "assets/icons/items/821348.webp",
+      "artwork": "assets/icons/item_artwork/821348.webp",
+      "id": 821348,
+      "name": "Withered Wood Chip",
+      "grade": 3,
+      "clientIcon": "New_Icon/03_ETC/07_ProductMaterial/00821348.dds",
+      "sha256": "26a9595fda331b1cf94539ef8789c349c4d9c550ba801b7f0a11c26a415fc6fb",
+      "referenceSha256": "26a9595fda331b1cf94539ef8789c349c4d9c550ba801b7f0a11c26a415fc6fb"
+    },
+    {
+      "original": "assets/icons/items/821349.webp",
+      "artwork": "assets/icons/item_artwork/821349.webp",
+      "id": 821349,
+      "name": "Thin Essence of Life",
+      "grade": 3,
+      "clientIcon": "New_Icon/03_ETC/07_ProductMaterial/00821349.dds",
+      "sha256": "2ec213301b741637834e90b1c558dbc26de8278bf9f3e22073346192d3d6038d",
+      "referenceSha256": "2ec213301b741637834e90b1c558dbc26de8278bf9f3e22073346192d3d6038d"
+    },
+    {
+      "original": "assets/icons/items/821350.webp",
+      "artwork": "assets/icons/item_artwork/821350.webp",
+      "id": 821350,
+      "name": "Cracked Terrashard",
+      "grade": 3,
+      "clientIcon": "New_Icon/03_ETC/07_ProductMaterial/00821350.dds",
+      "sha256": "3c83cd6037a22ea8db3f38286d389cfcdd2dac1ba4bba6c3c98a5cf2c1510353",
+      "referenceSha256": "3c83cd6037a22ea8db3f38286d389cfcdd2dac1ba4bba6c3c98a5cf2c1510353"
+    },
+    {
+      "original": "assets/icons/items/821351.webp",
+      "artwork": "assets/icons/item_artwork/821351.webp",
+      "id": 821351,
+      "name": "Faint Wildsoul",
+      "grade": 3,
+      "clientIcon": "New_Icon/03_ETC/07_ProductMaterial/00821351.dds",
+      "sha256": "67b6fb4cb0d49dd607d1d83f8f4fcfa6ee606e1de6fb0aeeef1d3f1750199780",
+      "referenceSha256": "67b6fb4cb0d49dd607d1d83f8f4fcfa6ee606e1de6fb0aeeef1d3f1750199780"
+    },
+    {
+      "original": "assets/icons/items/821352.webp",
+      "artwork": "assets/icons/item_artwork/821352.webp",
+      "id": 821352,
+      "name": "Faded Naturewoven Hide",
+      "grade": 3,
+      "clientIcon": "New_Icon/03_ETC/07_ProductMaterial/00821352.dds",
+      "sha256": "1b403facd0c4de20d4ea2cf95a7b67ddceaa6fb23767fc8f7e36345a956a398b",
+      "referenceSha256": "1b403facd0c4de20d4ea2cf95a7b67ddceaa6fb23767fc8f7e36345a956a398b"
+    },
+    {
+      "original": "assets/icons/items/821353.webp",
+      "artwork": "assets/icons/item_artwork/821353.webp",
+      "id": 821353,
+      "name": "Dim Heartvein Shard",
+      "grade": 3,
+      "clientIcon": "New_Icon/03_ETC/07_ProductMaterial/00821353.dds",
+      "sha256": "bedda3a69c43a9d10ecdeecf0c90706f258d8347f703c2596463eb0044ce70f7",
+      "referenceSha256": "bedda3a69c43a9d10ecdeecf0c90706f258d8347f703c2596463eb0044ce70f7"
+    },
+    {
+      "original": "assets/icons/items/821371.webp",
+      "artwork": "assets/icons/item_artwork/821371.webp",
+      "id": 821371,
+      "name": "Fairy's Breath",
+      "grade": 3,
+      "clientIcon": "New_Icon/03_ETC/07_ProductMaterial/000820014.dds",
+      "sha256": "7a747757e0b8f2b277727d568dd12b22f791735e9b51d88482e651b4ff28b6e3",
+      "referenceSha256": "7a747757e0b8f2b277727d568dd12b22f791735e9b51d88482e651b4ff28b6e3"
+    },
+    {
+      "original": "assets/icons/items/821469.webp",
+      "artwork": "assets/icons/item_artwork/821469.webp",
+      "id": 821469,
+      "name": "Evergreen Shard",
+      "grade": 3,
+      "clientIcon": "New_Icon/03_ETC/07_ProductMaterial/00821469.dds",
+      "sha256": "660e563a2ba1b1a4d7cd0b933c5f5ead8bd03b57134d7c28d3bb26e63962f666",
+      "referenceSha256": "660e563a2ba1b1a4d7cd0b933c5f5ead8bd03b57134d7c28d3bb26e63962f666"
+    },
+    {
+      "original": "assets/icons/items/9065.webp",
+      "artwork": "assets/icons/item_artwork/9065.webp",
+      "id": 9065,
+      "name": "Milk",
+      "grade": 0,
+      "clientIcon": "New_Icon/03_ETC/07_ProductMaterial/00009065.dds",
+      "sha256": "fc4e609d487000acf67f63f013a8099b46718bb0042205f659245427348a8cfa",
+      "referenceSha256": "973968a77b55754ee5d0cfcf88c149da1d21fa9a69ac0b3d2114494961df6222"
+    },
+    {
+      "original": "assets/icons/items/9799.webp",
+      "artwork": "assets/icons/item_artwork/9799.webp",
+      "id": 9799,
+      "name": "Wildspark",
+      "grade": 3,
+      "clientIcon": "New_Icon/03_ETC/10_Free_TradeItem/00800107.dds",
+      "sha256": "d7bc4e46cdffe7189eb8ec97df5e5c7add326a5b2634a3b4563e3851c3b6207a",
+      "referenceSha256": "d7bc4e46cdffe7189eb8ec97df5e5c7add326a5b2634a3b4563e3851c3b6207a"
+    },
+    {
+      "original": "assets/icons/buffs/1000408.webp",
+      "artwork": "assets/icons/item_artwork/1000408.webp",
+      "id": 1000408,
+      "name": "[Event] Divine Blessing of Life",
+      "grade": 3,
+      "clientIcon": "New_Icon/03_ETC/01000408.dds",
+      "sha256": "cacb7aaae1f0ee7820b420a8379b7436543b886977323a889de26ef8358a321b",
+      "referenceSha256": "cacb7aaae1f0ee7820b420a8379b7436543b886977323a889de26ef8358a321b"
+    },
+    {
+      "original": "assets/icons/buffs/1155.webp",
+      "artwork": "assets/icons/item_artwork/1155.webp",
+      "id": 1155,
+      "name": "Elixir of Mastery",
+      "grade": 1,
+      "clientIcon": "New_Icon/03_ETC/08_Potion/00001354.dds",
+      "sha256": "efbc6efd5d56a887ee29c8f8e677e1f58548e26b1b79f0e7a50b071fc579081c",
+      "referenceSha256": "efbc6efd5d56a887ee29c8f8e677e1f58548e26b1b79f0e7a50b071fc579081c"
+    },
+    {
+      "original": "assets/icons/buffs/1156.webp",
+      "artwork": "assets/icons/item_artwork/1156.webp",
+      "id": 1156,
+      "name": "Elixir of Labor",
+      "grade": 1,
+      "clientIcon": "New_Icon/03_ETC/08_Potion/00001355.dds",
+      "sha256": "10d0b2fcaee01121217110c9861a5fb040b4f6016738314df41c357c06743eb5",
+      "referenceSha256": "10d0b2fcaee01121217110c9861a5fb040b4f6016738314df41c357c06743eb5"
+    },
+    {
+      "original": "assets/icons/buffs/1158.webp",
+      "artwork": "assets/icons/item_artwork/1158.webp",
+      "id": 1158,
+      "name": "Elixir of Improved Mastery",
+      "grade": 2,
+      "clientIcon": "New_Icon/03_ETC/08_Potion/00001357.dds",
+      "sha256": "5289b29ac153eb289d5de9f4caa47286e44e4963e78500fabc33ff8b86396467",
+      "referenceSha256": "5289b29ac153eb289d5de9f4caa47286e44e4963e78500fabc33ff8b86396467"
+    },
+    {
+      "original": "assets/icons/buffs/1159.webp",
+      "artwork": "assets/icons/item_artwork/1159.webp",
+      "id": 1159,
+      "name": "Elixir of Rough Labor",
+      "grade": 2,
+      "clientIcon": "New_Icon/03_ETC/08_Potion/00001358.dds",
+      "sha256": "a6150a263742a5d4607cb8a5ffc5fc6bc96d4d0ffd555e6ada151fc93fe0cb2c",
+      "referenceSha256": "a6150a263742a5d4607cb8a5ffc5fc6bc96d4d0ffd555e6ada151fc93fe0cb2c"
+    },
+    {
+      "original": "assets/icons/buffs/1181.webp",
+      "artwork": "assets/icons/item_artwork/1181.webp",
+      "id": 1181,
+      "name": "Elixir of Lethal Destruction",
+      "grade": 2,
+      "clientIcon": "New_Icon/03_ETC/08_Potion/00001183.dds",
+      "sha256": "3494922f19326ff3b92ebd07006ccfae41edaa8d66a223f82de4dc780af7657b",
+      "referenceSha256": "ae8f9357df71ee7c40390f5ba668c30d31ac903de6938ed22940b0b0da5482fa"
+    },
+    {
+      "original": "assets/icons/buffs/17325.webp",
+      "artwork": "assets/icons/item_artwork/17325.webp",
+      "id": 17325,
+      "name": "Energy Tonic (XL)",
+      "grade": 3,
+      "clientIcon": "New_Icon/09_Cash/00017325.dds",
+      "sha256": "447f119f8f94111ffdd7911b64aefd93d25fa5fe60387e2c4a58a593437c5499",
+      "referenceSha256": "447f119f8f94111ffdd7911b64aefd93d25fa5fe60387e2c4a58a593437c5499"
+    },
+    {
+      "original": "assets/icons/buffs/17503.webp",
+      "artwork": "assets/icons/item_artwork/17503.webp",
+      "id": 17503,
+      "name": "Energy Tonic (L)",
+      "grade": 3,
+      "clientIcon": "New_Icon/09_Cash/00017503.dds",
+      "sha256": "1483b22a8bcb9bcc5794cf14f814f4143ce25228234c5dc7859e3dfbd5b09524",
+      "referenceSha256": "1483b22a8bcb9bcc5794cf14f814f4143ce25228234c5dc7859e3dfbd5b09524"
+    },
+    {
+      "original": "assets/icons/buffs/17562.webp",
+      "artwork": "assets/icons/item_artwork/17562.webp",
+      "id": 17562,
+      "name": "Extra Life EXP Scroll",
+      "grade": 3,
+      "clientIcon": "New_Icon/09_Cash/00017562.dds",
+      "sha256": "3c23ae36d8d5e90e3917ab4075849c1167d954f0890bb35c2866878c53f3e1f1",
+      "referenceSha256": "3c23ae36d8d5e90e3917ab4075849c1167d954f0890bb35c2866878c53f3e1f1"
+    },
+    {
+      "original": "assets/icons/buffs/17583.webp",
+      "artwork": "assets/icons/item_artwork/17583.webp",
+      "id": 17583,
+      "name": "Value Pack (30 Days)",
+      "grade": 3,
+      "clientIcon": "New_Icon/09_Cash/00017583.dds",
+      "sha256": "a993ee9b1cc721d9adb728e8aee6986d5eb7760752b5f6e74329badfedf71a5f",
+      "referenceSha256": "a993ee9b1cc721d9adb728e8aee6986d5eb7760752b5f6e74329badfedf71a5f"
+    },
+    {
+      "original": "assets/icons/buffs/18926.webp",
+      "artwork": "assets/icons/item_artwork/18926.webp",
+      "id": 18926,
+      "name": "[Event] Book of Life (7 Days)",
+      "grade": 4,
+      "clientIcon": "New_Icon/09_Cash/00018925.dds",
+      "sha256": "a8915cb6bee2b9bed7dd8b00cdcac693e26c5223d7a63b0e460f071e866507ef",
+      "referenceSha256": "a8915cb6bee2b9bed7dd8b00cdcac693e26c5223d7a63b0e460f071e866507ef"
+    },
+    {
+      "original": "assets/icons/buffs/27866.webp",
+      "artwork": "assets/icons/item_artwork/27866.webp",
+      "id": 27866,
+      "name": "Kamasylvia Bed",
+      "grade": 3,
+      "clientIcon": "New_Icon/03_ETC/06_Housing/InHouse_034_DFF_Bed_01.dds",
+      "sha256": "9e7b2c9c0c67a297a56090f6809afd1f7d103f3e8dbf420c48ed2d6acd6f9bb9",
+      "referenceSha256": "a62f06b2bb8468ec045548b8d9782054abfa13894fba27980514eb609842abb1"
+    },
+    {
+      "original": "assets/icons/buffs/43704.webp",
+      "artwork": "assets/icons/item_artwork/43704.webp",
+      "id": 43704,
+      "name": "[Villa] Turning Gates (180 min)",
+      "grade": 4,
+      "clientIcon": "New_Icon/04_PC_Skill/03_Buff/Product_EXPUP.dds",
+      "sha256": "fef7ecfd0b353190779159d27fe3ae6bb976a47cca5719699d68dba952352ea7",
+      "referenceSha256": "fef7ecfd0b353190779159d27fe3ae6bb976a47cca5719699d68dba952352ea7"
+    },
+    {
+      "original": "assets/icons/buffs/45298.webp",
+      "artwork": "assets/icons/item_artwork/45298.webp",
+      "id": 45298,
+      "name": "Destruction Spirit Stone",
+      "grade": 2,
+      "clientIcon": "New_Icon/03_ETC/07_ProductMaterial/00045298.dds",
+      "sha256": "4d2b04ae0254baec421e0530ab816c71e1fd88bae886f09776eb8d17a6e3cafc",
+      "referenceSha256": "4d2b04ae0254baec421e0530ab816c71e1fd88bae886f09776eb8d17a6e3cafc"
+    },
+    {
+      "original": "assets/icons/buffs/45302.webp",
+      "artwork": "assets/icons/item_artwork/45302.webp",
+      "id": 45302,
+      "name": "Life Spirit Stone",
+      "grade": 2,
+      "clientIcon": "New_Icon/03_ETC/07_ProductMaterial/00045302.dds",
+      "sha256": "d6f972d763f0d1f860e40c9ab521a07837580e6e1718b7a23cd6b3b2b602540e",
+      "referenceSha256": "d6f972d763f0d1f860e40c9ab521a07837580e6e1718b7a23cd6b3b2b602540e"
+    },
+    {
+      "original": "assets/icons/buffs/45514.webp",
+      "artwork": "assets/icons/item_artwork/45514.webp",
+      "id": 45514,
+      "name": "Khan's Heart: Life",
+      "grade": 3,
+      "clientIcon": "New_Icon/03_ETC/00045514.dds",
+      "sha256": "9b28732eab0411ae54c031560e5e76eac171afcc1fc6d84eb620014853ee7205",
+      "referenceSha256": "9b28732eab0411ae54c031560e5e76eac171afcc1fc6d84eb620014853ee7205"
+    },
+    {
+      "original": "assets/icons/buffs/46952.webp",
+      "artwork": "assets/icons/item_artwork/46952.webp",
+      "id": 46952,
+      "name": "[Event] Bubble-bobblin' Budae Jjigae",
+      "grade": 3,
+      "clientIcon": "New_Icon/09_Cash/00046952.dds",
+      "sha256": "f030893852bd820f5d232c50b50cfd4e4b004c110fae2ef586524d4e7a71279b",
+      "referenceSha256": "f030893852bd820f5d232c50b50cfd4e4b004c110fae2ef586524d4e7a71279b"
+    },
+    {
+      "original": "assets/icons/buffs/47002.webp",
+      "artwork": "assets/icons/item_artwork/47002.webp",
+      "id": 47002,
+      "name": "Blessing of Kamasylve (3 Days)",
+      "grade": 3,
+      "clientIcon": "New_Icon/09_Cash/00017081.dds",
+      "sha256": "b16e4b925b27a942f37aea54bab48628336ce64a32e5ba1f18cf48a56dade522",
+      "referenceSha256": "b16e4b925b27a942f37aea54bab48628336ce64a32e5ba1f18cf48a56dade522"
+    },
+    {
+      "original": "assets/icons/buffs/47003.webp",
+      "artwork": "assets/icons/item_artwork/47003.webp",
+      "id": 47003,
+      "name": "Secret Book of Old Moon (3 Days)",
+      "grade": 3,
+      "clientIcon": "New_Icon/09_Cash/00601201.dds",
+      "sha256": "bd7830189d82ef1b4d2ccf5b7359d71302ceead6fcb835cb7e0ab60cf9baf356",
+      "referenceSha256": "bd7830189d82ef1b4d2ccf5b7359d71302ceead6fcb835cb7e0ab60cf9baf356"
+    },
+    {
+      "original": "assets/icons/buffs/47110.webp",
+      "artwork": "assets/icons/item_artwork/47110.webp",
+      "id": 47110,
+      "name": "[Event] Coming-of-Age Perfume",
+      "grade": 2,
+      "clientIcon": "New_Icon/09_Cash/00018971.dds",
+      "sha256": "1963c7385faa5c558e87bc4efa3de05ecfda3e73d93a9c7cc6403bfb8dcfa31f",
+      "referenceSha256": "1963c7385faa5c558e87bc4efa3de05ecfda3e73d93a9c7cc6403bfb8dcfa31f"
+    },
+    {
+      "original": "assets/icons/buffs/589.webp",
+      "artwork": "assets/icons/item_artwork/589.webp",
+      "id": 589,
+      "name": "Energy Potion (Extra Large)",
+      "grade": 2,
+      "clientIcon": "New_Icon/03_ETC/08_Potion/00000589.dds",
+      "sha256": "3eca395d564c440a3afb08323f138b8f310f4b007954fc910adf0d4830e6bce2",
+      "referenceSha256": "ee44734f1e50ec59691302f2ec18955abb8180214a03507e91b4e1299b9b22d7"
+    },
+    {
+      "original": "assets/icons/buffs/616409.webp",
+      "artwork": "assets/icons/item_artwork/616409.webp",
+      "id": 616409,
+      "name": "Ancient Book of Life (7 Days)",
+      "grade": 4,
+      "clientIcon": "New_Icon/09_Cash/00616408.dds",
+      "sha256": "c86a555af4813f6f6d51ed173e80cb417336c16ceb315e1876f964550b992fac",
+      "referenceSha256": "c86a555af4813f6f6d51ed173e80cb417336c16ceb315e1876f964550b992fac"
+    },
+    {
+      "original": "assets/icons/buffs/689.webp",
+      "artwork": "assets/icons/item_artwork/689.webp",
+      "id": 689,
+      "name": "Elixir of Flowing Wind",
+      "grade": 2,
+      "clientIcon": "New_Icon/03_ETC/08_Potion/00000626.dds",
+      "sha256": "cf5ffc8871ef2c201d703ae922f46cc7967cd896331fe842b3c4df1c99c0005f",
+      "referenceSha256": "cf5ffc8871ef2c201d703ae922f46cc7967cd896331fe842b3c4df1c99c0005f"
+    },
+    {
+      "original": "assets/icons/buffs/690.webp",
+      "artwork": "assets/icons/item_artwork/690.webp",
+      "id": 690,
+      "name": "Elixir of Swiftness",
+      "grade": 1,
+      "clientIcon": "New_Icon/03_ETC/08_Potion/00000627.dds",
+      "sha256": "49083dae619a74a4233679970aaad912574f0a6ca5121311936f4b1f4c0a59c3",
+      "referenceSha256": "49083dae619a74a4233679970aaad912574f0a6ca5121311936f4b1f4c0a59c3"
+    },
+    {
+      "original": "assets/icons/buffs/691.webp",
+      "artwork": "assets/icons/item_artwork/691.webp",
+      "id": 691,
+      "name": "Elixir of Intrepid Swiftness",
+      "grade": 2,
+      "clientIcon": "New_Icon/03_ETC/08_Potion/00000628.dds",
+      "sha256": "2580af27e0f59ee1febed76be238209b031cda71339559b646c5bc0822d2ced7",
+      "referenceSha256": "2580af27e0f59ee1febed76be238209b031cda71339559b646c5bc0822d2ced7"
+    },
+    {
+      "original": "assets/icons/buffs/697.webp",
+      "artwork": "assets/icons/item_artwork/697.webp",
+      "id": 697,
+      "name": "Elixir of Lethal Assassin",
+      "grade": 2,
+      "clientIcon": "New_Icon/03_ETC/08_Potion/00000634.dds",
+      "sha256": "e646a64b084544813f6587f1d62b6907a4f549c13848498f82016fb6fe3b51b3",
+      "referenceSha256": "e646a64b084544813f6587f1d62b6907a4f549c13848498f82016fb6fe3b51b3"
+    },
+    {
+      "original": "assets/icons/buffs/699.webp",
+      "artwork": "assets/icons/item_artwork/699.webp",
+      "id": 699,
+      "name": "Elixir of Sharp Detection",
+      "grade": 2,
+      "clientIcon": "New_Icon/03_ETC/08_Potion/00000636.dds",
+      "sha256": "a0d6a4ed9cf180e312c682909d5cf6914ab6b155834157ca14ab0a15486821e5",
+      "referenceSha256": "a0d6a4ed9cf180e312c682909d5cf6914ab6b155834157ca14ab0a15486821e5"
+    },
+    {
+      "original": "assets/icons/buffs/721032.webp",
+      "artwork": "assets/icons/item_artwork/721032.webp",
+      "id": 721032,
+      "name": "Bonfire Tool",
+      "grade": 1,
+      "clientIcon": "New_Icon/03_ETC/00721032.dds",
+      "sha256": "5407b76af4a997a3c72a31bccec26f38eba7ea4c00290d840ef334421720d0fd",
+      "referenceSha256": "c3ce45142f0fc9e60cad0397e19e333ccccec91443a463ecda6708b232c38adc"
+    },
+    {
+      "original": "assets/icons/buffs/721092.webp",
+      "artwork": "assets/icons/item_artwork/721092.webp",
+      "id": 721092,
+      "name": "Treant's Tear",
+      "grade": 3,
+      "clientIcon": "New_Icon/03_ETC/00721092.dds",
+      "sha256": "a0a6130c60b54936e778815823d75bb1ec6d73ecd948b0c32384bca42cd0a064",
+      "referenceSha256": "a0a6130c60b54936e778815823d75bb1ec6d73ecd948b0c32384bca42cd0a064"
+    },
+    {
+      "original": "assets/icons/buffs/724.webp",
+      "artwork": "assets/icons/item_artwork/724.webp",
+      "id": 724,
+      "name": "Worker's Elixir",
+      "grade": 1,
+      "clientIcon": "New_Icon/03_ETC/08_Potion/00000661.dds",
+      "sha256": "10a988a13d9c2baefbbb374ce36930a9cf2a239b7422458e712acc2aca3c2a82",
+      "referenceSha256": "10a988a13d9c2baefbbb374ce36930a9cf2a239b7422458e712acc2aca3c2a82"
+    },
+    {
+      "original": "assets/icons/buffs/725.webp",
+      "artwork": "assets/icons/item_artwork/725.webp",
+      "id": 725,
+      "name": "Skilled Worker's Elixir",
+      "grade": 2,
+      "clientIcon": "New_Icon/03_ETC/08_Potion/00000662.dds",
+      "sha256": "ce097a27389b4397b1030c6ea9e8749c292408ff7437906e5a640359bae608cf",
+      "referenceSha256": "ce097a27389b4397b1030c6ea9e8749c292408ff7437906e5a640359bae608cf"
+    },
+    {
+      "original": "assets/icons/buffs/735.webp",
+      "artwork": "assets/icons/item_artwork/735.webp",
+      "id": 735,
+      "name": "Perfume of Swiftness",
+      "grade": 3,
+      "clientIcon": "New_Icon/03_ETC/07_ProductMaterial/00000735.dds",
+      "sha256": "632c1c84d44634db2876dd2c22e27067a19e8348754c339127a75c47a696aba9",
+      "referenceSha256": "632c1c84d44634db2876dd2c22e27067a19e8348754c339127a75c47a696aba9"
+    },
+    {
+      "original": "assets/icons/buffs/749.webp",
+      "artwork": "assets/icons/item_artwork/749.webp",
+      "id": 749,
+      "name": "Elixir of Time",
+      "grade": 1,
+      "clientIcon": "New_Icon/03_ETC/08_Potion/00000751.dds",
+      "sha256": "965cf617bf6bec888b4b2c1d3f033db4a2a27d40769ababae3a3308257a48463",
+      "referenceSha256": "965cf617bf6bec888b4b2c1d3f033db4a2a27d40769ababae3a3308257a48463"
+    },
+    {
+      "original": "assets/icons/buffs/750.webp",
+      "artwork": "assets/icons/item_artwork/750.webp",
+      "id": 750,
+      "name": "Elixir of Flowing Time",
+      "grade": 2,
+      "clientIcon": "New_Icon/03_ETC/08_Potion/00000752.dds",
+      "sha256": "35db1afd568d98ce4048357df240bf641effb02674031c3e4955fea3760cca6e",
+      "referenceSha256": "35db1afd568d98ce4048357df240bf641effb02674031c3e4955fea3760cca6e"
+    },
+    {
+      "original": "assets/icons/buffs/750472.webp",
+      "artwork": "assets/icons/item_artwork/750472.webp",
+      "id": 750472,
+      "name": "[Event] Stella's Spirit Stone (7 Days)",
+      "grade": 3,
+      "clientIcon": "New_Icon/03_ETC/00750472.dds",
+      "sha256": "5c65adc6f9ec4dc33919dfc51beddc37a1c36673254281d624e1ac14766f4dbb",
+      "referenceSha256": "5c65adc6f9ec4dc33919dfc51beddc37a1c36673254281d624e1ac14766f4dbb"
+    },
+    {
+      "original": "assets/icons/buffs/750490.webp",
+      "artwork": "assets/icons/item_artwork/750490.webp",
+      "id": 750490,
+      "name": "[Event] Lara's Warm Black Tea",
+      "grade": 2,
+      "clientIcon": "New_Icon/03_ETC/00750490.dds",
+      "sha256": "0ed252aac23d3816e8048711ba3788cbe6359bc2513289c9ee42fbbb44b8a76f",
+      "referenceSha256": "0ed252aac23d3816e8048711ba3788cbe6359bc2513289c9ee42fbbb44b8a76f"
+    },
+    {
+      "original": "assets/icons/buffs/750589.webp",
+      "artwork": "assets/icons/item_artwork/750589.webp",
+      "id": 750589,
+      "name": "[Event] Giovan Grolin's Support Scroll",
+      "grade": 3,
+      "clientIcon": "New_Icon/03_ETC/03_Quest_Item/00042569.dds",
+      "sha256": "1c58c82dcfd85751ef009e9bb4958b045006dce846e5ca21b363e897ac7b55fb",
+      "referenceSha256": "1c58c82dcfd85751ef009e9bb4958b045006dce846e5ca21b363e897ac7b55fb"
+    },
+    {
+      "original": "assets/icons/buffs/752047.webp",
+      "artwork": "assets/icons/item_artwork/752047.webp",
+      "id": 752047,
+      "name": "[Event] Magical: Verdure Draught",
+      "grade": 3,
+      "clientIcon": "New_Icon/03_ETC/00752047.dds",
+      "sha256": "4c703ae4661192dc9eeaf511516985be2939006755325dbdea8781cb5975524f",
+      "referenceSha256": "4c703ae4661192dc9eeaf511516985be2939006755325dbdea8781cb5975524f"
+    },
+    {
+      "original": "assets/icons/buffs/752459.webp",
+      "artwork": "assets/icons/item_artwork/752459.webp",
+      "id": 752459,
+      "name": "[Event] Energy Gourd Bottle",
+      "grade": 3,
+      "clientIcon": "New_Icon/03_ETC/00752459.dds",
+      "sha256": "a1ef2625c8a091dd86927dff74d3b96003e8022576c7bf4375f44e10b57ea29b",
+      "referenceSha256": "a1ef2625c8a091dd86927dff74d3b96003e8022576c7bf4375f44e10b57ea29b"
+    },
+    {
+      "original": "assets/icons/buffs/752460.webp",
+      "artwork": "assets/icons/item_artwork/752460.webp",
+      "id": 752460,
+      "name": "[Event] Marni's Endurance Potion",
+      "grade": 3,
+      "clientIcon": "New_Icon/03_ETC/00752460.dds",
+      "sha256": "dac1391b2ad707384d9185969cc6a1ac1c57ea99bf180c7923ba3193e072af18",
+      "referenceSha256": "dac1391b2ad707384d9185969cc6a1ac1c57ea99bf180c7923ba3193e072af18"
+    },
+    {
+      "original": "assets/icons/buffs/752740.webp",
+      "artwork": "assets/icons/item_artwork/752740.webp",
+      "id": 752740,
+      "name": "[Event] Scary Halloween Candy",
+      "grade": 3,
+      "clientIcon": "New_Icon/03_ETC/00752740.dds",
+      "sha256": "317f1ab901b8c73f43d65e49250c49113c7421b3871de61b51818f8301462b4c",
+      "referenceSha256": "317f1ab901b8c73f43d65e49250c49113c7421b3871de61b51818f8301462b4c"
+    },
+    {
+      "original": "assets/icons/buffs/760681.webp",
+      "artwork": "assets/icons/item_artwork/760681.webp",
+      "id": 760681,
+      "name": "[Event] Dragon King's Hyangon Wine",
+      "grade": 3,
+      "clientIcon": "New_Icon/03_ETC/000760681.dds",
+      "sha256": "4cc3df68c8e370accc1432263d1c15e93f1e444ec7815443f93f9cd8d7c98dc5",
+      "referenceSha256": "4cc3df68c8e370accc1432263d1c15e93f1e444ec7815443f93f9cd8d7c98dc5"
+    },
+    {
+      "original": "assets/icons/buffs/761074.webp",
+      "artwork": "assets/icons/item_artwork/761074.webp",
+      "id": 761074,
+      "name": "Fughar's Magical Elixir",
+      "grade": 3,
+      "clientIcon": "New_Icon/03_ETC/00752488.dds",
+      "sha256": "785cff4eeb464a87bdfa8108680b68e69de2bbee700e2c0c44e15c0f9c4da58a",
+      "referenceSha256": "785cff4eeb464a87bdfa8108680b68e69de2bbee700e2c0c44e15c0f9c4da58a"
+    },
+    {
+      "original": "assets/icons/buffs/761893.webp",
+      "artwork": "assets/icons/item_artwork/761893.webp",
+      "id": 761893,
+      "name": "[Scroll] Turning Gates",
+      "grade": 0,
+      "clientIcon": "New_Icon/03_ETC/00761893.dds",
+      "sha256": "fcf9079d2c9bd199cbf5be0bc1c32cb54f24a23dedbe07b75eee1bbb80f7dc8d",
+      "referenceSha256": "fcf9079d2c9bd199cbf5be0bc1c32cb54f24a23dedbe07b75eee1bbb80f7dc8d"
+    },
+    {
+      "original": "assets/icons/buffs/762.webp",
+      "artwork": "assets/icons/item_artwork/762.webp",
+      "id": 762,
+      "name": "Elixir of Shock",
+      "grade": 1,
+      "clientIcon": "New_Icon/03_ETC/08_Potion/00000764.dds",
+      "sha256": "c824e976c13aea6a62f50eced68861d9953cf49846a83ab2bb725a4f0c70e349",
+      "referenceSha256": "c824e976c13aea6a62f50eced68861d9953cf49846a83ab2bb725a4f0c70e349"
+    },
+    {
+      "original": "assets/icons/buffs/763.webp",
+      "artwork": "assets/icons/item_artwork/763.webp",
+      "id": 763,
+      "name": "Elixir of Strong Shock",
+      "grade": 2,
+      "clientIcon": "New_Icon/03_ETC/08_Potion/00000765.dds",
+      "sha256": "3c63801e193af7c1eb2905ebacf7aa6d28f33402737c9beacb235e38d062770f",
+      "referenceSha256": "3c63801e193af7c1eb2905ebacf7aa6d28f33402737c9beacb235e38d062770f"
+    },
+    {
+      "original": "assets/icons/buffs/767137.webp",
+      "artwork": "assets/icons/item_artwork/767137.webp",
+      "id": 767137,
+      "name": "[Event] Western Bourbon Whiskey",
+      "grade": 3,
+      "clientIcon": "New_Icon/03_ETC/00016630.dds",
+      "sha256": "8be9f7f205978ec37a9422e68299d3a8a51d3fc8fb66de309679fae8ab4a8240",
+      "referenceSha256": "8be9f7f205978ec37a9422e68299d3a8a51d3fc8fb66de309679fae8ab4a8240"
+    },
+    {
+      "original": "assets/icons/buffs/767989.webp",
+      "artwork": "assets/icons/item_artwork/767989.webp",
+      "id": 767989,
+      "name": "[Event] Scroll - Life Skill I",
+      "grade": 3,
+      "clientIcon": "New_Icon/03_ETC/00750470.dds",
+      "sha256": "a44c25d8df7b8a0873d6728cccfaa7107263ce53139d2886cea26e9a6166cf37",
+      "referenceSha256": "a44c25d8df7b8a0873d6728cccfaa7107263ce53139d2886cea26e9a6166cf37"
+    },
+    {
+      "original": "assets/icons/buffs/767990.webp",
+      "artwork": "assets/icons/item_artwork/767990.webp",
+      "id": 767990,
+      "name": "[Event] Scroll - Life Skill II",
+      "grade": 3,
+      "clientIcon": "New_Icon/03_ETC/00750470.dds",
+      "sha256": "a44c25d8df7b8a0873d6728cccfaa7107263ce53139d2886cea26e9a6166cf37",
+      "referenceSha256": "a44c25d8df7b8a0873d6728cccfaa7107263ce53139d2886cea26e9a6166cf37"
+    },
+    {
+      "original": "assets/icons/buffs/768064.webp",
+      "artwork": "assets/icons/item_artwork/768064.webp",
+      "id": 768064,
+      "name": "Secret Book of Florin",
+      "grade": 3,
+      "clientIcon": "New_Icon/03_ETC/00768064.dds",
+      "sha256": "518216b32d6428fdf88bb2dea1b373d7f1f30877b6e9a17d0772ee23af372d17",
+      "referenceSha256": "518216b32d6428fdf88bb2dea1b373d7f1f30877b6e9a17d0772ee23af372d17"
+    },
+    {
+      "original": "assets/icons/buffs/768918.webp",
+      "artwork": "assets/icons/item_artwork/768918.webp",
+      "id": 768918,
+      "name": "Mercenary's Life (60 min)",
+      "grade": 3,
+      "clientIcon": "New_Icon/03_ETC/00768918.dds",
+      "sha256": "d21817954ee1ed775ed48f31c2158f8d4f6a621ae6c297547fbad390d7a6f7cf",
+      "referenceSha256": "d21817954ee1ed775ed48f31c2158f8d4f6a621ae6c297547fbad390d7a6f7cf"
+    },
+    {
+      "original": "assets/icons/buffs/768919.webp",
+      "artwork": "assets/icons/item_artwork/768919.webp",
+      "id": 768919,
+      "name": "Mercenary's Life (60 min)",
+      "grade": 3,
+      "clientIcon": "New_Icon/03_ETC/00768918.dds",
+      "sha256": "d21817954ee1ed775ed48f31c2158f8d4f6a621ae6c297547fbad390d7a6f7cf",
+      "referenceSha256": "d21817954ee1ed775ed48f31c2158f8d4f6a621ae6c297547fbad390d7a6f7cf"
+    },
+    {
+      "original": "assets/icons/buffs/781.webp",
+      "artwork": "assets/icons/item_artwork/781.webp",
+      "id": 781,
+      "name": "Perfume of Spirits",
+      "grade": 3,
+      "clientIcon": "New_Icon/03_ETC/08_Potion/00000781.dds",
+      "sha256": "15ff9e7946d049e8f297ddb06abde9d7af6ec207ae5247542411ed106515dbae",
+      "referenceSha256": "15ff9e7946d049e8f297ddb06abde9d7af6ec207ae5247542411ed106515dbae"
+    },
+    {
+      "original": "assets/icons/buffs/790575.webp",
+      "artwork": "assets/icons/item_artwork/790575.webp",
+      "id": 790575,
+      "name": "[Event] FESTA Beer",
+      "grade": 3,
+      "clientIcon": "New_Icon/03_ETC/07_ProductMaterial/00008094.dds",
+      "sha256": "c198d31b2e8f214a6c1b1d3101040675ba4f7f75479559352c7431ed9b111430",
+      "referenceSha256": "c198d31b2e8f214a6c1b1d3101040675ba4f7f75479559352c7431ed9b111430"
+    },
+    {
+      "original": "assets/icons/buffs/790781.webp",
+      "artwork": "assets/icons/item_artwork/790781.webp",
+      "id": 790781,
+      "name": "Blessing of Mystic Beasts - Life Skill Mastery",
+      "grade": 3,
+      "clientIcon": "New_Icon/03_ETC/00790781.dds",
+      "sha256": "d97eed66538884534fd62a395de9ad8a3726358b8771b9fc1face19681075468",
+      "referenceSha256": "d97eed66538884534fd62a395de9ad8a3726358b8771b9fc1face19681075468"
+    },
+    {
+      "original": "assets/icons/buffs/791.webp",
+      "artwork": "assets/icons/item_artwork/791.webp",
+      "id": 791,
+      "name": "Verdure Draught",
+      "grade": 3,
+      "clientIcon": "New_Icon/03_ETC/08_Potion/00000791.dds",
+      "sha256": "9766a4417f6c48af71d395ae5ffe333bd9d468b14dcb97724edb98098d727b5c",
+      "referenceSha256": "9766a4417f6c48af71d395ae5ffe333bd9d468b14dcb97724edb98098d727b5c"
+    },
+    {
+      "original": "assets/icons/buffs/800.webp",
+      "artwork": "assets/icons/item_artwork/800.webp",
+      "id": 800,
+      "name": "Viridian Draught",
+      "grade": 3,
+      "clientIcon": "New_Icon/03_ETC/08_Potion/00000800.dds",
+      "sha256": "eb7ff7e9a60273f54c115e1f95ba0c4df658a2173fcafc65b3a64056ab40faed",
+      "referenceSha256": "eb7ff7e9a60273f54c115e1f95ba0c4df658a2173fcafc65b3a64056ab40faed"
+    },
+    {
+      "original": "assets/icons/buffs/820150.webp",
+      "artwork": "assets/icons/item_artwork/820150.webp",
+      "id": 820150,
+      "name": "Miraculous Herbal Medicine",
+      "grade": 4,
+      "clientIcon": "New_Icon/03_ETC/07_ProductMaterial/00820150.dds",
+      "sha256": "13e230929873bfcf86834e5b7c885e3fc3ab30cb14841a5dc18efe85309f86bf",
+      "referenceSha256": "2e16bd3564a8323f6030cabf61feed9be1064403cd7c88706f017739b44c9dc4"
+    },
+    {
+      "original": "assets/icons/buffs/820152.webp",
+      "artwork": "assets/icons/item_artwork/820152.webp",
+      "id": 820152,
+      "name": "Millennial Wild Ginseng",
+      "grade": 4,
+      "clientIcon": "New_Icon/03_ETC/07_ProductMaterial/00820152.dds",
+      "sha256": "920a91ddbb8bb5b01007f0c19f23186c8842b6f105c6718a950edb90285f07da",
+      "referenceSha256": "920a91ddbb8bb5b01007f0c19f23186c8842b6f105c6718a950edb90285f07da"
+    },
+    {
+      "original": "assets/icons/buffs/821144.webp",
+      "artwork": "assets/icons/item_artwork/821144.webp",
+      "id": 821144,
+      "name": "Mystical Herbal Medicine",
+      "grade": 4,
+      "clientIcon": "New_Icon/03_ETC/07_ProductMaterial/00820151.dds",
+      "sha256": "5469b6cc57850d9b0ce328be6857bae4ef09c60abaa481fe5fb14895b5551224",
+      "referenceSha256": "5469b6cc57850d9b0ce328be6857bae4ef09c60abaa481fe5fb14895b5551224"
+    },
+    {
+      "original": "assets/icons/buffs/821145.webp",
+      "artwork": "assets/icons/item_artwork/821145.webp",
+      "id": 821145,
+      "name": "Mellow Herbal Medicine",
+      "grade": 3,
+      "clientIcon": "New_Icon/03_ETC/03_Quest_Item/00066671.dds",
+      "sha256": "39dc00122582c332dad7129f35bdcd76d0f6cf73edb4684a3a268e7bb4b914bf",
+      "referenceSha256": "39dc00122582c332dad7129f35bdcd76d0f6cf73edb4684a3a268e7bb4b914bf"
+    },
+    {
+      "original": "assets/icons/buffs/860435.webp",
+      "artwork": "assets/icons/item_artwork/860435.webp",
+      "id": 860435,
+      "name": "Gatherer's Special Herbal Tea",
+      "grade": 4,
+      "clientIcon": "New_Icon/09_Cash/00860435.dds",
+      "sha256": "82b49f21c2040fa571fc2e600957f177f511a755cb0e8f2a5a6816897e16a757",
+      "referenceSha256": "82b49f21c2040fa571fc2e600957f177f511a755cb0e8f2a5a6816897e16a757"
+    },
+    {
+      "original": "assets/icons/buffs/890.webp",
+      "artwork": "assets/icons/item_artwork/890.webp",
+      "id": 890,
+      "name": "Perfume of Verdure",
+      "grade": 3,
+      "clientIcon": "New_Icon/03_ETC/07_ProductMaterial/00000890.dds",
+      "sha256": "9b75b52b5ef04e19c44fd76c2dc336d1234a579db37a6afb9a8e8884fcce3967",
+      "referenceSha256": "9b75b52b5ef04e19c44fd76c2dc336d1234a579db37a6afb9a8e8884fcce3967"
+    },
+    {
+      "original": "assets/icons/buffs/9216.webp",
+      "artwork": "assets/icons/item_artwork/9216.webp",
+      "id": 9216,
+      "name": "Fig Pie",
+      "grade": 1,
+      "clientIcon": "New_Icon/03_ETC/07_ProductMaterial/00009216.dds",
+      "sha256": "aa6aa7414de55bd824b9f394d025a7a679c37467c7a1bd818bd71ab236144ad2",
+      "referenceSha256": "aa6aa7414de55bd824b9f394d025a7a679c37467c7a1bd818bd71ab236144ad2"
+    },
+    {
+      "original": "assets/icons/buffs/9301.webp",
+      "artwork": "assets/icons/item_artwork/9301.webp",
+      "id": 9301,
+      "name": "Sweet Fig Pie",
+      "grade": 2,
+      "clientIcon": "New_Icon/03_ETC/07_ProductMaterial/00009301.dds",
+      "sha256": "7778f5c234e0f7008d62e3ea9f0580539f1ed490598c9386dbeb28a8066c0529",
+      "referenceSha256": "7778f5c234e0f7008d62e3ea9f0580539f1ed490598c9386dbeb28a8066c0529"
+    },
+    {
+      "original": "assets/icons/buffs/9408.webp",
+      "artwork": "assets/icons/item_artwork/9408.webp",
+      "id": 9408,
+      "name": "Borscht",
+      "grade": 1,
+      "clientIcon": "New_Icon/03_ETC/07_ProductMaterial/00009408.dds",
+      "sha256": "64555ad9acaedfceffb5e06c5ceb6b6e26bcdb719933cf0727d0fb7ec4b8fa46",
+      "referenceSha256": "6d1c6d801003c1d096d6f9ae672c9cf68793c4f55435b4c65e2f6dfd30a4bd3f"
+    },
+    {
+      "original": "assets/icons/buffs/9452.webp",
+      "artwork": "assets/icons/item_artwork/9452.webp",
+      "id": 9452,
+      "name": "Fragrant Borscht",
+      "grade": 2,
+      "clientIcon": "New_Icon/03_ETC/07_ProductMaterial/00009452.dds",
+      "sha256": "47b577d8082187ce924b342d409704f91c098843f5d6943aab107386646b6804",
+      "referenceSha256": "8899ab76b416625c18f7bd35d7a0e1d3d3f8b55ef144abde01c47447d65d1224"
+    },
+    {
+      "original": "assets/icons/buffs/9456.webp",
+      "artwork": "assets/icons/item_artwork/9456.webp",
+      "id": 9456,
+      "name": "Whale Meat Salad",
+      "grade": 1,
+      "clientIcon": "New_Icon/03_ETC/07_ProductMaterial/00009456.dds",
+      "sha256": "17a85ba5dba0fb49a1de9c765e9c198129b60657616f445da7cb77ab0c5c2d9a",
+      "referenceSha256": "8357d38cbc7e0aa4d8132f98d13f217dd67b5f8e075fdc14fc4424a0657ec0fd"
+    },
+    {
+      "original": "assets/icons/buffs/9458.webp",
+      "artwork": "assets/icons/item_artwork/9458.webp",
+      "id": 9458,
+      "name": "Fresh Whale Meat Salad",
+      "grade": 2,
+      "clientIcon": "New_Icon/03_ETC/07_ProductMaterial/00009458.dds",
+      "sha256": "43d7fd9489984ba87c5635f6885d16275c326bc9584ce22ee5c3cef68f76d761",
+      "referenceSha256": "43d7fd9489984ba87c5635f6885d16275c326bc9584ce22ee5c3cef68f76d761"
+    },
+    {
+      "original": "assets/icons/buffs/9691.webp",
+      "artwork": "assets/icons/item_artwork/9691.webp",
+      "id": 9691,
+      "name": "Seafood Cron Meal",
+      "grade": 4,
+      "clientIcon": "New_Icon/03_ETC/07_ProductMaterial/00009691.dds",
+      "sha256": "0820db32edfac020fa9231070878739944a2dc3fc4f80b1d508167b59af65dbb",
+      "referenceSha256": "0820db32edfac020fa9231070878739944a2dc3fc4f80b1d508167b59af65dbb"
+    },
+    {
+      "original": "assets/icons/buffs/9693.webp",
+      "artwork": "assets/icons/item_artwork/9693.webp",
+      "id": 9693,
+      "name": "Exquisite Cron Meal",
+      "grade": 4,
+      "clientIcon": "New_Icon/03_ETC/07_ProductMaterial/00009693.dds",
+      "sha256": "9a471a657cee3e4a5800501e334682de52a7dfe5150708e2947cb7656e99dd69",
+      "referenceSha256": "9a471a657cee3e4a5800501e334682de52a7dfe5150708e2947cb7656e99dd69"
+    }
+  ]
+}

@@ -212,6 +212,7 @@ void main() {
           final guideState = tester.state(find.byType(FieldGuide));
           await tester.enterText(keyed('spot-search'), 'Lions');
           await tester.pumpAndSettle();
+          await tap(tester, 'spot-filter-compact-control');
           await tester.tap(keyed('spot-ranking-$rankingKey'));
           for (var attempt = 0; attempt < 500; attempt++) {
             await tester.pump(const Duration(milliseconds: 200));

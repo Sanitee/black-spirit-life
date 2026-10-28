@@ -1,6 +1,7 @@
 import '../../domain/catalog/temporarily_archived_items.dart';
 import '../../domain/formatting/acquisition_notes.dart';
 import '../../domain/models/catalog_models.dart';
+import '../../domain/models/craft_mode.dart';
 import '../../domain/state/user_source_notes.dart';
 import 'recipe_book_exact_buff_info.dart';
 import 'recipe_book_exact_crystal_info.dart';
@@ -45,6 +46,7 @@ final class RecipeBookFormula {
     required this.method,
     required this.baseOutput,
     required this.ingredients,
+    this.mode,
     this.variantId,
     this.routeId,
     this.routeLabel,
@@ -57,6 +59,7 @@ final class RecipeBookFormula {
   final String outputName;
   final String type;
   final String method;
+  final CraftMode? mode;
   final String? variantId;
   final String? routeId;
   final String? routeLabel;
@@ -68,12 +71,14 @@ final class RecipeBookFormula {
   final List<Ingredient> ingredients;
 
   RecipeBookFormula copyWith({
+    CraftMode? mode,
     bool? outputEstimated,
     List<Ingredient>? ingredients,
   }) => RecipeBookFormula(
     outputName: outputName,
     type: type,
     method: method,
+    mode: mode ?? this.mode,
     variantId: variantId,
     routeId: routeId,
     routeLabel: routeLabel,
@@ -1191,7 +1196,7 @@ RecipeBookItemInfo _exactBuffHoverInfo(
     summary: '',
     effects: info.effects,
     craftUses: _compactCraftUses(consumers, limit: 1),
-    acquisitionFormulas: _recipeBookFormulas(recipe),
+    acquisitionFormulas: recipeBookFormulas(recipe),
     acquisitionNotes: _compactAcquisitionNotes(recipe),
     notes: <String>[
       if (info.duration.isNotEmpty) 'Duration: ${info.duration}.',
@@ -1220,7 +1225,7 @@ RecipeBookItemInfo _exactFoodHoverInfo(
     summary: info.description,
     effects: info.effects,
     craftUses: _compactCraftUses(consumers, limit: 1),
-    acquisitionFormulas: _recipeBookFormulas(recipe),
+    acquisitionFormulas: recipeBookFormulas(recipe),
     acquisitionNotes: _compactAcquisitionNotes(recipe),
     notes: <String>[
       if (info.duration.isNotEmpty) 'Duration: ${info.duration}.',
@@ -1264,7 +1269,7 @@ RecipeBookItemInfo _completeCuratedInfo(
     craftUses: _mergeCraftUses(curated.craftUses, consumers),
     acquisitionFormulas: curated.acquisitionFormulas.isNotEmpty
         ? curated.acquisitionFormulas
-        : _recipeBookFormulas(recipe),
+        : recipeBookFormulas(recipe),
     acquisitionNotes: curated.acquisitionNotes.isNotEmpty
         ? curated.acquisitionNotes
         : _compactAcquisitionNotes(recipe),
@@ -1335,7 +1340,7 @@ RecipeBookItemInfo _finishItemInfo(
       .toList(growable: false);
   final acquisitionFormulas = info.acquisitionFormulas.isNotEmpty
       ? info.acquisitionFormulas
-      : _recipeBookFormulas(recipe);
+      : recipeBookFormulas(recipe);
   final acquisitionNotes = _uniqueLines(info.acquisitionNotes)
       .where(
         (note) => !acquisitionFormulas.any(
@@ -1398,7 +1403,7 @@ RecipeBookItemInfo _compactItemInfo({
     kind: _compactKind(name, recipe),
     summary: '',
     craftUses: craftUses,
-    acquisitionFormulas: _recipeBookFormulas(recipe),
+    acquisitionFormulas: recipeBookFormulas(recipe),
     acquisitionNotes: _compactAcquisitionNotes(recipe),
   );
 }
@@ -1544,7 +1549,7 @@ List<RecipeBookCraftUse> _compactCraftUses(
       .map(
         (consumer) => RecipeBookCraftUse(
           output: consumer.name,
-          formulas: _recipeBookFormulas(consumer),
+          formulas: recipeBookFormulas(consumer),
         ),
       )
       .toList(growable: false);
@@ -1564,7 +1569,8 @@ List<String> _compactAcquisitionNotes(Recipe? recipe) {
   return const <String>[];
 }
 
-List<RecipeBookFormula> _recipeBookFormulas(Recipe? recipe) {
+/// Preserves the workstation and complete route/batch identity of each formula.
+List<RecipeBookFormula> recipeBookFormulas(Recipe? recipe, {CraftMode? mode}) {
   if (recipe == null ||
       !recipe.hasRecordedRecipe ||
       (!recipe.isCraftable && !isBrowsableRecipeBookReference(recipe))) {
@@ -1574,6 +1580,7 @@ List<RecipeBookFormula> _recipeBookFormulas(Recipe? recipe) {
     return <RecipeBookFormula>[
       RecipeBookFormula(
         outputName: recipe.name,
+        mode: mode,
         type: recipe.type,
         method: _compactMethodValues(recipe.method, recipe.type),
         baseOutput: recipe.baseOutput,
@@ -1589,6 +1596,7 @@ List<RecipeBookFormula> _recipeBookFormulas(Recipe? recipe) {
   for (final variant in recipe.variants) {
     final formula = RecipeBookFormula(
       outputName: recipe.name,
+      mode: mode,
       type: variant.type,
       method: _compactMethodValues(variant.method, variant.type),
       variantId: variant.id,
@@ -1611,6 +1619,7 @@ String recipeBookFormulaSummary(RecipeBookFormula formula) {
 }
 
 String _formulaIdentity(RecipeBookFormula formula) => <String>[
+  formula.mode?.key ?? '',
   _fold(formula.routeId ?? ''),
   formula.batchMultiplier.toString(),
   _fold(formula.method),
@@ -1735,7 +1744,7 @@ RecipeBookItemInfo _exactCrystalHoverInfo(
     effects: info.effects,
     uses: _compactExactUses(info.uses),
     craftUses: _compactCraftUses(consumers, limit: 1),
-    acquisitionFormulas: _recipeBookFormulas(recipe),
+    acquisitionFormulas: recipeBookFormulas(recipe),
     acquisitionNotes: _compactAcquisitionNotes(recipe),
   );
 }

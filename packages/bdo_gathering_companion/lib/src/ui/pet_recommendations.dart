@@ -138,12 +138,12 @@ class _PetHeading extends StatelessWidget {
     child: Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        const Flexible(
+        Flexible(
           child: Text(
             'Pets',
             style: TextStyle(
               fontSize: 14,
-              color: muted,
+              color: context.gatheringColors.muted,
               fontWeight: FontWeight.w600,
               height: 1.2,
             ),
@@ -227,7 +227,7 @@ class _PetIcon extends StatelessWidget {
                           child: Icon(
                             Icons.check_circle,
                             size: 16,
-                            color: accent,
+                            color: context.gatheringColors.accent,
                           ),
                         ),
                       ),
@@ -329,10 +329,10 @@ class _PetDetailsSections extends StatelessWidget {
     mainAxisSize: MainAxisSize.min,
     crossAxisAlignment: CrossAxisAlignment.start,
     children: [
-      const Text(
+      Text(
         'Why it helps',
         style: TextStyle(
-          color: accent,
+          color: context.gatheringColors.accent,
           fontSize: 13.5,
           fontWeight: FontWeight.w700,
         ),
@@ -341,10 +341,10 @@ class _PetDetailsSections extends StatelessWidget {
       Text(pet.summary, style: const TextStyle(fontSize: 14, height: 1.28)),
       if (pet.details.isNotEmpty) ...[
         const Divider(height: 16),
-        const Text(
+        Text(
           'Details',
           style: TextStyle(
-            color: accent,
+            color: context.gatheringColors.accent,
             fontSize: 13.5,
             fontWeight: FontWeight.w700,
           ),

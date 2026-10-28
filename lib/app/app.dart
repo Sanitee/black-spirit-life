@@ -27,6 +27,7 @@ import 'window/app_startup_frame.dart';
 import 'window/window_host_service.dart';
 import 'window/world_root_startup_animation.dart';
 import 'workspace/application_workspace.dart';
+import 'workspace/retained_workspace_viewport.dart';
 
 /// Creates the app-owned Fish service host without waiting for the full
 /// application bundle. The service starts as soon as the validated personal
@@ -116,6 +117,7 @@ class BdoCraftPlannerApp extends StatelessWidget {
     this.fishCompanionRuntimeHost,
     this.fishCompanionRuntimeStarter,
     this.fishCompanionPageReadinessOverride,
+    this.diagnosticDeferFishPrewarm = false,
     this.updateService,
     this.updateSource,
     this.enableBetaUpdates = AppIdentity.outOfProcessBetaUpdatesEnabled,
@@ -136,6 +138,7 @@ class BdoCraftPlannerApp extends StatelessWidget {
   final FishCompanionRuntimeHost? fishCompanionRuntimeHost;
   final FishCompanionRuntimeStarter? fishCompanionRuntimeStarter;
   final FishCompanionPageReadinessOverride? fishCompanionPageReadinessOverride;
+  final bool diagnosticDeferFishPrewarm;
   final BetaUpdateService? updateService;
   final String? updateSource;
   final bool enableBetaUpdates;
@@ -164,6 +167,7 @@ class BdoCraftPlannerApp extends StatelessWidget {
           fishCompanionRuntimeStarter: fishCompanionRuntimeStarter,
           fishCompanionPageReadinessOverride:
               fishCompanionPageReadinessOverride,
+          diagnosticDeferFishPrewarm: diagnosticDeferFishPrewarm,
           updateService: updateService,
           updateSource: updateSource,
           enableBetaUpdates: enableBetaUpdates,
@@ -185,6 +189,7 @@ class _BootstrapGate extends StatefulWidget {
     required this.fishCompanionRuntimeHost,
     required this.fishCompanionRuntimeStarter,
     required this.fishCompanionPageReadinessOverride,
+    required this.diagnosticDeferFishPrewarm,
     required this.updateService,
     required this.updateSource,
     required this.enableBetaUpdates,
@@ -199,6 +204,7 @@ class _BootstrapGate extends StatefulWidget {
   final FishCompanionRuntimeHost? fishCompanionRuntimeHost;
   final FishCompanionRuntimeStarter? fishCompanionRuntimeStarter;
   final FishCompanionPageReadinessOverride? fishCompanionPageReadinessOverride;
+  final bool diagnosticDeferFishPrewarm;
   final BetaUpdateService? updateService;
   final String? updateSource;
   final bool enableBetaUpdates;
@@ -332,6 +338,7 @@ class _BootstrapGateState extends State<_BootstrapGate> {
         marketGateway: widget.marketGateway,
         resourceMapConfiguration: widget.resourceMapConfiguration,
         fishMapWorkspace: _fishMapWorkspace,
+        diagnosticDeferFishPrewarm: widget.diagnosticDeferFishPrewarm,
         gatheringDurabilityController: _gatheringDurabilityController,
         gatheringDurabilityParticipant:
             ApplicationWorkspaceDurabilityParticipant(
@@ -360,13 +367,14 @@ class _BootstrapGateState extends State<_BootstrapGate> {
   Widget _withPrewarmedFishMap(Widget foreground) => Stack(
     fit: StackFit.expand,
     children: <Widget>[
-      Offstage(
-        offstage: true,
-        child: ExcludeFocus(
-          excluding: true,
-          child: TickerMode(enabled: false, child: _fishMapWorkspace),
+      if (!widget.diagnosticDeferFishPrewarm)
+        RetainedWorkspaceViewport(
+          offstage: true,
+          child: ExcludeFocus(
+            excluding: true,
+            child: TickerMode(enabled: false, child: _fishMapWorkspace),
+          ),
         ),
-      ),
       foreground,
     ],
   );
@@ -394,6 +402,7 @@ class _BootstrapGateState extends State<_BootstrapGate> {
   }
 
   void _prewarmFishCompanion() {
+    if (widget.diagnosticDeferFishPrewarm) return;
     if (widget.fishCompanionRuntimeHost != null ||
         widget.fishCompanionRuntimeStarter != null ||
         Platform.environment['FLUTTER_TEST'] != 'true') {

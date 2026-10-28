@@ -14,6 +14,47 @@ import 'package:flutter_test/flutter_test.dart';
 import 'planner_test_fixture.dart';
 
 void main() {
+  testWidgets('optional clear keeps Tab empty but retains arrow selection', (
+    tester,
+  ) async {
+    await setPlannerTestSize(tester, const Size(900, 700));
+    final harness = PlannerTestHarness();
+    addTearDown(harness.controller.dispose);
+    final selected = <String>[];
+    await tester.pumpWidget(
+      _host(
+        harness,
+        allowEmptySelection: true,
+        fieldBuilder: _customField,
+        onSelected: (name) {
+          selected.add(name);
+          return true;
+        },
+      ),
+    );
+    final field = find.byType(TextField);
+    await tester.enterText(field, 'Sunrise');
+    await tester.pump();
+    expect(_popup(), findsOneWidget);
+    await tester.tap(find.byKey(const ValueKey('clear-test-choice')));
+    await tester.pumpAndSettle();
+    expect(selected.last, isEmpty);
+    expect(tester.widget<TextField>(field).controller!.text, isEmpty);
+    expect(tester.widget<TextField>(field).focusNode!.hasFocus, isTrue);
+    expect(_popup(), findsNothing);
+    await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+    await tester.pumpAndSettle();
+    expect(selected.every((value) => value.isEmpty), isTrue);
+    await tester.tap(field);
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+    await tester.testTextInput.receiveAction(TextInputAction.done);
+    await tester.pumpAndSettle();
+    expect(selected.last, 'Silver Azalea');
+    expect(tester.widget<TextField>(field).controller!.text, 'Silver Azalea');
+    expect(_popup(), findsNothing);
+    expect(tester.takeException(), isNull);
+  });
+
   testWidgets('default chooser keeps Planner copy, dimensions and artwork', (
     tester,
   ) async {
@@ -21,6 +62,7 @@ void main() {
     final harness = PlannerTestHarness();
     addTearDown(harness.controller.dispose);
     await tester.pumpWidget(_host(harness));
+    expect(find.byKey(const ValueKey('clear-test-choice')), findsNothing);
     final field = find.byType(TextField);
     expect(
       tester.widget<TextField>(field).decoration?.hintText,
@@ -337,6 +379,7 @@ Widget _customField(
   VoidCallback onTap,
   ValueChanged<String> onSubmitted,
   FocusOnKeyEventCallback onKeyEvent,
+  VoidCallback? onClear,
 ) => Focus(
   onKeyEvent: onKeyEvent,
   child: TextField(
@@ -346,7 +389,16 @@ Widget _customField(
     onChanged: onChanged,
     onTap: onTap,
     onSubmitted: onSubmitted,
-    decoration: const InputDecoration(hintText: 'Custom item field'),
+    decoration: InputDecoration(
+      hintText: 'Custom item field',
+      suffixIcon: onClear == null
+          ? null
+          : IconButton(
+              key: const ValueKey('clear-test-choice'),
+              onPressed: onClear,
+              icon: const Icon(Icons.close),
+            ),
+    ),
   ),
 );
 
@@ -371,6 +423,7 @@ Widget _host(
   Widget Function(BuildContext, String)? itemIconBuilder,
   PlannerTargetOptionBuilder? optionBuilder,
   PlannerTargetFieldBuilder? fieldBuilder,
+  bool allowEmptySelection = false,
 }) => AppOverlayCoordinatorHost(
   child: MaterialApp(
     theme: StandardSpec.theme.materialTheme(),
@@ -403,6 +456,7 @@ Widget _host(
                 itemIconBuilder: itemIconBuilder,
                 optionBuilder: optionBuilder,
                 fieldBuilder: fieldBuilder,
+                allowEmptySelection: allowEmptySelection,
               ),
             ),
           ),

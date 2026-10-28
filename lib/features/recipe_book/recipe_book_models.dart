@@ -73,6 +73,7 @@ final class RecipeBookEntry {
     required this.usedInCount,
     this.marketStock,
     this.profitability,
+    this.mode,
   });
 
   final String name;
@@ -84,6 +85,7 @@ final class RecipeBookEntry {
   final int usedInCount;
   final double? marketStock;
   final RecipeProfitabilityQuote? profitability;
+  final CraftMode? mode;
 }
 
 final class RecipeBookSnapshot {

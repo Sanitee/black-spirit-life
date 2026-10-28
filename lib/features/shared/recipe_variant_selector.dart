@@ -106,6 +106,7 @@ class RecipeVariantSelector extends StatelessWidget {
         .toList(growable: false);
     final batches =
         availableVariants
+            .where((variant) => _sameId(variant.routeId, selected.routeId))
             .map((variant) => variant.batchMultiplier)
             .toSet()
             .toList()

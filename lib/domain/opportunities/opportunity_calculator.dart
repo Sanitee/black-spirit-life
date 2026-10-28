@@ -38,6 +38,34 @@ enum OpportunityIssue {
   invalidSalePrice,
 }
 
+/// Inventory resolved once for a group of calculations using the same inputs.
+/// Copies the recipe map so later in-place edits cannot reuse stale identities.
+final class OpportunityInventorySnapshot {
+  OpportunityInventorySnapshot._(
+    Map<String, Recipe> recipes,
+    this._inventory,
+    this._rules,
+  ) : _recipes = Map.unmodifiable(recipes),
+      _owned = _ownedInventory(_inventory, recipes, _rules);
+
+  final Map<String, Recipe> _recipes;
+  final Map<String, double> _inventory;
+  final planning.PlannerRules _rules;
+  final Map<String, int> _owned;
+
+  bool _matches(
+    Map<String, Recipe> recipes,
+    ModeState state,
+    planning.PlannerRules rules,
+  ) =>
+      identical(_inventory, state.inventory) &&
+      identical(_rules, rules) &&
+      recipes.length == _recipes.length &&
+      recipes.entries.every(
+        (entry) => identical(_recipes[entry.key], entry.value),
+      );
+}
+
 /// A user's own measured or estimated timing, not an asserted game speed.
 /// One craft means one complete selected formula, including a 10x formula.
 final class OpportunityTimingAssumption {
@@ -91,11 +119,15 @@ final class OpportunityIngredientQuote {
     required Iterable<OpportunityIssue> issues,
     this.estimatedMarketQuantity = 0,
     this.estimatedUnitPrice,
+    this.estimatedFromPreorder = false,
     this.estimatedCost,
     this.estimateKind,
     this.marketUnitPrice,
     this.marketUnitPriceEstimated = false,
     this.stockCoversRequest = false,
+    this.ownedQuantity = 0,
+    this.ownedSaleAfterTax = 0,
+    this.allSaleAfterTax,
   }) : originalNames = Set<String>.unmodifiable(originalNames),
        issues = Set<OpportunityIssue>.unmodifiable(issues);
 
@@ -104,9 +136,22 @@ final class OpportunityIngredientQuote {
   final Set<String> originalNames;
   final double quantityPerCraft;
   final int quantity;
+
+  /// Owned units consumed by this batch, capped at its requirement.
+  final int ownedQuantity;
+  int get purchaseQuantity => quantity - ownedQuantity;
+
+  /// Forgone listing proceeds. Null means an owned sellable input is unpriced.
+  final double? ownedSaleAfterTax;
+
+  /// Listing proceeds for the entire selected input, independent of inventory.
+  /// Null means unpriced; an audited non-marketable input contributes no market
+  /// proceeds. Its NPC purchase price is never substituted as a resale price.
+  final double? allSaleAfterTax;
+  double? get comparisonCost => _sumCost(costForCalculation, ownedSaleAfterTax);
   final double? npcUnitPrice;
 
-  /// Cheapest checked sell order, or the fresh summary price as an estimate.
+  /// Cheapest checked sell order, or highest fresh preorder / summary estimate.
   /// This remains visible independently of which supplier the calculation uses.
   final double? marketUnitPrice;
   final bool marketUnitPriceEstimated;
@@ -114,9 +159,10 @@ final class OpportunityIngredientQuote {
   final double? buyCost;
   final double? preliminaryCost;
 
-  /// Units valued at a fresh base price, never a claim of buyable stock.
+  /// Units valued at a fresh preorder or base price, never buyable stock.
   final int estimatedMarketQuantity;
   final double? estimatedUnitPrice;
+  final bool estimatedFromPreorder;
   final OpportunityInputEstimateKind? estimateKind;
 
   /// Full input cost: verified asks/NPC costs plus current-price estimated units.
@@ -166,6 +212,7 @@ final class OpportunityQuote {
     this.extraCostPerCraft = 0,
     this.estimatedInputCost,
     this.customSalePrice,
+    this.usesInventory = false,
   }) : ingredients = List<OpportunityIngredientQuote>.unmodifiable(ingredients),
        issues = Set<OpportunityIssue>.unmodifiable(issues);
 
@@ -178,6 +225,23 @@ final class OpportunityQuote {
   final double? expectedOutput;
   final OpportunityMarketItem? outputMarket;
   final List<OpportunityIngredientQuote> ingredients;
+  final bool usesInventory;
+  double? get allIngredientSales =>
+      ingredients.isEmpty ||
+          ingredients.any((input) => input.allSaleAfterTax == null)
+      ? null
+      : ingredients.fold<double>(
+          0,
+          (sum, input) => sum + input.allSaleAfterTax!,
+        );
+  double? get ownedIngredientSales =>
+      ingredients.isEmpty ||
+          ingredients.any((input) => input.ownedSaleAfterTax == null)
+      ? null
+      : ingredients.fold<double>(
+          0,
+          (sum, input) => sum + input.ownedSaleAfterTax!,
+        );
 
   bool get ingredientsAvailable =>
       crafts > 0 &&
@@ -200,7 +264,7 @@ final class OpportunityQuote {
   /// Main-output proceeds after tax, at the supplied price or current base price.
   final double? listingRevenue;
 
-  /// Full current ask-depth/NPC purchase cost. Null is not a free input.
+  /// Current ask-depth/NPC cost of purchases still needed. Null is not free.
   final double? inputCost;
 
   /// Full run input estimate, only when every input can be priced and at least
@@ -245,6 +309,9 @@ final class OpportunityQuote {
   double? get listingProfit => _difference(listingRevenue, totalCost);
   double? get preliminaryListingProfit =>
       _difference(listingRevenue, _sumCost(preliminaryInputCost, extraCost));
+  double? get preliminaryComparisonProfit => usesInventory
+      ? _difference(preliminaryListingProfit, ownedIngredientSales)
+      : preliminaryListingProfit;
   double? get buyerProfit => _difference(buyerRevenue, totalCost);
   double? get listingProfitPerCraft =>
       crafts > 0 && listingProfit != null ? listingProfit! / crafts : null;
@@ -253,14 +320,19 @@ final class OpportunityQuote {
   double? get listingProfitPerHour => _hourly(listingProfit, estimatedSeconds);
   double? get buyerProfitPerHour => _hourly(buyerProfit, estimatedSeconds);
 
-  double? profitFor(OpportunitySaleMode mode) =>
+  double? cashProfitFor(OpportunitySaleMode mode) =>
       hasCustomSalePrice || mode == OpportunitySaleMode.listing
       ? listingProfit
       : buyerProfit;
+
+  /// With inventory, compare both choices from the same starting inventory.
+  double? profitFor(OpportunitySaleMode mode) => usesInventory
+      ? _difference(cashProfitFor(mode), ownedIngredientSales)
+      : cashProfitFor(mode);
 }
 
-/// Direct purchases only. No owned inputs, upstream crafts, unrecorded
-/// byproducts, free materials, saved fallback prices, or invented speeds.
+/// Direct inputs only, optionally using owned stock with its resale value.
+/// No upstream crafts, unrecorded byproducts, saved fallback prices or speeds.
 /// Unchecked depth or a confirmed shortage may use a fresh base-price estimate,
 /// never availability. Every input must still have a real price.
 final class OpportunityCalculator {
@@ -273,6 +345,12 @@ final class OpportunityCalculator {
 
   final PlannerEngine engine;
   final Map<String, double> catalogNpcPrices;
+
+  OpportunityInventorySnapshot prepareInventory({
+    required Map<String, Recipe> recipes,
+    required ModeState state,
+    required planning.PlannerRules rules,
+  }) => OpportunityInventorySnapshot._(recipes, state.inventory, rules);
 
   Set<String> marketItemNames({
     required Recipe recipe,
@@ -377,6 +455,8 @@ final class OpportunityCalculator {
     int crafts = 1,
     OpportunitySaleMode saleMode = OpportunitySaleMode.listing,
     bool preferAvailableInputs = false,
+    bool useInventory = false,
+    Set<String> nonMarketableIds = const {},
     String? selectedVariantId,
     OpportunityTimingAssumption? timing,
     double extraCostPerRun = 0,
@@ -385,11 +465,17 @@ final class OpportunityCalculator {
     Duration maxMarketAge = const Duration(minutes: 5),
     Map<String, String> ingredientChoices = const {},
     Map<String, Map<String, int>> ingredientAllocations = const {},
+    OpportunityInventorySnapshot? preparedInventory,
     void Function(String originalName, OpportunityIngredientQuote candidate)?
     onInputCandidate,
   }) {
-    OpportunityQuote unavailable(OpportunityIssue issue) =>
-        _unavailable(recipe, crafts, issue, customSalePrice: customSalePrice);
+    OpportunityQuote unavailable(OpportunityIssue issue) => _unavailable(
+      recipe,
+      crafts,
+      issue,
+      customSalePrice: customSalePrice,
+      usesInventory: useInventory,
+    );
     final forbidden =
         _contains(rules.legacyUnavailableItems, recipe.name) ||
         isTemporarilyArchivedItem(recipe.name, itemId: recipe.marketId);
@@ -421,6 +507,11 @@ final class OpportunityCalculator {
         : <(Recipe, RecipeVariant?)>[
             (recipe.resolveVariant(locked.id), locked),
           ];
+    final owned = !useInventory
+        ? const <String, int>{}
+        : preparedInventory?._matches(recipes, state, rules) == true
+        ? preparedInventory!._owned
+        : _ownedInventory(state.inventory, recipes, rules);
     OpportunityQuote? best;
     for (final (formula, variant) in formulas) {
       final quote = _evaluateFormula(
@@ -442,6 +533,9 @@ final class OpportunityCalculator {
         ingredientAllocations: ingredientAllocations,
         onInputCandidate: onInputCandidate,
         preferAvailableInputs: preferAvailableInputs,
+        useInventory: useInventory,
+        owned: owned,
+        nonMarketableIds: nonMarketableIds,
       );
       if (best == null ||
           _compareQuotes(quote, best, saleMode, preferAvailableInputs) < 0) {
@@ -462,6 +556,9 @@ final class OpportunityCalculator {
     required DateTime now,
     required int crafts,
     required bool preferAvailableInputs,
+    required bool useInventory,
+    required Map<String, int> owned,
+    required Set<String> nonMarketableIds,
     required OpportunityTimingAssumption? timing,
     required double extraCostPerRun,
     required double extraCostPerCraft,
@@ -472,9 +569,29 @@ final class OpportunityCalculator {
     required void Function(String, OpportunityIngredientQuote)?
     onInputCandidate,
   }) {
-    OpportunityQuote unavailable(OpportunityIssue issue) =>
-        _unavailable(formula, crafts, issue, customSalePrice: customSalePrice);
+    OpportunityQuote unavailable(OpportunityIssue issue) => _unavailable(
+      formula,
+      crafts,
+      issue,
+      customSalePrice: customSalePrice,
+      usesInventory: useInventory,
+    );
     final plannerRules = _withoutFallbacks(rules);
+    final excludedNpcSources = <String>{
+      for (final name in state.hiddenItems) name.trim().toLowerCase(),
+      for (final entry in state.recipeEdits.entries)
+        if (entry.value == null) entry.key.trim().toLowerCase(),
+    };
+    OpportunityIngredientQuote buy(_Input input) => _buy(
+      input,
+      crafts,
+      market,
+      now,
+      maxMarketAge,
+      owned: owned[input.key] ?? 0,
+      taxRate: marketNetRate(marketTax),
+      nonMarketable: nonMarketableIds.contains(input.id),
+    );
     // The same resolved formula is used for every substitute/grade candidate.
     // Build its catalog overlay once, not once per candidate.
     final formulaRecipes = <String, Recipe>{...recipes, formula.name: formula};
@@ -577,11 +694,13 @@ final class OpportunityCalculator {
           final id = _itemId(selected.name, recipes, rules);
           final alias = _lookup(rules.marketNameAliases, selected.name);
           final npc =
-              _positive(source.npcPrice) ??
-              _positive(_lookup(catalogNpcPrices, selected.name) ?? 0) ??
-              (alias == null
-                  ? null
-                  : _positive(_lookup(catalogNpcPrices, alias) ?? 0));
+              excludedNpcSources.contains(selected.name.trim().toLowerCase())
+              ? null
+              : _positive(source.npcPrice) ??
+                    _positive(_lookup(catalogNpcPrices, selected.name) ?? 0) ??
+                    (alias == null
+                        ? null
+                        : _positive(_lookup(catalogNpcPrices, alias) ?? 0));
           final input = _Input(
             name: selected.name,
             id: id,
@@ -591,7 +710,7 @@ final class OpportunityCalculator {
           );
           final previous = aggregated[input.key];
           final combined = previous == null ? input : previous.plus(input);
-          final quote = _buy(combined, crafts, market, now, maxMarketAge);
+          final quote = buy(combined);
           if ((availableOptions[selected.name]?.quantityPerCraft ??
                   double.infinity) >
               input.quantityPerCraft) {
@@ -599,21 +718,19 @@ final class OpportunityCalculator {
           }
           onInputCandidate?.call(
             ingredient.name,
-            previous == null
-                ? quote
-                : _buy(input, crafts, market, now, maxMarketAge),
+            previous == null ? quote : buy(input),
           );
           final explicit = ingredientChoices[ingredient.name];
           if (explicit != null && selected.name != explicit) continue;
-          final previousQuote = previous == null
+          final previousQuote = previous == null ? null : buy(previous);
+          final incrementalCost = quote.comparisonCost != null
+              ? quote.comparisonCost! - (previousQuote?.comparisonCost ?? 0)
+              : quote.preliminaryCost == null || quote.ownedSaleAfterTax == null
               ? null
-              : _buy(previous, crafts, market, now, maxMarketAge);
-          final incrementalCost = quote.costForCalculation != null
-              ? quote.costForCalculation! -
-                    (previousQuote?.costForCalculation ?? 0)
-              : quote.preliminaryCost == null
-              ? null
-              : quote.preliminaryCost! - (previousQuote?.preliminaryCost ?? 0);
+              : quote.preliminaryCost! +
+                    quote.ownedSaleAfterTax! -
+                    (previousQuote?.preliminaryCost ?? 0) -
+                    (previousQuote?.ownedSaleAfterTax ?? 0);
           if (chosenQuote == null ||
               _compareInputs(
                     quote,
@@ -699,8 +816,7 @@ final class OpportunityCalculator {
       );
     }
     final inputs = <OpportunityIngredientQuote>[
-      for (final input in aggregated.values)
-        _buy(input, crafts, market, now, maxMarketAge),
+      for (final input in aggregated.values) buy(input),
     ];
     for (final input in inputs) {
       issues.addAll(input.issues);
@@ -816,6 +932,7 @@ final class OpportunityCalculator {
       extraCostPerRun: extraCostPerRun,
       extraCostPerCraft: extraCostPerCraft,
       customSalePrice: customSalePrice,
+      usesInventory: useInventory,
       issues: issues,
     );
   }
@@ -826,8 +943,11 @@ OpportunityIngredientQuote _buy(
   int crafts,
   OpportunityMarketSnapshot market,
   DateTime now,
-  Duration maxAge,
-) {
+  Duration maxAge, {
+  int owned = 0,
+  double taxRate = 1,
+  bool nonMarketable = false,
+}) {
   final required = (input.quantityPerCraft * crafts + input.allocatedQuantity)
       .ceil();
   final archived = isTemporarilyArchivedItem(input.name, itemId: input.id);
@@ -840,11 +960,6 @@ OpportunityIngredientQuote _buy(
           (item.basePrice ?? 0) > 0
       ? item.basePrice!.toDouble()
       : null;
-  final preliminaryUnit = npc == null
-      ? base
-      : base == null
-      ? npc
-      : math.min(npc, base);
   final issues = <OpportunityIssue>{};
   final bookFresh = item != null && item.bookIsFresh(now, maxAge);
   final bookKnown =
@@ -855,7 +970,32 @@ OpportunityIngredientQuote _buy(
   final asks = bookKnown
       ? _validLevels(item.asks!, buying: true)
       : const <OpportunityMarketLevel>[];
-  var left = required;
+  double? preorderPrice;
+  if (bookKnown) {
+    for (final bid in item.bids!) {
+      if (bid.price <= 0 || bid.quantity < 0) {
+        preorderPrice = null;
+        break;
+      }
+      if (bid.quantity > 0 && bid.price > (preorderPrice ?? 0)) {
+        preorderPrice = bid.price.toDouble();
+      }
+    }
+  }
+  final estimateUnit = preorderPrice ?? base;
+  final preliminaryUnit = npc == null
+      ? estimateUnit
+      : estimateUnit == null
+      ? npc
+      : math.min(npc, estimateUnit);
+  final usedOwned = math.min(required, owned);
+  final purchasing = required - usedOwned;
+  final ownedSale = usedOwned == 0 || nonMarketable
+      ? 0.0
+      : base == null
+      ? null
+      : usedOwned * base * taxRate;
+  var left = purchasing;
   var cost = 0.0;
   var marketUnits = 0;
   var npcUnits = 0;
@@ -887,12 +1027,12 @@ OpportunityIngredientQuote _buy(
       issues.add(OpportunityIssue.insufficientInputs);
     }
   }
-  // A fresh quote can price every unverified unit, but cannot prove availability.
-  // Preserve actual ask/NPC costs and distinguish unchecked depth from a known
-  // shortage. Stale/missing base quotes never become zero-cost ingredients.
-  final estimatedUnits = left > 0 && base != null ? left : 0;
+  // Price the shortfall at the highest active preorder, falling back to a fresh
+  // summary only when no valid bid is available. Neither implies seller stock.
+  // Preserve the actual ask/NPC portion; unknown prices never become zero.
+  final estimatedUnits = left > 0 && estimateUnit != null ? left : 0;
   final estimatedCost = estimatedUnits > 0
-      ? cost + estimatedUnits * base!
+      ? cost + estimatedUnits * estimateUnit!
       : null;
   final invalidLatestBook =
       bookFresh &&
@@ -910,24 +1050,39 @@ OpportunityIngredientQuote _buy(
     originalNames: input.originals,
     quantityPerCraft: input.quantityPerCraft + input.allocatedQuantity / crafts,
     quantity: required,
+    ownedQuantity: usedOwned,
+    ownedSaleAfterTax: ownedSale,
+    allSaleAfterTax: nonMarketable
+        ? 0.0
+        : base == null
+        ? null
+        : required * base * taxRate,
     npcUnitPrice: npc,
-    marketUnitPrice: asks.isNotEmpty ? asks.first.price.toDouble() : base,
-    marketUnitPriceEstimated: asks.isEmpty && base != null,
+    marketUnitPrice: asks.isNotEmpty
+        ? asks.first.price.toDouble()
+        : estimateUnit,
+    marketUnitPriceEstimated: asks.isEmpty && estimateUnit != null,
     market: item,
-    buyCost: left == 0 && cost.isFinite && cost > 0 ? cost : null,
+    buyCost: left == 0 && cost.isFinite && (cost > 0 || purchasing == 0)
+        ? cost
+        : null,
     estimatedMarketQuantity: estimatedCost?.isFinite == true
         ? estimatedUnits
         : 0,
-    estimatedUnitPrice: estimatedCost?.isFinite == true ? base : null,
+    estimatedUnitPrice: estimatedCost?.isFinite == true ? estimateUnit : null,
+    estimatedFromPreorder:
+        estimatedCost?.isFinite == true && preorderPrice != null,
     estimatedCost: estimatedCost?.isFinite == true ? estimatedCost : null,
     estimateKind: estimatedCost?.isFinite == true
         ? bookKnown
               ? OpportunityInputEstimateKind.missingStock
               : OpportunityInputEstimateKind.uncheckedDepth
         : null,
-    preliminaryCost: preliminaryUnit == null
+    preliminaryCost: purchasing == 0
+        ? 0
+        : preliminaryUnit == null
         ? null
-        : required * preliminaryUnit,
+        : purchasing * preliminaryUnit,
     filledQuantity: required - left,
     marketQuantity: marketUnits,
     npcQuantity: npcUnits,
@@ -935,10 +1090,13 @@ OpportunityIngredientQuote _buy(
     availableQuantity: npc != null
         ? null
         : bookKnown
-        ? asks.fold<int>(0, (sum, level) => sum + level.quantity)
+        ? owned + asks.fold<int>(0, (sum, level) => sum + level.quantity)
         : null,
     stockCoversRequest:
-        required > 0 && (npc != null || (stock != null && stock >= required)),
+        required > 0 &&
+        (purchasing == 0 ||
+            npc != null ||
+            (stock != null && stock >= purchasing)),
     issues: issues,
   );
 }
@@ -1070,14 +1228,14 @@ int _compareQuotes(
   }
   if (aProfit == null &&
       bProfit == null &&
-      (a.preliminaryListingProfit != null ||
-          b.preliminaryListingProfit != null)) {
-    final aEstimate = a.preliminaryListingProfit == null
+      (a.preliminaryComparisonProfit != null ||
+          b.preliminaryComparisonProfit != null)) {
+    final aEstimate = a.preliminaryComparisonProfit == null
         ? double.negativeInfinity
-        : a.preliminaryListingProfit! / a.expectedOutput!;
-    final bEstimate = b.preliminaryListingProfit == null
+        : a.preliminaryComparisonProfit! / a.expectedOutput!;
+    final bEstimate = b.preliminaryComparisonProfit == null
         ? double.negativeInfinity
-        : b.preliminaryListingProfit! / b.expectedOutput!;
+        : b.preliminaryComparisonProfit! / b.expectedOutput!;
     final result = bEstimate.compareTo(aEstimate);
     if (result != 0) return result;
   }
@@ -1114,6 +1272,22 @@ Iterable<String> _optionNames(
     }
     if (name == ingredient.name || _lookup(recipes, name) != null) yield name;
   }
+}
+
+Map<String, int> _ownedInventory(
+  Map<String, double> inventory,
+  Map<String, Recipe> recipes,
+  planning.PlannerRules rules,
+) {
+  final owned = <String, int>{};
+  for (final entry in inventory.entries) {
+    if (!entry.value.isFinite || entry.value <= 0) continue;
+    final id = _itemId(entry.key, recipes, rules);
+    final key = id == null ? 'name:${_fold(entry.key)}' : 'id:$id';
+    // Aliases for the same item must not count the same stock twice.
+    owned[key] = math.max(owned[key] ?? 0, entry.value.floor());
+  }
+  return owned;
 }
 
 planning.PlannerState _selectionState(
@@ -1166,19 +1340,20 @@ String? _itemId(
   planning.PlannerRules rules,
 ) {
   final recipeId = _lookup(recipes, name)?.marketId;
-  final ruleId = _lookup(rules.marketIds, name);
-  final direct =
-      (recipeId == null ? null : normalizeNumericMarketId(recipeId)) ??
-      (ruleId == null ? null : normalizeNumericMarketId(ruleId));
+  final direct = recipeId == null ? null : normalizeNumericMarketId(recipeId);
   if (direct != null) return direct;
+  final ruleId = _lookup(rules.marketIds, name);
+  final fallback = ruleId == null ? null : normalizeNumericMarketId(ruleId);
+  if (fallback != null) return fallback;
   final alias = _lookup(rules.marketNameAliases, name);
   if (alias == null || _fold(alias) == _fold(name)) return null;
   final aliasRecipeId = _lookup(recipes, alias)?.marketId;
+  final aliasDirect = aliasRecipeId == null
+      ? null
+      : normalizeNumericMarketId(aliasRecipeId);
+  if (aliasDirect != null) return aliasDirect;
   final aliasRuleId = _lookup(rules.marketIds, alias);
-  return (aliasRecipeId == null
-          ? null
-          : normalizeNumericMarketId(aliasRecipeId)) ??
-      (aliasRuleId == null ? null : normalizeNumericMarketId(aliasRuleId));
+  return aliasRuleId == null ? null : normalizeNumericMarketId(aliasRuleId);
 }
 
 OpportunityQuote _unavailable(
@@ -1186,8 +1361,10 @@ OpportunityQuote _unavailable(
   int crafts,
   OpportunityIssue issue, {
   int? customSalePrice,
+  bool usesInventory = false,
 }) => OpportunityQuote(
   recipeName: recipe.name,
+  usesInventory: usesInventory,
   selectedVariantId: null,
   variantLabel: null,
   batchMultiplier: 1,
@@ -1214,14 +1391,18 @@ OpportunityQuote _unavailable(
 T? _lookup<T>(Map<String, T> values, String name) {
   final direct = values[name];
   if (direct != null) return direct;
+  final folded = _fold(name);
   for (final entry in values.entries) {
-    if (_fold(entry.key) == _fold(name)) return entry.value;
+    if (_fold(entry.key) == folded) return entry.value;
   }
   return null;
 }
 
-bool _contains(Iterable<String> values, String name) =>
-    values.any((v) => _fold(v) == _fold(name));
+bool _contains(Iterable<String> values, String name) {
+  final folded = _fold(name);
+  return values.any((value) => _fold(value) == folded);
+}
+
 String _fold(String name) => name.trim().toLowerCase();
 double? _positive(double value) => value.isFinite && value > 0 ? value : null;
 bool _validQuantity(double quantity, int crafts) =>
@@ -1241,8 +1422,8 @@ OpportunityMarketItem? _marketItem(
       : null;
 }
 
-double? _sumCost(double? inputCost, double extraCost) =>
-    inputCost != null && (inputCost + extraCost).isFinite
+double? _sumCost(double? inputCost, double? extraCost) =>
+    inputCost != null && extraCost != null && (inputCost + extraCost).isFinite
     ? inputCost + extraCost
     : null;
 double? _difference(double? revenue, double? cost) =>

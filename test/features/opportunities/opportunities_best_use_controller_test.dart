@@ -144,6 +144,42 @@ void main() {
   );
 
   test(
+    'clearing Best use during calculation cannot restore the previous selection or rows',
+    () async {
+      final f = await _Fixture.create();
+      addTearDown(f.dispose);
+      final c = f.controller;
+      final plannerBefore = f.harness.bundle.controller.documentSnapshot;
+      final preferencesBefore = c.preferences.toJson()..['bestUseItem'] = '';
+      expect(c.bestUseQuotes, hasLength(3));
+
+      c.selectBestUseItem(_different);
+      expect(c.calculatingBestUse, isTrue);
+      final pending = c.calculationSettled;
+      c.selectBestUseItem('');
+      expect(c.preferences.bestUseItem, isEmpty);
+      expect(c.bestUseQuotes, isEmpty);
+      await pending;
+      await f.settle();
+      expect(c.calculatingBestUse, isFalse);
+      expect(c.bestUseQuotes, isEmpty);
+      expect(c.visibleBestUseQuotes, isEmpty);
+      expect(c.preferences.toJson(), preferencesBefore);
+
+      // A subsequent receipt-style recalculation must not revive stale input.
+      c.recalculate(marketUpdate: true);
+      await c.calculationSettled;
+      expect(c.preferences.bestUseItem, isEmpty);
+      expect(c.bestUseQuotes, isEmpty);
+      expect(c.visibleBestUseQuotes, isEmpty);
+      expect(f.harness.bundle.controller.documentSnapshot, same(plannerBefore));
+      expect(f.transport.quoteIds, isEmpty);
+      expect(f.transport.books, isEmpty);
+      expect(c.notice, isNull);
+    },
+  );
+
+  test(
     'ready filter scans hidden candidates but ignores selected material stock',
     () async {
       final f = await _Fixture.create();

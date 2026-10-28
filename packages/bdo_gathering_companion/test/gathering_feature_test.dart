@@ -156,9 +156,13 @@ void main() {
     );
     expect(sourceSemantics.properties.link, isTrue);
 
-    final titleRect = tester.getRect(find.text('Gathering'));
     final sourceRect = tester.getRect(source);
-    expect(sourceRect.right, lessThanOrEqualTo(titleRect.left));
+    expect(source.hitTestable(), findsOneWidget);
+    expect(sourceRect.left, greaterThanOrEqualTo(0));
+    expect(
+      sourceRect.bottom,
+      lessThanOrEqualTo(tester.view.physicalSize.height),
+    );
     expect(sourceRect.size.shortestSide, greaterThanOrEqualTo(44));
     expect(sourceRect.right, lessThanOrEqualTo(1500));
     expect(find.byKey(const ValueKey('workflow-spots')), findsOneWidget);
@@ -186,7 +190,7 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets('Garmoth Upload opens the native session importer', (
+  testWidgets('Gathering header no longer shows the Garmoth Upload shortcut', (
     tester,
   ) async {
     tester.view.devicePixelRatio = 1;
@@ -219,20 +223,12 @@ void main() {
     );
     await tester.pump();
 
-    final upload = find.byKey(const ValueKey('open-garmoth-upload'));
-    expect(upload, findsOneWidget);
-    expect(tester.widget(upload), isA<TextButton>());
-    expect(
-      find.descendant(of: upload, matching: find.text('Garmoth Upload')),
-      findsOneWidget,
-    );
-
-    await tester.tap(upload);
-    await tester.pump();
-
-    expect(calls, hasLength(1));
-    expect(calls.single.method, 'openSessionImport');
-    expect(calls.single.arguments, {'receiptDirectory': _receiptDirectory});
+    expect(find.byKey(const ValueKey('open-garmoth-upload')), findsNothing);
+    expect(find.text('Garmoth Upload'), findsNothing);
+    expect(find.byTooltip('Garmoth Upload'), findsNothing);
+    expect(find.byKey(const ValueKey('open-minigame-helper')), findsOneWidget);
+    expect(find.byTooltip('Help'), findsOneWidget);
+    expect(calls, isEmpty);
     expect(tester.takeException(), isNull);
   });
 
@@ -277,7 +273,7 @@ void main() {
       expect(find.byKey(const ValueKey('workflow-spots')), findsOneWidget);
       expect(find.byKey(const ValueKey('workflow-prepare')), findsOneWidget);
       expect(find.byKey(const ValueKey('workflow-gather')), findsOneWidget);
-      expect(find.text('Sessions'), findsOneWidget);
+      expect(find.text('Journal'), findsOneWidget);
       expect(find.byKey(const ValueKey('spot-list')), findsOneWidget);
       expect(find.byKey(const ValueKey('preparation-summary')), findsOneWidget);
       expect(find.byKey(const ValueKey('paste-screenshot')), findsNothing);
@@ -316,16 +312,16 @@ void main() {
         find.byKey(const ValueKey('open-minigame-helper')),
         findsOneWidget,
       );
-      expect(find.byKey(const ValueKey('open-garmoth-upload')), findsOneWidget);
+      expect(find.byKey(const ValueKey('open-garmoth-upload')), findsNothing);
 
       await tester.tap(find.byKey(const ValueKey('workflow-spots')));
-      await tester.pump();
-      final initialOverlay = tester.widget<AnimatedOpacity>(
-        find.byKey(const ValueKey('spot-filter-overlay')),
-      );
-      if (initialOverlay.opacity != 0) {
+      await tester.pumpAndSettle();
+      if (find
+          .byKey(const ValueKey('spot-ranking-palette'))
+          .evaluate()
+          .isNotEmpty) {
         await tester.tap(
-          find.byKey(const ValueKey('spot-filter-rail-control')),
+          find.byKey(const ValueKey('spot-filter-compact-control')),
         );
         await tester.pumpAndSettle();
       }
@@ -339,28 +335,31 @@ void main() {
         find.byKey(const ValueKey('spot-list')),
       );
       expect(
-        find.byKey(const ValueKey('spot-filter-vertical-label')),
+        find.byKey(const ValueKey('spot-filter-compact-control')),
         findsOneWidget,
       );
-      expect(find.byKey(const ValueKey('spot-filter-divider')), findsOneWidget);
-      final hiddenFilters = tester.widget<AnimatedOpacity>(
-        find.byKey(const ValueKey('spot-filter-overlay')),
+      expect(
+        find.byKey(const ValueKey('spot-filter-vertical-label')),
+        findsNothing,
       );
-      expect(hiddenFilters.opacity, 0);
+      expect(find.byKey(const ValueKey('spot-ranking-palette')), findsNothing);
       expect(
         find.byKey(const ValueKey('spot-ranking-sharp')).hitTestable(),
         findsNothing,
       );
-      await tester.tap(find.byKey(const ValueKey('spot-filter-rail-control')));
+      await tester.tap(
+        find.byKey(const ValueKey('spot-filter-compact-control')),
+      );
       await tester.pumpAndSettle();
       expect(
-        find.byKey(const ValueKey('spot-filter-hide-arrow')),
+        find.byKey(const ValueKey('spot-filter-compact-control')),
         findsOneWidget,
       );
       final rankingPalette = tester.getRect(
         find.byKey(const ValueKey('spot-ranking-palette')),
       );
-      expect(rankingPalette.width, inInclusiveRange(240, 286));
+      expect(rankingPalette.width, greaterThanOrEqualTo(240));
+      expect(rankingPalette.width, lessThanOrEqualTo(initialSpotList.width));
       expect(rankingPalette.left, greaterThanOrEqualTo(0));
       expect(rankingPalette.right, lessThanOrEqualTo(1500));
       expect(rankingPalette.bottom, lessThanOrEqualTo(940));
@@ -449,9 +448,9 @@ void main() {
         find.byKey(const ValueKey('spot-list')),
       );
       expect(rankedSpotList.left, closeTo(initialSpotList.left, .01));
-      expect(rankedSpotList.top, closeTo(initialSpotList.top, .01));
+      expect(rankedSpotList.top, greaterThan(initialSpotList.top));
       expect(rankedSpotList.width, closeTo(initialSpotList.width, .01));
-      expect(rankedSpotList.height, closeTo(initialSpotList.height, .01));
+      expect(rankedSpotList.bottom, closeTo(initialSpotList.bottom, .01));
       expect(find.byKey(const ValueKey('spot-source-personal')), findsNothing);
       expect(find.byKey(const ValueKey('spot-source-bairog')), findsNothing);
       expect(
@@ -499,10 +498,12 @@ void main() {
       );
       expect(find.textContaining('gathers/h'), findsWidgets);
       expect(find.text('At 878 gathers/h'), findsOneWidget);
-      await tester.tap(find.byKey(const ValueKey('spot-filter-rail-control')));
+      await tester.tap(
+        find.byKey(const ValueKey('spot-filter-compact-control')),
+      );
       await tester.pumpAndSettle();
       expect(
-        find.byKey(const ValueKey('spot-filter-vertical-label')),
+        find.byKey(const ValueKey('spot-filter-compact-control')),
         findsOneWidget,
       );
       expect(routeCards, findsWidgets);
@@ -529,12 +530,8 @@ void main() {
         reason: 'Returning from Prepare keeps the selected Sharp ranking.',
       );
       expect(
-        tester
-            .widget<AnimatedOpacity>(
-              find.byKey(const ValueKey('spot-filter-overlay')),
-            )
-            .opacity,
-        0,
+        find.byKey(const ValueKey('spot-ranking-palette')),
+        findsNothing,
         reason: 'Returning to Spots retains the collapsed filters.',
       );
 

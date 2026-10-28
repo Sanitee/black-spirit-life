@@ -16,6 +16,7 @@ import '../../domain/state/state_copy.dart';
 import '../../domain/state/transactions/state_transactions.dart';
 import '../../domain/state/user_source_notes.dart';
 import '../../visual/visual.dart';
+import '../shared/workshop_presentation.dart';
 import 'editor_action_keys.dart';
 import 'editor_contracts.dart';
 import 'editor_models.dart';
@@ -1661,7 +1662,13 @@ class _RecipeEditorViewState extends State<RecipeEditorView> {
             height: 1.12,
           ),
         ),
-        SizedBox(height: denseGeometry ? 10 : 14),
+        Padding(
+          padding: EdgeInsets.only(
+            top: denseGeometry ? 4 : 6,
+            bottom: denseGeometry ? 5 : 7,
+          ),
+          child: const WorkshopSectionRule(emphasis: true),
+        ),
         child,
       ],
     );
@@ -2659,17 +2666,17 @@ class _EditorIcon extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final spec = context.visualTheme;
-    final ledger = spec.isIlluminatedLedger;
-    final sakura = spec.isSakuraNightGarden;
     final stateReference = foldedEntry(
       controller.state.value.customIcons,
       name,
     )?.value;
     final reference = customReference ?? stateReference;
-    final iconUri = foldedEntry(
-      controller.owner.catalog.forMode(controller.mode).iconDataUris,
+    final catalog = CatalogRepository.cached(controller.owner.catalog);
+    final iconUri = catalog.iconDataUriAcrossModes(
+      controller.mode,
       name,
-    )?.value;
+      preferCleanArtwork: true,
+    );
     final bytes = iconUri == null
         ? null
         : _EditorIconCache.instance.resolve(iconUri);
@@ -2689,15 +2696,17 @@ class _EditorIcon extends StatelessWidget {
           ? _fallback(spec)
           : Image.memory(
               customBytes,
-              fit: BoxFit.cover,
+              fit: BoxFit.contain,
               gaplessPlayback: true,
               filterQuality: FilterQuality.medium,
               errorBuilder: (_, _, _) => _fallback(spec),
             );
+    } else if (catalog.isEmptyIconArtwork(name)) {
+      content = const SizedBox.shrink();
     } else if (bytes != null) {
       content = Image.memory(
         bytes,
-        fit: BoxFit.cover,
+        fit: BoxFit.contain,
         gaplessPlayback: true,
         filterQuality: FilterQuality.medium,
         errorBuilder: (_, _, _) => _fallback(spec),
@@ -2708,40 +2717,9 @@ class _EditorIcon extends StatelessWidget {
     return Semantics(
       image: true,
       label: name.trim().isEmpty ? 'New recipe icon' : '$name icon',
-      child: Container(
-        width: size,
-        height: size,
-        clipBehavior: Clip.antiAlias,
-        decoration: BoxDecoration(
-          color: spec.palette.surfaceInset,
-          gradient: ledger
-              ? const LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                  colors: <Color>[Color(0xFF174D7E), Color(0xFF0A2744)],
-                )
-              : null,
-          borderRadius: BorderRadius.circular(
-            ledger ? 1 : spec.geometry.fieldRadius,
-          ),
-          border: Border.all(
-            color: ledger
-                ? const Color(0xFFC3A04B)
-                : spec.palette.trimBright.withAlpha(130),
-            width: ledger ? 1.3 : 1,
-          ),
-          boxShadow: ledger
-              ? const <BoxShadow>[
-                  BoxShadow(
-                    color: Color(0x44352516),
-                    blurRadius: 5,
-                    offset: Offset(0, 2),
-                  ),
-                ]
-              : sakura
-              ? spec.materials.lowShadow
-              : null,
-        ),
+      child: ItemIconFrame(
+        size: size,
+        grade: catalog.itemIconGrade(name),
         child: content,
       ),
     );

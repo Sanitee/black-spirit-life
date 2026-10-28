@@ -94,7 +94,7 @@ void main() {
       ),
     );
     await tester.pump();
-    await tester.tap(find.byKey(const ValueKey('spot-filter-rail-control')));
+    await tester.tap(find.byKey(const ValueKey('spot-filter-compact-control')));
     await tester.pumpAndSettle();
     await tester.tap(find.byKey(const ValueKey('spot-ranking-profit')));
     await tester.pump();

@@ -720,6 +720,59 @@ void main() {
   );
 
   testWidgets(
+    'automatic water suggestions prefer oils but manual water choices survive',
+    (tester) async {
+      final harness = InventoryTestHarness(
+        pasteScreenshot: () async =>
+            _sharedBottleAnalysis(preselectWater: true),
+      );
+      await pumpInventory(tester, harness, size: const Size(1500, 940));
+      await tester.tap(find.byKey(InventoryActionKeys.pasteScreenshot));
+      await tester.pumpAndSettle();
+      AppSearchSelect<String> chooser(String id) =>
+          tester.widget<AppSearchSelect<String>>(
+            find.byKey(ValueKey<String>('inventory-import-item-$id')),
+          );
+      expect(chooser('storms-bottle').value, 'Oil of Storms');
+      expect(chooser('regeneration-bottle').value, 'Oil of Regeneration');
+      await _chooseReviewItem(
+        tester,
+        'storms-bottle',
+        'Bottle of Turbid Water',
+      );
+      await _chooseReviewItem(
+        tester,
+        'regeneration-bottle',
+        'Bottle of Clean Water',
+      );
+      expect(chooser('storms-bottle').value, 'Bottle of Turbid Water');
+      expect(chooser('regeneration-bottle').value, 'Bottle of Clean Water');
+    },
+  );
+
+  testWidgets('two shared bottle stacks retain both water and oil identities', (
+    tester,
+  ) async {
+    final harness = InventoryTestHarness(
+      pasteScreenshot: () async =>
+          _sharedBottleAnalysis(preselectWater: true, duplicateStorms: true),
+    );
+    await pumpInventory(tester, harness, size: const Size(1500, 940));
+    await tester.tap(find.byKey(InventoryActionKeys.pasteScreenshot));
+    await tester.pumpAndSettle();
+    String? selected(String id) => tester
+        .widget<AppSearchSelect<String>>(
+          find.byKey(ValueKey<String>('inventory-import-item-$id')),
+        )
+        .value;
+    expect(
+      {selected('storms-bottle'), selected('storms-second')},
+      {'Bottle of Turbid Water', 'Oil of Storms'},
+    );
+    expect(selected('regeneration-bottle'), 'Oil of Regeneration');
+  });
+
+  testWidgets(
     'long selected item wraps to two lines without moving amount or delete',
     (tester) async {
       final harness = InventoryTestHarness(
@@ -1943,7 +1996,10 @@ InventoryScreenshotAnalysis _barleyFlourWithSaltFallbackAnalysis() {
   );
 }
 
-InventoryScreenshotAnalysis _sharedBottleAnalysis() {
+InventoryScreenshotAnalysis _sharedBottleAnalysis({
+  bool preselectWater = false,
+  bool duplicateStorms = false,
+}) {
   final png = _pixelPng();
   const ids = <String, int>{
     'Bottle of Turbid Water': 6654,
@@ -1993,7 +2049,7 @@ InventoryScreenshotAnalysis _sharedBottleAnalysis() {
         _row(
           id: 'storms-bottle',
           column: 0,
-          selectedName: null,
+          selectedName: preselectWater ? 'Bottle of Turbid Water' : null,
           itemSuggestionUncertain: true,
           quantity: 9418,
           matches: family(
@@ -2006,7 +2062,7 @@ InventoryScreenshotAnalysis _sharedBottleAnalysis() {
         _row(
           id: 'regeneration-bottle',
           column: 1,
-          selectedName: null,
+          selectedName: preselectWater ? 'Bottle of Clean Water' : null,
           itemSuggestionUncertain: true,
           quantity: 8991,
           matches: family(
@@ -2016,6 +2072,20 @@ InventoryScreenshotAnalysis _sharedBottleAnalysis() {
           ),
           previewPng: png,
         ),
+        if (duplicateStorms)
+          _row(
+            id: 'storms-second',
+            column: 2,
+            selectedName: preselectWater ? 'Bottle of Turbid Water' : null,
+            itemSuggestionUncertain: true,
+            quantity: 42,
+            matches: family(
+              'Bottle of Turbid Water',
+              'Oil of Storms',
+              'helper:storms-bottle',
+            ),
+            previewPng: png,
+          ),
       ],
       hiddenRows: const <InventoryScreenshotRow>[],
       warnings: const <String>[],

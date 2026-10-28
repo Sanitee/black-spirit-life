@@ -12,6 +12,7 @@ import 'package:bdo_craft_planner_flutter/domain/state/state_copy.dart';
 import 'package:bdo_craft_planner_flutter/features/planner/planner.dart';
 import 'package:bdo_craft_planner_flutter/features/planner/planner_quantity_layout.dart';
 import 'package:bdo_craft_planner_flutter/features/shared/recipe_variant_selector.dart';
+import 'package:bdo_craft_planner_flutter/features/shared/workshop_presentation.dart';
 import 'package:bdo_craft_planner_flutter/shared/overlays/anchored_popover.dart';
 import 'package:bdo_craft_planner_flutter/visual/visual.dart';
 import 'package:flutter/gestures.dart';
@@ -147,7 +148,7 @@ void main() {
       await tester.pumpWidget(harness.bonusHost());
       await tester.pumpAndSettle();
       _expectNoTrialControls();
-      expect(find.byType(PlannerNeedQuantities), findsNothing);
+      expect(find.byType(PlannerNeedQuantities), findsWidgets);
       expect(
         tester
             .widget<Text>(
@@ -171,15 +172,85 @@ void main() {
   );
 
   for (final spec in _themes) {
+    testWidgets(
+      'B keeps the compact quantity line in the header in ${spec.id}',
+      (tester) async {
+        await setPlannerTestSize(tester, const Size(1500, 940));
+        final harness = PlannerTestHarness();
+        addTearDown(harness.controller.dispose);
+        await tester.pumpWidget(
+          _host(harness, spec: spec, size: const Size(1500, 940)),
+        );
+        await tester.pumpAndSettle();
+        final step = harness.controller.active.plan.value.steps.first;
+        final card = find.byKey(ValueKey('queue:${step.name}'));
+        final header = find.byKey(
+          ValueKey('planner-queue-heading:${step.name}'),
+        );
+        final summary = _summary(step.name);
+        _expectSummary(tester, step);
+        final fields = [
+          for (final label in ['Craft', 'Results', 'Need'])
+            tester.getRect(
+              find.byKey(ValueKey('planner-craft-field:${step.name}:$label')),
+            ),
+        ];
+        expect(fields[1].top, closeTo(fields[0].top, .01));
+        expect(fields[2].top, closeTo(fields[0].top, .01));
+        expect(fields[1].left - fields[0].right, closeTo(8, .01));
+        expect(fields[2].left - fields[1].right, closeTo(8, .01));
+        final method = find.descendant(
+          of: header,
+          matching: find.text('Residence Alchemy'),
+        );
+        expect(
+          tester.getRect(summary).top - tester.getRect(method).bottom,
+          // The 12 px gap starts after the pill, whose text inset is themed.
+          inInclusiveRange(12, 18),
+        );
+        final divider = find
+            .descendant(of: card, matching: find.byType(WorkshopSectionRule))
+            .first;
+        expect(
+          tester.getRect(divider).top,
+          greaterThanOrEqualTo(tester.getRect(header).bottom + 11.9),
+        );
+        final summaryBefore = tester.getRect(summary);
+        final heightBefore = tester.getSize(card).height;
+        final planBefore = jsonEncode(
+          harness.controller.active.plan.value.toJson(),
+        );
+        await _tap(tester, find.byKey(PlannerActionKeys.row('P09', step.name)));
+        expect(tester.getRect(summary), summaryBefore);
+        expect(tester.getSize(card).height, lessThan(heightBefore));
+        expect(
+          jsonEncode(harness.controller.active.plan.value.toJson()),
+          planBefore,
+        );
+        expect(tester.takeException(), isNull);
+      },
+    );
     for (final size in const [Size(916, 674), Size(1216, 862)]) {
       for (final scale in [1.0, 1.5, 2.0]) {
         testWidgets(
           'default quantities ${spec.id} at $size and ${scale}x text keep long rows readable',
           (tester) async {
             await setPlannerTestSize(tester, const Size(1500, 940));
-            final harness = PlannerTestHarness(includeLightstoneNeed: true);
+            final harness = PlannerTestHarness(
+              includeLightstoneNeed: true,
+              supportingDataOverrides: const {
+                'marketIds': {'Imperfect Lightstone of Flora': '999001'},
+              },
+            );
             addTearDown(harness.controller.dispose);
             harness.controller.active.commitAmount('13709');
+            harness.controller.active.replaceMarketValues(
+              prices: const {'Imperfect Lightstone of Flora': 1200},
+              stock: const {'Imperfect Lightstone of Flora': 0},
+              unlistedItemNames: const [],
+              fetchedAt: 1784534400000,
+            );
+            harness.controller.active.setPricesVisible(true);
             await tester.pumpWidget(
               _host(harness, spec: spec, size: size, scale: scale),
             );
@@ -211,6 +282,23 @@ void main() {
               harness.controller.active.plan.value.missing.single,
               spec: spec,
             );
+            final needRow = find.byType(PlannerNeedQuantities).first;
+            for (final detail in [
+              find.text('Out of stock'),
+              find.text('1.200 each'),
+            ]) {
+              final bounds = tester.getRect(
+                find.descendant(of: needRow, matching: detail),
+              );
+              expect(
+                bounds.left,
+                greaterThanOrEqualTo(tester.getRect(needRow).left),
+              );
+              expect(
+                bounds.right,
+                lessThanOrEqualTo(tester.getRect(needRow).right + .01),
+              );
+            }
             _expectNoBroadRedesign();
             expect(
               tester.getRect(formula).overlaps(tester.getRect(total)),
@@ -318,10 +406,13 @@ void main() {
       );
       await tester.ensureVisible(ownedField);
       await tester.enterText(ownedField, '12');
-      final quantities = find.byType(PlannerNeedQuantities);
+      final quantities = find.byWidgetPredicate(
+        (widget) =>
+            widget is PlannerNeedQuantities && widget.stableId == ingredient,
+      );
       expect(
-        tester.getRect(ownedField).top,
-        greaterThan(tester.getRect(quantities).bottom),
+        tester.getRect(quantities).contains(tester.getCenter(ownedField)),
+        isTrue,
       );
       await tester.pumpWidget(_host(harness));
       await tester.pumpAndSettle();
@@ -335,7 +426,9 @@ void main() {
       expect(tester.widget<TextField>(ownedField).controller!.text, '12');
       expect(
         tester.getRect(ownedField).top,
-        greaterThan(tester.getRect(quantities).bottom),
+        greaterThan(
+          tester.getRect(_needQuantity(ingredient, 'Missing')).bottom,
+        ),
       );
       await _tap(tester, find.byKey(PlannerActionKeys.row('P19', ingredient)));
       expect(harness.controller.active.state.value.inventory[ingredient], 12);
@@ -385,8 +478,11 @@ void main() {
       expect(step.batchCount, 343);
       _expectSummary(tester, step, processing: true);
       expect(
-        tester.widget<Text>(_summary(step.name)).data,
-        'Craft 13.709 | Mass batches 343 x40 | Results in 13.709 | Need 13.709',
+        find.descendant(
+          of: _summary(step.name),
+          matching: find.text('Mass batches 343 ×40'),
+        ),
+        findsOneWidget,
       );
       _expectNoBroadRedesign();
       expect(tester.takeException(), isNull);
@@ -495,8 +591,11 @@ void main() {
         tester
             .widget<Text>(_quantity('Intermediate Reagent', 'Sunrise Herb'))
             .data,
-        '8',
+        '10',
       );
+      // The manual quality choice already fetched and revealed prices.
+      expect(find.byKey(PlannerActionKeys.p16), findsOneWidget);
+      await _tap(tester, find.byKey(PlannerActionKeys.p16));
       await _tap(tester, find.byKey(PlannerActionKeys.p15));
       expect(harness.marketRequest, isNotNull);
       expect(
@@ -574,15 +673,225 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
+  testWidgets(
+    'real Adaptation chain keeps choices off reagents and preserves actual elixir and blood substitutes',
+    (tester) async {
+      await setPlannerTestSize(tester, const Size(1500, 940));
+      final original = (await tester.runAsync(ApplicationTestHarness.create))!;
+      final real = original.rebindControllerInCurrentZone();
+      await tester.runAsync(original.disposeControllerOnly);
+      final fixture = PlannerTestHarness();
+      addTearDown(fixture.controller.dispose);
+      final controller = real.bundle.controller.active;
+      controller.selectTarget('Adaptation Draught');
+      controller.commitAmount('100');
+      controller.selectRecipeVariant(
+        recipeName: 'Adaptation Draught',
+        variantId: 'simple-alchemy-10x',
+      );
+      final variant = controller
+          .recipeDefinition('Adaptation Draught')!
+          .variantById('simple-alchemy-10x')!;
+      for (final ingredient in variant.ingredients) {
+        if (ingredient.options.length > 1) {
+          controller.selectSubstitute(
+            parentName: 'Adaptation Draught',
+            ingredient: ingredient,
+            selection: ingredient.name,
+          );
+        }
+      }
+      try {
+        final plan = controller.plan.value;
+        expect(
+          plan.steps.map((step) => step.name),
+          containsAll([
+            'Clear Liquid Reagent',
+            "Clown's Blood",
+            'Helix Elixir',
+          ]),
+        );
+        await tester.pumpWidget(
+          _host(
+            fixture,
+            application: real.bundle.controller,
+            spec: SakuraNightGardenSpec.theme,
+          ),
+        );
+        await tester.pumpAndSettle();
+        for (final name in ['Clear Liquid Reagent', "Clown's Blood"]) {
+          final card = find.byKey(ValueKey('queue:$name'));
+          await tester.ensureVisible(card);
+          await tester.pumpAndSettle();
+          expect(card, findsOneWidget);
+          expect(
+            find.byKey(PlannerActionKeys.row('P12', 'queue-title:$name')),
+            findsNothing,
+          );
+        }
+        final blood = plan.steps.singleWhere(
+          (step) => step.name == "Clown's Blood",
+        );
+        final bloodIngredient = blood.ingredients.firstWhere(
+          (ingredient) =>
+              ingredient.options.length > 1 &&
+              ingredient.name.contains('Blood'),
+        );
+        expect(
+          bloodIngredient.options.every((name) => name.contains('Blood')),
+          isTrue,
+        );
+        final bloodChoice = find.byKey(
+          PlannerActionKeys.row(
+            'P12',
+            "step:Clown's Blood:${bloodIngredient.substituteGroup}",
+          ),
+        );
+        if (bloodChoice.evaluate().isEmpty) {
+          await _tap(
+            tester,
+            find.byKey(PlannerActionKeys.row('P09', "Clown's Blood")),
+          );
+        }
+        await _tap(tester, bloodChoice);
+        final alternative = bloodIngredient.options.firstWhere(
+          (name) => name != bloodIngredient.name,
+        );
+        await _tap(
+          tester,
+          find.byKey(PlannerActionKeys.row('P13', alternative)),
+        );
+        expect(
+          controller.plan.value.steps
+              .singleWhere((step) => step.name == "Clown's Blood")
+              .ingredients
+              .any((ingredient) => ingredient.name == alternative),
+          isTrue,
+        );
+
+        final elixirChoice = find.byKey(
+          PlannerActionKeys.row('P12', 'queue-title:Helix Elixir'),
+        );
+        await tester.scrollUntilVisible(
+          elixirChoice,
+          250,
+          scrollable: find
+              .descendant(
+                of: find.byType(ListView).first,
+                matching: find.byType(Scrollable),
+              )
+              .first,
+        );
+        await _tap(tester, elixirChoice);
+        await _tap(
+          tester,
+          find.byKey(PlannerActionKeys.row('P13', 'Splendid Helix Elixir')),
+        );
+        final draught = controller.plan.value.steps.singleWhere(
+          (step) => step.name == 'Adaptation Draught',
+        );
+        expect(
+          draught.ingredients.any(
+            (ingredient) => ingredient.name == 'Splendid Helix Elixir',
+          ),
+          isTrue,
+        );
+        expect(
+          find.byKey(
+            PlannerActionKeys.row('P12', 'queue-title:Clear Liquid Reagent'),
+          ),
+          findsNothing,
+        );
+        expect(
+          find.byKey(PlannerActionKeys.row('P12', "queue-title:Clown's Blood")),
+          findsNothing,
+        );
+        expect(tester.takeException(), isNull);
+      } finally {
+        await tester.pumpWidget(const SizedBox.shrink());
+        await real.disposeControllerOnly();
+        await tester.runAsync(
+          () => real.temporaryDirectory.delete(recursive: true),
+        );
+      }
+    },
+  );
+
+  for (final spec in _themes) {
+    testWidgets('A2 groups market details beside the item in ${spec.id}', (
+      tester,
+    ) async {
+      await setPlannerTestSize(tester, const Size(1500, 940));
+      final fixture = PlannerTestHarness();
+      addTearDown(fixture.controller.dispose);
+      fixture.controller.active.setPricesVisible(true);
+      await tester.pumpWidget(
+        _host(fixture, spec: spec, size: const Size(1500, 940)),
+      );
+      await tester.pumpAndSettle();
+      final row = find.byType(PlannerNeedQuantities).first;
+      final name = find
+          .descendant(of: row, matching: find.text('Sunrise Herb'))
+          .first;
+      final stock = find.descendant(
+        of: row,
+        matching: find.text('Vendor item'),
+      );
+      final price = find.descendant(of: row, matching: find.text('500 each'));
+      final total = find.descendant(
+        of: row,
+        matching: find.textContaining('Total '),
+      );
+      final missing = _needQuantity('Sunrise Herb', 'Missing');
+      expect(
+        tester.getRect(price).top,
+        greaterThan(tester.getRect(missing).bottom),
+      );
+      expect(tester.getRect(stock).left, closeTo(tester.getRect(name).left, 4));
+      expect(
+        tester.getRect(price).left - tester.getRect(stock).right,
+        closeTo(14, .01),
+      );
+      final priceBounds = tester.getRect(price);
+      final totalBounds = tester.getRect(total);
+      if ((totalBounds.top - priceBounds.top).abs() < 1) {
+        expect(totalBounds.left - priceBounds.right, closeTo(14, .01));
+      } else {
+        expect(totalBounds.top, greaterThan(priceBounds.bottom));
+        expect(totalBounds.left, closeTo(tester.getRect(stock).left, .01));
+      }
+      expect(
+        find.descendant(of: row, matching: find.byType(Divider)),
+        findsNothing,
+      );
+      final pricedHeight = tester.getSize(row).height;
+      fixture.controller.active.setPricesVisible(false);
+      await tester.pumpAndSettle();
+      expect(stock, findsNothing);
+      expect(price, findsNothing);
+      expect(tester.getSize(row).height, lessThan(pricedHeight));
+      expect(tester.takeException(), isNull);
+    });
+  }
+
   const capture = bool.fromEnvironment('CAPTURE_PLANNER_QUANTITIES');
-  if (capture) {
+  const captureA2 = bool.fromEnvironment('CAPTURE_NEED_A2');
+  const captureTextPercent = int.fromEnvironment(
+    'PLANNER_QUANTITY_CAPTURE_TEXT_PERCENT',
+    defaultValue: 100,
+  );
+  if (capture || captureA2) {
     setUpAll(_loadCaptureFonts);
     for (final spec in _themes) {
       for (final size in const [Size(1200, 752), Size(1500, 940)]) {
         testWidgets(
           'capture default quantities ${spec.id} $size full real-catalog workspace',
           (tester) async {
-            configureApplicationTestSurface(tester, size);
+            configureApplicationTestSurface(
+              tester,
+              size,
+              textScaleFactor: captureTextPercent / 100,
+            );
             final original = (await tester.runAsync(
               () => ApplicationTestHarness.create(
                 backgroundId: spec.isStandard ? 'greenhouse' : spec.id,
@@ -591,8 +900,31 @@ void main() {
             final harness = original.rebindControllerInCurrentZone();
             await tester.runAsync(original.disposeControllerOnly);
             final controller = harness.bundle.controller;
-            controller.active.selectTarget('Clear Liquid Reagent');
-            controller.active.commitAmount('34272');
+            controller.active.selectTarget(
+              captureA2 ? 'Adaptation Draught' : 'Clear Liquid Reagent',
+            );
+            controller.active.commitAmount(captureA2 ? '100' : '34272');
+            if (captureA2) {
+              controller.active.replaceMarketValues(
+                prices: {
+                  for (final row in controller.active.plan.value.missing)
+                    row.name: 5000,
+                },
+                stock: {
+                  for (final row in controller.active.plan.value.missing)
+                    row.name: row.name == 'Thuja Sap' ? 0 : 125000,
+                },
+                unlistedItemNames: const [],
+                fetchedAt: DateTime.utc(
+                  2026,
+                  9,
+                  26,
+                  21,
+                  30,
+                ).millisecondsSinceEpoch,
+              );
+              controller.active.setPricesVisible(true);
+            }
             const root = ValueKey('planner-quantity-capture-root');
             try {
               await tester.pumpWidget(
@@ -617,7 +949,7 @@ void main() {
               expect(find.byType(PlannerQuantityBadge), findsWidgets);
               _expectNoTrialControls();
               _expectNoBroadRedesign();
-              _expectVisibleNeedRowsUseThreeColumns(tester);
+              _expectVisibleNeedRowsEmphasizeMissing(tester);
               for (final element in find.byWidgetPredicate((widget) {
                 final key = widget.key;
                 return widget is Text &&
@@ -635,34 +967,42 @@ void main() {
                   ),
                   find.byKey(key),
                   spec: spec,
-                  expectInline: true,
+                  scale: captureTextPercent / 100,
+                  expectInline: captureTextPercent == 100,
                 );
               }
-              final boundary = tester.renderObject<RenderRepaintBoundary>(
-                find.byKey(root),
-              );
-              await tester.runAsync(() async {
-                final image = await boundary.toImage(pixelRatio: 1);
-                try {
-                  final bytes = await image.toByteData(
-                    format: ui.ImageByteFormat.png,
-                  );
-                  const directory = String.fromEnvironment(
-                    'PLANNER_QUANTITY_CAPTURE_DIRECTORY',
-                    defaultValue: 'tmp/planner-quantity-default',
-                  );
-                  final file = File(
-                    '$directory/${spec.id}-${size.width.toInt()}x${size.height.toInt()}.png',
-                  );
-                  await file.parent.create(recursive: true);
-                  await file.writeAsBytes(
-                    bytes!.buffer.asUint8List(),
-                    flush: true,
-                  );
-                } finally {
-                  image.dispose();
+              for (final prices in captureA2 ? [true, false] : [false]) {
+                if (captureA2) {
+                  controller.active.setPricesVisible(prices);
+                  await tester.pumpAndSettle();
+                  expect(tester.takeException(), isNull);
                 }
-              });
+                final boundary = tester.renderObject<RenderRepaintBoundary>(
+                  find.byKey(root),
+                );
+                await tester.runAsync(() async {
+                  final image = await boundary.toImage(pixelRatio: 1);
+                  try {
+                    final bytes = await image.toByteData(
+                      format: ui.ImageByteFormat.png,
+                    );
+                    const directory = String.fromEnvironment(
+                      'PLANNER_QUANTITY_CAPTURE_DIRECTORY',
+                      defaultValue: 'tmp/planner-quantity-default',
+                    );
+                    final file = File(
+                      '$directory/${spec.id}-${size.width.toInt()}x${size.height.toInt()}${captureTextPercent == 100 ? '' : '-text$captureTextPercent'}${captureA2 ? (prices ? '-prices' : '-hidden') : ''}.png',
+                    );
+                    await file.parent.create(recursive: true);
+                    await file.writeAsBytes(
+                      bytes!.buffer.asUint8List(),
+                      flush: true,
+                    );
+                  } finally {
+                    image.dispose();
+                  }
+                });
+              }
             } finally {
               await tester.pumpWidget(const SizedBox.shrink());
               await harness.disposeControllerOnly();
@@ -722,19 +1062,41 @@ void _expectSummary(
   PlanStep step, {
   bool processing = false,
 }) {
-  final expected = processing && step.batchSize == 1
-      ? '${formatQuantity(step.count)} ${step.count == 1 ? 'batch' : 'batches'} · '
-            'Makes ${formatQuantity(step.produced)} · '
-            'Need ${formatQuantity(step.demand)}'
-      : step.batchSize > 1
-      ? 'Craft ${formatQuantity(step.count)} | '
-            'Mass batches ${formatQuantity(step.batchCount)} x${step.batchSize} | '
-            'Results in ${formatQuantity(step.produced)} | '
-            'Need ${formatQuantity(step.demand)}'
-      : 'Craft ${formatQuantity(step.count)} | '
-            'Results in ${formatQuantity(step.produced)} | '
-            'Need ${formatQuantity(step.demand)}';
-  expect(tester.widget<Text>(_summary(step.name)).data, expected);
+  expect(_summary(step.name), findsOneWidget);
+  final header = find.byKey(ValueKey('planner-queue-heading:${step.name}'));
+  expect(
+    find.descendant(of: header, matching: _summary(step.name)),
+    findsOneWidget,
+  );
+  final bounds = tester.getRect(header);
+  for (final entry in {
+    'Craft': step.count,
+    'Results': step.produced,
+    'Need': step.demand,
+  }.entries) {
+    final finder = find.byKey(
+      ValueKey('planner-craft-quantity:${step.name}:${entry.key}'),
+    );
+    expect(tester.widget<Text>(finder).data, formatQuantity(entry.value));
+    expect(tester.widget<Text>(finder).style?.fontSize, 16);
+    expect(tester.widget<Text>(finder).style?.fontWeight, FontWeight.w700);
+    final valueBounds = tester.getRect(finder);
+    expect(valueBounds.left, greaterThanOrEqualTo(bounds.left));
+    expect(valueBounds.right, lessThanOrEqualTo(bounds.right + .01));
+    expect(valueBounds.top, greaterThanOrEqualTo(bounds.top));
+    expect(valueBounds.bottom, lessThanOrEqualTo(bounds.bottom + .01));
+  }
+  if (step.batchSize > 1) {
+    expect(
+      find.descendant(
+        of: _summary(step.name),
+        matching: find.text(
+          'Mass batches ${formatQuantity(step.batchCount)} ×${step.batchSize}',
+        ),
+      ),
+      findsOneWidget,
+    );
+  }
 }
 
 void _expectNoBroadRedesign() {
@@ -851,7 +1213,7 @@ void _expectMatchingQuantityBadges(
   }
 }
 
-void _expectVisibleNeedRowsUseThreeColumns(WidgetTester tester) {
+void _expectVisibleNeedRowsEmphasizeMissing(WidgetTester tester) {
   final viewport = Offset.zero & tester.view.physicalSize;
   var visibleRows = 0;
   for (final widget in tester.widgetList<PlannerNeedQuantities>(
@@ -860,32 +1222,13 @@ void _expectVisibleNeedRowsUseThreeColumns(WidgetTester tester) {
     final root = find.byKey(widget.key!);
     if (!tester.getRect(root).overlaps(viewport)) continue;
     visibleRows += 1;
-    Rect? firstLabel;
-    Rect? firstValue;
-    Rect? previousValue;
-    for (final label in ['Need', 'Have', 'Missing']) {
-      final labelBounds = tester.getRect(
-        find.descendant(of: root, matching: find.text(label)),
-      );
-      final valueBounds = tester.getRect(_needQuantity(widget.stableId, label));
-      firstLabel ??= labelBounds;
-      firstValue ??= valueBounds;
-      expect(
-        labelBounds.top,
-        closeTo(firstLabel.top, 0.01),
-        reason: '${widget.stableId}: quantity labels must share one row',
-      );
-      expect(
-        valueBounds.top,
-        closeTo(firstValue.top, 0.01),
-        reason: '${widget.stableId}: quantity values must share one row',
-      );
-      expect(valueBounds.top, greaterThan(labelBounds.bottom));
-      if (previousValue != null) {
-        expect(valueBounds.left, greaterThan(previousValue.right));
-      }
-      previousValue = valueBounds;
-    }
+    final need = tester.getRect(_needQuantity(widget.stableId, 'Need'));
+    final have = tester.getRect(_needQuantity(widget.stableId, 'Have'));
+    final missing = tester.getRect(_needQuantity(widget.stableId, 'Missing'));
+    expect(have.top, greaterThanOrEqualTo(need.top - 1));
+    expect(missing.top, greaterThanOrEqualTo(need.top - 2));
+    expect(need.overlaps(have), isFalse);
+    expect(have.overlaps(missing), isFalse);
   }
   expect(visibleRows, greaterThan(0));
 }
@@ -907,15 +1250,12 @@ void _expectNeedQuantities(
     final finder = _needQuantity(row.key, entry.key);
     final text = tester.widget<Text>(finder);
     expect(text.data, formatQuantity(entry.value));
-    expect(text.style?.fontSize, entry.key == 'Need' ? 16 : 15);
+    expect(text.style?.fontSize, entry.key == 'Missing' ? 16 : 14);
     expect(
       text.style?.fontWeight,
-      entry.key == 'Need' ? FontWeight.w700 : FontWeight.w500,
+      entry.key == 'Missing' ? FontWeight.w700 : FontWeight.w500,
     );
-    expect(
-      text.style?.color,
-      entry.key == 'Need' ? spec.palette.text : spec.palette.textMuted,
-    );
+    expect(text.style?.color, spec.palette.text);
     final label = tester.widget<Text>(
       find.descendant(of: root, matching: find.text(entry.key)),
     );

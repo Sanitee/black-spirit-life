@@ -1,9 +1,11 @@
+import '../../data/catalog/catalog_repository.dart';
 import '../../domain/models/catalog_models.dart';
 import '../../domain/models/craft_mode.dart';
 import '../../domain/planner/ingredient_quality.dart';
 import '../../domain/planner/planner_engine.dart';
 import '../../domain/planner/planner_models.dart' as planner;
 import '../../domain/planner/reviewed_acquisition_choices.dart';
+import '../../domain/state/craft_completion.dart';
 import '../../domain/state/planner_state.dart' as stored;
 
 /// Assembles the immutable, mode-local planning snapshot consumed by feature
@@ -32,8 +34,11 @@ final class PlannerAssembly {
     return engine.buildPlan(
       mode: mode,
       recipes: recipes,
-      state: plannerState(state),
-      rules: plannerRules(catalog.supportingData),
+      state: plannerState(state, target: targetOverride, want: wantOverride),
+      rules: plannerRules(
+        catalog.supportingData,
+        npcPurchasePrices: CatalogRepository.cached(catalog).npcPurchasePrices,
+      ),
       targetOverride: targetOverride,
       wantOverride: wantOverride,
     );
@@ -131,26 +136,34 @@ final class PlannerAssembly {
     return Map.unmodifiable(items);
   }
 
-  planner.PlannerState plannerState(stored.ModeState state) =>
-      planner.PlannerState(
-        target: state.target,
-        want: state.want,
-        inventory: state.inventory,
-        completedSteps: state.completedSteps,
-        ignoreTargetInventory: state.ignoreTargetInventory,
-        ignoreIngredientInventory: state.ignoreIngredientInventory,
-        alchemyMastery: state.alchemyMastery,
-        cookingMastery: state.cookingMastery,
-        processingMastery: state.processingMastery,
-        useMassProcessing: state.useMassProcessing,
-        substituteChoices: state.substituteChoices,
-        ingredientGrades: state.ingredientGrades,
-        recipeVariantChoices: state.recipeVariantChoices,
-        marketPrices: state.market.prices,
-        marketStock: state.market.stock,
-      );
+  planner.PlannerState plannerState(
+    stored.ModeState state, {
+    String? target,
+    int? want,
+  }) => planner.PlannerState(
+    target: state.target,
+    want: state.want,
+    inventory: state.inventory,
+    craftedInventory: craftCredits(state, target: target, want: want),
+    completedSteps: state.completedSteps,
+    ignoreTargetInventory: state.ignoreTargetInventory,
+    ignoreIngredientInventory: state.ignoreIngredientInventory,
+    alchemyMastery: state.alchemyMastery,
+    cookingMastery: state.cookingMastery,
+    processingMastery: state.processingMastery,
+    useMassProcessing: state.useMassProcessing,
+    substituteChoices: state.substituteChoices,
+    ingredientGrades: state.ingredientGrades,
+    recipeVariantChoices: state.recipeVariantChoices,
+    marketPrices: state.market.prices,
+    marketStock: state.market.stock,
+    marketPreorderPrices: state.market.preorderPrices,
+  );
 
-  planner.PlannerRules plannerRules(Map<String, Object?> supportingData) {
+  planner.PlannerRules plannerRules(
+    Map<String, Object?> supportingData, {
+    Map<String, double> npcPurchasePrices = const {},
+  }) {
     final conversions = <String, planner.QualityConversionRule>{};
     for (final entry in _map(supportingData['qualityConversions']).entries) {
       final value = _map(entry.value);
@@ -226,6 +239,7 @@ final class PlannerAssembly {
       itemWeightIds: _stringMap(supportingData['itemWeightIds']),
       itemWeightsLtById: _doubleMap(supportingData['itemWeightsLtById']),
       vendorInfo: vendorInfo,
+      npcPurchasePrices: npcPurchasePrices,
       acquisitionInfo: acquisitionInfo,
     );
   }

@@ -5,8 +5,10 @@ import 'package:flutter/services.dart';
 
 import '../../app/state/planner_application_controller.dart';
 import '../../domain/formatting/planner_formatters.dart';
+import '../../visual/components/app_interaction_frame.dart';
 import '../../visual/visual.dart';
 import '../shared/mode_item_icon.dart';
+import '../shared/workshop_presentation.dart';
 import 'inventory_action_keys.dart';
 import 'inventory_amount_input_formatter.dart';
 import 'inventory_projection.dart';
@@ -215,20 +217,24 @@ class _InventoryItemRowState extends State<InventoryItemRow> {
               constraints: BoxConstraints(
                 minHeight: widget.fixedStandardColumns ? 90 : 0,
               ),
-              child: AppSurface(
-                role: AppSurfaceRole.card,
-                tone: tone,
-                // In Standard the source field is the card's lower edge. A
-                // second eight-pixel strip beneath it read as a detached drop
-                // shadow, especially over atmospheric backdrops. Let the
-                // control consume that authored space; Ledger keeps its
-                // manuscript inset.
-                padding: EdgeInsets.fromLTRB(10, 8, 10, standard ? 0 : 8),
-                child: widget.compact
-                    ? _compact(context)
-                    : widget.fixedStandardColumns
-                    ? _fixedWide(context)
-                    : _fluidWide(context),
+              child: AppInteractionFrame(
+                selected: widget.selected,
+                radius: 7,
+                child: AppSurface(
+                  role: AppSurfaceRole.card,
+                  tone: tone,
+                  // In Standard the source field is the card's lower edge. A
+                  // second eight-pixel strip beneath it read as a detached drop
+                  // shadow, especially over atmospheric backdrops. Let the
+                  // control consume that authored space; Ledger keeps its
+                  // manuscript inset.
+                  padding: EdgeInsets.fromLTRB(10, 8, 10, standard ? 0 : 8),
+                  child: widget.compact
+                      ? _compact(context)
+                      : widget.fixedStandardColumns
+                      ? _fixedWide(context)
+                      : _fluidWide(context),
+                ),
               ),
             ),
           ),
@@ -514,6 +520,7 @@ class InventoryItemIcon extends StatelessWidget {
   final double size;
 
   @override
-  Widget build(BuildContext context) =>
-      ModeItemIcon(controller: controller, name: name, size: size);
+  Widget build(BuildContext context) => WorkshopItemMount(
+    child: ModeItemIcon(controller: controller, name: name, size: size),
+  );
 }

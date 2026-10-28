@@ -16,6 +16,8 @@ import '../../domain/planner/planner_models.dart'
     show ChoiceMeta, ItemAcquisitionRoute;
 import '../../domain/state/planner_state.dart' show MarketState;
 import '../shared/mode_item_icon.dart';
+import 'recipe_worker_controller.dart';
+import 'recipe_worker_panel.dart';
 import 'worker_output_market_policy.dart';
 
 class ResourceMapWorkspaceConfiguration {
@@ -96,6 +98,8 @@ class ResourceMapWorkspace extends StatefulWidget {
     this.activeNodeRecordingScanner,
     this.onRefreshMarketEvidence,
     this.gatherChecklistBridge,
+    this.recipeWorkers,
+    this.onOpenRecipeGathering,
     super.key,
   });
 
@@ -115,6 +119,8 @@ class ResourceMapWorkspace extends StatefulWidget {
   final BdoActiveNodeRecordingScanner? activeNodeRecordingScanner;
   final BdoMarketEvidenceRefresh? onRefreshMarketEvidence;
   final PlannerGatherChecklistBridge? gatherChecklistBridge;
+  final RecipeWorkerController? recipeWorkers;
+  final VoidCallback? onOpenRecipeGathering;
 
   @override
   State<ResourceMapWorkspace> createState() => _ResourceMapWorkspaceState();
@@ -187,241 +193,263 @@ class _ResourceMapWorkspaceState extends State<ResourceMapWorkspace> {
 
   @override
   Widget build(BuildContext context) {
-    final chrome = context.mapChrome;
-    return ResourceMapChromeTheme(
-      data: chrome,
-      child: FutureBuilder<_ResourceMapWorkspaceData>(
-        future: _data,
-        builder: (context, snapshot) {
-          if (snapshot.hasError) {
-            return _ResourceMapLoadFailure(
-              error: snapshot.error!,
-              onRetry: () {
-                _datasetCache.invalidate();
-                _workerEconomicsCache.invalidate();
-                _lodgingCache.invalidate();
-                setState(() {
-                  _data = _loadData();
-                });
-              },
-            );
-          }
-          final data = snapshot.data;
-          if (data == null) {
-            return const _ResourceMapLoading();
-          }
-          final dataset = data.map;
-          return ValueListenableBuilder<Set<String>>(
-            valueListenable: widget.appController.resourceMapFavoriteIds,
-            builder: (context, favoriteResourceIds, _) {
-              return ValueListenableBuilder<CraftMode>(
-                valueListenable: widget.appController.activeMode,
-                builder: (context, mode, _) {
-                  final modeController = widget.appController.modes[mode]!;
-                  return ValueListenableBuilder<BdoNodeNetworkPreferences>(
-                    valueListenable:
-                        widget.appController.resourceMapNodeNetworkPreferences,
-                    builder: (context, nodeNetworkPreferences, _) {
-                      return ValueListenableBuilder<BdoGatherChecklist>(
-                        valueListenable:
-                            widget.appController.resourceMapGatherChecklist,
-                        builder: (context, gatherChecklist, _) {
-                          return AnimatedBuilder(
-                            animation: Listenable.merge(<Listenable>[
-                              for (final controller
-                                  in widget.appController.modes.values) ...[
-                                controller.state,
-                                controller.plan,
-                              ],
-                              widget.appController.marketTax,
-                              widget.appController.resourceMapUiOpacity,
-                            ]),
-                            builder: (context, _) {
-                              final plan = modeController.plan.value;
-                              final market = modeController.state.value.market;
-                              final marketStates =
-                                  <MarketState>[
-                                        market,
-                                        for (final entry
-                                            in widget
-                                                .appController
-                                                .modes
-                                                .entries)
-                                          if (entry.key != mode)
-                                            entry.value.state.value.market,
-                                      ]
-                                      .where(
-                                        (state) =>
-                                            state.region.trim().toLowerCase() ==
-                                            market.region.trim().toLowerCase(),
-                                      )
-                                      .toList()
-                                    ..sort(
-                                      (left, right) => right.fetchedAt
-                                          .compareTo(left.fetchedAt),
-                                    );
-                              final marketEvidence = _marketEvidence(
-                                dataset,
-                                marketStates,
-                              );
-                              final latestMarketTimestamp = marketStates
-                                  .fold<int>(
-                                    0,
-                                    (latest, state) => state.fetchedAt > latest
-                                        ? state.fetchedAt
-                                        : latest,
-                                  );
-                              final needs = _plannerNeedsFor(modeController);
-                              final plannerNeedGroups = _plannerNeedGroups();
-                              final target = plan.target.trim();
-                              return BdoResourceMap(
-                                dataset: dataset,
-                                interfaceStyle: widget
-                                    .appController
-                                    .resourceMapInterfaceStyle
-                                    .value,
-                                onInterfaceStyleChanged: widget
-                                    .appController
-                                    .setResourceMapInterfaceStyle,
-                                uiOpacity: widget
-                                    .appController
-                                    .resourceMapUiOpacity
-                                    .value,
-                                onUiOpacityChanged: widget
-                                    .appController
-                                    .setResourceMapUiOpacity,
-                                workerEconomics: data.workerEconomics,
-                                lodgingDataset: data.lodging,
-                                cacheDirectory: _cacheDirectory(),
-                                tileSource: widget.configuration.tileSource,
-                                tileHttpClient:
-                                    widget.configuration.tileHttpClient,
-                                showSourceNotice:
-                                    widget.configuration.showSourceNotice,
-                                plannerNeeds: needs,
-                                plannerNeedGroups: plannerNeedGroups,
-                                favoriteResourceIds: favoriteResourceIds,
-                                onFavoriteResourceIdsChanged: widget
-                                    .appController
-                                    .setResourceMapFavoriteIds,
-                                gatherChecklist: gatherChecklist,
-                                gatherChecklistQuantities: _gatherBridge
-                                    .quantities(dataset),
-                                onRecordGathered: (resourceId, quantity) =>
-                                    _gatherBridge.record(
-                                      dataset,
-                                      resourceId,
-                                      quantity,
-                                    ),
-                                onGatherChecklistChanged: widget
-                                    .appController
-                                    .setResourceMapGatherChecklist,
-                                nodeNetworkPreferences: nodeNetworkPreferences,
-                                setupScreenshotPicker: widget.screenshotPicker,
-                                setupScreenshotClipboardReader:
-                                    widget.screenshotClipboardReader,
-                                activeNodeRecordingLauncher:
-                                    widget.activeNodeRecordingLauncher,
-                                activeNodeRecordingFinder:
-                                    widget.activeNodeRecordingFinder,
-                                activeNodeRecordingPicker:
-                                    widget.activeNodeRecordingPicker,
-                                activeNodeRecordingScanner:
-                                    widget.activeNodeRecordingScanner,
-                                onNodeNetworkPreferencesChanged: widget
-                                    .appController
-                                    .setResourceMapNodeNetworkPreferences,
-                                marketOutputEvidenceByResourceId:
-                                    marketEvidence,
-                                marketNetRate: marketNetRate(
-                                  widget.appController.marketTax.value,
-                                ),
-                                marketRegion: market.region,
-                                marketFetchedAt: latestMarketTimestamp > 0
-                                    ? DateTime.fromMillisecondsSinceEpoch(
-                                        latestMarketTimestamp,
-                                        isUtc: true,
-                                      )
-                                    : null,
-                                onRefreshMarketEvidence:
-                                    widget.onRefreshMarketEvidence,
-                                controller: widget.controller,
-                                plannerContextLabel: target.isEmpty
-                                    ? '${mode.label} plan'
-                                    : '${mode.label} · $target',
-                                resourceIconBuilder:
-                                    (context, resource, size) => ModeItemIcon(
-                                      controller: modeController,
-                                      name: resource.name,
-                                      size: size,
-                                      catalogRepository:
-                                          widget.catalogRepository,
-                                      searchAcrossModes: true,
-                                      fallbackIcon: _fallbackIconFor(resource),
-                                      showFrame: false,
-                                    ),
-                                workerOutputIconBuilder:
-                                    (context, resource, size) => ModeItemIcon(
-                                      controller: modeController,
-                                      name: resource.name,
-                                      size: size,
-                                      catalogRepository:
-                                          widget.catalogRepository,
-                                      searchAcrossModes: true,
-                                      fallbackIcon:
-                                          Icons.image_not_supported_outlined,
-                                      showFrame: false,
-                                    ),
-                                vendorItemIconBuilder:
-                                    (context, itemName, size) => ModeItemIcon(
-                                      controller: modeController,
-                                      name: itemName,
-                                      size: size,
-                                      catalogRepository:
-                                          widget.catalogRepository,
-                                      searchAcrossModes: true,
-                                      fallbackIcon: Icons.inventory_2_outlined,
-                                      showFrame: false,
-                                    ),
-                                vendorPortraitBuilder: (context, vendor, size) {
-                                  final assetPath =
-                                      bdoBundledVendorPortraitAsset(
-                                        vendor.sourceVendorId,
-                                      );
-                                  final fallback = Icon(
-                                    Icons.person_rounded,
-                                    color: Theme.of(
-                                      context,
-                                    ).colorScheme.primary,
-                                    size: size,
-                                  );
-                                  if (assetPath == null) {
-                                    return fallback;
-                                  }
-                                  return Image.asset(
-                                    assetPath,
-                                    width: size,
-                                    height: size,
-                                    alignment: Alignment.bottomCenter,
-                                    fit: BoxFit.contain,
-                                    filterQuality: FilterQuality.high,
-                                    errorBuilder: (context, error, stack) =>
-                                        fallback,
-                                  );
-                                },
-                              );
-                            },
-                          );
-                        },
-                      );
-                    },
-                  );
-                },
-              );
+    return FutureBuilder<_ResourceMapWorkspaceData>(
+      future: _data,
+      builder: (context, snapshot) {
+        if (snapshot.hasError) {
+          return _ResourceMapLoadFailure(
+            error: snapshot.error!,
+            onRetry: () {
+              _datasetCache.invalidate();
+              _workerEconomicsCache.invalidate();
+              _lodgingCache.invalidate();
+              setState(() {
+                _data = _loadData();
+              });
             },
           );
-        },
-      ),
+        }
+        final data = snapshot.data;
+        if (data == null) {
+          return const _ResourceMapLoading();
+        }
+        final dataset = data.map;
+        return ValueListenableBuilder<Set<String>>(
+          valueListenable: widget.appController.resourceMapFavoriteIds,
+          builder: (context, favoriteResourceIds, _) {
+            return ValueListenableBuilder<CraftMode>(
+              valueListenable: widget.appController.activeMode,
+              builder: (context, mode, _) {
+                final modeController = widget.appController.modes[mode]!;
+                return ValueListenableBuilder<BdoNodeNetworkPreferences>(
+                  valueListenable:
+                      widget.appController.resourceMapNodeNetworkPreferences,
+                  builder: (context, nodeNetworkPreferences, _) {
+                    return ValueListenableBuilder<BdoGatherChecklist>(
+                      valueListenable:
+                          widget.appController.resourceMapGatherChecklist,
+                      builder: (context, gatherChecklist, _) {
+                        return AnimatedBuilder(
+                          animation: Listenable.merge(<Listenable>[
+                            for (final controller
+                                in widget.appController.modes.values) ...[
+                              controller.state,
+                              controller.plan,
+                            ],
+                            widget.appController.marketTax,
+                            widget.appController.resourceMapInterfaceStyle,
+                            ?widget.recipeWorkers,
+                          ]),
+                          builder: (context, _) {
+                            final plan = modeController.plan.value;
+                            final market = modeController.state.value.market;
+                            final marketStates =
+                                <MarketState>[
+                                      market,
+                                      for (final entry
+                                          in widget.appController.modes.entries)
+                                        if (entry.key != mode)
+                                          entry.value.state.value.market,
+                                    ]
+                                    .where(
+                                      (state) =>
+                                          state.region.trim().toLowerCase() ==
+                                          market.region.trim().toLowerCase(),
+                                    )
+                                    .toList()
+                                  ..sort(
+                                    (left, right) => right.fetchedAt.compareTo(
+                                      left.fetchedAt,
+                                    ),
+                                  );
+                            final marketEvidence = _marketEvidence(
+                              dataset,
+                              marketStates,
+                            );
+                            final latestMarketTimestamp = marketStates
+                                .fold<int>(
+                                  0,
+                                  (latest, state) => state.fetchedAt > latest
+                                      ? state.fetchedAt
+                                      : latest,
+                                );
+                            final needs = _plannerNeedsFor(modeController);
+                            final plannerNeedGroups = _plannerNeedGroups();
+                            final target = plan.target.trim();
+                            return BdoResourceMap(
+                              dataset: dataset,
+                              recipeWorkerPlan:
+                                  widget.recipeWorkers?.plan?.network,
+                              recipeWorkerTitle:
+                                  widget.recipeWorkers?.pageTitle,
+                              recipePlanArtwork: widget.recipeWorkers == null
+                                  ? null
+                                  : ModeItemIcon(
+                                      controller: modeController,
+                                      name: 'Harmony Draught',
+                                      size: 30,
+                                      catalogRepository:
+                                          widget.catalogRepository,
+                                      searchAcrossModes: true,
+                                    ),
+                              onRecipeWorkerBack: widget.recipeWorkers?.back,
+                              recipeWorkerBuilder: widget.recipeWorkers == null
+                                  ? null
+                                  : (context, setup, node) => RecipeWorkerPanel(
+                                      controller: widget.recipeWorkers!,
+                                      hosted: true,
+                                      onSetup: setup,
+                                      onNode: node,
+                                      onGathering: widget.onOpenRecipeGathering,
+                                      artwork: (name, size) => ModeItemIcon(
+                                        controller: modeController,
+                                        name: name,
+                                        size: size,
+                                        catalogRepository:
+                                            widget.catalogRepository,
+                                        searchAcrossModes: true,
+                                      ),
+                                    ),
+                              interfaceStyle: widget
+                                  .appController
+                                  .resourceMapInterfaceStyle
+                                  .value,
+                              onInterfaceStyleChanged: widget
+                                  .appController
+                                  .setResourceMapInterfaceStyle,
+                              uiOpacity: widget
+                                  .appController
+                                  .resourceMapUiOpacity
+                                  .value,
+                              onUiOpacityChanged: widget
+                                  .appController
+                                  .previewResourceMapUiOpacity,
+                              onUiOpacityChangeEnd: widget
+                                  .appController
+                                  .commitResourceMapUiOpacity,
+                              uiOpacityListenable:
+                                  widget.appController.resourceMapUiOpacity,
+                              workerEconomics: data.workerEconomics,
+                              lodgingDataset: data.lodging,
+                              cacheDirectory: _cacheDirectory(),
+                              tileSource: widget.configuration.tileSource,
+                              tileHttpClient:
+                                  widget.configuration.tileHttpClient,
+                              showSourceNotice:
+                                  widget.configuration.showSourceNotice,
+                              plannerNeeds: needs,
+                              plannerNeedGroups: plannerNeedGroups,
+                              favoriteResourceIds: favoriteResourceIds,
+                              onFavoriteResourceIdsChanged: widget
+                                  .appController
+                                  .setResourceMapFavoriteIds,
+                              gatherChecklist: gatherChecklist,
+                              gatherChecklistQuantities: _gatherBridge
+                                  .quantities(dataset),
+                              onRecordGathered: (resourceId, quantity) =>
+                                  _gatherBridge.record(
+                                    dataset,
+                                    resourceId,
+                                    quantity,
+                                  ),
+                              onGatherChecklistChanged: widget
+                                  .appController
+                                  .setResourceMapGatherChecklist,
+                              nodeNetworkPreferences: nodeNetworkPreferences,
+                              setupScreenshotPicker: widget.screenshotPicker,
+                              setupScreenshotClipboardReader:
+                                  widget.screenshotClipboardReader,
+                              activeNodeRecordingLauncher:
+                                  widget.activeNodeRecordingLauncher,
+                              activeNodeRecordingFinder:
+                                  widget.activeNodeRecordingFinder,
+                              activeNodeRecordingPicker:
+                                  widget.activeNodeRecordingPicker,
+                              activeNodeRecordingScanner:
+                                  widget.activeNodeRecordingScanner,
+                              onNodeNetworkPreferencesChanged: widget
+                                  .appController
+                                  .setResourceMapNodeNetworkPreferences,
+                              marketOutputEvidenceByResourceId: marketEvidence,
+                              marketNetRate: marketNetRate(
+                                widget.appController.marketTax.value,
+                              ),
+                              marketRegion: market.region,
+                              marketFetchedAt: latestMarketTimestamp > 0
+                                  ? DateTime.fromMillisecondsSinceEpoch(
+                                      latestMarketTimestamp,
+                                      isUtc: true,
+                                    )
+                                  : null,
+                              onRefreshMarketEvidence:
+                                  widget.onRefreshMarketEvidence,
+                              controller: widget.controller,
+                              plannerContextLabel: target.isEmpty
+                                  ? '${mode.label} plan'
+                                  : '${mode.label} · $target',
+                              resourceIconBuilder: (context, resource, size) =>
+                                  ModeItemIcon(
+                                    controller: modeController,
+                                    name: resource.name,
+                                    size: size,
+                                    catalogRepository: widget.catalogRepository,
+                                    searchAcrossModes: true,
+                                    fallbackIcon: _fallbackIconFor(resource),
+                                  ),
+                              workerOutputIconBuilder:
+                                  (context, resource, size) => ModeItemIcon(
+                                    controller: modeController,
+                                    name: resource.name,
+                                    size: size,
+                                    catalogRepository: widget.catalogRepository,
+                                    searchAcrossModes: true,
+                                    fallbackIcon:
+                                        Icons.image_not_supported_outlined,
+                                  ),
+                              vendorItemIconBuilder:
+                                  (context, itemName, size) => ModeItemIcon(
+                                    controller: modeController,
+                                    name: itemName,
+                                    size: size,
+                                    catalogRepository: widget.catalogRepository,
+                                    searchAcrossModes: true,
+                                    fallbackIcon: Icons.inventory_2_outlined,
+                                  ),
+                              vendorPortraitBuilder: (context, vendor, size) {
+                                final assetPath = bdoBundledVendorPortraitAsset(
+                                  vendor.sourceVendorId,
+                                );
+                                final fallback = Icon(
+                                  Icons.person_rounded,
+                                  color: Theme.of(context).colorScheme.primary,
+                                  size: size,
+                                );
+                                if (assetPath == null) {
+                                  return fallback;
+                                }
+                                return Image.asset(
+                                  assetPath,
+                                  width: size,
+                                  height: size,
+                                  alignment: Alignment.bottomCenter,
+                                  fit: BoxFit.contain,
+                                  filterQuality: FilterQuality.high,
+                                  errorBuilder: (context, error, stack) =>
+                                      fallback,
+                                );
+                              },
+                            );
+                          },
+                        );
+                      },
+                    );
+                  },
+                );
+              },
+            );
+          },
+        );
+      },
     );
   }
 

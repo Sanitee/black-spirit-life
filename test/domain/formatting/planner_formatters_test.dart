@@ -81,6 +81,15 @@ void main() {
       '2026-07-20 12:34:56 UTC',
     );
     expect(formatMarketFetchedAt(0), 'Never');
+    expect(formatMarketFetchedTime(0), '');
+    expect(formatMarketFetchedTime(-1), '');
+    expect(formatMarketFetchedTime(value.millisecondsSinceEpoch), '12:34');
+    expect(
+      formatMarketFetchedTime(
+        DateTime.utc(2026, 7, 20, 8, 3).millisecondsSinceEpoch,
+      ),
+      '08:03',
+    );
     expect(
       formatMarketFetchedAt(value.millisecondsSinceEpoch),
       '20.07.2026, 12:34 UTC',

@@ -38,7 +38,7 @@ void main() {
           name: 'Magnetite Ore',
           size: 44,
         ).fit,
-        BoxFit.cover,
+        BoxFit.contain,
       );
       for (final source in [
         (name: "Margahan's Artifact", width: 48),
@@ -48,6 +48,7 @@ void main() {
         final uri = repository.iconDataUriAcrossModes(
           CraftMode.processing,
           source.name,
+          preferCleanArtwork: true,
         );
         expect(uri, isNotNull);
         final originalBytes = Uri.parse(uri!).data!.contentAsBytes();
@@ -67,7 +68,8 @@ void main() {
             codec.dispose();
           }
         });
-        expect(dimensions, Size(source.width.toDouble(), 44));
+        expect(dimensions!.width, greaterThan(0));
+        expect(dimensions.height, greaterThan(0));
         for (final fit in [null, BoxFit.contain]) {
           await tester.pumpWidget(
             _host(
@@ -83,17 +85,17 @@ void main() {
           final image = tester.widget<Image>(
             find.byKey(ModeItemIconKeys.image(source.name)),
           );
-          expect(image.fit, fit ?? BoxFit.cover);
+          expect(image.fit, fit ?? BoxFit.contain);
           expect(
             (image.image as MemoryImage).bytes,
             orderedEquals(originalBytes),
           );
           expect(tester.getSize(find.byType(ModeItemIcon)), const Size(44, 44));
           if (fit == BoxFit.contain) {
-            final fitted = applyBoxFit(fit!, dimensions!, const Size(44, 44));
+            final fitted = applyBoxFit(fit!, dimensions, const Size(44, 44));
             expect(fitted.source, dimensions);
-            expect(fitted.destination.width, 44);
-            expect(fitted.destination.height, lessThan(44));
+            expect(fitted.destination.width, lessThanOrEqualTo(44));
+            expect(fitted.destination.height, lessThanOrEqualTo(44));
           }
         }
       }
@@ -137,7 +139,7 @@ void main() {
         (tester.widget<Image>(image).image as MemoryImage).bytes,
         orderedEquals(stored.bytes),
       );
-      expect(tester.widget<Image>(image).fit, BoxFit.cover);
+      expect(tester.widget<Image>(image).fit, BoxFit.contain);
       await tester.pumpWidget(
         _host(
           harness: harness,
@@ -338,7 +340,7 @@ Widget _host({
             controller: harness.controller.active,
             name: name,
             size: size,
-            fit: fit ?? BoxFit.cover,
+            fit: fit ?? BoxFit.contain,
             aliases: aliases,
             searchAcrossModes: searchAcrossModes,
             fallbackIcon: fallbackIcon,

@@ -129,7 +129,7 @@ class _PlannerCommandBand extends StatelessWidget {
     );
     final amount = PlannerNumberField(
       value: state.want,
-      width: denseLayout ? 78 : 86,
+      width: (denseLayout ? 78 : 86) * (textScale > 1.25 ? textScale : 1),
       semanticLabel: 'Requested amount',
       actionKey: PlannerActionKeys.p02,
       minimumHeight: denseLayout ? null : plannerStandardCommandControlHeight,

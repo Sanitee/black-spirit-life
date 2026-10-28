@@ -7,7 +7,7 @@ void main() {
   test('Windows runner is locked to the public application identity', () {
     expect(AppIdentity.productName, 'Black Spirit Life');
     expect(AppIdentity.displayName, 'Black Spirit Life');
-    expect(AppIdentity.applicationVersion, '0.1.11');
+    expect(AppIdentity.applicationVersion, '0.1.12');
     expect(AppIdentity.inProcessBetaUpdatesEnabled, isFalse);
     expect(AppIdentity.outOfProcessBetaUpdatesEnabled, isTrue);
     expect(AppIdentity.releaseChannel, 'win-x64-stable');
@@ -25,7 +25,10 @@ void main() {
     final runner = File('windows/runner/main.cpp').readAsStringSync();
     final resources = File('windows/runner/Runner.rc').readAsStringSync();
 
-    expect(cmake, contains('project(black_spirit_life LANGUAGES CXX)'));
+    expect(
+      cmake,
+      contains('project(black_spirit_life LANGUAGES CXX)'),
+    );
     expect(cmake, contains('set(BINARY_NAME "BlackSpiritLife")'));
     expect(runner, contains('L"${AppIdentity.displayName}"'));
     expect(

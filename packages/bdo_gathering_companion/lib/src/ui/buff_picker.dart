@@ -343,13 +343,16 @@ class BuffPicker extends StatelessWidget {
       },
       constraints: const BoxConstraints(minWidth: 300, maxWidth: 360),
       itemBuilder: (menuContext) => [
-        const PopupMenuItem<Buff>(
+        PopupMenuItem<Buff>(
           key: ValueKey('event-items-section'),
           enabled: false,
           height: 34,
           child: Text(
             'Event items you may own',
-            style: TextStyle(color: muted, fontWeight: FontWeight.w600),
+            style: TextStyle(
+              color: context.gatheringColors.muted,
+              fontWeight: FontWeight.w600,
+            ),
           ),
         ),
         for (final buff in events)
@@ -385,13 +388,20 @@ class BuffPicker extends StatelessWidget {
                           buff.effectSummary,
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(color: muted, fontSize: 12),
+                          style: TextStyle(
+                            color: context.gatheringColors.muted,
+                            fontSize: 12,
+                          ),
                         ),
                       ],
                     ),
                   ),
                   if (!buff.referenceOnly && selected.contains(buff.id))
-                    const Icon(Icons.check_circle, size: 17, color: accent),
+                    Icon(
+                      Icons.check_circle,
+                      size: 17,
+                      color: context.gatheringColors.accent,
+                    ),
                 ],
               ),
             ),
@@ -407,25 +417,34 @@ class BuffPicker extends StatelessWidget {
               Icon(
                 Icons.event_available_outlined,
                 size: 18,
-                color: selectedCount > 0 ? accent : muted,
+                color: selectedCount > 0
+                    ? context.gatheringColors.accent
+                    : context.gatheringColors.muted,
               ),
               const SizedBox(width: 4),
-              const Text(
+              Text(
                 'Event items',
-                style: TextStyle(fontSize: 13, color: muted),
+                style: TextStyle(
+                  fontSize: 13,
+                  color: context.gatheringColors.muted,
+                ),
               ),
               if (selectedCount > 0) ...[
                 const SizedBox(width: 3),
                 Text(
                   '$selectedCount',
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 12,
-                    color: accent,
+                    color: context.gatheringColors.accent,
                     fontWeight: FontWeight.w700,
                   ),
                 ),
               ],
-              const Icon(Icons.arrow_drop_down, size: 17, color: muted),
+              Icon(
+                Icons.arrow_drop_down,
+                size: 17,
+                color: context.gatheringColors.muted,
+              ),
             ],
           ),
         ),
@@ -474,11 +493,14 @@ class BuffPicker extends StatelessWidget {
             constraints: const BoxConstraints(minHeight: 20),
             child: Tooltip(
               message: textOf(category, 'label'),
-              textStyle: const TextStyle(color: ink, fontSize: 14),
+              textStyle: TextStyle(
+                color: context.gatheringColors.ink,
+                fontSize: 14,
+              ),
               child: Text(
                 label,
-                style: const TextStyle(
-                  color: ink,
+                style: TextStyle(
+                  color: context.gatheringColors.ink,
                   fontSize: 14,
                   fontWeight: FontWeight.w600,
                   height: 1.2,
@@ -545,7 +567,7 @@ class BuffPicker extends StatelessWidget {
                           child: Icon(
                             Icons.check_circle,
                             size: 16,
-                            color: accent,
+                            color: context.gatheringColors.accent,
                           ),
                         ),
                       ),
@@ -765,8 +787,8 @@ class RecommendedBuffs extends StatelessWidget {
       message: goal == 'drops' ? 'Gathering item drop rate' : label,
       child: Text(
         label,
-        style: const TextStyle(
-          color: muted,
+        style: TextStyle(
+          color: context.gatheringColors.muted,
           fontSize: 14,
           fontWeight: FontWeight.w600,
           height: 1.2,
@@ -918,20 +940,33 @@ Future<void> showBuffInfo(BuildContext context, Catalog catalog, Buff buff) {
       insetPadding: const EdgeInsets.all(16),
       titlePadding: const EdgeInsets.fromLTRB(16, 16, 16, 12),
       contentPadding: const EdgeInsets.fromLTRB(16, 0, 16, 10),
-      actionsPadding: const EdgeInsets.fromLTRB(12, 0, 12, 8),
-      title: _BuffDetailsTitle(buff),
+      title: Row(
+        key: ValueKey('buff-details-header-${buff.id}'),
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Expanded(child: _BuffDetailsTitle(buff)),
+          const SizedBox(width: 8),
+          IconButton(
+            key: ValueKey('buff-details-close-${buff.id}'),
+            tooltip: 'Close',
+            onPressed: () => Navigator.pop(context),
+            icon: const Icon(Icons.close, size: 20),
+            padding: EdgeInsets.zero,
+            constraints: const BoxConstraints.tightFor(width: 34, height: 34),
+            style: IconButton.styleFrom(
+              minimumSize: const Size(34, 34),
+              maximumSize: const Size(34, 34),
+              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+            ),
+          ),
+        ],
+      ),
       content: SizedBox(
         width: 368,
         child: SingleChildScrollView(
           child: _BuffDetailsSections(catalog: catalog, buff: buff),
         ),
       ),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.pop(context),
-          child: const Text('Close'),
-        ),
-      ],
     ),
   );
 }
@@ -992,7 +1027,7 @@ class _BuffDetailsTitle extends StatelessWidget {
           style: TextStyle(
             fontSize: 16,
             fontWeight: FontWeight.w600,
-            color: itemGradeColor(buff.grade) ?? ink,
+            color: itemGradeColor(buff.grade) ?? context.gatheringColors.ink,
           ),
         ),
       ),
@@ -1039,8 +1074,8 @@ class _BuffDetailsSections extends StatelessWidget {
                   const SizedBox(width: 8),
                   Text(
                     effectText(catalog, e.key, e.value),
-                    style: const TextStyle(
-                      color: accent,
+                    style: TextStyle(
+                      color: context.gatheringColors.accent,
                       fontSize: 14,
                       fontWeight: FontWeight.w600,
                     ),
@@ -1074,7 +1109,7 @@ class _BuffDetailsSections extends StatelessWidget {
               )
           else
             for (final line in acquisition.lines)
-              _BuffDetailLine(line, color: gold),
+              _BuffDetailLine(line, color: context.gatheringColors.gold),
         ],
         if (buff.components.isNotEmpty) ...[
           const Divider(height: 16),
@@ -1101,8 +1136,8 @@ class _BuffDetailHeading extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Text(
     label,
-    style: const TextStyle(
-      color: accent,
+    style: TextStyle(
+      color: context.gatheringColors.accent,
       fontSize: 13.5,
       fontWeight: FontWeight.w700,
     ),
@@ -1110,17 +1145,21 @@ class _BuffDetailHeading extends StatelessWidget {
 }
 
 class _BuffDetailLine extends StatelessWidget {
-  const _BuffDetailLine(this.text, {super.key, this.color = ink});
+  const _BuffDetailLine(this.text, {super.key, this.color});
 
   final String text;
-  final Color color;
+  final Color? color;
 
   @override
   Widget build(BuildContext context) => Padding(
     padding: const EdgeInsets.only(bottom: 6),
     child: Text(
       text,
-      style: TextStyle(fontSize: 14, color: color, height: 1.28),
+      style: TextStyle(
+        fontSize: 14,
+        color: color ?? context.gatheringColors.ink,
+        height: 1.28,
+      ),
     ),
   );
 }
@@ -1150,8 +1189,8 @@ class _BuffIngredientRow extends StatelessWidget {
         const SizedBox(width: 8),
         Text(
           '×${ingredient.quantity}',
-          style: const TextStyle(
-            color: gold,
+          style: TextStyle(
+            color: context.gatheringColors.gold,
             fontSize: 13.5,
             fontWeight: FontWeight.w700,
           ),
@@ -1191,8 +1230,8 @@ Widget _buffComponentTile(BuildContext context, BuffComponent component) =>
                   const SizedBox(height: 1),
                   Text(
                     component.effectSummary,
-                    style: const TextStyle(
-                      color: muted,
+                    style: TextStyle(
+                      color: context.gatheringColors.muted,
                       fontSize: 13,
                       height: 1.25,
                     ),
@@ -1255,9 +1294,9 @@ class BuffSummary extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         if (totals.isEmpty)
-          const Text(
+          Text(
             'Select buffs to see their combined bonuses.',
-            style: TextStyle(color: muted),
+            style: TextStyle(color: context.gatheringColors.muted),
           ),
         if (totals.isNotEmpty) ...[
           ...primary.map(
@@ -1270,8 +1309,8 @@ class BuffSummary extends StatelessWidget {
                   ),
                   Text(
                     r.$2,
-                    style: const TextStyle(
-                      color: accent,
+                    style: TextStyle(
+                      color: context.gatheringColors.accent,
                       fontSize: 15,
                       fontWeight: FontWeight.w600,
                     ),
@@ -1303,12 +1342,15 @@ class BuffSummary extends StatelessWidget {
                     children: [
                       Text(
                         '+${numberText(amount)} levels',
-                        style: const TextStyle(color: accent),
+                        style: TextStyle(color: context.gatheringColors.accent),
                       ),
                       if (amount >= 5)
-                        const Text(
+                        Text(
                           'Resulting ability caps at 5',
-                          style: TextStyle(fontSize: 14, color: gold),
+                          style: TextStyle(
+                            fontSize: 14,
+                            color: context.gatheringColors.gold,
+                          ),
                         ),
                     ],
                   ),
@@ -1332,7 +1374,10 @@ class BuffSummary extends StatelessWidget {
                         Expanded(
                           child: Text(
                             catalog.statLabel(e.key),
-                            style: const TextStyle(fontSize: 14, color: muted),
+                            style: TextStyle(
+                              fontSize: 14,
+                              color: context.gatheringColors.muted,
+                            ),
                           ),
                         ),
                         Text(
@@ -1346,16 +1391,24 @@ class BuffSummary extends StatelessWidget {
                 .toList(),
           ),
           const SizedBox(height: 7),
-          const Text(
+          Text(
             'Buff contributions only. Gear and ability caps affect the final in-game values. EXP includes general Life EXP plus the activity-specific bonus.',
-            style: TextStyle(color: muted, fontSize: 14, height: 1.5),
+            style: TextStyle(
+              color: context.gatheringColors.muted,
+              fontSize: 14,
+              height: 1.5,
+            ),
           ),
           if (!gathering)
-            const Padding(
+            Padding(
               padding: EdgeInsets.only(top: 8),
               child: Text(
                 'Gathering drop-rate and combat bonuses do not all apply equally to matchlock and sniper hunting. No loot or shot-damage multiplier is inferred.',
-                style: TextStyle(color: gold, fontSize: 14, height: 1.5),
+                style: TextStyle(
+                  color: context.gatheringColors.gold,
+                  fontSize: 14,
+                  height: 1.5,
+                ),
               ),
             ),
         ],
@@ -1397,7 +1450,11 @@ class BuffSummary extends StatelessWidget {
     ].join('\n');
     return Tooltip(
       message: detailText,
-      textStyle: const TextStyle(color: ink, fontSize: 14, height: 1.4),
+      textStyle: TextStyle(
+        color: context.gatheringColors.ink,
+        fontSize: 14,
+        height: 1.4,
+      ),
       decoration: BoxDecoration(
         color: context.glass.panel,
         border: Border.all(color: context.glass.line),
@@ -1428,8 +1485,8 @@ class BuffSummary extends StatelessWidget {
                             children: [
                               Text(
                                 v.$2,
-                                style: const TextStyle(
-                                  color: muted,
+                                style: TextStyle(
+                                  color: context.gatheringColors.muted,
                                   fontSize: 14,
                                   height: 1.3,
                                 ),
@@ -1437,8 +1494,8 @@ class BuffSummary extends StatelessWidget {
                               const SizedBox(height: 2),
                               Text(
                                 v.$3,
-                                style: const TextStyle(
-                                  color: accent,
+                                style: TextStyle(
+                                  color: context.gatheringColors.accent,
                                   fontSize: 16,
                                   fontWeight: FontWeight.w600,
                                   height: 1.3,
@@ -1480,7 +1537,11 @@ class BuffSummary extends StatelessWidget {
                 ],
               ),
             ),
-            icon: const Icon(Icons.info_outline, size: 20, color: muted),
+            icon: Icon(
+              Icons.info_outline,
+              size: 20,
+              color: context.gatheringColors.muted,
+            ),
             padding: EdgeInsets.zero,
             constraints: const BoxConstraints.tightFor(width: 36, height: 36),
             visualDensity: VisualDensity.compact,

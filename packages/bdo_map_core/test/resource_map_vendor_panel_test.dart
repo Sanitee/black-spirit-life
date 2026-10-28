@@ -37,98 +37,91 @@ void main() {
   });
 
   for (final viewport in [const Size(1200, 752), const Size(790, 500)]) {
-    testWidgets('small NPC details follow the clicked marker at $viewport', (
-      tester,
-    ) async {
-      final controller = BdoResourceMapController();
-      addTearDown(controller.dispose);
-      await tester.binding.setSurfaceSize(viewport);
-      addTearDown(() => tester.binding.setSurfaceSize(null));
-      await tester.pumpWidget(
-        MaterialApp(
-          home: RepaintBoundary(
-            key: const ValueKey('anchored-npc-capture'),
-            child: BdoResourceMap(
-              dataset: dataset,
-              cacheDirectory: cacheDirectory,
-              tileHttpClient: tileClient,
-              showSourceNotice: false,
-              controller: controller,
-              vendorPortraitBuilder: (context, vendor, size) {
-                final asset = bdoBundledVendorPortraitAsset(
-                  vendor.sourceVendorId,
-                );
-                return asset == null
-                    ? Icon(Icons.person, size: size)
-                    : Image.asset(
-                        asset,
-                        width: size,
-                        height: size,
-                        fit: BoxFit.contain,
-                      );
-              },
+    testWidgets(
+      'small NPC inspector stays steady when the map pans at $viewport',
+      (tester) async {
+        final controller = BdoResourceMapController();
+        addTearDown(controller.dispose);
+        await tester.binding.setSurfaceSize(viewport);
+        addTearDown(() => tester.binding.setSurfaceSize(null));
+        await tester.pumpWidget(
+          MaterialApp(
+            home: RepaintBoundary(
+              key: const ValueKey('anchored-npc-capture'),
+              child: BdoResourceMap(
+                dataset: dataset,
+                cacheDirectory: cacheDirectory,
+                tileHttpClient: tileClient,
+                showSourceNotice: false,
+                controller: controller,
+                vendorPortraitBuilder: (context, vendor, size) {
+                  final asset = bdoBundledVendorPortraitAsset(
+                    vendor.sourceVendorId,
+                  );
+                  return asset == null
+                      ? Icon(Icons.person, size: size)
+                      : Image.asset(
+                          asset,
+                          width: size,
+                          height: size,
+                          fit: BoxFit.contain,
+                        );
+                },
+              ),
             ),
           ),
-        ),
-      );
-      controller.focus(
-        const BdoResourceMapFocusRequest(
-          materialName: 'Purified Water',
-          source: BdoResourceMapFocusSource.npcVendors,
-        ),
-      );
-      await tester.pumpAndSettle();
-      final vendor = dataset
-          .vendorNpcsForItem('Purified Water')
-          .firstWhere((v) => v.name == 'Waida');
-      final camera = tester
-          .widget<BdoMapCanvas>(find.byType(BdoMapCanvas))
-          .cameraController;
-      camera.showPoint(vendor.location, viewport: viewport, zoom: 6.4);
-      await tester.pumpAndSettle();
-      final marker = find.byKey(
-        ValueKey('resource-map-vendor-marker-${vendor.id}'),
-      );
-      expect(tester.getSize(marker), const Size(56, 56));
-      final art = tester.widget<Image>(
-        find.descendant(of: marker, matching: find.byType(Image)),
-      );
-      expect(art.width, 44);
-      await tester.tap(marker);
-      await tester.pumpAndSettle();
-      final details = find.byKey(
-        const ValueKey('resource-map-anchored-details-surface'),
-      );
-      final before = tester.getRect(details);
-      expect(before.height, lessThan(330));
-      expect(before.left, isNot(16));
-      expect(before.top, greaterThan(120));
-      expect(before.right, lessThanOrEqualTo(viewport.width - 12));
-      expect(before.bottom, lessThanOrEqualTo(viewport.height - 12));
-      expect(
-        tester
-            .getRect(
-              find.byKey(const ValueKey('resource-map-workspace-position')),
-            )
-            .topLeft,
-        const Offset(16, 16),
-      );
-      await captureMapMenu(
-        tester,
-        boundary: find.byKey(const ValueKey('anchored-npc-capture')),
-        name: 'waida-click-details-${viewport.width.toInt()}',
-      );
-      camera.panBy(const Offset(0, 20), viewport);
-      await tester.pumpAndSettle();
-      expect(
-        tester.getRect(details).top,
-        closeTo(
-          (before.top + 20).clamp(12, viewport.height - before.height - 12),
-          1,
-        ),
-      );
-      expect(tester.takeException(), isNull);
-    });
+        );
+        controller.focus(
+          const BdoResourceMapFocusRequest(
+            materialName: 'Purified Water',
+            source: BdoResourceMapFocusSource.npcVendors,
+          ),
+        );
+        await tester.pumpAndSettle();
+        final vendor = dataset
+            .vendorNpcsForItem('Purified Water')
+            .firstWhere((v) => v.name == 'Waida');
+        final camera = tester
+            .widget<BdoMapCanvas>(find.byType(BdoMapCanvas))
+            .cameraController;
+        camera.showPoint(vendor.location, viewport: viewport, zoom: 6.4);
+        await tester.pumpAndSettle();
+        final marker = find.byKey(
+          ValueKey('resource-map-vendor-marker-${vendor.id}'),
+        );
+        expect(tester.getSize(marker), const Size(56, 56));
+        final art = tester.widget<Image>(
+          find.descendant(of: marker, matching: find.byType(Image)),
+        );
+        expect(art.width, 44);
+        await tester.tap(marker);
+        await tester.pumpAndSettle();
+        final details = find.byKey(const ValueKey('resource-map-atlas-dock'));
+        final before = tester.getRect(details);
+        expect(before.height, lessThan(330));
+        expect(before.left, isNot(16));
+        expect(before.top, 16);
+        expect(before.right, closeTo(viewport.width - 88, 1));
+        expect(before.bottom, lessThanOrEqualTo(viewport.height - 12));
+        expect(
+          tester
+              .getRect(
+                find.byKey(const ValueKey('resource-map-workspace-position')),
+              )
+              .topLeft,
+          before.topLeft,
+        );
+        await captureMapMenu(
+          tester,
+          boundary: find.byKey(const ValueKey('anchored-npc-capture')),
+          name: 'waida-click-details-${viewport.width.toInt()}',
+        );
+        camera.panBy(const Offset(0, 20), viewport);
+        await tester.pumpAndSettle();
+        expect(tester.getRect(details).top, before.top);
+        expect(tester.takeException(), isNull);
+      },
+    );
   }
 
   test('every vendor item lookup returns every unique mapped seller', () {
@@ -244,25 +237,13 @@ void main() {
       await tester.tap(choice);
       await tester.pump();
 
-      final inspector = find.byKey(
-        const ValueKey('resource-map-anchored-details-surface'),
-      );
+      final inspector = find.byKey(const ValueKey('resource-map-atlas-dock'));
       expect(inspector, findsOneWidget);
       final panelRect = tester.getRect(inspector);
-      final selectedVendor = dataset.vendorNpcsById[selectedVendorId]!;
-      final selectedAnchor = canvas.cameraController.worldToScreen(
-        selectedVendor.location.mapPoint,
-        viewport,
-      );
       expect(panelRect.left, isNot(16));
       expect(panelRect.right, lessThanOrEqualTo(viewport.width - 12));
       expect(panelRect.bottom, lessThanOrEqualTo(viewport.height - 12));
-      expect(
-        (panelRect.right - (selectedAnchor.dx - 32)).abs() < 1 ||
-            (panelRect.left - (selectedAnchor.dx + 32)).abs() < 1 ||
-            panelRect.left == 12,
-        isTrue,
-      );
+      expect(panelRect.right, closeTo(viewport.width - 88, 1));
       expect(panelRect.height, greaterThan(500));
       expect(panelRect.top, greaterThanOrEqualTo(0));
       expect(panelRect.bottom, lessThanOrEqualTo(viewport.height));
@@ -403,9 +384,7 @@ void main() {
       await tester.tap(choice);
       await tester.pump();
 
-      final inspector = find.byKey(
-        const ValueKey('resource-map-anchored-details-surface'),
-      );
+      final inspector = find.byKey(const ValueKey('resource-map-atlas-dock'));
       expect(inspector, findsOneWidget);
       final panelRect = tester.getRect(inspector);
       expect(panelRect.height, greaterThan(500));
@@ -520,9 +499,7 @@ void main() {
       );
     }
 
-    final inspector = find.byKey(
-      const ValueKey('resource-map-anchored-details-surface'),
-    );
+    final inspector = find.byKey(const ValueKey('resource-map-atlas-dock'));
     final panelRect = tester.getRect(inspector);
     final scrollable = find.descendant(
       of: find.byKey(const ValueKey<String>('resource-map-sidebar-details')),

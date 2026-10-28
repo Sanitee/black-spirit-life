@@ -3,9 +3,9 @@ import 'package:flutter/painting.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  test('opacity clamps malformed imports and keeps the old default', () {
+  test('opacity defaults to glass and clamps malformed imports', () {
     for (final value in [null, '0.7', true, double.nan, double.infinity]) {
-      expect(ResourceMapUiOpacity.normalize(value), 1);
+      expect(ResourceMapUiOpacity.normalize(value), .6);
     }
     expect(ResourceMapUiOpacity.minimum, 0);
     expect(ResourceMapUiOpacity.normalize(-1), 0);
@@ -17,6 +17,50 @@ void main() {
     }
   });
 
+  test('the translucent default scales the full-strength palette once', () {
+    const palette = ResourceMapChromeThemeData.glassDock;
+    expect(palette.uiOpacity, 1);
+    final glass = palette.withUiOpacity(ResourceMapUiOpacity.defaultValue);
+    expect(glass.uiOpacity, .6);
+    expect(
+      glass.readingSurfaceGradient.colors.first.a,
+      closeTo(
+        palette.readingSurfaceGradient.colors.first.a * _density(.6),
+        1e-9,
+      ),
+    );
+    expect(
+      glass.readingSurfaceGradient.colors.last.a,
+      closeTo(
+        palette.readingSurfaceGradient.colors.last.a * _density(.6),
+        1e-9,
+      ),
+    );
+    expect(glass.withUiOpacity(.6), same(glass));
+    expect(glass.ink, palette.ink);
+    expect(glass.readingInk.a, 1);
+  });
+
+  test('material density preserves endpoints and advances monotonically', () {
+    const palette = ResourceMapChromeThemeData.glassDock;
+    var previous = .02;
+    for (var percent = 0; percent <= 100; percent++) {
+      final opacity = percent / 100;
+      final changed = palette.withUiOpacity(opacity);
+      expect(changed.uiOpacity, opacity);
+      expect(changed.materialOpacity, closeTo(_density(opacity), 1e-12));
+      expect(changed.materialOpacity, greaterThanOrEqualTo(previous));
+      expect(changed.materialOpacity, inInclusiveRange(.02, 1));
+      previous = changed.materialOpacity;
+    }
+    expect(palette.withUiOpacity(0).materialOpacity, .02);
+    expect(palette.withUiOpacity(1).materialOpacity, 1);
+    expect(
+      palette.withUiOpacity(.7).materialOpacity,
+      closeTo(.9081632653, 1e-9),
+    );
+  });
+
   for (final chrome in [
     ResourceMapChromeThemeData.glassDock,
     ResourceMapChromeThemeData.ghostLedger,
@@ -26,7 +70,7 @@ void main() {
     for (final opacity in [0.0, .01, .25, .6, 1.0]) {
       test('${chrome.variant.name} fades material and shadows at $opacity', () {
         final changed = chrome.withUiOpacity(opacity);
-        final material = opacity < .02 ? .02 : opacity;
+        final material = _density(opacity);
         expect(changed.uiOpacity, opacity);
         expect(changed.materialOpacity, material);
         _expectMaterials(changed, chrome, material);
@@ -42,7 +86,7 @@ void main() {
         for (final opacity in [0.0, .01, .75, 0.0, 1.0, .25, .65, 1.0]) {
           changed = changed.withUiOpacity(opacity);
           expect(changed.uiOpacity, opacity);
-          _expectMaterials(changed, chrome, opacity < .02 ? .02 : opacity);
+          _expectMaterials(changed, chrome, _density(opacity));
         }
       }
     });
@@ -63,16 +107,19 @@ void main() {
       expect(translucent.surfaceRadius, chrome.surfaceRadius);
       expect(
         translucent.chromeBase.a,
-        closeTo(chrome.chromeBase.a * .65, .001),
+        closeTo(chrome.chromeBase.a * _density(.65), .001),
       );
       expect(
         translucent.fillAlpha(chrome.chromeBase, .9).a,
-        closeTo(.585, .001),
+        closeTo(.9 * _density(.65), .001),
       );
       for (var i = 0; i < chrome.readingSurfaceGradient.colors.length; i++) {
         expect(
           translucent.readingSurfaceGradient.colors[i].a,
-          closeTo(chrome.readingSurfaceGradient.colors[i].a * .65, .001),
+          closeTo(
+            chrome.readingSurfaceGradient.colors[i].a * _density(.65),
+            .001,
+          ),
         );
       }
       expect(
@@ -88,6 +135,11 @@ void main() {
       );
     });
   }
+}
+
+double _density(double opacity) {
+  final clamped = opacity.clamp(.02, 1.0);
+  return .02 + .98 * (1 - ((1 - clamped) / .98) * ((1 - clamped) / .98));
 }
 
 void _expectMaterials(
@@ -106,6 +158,8 @@ void _expectMaterials(
       actual.deepAccent,
       actual.onPrimary,
       actual.accent,
+      actual.materialAccent,
+      actual.finishAccent,
       actual.positive,
       actual.warning,
       actual.error,
@@ -121,6 +175,8 @@ void _expectMaterials(
       original.deepAccent,
       original.onPrimary,
       original.accent,
+      original.materialAccent,
+      original.finishAccent,
       original.positive,
       original.warning,
       original.error,

@@ -7,7 +7,7 @@ import '../../visual/visual.dart';
 import 'opportunities_controller.dart';
 import 'opportunities_visuals.dart';
 
-/// Only this control ticks; the recipe workspace does not rebuild each second.
+/// Only this control and its wait label tick, not the recipe workspace.
 class OpportunityRefreshControl extends StatefulWidget {
   const OpportunityRefreshControl({required this.controller, super.key});
 
@@ -144,7 +144,7 @@ class _OpportunityRefreshControlState extends State<OpportunityRefreshControl>
         : 'Please wait';
     final spec = context.visualTheme;
     final countdown = _formatWait(scanning ? _dispatchWait : _readiness.wait);
-    return OpportunityButton(
+    final button = OpportunityButton(
       key: const ValueKey('opportunities-refresh'),
       minimumSize: const Size(0, 40),
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
@@ -170,19 +170,15 @@ class _OpportunityRefreshControlState extends State<OpportunityRefreshControl>
           : enabled
           ? () => unawaited(widget.controller.refresh())
           : null,
-      child: scanWaiting || waiting
+      child: waiting
           ? Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Text(scanning ? label : 'Refresh in'),
+                const Text('Refresh in'),
                 const SizedBox(width: 8),
                 Text(
                   countdown,
-                  key: ValueKey(
-                    scanning
-                        ? 'opportunities-dispatch-countdown'
-                        : 'opportunities-refresh-countdown',
-                  ),
+                  key: const ValueKey('opportunities-refresh-countdown'),
                   style: spec.typography.meta.copyWith(
                     fontSize: 12,
                     height: 1.1,
@@ -192,6 +188,36 @@ class _OpportunityRefreshControlState extends State<OpportunityRefreshControl>
               ],
             )
           : Text(label),
+    );
+    return Wrap(
+      alignment: WrapAlignment.end,
+      crossAxisAlignment: WrapCrossAlignment.center,
+      spacing: 12,
+      runSpacing: 8,
+      children: [
+        if (scanWaiting)
+          Tooltip(
+            message:
+                'Market requests are paced to avoid a block. '
+                'The check continues automatically; loaded results stay available.',
+            child: Wrap(
+              key: const ValueKey('opportunities-dispatch-wait'),
+              spacing: 5,
+              crossAxisAlignment: WrapCrossAlignment.center,
+              children: [
+                Text('Waiting · resumes in', style: spec.typography.meta),
+                Text(
+                  countdown,
+                  key: const ValueKey('opportunities-dispatch-countdown'),
+                  style: spec.typography.meta.copyWith(
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        button,
+      ],
     );
   }
 }

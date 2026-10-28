@@ -15,6 +15,69 @@ const _iconDataUri = 'data:image/png;base64,AA==';
 void main() {
   const codec = PortableV4Codec();
 
+  test('Settings portable export round-trips Planner content size', () {
+    final source = buildStateFixture().copyWith(plannerContentScale: 1.22);
+    final exported = codec.export(
+      source,
+      scopes: const PortableScopes(settings: true),
+    );
+    final result = codec.import(buildStateFixture(), exported);
+    expect(result.state.plannerContentScale, 1.22);
+  });
+
+  test('older Settings portable files preserve the current Planner size', () {
+    final source = buildStateFixture();
+    final exported =
+        jsonDecode(
+              codec.export(
+                source,
+                scopes: const PortableScopes(settings: true),
+              ),
+            )
+            as Map<String, Object?>;
+    (exported['data']! as Map<String, Object?>).remove('plannerContentScale');
+    final result = codec.import(
+      source.copyWith(plannerContentScale: 1.2),
+      jsonEncode(exported),
+    );
+    expect(result.state.plannerContentScale, 1.2);
+  });
+
+  test('non-Settings imports do not overwrite Planner content size', () {
+    final source = buildStateFixture();
+    final exported =
+        jsonDecode(
+              codec.export(source, scopes: const PortableScopes(plans: true)),
+            )
+            as Map<String, Object?>;
+    (exported['data']! as Map<String, Object?>)['plannerContentScale'] = 1.25;
+    final result = codec.import(
+      source.copyWith(plannerContentScale: 1.1),
+      jsonEncode(exported),
+    );
+    expect(result.state.plannerContentScale, 1.1);
+  });
+
+  test('portable Planner size values are normalized safely', () {
+    final source = buildStateFixture();
+    final exported =
+        jsonDecode(
+              codec.export(
+                source,
+                scopes: const PortableScopes(settings: true),
+              ),
+            )
+            as Map<String, Object?>;
+    final data = exported['data']! as Map<String, Object?>;
+    for (final entry in <Object, double>{'bad': 1, -1: 1, 100: 1.25}.entries) {
+      data['plannerContentScale'] = entry.key;
+      expect(
+        codec.import(source, jsonEncode(exported)).state.plannerContentScale,
+        entry.value,
+      );
+    }
+  });
+
   group('portable v4 export contract', () {
     const cases =
         <
@@ -89,6 +152,7 @@ void main() {
               'processingYields',
               'marketTax',
               'afkWeightProfile',
+              'plannerContentScale',
             },
             includeMarketTax: false,
           ),

@@ -355,6 +355,17 @@ final class PersonalDataLocationService implements PersonalDataLocationManager {
       Directory(_join(local, AppIdentity.formerLocalCacheDirectoryName)),
       Directory(_join(local, AppIdentity.liveBetaInstallerPackageId)),
       Directory(_join(local, AppIdentity.formerInstallerPackageId)),
+      Directory(_join(roaming, 'Black Spirit Life Beta by Codex')),
+      Directory(_join(local, 'Black Spirit Life Beta by Codex')),
+      Directory(_join(local, 'BlackSpiritLife.App.CodexBeta')),
+      Directory(
+        _join(local, 'flutter_webview_windows/BlackSpiritLifeBetaByCodex'),
+      ),
+      Directory(_join(roaming, 'BDO Gathering Companion')),
+      Directory(_join(local, 'BDO Gathering Companion')),
+      Directory(
+        _join(local, 'flutter_webview_windows/BlackSpiritLifeLiveBeta'),
+      ),
       ...additionalProtectedDirectories,
       executableDirectory,
       ?velopackInstallRoot,
@@ -449,6 +460,8 @@ final class PersonalDataLocationService implements PersonalDataLocationManager {
     final configured = await _readLocator();
     if (configured == null) {
       _requiresExistingProfile = false;
+      await _rejectLinksInExistingAncestors(defaultDirectory);
+      await _rejectForeignProfileAncestors(defaultDirectory);
       return _resolvedDirectory = Directory(
         _normalizeAbsolute(defaultDirectory.path),
       );
@@ -935,6 +948,7 @@ final class PersonalDataLocationService implements PersonalDataLocationManager {
       );
     }
     await _rejectLinksInExistingAncestors(directory);
+    await _rejectForeignProfileAncestors(directory);
     await _validatePhysicalCurrentSourceLocation(directory);
     await _rejectLinksInProfileTree(directory);
     if (!_samePath(directory.path, defaultDirectory.path) &&
@@ -981,6 +995,7 @@ final class PersonalDataLocationService implements PersonalDataLocationManager {
   }
 
   Future<bool> _validateDestinationContents(Directory destination) async {
+    await _rejectForeignProfileAncestors(destination);
     final type = await FileSystemEntity.type(
       destination.path,
       followLinks: false,
@@ -1016,6 +1031,27 @@ final class PersonalDataLocationService implements PersonalDataLocationManager {
           source.path,
         );
       }
+    }
+  }
+
+  // A normal Beta can relocate its profile outside AppData. Do not read its
+  // locator or assume a fixed directory: the durable ownership marker protects
+  // that folder and every descendant, even if the user chooses an empty child.
+  Future<void> _rejectForeignProfileAncestors(Directory directory) async {
+    var current = directory.absolute;
+    while (true) {
+      final marker = File(_join(current.path, profileMarkerFileName));
+      if (await marker.exists() &&
+          (!_samePath(current.path, directory.path) ||
+              !await _hasOwnedProfileMarker(current))) {
+        throw FileSystemException(
+          'Choose a folder outside another application profile. Its files were not changed.',
+          directory.path,
+        );
+      }
+      final parent = current.parent;
+      if (_samePath(parent.path, current.path)) return;
+      current = parent;
     }
   }
 

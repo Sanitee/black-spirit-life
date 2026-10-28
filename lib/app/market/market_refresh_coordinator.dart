@@ -93,12 +93,10 @@ final class MarketRefreshSummary {
     MarketRefreshStatus.partiallyUpdated =>
       'Market updated for $updatedMaterialCount material(s); '
           '$failedRequestCount request(s) failed and '
-          '$unresolvedMaterialCount material(s) need a market ID.',
+          '$unresolvedMaterialCount material(s) have no available price.',
     MarketRefreshStatus.noMarketListings =>
       'None of the requested materials are registered on the Central Market.',
-    MarketRefreshStatus.noResolvableItems =>
-      'No requested materials have a usable market ID. Add or correct the '
-          'market ID in item metadata, then retry.',
+    MarketRefreshStatus.noResolvableItems => 'Price unavailable.',
     MarketRefreshStatus.npcPricesOnly => 'NPC prices are already included.',
     MarketRefreshStatus.temporarilyArchived => 'Archived items were skipped.',
     MarketRefreshStatus.failed =>
@@ -125,6 +123,8 @@ final class MarketRefreshResult {
   MarketRefreshStatus get status => summary.status;
   Map<String, double> get prices => market.prices;
   Map<String, double> get stock => market.stock;
+  Map<String, double> get preorderPrices => market.preorderPrices;
+  Map<String, int> get preorderObservedAt => market.preorderObservedAt;
   Map<String, String> get tradeMarketIds => market.tradeMarketIds;
   Map<String, int> get totalTrades => market.totalTrades;
   Map<String, int> get tradeObservedAt => market.tradeObservedAt;
@@ -286,7 +286,10 @@ final class MarketRefreshCoordinator {
     final diagnostics = <MarketRefreshDiagnostic>[];
     final seenNames = <String>{};
     final supporting = catalogRepository.snapshot.supportingData;
-    final sourceRules = const PlannerAssembly().plannerRules(supporting);
+    final sourceRules = const PlannerAssembly().plannerRules(
+      supporting,
+      npcPurchasePrices: catalogRepository.npcPurchasePrices,
+    );
     final recipesByName = <String, Recipe>{
       for (final entry in assembledRecipes.entries)
         _marketItemKey(entry.key): entry.value,
@@ -352,11 +355,7 @@ final class MarketRefreshCoordinator {
                 ? MarketRefreshDiagnosticCode.invalidMarketId
                 : MarketRefreshDiagnosticCode.unresolvedMarketId,
             materialName: name,
-            message: resolved.hadInvalidCandidate
-                ? '$name has a non-positive or non-decimal market ID. Correct '
-                      'the item metadata before checking prices again.'
-                : 'No market ID was found for $name. Add one in item metadata '
-                      'before checking prices again.',
+            message: 'Price unavailable.',
           ),
         );
         continue;
@@ -448,6 +447,8 @@ final class MarketRefreshCoordinator {
   }) {
     final prices = Map<String, double>.of(current.prices);
     final stock = Map<String, double>.of(current.stock);
+    final preorderPrices = Map<String, double>.of(current.preorderPrices);
+    final preorderObservedAt = Map<String, int>.of(current.preorderObservedAt);
     final tradeMarketIds = Map<String, String>.of(current.tradeMarketIds);
     final totalTrades = Map<String, int>.of(current.totalTrades);
     final tradeObservedAt = Map<String, int>.of(current.tradeObservedAt);
@@ -521,6 +522,8 @@ final class MarketRefreshCoordinator {
           for (final target in targets) {
             prices.remove(target);
             stock.remove(target);
+            preorderPrices.remove(target);
+            preorderObservedAt.remove(target);
             tradeMarketIds.remove(target);
             totalTrades.remove(target);
             tradeObservedAt.remove(target);
@@ -583,6 +586,20 @@ final class MarketRefreshCoordinator {
         }
       }
       for (final target in targets) {
+        final sameItem = tradeMarketIds[target] == id;
+        final previousBook = sameItem ? preorderObservedAt[target] : null;
+        final nextBook = row.preorderFetchedAt?.millisecondsSinceEpoch;
+        if (!sameItem ||
+            (nextBook == null &&
+                row.fetchedAt.millisecondsSinceEpoch > (previousBook ?? 0))) {
+          preorderPrices.remove(target);
+          preorderObservedAt.remove(target);
+        }
+        if (nextBook != null && nextBook >= (previousBook ?? 0)) {
+          preorderPrices[target] = (row.preorderPrice ?? 0).toDouble();
+          preorderObservedAt[target] = nextBook;
+          appliedAnyField = true;
+        }
         if (_mergeTradeEvidence(
           target: target,
           marketId: id,
@@ -650,6 +667,8 @@ final class MarketRefreshCoordinator {
           current,
           prices: prices,
           stock: stock,
+          preorderPrices: preorderPrices,
+          preorderObservedAt: preorderObservedAt,
           tradeMarketIds: tradeMarketIds,
           totalTrades: totalTrades,
           tradeObservedAt: tradeObservedAt,
@@ -676,6 +695,8 @@ final class MarketRefreshCoordinator {
       current,
       prices: prices,
       stock: stock,
+      preorderPrices: preorderPrices,
+      preorderObservedAt: preorderObservedAt,
       tradeMarketIds: tradeMarketIds,
       totalTrades: totalTrades,
       tradeObservedAt: tradeObservedAt,
@@ -835,6 +856,8 @@ MarketState _copyMarket(
   MarketState source, {
   Map<String, double>? prices,
   Map<String, double>? stock,
+  Map<String, double>? preorderPrices,
+  Map<String, int>? preorderObservedAt,
   Map<String, String>? tradeMarketIds,
   Map<String, int>? totalTrades,
   Map<String, int>? tradeObservedAt,
@@ -847,6 +870,8 @@ MarketState _copyMarket(
 }) => MarketState(
   prices: prices ?? source.prices,
   stock: stock ?? source.stock,
+  preorderPrices: preorderPrices ?? source.preorderPrices,
+  preorderObservedAt: preorderObservedAt ?? source.preorderObservedAt,
   tradeMarketIds: tradeMarketIds ?? source.tradeMarketIds,
   totalTrades: totalTrades ?? source.totalTrades,
   tradeObservedAt: tradeObservedAt ?? source.tradeObservedAt,

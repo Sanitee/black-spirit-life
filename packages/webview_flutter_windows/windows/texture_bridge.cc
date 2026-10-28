@@ -47,32 +47,47 @@ bool TextureBridge::Start() {
     return false;
   }
 
-  ABI::Windows::Graphics::SizeInt32 size;
-  capture_item_->get_Size(&size);
+  // Clear any partially initialized capture before retrying. The WebView,
+  // capture item and registered Flutter texture are not recreated.
+  StopInternal();
+
+  ABI::Windows::Graphics::SizeInt32 size = {};
+  if (FAILED(capture_item_->get_Size(&size)) || size.Width <= 0 ||
+      size.Height <= 0) {
+    return false;
+  }
 
   frame_pool_ = graphics_context_->CreateCaptureFramePool(
       graphics_context_->device(),
       static_cast<ABI::Windows::Graphics::DirectX::DirectXPixelFormat>(
           kPixelFormat),
       kNumBuffers, size);
-  assert(frame_pool_);
+  if (!frame_pool_) {
+    return false;
+  }
 
-  frame_pool_->add_FrameArrived(
+  const auto registration_result = frame_pool_->add_FrameArrived(
       Microsoft::WRL::Callback<ABI::Windows::Foundation::ITypedEventHandler<
           ABI::Windows::Graphics::Capture::Direct3D11CaptureFramePool*,
           IInspectable*>>(
           [this](ABI::Windows::Graphics::Capture::IDirect3D11CaptureFramePool*
                      pool,
                  IInspectable* args) -> HRESULT {
-            OnFrameArrived();
+            OnFrameArrived(pool);
             return S_OK;
           })
           .Get(),
       &on_frame_arrived_token_);
+  if (FAILED(registration_result)) {
+    StopInternal();
+    return false;
+  }
+  frame_arrived_registered_ = true;
 
   if (FAILED(frame_pool_->CreateCaptureSession(capture_item_.get(),
                                                capture_session_.put()))) {
     std::cerr << "Creating capture session failed." << std::endl;
+    StopInternal();
     return false;
   }
 
@@ -81,6 +96,7 @@ bool TextureBridge::Start() {
     return true;
   }
 
+  StopInternal();
   return false;
 }
 
@@ -90,20 +106,41 @@ void TextureBridge::Stop() {
 }
 
 void TextureBridge::StopInternal() {
-  if (is_running_) {
-    is_running_ = false;
-    frame_pool_->remove_FrameArrived(on_frame_arrived_token_);
+  // Quiesce callbacks before closing either object. This also cleans up
+  // failures between pool creation and StartCapture, not just running sessions.
+  is_running_ = false;
+  const auto had_frame_arrived_handler = frame_arrived_registered_;
+  frame_arrived_registered_ = false;
+  const auto frame_arrived_token = on_frame_arrived_token_;
+  on_frame_arrived_token_ = {};
+  needs_update_ = false;
+  if (frame_pool_ && had_frame_arrived_handler) {
+    frame_pool_->remove_FrameArrived(frame_arrived_token);
+  }
+  if (capture_session_) {
     auto closable =
         capture_session_.try_as<ABI::Windows::Foundation::IClosable>();
-    assert(closable);
-    closable->Close();
+    if (closable) {
+      closable->Close();
+    }
     capture_session_ = nullptr;
+  }
+  if (frame_pool_) {
+    auto closable =
+        frame_pool_.try_as<ABI::Windows::Foundation::IClosable>();
+    if (closable) {
+      closable->Close();
+    }
+    frame_pool_ = nullptr;
   }
 }
 
-void TextureBridge::OnFrameArrived() {
+void TextureBridge::OnFrameArrived(
+    ABI::Windows::Graphics::Capture::IDirect3D11CaptureFramePool* source_pool) {
   const std::lock_guard<std::mutex> lock(mutex_);
-  if (!is_running_) {
+  // A callback already queued by an old pool must not consume a newer pool's
+  // frames if capture was stopped and restarted before it acquired this lock.
+  if (!is_running_ || source_pool != frame_pool_.get()) {
     return;
   }
 

@@ -1,0 +1,17 @@
+{
+  "purpose": "User-approved compact profile and AFK Weight artwork, 2026-10-23",
+  "originalArtwork": {
+    "asset": "assets/app/profile_feathery_steps.webp",
+    "name": "Feathery Steps V",
+    "referencePage": "https://bdocodex.com/us/skill/49110/",
+    "downloadUrl": "https://bdocodex.com/items/new_icon/08_servant_skill/02_pet/equipskill_fairy_00049110.webp",
+    "sha256": "B302280457802AAE76FB2A0AFD18499079E07BAEDDD89798AED8C967D1FAE1BD",
+    "treatment": "Original downloaded bytes, no recolouring or alteration",
+    "rights": "Black Desert game artwork belongs to Pearl Abyss; BDO Codex is the reference source, not a rights grant."
+  },
+  "vectorSymbols": {
+    "source": "lib/features/shared/profile_game_icon.dart",
+    "symbols": ["Alchemy", "Cooking", "Processing", "Character weight"],
+    "provenance": "Code-native silhouette recreations using the user's supplied in-game references. These are not extracted original client assets."
+  }
+}

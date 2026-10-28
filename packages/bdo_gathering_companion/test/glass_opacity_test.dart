@@ -8,31 +8,62 @@ void main() {
     () {
       final glass = CompanionGlassTheme.fromPercent(100);
       final theme = companionTheme(opacityPercent: 100);
-      expect(canvasColor, const Color(0xFF0C151D));
-      expect(glass.panel, const Color(0xFF1B2A35));
-      expect(glass.row, const Color(0xFF243744));
-      expect(glass.popup, const Color(0xFF0F1820));
-      expect(glass.iconWell, const Color(0xFF253540));
-      expect(glass.toolPlate, const Color(0xFF546574));
-      expect(glass.toolPlateSelected, const Color(0xFF607383));
-      expect(accent, const Color(0xFF7DE0D3));
-      expect(positive, const Color(0xFF69C59A));
-      expect(glass.surfaceGradient.colors, const [
-        Color(0xFF253946),
-        Color(0xFF15232E),
-        Color(0xFF111C26),
-      ]);
-      expect(glass.controlGradient.colors, const [
-        Color(0xFF243744),
-        Color(0xFF101B24),
-      ]);
-      expect(glass.selectedGradient.colors, const [
-        Color(0xFF214A4D),
-        Color(0xFF142B34),
-      ]);
+      expect(canvasColor, const Color(0xFF141218));
+      expect(glass.panel, const Color(0xFF25212A));
+      expect(glass.row, const Color(0xFF342B32));
+      expect(glass.popup, const Color(0xFF1B171E));
+      expect(glass.iconWell, const Color(0xFF393039));
+      expect(glass.toolPlate, const Color(0xFF6B5A57));
+      expect(glass.toolPlateSelected, const Color(0xFF7A6260));
+      expect(accent, const Color(0xFFE1B5B1));
+      expect(positive, const Color(0xFF9DC4AA));
+      // The broad satin shoulder replaces the old flat two/three-stop faces.
+      // Keep the original .52 surface-alpha knot as well as the new RGB knots.
+      expect(glass.surfaceGradient.stops, const [0, .16, .52, .55, 1]);
+      expect(glass.controlGradient.stops, const [0, .16, .55, 1]);
+      expect(glass.selectedGradient.stops, const [0, .16, .55, 1]);
+      expect(
+        glass.surfaceGradient.colors.first,
+        Color.alphaBlend(ink.withAlpha(20), const Color(0xFF3B3038)),
+      );
+      expect(
+        glass.surfaceGradient.colors.last,
+        Color.lerp(const Color(0xFF1C1820), const Color(0xFF251F28), .70),
+      );
+      expect(
+        glass.controlGradient.colors.first,
+        Color.alphaBlend(ink.withAlpha(20), const Color(0xFF342B32)),
+      );
+      expect(
+        glass.selectedGradient.colors.first,
+        Color.alphaBlend(ink.withAlpha(8), const Color(0xFF51343D)),
+      );
+      for (final face in [
+        glass.surfaceGradient,
+        glass.controlGradient,
+        glass.selectedGradient,
+      ]) {
+        expect(face.colors.every((color) => color.a == 1), isTrue);
+        for (var i = 1; i < face.colors.length; i++) {
+          expect(
+            face.colors[i - 1].computeLuminance(),
+            greaterThan(face.colors[i].computeLuminance()),
+          );
+        }
+      }
+      for (final well in [glass.iconWellGradient, glass.toolWellGradient]) {
+        expect(well.begin, Alignment.topCenter);
+        expect(well.end, Alignment.bottomCenter);
+        expect(well.stops, const [0, .32, 1]);
+        expect(
+          well.colors.last.computeLuminance(),
+          greaterThan(well.colors.first.computeLuminance()),
+          reason: 'Artwork wells have a darker recess and a lit lower lip.',
+        );
+      }
       expect(glass.primaryGradient.colors, const [
-        Color(0xFFA9EDE0),
-        Color(0xFF68C9BB),
+        Color(0xFFE1B5B1),
+        Color(0xFFC58C92),
       ]);
       expect(glass.controlGradient.begin, Alignment.topCenter);
       expect(glass.selectedGradient.begin, Alignment.topLeft);
@@ -49,7 +80,7 @@ void main() {
         glass.toolPlateSelected.computeLuminance(),
         greaterThan(glass.toolPlate.computeLuminance()),
       );
-      expect(HSLColor.fromColor(accent).hue, inInclusiveRange(170, 175));
+      expect(HSLColor.fromColor(accent).hue, inInclusiveRange(0, 10));
       expect(theme.chipTheme.labelStyle?.color, ink);
       expect(theme.chipTheme.secondaryLabelStyle?.color, ink);
       expect(theme.chipTheme.checkmarkColor, accent);
@@ -82,7 +113,7 @@ void main() {
           greaterThanOrEqualTo(4.5),
         );
       }
-      expect(theme.colorScheme.onPrimary, const Color(0xFF071013));
+      expect(theme.colorScheme.onPrimary, const Color(0xFF22191C));
       // Grade frames identify game rarity, not the application palette.
       expect(itemGradeColor(2), const Color(0xFF04B3F1));
       expect(itemGradeColor(3), const Color(0xFFF6C232));
@@ -165,7 +196,7 @@ void main() {
         material.active,
         material.hover,
       ]) {
-        final surface = Color.alphaBlend(tint, const Color(0xFF182B34));
+        final surface = Color.alphaBlend(tint, const Color(0xFF27212A));
         final coated = Color.alphaBlend(
           material.clearcoatGradient.colors.first,
           surface,

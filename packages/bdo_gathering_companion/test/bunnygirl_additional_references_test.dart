@@ -104,49 +104,57 @@ void main() {
     },
   );
 
-  test('guide-only mining has no invented coordinates IDs or yield values', () {
-    const expectedIcons = <String, String>{
-      'edania-marble-bunnygirl-guide': 'assets/icons/items/4016.webp',
-      'edania-basalt-magnetite-bunnygirl-guide': 'assets/icons/items/4017.webp',
-    };
-    for (final id in references.keys.where((id) => id.endsWith('-guide'))) {
-      final spot = catalog.spots.singleWhere((spot) => spot.id == id);
-      final raw = objectList(
-        source['spots'],
-      ).singleWhere((spot) => spot['id'] == id);
-      expect(spot.region, 'Edania');
-      expect(spot.methodIds, ['mining']);
-      expect(spot.nodeName, isEmpty);
-      expect(spot.mapped, isFalse);
-      expect(spot.x, isNull);
-      expect(spot.z, isNull);
-      expect(spot.mapPrecision, 'unmapped');
-      expect(spot.icon, expectedIcons[id]);
-      expect(spot.requirements, isEmpty);
-      for (final material in spot.materials) {
-        expect(material['itemId'], isNull);
-        expect(material.keys, isNot(contains('yieldPerHour')));
+  test(
+    'guide-only mining has no invented coordinates IDs or yield values',
+    () async {
+      for (final id in references.keys.where((id) => id.endsWith('-guide'))) {
+        final spot = catalog.spots.singleWhere((spot) => spot.id == id);
+        final raw = objectList(
+          source['spots'],
+        ).singleWhere((spot) => spot['id'] == id);
+        expect(spot.region, 'Edania');
+        expect(spot.methodIds, ['mining']);
+        expect(spot.nodeName, isEmpty);
+        expect(spot.mapped, isFalse);
+        expect(spot.x, isNull);
+        expect(spot.z, isNull);
+        expect(spot.mapPrecision, 'unmapped');
+        final expectedArtwork = id == 'edania-marble-bunnygirl-guide'
+            ? 'assets/icons/items/4016.webp'
+            : 'assets/icons/items/4017.webp';
+        expect(spot.icon, expectedArtwork);
+        expect(
+          (await rootBundle.load(
+            'packages/bdo_gathering_companion/$expectedArtwork',
+          )).lengthInBytes,
+          greaterThan(0),
+        );
+        expect(spot.requirements, isEmpty);
+        for (final material in spot.materials) {
+          expect(material['itemId'], isNull);
+          expect(material.keys, isNot(contains('yieldPerHour')));
+        }
+        for (final key in [
+          'worldX',
+          'worldZ',
+          'profit',
+          'silverPerHour',
+          'gathersPerHour',
+          'yieldPerHour',
+        ]) {
+          expect(raw.containsKey(key), isFalse, reason: '$id/$key');
+        }
+        for (final goal in BairogBenchmarkGoal.values) {
+          expect(bairogBenchmarkSet.bestForSpot(id, goal), isNull);
+        }
+        // Descriptive material labels must not become fabricated market identities.
+        expect(
+          catalog.lootForSpot(spot, 'mining').map((item) => item.name),
+          isNot(contains(spot.displayName)),
+        );
       }
-      for (final key in [
-        'worldX',
-        'worldZ',
-        'profit',
-        'silverPerHour',
-        'gathersPerHour',
-        'yieldPerHour',
-      ]) {
-        expect(raw.containsKey(key), isFalse, reason: '$id/$key');
-      }
-      for (final goal in BairogBenchmarkGoal.values) {
-        expect(bairogBenchmarkSet.bestForSpot(id, goal), isNull);
-      }
-      // Descriptive material labels must not become fabricated market identities.
-      expect(
-        catalog.lootForSpot(spot, 'mining').map((item) => item.name),
-        isNot(contains(spot.displayName)),
-      );
-    }
-  });
+    },
+  );
 
   test('Marble and Basalt chapters point to the reviewed creator video', () {
     for (final id in references.keys.where((id) => id.endsWith('-guide'))) {

@@ -10,6 +10,14 @@
 #include <string>
 
 #include "win32_window.h"
+#include "flutter_view_teardown_guard.h"
+
+#ifndef BSL_DIAGNOSTIC_RESOURCE_REDRAW
+#define BSL_DIAGNOSTIC_RESOURCE_REDRAW 0
+#endif
+#if BSL_DIAGNOSTIC_RESOURCE_REDRAW
+#include "resource_redraw_budget.h"
+#endif
 
 // A window that does nothing but host a Flutter view.
 class FlutterWindow : public Win32Window {
@@ -34,11 +42,24 @@ class FlutterWindow : public Win32Window {
   bool QueueBottomInset(double logical_pixels);
   void SetBottomInset(double logical_pixels);
 
+#if BSL_DIAGNOSTIC_RESOURCE_REDRAW
+  void StartResourceRedraw(
+      std::unique_ptr<flutter::MethodResult<flutter::EncodableValue>> result);
+  void TickResourceRedraw();
+  void StopResourceRedraw(const char* status);
+  ResourceRedrawBudget resource_redraw_budget_;
+  UINT_PTR resource_redraw_timer_ = 0;
+  std::unique_ptr<flutter::MethodResult<flutter::EncodableValue>>
+      resource_redraw_result_;
+#endif
+
   // The project to run.
   flutter::DartProject project_;
   bool reference_mode_ = false;
 
   // The Flutter instance hosted by this window.
+  // Declared first so the guard also outlives implicit controller destruction.
+  FlutterViewTeardownGuard flutter_view_teardown_guard_;
   std::unique_ptr<flutter::FlutterViewController> flutter_controller_;
   std::unique_ptr<flutter::MethodChannel<flutter::EncodableValue>>
       window_channel_;

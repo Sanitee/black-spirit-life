@@ -180,6 +180,7 @@ class _OpportunitySubstituteChooserState
           ingredientAllocations: allocations,
           extraCostPerRun: widget.inspection.quote.extraCostPerRun,
           extraCostPerCraft: widget.inspection.quote.extraCostPerCraft,
+          useInventory: widget.inspection.quote.usesInventory,
         )
         .quote;
   }
@@ -402,16 +403,8 @@ class _OpportunitySubstituteChooserState
           if (!split)
             _MetricColumns(
               children: [
-                if (!nonMarket)
-                  _metric(
-                    context,
-                    'Stock',
-                    input?.depthKnown != true
-                        ? '—'
-                        : stock == null
-                        ? 'NPC'
-                        : _quantity(stock),
-                  )
+                if (hasMarket)
+                  _ingredientStockBadge(context, widget.controller, source)
                 else if (source.npcUnitPrice != null)
                   _metric(context, 'NPC each', _quantity(source.npcUnitPrice!)),
                 _metric(
@@ -458,17 +451,8 @@ class _OpportunitySubstituteChooserState
             runSpacing: 8,
             crossAxisAlignment: WrapCrossAlignment.center,
             children: [
-              if (nonMarket)
-                Text('Not sold on the market', style: spec.typography.meta),
-              if (split && !nonMarket)
-                Text(
-                  'Stock ${input?.depthKnown != true
-                      ? '—'
-                      : stock == null
-                      ? 'NPC'
-                      : _quantity(stock)}',
-                  style: spec.typography.meta,
-                ),
+              if (split && hasMarket)
+                _ingredientStockBadge(context, widget.controller, source),
               if (split && nonMarket && source.npcUnitPrice != null)
                 Text(
                   'NPC each ${_quantity(source.npcUnitPrice!)}',

@@ -77,6 +77,14 @@ void main() {
       await tester.pumpWidget(_host(controller));
       expect(find.text('Stop check'), findsOneWidget);
       expect(find.text('0:03'), findsOneWidget);
+      expect(find.text('Waiting · resumes in'), findsOneWidget);
+      expect(
+        find.descendant(
+          of: find.byKey(_buttonKey),
+          matching: find.text('0:03'),
+        ),
+        findsNothing,
+      );
       await _captureWait(tester, 'active-scan-wait-normal');
       expect(find.text('Refresh in'), findsNothing);
       final height = tester.getSize(find.byKey(_buttonKey)).height;
@@ -94,6 +102,7 @@ void main() {
         findsNothing,
       );
       expect(find.text('Stop check'), findsOneWidget);
+      expect(find.text('Waiting · resumes in'), findsNothing);
       expect(tester.getSize(find.byKey(_buttonKey)).height, height);
       expect(controller.refreshCalls, 0);
       await tester.tap(find.byKey(_buttonKey));
@@ -165,11 +174,15 @@ void main() {
       await tester.pumpWidget(_host(controller, textScale: 2));
       await _captureWait(tester, 'active-scan-wait-enlarged-200');
       final plate = tester.getRect(find.byKey(_buttonKey));
-      for (final label in ['Stop check', '1:01:01']) {
+      for (final label in ['Stop check']) {
         final rect = tester.getRect(find.text(label));
         expect(plate.contains(rect.topLeft), isTrue);
         expect(plate.contains(rect.bottomRight), isTrue);
       }
+      final timer = tester.getRect(find.text('1:01:01'));
+      expect(timer.right, lessThanOrEqualTo(520));
+      expect(timer.bottom, lessThanOrEqualTo(200));
+      expect(find.text('Waiting · resumes in'), findsOneWidget);
       expect(plate.height, tester.getSize(find.byKey(_marketKey)).height);
       await tester.tap(find.byKey(_buttonKey));
       expect(controller.cancelCalls, 1);
@@ -327,8 +340,13 @@ void main() {
           final timer = find.byKey(ValueKey(key));
           if (timer.evaluate().isEmpty) continue;
           final rect = tester.getRect(timer);
-          expect(plate.contains(rect.topLeft), isTrue);
-          expect(plate.contains(rect.bottomRight), isTrue);
+          if (key == 'opportunities-refresh-countdown') {
+            expect(plate.contains(rect.topLeft), isTrue);
+            expect(plate.contains(rect.bottomRight), isTrue);
+          } else {
+            expect(plate.overlaps(rect), isFalse);
+            expect(find.text('Waiting · resumes in'), findsOneWidget);
+          }
         }
         await _captureWait(
           tester,

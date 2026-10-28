@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'resource_map_chrome_theme.dart';
+import 'resource_map_field_desk.dart';
 import 'resource_map_menu_artwork.dart';
 import 'resource_map_panel_metrics.dart';
 import 'resource_map_pill.dart';
@@ -18,6 +19,8 @@ class ResourceMapDiscoveryHome extends StatefulWidget {
     required this.onSetup,
     this.onHouses,
     this.onPlannerNeeds,
+    this.selectedAction,
+    this.planArtwork,
   });
 
   final VoidCallback onFindMaterial;
@@ -29,6 +32,8 @@ class ResourceMapDiscoveryHome extends StatefulWidget {
   final VoidCallback onSetup;
   final VoidCallback? onHouses;
   final VoidCallback? onPlannerNeeds;
+  final String? selectedAction;
+  final Widget? planArtwork;
 
   @override
   State<ResourceMapDiscoveryHome> createState() =>
@@ -49,61 +54,69 @@ class _ResourceMapDiscoveryHomeState extends State<ResourceMapDiscoveryHome> {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          LayoutBuilder(
-            builder: (context, constraints) {
-              final columns =
-                  constraints.maxWidth >=
-                      240 * MediaQuery.textScalerOf(context).scale(14) / 14
-                  ? 2
-                  : 1;
-              final width =
-                  (constraints.maxWidth - 6 * (columns - 1)) / columns;
-              return Wrap(
-                spacing: 6,
-                runSpacing: 7,
-                children: [
-                  for (final action in <Widget>[
-                    _DiscoveryAction(
-                      key: const ValueKey('resource-map-home-find-material'),
-                      artwork: ResourceMapMenuArtworkKind.materials,
-                      title: 'Materials',
-                      compact: true,
-                      onPressed: widget.onFindMaterial,
-                    ),
-                    _DiscoveryAction(
-                      key: const ValueKey('resource-map-home-worker-income'),
-                      artwork: ResourceMapMenuArtworkKind.income,
-                      title: 'Income',
-                      compact: true,
-                      onPressed: widget.onWorkerIncome,
-                    ),
-                    if (widget.onHouses case final onHouses?)
-                      _DiscoveryAction(
-                        key: const ValueKey('resource-map-home-houses'),
-                        artwork: ResourceMapMenuArtworkKind.houses,
-                        title: 'Houses',
-                        compact: true,
-                        onPressed: onHouses,
-                      ),
-                    _DiscoveryAction(
-                      key: const ValueKey('resource-map-home-saved'),
-                      artwork: ResourceMapMenuArtworkKind.saved,
-                      title: 'Saved',
-                      compact: true,
-                      onPressed: widget.onSaved,
-                    ),
-                    _DiscoveryAction(
-                      key: const ValueKey('resource-map-home-checklist'),
-                      artwork: ResourceMapMenuArtworkKind.checklist,
-                      title: 'To-do list',
-                      compact: true,
-                      onPressed: widget.onTodoList,
-                    ),
-                  ])
-                    SizedBox(width: width, child: action),
-                ],
-              );
-            },
+          Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              _DiscoveryAction(
+                key: const ValueKey('resource-map-home-find-material'),
+                artwork: ResourceMapMenuArtworkKind.materials,
+                title: 'Materials',
+                selected: widget.selectedAction == 'find-material',
+                compact: true,
+                onPressed: widget.onFindMaterial,
+              ),
+              const SizedBox(height: 7),
+              _DiscoveryAction(
+                key: const ValueKey('resource-map-home-worker-income'),
+                artwork: ResourceMapMenuArtworkKind.income,
+                title: widget.planArtwork == null ? 'Workers' : 'Plan',
+                customArtwork: widget.planArtwork,
+                selected: widget.selectedAction == 'worker-income',
+                compact: true,
+                onPressed: widget.onWorkerIncome,
+              ),
+              if (widget.onHouses case final onHouses?) ...[
+                const SizedBox(height: 7),
+                _DiscoveryAction(
+                  key: const ValueKey('resource-map-home-houses'),
+                  artwork: ResourceMapMenuArtworkKind.houses,
+                  title: 'Houses',
+                  selected: widget.selectedAction == 'houses',
+                  compact: true,
+                  onPressed: onHouses,
+                ),
+              ],
+              Divider(
+                key: const ValueKey('resource-map-personal-shortcuts-divider'),
+                height: 7,
+                thickness: .5,
+                indent: 10,
+                endIndent: 10,
+                color: chrome.readingOutline.withValues(
+                  alpha: .34 * chrome.materialOpacity,
+                ),
+              ),
+              _DiscoveryAction(
+                key: const ValueKey('resource-map-home-saved'),
+                artwork: ResourceMapMenuArtworkKind.saved,
+                title: 'Saved',
+                selected: widget.selectedAction == 'saved',
+                compact: true,
+                secondary: true,
+                onPressed: widget.onSaved,
+              ),
+              const SizedBox(height: 7),
+              _DiscoveryAction(
+                key: const ValueKey('resource-map-home-checklist'),
+                artwork: ResourceMapMenuArtworkKind.checklist,
+                title: 'To-do list',
+                selected: widget.selectedAction == 'checklist',
+                compact: true,
+                secondary: true,
+                onPressed: widget.onTodoList,
+              ),
+            ],
           ),
           const SizedBox(height: 6),
           Align(
@@ -202,12 +215,18 @@ class _DiscoveryAction extends StatelessWidget {
     required this.title,
     required this.onPressed,
     this.compact = false,
+    this.selected = false,
+    this.secondary = false,
+    this.customArtwork,
   });
 
   final ResourceMapMenuArtworkKind artwork;
   final String title;
   final VoidCallback onPressed;
   final bool compact;
+  final bool selected;
+  final bool secondary;
+  final Widget? customArtwork;
 
   @override
   Widget build(BuildContext context) => Padding(
@@ -215,31 +234,49 @@ class _DiscoveryAction extends StatelessWidget {
       bottom: compact ? 0 : ResourceMapPanelMetrics.optionGap,
     ),
     child: ResourceMapPill(
+      selected: selected,
+      quiet: secondary,
+      leadingWidth: compact ? 52 : 48,
       child: Semantics(
         button: true,
+        selected: selected,
         child: InkWell(
           onTap: onPressed,
-          borderRadius: BorderRadius.circular(10),
+          borderRadius: BorderRadius.circular(8),
           child: ConstrainedBox(
             constraints: const BoxConstraints(
               minHeight: ResourceMapPanelMetrics.optionHeight,
             ),
             child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 7),
+              padding: EdgeInsetsDirectional.fromSTEB(
+                compact ? 10 : 6,
+                7,
+                8,
+                7,
+              ),
               child: Row(
                 children: [
-                  ResourceMapMenuArtwork(
-                    kind: artwork,
+                  ResourceMapArtworkMount(
                     size: compact ? 30 : ResourceMapPanelMetrics.optionArtwork,
+                    child:
+                        customArtwork ??
+                        ResourceMapMenuArtwork(
+                          kind: artwork,
+                          size: compact
+                              ? 30
+                              : ResourceMapPanelMetrics.optionArtwork,
+                        ),
                   ),
-                  const SizedBox(width: 8),
+                  SizedBox(width: compact ? 20 : 10),
                   Expanded(
                     child: Text(
                       title,
                       style: TextStyle(
                         color: context.mapChrome.ink,
                         fontSize: ResourceMapPanelMetrics.optionLabel,
-                        fontWeight: FontWeight.w700,
+                        fontWeight: secondary
+                            ? FontWeight.w600
+                            : FontWeight.w700,
                         height: 1.12,
                       ),
                     ),

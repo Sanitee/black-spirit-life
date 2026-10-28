@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:ui' as ui;
 
 import 'package:bdo_craft_planner_flutter/app/window/app_title_bar.dart';
+import 'package:bdo_craft_planner_flutter/app/window/app_title_bar_visual.dart';
 import 'package:bdo_craft_planner_flutter/app/window/window_host_service.dart';
 import 'package:bdo_craft_planner_flutter/app_identity.dart';
 import 'package:bdo_craft_planner_flutter/visual/foundations/theme_spec.dart';
@@ -38,6 +39,272 @@ void main() {
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
         .setMockMethodCallHandler(channel, null);
   });
+
+  testWidgets('field desk exposes labels without changing Planner strip', (
+    tester,
+  ) async {
+    const names = [
+      'Planner',
+      'Opportunities',
+      'Resource Map',
+      'Gathering',
+      'Fish Map',
+    ];
+    Future<void> show({required bool fieldDesk, required double width}) async {
+      await tester.binding.setSurfaceSize(Size(width, 200));
+      Widget strip = AppTitleTabStrip(
+        tabs: [
+          for (final name in names)
+            AppTitleTab(
+              tabKey: ValueKey('codex-navigation-$name'),
+              label: name,
+              selected: name == (fieldDesk ? 'Gathering' : 'Planner'),
+              icon: Icons.map_outlined,
+              onPressed: () {},
+            ),
+        ],
+      );
+      if (fieldDesk) {
+        strip = AppTitleBarVisualScope(
+          visual: AppTitleBarVisual.gathering,
+          child: strip,
+        );
+      }
+      await tester.pumpWidget(MaterialApp(home: Scaffold(body: strip)));
+      await tester.pumpAndSettle();
+      expect(tester.takeException(), isNull);
+    }
+
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    await show(fieldDesk: true, width: 1200);
+    for (final name in names) {
+      expect(find.text(name), findsOneWidget);
+    }
+    await show(fieldDesk: false, width: 1200);
+    expect(find.text('Planner'), findsOneWidget);
+    expect(find.text('Gathering'), findsNothing);
+    await show(fieldDesk: true, width: 330);
+    expect(find.text('Gathering'), findsNothing);
+    for (final name in names) {
+      expect(find.byTooltip(name), findsOneWidget);
+    }
+  });
+
+  testWidgets('Codex tab labels stay expanded under every Appearance theme', (
+    tester,
+  ) async {
+    const names = [
+      'Planner',
+      'Opportunities',
+      'Resource Map',
+      'Gathering',
+      'Fish Map',
+    ];
+    await tester.binding.setSurfaceSize(const Size(1400, 200));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    for (final spec in const [
+      SakuraNightGardenSpec.theme,
+      IlluminatedLedgerSpec.theme,
+      StandardSpec.theme,
+    ]) {
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: spec.materialTheme(),
+          home: ThemeSpecScope(
+            spec: spec,
+            child: Scaffold(
+              body: AppTitleTabStrip(
+                showAllLabels: true,
+                tabs: [
+                  for (final name in names)
+                    AppTitleTab(
+                      tabKey: ValueKey('shared-theme-$name'),
+                      label: name,
+                      selected: name == 'Gathering',
+                      icon: Icons.map_outlined,
+                      onPressed: () {},
+                    ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      for (final name in names) {
+        expect(find.text(name), findsOneWidget);
+      }
+      expect(tester.takeException(), isNull);
+    }
+  });
+
+  for (final entry in [
+    (name: 'sakura', spec: SakuraNightGardenSpec.theme, visual: null),
+    (name: 'ledger', spec: IlluminatedLedgerSpec.theme, visual: null),
+    (name: 'standard', spec: StandardSpec.theme, visual: null),
+    (
+      name: 'opportunities',
+      spec: StandardSpec.theme,
+      visual: AppTitleBarVisual.opportunities,
+    ),
+  ]) {
+    testWidgets('return arrow fits and follows ${entry.name} title colours', (
+      tester,
+    ) async {
+      var visible = false;
+      var returns = 0;
+      late StateSetter update;
+      Widget host() => MaterialApp(
+        home: ThemeSpecScope(
+          spec: entry.spec,
+          child: MediaQuery(
+            data: const MediaQueryData(
+              disableAnimations: true,
+              textScaler: TextScaler.linear(2),
+            ),
+            child: Scaffold(
+              body: Align(
+                alignment: Alignment.topLeft,
+                child: SizedBox(
+                  width: 620,
+                  child: StatefulBuilder(
+                    builder: (context, setState) {
+                      update = setState;
+                      final title = AppTitleBar(
+                        workspaceNavigation: AppTitleTabStrip(
+                          returnLabel: visible ? 'Back to Planner' : null,
+                          onReturn: visible ? () => returns++ : null,
+                          tabs: [
+                            for (final name in [
+                              'Planner',
+                              'Opportunities',
+                              'Resource Map',
+                              'Gathering',
+                              'Fish Map',
+                            ])
+                              AppTitleTab(
+                                tabKey: ValueKey('return-test-$name'),
+                                icon: Icons.map_outlined,
+                                label: name,
+                                selected: name == 'Resource Map',
+                                onPressed: () => update(() => visible = false),
+                              ),
+                          ],
+                        ),
+                      );
+                      return entry.visual == null
+                          ? title
+                          : AppTitleBarVisualScope(
+                              visual: entry.visual!,
+                              child: title,
+                            );
+                    },
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpWidget(host());
+      final arrow = find.byKey(AppTitleTabStrip.returnButtonKey);
+      final first = find.byKey(const ValueKey('return-test-Planner'));
+      final originalX = tester.getTopLeft(first).dx;
+      expect(arrow, findsNothing);
+      update(() => visible = true);
+      await tester.pump();
+      expect(tester.getSize(arrow), const Size(40, 40));
+      expect(tester.getTopLeft(first).dx, originalX + 40);
+      expect(
+        tester.getTopRight(arrow).dx,
+        lessThanOrEqualTo(tester.getTopLeft(first).dx),
+      );
+      final button = tester.widget<IconButton>(arrow);
+      final colour = button.style!.foregroundColor!.resolve({})!;
+      expect(colour.computeLuminance(), greaterThan(.4));
+      if (entry.visual != null) {
+        expect(colour, entry.visual!.tabSelectedForeground);
+      }
+      expect(find.byTooltip('Back to Planner'), findsOneWidget);
+      await tester.tap(arrow);
+      expect(returns, 1);
+      expect(calls, isEmpty);
+      for (final name in [
+        'Planner',
+        'Opportunities',
+        'Resource Map',
+        'Gathering',
+        'Fish Map',
+      ]) {
+        expect(
+          find.byKey(ValueKey('return-test-$name')).hitTestable(),
+          findsOneWidget,
+        );
+      }
+      expect(
+        tester.getTopRight(find.byTooltip('Close')).dx,
+        lessThanOrEqualTo(620),
+      );
+      await tester.tap(first);
+      await tester.pump();
+      expect(arrow, findsNothing);
+      expect(tester.getTopLeft(first).dx, originalX);
+      expect(tester.takeException(), isNull);
+    });
+  }
+
+  testWidgets(
+    'return arrow animates into space but stops accepting input immediately on hide',
+    (tester) async {
+      var visible = false;
+      late StateSetter update;
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: AppTitleBar(
+              workspaceNavigation: StatefulBuilder(
+                builder: (context, setState) {
+                  update = setState;
+                  return AppTitleTabStrip(
+                    returnLabel: visible ? 'Back to Opportunities' : null,
+                    onReturn: visible
+                        ? () => update(() => visible = false)
+                        : null,
+                    tabs: [
+                      AppTitleTab(
+                        tabKey: const ValueKey('animated-return-planner'),
+                        label: 'Planner',
+                        icon: Icons.calculate_outlined,
+                        selected: true,
+                        onPressed: () => update(() => visible = true),
+                      ),
+                    ],
+                  );
+                },
+              ),
+            ),
+          ),
+        ),
+      );
+      final first = find.byKey(const ValueKey('animated-return-planner'));
+      final initialX = tester.getTopLeft(first).dx;
+      update(() => visible = true);
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 40));
+      expect(
+        tester.getTopLeft(first).dx,
+        inExclusiveRange(initialX, initialX + 40),
+      );
+      await tester.pumpAndSettle();
+      expect(tester.getTopLeft(first).dx, initialX + 40);
+      await tester.tap(find.byKey(AppTitleTabStrip.returnButtonKey));
+      await tester.pump();
+      expect(find.byKey(AppTitleTabStrip.returnButtonKey), findsNothing);
+      await tester.pumpAndSettle();
+      expect(tester.getTopLeft(first).dx, initialX);
+      expect(tester.takeException(), isNull);
+    },
+  );
 
   testWidgets('caption controls invoke distinct native operations', (
     tester,

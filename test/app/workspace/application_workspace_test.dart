@@ -430,10 +430,10 @@ void main() {
 
     await tester.tap(find.byKey(ShellDestination.data.actionKey));
     await _pumpWorkspace(tester);
-    await tester.tap(
+    expect(
       find.byKey(const ValueKey<String>('data-afk-load-toggle')),
+      findsNothing,
     );
-    await _pumpWorkspace(tester);
     expect(
       find.byKey(const ValueKey<String>('data-afk-maximum-weight')),
       findsOneWidget,

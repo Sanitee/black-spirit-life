@@ -51,8 +51,8 @@ $expectedEngineHashes = [ordered]@{
 }
 
 $expectedAppMatcherHashes = [ordered]@{
-    'AppMatcher\inventory-ocr-templates.json' = '91F2D1B116A165A4C24BCA8816F1846C440F7304B1520398ADC92DDAC06C6FB7'
-    'AppMatcher\inventory-ocr-templates.rgb' = 'A7E19ED26C6E7B3D4FF847FE3A438CEA8C9E896C27B90BF202FDB92E8E1CC9B0'
+    'AppMatcher\inventory-ocr-templates.json' = 'AF3F36593B873DD9B6AC7292CB7C9025C4DC198068768F05E1782C4A3B179C9C'
+    'AppMatcher\inventory-ocr-templates.rgb' = '0D3C5CF5DBD248D5A391F684CDC74EE870FCFE329BFD397C9D961B5DA8186A5E'
 }
 
 foreach ($entry in $expectedHashes.GetEnumerator()) {

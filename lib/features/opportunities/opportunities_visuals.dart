@@ -4,20 +4,116 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import '../../visual/components/app_interaction_frame.dart';
 import '../../visual/visual.dart';
 import 'opportunities_glass_material.dart';
+import 'opportunity_glass_finish.dart';
 
-/// Feature-owned materials; none of these values comes from Craft Profile.
+/// Feature-owned density with materials supplied by the shared Appearance.
 abstract final class OpportunitiesVisualSpec {
+  static final _appearanceSpecs = Expando<ThemeSpec>();
+
+  static ThemeSpec forAppearance(ThemeSpec source) {
+    if (source.id.startsWith('opportunities-smoked-glass-appearance-')) {
+      return source;
+    }
+    return _appearanceSpecs[source] ??= ThemeSpec(
+      id: 'opportunities-smoked-glass-appearance-${source.id}',
+      displayName: source.displayName,
+      // Component silhouettes and layout remain the Codex workbench's.
+      family: spec.family,
+      layoutProfile: spec.layoutProfile,
+      brightness: source.brightness,
+      palette: source.palette,
+      geometry: geometry,
+      typography: ThemeTypography(
+        display: typography.display.copyWith(color: source.palette.text),
+        section: typography.section.copyWith(color: source.palette.text),
+        body: typography.body.copyWith(color: source.palette.text),
+        meta: typography.meta.copyWith(color: source.palette.textMuted),
+        label: typography.label.copyWith(color: source.palette.textMuted),
+        button: typography.button.copyWith(color: source.palette.text),
+      ),
+      materials: source.materials,
+      motion: spec.motion,
+    );
+  }
+
+  // Retained for legacy finish compatibility checks, not active theme choice.
+  static final _finishes = {
+    for (final finish in OpportunityGlassFinish.values)
+      finish.key: finish.theme(spec),
+  };
+  static ThemeSpec forFinish(String key) =>
+      _finishes[key] ?? _finishes['bronze']!;
+  static ThemeSpec of(BuildContext context) {
+    final inherited = ThemeSpecScope.maybeOf(context);
+    return inherited?.id.startsWith('opportunities-') == true
+        ? inherited!
+        : spec;
+  }
+
   static const id = 'opportunities-smoked-glass';
   // Card-only density; never scale the toolbar or the user's text setting.
-  static const recipeCardScale = .9;
-  static const cardNameFontSize = 20.0;
+  static const recipeCardScale = 1.0;
+  static const cardNameFontSize = 18.0;
   // Keep financial values at or below the item's name in the card hierarchy.
-  static const cardPrimaryValueFontSize = 18.0;
-  static const cardLabelFontSize = 14.0;
+  static const cardPrimaryValueFontSize = 22.0;
+  static const cardLabelFontSize = 12.0;
   static const cardSecondaryValueFontSize = 15.0;
+  static const craftCardPadding = 14.0;
+  static const craftArtworkMountSize = 64.0;
+  static const craftArtworkRailWidth =
+      craftCardPadding * 2 + craftArtworkMountSize;
+  static const craftArtworkReadoutGap = 6.0;
   static const experienceColor = Color(0xFF8FC8F4);
+  static Color informationColor(ThemeSpec spec) =>
+      spec.brightness == Brightness.light
+      ? const Color(0xFF1C4D71)
+      : experienceColor;
+  static final _valueColors = Expando<Map<Color, Color>>();
+
+  /// Preserve the selected theme's semantic hues without letting small values
+  /// disappear into a dark or light reading surface. Cached per theme/colour.
+  static Color readableValueColor(ThemeSpec spec, Color color) =>
+      (_valueColors[spec] ??= {}).putIfAbsent(color, () {
+        final surfaces = {
+          spec.palette.surface,
+          spec.palette.surfaceRaised,
+          spec.palette.surfaceInset,
+          ...spec.materials.surface.colors,
+          ...spec.materials.surfaceRaised.colors,
+          ...OpportunityGlassFinish.forSpec(spec).cardSurface.colors,
+          spec.brightness == Brightness.light
+              ? Color.lerp(spec.palette.surfaceRaised, Colors.white, .28)!
+              : Color.alphaBlend(
+                  spec.palette.primaryBright.withAlpha(18),
+                  spec.palette.surfaceRaised,
+                ),
+        };
+        final luminances = [
+          for (final surface in surfaces) ...[
+            surface.computeLuminance(),
+            Color.alphaBlend(color.withAlpha(25), surface).computeLuminance(),
+          ],
+        ];
+        bool readable(Color candidate) {
+          final value = candidate.computeLuminance();
+          return luminances.every(
+            (background) =>
+                (math.max(value, background) + .05) /
+                    (math.min(value, background) + .05) >=
+                4.5,
+          );
+        }
+
+        if (readable(color)) return color;
+        for (var step = 1; step <= 20; step++) {
+          final candidate = Color.lerp(color, spec.palette.text, step / 20)!;
+          if (readable(candidate)) return candidate;
+        }
+        return spec.palette.text;
+      });
   static const palette = ThemePalette(
     canvas: Color(0xFF0D1926),
     canvasDeep: Color(0xFF0A1420),
@@ -40,8 +136,8 @@ abstract final class OpportunitiesVisualSpec {
 
   static const typography = ThemeTypography(
     display: TextStyle(
-      fontFamily: 'Segoe UI',
-      fontSize: 28,
+      fontFamily: 'Georgia',
+      fontSize: 26,
       fontWeight: FontWeight.w600,
       letterSpacing: -.5,
       height: 1.12,
@@ -92,7 +188,7 @@ abstract final class OpportunitiesVisualSpec {
     contentGap: 14,
     panelRadius: 12,
     commandRadius: 0,
-    cardRadius: 12,
+    cardRadius: 8,
     buttonRadius: 8,
     navigationRadius: 9,
     fieldRadius: 8,
@@ -224,7 +320,7 @@ class OpportunitySurface extends AppSurface {
 
   @override
   Widget build(BuildContext context) {
-    final tokens = spec ?? OpportunitiesVisualSpec.spec;
+    final tokens = spec ?? OpportunitiesVisualSpec.of(context);
     final p = tokens.palette;
     final modal =
         role == AppSurfaceRole.modal ||
@@ -243,30 +339,49 @@ class OpportunitySurface extends AppSurface {
     final materialDecoration =
         decoration ??
         BoxDecoration(
+          gradient: flat || row
+              ? null
+              : (raised
+                    ? tokens.materials.surfaceRaised
+                    : tokens.materials.surface),
           color: flat
               ? Colors.transparent
               : row
               ? p.surfaceInset
-              : raised
-              ? p.surfaceRaised
-              : p.surface,
+              : null,
           borderRadius: BorderRadius.circular(radius),
           border: flat
               ? null
               : Border.all(color: (toneColor ?? p.trim).withAlpha(160)),
+          boxShadow: raised ? tokens.materials.lowShadow : null,
         );
     Widget result = DecoratedBox(
       key: AppSurface.materialKey,
       decoration: materialDecoration,
       child: Material(
         type: MaterialType.transparency,
-        child: Padding(
-          padding:
-              padding ??
-              (flat ? EdgeInsets.zero : EdgeInsets.all(row ? 8 : 12)),
-          child: DefaultTextStyle.merge(
-            style: tokens.typography.body,
-            child: child,
+        child: CustomPaint(
+          foregroundPainter:
+              !flat && tokens.id.startsWith('opportunities-smoked-glass-')
+              ? OpportunityGlassBevel(
+                  light: p.trimBright,
+                  radius: radius,
+                  inset: row,
+                  strength: row ? .42 : 1,
+                  raisedLip:
+                      role == AppSurfaceRole.card &&
+                      decoration?.borderRadius == BorderRadius.circular(radius),
+                  lightSurface: tokens.brightness == Brightness.light,
+                )
+              : null,
+          child: Padding(
+            padding:
+                padding ??
+                (flat ? EdgeInsets.zero : EdgeInsets.all(row ? 8 : 12)),
+            child: DefaultTextStyle.merge(
+              style: tokens.typography.body,
+              child: child,
+            ),
           ),
         ),
       ),
@@ -286,8 +401,13 @@ class OpportunitySurface extends AppSurface {
 
 /// A stationary tint and keyboard outline; interactions never lift the card.
 class OpportunityCardMotion extends StatefulWidget {
-  const OpportunityCardMotion({required this.child, super.key});
+  const OpportunityCardMotion({
+    required this.child,
+    this.radius = 8,
+    super.key,
+  });
   final Widget child;
+  final double radius;
 
   @override
   State<OpportunityCardMotion> createState() => _OpportunityCardMotionState();
@@ -298,8 +418,11 @@ class _OpportunityCardMotionState extends State<OpportunityCardMotion> {
 
   @override
   Widget build(BuildContext context) {
-    final reduced = MediaQuery.disableAnimationsOf(context);
+    final reduced =
+        MediaQuery.disableAnimationsOf(context) ||
+        MediaQuery.accessibleNavigationOf(context);
     final active = _hovered || _focused;
+    final p = OpportunitiesVisualSpec.of(context).palette;
     return Focus(
       canRequestFocus: false,
       onFocusChange: (value) => setState(() => _focused = value),
@@ -320,21 +443,117 @@ class _OpportunityCardMotionState extends State<OpportunityCardMotion> {
                 ? Duration.zero
                 : const Duration(milliseconds: 140),
             curve: Curves.easeOutCubic,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(widget.radius),
+              boxShadow: [
+                BoxShadow(
+                  color: p.primary.withAlpha(active ? 50 : 0),
+                  blurRadius: 10,
+                ),
+              ],
+            ),
             foregroundDecoration: BoxDecoration(
-              color: OpportunitiesVisualSpec.palette.primary.withAlpha(
-                _pressed ? 10 : (active ? 5 : 0),
+              color: p.primary.withAlpha(
+                _pressed
+                    ? 8
+                    : active
+                    ? 3
+                    : 0,
               ),
-              borderRadius: BorderRadius.circular(
-                OpportunitiesVisualSpec.geometry.cardRadius,
-              ),
+              borderRadius: BorderRadius.circular(widget.radius),
               border: Border.all(
-                color: _focused
-                    ? OpportunitiesVisualSpec.palette.primaryBright
+                color: active
+                    ? p.primaryBright.withAlpha(_focused ? 255 : 140)
                     : Colors.transparent,
               ),
             ),
             child: widget.child,
           ),
+        ),
+      ),
+    );
+  }
+}
+
+class OpportunityItemMount extends StatelessWidget {
+  const OpportunityItemMount({required this.child, this.size = 64, super.key});
+  final Widget child;
+  final double size;
+
+  @override
+  Widget build(BuildContext context) => SizedBox.square(
+    dimension: size,
+    child: CustomPaint(
+      painter: OpportunityItemMountPainter(
+        finish: OpportunityGlassFinish.of(context),
+      ),
+      child: Center(child: child),
+    ),
+  );
+}
+
+/// Paint-only relief whose rail width matches the Crafting artwork layout.
+class OpportunityCraftCardFinish extends StatelessWidget {
+  const OpportunityCraftCardFinish({
+    required this.child,
+    this.artworkRail = true,
+    super.key,
+  });
+  final Widget child;
+  final bool artworkRail;
+
+  @override
+  Widget build(BuildContext context) => artworkRail
+      ? CustomPaint(
+          painter: OpportunityCraftCardRelief(
+            finish: OpportunityGlassFinish.of(context),
+            artworkWidth: OpportunitiesVisualSpec.craftArtworkRailWidth,
+          ),
+          child: child,
+        )
+      : child;
+}
+
+/// Separates identity from the readout using the existing twelve-pixel gap.
+class OpportunityReadoutRule extends StatelessWidget {
+  const OpportunityReadoutRule({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final spec = OpportunitiesVisualSpec.of(context);
+    final color = spec.palette.trimBright;
+    return SizedBox(
+      height: 12,
+      child: Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            DecoratedBox(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [
+                    color.withAlpha(125),
+                    color.withAlpha(48),
+                    color.withAlpha(0),
+                  ],
+                ),
+              ),
+              child: const SizedBox(height: 1, width: double.infinity),
+            ),
+            DecoratedBox(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [
+                    Colors.black.withAlpha(
+                      spec.brightness == Brightness.light ? 16 : 85,
+                    ),
+                    Colors.transparent,
+                  ],
+                ),
+              ),
+              child: const SizedBox(height: 1, width: double.infinity),
+            ),
+          ],
         ),
       ),
     );
@@ -355,9 +574,15 @@ class OpportunityComparisonRowFinish extends StatelessWidget {
   Widget build(BuildContext context) => Ink(
     decoration: _ComparisonRowDecoration(
       color: alternate
-          ? OpportunitiesVisualSpec.palette.surfaceRaised
-          : OpportunitiesVisualSpec.palette.surface,
-      border: const Border(bottom: BorderSide(color: Color(0x80314A5E))),
+          ? OpportunitiesVisualSpec.of(context).palette.surfaceRaised
+          : OpportunitiesVisualSpec.of(context).palette.surface,
+      border: Border(
+        bottom: BorderSide(
+          color: OpportunitiesVisualSpec.of(
+            context,
+          ).palette.trim.withAlpha(100),
+        ),
+      ),
     ),
     child: child,
   );
@@ -387,6 +612,8 @@ class OpportunityButton extends AppButton {
     super.autofocus,
     super.semanticLabel,
     super.tooltip,
+    this.compact = false,
+    this.colourSwatch = false,
     super.key,
   });
 
@@ -445,6 +672,10 @@ class OpportunityButton extends AppButton {
     child: icon,
   );
 
+  /// Opt-in for the approved recipe/batch selector; other controls stay 40 px.
+  final bool compact;
+  final bool colourSwatch;
+
   @override
   State<AppButton> createState() => _OpportunityButtonState();
 }
@@ -496,12 +727,15 @@ class _OpportunityButtonState extends State<AppButton> {
 
   @override
   Widget build(BuildContext context) {
-    final spec = widget.spec ?? OpportunitiesVisualSpec.spec;
+    final spec = widget.spec ?? OpportunitiesVisualSpec.of(context);
     final p = spec.palette;
     final active = widget.selected || widget.role == AppButtonRole.primary;
     final danger = widget.role == AppButtonRole.danger;
     final icon = widget.role == AppButtonRole.icon;
     final quiet = icon || widget.role == AppButtonRole.infoChip;
+    final swatch =
+        widget is OpportunityButton &&
+        (widget as OpportunityButton).colourSwatch;
     final highlight = _enabled && (_hovered || _focused);
     final foreground = !_enabled
         ? p.textMuted.withAlpha(112)
@@ -538,18 +772,27 @@ class _OpportunityButtonState extends State<AppButton> {
     final requestedMin =
         widget.minimumSize ??
         (icon ? const Size.square(40) : const Size(0, 40));
+    final compact =
+        widget is OpportunityButton && (widget as OpportunityButton).compact;
     final min = Size(
       math.max(icon ? 40 : 0, requestedMin.width),
-      math.max(40, requestedMin.height),
+      math.max(compact && !icon ? 36 : 40, requestedMin.height),
     );
     final radius =
         widget.role == AppButtonRole.navigation ||
             widget.role == AppButtonRole.modeSelector
         ? spec.geometry.navigationRadius
         : spec.geometry.buttonRadius;
-    final duration = MediaQuery.disableAnimationsOf(context)
+    final duration =
+        MediaQuery.disableAnimationsOf(context) ||
+            MediaQuery.accessibleNavigationOf(context)
         ? Duration.zero
         : spec.motion.interactionDuration;
+    final polished =
+        spec.id.startsWith('opportunities-smoked-glass-') &&
+        !swatch &&
+        _enabled &&
+        (!quiet || active || highlight);
     Widget button = FocusableActionDetector(
       focusNode: widget.focusNode ?? _ownedFocus,
       autofocus: widget.autofocus,
@@ -577,38 +820,80 @@ class _OpportunityButtonState extends State<AppButton> {
         onTapUp: !_enabled ? null : (_) => _state(press: false),
         onTapCancel: !_enabled ? null : () => _state(press: false),
         onTap: !_enabled ? null : _activate,
-        child: AnimatedContainer(
-          key: AppButton.materialKey,
-          duration: duration,
-          curve: Curves.easeOutCubic,
-          constraints: BoxConstraints(
-            minWidth: min.width,
-            minHeight: min.height,
-          ),
-          decoration: BoxDecoration(
-            color: fill,
-            borderRadius: BorderRadius.circular(radius),
-            border: Border.all(color: border),
-          ),
-          child: Padding(
-            padding:
-                widget.padding ??
-                (icon
-                    ? const EdgeInsets.all(6)
-                    : const EdgeInsets.symmetric(horizontal: 10, vertical: 6)),
-            child: Opacity(
-              opacity: _pressed && _enabled ? .88 : 1,
-              child: IconTheme.merge(
-                data: IconThemeData(color: foreground, size: 18),
-                child: DefaultTextStyle.merge(
-                  style: spec.typography.button.copyWith(
-                    color: foreground,
-                    fontWeight: active ? FontWeight.w600 : FontWeight.w500,
+        child: CustomPaint(
+          foregroundPainter: polished
+              ? OpportunityGlassBevel(
+                  light: p.primaryBright,
+                  radius: radius,
+                  strength: active || highlight ? .9 : .48,
+                  inset: _pressed,
+                )
+              : null,
+          child: AnimatedContainer(
+            key: AppButton.materialKey,
+            duration: duration,
+            curve: Curves.easeOutCubic,
+            constraints: BoxConstraints(
+              minWidth: min.width,
+              minHeight: min.height,
+            ),
+            decoration: BoxDecoration(
+              color: swatch ? Colors.transparent : fill,
+              gradient: swatch || (quiet && !active && !highlight)
+                  ? null
+                  : LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors: [
+                        polished
+                            ? Color.lerp(
+                                fill,
+                                p.trimBright,
+                                active ? .16 : .07,
+                              )!
+                            : Color.alphaBlend(
+                                p.specular.withAlpha(active ? 24 : 12),
+                                fill,
+                              ),
+                        fill,
+                      ],
+                    ),
+              borderRadius: BorderRadius.circular(radius),
+              border: Border.all(
+                color: swatch && !_focused ? Colors.transparent : border,
+              ),
+              boxShadow: [
+                if (polished)
+                  BoxShadow(
+                    color: Colors.black.withAlpha(_pressed ? 45 : 115),
+                    blurRadius: 4,
+                    offset: Offset(0, _pressed ? 1 : 3),
                   ),
-                  child: Center(
-                    widthFactor: 1,
-                    heightFactor: 1,
-                    child: widget.child,
+              ],
+            ),
+            child: Padding(
+              padding:
+                  widget.padding ??
+                  (icon
+                      ? const EdgeInsets.all(6)
+                      : const EdgeInsets.symmetric(
+                          horizontal: 10,
+                          vertical: 6,
+                        )),
+              child: Opacity(
+                opacity: _pressed && _enabled ? .88 : 1,
+                child: IconTheme.merge(
+                  data: IconThemeData(color: foreground, size: 18),
+                  child: DefaultTextStyle.merge(
+                    style: spec.typography.button.copyWith(
+                      color: foreground,
+                      fontWeight: active ? FontWeight.w600 : FontWeight.w500,
+                    ),
+                    child: Center(
+                      widthFactor: 1,
+                      heightFactor: 1,
+                      child: widget.child,
+                    ),
                   ),
                 ),
               ),
@@ -616,6 +901,12 @@ class _OpportunityButtonState extends State<AppButton> {
           ),
         ),
       ),
+    );
+    button = AppInteractionFrame(
+      enabled: _enabled,
+      radius: swatch ? 100 : radius,
+      accent: danger ? p.danger : p.primaryBright,
+      child: button,
     );
     button = Semantics(
       button: true,
@@ -704,8 +995,8 @@ class OpportunityTextField extends AppTextField {
 
   @override
   Widget build(BuildContext context) {
-    const spec = OpportunitiesVisualSpec.spec;
-    const p = OpportunitiesVisualSpec.palette;
+    final spec = OpportunitiesVisualSpec.of(context);
+    final p = spec.palette;
     final controlStyle = textStyle ?? spec.typography.body;
     final scaledLine =
         MediaQuery.textScalerOf(context).scale(controlStyle.fontSize ?? 14) *
@@ -784,6 +1075,27 @@ class OpportunityTextField extends AppTextField {
         child: field,
       );
     }
+    if (label == null && spec.id.startsWith('opportunities-smoked-glass-')) {
+      // Floating labels need their border gap; unlabelled toolbar fields can
+      // use the continuous recessed rim without painting across label text.
+      field = CustomPaint(
+        foregroundPainter: OpportunityGlassBevel(
+          light: p.primaryBright,
+          radius: spec.geometry.fieldRadius,
+          inset: true,
+          strength: enabled == false ? .35 : .8,
+        ),
+        child: field,
+      );
+    }
+    // A continuous hover rim must not cross InputDecorator's floating-label
+    // gap. Labelled callers retain their native focused outline instead.
+    if (enabled != false && label == null) {
+      field = OpportunityCardMotion(
+        radius: spec.geometry.fieldRadius,
+        child: field,
+      );
+    }
     return semanticLabel == null
         ? field
         : Semantics(textField: true, label: semanticLabel, child: field);
@@ -794,9 +1106,13 @@ class OpportunityDeskBackdrop extends StatelessWidget {
   const OpportunityDeskBackdrop({super.key});
 
   @override
-  Widget build(BuildContext context) => const RepaintBoundary(
+  Widget build(BuildContext context) => RepaintBoundary(
     child: IgnorePointer(
-      child: CustomPaint(painter: OpportunityGlassBackdrop()),
+      child: CustomPaint(
+        painter: OpportunityGlassBackdrop(
+          finish: OpportunityGlassFinish.of(context),
+        ),
+      ),
     ),
   );
 }

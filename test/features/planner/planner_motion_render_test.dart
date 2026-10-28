@@ -101,6 +101,7 @@ void main() {
         await tester.pumpAndSettle();
         final complete = find.byKey(PlannerActionKeys.row('P08', 'Beer'));
         await tester.ensureVisible(complete);
+        await tester.pumpAndSettle();
         await tester.tap(complete);
         await tester.pump();
         expect(

@@ -30,8 +30,21 @@ void main() {
       const ValueKey<String>('resource-map-zoom-dock-surface'),
     );
     final surface = tester.widget<Material>(surfaceFinder);
-    const chrome = ResourceMapChromeThemeData.sakuraCartographer;
-    expect(surface.color, chrome.chromeBase.withValues(alpha: .9));
+    expect(surface.color, Colors.transparent);
+    final face =
+        tester
+                .widget<Ink>(
+                  find
+                      .descendant(of: surfaceFinder, matching: find.byType(Ink))
+                      .first,
+                )
+                .decoration!
+            as BoxDecoration;
+    expect(
+      face.gradient!.colors.every((color) => (color.a - .9).abs() < .005),
+      isTrue,
+    );
+    expect(face.gradient!.colors.first, isNot(face.gradient!.colors.last));
     expect(surface.elevation, 6);
     expect(surface.shadowColor, const Color(0x59000000));
     expect(
@@ -124,7 +137,20 @@ void main() {
     );
     final surface = tester.widget<Material>(surfaceFinder);
     final shape = surface.shape! as RoundedRectangleBorder;
-    expect(surface.color, chrome.chromeBase.withValues(alpha: .9));
+    expect(surface.color, Colors.transparent);
+    final face =
+        tester
+                .widget<Ink>(
+                  find
+                      .descendant(of: surfaceFinder, matching: find.byType(Ink))
+                      .first,
+                )
+                .decoration!
+            as BoxDecoration;
+    expect(
+      face.gradient!.colors.every((color) => (color.a - .9).abs() < .005),
+      isTrue,
+    );
     expect(surface.shadowColor, const Color(0x59000000));
     expect(shape.side.color, chrome.softOutline.withValues(alpha: .82));
     expect(shape.borderRadius, BorderRadius.circular(12));

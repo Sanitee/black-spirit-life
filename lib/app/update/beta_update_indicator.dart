@@ -1,15 +1,14 @@
 import 'dart:async';
-import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 
 import '../../visual/visual.dart';
 import 'beta_update.dart';
 
-/// In-app status notice for Black Spirit Life updates.
+/// Compact, global title-bar offer for Black Spirit Life updates.
 ///
-/// The strip deliberately avoids release-note dialogs and browser hand-offs:
-/// one activation downloads the selected update and restarts when it is ready.
+/// One activation keeps the existing download, prepare, save, restart and
+/// durability flow. This widget only changes its presentation.
 class BetaUpdateIndicator extends StatefulWidget {
   const BetaUpdateIndicator({
     required this.controller,
@@ -17,33 +16,26 @@ class BetaUpdateIndicator extends StatefulWidget {
     super.key,
   });
 
-  // Keep the updater as a notice strip, not a second toolbar. The previous
-  // 84 px presentation consumed too much of the workspace at normal desktop
-  // sizes even though the same information fits comfortably in two compact
-  // text rows.
-  static const double height = 56;
-
-  /// The ordinary desktop notice stays compact while accessibility text is
-  /// allowed enough vertical room to remain unclipped.
-  static double heightFor(BuildContext context) {
-    final textScale = MediaQuery.textScalerOf(context).scale(1);
-    return math.max(height, 8 + 28 * textScale);
-  }
-
-  static const Key buttonKey = ValueKey<String>('beta-update-strip');
-  static const Key iconKey = ValueKey<String>('beta-update-strip-icon');
+  static const double height = 40;
+  static const double expandedWidth = 134;
+  static const double compactWidth = 42;
+  static const Key buttonKey = ValueKey<String>('beta-update-title-button');
+  static const Key iconKey = ValueKey<String>('beta-update-title-icon');
   static const Key availableContentKey = ValueKey<String>(
-    'beta-update-strip-available-content',
+    'beta-update-title-available-content',
   );
+  static const Key actionPanelKey = ValueKey<String>(
+    'beta-update-title-action-panel',
+  );
+  static const Key progressKey = ValueKey<String>('beta-update-title-progress');
+
+  // Retained as public test keys so older callers compile while the approved
+  // compact design deliberately omits the former petals, savings row and arrow.
   static const Key petalRainKey = ValueKey<String>(
     'beta-update-strip-petal-rain',
   );
   static const Key savingsKey = ValueKey<String>('beta-update-strip-savings');
-  static const Key actionPanelKey = ValueKey<String>(
-    'beta-update-strip-action-panel',
-  );
   static const Key arrowKey = ValueKey<String>('beta-update-strip-arrow');
-  static const Key progressKey = ValueKey<String>('beta-update-strip-progress');
 
   final BetaUpdateController controller;
   final Future<void> Function() onUpdateNow;
@@ -54,12 +46,14 @@ class BetaUpdateIndicator extends StatefulWidget {
 
 class _BetaUpdateIndicatorState extends State<BetaUpdateIndicator>
     with SingleTickerProviderStateMixin {
+  static const _attentionDuration = Duration(milliseconds: 5200);
+
   late final AnimationController _attention = AnimationController(
     vsync: this,
-    duration: const Duration(milliseconds: 10400),
+    duration: _attentionDuration,
   );
   bool _activationPending = false;
-  String? _playedAvailableOffer;
+  String? _activeOffer;
 
   @override
   void initState() {
@@ -88,12 +82,12 @@ class _BetaUpdateIndicatorState extends State<BetaUpdateIndicator>
     setState(_syncAnimation);
   }
 
-  bool get _shouldAnimateAttention =>
+  bool get _canBreathe =>
       widget.controller.snapshot.phase == BetaUpdatePhase.available &&
       !_activationPending &&
       !widget.controller.operationPending;
 
-  String get _availableOfferKey {
+  String get _offerKey {
     final snapshot = widget.controller.snapshot;
     return <Object>[
       snapshot.currentVersion,
@@ -109,31 +103,20 @@ class _BetaUpdateIndicatorState extends State<BetaUpdateIndicator>
     if (!mounted) return;
     final reduceMotion =
         MediaQuery.maybeOf(context)?.disableAnimations ?? false;
-    final phase = widget.controller.snapshot.phase;
-    if (phase != BetaUpdatePhase.available) {
-      _playedAvailableOffer = null;
+    if (!_canBreathe || reduceMotion) {
       _attention
         ..stop()
         ..value = 0;
+      if (widget.controller.snapshot.phase != BetaUpdatePhase.available) {
+        _activeOffer = null;
+      }
       return;
     }
-    if (reduceMotion) {
-      _playedAvailableOffer = _availableOfferKey;
-      _attention
-        ..stop()
-        ..value = 1;
-      return;
-    }
-    if (!_shouldAnimateAttention) {
-      _attention
-        ..stop()
-        ..value = 0;
-      return;
-    }
-    final offer = _availableOfferKey;
-    if (_playedAvailableOffer != offer) {
-      _playedAvailableOffer = offer;
-      unawaited(_attention.forward(from: 0));
+    final offer = _offerKey;
+    if (_activeOffer != offer || !_attention.isAnimating) {
+      _activeOffer = offer;
+      _attention.value = 0;
+      unawaited(_attention.repeat());
     }
   }
 
@@ -177,634 +160,378 @@ class _BetaUpdateIndicatorState extends State<BetaUpdateIndicator>
         !widget.controller.operationPending &&
         (snapshot.phase == BetaUpdatePhase.available ||
             snapshot.phase == BetaUpdatePhase.ready);
-    final presentation = _presentation(snapshot);
-    final toneColor = spec.palette.forTone(presentation.tone);
-    final reduceMotion =
-        MediaQuery.maybeOf(context)?.disableAnimations ?? false;
-    final animateAttention = _shouldAnimateAttention && !reduceMotion;
-    final petalBase = Color.lerp(
-      spec.palette.primary,
-      const Color(0xFFCF7F98),
-      .48,
-    )!;
-    final petalHighlight = Color.lerp(
-      spec.palette.primaryBright,
-      const Color(0xFFE8B0BF),
-      .58,
-    )!;
-    final semanticsLabel = snapshot.phase == BetaUpdatePhase.available
-        ? _availableSemanticsLabel(snapshot)
-        : presentation.actionHint.isEmpty
-        ? presentation.label
-        : '${presentation.label}. ${presentation.actionHint}';
+    final narrow = MediaQuery.sizeOf(context).width < 680;
+    final enlarged = MediaQuery.textScalerOf(context).scale(1) > 1.35;
+    final compact = narrow || enlarged;
+    final width = compact
+        ? BetaUpdateIndicator.compactWidth
+        : BetaUpdateIndicator.expandedWidth;
+    final label = _label(snapshot);
+    final tooltip = _tooltip(snapshot);
 
     return SizedBox(
-      height: BetaUpdateIndicator.heightFor(context),
-      width: double.infinity,
-      child: AppSurface(
-        role: AppSurfaceRole.commandBand,
-        tone: presentation.tone,
-        padding: EdgeInsets.zero,
-        clipBehavior: Clip.hardEdge,
-        child: Semantics(
-          liveRegion: true,
-          button: actionable,
-          enabled: actionable,
-          label: semanticsLabel,
-          onTap: actionable ? () => unawaited(_activate()) : null,
-          excludeSemantics: true,
-          child: Material(
-            color: Colors.transparent,
-            child: InkWell(
-              key: BetaUpdateIndicator.buttonKey,
-              onTap: actionable ? _activate : null,
-              child: Stack(
-                fit: StackFit.expand,
-                children: <Widget>[
-                  ExcludeSemantics(
-                    child: IgnorePointer(
-                      child: DecoratedBox(
-                        decoration: BoxDecoration(
-                          gradient: LinearGradient(
-                            begin: Alignment.topLeft,
-                            end: Alignment.bottomRight,
-                            colors: <Color>[
-                              toneColor.withAlpha(18),
-                              Colors.transparent,
-                              spec.palette.primary.withAlpha(13),
-                            ],
-                            stops: const <double>[0, .56, 1],
+      width: width,
+      height: BetaUpdateIndicator.height,
+      child: Center(
+        child: Tooltip(
+          message: tooltip,
+          excludeFromSemantics: true,
+          child: Semantics(
+            liveRegion: true,
+            button: actionable,
+            enabled: actionable,
+            label: tooltip,
+            onTap: actionable ? () => unawaited(_activate()) : null,
+            excludeSemantics: true,
+            child: Material(
+              color: Colors.transparent,
+              child: InkWell(
+                key: BetaUpdateIndicator.buttonKey,
+                onTap: actionable ? _activate : null,
+                customBorder: const _TightGlowBorder(),
+                hoverColor: spec.palette.primaryBright.withAlpha(18),
+                focusColor: spec.palette.primaryBright.withAlpha(28),
+                splashColor: spec.palette.primaryBright.withAlpha(32),
+                child: AnimatedBuilder(
+                  animation: _attention,
+                  builder: (context, _) {
+                    final glow = _canBreathe
+                        ? _tightGlow(_attention.value)
+                        : 0.0;
+                    return RepaintBoundary(
+                      child: SizedBox(
+                        key: BetaUpdateIndicator.availableContentKey,
+                        width: width,
+                        height: 36,
+                        child: CustomPaint(
+                          painter: _TightGlowFramePainter(
+                            spec: spec,
+                            glow: glow,
+                            compact: compact,
+                            enabled: actionable,
                           ),
-                        ),
-                      ),
-                    ),
-                  ),
-                  if (animateAttention)
-                    SakuraPetalRain(
-                      paintKey: BetaUpdateIndicator.petalRainKey,
-                      animation: _attention,
-                      baseColor: petalBase,
-                      highlightColor: petalHighlight,
-                    ),
-                  if (snapshot.phase == BetaUpdatePhase.available)
-                    _AvailableUpdateContent(
-                      snapshot: snapshot,
-                      actionable: actionable,
-                      attention: animateAttention
-                          ? _attention
-                          : kAlwaysDismissedAnimation,
-                      toneColor: toneColor,
-                    )
-                  else
-                    _UpdateStatusContent(
-                      snapshot: snapshot,
-                      presentation: presentation,
-                      actionable: actionable,
-                      toneColor: toneColor,
-                    ),
-                ],
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _AvailableUpdateContent extends StatelessWidget {
-  const _AvailableUpdateContent({
-    required this.snapshot,
-    required this.actionable,
-    required this.attention,
-    required this.toneColor,
-  });
-
-  final BetaUpdateSnapshot snapshot;
-  final bool actionable;
-  final Animation<double> attention;
-  final Color toneColor;
-
-  @override
-  Widget build(BuildContext context) {
-    final spec = context.visualTheme;
-    final version = snapshot.targetVersion.trim();
-    final kind = snapshot.usesDelta ? 'patch' : 'update';
-    final size = snapshot.sizeBytes > 0
-        ? '${_formatBytes(snapshot.sizeBytes)} $kind'
-        : '';
-    final savingsBytes = snapshot.usesDelta
-        ? snapshot.fullSizeBytes - snapshot.sizeBytes
-        : 0;
-    final savings = savingsBytes > 0
-        ? '${_formatBytes(savingsBytes)} smaller than the full download'
-        : '';
-    final eyebrow = snapshot.testOnly
-        ? 'TEST UPDATE'
-        : snapshot.usesDelta
-        ? 'DELTA UPDATE'
-        : 'APP UPDATE';
-    final heading = version.isEmpty
-        ? 'A new version is ready'
-        : 'Version $version is ready';
-
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final compact = constraints.maxWidth < 620;
-        final simplified = MediaQuery.textScalerOf(context).scale(1) >= 1.25;
-        final behavior = snapshot.testOnly
-            ? compact
-                  ? 'simulates install flow'
-                  : 'simulates the automatic install flow'
-            : compact
-            ? 'installs automatically'
-            : 'installs and restarts automatically';
-        final meta = <String>[
-          if (size.isNotEmpty) size,
-          behavior,
-        ].join('  ·  ');
-        final accessibleMeta = snapshot.testOnly
-            ? <String>['TEST', if (size.isNotEmpty) size].join('  ·  ')
-            : snapshot.usesDelta
-            ? <String>[
-                if (size.isNotEmpty) size,
-                if (savingsBytes > 0) 'saves ${_formatBytes(savingsBytes)}',
-              ].join('  ·  ')
-            : size;
-        return Padding(
-          key: BetaUpdateIndicator.availableContentKey,
-          padding: EdgeInsets.symmetric(
-            horizontal: compact ? 12 : 18,
-            vertical: 4,
-          ),
-          child: Row(
-            children: <Widget>[
-              _UpdateStatusGlyph(
-                key: BetaUpdateIndicator.iconKey,
-                snapshot: snapshot,
-                color: toneColor,
-                attention: attention,
-              ),
-              SizedBox(width: compact ? 9 : 12),
-              Expanded(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: <Widget>[
-                    if (!simplified) ...<Widget>[
-                      Row(
-                        children: <Widget>[
-                          Container(
-                            width: 5,
-                            height: 5,
-                            decoration: BoxDecoration(
-                              color: toneColor,
-                              shape: BoxShape.circle,
-                              boxShadow: <BoxShadow>[
-                                BoxShadow(
-                                  color: toneColor.withAlpha(118),
-                                  blurRadius: 5,
+                          child: Padding(
+                            padding: EdgeInsets.only(
+                              left: 3,
+                              right: compact ? 3 : 9,
+                            ),
+                            child: Row(
+                              children: <Widget>[
+                                _UpdateBadge(
+                                  snapshot: snapshot,
+                                  spec: spec,
+                                  glow: glow,
                                 ),
+                                if (!compact) ...<Widget>[
+                                  const SizedBox(width: 8),
+                                  Expanded(
+                                    child: Text(
+                                      label,
+                                      key: BetaUpdateIndicator.actionPanelKey,
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: spec.typography.button.copyWith(
+                                        color: actionable
+                                            ? spec.palette.text
+                                            : spec.palette.textMuted,
+                                        fontSize: 12.5,
+                                        fontWeight: FontWeight.w700,
+                                        letterSpacing: .15,
+                                        height: 1,
+                                      ),
+                                    ),
+                                  ),
+                                  const SizedBox(width: 7),
+                                  Transform.rotate(
+                                    angle: .785398,
+                                    child: Container(
+                                      width: 5,
+                                      height: 5,
+                                      decoration: BoxDecoration(
+                                        color: spec.palette.primaryBright
+                                            .withAlpha(actionable ? 190 : 86),
+                                        border: Border.all(
+                                          color: spec.palette.text.withAlpha(
+                                            actionable ? 116 : 54,
+                                          ),
+                                          width: .7,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ],
                               ],
                             ),
                           ),
-                          const SizedBox(width: 6),
-                          Flexible(
-                            child: Text(
-                              eyebrow,
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              style: spec.typography.label.copyWith(
-                                color: toneColor,
-                                fontSize: 10,
-                                fontWeight: FontWeight.w800,
-                                letterSpacing: .78,
-                                height: 1.05,
-                              ),
-                            ),
-                          ),
-                          if (!compact && savings.isNotEmpty) ...<Widget>[
-                            const SizedBox(width: 10),
-                            Flexible(
-                              child: Text(
-                                savings,
-                                key: BetaUpdateIndicator.savingsKey,
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                                style: spec.typography.meta.copyWith(
-                                  color: spec.palette.textMuted,
-                                  fontSize: 10.5,
-                                  height: 1.05,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ],
-                      ),
-                      const SizedBox(height: 1),
-                    ],
-                    Text(
-                      heading,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: spec.typography.button.copyWith(
-                        color: spec.palette.text,
-                        fontSize: compact ? 12.5 : 13.5,
-                        fontWeight: FontWeight.w700,
-                        height: 1.05,
-                      ),
-                    ),
-                    if (!simplified) ...<Widget>[
-                      const SizedBox(height: 1),
-                      Text(
-                        meta,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: spec.typography.meta.copyWith(
-                          color: spec.palette.textMuted,
-                          fontSize: compact ? 10 : 11,
-                          height: 1.05,
                         ),
                       ),
-                    ] else if (accessibleMeta.isNotEmpty) ...<Widget>[
-                      const SizedBox(height: 1),
-                      Text(
-                        accessibleMeta,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: spec.typography.meta.copyWith(
-                          color: spec.palette.textMuted,
-                          fontSize: compact ? 10 : 11,
-                          height: 1.05,
-                        ),
-                      ),
-                    ],
-                  ],
+                    );
+                  },
                 ),
               ),
-              SizedBox(width: compact ? 8 : 18),
-              AnimatedBuilder(
-                animation: attention,
-                builder: (context, child) {
-                  final pulse = _arrivalPulse(attention.value);
-                  final actionColor = actionable
-                      ? spec.palette.primaryBright
-                      : spec.palette.textMuted;
-                  return Container(
-                    key: BetaUpdateIndicator.actionPanelKey,
-                    padding: EdgeInsets.symmetric(
-                      horizontal: compact ? 10 : 14,
-                      vertical: 7,
-                    ),
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        begin: Alignment.topCenter,
-                        end: Alignment.bottomCenter,
-                        colors: <Color>[
-                          spec.palette.primary.withAlpha(
-                            actionable ? 48 + (pulse * 20).round() : 20,
-                          ),
-                          spec.palette.surfaceInset.withAlpha(148),
-                        ],
-                      ),
-                      borderRadius: BorderRadius.circular(
-                        spec.geometry.buttonRadius + 2,
-                      ),
-                      border: Border.all(
-                        color: actionColor.withAlpha(
-                          actionable ? 128 + (pulse * 55).round() : 54,
-                        ),
-                      ),
-                      boxShadow: pulse <= 0
-                          ? const <BoxShadow>[]
-                          : <BoxShadow>[
-                              BoxShadow(
-                                color: actionColor.withAlpha(
-                                  (pulse * 70).round(),
-                                ),
-                                blurRadius: 8 + pulse * 8,
-                              ),
-                            ],
-                    ),
-                    child: child,
-                  );
-                },
-                child: compact
-                    ? SizedBox(
-                        width: 92,
-                        child: Row(
-                          children: <Widget>[
-                            Expanded(
-                              child: Text(
-                                'Update',
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                                style: spec.typography.button.copyWith(
-                                  color: actionable
-                                      ? spec.palette.primaryBright
-                                      : spec.palette.textMuted,
-                                  fontSize: 11.5,
-                                  fontWeight: FontWeight.w700,
-                                ),
-                              ),
-                            ),
-                            const SizedBox(width: 4),
-                            _AnimatedActionArrow(
-                              color: actionable
-                                  ? spec.palette.primaryBright
-                                  : spec.palette.textMuted,
-                              animation: attention,
-                            ),
-                          ],
-                        ),
-                      )
-                    : Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: <Widget>[
-                          Text(
-                            'Update now',
-                            style: spec.typography.button.copyWith(
-                              color: actionable
-                                  ? spec.palette.primaryBright
-                                  : spec.palette.textMuted,
-                              fontSize: 12.5,
-                              fontWeight: FontWeight.w700,
-                            ),
-                          ),
-                          const SizedBox(width: 5),
-                          _AnimatedActionArrow(
-                            color: actionable
-                                ? spec.palette.primaryBright
-                                : spec.palette.textMuted,
-                            animation: attention,
-                          ),
-                        ],
-                      ),
-              ),
-            ],
-          ),
-        );
-      },
-    );
-  }
-}
-
-class _UpdateStatusContent extends StatelessWidget {
-  const _UpdateStatusContent({
-    required this.snapshot,
-    required this.presentation,
-    required this.actionable,
-    required this.toneColor,
-  });
-
-  final BetaUpdateSnapshot snapshot;
-  final _UpdatePresentation presentation;
-  final bool actionable;
-  final Color toneColor;
-
-  @override
-  Widget build(BuildContext context) {
-    final spec = context.visualTheme;
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 18),
-      child: Row(
-        children: <Widget>[
-          _UpdateStatusGlyph(
-            key: BetaUpdateIndicator.iconKey,
-            snapshot: snapshot,
-            color: toneColor,
-            attention: kAlwaysDismissedAnimation,
-          ),
-          const SizedBox(width: 11),
-          Expanded(
-            child: Text(
-              presentation.label,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: spec.typography.label.copyWith(
-                color: spec.palette.text,
-                fontWeight: FontWeight.w700,
-              ),
             ),
           ),
-          if (presentation.actionHint.isNotEmpty) ...<Widget>[
-            const SizedBox(width: 16),
-            Text(
-              presentation.actionHint,
-              style: spec.typography.meta.copyWith(
-                color: actionable
-                    ? spec.palette.primaryBright
-                    : spec.palette.textMuted,
-                fontWeight: FontWeight.w700,
-              ),
-            ),
-            if (actionable) ...<Widget>[
-              const SizedBox(width: 5),
-              _AnimatedActionArrow(
-                color: spec.palette.primaryBright,
-                animation: kAlwaysDismissedAnimation,
-              ),
-            ],
-          ],
-        ],
+        ),
       ),
     );
   }
 }
 
-class _AnimatedActionArrow extends StatelessWidget {
-  const _AnimatedActionArrow({required this.color, required this.animation});
-
-  final Color color;
-  final Animation<double> animation;
-
-  @override
-  Widget build(BuildContext context) => SizedBox(
-    width: 21,
-    child: Align(
-      alignment: Alignment.centerLeft,
-      child: AnimatedBuilder(
-        animation: animation,
-        builder: (context, child) => Transform.translate(
-          key: BetaUpdateIndicator.arrowKey,
-          offset: Offset(_arrivalPulse(animation.value) * 4, 0),
-          child: child,
-        ),
-        child: Icon(Icons.arrow_forward_rounded, size: 17, color: color),
-      ),
-    ),
-  );
-}
-
-class _UpdateStatusGlyph extends StatelessWidget {
-  const _UpdateStatusGlyph({
+class _UpdateBadge extends StatelessWidget {
+  const _UpdateBadge({
     required this.snapshot,
-    required this.color,
-    required this.attention,
-    super.key,
+    required this.spec,
+    required this.glow,
   });
 
   final BetaUpdateSnapshot snapshot;
-  final Color color;
-  final Animation<double> attention;
+  final ThemeSpec spec;
+  final double glow;
 
   @override
   Widget build(BuildContext context) {
-    if (snapshot.phase == BetaUpdatePhase.downloading) {
-      return SizedBox.square(
-        key: BetaUpdateIndicator.progressKey,
-        dimension: 22,
-        child: CircularProgressIndicator(
-          value: snapshot.progress > 0 ? snapshot.progress : null,
-          strokeWidth: 2.4,
-          color: color,
-          backgroundColor: color.withAlpha(42),
+    final downloading = snapshot.phase == BetaUpdatePhase.downloading;
+    return SizedBox.square(
+      key: BetaUpdateIndicator.iconKey,
+      dimension: 34,
+      child: CustomPaint(
+        painter: _TightGlowBadgePainter(spec: spec, glow: glow),
+        child: Center(
+          child: downloading
+              ? SizedBox.square(
+                  key: BetaUpdateIndicator.progressKey,
+                  dimension: 20,
+                  child: CircularProgressIndicator(
+                    value: snapshot.progress > 0 ? snapshot.progress : null,
+                    strokeWidth: 1.8,
+                    color: spec.palette.primaryBright,
+                    backgroundColor: spec.palette.text.withAlpha(28),
+                  ),
+                )
+              : Icon(
+                  snapshot.phase == BetaUpdatePhase.ready
+                      ? Icons.restart_alt_rounded
+                      : snapshot.phase == BetaUpdatePhase.applying
+                      ? Icons.autorenew_rounded
+                      : Icons.system_update_alt_rounded,
+                  size: 18,
+                  color: spec.palette.text,
+                  shadows: glow <= 0
+                      ? null
+                      : <Shadow>[
+                          Shadow(
+                            color: spec.palette.primaryBright.withAlpha(
+                              (glow * 150).round(),
+                            ),
+                            blurRadius: 2,
+                          ),
+                        ],
+                ),
         ),
+      ),
+    );
+  }
+}
+
+class _TightGlowFramePainter extends CustomPainter {
+  const _TightGlowFramePainter({
+    required this.spec,
+    required this.glow,
+    required this.compact,
+    required this.enabled,
+  });
+
+  final ThemeSpec spec;
+  final double glow;
+  final bool compact;
+  final bool enabled;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final face = Rect.fromLTRB(compact ? 1 : 15, 4, size.width - 1, 32);
+    final path = _octagon(face, 5);
+    if (glow > 0) {
+      canvas.drawPath(
+        path,
+        Paint()
+          ..color = spec.palette.primaryBright.withAlpha(
+            (glow * .9 * 86).round(),
+          )
+          ..maskFilter = MaskFilter.blur(BlurStyle.normal, 4 + glow * 3),
       );
     }
-
-    final icon = switch (snapshot.phase) {
-      BetaUpdatePhase.ready => Icons.restart_alt_rounded,
-      BetaUpdatePhase.offline => Icons.cloud_off_outlined,
-      BetaUpdatePhase.error => Icons.error_outline_rounded,
-      _ => Icons.system_update_alt_rounded,
-    };
-    return AnimatedBuilder(
-      animation: attention,
-      builder: (context, child) {
-        final pulse = _arrivalPulse(attention.value);
-        return Transform.scale(
-          scale: 1 + pulse * .07,
-          child: Container(
-            width: 32,
-            height: 32,
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(8),
-              color: color.withAlpha(24 + (pulse * 28).round()),
-              border: Border.all(
-                color: color.withAlpha(76 + (pulse * 76).round()),
-              ),
-              boxShadow: <BoxShadow>[
-                BoxShadow(
-                  color: color.withAlpha(32 + (pulse * 82).round()),
-                  blurRadius: 4 + pulse * 7,
-                  spreadRadius: pulse * 1.2,
-                ),
-              ],
+    canvas.drawPath(
+      path,
+      Paint()
+        ..shader = LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: <Color>[
+            Color.alphaBlend(
+              spec.palette.primary.withAlpha(enabled ? 42 : 20),
+              spec.palette.surface,
             ),
-            child: Icon(icon, size: 18, color: color),
-          ),
-        );
-      },
+            spec.palette.surfaceInset,
+          ],
+        ).createShader(face),
+    );
+    canvas.drawPath(
+      path,
+      Paint()
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 1
+        ..color = spec.palette.primaryBright.withAlpha(
+          enabled ? 126 + (glow * 92).round() : 56,
+        ),
+    );
+    canvas.drawPath(
+      _octagon(face.deflate(2), 4),
+      Paint()
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = .7
+        ..color = spec.palette.text.withAlpha(
+          enabled ? 28 + (glow * 42).round() : 14,
+        ),
     );
   }
+
+  @override
+  bool shouldRepaint(_TightGlowFramePainter oldDelegate) =>
+      oldDelegate.spec != spec ||
+      oldDelegate.glow != glow ||
+      oldDelegate.compact != compact ||
+      oldDelegate.enabled != enabled;
 }
 
-double _arrivalPulse(double progress) {
-  if (progress <= 0 || progress >= .30) return 0;
-  return math.sin(progress / .30 * math.pi);
-}
+class _TightGlowBadgePainter extends CustomPainter {
+  const _TightGlowBadgePainter({required this.spec, required this.glow});
 
-_UpdatePresentation _presentation(BetaUpdateSnapshot snapshot) {
-  switch (snapshot.phase) {
-    case BetaUpdatePhase.available:
-      final version = snapshot.targetVersion.trim();
-      final size = snapshot.sizeBytes > 0
-          ? _formatBytes(snapshot.sizeBytes)
-          : '';
-      final kind = snapshot.usesDelta ? 'patch' : 'update';
-      return _UpdatePresentation(
-        label: <String>[
-          snapshot.testOnly ? 'Update available (test)' : 'Update available',
-          if (version.isNotEmpty) version,
-          if (size.isNotEmpty) '$size $kind',
-        ].join('  ·  '),
-        actionHint: 'Update now',
-        tone: AppSurfaceTone.info,
+  final ThemeSpec spec;
+  final double glow;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final rect = Offset.zero & size;
+    final path = _octagon(rect.deflate(.7), 7);
+    if (glow > 0) {
+      canvas.drawPath(
+        path,
+        Paint()
+          ..color = spec.palette.primaryBright.withAlpha(
+            (glow * .72 * 108).round(),
+          )
+          ..maskFilter = MaskFilter.blur(BlurStyle.normal, 3 + glow * 2),
       );
-    case BetaUpdatePhase.downloading:
-      final percent = (snapshot.progress.clamp(0, 1) * 100).round();
-      return _UpdatePresentation(
-        label: snapshot.testOnly
-            ? 'Testing update download  ·  $percent%'
-            : 'Downloading update  ·  $percent%',
-        actionHint: '',
-        tone: AppSurfaceTone.info,
-      );
-    case BetaUpdatePhase.ready:
-      return _UpdatePresentation(
-        label: snapshot.testOnly ? 'Update test complete' : 'Update ready',
-        actionHint: snapshot.testOnly ? '' : 'Restart to install',
-        tone: AppSurfaceTone.success,
-      );
-    case BetaUpdatePhase.applying:
-      return const _UpdatePresentation(
-        label: 'Applying update',
-        actionHint: 'Restarting',
-        tone: AppSurfaceTone.info,
-      );
-    case BetaUpdatePhase.offline:
-      return const _UpdatePresentation(
-        label: 'Update check is offline',
-        actionHint: 'Try again',
-        tone: AppSurfaceTone.warning,
-      );
-    case BetaUpdatePhase.error:
-      return const _UpdatePresentation(
-        label: 'Update could not be checked',
-        actionHint: 'Try again',
-        tone: AppSurfaceTone.danger,
-      );
-    default:
-      return const _UpdatePresentation(
-        label: '',
-        actionHint: '',
-        tone: AppSurfaceTone.neutral,
-      );
+    }
+    canvas.drawPath(
+      path,
+      Paint()
+        ..shader = LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: <Color>[
+            Color.alphaBlend(
+              spec.palette.primaryBright.withAlpha(52),
+              spec.palette.surface,
+            ),
+            spec.palette.surfaceInset,
+          ],
+        ).createShader(rect),
+    );
+    canvas.drawPath(
+      path,
+      Paint()
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 1
+        ..color = spec.palette.primaryBright.withAlpha(
+          152 + (glow * 82).round(),
+        ),
+    );
   }
+
+  @override
+  bool shouldRepaint(_TightGlowBadgePainter oldDelegate) =>
+      oldDelegate.spec != spec || oldDelegate.glow != glow;
+}
+
+class _TightGlowBorder extends ShapeBorder {
+  const _TightGlowBorder();
+
+  @override
+  EdgeInsetsGeometry get dimensions => EdgeInsets.zero;
+
+  @override
+  Path getInnerPath(Rect rect, {TextDirection? textDirection}) =>
+      _octagon(rect.deflate(2), 5);
+
+  @override
+  Path getOuterPath(Rect rect, {TextDirection? textDirection}) =>
+      _octagon(rect, 6);
+
+  @override
+  void paint(Canvas canvas, Rect rect, {TextDirection? textDirection}) {}
+
+  @override
+  ShapeBorder scale(double t) => this;
+}
+
+Path _octagon(Rect rect, double cut) => Path()
+  ..moveTo(rect.left + cut, rect.top)
+  ..lineTo(rect.right - cut, rect.top)
+  ..lineTo(rect.right, rect.top + cut)
+  ..lineTo(rect.right, rect.bottom - cut)
+  ..lineTo(rect.right - cut, rect.bottom)
+  ..lineTo(rect.left + cut, rect.bottom)
+  ..lineTo(rect.left, rect.bottom - cut)
+  ..lineTo(rect.left, rect.top + cut)
+  ..close();
+
+double _tightGlow(double value) {
+  const curve = Cubic(.45, 0, .55, 1);
+  if (value <= .44) {
+    return curve.transform((value / .44).clamp(0, 1).toDouble());
+  }
+  if (value <= .88) {
+    return curve.transform((1 - (value - .44) / .44).clamp(0, 1).toDouble());
+  }
+  return 0;
+}
+
+String _label(BetaUpdateSnapshot snapshot) => switch (snapshot.phase) {
+  BetaUpdatePhase.available => 'Update',
+  BetaUpdatePhase.downloading => '${(snapshot.progress * 100).round()}%',
+  BetaUpdatePhase.ready => 'Restart',
+  BetaUpdatePhase.applying => 'Updating',
+  _ => 'Update',
+};
+
+String _tooltip(BetaUpdateSnapshot snapshot) {
+  final version = snapshot.targetVersion.trim();
+  final target = version.isEmpty ? 'the latest version' : 'version $version';
+  return switch (snapshot.phase) {
+    BetaUpdatePhase.available => <String>[
+      snapshot.testOnly ? 'Test update available' : 'Update to $target',
+      if (snapshot.sizeBytes > 0)
+        '${_formatBytes(snapshot.sizeBytes)} ${snapshot.usesDelta ? 'patch' : 'download'}',
+      snapshot.testOnly
+          ? 'Runs the safe update demonstration'
+          : 'Installs and restarts automatically',
+    ].join(' · '),
+    BetaUpdatePhase.downloading =>
+      'Downloading $target · ${(snapshot.progress * 100).round()}%',
+    BetaUpdatePhase.ready => '$target is ready · restart and apply',
+    BetaUpdatePhase.applying => 'Applying $target',
+    _ => 'Black Spirit Life update',
+  };
 }
 
 String _formatBytes(int bytes) {
-  if (bytes < 1024) return '$bytes B';
-  const units = <String>['KB', 'MB', 'GB'];
-  var value = bytes.toDouble();
-  var unit = -1;
-  do {
-    value /= 1024;
-    unit += 1;
-  } while (value >= 1024 && unit < units.length - 1);
-  final decimals = value >= 10 ? 0 : 1;
-  return '${value.toStringAsFixed(decimals)} ${units[unit]}';
-}
-
-String _availableSemanticsLabel(BetaUpdateSnapshot snapshot) {
-  final version = snapshot.targetVersion.trim();
-  final size = snapshot.sizeBytes > 0 ? _formatBytes(snapshot.sizeBytes) : '';
-  final savingsBytes = snapshot.usesDelta
-      ? snapshot.fullSizeBytes - snapshot.sizeBytes
-      : 0;
-  return <String>[
-    snapshot.testOnly ? 'Test update available' : 'Update available',
-    if (version.isNotEmpty) 'Version $version',
-    if (size.isNotEmpty)
-      snapshot.usesDelta ? '$size delta patch' : '$size full update',
-    if (savingsBytes > 0)
-      'Saves ${_formatBytes(savingsBytes)} compared with the full download',
-    snapshot.testOnly
-        ? 'Runs a local simulation and does not install a package'
-        : 'Installs and restarts automatically',
-    snapshot.testOnly ? 'Run update test' : 'Update now',
-  ].join('. ');
-}
-
-class _UpdatePresentation {
-  const _UpdatePresentation({
-    required this.label,
-    required this.actionHint,
-    required this.tone,
-  });
-
-  final String label;
-  final String actionHint;
-  final AppSurfaceTone tone;
+  if (bytes >= 1024 * 1024 * 1024) {
+    return '${(bytes / (1024 * 1024 * 1024)).toStringAsFixed(1)} GB';
+  }
+  if (bytes >= 1024 * 1024) {
+    return '${(bytes / (1024 * 1024)).toStringAsFixed(1)} MB';
+  }
+  if (bytes >= 1024) return '${(bytes / 1024).toStringAsFixed(1)} KB';
+  return '$bytes B';
 }

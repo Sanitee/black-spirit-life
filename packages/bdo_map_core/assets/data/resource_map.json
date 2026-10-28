@@ -1,10 +1,18 @@
 {
   "manifest": {
     "schemaVersion": 1,
-    "datasetVersion": "2026.09.09-beta-v4",
-    "generatedAt": "2026-09-09T02:30:00Z",
+    "datasetVersion": "2026.10.09-beta-v5",
+    "generatedAt": "2026-10-09T08:00:00Z",
     "coordinateReference": "Black Desert game-world X/Z; render Y = -Z",
     "provenance": [
+      {
+        "id": "pearl-abyss-sea-node-correction-2026-10-08",
+        "title": "Official Oceanus Sea and Tiamat Sea node-display correction",
+        "url": "https://www.naeu.playblackdesert.com/en-US/News/Detail?countryType=en-US&groupContentNo=10678",
+        "license": "Official factual cross-check; no source media copied",
+        "permittedUse": "The October 8, 2026 PC update corrects Oceanus Sea and Tiamat Sea being displayed as ordinary world-map nodes. Exclude the two empty, unlinked exploration records 2113 and 2114 from the older seed. Retain all production nodes, fishing records and sea-region geometry; no fishing-origin or distance correction is inferred.",
+        "attribution": "Pearl Abyss Corp."
+      },
       {
         "id": "bdo-codex-wild-beehive-facts-2026-09-09",
         "title": "Current Wild Beehive hunting and processing quest facts",
@@ -34395,38 +34403,6 @@
       "isResourceNode": false,
       "isProductionNode": false,
       "sourceIconType": 3,
-      "sourceLayerFlag": 1,
-      "provenanceId": "bdo-codex-current-worldmap-nodes-2026-08-15-reference"
-    },
-    {
-      "id": "2113",
-      "name": "Oceanus Sea",
-      "nodeType": "Connection",
-      "region": "",
-      "x": 968000.0,
-      "z": 961600.0,
-      "contributionPoints": 0,
-      "linkIds": [],
-      "outputs": [],
-      "isResourceNode": false,
-      "isProductionNode": false,
-      "sourceIconType": 0,
-      "sourceLayerFlag": 1,
-      "provenanceId": "bdo-codex-current-worldmap-nodes-2026-08-15-reference"
-    },
-    {
-      "id": "2114",
-      "name": "Tiamat Sea",
-      "nodeType": "Connection",
-      "region": "",
-      "x": 1283800.0,
-      "z": 663600.0,
-      "contributionPoints": 0,
-      "linkIds": [],
-      "outputs": [],
-      "isResourceNode": false,
-      "isProductionNode": false,
-      "sourceIconType": 0,
       "sourceLayerFlag": 1,
       "provenanceId": "bdo-codex-current-worldmap-nodes-2026-08-15-reference"
     },

@@ -3,6 +3,7 @@ import 'dart:io';
 
 import '../../data/persistence/atomic_file_store.dart';
 import '../../domain/models/craft_mode.dart';
+import 'opportunities_content_scale.dart';
 
 /// Kept apart from planner targets, inventory and recipe choices.
 class OpportunitiesPreferences {
@@ -30,6 +31,10 @@ class OpportunitiesPreferences {
       orElse: () => CraftMode.cooking,
     );
     result.region = choice('region', ['eu', 'na'], 'eu');
+    result.glassFinish = choice('glassFinish', ['bronze', 'moon'], 'bronze');
+    result.contentScale = normalizeOpportunitiesContentScale(
+      value['contentScale'],
+    );
     result.craftSearch = value['craftSearch'] is String
         ? value['craftSearch'] as String
         : '';
@@ -72,6 +77,7 @@ class OpportunitiesPreferences {
     result.profitableOnly = value['profitableOnly'] != false;
     result.demandOnly = legacyDemandSort || value['demandOnly'] == true;
     result.readyOnly = value['readyOnly'] == true;
+    result.useInventory = value['useInventory'] == true;
     result.crafts = number('crafts', 1, 1000000).toInt().clamp(1, 1000000);
     result.currencyId = value['currencyId'] is String
         ? value['currencyId'] as String
@@ -100,6 +106,8 @@ class OpportunitiesPreferences {
   String section = 'crafting';
   CraftMode mode = CraftMode.cooking;
   String region = 'eu';
+  String glassFinish = 'bronze';
+  double contentScale = 1;
   String craftSearch = '';
   String exchangeSearch = '';
   String bestUseItem = '';
@@ -116,6 +124,7 @@ class OpportunitiesPreferences {
   bool profitableOnly = true;
   bool demandOnly = false;
   bool readyOnly = false;
+  bool useInventory = false;
   // Retired global controls: retained for saved-file/export/rollback
   // compatibility only. Overview calculations use one craft and zero extras;
   // detail quantities are local to the inspected recipe.
@@ -133,6 +142,8 @@ class OpportunitiesPreferences {
     'section': section,
     'mode': mode.key,
     'region': region,
+    'glassFinish': glassFinish,
+    'contentScale': contentScale,
     'craftSearch': craftSearch,
     'exchangeSearch': exchangeSearch,
     'bestUseItem': bestUseItem,
@@ -144,6 +155,7 @@ class OpportunitiesPreferences {
     'profitableOnly': profitableOnly,
     'demandOnly': demandOnly,
     'readyOnly': readyOnly,
+    'useInventory': useInventory,
     'crafts': crafts,
     'currencyId': currencyId,
     'owned': owned,

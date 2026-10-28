@@ -6,8 +6,11 @@ import 'dart:typed_data';
 
 import 'package:crypto/crypto.dart';
 
+const int fishCompanionFirstPort = 8925;
+const int fishCompanionLastPort = 8955;
+
 const String fishCompanionAcceptedPayloadVersion =
-    'd9998b921bcfa92464ab59b37072ae637470d621c672e81f71f23fc60c569868:'
+    '5f6a9f77f375ad04eabfdccf5f756de9986a5359ce87239fc4c0cadb8b4eb411:'
     'c0b5c5c84980be389420cf247d7a89ac8c256676b7313ce3a496c933cb0667a9';
 
 /// The credited, noncommercial public release includes the reviewed reference

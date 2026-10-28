@@ -185,6 +185,20 @@ class PlannerStateTransactions {
         'market.tradeMarketIds',
         affected,
       ),
+      preorderPrices: _renameKey(
+        source.market.preorderPrices,
+        oldValue,
+        newValue,
+        'market.preorderPrices',
+        affected,
+      ),
+      preorderObservedAt: _renameKey(
+        source.market.preorderObservedAt,
+        oldValue,
+        newValue,
+        'market.preorderObservedAt',
+        affected,
+      ),
       totalTrades: _renameKey(
         source.market.totalTrades,
         oldValue,
@@ -418,6 +432,18 @@ class PlannerStateTransactions {
         affected,
       ),
       stock: _removeKeys(source.market.stock, name, 'market.stock', affected),
+      preorderPrices: _removeKeys(
+        source.market.preorderPrices,
+        name,
+        'market.preorderPrices',
+        affected,
+      ),
+      preorderObservedAt: _removeKeys(
+        source.market.preorderObservedAt,
+        name,
+        'market.preorderObservedAt',
+        affected,
+      ),
       tradeMarketIds: _removeKeys(
         source.market.tradeMarketIds,
         name,

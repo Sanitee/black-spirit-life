@@ -214,15 +214,20 @@ class _CraftMasteryControlState extends State<_CraftMasteryControl> {
 }
 
 class _CraftingToolbar extends StatefulWidget {
-  const _CraftingToolbar({required this.controller});
+  const _CraftingToolbar({
+    required this.controller,
+    required this.showModeTabs,
+    required this.showSortControl,
+  });
   final OpportunitiesController controller;
+  final bool showModeTabs;
+  final bool showSortControl;
 
   @override
   State<_CraftingToolbar> createState() => _CraftingToolbarState();
 }
 
 class _CraftingToolbarState extends State<_CraftingToolbar> {
-  // Keep editing state when the two rows wrap at narrower widths.
   final _searchSlot = GlobalKey();
   OpportunitiesController get controller => widget.controller;
 
@@ -231,6 +236,29 @@ class _CraftingToolbarState extends State<_CraftingToolbar> {
     final spec = context.visualTheme;
     final p = controller.preferences;
     final scale = MediaQuery.textScalerOf(context).scale(14) / 14;
+    final filters = Wrap(
+      key: const ValueKey('craft-filters'),
+      spacing: 6,
+      runSpacing: 6,
+      children: [
+        _CraftIngredientsControl(controller: controller),
+        _CraftFilterPill(
+          controlKey: const ValueKey('craft-has-demand'),
+          label: 'Out of stock',
+          selected: p.demandOnly,
+          tooltip: 'Zero listed stock, with or without preorders.',
+          onSelected: (value) => controller.change((p) => p.demandOnly = value),
+        ),
+        _CraftFilterPill(
+          controlKey: const ValueKey('craft-profitable'),
+          label: 'Profitable',
+          selected: p.profitableOnly,
+          tooltip: 'Name searches also include recipes with a loss.',
+          onSelected: (value) =>
+              controller.change((p) => p.profitableOnly = value),
+        ),
+      ],
+    );
     return LayoutBuilder(
       key: const ValueKey('craft-toolbar'),
       builder: (context, constraints) => Column(
@@ -241,10 +269,10 @@ class _CraftingToolbarState extends State<_CraftingToolbar> {
             alignment: WrapAlignment.spaceBetween,
             crossAxisAlignment: WrapCrossAlignment.center,
             spacing: 16,
-            runSpacing: 12,
+            runSpacing: 10,
             children: [
               SizedBox(
-                width: math.min(326 * scale, constraints.maxWidth),
+                width: math.min(280 * scale, constraints.maxWidth),
                 child: KeyedSubtree(
                   key: _searchSlot,
                   child: _TextInput(
@@ -257,74 +285,140 @@ class _CraftingToolbarState extends State<_CraftingToolbar> {
                   ),
                 ),
               ),
-              _CraftSortControl(controller: controller),
+              if (widget.showModeTabs) _CraftModeTabs(controller: controller),
+              if (!widget.showSortControl) filters,
             ],
           ),
-          const SizedBox(height: 12),
-          DecoratedBox(
-            decoration: BoxDecoration(
-              border: Border(
-                bottom: BorderSide(color: spec.palette.trim.withAlpha(70)),
+          if (widget.showSortControl) ...[
+            const SizedBox(height: 10),
+            DecoratedBox(
+              decoration: BoxDecoration(
+                color: spec.palette.surfaceInset.withAlpha(100),
+                borderRadius: BorderRadius.circular(6),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+                child: Wrap(
+                  alignment: WrapAlignment.spaceBetween,
+                  crossAxisAlignment: WrapCrossAlignment.center,
+                  spacing: 12,
+                  runSpacing: 8,
+                  children: [
+                    _CraftSortControl(controller: controller),
+                    filters,
+                  ],
+                ),
               ),
             ),
-            child: Padding(
-              padding: const EdgeInsets.only(bottom: 8),
-              child: Wrap(
-                alignment: WrapAlignment.spaceBetween,
-                crossAxisAlignment: WrapCrossAlignment.center,
-                spacing: 16,
-                runSpacing: 12,
-                children: [
-                  _CraftModeTabs(controller: controller),
-                  Wrap(
-                    key: const ValueKey('craft-filters'),
-                    spacing: 8,
-                    runSpacing: 8,
-                    children: [
-                      _CraftFilterPill(
-                        controlKey: const ValueKey('craft-has-demand'),
-                        label: 'Out of stock',
-                        selected: p.demandOnly,
-                        tooltip:
-                            'Zero listed stock, with or without preorders.',
-                        onSelected: (value) =>
-                            controller.change((p) => p.demandOnly = value),
-                      ),
-                      _CraftFilterPill(
-                        controlKey: const ValueKey(
-                          'craft-ingredients-available',
-                        ),
-                        label: 'Ingredients available',
-                        selected: p.readyOnly,
-                        tooltip:
-                            'Enough market stock or NPC supply for one craft.',
-                        onSelected: (value) =>
-                            controller.change((p) => p.readyOnly = value),
-                      ),
-                      _CraftFilterPill(
-                        controlKey: const ValueKey('craft-profitable'),
-                        label: 'Profitable',
-                        selected: p.profitableOnly,
-                        tooltip:
-                            'Name searches also include recipes with a loss.',
-                        onSelected: (value) =>
-                            controller.change((p) => p.profitableOnly = value),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-          ),
+          ],
         ],
       ),
     );
   }
 }
 
-class _CraftSortControl extends StatelessWidget {
-  const _CraftSortControl({required this.controller});
+class _CraftIngredientsControl extends StatelessWidget {
+  const _CraftIngredientsControl({required this.controller});
   final OpportunitiesController controller;
+
+  @override
+  Widget build(BuildContext context) {
+    final p = controller.preferences;
+    final suffix = [if (p.readyOnly) 'available', if (p.useInventory) 'owned'];
+    return AnchoredPopover(
+      overlayId: 'craft-ingredients',
+      preferredWidth: 224 * (MediaQuery.textScalerOf(context).scale(14) / 14),
+      maximumHeight: 260,
+      popoverBuilder: (context, close) => AnimatedBuilder(
+        animation: controller,
+        builder: (context, _) => OpportunitySurface(
+          role: AppSurfaceRole.panel,
+          padding: const EdgeInsets.all(6),
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                _InventoryMenuChoice(
+                  key: const ValueKey('craft-ingredients-available'),
+                  label: 'Only available',
+                  selected: p.readyOnly,
+                  onPressed: () =>
+                      controller.change((p) => p.readyOnly = !p.readyOnly),
+                ),
+                Divider(height: 12, color: context.visualTheme.palette.trim),
+                _InventoryMenuChoice(
+                  key: const ValueKey('craft-use-inventory'),
+                  label: 'Use inventory',
+                  selected: p.useInventory,
+                  onPressed: () => controller.change(
+                    (p) => p.useInventory = !p.useInventory,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+      anchorBuilder: (context, toggle, showing) => OpportunityButton(
+        key: const ValueKey('craft-ingredients-menu'),
+        selected: showing || suffix.isNotEmpty,
+        role: AppButtonRole.infoChip,
+        onPressed: toggle,
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              'Ingredients${suffix.isEmpty ? '' : ' · ${suffix.join(' + ')}'}',
+            ),
+            const SizedBox(width: 5),
+            const Icon(Icons.arrow_drop_down, size: 16),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _InventoryMenuChoice extends StatelessWidget {
+  const _InventoryMenuChoice({
+    required this.label,
+    required this.selected,
+    required this.onPressed,
+    super.key,
+  });
+  final String label;
+  final bool selected;
+  final VoidCallback onPressed;
+
+  @override
+  Widget build(BuildContext context) => Semantics(
+    checked: selected,
+    child: OpportunityButton(
+      role: AppButtonRole.infoChip,
+      onPressed: onPressed,
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(
+            selected ? Icons.check_box : Icons.check_box_outline_blank,
+            size: 18,
+            color: selected
+                ? context.visualTheme.palette.primaryBright
+                : context.visualTheme.palette.textMuted,
+          ),
+          const SizedBox(width: 8),
+          Flexible(child: Text(label)),
+        ],
+      ),
+    ),
+  );
+}
+
+class _CraftSortControl extends StatelessWidget {
+  const _CraftSortControl({required this.controller, this.vertical = false});
+  final OpportunitiesController controller;
+  final bool vertical;
 
   @override
   Widget build(BuildContext context) {
@@ -347,6 +441,7 @@ class _CraftSortControl extends StatelessWidget {
         textWidth('EXP') +
         24 +
         (activeSort == 'exp' ? math.max(32, textWidth('↓') + 16) : 0);
+    Widget item(Widget child) => vertical ? child : Flexible(child: child);
     ButtonStyle style(bool selected) => ButtonStyle(
       minimumSize: const WidgetStatePropertyAll(Size(0, 40)),
       padding: const WidgetStatePropertyAll(
@@ -386,15 +481,19 @@ class _CraftSortControl extends StatelessWidget {
       child: Material(
         key: const ValueKey('craft-sort-options'),
         color: Colors.transparent,
-        child: Row(
+        child: Flex(
+          direction: vertical ? Axis.vertical : Axis.horizontal,
           mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: vertical
+              ? CrossAxisAlignment.start
+              : CrossAxisAlignment.center,
           children: [
             for (final option in const [
               ('preorders', 'Demand'),
               ('profit', 'Profit'),
             ]) ...[
-              Flexible(
-                child: MergeSemantics(
+              item(
+                MergeSemantics(
                   child: Semantics(
                     selected: activeSort == option.$1,
                     inMutuallyExclusiveGroup: true,
@@ -419,11 +518,11 @@ class _CraftSortControl extends StatelessWidget {
                   ),
                 ),
               ),
-              const SizedBox(width: 6),
+              SizedBox(width: vertical ? 0 : 6, height: vertical ? 6 : 0),
             ],
             if (p.section != 'best-use')
-              Flexible(
-                child: AnchoredPopover(
+              item(
+                AnchoredPopover(
                   overlayId: 'craft-exp-filter',
                   placement: AnchoredPopoverPlacement.beside,
                   // Beside placement uses the anchor centre; include half its
@@ -572,63 +671,91 @@ class _CraftFilterPill extends StatelessWidget {
   }
 }
 
+const _craftModeIconSize = 20.0;
+const _craftModeIconGap = 8.0;
+
 class _CraftModeTabs extends StatelessWidget {
-  const _CraftModeTabs({required this.controller});
+  const _CraftModeTabs({required this.controller, this.vertical = false});
   final OpportunitiesController controller;
+  final bool vertical;
 
   @override
   Widget build(BuildContext context) {
     final spec = context.visualTheme;
-    return Wrap(
-      key: const ValueKey('craft-mode-tabs'),
-      spacing: 8,
-      runSpacing: 8,
-      children: [
-        for (final mode in [
-          CraftMode.cooking,
-          CraftMode.alchemy,
-          CraftMode.processing,
-        ])
-          MergeSemantics(
-            child: Semantics(
-              selected: controller.preferences.mode == mode,
-              inMutuallyExclusiveGroup: true,
-              child: TextButton(
-                key: ValueKey('craft-mode-${mode.name}'),
-                onPressed: () =>
-                    controller.change((p) => p.mode = mode, assemble: true),
-                style: TextButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(horizontal: 8),
-                  minimumSize: const Size(0, 40),
-                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                  foregroundColor: controller.preferences.mode == mode
-                      ? spec.palette.text
-                      : spec.palette.textMuted,
-                  textStyle: spec.typography.button,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(3),
-                  ),
+    final choices = <Widget>[
+      for (final mode in [
+        CraftMode.cooking,
+        CraftMode.alchemy,
+        CraftMode.processing,
+      ])
+        MergeSemantics(
+          child: Semantics(
+            selected: controller.preferences.mode == mode,
+            inMutuallyExclusiveGroup: true,
+            child: TextButton(
+              key: ValueKey('craft-mode-${mode.name}'),
+              onPressed: () =>
+                  controller.change((p) => p.mode = mode, assemble: true),
+              style: TextButton.styleFrom(
+                padding: const EdgeInsets.symmetric(horizontal: 8),
+                minimumSize: const Size(0, 40),
+                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                foregroundColor: controller.preferences.mode == mode
+                    ? spec.palette.text
+                    : spec.palette.textMuted,
+                textStyle: spec.typography.button,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(3),
                 ),
-                child: DecoratedBox(
-                  decoration: BoxDecoration(
-                    border: Border(
-                      bottom: BorderSide(
-                        width: 2,
-                        color: controller.preferences.mode == mode
-                            ? spec.palette.primary
-                            : Colors.transparent,
-                      ),
+              ),
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  border: Border(
+                    bottom: BorderSide(
+                      width: 2,
+                      color: controller.preferences.mode == mode
+                          ? spec.palette.primary
+                          : Colors.transparent,
                     ),
                   ),
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 10),
-                    child: Text(mode.label),
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 10),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      ExcludeSemantics(
+                        child: ProfileIcon(
+                          artwork: switch (mode) {
+                            CraftMode.cooking => ProfileArtwork.cooking,
+                            CraftMode.alchemy => ProfileArtwork.alchemy,
+                            CraftMode.processing => ProfileArtwork.processing,
+                          },
+                          size: _craftModeIconSize,
+                        ),
+                      ),
+                      const SizedBox(width: _craftModeIconGap),
+                      Flexible(child: Text(mode.label)),
+                    ],
                   ),
                 ),
               ),
             ),
           ),
-      ],
-    );
+        ),
+    ];
+    return vertical
+        ? Column(
+            key: const ValueKey('craft-mode-tabs'),
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: choices,
+          )
+        : Wrap(
+            key: const ValueKey('craft-mode-tabs'),
+            spacing: 8,
+            runSpacing: 8,
+            children: choices,
+          );
   }
 }

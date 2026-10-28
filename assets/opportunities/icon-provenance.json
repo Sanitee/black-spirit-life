@@ -1,12 +1,16 @@
 {
-  "source": "Sep 3 and Sep 10, 2026 extracted PC client; decoded original artwork copied without transformation",
+  "source": "Original Pearl Abyss artwork copied without transformation; Sep 3 and Sep 10, 2026 extracted PC client, with individually sourced updates recorded below",
   "icons": [
     {
       "id": 980170,
-      "source": "Pearl Abyss PC client extraction (2026-09-10): ui_texture/icon/new_icon/03_etc/00752374.png",
-      "asset": "assets/opportunities/items/980170.png",
-      "sha256": "84CFAF9605755E7437EBA4532136E92873452B3F04D26A2B65DF60E801D02994",
-      "bytes": 5729
+      "source": "https://bdocodex.com/items/new_icon/03_etc/01000818.webp",
+      "itemReference": "https://bdocodex.com/us/item/980170/",
+      "officialReference": "https://www.naeu.playblackdesert.com/en-US/News/Detail?countryType=en-US&groupContentNo=10678",
+      "reviewedAt": "2026-10-09",
+      "attribution": "Pearl Abyss original game artwork; BDO Codex retrieval reference. Matches the October 8 official icon change.",
+      "asset": "assets/opportunities/items/980170.webp",
+      "sha256": "FD72F1C415CADE51CE72C8D329011C26F319512486B10EDE564B829A9F0768E5",
+      "bytes": 1850
     },
     {
       "id": 821344,
@@ -1078,6 +1082,405 @@
       "asset": "assets/opportunities/items/16001.webp",
       "sha256": "5B5BDC731F68CA09742C783F9D5B794E0EB907892E9C94A85B8B16B243828DFF",
       "bytes": 2328
+    },
+    {
+      "id": 761321,
+      "source": "Pearl Abyss PC client extraction (2026-09-03): new_icon/03_etc/00016024.webp",
+      "asset": "assets/opportunities/items/761321.webp",
+      "sha256": "3AFAD5FDD40E54C2F2FAD658A329ED15AAEA76E02587A3D74D6F0D513B2663C2",
+      "bytes": 2524
+    },
+    {
+      "id": 65396,
+      "source": "Pearl Abyss PC client extraction (2026-09-03): new_icon/03_etc/00752378.webp",
+      "asset": "assets/opportunities/items/65396.webp",
+      "sha256": "875FF01D3DFE020500266A371796D3D060F3D98AE7018BDDD60F54944AD943D0",
+      "bytes": 2746
+    },
+    {
+      "id": 42497,
+      "source": "Pearl Abyss PC client extraction (2026-09-03): new_icon/03_etc/03_quest_item/00042497.webp",
+      "asset": "assets/opportunities/items/42497.webp",
+      "sha256": "03CB15E8CED6586AEA060114BB023EF463781AEDFB7CA849F73395B60D24B93A",
+      "bytes": 2610
+    },
+    {
+      "id": 767325,
+      "source": "Pearl Abyss PC client extraction (2026-09-03): new_icon/03_etc/00767325.webp",
+      "asset": "assets/opportunities/items/767325.webp",
+      "sha256": "F79F80B16EA59DF426ED2321D9E33A09178CF691881AD5F7768AEB3EF9417A05",
+      "bytes": 2564
+    },
+    {
+      "id": 890002,
+      "source": "Pearl Abyss PC client extraction (2026-09-03): new_icon/03_etc/00890002.webp",
+      "asset": "assets/opportunities/items/890002.webp",
+      "sha256": "22A93828E723C1BCE25FBC067EAEC7BF1C1CEA05CE7658CAD969414286E94C85",
+      "bytes": 2996
+    },
+    {
+      "id": 821137,
+      "source": "Pearl Abyss PC client extraction (2026-09-03): new_icon/03_etc/07_productmaterial/00009647.webp",
+      "asset": "assets/opportunities/items/821137.webp",
+      "sha256": "22EEA9FCF102D0840361F04D6B7F2B6D699D025A2B4AEF0C1E7570828F4EE64F",
+      "bytes": 2806
+    },
+    {
+      "id": 821139,
+      "source": "Pearl Abyss PC client extraction (2026-09-03): new_icon/03_etc/07_productmaterial/00820858.webp",
+      "asset": "assets/opportunities/items/821139.webp",
+      "sha256": "01B6DF398B9FC201D6761BD658C12E3390CA0987C0DCE97C1975801D86D82CF6",
+      "bytes": 2616
+    },
+    {
+      "id": 821141,
+      "source": "Pearl Abyss PC client extraction (2026-09-03): new_icon/03_etc/07_productmaterial/00820859.webp",
+      "asset": "assets/opportunities/items/821141.webp",
+      "sha256": "FF61892DC03B8CC92E7005F898DEA6963974FB894674F29F65094A94B4FC57FE",
+      "bytes": 2846
+    },
+    {
+      "id": 821143,
+      "source": "Pearl Abyss PC client extraction (2026-09-03): new_icon/03_etc/07_productmaterial/00820866.webp",
+      "asset": "assets/opportunities/items/821143.webp",
+      "sha256": "5944EDDD803B4143FD1ABAE5CE41050ABAAA7868114AC59378F2E638FCF7DEC0",
+      "bytes": 2610
+    },
+    {
+      "id": 821145,
+      "source": "Pearl Abyss PC client extraction (2026-09-03): new_icon/03_etc/03_quest_item/00066671.webp",
+      "asset": "assets/opportunities/items/821145.webp",
+      "sha256": "39DC00122582C332DAD7129F35BDCD76D0F6CF73EDB4684A3A268E7BB4B914BF",
+      "bytes": 2568
+    },
+    {
+      "id": 575,
+      "source": "Pearl Abyss PC client extraction (2026-09-03): new_icon/03_etc/08_potion/00000575.webp",
+      "asset": "assets/opportunities/items/575.webp",
+      "sha256": "B883C9F541AAA1BF2754F751297514AB8DCBFA0F964B5AD9D73520A6C0CA5634",
+      "bytes": 2348
+    },
+    {
+      "id": 576,
+      "source": "Pearl Abyss PC client extraction (2026-09-03): new_icon/03_etc/08_potion/00000576.webp",
+      "asset": "assets/opportunities/items/576.webp",
+      "sha256": "9E625EAB03C5EA905C1B2359D772415FEEBC37AEF07D2C0CF8B313295C2648B3",
+      "bytes": 2418
+    },
+    {
+      "id": 732,
+      "source": "Pearl Abyss PC client extraction (2026-09-03): new_icon/03_etc/07_productmaterial/00000732.webp",
+      "asset": "assets/opportunities/items/732.webp",
+      "sha256": "8BD61E26E10234B00BE3318782EB7082C30A32C3E2C9BCBC0B7C142266311A31",
+      "bytes": 2338
+    },
+    {
+      "id": 733,
+      "source": "Pearl Abyss PC client extraction (2026-09-03): new_icon/03_etc/07_productmaterial/00000733.webp",
+      "asset": "assets/opportunities/items/733.webp",
+      "sha256": "3AB97361B1806CBB0342CFA44989D1C570C8AFF9BF8D11881A7611933EAEFCA1",
+      "bytes": 2436
+    },
+    {
+      "id": 735,
+      "source": "Pearl Abyss PC client extraction (2026-09-03): new_icon/03_etc/07_productmaterial/00000735.webp",
+      "asset": "assets/opportunities/items/735.webp",
+      "sha256": "632C1C84D44634DB2876DD2C22E27067A19E8348754C339127A75C47A696ABA9",
+      "bytes": 2470
+    },
+    {
+      "id": 748,
+      "source": "Pearl Abyss PC client extraction (2026-09-03): new_icon/03_etc/08_potion/00000748.webp",
+      "asset": "assets/opportunities/items/748.webp",
+      "sha256": "E7BFE7DB629211ACEBDFBDECFF2153E9A3A90C395A6908B805297267A2813B5D",
+      "bytes": 2266
+    },
+    {
+      "id": 771,
+      "source": "Pearl Abyss PC client extraction (2026-09-03): new_icon/03_etc/08_potion/00000771.webp",
+      "asset": "assets/opportunities/items/771.webp",
+      "sha256": "A770E9406FDFF37E211D2AD204684A613144EB929E08BA77A7CF6DAD7BEC55EF",
+      "bytes": 2328
+    },
+    {
+      "id": 1178,
+      "source": "Pearl Abyss PC client extraction (2026-09-03): new_icon/03_etc/07_productmaterial/00001178.webp",
+      "asset": "assets/opportunities/items/1178.webp",
+      "sha256": "51F1045B3E401E26521626A15FE5F62A40E3D5E1B30D43D0BC63D303258C07BC",
+      "bytes": 2460
+    },
+    {
+      "id": 65401,
+      "source": "Pearl Abyss PC client extraction (2026-09-03): new_icon/03_etc/00752882.webp",
+      "asset": "assets/opportunities/items/65401.webp",
+      "sha256": "8030AE953A7710194E6726B879FC9C2C00349080EF3A1287B4A5344FD126E2E3",
+      "bytes": 2626
+    },
+    {
+      "id": 750490,
+      "source": "Pearl Abyss PC client extraction (2026-09-03): new_icon/03_etc/00750490.webp",
+      "asset": "assets/opportunities/items/750490.webp",
+      "sha256": "0ED252AAC23D3816E8048711BA3788CBE6359BC2513289C9EE42FBBB44B8A76F",
+      "bytes": 2732
+    },
+    {
+      "id": 320009,
+      "source": "Pearl Abyss PC client extraction (2026-09-03): new_icon/09_cash/00018973.webp",
+      "asset": "assets/opportunities/items/320009.webp",
+      "sha256": "986E33C94C4689970B21B63B46EB28EFB2CE8F0475B75CE8DFFDFB843E28D38F",
+      "bytes": 2414
+    },
+    {
+      "id": 320011,
+      "source": "Pearl Abyss PC client extraction (2026-09-03): new_icon/09_cash/00018949.webp",
+      "asset": "assets/opportunities/items/320011.webp",
+      "sha256": "00F69F1F98B4FCC762AB103F21D06078CF5E734747D35C2A3436155A1D51F8BE",
+      "bytes": 2724
+    },
+    {
+      "id": 320010,
+      "source": "Pearl Abyss PC client extraction (2026-09-03): new_icon/09_cash/00017987.webp",
+      "asset": "assets/opportunities/items/320010.webp",
+      "sha256": "F0A891857411F41A7BD47182D6C0A57522F88CD610621B17BBE1039A9C5DD665",
+      "bytes": 2742
+    },
+    {
+      "id": 890001,
+      "source": "Pearl Abyss PC client extraction (2026-09-03): new_icon/03_etc/07_productmaterial/00055850.webp",
+      "asset": "assets/opportunities/items/890001.webp",
+      "sha256": "A25BB5F9AF11C6A60B9B7C4B81107D3946376823A8A2992F14FF7DB82A9C5ABE",
+      "bytes": 2450
+    },
+    {
+      "id": 45912,
+      "source": "Pearl Abyss PC client extraction (2026-09-03): new_icon/03_etc/00045912.webp",
+      "asset": "assets/opportunities/items/45912.webp",
+      "sha256": "95600A51878F869B6CAA26C2A0DF2B664A8BFED45666A3A5938B0E130B319DE7",
+      "bytes": 2346
+    },
+    {
+      "id": 761018,
+      "source": "Pearl Abyss PC client extraction (2026-09-03): new_icon/03_etc/0000001_19.webp",
+      "asset": "assets/opportunities/items/761018.webp",
+      "sha256": "DD9F6BFA567FF8FD64E1E2F21CF3D44F36D75F347BEB6CFE11DA8886230245F8",
+      "bytes": 2598
+    },
+    {
+      "id": 768160,
+      "source": "Pearl Abyss PC client extraction (2026-09-03): new_icon/03_etc/00768160.webp",
+      "asset": "assets/opportunities/items/768160.webp",
+      "sha256": "A4DA18624B1357EE3C15866463B60E30EBA06D48B18256D88C0F7C27C81E5EA5",
+      "bytes": 2848
+    },
+    {
+      "id": 59858,
+      "source": "Pearl Abyss PC client extraction (2026-09-03): new_icon/03_etc/00766005.webp",
+      "asset": "assets/opportunities/items/59858.webp",
+      "sha256": "2DFBFE80D93F316F1D4223DEC313B0CDFE3CAC0323391AACD83BF23974E502C4",
+      "bytes": 2632
+    },
+    {
+      "id": 59859,
+      "source": "Pearl Abyss PC client extraction (2026-09-03): new_icon/03_etc/00766025.webp",
+      "asset": "assets/opportunities/items/59859.webp",
+      "sha256": "1F0FACA7B6482DC5DDACA6565A723B40B3DC79C417FEF7E0FFCFA10C218B8ECB",
+      "bytes": 2524
+    },
+    {
+      "id": 59860,
+      "source": "Pearl Abyss PC client extraction (2026-09-03): new_icon/03_etc/00766035.webp",
+      "asset": "assets/opportunities/items/59860.webp",
+      "sha256": "AE56B276B68E8E25196E59291F902835886FBF9865EA63CCC7DE8ED2370869AB",
+      "bytes": 2514
+    },
+    {
+      "id": 45107,
+      "source": "Pearl Abyss PC client extraction (2026-09-03): new_icon/03_etc/00045107.webp",
+      "asset": "assets/opportunities/items/45107.webp",
+      "sha256": "3287AB55EB5F32C479FEACE87BA7A06A2270D65571D27FD4502BBA53F668CA8F",
+      "bytes": 2520
+    },
+    {
+      "id": 45105,
+      "source": "Pearl Abyss PC client extraction (2026-09-03): new_icon/03_etc/00045105.webp",
+      "asset": "assets/opportunities/items/45105.webp",
+      "sha256": "4F92F2D7D831215C02C940AD8830A434312C671D4016FC7DD46B8B43D1CBFBDB",
+      "bytes": 2554
+    },
+    {
+      "id": 45026,
+      "source": "Pearl Abyss PC client extraction (2026-09-03): new_icon/03_etc/00045026.webp",
+      "asset": "assets/opportunities/items/45026.webp",
+      "sha256": "FAA1CD895E9864CF91CEFB157AEF4AC65DED87FA330C7767C0C05E74A720AC9B",
+      "bytes": 2514
+    },
+    {
+      "id": 820152,
+      "source": "Pearl Abyss PC client extraction (2026-09-03): new_icon/03_etc/07_productmaterial/00820152.webp",
+      "asset": "assets/opportunities/items/820152.webp",
+      "sha256": "920A91DDBB8BB5B01007F0C19F23186C8842B6F105C6718A950EDB90285F07DA",
+      "bytes": 2732
+    },
+    {
+      "id": 11017,
+      "source": "Pearl Abyss PC client extraction (2026-09-03): new_icon/06_pc_equipitem/00_common/09_upperbody/00011017.webp",
+      "asset": "assets/opportunities/items/11017.webp",
+      "sha256": "3BB2BF49CB4298E60A07601E3253ED8DDBBE6729448C2BA3D1BD860BA056D554",
+      "bytes": 2658
+    },
+    {
+      "id": 752825,
+      "source": "Pearl Abyss PC client extraction (2026-09-03): new_icon/03_etc/00752825.webp",
+      "asset": "assets/opportunities/items/752825.webp",
+      "sha256": "51D31B91EC550FCFE652D0D8D059F693E709C329779904FD51E48AC0F51F5EC2",
+      "bytes": 2600
+    },
+    {
+      "id": 757004,
+      "source": "Pearl Abyss PC client extraction (2026-09-03): new_icon/03_etc/00757004.webp",
+      "asset": "assets/opportunities/items/757004.webp",
+      "sha256": "F981165E34D0600BFE99DFFFCA5A5AF9097BDC29537D757AE55A1BDC805B7B53",
+      "bytes": 2674
+    },
+    {
+      "id": 757010,
+      "source": "Pearl Abyss PC client extraction (2026-09-03): new_icon/03_etc/00757010.webp",
+      "asset": "assets/opportunities/items/757010.webp",
+      "sha256": "53D2BC07149C084E882EB2AA07DF27E9A49D2235255C0E477E205D0E2FE4453A",
+      "bytes": 2332
+    },
+    {
+      "id": 59861,
+      "source": "Pearl Abyss PC client extraction (2026-09-03): new_icon/03_etc/00766015.webp",
+      "asset": "assets/opportunities/items/59861.webp",
+      "sha256": "7EC22B9E9BEA2A2BA28E0583D3A49E485F23EE751571CAB3E88089B551A4CD0D",
+      "bytes": 2498
+    },
+    {
+      "id": 4917,
+      "source": "Pearl Abyss PC client extraction (2026-09-03): new_icon/03_etc/07_productmaterial/00004917.webp",
+      "asset": "assets/opportunities/items/4917.webp",
+      "sha256": "91E746A600C54A01B3811CAC794AD7B4026EAF8B47D755CDB104527110CAD173",
+      "bytes": 2512
+    },
+    {
+      "id": 50815,
+      "source": "Pearl Abyss PC client extraction (2026-09-03): new_icon/03_etc/09_petitem/00050815.webp",
+      "asset": "assets/opportunities/items/50815.webp",
+      "sha256": "315F0F77845A3C1936B47D45878389AC279C3E66D2BBFE3131BF8A5737F5A38D",
+      "bytes": 2728
+    },
+    {
+      "id": 50816,
+      "source": "Pearl Abyss PC client extraction (2026-09-03): new_icon/03_etc/09_petitem/00050816.webp",
+      "asset": "assets/opportunities/items/50816.webp",
+      "sha256": "F721693CC44E7A82C37EB7F25774ADF647466F4D557C59D70ACA9FC2B34CD47A",
+      "bytes": 2628
+    },
+    {
+      "id": 50817,
+      "source": "Pearl Abyss PC client extraction (2026-09-03): new_icon/03_etc/09_petitem/00050817.webp",
+      "asset": "assets/opportunities/items/50817.webp",
+      "sha256": "10BE60309126C454B08B7A5BB70FD07893E949045580CBA7517A00E1F1BE6157",
+      "bytes": 2796
+    },
+    {
+      "id": 607185,
+      "source": "Pearl Abyss PC client extraction (2026-09-03): new_icon/03_etc/00752164.webp",
+      "asset": "assets/opportunities/items/607185.webp",
+      "sha256": "35F20AFFE3E91031C890F5E37F9027BDA8FB8869A827303B488521B2A1C8B5F4",
+      "bytes": 2698
+    },
+    {
+      "id": 289250,
+      "source": "Pearl Abyss PC client extraction (2026-09-03): new_icon/03_etc/15_advice/00000350_11.webp",
+      "asset": "assets/opportunities/items/289250.webp",
+      "sha256": "19922FB1D17F612A31EFC5FE6F048B82F6BB96670642364703CBDC6B9B10922B",
+      "bytes": 2506
+    },
+    {
+      "id": 289200,
+      "source": "Pearl Abyss PC client extraction (2026-09-03): new_icon/03_etc/15_advice/00000300_11.webp",
+      "asset": "assets/opportunities/items/289200.webp",
+      "sha256": "9A1578B2ED5D49E6AE2DC663C63070BE035CCCC57A392DED95B0284E6EC90CAC",
+      "bytes": 2506
+    },
+    {
+      "id": 289150,
+      "source": "Pearl Abyss PC client extraction (2026-09-03): new_icon/03_etc/15_advice/00000250_11.webp",
+      "asset": "assets/opportunities/items/289150.webp",
+      "sha256": "C9933E77A5B19B50211F161E8CC7FE93C7FCBB088A642C13FB0C7D27A71BF463",
+      "bytes": 2510
+    },
+    {
+      "id": 289100,
+      "source": "Pearl Abyss PC client extraction (2026-09-03): new_icon/03_etc/15_advice/00000200_11.webp",
+      "asset": "assets/opportunities/items/289100.webp",
+      "sha256": "EE77D27061CF9316038234D78096AD99024C1F373B894DD8EE1B3A2A9E5028A0",
+      "bytes": 2504
+    },
+    {
+      "id": 1000509,
+      "source": "Pearl Abyss PC client extraction (2026-09-03): new_icon/09_cash/00054701.webp",
+      "asset": "assets/opportunities/items/1000509.webp",
+      "sha256": "99F3E5A8749658B02281F0481D10505479855D29EAA526DFCABA516D9D7928EC",
+      "bytes": 2498
+    },
+    {
+      "id": 1000510,
+      "source": "Pearl Abyss PC client extraction (2026-09-03): new_icon/09_cash/00054701.webp",
+      "asset": "assets/opportunities/items/1000510.webp",
+      "sha256": "99F3E5A8749658B02281F0481D10505479855D29EAA526DFCABA516D9D7928EC",
+      "bytes": 2498
+    },
+    {
+      "id": 1000511,
+      "source": "Pearl Abyss PC client extraction (2026-09-03): new_icon/09_cash/00054701.webp",
+      "asset": "assets/opportunities/items/1000511.webp",
+      "sha256": "99F3E5A8749658B02281F0481D10505479855D29EAA526DFCABA516D9D7928EC",
+      "bytes": 2498
+    },
+    {
+      "id": 1000512,
+      "source": "Pearl Abyss PC client extraction (2026-09-03): new_icon/09_cash/00054701.webp",
+      "asset": "assets/opportunities/items/1000512.webp",
+      "sha256": "99F3E5A8749658B02281F0481D10505479855D29EAA526DFCABA516D9D7928EC",
+      "bytes": 2498
+    },
+    {
+      "id": 1000513,
+      "source": "Pearl Abyss PC client extraction (2026-09-03): new_icon/09_cash/00054701.webp",
+      "asset": "assets/opportunities/items/1000513.webp",
+      "sha256": "99F3E5A8749658B02281F0481D10505479855D29EAA526DFCABA516D9D7928EC",
+      "bytes": 2498
+    },
+    {
+      "id": 45124,
+      "source": "Pearl Abyss PC client extraction (2026-09-03): new_icon/03_etc/07_productmaterial/00055850.webp",
+      "asset": "assets/opportunities/items/45124.webp",
+      "sha256": "A25BB5F9AF11C6A60B9B7C4B81107D3946376823A8A2992F14FF7DB82A9C5ABE",
+      "bytes": 2450
+    },
+    {
+      "id": 890003,
+      "source": "Pearl Abyss PC client extraction (2026-09-03): new_icon/03_etc/07_productmaterial/00055850.webp",
+      "asset": "assets/opportunities/items/890003.webp",
+      "sha256": "A25BB5F9AF11C6A60B9B7C4B81107D3946376823A8A2992F14FF7DB82A9C5ABE",
+      "bytes": 2450
+    },
+    {
+      "id": 8042,
+      "source": "Pearl Abyss PC client extraction (2026-09-03): new_icon/03_etc/07_productmaterial/00008042.webp",
+      "asset": "assets/opportunities/items/8042.webp",
+      "sha256": "D843868B2180006C3CF3EC7B8B4BC1E55E3CC29D21E0C5CAB1144F2907E48F1D",
+      "bytes": 2754
+    },
+    {
+      "id": 4989,
+      "source": "Pearl Abyss PC client extraction (2026-09-03): new_icon/03_etc/07_productmaterial/00004989.webp",
+      "asset": "assets/opportunities/items/4989.webp",
+      "sha256": "3756F8EC4F11D482CA02D2397C199774205005C337151E0050377D12E3C456A5",
+      "bytes": 2468
     }
   ]
 }

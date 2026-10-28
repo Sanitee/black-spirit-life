@@ -84,56 +84,66 @@ void main() {
     expect(catalog.bairogCalculatorData, isNotNull);
   });
 
-  testWidgets('content boxes share grouped blur and sparse results shrink', (
-    tester,
-  ) async {
-    tester.view.devicePixelRatio = 1;
-    tester.view.physicalSize = const Size(1360, 900);
-    addTearDown(tester.view.reset);
-    await HttpOverrides.runZoned(() async {
-      await tester.pumpWidget(
-        MaterialApp(
-          theme: companionTheme(),
-          home: Scaffold(
-            body: FieldGuide(catalog: catalog, onUse: (_) {}),
+  testWidgets(
+    'finder uses unblurred glass and retains its lazy floating list',
+    (tester) async {
+      tester.view.devicePixelRatio = 1;
+      tester.view.physicalSize = const Size(1360, 900);
+      addTearDown(tester.view.reset);
+      await HttpOverrides.runZoned(() async {
+        await tester.pumpWidget(
+          MaterialApp(
+            theme: companionTheme(),
+            home: Scaffold(
+              body: FieldGuide(catalog: catalog, onUse: (_) {}),
+            ),
           ),
-        ),
-      );
-      await tester.pumpAndSettle();
-      final journal = find.byKey(const ValueKey('spot-journal-surface'));
-      final cards = find.byWidgetPredicate(
-        (widget) =>
-            widget is GlassControl &&
-            widget.key is ValueKey<String> &&
-            (widget.key! as ValueKey<String>).value.startsWith('spot-card-'),
-      );
-      expect(cards, findsWidgets);
-      expect(
-        find.descendant(of: journal, matching: find.byType(BackdropFilter)),
-        findsWidgets,
-      );
-      expect(tester.widget(journal), isA<Padding>());
-      for (final card in cards.evaluate()) {
+        );
+        await tester.pumpAndSettle();
+        final journal = find.byKey(const ValueKey('spot-journal-surface'));
+        final cards = find.byWidgetPredicate(
+          (widget) =>
+              widget is GlassControl &&
+              widget.key is ValueKey<String> &&
+              (widget.key! as ValueKey<String>).value.startsWith('spot-card-'),
+        );
+        expect(cards, findsWidgets);
         expect(
-          find.descendant(
-            of: find.byWidget(card.widget),
-            matching: find.byType(BackdropFilter),
-          ),
+          find.descendant(of: journal, matching: find.byType(BackdropFilter)),
           findsNothing,
         );
-      }
-      final fullHeight = tester.getSize(journal).height;
-      await tester.enterText(
-        find.byKey(const ValueKey('spot-search')),
-        'no-such-gathering-spot',
-      );
-      await tester.pumpAndSettle();
-      expect(find.text('No matching spots'), findsOneWidget);
-      expect(tester.getSize(journal).height, lessThan(220));
-      expect(tester.getSize(journal).height, lessThan(fullHeight));
-      expect(tester.takeException(), isNull);
-    }, createHttpClient: (_) => _OfflineTiles._());
-  });
+        expect(tester.widget(journal), isA<Padding>());
+        for (final card in cards.evaluate()) {
+          expect(
+            find.descendant(
+              of: find.byWidget(card.widget),
+              matching: find.byType(BackdropFilter),
+            ),
+            findsNothing,
+          );
+        }
+        final fullHeight = tester.getSize(journal).height;
+        final list = tester.widget<ListView>(
+          find.byKey(const ValueKey('spot-list')),
+        );
+        expect(list.shrinkWrap, isFalse);
+        expect(list.childrenDelegate, isA<SliverChildBuilderDelegate>());
+        await tester.enterText(
+          find.byKey(const ValueKey('spot-search')),
+          'no-such-gathering-spot',
+        );
+        await tester.pumpAndSettle();
+        expect(find.text('No matching spots'), findsOneWidget);
+        expect(tester.getSize(journal).height, fullHeight);
+        expect(tester.getRect(journal).right, lessThan(1360 * .5));
+        expect(
+          tester.getRect(find.text('No matching spots')).right,
+          lessThanOrEqualTo(tester.getRect(journal).right),
+        );
+        expect(tester.takeException(), isNull);
+      }, createHttpClient: (_) => _OfflineTiles._());
+    },
+  );
 
   testWidgets('journal filters and tool menu stay readable at doubled text', (
     tester,
@@ -158,7 +168,9 @@ void main() {
         ),
       );
       await tester.pumpAndSettle();
-      await tester.tap(find.byKey(const ValueKey('spot-filter-rail-control')));
+      await tester.tap(
+        find.byKey(const ValueKey('spot-filter-compact-control')),
+      );
       await tester.pumpAndSettle();
       final filter = find.byKey(const ValueKey('spot-ranking-nostos-821353'));
       await tester.ensureVisible(filter);
@@ -262,6 +274,9 @@ void main() {
           ),
         );
         await tester.pumpAndSettle();
+        await tester.ensureVisible(
+          find.byKey(const ValueKey('spot-ranking-sharp')),
+        );
         await tester.tap(find.byKey(const ValueKey('spot-ranking-sharp')));
         await tester.enterText(
           find.byKey(const ValueKey('spot-search')),
@@ -378,9 +393,12 @@ void main() {
         await tester.pump();
 
         await tester.tap(
-          find.byKey(const ValueKey('spot-filter-rail-control')),
+          find.byKey(const ValueKey('spot-filter-compact-control')),
         );
         await tester.pumpAndSettle();
+        await tester.ensureVisible(
+          find.byKey(const ValueKey('spot-ranking-sharp')),
+        );
         await tester.tap(find.byKey(const ValueKey('spot-ranking-sharp')));
         await tester.pumpAndSettle();
 
@@ -472,15 +490,26 @@ void main() {
         );
         await tester.pump();
         await tester.tap(
-          find.byKey(const ValueKey('spot-filter-rail-control')),
+          find.byKey(const ValueKey('spot-filter-compact-control')),
         );
         await tester.pumpAndSettle();
+        await tester.ensureVisible(
+          find.byKey(const ValueKey('spot-ranking-nostos-821349')),
+        );
         await tester.tap(
           find.byKey(const ValueKey('spot-ranking-nostos-821349')),
         );
         await tester.pumpAndSettle();
 
         final ashSapCard = find.byKey(const ValueKey('spot-route-40'));
+        await tester.scrollUntilVisible(
+          ashSapCard,
+          150,
+          scrollable: find.descendant(
+            of: find.byKey(const ValueKey('spot-list')),
+            matching: find.byType(Scrollable),
+          ),
+        );
         expect(ashSapCard, findsOneWidget);
         expect(
           find.descendant(
@@ -523,6 +552,19 @@ void main() {
           (spot) => spot.id == 'forest-seclusion-foxes',
         );
         final foxCard = find.byKey(const ValueKey('spot-route-43'));
+        final listController = tester
+            .widget<ListView>(find.byKey(const ValueKey('spot-list')))
+            .controller!;
+        listController.jumpTo(0);
+        await tester.pump();
+        await tester.scrollUntilVisible(
+          foxCard,
+          150,
+          scrollable: find.descendant(
+            of: find.byKey(const ValueKey('spot-list')),
+            matching: find.byType(Scrollable),
+          ),
+        );
         expect(foxCard, findsOneWidget);
         expect(
           find.descendant(
@@ -620,9 +662,12 @@ void main() {
         );
         await tester.pump();
         await tester.tap(
-          find.byKey(const ValueKey('spot-filter-rail-control')),
+          find.byKey(const ValueKey('spot-filter-compact-control')),
         );
         await tester.pumpAndSettle();
+        await tester.ensureVisible(
+          find.byKey(const ValueKey('spot-ranking-profit')),
+        );
         await tester.tap(find.byKey(const ValueKey('spot-ranking-profit')));
         await tester.pumpAndSettle();
 
@@ -979,9 +1024,12 @@ void main() {
         );
         await tester.pump();
         await tester.tap(
-          find.byKey(const ValueKey('spot-filter-rail-control')),
+          find.byKey(const ValueKey('spot-filter-compact-control')),
         );
         await tester.pumpAndSettle();
+        await tester.ensureVisible(
+          find.byKey(const ValueKey('spot-ranking-profit')),
+        );
         await tester.tap(find.byKey(const ValueKey('spot-ranking-profit')));
         await tester.pumpAndSettle();
         await tester.enterText(
@@ -1115,6 +1163,9 @@ void main() {
         ),
       );
       await tester.pumpAndSettle();
+      await tester.ensureVisible(
+        find.byKey(const ValueKey('spot-ranking-profit')),
+      );
       await tester.tap(find.byKey(const ValueKey('spot-ranking-profit')));
       await tester.enterText(
         find.byKey(const ValueKey('spot-search')),
@@ -1148,7 +1199,7 @@ void main() {
 
       final calls = <({bool preorders, Set<String> ids})>[];
 
-      List<String> routeOrder() {
+      List<String> mountedRouteOrder() {
         const prefix = 'spot-route-';
         return find
             .descendant(
@@ -1167,6 +1218,30 @@ void main() {
                   .substring(prefix.length),
             )
             .toList(growable: false);
+      }
+
+      Future<List<String>> routeOrder() async {
+        final list = tester.widget<ListView>(
+          find.byKey(const ValueKey('spot-list')),
+        );
+        final controller = list.controller!;
+        final seen = <String>{};
+        controller.jumpTo(0);
+        await tester.pump();
+        for (var step = 0; step < 30; step++) {
+          seen.addAll(mountedRouteOrder());
+          if (controller.offset >= controller.position.maxScrollExtent) break;
+          controller.jumpTo(
+            (controller.offset + 100).clamp(
+              0,
+              controller.position.maxScrollExtent,
+            ),
+          );
+          await tester.pump();
+        }
+        controller.jumpTo(0);
+        await tester.pump();
+        return seen.toList();
       }
 
       await HttpOverrides.runZoned(() async {
@@ -1218,9 +1293,12 @@ void main() {
         );
         await tester.pump();
         await tester.tap(
-          find.byKey(const ValueKey('spot-filter-rail-control')),
+          find.byKey(const ValueKey('spot-filter-compact-control')),
         );
         await tester.pumpAndSettle();
+        await tester.ensureVisible(
+          find.byKey(const ValueKey('spot-ranking-demand')),
+        );
         await tester.tap(find.byKey(const ValueKey('spot-ranking-demand')));
         await tester.pumpAndSettle();
         await tester.tap(find.byKey(const ValueKey('spot-method-filter')));
@@ -1239,13 +1317,13 @@ void main() {
           find.byKey(const ValueKey('spot-demand-sort-value')),
           findsOneWidget,
         );
-        expect(routeOrder(), orderedEquals(preorderOrder));
+        expect(await routeOrder(), orderedEquals(preorderOrder));
         final marketCallCount = calls.length;
 
         await tester.tap(find.byKey(const ValueKey('spot-demand-sort-value')));
         await tester.pumpAndSettle();
         expect(
-          routeOrder(),
+          await routeOrder(),
           orderedEquals(valueWithinDemandOrder),
           reason:
               'Positive-preorder spots remain first, then each demand group '
@@ -1257,7 +1335,7 @@ void main() {
           find.byKey(const ValueKey('spot-demand-sort-preorders')),
         );
         await tester.pumpAndSettle();
-        expect(routeOrder(), orderedEquals(preorderOrder));
+        expect(await routeOrder(), orderedEquals(preorderOrder));
         expect(calls, hasLength(marketCallCount));
 
         tester.view.physicalSize = const Size(1200, 752);
@@ -1308,8 +1386,13 @@ void main() {
         ),
       );
       await tester.pump();
-      await tester.tap(find.byKey(const ValueKey('spot-filter-rail-control')));
+      await tester.tap(
+        find.byKey(const ValueKey('spot-filter-compact-control')),
+      );
       await tester.pumpAndSettle();
+      await tester.ensureVisible(
+        find.byKey(const ValueKey('spot-ranking-profit')),
+      );
       await tester.tap(find.byKey(const ValueKey('spot-ranking-profit')));
       await tester.pumpAndSettle();
 
@@ -1386,9 +1469,12 @@ void main() {
         );
         await tester.pump();
         await tester.tap(
-          find.byKey(const ValueKey('spot-filter-rail-control')),
+          find.byKey(const ValueKey('spot-filter-compact-control')),
         );
         await tester.pumpAndSettle();
+        await tester.ensureVisible(
+          find.byKey(const ValueKey('spot-ranking-profit')),
+        );
         await tester.tap(find.byKey(const ValueKey('spot-ranking-profit')));
         await tester.pumpAndSettle();
 
@@ -1673,8 +1759,13 @@ void main() {
         ),
       );
       await tester.pump();
-      await tester.tap(find.byKey(const ValueKey('spot-filter-rail-control')));
+      await tester.tap(
+        find.byKey(const ValueKey('spot-filter-compact-control')),
+      );
       await tester.pumpAndSettle();
+      await tester.ensureVisible(
+        find.byKey(const ValueKey('spot-ranking-profit')),
+      );
       await tester.tap(find.byKey(const ValueKey('spot-ranking-profit')));
       await tester.pumpAndSettle();
       await tester.enterText(
@@ -1810,9 +1901,12 @@ void main() {
         );
         await tester.pump();
         await tester.tap(
-          find.byKey(const ValueKey('spot-filter-rail-control')),
+          find.byKey(const ValueKey('spot-filter-compact-control')),
         );
         await tester.pumpAndSettle();
+        await tester.ensureVisible(
+          find.byKey(const ValueKey('spot-ranking-profit')),
+        );
         await tester.tap(find.byKey(const ValueKey('spot-ranking-profit')));
         await tester.pumpAndSettle();
         await tester.enterText(
@@ -1963,9 +2057,12 @@ void main() {
         );
         await tester.pump();
         await tester.tap(
-          find.byKey(const ValueKey('spot-filter-rail-control')),
+          find.byKey(const ValueKey('spot-filter-compact-control')),
         );
         await tester.pumpAndSettle();
+        await tester.ensureVisible(
+          find.byKey(const ValueKey('spot-ranking-profit')),
+        );
         await tester.tap(find.byKey(const ValueKey('spot-ranking-profit')));
         await tester.pumpAndSettle();
 
@@ -2121,9 +2218,12 @@ void main() {
         );
         await tester.pump();
         await tester.tap(
-          find.byKey(const ValueKey('spot-filter-rail-control')),
+          find.byKey(const ValueKey('spot-filter-compact-control')),
         );
         await tester.pumpAndSettle();
+        await tester.ensureVisible(
+          find.byKey(const ValueKey('spot-ranking-profit')),
+        );
         await tester.tap(find.byKey(const ValueKey('spot-ranking-profit')));
         await tester.pumpAndSettle();
 
@@ -2226,13 +2326,21 @@ void main() {
         ),
       );
       await tester.pump();
-      await tester.tap(find.byKey(const ValueKey('spot-filter-rail-control')));
+      await tester.tap(
+        find.byKey(const ValueKey('spot-filter-compact-control')),
+      );
       await tester.pumpAndSettle();
+      await tester.ensureVisible(
+        find.byKey(const ValueKey('spot-ranking-profit')),
+      );
       await tester.tap(find.byKey(const ValueKey('spot-ranking-profit')));
       await tester.pump();
       expect(calls, hasLength(1));
       expect(calls.single.ids, containsAll(<String>['589', '44164']));
 
+      await tester.ensureVisible(
+        find.byKey(const ValueKey('spot-ranking-demand')),
+      );
       await tester.tap(find.byKey(const ValueKey('spot-ranking-demand')));
       await tester.pump();
       firstBase.complete();
@@ -2292,12 +2400,20 @@ void main() {
         ),
       );
       await tester.pump();
-      await tester.tap(find.byKey(const ValueKey('spot-filter-rail-control')));
+      await tester.tap(
+        find.byKey(const ValueKey('spot-filter-compact-control')),
+      );
       await tester.pumpAndSettle();
+      await tester.ensureVisible(
+        find.byKey(const ValueKey('spot-ranking-demand')),
+      );
       await tester.tap(find.byKey(const ValueKey('spot-ranking-demand')));
       await tester.pump();
       expect(calls, hasLength(1));
 
+      await tester.ensureVisible(
+        find.byKey(const ValueKey('spot-ranking-profit')),
+      );
       await tester.tap(find.byKey(const ValueKey('spot-ranking-profit')));
       await tester.pump();
       firstBase.complete();
@@ -2375,9 +2491,12 @@ void main() {
         );
         await tester.pump();
         await tester.tap(
-          find.byKey(const ValueKey('spot-filter-rail-control')),
+          find.byKey(const ValueKey('spot-filter-compact-control')),
         );
         await tester.pumpAndSettle();
+        await tester.ensureVisible(
+          find.byKey(const ValueKey('spot-ranking-demand')),
+        );
         await tester.tap(find.byKey(const ValueKey('spot-ranking-demand')));
         await tester.pumpAndSettle();
         await tester.enterText(
@@ -2716,6 +2835,9 @@ void main() {
         await tester.pumpAndSettle();
         expect(demandDialog, findsNothing);
 
+        await tester.ensureVisible(
+          find.byKey(const ValueKey('spot-ranking-profit')),
+        );
         await tester.tap(find.byKey(const ValueKey('spot-ranking-profit')));
         await tester.pumpAndSettle();
         final valueCard = find.byKey(const ValueKey('spot-route-39'));
@@ -2954,8 +3076,13 @@ void main() {
         ),
       );
       await tester.pump();
-      await tester.tap(find.byKey(const ValueKey('spot-filter-rail-control')));
+      await tester.tap(
+        find.byKey(const ValueKey('spot-filter-compact-control')),
+      );
       await tester.pumpAndSettle();
+      await tester.ensureVisible(
+        find.byKey(const ValueKey('spot-ranking-demand')),
+      );
       await tester.tap(find.byKey(const ValueKey('spot-ranking-demand')));
       await tester.pumpAndSettle();
       await tester.enterText(
@@ -3067,9 +3194,12 @@ void main() {
         );
         await tester.pump();
         await tester.tap(
-          find.byKey(const ValueKey('spot-filter-rail-control')),
+          find.byKey(const ValueKey('spot-filter-compact-control')),
         );
         await tester.pumpAndSettle();
+        await tester.ensureVisible(
+          find.byKey(const ValueKey('spot-ranking-demand')),
+        );
         await tester.tap(find.byKey(const ValueKey('spot-ranking-demand')));
         await tester.pumpAndSettle();
 
@@ -3188,9 +3318,12 @@ void main() {
         );
         await tester.pump();
         await tester.tap(
-          find.byKey(const ValueKey('spot-filter-rail-control')),
+          find.byKey(const ValueKey('spot-filter-compact-control')),
         );
         await tester.pumpAndSettle();
+        await tester.ensureVisible(
+          find.byKey(const ValueKey('spot-ranking-demand')),
+        );
         await tester.tap(find.byKey(const ValueKey('spot-ranking-demand')));
         await tester.pumpAndSettle();
 
@@ -3308,9 +3441,12 @@ void main() {
         );
         await tester.pump();
         await tester.tap(
-          find.byKey(const ValueKey('spot-filter-rail-control')),
+          find.byKey(const ValueKey('spot-filter-compact-control')),
         );
         await tester.pumpAndSettle();
+        await tester.ensureVisible(
+          find.byKey(const ValueKey('spot-ranking-demand')),
+        );
         await tester.tap(find.byKey(const ValueKey('spot-ranking-demand')));
         await tester.pumpAndSettle();
 
@@ -3325,8 +3461,14 @@ void main() {
         );
         final callCount = calls.length;
 
+        await tester.ensureVisible(
+          find.byKey(const ValueKey('spot-ranking-browse')),
+        );
         await tester.tap(find.byKey(const ValueKey('spot-ranking-browse')));
         await tester.pumpAndSettle();
+        await tester.ensureVisible(
+          find.byKey(const ValueKey('spot-ranking-demand')),
+        );
         await tester.tap(find.byKey(const ValueKey('spot-ranking-demand')));
         await tester.pumpAndSettle();
 
@@ -3387,9 +3529,12 @@ void main() {
         );
         await tester.pump();
         await tester.tap(
-          find.byKey(const ValueKey('spot-filter-rail-control')),
+          find.byKey(const ValueKey('spot-filter-compact-control')),
         );
         await tester.pumpAndSettle();
+        await tester.ensureVisible(
+          find.byKey(const ValueKey('spot-ranking-demand')),
+        );
         await tester.tap(find.byKey(const ValueKey('spot-ranking-demand')));
         await tester.pumpAndSettle();
 
@@ -3509,9 +3654,12 @@ void main() {
         );
         await tester.pump();
         await tester.tap(
-          find.byKey(const ValueKey('spot-filter-rail-control')),
+          find.byKey(const ValueKey('spot-filter-compact-control')),
         );
         await tester.pumpAndSettle();
+        await tester.ensureVisible(
+          find.byKey(const ValueKey('spot-ranking-demand')),
+        );
         await tester.tap(find.byKey(const ValueKey('spot-ranking-demand')));
         await tester.pumpAndSettle();
 
@@ -3612,9 +3760,12 @@ void main() {
         );
         await tester.pump();
         await tester.tap(
-          find.byKey(const ValueKey('spot-filter-rail-control')),
+          find.byKey(const ValueKey('spot-filter-compact-control')),
         );
         await tester.pumpAndSettle();
+        await tester.ensureVisible(
+          find.byKey(const ValueKey('spot-ranking-demand')),
+        );
         await tester.tap(find.byKey(const ValueKey('spot-ranking-demand')));
         await tester.pumpAndSettle();
 

@@ -1923,6 +1923,7 @@ class AppSelect<T> extends StatefulWidget {
     this.semanticLabel,
     this.focusNode,
     this.autofocus = false,
+    this.inline = false,
     super.key,
   });
 
@@ -1934,6 +1935,9 @@ class AppSelect<T> extends StatefulWidget {
 
   final FocusNode? focusNode;
   final bool autofocus;
+
+  /// A content-sized label and chevron for selectors inside open detail rows.
+  final bool inline;
 
   static const Key anchorMaterialKey = ValueKey<String>(
     'app-select-anchor-material',
@@ -2272,13 +2276,15 @@ class _AppSelectState<T> extends State<AppSelect<T>> {
                     constraints: const BoxConstraints(minHeight: 28),
                     clipBehavior: Clip.antiAlias,
                     decoration: BoxDecoration(
-                      gradient: anchorVisual.gradient,
+                      gradient: widget.inline ? null : anchorVisual.gradient,
                       borderRadius: BorderRadius.circular(anchorVisual.radius),
-                      border: Border.all(
-                        color: anchorVisual.borderColor,
-                        width: anchorVisual.borderWidth,
-                      ),
-                      boxShadow: anchorVisual.shadows,
+                      border: widget.inline
+                          ? null
+                          : Border.all(
+                              color: anchorVisual.borderColor,
+                              width: anchorVisual.borderWidth,
+                            ),
+                      boxShadow: widget.inline ? null : anchorVisual.shadows,
                     ),
                     child: Stack(
                       alignment: Alignment.center,
@@ -2286,46 +2292,60 @@ class _AppSelectState<T> extends State<AppSelect<T>> {
                         Positioned.fill(
                           child: AnimatedContainer(
                             duration: spec.motion.interactionDuration,
-                            color: anchorVisual.stateOverlay,
+                            color: widget.inline
+                                ? (_hovered || _focused || _expanded
+                                      ? spec.palette.trim.withValues(alpha: .16)
+                                      : Colors.transparent)
+                                : anchorVisual.stateOverlay,
                           ),
                         ),
                         Padding(
-                          padding: const EdgeInsets.fromLTRB(10, 0, 8, 0),
+                          padding: widget.inline
+                              ? const EdgeInsets.symmetric(vertical: 4)
+                              : const EdgeInsets.fromLTRB(10, 0, 8, 0),
                           child: Row(
                             crossAxisAlignment: CrossAxisAlignment.center,
                             children: <Widget>[
                               Expanded(
                                 child: Text(
                                   selectedLabel,
-                                  maxLines: 1,
-                                  softWrap: false,
-                                  style: spec.typography.body.copyWith(
-                                    color: anchorVisual.foreground,
-                                    fontFamily: ledger
-                                        ? 'Georgia'
-                                        : spec.typography.body.fontFamily,
-                                    fontWeight: ledger
-                                        ? FontWeight.w700
-                                        : FontWeight.w500,
-                                    height: ledger
-                                        ? 1.15
-                                        : spec.typography.body.height,
-                                    leadingDistribution: ledger
-                                        ? TextLeadingDistribution.even
-                                        : spec
-                                              .typography
-                                              .body
-                                              .leadingDistribution,
-                                  ),
+                                  maxLines: widget.inline ? 2 : 1,
+                                  softWrap: widget.inline,
+                                  overflow: widget.inline
+                                      ? TextOverflow.ellipsis
+                                      : null,
+                                  style: widget.inline
+                                      ? spec.typography.label.copyWith(
+                                          fontSize: 15,
+                                          height: 1.3,
+                                        )
+                                      : spec.typography.body.copyWith(
+                                          color: anchorVisual.foreground,
+                                          fontFamily: ledger
+                                              ? 'Georgia'
+                                              : spec.typography.body.fontFamily,
+                                          fontWeight: ledger
+                                              ? FontWeight.w700
+                                              : FontWeight.w500,
+                                          height: ledger
+                                              ? 1.15
+                                              : spec.typography.body.height,
+                                          leadingDistribution: ledger
+                                              ? TextLeadingDistribution.even
+                                              : spec
+                                                    .typography
+                                                    .body
+                                                    .leadingDistribution,
+                                        ),
                                 ),
                               ),
-                              const SizedBox(width: 8),
+                              SizedBox(width: widget.inline ? 6 : 8),
                               AnimatedRotation(
                                 turns: _expanded ? .5 : 0,
                                 duration: spec.motion.interactionDuration,
                                 child: AppVectorGlyph(
                                   'chevron-down',
-                                  size: 15,
+                                  size: widget.inline ? 12 : 15,
                                   color: anchorVisual.chevron,
                                 ),
                               ),
@@ -2345,6 +2365,19 @@ class _AppSelectState<T> extends State<AppSelect<T>> {
   }
 
   double _readableControlWidth(BuildContext context, ThemeSpec spec) {
+    if (widget.inline) {
+      final painter = TextPainter(
+        text: TextSpan(
+          text: widget.labelFor(widget.value),
+          style: spec.typography.label.copyWith(fontSize: 15, height: 1.3),
+        ),
+        textDirection: Directionality.of(context),
+        textScaler: MediaQuery.textScalerOf(context),
+      )..layout();
+      final width = painter.width + 20;
+      painter.dispose();
+      return width;
+    }
     return AppSelect.readableWidthFor<T>(
       context,
       items: widget.items,

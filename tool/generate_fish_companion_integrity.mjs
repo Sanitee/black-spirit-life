@@ -85,7 +85,7 @@ const service = readFileSync(
 );
 const integrity = {
   source:
-    'Black Spirit Life 0.1.9 accepted Fish payload with local-only empty-on-first-run personal storage',
+    'Black Spirit Life 0.1.12 Fish payload with local-only empty-on-first-run personal storage',
   sourceFileCount: files.length,
   sourceByteCount,
   sourceAggregateSha256: sha256(Buffer.from(lines.join('\n'), 'utf8')),

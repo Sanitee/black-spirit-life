@@ -128,7 +128,9 @@ class _ReferenceWindowState extends State<ReferenceWindow> {
                           : 'Keep on top',
                       icon: Icon(
                         _pinned ? Icons.push_pin : Icons.push_pin_outlined,
-                        color: _pinned ? accent : muted,
+                        color: _pinned
+                            ? context.gatheringColors.accent
+                            : context.gatheringColors.muted,
                         size: 18,
                       ),
                       style: IconButton.styleFrom(
@@ -218,7 +220,7 @@ class _ReferenceWindowState extends State<ReferenceWindow> {
                 child: _bytes == null
                     ? const SizedBox.expand()
                     : ColoredBox(
-                        color: canvasColor,
+                        color: context.gatheringColors.inset,
                         child: InteractiveViewer(
                           transformationController: _transform,
                           minScale: .3,
@@ -252,7 +254,7 @@ class _ReferenceWindowState extends State<ReferenceWindow> {
                     style: const TextStyle(fontSize: 14),
                   ),
                   style: TextButton.styleFrom(
-                    foregroundColor: muted,
+                    foregroundColor: context.gatheringColors.muted,
                     minimumSize: const Size(0, 36),
                     padding: const EdgeInsets.symmetric(horizontal: 10),
                     tapTargetSize: MaterialTapTargetSize.shrinkWrap,

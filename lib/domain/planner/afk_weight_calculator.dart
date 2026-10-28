@@ -8,10 +8,13 @@ import 'planner_models.dart';
 
 /// How directly the calculator can support its output-load estimate.
 enum AfkWeightConfidence {
-  /// The recipe supplies a positive recorded maximum output per attempt.
+  /// A recorded maximum or fixed main-output conversion is used.
   exact,
 
-  /// The recipe has no recorded maximum, so a conservative fallback is used.
+  /// A recipe-owned average, with the user's reserve kept free.
+  estimated,
+
+  /// Output bounds or extra-drop rates are incomplete; use a fallback allowance.
   modelled,
 
   /// Required setup or item-weight data is missing.
@@ -26,6 +29,8 @@ enum AfkWeightWarning {
   missingItemWeights,
   modelledOutputMaximum,
   byproductsUnmodelled,
+  extraOutputRatesUnknown,
+  invalidOutputEstimate,
 }
 
 enum AfkLoadStackKind { ingredient, output }
@@ -72,6 +77,7 @@ final class AfkWeightCalculation {
     required this.peakLoadLt,
     required Iterable<AfkLoadStack> ingredientStacks,
     required this.outputStack,
+    this.expectedOutputStack,
     required this.confidence,
     required Iterable<AfkWeightWarning> warnings,
     required Iterable<String> missingWeightItems,
@@ -93,6 +99,14 @@ final class AfkWeightCalculation {
   final double peakLoadLt;
   final List<AfkLoadStack> ingredientStacks;
   final AfkLoadStack? outputStack;
+
+  /// Expected main item only; never includes invented special-output rates.
+  final AfkLoadStack? expectedOutputStack;
+  double? get expectedFinishLoadLt => expectedOutputStack?.loadLt;
+  bool get usesConservativeOutput =>
+      confidence == AfkWeightConfidence.modelled ||
+      warnings.contains(AfkWeightWarning.extraOutputRatesUnknown) ||
+      warnings.contains(AfkWeightWarning.invalidOutputEstimate);
   final AfkWeightConfidence confidence;
   final Set<AfkWeightWarning> warnings;
   final List<String> missingWeightItems;
@@ -132,6 +146,7 @@ final class AfkWeightSessionLoad {
     required this.peakLoadLt,
     required Iterable<AfkLoadStack> ingredientStacks,
     required this.outputStack,
+    this.expectedOutputStack,
   }) : ingredientStacks = List<AfkLoadStack>.unmodifiable(ingredientStacks);
 
   final int number;
@@ -145,6 +160,8 @@ final class AfkWeightSessionLoad {
   final double peakLoadLt;
   final List<AfkLoadStack> ingredientStacks;
   final AfkLoadStack outputStack;
+  final AfkLoadStack? expectedOutputStack;
+  double? get expectedFinishLoadLt => expectedOutputStack?.loadLt;
 
   bool get isFinal => remainingAttemptsAfter == 0;
 }
@@ -213,6 +230,16 @@ final class AfkWeightSessionPlan {
       quantity: (maximumOutputStack.perAttemptQuantity * attempts).ceil(),
       unitWeightLt: maximumOutputStack.unitWeightLt,
     );
+    final expected = maximumCapacity.expectedOutputStack;
+    final expectedOutputStack = expected == null
+        ? null
+        : AfkLoadStack(
+            kind: expected.kind,
+            itemName: expected.itemName,
+            perAttemptQuantity: expected.perAttemptQuantity,
+            quantity: (expected.perAttemptQuantity * attempts).ceil(),
+            unitWeightLt: expected.unitWeightLt,
+          );
     final startLoadLt = ingredientStacks.fold<double>(
       0,
       (total, stack) => total + stack.loadLt,
@@ -231,6 +258,7 @@ final class AfkWeightSessionPlan {
       peakLoadLt: math.max(startLoadLt, finishLoadLt),
       ingredientStacks: ingredientStacks,
       outputStack: outputStack,
+      expectedOutputStack: expectedOutputStack,
     );
   }
 
@@ -262,17 +290,19 @@ final class _AfkWeightSessionLoadList extends ListBase<AfkWeightSessionLoad> {
       throw UnsupportedError('AFK loads are immutable.');
 }
 
-/// Calculates the maximum conservative AFK load for the selected queue recipe.
+/// Calculates an estimated AFK load, retaining a conservative main-output
+/// allowance when output bounds or extra-output rates are incomplete.
 ///
 /// Only the selected ingredient stacks in [step] are considered. Their
 /// per-attempt quantities are recovered from `need / count`, then each final
 /// inventory stack is rounded up independently. Both the fully loaded start
 /// and fully produced finish endpoints must fit. The queued count is reported
-/// by the result but never caps the maximum safe recommendation.
+/// by the result but never caps the capacity recommendation. Average-based
+/// loads are estimates, not guaranteed safe maxima.
 final class AfkWeightCalculator {
   const AfkWeightCalculator();
 
-  /// Splits the current recipe goal into exact, numbered safe loads.
+  /// Splits the current recipe goal into exact, numbered estimated loads.
   ///
   /// [PlanStep.count] is the planner's remaining number of recipe attempts and
   /// is rounded up exactly as [calculate] reports it. [completedAttempts] is
@@ -290,6 +320,7 @@ final class AfkWeightCalculator {
     required PlannerRules rules,
     required AfkWeightProfile profile,
     int completedAttempts = 0,
+    double? expectedOutputPerAttempt,
   }) {
     final maximumCapacity = calculate(
       mode: mode,
@@ -297,6 +328,7 @@ final class AfkWeightCalculator {
       recipe: recipe,
       rules: rules,
       profile: profile,
+      expectedOutputPerAttempt: expectedOutputPerAttempt,
     );
     final requestedAttempts = maximumCapacity.queuedAttempts;
     final normalizedCompletedAttempts = completedAttempts.clamp(
@@ -314,12 +346,16 @@ final class AfkWeightCalculator {
     );
   }
 
+  /// [expectedOutputPerAttempt] must come from the assembled planner step so
+  /// recipe overrides and mastery stay consistent. Omitting it retains the
+  /// legacy maximum-main-output calculation. Neither mode models extra drops.
   AfkWeightCalculation calculate({
     required CraftMode mode,
     required PlanStep step,
     required Recipe recipe,
     required PlannerRules rules,
     required AfkWeightProfile profile,
+    double? expectedOutputPerAttempt,
   }) {
     final configured = profile.isConfigured;
     final queuedAttempts = step.count.isFinite && step.count > 0
@@ -410,14 +446,94 @@ final class AfkWeightCalculator {
         explicitOutputMaximum != null &&
         explicitOutputMaximum.isFinite &&
         explicitOutputMaximum > 0;
-    final outputPerAttempt = hasExplicitOutputMaximum
+    final legacyMaximum = hasExplicitOutputMaximum
         ? explicitOutputMaximum
         : math.max(4, recipe.baseOutput.ceil()).toDouble();
-    final confidence = hasExplicitOutputMaximum
+    var outputPerAttempt = legacyMaximum;
+    double? expectedPerAttempt;
+    var confidence = hasExplicitOutputMaximum
         ? AfkWeightConfidence.exact
         : AfkWeightConfidence.modelled;
     if (!hasExplicitOutputMaximum) {
       warnings.add(AfkWeightWarning.modelledOutputMaximum);
+    }
+
+    if (expectedOutputPerAttempt != null) {
+      final type = recipe.type.trim().toLowerCase();
+      final masteryRecipe = type == 'cooking' || type == 'alchemy';
+      final minimum = recipe.outputMinimum;
+      final bounded =
+          minimum != null &&
+          minimum.isFinite &&
+          minimum > 0 &&
+          hasExplicitOutputMaximum &&
+          explicitOutputMaximum >= minimum;
+      final multiplier =
+          masteryRecipe && recipe.baseOutput.isFinite && recipe.baseOutput > 0
+          ? recipe.baseOutput
+          : 1.0;
+      final high = hasExplicitOutputMaximum
+          ? explicitOutputMaximum * multiplier
+          : null;
+      final recordedMinimum = minimum != null && minimum.isFinite && minimum > 0
+          ? minimum * multiplier
+          : null;
+      final fallbackMaximum = math.max(
+        legacyMaximum,
+        math.max(
+          high != null && high.isFinite ? high : 0.0,
+          recordedMinimum != null && recordedMinimum.isFinite
+              ? recordedMinimum
+              : 0.0,
+        ),
+      );
+      final low = bounded ? minimum * multiplier : null;
+      final fixedConversion =
+          type != 'processing' &&
+          !masteryRecipe &&
+          recipe.baseOutput.isFinite &&
+          recipe.baseOutput > 0;
+      final valid =
+          expectedOutputPerAttempt.isFinite &&
+          expectedOutputPerAttempt > 0 &&
+          (low == null || expectedOutputPerAttempt >= low - 1e-9) &&
+          (high == null || expectedOutputPerAttempt <= high + 1e-9) &&
+          (!fixedConversion ||
+              (expectedOutputPerAttempt - recipe.baseOutput).abs() < 1e-9);
+      if (!valid) {
+        warnings.add(AfkWeightWarning.invalidOutputEstimate);
+        confidence = AfkWeightConfidence.modelled;
+        outputPerAttempt = fallbackMaximum;
+      } else {
+        expectedPerAttempt = expectedOutputPerAttempt;
+        if (masteryRecipe) {
+          // The verified mastery table describes the main item, not blue
+          // elixirs, special dishes or individual byproduct pools. Retain a
+          // maximum-main-output allowance until those rates are established.
+          // This is deliberately NOT a bound on all possible extra drops.
+          warnings.add(AfkWeightWarning.extraOutputRatesUnknown);
+          outputPerAttempt = math.max(
+            fallbackMaximum,
+            expectedOutputPerAttempt.ceilToDouble(),
+          );
+          confidence = AfkWeightConfidence.modelled;
+        } else if (bounded || fixedConversion) {
+          outputPerAttempt = expectedOutputPerAttempt;
+          confidence = fixedConversion || minimum == explicitOutputMaximum
+              ? AfkWeightConfidence.exact
+              : AfkWeightConfidence.estimated;
+          warnings.remove(AfkWeightWarning.modelledOutputMaximum);
+        } else {
+          // Missing processing bounds must not silently become an optimistic
+          // average, even when the legacy planner supplies an estimate.
+          outputPerAttempt = math.max(
+            fallbackMaximum,
+            expectedOutputPerAttempt.ceilToDouble(),
+          );
+          warnings.add(AfkWeightWarning.modelledOutputMaximum);
+          confidence = AfkWeightConfidence.modelled;
+        }
+      }
     }
 
     final missingWeights = <String>{};
@@ -547,6 +663,15 @@ final class AfkWeightCalculator {
       peakLoadLt: loads.peakLt,
       ingredientStacks: ingredientStacks,
       outputStack: outputStack,
+      expectedOutputStack: expectedPerAttempt == null
+          ? null
+          : AfkLoadStack(
+              kind: AfkLoadStackKind.output,
+              itemName: outputName,
+              perAttemptQuantity: expectedPerAttempt,
+              quantity: (expectedPerAttempt * safeAttempts).ceil(),
+              unitWeightLt: resolvedOutputWeight,
+            ),
       confidence: confidence,
       warnings: warnings,
       missingWeightItems: const <String>[],

@@ -158,8 +158,8 @@ void main() {
           // contrast. Exact opaque preview tones are separately palette-tested;
           // these rendered default tones include native blur and modal layering.
           final expectedShades = modal
-              ? const [Color(0xFF14212C), Color(0xFF13202A), Color(0xFF131E29)]
-              : const [Color(0xFF13222B), Color(0xFF121F27), Color(0xFF111D26)];
+              ? const [Color(0xFF231D26), Color(0xFF211C24), Color(0xFF1F1A23)]
+              : const [Color(0xFF261F26), Color(0xFF221C24), Color(0xFF201A22)];
           const points = [Offset(750, 60), Offset(750, 230), Offset(750, 420)];
           debugPrint(
             '$mode panel shades: ${points.map((p) => _hex(pixels.at(p))).join(', ')}',

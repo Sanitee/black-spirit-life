@@ -3,6 +3,7 @@ import 'dart:typed_data';
 
 import '../models/catalog_models.dart';
 import '../models/craft_mode.dart';
+import 'planner_content_scale.dart';
 import 'planner_state.dart';
 
 class PlannerStateFormatException implements Exception {
@@ -77,6 +78,9 @@ class PlannerStateJsonCodec {
       showDeleteTools: _boolean(
         reader.take('showDeleteTools'),
         r'$.showDeleteTools',
+      ),
+      plannerContentScale: PlannerContentScale.normalize(
+        reader.takeOptional('plannerContentScale'),
       ),
       extensions: reader.extensions(),
     );
@@ -490,6 +494,8 @@ class PlannerStateJsonCodec {
 
   MarketState _market(Object? value, String path) {
     final reader = _NativeReader(_object(value, path), path);
+    final preorderPrices = reader.takeOptional('preorderPrices');
+    final preorderObservedAt = reader.takeOptional('preorderObservedAt');
     final unlistedItemNames = reader.takeOptional('unlistedItemNames');
     final tradeMarketIds = reader.takeOptional('tradeMarketIds');
     final totalTrades = reader.takeOptional('totalTrades');
@@ -502,6 +508,15 @@ class PlannerStateJsonCodec {
     return MarketState(
       prices: _numberMap(reader.take('prices'), '$path.prices'),
       stock: _numberMap(reader.take('stock'), '$path.stock'),
+      preorderPrices: preorderPrices == null
+          ? const {}
+          : _nonnegativeNumberMap(preorderPrices, '$path.preorderPrices'),
+      preorderObservedAt: preorderObservedAt == null
+          ? const {}
+          : _nonnegativeIntegerMap(
+              preorderObservedAt,
+              '$path.preorderObservedAt',
+            ),
       tradeMarketIds: tradeMarketIds == null
           ? const <String, String>{}
           : _stringMap(tradeMarketIds, '$path.tradeMarketIds'),

@@ -197,7 +197,7 @@ void main() {
     () {
       final mapData = jsonDecode(mapDataText) as Map<String, dynamic>;
       final manifest = mapData['manifest']! as Map<String, dynamic>;
-      expect(manifest['datasetVersion'], '2026.09.09-beta-v4');
+      expect(manifest['datasetVersion'], '2026.10.09-beta-v5');
       for (final text in <String>[mapDataText, lodgingText, economicsText]) {
         expect(text, isNot(contains('Redistribution permission unconfirmed')));
         expect(text, isNot(contains('Do not publish or redistribute')));

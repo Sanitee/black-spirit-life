@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 
 import '../engine/map_camera.dart';
 import 'resource_map_chrome_theme.dart';
+import 'resource_map_field_desk.dart';
+import 'resource_map_pill.dart';
 
 /// A compact continuous zoom rail with a separate full-world reset.
 class ResourceMapZoomDock extends StatelessWidget {
@@ -29,7 +31,7 @@ class ResourceMapZoomDock extends StatelessWidget {
       label: 'Map zoom controls',
       child: Material(
         key: const ValueKey<String>('resource-map-zoom-dock-surface'),
-        color: chrome.fillAlpha(chrome.chromeBase, ghost ? .68 : .9),
+        color: Colors.transparent,
         elevation: ghost ? 2 : 6,
         shadowColor: const Color(0x59000000),
         shape: RoundedRectangleBorder(
@@ -37,90 +39,113 @@ class ResourceMapZoomDock extends StatelessWidget {
           side: BorderSide(color: chrome.softOutline.withValues(alpha: .82)),
         ),
         clipBehavior: Clip.antiAlias,
-        child: SizedBox(
-          width: controlExtent,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: <Widget>[
-              AnimatedBuilder(
-                animation: cameraController,
-                builder: (context, _) {
-                  final zoom = cameraController.camera.zoom
-                      .clamp(
-                        cameraController.minimumZoom,
-                        cameraController.maximumZoom,
-                      )
-                      .toDouble();
-                  return Semantics(
-                    label: 'Map zoom level',
-                    value: zoom.toStringAsFixed(1),
-                    increasedValue: (zoom + .5)
-                        .clamp(
-                          cameraController.minimumZoom,
-                          cameraController.maximumZoom,
-                        )
-                        .toStringAsFixed(1),
-                    decreasedValue: (zoom - .5)
-                        .clamp(
-                          cameraController.minimumZoom,
-                          cameraController.maximumZoom,
-                        )
-                        .toStringAsFixed(1),
-                    child: SizedBox(
-                      width: controlExtent,
-                      height: sliderExtent,
-                      child: RotatedBox(
-                        quarterTurns: 3,
-                        child: SliderTheme(
-                          data: SliderTheme.of(context).copyWith(
-                            trackHeight: 2,
-                            activeTrackColor: chrome.primary,
-                            inactiveTrackColor: chrome.softOutline.withValues(
-                              alpha: .72,
+        child: Ink(
+          decoration: BoxDecoration(
+            gradient: resourceMapRaisedSurfaceGradient(
+              chrome,
+              LinearGradient(
+                colors: [
+                  chrome.fillAlpha(chrome.chromeBase, ghost ? .68 : .9),
+                  chrome.fillAlpha(chrome.chromeBase, ghost ? .68 : .9),
+                ],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+            ),
+          ),
+          child: CustomPaint(
+            foregroundPainter: ResourceMapInstrumentEdge(
+              light: chrome.primary,
+              opacity: chrome.materialOpacity,
+              radius: ghost ? 8 : 12,
+            ),
+            child: SizedBox(
+              width: controlExtent,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: <Widget>[
+                  AnimatedBuilder(
+                    animation: cameraController,
+                    builder: (context, _) {
+                      final zoom = cameraController.camera.zoom
+                          .clamp(
+                            cameraController.minimumZoom,
+                            cameraController.maximumZoom,
+                          )
+                          .toDouble();
+                      return Semantics(
+                        label: 'Map zoom level',
+                        value: zoom.toStringAsFixed(1),
+                        increasedValue: (zoom + .5)
+                            .clamp(
+                              cameraController.minimumZoom,
+                              cameraController.maximumZoom,
+                            )
+                            .toStringAsFixed(1),
+                        decreasedValue: (zoom - .5)
+                            .clamp(
+                              cameraController.minimumZoom,
+                              cameraController.maximumZoom,
+                            )
+                            .toStringAsFixed(1),
+                        child: SizedBox(
+                          width: controlExtent,
+                          height: sliderExtent,
+                          child: RotatedBox(
+                            quarterTurns: 3,
+                            child: SliderTheme(
+                              data: SliderTheme.of(context).copyWith(
+                                trackHeight: 2,
+                                activeTrackColor: chrome.primary,
+                                inactiveTrackColor: chrome.softOutline
+                                    .withValues(alpha: .72),
+                                thumbColor: chrome.ink,
+                                overlayColor: chrome.primary.withValues(
+                                  alpha: .14,
+                                ),
+                                thumbShape: const RoundSliderThumbShape(
+                                  enabledThumbRadius: 6,
+                                  elevation: 0,
+                                  pressedElevation: 0,
+                                ),
+                                overlayShape: const RoundSliderOverlayShape(
+                                  overlayRadius: 15,
+                                ),
+                                showValueIndicator: ShowValueIndicator.onDrag,
+                                valueIndicatorColor: chrome.chromeRaised,
+                                valueIndicatorTextStyle: TextStyle(
+                                  color: chrome.ink,
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.w700,
+                                ),
+                              ),
+                              child: Slider(
+                                key: const ValueKey<String>(
+                                  'resource-map-zoom-slider',
+                                ),
+                                min: cameraController.minimumZoom,
+                                max: cameraController.maximumZoom,
+                                value: zoom,
+                                label: zoom.toStringAsFixed(1),
+                                onChanged: onZoomChanged,
+                              ),
                             ),
-                            thumbColor: chrome.ink,
-                            overlayColor: chrome.primary.withValues(alpha: .14),
-                            thumbShape: const RoundSliderThumbShape(
-                              enabledThumbRadius: 6,
-                              elevation: 0,
-                              pressedElevation: 0,
-                            ),
-                            overlayShape: const RoundSliderOverlayShape(
-                              overlayRadius: 15,
-                            ),
-                            showValueIndicator: ShowValueIndicator.onDrag,
-                            valueIndicatorColor: chrome.chromeRaised,
-                            valueIndicatorTextStyle: TextStyle(
-                              color: chrome.ink,
-                              fontSize: 11,
-                              fontWeight: FontWeight.w700,
-                            ),
-                          ),
-                          child: Slider(
-                            key: const ValueKey<String>(
-                              'resource-map-zoom-slider',
-                            ),
-                            min: cameraController.minimumZoom,
-                            max: cameraController.maximumZoom,
-                            value: zoom,
-                            label: zoom.toStringAsFixed(1),
-                            onChanged: onZoomChanged,
                           ),
                         ),
-                      ),
-                    ),
-                  );
-                },
+                      );
+                    },
+                  ),
+                  const _ZoomDockDivider(),
+                  _ZoomDockControl(
+                    key: const ValueKey<String>('resource-map-full-world'),
+                    icon: Icons.public_rounded,
+                    tooltip: 'Show the full world',
+                    semanticLabel: 'Show full world',
+                    onPressed: onShowFullWorld,
+                  ),
+                ],
               ),
-              const _ZoomDockDivider(),
-              _ZoomDockControl(
-                key: const ValueKey<String>('resource-map-full-world'),
-                icon: Icons.public_rounded,
-                tooltip: 'Show the full world',
-                semanticLabel: 'Show full world',
-                onPressed: onShowFullWorld,
-              ),
-            ],
+            ),
           ),
         ),
       ),

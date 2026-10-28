@@ -496,7 +496,7 @@ void main() {
   );
 
   test(
-    'curated reference records are browsable but never become planner state',
+    'accessory reforms keep item info without appearing as craft recipes',
     () {
       final environment = buildRecipeBookTestEnvironment(
         activeMode: CraftMode.processing,
@@ -515,7 +515,8 @@ void main() {
 
       const reference = 'Dawnbound Ekleta Necklace';
       final names = book.snapshot.entries.map((entry) => entry.name).toSet();
-      expect(names, contains(reference));
+      expect(names, isNot(contains(reference)));
+      expect(names, contains('Twilight of the End - Necklace'));
       expect(names, isNot(contains('Legacy Manual Record')));
 
       final targetBefore = mode.state.value.target;

@@ -75,14 +75,14 @@ class OpportunityCopyName extends StatelessWidget {
         key: ValueKey('opportunity-copy-name:$name'),
         borderRadius: BorderRadius.circular(4),
         hoverColor: Colors.transparent,
-        onTap: () => _copyOpportunityName(context, name),
+        onTap: () => copyOpportunityItemName(context, name),
         child: Text(displayLabel ?? name, style: style),
       ),
     ),
   );
 }
 
-Future<void> _copyOpportunityName(BuildContext context, String name) async {
+Future<void> copyOpportunityItemName(BuildContext context, String name) async {
   final actions = OpportunityItemActionsScope.maybeOf(context);
   if (actions != null) {
     await actions.copyName(name);
@@ -105,7 +105,8 @@ Future<void> _copyOpportunityName(BuildContext context, String name) async {
   }
 }
 
-/// Secondary actions do not replace the item's existing primary click.
+/// Secondary actions preserve existing clicks unless an otherwise passive
+/// item icon explicitly opts into opening its reference directly.
 class OpportunityItemRegion extends StatefulWidget {
   const OpportunityItemRegion({
     required this.controller,
@@ -119,6 +120,9 @@ class OpportunityItemRegion extends StatefulWidget {
     this.resolvePlannerTarget,
     this.resolveGatherDemand,
     this.childHandlesFocus = false,
+    this.primaryOpensItemInfo = false,
+    this.itemInfo,
+    this.itemInfoIcon,
     super.key,
   });
 
@@ -138,6 +142,12 @@ class OpportunityItemRegion extends StatefulWidget {
   /// Keeps an already-focusable primary action as the only Tab stop.
   /// Item-menu shortcuts still work while a descendant has focus.
   final bool childHandlesFocus;
+
+  /// Passive reference icons can open the existing item card in one click.
+  /// Names and recipe actions leave this disabled to retain their own action.
+  final bool primaryOpensItemInfo;
+  final RecipeBookItemInfo? itemInfo;
+  final Widget? itemInfoIcon;
 
   @override
   State<OpportunityItemRegion> createState() => _OpportunityItemRegionState();
@@ -169,11 +179,18 @@ class _OpportunityItemRegionState extends State<OpportunityItemRegion> {
   Widget build(BuildContext context) => FocusableActionDetector(
     focusNode: _focus,
     includeFocusSemantics: !widget.childHandlesFocus,
-    mouseCursor: SystemMouseCursors.contextMenu,
-    shortcuts: const {
-      SingleActivator(LogicalKeyboardKey.contextMenu): _OpenItemMenuIntent(),
-      SingleActivator(LogicalKeyboardKey.f10, shift: true):
-          _OpenItemMenuIntent(),
+    mouseCursor: widget.primaryOpensItemInfo
+        ? SystemMouseCursors.click
+        : SystemMouseCursors.contextMenu,
+    shortcuts: {
+      const SingleActivator(LogicalKeyboardKey.contextMenu):
+          const _OpenItemMenuIntent(),
+      const SingleActivator(LogicalKeyboardKey.f10, shift: true):
+          const _OpenItemMenuIntent(),
+      if (widget.primaryOpensItemInfo) ...{
+        const SingleActivator(LogicalKeyboardKey.enter): const ActivateIntent(),
+        const SingleActivator(LogicalKeyboardKey.space): const ActivateIntent(),
+      },
     },
     actions: {
       _OpenItemMenuIntent: CallbackAction<_OpenItemMenuIntent>(
@@ -187,10 +204,23 @@ class _OpportunityItemRegionState extends State<OpportunityItemRegion> {
           return null;
         },
       ),
+      if (widget.primaryOpensItemInfo)
+        ActivateIntent: CallbackAction<ActivateIntent>(
+          onInvoke: (_) {
+            unawaited(_openItemInfo());
+            return null;
+          },
+        ),
     },
     child: GestureDetector(
       key: ValueKey('opportunity-item:${widget.stableId}'),
       behavior: HitTestBehavior.translucent,
+      onTapDown: widget.primaryOpensItemInfo
+          ? (_) => _focus.requestFocus()
+          : null,
+      onTap: widget.primaryOpensItemInfo
+          ? () => unawaited(_openItemInfo())
+          : null,
       onSecondaryTapDown: (details) {
         if (!widget.childHandlesFocus) _focus.requestFocus();
         unawaited(_showMenu(details.globalPosition));
@@ -199,13 +229,39 @@ class _OpportunityItemRegionState extends State<OpportunityItemRegion> {
         if (!widget.childHandlesFocus) _focus.requestFocus();
         unawaited(_showMenu(details.globalPosition));
       },
-      child: widget.child,
+      child: widget.primaryOpensItemInfo
+          ? Semantics(
+              button: true,
+              label: 'Show ${widget.name} information',
+              child: widget.child,
+            )
+          : widget.child,
     ),
   );
+
+  Future<void> _openItemInfo() async {
+    if (_opening) return;
+    _opening = true;
+    Tooltip.dismissAllToolTips();
+    AppOverlayCoordinatorScope.maybeOf(context)?.dismissTop();
+    try {
+      await _showItemInfo(
+        context,
+        widget.controller,
+        widget.name,
+        info: widget.itemInfo,
+        icon: widget.itemInfoIcon,
+      );
+    } finally {
+      _opening = false;
+      if (mounted) _focus.requestFocus();
+    }
+  }
 
   Future<void> _showMenu(Offset position) async {
     if (_opening) return;
     _opening = true;
+    Tooltip.dismissAllToolTips();
     final actions = OpportunityItemActionsScope.maybeOf(context);
     final navigator = Navigator.of(context);
     try {
@@ -223,7 +279,6 @@ class _OpportunityItemRegionState extends State<OpportunityItemRegion> {
               mode: widget.plannerMode,
               variantId: widget.plannerVariantId,
             );
-      final spec = context.visualTheme;
       final overlay = navigator.overlay?.context.findRenderObject();
       if (overlay is! RenderBox || !overlay.hasSize) return;
       final localPosition = overlay.globalToLocal(position);
@@ -240,16 +295,11 @@ class _OpportunityItemRegionState extends State<OpportunityItemRegion> {
           Rect.fromLTWH(localPosition.dx, localPosition.dy, 0, 0),
           Offset.zero & overlay.size,
         ),
-        color: spec.palette.surfaceRaised,
         surfaceTintColor: Colors.transparent,
         elevation: 18,
         constraints: BoxConstraints(
           minWidth: math.min(240, overlay.size.width - 16),
           maxWidth: math.min(360, overlay.size.width - 16),
-        ),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(spec.geometry.cardRadius),
-          side: BorderSide(color: spec.palette.trim),
         ),
         items: [
           _entry(_ItemAction.info, 'Item info', Icons.info_outline),
@@ -300,7 +350,13 @@ class _OpportunityItemRegionState extends State<OpportunityItemRegion> {
       if (selected == null || !mounted) return;
       switch (selected) {
         case _ItemAction.info:
-          await _showItemInfo(context, widget.controller, widget.name);
+          await _showItemInfo(
+            context,
+            widget.controller,
+            widget.name,
+            info: widget.itemInfo,
+            icon: widget.itemInfoIcon,
+          );
         case _ItemAction.recipe:
           widget.onViewRecipe?.call();
         case _ItemAction.planner:
@@ -323,7 +379,7 @@ class _OpportunityItemRegionState extends State<OpportunityItemRegion> {
             actions?.addToPlannedNetwork?.call(availability);
           }
         case _ItemAction.copy:
-          await _copyOpportunityName(context, widget.name);
+          await copyOpportunityItemName(context, widget.name);
         case _ItemAction.npc:
         case _ItemAction.gathering:
         case _ItemAction.workers:
@@ -375,17 +431,28 @@ class _OpenItemMenuIntent extends Intent {
 Future<void> _showItemInfo(
   BuildContext context,
   OpportunitiesController controller,
-  String name,
-) async {
+  String name, {
+  RecipeBookItemInfo? info,
+  Widget? icon,
+}) async {
   final book = controller.itemInfoController;
   final mode = controller.modeController.mode;
-  final info =
+  final openPlanner = OpportunityItemActionsScope.maybeOf(
+    context,
+  )?.openPlannerTarget;
+  final resolvedInfo =
+      info ??
       book.itemInfoFor(name, mode: mode) ??
       RecipeBookItemInfo(title: name, kind: 'Item', summary: '');
+  final ownerNavigator = Navigator.of(context);
+  final ownerRoute = ModalRoute.of(context);
   await showDialog<void>(
     context: context,
     useRootNavigator: false,
     barrierColor: Colors.black.withAlpha(200),
+    animationStyle: MediaQuery.disableAnimationsOf(context)
+        ? AnimationStyle.noAnimation
+        : null,
     builder: (context) => Dialog(
       key: ValueKey('opportunity-item-info:$name'),
       backgroundColor: Colors.transparent,
@@ -396,11 +463,40 @@ Future<void> _showItemInfo(
         controller: book,
         mode: mode,
         name: name,
-        info: info,
+        info: resolvedInfo,
+        icon: icon,
         maxWidth: itemReferenceCardWidth(context),
         spec: context.visualTheme,
         onClose: () => Navigator.pop(context),
-        onCopyItemName: (name) => _copyOpportunityName(context, name),
+        onCopyItemName: (name) => copyOpportunityItemName(context, name),
+        onUseFormula: openPlanner == null
+            ? null
+            : (formula) async {
+                final route = ModalRoute.of(context);
+                Navigator.pop(context);
+                // The retained Opportunities workspace disables its tickers
+                // when hidden. Finish removing this route before switching
+                // tabs, or its reverse animation would remain offstage.
+                await route?.completed;
+                if (!ownerNavigator.mounted) return;
+                // An icon inside an exchange detail has one containing dialog.
+                // Close that captured route only, never the retained page or
+                // an unrelated route that might now be above it.
+                if (ownerRoute is DialogRoute<dynamic> &&
+                    ownerRoute.isActive &&
+                    identical(ownerRoute.navigator, ownerNavigator)) {
+                  ownerNavigator.removeRoute(ownerRoute);
+                  await ownerRoute.completed;
+                  if (!ownerNavigator.mounted) return;
+                }
+                openPlanner(
+                  PlannerTargetRequest(
+                    exactName: formula.outputName,
+                    mode: formula.mode!,
+                    variantId: formula.variantId,
+                  ),
+                );
+              },
       ),
     ),
   );

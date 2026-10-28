@@ -127,7 +127,16 @@ bool OpenExternal(HWND window, const std::string& url) {
       nullptr, nullptr, SW_SHOWNORMAL)) > 32;
 }
 
-bool OpenReferenceWindow(int glass_opacity_percent) {
+bool OpenReferenceWindow(int glass_opacity_percent,
+                         const std::string& visual_palette) {
+  // An opaque, bounded base64url palette snapshot, never an arbitrary argument.
+  if (visual_palette.size() > 8192 ||
+      std::any_of(visual_palette.begin(), visual_palette.end(),
+                  [](unsigned char c) {
+                    return !((c >= 'A' && c <= 'Z') ||
+                             (c >= 'a' && c <= 'z') ||
+                             (c >= '0' && c <= '9') || c == '_' || c == '-');
+                  })) return false;
   std::wstring executable(32768, L'\0');
   const DWORD size = GetModuleFileNameW(nullptr, executable.data(),
                                       static_cast<DWORD>(executable.size()));
@@ -140,6 +149,9 @@ bool OpenReferenceWindow(int glass_opacity_percent) {
   std::wstring command = L"\"" + executable + L"\" --reference "
                          L"--glass-opacity=" +
                          std::to_wstring(glass_opacity_percent);
+  if (!visual_palette.empty()) {
+    command += L" --gathering-theme=" + ToWide(visual_palette);
+  }
   STARTUPINFOW startup{};
   startup.cb = sizeof(startup);
   PROCESS_INFORMATION process{};
@@ -268,7 +280,15 @@ CreateGatheringNativeBridge(
             opacity =
                 static_cast<int>(std::clamp<int64_t>(*wide_value, 0, 100));
           }
-          result->Success(EncodableValue(OpenReferenceWindow(opacity)));
+          const auto* palette_argument = Argument(call.arguments(), "visualPalette");
+          const auto* palette = palette_argument
+              ? std::get_if<std::string>(palette_argument) : nullptr;
+          if (palette_argument && !palette) {
+            result->Success(EncodableValue(false));
+          } else {
+            result->Success(EncodableValue(
+                OpenReferenceWindow(opacity, palette ? *palette : "")));
+          }
         } else if (call.method_name() == "openSessionImport") {
           const auto* argument = Argument(call.arguments(), "receiptDirectory");
           const auto* directory = argument ? std::get_if<std::string>(argument) : nullptr;

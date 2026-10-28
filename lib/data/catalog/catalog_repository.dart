@@ -2,6 +2,9 @@ import '../../domain/models/catalog_models.dart';
 import '../../domain/models/craft_mode.dart';
 
 class CatalogRepository {
+  factory CatalogRepository.cached(CatalogSnapshot snapshot) =>
+      _cache[snapshot] ??= CatalogRepository(snapshot);
+
   CatalogRepository(this.snapshot)
     : _itemIndexes = {
         for (final mode in CraftMode.values)
@@ -20,6 +23,50 @@ class CatalogRepository {
       );
 
   final CatalogSnapshot snapshot;
+  static final Expando<CatalogRepository> _cache = Expando(
+    'catalog-repository',
+  );
+
+  late final Map<String, int> _itemIconGrades = {
+    for (final entry in _stringMap(
+      snapshot.supportingData['itemIconGrades'],
+    ).entries)
+      if (int.tryParse(entry.value) case final grade?
+          when grade >= 0 && grade <= 5)
+        normalizeMarketName(entry.key): grade,
+  };
+
+  /// Grade belongs to the displayed item, never the recipe's selected quality
+  /// override. A custom alias can inherit a verified grade; unknowns stay neutral.
+  int? itemIconGrade(String name, {Iterable<String> aliases = const []}) {
+    for (final candidate in [name, ...aliases, ?_iconAliases.resolve(name)]) {
+      final grade = _itemIconGrades[normalizeMarketName(candidate)];
+      if (grade != null) return grade;
+    }
+    return null;
+  }
+
+  late final Map<String, String> _itemIconGradesById = _stringMap(
+    snapshot.supportingData['itemIconGradesById'],
+  );
+
+  int? itemIconGradeById(int id) =>
+      int.tryParse(_itemIconGradesById['$id'] ?? '');
+
+  late final Map<String, String> _displayArtwork = _stringMap(
+    snapshot.supportingData['itemIconArtwork'],
+  );
+
+  String _artworkFor(String name, String reference) =>
+      _displayArtwork[normalizeMarketName(name)] ?? reference;
+
+  late final Set<String> _emptyIconArtwork = {
+    if (snapshot.supportingData['itemIconEmptyArtwork'] case final List names)
+      for (final name in names) normalizeMarketName('$name'),
+  };
+
+  bool isEmptyIconArtwork(String name) =>
+      _emptyIconArtwork.contains(normalizeMarketName(name));
 
   /// Recorded NPC purchase prices are item facts, not crafting-mode facts.
   /// This fallback never reads client sell values or saved market prices.
@@ -40,17 +87,18 @@ class CatalogRepository {
     CraftMode mode,
     String name, {
     Iterable<String> aliases = const <String>[],
+    bool preferCleanArtwork = false,
   }) {
-    final direct = _iconDataUriForName(mode, name);
+    final direct = _iconDataUriForName(mode, name, preferCleanArtwork);
     if (direct != null) return direct;
     for (final alias in aliases) {
-      final resolved = _iconDataUriForName(mode, alias);
+      final resolved = _iconDataUriForName(mode, alias, preferCleanArtwork);
       if (resolved != null) return resolved;
     }
     final catalogAlias = _iconAliases.resolve(name);
     return catalogAlias == null
         ? null
-        : _iconDataUriForName(mode, catalogAlias);
+        : _iconDataUriForName(mode, catalogAlias, preferCleanArtwork);
   }
 
   /// Resolves artwork without letting the selected craft mode hide an
@@ -63,31 +111,48 @@ class CatalogRepository {
     CraftMode preferredMode,
     String name, {
     Iterable<String> aliases = const <String>[],
+    bool preferCleanArtwork = false,
   }) {
-    final preferred = iconDataUri(preferredMode, name, aliases: aliases);
+    final preferred = iconDataUri(
+      preferredMode,
+      name,
+      aliases: aliases,
+      preferCleanArtwork: preferCleanArtwork,
+    );
     if (preferred != null) return preferred;
     for (final mode in CraftMode.values) {
       if (mode == preferredMode) continue;
-      final resolved = iconDataUri(mode, name, aliases: aliases);
+      final resolved = iconDataUri(
+        mode,
+        name,
+        aliases: aliases,
+        preferCleanArtwork: preferCleanArtwork,
+      );
       if (resolved != null) return resolved;
     }
     return null;
   }
 
-  String? _iconDataUriForName(CraftMode mode, String name) {
+  String? _iconDataUriForName(CraftMode mode, String name, bool cleanArtwork) {
     final icons = _iconIndexes[mode]!;
     final exact = icons.exact(name);
-    if (exact != null) return exact;
+    if (exact != null) return cleanArtwork ? _artworkFor(name, exact) : exact;
 
     final candidates = icons.candidates(name);
     if (candidates.isEmpty) return null;
     final canonicalNames = _itemIndexes[mode]!.candidateNames(name);
     if (canonicalNames.isNotEmpty) {
       final canonicalIcon = icons.exact(canonicalNames.first);
-      if (canonicalIcon != null) return canonicalIcon;
+      if (canonicalIcon != null) {
+        return cleanArtwork
+            ? _artworkFor(canonicalNames.first, canonicalIcon)
+            : canonicalIcon;
+      }
     }
     candidates.sort((left, right) => left.key.compareTo(right.key));
-    return candidates.first.value;
+    return cleanArtwork
+        ? _artworkFor(candidates.first.key, candidates.first.value)
+        : candidates.first.value;
   }
 
   String? bundledMarketId(String name, {Iterable<String> aliases = const []}) {

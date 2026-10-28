@@ -3,6 +3,11 @@
 #include <string_view>
 
 namespace bdo_video {
+// Keep the experimental companion isolated from normal Beta's 8765–8795.
+// The Dart isolation contract checks these against the service's bind range.
+inline constexpr unsigned int kFishCompanionFirstPort = 8925;
+inline constexpr unsigned int kFishCompanionLastPort = 8955;
+
 inline bool AllowsFishCompanionLoopback(std::wstring_view uri) {
   constexpr std::wstring_view kLoopbackPrefix = L"http://127.0.0.1:";
   if (uri.substr(0, kLoopbackPrefix.size()) != kLoopbackPrefix) {
@@ -26,7 +31,7 @@ inline bool AllowsFishCompanionLoopback(std::wstring_view uri) {
     }
     port = port * 10 + static_cast<unsigned int>(character - L'0');
   }
-  return port >= 8765 && port <= 8795;
+  return port >= kFishCompanionFirstPort && port <= kFishCompanionLastPort;
 }
 
 inline bool AllowsTopLevel(std::wstring_view uri) {

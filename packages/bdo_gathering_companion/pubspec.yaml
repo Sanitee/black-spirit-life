@@ -25,6 +25,7 @@ flutter:
     - assets/icons/buffs/
     - assets/icons/tools/
     - assets/icons/items/
+    - assets/icons/item_artwork/
     - assets/icons/nodes/
     - assets/icons/spots/
     - assets/icons/pets/

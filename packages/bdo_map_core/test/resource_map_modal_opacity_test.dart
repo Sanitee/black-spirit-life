@@ -36,10 +36,14 @@ void main() {
   Future<void> openMap(
     WidgetTester tester,
     ResourceMapInterfaceStyle style,
-    double opacity,
-  ) async {
+    double opacity, {
+    ValueNotifier<ResourceMapChromeThemeData>? liveChrome,
+  }) async {
     await tester.binding.setSurfaceSize(const Size(1200, 800));
     addTearDown(() => tester.binding.setSurfaceSize(null));
+    final source =
+        liveChrome ?? ValueNotifier(palette(style).withUiOpacity(opacity));
+    if (liveChrome == null) addTearDown(source.dispose);
     await tester.pumpWidget(
       MaterialApp(
         home: MediaQuery(
@@ -47,8 +51,13 @@ void main() {
             size: Size(1200, 800),
             disableAnimations: true,
           ),
-          child: ResourceMapChromeTheme(
-            data: palette(style).withUiOpacity(opacity),
+          child: ValueListenableBuilder<ResourceMapChromeThemeData>(
+            valueListenable: source,
+            builder: (context, chrome, child) => ResourceMapChromeTheme(
+              data: chrome,
+              liveData: liveChrome,
+              child: child!,
+            ),
             child: BdoResourceMap(
               dataset: dataset,
               workerEconomics: economics,
@@ -127,6 +136,61 @@ void main() {
     await tester.tap(find.byTooltip('House options'));
     await tester.pumpAndSettle();
   }
+
+  testWidgets(
+    'an already-open map settings modal follows a live light palette',
+    (tester) async {
+      final live = ValueNotifier(
+        ResourceMapChromeThemeData.glassDock.withUiOpacity(.25),
+      );
+      addTearDown(live.dispose);
+      await openMap(
+        tester,
+        ResourceMapInterfaceStyle.glassDock,
+        .25,
+        liveChrome: live,
+      );
+      await tapKey(tester, 'resource-map-home-worker-income');
+      await tapKey(tester, 'resource-map-worker-income-settings');
+      final mapState = tester.state(find.byType(BdoResourceMap));
+      final dialogState = tester.state(find.byType(TextField).first);
+      final light = ResourceMapChromeThemeData.glassDock.withPalette(
+        canvas: const Color(0xFF071A2E),
+        surface: const Color(0xFFE9D5A8),
+        raised: const Color(0xFFF2E3BD),
+        inset: const Color(0xFFD8BF8A),
+        foreground: const Color(0xFF352516),
+        secondaryForeground: const Color(0xFF765F3B),
+        primary: const Color(0xFF123D69),
+        primaryBright: const Color(0xFF1A5487),
+        trim: const Color(0xFF9A742F),
+        trimBright: const Color(0xFFD6B45A),
+        positive: const Color(0xFF647B35),
+        warning: const Color(0xFFB78338),
+        error: const Color(0xFFA45648),
+        shadow: const Color(0x70352516),
+      );
+      live.value = light.withUiOpacity(.25);
+      await tester.pumpAndSettle();
+      final context = tester.element(find.byType(AlertDialog));
+      expect(context.mapChrome.ink, light.ink);
+      expect(context.mapChrome.uiOpacity, 1);
+      expect(Theme.of(context).brightness, Brightness.light);
+      expect(
+        Theme.of(context).inputDecorationTheme.fillColor,
+        light.chromeRaised,
+      );
+      expect(tester.state(find.byType(BdoResourceMap)), same(mapState));
+      expect(tester.state(find.byType(TextField).first), same(dialogState));
+      expect(
+        tester.element(find.byType(BdoResourceMap)).mapChrome.uiOpacity,
+        .25,
+      );
+      expect(tester.takeException(), isNull);
+      await tester.tap(find.text('Cancel'));
+      await tester.pumpAndSettle();
+    },
+  );
 
   for (final style in ResourceMapInterfaceStyle.values) {
     for (final opacity in <double>[0, .25]) {

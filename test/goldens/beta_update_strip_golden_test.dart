@@ -1,12 +1,17 @@
+import 'dart:io';
+
 import 'package:bdo_craft_planner_flutter/app/update/beta_update.dart';
 import 'package:bdo_craft_planner_flutter/app/update/beta_update_indicator.dart';
 import 'package:bdo_craft_planner_flutter/visual/visual.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../support/application_test_harness.dart';
 
 void main() {
+  setUpAll(_loadFonts);
+
   testWidgets('available Beta patch adds the Sakura update notice', (
     tester,
   ) async {
@@ -24,9 +29,15 @@ void main() {
 
     try {
       await controller.checkOnce();
+      final theme = SakuraNightGardenSpec.theme.materialTheme();
       await tester.pumpWidget(
         MaterialApp(
-          theme: SakuraNightGardenSpec.theme.materialTheme(),
+          theme: theme.copyWith(
+            textTheme: theme.textTheme.apply(fontFamily: 'Roboto'),
+            primaryTextTheme: theme.primaryTextTheme.apply(
+              fontFamily: 'Roboto',
+            ),
+          ),
           home: ThemeSpecScope(
             spec: SakuraNightGardenSpec.theme,
             child: Align(
@@ -56,6 +67,40 @@ void main() {
       controller.dispose();
     }
   });
+}
+
+Future<void> _loadFonts() async {
+  final windows = Platform.environment['WINDIR'] ?? r'C:\Windows';
+  var sdk = File(Platform.resolvedExecutable).parent;
+  while (!Directory(
+        '${sdk.path}/bin/cache/artifacts/material_fonts',
+      ).existsSync() &&
+      sdk.parent.path != sdk.path) {
+    sdk = sdk.parent;
+  }
+  for (final entry in <String, List<String>>{
+    'Segoe UI': [
+      '$windows/Fonts/segoeui.ttf',
+      '$windows/Fonts/seguisb.ttf',
+      '$windows/Fonts/segoeuib.ttf',
+    ],
+    'Roboto': [
+      '${sdk.path}/bin/cache/artifacts/material_fonts/Roboto-Regular.ttf',
+    ],
+    'MaterialIcons': [
+      '${sdk.path}/bin/cache/artifacts/material_fonts/MaterialIcons-Regular.otf',
+    ],
+  }.entries) {
+    final loader = FontLoader(entry.key);
+    for (final path in entry.value) {
+      final file = File(path);
+      if (!file.existsSync()) continue;
+      loader.addFont(
+        file.readAsBytes().then((bytes) => ByteData.sublistView(bytes)),
+      );
+    }
+    await loader.load();
+  }
 }
 
 class _GoldenUpdateService implements BetaUpdateService {

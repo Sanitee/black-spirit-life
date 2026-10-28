@@ -31,11 +31,11 @@ void main() {
     radiusWorld: 10000,
   );
 
-  test('loads the attributed September 9 Beta dataset', () {
+  test('loads the attributed October 9 Beta dataset', () {
     expect(dataset.manifest.schemaVersion, 1);
-    expect(dataset.manifest.datasetVersion, '2026.09.09-beta-v4');
+    expect(dataset.manifest.datasetVersion, '2026.10.09-beta-v5');
     expect(dataset.manifest.provenance, isNotEmpty);
-    expect(dataset.workerNodes.length, 1052);
+    expect(dataset.workerNodes.length, 1050);
     expect(dataset.resources.length, 358);
     expect(dataset.gatheringSpots, hasLength(23));
     expect(dataset.gatheringPoints, hasLength(13315));
@@ -335,7 +335,7 @@ void main() {
       dataset.workerNodes.where((node) => node.id.startsWith('client:')),
       isEmpty,
     );
-    expect(dataset.workerNodesById, hasLength(1052));
+    expect(dataset.workerNodesById, hasLength(1050));
     expect(
       dataset.workerNodes
           .where((node) => node.isProductionNode)
@@ -344,11 +344,11 @@ void main() {
     );
     expect(
       dataset.workerNodes.where((node) => !node.isProductionNode),
-      hasLength(610),
+      hasLength(608),
     );
     expect(
       dataset.workerNodes.where((node) => node.sourceLayerFlag == 1),
-      hasLength(610),
+      hasLength(608),
     );
     expect(
       dataset.workerNodes.where((node) => node.sourceLayerFlag == 0),

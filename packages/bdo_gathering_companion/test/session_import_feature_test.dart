@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:bdo_gathering_companion/src/domain/models.dart';
 import 'package:bdo_gathering_companion/src/feature.dart';
 import 'package:bdo_gathering_companion/src/gathering_companion_home.dart';
+import 'package:bdo_gathering_companion/src/services/native_bridge.dart';
 import 'package:bdo_gathering_companion/src/services/session_store.dart';
 import 'package:bdo_gathering_companion/src/services/shared_market_loader.dart';
 import 'package:bdo_gathering_companion/src/ui/theme.dart';
@@ -96,8 +97,13 @@ void main() {
           '${directory.absolute.path}${Platform.pathSeparator}session-import-inbox';
       expect(home.sessionImportReceiptDirectory, expectedInbox);
       expect(home.store.directory.absolute.path, directory.absolute.path);
-      await tester.tap(find.byKey(const ValueKey('open-garmoth-upload')));
-      await tester.pump();
+      expect(find.byKey(const ValueKey('open-garmoth-upload')), findsNothing);
+      expect(
+        await NativeBridge.openSessionImport(
+          receiptDirectory: home.sessionImportReceiptDirectory!,
+        ),
+        isTrue,
+      );
       expect(calls, hasLength(1));
       expect(calls.single.method, 'openSessionImport');
       expect(calls.single.arguments, {'receiptDirectory': expectedInbox});
@@ -106,8 +112,10 @@ void main() {
       await tester.pumpAndSettle();
       await tester.tap(find.byKey(const ValueKey('time-60')));
       await tester.pump();
-      await tester.ensureVisible(find.text('Details'));
-      await tester.tap(find.text('Details'));
+      await tester.ensureVisible(
+        find.byKey(const ValueKey('session-edit-details')),
+      );
+      await tester.tap(find.byKey(const ValueKey('session-edit-details')));
       await tester.pumpAndSettle();
       final noteField = find.byWidgetPredicate(
         (widget) =>
@@ -146,7 +154,7 @@ void main() {
             .first,
       );
       expect(timeChoice.selected, isTrue);
-      await tester.tap(find.text('Details'));
+      await tester.tap(find.byKey(const ValueKey('session-edit-details')));
       await tester.pumpAndSettle();
       expect(
         tester.widget<TextField>(noteField).controller!.text,
@@ -254,7 +262,7 @@ final class _IsolatedVideoCache extends IOOverrides {
     final local = Platform.environment['LOCALAPPDATA'];
     if (local != null &&
         path.toLowerCase() ==
-            '$local${Platform.pathSeparator}BDO Gathering Companion${Platform.pathSeparator}video-webview'
+            '$local${Platform.pathSeparator}Black Spirit Life Codex Trial${Platform.pathSeparator}video-webview'
                 .toLowerCase()) {
       return super.createDirectory(cachePath);
     }

@@ -26,6 +26,21 @@ add_executable(${BINARY_NAME} WIN32
 # that need different build settings.
 apply_standard_settings(${BINARY_NAME})
 
+# Diagnostic entry point is compiled out of ordinary builds. Read, never edit,
+# Flutter's generated define list, deriving the value anew on every configure.
+include("${CMAKE_CURRENT_SOURCE_DIR}/resource_redraw_diagnostic.cmake")
+set(BSL_RESOURCE_REDRAW_DEFINES "")
+file(STRINGS "${FLUTTER_MANAGED_DIR}/ephemeral/generated_config.cmake"
+  BSL_RESOURCE_REDRAW_CONFIG_LINES REGEX "DART_DEFINES=")
+foreach(CONFIG_LINE IN LISTS BSL_RESOURCE_REDRAW_CONFIG_LINES)
+  if(CONFIG_LINE MATCHES "^[ ]*\"DART_DEFINES=([^\"]*)\"[ ]*$")
+    set(BSL_RESOURCE_REDRAW_DEFINES "${CMAKE_MATCH_1}")
+  endif()
+endforeach()
+bsl_resource_redraw_flag("${BSL_RESOURCE_REDRAW_DEFINES}" BSL_RESOURCE_REDRAW_ENABLED)
+target_compile_definitions(${BINARY_NAME} PRIVATE
+  "BSL_DIAGNOSTIC_RESOURCE_REDRAW=${BSL_RESOURCE_REDRAW_ENABLED}")
+
 # Add preprocessor definitions for the build version.
 target_compile_definitions(${BINARY_NAME} PRIVATE "FLUTTER_VERSION=\"${FLUTTER_VERSION}\"")
 target_compile_definitions(${BINARY_NAME} PRIVATE "FLUTTER_VERSION_MAJOR=${FLUTTER_VERSION_MAJOR}")

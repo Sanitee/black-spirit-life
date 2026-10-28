@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../domain/formatting/planner_formatters.dart';
+import '../../domain/planner/planner_models.dart';
 import '../../visual/visual.dart';
 
 /// Main Planner quantities; shared Bonus rows retain their own presentation.
@@ -13,6 +14,86 @@ class PlannerQuantityLayout extends InheritedWidget {
 
   @override
   bool updateShouldNotify(PlannerQuantityLayout oldWidget) => false;
+}
+
+/// Existing calculation results in a compact, wrapping header line.
+class PlannerCraftQuantities extends StatelessWidget {
+  const PlannerCraftQuantities({required this.step, super.key});
+
+  final PlanStep step;
+
+  @override
+  Widget build(BuildContext context) {
+    final spec = context.visualTheme;
+    final values = [
+      ('Craft', step.count),
+      ('Results', step.produced),
+      ('Need', step.demand),
+    ];
+    final labelStyle = spec.typography.meta.copyWith(
+      fontSize: 12,
+      fontStyle: FontStyle.normal,
+      color: spec.palette.textMuted,
+    );
+    final valueStyle = spec.typography.body.copyWith(
+      fontSize: 16,
+      fontWeight: FontWeight.w700,
+      fontStyle: FontStyle.normal,
+      color: spec.palette.text,
+      fontFeatures: const [FontFeature.tabularFigures()],
+    );
+    return Column(
+      key: ValueKey('planner-step-summary:${step.name}'),
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Wrap(
+          spacing: 8,
+          runSpacing: 6,
+          crossAxisAlignment: WrapCrossAlignment.center,
+          children: [
+            for (final value in values)
+              DecoratedBox(
+                key: ValueKey('planner-craft-field:${step.name}:${value.$1}'),
+                decoration: BoxDecoration(
+                  color: spec.palette.surfaceInset.withValues(alpha: .24),
+                  borderRadius: BorderRadius.circular(5),
+                  border: Border(
+                    bottom: BorderSide(
+                      color: spec.palette.trim.withValues(alpha: .30),
+                    ),
+                  ),
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 8),
+                  child: Wrap(
+                    spacing: 7,
+                    runSpacing: 3,
+                    crossAxisAlignment: WrapCrossAlignment.center,
+                    children: [
+                      Text(value.$1, style: labelStyle),
+                      Text(
+                        formatQuantity(value.$2),
+                        style: valueStyle,
+                        key: ValueKey(
+                          'planner-craft-quantity:${step.name}:${value.$1}',
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+          ],
+        ),
+        if (step.batchSize > 1) ...[
+          const SizedBox(height: 8),
+          Text(
+            'Mass batches ${formatQuantity(step.batchCount)} ×${step.batchSize}',
+            style: labelStyle,
+          ),
+        ],
+      ],
+    );
+  }
 }
 
 /// A quiet, noninteractive backing shared by per-craft and total quantities.
@@ -119,6 +200,10 @@ class PlannerNeedQuantities extends StatelessWidget {
     required this.need,
     required this.have,
     required this.missing,
+    required this.leading,
+    required this.identity,
+    required this.actions,
+    this.marketDetails,
     super.key,
   });
 
@@ -126,15 +211,13 @@ class PlannerNeedQuantities extends StatelessWidget {
   final double need;
   final double have;
   final double missing;
+  final Widget leading;
+  final Widget identity;
+  final Widget actions;
+  final Widget? marketDetails;
 
-  @override
-  Widget build(BuildContext context) {
+  Widget _emphasized(BuildContext context) {
     final spec = context.visualTheme;
-    final values = [
-      ('Need', formatQuantity(need)),
-      ('Have', formatQuantity(have)),
-      ('Missing', formatQuantity(missing)),
-    ];
     final labelStyle = spec.typography.meta.copyWith(
       fontSize: 12.5,
       fontWeight: FontWeight.w400,
@@ -142,113 +225,93 @@ class PlannerNeedQuantities extends StatelessWidget {
       height: 1.2,
       color: spec.palette.textMuted,
     );
-    TextStyle valueStyle(int index) => spec.typography.body.copyWith(
-      fontSize: index == 0 ? 16 : 15,
-      fontWeight: index == 0 ? FontWeight.w700 : FontWeight.w500,
+    final valueStyle = spec.typography.body.copyWith(
+      fontSize: 14,
+      fontWeight: FontWeight.w500,
       fontStyle: FontStyle.normal,
-      height: 1.25,
-      color: index == 0 ? spec.palette.text : spec.palette.textMuted,
+      height: 1.2,
+      color: spec.palette.text,
       fontFeatures: const [FontFeature.tabularFigures()],
     );
-
+    final missingStyle = valueStyle.copyWith(
+      fontSize: 16,
+      fontWeight: FontWeight.w700,
+    );
+    Widget value(String label, double amount, TextStyle style) => Text(
+      formatQuantity(amount),
+      key: ValueKey('planner-need-quantity:$stableId:$label'),
+      style: style,
+    );
+    Widget inline(String label, double amount) => Wrap(
+      crossAxisAlignment: WrapCrossAlignment.center,
+      spacing: 6,
+      runSpacing: 3,
+      children: [
+        Text(label, style: labelStyle),
+        value(label, amount, label == 'Missing' ? missingStyle : valueStyle),
+      ],
+    );
+    final item = Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        leading,
+        const SizedBox(width: 12),
+        Expanded(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              identity,
+              const SizedBox(height: 8),
+              Wrap(
+                crossAxisAlignment: WrapCrossAlignment.center,
+                spacing: 16,
+                runSpacing: 6,
+                children: [
+                  inline('Need', need),
+                  inline('Have', have),
+                  inline('Missing', missing),
+                ],
+              ),
+              if (marketDetails case final market?) ...[
+                const SizedBox(height: 10),
+                market,
+              ],
+            ],
+          ),
+        ),
+      ],
+    );
     return LayoutBuilder(
       builder: (context, constraints) {
-        const gap = 10.0;
-        var minimumWidth = 0.0;
-        // Measure actual values and text scale so columns reflow, not shrink.
-        for (var i = 0; i < values.length; i++) {
-          for (final text in [
-            TextSpan(text: values[i].$1, style: labelStyle),
-            TextSpan(text: values[i].$2, style: valueStyle(i)),
-          ]) {
-            final painter = TextPainter(
-              text: text,
-              textDirection: Directionality.of(context),
-              textScaler: MediaQuery.textScalerOf(context),
-            )..layout();
-            if (painter.width > minimumWidth) minimumWidth = painter.width;
-            painter.dispose();
-          }
+        // Keep the item details together; move only the Add controls below
+        // when the column or enlarged text needs the extra room.
+        final sideBySideWidth =
+            60 + MediaQuery.textScalerOf(context).scale(350);
+        if (constraints.maxWidth < sideBySideWidth) {
+          return Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              item,
+              const SizedBox(height: 12),
+              Align(alignment: Alignment.centerRight, child: actions),
+            ],
+          );
         }
-        minimumWidth = minimumWidth.ceilToDouble() + 2;
-        final columns = ((constraints.maxWidth + gap) / (minimumWidth + gap))
-            .floor()
-            .clamp(1, 3);
-        final width = (constraints.maxWidth - (columns - 1) * gap) / columns;
-        return Wrap(
-          spacing: gap,
-          runSpacing: 7,
+        return Row(
           children: [
-            for (var i = 0; i < values.length; i++)
-              SizedBox(
-                width: width,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(values[i].$1, style: labelStyle),
-                    const SizedBox(height: 2),
-                    Text(
-                      values[i].$2,
-                      key: ValueKey(
-                        'planner-need-quantity:$stableId:${values[i].$1}',
-                      ),
-                      style: valueStyle(i),
-                    ),
-                  ],
-                ),
-              ),
+            Expanded(child: item),
+            const SizedBox(width: 16),
+            actions,
           ],
         );
       },
     );
   }
-}
-
-/// Keep amount-entry controls beside the row, or below on narrow Planners.
-class PlannerNeedRowLayout extends StatelessWidget {
-  const PlannerNeedRowLayout({
-    required this.icon,
-    required this.content,
-    required this.actions,
-    required this.gap,
-    required this.reservedWidth,
-    super.key,
-  });
-
-  final Widget icon;
-  final Widget content;
-  final Widget actions;
-  final double gap;
-  final double reservedWidth;
 
   @override
-  Widget build(BuildContext context) => LayoutBuilder(
-    builder: (context, constraints) {
-      final stackActions =
-          PlannerQuantityLayout.of(context) &&
-          constraints.maxWidth <
-              reservedWidth + MediaQuery.textScalerOf(context).scale(220);
-      final item = Row(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          icon,
-          SizedBox(width: gap),
-          Expanded(child: content),
-          if (!stackActions) ...[SizedBox(width: gap), actions],
-        ],
-      );
-      if (!stackActions) return item;
-      return Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          item,
-          const SizedBox(height: 8),
-          Align(alignment: Alignment.centerRight, child: actions),
-        ],
-      );
-    },
-  );
+  Widget build(BuildContext context) => _emphasized(context);
 }
 
 /// Keep names and quality actions intact beside the more readable quantity.

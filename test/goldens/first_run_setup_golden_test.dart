@@ -48,7 +48,7 @@ void main() {
         ),
       );
       await tester.pumpAndSettle();
-      expect(find.text('Step 1 of 3'), findsOneWidget);
+      expect(find.text('Mastery'), findsOneWidget);
 
       await expectLater(
         find.byKey(goldenRoot),
@@ -56,25 +56,27 @@ void main() {
       );
 
       await tester.tap(
-        find.byKey(const ValueKey<String>('first-run-setup-next')),
+        find.byKey(const ValueKey<String>('setup-section-afkLoad')),
       );
       await tester.pumpAndSettle();
-      expect(find.text('Step 2 of 3'), findsOneWidget);
+      expect(find.text('Feathery Steps'), findsOneWidget);
       await expectLater(
         find.byKey(goldenRoot),
         matchesGoldenFile('first_run_setup_afk_1200x752.png'),
       );
 
       await tester.tap(
-        find.byKey(const ValueKey<String>('first-run-setup-next')),
+        find.byKey(const ValueKey<String>('setup-section-marketSales')),
       );
       await tester.pumpAndSettle();
-      expect(find.text('Step 3 of 3'), findsOneWidget);
+      expect(find.text('Family Fame bonus'), findsOneWidget);
       await expectLater(
         find.byKey(goldenRoot),
         matchesGoldenFile('first_run_setup_market_1200x752.png'),
       );
 
+      await tester.tap(find.byKey(const ValueKey<String>('setup-value-pack')));
+      await tester.pumpAndSettle();
       await tester.tap(
         find.byKey(const ValueKey<String>('first-run-setup-finish')),
       );

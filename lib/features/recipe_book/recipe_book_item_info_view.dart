@@ -10,9 +10,11 @@ import '../../domain/models/craft_mode.dart';
 import '../../shared/overlays/anchored_popover.dart';
 import '../../visual/visual.dart';
 import '../shared/mode_item_icon.dart';
+import '../shared/workshop_presentation.dart';
 import 'recipe_book_controller.dart';
 import 'recipe_book_item_info.dart';
 import 'recipe_book_keys.dart';
+import 'recipe_book_preview_routes.dart';
 
 /// The Recipe Book's reference preview, without taking over its child's clicks.
 class RecipeBookItemInfoHover extends StatelessWidget {
@@ -21,6 +23,9 @@ class RecipeBookItemInfoHover extends StatelessWidget {
     required this.name,
     required this.child,
     this.mode,
+    this.info,
+    this.referenceIcon,
+    this.interactivePreview = true,
     super.key,
   });
 
@@ -28,17 +33,22 @@ class RecipeBookItemInfoHover extends StatelessWidget {
   final String name;
   final Widget child;
   final CraftMode? mode;
+  final RecipeBookItemInfo? info;
+  final Widget? referenceIcon;
+  final bool interactivePreview;
 
   @override
   Widget build(BuildContext context) {
     final itemMode = mode ?? controller.modeController.mode;
-    final info = controller.itemInfoFor(name, mode: itemMode);
+    final info = this.info ?? controller.itemInfoFor(name, mode: itemMode);
     if (info == null || !info.hasBody) return child;
     return _RecipeBookItemInfoTooltip(
       controller: controller,
       name: name,
       mode: itemMode,
       info: info,
+      referenceIcon: referenceIcon,
+      interactivePreview: interactivePreview,
       triggerMode: TooltipTriggerMode.manual,
       child: child,
     );
@@ -53,6 +63,8 @@ class _RecipeBookItemInfoTooltip extends StatelessWidget {
     required this.info,
     required this.child,
     this.triggerMode,
+    this.referenceIcon,
+    this.interactivePreview = true,
   });
 
   final RecipeBookController controller;
@@ -61,6 +73,8 @@ class _RecipeBookItemInfoTooltip extends StatelessWidget {
   final RecipeBookItemInfo info;
   final Widget child;
   final TooltipTriggerMode? triggerMode;
+  final Widget? referenceIcon;
+  final bool interactivePreview;
 
   @override
   Widget build(BuildContext context) {
@@ -76,7 +90,7 @@ class _RecipeBookItemInfoTooltip extends StatelessWidget {
         showDuration: const Duration(seconds: 12),
         exitDuration: const Duration(milliseconds: 300),
         preferBelow: false,
-        ignorePointer: false,
+        ignorePointer: !interactivePreview,
         decoration: BoxDecoration(
           color: Colors.transparent,
           borderRadius: BorderRadius.circular(6),
@@ -95,6 +109,7 @@ class _RecipeBookItemInfoTooltip extends StatelessWidget {
               info: info,
               maxWidth: width,
               spec: context.visualTheme,
+              icon: referenceIcon,
             ),
           ),
         ),
@@ -104,15 +119,8 @@ class _RecipeBookItemInfoTooltip extends StatelessWidget {
   }
 }
 
-double itemReferenceCardWidth(BuildContext context) {
-  final scale = MediaQuery.textScalerOf(context).scale(14) / 14;
-  return (440 * scale.clamp(1.0, 2.0))
-      .clamp(
-        0.0,
-        (MediaQuery.sizeOf(context).width - 32).clamp(0.0, double.infinity),
-      )
-      .toDouble();
-}
+double itemReferenceCardWidth(BuildContext context) =>
+    ItemDetailStyle.width(context);
 
 double itemReferenceCardHeight(BuildContext context) {
   final overlay = Overlay.maybeOf(context)?.context.findRenderObject();
@@ -125,6 +133,20 @@ double itemReferenceCardHeight(BuildContext context) {
 
 double _itemInfoSpacing(BuildContext context, double value) =>
     value * (MediaQuery.textScalerOf(context).scale(14) / 14).clamp(1.0, 1.5);
+
+// Accents must remain readable on every theme's raised reading surface.
+Color _referenceAccent(ThemeSpec spec) {
+  return ItemDetailStyle.accent(spec);
+}
+
+List<RecipeBookFormula> _distinctReferenceFormulas(
+  Iterable<RecipeBookFormula> formulas,
+) {
+  final seen = <String>{};
+  return formulas
+      .where((formula) => seen.add(recipeBookPreviewFormulaIdentity(formula)))
+      .toList(growable: false);
+}
 
 class RecipeBookItemIcon extends StatefulWidget {
   const RecipeBookItemIcon({
@@ -247,6 +269,8 @@ class ItemReferenceCard extends StatefulWidget {
     this.closeKey,
     this.headerDragKey,
     this.onCopyItemName,
+    this.onUseFormula,
+    this.icon,
     super.key,
   });
 
@@ -260,6 +284,8 @@ class ItemReferenceCard extends StatefulWidget {
   final Key? closeKey;
   final Key? headerDragKey;
   final ValueChanged<String>? onCopyItemName;
+  final ValueChanged<RecipeBookFormula>? onUseFormula;
+  final Widget? icon;
 
   @override
   State<ItemReferenceCard> createState() => _ItemReferenceCardState();
@@ -285,30 +311,16 @@ class _ItemReferenceCardState extends State<ItemReferenceCard> {
     final spec = widget.spec;
     final onClose = widget.onClose;
     final closeKey = widget.closeKey;
-    final heading = spec.typography.section.copyWith(
-      fontSize: 17,
-      color: spec.palette.text,
-      height: 1.2,
-    );
-    final meta = spec.typography.meta.copyWith(
-      color: spec.palette.textMuted,
-      fontWeight: FontWeight.w700,
-      letterSpacing: .2,
-    );
-    final body = spec.typography.body.copyWith(
-      color: spec.palette.text,
-      fontSize: 12.5,
-      height: 1.4,
-    );
-    final accent = body.copyWith(
-      color: spec.palette.warning,
-      fontWeight: FontWeight.w700,
-    );
+    final heading = ItemDetailStyle.title(spec);
+    final meta = ItemDetailStyle.meta(spec);
+    final body = ItemDetailStyle.body(spec);
     final maxHeight = itemReferenceCardHeight(context);
     return ConstrainedBox(
       constraints: BoxConstraints(maxWidth: maxWidth, maxHeight: maxHeight),
       child: _ItemReferenceCopyScope(
         onCopyItemName: widget.onCopyItemName,
+        onRecipeActivated: onClose,
+        onUseFormula: widget.onUseFormula,
         child: AppSurface(
           role: AppSurfaceRole.tooltip,
           tone: AppSurfaceTone.info,
@@ -330,30 +342,37 @@ class _ItemReferenceCardState extends State<ItemReferenceCard> {
                       Row(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: <Widget>[
-                          ModeItemIcon(
-                            controller:
-                                controller.modeController.owner.modes[mode]!,
-                            catalogRepository: controller.catalogRepository,
-                            name: name,
-                            size: 36,
-                            searchAcrossModes: true,
+                          WorkshopItemMount(
+                            child:
+                                widget.icon ??
+                                ModeItemIcon(
+                                  controller: controller
+                                      .modeController
+                                      .owner
+                                      .modes[mode]!,
+                                  catalogRepository:
+                                      controller.catalogRepository,
+                                  name: name,
+                                  size: ItemDetailStyle.headerIcon,
+                                  searchAcrossModes: true,
+                                ),
                           ),
-                          const SizedBox(width: 10),
+                          const SizedBox(width: 12),
                           Expanded(
                             child: AnchoredPopoverDragRegion(
                               key: widget.headerDragKey,
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: <Widget>[
-                                  Text(info.kind, style: meta, maxLines: 1),
-                                  SizedBox(
-                                    height: _itemInfoSpacing(context, 4),
-                                  ),
                                   _ReferenceItemName(
                                     name: name,
                                     label: info.title,
                                     style: heading,
                                   ),
+                                  SizedBox(
+                                    height: _itemInfoSpacing(context, 6),
+                                  ),
+                                  Text(info.kind, style: meta),
                                 ],
                               ),
                             ),
@@ -363,7 +382,7 @@ class _ItemReferenceCardState extends State<ItemReferenceCard> {
                             AppButton(
                               key: closeKey,
                               role: AppButtonRole.optionPill,
-                              minimumSize: const Size.square(26),
+                              minimumSize: const Size.square(30),
                               padding: EdgeInsets.zero,
                               semanticLabel: 'Close $name information',
                               tooltip: 'Close information',
@@ -373,52 +392,14 @@ class _ItemReferenceCardState extends State<ItemReferenceCard> {
                           ],
                         ],
                       ),
-                      if (info.summary.trim().isNotEmpty) ...<Widget>[
-                        SizedBox(height: _itemInfoSpacing(context, 20)),
-                        _InfoSectionHeading(title: 'Description', spec: spec),
-                        SizedBox(height: _itemInfoSpacing(context, 8)),
-                        Text(info.summary, style: body),
-                      ],
-                      if (info.effects.isNotEmpty)
-                        _InfoSection(
-                          title: info.effectsTitle,
-                          values: info.effects,
-                          style: accent,
-                        ),
-                      if (info.acquisitionNotes.isNotEmpty)
-                        _InfoSection(
-                          title: 'How to Obtain',
-                          values: info.acquisitionNotes,
-                          style: body,
-                        ),
-                      if (info.acquisitionFormulas.isNotEmpty)
-                        _FormulaSection(
-                          controller: controller,
-                          mode: mode,
-                          title: 'Recipe & materials',
-                          formulas: info.acquisitionFormulas,
-                          style: body,
-                        ),
-                      if (info.uses.isNotEmpty || info.craftUses.isNotEmpty)
-                        _UsedForSection(
-                          controller: controller,
-                          mode: mode,
-                          values: info.uses,
-                          craftUses: info.craftUses,
-                          style: body,
-                        ),
-                      if (info.example?.trim().isNotEmpty ?? false)
-                        _InfoSection(
-                          title: 'Example',
-                          values: <String>[info.example!.trim()],
-                          style: body,
-                        ),
-                      if (info.notes.isNotEmpty)
-                        _InfoSection(
-                          title: 'Notes',
-                          values: info.notes,
-                          style: body,
-                        ),
+                      ..._itemReferenceSectionWidgets(
+                        context,
+                        controller: controller,
+                        mode: mode,
+                        name: name,
+                        info: info,
+                        spec: spec,
+                      ),
                       if (info.summary.trim().isEmpty &&
                           info.effects.isEmpty &&
                           info.acquisitionFormulas.isEmpty &&
@@ -441,6 +422,125 @@ class _ItemReferenceCardState extends State<ItemReferenceCard> {
   }
 }
 
+/// The same structured item facts used by hover and pinned reference cards,
+/// without adding a second header, surface, scroll view or empty-state copy.
+class ItemReferenceSections extends StatelessWidget {
+  const ItemReferenceSections({
+    required this.controller,
+    required this.mode,
+    required this.name,
+    required this.info,
+    required this.spec,
+    this.onCopyItemName,
+    this.onRecipeActivated,
+    this.onUseFormula,
+    super.key,
+  });
+
+  final RecipeBookController controller;
+  final CraftMode mode;
+  final String name;
+  final RecipeBookItemInfo info;
+  final ThemeSpec spec;
+  final ValueChanged<String>? onCopyItemName;
+
+  /// Dismiss the enclosing view before the existing recipe activation runs.
+  final VoidCallback? onRecipeActivated;
+
+  /// Hosts with their own navigation may route the action instead of invoking
+  /// the reference controller. The default close-then-activate path is retained
+  /// when no override is provided.
+  final ValueChanged<RecipeBookFormula>? onUseFormula;
+
+  @override
+  Widget build(BuildContext context) {
+    final children = _itemReferenceSectionWidgets(
+      context,
+      controller: controller,
+      mode: mode,
+      name: name,
+      info: withReadableRecipeBookSections(info),
+      spec: spec,
+    );
+    if (children.isEmpty) return const SizedBox.shrink();
+    final inherited = context
+        .dependOnInheritedWidgetOfExactType<_ItemReferenceCopyScope>();
+    return _ItemReferenceCopyScope(
+      onCopyItemName: onCopyItemName ?? inherited?.onCopyItemName,
+      onRecipeActivated: onRecipeActivated ?? inherited?.onRecipeActivated,
+      onUseFormula: onUseFormula ?? inherited?.onUseFormula,
+      child: DefaultTextStyle(
+        style: ItemDetailStyle.body(spec),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: children,
+        ),
+      ),
+    );
+  }
+}
+
+List<Widget> _itemReferenceSectionWidgets(
+  BuildContext context, {
+  required RecipeBookController controller,
+  required CraftMode mode,
+  required String name,
+  required RecipeBookItemInfo info,
+  required ThemeSpec spec,
+}) {
+  final body = ItemDetailStyle.body(spec);
+  final accent = body.copyWith(
+    color: _referenceAccent(spec),
+    fontWeight: FontWeight.w500,
+  );
+  return <Widget>[
+    if (info.summary.trim().isNotEmpty) ...<Widget>[
+      SizedBox(height: _itemInfoSpacing(context, 24)),
+      _InfoSectionHeading(title: 'Description', spec: spec),
+      SizedBox(height: _itemInfoSpacing(context, 8)),
+      Text(info.summary, style: body),
+    ],
+    if (info.effects.isNotEmpty)
+      _InfoSection(
+        title: info.effectsTitle,
+        values: info.effects,
+        style: accent,
+      ),
+    if (info.acquisitionNotes.isNotEmpty)
+      _InfoSection(
+        title: 'How to Obtain',
+        values: info.acquisitionNotes,
+        style: body,
+      ),
+    if (info.acquisitionFormulas.isNotEmpty)
+      _FormulaSection(
+        controller: controller,
+        mode: mode,
+        title: 'Recipe & materials',
+        formulas: info.acquisitionFormulas,
+        style: body,
+      ),
+    if (info.uses.isNotEmpty || info.craftUses.isNotEmpty)
+      _UsedForSection(
+        controller: controller,
+        mode: mode,
+        sourceName: name,
+        values: info.uses,
+        craftUses: info.craftUses,
+        style: body,
+      ),
+    if (info.example?.trim().isNotEmpty ?? false)
+      _InfoSection(
+        title: 'Example',
+        values: <String>[info.example!.trim()],
+        style: body,
+      ),
+    if (info.notes.isNotEmpty)
+      _InfoSection(title: 'Notes', values: info.notes, style: body),
+  ];
+}
+
 class _ReferenceSelection extends StatelessWidget {
   const _ReferenceSelection({required this.enabled, required this.child});
   final bool enabled;
@@ -454,14 +554,20 @@ class _ReferenceSelection extends StatelessWidget {
 class _ItemReferenceCopyScope extends InheritedWidget {
   const _ItemReferenceCopyScope({
     required this.onCopyItemName,
+    required this.onRecipeActivated,
+    this.onUseFormula,
     required super.child,
   });
 
   final ValueChanged<String>? onCopyItemName;
+  final VoidCallback? onRecipeActivated;
+  final ValueChanged<RecipeBookFormula>? onUseFormula;
 
   @override
   bool updateShouldNotify(_ItemReferenceCopyScope oldWidget) =>
-      onCopyItemName != oldWidget.onCopyItemName;
+      onCopyItemName != oldWidget.onCopyItemName ||
+      onRecipeActivated != oldWidget.onRecipeActivated ||
+      onUseFormula != oldWidget.onUseFormula;
 }
 
 class _ReferenceItemName extends StatelessWidget {
@@ -546,6 +652,7 @@ class _FormulaSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final spec = context.visualTheme;
+    final formulas = _distinctReferenceFormulas(this.formulas);
     final routeIds = formulas
         .map((formula) => (formula.routeId ?? formula.routeLabel ?? '').trim())
         .where((value) => value.isNotEmpty)
@@ -599,6 +706,9 @@ class _FormulaCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final spec = context.visualTheme;
+    final formulaMode = formula.mode ?? mode;
+    final canActivate =
+        formula.mode != null && controller.canActivateFormula(formula);
     final routeLabel = formula.routeLabel?.trim() ?? '';
     final tags = <String>[
       if (showRouteLabel && routeLabel.isNotEmpty) routeLabel,
@@ -606,40 +716,35 @@ class _FormulaCard extends StatelessWidget {
     ];
     final meta = spec.typography.meta.copyWith(
       color: spec.palette.textMuted,
-      fontSize: 10.5,
-      fontWeight: FontWeight.w700,
+      fontSize: 13,
+      fontWeight: FontWeight.w500,
       height: 1.3,
     );
     final output = _formulaOutputLabel(formula);
     return LayoutBuilder(
       builder: (context, constraints) => Align(
-        alignment: Alignment.center,
+        alignment: Alignment.centerLeft,
         child: SizedBox(
           width: math.min(
             constraints.maxWidth,
             _formulaContentWidth(
               context,
               controller,
-              mode,
+              formulaMode,
               formula,
               style,
               meta,
+              showUseRecipe: canActivate,
             ),
           ),
           child: Semantics(
             container: true,
             explicitChildNodes: true,
-            child: Container(
+            child: ItemDetailGroup(
               key: RecipeBookKeys.itemInfoFormula(
                 formula.outputName,
                 formula.variantId,
                 formula.batchMultiplier,
-              ),
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: spec.palette.surfaceInset.withAlpha(150),
-                border: Border.all(color: spec.palette.trim.withAlpha(105)),
-                borderRadius: BorderRadius.circular(spec.geometry.cardRadius),
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -652,24 +757,30 @@ class _FormulaCard extends StatelessWidget {
                       children: <Widget>[
                         Text(
                           formula.method,
-                          style: style.copyWith(fontWeight: FontWeight.w800),
+                          style: style.copyWith(
+                            fontSize: 15,
+                            fontWeight: FontWeight.w600,
+                          ),
                         ),
-                        if (tags.isNotEmpty) ...<Widget>[
-                          const SizedBox(height: 2),
-                          Text(tags.join(' · '), style: meta),
-                        ],
-                        SizedBox(height: _itemInfoSpacing(context, 4)),
-                        _ReferenceItemName(
-                          name: formula.outputName,
-                          label: output,
-                          style: meta,
+                        SizedBox(height: _itemInfoSpacing(context, 6)),
+                        Wrap(
+                          spacing: 14,
+                          runSpacing: 4,
+                          children: [
+                            for (final tag in tags) Text(tag, style: meta),
+                            _ReferenceItemName(
+                              name: formula.outputName,
+                              label: output,
+                              style: meta.copyWith(
+                                color: _referenceAccent(spec),
+                              ),
+                            ),
+                          ],
                         ),
                       ],
                     ),
                   ),
-                  SizedBox(height: _itemInfoSpacing(context, 8)),
-                  Container(height: 1, color: spec.palette.trim.withAlpha(65)),
-                  SizedBox(height: _itemInfoSpacing(context, 4)),
+                  SizedBox(height: _itemInfoSpacing(context, 12)),
                   for (
                     var index = 0;
                     index < formula.ingredients.length;
@@ -677,12 +788,53 @@ class _FormulaCard extends StatelessWidget {
                   )
                     _FormulaMaterialRow(
                       controller: controller,
-                      mode: mode,
+                      mode: formulaMode,
                       formula: formula,
                       ingredient: formula.ingredients[index],
                       style: style,
-                      topSpacing: _itemInfoSpacing(context, index == 0 ? 4 : 8),
+                      topSpacing: _itemInfoSpacing(
+                        context,
+                        index == 0 ? 0 : 12,
+                      ),
                     ),
+                  if (canActivate) ...<Widget>[
+                    SizedBox(height: _itemInfoSpacing(context, 14)),
+                    Align(
+                      alignment: Alignment.centerLeft,
+                      child: AppButton(
+                        key: ValueKey<String>(
+                          'item-info-use-recipe:${formulaMode.key}:'
+                          '${formula.outputName}:${formula.variantId ?? 'base'}:'
+                          '${formula.batchMultiplier}',
+                        ),
+                        role: AppButtonRole.optionPill,
+                        minimumSize: const Size(0, 34),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 10,
+                          vertical: 5,
+                        ),
+                        semanticLabel:
+                            'Use ${formula.outputName}, ${formula.method}'
+                            '${tags.isEmpty ? '' : ', ${tags.join(', ')}'}',
+                        onPressed: () {
+                          if (!controller.canActivateFormula(formula)) return;
+                          final scope = context
+                              .dependOnInheritedWidgetOfExactType<
+                                _ItemReferenceCopyScope
+                              >();
+                          Tooltip.dismissAllToolTips();
+                          final onUseFormula = scope?.onUseFormula;
+                          if (onUseFormula != null) {
+                            onUseFormula(formula);
+                          } else {
+                            scope?.onRecipeActivated?.call();
+                            controller.activateFormula(formula);
+                          }
+                        },
+                        child: const Text('Use recipe'),
+                      ),
+                    ),
+                  ],
                 ],
               ),
             ),
@@ -699,8 +851,9 @@ double _formulaContentWidth(
   CraftMode mode,
   RecipeBookFormula formula,
   TextStyle style,
-  TextStyle meta,
-) {
+  TextStyle meta, {
+  required bool showUseRecipe,
+}) {
   double textWidth(String value, TextStyle textStyle) {
     final painter = TextPainter(
       text: TextSpan(text: value, style: textStyle),
@@ -713,16 +866,25 @@ double _formulaContentWidth(
     return width;
   }
 
-  final nameStyle = style.copyWith(fontWeight: FontWeight.w700);
-  final quantityStyle = style.copyWith(fontWeight: FontWeight.w800);
-  final alternativeStyle = style.copyWith(
-    fontSize: (style.fontSize ?? 12.5) - 1,
-    height: 1.2,
+  final nameStyle = style.copyWith(fontSize: 15, fontWeight: FontWeight.w600);
+  final quantityStyle = style.copyWith(
+    fontSize: 13,
+    fontWeight: FontWeight.w500,
   );
+  final alternativeStyle = style.copyWith(fontSize: 13, height: 1.35);
   var width = math.max(
-    textWidth(formula.method, style.copyWith(fontWeight: FontWeight.w800)),
+    textWidth(
+      formula.method,
+      style.copyWith(fontSize: 15, fontWeight: FontWeight.w600),
+    ),
     textWidth(_formulaOutputLabel(formula), meta),
   );
+  if (showUseRecipe) {
+    width = math.max(
+      width,
+      textWidth('Use recipe', context.visualTheme.typography.label) + 20,
+    );
+  }
   for (final ingredient in formula.ingredients) {
     var labelWidth = textWidth(ingredient.name, nameStyle);
     for (final alternative in _formulaAlternatives(
@@ -739,16 +901,16 @@ double _formulaContentWidth(
     }
     width = math.max(
       width,
-      24 +
-          8 +
+      36 +
+          12 +
           labelWidth +
           12 +
           textWidth('×${_displayQuantity(ingredient.quantity)}', quantityStyle),
     );
   }
-  // Include both 12 px content insets and the one-pixel borders. The width is
+  // Include the content insets and the leading rule. The width is
   // independent of the outer description, while bounded layouts still wrap.
-  return (width + 26).ceilToDouble();
+  return (width + 28).ceilToDouble();
 }
 
 class _FormulaMaterialRow extends StatelessWidget {
@@ -783,8 +945,8 @@ class _FormulaMaterialRow extends StatelessWidget {
     ].join(', ');
     final alternateStyle = style.copyWith(
       color: spec.palette.textMuted,
-      fontSize: (style.fontSize ?? 12.5) - 1,
-      height: 1.2,
+      fontSize: 13,
+      height: 1.35,
     );
     return Padding(
       padding: EdgeInsets.only(top: topSpacing),
@@ -804,21 +966,40 @@ class _FormulaMaterialRow extends StatelessWidget {
               controller: controller.modeController.owner.modes[mode]!,
               catalogRepository: controller.catalogRepository,
               name: ingredient.name,
-              size: 24,
+              size: ItemDetailStyle.ingredientIcon,
               searchAcrossModes: true,
             ),
-            const SizedBox(width: 8),
+            const SizedBox(width: 12),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
-                  _ReferenceItemName(
-                    name: ingredient.name,
-                    style: style.copyWith(fontWeight: FontWeight.w700),
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Flexible(
+                        child: _ReferenceItemName(
+                          name: ingredient.name,
+                          style: style.copyWith(
+                            fontSize: 15,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Text(
+                        '×$quantity',
+                        style: style.copyWith(
+                          color: spec.palette.textMuted,
+                          fontSize: 13,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ],
                   ),
                   for (final alternative in alternatives)
                     Padding(
-                      padding: const EdgeInsets.only(top: 1),
+                      padding: const EdgeInsets.only(top: 4),
                       child: _ReferenceItemName(
                         name: alternative.name,
                         label:
@@ -828,14 +1009,6 @@ class _FormulaMaterialRow extends StatelessWidget {
                       ),
                     ),
                 ],
-              ),
-            ),
-            const SizedBox(width: 12),
-            Text(
-              '×$quantity',
-              style: style.copyWith(
-                color: spec.palette.warning,
-                fontWeight: FontWeight.w800,
               ),
             ),
           ],
@@ -914,6 +1087,7 @@ class _UsedForSection extends StatelessWidget {
   const _UsedForSection({
     required this.controller,
     required this.mode,
+    required this.sourceName,
     required this.values,
     required this.craftUses,
     required this.style,
@@ -921,6 +1095,7 @@ class _UsedForSection extends StatelessWidget {
 
   final RecipeBookController controller;
   final CraftMode mode;
+  final String sourceName;
   final List<String> values;
   final List<RecipeBookCraftUse> craftUses;
   final TextStyle style;
@@ -942,6 +1117,7 @@ class _UsedForSection extends StatelessWidget {
             _CraftUseEntry(
               controller: controller,
               mode: mode,
+              sourceName: sourceName,
               craftUse: craftUses[index],
               style: style,
               topSpacing: index == 0 && values.isEmpty
@@ -958,6 +1134,7 @@ class _CraftUseEntry extends StatelessWidget {
   const _CraftUseEntry({
     required this.controller,
     required this.mode,
+    required this.sourceName,
     required this.craftUse,
     required this.style,
     required this.topSpacing,
@@ -965,6 +1142,7 @@ class _CraftUseEntry extends StatelessWidget {
 
   final RecipeBookController controller;
   final CraftMode mode;
+  final String sourceName;
   final RecipeBookCraftUse craftUse;
   final TextStyle style;
   final double topSpacing;
@@ -972,6 +1150,23 @@ class _CraftUseEntry extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final spec = context.visualTheme;
+    final source = sourceName.trim().toLowerCase();
+    final matching = craftUse.formulas
+        .where(
+          (formula) => formula.ingredients.any(
+            (ingredient) => [
+              ingredient.name,
+              ...ingredient.options,
+              ...ingredient.substituteRatios.keys,
+            ].any((name) => name.trim().toLowerCase() == source),
+          ),
+        )
+        .toList(growable: false);
+    // Curated indirect uses may have no exact input match; keep those intact.
+    // Direct material references should not lead with a batch using another item.
+    final formulas = _distinctReferenceFormulas(
+      matching.isEmpty ? craftUse.formulas : matching,
+    );
     final outputInfo = controller.itemInfoFor(craftUse.output, mode: mode);
     final effects = outputInfo?.effects ?? const <String>[];
     final effectHeading = outputInfo?.effectsTitle ?? 'Effects';
@@ -984,13 +1179,13 @@ class _CraftUseEntry extends StatelessWidget {
       color: spec.palette.textMuted,
       fontSize: (style.fontSize ?? 12.5) - .5,
     );
-    final routeIds = craftUse.formulas
+    final routeIds = formulas
         .map((formula) => (formula.routeId ?? formula.routeLabel ?? '').trim())
         .where((value) => value.isNotEmpty)
         .map((value) => value.toLowerCase())
         .toSet();
     final showRouteLabel = routeIds.length > 1;
-    final showBatchLabel = craftUse.formulas.any(
+    final showBatchLabel = formulas.any(
       (formula) => formula.batchMultiplier != 1,
     );
     return Padding(
@@ -1005,14 +1200,17 @@ class _CraftUseEntry extends StatelessWidget {
                 controller: controller.modeController.owner.modes[mode]!,
                 catalogRepository: controller.catalogRepository,
                 name: craftUse.output,
-                size: 24,
+                size: ItemDetailStyle.recipeIcon,
                 searchAcrossModes: true,
               ),
-              const SizedBox(width: 8),
+              const SizedBox(width: 12),
               Expanded(
                 child: _ReferenceItemName(
                   name: craftUse.output,
-                  style: style.copyWith(fontWeight: FontWeight.w800),
+                  style: style.copyWith(
+                    fontSize: 17,
+                    fontWeight: FontWeight.w700,
+                  ),
                 ),
               ),
             ],
@@ -1031,9 +1229,9 @@ class _CraftUseEntry extends StatelessWidget {
               _InfoBullet(
                 value: effect,
                 style: style.copyWith(
-                  color: spec.palette.warning,
-                  fontWeight: FontWeight.w700,
-                  height: 1.2,
+                  color: spec.palette.textMuted,
+                  fontWeight: FontWeight.w400,
+                  height: 1.4,
                 ),
               ),
           ],
@@ -1054,18 +1252,14 @@ class _CraftUseEntry extends StatelessWidget {
               ),
             ),
           ],
-          if (craftUse.formulas.isNotEmpty)
+          if (formulas.isNotEmpty)
             SizedBox(height: _itemInfoSpacing(context, 12)),
-          for (
-            var index = 0;
-            index < craftUse.formulas.length;
-            index++
-          ) ...<Widget>[
+          for (var index = 0; index < formulas.length; index++) ...<Widget>[
             if (index > 0) SizedBox(height: _itemInfoSpacing(context, 12)),
             _FormulaCard(
               controller: controller,
               mode: mode,
-              formula: craftUse.formulas[index],
+              formula: formulas[index],
               style: style,
               showRouteLabel: showRouteLabel,
               showBatchLabel: showBatchLabel,
@@ -1117,13 +1311,12 @@ class _InfoSectionHeading extends StatelessWidget {
   Widget build(BuildContext context) {
     return Semantics(
       header: true,
-      child: Text(
-        title,
-        style: spec.typography.meta.copyWith(
-          color: spec.palette.textMuted,
-          fontWeight: FontWeight.w800,
-          letterSpacing: .2,
-        ),
+      child: Row(
+        children: [
+          Flexible(child: Text(title, style: ItemDetailStyle.section(spec))),
+          const SizedBox(width: 12),
+          const Expanded(child: WorkshopSectionRule()),
+        ],
       ),
     );
   }

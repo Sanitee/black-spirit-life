@@ -2,13 +2,90 @@ import 'dart:convert';
 import 'dart:typed_data';
 
 import 'package:bdo_craft_planner_flutter/domain/models/catalog_models.dart';
+import 'package:bdo_craft_planner_flutter/domain/state/planner_content_scale.dart';
 import 'package:bdo_craft_planner_flutter/domain/state/planner_state_json_codec.dart';
+import 'package:bdo_craft_planner_flutter/domain/state/state_copy.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'state_test_fixture.dart';
 
 void main() {
   const codec = PlannerStateJsonCodec();
+
+  test(
+    'Planner content size defaults and survives native copies and reload',
+    () {
+      final initial = buildStateFixture();
+      expect(initial.plannerContentScale, 1);
+      final changed = initial.copyWith(plannerContentScale: 1.2);
+      final copied = changed.copyWith(showDeleteTools: true);
+      expect(copied.plannerContentScale, 1.2);
+      final restored = codec.decode(codec.encode(copied));
+      expect(restored.toJson(), copied.toJson());
+      expect(restored.plannerContentScale, 1.2);
+      final old = jsonDecode(codec.encode(changed)) as Map<String, Object?>;
+      old.remove('plannerContentScale');
+      expect(codec.decode(jsonEncode(old)).plannerContentScale, 1);
+    },
+  );
+
+  test(
+    'Planner content size safely normalizes invalid and oversized values',
+    () {
+      final source =
+          jsonDecode(codec.encode(buildStateFixture())) as Map<String, Object?>;
+      for (final entry in <Object?, double>{
+        null: 1,
+        'large': 1,
+        true: 1,
+        -2: 1,
+        0: 1,
+        1.12: 1.12,
+        3: 1.25,
+      }.entries) {
+        source['plannerContentScale'] = entry.key;
+        expect(
+          codec.decode(jsonEncode(source)).plannerContentScale,
+          entry.value,
+        );
+      }
+      expect(PlannerContentScale.normalize(double.nan), 1);
+      expect(PlannerContentScale.normalize(double.infinity), 1);
+      expect(PlannerContentScale.normalize(double.negativeInfinity), 1);
+      expect(
+        buildStateFixture()
+            .copyWith(plannerContentScale: 3)
+            .plannerContentScale,
+        1.25,
+      );
+    },
+  );
+
+  test(
+    'preorder prices round-trip separately and older saves need no migration',
+    () {
+      final initial = buildStateFixture();
+      final old = codec.decode(codec.encode(initial));
+      expect(old.alchemy.market.preorderPrices, isEmpty);
+      expect(old.alchemy.market.preorderObservedAt, isEmpty);
+      final state = initial.copyWith(
+        alchemy: initial.alchemy.copyWith(
+          market: initial.alchemy.market.copyWith(
+            preorderPrices: const {'Old Item': 1200},
+            preorderObservedAt: const {'Old Item': 10000},
+          ),
+        ),
+      );
+      final decoded = codec.decode(codec.encode(state));
+      expect(decoded.toJson(), state.toJson());
+      expect(decoded.alchemy.market.prices, initial.alchemy.market.prices);
+      expect(decoded.alchemy.market.preorderPrices['Old Item'], 1200);
+      expect(
+        () => decoded.alchemy.market.preorderPrices['Old Item'] = 0,
+        throwsUnsupportedError,
+      );
+    },
+  );
 
   test('round-trips the complete native schema without losing extensions', () {
     final state = buildStateFixture();

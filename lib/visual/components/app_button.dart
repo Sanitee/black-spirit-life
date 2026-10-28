@@ -8,6 +8,7 @@ import '../illuminated_ledger/ledger_ornament_painters.dart';
 import '../sakura_night_garden/sakura_material_painters.dart';
 import '../sakura_night_garden/sakura_spec.dart';
 import '../standard/standard_spec.dart';
+import 'app_interaction_frame.dart';
 import 'button_effect_scope.dart';
 
 const Color _ledgerAccentBorder = Color(0xFFB9903E);
@@ -224,7 +225,11 @@ class _AppButtonState extends State<AppButton> {
     Widget buildMaterial() {
       final material = AnimatedContainer(
         key: AppButton.materialKey,
-        duration: tokens.motion.interactionDuration,
+        duration:
+            MediaQuery.disableAnimationsOf(context) ||
+                MediaQuery.accessibleNavigationOf(context)
+            ? Duration.zero
+            : tokens.motion.interactionDuration,
         curve: Curves.easeOutCubic,
         padding: materialPadding,
         clipBehavior: Clip.antiAlias,
@@ -339,51 +344,60 @@ class _AppButtonState extends State<AppButton> {
       );
     }
 
-    Widget result = Semantics(
+    Widget result = FocusableActionDetector(
+      enabled: _enabled,
+      focusNode: _focusNode,
+      autofocus: widget.autofocus,
+      mouseCursor: _enabled
+          ? SystemMouseCursors.click
+          : SystemMouseCursors.forbidden,
+      onShowHoverHighlight: _setHovered,
+      onShowFocusHighlight: _setFocused,
+      shortcuts: const <ShortcutActivator, Intent>{
+        SingleActivator(LogicalKeyboardKey.enter): ActivateIntent(),
+        SingleActivator(LogicalKeyboardKey.space): ActivateIntent(),
+      },
+      actions: <Type, Action<Intent>>{
+        ActivateIntent: CallbackAction<ActivateIntent>(
+          onInvoke: _keyboardActivate,
+        ),
+      },
+      child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTapDown: _enabled
+            ? (_) {
+                _focusNode.requestFocus();
+                _setPressed(true);
+              }
+            : null,
+        onTapUp: _enabled ? (_) => _setPressed(false) : null,
+        onTapCancel: _enabled ? () => _setPressed(false) : null,
+        onTap: _enabled ? _activate : null,
+        child: ConstrainedBox(
+          constraints: BoxConstraints(
+            minWidth: minSize.width,
+            minHeight: minSize.height,
+          ),
+          child: materialInset == EdgeInsets.zero
+              ? buildMaterial()
+              : Padding(padding: materialInset, child: buildMaterial()),
+        ),
+      ),
+    );
+    result = AppInteractionFrame(
+      enabled: _enabled,
+      radius: visual.radius,
+      accent: widget.role == AppButtonRole.danger
+          ? tokens.palette.danger
+          : tokens.palette.primaryBright,
+      child: result,
+    );
+    result = Semantics(
       button: true,
       enabled: _enabled,
       selected: widget.selected,
       label: widget.semanticLabel,
-      child: FocusableActionDetector(
-        enabled: _enabled,
-        focusNode: _focusNode,
-        autofocus: widget.autofocus,
-        mouseCursor: _enabled
-            ? SystemMouseCursors.click
-            : SystemMouseCursors.forbidden,
-        onShowHoverHighlight: _setHovered,
-        onShowFocusHighlight: _setFocused,
-        shortcuts: const <ShortcutActivator, Intent>{
-          SingleActivator(LogicalKeyboardKey.enter): ActivateIntent(),
-          SingleActivator(LogicalKeyboardKey.space): ActivateIntent(),
-        },
-        actions: <Type, Action<Intent>>{
-          ActivateIntent: CallbackAction<ActivateIntent>(
-            onInvoke: _keyboardActivate,
-          ),
-        },
-        child: GestureDetector(
-          behavior: HitTestBehavior.opaque,
-          onTapDown: _enabled
-              ? (_) {
-                  _focusNode.requestFocus();
-                  _setPressed(true);
-                }
-              : null,
-          onTapUp: _enabled ? (_) => _setPressed(false) : null,
-          onTapCancel: _enabled ? () => _setPressed(false) : null,
-          onTap: _enabled ? _activate : null,
-          child: ConstrainedBox(
-            constraints: BoxConstraints(
-              minWidth: minSize.width,
-              minHeight: minSize.height,
-            ),
-            child: materialInset == EdgeInsets.zero
-                ? buildMaterial()
-                : Padding(padding: materialInset, child: buildMaterial()),
-          ),
-        ),
-      ),
+      child: result,
     );
     if (widget.tooltip case final message?) {
       result = Tooltip(message: message, child: result);

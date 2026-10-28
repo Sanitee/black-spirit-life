@@ -93,7 +93,7 @@ void main() {
       expect(find.text('Armor Workshop · Lv. 1'), findsOneWidget);
       expect(find.text('Connection'), findsOneWidget);
       expect(find.text('2 CP'), findsOneWidget);
-      expect(find.byType(BackdropFilter), findsOneWidget);
+      expect(find.byType(BackdropFilter), findsNothing);
       expect(tester.takeException(), isNull);
     });
     for (final scale in [1.0, 2.0]) {
@@ -103,7 +103,7 @@ void main() {
           await tester.pumpWidget(_app(altinova, chrome: chrome, scale: scale));
           await tester.pumpAndSettle();
           expect(tester.takeException(), isNull);
-          expect(find.byType(BackdropFilter), findsOneWidget);
+          expect(find.byType(BackdropFilter), findsNothing);
           expect(find.byType(HouseUseIcon), findsWidgets);
           expect(find.text('Invest in'), findsNothing);
           expect(find.textContaining('Max. house'), findsNothing);

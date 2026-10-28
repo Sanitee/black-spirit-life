@@ -794,6 +794,16 @@ class WebviewController extends ValueNotifier<WebviewValue> {
     return _channel.invokeMethod('setDefaultContextMenusEnabled', enabled);
   }
 
+  /// Enables native capture of the page into its Flutter texture.
+  ///
+  /// Disabling delivery stops the Windows Graphics Capture session, not the
+  /// page: navigation, scripts, timers and retained browser state stay alive.
+  /// Size updates cannot restart capture until delivery is enabled again.
+  Future<void> setFrameDeliveryEnabled(bool enabled) async {
+    if (_isDisposed) return;
+    return _channel.invokeMethod('setFrameDeliveryEnabled', enabled);
+  }
+
   /// Suspends the webview to reduce its resource usage.
   ///
   /// See [the WebView2 documentation](https://learn.microsoft.com/en-us/microsoft-edge/webview2/reference/win32/icorewebview2_3#trysuspend).
@@ -966,6 +976,12 @@ class Webview extends StatefulWidget {
   /// unless specifying a [scaleFactor].
   final FilterQuality filterQuality;
 
+  /// Stops native texture capture while an ancestor [TickerMode] is disabled.
+  ///
+  /// Opt-in so existing hosts retain their behavior. This does not suspend the
+  /// browser page or change its state; it only gates delivery to Flutter.
+  final bool pauseFrameDeliveryWhenOffstage;
+
   /// Creates a webview widget backed by [controller].
   const Webview(
     this.controller, {
@@ -975,6 +991,7 @@ class Webview extends StatefulWidget {
     this.permissionRequested,
     this.scaleFactor,
     this.filterQuality = FilterQuality.none,
+    this.pauseFrameDeliveryWhenOffstage = false,
   });
 
   @override
@@ -992,6 +1009,8 @@ class _WebviewState extends State<Webview> {
   WebviewController get _controller => widget.controller;
 
   StreamSubscription<SystemMouseCursor>? _cursorSubscription;
+  bool? _lastFrameDeliveryEnabled;
+  WebviewController? _lastFrameDeliveryController;
 
   @override
   void initState() {
@@ -1009,6 +1028,36 @@ class _WebviewState extends State<Webview> {
     });
 
     _WebviewFocusCoordinator.register(this);
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _syncFrameDelivery();
+  }
+
+  @override
+  void didUpdateWidget(Webview oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    _syncFrameDelivery();
+  }
+
+  void _syncFrameDelivery() {
+    if (!widget.pauseFrameDeliveryWhenOffstage &&
+        _lastFrameDeliveryEnabled == null) {
+      return;
+    }
+    final enabled =
+        !widget.pauseFrameDeliveryWhenOffstage || TickerMode.of(context);
+    if (_lastFrameDeliveryEnabled == enabled &&
+        identical(_lastFrameDeliveryController, _controller)) {
+      return;
+    }
+    _lastFrameDeliveryEnabled = enabled;
+    _lastFrameDeliveryController = _controller;
+    // MethodChannel preserves send order: rapid hide/show changes leave the
+    // native gate in the latest state, before later surface-size reports.
+    unawaited(_controller.setFrameDeliveryEnabled(enabled));
   }
 
   @override
@@ -1149,6 +1198,9 @@ class _WebviewState extends State<Webview> {
 
   @override
   void dispose() {
+    if (widget.pauseFrameDeliveryWhenOffstage) {
+      unawaited(_controller.setFrameDeliveryEnabled(false));
+    }
     _WebviewFocusCoordinator.unregister(this);
     _cursorSubscription?.cancel();
     super.dispose();

@@ -105,6 +105,7 @@ constexpr auto kMethodRemoveScriptToExecuteOnDocumentCreated =
 constexpr auto kMethodExecuteScript = "executeScript";
 constexpr auto kMethodPostWebMessage = "postWebMessage";
 constexpr auto kMethodSetSize = "setSize";
+constexpr auto kMethodSetFrameDeliveryEnabled = "setFrameDeliveryEnabled";
 constexpr auto kMethodSetCursorPos = "setCursorPos";
 constexpr auto kMethodSetPointerUpdate = "setPointerUpdate";
 constexpr auto kMethodSetPointerButton = "setPointerButton";
@@ -238,6 +239,15 @@ WebviewBridge::~WebviewBridge() {
   // destroy the sink first, leaving that callback with a dangling reference.
   event_sink_ = nullptr;
   webview_ = nullptr;
+}
+
+void WebviewBridge::UpdateFrameDelivery() {
+  if (frame_delivery_policy_.ShouldCapture()) {
+    texture_bridge_->Start();
+  } else {
+    // Keep page/controller and texture identity; do not pause or hide the page.
+    texture_bridge_->Stop();
+  }
 }
 
 void WebviewBridge::RegisterEventHandlers() {
@@ -480,11 +490,36 @@ void WebviewBridge::HandleMethodCall(
     if (size) {
       const auto [width, height, scale_factor] = size.value();
 
-      webview_->SetSurfaceSize(static_cast<size_t>(width),
-                               static_cast<size_t>(height),
-                               static_cast<float>(scale_factor));
+      const auto size_state =
+          webview_capture::ClassifySurfaceSize(width, height, scale_factor);
+      if (size_state != webview_capture::SurfaceSizeState::kReady) {
+        frame_delivery_policy_.SetSurfaceReady(false);
+        UpdateFrameDelivery();
+        if (size_state == webview_capture::SurfaceSizeState::kEmpty) {
+          return result->Success();
+        }
+        return result->Error(kErrorInvalidArgs);
+      }
+      const auto surface_ready = webview_->SetSurfaceSize(
+          static_cast<size_t>(width), static_cast<size_t>(height),
+          static_cast<float>(scale_factor));
+      frame_delivery_policy_.SetSurfaceReady(surface_ready);
+      UpdateFrameDelivery();
+      if (!surface_ready) {
+        return result->Error(kMethodFailed, "Setting webview size failed.");
+      }
+      return result->Success();
+    }
+    frame_delivery_policy_.SetSurfaceReady(false);
+    UpdateFrameDelivery();
+    return result->Error(kErrorInvalidArgs);
+  }
 
-      texture_bridge_->Start();
+  // setFrameDeliveryEnabled: bool. This controls capture only, not page state.
+  if (method_name.compare(kMethodSetFrameDeliveryEnabled) == 0) {
+    if (const auto enabled = std::get_if<bool>(method_call.arguments())) {
+      frame_delivery_policy_.SetEnabled(*enabled);
+      UpdateFrameDelivery();
       return result->Success();
     }
     return result->Error(kErrorInvalidArgs);
@@ -543,7 +578,8 @@ void WebviewBridge::HandleMethodCall(
 
   // suspend
   if (method_name.compare(kMethodSuspend) == 0) {
-    texture_bridge_->Stop();
+    frame_delivery_policy_.SetSuspended(true);
+    UpdateFrameDelivery();
     webview_->Suspend();
     return result->Success();
   }
@@ -551,7 +587,8 @@ void WebviewBridge::HandleMethodCall(
   // resume
   if (method_name.compare(kMethodResume) == 0) {
     webview_->Resume();
-    texture_bridge_->Start();
+    frame_delivery_policy_.SetSuspended(false);
+    UpdateFrameDelivery();
     return result->Success();
   }
 

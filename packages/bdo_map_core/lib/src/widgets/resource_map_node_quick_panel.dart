@@ -41,7 +41,7 @@ class _NodePanelPalette {
     }
     return _NodePanelPalette(
       surface: chrome.fillAlpha(chrome.chromeBase, .98),
-      inset: chrome.fillAlpha(chrome.canvas, .94),
+      inset: chrome.fillAlpha(chrome.controlInset, .94),
       outline: chrome.warmOutline,
       divider: chrome.divider,
       shadowColor: chrome.idleShadow.color,
@@ -1188,7 +1188,7 @@ class ResourceMapManagerMarker extends StatelessWidget {
         child: RepaintBoundary(
           child: DecoratedBox(
             decoration: BoxDecoration(
-              color: chrome.canvas.withValues(alpha: .9),
+              color: chrome.controlInset.withValues(alpha: .9),
               shape: BoxShape.circle,
               border: Border.all(color: chrome.warning, width: 2),
               boxShadow: const <BoxShadow>[

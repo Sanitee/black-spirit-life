@@ -5,6 +5,122 @@ import 'package:flutter_test/flutter_test.dart';
 import 'opportunity_calculator_test.dart' as fixture;
 
 void main() {
+  test('sold out uses highest active preorder rather than summary price', () {
+    final quote = fixture.calculate(
+      crafts: 3,
+      input: fixture.marketItem(
+        '2',
+        price: 20,
+        stock: 0,
+        asks: [],
+        bids: [
+          fixture.level(22, 10),
+          fixture.level(30, 5),
+          fixture.level(99, 0),
+        ],
+      ),
+    );
+    final input = quote.ingredients.single;
+    expect(input.costForCalculation, 90);
+    expect(input.estimatedUnitPrice, 30);
+    expect(input.marketUnitPrice, 30);
+    expect(input.estimatedFromPreorder, isTrue);
+    expect(input.estimatedMarketQuantity, 3);
+    expect(input.filledQuantity, 0);
+    expect(quote.marketReady, isFalse);
+    expect(quote.inputCraftCapacity, 0);
+    expect(quote.listingProfit, closeTo(163.5, .000001));
+  });
+
+  test('partial stock combines actual asks with preorder-priced shortfall', () {
+    final quote = fixture.calculate(
+      crafts: 5,
+      input: fixture.marketItem(
+        '2',
+        price: 10,
+        stock: 2,
+        asks: [fixture.level(30, 2)],
+        bids: [fixture.level(25, 100)],
+      ),
+    );
+    expect(quote.totalCost, 135); // 2 x 30 + 3 x 25.
+    expect(quote.ingredients.single.filledQuantity, 2);
+    expect(quote.ingredients.single.estimatedMarketQuantity, 3);
+    expect(quote.ingredients.single.estimatedFromPreorder, isTrue);
+  });
+
+  test('fresh preorders can estimate without a usable summary quote', () {
+    final quote = fixture.calculate(
+      input: fixture.marketItem(
+        '2',
+        price: 0,
+        stock: 0,
+        asks: [],
+        bids: [fixture.level(25, 100)],
+      ),
+    );
+    expect(quote.totalCost, 25);
+    expect(quote.ingredients.single.estimatedFromPreorder, isTrue);
+  });
+
+  test(
+    'stale future or malformed preorders cannot replace a valid base price',
+    () {
+      for (final item in [
+        fixture.marketItem(
+          '2',
+          price: 20,
+          asks: [],
+          bids: [fixture.level(30, 10)],
+          bookTime: fixture.now.subtract(const Duration(minutes: 6)),
+        ),
+        fixture.marketItem(
+          '2',
+          price: 20,
+          asks: [],
+          bids: [fixture.level(30, 10)],
+          bookTime: fixture.now.add(const Duration(seconds: 1)),
+        ),
+        fixture.marketItem(
+          '2',
+          price: 20,
+          asks: [],
+          bids: [fixture.level(30, -1)],
+        ),
+        fixture.marketItem(
+          '2',
+          price: 20,
+          asks: [],
+          bids: [fixture.level(0, 10)],
+        ),
+      ]) {
+        final quote = fixture.calculate(input: item);
+        expect(quote.totalCost, 20);
+        expect(quote.ingredients.single.estimatedFromPreorder, isFalse);
+      }
+    },
+  );
+
+  test(
+    'NPC supply keeps its verified price instead of a preorder estimate',
+    () {
+      final quote = fixture.calculate(
+        npcPrice: 12,
+        input: fixture.marketItem(
+          '2',
+          price: 20,
+          stock: 0,
+          asks: [],
+          bids: [fixture.level(30, 100)],
+        ),
+      );
+      expect(quote.totalCost, 12);
+      expect(quote.ingredients.single.npcQuantity, 1);
+      expect(quote.ingredients.single.estimatedFromPreorder, isFalse);
+      expect(quote.hasEstimatedInputs, isFalse);
+    },
+  );
+
   test('zero stock uses fresh base price without inventing availability', () {
     final quote = fixture.calculate(
       crafts: 3,

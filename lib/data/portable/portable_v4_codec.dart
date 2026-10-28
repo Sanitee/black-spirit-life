@@ -4,6 +4,7 @@ import '../../domain/migration/avalonia_v1_migration.dart';
 import '../../domain/migration/migration_report.dart';
 import '../../domain/models/craft_mode.dart';
 import '../../domain/state/inventory_storage.dart';
+import '../../domain/state/planner_content_scale.dart';
 import '../../domain/state/planner_state.dart';
 import '../../domain/state/planner_state_json_codec.dart';
 import '../../domain/state/state_copy.dart';
@@ -170,6 +171,7 @@ class PortableV4Codec {
     }
     if (scopes.settings) {
       data['processingYields'] = state.processingYields;
+      data['plannerContentScale'] = state.plannerContentScale;
       data['afkWeightProfile'] = _withoutExtensions(
         state.afkWeightProfile.toJson(),
       );
@@ -250,6 +252,7 @@ class PortableV4Codec {
       'processingYields',
       'marketTax',
       'afkWeightProfile',
+      'plannerContentScale',
     }, r'$.data');
 
     final presentModes = <CraftMode>{};
@@ -340,6 +343,12 @@ class PortableV4Codec {
     }
     if (scopes.settings && afkWeightProfile != null) {
       result = result.copyWith(afkWeightProfile: afkWeightProfile);
+    }
+    final plannerContentScale = _caseValueOptional(data, 'plannerContentScale');
+    if (scopes.settings && plannerContentScale != null) {
+      result = result.copyWith(
+        plannerContentScale: PlannerContentScale.normalize(plannerContentScale),
+      );
     }
     if ((scopes.settings || scopes.market) && marketTax != null) {
       result = result.copyWith(marketTax: migrated.state!.marketTax);

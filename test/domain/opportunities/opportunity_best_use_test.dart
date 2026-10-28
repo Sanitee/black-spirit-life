@@ -16,6 +16,61 @@ import 'package:flutter_test/flutter_test.dart';
 import 'opportunity_calculator_test.dart' as f;
 
 void main() {
+  test('Frenzy Draught prices NPC tears and sold-out elixir preorders', () {
+    final catalog = const BundledCatalogParser().parse(
+      File('assets/data/app-data.json').readAsStringSync(),
+    );
+    final repository = CatalogRepository(catalog);
+    expect(repository.npcPurchasePrices['tears of the falling moon'], 100000);
+    final result = evaluateOpportunityBestUse(
+      itemName: 'Abyssal Essence',
+      recipe: catalog.processing.items['Frenzy Draught']!,
+      mode: CraftMode.processing,
+      recipes: catalog.processing.items,
+      rules: const PlannerAssembly().plannerRules(catalog.supportingData),
+      state: f.state(),
+      marketTax: MarketTax(valuePack: true),
+      market: OpportunityMarketSnapshot(
+        region: 'eu',
+        items: {
+          '795': f.marketItem('795', price: 2240000, stock: 959),
+          '9774': f.marketItem('9774', price: 560000),
+          '672': f.marketItem(
+            '672',
+            price: 228000,
+            asks: [f.level(239000, 1), f.level(240000, 1000)],
+          ),
+          '678': f.marketItem(
+            '678',
+            price: 19400,
+            stock: 0,
+            asks: [],
+            bids: [f.level(18900, 3786), f.level(20800, 91)],
+          ),
+        },
+      ),
+      now: f.now,
+      maxMarketAge: const Duration(minutes: 5),
+      catalogNpcPrices: repository.npcPurchasePrices,
+    )!;
+    final tears = result.quote.ingredients.singleWhere(
+      (input) => input.name == 'Tears of the Falling Moon',
+    );
+    final elixir = result.quote.ingredients.singleWhere(
+      (input) => input.name == 'Elixir of Demihuman Hunt',
+    );
+    expect(tears.npcUnitPrice, 100000);
+    expect(tears.costForCalculation, 100000);
+    expect(tears.market, isNull);
+    expect(elixir.estimatedUnitPrice, 20800);
+    expect(elixir.costForCalculation, 62400);
+    expect(elixir.estimatedFromPreorder, isTrue);
+    expect(result.otherInputCost, 881400);
+    expect(result.extraProfitPerUnit, closeTo(538200, .001));
+    expect(result.isEstimated, isTrue);
+    expect(result.otherIngredientsAvailable, isFalse);
+  });
+
   test(
     'values one complete craft against selling consumed material after tax',
     () {
@@ -24,6 +79,11 @@ void main() {
       expect(result.quote.crafts, 1);
       expect(result.otherInputCost, 60);
       expect(result.extraProfitPerUnit, 230); // (650 - 60 - 130) / 2.
+      expect(result.selectedItemId, '2');
+      expect(result.comparison!.rawIngredientSale, 130);
+      expect(result.comparison!.rawSalePerUnit, 65);
+      expect(result.comparison!.profitLossPerUnit, result.extraProfitPerUnit);
+      expect(result.comparison!.otherInputCost, result.otherInputCost);
       expect(
         result.quote.listingProfit,
         390,

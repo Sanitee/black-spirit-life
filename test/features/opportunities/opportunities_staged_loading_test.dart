@@ -33,6 +33,39 @@ void main() {
   );
 
   test(
+    'preorder window resumes automatically and keeps loaded quotes usable',
+    () async {
+      final f = await _Fixture.create(
+        requestWindowLimit: 2,
+        requestWindowDuration: const Duration(milliseconds: 250),
+      );
+      addTearDown(f.dispose);
+      await f.controller.refresh();
+      await f.controller.calculationSettled;
+      final saved = Map.of(f.controller.market.items);
+      final quotes = f.controller.quotes.toList();
+      f.transport.requests.clear();
+      final details = f.controller.ensureMarketDepth(['9101', '9102', '9201']);
+      await _until(() => f.controller.activeDispatchWait > Duration.zero);
+      expect(f.controller.scanning, isTrue);
+      expect(f.controller.summaryComplete, isTrue);
+      expect(f.controller.quotes.length, quotes.length);
+      for (final entry in saved.entries) {
+        expect(
+          f.controller.market.items[entry.key]!.quoteFetchedAt,
+          entry.value.quoteFetchedAt,
+        );
+      }
+      await details;
+      expect(f.transport.books.toSet(), {'9101', '9102', '9201'});
+      expect(f.transport.quotes, isEmpty);
+      expect(f.controller.detailStatus.complete, isTrue);
+      expect(f.controller.activeDispatchWait, Duration.zero);
+      expect(f.controller.summaryComplete, isTrue);
+    },
+  );
+
+  test(
     'global toolbar Refresh renews all summaries without reviving closed books',
     () async {
       final f = await _Fixture.create(startup: true);
@@ -576,6 +609,8 @@ final class _Fixture {
   static Future<_Fixture> create({
     bool startup = false,
     Duration minimumRefreshAge = Duration.zero,
+    int? requestWindowLimit,
+    Duration requestWindowDuration = const Duration(minutes: 1),
   }) async {
     final f = _Fixture(await ApplicationTestHarness.create());
     f.transport = _Transport(() => f.now);
@@ -589,6 +624,8 @@ final class _Fixture {
       cacheMaxAge: sharedMarketFreshness,
       minimumQuoteRefreshAge: minimumRefreshAge,
       minimumBookRefreshAge: minimumRefreshAge,
+      requestWindowLimit: requestWindowLimit,
+      requestWindowDuration: requestWindowDuration,
     );
     f.controller = OpportunitiesController(
       appController: f.harness.bundle.controller,

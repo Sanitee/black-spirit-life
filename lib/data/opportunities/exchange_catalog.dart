@@ -1,4 +1,5 @@
 import '../../domain/opportunities/exchange_models.dart';
+import 'exchange_additional_items.dart';
 
 const _loml = ExchangeSource(
   'Official Land of the Morning Light exchanges',
@@ -36,15 +37,157 @@ const _divine = ExchangeSource(
   'Official Divine Coin exchanges · 10 September 2026',
   'https://www.naeu.playblackdesert.com/en-US/News/Detail?countryType=en-US&groupContentNo=10577',
 );
+const _lakiaro = ExchangeSource(
+  'Official Lakiaro exchange costs and weekly limits',
+  'https://blackdesert.pearlabyss.com/Asia/en-US/News/Notice/Detail?_boardNo=6446',
+);
+const _solare = ExchangeSource(
+  'Official PC Solare exchanges · 30 April 2026',
+  'https://www.sa.playblackdesert.com/es-Mx/News/Detail?groupContentNo=7892',
+);
+const _glory = ExchangeSource(
+  'Official Medal of Glory exchanges · 15 January 2026',
+  'https://blackdesert.pearlabyss.com/Asia/en-US/News/Notice/Detail?_boardNo=12775',
+);
+const _battlefield = ExchangeSource(
+  'Official PC Battlefield Token exchange list · 25 June 2026',
+  'https://blackdesert.pearlabyss.com/TR/en-US/News/Notice/Detail?_boardNo=19532',
+);
+const _royalWorkshop = ExchangeSource(
+  'Royal Workshop token exchanges',
+  'https://www.blackdesertfoundry.com/royal-workshop-guide/',
+);
 
 /// IDs, names, market eligibility and NPC sell prices come from the reviewed
-/// Sep 3 PC client, with Divine Coin additions verified on Sep 10.
+/// Sep 3/10 PC client, with selected consumable exchanges reviewed on Sep 25.
 /// No buyPrice field is used as sale income.
 const exchangeItems = <int, ExchangeItem>{
+  ...additionalExchangeItems,
+  761321: ExchangeItem(
+    id: 761321,
+    name: "Morning's Gratitude Token",
+    iconAsset: 'assets/opportunities/items/761321.webp',
+  ),
+  65396: ExchangeItem(
+    id: 65396,
+    name: 'Seal of Solare',
+    iconAsset: 'assets/opportunities/items/65396.webp',
+  ),
+  42497: ExchangeItem(
+    id: 42497,
+    name: 'Energy of Lakiaro',
+    iconAsset: 'assets/opportunities/items/42497.webp',
+  ),
+  767325: ExchangeItem(
+    id: 767325,
+    name: 'Medal of Glory',
+    iconAsset: 'assets/opportunities/items/767325.webp',
+  ),
+  890002: ExchangeItem(
+    id: 890002,
+    name: 'Battlefield Token',
+    iconAsset: 'assets/opportunities/items/890002.webp',
+  ),
+  821137: ExchangeItem(
+    id: 821137,
+    name: 'Refined Feast',
+    iconAsset: 'assets/opportunities/items/821137.webp',
+    marketable: true,
+  ),
+  821139: ExchangeItem(
+    id: 821139,
+    name: 'Assorted Tteok',
+    iconAsset: 'assets/opportunities/items/821139.webp',
+    marketable: true,
+  ),
+  821141: ExchangeItem(
+    id: 821141,
+    name: 'Tricolor Namul',
+    iconAsset: 'assets/opportunities/items/821141.webp',
+    marketable: true,
+  ),
+  821143: ExchangeItem(
+    id: 821143,
+    name: 'Gujeolpan',
+    iconAsset: 'assets/opportunities/items/821143.webp',
+    marketable: true,
+  ),
+  821145: ExchangeItem(
+    id: 821145,
+    name: 'Mellow Herbal Medicine',
+    iconAsset: 'assets/opportunities/items/821145.webp',
+    marketable: true,
+  ),
+  575: ExchangeItem(
+    id: 575,
+    name: 'Whale Tendon Potion',
+    iconAsset: 'assets/opportunities/items/575.webp',
+    marketable: true,
+    vendorSellPrice: 9000,
+  ),
+  576: ExchangeItem(
+    id: 576,
+    name: 'Superior Whale Tendon Potion',
+    iconAsset: 'assets/opportunities/items/576.webp',
+    marketable: true,
+    vendorSellPrice: 12000,
+  ),
+  732: ExchangeItem(
+    id: 732,
+    name: 'Whale Tendon Elixir',
+    iconAsset: 'assets/opportunities/items/732.webp',
+    marketable: true,
+    vendorSellPrice: 20000,
+  ),
+  733: ExchangeItem(
+    id: 733,
+    name: 'Tough Whale Tendon Elixir',
+    iconAsset: 'assets/opportunities/items/733.webp',
+    marketable: true,
+    vendorSellPrice: 30000,
+  ),
+  735: ExchangeItem(
+    id: 735,
+    name: 'Perfume of Swiftness',
+    iconAsset: 'assets/opportunities/items/735.webp',
+    marketable: true,
+    vendorSellPrice: 154908,
+  ),
+  748: ExchangeItem(
+    id: 748,
+    name: 'Perfume of Khalk',
+    iconAsset: 'assets/opportunities/items/748.webp',
+    marketable: true,
+    vendorSellPrice: 156540,
+  ),
+  771: ExchangeItem(
+    id: 771,
+    name: 'Perfume of Deep Sea',
+    iconAsset: 'assets/opportunities/items/771.webp',
+    marketable: true,
+    vendorSellPrice: 68540,
+  ),
+  1178: ExchangeItem(
+    id: 1178,
+    name: 'Corrupt Oil of Immortality',
+    iconAsset: 'assets/opportunities/items/1178.webp',
+    marketable: true,
+    vendorSellPrice: 20000,
+  ),
+  65401: ExchangeItem(
+    id: 65401,
+    name: 'Box of 3 Whale Tendon Potions',
+    iconAsset: 'assets/opportunities/items/65401.webp',
+  ),
+  750490: ExchangeItem(
+    id: 750490,
+    name: "[Event] Lara's Warm Black Tea",
+    iconAsset: 'assets/opportunities/items/750490.webp',
+  ),
   980170: ExchangeItem(
     id: 980170,
     name: 'Divine Coin',
-    iconAsset: 'assets/opportunities/items/980170.png',
+    iconAsset: 'assets/opportunities/items/980170.webp',
   ),
   821344: ExchangeItem(
     id: 821344,
@@ -1864,6 +2007,287 @@ final List<ExchangeCurrency> exchangeCatalog = List.unmodifiable([
           'Exchange the Gold Bar with a Storage Keeper for 10,000,000 silver.',
         ],
       ),
+    ],
+  ),
+  // Five selected currencies; all current rewards are included at user request.
+  _currency(
+    id: 'mornings-gratitude-token',
+    itemId: 761321,
+    activity: 'Royal Workshops · Land of the Morning Light',
+    sources: [_royalWorkshop],
+    notes: const [
+      'Each 30,000 tokens buys one chosen item, not all five.',
+      'Keep any tokens you still need for workshop unlocks.',
+    ],
+    routes: [
+      for (final id in const [821143, 821141, 821145, 821137, 821139])
+        _route(
+          'gratitude-$id',
+          30000,
+          id,
+          1,
+          'Heo Seungwon · Yukjo Street',
+          sources: [_itemSource(761321), _royalWorkshop],
+        ),
+    ],
+  ),
+  _currency(
+    id: 'seal-of-solare',
+    itemId: 65396,
+    activity: 'Arena of Solare',
+    sources: [_solare],
+    routes: [
+      for (final id in const [734, 748, 771])
+        _route('solare-$id', 15, id, 1, 'Manage Currency', sources: [_solare]),
+      _route('solare-732', 2, 732, 1, 'Manage Currency', sources: [_solare]),
+      _route(
+        'solare-potion-box',
+        1,
+        575,
+        3,
+        'Manage Currency',
+        containerItemId: 65401,
+        notes: const ['Open the box for three Whale Tendon Potions.'],
+        sources: [_solare, _itemSource(65401)],
+      ),
+      for (final entry in const [
+        (35, 1178, 3, 3),
+        (20, 733, 5, 2),
+        (20, 576, 25, 1),
+      ])
+        _route(
+          'solare-weekly-${entry.$2}',
+          entry.$1,
+          entry.$2,
+          entry.$3,
+          'Manage Currency',
+          limit: ExchangeLimit.weekly(entry.$4),
+          sources: [_solare],
+        ),
+      for (final id in const [320009, 320011, 320010])
+        _route(
+          'solare-family-$id',
+          5000,
+          id,
+          1,
+          'Manage Currency',
+          limit: const ExchangeLimit.oncePerFamily(),
+          sources: [_solare],
+        ),
+      for (final entry in const [
+        (150, 890001, 1, 3),
+        (30, 820022, 3, 5),
+        (30, 45912, 1, 3),
+        (30, 761018, 10, 5),
+        (20, 17572, 3, 3),
+        (20, 45162, 30, 3),
+        (20, 768160, 10, 10),
+        (5, 59858, 1, 10),
+        (5, 59859, 1, 10),
+        (5, 59860, 1, 10),
+      ])
+        _route(
+          'solare-weekly-${entry.$2}',
+          entry.$1,
+          entry.$2,
+          entry.$3,
+          'Manage Currency',
+          limit: ExchangeLimit.weekly(entry.$4),
+          sources: [_solare],
+        ),
+      for (final id in const [45107, 45105])
+        _route(
+          'solare-daily-$id',
+          20,
+          id,
+          1,
+          'Manage Currency',
+          limit: const ExchangeLimit.daily(1),
+          sources: [_solare],
+        ),
+      for (final entry in const [(10, 4), (5, 45026), (1, 3)])
+        _route(
+          'solare-${entry.$2}',
+          entry.$1,
+          entry.$2,
+          1,
+          'Manage Currency',
+          sources: [_solare],
+        ),
+    ],
+  ),
+  _currency(
+    id: 'energy-of-lakiaro',
+    itemId: 42497,
+    activity: 'Lakiaro gathering',
+    sources: [_lakiaro],
+    routes: [
+      _route(
+        'lakiaro-swiftness',
+        1,
+        735,
+        1,
+        'Manage Currency',
+        sources: [_lakiaro],
+      ),
+      for (final entry in const [(500, 820152), (100, 11017)])
+        _route(
+          'lakiaro-family-${entry.$2}',
+          entry.$1,
+          entry.$2,
+          1,
+          'Manage Currency',
+          limit: const ExchangeLimit.oncePerFamily(),
+          sources: [_lakiaro],
+        ),
+      for (final entry in const [
+        (60, 752825, 1),
+        (30, 757004, 50),
+        (5, 757010, 1),
+      ])
+        _route(
+          'lakiaro-weekly-${entry.$2}',
+          entry.$1,
+          entry.$2,
+          entry.$3,
+          'Manage Currency',
+          limit: const ExchangeLimit.weekly(1),
+          sources: [_lakiaro],
+        ),
+      for (final entry in const [
+        (10, 59861),
+        (4, 4917),
+        (2, 50815),
+        (2, 50816),
+        (2, 50817),
+        (1, 44195),
+      ])
+        _route(
+          'lakiaro-${entry.$2}',
+          entry.$1,
+          entry.$2,
+          1,
+          'Manage Currency',
+          sources: [_lakiaro],
+        ),
+      _route(
+        'lakiaro-tea',
+        10,
+        750490,
+        1,
+        'Manage Currency',
+        limit: const ExchangeLimit.weekly(5),
+        sources: [_lakiaro],
+      ),
+    ],
+  ),
+  _currency(
+    id: 'medal-of-glory',
+    itemId: 767325,
+    activity: 'Node War · Conquest War · War of the Roses',
+    sources: [_glory],
+    routes: [
+      for (final id in const [734, 771])
+        _route('glory-$id', 1, id, 1, 'Manage Currency', sources: [_glory]),
+      for (final entry in const [(10, 1178, 10), (3, 576, 30), (2, 733, 10)])
+        _route(
+          'glory-weekly-${entry.$2}',
+          entry.$1,
+          entry.$2,
+          entry.$3,
+          'Manage Currency',
+          limit: const ExchangeLimit.weekly(1),
+          sources: [_glory],
+        ),
+      for (final entry in const [
+        (500, 607185),
+        (250, 289250),
+        (150, 289200),
+        (85, 289150),
+        (50, 289100),
+        (10, 1000509),
+        (10, 1000510),
+        (10, 1000511),
+        (10, 1000512),
+        (10, 1000513),
+      ])
+        _route(
+          'glory-family-${entry.$2}',
+          entry.$1,
+          entry.$2,
+          1,
+          'Manage Currency',
+          limit: const ExchangeLimit.oncePerFamily(),
+          sources: [_glory],
+        ),
+      for (final entry in const [
+        (30, 16080, 500, 2),
+        (10, 45026, 50, 1),
+        (10, 820022, 10, 1),
+        (5, 17572, 5, 1),
+      ])
+        _route(
+          'glory-weekly-${entry.$2}',
+          entry.$1,
+          entry.$2,
+          entry.$3,
+          'Manage Currency',
+          limit: ExchangeLimit.weekly(entry.$4),
+          sources: [_glory],
+        ),
+      _route('glory-45124', 10, 45124, 1, 'Manage Currency', sources: [_glory]),
+    ],
+  ),
+  _currency(
+    id: 'battlefield-token',
+    itemId: 890002,
+    activity: 'Red Battlefield',
+    sources: [_battlefield],
+    routes: [
+      for (final entry in const [
+        (3, 734, 1, 10),
+        (3, 771, 1, 10),
+        (1, 576, 5, 5),
+        (1, 733, 2, 5),
+      ])
+        _route(
+          'battlefield-weekly-${entry.$2}',
+          entry.$1,
+          entry.$2,
+          entry.$3,
+          'Manage Currency',
+          limit: ExchangeLimit.weekly(entry.$4),
+          sources: [_battlefield],
+        ),
+      for (final entry in const [
+        (50, 890003, 1, 3),
+        (3, 721003, 30, 7),
+        (3, 820022, 1, 10),
+        (3, 768160, 10, 10),
+        (2, 45026, 5, 10),
+        (1, 8042, 5, 1),
+        (1, 59858, 1, 10),
+        (1, 59859, 1, 10),
+        (1, 59860, 1, 10),
+      ])
+        _route(
+          'battlefield-weekly-${entry.$2}',
+          entry.$1,
+          entry.$2,
+          entry.$3,
+          'Manage Currency',
+          limit: ExchangeLimit.weekly(entry.$4),
+          sources: [_battlefield],
+        ),
+      for (final entry in const [(50, 4989), (1, 4)])
+        _route(
+          'battlefield-${entry.$2}',
+          entry.$1,
+          entry.$2,
+          1,
+          'Manage Currency',
+          sources: [_battlefield],
+        ),
     ],
   ),
 ]);

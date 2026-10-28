@@ -1,7 +1,7 @@
 /// Reviewed exchange facts. These are choices, never simultaneous rewards.
 enum ExchangeSaleMode { immediate, listing }
 
-enum ExchangeLimitKind { repeatable, oncePerFamily, weekly }
+enum ExchangeLimitKind { repeatable, oncePerFamily, weekly, daily }
 
 enum ExchangeAvailability {
   available,
@@ -71,6 +71,8 @@ class ExchangeLimit {
 
   const ExchangeLimit.weekly(this.maximum) : kind = ExchangeLimitKind.weekly;
 
+  const ExchangeLimit.daily(this.maximum) : kind = ExchangeLimitKind.daily;
+
   final ExchangeLimitKind kind;
   final int? maximum;
 
@@ -80,6 +82,7 @@ class ExchangeLimit {
     ExchangeLimitKind.oncePerFamily =>
       maximum == 1 ? 'Once per family' : 'Up to $maximum per family',
     ExchangeLimitKind.weekly => 'Up to $maximum per week',
+    ExchangeLimitKind.daily => 'Up to $maximum per day',
   };
 }
 

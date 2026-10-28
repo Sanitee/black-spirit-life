@@ -85,7 +85,7 @@ internal static class FirefoxRegistration
     {
         var directory = Path.Combine(
             Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-            "Black Spirit Life",
+            SessionImportProtocol.LocalDataDirectoryName,
             "Session Import",
             "browser_helper");
         Directory.CreateDirectory(directory);

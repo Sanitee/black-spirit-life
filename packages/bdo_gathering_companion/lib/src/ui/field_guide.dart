@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:math' as math;
-import 'dart:ui' show ImageFilter;
 
 import 'package:flutter/material.dart';
 import '../assets.dart';
@@ -14,6 +13,8 @@ import '../services/native_bridge.dart';
 import '../widgets/spot_map.dart';
 import '../widgets/spot_media_gallery.dart';
 import 'buff_picker.dart';
+import 'field_desk_materials.dart';
+import 'item_artwork.dart';
 import 'theme.dart';
 
 typedef SpotMarketPriceLoader =
@@ -71,6 +72,16 @@ enum _SpotCardMode { browse, yield, value, demand }
 enum _MarketLoadScope { value, demand }
 
 enum _DemandSort { preorders, value }
+
+class _SpotListShadowClipper extends CustomClipper<Rect> {
+  const _SpotListShadowClipper();
+
+  @override
+  Rect getClip(Size size) => Rect.fromLTRB(-8, 0, size.width + 8, size.height);
+
+  @override
+  bool shouldReclip(_SpotListShadowClipper oldClipper) => false;
+}
 
 enum _MarketPriceSource { market, custom, vendor }
 
@@ -418,6 +429,7 @@ class FieldGuide extends StatefulWidget {
     this.initialSpot,
     this.initialMethodId,
     this.onUseWithMethod,
+    this.onBrowseContextChanged,
     this.marketPriceLoader,
     this.marketQuoteLoader,
     this.marketOrderBookLoader,
@@ -429,6 +441,7 @@ class FieldGuide extends StatefulWidget {
     this.navigationRequest = 0,
     this.initialFiltersExpanded = false,
     this.useLabel = 'Use spot',
+    this.onReturnToChecklist,
   });
   final Catalog catalog;
   final List<GatheringSession> sessions;
@@ -436,6 +449,9 @@ class FieldGuide extends StatefulWidget {
   final String? initialMethodId;
   final ValueChanged<Spot> onUse;
   final void Function(Spot, String)? onUseWithMethod;
+
+  /// Presentation context for the host's recommendations; never starts a run.
+  final void Function(Spot?, String?)? onBrowseContextChanged;
 
   /// Legacy price-only hook retained for existing embedders and tests.
   final SpotMarketPriceLoader? marketPriceLoader;
@@ -457,6 +473,7 @@ class FieldGuide extends StatefulWidget {
   final int navigationRequest;
   final bool initialFiltersExpanded;
   final String useLabel;
+  final VoidCallback? onReturnToChecklist;
 
   @override
   State<FieldGuide> createState() => _FieldGuideState();
@@ -1011,6 +1028,7 @@ class _FieldGuideState extends State<FieldGuide> {
         _selectedBenchmark = null;
       }
     });
+    _notifyBrowseContext();
   }
 
   Future<void> _setRanking(_SpotRanking ranking) async {
@@ -2434,10 +2452,27 @@ class _FieldGuideState extends State<FieldGuide> {
       }
     });
     if (_detailScroll.hasClients) _detailScroll.jumpTo(0);
+    _notifyBrowseContext();
+  }
+
+  void _notifyBrowseContext() {
+    final selected = _selected;
+    final requested = _detailMethodId ?? _method;
+    widget.onBrowseContextChanged?.call(
+      selected,
+      selected == null || selected.methodIds.contains(requested)
+          ? requested
+          : selected.methodIds.first,
+    );
   }
 
   void _chooseAnotherSpot() {
+    if (widget.onReturnToChecklist != null) {
+      widget.onReturnToChecklist!();
+      return;
+    }
     setState(() => _selected = null);
+    _notifyBrowseContext();
     if (_detailScroll.hasClients) _detailScroll.jumpTo(0);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted || _selected != null) return;
@@ -2515,10 +2550,10 @@ class _FieldGuideState extends State<FieldGuide> {
           Expanded(
             child: Text(
               _benchmarkMetricText(route),
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 17,
                 fontWeight: FontWeight.w700,
-                color: accent,
+                color: context.gatheringColors.accent,
               ),
             ),
           ),
@@ -2575,9 +2610,9 @@ class _FieldGuideState extends State<FieldGuide> {
               Text(
                 'At ${route.gathersPerHour} gathers/h',
                 key: ValueKey('bairog-route-evidence-${route.sourceRouteId}'),
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 13,
-                  color: muted,
+                  color: context.gatheringColors.muted,
                   fontWeight: FontWeight.w600,
                 ),
               ),
@@ -2587,9 +2622,9 @@ class _FieldGuideState extends State<FieldGuide> {
                     ? 'Captured baseline · '
                           '${bairogBenchmarkSet.conditions.compactLabel}'
                     : 'Estimated for your setup · $_setupAccessibleLabel',
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 13,
-                  color: accent,
+                  color: context.gatheringColors.accent,
                   fontWeight: FontWeight.w600,
                 ),
               ),
@@ -2597,7 +2632,10 @@ class _FieldGuideState extends State<FieldGuide> {
                 const SizedBox(height: 4),
                 Text(
                   _energyEvidence(projection.energy),
-                  style: const TextStyle(fontSize: 12.5, color: muted),
+                  style: TextStyle(
+                    fontSize: 12.5,
+                    color: context.gatheringColors.muted,
+                  ),
                 ),
               ],
               const SizedBox(height: 10),
@@ -2635,204 +2673,171 @@ class _FieldGuideState extends State<FieldGuide> {
   }
 
   @override
-  Widget build(BuildContext context) => BackdropGroup(
-    child: LayoutBuilder(
-      builder: (context, constraints) {
-        if (_selected case final spot?) {
-          return SingleChildScrollView(
-            key: const ValueKey('spot-guide-scroll'),
-            controller: _detailScroll,
-            padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
-            child: _detail(spot),
-          );
-        }
-        final entries = _visibleEntries;
-        final compact = constraints.maxWidth < 900;
-        const sidebarWidth = 376.0;
-        final textScale = math.max(
-          1.0,
-          MediaQuery.textScalerOf(context).scale(15) / 15,
-        );
-        final cardExtent = _cardMainExtent(textScale);
-        final compactListHeight = math.min(
-          cardExtent * 2 + 16,
-          math.max(cardExtent + 8, constraints.maxHeight * .36),
-        );
-        final compactFilterHeight =
-            (constraints.maxHeight - compactListHeight - 170).clamp(
-              96.0,
-              312.0,
-            );
-        final mapHeight = (constraints.maxHeight - compactListHeight - 112)
-            .clamp(260.0, 1600.0);
-        final detail = SingleChildScrollView(
+  Widget build(BuildContext context) => LayoutBuilder(
+    builder: (context, constraints) {
+      if (_selected case final spot?) {
+        return SingleChildScrollView(
           key: const ValueKey('spot-guide-scroll'),
           controller: _detailScroll,
-          padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [_map(mapHeight)],
-          ),
+          padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
+          child: _detail(spot),
         );
-        if (compact) {
-          return Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Padding(
-                padding: const EdgeInsets.fromLTRB(16, 12, 16, 10),
-                child: _searchBar(),
-              ),
-              Padding(
-                padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
-                child: _compactFilterControl(),
-              ),
-              AnimatedSize(
-                duration: _filterAnimationDuration,
-                curve: Curves.easeOutCubic,
-                alignment: Alignment.topCenter,
-                child: _filterRailExpanded
-                    ? SizedBox(
-                        height: compactFilterHeight,
-                        child: Padding(
-                          padding: const EdgeInsets.fromLTRB(16, 0, 16, 10),
-                          child: _floatingFilterPalette(),
-                        ),
-                      )
-                    : const SizedBox.shrink(),
-              ),
-              SizedBox(
-                height: compactListHeight,
-                child: entries.isEmpty
-                    ? _emptyResults()
-                    : ListView.builder(
-                        key: const ValueKey('spot-strip'),
-                        controller: _stripScroll,
-                        padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
-                        itemCount: entries.length,
-                        itemBuilder: (context, index) => Padding(
-                          padding: EdgeInsets.only(
-                            bottom: index + 1 == entries.length ? 0 : 8,
-                          ),
-                          child: _spotCard(entries[index]),
-                        ),
-                      ),
-              ),
-              Expanded(child: detail),
-            ],
-          );
-        }
-        const sidebarLeft = 16.0;
-        const dividerLeft = sidebarLeft + sidebarWidth + 12;
-        const paletteLeft = dividerLeft + 18;
-        const paletteWidth = 286.0;
-        return Stack(
-          key: const ValueKey('spot-guide-layered-layout'),
-          fit: StackFit.expand,
+      }
+      final entries = _visibleEntries;
+      final compact = constraints.maxWidth < 900;
+      final textScale = math.max(
+        1.0,
+        MediaQuery.textScalerOf(context).scale(15) / 15,
+      );
+      // A compact finder leaves the map prominent; larger system type still
+      // gets enough room for legible spot names and filter controls.
+      final sidebarWidth = (336 * textScale).clamp(336.0, 448.0);
+      final cardExtent = _cardMainExtent(textScale);
+      final compactListHeight = math.min(
+        cardExtent * 2 + 16,
+        math.max(cardExtent + 8, constraints.maxHeight * .36),
+      );
+      final compactFilterHeight =
+          (constraints.maxHeight - compactListHeight - 170).clamp(96.0, 312.0);
+      final mapHeight = (constraints.maxHeight - compactListHeight - 112).clamp(
+        260.0,
+        1600.0,
+      );
+      final detail = SingleChildScrollView(
+        key: const ValueKey('spot-guide-scroll'),
+        controller: _detailScroll,
+        padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [_map(mapHeight)],
+        ),
+      );
+      if (compact) {
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            _map(constraints.maxHeight),
-            Positioned(
-              left: sidebarLeft,
-              top: 16,
-              bottom: 16,
-              width: sidebarWidth,
-              child: Align(
-                alignment: Alignment.topLeft,
-                child: Padding(
-                  key: const ValueKey('spot-journal-surface'),
-                  padding: const EdgeInsets.all(8),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.only(bottom: 8),
-                        child: _searchBar(),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 12, 16, 10),
+              child: _searchBar(),
+            ),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+              child: _compactFilterControl(),
+            ),
+            _filterSizeTransition(
+              child: _filterRailExpanded
+                  ? SizedBox(
+                      height: compactFilterHeight,
+                      child: Padding(
+                        padding: const EdgeInsets.fromLTRB(16, 0, 16, 10),
+                        child: _floatingFilterPalette(),
                       ),
-                      Flexible(
-                        child: entries.isEmpty
-                            ? _emptyResults()
-                            : ListView.builder(
+                    )
+                  : const SizedBox.shrink(),
+            ),
+            SizedBox(
+              height: compactListHeight,
+              child: entries.isEmpty
+                  ? _emptyResults()
+                  : ListView.builder(
+                      key: const ValueKey('spot-strip'),
+                      controller: _stripScroll,
+                      padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+                      itemCount: entries.length,
+                      itemBuilder: (context, index) => Padding(
+                        padding: EdgeInsets.only(
+                          bottom: index + 1 == entries.length ? 0 : 8,
+                        ),
+                        child: _spotCard(entries[index]),
+                      ),
+                    ),
+            ),
+            Expanded(child: detail),
+          ],
+        );
+      }
+      return Stack(
+        key: const ValueKey('spot-guide-layered-layout'),
+        children: [
+          Positioned.fill(
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(14, 4, 14, 14),
+              child: _map(
+                constraints.maxHeight - 18,
+                viewInsets: EdgeInsets.only(left: sidebarWidth),
+              ),
+            ),
+          ),
+          Positioned(
+            top: 0,
+            bottom: 0,
+            left: 0,
+            width: sidebarWidth,
+            // This is a floating reading lane, not another full-height
+            // painted panel. Its hit region shields the map through gaps
+            // while the exposed map remains independently pannable.
+            child: Listener(
+              behavior: HitTestBehavior.opaque,
+              child: Padding(
+                key: const ValueKey('spot-journal-surface'),
+                padding: const EdgeInsets.fromLTRB(14, 4, 10, 14),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    _searchBar(),
+                    const SizedBox(height: 8),
+                    _compactFilterControl(),
+                    _filterSizeTransition(
+                      child: _filterRailExpanded
+                          ? SizedBox(
+                              height: math.min(
+                                310,
+                                constraints.maxHeight * .42,
+                              ),
+                              child: _floatingFilterPalette(),
+                            )
+                          : const SizedBox.shrink(),
+                    ),
+                    const SizedBox(height: 10),
+                    Expanded(
+                      child: entries.isEmpty
+                          ? _emptyResults()
+                          : _spotListViewport(
+                              ListView.builder(
                                 key: const ValueKey('spot-list'),
                                 controller: _listScroll,
-                                hitTestBehavior: HitTestBehavior.deferToChild,
-                                shrinkWrap: true,
+                                clipBehavior:
+                                    context.glass.visualPalette == null
+                                    ? Clip.hardEdge
+                                    : Clip.none,
                                 padding: EdgeInsets.zero,
                                 itemCount: entries.length,
                                 itemBuilder: (context, index) => Padding(
-                                  padding: EdgeInsets.only(
-                                    bottom: index + 1 == entries.length ? 0 : 6,
-                                  ),
+                                  padding: const EdgeInsets.only(bottom: 8),
                                   child: _spotCard(entries[index]),
                                 ),
                               ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-            Positioned(
-              left: dividerLeft,
-              top: 0,
-              bottom: 0,
-              width: 1,
-              child: DecoratedBox(
-                key: const ValueKey('spot-filter-divider'),
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                    colors: [
-                      Colors.transparent,
-                      context.glass.strongLine,
-                      Colors.transparent,
-                    ],
-                  ),
-                ),
-              ),
-            ),
-            Positioned(
-              left: dividerLeft - 13,
-              top: 0,
-              bottom: 0,
-              width: 27,
-              child: Align(child: _filterRailControl()),
-            ),
-            Positioned(
-              left: paletteLeft,
-              top: 16,
-              bottom: 16,
-              width: paletteWidth,
-              child: IgnorePointer(
-                ignoring: !_filterRailExpanded,
-                child: AnimatedSlide(
-                  duration: _filterAnimationDuration,
-                  curve: Curves.easeOutCubic,
-                  offset: _filterRailExpanded
-                      ? Offset.zero
-                      : const Offset(-.08, 0),
-                  child: AnimatedOpacity(
-                    key: const ValueKey('spot-filter-overlay'),
-                    duration: _filterAnimationDuration,
-                    curve: Curves.easeOutCubic,
-                    opacity: _filterRailExpanded ? 1 : 0,
-                    child: Align(
-                      alignment: Alignment.topLeft,
-                      child: _floatingFilterPalette(),
+                            ),
                     ),
-                  ),
+                  ],
                 ),
               ),
             ),
-          ],
-        );
-      },
-    ),
+          ),
+        ],
+      );
+    },
   );
 
-  Duration get _filterAnimationDuration =>
+  Widget _filterSizeTransition({required Widget child}) =>
       MediaQuery.disableAnimationsOf(context)
-      ? Duration.zero
-      : const Duration(milliseconds: 240);
+      ? child
+      : AnimatedSize(
+          duration: const Duration(milliseconds: 240),
+          curve: Curves.easeOutCubic,
+          alignment: Alignment.topCenter,
+          child: child,
+        );
 
   Widget _searchBar() => Row(
     children: [
@@ -2845,6 +2850,8 @@ class _FieldGuideState extends State<FieldGuide> {
             onChanged: (_) => _filterChanged(),
             decoration: InputDecoration(
               hintText: 'Search',
+              // This field now sits directly over terrain, not a panel.
+              fillColor: context.glass.row,
               prefixIcon: const Icon(Icons.search_rounded, size: 19),
               prefixIconConstraints: const BoxConstraints(minWidth: 36),
               hintStyle: const TextStyle(fontSize: 15),
@@ -3076,7 +3083,7 @@ class _FieldGuideState extends State<FieldGuide> {
     minimumSize: Size(width, 48),
     maximumSize: Size(width, double.infinity),
     padding: const EdgeInsets.symmetric(horizontal: 12),
-    foregroundColor: ink,
+    foregroundColor: context.gatheringColors.ink,
     alignment: Alignment.centerLeft,
   );
 
@@ -3101,51 +3108,6 @@ class _FieldGuideState extends State<FieldGuide> {
     _SpotRanking.nostosFadedNaturewovenHide,
   ];
 
-  Widget _filterRailControl() => Tooltip(
-    message: _filterRailExpanded ? 'Hide filters' : 'Show filters',
-    child: Semantics(
-      button: true,
-      expanded: _filterRailExpanded,
-      label: _filterRailExpanded ? 'Hide filters' : 'Show filters',
-      child: GlassControl(
-        key: const ValueKey('spot-filter-rail-control'),
-        radius: 8,
-        child: InkWell(
-          borderRadius: BorderRadius.circular(8),
-          onTap: () =>
-              setState(() => _filterRailExpanded = !_filterRailExpanded),
-          child: AnimatedContainer(
-            duration: _filterAnimationDuration,
-            curve: Curves.easeOutCubic,
-            width: 27,
-            height: _filterRailExpanded ? 44 : 106,
-            child: Center(
-              child: _filterRailExpanded
-                  ? const Icon(
-                      Icons.chevron_left_rounded,
-                      key: ValueKey('spot-filter-hide-arrow'),
-                      size: 23,
-                      color: ink,
-                    )
-                  : const Text(
-                      'F\nI\nL\nT\nE\nR',
-                      key: ValueKey('spot-filter-vertical-label'),
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        fontSize: 10.5,
-                        height: 1.22,
-                        color: ink,
-                        fontWeight: FontWeight.w700,
-                        letterSpacing: .3,
-                      ),
-                    ),
-            ),
-          ),
-        ),
-      ),
-    ),
-  );
-
   Widget _compactFilterControl() => GlassControl(
     key: const ValueKey('spot-filter-compact-control'),
     radius: 9,
@@ -3158,13 +3120,13 @@ class _FieldGuideState extends State<FieldGuide> {
           padding: const EdgeInsets.symmetric(horizontal: 11),
           child: Row(
             children: [
-              const Text(
+              Text(
                 'FILTER',
                 style: TextStyle(
                   fontSize: 12,
                   fontWeight: FontWeight.w700,
                   letterSpacing: 1.1,
-                  color: muted,
+                  color: context.gatheringColors.muted,
                 ),
               ),
               const SizedBox(width: 10),
@@ -3188,7 +3150,7 @@ class _FieldGuideState extends State<FieldGuide> {
                     ? Icons.expand_less_rounded
                     : Icons.expand_more_rounded,
                 size: 20,
-                color: muted,
+                color: context.gatheringColors.muted,
               ),
             ],
           ),
@@ -3264,8 +3226,8 @@ class _FieldGuideState extends State<FieldGuide> {
         padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
         child: Text(
           label,
-          style: const TextStyle(
-            color: muted,
+          style: TextStyle(
+            color: context.gatheringColors.muted,
             fontSize: 11.5,
             height: 1.1,
             fontWeight: FontWeight.w700,
@@ -3277,15 +3239,25 @@ class _FieldGuideState extends State<FieldGuide> {
     radius: 4,
   );
 
-  // Blur only the content boxes, not the empty journal/filter footprints.
-  // Grouping these non-overlapping clips shares the map sampling work.
-  Widget _mapContentBox(Widget child, {double radius = 10}) => ClipRRect(
-    borderRadius: BorderRadius.circular(radius),
-    child: BackdropFilter.grouped(
-      filter: ImageFilter.blur(sigmaX: glassBlurSigma, sigmaY: glassBlurSigma),
-      child: child,
-    ),
-  );
+  // A single tinted control face lets the real map show through. No sampled
+  // backdrop blur or whole-widget opacity: text and item art remain crisp.
+  Widget _mapContentBox(
+    Widget child, {
+    double radius = 10,
+    bool preserveCardShadow = false,
+  }) => preserveCardShadow && context.glass.visualPalette != null
+      ? child
+      : ClipRRect(borderRadius: BorderRadius.circular(radius), child: child);
+
+  // Keep scrolled content inside the vertical viewport, but let the contact
+  // shadow use the existing side gutters. No padding or hit region is added.
+  Widget _spotListViewport(Widget child) => context.glass.visualPalette == null
+      ? child
+      : ClipRect(
+          key: const ValueKey('spot-list-shadow-viewport'),
+          clipper: const _SpotListShadowClipper(),
+          child: child,
+        );
 
   Widget _demandSortControl() => Column(
     crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -3351,7 +3323,7 @@ class _FieldGuideState extends State<FieldGuide> {
                 softWrap: false,
                 textAlign: TextAlign.center,
                 style: TextStyle(
-                  color: ink,
+                  color: context.gatheringColors.ink,
                   fontSize: 12.5,
                   height: 1,
                   fontWeight: selected ? FontWeight.w700 : FontWeight.w600,
@@ -3409,7 +3381,7 @@ class _FieldGuideState extends State<FieldGuide> {
                         fontWeight: selected
                             ? FontWeight.w700
                             : FontWeight.w600,
-                        color: ink,
+                        color: context.gatheringColors.ink,
                       ),
                     ),
                   ),
@@ -3489,10 +3461,10 @@ class _FieldGuideState extends State<FieldGuide> {
             Text(
               '${_bairogRoutes.length} public routes · '
               'estimated for your setup',
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 15,
                 fontWeight: FontWeight.w700,
-                color: accent,
+                color: context.gatheringColors.accent,
               ),
             ),
             const SizedBox(height: 8),
@@ -3500,7 +3472,10 @@ class _FieldGuideState extends State<FieldGuide> {
               '$_setupAccessibleLabel · '
               '${_minigameLabel(widget.bairogSettings.minigameMode)} · '
               '${_hedgehogLabel(widget.bairogSettings.hedgehogTier)}',
-              style: const TextStyle(fontSize: 14, color: muted),
+              style: TextStyle(
+                fontSize: 14,
+                color: context.gatheringColors.muted,
+              ),
             ),
             const SizedBox(height: 8),
             Text(
@@ -3518,7 +3493,10 @@ class _FieldGuideState extends State<FieldGuide> {
               '${_bairogRoutes.where((route) => !route.isMapped).length} '
               'source-only routes open their Bairog guide after selection. '
               'Calculator data captured ${_calculatorCaptureDate()}.',
-              style: const TextStyle(fontSize: 13, color: muted),
+              style: TextStyle(
+                fontSize: 13,
+                color: context.gatheringColors.muted,
+              ),
             ),
           ],
         ),
@@ -3557,7 +3535,10 @@ class _FieldGuideState extends State<FieldGuide> {
           padding: const EdgeInsets.all(16),
           child: Text(
             message,
-            style: const TextStyle(fontSize: 15, color: muted),
+            style: TextStyle(
+              fontSize: 15,
+              color: context.gatheringColors.muted,
+            ),
           ),
         ),
       ),
@@ -3565,6 +3546,8 @@ class _FieldGuideState extends State<FieldGuide> {
   }
 
   Widget _spotCard(_SpotListEntry entry) {
+    final copperInlay = context.glass.visualPalette != null;
+    final cardRadius = copperInlay ? 8.0 : 10.0;
     final spot = entry.spot;
     final performance = entry.performance;
     final benchmark = entry.benchmark;
@@ -3599,51 +3582,67 @@ class _FieldGuideState extends State<FieldGuide> {
         ? 'At ${benchmark.gathersPerHour} gathers/h · $_setupCompactLabel'
         : spot!.nodeName;
     return _mapContentBox(
-      GlassControl(
-        key: cardKey,
+      FieldDeskSelection(
         selected: selected,
-        radius: 10,
-        child: InkWell(
-          borderRadius: BorderRadius.circular(10),
-          onTap: () => _selectEntry(entry),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-            child: _cardMode == _SpotCardMode.browse
-                ? _browseCardContent(
-                    icon: spot!.icon,
-                    title: title,
-                    location: evidence,
-                  )
-                : _cardMode == _SpotCardMode.value
-                ? _valueGoalCardContent(
-                    icon: _primaryCardIcon(entry),
-                    title: title,
-                    method: method,
-                    benchmark: benchmark,
-                    summary: marketSummary!,
-                    evidence: evidence,
-                    performance: performance,
-                  )
-                : _cardMode == _SpotCardMode.demand
-                ? _demandGoalCardContent(
-                    icon: _primaryCardIcon(entry),
-                    title: title,
-                    method: method,
-                    benchmark: benchmark,
-                    summary: marketSummary!,
-                    evidence: evidence,
-                    performance: performance,
-                  )
-                : _goalCardContent(
-                    icon: _primaryCardIcon(entry),
-                    title: title,
-                    method: method,
-                    benchmark: benchmark,
-                    metric: _yieldCardMetric(metric!, evidence),
-                  ),
+        child: GlassControl(
+          key: cardKey,
+          selected: selected,
+          radius: cardRadius,
+          leadingWidth: copperInlay ? 68 : 59,
+          copperInlay: copperInlay,
+          leadingHeight:
+              _cardMode == _SpotCardMode.value ||
+                  _cardMode == _SpotCardMode.demand
+              ? 60
+              : null,
+          child: InkWell(
+            borderRadius: BorderRadius.circular(cardRadius),
+            hoverColor: copperInlay ? Colors.transparent : null,
+            focusColor: copperInlay ? Colors.transparent : null,
+            onTap: () => _selectEntry(entry),
+            child: Padding(
+              padding: EdgeInsets.symmetric(
+                horizontal: copperInlay ? 12 : 10,
+                vertical: 8,
+              ),
+              child: _cardMode == _SpotCardMode.browse
+                  ? _browseCardContent(
+                      icon: spot!.icon,
+                      title: title,
+                      location: evidence,
+                    )
+                  : _cardMode == _SpotCardMode.value
+                  ? _valueGoalCardContent(
+                      icon: _primaryCardIcon(entry),
+                      title: title,
+                      method: method,
+                      benchmark: benchmark,
+                      summary: marketSummary!,
+                      evidence: evidence,
+                      performance: performance,
+                    )
+                  : _cardMode == _SpotCardMode.demand
+                  ? _demandGoalCardContent(
+                      icon: _primaryCardIcon(entry),
+                      title: title,
+                      method: method,
+                      benchmark: benchmark,
+                      summary: marketSummary!,
+                      evidence: evidence,
+                      performance: performance,
+                    )
+                  : _goalCardContent(
+                      icon: _primaryCardIcon(entry),
+                      title: title,
+                      method: method,
+                      benchmark: benchmark,
+                      metric: _yieldCardMetric(metric!, evidence),
+                    ),
+            ),
           ),
         ),
       ),
+      preserveCardShadow: true,
     );
   }
 
@@ -3666,8 +3665,8 @@ class _FieldGuideState extends State<FieldGuide> {
     required String location,
   }) => Row(
     children: [
-      GameIcon(icon, size: 44),
-      const SizedBox(width: 10),
+      GameIcon(icon, size: 44, recessed: true),
+      SizedBox(width: context.glass.visualPalette == null ? 10 : 24),
       Expanded(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -3689,7 +3688,10 @@ class _FieldGuideState extends State<FieldGuide> {
                 location,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
-                style: const TextStyle(fontSize: 12.5, color: muted),
+                style: TextStyle(
+                  fontSize: 12.5,
+                  color: context.gatheringColors.muted,
+                ),
               ),
             ],
           ],
@@ -3707,8 +3709,8 @@ class _FieldGuideState extends State<FieldGuide> {
   }) => Row(
     crossAxisAlignment: CrossAxisAlignment.start,
     children: [
-      GameIcon(icon, size: 44),
-      const SizedBox(width: 10),
+      GameIcon(icon, size: 44, recessed: true),
+      SizedBox(width: context.glass.visualPalette == null ? 10 : 24),
       Expanded(
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -3734,10 +3736,10 @@ class _FieldGuideState extends State<FieldGuide> {
                   'bairog-card-evidence-${benchmark.sourceRouteId}',
                 ),
                 softWrap: true,
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 11.5,
                   height: 1.1,
-                  color: muted,
+                  color: context.gatheringColors.muted,
                 ),
               ),
             ],
@@ -3767,10 +3769,10 @@ class _FieldGuideState extends State<FieldGuide> {
             metric,
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 17,
               height: 1.1,
-              color: accent,
+              color: context.gatheringColors.accent,
               fontWeight: FontWeight.w700,
             ),
           ),
@@ -3806,8 +3808,8 @@ class _FieldGuideState extends State<FieldGuide> {
             key: const ValueKey('value-card-header'),
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              GameIcon(icon, size: 44),
-              const SizedBox(width: 10),
+              GameIcon(icon, size: 44, recessed: true),
+              SizedBox(width: context.glass.visualPalette == null ? 10 : 24),
               Expanded(
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
@@ -3844,7 +3846,7 @@ class _FieldGuideState extends State<FieldGuide> {
             ],
           ),
           if (displayedContributions.isNotEmpty) ...[
-            const SizedBox(height: 5),
+            Divider(height: 5, color: context.glass.line),
             _valueLootRows(summary),
           ],
           if (benchmark != null) ...[
@@ -3853,7 +3855,11 @@ class _FieldGuideState extends State<FieldGuide> {
               'At ${benchmark.gathersPerHour} gathers/h',
               key: ValueKey('bairog-card-evidence-${benchmark.sourceRouteId}'),
               softWrap: true,
-              style: const TextStyle(fontSize: 11.5, height: 1.1, color: muted),
+              style: TextStyle(
+                fontSize: 11.5,
+                height: 1.1,
+                color: context.gatheringColors.muted,
+              ),
             ),
           ],
         ],
@@ -3871,7 +3877,7 @@ class _FieldGuideState extends State<FieldGuide> {
         _marketLoading ? 'Updating…' : _marketError ?? 'No current value',
         maxLines: 1,
         overflow: TextOverflow.ellipsis,
-        style: const TextStyle(fontSize: 14, color: muted),
+        style: TextStyle(fontSize: 14, color: context.gatheringColors.muted),
       );
     }
     final displayedContributions = _displayedValueContributions(summary);
@@ -3908,7 +3914,7 @@ class _FieldGuideState extends State<FieldGuide> {
         _marketLoading ? 'Updating…' : _marketError ?? 'No current value',
         maxLines: 1,
         overflow: TextOverflow.ellipsis,
-        style: const TextStyle(fontSize: 14, color: muted),
+        style: TextStyle(fontSize: 14, color: context.gatheringColors.muted),
       );
     }
     final prefix = _valuePrefix(summary, performance);
@@ -3922,10 +3928,10 @@ class _FieldGuideState extends State<FieldGuide> {
             '$prefix${_silverText(summary.total)}/h',
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 17,
               height: 1.1,
-              color: positive,
+              color: context.gatheringColors.positive,
               fontWeight: FontWeight.w700,
             ),
           ),
@@ -4059,9 +4065,9 @@ class _FieldGuideState extends State<FieldGuide> {
               children: [
                 Text(
                   _silverText(contribution.netValuePerHour),
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 12,
-                    color: positive,
+                    color: context.gatheringColors.positive,
                     fontWeight: FontWeight.w700,
                   ),
                 ),
@@ -4085,7 +4091,9 @@ class _FieldGuideState extends State<FieldGuide> {
     final stock = contribution.stock;
     final preorders = stock == 0 ? contribution.preorders : null;
     final hasPreorders = preorders != null && preorders > 0;
-    final color = hasPreorders ? Theme.of(context).colorScheme.error : muted;
+    final color = hasPreorders
+        ? Theme.of(context).colorScheme.error
+        : context.gatheringColors.muted;
     final displayCount = stock == null
         ? '—'
         : hasPreorders
@@ -4147,8 +4155,8 @@ class _FieldGuideState extends State<FieldGuide> {
             key: const ValueKey('demand-card-header'),
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              GameIcon(icon, size: 44),
-              const SizedBox(width: 10),
+              GameIcon(icon, size: 44, recessed: true),
+              SizedBox(width: context.glass.visualPalette == null ? 10 : 24),
               Expanded(
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
@@ -4185,7 +4193,7 @@ class _FieldGuideState extends State<FieldGuide> {
             ],
           ),
           if (displayedContributions.isNotEmpty) ...[
-            const SizedBox(height: 5),
+            Divider(height: 5, color: context.glass.line),
             _demandLootRows(displayedContributions),
           ],
           if (benchmark != null) ...[
@@ -4194,7 +4202,11 @@ class _FieldGuideState extends State<FieldGuide> {
               'At ${benchmark.gathersPerHour} gathers/h',
               key: ValueKey('bairog-card-evidence-${benchmark.sourceRouteId}'),
               softWrap: true,
-              style: const TextStyle(fontSize: 11.5, height: 1.1, color: muted),
+              style: TextStyle(
+                fontSize: 11.5,
+                height: 1.1,
+                color: context.gatheringColors.muted,
+              ),
             ),
           ],
         ],
@@ -4211,7 +4223,7 @@ class _FieldGuideState extends State<FieldGuide> {
         key: const ValueKey('demand-card-total'),
         maxLines: 1,
         overflow: TextOverflow.ellipsis,
-        style: const TextStyle(fontSize: 14, color: muted),
+        style: TextStyle(fontSize: 14, color: context.gatheringColors.muted),
       );
     }
     final prefix = _valuePrefix(summary, performance);
@@ -4225,10 +4237,10 @@ class _FieldGuideState extends State<FieldGuide> {
             '$prefix${_silverText(summary.total)}/h',
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 17,
               height: 1.1,
-              color: positive,
+              color: context.gatheringColors.positive,
               fontWeight: FontWeight.w700,
             ),
           ),
@@ -4388,9 +4400,9 @@ class _FieldGuideState extends State<FieldGuide> {
                     Text(
                       _silverText(contribution.netValuePerHour),
                       key: ValueKey('demand-value-${contribution.itemId}'),
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 12,
-                        color: positive,
+                        color: context.gatheringColors.positive,
                         fontWeight: FontWeight.w700,
                       ),
                     ),
@@ -4419,7 +4431,11 @@ class _FieldGuideState extends State<FieldGuide> {
       return Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(Icons.storefront_outlined, size: iconSize, color: muted),
+          Icon(
+            Icons.storefront_outlined,
+            size: iconSize,
+            color: context.gatheringColors.muted,
+          ),
           const SizedBox(width: 2),
           Text(
             '—',
@@ -4427,7 +4443,7 @@ class _FieldGuideState extends State<FieldGuide> {
             style: TextStyle(
               fontSize: fontSize,
               height: 1,
-              color: muted,
+              color: context.gatheringColors.muted,
               fontWeight: FontWeight.w700,
             ),
           ),
@@ -4438,7 +4454,11 @@ class _FieldGuideState extends State<FieldGuide> {
       mainAxisSize: MainAxisSize.min,
       children: [
         if (stock != null) ...[
-          Icon(Icons.storefront_outlined, size: iconSize, color: muted),
+          Icon(
+            Icons.storefront_outlined,
+            size: iconSize,
+            color: context.gatheringColors.muted,
+          ),
           const SizedBox(width: 2),
           Text(
             _groupedWholeNumber(stock),
@@ -4447,15 +4467,19 @@ class _FieldGuideState extends State<FieldGuide> {
             style: TextStyle(
               fontSize: fontSize,
               height: 1,
-              color: muted,
+              color: context.gatheringColors.muted,
               fontWeight: FontWeight.w700,
             ),
           ),
         ],
         if (stock != null && preorders != null)
-          const Text(
+          Text(
             ' · ',
-            style: TextStyle(fontSize: 11, height: 1, color: muted),
+            style: TextStyle(
+              fontSize: 11,
+              height: 1,
+              color: context.gatheringColors.muted,
+            ),
           ),
         if (preorders != null)
           Text(
@@ -4467,7 +4491,7 @@ class _FieldGuideState extends State<FieldGuide> {
               height: 1,
               color: preorders > 0
                   ? Theme.of(context).colorScheme.error
-                  : muted,
+                  : context.gatheringColors.muted,
               fontWeight: FontWeight.w700,
             ),
           ),
@@ -4496,7 +4520,7 @@ class _FieldGuideState extends State<FieldGuide> {
       constraints: const BoxConstraints.tightFor(width: 40, height: 40),
       padding: EdgeInsets.zero,
       iconSize: 18,
-      color: muted,
+      color: context.gatheringColors.muted,
       onPressed: loading
           ? null
           : () => _openMarketCalculationDetails(
@@ -4576,7 +4600,10 @@ class _FieldGuideState extends State<FieldGuide> {
         () async {
           try {
             await precacheImage(
-              AssetImage(path, package: gatheringAssetPackage),
+              AssetImage(
+                gatheringItemArtwork(path),
+                package: gatheringAssetPackage,
+              ),
               context,
               onError: (_, _) {
                 return;
@@ -4753,10 +4780,10 @@ class _FieldGuideState extends State<FieldGuide> {
                     key: ValueKey(
                       'calculation-quantity-${contribution.itemId}',
                     ),
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 12,
                       height: 1.15,
-                      color: muted,
+                      color: context.gatheringColors.muted,
                     ),
                   ),
                   const SizedBox(height: 4),
@@ -4768,8 +4795,8 @@ class _FieldGuideState extends State<FieldGuide> {
                           'Value / h',
                           displayedValue,
                           valueColor: contribution.missingPrice
-                              ? muted
-                              : positive,
+                              ? context.gatheringColors.muted
+                              : context.gatheringColors.positive,
                           scaleDown: true,
                         ),
                       ),
@@ -4811,13 +4838,13 @@ class _FieldGuideState extends State<FieldGuide> {
 
   Color _calculationMarketColor(_MarketContribution contribution) {
     final stock = _freshDemandStock(contribution);
-    if (stock == null) return muted;
-    if (stock > 0) return muted;
+    if (stock == null) return context.gatheringColors.muted;
+    if (stock > 0) return context.gatheringColors.muted;
     final preorders = contribution.preorders;
     if (preorders != null && preorders > 0) {
       return Theme.of(context).colorScheme.error;
     }
-    return muted;
+    return context.gatheringColors.muted;
   }
 
   String _calculationMarketAccessibility(_MarketContribution contribution) {
@@ -4848,7 +4875,11 @@ class _FieldGuideState extends State<FieldGuide> {
     children: [
       Text(
         label,
-        style: const TextStyle(fontSize: 11, height: 1, color: muted),
+        style: TextStyle(
+          fontSize: 11,
+          height: 1,
+          color: context.gatheringColors.muted,
+        ),
       ),
       const SizedBox(height: 2),
       if (scaleDown)
@@ -4862,7 +4893,7 @@ class _FieldGuideState extends State<FieldGuide> {
             style: TextStyle(
               fontSize: 12.5,
               height: 1.1,
-              color: valueColor ?? ink,
+              color: valueColor ?? context.gatheringColors.ink,
               fontWeight: FontWeight.w700,
             ),
           ),
@@ -4876,7 +4907,7 @@ class _FieldGuideState extends State<FieldGuide> {
           style: TextStyle(
             fontSize: 12.5,
             height: 1.1,
-            color: valueColor ?? ink,
+            color: valueColor ?? context.gatheringColors.ink,
             fontWeight: FontWeight.w700,
           ),
         ),
@@ -5039,25 +5070,27 @@ class _FieldGuideState extends State<FieldGuide> {
     return value.toStringAsFixed(0);
   }
 
-  Widget _map(double height) => SizedBox(
-    height: height,
-    child: Stack(
-      fit: StackFit.expand,
-      children: [
-        SpotMap(
-          key: const ValueKey('spot-guide-map'),
-          spots: _visibleSpots,
-          selected: _selected,
-          methods: widget.catalog.methods,
-          nodes: widget.catalog.mapNodes,
-          overview: _selected == null,
-          onSelect: _select,
+  Widget _map(double height, {EdgeInsets viewInsets = EdgeInsets.zero}) =>
+      SizedBox(
+        height: height,
+        child: Stack(
+          fit: StackFit.expand,
+          children: [
+            SpotMap(
+              key: const ValueKey('spot-guide-map'),
+              spots: _visibleSpots,
+              selected: _selected,
+              methods: widget.catalog.methods,
+              nodes: widget.catalog.mapNodes,
+              overview: _selected == null,
+              viewInsets: viewInsets,
+              onSelect: _select,
+            ),
+            if (_isGoalRanking)
+              Positioned(right: 12, bottom: 12, child: _bairogMapLink()),
+          ],
         ),
-        if (_isGoalRanking)
-          Positioned(right: 12, bottom: 12, child: _bairogMapLink()),
-      ],
-    ),
-  );
+      );
 
   Widget _bairogMapLink() => Tooltip(
     message: 'Bairog',
@@ -5162,18 +5195,21 @@ class _FieldGuideState extends State<FieldGuide> {
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    const Text(
+                    Text(
                       'Map',
-                      style: TextStyle(fontSize: 14, color: muted),
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: context.gatheringColors.muted,
+                      ),
                     ),
                     if (spot.mapNote.isNotEmpty) ...[
                       const SizedBox(width: 6),
                       Tooltip(
                         message: spot.mapNote,
-                        child: const Icon(
+                        child: Icon(
                           Icons.info_outline,
                           size: 16,
-                          color: muted,
+                          color: context.gatheringColors.muted,
                         ),
                       ),
                     ],
@@ -5194,7 +5230,10 @@ class _FieldGuideState extends State<FieldGuide> {
               if (spot.summary.isNotEmpty) ...[
                 Text(
                   spot.summary,
-                  style: const TextStyle(fontSize: 14, color: muted),
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: context.gatheringColors.muted,
+                  ),
                 ),
                 const SizedBox(height: 12),
               ],
@@ -5273,7 +5312,10 @@ class _FieldGuideState extends State<FieldGuide> {
     expandedCrossAxisAlignment: CrossAxisAlignment.start,
     title: const Text('Route tips', style: TextStyle(fontSize: 15)),
     children: [
-      Text(spot.mapNote, style: const TextStyle(fontSize: 14, color: muted)),
+      Text(
+        spot.mapNote,
+        style: TextStyle(fontSize: 14, color: context.gatheringColors.muted),
+      ),
       if (spot.tips.isNotEmpty) ...[
         const SizedBox(height: 8),
         for (final tip in spot.tips)
@@ -5298,36 +5340,48 @@ class _FieldGuideState extends State<FieldGuide> {
           key: const ValueKey('guide-change-spot'),
           onPressed: _chooseAnotherSpot,
           icon: const Icon(Icons.arrow_back, size: 18),
-          label: const Text('Choose another spot'),
+          label: Text(
+            widget.onReturnToChecklist == null
+                ? 'Choose another spot'
+                : 'Back to checklist',
+          ),
         ),
         const SizedBox(height: 6),
         Padding(
           padding: const EdgeInsets.symmetric(vertical: 4),
-          child: Row(
-            children: [
-              GameIcon(spot.icon, size: 58),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      spot.displayName,
-                      style: const TextStyle(
-                        fontSize: 26,
-                        fontWeight: FontWeight.w600,
-                        height: 1.2,
+          child: FieldDeskPanel(
+            leadingWidth: 72,
+            radius: 10,
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+            child: Row(
+              children: [
+                GameIcon(spot.icon, size: 58),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        spot.displayName,
+                        style: const TextStyle(
+                          fontSize: 26,
+                          fontWeight: FontWeight.w600,
+                          height: 1.2,
+                        ),
                       ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      spot.nodeName,
-                      style: const TextStyle(fontSize: 15, color: muted),
-                    ),
-                  ],
+                      const SizedBox(height: 4),
+                      Text(
+                        spot.nodeName,
+                        style: TextStyle(
+                          fontSize: 15,
+                          color: context.gatheringColors.muted,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ],
@@ -5349,7 +5403,10 @@ class _FieldGuideState extends State<FieldGuide> {
                 child: InkWell(
                   key: ValueKey('guide-tool-${method.id}'),
                   borderRadius: BorderRadius.circular(8),
-                  onTap: () => setState(() => _detailMethodId = method.id),
+                  onTap: () {
+                    setState(() => _detailMethodId = method.id);
+                    _notifyBrowseContext();
+                  },
                   child: Padding(
                     padding: const EdgeInsets.all(4),
                     child: _methodArtwork(method.icon, size: 44),
@@ -5379,7 +5436,11 @@ class _FieldGuideState extends State<FieldGuide> {
       key: const ValueKey('guide-directions'),
       tooltip: 'Directions',
       onPressed: () => _showDirections(spot, media),
-      icon: const Icon(Icons.info_outline, size: 21, color: muted),
+      icon: Icon(
+        Icons.info_outline,
+        size: 21,
+        color: context.gatheringColors.muted,
+      ),
     );
     return LayoutBuilder(
       key: const ValueKey('guide-context'),
@@ -5452,10 +5513,10 @@ class _FieldGuideState extends State<FieldGuide> {
                     key: const ValueKey('bairog-selected-route-evidence'),
                     textAlign: TextAlign.end,
                     softWrap: true,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 12.5,
                       height: 1.15,
-                      color: muted,
+                      color: context.gatheringColors.muted,
                       fontWeight: FontWeight.w600,
                     ),
                   ),

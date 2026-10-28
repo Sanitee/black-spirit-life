@@ -6,7 +6,7 @@ import 'package:bdo_map_core/bdo_map_core.dart';
 import 'package:bdo_map_core/src/widgets/resource_map_atlas_shell.dart';
 import 'package:bdo_map_core/src/widgets/map_canvas.dart';
 import 'package:bdo_map_core/src/widgets/house_use_icon.dart';
-import 'package:bdo_map_core/src/widgets/resource_map_pill.dart';
+import 'package:bdo_map_core/src/widgets/resource_map_field_desk.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
@@ -15,11 +15,21 @@ import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
 
 // Native Windows typography over a deliberately busy, generated basemap.
+// Optional real-tile captures copy only the experiment's existing tile cache;
+// they neither contact the network nor write into a live application profile.
 // All geographical markers and workflows use the complete bundled dataset.
-void main() {
+void main() => resourceMapNavigationGlassTests();
+
+/// Shared headless fixture also exercises application-resolved palettes.
+void resourceMapNavigationGlassTests({
+  Map<String, ResourceMapChromeThemeData> appearanceThemes = const {},
+  bool onlyAppearance = false,
+}) {
   TestWidgetsFlutterBinding.ensureInitialized();
+  final realTileCache = Platform.environment['RESOURCE_MAP_REAL_TILE_CACHE'];
   late BdoResourceMapDataset dataset;
   late LodgingDataset lodging;
+  BdoWorkerEconomicsDataset? economics;
   late List<int> tilePng;
   late Directory cache;
   late MockClient client;
@@ -29,9 +39,14 @@ void main() {
   setUpAll(() async {
     dataset = await BdoResourceMapLoader.loadBundled();
     lodging = await LodgingDataLoader.loadBundled();
+    if (onlyAppearance) {
+      economics = await BdoWorkerEconomicsLoader.loadBundled();
+    }
+    final catalogFile = File('assets/data/app-data.json').existsSync()
+        ? File('assets/data/app-data.json')
+        : File('../../assets/data/app-data.json');
     final catalog =
-        jsonDecode(File('../../assets/data/app-data.json').readAsStringSync())
-            as Map<String, dynamic>;
+        jsonDecode(catalogFile.readAsStringSync()) as Map<String, dynamic>;
     itemIcons = <String, dynamic>{
       ...(catalog['processing'] as Map<String, dynamic>)['itemIcons']
           as Map<String, dynamic>,
@@ -48,6 +63,13 @@ void main() {
         );
       }
       await font.load();
+      final serif = FontLoader('Georgia');
+      for (final file in ['georgia.ttf', 'georgiab.ttf']) {
+        serif.addFont(
+          File('$windows/Fonts/$file').readAsBytes().then(ByteData.sublistView),
+        );
+      }
+      await serif.load();
       var sdk = File(Platform.resolvedExecutable).parent;
       while (!Directory(
         '${sdk.path}/bin/cache/artifacts/material_fonts',
@@ -68,6 +90,32 @@ void main() {
   });
   setUp(() {
     cache = Directory.systemTemp.createTempSync('map_glass_navigation_');
+    if (realTileCache != null) {
+      final source = BdoTileSource.workermanCommunity;
+      final original = Directory('$realTileCache/${source.id}');
+      expect(original.existsSync(), isTrue);
+      final copied = Directory('${cache.path}/${source.id}')..createSync();
+      for (final tile in original.listSync().whereType<File>()) {
+        if (!tile.path.endsWith('.${source.fileExtension}')) continue;
+        final zoom = int.parse(tile.uri.pathSegments.last.split('_').first);
+        if (zoom > 3) continue;
+        tile.copySync('${copied.path}/${tile.uri.pathSegments.last}');
+      }
+      client = MockClient((request) async {
+        final segments = request.url.pathSegments;
+        final file = File(
+          '${original.path}/${segments[segments.length - 2]}_${segments.last}',
+        );
+        return file.existsSync()
+            ? http.Response.bytes(
+                file.readAsBytesSync(),
+                200,
+                headers: {'content-type': 'image/webp'},
+              )
+            : http.Response('', 404);
+      });
+      return;
+    }
     // The overview is a visual fixture, not a cache-write benchmark. Seed its
     // tiny generated tiles so Windows file locks cannot race the first frame.
     final directory = Directory('${cache.path}/map-glass-test')..createSync();
@@ -146,10 +194,11 @@ void main() {
     ResourceMapInterfaceStyle style = ResourceMapInterfaceStyle.glassDock,
     ValueChanged<BdoNodeNetworkPreferences>? onPreferences,
     BdoNodeNetworkPreferences? preferences,
-    double uiOpacity = 1,
+    double uiOpacity = ResourceMapUiOpacity.defaultValue,
     ValueChanged<double>? onUiOpacityChanged,
     BdoResourceMapController? controller,
     bool originalItemArtwork = false,
+    ResourceMapChromeThemeData? chrome,
   }) async {
     await tester.binding.setSurfaceSize(size);
     addTearDown(() => tester.binding.setSurfaceSize(null));
@@ -163,6 +212,17 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData(fontFamily: 'Segoe UI'),
+        builder: (context, child) => MediaQuery(
+          data: MediaQuery.of(context).copyWith(
+            size: size,
+            textScaler: TextScaler.linear(scale),
+            disableAnimations: true,
+          ),
+          child: RepaintBoundary(
+            key: const ValueKey('map-glass-full-capture'),
+            child: child!,
+          ),
+        ),
         home: MediaQuery(
           data: MediaQueryData(
             size: size,
@@ -171,9 +231,10 @@ void main() {
           ),
           child: ResourceMapChromeTheme(
             data:
-                (style == ResourceMapInterfaceStyle.ghostLedger
-                        ? ResourceMapChromeThemeData.ghostLedger
-                        : ResourceMapChromeThemeData.glassDock)
+                (chrome ??
+                        (style == ResourceMapInterfaceStyle.ghostLedger
+                            ? ResourceMapChromeThemeData.ghostLedger
+                            : ResourceMapChromeThemeData.glassDock))
                     .withUiOpacity(uiOpacity),
             child: RepaintBoundary(
               key: const ValueKey('map-glass-capture'),
@@ -181,6 +242,7 @@ void main() {
                 dataset: dataset,
                 controller: controller,
                 lodgingDataset: lodging,
+                workerEconomics: economics,
                 cacheDirectory: cache,
                 tileHttpClient: client,
                 showSourceNotice: false,
@@ -211,15 +273,18 @@ void main() {
                     : null,
                 onNodeNetworkPreferencesChanged: onPreferences,
                 nodeNetworkPreferences: preferences,
-                tileSource: BdoTileSource(
-                  id: 'map-glass-test',
-                  displayName: 'Generated terrain fixture',
-                  urlTemplate: 'https://example.test/{z}/{x}_{y}.png',
-                  worldBounds: BdoTileSource.workermanCommunity.worldBounds,
-                  attribution: 'Generated test fixture',
-                  usageNotice: 'Automated visual QA only.',
-                  fileExtension: 'png',
-                ),
+                tileSource: realTileCache != null
+                    ? BdoTileSource.workermanCommunity
+                    : BdoTileSource(
+                        id: 'map-glass-test',
+                        displayName: 'Generated terrain fixture',
+                        urlTemplate: 'https://example.test/{z}/{x}_{y}.png',
+                        worldBounds:
+                            BdoTileSource.workermanCommunity.worldBounds,
+                        attribution: 'Generated test fixture',
+                        usageNotice: 'Automated visual QA only.',
+                        fileExtension: 'png',
+                      ),
               ),
             ),
           ),
@@ -229,7 +294,11 @@ void main() {
     await settleTerrain(tester);
   }
 
-  Future<void> capture(WidgetTester tester, String name) async {
+  Future<void> capture(
+    WidgetTester tester,
+    String name, {
+    bool fullFrame = false,
+  }) async {
     await settleTerrain(tester);
     for (final element in find.byType(Image).evaluate().toList()) {
       await tester.runAsync(
@@ -254,11 +323,16 @@ void main() {
     expect(tester.takeException(), isNull);
     expect(find.byType(Scrollbar), findsNothing);
     expect(find.byType(RawScrollbar), findsNothing);
+    expect(find.byType(BackdropFilter), findsNothing);
     final captureDirectory = Platform.environment['RESOURCE_MAP_CAPTURE_DIR'];
     if (captureDirectory != null) {
       await tester.runAsync(() async {
         final boundary = tester.renderObject<RenderRepaintBoundary>(
-          find.byKey(const ValueKey('map-glass-capture')),
+          find.byKey(
+            ValueKey(
+              fullFrame ? 'map-glass-full-capture' : 'map-glass-capture',
+            ),
+          ),
         );
         final image = await boundary.toImage();
         final bytes = await image.toByteData(format: ui.ImageByteFormat.png);
@@ -270,10 +344,12 @@ void main() {
         ).writeAsBytes(bytes!.buffer.asUint8List());
       });
     }
-    await expectLater(
-      find.byKey(const ValueKey('map-glass-capture')),
-      matchesGoldenFile('goldens/$name.png'),
-    );
+    if (realTileCache == null && !onlyAppearance) {
+      await expectLater(
+        find.byKey(const ValueKey('map-glass-capture')),
+        matchesGoldenFile('goldens/$name.png'),
+      );
+    }
   }
 
   Future<void> tap(WidgetTester tester, String key) async {
@@ -281,6 +357,164 @@ void main() {
     await tester.ensureVisible(target);
     await tester.tap(target);
     await tester.pumpAndSettle();
+  }
+
+  for (final entry in appearanceThemes.entries) {
+    for (final scale in [1.0, 2.0]) {
+      testWidgets(
+        'Appearance ${entry.key} keeps real Atlas layout at ${scale}x',
+        (tester) async {
+          await open(
+            tester,
+            size: scale == 1 ? const Size(1200, 752) : const Size(900, 820),
+            scale: scale,
+            chrome: entry.value,
+            originalItemArtwork: true,
+            onUiOpacityChanged: (_) {},
+          );
+          expect(
+            tester
+                .widgetList<ResourceMapPill>(find.byType(ResourceMapPill))
+                .where((pill) => pill.leadingWidth != null)
+                .length,
+            greaterThanOrEqualTo(3),
+          );
+          await tap(tester, 'resource-map-home-worker-income');
+          final budgetLabel = find.descendant(
+            of: find.byKey(
+              const ValueKey('resource-map-market-value-cp-budget'),
+            ),
+            matching: find.text('Network CP limit'),
+          );
+          expect(
+            tester.renderObject<RenderParagraph>(budgetLabel).didExceedMaxLines,
+            isFalse,
+          );
+          expect(
+            Theme.of(
+              tester.element(
+                find.byKey(
+                  const ValueKey('resource-map-worker-income-settings'),
+                ),
+              ),
+            ).brightness,
+            entry.value.brightness,
+          );
+          await capture(
+            tester,
+            'resource_map_appearance_${entry.key}_workers_${(scale * 100).round()}',
+          );
+          await tap(tester, 'resource-map-worker-income-settings');
+          final modalContext = tester.element(find.byType(AlertDialog));
+          expect(modalContext.mapChrome.uiOpacity, 1);
+          expect(Theme.of(modalContext).brightness, entry.value.brightness);
+          expect(MediaQuery.textScalerOf(modalContext).scale(16), 16 * scale);
+          final hours = tester.getRect(
+            find.byKey(const ValueKey('resource-map-online-hours-input')),
+          );
+          final resources = tester.getRect(
+            find.byKey(const ValueKey('resource-map-availability-input')),
+          );
+          if (scale == 1) {
+            expect(hours.top, resources.top);
+            expect(resources.left, greaterThan(hours.right));
+          } else {
+            expect(resources.top, greaterThan(hours.bottom));
+          }
+          await capture(
+            tester,
+            'resource_map_appearance_${entry.key}_modal_${(scale * 100).round()}',
+            fullFrame: true,
+          );
+          await tester.tap(find.text('Cancel'));
+          await tester.pumpAndSettle();
+          await tap(tester, 'resource-map-worker-capacity-settings');
+          final lodgingContext = tester.element(find.byType(AlertDialog));
+          expect(lodgingContext.mapChrome.uiOpacity, 1);
+          expect(Theme.of(lodgingContext).brightness, entry.value.brightness);
+          expect(find.text('Purchased slots'), findsOneWidget);
+          await capture(
+            tester,
+            'resource_map_appearance_${entry.key}_extra_lodging_${(scale * 100).round()}',
+            fullFrame: true,
+          );
+          await tap(tester, 'resource-map-town-lodging-cancel');
+          await tap(tester, 'resource-map-home-find-material');
+          await tap(tester, 'resource-map-section-plantsWood');
+          await tester.tap(find.text('Acacia Tree').first);
+          await tester.pumpAndSettle();
+          final mapContext = tester.element(find.byType(BdoResourceMap));
+          expect(mapContext.mapChrome.ink, entry.value.ink);
+          expect(mapContext.mapChrome.uiOpacity, .6);
+          expect(find.text('60%'), findsOneWidget);
+          expect(find.byType(ResourceMapArtworkMount), findsWidgets);
+          final sapLabel = find.text('Acacia Sap').first;
+          final sapCard = find
+              .ancestor(of: sapLabel, matching: find.byType(ResourceMapPill))
+              .first;
+          expect(tester.widget<ResourceMapPill>(sapCard).leadingWidth, 48);
+          expect(
+            tester.getRect(sapLabel).left,
+            greaterThan(tester.getRect(sapCard).left + 48),
+          );
+          expect(
+            find.byKey(const ValueKey('resource-map-sidebar-details')),
+            findsOneWidget,
+          );
+          await capture(
+            tester,
+            'resource_map_appearance_${entry.key}_${(scale * 100).round()}',
+          );
+          final search = find.byKey(
+            const ValueKey('resource-map-atlas-search-field'),
+          );
+          tester.widget<TextField>(search).focusNode!.requestFocus();
+          await tester.pumpAndSettle();
+          await capture(
+            tester,
+            'resource_map_appearance_${entry.key}_focus_${(scale * 100).round()}',
+          );
+          tester.widget<TextField>(search).focusNode!.unfocus();
+          await tester.pumpAndSettle();
+          expect(tester.takeException(), isNull);
+        },
+        skip: !Platform.isWindows,
+      );
+    }
+  }
+  if (onlyAppearance) return;
+
+  for (final scale in [1.5, 2.0]) {
+    testWidgets(
+      'translucent default keeps Atlas readable at ${scale}x',
+      (tester) async {
+        await open(
+          tester,
+          size: scale == 1.5 ? const Size(1200, 752) : const Size(900, 820),
+          scale: scale,
+          originalItemArtwork: true,
+          onUiOpacityChanged: (_) {},
+        );
+        expect(find.text('60%'), findsOneWidget);
+        final suffix = (scale * 100).round();
+        await capture(tester, 'resource_map_glass_default_home_text$suffix');
+        await tap(tester, 'resource-map-home-find-material');
+        await capture(
+          tester,
+          'resource_map_glass_default_materials_text$suffix',
+        );
+        await tap(tester, 'resource-map-section-plantsWood');
+        await tester.tap(find.text('Acacia Tree').first);
+        await tester.pumpAndSettle();
+        expect(
+          find.byKey(const ValueKey('resource-map-sidebar-details')),
+          findsOneWidget,
+        );
+        await capture(tester, 'resource_map_glass_default_detail_text$suffix');
+        expect(tester.takeException(), isNull);
+      },
+      skip: !Platform.isWindows,
+    );
   }
 
   for (final opacity in [1.0, .6]) {
@@ -302,7 +536,7 @@ void main() {
                 find.byType(ResourceMapJourneySurface),
               )
               .framedBody,
-          isFalse,
+          isTrue,
         );
         final categories = find.byKey(
           const ValueKey('resource-map-material-categories'),
@@ -326,7 +560,7 @@ void main() {
                 find.byType(ResourceMapJourneySurface),
               )
               .framedBody,
-          isFalse,
+          isTrue,
         );
         final name = find.text('Acacia Tree').first;
         expect(name, findsOneWidget);
@@ -442,7 +676,12 @@ void main() {
         expect(find.text('The complete route is on the map'), findsNothing);
         expect(
           tester.getRect(find.byType(ResourceMapJourneySurface)).right,
-          lessThanOrEqualTo(470),
+          lessThanOrEqualTo(720),
+        );
+        expect(
+          tester.getRect(find.byType(ResourceMapJourneySurface)).left,
+          greaterThan(tester.getRect(find.byType(ResourceMapFieldDesk)).right),
+          reason: 'The workbench must not cover the persistent task rail.',
         );
         await capture(tester, 'resource_map_review_18_nodes_1200_$suffix');
         final apply = find.byKey(
@@ -496,11 +735,11 @@ void main() {
       findsNothing,
     );
     await capture(tester, 'resource_map_task_home_1500');
-    final home = tester.getRect(find.byType(ResourceMapJourneySurface));
-    expect(home.width, 266);
-    expect(home.height, lessThan(300));
+    final home = tester.getRect(find.byType(ResourceMapFieldDesk));
+    expect(home.width, 200);
+    expect(home.height, lessThan(440));
     expect(
-      find.byKey(const ValueKey('resource-map-unframed-home')),
+      find.byKey(const ValueKey('resource-map-field-desk')),
       findsOneWidget,
     );
     await tap(tester, 'resource-map-home-find-material');
@@ -585,7 +824,7 @@ void main() {
     (tester) async {
       for (final style in ResourceMapInterfaceStyle.values) {
         await open(tester, size: const Size(900, 820), scale: 2, style: style);
-        final panel = tester.getRect(find.byType(ResourceMapJourneySurface));
+        final panel = tester.getRect(find.byType(ResourceMapFieldDesk));
         expect(panel.left, greaterThanOrEqualTo(0));
         expect(panel.right, lessThanOrEqualTo(820));
         expect(panel.bottom, lessThanOrEqualTo(820));
@@ -694,12 +933,60 @@ void main() {
       expect(task, findsOneWidget);
       await tap(tester, 'resource-map-task-back');
       expect(
-        find.byKey(const ValueKey('resource-map-unframed-home')),
+        find.byKey(const ValueKey('resource-map-field-desk')),
         findsOneWidget,
       );
       expect(tester.takeException(), isNull);
     },
     skip: !Platform.isWindows,
+  );
+
+  testWidgets(
+    'field desk retains map state and keeps inspector clear of zoom tools',
+    (tester) async {
+      await open(tester, size: const Size(1200, 752));
+      final mapState = tester.state(find.byType(BdoResourceMap));
+      final rail = find.byType(ResourceMapFieldDesk);
+      final railBounds = tester.getRect(rail);
+      expect(railBounds.width, 200);
+      expect(railBounds.height, lessThan(440));
+      await tap(tester, 'resource-map-home-find-material');
+      expect(tester.state(find.byType(BdoResourceMap)), same(mapState));
+      expect(tester.getRect(rail), railBounds);
+      final search = find.byKey(
+        const ValueKey('resource-map-atlas-search-field'),
+      );
+      await tester.enterText(search, 'Thornwood Forest - Lumbering');
+      await tester.pumpAndSettle();
+      final node = dataset.workerNodes.singleWhere(
+        (node) => node.name == 'Thornwood Forest - Lumbering',
+      );
+      await tap(tester, 'resource-map-search-result-workerNode-${node.id}');
+      final inspector = tester.getRect(find.byType(ResourceMapJourneySurface));
+      expect(inspector.left, greaterThan(railBounds.right + 250));
+      expect(inspector.right, lessThanOrEqualTo(1112));
+      expect(
+        find.byKey(const ValueKey('resource-map-full-world')).hitTestable(),
+        findsOneWidget,
+      );
+      expect(tester.state(find.byType(BdoResourceMap)), same(mapState));
+      await tap(tester, 'resource-map-home-saved');
+      expect(
+        find.byKey(const ValueKey('resource-map-saved-list')),
+        findsOneWidget,
+      );
+      await tap(tester, 'resource-map-home-find-material');
+      expect(
+        find.byKey(const ValueKey('resource-map-saved-list')),
+        findsNothing,
+      );
+      expect(
+        find.byKey(const ValueKey('resource-map-material-categories')),
+        findsOneWidget,
+      );
+      expect(tester.state(find.byType(BdoResourceMap)), same(mapState));
+      expect(tester.takeException(), isNull);
+    },
   );
 
   testWidgets(

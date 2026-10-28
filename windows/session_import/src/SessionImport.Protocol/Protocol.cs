@@ -12,6 +12,7 @@ public static class SessionImportProtocol
     public const string PipeName = "blackspiritlife.session_import.trial.v1";
     public const string NativeHostName = "com.blackspiritlife.session_import.trial";
     public const string FirefoxExtensionId = "session-import-trial@blackspirit.life";
+    public const string LocalDataDirectoryName = "Black Spirit Life";
 }
 
 public static class FramedJson

@@ -192,23 +192,7 @@ void main() {
     expect(find.byKey(BetaUpdateIndicator.buttonKey), findsOneWidget);
     expect(find.text('Startup notice remains visible.'), findsOneWidget);
     final afterUpdate = tester.widget<SnackBar>(find.byType(SnackBar));
-    expect(
-      (afterUpdate.margin! as EdgeInsets).bottom,
-      20 + BetaUpdateIndicator.height,
-    );
-    expect(windowHost.bottomInsets, <double>[BetaUpdateIndicator.height]);
-
-    tester.platformDispatcher.textScaleFactorTestValue = 2;
-    await tester.pump();
-    await tester.pump();
-
-    expect(
-      tester.getSize(find.byKey(BetaUpdateIndicator.buttonKey)).height,
-      64,
-    );
-    expect(windowHost.bottomInsets, <double>[BetaUpdateIndicator.height, 64]);
-    final afterTextScaleChange = tester.widget<SnackBar>(find.byType(SnackBar));
-    expect((afterTextScaleChange.margin! as EdgeInsets).bottom, 84);
+    expect((afterUpdate.margin! as EdgeInsets).bottom, 20);
 
     service.completeCurrentStatus();
     await tester.pump();
@@ -252,7 +236,7 @@ void main() {
     await service.dispose();
   });
 
-  testWidgets('public build never exposes the developer update control', (
+  testWidgets('Codex Beta never exposes a developer update action', (
     tester,
   ) async {
     configureApplicationTestSurface(tester, const Size(1575, 987));
@@ -328,8 +312,8 @@ void main() {
         await tester.pump(const Duration(milliseconds: 80));
       }
 
-      expect(find.textContaining('2.5 MB patch'), findsOneWidget);
-      expect(windowHost.bottomInsets, <double>[BetaUpdateIndicator.height]);
+      expect(find.text('Update'), findsOneWidget);
+      expect(windowHost.bottomInsets, isEmpty);
 
       await tester.tap(find.byKey(BetaUpdateIndicator.buttonKey));
       for (var index = 0; index < 8; index++) {
@@ -344,7 +328,7 @@ void main() {
 
       await tester.pumpWidget(const SizedBox.shrink());
       await tester.pump();
-      expect(windowHost.bottomInsets.last, 0);
+      expect(windowHost.bottomInsets, isEmpty);
       await tester.runAsync(harness.dispose);
       await service.dispose();
     },
@@ -484,7 +468,7 @@ void main() {
     expect(service.downloadCalls, 1);
     expect(find.byKey(BetaUpdateIndicator.buttonKey), findsNothing);
     expect(find.text('The update download failed.'), findsOneWidget);
-    expect(windowHost.bottomInsets, <double>[BetaUpdateIndicator.height, 0]);
+    expect(windowHost.bottomInsets, isEmpty);
     expect(windowHost.closeCalls, 0);
 
     await tester.pumpWidget(const SizedBox.shrink());

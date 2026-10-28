@@ -472,67 +472,72 @@ class _SpotVideoPlayerState extends State<SpotVideoPlayer>
             child: ColoredBox(
               key: _viewportKey,
               color: Colors.black,
-              child: LayoutBuilder(
-                builder: (context, constraints) {
-                  if (constraints.maxWidth < 200 ||
-                      constraints.maxHeight < 200) {
-                    return const Center(
-                      child: Padding(
-                        padding: EdgeInsets.all(12),
+                // Media stays black in every theme. Status/error copy on
+              // that plane must remain light even in a light app theme.
+              child: DefaultTextStyle.merge(
+                style: const TextStyle(color: Colors.white),
+                child: LayoutBuilder(
+                  builder: (context, constraints) {
+                    if (constraints.maxWidth < 200 ||
+                        constraints.maxHeight < 200) {
+                      return const Center(
+                        child: Padding(
+                          padding: EdgeInsets.all(12),
+                          child: Text(
+                            'Enlarge the window to play this video.',
+                            textAlign: TextAlign.center,
+                          ),
+                        ),
+                      );
+                    }
+                    if (video == null) {
+                      return const Center(
                         child: Text(
-                          'Enlarge the window to play this video.',
-                          textAlign: TextAlign.center,
+                          'This is not a supported YouTube video link.',
+                        ),
+                      );
+                    }
+                    if (_session != null && !_opening) {
+                      return _session!.buildView();
+                    }
+                    if (_opening) {
+                      return const Center(child: CircularProgressIndicator());
+                    }
+                    return Center(
+                      child: Padding(
+                        padding: const EdgeInsets.all(16),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            if (compact && _message != null) ...[
+                              Flexible(
+                                child: SingleChildScrollView(
+                                  primary: false,
+                                  child: Text(
+                                    _message!,
+                                    key: const ValueKey('spot-video-message'),
+                                    textAlign: TextAlign.center,
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(height: 12),
+                            ],
+                            FilledButton.icon(
+                              key: const ValueKey('play-spot-video'),
+                              onPressed: _play,
+                              icon: const Icon(Icons.play_arrow),
+                              label: Text(
+                                compact && _message != null
+                                    ? 'Try again'
+                                    : 'Play video',
+                              ),
+                            ),
+                          ],
                         ),
                       ),
                     );
-                  }
-                  if (video == null) {
-                    return const Center(
-                      child: Text(
-                        'This is not a supported YouTube video link.',
-                      ),
-                    );
-                  }
-                  if (_session != null && !_opening) {
-                    return _session!.buildView();
-                  }
-                  if (_opening) {
-                    return const Center(child: CircularProgressIndicator());
-                  }
-                  return Center(
-                    child: Padding(
-                      padding: const EdgeInsets.all(16),
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          if (compact && _message != null) ...[
-                            Flexible(
-                              child: SingleChildScrollView(
-                                primary: false,
-                                child: Text(
-                                  _message!,
-                                  key: const ValueKey('spot-video-message'),
-                                  textAlign: TextAlign.center,
-                                ),
-                              ),
-                            ),
-                            const SizedBox(height: 12),
-                          ],
-                          FilledButton.icon(
-                            key: const ValueKey('play-spot-video'),
-                            onPressed: _play,
-                            icon: const Icon(Icons.play_arrow),
-                            label: Text(
-                              compact && _message != null
-                                  ? 'Try again'
-                                  : 'Play video',
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  );
-                },
+                  },
+                ),
               ),
             ),
           ),
