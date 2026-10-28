@@ -17,7 +17,7 @@ class BetaUpdateIndicator extends StatefulWidget {
   });
 
   static const double height = 40;
-  static const double expandedWidth = 134;
+  static const double expandedWidth = 128;
   static const double compactWidth = 42;
   static const Key buttonKey = ValueKey<String>('beta-update-title-button');
   static const Key iconKey = ValueKey<String>('beta-update-title-icon');
@@ -103,7 +103,7 @@ class _BetaUpdateIndicatorState extends State<BetaUpdateIndicator>
     if (!mounted) return;
     final reduceMotion =
         MediaQuery.maybeOf(context)?.disableAnimations ?? false;
-    if (!_canBreathe || reduceMotion) {
+    if (!_canBreathe || reduceMotion || !TickerMode.valuesOf(context).enabled) {
       _attention
         ..stop()
         ..value = 0;
@@ -212,8 +212,8 @@ class _BetaUpdateIndicatorState extends State<BetaUpdateIndicator>
                           ),
                           child: Padding(
                             padding: EdgeInsets.only(
-                              left: 3,
-                              right: compact ? 3 : 9,
+                              left: compact ? 4 : 0,
+                              right: compact ? 4 : 14,
                             ),
                             child: Row(
                               children: <Widget>[
@@ -223,8 +223,8 @@ class _BetaUpdateIndicatorState extends State<BetaUpdateIndicator>
                                   glow: glow,
                                 ),
                                 if (!compact) ...<Widget>[
-                                  const SizedBox(width: 8),
-                                  Expanded(
+                                  const SizedBox(width: 16),
+                                  Flexible(
                                     child: Text(
                                       label,
                                       key: BetaUpdateIndicator.actionPanelKey,
@@ -234,8 +234,8 @@ class _BetaUpdateIndicatorState extends State<BetaUpdateIndicator>
                                         color: actionable
                                             ? spec.palette.text
                                             : spec.palette.textMuted,
-                                        fontSize: 12.5,
-                                        fontWeight: FontWeight.w700,
+                                        fontSize: 12,
+                                        fontWeight: FontWeight.w600,
                                         letterSpacing: .15,
                                         height: 1,
                                       ),
@@ -245,17 +245,11 @@ class _BetaUpdateIndicatorState extends State<BetaUpdateIndicator>
                                   Transform.rotate(
                                     angle: .785398,
                                     child: Container(
-                                      width: 5,
-                                      height: 5,
+                                      width: 3,
+                                      height: 3,
                                       decoration: BoxDecoration(
                                         color: spec.palette.primaryBright
                                             .withAlpha(actionable ? 190 : 86),
-                                        border: Border.all(
-                                          color: spec.palette.text.withAlpha(
-                                            actionable ? 116 : 54,
-                                          ),
-                                          width: .7,
-                                        ),
                                       ),
                                     ),
                                   ),
@@ -308,6 +302,13 @@ class _UpdateBadge extends StatelessWidget {
                     backgroundColor: spec.palette.text.withAlpha(28),
                   ),
                 )
+              : snapshot.phase == BetaUpdatePhase.available
+              ? SizedBox.square(
+                  dimension: 16,
+                  child: CustomPaint(
+                    painter: _DownloadGlyphPainter(spec: spec, glow: glow),
+                  ),
+                )
               : Icon(
                   snapshot.phase == BetaUpdatePhase.ready
                       ? Icons.restart_alt_rounded
@@ -348,50 +349,63 @@ class _TightGlowFramePainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    final face = Rect.fromLTRB(compact ? 1 : 15, 4, size.width - 1, 32);
-    final path = _octagon(face, 5);
+    // Compact mode is the crest alone, not a second frame behind the crest.
+    if (compact) return;
+    final material = _UpdateMetal(spec);
+    final face = Rect.fromLTRB(18, 4, size.width, 32);
+    final path = _taperedFace(face);
+    final edge = material.edge(1 + glow * 1.8);
     if (glow > 0) {
       canvas.drawPath(
         path,
         Paint()
-          ..color = spec.palette.primaryBright.withAlpha(
-            (glow * .9 * 86).round(),
-          )
-          ..maskFilter = MaskFilter.blur(BlurStyle.normal, 4 + glow * 3),
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = 2
+          ..color = material.light.withValues(alpha: glow * .9)
+          ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 2),
       );
     }
+    // The breathing rim is a separate layer; the opaque face cannot cover it.
+    canvas.drawPath(path, Paint()..shader = edge.createShader(face));
+    final inner = _taperedFace(face.deflate(1));
     canvas.drawPath(
-      path,
+      inner,
       Paint()
         ..shader = LinearGradient(
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
-          colors: <Color>[
-            Color.alphaBlend(
-              spec.palette.primary.withAlpha(enabled ? 42 : 20),
-              spec.palette.surface,
-            ),
-            spec.palette.surfaceInset,
-          ],
+          colors: [material.faceTop, material.faceBottom, material.faceBounce],
+          stops: const [0, .75, 1],
         ).createShader(face),
     );
-    canvas.drawPath(
-      path,
+    // Restrained lower copper reflection, as in the approved Copper light face.
+    canvas.save();
+    canvas.clipPath(inner);
+    canvas.drawRect(
+      face,
       Paint()
-        ..style = PaintingStyle.stroke
-        ..strokeWidth = 1
-        ..color = spec.palette.primaryBright.withAlpha(
-          enabled ? 126 + (glow * 92).round() : 56,
-        ),
+        ..shader = RadialGradient(
+          center: Alignment.bottomLeft,
+          radius: 1.1,
+          colors: [material.copper.withAlpha(56), material.copper.withAlpha(0)],
+        ).createShader(face),
     );
+    canvas.restore();
     canvas.drawPath(
-      _octagon(face.deflate(2), 4),
+      Path()
+        ..moveTo(38, 7)
+        ..lineTo(size.width - 15, 7),
       Paint()
         ..style = PaintingStyle.stroke
         ..strokeWidth = .7
-        ..color = spec.palette.text.withAlpha(
-          enabled ? 28 + (glow * 42).round() : 14,
-        ),
+        ..color = material.light.withAlpha(enabled ? 78 : 35),
+    );
+    canvas.drawLine(
+      const Offset(36, 29),
+      Offset(size.width - 13, 29),
+      Paint()
+        ..strokeWidth = .7
+        ..color = material.copper.withAlpha(124),
     );
   }
 
@@ -411,41 +425,51 @@ class _TightGlowBadgePainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
+    final material = _UpdateMetal(spec);
     final rect = Offset.zero & size;
-    final path = _octagon(rect.deflate(.7), 7);
+    final path = _octagon(rect.deflate(.5), 8);
     if (glow > 0) {
       canvas.drawPath(
         path,
         Paint()
-          ..color = spec.palette.primaryBright.withAlpha(
-            (glow * .72 * 108).round(),
-          )
-          ..maskFilter = MaskFilter.blur(BlurStyle.normal, 3 + glow * 2),
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = 2
+          ..color = material.light.withValues(alpha: glow * .72)
+          ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 2),
       );
     }
+    final brightness = 1 + glow * .48;
     canvas.drawPath(
       path,
+      Paint()..shader = material.edge(brightness).createShader(rect),
+    );
+    canvas.drawPath(
+      _octagon(rect.deflate(1.5), 7.3),
       Paint()
         ..shader = LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: <Color>[
-            Color.alphaBlend(
-              spec.palette.primaryBright.withAlpha(52),
-              spec.palette.surface,
-            ),
-            spec.palette.surfaceInset,
+          colors: [
+            _brighten(material.crestTop, brightness),
+            _brighten(material.crestBottom, brightness),
           ],
         ).createShader(rect),
     );
+    // Inset diamond makes the arrow badge distinct from the app's box buttons.
+    final center = rect.center;
+    final diamond = Path()
+      ..moveTo(center.dx, 3.7)
+      ..lineTo(size.width - 3.7, center.dy)
+      ..lineTo(center.dx, size.height - 3.7)
+      ..lineTo(3.7, center.dy)
+      ..close();
     canvas.drawPath(
-      path,
+      diamond,
       Paint()
         ..style = PaintingStyle.stroke
-        ..strokeWidth = 1
-        ..color = spec.palette.primaryBright.withAlpha(
-          152 + (glow * 82).round(),
-        ),
+        ..strokeJoin = StrokeJoin.round
+        ..strokeWidth = .8
+        ..color = _brighten(material.copper, brightness).withAlpha(100),
     );
   }
 
@@ -453,6 +477,111 @@ class _TightGlowBadgePainter extends CustomPainter {
   bool shouldRepaint(_TightGlowBadgePainter oldDelegate) =>
       oldDelegate.spec != spec || oldDelegate.glow != glow;
 }
+
+class _DownloadGlyphPainter extends CustomPainter {
+  const _DownloadGlyphPainter({required this.spec, required this.glow});
+  final ThemeSpec spec;
+  final double glow;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    // Same open tray and downward arrow as the approved preview, not the
+    // generic system-update window glyph. Scale a 16px vector without a font.
+    canvas.save();
+    canvas.scale(size.width / 16, size.height / 16);
+    final arrow = Path()
+      ..moveTo(8, 1.5)
+      ..lineTo(8, 10)
+      ..moveTo(4.5, 6.5)
+      ..lineTo(8, 10)
+      ..lineTo(11.5, 6.5)
+      ..moveTo(2, 10.5)
+      ..lineTo(2, 13.2)
+      ..quadraticBezierTo(2, 14, 3, 14)
+      ..lineTo(13, 14)
+      ..quadraticBezierTo(14, 14, 14, 13.2)
+      ..lineTo(14, 10.5);
+    final paint = Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeCap = StrokeCap.round
+      ..strokeJoin = StrokeJoin.round
+      ..strokeWidth = 1.35;
+    if (glow > 0) {
+      canvas.drawPath(
+        arrow,
+        paint
+          ..color = _UpdateMetal(spec).light.withValues(alpha: glow * .8)
+          ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 2),
+      );
+    }
+    canvas.drawPath(
+      arrow,
+      paint
+        ..color = spec.palette.text
+        ..maskFilter = null,
+    );
+    canvas.restore();
+  }
+
+  @override
+  bool shouldRepaint(_DownloadGlyphPainter oldDelegate) =>
+      oldDelegate.spec != spec || oldDelegate.glow != glow;
+}
+
+// Material tokens derive from the active theme, including Appearance changes.
+// Dark faces retain the preview's copper/plum relationships; light themes keep
+// their own paper/surface contrast rather than inheriting a dark badge.
+class _UpdateMetal {
+  _UpdateMetal(this.spec);
+  final ThemeSpec spec;
+  ThemePalette get palette => spec.palette;
+  bool get dark => spec.brightness == Brightness.dark;
+  Color get copper => Color.lerp(palette.trimBright, palette.warning, .55)!;
+  Color get light => Color.lerp(copper, palette.text, .72)!;
+  Color get faceTop =>
+      Color.lerp(palette.surfaceRaised, palette.primary, dark ? .13 : .04)!;
+  Color get faceBottom => palette.surface;
+  Color get faceBounce => Color.lerp(palette.surface, palette.trimBright, .18)!;
+  Color get crestTop => Color.lerp(faceTop, copper, .2)!;
+  Color get crestBottom => Color.lerp(palette.surface, palette.primary, .12)!;
+
+  LinearGradient edge(double brightness) => LinearGradient(
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+    stops: const [0, .19, .4, .69, .87, 1],
+    colors:
+        [
+              light,
+              copper,
+              palette.trim,
+              Color.lerp(copper, palette.text, .38)!,
+              palette.trim,
+              copper,
+            ]
+            .map(
+              (color) => _brighten(
+                color,
+                dark ? brightness : 1 + (brightness - 1) * .18,
+              ),
+            )
+            .toList(),
+  );
+}
+
+Color _brighten(Color color, double amount) => Color.from(
+  alpha: color.a,
+  red: (color.r * amount).clamp(0, 1),
+  green: (color.g * amount).clamp(0, 1),
+  blue: (color.b * amount).clamp(0, 1),
+);
+
+Path _taperedFace(Rect rect) => Path()
+  ..moveTo(rect.left, rect.top)
+  ..lineTo(rect.right - 8, rect.top)
+  ..lineTo(rect.right, rect.center.dy)
+  ..lineTo(rect.right - 8, rect.bottom)
+  ..lineTo(rect.left, rect.bottom)
+  ..close();
 
 class _TightGlowBorder extends ShapeBorder {
   const _TightGlowBorder();

@@ -8,7 +8,7 @@ abstract final class AppIdentity {
   static const productName = 'Black Spirit Life';
   static const displayName = productName;
   static const releaseChannel = 'win-x64-stable';
-  static const applicationVersion = '0.1.12';
+  static const applicationVersion = '0.1.13';
 
   /// About remains implemented and verified, but its navigation entry stays
   /// hidden until a later product update explicitly enables it.
@@ -32,9 +32,9 @@ abstract final class AppIdentity {
   /// so a native updater fault cannot terminate the planner.
   static const outOfProcessBetaUpdatesEnabled = true;
 
-  /// Session-only developer control for exercising the real update strip
-  /// without contacting a feed, downloading a package, or restarting.
-  static const developerUpdateTestEnabled = false;
+  /// Session-unlocked Editor Settings preview of the title-bar update button.
+  /// It never contacts the feed, downloads, installs or restarts.
+  static const developerUpdateTestEnabled = true;
 
   /// Permanent Velopack ownership identity for the public application.
   /// This must remain distinct from every settings and cache directory name.

@@ -122,6 +122,37 @@ void main() {
     expect(find.byKey(BetaUpdateIndicator.iconKey), findsOneWidget);
   });
 
+  testWidgets('hidden ticker mode pauses breathing and resumes when visible', (
+    tester,
+  ) async {
+    final fixture = _Fixture();
+    addTearDown(fixture.dispose);
+    await tester.pumpWidget(_host(fixture.controller));
+    fixture.emit(const BetaUpdateSnapshot(phase: BetaUpdatePhase.available));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 600));
+    await tester.pumpWidget(_host(fixture.controller, tickerEnabled: false));
+    final paints = find.descendant(
+      of: find.byKey(BetaUpdateIndicator.availableContentKey),
+      matching: find.byType(CustomPaint),
+    );
+    final paused = tester.widgetList<CustomPaint>(paints).first.painter;
+    await tester.pump(const Duration(seconds: 3));
+    expect(tester.widgetList<CustomPaint>(paints).first.painter, same(paused));
+    await tester.pumpWidget(_host(fixture.controller, tickerEnabled: true));
+    final resumed = tester.widgetList<CustomPaint>(paints).first.painter;
+    await tester.pump(const Duration(milliseconds: 2288));
+    expect(
+      tester.widgetList<CustomPaint>(paints).first.painter,
+      isNot(same(resumed)),
+    );
+    fixture.emit(const BetaUpdateSnapshot(phase: BetaUpdatePhase.upToDate));
+    await tester.pumpAndSettle();
+    expect(find.byKey(BetaUpdateIndicator.buttonKey), findsNothing);
+    await tester.pumpWidget(const SizedBox.shrink());
+    expect(tester.takeException(), isNull);
+  });
+
   testWidgets('uses compact mode at enlarged text scale', (tester) async {
     final fixture = _Fixture();
     addTearDown(fixture.dispose);
@@ -244,6 +275,7 @@ void main() {
 Widget _host(
   BetaUpdateController controller, {
   bool disableAnimations = false,
+  bool tickerEnabled = true,
   double width = 900,
   TextScaler textScaler = TextScaler.noScaling,
   Future<void> Function()? onUpdateNow,
@@ -262,9 +294,12 @@ Widget _host(
         child: Scaffold(
           body: Align(
             alignment: Alignment.topRight,
-            child: BetaUpdateIndicator(
-              controller: controller,
-              onUpdateNow: onUpdateNow ?? () async {},
+            child: TickerMode(
+              enabled: tickerEnabled,
+              child: BetaUpdateIndicator(
+                controller: controller,
+                onUpdateNow: onUpdateNow ?? () async {},
+              ),
             ),
           ),
         ),

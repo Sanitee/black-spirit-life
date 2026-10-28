@@ -210,4 +210,4 @@ if ($violations.Count -gt 0) {
     exit 1
 }
 
-Write-Output 'Production source verification passed for exact-Beta Stable 0.1.12.'
+Write-Output 'Production source verification passed for exact-Beta Stable 0.1.13.'

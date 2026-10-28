@@ -236,54 +236,88 @@ void main() {
     await service.dispose();
   });
 
-  testWidgets('Codex Beta never exposes a developer update action', (
-    tester,
-  ) async {
-    configureApplicationTestSurface(tester, const Size(1575, 987));
-    final harness = (await tester.runAsync(ApplicationTestHarness.create))!;
-    final service = _DeferredUpdateService();
-    final windowHost = _RecordingWindowHost(<String>[]);
+  for (final updatesEnabled in <bool>[false, true]) {
+    testWidgets(
+      'editor update preview is session-gated and safe with updates $updatesEnabled',
+      (tester) async {
+        configureApplicationTestSurface(tester, const Size(1575, 987));
+        final harness = (await tester.runAsync(ApplicationTestHarness.create))!;
+        final service = _DeferredUpdateService();
+        final windowHost = _RecordingWindowHost(<String>[]);
+        service.completeCurrentStatus();
 
-    await tester.pumpWidget(
-      BdoCraftPlannerApp(
-        enableOpportunityAutoCheck: false,
-        applicationFuture: Future.value(harness.bundle),
-        marketGateway: const EmptyMarketGateway(),
-        updateService: service,
-        updateSource: r'C:\private-beta-feed',
-        enableBetaUpdates: false,
-        windowHost: windowHost,
-      ),
+        await tester.pumpWidget(
+          BdoCraftPlannerApp(
+            enableOpportunityAutoCheck: false,
+            applicationFuture: Future.value(harness.bundle),
+            marketGateway: const EmptyMarketGateway(),
+            updateService: service,
+            updateSource: r'C:\private-beta-feed',
+            enableBetaUpdates: updatesEnabled,
+            windowHost: windowHost,
+          ),
+        );
+        await tester.pumpAndSettle();
+
+        harness.bundle.controller.active.navigate('data');
+        await tester.pumpAndSettle();
+        final preview = find.byKey(const ValueKey<String>('data-test-update'));
+        final build = find.byKey(
+          const ValueKey<String>('data-editor-unlock-build'),
+        );
+        expect(preview, findsNothing);
+        expect(find.byKey(BetaUpdateIndicator.buttonKey), findsNothing);
+        await tester.ensureVisible(build);
+        await tester.pumpAndSettle();
+        for (
+          var tap = 0;
+          tap < DataSessionController.editorUnlockTapCount;
+          tap++
+        ) {
+          await tester.tap(build);
+        }
+        await tester.pumpAndSettle();
+        expect(preview, findsOneWidget);
+        expect(AppIdentity.developerUpdateTestEnabled, isTrue);
+        await tester.ensureVisible(preview);
+        await tester.pumpAndSettle();
+
+        final beforeState = harness.bundle.controller.documentSnapshot;
+        final statusCalls = service.currentStatusCalls;
+        final checkCalls = service.checkCalls;
+        await tester.tap(preview);
+        await tester.pump();
+        final update = find.byKey(BetaUpdateIndicator.buttonKey);
+        expect(update, findsOneWidget);
+        expect(
+          tester.getRect(update).bottom,
+          lessThan(tester.getRect(find.byType(DataView)).top),
+        );
+        await tester.tap(update);
+        await tester.pump();
+        for (var frame = 0; frame < 12; frame++) {
+          await tester.pump(const Duration(milliseconds: 160));
+        }
+        expect(find.byKey(BetaUpdateIndicator.buttonKey), findsNothing);
+        expect(find.textContaining('Update test complete.'), findsOneWidget);
+        expect(service.currentStatusCalls, statusCalls);
+        expect(service.checkCalls, checkCalls);
+        expect(service.downloadCalls, 0);
+        expect(service.applyCalls, 0);
+        expect(windowHost.closeCalls, 0);
+        expect(harness.bundle.controller.mutationsFrozen, isFalse);
+        expect(
+          identical(harness.bundle.controller.documentSnapshot, beforeState),
+          isTrue,
+        );
+        expect(tester.takeException(), isNull);
+
+        await tester.pumpWidget(const SizedBox.shrink());
+        await tester.runAsync(harness.dispose);
+        await service.dispose();
+      },
     );
-    for (var index = 0; index < 4; index++) {
-      await tester.pump(const Duration(milliseconds: 80));
-    }
-
-    harness.bundle.controller.active.navigate('data');
-    await tester.pumpAndSettle();
-    final build = find.byKey(
-      const ValueKey<String>('data-editor-unlock-build'),
-    );
-    await tester.ensureVisible(build);
-    for (var tap = 0; tap < DataSessionController.editorUnlockTapCount; tap++) {
-      await tester.tap(build);
-    }
-    await tester.pumpAndSettle();
-
-    expect(
-      find.byKey(const ValueKey<String>('data-test-update')),
-      findsNothing,
-    );
-    expect(find.byKey(BetaUpdateIndicator.buttonKey), findsNothing);
-    expect(windowHost.bottomInsets, isEmpty);
-    expect(windowHost.closeCalls, 0);
-    expect(service.downloadCalls, 0);
-    expect(service.applyCalls, 0);
-
-    await tester.pumpWidget(const SizedBox.shrink());
-    await tester.runAsync(harness.dispose);
-    await service.dispose();
-  });
+  }
 
   testWidgets(
     'one click downloads, prepares, and closes for an available patch',
@@ -887,10 +921,7 @@ class _DownloadFailureUpdateService extends _AvailableUpdateService {
 }
 
 class _RecordingWindowHost extends WindowHostService {
-  _RecordingWindowHost(
-    this.events, {
-    super.closeFlushTimeout,
-  });
+  _RecordingWindowHost(this.events, {super.closeFlushTimeout});
 
   final List<String> events;
   int closeCalls = 0;

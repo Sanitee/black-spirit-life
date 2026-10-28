@@ -5,7 +5,7 @@ third-party/reference-use decisions and accepted residual risk recorded; the
 approved Beta product is retained while personal player/publisher state, four
 privacy-bearing captures, and six source-only research inputs are excluded**
 
-Release identity: Black Spirit Life `0.1.12+31`, tag `v0.1.12`, package
+Release identity: Black Spirit Life `0.1.13+32`, tag `v0.1.13`, package
 `BlackSpiritLife.App`, channel `win-x64-stable`. The exact source commit and
 artifact hashes are recorded by the release-candidate manifest generated from
 the clean public history, which contains no internal Beta ancestry.
@@ -18,6 +18,20 @@ Permanent public/update destination approved by the project owner:
 This is the controlling source-by-source gate for the full-feature public
 route. It replaces earlier blanket treatment of every fact or game asset seen
 through a community reference as separately blocked.
+
+## 0.1.13 current-Beta update boundary
+
+Version 0.1.13 promotes the user-approved Tight glow update control correction
+on top of public Stable 0.1.12. The title-bar control uses the slimmer tapered
+copper frame, open-tray download arrow, inset crest diamond and visible
+5.2-second breathing treatment already approved in Beta. The session-unlocked
+Editor Settings preview is restored and remains an in-memory demonstration that
+does not contact the feed, download, install or restart.
+
+The real Stable updater, channel, package and storage identities remain in
+force. No personal profile, mastery, inventory, journal, loadout, session,
+setting, credential, cookie, browser state or machine-specific path is promoted
+from Beta. Existing users retain their selected personal-data folder.
 
 ## 0.1.12 current-Beta update boundary
 
@@ -268,8 +282,9 @@ they are excluded to maintain a clean public/private research boundary.
 
 ## Authorized release treatment
 
-The project owner authorized the exact current-Beta 0.1.12 promotion and
-publication on 2026-10-28, continuing the 0.1.11 authorization and boundary.
+The project owner authorized the exact current-Beta 0.1.13 update-button
+correction and publication on 2026-10-28, continuing the 0.1.12 authorization
+and boundary.
 The release work must:
 
 1. preserve the reviewed Planner, Resource Map, Gathering, Fish Map,
@@ -300,8 +315,8 @@ No draft may be sent without a new explicit user instruction.
 The private Beta ancestry contains private-machine paths and a historical
 migration fixture with real-looking planner values, so it must never be added
 to this repository. The separate public branch contains the reviewed public
-history through the v0.1.11 release and adopted release-tooling optimization.
-Publication of `v0.1.12` must remain one reviewed release commit
+history through the v0.1.12 release and adopted release-tooling optimization.
+Publication of `v0.1.13` must remain one reviewed release commit
 on that history, followed by a fresh-clone scan of every public ref and tag.
 
 Publication remains conditional on Stable install/update/uninstall
