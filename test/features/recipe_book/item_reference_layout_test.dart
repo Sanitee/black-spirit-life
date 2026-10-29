@@ -286,24 +286,22 @@ void main() {
           final icons = tester
               .widgetList<ModeItemIcon>(find.byType(ModeItemIcon))
               .toList();
-          expect(icons.first.size, 48);
-          expect(icons.where((icon) => icon.name == name).first.size, 48);
+          expect(icons.first.size, 44);
+          expect(icons.where((icon) => icon.name == name).first.size, 44);
           expect(find.byIcon(Icons.broken_image_outlined), findsNothing);
           final panel = tester.getRect(find.byType(ItemReferenceCard));
           expect(panel.right, lessThanOrEqualTo(1200));
           expect(panel.bottom, lessThanOrEqualTo(1000));
           if (name == _catalyst) {
-            final heading = tester.widget<Text>(
-              find.text('Recipe & materials'),
-            );
-            expect(heading.style!.fontSize, 15);
+            expect(find.text('Recipe & materials'), findsNothing);
             final exchange = find.byKey(
               RecipeBookKeys.itemInfoFormula(name, null, 1),
             );
-            expect(
-              tester.getRect(exchange).left,
-              closeTo(tester.getRect(find.text('Recipe & materials')).left, .5),
+            expect(tester.getRect(exchange).left, closeTo(panel.left + 1, .5));
+            await tester.tap(
+              find.byKey(const ValueKey('attached-reference-tab:used')),
             );
+            await _settleImages(tester);
             expect(find.text('100× batch'), findsOneWidget);
             expect(find.text('10× batch'), findsNothing);
             final catalystRecipe = find.byKey(

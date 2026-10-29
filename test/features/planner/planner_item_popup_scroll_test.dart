@@ -106,6 +106,11 @@ void main() {
             expect(rect.bottom, lessThanOrEqualTo(size.height));
             expect(rect.left, greaterThanOrEqualTo(0));
             expect(rect.right, lessThanOrEqualTo(size.width));
+            // The long downstream recipes now live in the attached Used for tab.
+            await tester.tap(
+              find.byKey(const ValueKey('attached-reference-tab:used')),
+            );
+            await tester.pumpAndSettle();
             final popupScroll = tester.state<ScrollableState>(
               find.descendant(of: popup, matching: find.byType(Scrollable)),
             );
@@ -136,10 +141,14 @@ void main() {
               );
             }
 
-            await wheel(rect.center, 120);
+            final wheelStep = (popupScroll.position.maxScrollExtent / 4).clamp(
+              1.0,
+              80.0,
+            );
+            await wheel(rect.center, wheelStep);
             expect(popupScroll.position.pixels, greaterThan(0));
             final firstOffset = popupScroll.position.pixels;
-            await wheel(rect.center, 120);
+            await wheel(rect.center, wheelStep);
             expect(popupScroll.position.pixels, greaterThan(firstOffset));
             await wheel(rect.center, 100000);
             expect(

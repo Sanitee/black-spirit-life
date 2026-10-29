@@ -18,6 +18,8 @@ import 'recipe_book_item_info.dart';
 import 'recipe_book_keys.dart';
 import 'recipe_book_preview_routes.dart';
 
+part 'item_reference_joined.dart';
+
 /// The Recipe Book's reference preview, without taking over its child's clicks.
 class RecipeBookItemInfoHover extends StatelessWidget {
   const RecipeBookItemInfoHover({
@@ -307,6 +309,9 @@ class _ItemReferenceCardState extends State<ItemReferenceCard> {
 
   @override
   Widget build(BuildContext context) {
+    if (widget.onClose != null) {
+      return _JoinedItemReference(card: widget);
+    }
     final controller = widget.controller;
     final mode = widget.mode;
     final name = widget.name;
