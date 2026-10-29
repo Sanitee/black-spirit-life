@@ -127,6 +127,7 @@ class PlannerIngredientRowLayout extends StatelessWidget {
     required this.total,
     required this.iconWidth,
     required this.totalRightInset,
+    this.showQuantityBadge = true,
     super.key,
   });
 
@@ -135,26 +136,33 @@ class PlannerIngredientRowLayout extends StatelessWidget {
   final Text total;
   final double iconWidth;
   final double totalRightInset;
+  final bool showQuantityBadge;
 
   @override
   Widget build(BuildContext context) {
     final plannerLayout = PlannerQuantityLayout.of(context);
-    final totalWidget = Tooltip(
-      message: 'Total needed for this craft step',
-      child: Padding(
-        padding: EdgeInsets.only(right: totalRightInset),
-        child: plannerLayout
-            ? PlannerQuantityBadge(child: total)
-            : SizedBox(
-                width: 86,
-                child: FittedBox(
-                  fit: BoxFit.scaleDown,
-                  alignment: Alignment.centerRight,
-                  child: total,
-                ),
+    final amount = Padding(
+      padding: EdgeInsets.only(right: totalRightInset),
+      child: plannerLayout
+          ? showQuantityBadge
+                ? PlannerQuantityBadge(child: total)
+                : total
+          : SizedBox(
+              width: 86,
+              child: FittedBox(
+                fit: BoxFit.scaleDown,
+                alignment: Alignment.centerRight,
+                child: total,
               ),
-      ),
+            ),
     );
+    final totalWidget = showQuantityBadge
+        ? Tooltip(message: 'Total needed for this craft step', child: amount)
+        : Semantics(
+            label: '${total.data} total needed for this craft step',
+            excludeSemantics: true,
+            child: amount,
+          );
     return LayoutBuilder(
       builder: (context, constraints) {
         var stackTotal = false;
@@ -165,7 +173,8 @@ class PlannerIngredientRowLayout extends StatelessWidget {
             textDirection: Directionality.of(context),
             textScaler: scaler,
           )..layout();
-          final totalWidth = painter.width + 12 + totalRightInset;
+          final totalWidth =
+              painter.width + (showQuantityBadge ? 12 : 0) + totalRightInset;
           painter.dispose();
           stackTotal =
               constraints.maxWidth <

@@ -81,7 +81,7 @@ void main() {
           await tester.pumpAndSettle();
           _expectNoTrialControls();
           _expectNoBroadRedesign();
-          _expectMatchingQuantityBadges(
+          _expectOpenQueueQuantities(
             tester,
             _quantity(step.name, ingredient, perCraft: true),
             _quantity(step.name, ingredient),
@@ -110,7 +110,7 @@ void main() {
         await tester.pumpWidget(_host(harness, application: application));
         await tester.pumpAndSettle();
         _expectNoTrialControls();
-        _expectMatchingQuantityBadges(
+        _expectOpenQueueQuantities(
           tester,
           _quantity(step.name, ingredient, perCraft: true),
           _quantity(step.name, ingredient),
@@ -130,7 +130,7 @@ void main() {
         await tester.pumpWidget(_host(harness, application: reloaded));
         await tester.pumpAndSettle();
         _expectNoTrialControls();
-        _expectMatchingQuantityBadges(
+        _expectOpenQueueQuantities(
           tester,
           _quantity(step.name, ingredient, perCraft: true),
           _quantity(step.name, ingredient),
@@ -270,7 +270,7 @@ void main() {
               FontWeight.w600,
             );
             expect(tester.widget<Text>(total).data, '54.836');
-            _expectMatchingQuantityBadges(
+            _expectOpenQueueQuantities(
               tester,
               formula,
               total,
@@ -946,7 +946,7 @@ void main() {
               await tester.pumpAndSettle();
               expect(tester.takeException(), isNull);
               expect(find.byType(PlannerNeedQuantities), findsWidgets);
-              expect(find.byType(PlannerQuantityBadge), findsWidgets);
+              expect(find.byType(PlannerQuantityBadge), findsNothing);
               _expectNoTrialControls();
               _expectNoBroadRedesign();
               _expectVisibleNeedRowsEmphasizeMissing(tester);
@@ -960,7 +960,7 @@ void main() {
                 final stableId = key.value.substring(
                   'planner-ingredient-batch-quantity:'.length,
                 );
-                _expectMatchingQuantityBadges(
+                _expectOpenQueueQuantities(
                   tester,
                   find.byKey(
                     ValueKey('planner-ingredient-per-craft-quantity:$stableId'),
@@ -1139,7 +1139,7 @@ void _expectOriginalTotalColumn(WidgetTester tester, Finder total) {
   );
 }
 
-void _expectMatchingQuantityBadges(
+void _expectOpenQueueQuantities(
   WidgetTester tester,
   Finder formula,
   Finder total, {
@@ -1165,36 +1165,13 @@ void _expectMatchingQuantityBadges(
     expect(totalBounds.top, lessThan(identityBounds.bottom));
     expect(totalBounds.bottom, greaterThan(identityBounds.top));
   }
-  BoxDecoration? firstDecoration;
-  EdgeInsetsGeometry? firstPadding;
   for (final quantity in [formula, total]) {
     final badge = find.ancestor(
       of: quantity,
       matching: find.byType(PlannerQuantityBadge),
     );
-    expect(badge, findsOneWidget);
-    final decoration =
-        tester
-                .widget<DecoratedBox>(
-                  find.descendant(
-                    of: badge,
-                    matching: find.byType(DecoratedBox),
-                  ),
-                )
-                .decoration
-            as BoxDecoration;
-    final padding = tester
-        .widget<Padding>(
-          find.descendant(of: badge, matching: find.byType(Padding)),
-        )
-        .padding;
-    firstDecoration ??= decoration;
-    firstPadding ??= padding;
-    expect(decoration, firstDecoration);
-    expect(padding, firstPadding);
-    expect(decoration.color, spec.palette.text.withValues(alpha: 0.09));
-    expect(decoration.borderRadius, BorderRadius.circular(3));
-    expect(padding, const EdgeInsets.symmetric(horizontal: 6, vertical: 2));
+    // Open rows deliberately leave both values directly on the stripe.
+    expect(badge, findsNothing);
     expect(
       find.ancestor(of: quantity, matching: find.byType(FittedBox)),
       findsNothing,
@@ -1207,9 +1184,16 @@ void _expectMatchingQuantityBadges(
     expect((horizontal - origin).distance, closeTo(10, 0.01));
     expect((vertical - origin).distance, closeTo(10, 0.01));
     final textBounds = tester.getRect(quantity);
-    final badgeBounds = tester.getRect(badge);
-    expect(badgeBounds.width, closeTo(textBounds.width + 12, 0.01));
-    expect(badgeBounds.height, closeTo(textBounds.height + 4, 0.01));
+    final rowBounds = tester.getRect(
+      find.ancestor(
+        of: quantity,
+        matching: find.byType(PlannerIngredientRowLayout),
+      ),
+    );
+    expect(textBounds.left, greaterThanOrEqualTo(rowBounds.left));
+    expect(textBounds.right, lessThanOrEqualTo(rowBounds.right));
+    expect(textBounds.top, greaterThanOrEqualTo(rowBounds.top));
+    expect(textBounds.bottom, lessThanOrEqualTo(rowBounds.bottom));
   }
 }
 

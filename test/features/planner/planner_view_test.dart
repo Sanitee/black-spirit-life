@@ -2936,8 +2936,9 @@ void main() {
         ),
       ),
     );
-    expect(queuePerCraft.left - queueSubstitute.right, 12);
-    expect(queueQuality.left - queuePerCraft.right, 12);
+    // Open quantity labels have 2 px breathing room instead of a 6 px badge.
+    expect(queuePerCraft.left - queueSubstitute.right, 8);
+    expect(queueQuality.left - queuePerCraft.right, 8);
     expect(
       queueSubstitute.center.dy,
       closeTo(queueIngredientName.center.dy, .01),

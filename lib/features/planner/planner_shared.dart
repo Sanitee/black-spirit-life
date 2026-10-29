@@ -2027,6 +2027,7 @@ class _QueueStepCard extends StatelessWidget {
     final hasAutomaticRoutes = routeSelection?.hasComparison ?? false;
     final showTotalIngredients = recipe?.type == 'processing';
     final ownedLayout = PlannerQuantityLayout.of(context);
+    final cardInset = denseLayout ? 10.0 : 14.0;
     final variants = hasVariants
         ? RecipeVariantSelector(
             recipe: recipe!,
@@ -2068,6 +2069,7 @@ class _QueueStepCard extends StatelessWidget {
       radius: 8,
       child: AppSurface(
         role: AppSurfaceRole.card,
+        padding: ownedLayout ? EdgeInsets.zero : null,
         ornamentIndex: index,
         tone: completed
             ? AppSurfaceTone.success
@@ -2079,231 +2081,259 @@ class _QueueStepCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: <Widget>[
-            if (ownedLayout && variants != null) ...[
-              Align(alignment: Alignment.centerRight, child: variants),
-              const SizedBox(height: 10),
-            ],
-            ConstrainedBox(
-              key: ValueKey('planner-queue-heading:${step.name}'),
-              constraints: BoxConstraints(
-                minHeight: ownedLayout
-                    ? 54
-                    : denseLayout
-                    ? 84
-                    : 88,
-              ),
-              child: Row(
-                crossAxisAlignment: ownedLayout
-                    ? CrossAxisAlignment.start
-                    : CrossAxisAlignment.center,
-                children: <Widget>[
-                  if (ownedLayout)
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 2),
-                      child: PlannerInventoryInput(
-                        controller: controller,
-                        itemName: step.name,
-                        iconSize: denseLayout ? 48 : 54,
-                        iconBuilder: (size) => PlannerItemIcon(
-                          key: ValueKey('planner-queue-icon:${step.name}'),
-                          controller: controller,
-                          name: step.name,
-                          size: size,
-                        ),
-                      ),
+            Padding(
+              padding: ownedLayout
+                  ? EdgeInsets.fromLTRB(
+                      cardInset,
+                      cardInset,
+                      cardInset,
+                      expanded ? 0 : cardInset,
                     )
-                  else
-                    SizedBox(
-                      key: ValueKey('planner-queue-icon:${step.name}'),
-                      width: denseLayout ? 52 : 58,
-                      child: Align(
-                        alignment: Alignment.center,
-                        child: PlannerItemIcon(
-                          controller: controller,
-                          name: step.name,
-                          size: denseLayout ? 48 : 54,
-                        ),
-                      ),
+                  : EdgeInsets.zero,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: <Widget>[
+                  if (ownedLayout && variants != null) ...[
+                    Align(alignment: Alignment.centerRight, child: variants),
+                    const SizedBox(height: 10),
+                  ],
+                  ConstrainedBox(
+                    key: ValueKey('planner-queue-heading:${step.name}'),
+                    constraints: BoxConstraints(
+                      minHeight: ownedLayout
+                          ? 54
+                          : denseLayout
+                          ? 84
+                          : 88,
                     ),
-                  SizedBox(width: denseLayout ? 9 : 12),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+                    child: Row(
+                      crossAxisAlignment: ownedLayout
+                          ? CrossAxisAlignment.start
+                          : CrossAxisAlignment.center,
                       children: <Widget>[
-                        if (primaryTitleChoice != null ||
-                            processingChoice != null)
-                          _SubstituteNameAnchor(
-                            controller: controller,
-                            key: PlannerActionKeys.row('P12', titleAnchor!),
-                            nameKey: PlannerActionKeys.row('P10', step.name),
-                            name: step.name,
-                            currentName:
-                                primaryTitleChoice?.source.baseName ??
-                                step.name,
-                            ingredient:
-                                primaryTitleChoice?.ingredient ??
-                                _acquisitionAnchorIngredient(step.name),
-                            fontSize: denseLayout ? 18 : 19,
-                            isShowing: titleChooserOpen,
-                            semanticLabel: primaryTitleChoice == null
-                                ? 'Choose how to get ${step.name}'
-                                : titleChoices.length > 1
-                                ? 'Choose recipe substitutions affecting '
-                                      '${step.name}; ${titleChoices.length} '
-                                      'choices; '
-                                      '${titleChooserOpen ? 'open' : 'closed'}'
-                                : null,
-                            tooltip: primaryTitleChoice == null
-                                ? 'Buy or process'
-                                : titleChoices.length > 1
-                                ? 'More than one recipe choice contributes to '
-                                      '${step.name}. Click to choose which one '
-                                      'to change.'
-                                : null,
-                            onToggle: () => onChoiceAnchorChanged(
-                              titleChooserOpen ? null : titleAnchor,
+                        if (ownedLayout)
+                          Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 2),
+                            child: PlannerInventoryInput(
+                              controller: controller,
+                              itemName: step.name,
+                              iconSize: denseLayout ? 48 : 54,
+                              iconBuilder: (size) => PlannerItemIcon(
+                                key: ValueKey(
+                                  'planner-queue-icon:${step.name}',
+                                ),
+                                controller: controller,
+                                name: step.name,
+                                size: size,
+                              ),
                             ),
                           )
                         else
-                          _CopyNameButton(
-                            key: PlannerActionKeys.row('P10', step.name),
-                            name: step.name,
-                            fontSize: denseLayout ? 18 : 19,
-                            semanticPrefix: 'Copy queue item',
-                            onCopy: externalActions.copyName,
+                          SizedBox(
+                            key: ValueKey('planner-queue-icon:${step.name}'),
+                            width: denseLayout ? 52 : 58,
+                            child: Align(
+                              alignment: Alignment.center,
+                              child: PlannerItemIcon(
+                                controller: controller,
+                                name: step.name,
+                                size: denseLayout ? 48 : 54,
+                              ),
+                            ),
                           ),
-                        SizedBox(height: denseLayout ? 8 : 10),
-                        if (qualityTitleChoices.isEmpty)
-                          _MethodPill(recipe: recipe)
-                        else
-                          Wrap(
-                            spacing: 8,
-                            runSpacing: 6,
-                            crossAxisAlignment: WrapCrossAlignment.center,
-                            children: [
-                              _MethodPill(recipe: recipe),
-                              for (final choice in qualityTitleChoices)
-                                _QualitySwatches(
+                        SizedBox(width: denseLayout ? 9 : 12),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: <Widget>[
+                              if (primaryTitleChoice != null ||
+                                  processingChoice != null)
+                                _SubstituteNameAnchor(
                                   controller: controller,
-                                  parentName: choice.source.parentName,
-                                  ingredientName: choice.source.original,
-                                  baseName: choice.source.baseName,
-                                  selectedGrade: choice.source.grade,
-                                  keyScope: 'queue-title:',
+                                  key: PlannerActionKeys.row(
+                                    'P12',
+                                    titleAnchor!,
+                                  ),
+                                  nameKey: PlannerActionKeys.row(
+                                    'P10',
+                                    step.name,
+                                  ),
+                                  name: step.name,
+                                  currentName:
+                                      primaryTitleChoice?.source.baseName ??
+                                      step.name,
+                                  ingredient:
+                                      primaryTitleChoice?.ingredient ??
+                                      _acquisitionAnchorIngredient(step.name),
+                                  fontSize: denseLayout ? 18 : 19,
+                                  isShowing: titleChooserOpen,
+                                  semanticLabel: primaryTitleChoice == null
+                                      ? 'Choose how to get ${step.name}'
+                                      : titleChoices.length > 1
+                                      ? 'Choose recipe substitutions affecting '
+                                            '${step.name}; ${titleChoices.length} '
+                                            'choices; '
+                                            '${titleChooserOpen ? 'open' : 'closed'}'
+                                      : null,
+                                  tooltip: primaryTitleChoice == null
+                                      ? 'Buy or process'
+                                      : titleChoices.length > 1
+                                      ? 'More than one recipe choice contributes to '
+                                            '${step.name}. Click to choose which one '
+                                            'to change.'
+                                      : null,
+                                  onToggle: () => onChoiceAnchorChanged(
+                                    titleChooserOpen ? null : titleAnchor,
+                                  ),
+                                )
+                              else
+                                _CopyNameButton(
+                                  key: PlannerActionKeys.row('P10', step.name),
+                                  name: step.name,
+                                  fontSize: denseLayout ? 18 : 19,
+                                  semanticPrefix: 'Copy queue item',
+                                  onCopy: externalActions.copyName,
                                 ),
+                              SizedBox(height: denseLayout ? 8 : 10),
+                              if (qualityTitleChoices.isEmpty)
+                                _MethodPill(recipe: recipe)
+                              else
+                                Wrap(
+                                  spacing: 8,
+                                  runSpacing: 6,
+                                  crossAxisAlignment: WrapCrossAlignment.center,
+                                  children: [
+                                    _MethodPill(recipe: recipe),
+                                    for (final choice in qualityTitleChoices)
+                                      _QualitySwatches(
+                                        controller: controller,
+                                        parentName: choice.source.parentName,
+                                        ingredientName: choice.source.original,
+                                        baseName: choice.source.baseName,
+                                        selectedGrade: choice.source.grade,
+                                        keyScope: 'queue-title:',
+                                      ),
+                                  ],
+                                ),
+                              if (ownedLayout) ...[
+                                const SizedBox(height: 12),
+                                PlannerCraftQuantities(step: step),
+                              ],
+                              if (hasVariants && !ownedLayout) ...<Widget>[
+                                SizedBox(height: denseLayout ? 12 : 14),
+                                variants!,
+                              ],
+                              if (routeSelection != null &&
+                                  routeSelection.hasComparison) ...<Widget>[
+                                const SizedBox(height: 6),
+                                RecipeRouteCostComparison(
+                                  selection: routeSelection,
+                                  itemIconBuilder: (name, size) =>
+                                      PlannerItemIcon(
+                                        controller: controller,
+                                        name: name,
+                                        size: size,
+                                      ),
+                                ),
+                              ],
+                              if (!ownedLayout) ...[
+                                SizedBox(height: denseLayout ? 10 : 12),
+                                Text(
+                                  summary,
+                                  key: ValueKey<String>(
+                                    'planner-step-summary:${step.name}',
+                                  ),
+                                  style: spec.typography.meta.copyWith(
+                                    color: denseLayout
+                                        ? spec.palette.textMuted
+                                        : const Color(0xFFC0D5CE),
+                                    fontSize: denseLayout ? 13 : 14,
+                                    fontWeight: FontWeight.w600,
+                                    fontStyle: denseLayout
+                                        ? FontStyle.normal
+                                        : null,
+                                    height: denseLayout ? 1.15 : null,
+                                  ),
+                                ),
+                              ],
                             ],
                           ),
-                        if (ownedLayout) ...[
-                          const SizedBox(height: 12),
-                          PlannerCraftQuantities(step: step),
-                        ],
-                        if (hasVariants && !ownedLayout) ...<Widget>[
-                          SizedBox(height: denseLayout ? 12 : 14),
-                          variants!,
-                        ],
-                        if (routeSelection != null &&
-                            routeSelection.hasComparison) ...<Widget>[
-                          const SizedBox(height: 6),
-                          RecipeRouteCostComparison(
-                            selection: routeSelection,
-                            itemIconBuilder: (name, size) => PlannerItemIcon(
-                              controller: controller,
-                              name: name,
-                              size: size,
-                            ),
-                          ),
-                        ],
-                        if (!ownedLayout) ...[
-                          SizedBox(height: denseLayout ? 10 : 12),
-                          Text(
-                            summary,
-                            key: ValueKey<String>(
-                              'planner-step-summary:${step.name}',
-                            ),
-                            style: spec.typography.meta.copyWith(
-                              color: denseLayout
-                                  ? spec.palette.textMuted
-                                  : const Color(0xFFC0D5CE),
-                              fontSize: denseLayout ? 13 : 14,
-                              fontWeight: FontWeight.w600,
-                              fontStyle: denseLayout ? FontStyle.normal : null,
-                              height: denseLayout ? 1.15 : null,
-                            ),
+                        ),
+                        if (allowCompletion) ...<Widget>[
+                          const SizedBox(width: 8),
+                          AppCompletionControl(
+                            key: PlannerActionKeys.row('P08', step.name),
+                            completed: completed,
+                            semanticLabel: completed
+                                ? '${step.name} is done'
+                                : 'Done with ${step.name}',
+                            onPressed: completed ? null : onComplete,
                           ),
                         ],
                       ],
                     ),
                   ),
-                  if (allowCompletion) ...<Widget>[
-                    const SizedBox(width: 8),
-                    AppCompletionControl(
-                      key: PlannerActionKeys.row('P08', step.name),
-                      completed: completed,
-                      semanticLabel: completed
-                          ? '${step.name} is done'
-                          : 'Done with ${step.name}',
-                      onPressed: completed ? null : onComplete,
+                  if (ownedLayout) ...[
+                    const SizedBox(height: 12),
+                    const WorkshopSectionRule(),
+                  ],
+                  if (titleChooserOpen) ...<Widget>[
+                    SizedBox(height: denseLayout ? 5 : 7),
+                    Padding(
+                      padding: EdgeInsets.only(left: denseLayout ? 61 : 70),
+                      child: titleChoices.isEmpty
+                          ? _InlineSubstituteChooser(
+                              controller: controller,
+                              parentName: step.name,
+                              currentName: step.name,
+                              ingredient: _acquisitionAnchorIngredient(
+                                step.name,
+                              ),
+                              onClose: () => onChoiceAnchorChanged(null),
+                            )
+                          : _QueueTitleSubstituteChooser(
+                              controller: controller,
+                              stepName: step.name,
+                              choices: titleChoices,
+                              onSubstituteSelected: onSubstituteSelected,
+                              onClose: () => onChoiceAnchorChanged(null),
+                            ),
                     ),
                   ],
+                  SizedBox(height: denseLayout ? 13 : 16),
+                  LayoutBuilder(
+                    builder: (context, constraints) {
+                      final showAfkLabel =
+                          constraints.maxWidth >= 330 &&
+                          MediaQuery.textScalerOf(context).scale(1) <= 1.3;
+                      return Row(
+                        children: <Widget>[
+                          Flexible(
+                            child: _IngredientToggle(
+                              key: PlannerActionKeys.row('P09', step.name),
+                              expanded: expanded,
+                              onPressed: onToggleExpanded,
+                            ),
+                          ),
+                          if (recipe != null) ...<Widget>[
+                            const SizedBox(width: 12),
+                            _AfkLoadPopover(
+                              controller: controller,
+                              step: step,
+                              recipe: recipe,
+                              sessionTargetName: sessionTargetName,
+                              sessionTargetAmount: sessionTargetAmount,
+                              bonusPlan: bonusPlan,
+                              externalActions: externalActions,
+                              showLabel: showAfkLabel,
+                            ),
+                          ],
+                        ],
+                      );
+                    },
+                  ),
                 ],
               ),
-            ),
-            if (ownedLayout) ...[
-              const SizedBox(height: 12),
-              const WorkshopSectionRule(),
-            ],
-            if (titleChooserOpen) ...<Widget>[
-              SizedBox(height: denseLayout ? 5 : 7),
-              Padding(
-                padding: EdgeInsets.only(left: denseLayout ? 61 : 70),
-                child: titleChoices.isEmpty
-                    ? _InlineSubstituteChooser(
-                        controller: controller,
-                        parentName: step.name,
-                        currentName: step.name,
-                        ingredient: _acquisitionAnchorIngredient(step.name),
-                        onClose: () => onChoiceAnchorChanged(null),
-                      )
-                    : _QueueTitleSubstituteChooser(
-                        controller: controller,
-                        stepName: step.name,
-                        choices: titleChoices,
-                        onSubstituteSelected: onSubstituteSelected,
-                        onClose: () => onChoiceAnchorChanged(null),
-                      ),
-              ),
-            ],
-            SizedBox(height: denseLayout ? 13 : 16),
-            LayoutBuilder(
-              builder: (context, constraints) {
-                final showAfkLabel =
-                    constraints.maxWidth >= 330 &&
-                    MediaQuery.textScalerOf(context).scale(1) <= 1.3;
-                return Row(
-                  children: <Widget>[
-                    Flexible(
-                      child: _IngredientToggle(
-                        key: PlannerActionKeys.row('P09', step.name),
-                        expanded: expanded,
-                        onPressed: onToggleExpanded,
-                      ),
-                    ),
-                    if (recipe != null) ...<Widget>[
-                      const SizedBox(width: 12),
-                      _AfkLoadPopover(
-                        controller: controller,
-                        step: step,
-                        recipe: recipe,
-                        sessionTargetName: sessionTargetName,
-                        sessionTargetAmount: sessionTargetAmount,
-                        bonusPlan: bonusPlan,
-                        externalActions: externalActions,
-                        showLabel: showAfkLabel,
-                      ),
-                    ],
-                  ],
-                );
-              },
             ),
             AppRevealTransition(
               key: ValueKey<String>('planner-ingredient-reveal:${step.name}'),
@@ -2318,14 +2348,12 @@ class _QueueStepCard extends StatelessWidget {
                     ingredientIndex < step.ingredients.length;
                     ingredientIndex += 1
                   )
-                    Padding(
-                      padding: EdgeInsets.only(
-                        bottom: ingredientIndex == step.ingredients.length - 1
-                            ? 0
-                            : denseLayout
-                            ? 6
-                            : 8,
+                    _QueueIngredientBand(
+                      key: ValueKey(
+                        'planner-ingredient-band:${step.name}:$ingredientIndex',
                       ),
+                      index: ingredientIndex,
+                      last: ingredientIndex == step.ingredients.length - 1,
                       child: _PlannerChoiceFeedback(
                         name: step.ingredients[ingredientIndex].baseName,
                         child: _IngredientRow(
@@ -2343,6 +2371,53 @@ class _QueueStepCard extends StatelessWidget {
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+/// Full-width alternating rows are part of the queue card, not nested cards.
+/// Other shared callers (including Bonus) retain their existing spacing.
+class _QueueIngredientBand extends StatelessWidget {
+  const _QueueIngredientBand({
+    required this.index,
+    required this.last,
+    required this.child,
+    super.key,
+  });
+
+  final int index;
+  final bool last;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    final spec = context.visualTheme;
+    final dense = spec.usesDenseSplitLayout;
+    if (!PlannerQuantityLayout.of(context)) {
+      return Padding(
+        padding: EdgeInsets.only(bottom: last ? 0 : (dense ? 6 : 8)),
+        child: child,
+      );
+    }
+    final base = spec.palette.surface;
+    final light = base.computeLuminance() > .35;
+    final stripe = Color.alphaBlend(
+      spec.palette.primary.withValues(alpha: light ? .13 : .20),
+      base,
+    );
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: index.isEven ? stripe : base,
+        borderRadius: last
+            ? BorderRadius.vertical(
+                bottom: Radius.circular(spec.geometry.cardRadius),
+              )
+            : BorderRadius.zero,
+      ),
+      child: Padding(
+        padding: EdgeInsets.symmetric(horizontal: dense ? 10 : 14, vertical: 7),
+        child: child,
       ),
     );
   }
@@ -4075,6 +4150,18 @@ class _IngredientRow extends StatelessWidget {
       fontStyle: FontStyle.normal,
       fontFeatures: const [FontFeature.tabularFigures()],
     );
+    final perCraftValue = perCraftQuantity == null
+        ? null
+        : Text(
+            'x${formatQuantity(perCraftQuantity)}',
+            key: ValueKey<String>(
+              'planner-ingredient-per-craft-quantity:'
+              '${ingredient.parentName}:${ingredient.original}',
+            ),
+            style: plannerLayout
+                ? quantityStyle
+                : spec.typography.meta.copyWith(fontSize: 13),
+          );
     final batchQuantity = Text(
       formatQuantity(ingredient.need),
       key: ValueKey<String>(
@@ -4102,6 +4189,7 @@ class _IngredientRow extends StatelessWidget {
             child: PlannerIngredientRowLayout(
               iconWidth: denseLayout ? 40 : 46,
               totalRightInset: quantityRightInset,
+              showQuantityBadge: !plannerLayout,
               total: batchQuantity,
               icon: _ItemAcquisitionPopover(
                 controller: controller,
@@ -4109,6 +4197,7 @@ class _IngredientRow extends StatelessWidget {
                 stableId: '${ingredient.parentName}:${ingredient.key}',
                 overlayScope: 'queue',
                 size: denseLayout ? 40 : 46,
+                showFrame: !plannerLayout,
                 onOpening: () => onChoiceAnchorChanged(null),
               ),
               identity: PlannerIngredientIdentity(
@@ -4150,20 +4239,19 @@ class _IngredientRow extends StatelessWidget {
                       ),
                 quantity: perCraftQuantity == null
                     ? null
+                    : plannerLayout
+                    ? Semantics(
+                        label:
+                            '${formatQuantity(perCraftQuantity)} needed for 1 craft',
+                        excludeSemantics: true,
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 2),
+                          child: perCraftValue,
+                        ),
+                      )
                     : Tooltip(
                         message: 'Needed for 1 craft',
-                        child: PlannerQuantityBadge(
-                          child: Text(
-                            'x${formatQuantity(perCraftQuantity)}',
-                            key: ValueKey<String>(
-                              'planner-ingredient-per-craft-quantity:'
-                              '${ingredient.parentName}:${ingredient.original}',
-                            ),
-                            style: plannerLayout
-                                ? quantityStyle
-                                : spec.typography.meta.copyWith(fontSize: 13),
-                          ),
-                        ),
+                        child: PlannerQuantityBadge(child: perCraftValue!),
                       ),
                 quality:
                     _qualityGrades(
@@ -4211,6 +4299,7 @@ class _ItemAcquisitionPopover extends StatelessWidget {
     required this.overlayScope,
     required this.size,
     required this.onOpening,
+    this.showFrame = true,
   });
 
   final ModeFeatureController controller;
@@ -4219,6 +4308,7 @@ class _ItemAcquisitionPopover extends StatelessWidget {
   final String overlayScope;
   final double size;
   final VoidCallback onOpening;
+  final bool showFrame;
 
   @override
   Widget build(BuildContext context) {
@@ -4243,6 +4333,7 @@ class _ItemAcquisitionPopover extends StatelessWidget {
         controller: controller,
         name: name,
         size: size,
+        showFrame: showFrame,
         isShowing: isShowing,
         onPressed: () {
           if (!isShowing) onOpening();
@@ -4260,6 +4351,7 @@ class _IngredientInfoAnchor extends StatelessWidget {
     required this.size,
     required this.isShowing,
     required this.onPressed,
+    this.showFrame = true,
     super.key,
   });
 
@@ -4268,6 +4360,7 @@ class _IngredientInfoAnchor extends StatelessWidget {
   final double size;
   final bool isShowing;
   final VoidCallback onPressed;
+  final bool showFrame;
 
   @override
   Widget build(BuildContext context) {
@@ -4302,6 +4395,7 @@ class _IngredientInfoAnchor extends StatelessWidget {
               controller: controller,
               name: name,
               size: size,
+              showFrame: showFrame,
             ),
           ),
         ),
@@ -6473,12 +6567,14 @@ class PlannerItemIcon extends StatelessWidget {
     required this.controller,
     required this.name,
     this.size = 42,
+    this.showFrame = true,
     super.key,
   });
 
   final ModeFeatureController controller;
   final String name;
   final double size;
+  final bool showFrame;
 
   @override
   Widget build(BuildContext context) {
@@ -6487,8 +6583,9 @@ class PlannerItemIcon extends StatelessWidget {
       name: name,
       size: size,
       searchAcrossModes: true,
+      showFrame: showFrame,
     );
-    return size >= 42 ? WorkshopItemMount(child: icon) : icon;
+    return showFrame && size >= 42 ? WorkshopItemMount(child: icon) : icon;
   }
 }
 
