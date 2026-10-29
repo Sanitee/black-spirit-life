@@ -711,6 +711,15 @@ void main() {
                 final portArgument = arguments.indexOf('--port');
                 expect(portArgument, greaterThanOrEqualTo(0));
                 final port = int.parse(arguments[portArgument + 1]);
+                expect(
+                  port,
+                  inInclusiveRange(
+                    fishCompanionFirstPort,
+                    fishCompanionLastPort,
+                  ),
+                  reason:
+                      'The actual service must use the browser-allowed range',
+                );
                 server = await HttpServer.bind(
                   InternetAddress.loopbackIPv4,
                   port,

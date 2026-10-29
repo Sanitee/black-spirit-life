@@ -6,8 +6,10 @@ import 'dart:typed_data';
 
 import 'package:crypto/crypto.dart';
 
-const int fishCompanionFirstPort = 8925;
-const int fishCompanionLastPort = 8955;
+// Stable's existing service range must also be allowed by the native WebView.
+// fish_companion_port_contract_test checks the two sides together.
+const int fishCompanionFirstPort = 8765;
+const int fishCompanionLastPort = 8795;
 
 const String fishCompanionAcceptedPayloadVersion =
     '5f6a9f77f375ad04eabfdccf5f756de9986a5359ce87239fc4c0cadb8b4eb411:'
@@ -1175,7 +1177,11 @@ class FishCompanionRuntime {
   static Future<int> _availablePort(
     FishCompanionStartupCancellation cancellation,
   ) async {
-    for (var port = 8765; port <= 8795; port++) {
+    for (
+      var port = fishCompanionFirstPort;
+      port <= fishCompanionLastPort;
+      port++
+    ) {
       cancellation.throwIfCanceled();
       try {
         final socket = await ServerSocket.bind(
