@@ -395,32 +395,40 @@ class _AnchoredPopoverState extends State<AnchoredPopover> {
             ),
             child: KeyedSubtree(
               key: ValueKey<String>('popover:${widget.overlayId}'),
-              child: TapRegion(
-                groupId: this,
-                onTapOutside: widget.consumeOutsideTap ? null : (_) => _close(),
-                child: SizedBox(
-                  key: _popoverKey,
-                  width: width,
-                  child: ConstrainedBox(
-                    constraints: BoxConstraints(maxHeight: maxHeight),
-                    child: _AnchoredPopoverDragScope(
-                      onStart: _beginDrag,
-                      onUpdate: _updateDrag,
-                      onEnd: _endDrag,
-                      onCancel: _cancelDrag,
-                      child: MediaQuery.disableAnimationsOf(context)
-                          ? widget.popoverBuilder(context, _close)
-                          : TweenAnimationBuilder<double>(
-                              key: ValueKey<String>(
-                                'popover-entrance:${widget.overlayId}',
+              // OverlayPortal keeps the anchor's notification ancestry even
+              // though its panel is painted in the overlay. A panel scrolling
+              // is not its owning page scrolling (which may dismiss popovers).
+              child: NotificationListener<ScrollNotification>(
+                onNotification: (_) => true,
+                child: TapRegion(
+                  groupId: this,
+                  onTapOutside: widget.consumeOutsideTap
+                      ? null
+                      : (_) => _close(),
+                  child: SizedBox(
+                    key: _popoverKey,
+                    width: width,
+                    child: ConstrainedBox(
+                      constraints: BoxConstraints(maxHeight: maxHeight),
+                      child: _AnchoredPopoverDragScope(
+                        onStart: _beginDrag,
+                        onUpdate: _updateDrag,
+                        onEnd: _endDrag,
+                        onCancel: _cancelDrag,
+                        child: MediaQuery.disableAnimationsOf(context)
+                            ? widget.popoverBuilder(context, _close)
+                            : TweenAnimationBuilder<double>(
+                                key: ValueKey<String>(
+                                  'popover-entrance:${widget.overlayId}',
+                                ),
+                                tween: Tween(begin: .84, end: 1),
+                                duration: const Duration(milliseconds: 140),
+                                curve: Curves.easeOutCubic,
+                                child: widget.popoverBuilder(context, _close),
+                                builder: (context, opacity, child) =>
+                                    Opacity(opacity: opacity, child: child),
                               ),
-                              tween: Tween(begin: .84, end: 1),
-                              duration: const Duration(milliseconds: 140),
-                              curve: Curves.easeOutCubic,
-                              child: widget.popoverBuilder(context, _close),
-                              builder: (context, opacity, child) =>
-                                  Opacity(opacity: opacity, child: child),
-                            ),
+                      ),
                     ),
                   ),
                 ),
