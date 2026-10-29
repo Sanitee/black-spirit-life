@@ -5,7 +5,7 @@ third-party/reference-use decisions and accepted residual risk recorded; the
 approved Beta product is retained while personal player/publisher state, four
 privacy-bearing captures, and six source-only research inputs are excluded**
 
-Release identity: Black Spirit Life `0.1.14+33`, tag `v0.1.14`, package
+Release identity: Black Spirit Life `0.1.15+34`, tag `v0.1.15`, package
 `BlackSpiritLife.App`, channel `win-x64-stable`. The exact source commit and
 artifact hashes are recorded by the release-candidate manifest generated from
 the clean public history, which contains no internal Beta ancestry.
@@ -18,6 +18,21 @@ Permanent public/update destination approved by the project owner:
 This is the controlling source-by-source gate for the full-feature public
 route. It replaces earlier blanket treatment of every fact or game asset seen
 through a community reference as separately blocked.
+
+## 0.1.15 approved update boundary
+
+Version 0.1.15 promotes the approved Joined copper item windows and the inherited
+item-popup scroll containment correction on top of public Stable 0.1.14. Opened
+item references keep Recipe and Used for in attached tabs with independent body
+scroll positions, joined artwork rows and fixed single-recipe actions. Long item
+content scrolls inside its popup instead of moving the Planner behind it.
+
+The complete 0.1.14 public product remains in force. Calculations, recipe and
+workstation identities, catalog/reference content, update channel and storage
+contracts are unchanged. No personal profile, mastery, inventory, journal,
+loadout, session, setting, credential, cookie, browser state or machine-specific
+path is included. Existing users continue to load and preserve their own selected
+personal-data folder.
 
 ## 0.1.14 approved update boundary
 
