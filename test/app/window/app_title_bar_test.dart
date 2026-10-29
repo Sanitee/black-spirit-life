@@ -16,6 +16,8 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../../support/action_hint_finder.dart';
+
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
@@ -86,7 +88,7 @@ void main() {
     await show(fieldDesk: true, width: 330);
     expect(find.text('Gathering'), findsNothing);
     for (final name in names) {
-      expect(find.byTooltip(name), findsOneWidget);
+      expect(findActionHint(name), findsOneWidget);
     }
   });
 
@@ -225,7 +227,7 @@ void main() {
       if (entry.visual != null) {
         expect(colour, entry.visual!.tabSelectedForeground);
       }
-      expect(find.byTooltip('Back to Planner'), findsOneWidget);
+      expect(findActionHint('Back to Planner'), findsOneWidget);
       await tester.tap(arrow);
       expect(returns, 1);
       expect(calls, isEmpty);
@@ -242,7 +244,7 @@ void main() {
         );
       }
       expect(
-        tester.getTopRight(find.byTooltip('Close')).dx,
+        tester.getTopRight(findActionHint('Close')).dx,
         lessThanOrEqualTo(620),
       );
       await tester.tap(first);
@@ -313,9 +315,9 @@ void main() {
       const MaterialApp(home: Scaffold(body: AppTitleBar())),
     );
 
-    await tester.tap(find.byTooltip('Minimize'));
-    await tester.tap(find.byTooltip('Maximize or restore'));
-    await tester.tap(find.byTooltip('Close'));
+    await tester.tap(findActionHint('Minimize'));
+    await tester.tap(findActionHint('Maximize or restore'));
+    await tester.tap(findActionHint('Close'));
     await tester.pump();
 
     expect(calls, ['minimize', 'toggleMaximize', 'requestClose']);
@@ -340,12 +342,12 @@ void main() {
 
     expect(find.byKey(AppTitleBar.trailingHostKey), findsOneWidget);
     expect(find.byKey(trailingKey), findsOneWidget);
-    expect(find.byTooltip('Minimize'), findsOneWidget);
-    expect(find.byTooltip('Maximize or restore'), findsOneWidget);
-    expect(find.byTooltip('Close'), findsOneWidget);
+    expect(findActionHint('Minimize'), findsOneWidget);
+    expect(findActionHint('Maximize or restore'), findsOneWidget);
+    expect(findActionHint('Close'), findsOneWidget);
     expect(
       tester.getTopLeft(find.byKey(trailingKey)).dx,
-      lessThan(tester.getTopLeft(find.byTooltip('Minimize')).dx),
+      lessThan(tester.getTopLeft(findActionHint('Minimize')).dx),
     );
   });
 
@@ -1030,7 +1032,7 @@ void main() {
         'Maximize or restore',
         'Close',
       ]) {
-        final caption = find.byTooltip(tooltip);
+        final caption = findActionHint(tooltip);
         expect(caption, findsOneWidget);
         final captionRect = tester.getRect(caption);
         expect(captionRect.left, greaterThanOrEqualTo(titleRect.left));
@@ -1155,7 +1157,7 @@ void main() {
     await tester.pump();
 
     expect(_glyph('maximize'), findsOneWidget);
-    await tester.tap(find.byTooltip('Maximize or restore'));
+    await tester.tap(findActionHint('Maximize or restore'));
     await tester.pump();
 
     expect(_glyph('restore'), findsOneWidget);
@@ -1175,8 +1177,9 @@ void main() {
       'close': 'Close',
     }.entries) {
       final button = find.descendant(
-        of: find.byTooltip(entry.value),
-        matching: find.byType(IconButton),
+        of: findActionHint(entry.value),
+        matching: find.byWidgetPredicate((widget) => widget is IconButton),
+        matchRoot: true,
       );
       expect(tester.getSize(button), const Size(52, 40));
       expect(
@@ -1200,7 +1203,7 @@ void main() {
       const Rect.fromLTWH(1, 1, 16, 16),
     );
 
-    await tester.tap(find.byTooltip('Maximize or restore'));
+    await tester.tap(findActionHint('Maximize or restore'));
     await tester.pump();
     expect(
       await _paintedBounds(tester, _glyph('restore')),
@@ -1244,20 +1247,23 @@ void main() {
     expect(title.style!.letterSpacing, 0);
     expect(find.byKey(AppTitleBar.sakuraSprigKey), findsNothing);
     final minimize = find.descendant(
-      of: find.byTooltip('Minimize'),
-      matching: find.byType(IconButton),
+      of: findActionHint('Minimize'),
+      matching: find.byWidgetPredicate((widget) => widget is IconButton),
+      matchRoot: true,
     );
     expect(tester.getSize(minimize), const Size(52, 40));
     expect(tester.getSize(_glyph('minimize')), const Size.square(18));
     final close = find.descendant(
-      of: find.byTooltip('Close'),
-      matching: find.byType(IconButton),
+      of: findActionHint('Close'),
+      matching: find.byWidgetPredicate((widget) => widget is IconButton),
+      matchRoot: true,
     );
     expect(tester.getSize(close), const Size(52, 40));
     expect(tester.getSize(_glyph('close')), const Size.square(18));
     final maximize = find.descendant(
-      of: find.byTooltip('Maximize or restore'),
-      matching: find.byType(IconButton),
+      of: findActionHint('Maximize or restore'),
+      matching: find.byWidgetPredicate((widget) => widget is IconButton),
+      matchRoot: true,
     );
     expect(tester.getSize(maximize), const Size(52, 40));
     expect(tester.getSize(_glyph('maximize')), const Size.square(18));
@@ -1304,8 +1310,9 @@ void main() {
       const Size.square(24),
     );
     final minimize = find.descendant(
-      of: find.byTooltip('Minimize'),
-      matching: find.byType(IconButton),
+      of: findActionHint('Minimize'),
+      matching: find.byWidgetPredicate((widget) => widget is IconButton),
+      matchRoot: true,
     );
     expect(tester.getSize(minimize), const Size(52, 40));
     expect(tester.getSize(_glyph('minimize')), const Size.square(18));
@@ -1350,7 +1357,7 @@ void main() {
     );
     expect(
       tester.getTopRight(sprigHost).dx,
-      lessThanOrEqualTo(tester.getTopLeft(find.byTooltip('Minimize')).dx),
+      lessThanOrEqualTo(tester.getTopLeft(findActionHint('Minimize')).dx),
     );
   });
 
@@ -1370,7 +1377,7 @@ void main() {
       ),
     );
 
-    await tester.tap(find.byTooltip('Close'));
+    await tester.tap(findActionHint('Close'));
     await tester.pump();
     expect(calls, isEmpty);
     expect(events, ['flush-start']);
@@ -1398,14 +1405,15 @@ void main() {
       ),
     );
 
-    await tester.tap(find.byTooltip('Close'));
+    await tester.tap(findActionHint('Close'));
     await tester.pump(timeout);
 
     expect(calls, isEmpty);
     expect(errors.single, isA<TimeoutException>());
     final closeButton = find.descendant(
-      of: find.byTooltip('Close'),
-      matching: find.byType(IconButton),
+      of: findActionHint('Close'),
+      matching: find.byWidgetPredicate((widget) => widget is IconButton),
+      matchRoot: true,
     );
     expect(tester.widget<IconButton>(closeButton).onPressed, isNotNull);
   });

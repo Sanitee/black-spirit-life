@@ -957,7 +957,7 @@ class _BdoSetupScreenshotImportDialogState
               ],
             ),
           ),
-          IconButton(
+          MapQuietIconButton(
             key: const ValueKey<String>('setup-screenshot-import-close'),
             tooltip: 'Close',
             onPressed: _busy ? null : () => Navigator.of(context).pop(),

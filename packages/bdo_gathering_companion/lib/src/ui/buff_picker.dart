@@ -179,7 +179,7 @@ class BuffPicker extends StatelessWidget {
                   if (eventBuffs.isNotEmpty)
                     _eventItemsMenu(context, eventBuffs),
                   if (selected.isNotEmpty)
-                    IconButton(
+                    GatheringQuietIconButton(
                       key: const ValueKey('clear-buffs'),
                       onPressed: onClear,
                       tooltip: 'Clear buffs',
@@ -946,7 +946,7 @@ Future<void> showBuffInfo(BuildContext context, Catalog catalog, Buff buff) {
         children: [
           Expanded(child: _BuffDetailsTitle(buff)),
           const SizedBox(width: 8),
-          IconButton(
+          GatheringQuietIconButton(
             key: ValueKey('buff-details-close-${buff.id}'),
             tooltip: 'Close',
             onPressed: () => Navigator.pop(context),
@@ -1511,7 +1511,7 @@ class BuffSummary extends StatelessWidget {
             ),
           ),
           const SizedBox(width: 8),
-          IconButton(
+          GatheringQuietIconButton(
             key: const ValueKey('buff-summary-details'),
             tooltip: 'All buff bonuses',
             onPressed: () => showDialog<void>(

@@ -118,7 +118,7 @@ class _CrystalDetails extends StatelessWidget {
                     ),
                   ),
                   if (pinned)
-                    IconButton(
+                    GatheringQuietIconButton(
                       key: const ValueKey('close-gathering-crystal-details'),
                       onPressed: () => Navigator.pop(context),
                       tooltip: 'Close',

@@ -241,7 +241,7 @@ class _TownShopLodgingDialogState extends State<TownShopLodgingDialog> {
               ),
             ),
           ),
-          IconButton(
+          MapQuietIconButton(
             key: const ValueKey('resource-map-town-lodging-close'),
             tooltip: 'Close',
             visualDensity: VisualDensity.compact,
@@ -499,7 +499,7 @@ class _PearlCounter extends StatelessWidget {
       ),
       child: Row(
         children: [
-          IconButton(
+          MapQuietIconButton(
             key: ValueKey(
               'resource-map-town-lodging-pearl-minus-${town.townNodeId}',
             ),
@@ -527,7 +527,7 @@ class _PearlCounter extends StatelessWidget {
               ),
             ),
           ),
-          IconButton(
+          MapQuietIconButton(
             key: ValueKey(
               'resource-map-town-lodging-pearl-plus-${town.townNodeId}',
             ),

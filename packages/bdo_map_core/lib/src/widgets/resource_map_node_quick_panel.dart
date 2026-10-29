@@ -644,7 +644,7 @@ class _NodeHeader extends StatelessWidget {
                 ? 'Back to previous map selection'
                 : 'Back to $backLabel',
             child: ExcludeSemantics(
-              child: IconButton(
+              child: MapQuietIconButton(
                 key: const ValueKey<String>('resource-map-node-quick-back'),
                 onPressed: onBack,
                 tooltip: backLabel == null ? 'Back' : 'Back to $backLabel',
@@ -731,7 +731,7 @@ class _NodeHeader extends StatelessWidget {
           button: true,
           label: 'Close node summary',
           child: ExcludeSemantics(
-            child: IconButton(
+            child: MapQuietIconButton(
               key: const ValueKey<String>('resource-map-node-panel-close'),
               onPressed: onClose,
               tooltip: 'Close',

@@ -176,7 +176,7 @@ class GatheringSpotBanner extends StatelessWidget {
         runSpacing: 8,
         children: [
           GlassControl(
-            child: IconButton(
+            child: GatheringQuietIconButton(
               key: const ValueKey('change-spot'),
               onPressed: onChange,
               tooltip: 'Change spot',
@@ -185,7 +185,7 @@ class GatheringSpotBanner extends StatelessWidget {
           ),
           if (location != null)
             GlassControl(
-              child: IconButton(
+              child: GatheringQuietIconButton(
                 key: const ValueKey('show-chosen-spot-map'),
                 onPressed: onMap,
                 tooltip: 'Show on map',

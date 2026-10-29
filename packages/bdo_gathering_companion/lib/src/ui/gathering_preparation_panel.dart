@@ -740,7 +740,7 @@ class _GatheringPreparationPanelState extends State<GatheringPreparationPanel> {
                             ? context.gatheringColors.accent
                             : context.gatheringColors.muted,
                       ),
-                    IconButton(
+                    GatheringQuietIconButton(
                       key: ValueKey('preparation-info-$group-${buff.id}'),
                       onPressed: pin,
                       tooltip: 'About ${buff.name}',
@@ -849,7 +849,7 @@ class _ArtifactReference extends StatelessWidget {
                   ),
                 ),
                 if (pinned)
-                  IconButton(
+                  GatheringQuietIconButton(
                     key: ValueKey('close-preparation-artifact-$id'),
                     tooltip: 'Close',
                     onPressed: () => Navigator.pop(context),

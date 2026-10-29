@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+
 import '../domain/models.dart';
 import '../domain/world_map.dart';
+import '../ui/theme.dart';
 import 'spot_map.dart';
 
 /// A large, temporary map. Selecting a spot returns it immediately.
@@ -39,7 +41,7 @@ Future<Spot?> showSpotMapPicker({
                       ),
                     ),
                   ),
-                  IconButton(
+                  GatheringQuietIconButton(
                     key: const ValueKey('close-spot-map'),
                     tooltip: 'Close',
                     onPressed: () => Navigator.of(dialogContext).pop(),

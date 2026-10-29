@@ -25,7 +25,7 @@ void main() {
         .trimRight();
     expect(
       hash(baseline),
-      'ae2e4aaba076db15bae6b7df66fd8b5f53d1c6b65ed7bf6e874ff348ad1f7971',
+      '15b09042e5f3de14194575913ee66dde62a8f5d04dafede18b698eb74ddeb56c',
     );
 
     // Presentation additions cannot move controls, change hit targets, clamp
@@ -79,25 +79,34 @@ void main() {
   });
 
   test(
-    'HTML changes only the stylesheet cache key; JavaScript stays exact',
+    'HTML and JavaScript retain the approved quiet-hover payload',
     () {
       final html = File(
         'assets/fish_companion/static/index.html',
       ).readAsStringSync().replaceAll('\r\n', '\n');
+      final script = File(
+        'assets/fish_companion/static/app.js',
+      ).readAsStringSync();
       expect(html, contains('/app.css?v=codex-depth-instruments-2'));
       expect(
         hash(
           html.replaceAll('codex-depth-instruments-2', 'codex-field-desk-1'),
         ),
-        '49f0cd0ca2bc48efe2af587434a40340ca99942c1d320f7b9ce781565e8297a1',
+        '5ff10d8f2b45cf3995c14abfa808154214e8edf7251050df6f494d66261aa840',
       );
       expect(
-        sha256
-            .convert(
-              File('assets/fish_companion/static/app.js').readAsBytesSync(),
-            )
-            .toString(),
-        '8edccaafd14159aeab0c39c4abd882cbaa00e75880f51b7aac3947ec4a25b12c',
+        sha256.convert(utf8.encode(script)).toString(),
+        'c647c86ea2cf4504f559849699482ee7ebdeb931c31963a9c58d121ab0782f6b',
+      );
+      expect(html, contains('aria-label="Hide towns and cities"'));
+      expect(
+        html,
+        isNot(contains('data-page="map" title="Fishing map"')),
+      );
+      expect(script, contains('els.profileButton.removeAttribute("title");'));
+      expect(
+        script,
+        contains('els.settlementToggle.setAttribute("aria-label"'),
       );
     },
   );

@@ -180,7 +180,7 @@ class _BdoRoyalWorkshopManagerState extends State<BdoRoyalWorkshopManager> {
       child: Row(
         children: <Widget>[
           if (selected != null)
-            IconButton(
+            MapQuietIconButton(
               key: const ValueKey<String>('royal-workshop-back-overview'),
               tooltip: 'Back to palace',
               onPressed: () => setState(() {
@@ -205,7 +205,7 @@ class _BdoRoyalWorkshopManagerState extends State<BdoRoyalWorkshopManager> {
           ),
           if (widget.onClose != null) ...<Widget>[
             const SizedBox(width: 7),
-            IconButton(
+            MapQuietIconButton(
               key: const ValueKey<String>('royal-workshop-close'),
               tooltip: 'Close Royal Workshops',
               onPressed: widget.onClose,
@@ -369,7 +369,7 @@ class _BdoRoyalWorkshopManagerState extends State<BdoRoyalWorkshopManager> {
               ),
             ),
             if (widget.onMarkManager != null)
-              IconButton(
+              MapQuietIconButton(
                 key: ValueKey<String>('royal-workshop-manager-${area.id}'),
                 tooltip: area.managerName,
                 onPressed: () => widget.onMarkManager!(area),
@@ -1279,7 +1279,7 @@ class _RoyalEstimateEditor extends StatelessWidget {
                                 ),
                               ),
                             ),
-                            IconButton(
+                            MapQuietIconButton(
                               key: ValueKey<String>(
                                 'royal-workshop-cycles-minus-${area.id}-$workshopIndex',
                               ),
@@ -1303,7 +1303,7 @@ class _RoyalEstimateEditor extends StatelessWidget {
                                 fontWeight: FontWeight.w600,
                               ),
                             ),
-                            IconButton(
+                            MapQuietIconButton(
                               key: ValueKey<String>(
                                 'royal-workshop-cycles-plus-${area.id}-$workshopIndex',
                               ),

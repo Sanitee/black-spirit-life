@@ -27,19 +27,19 @@
       </div>
 
       <nav class="primary-nav" aria-label="Main navigation">
-        <button class="nav-button is-active" data-page="map" title="Fishing map">
+        <button class="nav-button is-active" data-page="map">
           <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6.5 9 4l6 2.5L20 4v13.5L15 20l-6-2.5L4 20V6.5Zm5-.3v9.1l6 2.5V8.7L9 6.2Z"/></svg>
           <span>Map</span>
         </button>
-        <button class="nav-button" data-page="capture" title="Add a fishing haul">
+        <button class="nav-button" data-page="capture">
           <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3a1 1 0 0 1 1 1v7h7a1 1 0 1 1 0 2h-7v7a1 1 0 1 1-2 0v-7H4a1 1 0 1 1 0-2h7V4a1 1 0 0 1 1-1Z"/></svg>
           <span>Add haul</span>
         </button>
-        <button class="nav-button" data-page="journal" title="Fishing journal">
+        <button class="nav-button" data-page="journal">
           <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 3h12a2 2 0 0 1 2 2v15H6a3 3 0 0 1-3-3V5a2 2 0 0 1 2-2Zm1 13a1 1 0 0 0 0 2h11v-2H6Zm1-9h8v2H7V7Zm0 4h6v2H7v-2Z"/></svg>
           <span>Journal</span>
         </button>
-        <button class="nav-button" data-page="stats" title="Personal statistics">
+        <button class="nav-button" data-page="stats">
           <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 19h14v2H3V5h2v14Zm3-2H6v-6h2v6Zm5 0h-2V7h2v10Zm5 0h-2V3h2v14Z"/></svg>
           <span>Statistics</span>
         </button>
@@ -114,7 +114,7 @@
           <div id="mapVisibleFrame" class="map-visible-frame">
           <div class="map-toolbar">
             <div class="map-region-controls glass-panel">
-              <button id="regionToggle" class="quiet-button" type="button" aria-pressed="false" aria-controls="regionOpacityControl">
+              <button id="regionToggle" class="quiet-button" type="button" aria-pressed="false" aria-controls="regionOpacityControl" aria-label="Show FishyStuff zone-assignment colours">
                 <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m3 5 6-3 6 3 6-3v17l-6 3-6-3-6 3V5Zm7-.5v12.8l4 2V6.5l-4-2Zm6 2v12.8l3-1.5V5l-3 1.5ZM5 6.2v12.6l3-1.5V4.7L5 6.2Z"/></svg>
                 Fishing regions
               </button>
@@ -129,7 +129,7 @@
             <button id="cancelCaptureMap" type="button">Cancel</button>
           </div>
 
-          <button id="settlementToggle" class="quiet-button glass-panel map-towns-toggle" type="button" aria-pressed="true" title="Hide towns and cities"><img src="/node-icons/2.png" alt="">Towns</button>
+          <button id="settlementToggle" class="quiet-button glass-panel map-towns-toggle" type="button" aria-pressed="true" aria-label="Hide towns and cities"><img src="/node-icons/2.png" alt="">Towns</button>
         <div class="zoom-controls glass-panel" aria-label="Map zoom controls">
           <button id="zoomIn" aria-label="Zoom in">+</button>
           <button id="zoomOut" aria-label="Zoom out">−</button>
@@ -483,7 +483,7 @@
           <div id="timePickerNumbers" class="time-picker-numbers"></div>
           <span class="time-picker-center"></span>
         </div>
-        <footer class="time-picker-actions"><button id="timePickerCancel" type="button">Cancel</button><button id="timePickerNow" type="button" title="Use the current local date and time" hidden>Now</button><button id="timePickerDone" type="button">Done</button></footer>
+        <footer class="time-picker-actions"><button id="timePickerCancel" type="button">Cancel</button><button id="timePickerNow" type="button" aria-label="Use the current local date and time" hidden>Now</button><button id="timePickerDone" type="button">Done</button></footer>
       </section>
     </div>
 

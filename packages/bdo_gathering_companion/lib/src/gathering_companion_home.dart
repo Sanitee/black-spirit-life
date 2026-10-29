@@ -464,7 +464,7 @@ class _CompanionHomeState extends State<CompanionHome> {
     link: true,
     child: Tooltip(
       message: 'Bairog',
-      child: IconButton(
+      child: GatheringQuietIconButton(
         key: const ValueKey('open-bairog-source'),
         onPressed: _openBairogSource,
         style: IconButton.styleFrom(
@@ -543,7 +543,7 @@ class _CompanionHomeState extends State<CompanionHome> {
                           ),
                         ),
                       ),
-                      IconButton(
+                      GatheringQuietIconButton(
                         key: const ValueKey('close-gathering-buffs'),
                         tooltip: 'Close',
                         onPressed: () => Navigator.pop(dialogContext),
@@ -1618,19 +1618,19 @@ class _CompanionHomeState extends State<CompanionHome> {
 
   List<Widget> _workspaceUtilities() => [
     if (_page == 2)
-      IconButton(
+      GatheringQuietIconButton(
         key: const ValueKey('open-glass-opacity'),
         onPressed: _showGlassOpacity,
         tooltip: 'Glass opacity',
         icon: const Icon(Icons.opacity, size: 20),
       ),
-    IconButton(
+    GatheringQuietIconButton(
       key: const ValueKey('open-minigame-helper'),
       onPressed: _reference,
       tooltip: 'Minigame Helper',
       icon: _headerActionArtwork('assets/icons/sources/minigame_helper.png'),
     ),
-    IconButton(
+    GatheringQuietIconButton(
       onPressed: _help,
       tooltip: 'Help',
       icon: Icon(
@@ -1725,7 +1725,7 @@ class _CompanionHomeState extends State<CompanionHome> {
             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
             child: Row(
               children: [
-                IconButton(
+                GatheringQuietIconButton(
                   tooltip: 'Back to checklist',
                   onPressed: _restoreRecipeChecklist,
                   icon: const Icon(Icons.arrow_back),
@@ -1869,7 +1869,7 @@ class _CompanionHomeState extends State<CompanionHome> {
                                 style: const TextStyle(fontSize: 14),
                               ),
                             ),
-                            IconButton(
+                            GatheringQuietIconButton(
                               onPressed: () => setState(() => _notice = null),
                               tooltip: 'Dismiss',
                               icon: const Icon(Icons.close, size: 18),
@@ -2180,7 +2180,7 @@ class _CompanionHomeState extends State<CompanionHome> {
                 label: m.label,
                 button: true,
                 selected: m.id == _methodId,
-                child: Tooltip(
+                child: GatheringQuietTooltip(
                   message: m.label,
                   child: GlassControl(
                     selected: m.id == _methodId,
@@ -2412,7 +2412,7 @@ class _CompanionHomeState extends State<CompanionHome> {
                         child: Text('$minutes min'),
                       ),
                     ),
-                  Tooltip(
+                  GatheringQuietTooltip(
                     message: _timerStart != null
                         ? 'Pause timer'
                         : _timerAccumulated > 0
@@ -2543,7 +2543,7 @@ class _CompanionHomeState extends State<CompanionHome> {
           style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
         ),
       ),
-      IconButton(
+      GatheringQuietIconButton(
         onPressed: _saving || _opacitySaving || _estimateSetupSaving
             ? null
             : _newDraft,
@@ -3152,7 +3152,7 @@ class _CompanionHomeState extends State<CompanionHome> {
             label: const Text('Location'),
           ),
         if (stableV017Location == null)
-          Tooltip(
+          GatheringQuietTooltip(
             message: 'Edit session',
             child: TextButton.icon(
               key: ValueKey('edit-session-${session.id}'),
@@ -3161,7 +3161,7 @@ class _CompanionHomeState extends State<CompanionHome> {
               label: const Text('Edit'),
             ),
           ),
-        IconButton(
+        GatheringQuietIconButton(
           key: ValueKey('delete-session-${session.id}'),
           onPressed: () => _delete(session),
           tooltip: 'Delete session',

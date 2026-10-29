@@ -20,7 +20,7 @@ class MatchlockDamageAdvice extends StatelessWidget {
         crossAxisAlignment: WrapCrossAlignment.center,
         children: [
           Text('Damage setup', style: Theme.of(context).textTheme.titleSmall),
-          IconButton(
+          GatheringQuietIconButton(
             key: const ValueKey('matchlock-damage-info'),
             tooltip: 'Matchlock damage tips',
             onPressed: () => showDialog<void>(
@@ -264,7 +264,7 @@ class _DetailHeading extends StatelessWidget {
       ),
       if (closeKey != null) ...[
         const SizedBox(width: 4),
-        IconButton(
+        GatheringQuietIconButton(
           key: closeKey,
           tooltip: 'Close',
           onPressed: () => Navigator.pop(context),

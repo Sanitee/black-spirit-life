@@ -472,7 +472,7 @@ class _ResourceMapModeStripEdge extends StatelessWidget {
               ),
             ),
           ),
-          Tooltip(
+          MapQuietTooltip(
             message: label,
             child: Semantics(
               button: true,
@@ -1222,7 +1222,7 @@ class _ResourceMapDesktopToolRailButton extends StatelessWidget {
         : chrome.text;
     return _ResourceMapDesktopEnterTransition(
       beginOffset: const Offset(-3, 0),
-      child: Tooltip(
+      child: MapQuietTooltip(
         message: action.label,
         child: Semantics(
           button: true,
@@ -1698,14 +1698,14 @@ class _MapSearchControl extends StatelessWidget {
                     maxWidth: icon == null ? 42 : 112,
                   ),
                   suffixIcon: queryActive
-                      ? IconButton(
+                      ? MapQuietIconButton(
                           tooltip: 'Clear search',
                           onPressed: onClear,
                           visualDensity: VisualDensity.compact,
                           color: chrome.muted,
                           icon: const Icon(Icons.close_rounded, size: 18),
                         )
-                      : Tooltip(
+                      : MapQuietTooltip(
                           message: 'Focus search (Ctrl+F)',
                           child: Padding(
                             padding: EdgeInsetsDirectional.only(end: 14),
@@ -1851,7 +1851,7 @@ class _MapModeControl extends StatelessWidget {
     if (showLabel) {
       return control;
     }
-    return Tooltip(message: label, child: control);
+    return MapQuietTooltip(message: label, child: control);
   }
 }
 
@@ -1877,7 +1877,7 @@ class _MapIconControl extends StatelessWidget {
     final height = compact ? 38.0 : 46.0;
     final width = compact ? 38.0 : 46.0;
     final foreground = chrome.ink;
-    return Tooltip(
+    return MapQuietTooltip(
       message: tooltip,
       child: Semantics(
         button: true,

@@ -449,7 +449,7 @@ class _GatheringSetupDialogState extends State<_GatheringSetupDialog> {
               ).textTheme.titleLarge?.copyWith(fontSize: 21),
             ),
           ),
-          IconButton(
+          GatheringQuietIconButton(
             key: const ValueKey('inline-stats-info'),
             tooltip: 'About base stats',
             onPressed: () => showDialog<void>(
@@ -483,7 +483,7 @@ class _GatheringSetupDialogState extends State<_GatheringSetupDialog> {
             ),
           ),
           if (_validDraft == null)
-            IconButton(
+            GatheringQuietIconButton(
               key: const ValueKey('inline-stats-reset'),
               tooltip: 'Discard unfinished stat changes',
               onPressed: widget.enabled
@@ -555,7 +555,7 @@ class _GatheringSetupDialogState extends State<_GatheringSetupDialog> {
             style: Theme.of(context).textTheme.headlineSmall,
           ),
         ),
-        IconButton(
+        GatheringQuietIconButton(
           onPressed: () => Navigator.pop(context),
           tooltip: 'Close',
           icon: const Icon(Icons.close, size: 21),
@@ -921,7 +921,7 @@ class _GatheringSetupDialogState extends State<_GatheringSetupDialog> {
         'Leave out bonuses selected in Prepare.',
     constraints: const BoxConstraints(maxWidth: 340),
     textAlign: TextAlign.left,
-    child: IconButton(
+    child: GatheringQuietIconButton(
       key: const ValueKey('gathering-drop-rate-help'),
       visualDensity: VisualDensity.compact,
       onPressed: () => showDialog<void>(
@@ -1099,7 +1099,7 @@ class _GatheringSetupDialogState extends State<_GatheringSetupDialog> {
                 ),
               ),
               if (buff != null)
-                IconButton(
+                GatheringQuietIconButton(
                   key: ValueKey('energy-expense-info-${buff.id}'),
                   onPressed: () => showBuffInfo(context, widget.catalog, buff),
                   tooltip: 'About ${buff.name}',

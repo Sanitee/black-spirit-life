@@ -1,6 +1,8 @@
 import 'dart:async';
 import 'dart:math' as math;
 
+import 'package:bdo_craft_planner_flutter/visual/components/app_tooltip.dart';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -1602,7 +1604,7 @@ class _InventoryScreenshotImportDialogState
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: <Widget>[
-            Tooltip(
+            AppTooltip(
               message: 'Open a larger screenshot crop',
               child: Semantics(
                 button: true,
@@ -1825,7 +1827,7 @@ class _ScreenshotNumberBadge extends StatelessWidget {
     );
     final action = onPressed;
     if (action == null) return badge;
-    return Tooltip(
+    return AppTooltip(
       message: 'Jump to screenshot $number',
       child: Semantics(
         button: true,

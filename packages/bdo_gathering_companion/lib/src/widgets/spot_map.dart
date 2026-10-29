@@ -905,7 +905,7 @@ class _SpotMapState extends State<SpotMap> {
         borderRadius: BorderRadius.circular(7),
         child: SizedBox.square(
           dimension: 32,
-          child: IconButton(
+          child: GatheringQuietIconButton(
             key: ValueKey(key),
             onPressed: action,
             tooltip: tip,

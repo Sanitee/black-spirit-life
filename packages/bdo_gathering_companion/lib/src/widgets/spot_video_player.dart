@@ -3,6 +3,8 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+
+import '../ui/theme.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:webview_flutter_windows/webview_flutter_windows.dart';
@@ -472,7 +474,7 @@ class _SpotVideoPlayerState extends State<SpotVideoPlayer>
             child: ColoredBox(
               key: _viewportKey,
               color: Colors.black,
-                // Media stays black in every theme. Status/error copy on
+              // Media stays black in every theme. Status/error copy on
               // that plane must remain light even in a light app theme.
               child: DefaultTextStyle.merge(
                 style: const TextStyle(color: Colors.white),
@@ -555,7 +557,7 @@ class _SpotVideoPlayerState extends State<SpotVideoPlayer>
             child: Row(
               children: [
                 if (_session != null)
-                  IconButton(
+                  GatheringQuietIconButton(
                     key: const ValueKey('stop-spot-video'),
                     tooltip: 'Stop video',
                     onPressed: _stop,
@@ -575,7 +577,7 @@ class _SpotVideoPlayerState extends State<SpotVideoPlayer>
                       style: const TextStyle(fontSize: 12),
                     ),
                   ),
-                  IconButton(
+                  GatheringQuietIconButton(
                     key: const ValueKey('open-spot-video-youtube'),
                     tooltip: 'Open on YouTube',
                     onPressed: video == null ? null : _openOnYouTube,

@@ -121,7 +121,7 @@ class _ReferenceWindowState extends State<ReferenceWindow> {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
-                    IconButton(
+                    GatheringQuietIconButton(
                       onPressed: () => _setPinned(!_pinned),
                       tooltip: _pinned
                           ? 'Turn always on top off'
@@ -140,7 +140,7 @@ class _ReferenceWindowState extends State<ReferenceWindow> {
                         tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                       ),
                     ),
-                    IconButton(
+                    GatheringQuietIconButton(
                       onPressed: _bytes == null
                           ? null
                           : () => setState(
@@ -199,7 +199,7 @@ class _ReferenceWindowState extends State<ReferenceWindow> {
                             ),
                           ),
                         ),
-                        IconButton(
+                        GatheringQuietIconButton(
                           key: const ValueKey('dismiss-reference-error'),
                           onPressed: () => setState(() => _error = null),
                           tooltip: 'Dismiss error',

@@ -47,7 +47,9 @@ class _OpportunityNumberInput extends StatelessWidget {
         ),
       ],
     );
-    return tooltip == null ? field : Tooltip(message: tooltip!, child: field);
+    return tooltip == null
+        ? field
+        : AppTooltip(message: tooltip!, child: field);
   }
 }
 

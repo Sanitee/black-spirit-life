@@ -5,12 +5,12 @@ third-party/reference-use decisions and accepted residual risk recorded; the
 approved Beta product is retained while personal player/publisher state, four
 privacy-bearing captures, and six source-only research inputs are excluded**
 
-Release identity: Black Spirit Life `0.1.13+32`, tag `v0.1.13`, package
+Release identity: Black Spirit Life `0.1.14+33`, tag `v0.1.14`, package
 `BlackSpiritLife.App`, channel `win-x64-stable`. The exact source commit and
 artifact hashes are recorded by the release-candidate manifest generated from
 the clean public history, which contains no internal Beta ancestry.
 
-Review date: 2026-10-28
+Review date: 2026-10-29
 
 Permanent public/update destination approved by the project owner:
 `https://github.com/Sanitee/black-spirit-life`
@@ -18,6 +18,22 @@ Permanent public/update destination approved by the project owner:
 This is the controlling source-by-source gate for the full-feature public
 route. It replaces earlier blanket treatment of every fact or game asset seen
 through a community reference as separately blocked.
+
+## 0.1.14 approved update boundary
+
+Version 0.1.14 promotes the user-tested Fish Map startup correction, the
+approved Planner Open rows presentation and the quiet ordinary-hover cleanup on
+top of public Stable 0.1.13. Fish keeps the existing Stable service range and
+now uses the same range in native WebView navigation. Planner calculations,
+inventory and persistence are unchanged. Item, source, location and reference
+previews remain available while ordinary action names stay accessible without
+opening hover popups.
+
+The complete 0.1.13 public product remains in force, including the Tight glow
+update control and its Editor Settings preview. No personal profile, mastery,
+inventory, journal, loadout, session, setting, credential, cookie, browser state
+or machine-specific path is included. Existing users continue to load and
+preserve their own selected personal-data folder.
 
 ## 0.1.13 current-Beta update boundary
 

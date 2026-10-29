@@ -1,5 +1,7 @@
 import 'dart:async';
 
+import 'package:bdo_craft_planner_flutter/visual/components/app_tooltip.dart';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -165,7 +167,7 @@ class _ContentSizePopoverState extends State<ContentSizePopover> {
                   if (enabled)
                     slider
                   else
-                    Tooltip(
+                    AppTooltip(
                       message:
                           'Enlarge the window to increase ${widget.label}.',
                       child: slider,

@@ -337,7 +337,7 @@ class _BdoActiveNodeRecordingImportDialogState
               ],
             ),
           ),
-          IconButton(
+          MapQuietIconButton(
             tooltip: 'Close',
             onPressed: _busy ? null : () => Navigator.of(context).pop(),
             icon: const Icon(Icons.close_rounded),

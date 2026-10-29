@@ -1,3 +1,4 @@
+import 'package:bdo_craft_planner_flutter/visual/components/app_tooltip.dart';
 import 'package:flutter/material.dart';
 
 import '../foundations/theme_spec.dart';
@@ -79,7 +80,9 @@ class AppTextAction extends StatelessWidget {
         child: ExcludeSemantics(child: action),
       );
     }
-    if (tooltip != null) action = Tooltip(message: tooltip!, child: action);
+    if (tooltip != null) {
+      action = AppTooltip(message: tooltip!, child: action);
+    }
     return action;
   }
 }

@@ -1,6 +1,8 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:bdo_craft_planner_flutter/visual/components/app_tooltip.dart';
+
 import 'package:bdo_gathering_companion/bdo_gathering_companion.dart';
 import 'package:bdo_map_core/bdo_map_core.dart';
 import 'package:flutter/foundation.dart';
@@ -2325,14 +2327,14 @@ class _ActivityDataFolderTitleAction extends StatelessWidget {
     final pressed =
         visual?.captionPressedSurface ?? spec.palette.primary.withAlpha(64);
 
-    return Tooltip(
+    return AppTooltip(
       message: label,
       excludeFromSemantics: true,
       child: Semantics(
         key: ApplicationWorkspace.activityDataFolderShortcutKey,
         button: true,
         label: label,
-        child: IconButton(
+        child: QuietIconButton(
           onPressed: onPressed,
           style: ButtonStyle(
             fixedSize: const WidgetStatePropertyAll(Size(40, 40)),

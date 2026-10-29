@@ -12,7 +12,7 @@ const int fishCompanionFirstPort = 8765;
 const int fishCompanionLastPort = 8795;
 
 const String fishCompanionAcceptedPayloadVersion =
-    '5f6a9f77f375ad04eabfdccf5f756de9986a5359ce87239fc4c0cadb8b4eb411:'
+    '9b6dec8288717d4da213f49811f3bab9eb9c5907bcbe1824b87c9178842617e5:'
     'c0b5c5c84980be389420cf247d7a89ac8c256676b7313ce3a496c933cb0667a9';
 
 /// The credited, noncommercial public release includes the reviewed reference

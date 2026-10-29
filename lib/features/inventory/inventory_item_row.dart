@@ -1,5 +1,7 @@
 import 'dart:async';
 
+import 'package:bdo_craft_planner_flutter/visual/components/app_tooltip.dart';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -370,7 +372,7 @@ class _InventoryItemRowState extends State<InventoryItemRow> {
       label: 'I09 Copy exact item name ${widget.item.name}',
       button: true,
       excludeSemantics: true,
-      child: Tooltip(
+      child: AppTooltip(
         message: 'Copy ${widget.item.name}',
         child: TextButton(
           key: InventoryActionKeys.row('I09', widget.item.name),
@@ -442,7 +444,7 @@ class _InventoryItemRowState extends State<InventoryItemRow> {
         onSubmitted: _commitOwned,
         suffixIcon: _ownedError == null
             ? null
-            : Tooltip(
+            : AppTooltip(
                 message: _ownedError!,
                 child: const Icon(Icons.error_outline, size: 17),
               ),

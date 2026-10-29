@@ -460,7 +460,7 @@ void main() {
     await tester.pump();
     expect(submitted, 'Thuja Sap');
 
-    await tester.tap(find.byTooltip('Clear search'));
+    await tester.tap(_findQuietAction('Clear search'));
     await tester.pump();
     expect(clears, 1);
     expect(controller.text, isEmpty);
@@ -923,7 +923,7 @@ void main() {
       );
       expect(find.byKey(backKey), findsNothing);
       expect(find.byKey(forwardKey), findsOneWidget);
-      expect(find.byTooltip('Show more map tasks'), findsOneWidget);
+      expect(_findQuietAction('Show more map tasks'), findsOneWidget);
       expect(tester.getSize(find.byKey(forwardKey)).width, 52);
       expect(
         find.byKey(const ValueKey<String>('edge-last-action')).hitTestable(),
@@ -945,7 +945,7 @@ void main() {
       expect(controller.offset, controller.position.maxScrollExtent);
       expect(find.byKey(forwardKey), findsNothing);
       expect(find.byKey(backKey), findsOneWidget);
-      expect(find.byTooltip('Show previous map tasks'), findsOneWidget);
+      expect(_findQuietAction('Show previous map tasks'), findsOneWidget);
       final lastAction = find.byKey(const ValueKey<String>('edge-last-action'));
       expect(lastAction.hitTestable(), findsOneWidget);
       await tester.tap(lastAction);
@@ -1367,8 +1367,8 @@ void main() {
     final nodeAction = find.byKey(const ValueKey<String>('tool-nodes'));
     expect(tester.getSize(rail).width, 52);
     expect(tester.getSize(nodeAction), const Size(44, 44));
-    expect(find.byTooltip('Nodes'), findsOneWidget);
-    expect(find.byTooltip('Routes'), findsOneWidget);
+    expect(_findQuietAction('Nodes'), findsOneWidget);
+    expect(_findQuietAction('Routes'), findsOneWidget);
     expect(find.byType(Scrollbar), findsNothing);
     expect(find.byType(RawScrollbar), findsNothing);
 
@@ -1570,6 +1570,12 @@ void main() {
     },
   );
 }
+
+Finder _findQuietAction(String message) => find.byWidgetPredicate(
+  (widget) =>
+      (widget is MapQuietIconButton && widget.tooltip == message) ||
+      (widget is MapQuietTooltip && widget.message == message),
+);
 
 Widget _shellTestApp({
   required double width,

@@ -1,5 +1,7 @@
 import 'dart:async';
 
+import 'package:bdo_craft_planner_flutter/visual/components/app_tooltip.dart';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -400,7 +402,7 @@ class _AppButtonState extends State<AppButton> {
       child: result,
     );
     if (widget.tooltip case final message?) {
-      result = Tooltip(message: message, child: result);
+      result = AppTooltip(message: message, child: result);
     }
     return result;
   }

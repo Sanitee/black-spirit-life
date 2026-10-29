@@ -20,6 +20,8 @@ import 'package:flutter/rendering.dart' show RenderParagraph;
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../../support/action_hint_finder.dart';
+
 import '../shared/custom_icon_test_support.dart';
 import 'recipe_book_test_support.dart';
 
@@ -716,7 +718,7 @@ void main() {
         find.byKey(RecipeBookKeys.card('Clear Liquid Reagent')),
         findsNothing,
       );
-      final clearSearch = find.byTooltip('Clear recipe search');
+      final clearSearch = findActionHint('Clear recipe search');
       expect(clearSearch, findsOneWidget);
       expect(
         find.ancestor(of: clearSearch, matching: find.byType(AppButton)),
@@ -3852,7 +3854,7 @@ Future<void> _setSize(WidgetTester tester, Size size) async {
 }
 
 List<Tooltip> _richInfoTooltips(WidgetTester tester) => tester
-    .widgetList<Tooltip>(find.byType(Tooltip))
+    .widgetList<Tooltip>(find.byWidgetPredicate((widget) => widget is Tooltip))
     .where((tooltip) => tooltip.richMessage != null)
     .toList(growable: false);
 

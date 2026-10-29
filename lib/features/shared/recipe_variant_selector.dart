@@ -1,3 +1,4 @@
+import 'package:bdo_craft_planner_flutter/visual/components/app_tooltip.dart';
 import 'package:flutter/material.dart';
 
 import '../../domain/formatting/planner_formatters.dart';
@@ -169,7 +170,7 @@ class RecipeVariantSelector extends StatelessWidget {
                   mainAxisSize: MainAxisSize.min,
                   children: <Widget>[
                     if (onAutomaticSelected != null) ...<Widget>[
-                      Tooltip(
+                      AppTooltip(
                         message:
                             'Choose the cheapest available option for the materials you still need.',
                         child: AppButton(
@@ -354,7 +355,7 @@ class RecipeRouteCostComparison extends StatelessWidget {
     final tooltipWidth = (MediaQuery.sizeOf(context).width - 48)
         .clamp(180.0, 360.0)
         .toDouble();
-    return Tooltip(
+    return AppTooltip(
       constraints: BoxConstraints(maxWidth: tooltipWidth + 20),
       richMessage: WidgetSpan(
         child: SizedBox(
@@ -515,7 +516,7 @@ class _RouteSquare extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final size = compact ? 26.0 : 28.0;
-    return Tooltip(
+    return AppTooltip(
       message:
           '$letter - ${route.label}\n'
           '${_batchSummary(targetVariant)}\n'
@@ -592,7 +593,7 @@ class _BatchSquare extends StatelessWidget {
               '${_formulaSummary(target.ingredients)}\n'
               'Uses the recorded in-game formula; the requested target '
               'amount is unchanged.';
-    return Tooltip(
+    return AppTooltip(
       message: tooltip,
       child: SizedBox(
         width: width,

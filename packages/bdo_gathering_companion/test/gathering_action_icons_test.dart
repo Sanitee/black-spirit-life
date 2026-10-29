@@ -194,12 +194,27 @@ void main() {
           expect(bounds.right, lessThanOrEqualTo(variant.width));
           expect(bounds.top, greaterThanOrEqualTo(0));
           expect(bounds.bottom, lessThanOrEqualTo(752));
-          expect(find.byTooltip(action.label), findsOneWidget);
+          expect(
+            find.byWidgetPredicate(
+              (widget) =>
+                  widget is GatheringQuietIconButton &&
+                  widget.tooltip == action.label,
+            ),
+            findsOneWidget,
+          );
+          expect(find.byTooltip(action.label), findsNothing);
         }
         expect(find.byKey(const ValueKey('open-garmoth-upload')), findsNothing);
         expect(find.text('Garmoth Upload'), findsNothing);
         expect(find.byTooltip('Garmoth Upload'), findsNothing);
-        expect(find.byTooltip('Help'), findsOneWidget);
+        expect(
+          find.byWidgetPredicate(
+            (widget) =>
+                widget is GatheringQuietIconButton && widget.tooltip == 'Help',
+          ),
+          findsOneWidget,
+        );
+        expect(find.byTooltip('Help'), findsNothing);
         expect(calls, isEmpty);
         expect(tester.takeException(), isNull);
 

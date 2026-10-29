@@ -1,5 +1,7 @@
 import 'dart:convert';
 
+import 'package:bdo_craft_planner_flutter/visual/components/app_tooltip.dart';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -703,7 +705,7 @@ class _DataViewState extends State<DataView> {
           final options = Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: <Widget>[
-              Tooltip(
+              AppTooltip(
                 message: 'Adds the Value Pack collection bonus.',
                 child: AppToggle(
                   key: const ValueKey<String>('D16'),
@@ -720,7 +722,7 @@ class _DataViewState extends State<DataView> {
                 ),
               ),
               const SizedBox(height: 4),
-              Tooltip(
+              AppTooltip(
                 message: 'Adds the Rich Merchant’s Ring collection bonus.',
                 child: AppToggle(
                   key: const ValueKey<String>('D18'),
@@ -737,7 +739,7 @@ class _DataViewState extends State<DataView> {
                 ),
               ),
               const SizedBox(height: 10),
-              Tooltip(
+              AppTooltip(
                 message:
                     'Family Fame tiers: 1,000–3,999 grants +0.5%, '
                     '4,000–6,999 grants +1.0%, and 7,000+ grants +1.5%.',

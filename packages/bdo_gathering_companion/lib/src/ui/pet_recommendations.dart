@@ -151,7 +151,7 @@ class _PetHeading extends StatelessWidget {
         ),
         if (showClear) ...[
           const SizedBox(width: 4),
-          IconButton(
+          GatheringQuietIconButton(
             key: const ValueKey('clear-pets'),
             tooltip: 'Clear pets',
             onPressed: onClear,

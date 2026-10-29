@@ -1,5 +1,7 @@
 import 'dart:async';
 
+import 'package:bdo_craft_planner_flutter/visual/components/app_tooltip.dart';
+
 import 'package:flutter/material.dart';
 
 import '../../visual/visual.dart';
@@ -173,7 +175,7 @@ class _BetaUpdateIndicatorState extends State<BetaUpdateIndicator>
       width: width,
       height: BetaUpdateIndicator.height,
       child: Center(
-        child: Tooltip(
+        child: AppTooltip(
           message: tooltip,
           excludeFromSemantics: true,
           child: Semantics(

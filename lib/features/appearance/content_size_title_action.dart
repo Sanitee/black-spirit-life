@@ -1,3 +1,4 @@
+import 'package:bdo_craft_planner_flutter/visual/components/app_tooltip.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
@@ -98,7 +99,7 @@ class _ContentSizeTitleActionState extends State<ContentSizeTitleAction> {
           child: Center(
             child: Semantics(
               expanded: isShowing,
-              child: IconButton(
+              child: QuietIconButton(
                 key: widget.triggerKey,
                 focusNode: _triggerFocus,
                 tooltip: widget.label,

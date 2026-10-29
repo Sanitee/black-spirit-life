@@ -551,7 +551,7 @@ class _AtlasDockButtonState extends State<_AtlasDockButton> {
       child: MouseRegion(
         onEnter: (_) => setState(() => _hovered = true),
         onExit: (_) => setState(() => _hovered = false),
-        child: Tooltip(
+        child: MapQuietTooltip(
           message: action.label,
           child: Material(
             key: action.key,
@@ -828,7 +828,7 @@ class ResourceMapFavoriteButton extends StatelessWidget {
     return TextFieldTapRegion(
       child: Semantics(
         toggled: saved,
-        child: IconButton(
+        child: MapQuietIconButton(
           tooltip: saved
               ? 'Remove $name from favorites'
               : 'Add $name to favorites',
@@ -1543,7 +1543,7 @@ class _AtlasCompactButtonState extends State<_AtlasCompactButton> {
   @override
   Widget build(BuildContext context) {
     final chrome = context.mapChrome;
-    return Tooltip(
+    return MapQuietTooltip(
       message: widget.tooltip,
       child: Material(
         color: Colors.transparent,

@@ -147,7 +147,7 @@ class _WorkerLodgingShopSetupDialogState
               color: chrome.muted,
             ),
           ),
-          IconButton(
+          MapQuietIconButton(
             key: const ValueKey<String>('resource-map-shop-lodging-close'),
             tooltip: 'Close',
             visualDensity: VisualDensity.compact,
@@ -308,7 +308,7 @@ class _PurchasedCounterRow extends StatelessWidget {
               ),
             ),
           ),
-          IconButton(
+          MapQuietIconButton(
             key: const ValueKey<String>(
               'resource-map-shop-lodging-pearl-minus',
             ),
@@ -329,7 +329,7 @@ class _PurchasedCounterRow extends StatelessWidget {
               ),
             ),
           ),
-          IconButton(
+          MapQuietIconButton(
             key: const ValueKey<String>('resource-map-shop-lodging-pearl-plus'),
             tooltip: 'One more purchased',
             visualDensity: VisualDensity.compact,

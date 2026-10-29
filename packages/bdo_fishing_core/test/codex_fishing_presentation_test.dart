@@ -15,12 +15,12 @@ void main() {
     return sha256.convert(utf8.encode(values.join('\n'))).toString();
   }
 
-  test('all 178 accepted DOM identities survive the presentation rewrite', () {
+  test('all 185 accepted DOM identities survive the presentation rewrite', () {
     final ids = RegExp(r'\bid="([^"]+)"');
-    expect(ids.allMatches(html), hasLength(178));
+    expect(ids.allMatches(html), hasLength(185));
     expect(
       contractHash(ids, (match) => match.group(1)!),
-      '8f91d26ff5889a4f96c5611e6e866f1f333232f116746823ac3aa1716186ca95',
+      '7255957b731843f0ad96ee970c531eab2f079affddf95b38b2dd62f0745e680d',
     );
   });
 

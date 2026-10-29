@@ -13,13 +13,13 @@
     },
     {
       "path": "static/app.js",
-      "byteCount": 263778,
-      "sha256": "6ad514af8ec434c5fcf4892dbc42f8714617663f699f34d2c6ba36ed7420bd75"
+      "byteCount": 263429,
+      "sha256": "c647c86ea2cf4504f559849699482ee7ebdeb931c31963a9c58d121ab0782f6b"
     },
     {
       "path": "static/index.html",
-      "byteCount": 40561,
-      "sha256": "90f83aaa779eec419692252d11aceffe0555c635e034f5980835963379422a4b"
+      "byteCount": 40525,
+      "sha256": "027b8db5f900b038a4d82f31070d74135cc268f963fd8b3f8af61f1afefafc2f"
     }
   ],
   "snapshotFiles": [

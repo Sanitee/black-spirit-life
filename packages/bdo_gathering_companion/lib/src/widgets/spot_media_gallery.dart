@@ -278,7 +278,7 @@ class _SpotMediaGalleryState extends State<SpotMediaGallery> {
                 onSelected: (position) =>
                     _select(_preferredReference(groups[position], _remembered)),
               ),
-            IconButton(
+            GatheringQuietIconButton(
               key: const ValueKey('expand-spot-media'),
               tooltip: 'Expand ${selected.type == 'video' ? 'video' : 'image'}',
               onPressed: () => _expand(selected),
@@ -367,7 +367,7 @@ class _MediaPager extends StatelessWidget {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        IconButton(
+        GatheringQuietIconButton(
           key: ValueKey('${prefix}previous-spot-reference'),
           tooltip: 'Previous reference',
           onPressed: index > 0 ? () => onSelected(index - 1) : null,
@@ -387,7 +387,7 @@ class _MediaPager extends StatelessWidget {
             color: context.gatheringColors.muted,
           ),
         ),
-        IconButton(
+        GatheringQuietIconButton(
           key: ValueKey('${prefix}next-spot-reference'),
           tooltip: 'Next reference',
           onPressed: index + 1 < count ? () => onSelected(index + 1) : null,
@@ -522,7 +522,7 @@ class _ExpandedSpotMediaState extends State<_ExpandedSpotMedia> {
                         _preferredReference(groups[position], _remembered),
                       ),
                     ),
-                  IconButton(
+                  GatheringQuietIconButton(
                     key: const ValueKey('close-spot-media'),
                     tooltip: 'Close',
                     onPressed: () => Navigator.pop(context),
@@ -854,7 +854,7 @@ class _MediaCreditsState extends State<_MediaCredits> {
           ),
         ),
         if (widget.media.sourceUrl.isNotEmpty)
-          IconButton(
+          GatheringQuietIconButton(
             tooltip: 'Open source',
             onPressed: _openSource,
             icon: const Icon(Icons.open_in_new, size: 18),
@@ -942,7 +942,7 @@ class _RotationImageState extends State<_RotationImage> {
               ),
             ),
             if (widget.media.sourceUrl.isNotEmpty)
-              IconButton(
+              GatheringQuietIconButton(
                 tooltip: 'Open source',
                 onPressed: _source,
                 icon: const Icon(Icons.open_in_new, size: 18),

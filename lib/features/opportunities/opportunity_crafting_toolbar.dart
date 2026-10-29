@@ -135,7 +135,7 @@ class _CraftMasteryControlState extends State<_CraftMasteryControl> {
           SizedBox(
             width: 64 * scale,
             child: _editing
-                ? Tooltip(
+                ? AppTooltip(
                     message: '0–3000',
                     child: OpportunityTextField(
                       key: const ValueKey('craft-mastery-input'),

@@ -19,7 +19,7 @@ processing variants, calculations and persistence remain unchanged.
 
 ## Candidate and protection
 
-Source: `D:/Codex/Black Spirit Life/Fish Startup Fix 20261029`, branch
+Source: the approved release-candidate tree on branch
 `codex/planner-open-rows`, based on the user-tested Fish startup fix
 `896c6f7e02bc7587b37e4ccd7793bbb88f201c98`.
 
@@ -30,8 +30,8 @@ is changed. This is a local candidate awaiting the user's visual review, not a
 public release or acceptance of the new design.
 
 Before editing, the accepted Fish fix's complete tracked source (10,715 files)
-and complete runnable (9,582 files) were copied and hash-verified at:
-`D:/Codex/Black Spirit Life/Protected Rollback/accepted-fish-startup-20261029T085531981Z`.
+and complete runnable (9,582 files) were copied and hash-verified in a protected
+rollback snapshot kept outside the public repository.
 Manifest SHA-256: `059523D1E0D9B64595374C913475A18A0A59029A91D3E32F3D094EA86218DFA9`.
 The preceding accepted update-glow snapshot also passed full verification.
 

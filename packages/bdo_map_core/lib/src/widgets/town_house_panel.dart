@@ -178,7 +178,7 @@ class TownHousePanel extends StatelessWidget {
                     ? _summary(context, uses)
                     : const SizedBox.shrink(),
               ),
-              IconButton(
+              MapQuietIconButton(
                 tooltip: 'Show houses on map',
                 onPressed: onFit,
                 key: ValueKey('resource-map-fit-houses-${town.townNodeId}'),
@@ -461,7 +461,7 @@ class TownHousePanel extends StatelessWidget {
     IconData icon,
     VoidCallback? action,
     String key,
-  ) => IconButton(
+  ) => MapQuietIconButton(
     key: ValueKey(key),
     tooltip: label,
     onPressed: action,

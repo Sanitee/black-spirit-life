@@ -76,7 +76,7 @@ void main() {
     );
     expect(tester.getSize(fullWorld), const Size(44, 44));
 
-    expect(find.byTooltip('Show the full world'), findsOneWidget);
+    expect(_findQuietAction('Show the full world'), findsOneWidget);
     expect(find.bySemanticsLabel('Map zoom level'), findsOneWidget);
     expect(find.bySemanticsLabel('Show full world'), findsOneWidget);
 
@@ -116,7 +116,7 @@ void main() {
           .height,
       ResourceMapZoomDock.sliderExtent + ResourceMapZoomDock.controlExtent + 1,
     );
-    expect(find.byTooltip('Show the full world'), findsOneWidget);
+    expect(_findQuietAction('Show the full world'), findsOneWidget);
   });
 
   testWidgets('uses Illuminated Atlas semantic chrome roles', (tester) async {
@@ -164,6 +164,12 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 }
+
+Finder _findQuietAction(String message) => find.byWidgetPredicate(
+  (widget) =>
+      (widget is MapQuietIconButton && widget.tooltip == message) ||
+      (widget is MapQuietTooltip && widget.message == message),
+);
 
 BdoMapCameraController _camera() => BdoMapCameraController(
   tileSource: BdoTileSource.workermanCommunity,

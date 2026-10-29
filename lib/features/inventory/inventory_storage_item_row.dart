@@ -1,5 +1,7 @@
 import 'dart:async';
 
+import 'package:bdo_craft_planner_flutter/visual/components/app_tooltip.dart';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -194,7 +196,7 @@ class _InventoryStorageItemRowState extends State<InventoryStorageItemRow> {
       height: 1.2,
       fontWeight: FontWeight.w700,
     );
-    final name = Tooltip(
+    final name = AppTooltip(
       message: widget.item.name,
       child: TextButton(
         key: InventoryActionKeys.row('I09', widget.item.name),
@@ -236,7 +238,7 @@ class _InventoryStorageItemRowState extends State<InventoryStorageItemRow> {
             onSubmitted: _commit,
             suffixIcon: _error == null
                 ? null
-                : Tooltip(
+                : AppTooltip(
                     message: _error!,
                     child: const Icon(Icons.error_outline, size: 17),
                   ),

@@ -8,6 +8,98 @@ import '../assets.dart';
 import 'item_artwork.dart';
 import 'visual_palette.dart';
 
+/// Keeps ordinary action labels semantic without opening hover text.
+class GatheringQuietTooltip extends Tooltip {
+  const GatheringQuietTooltip({
+    super.key,
+    super.message,
+    super.richMessage,
+    super.constraints,
+    super.padding,
+    super.margin,
+    super.verticalOffset,
+    super.preferBelow,
+    super.excludeFromSemantics,
+    super.decoration,
+    super.textStyle,
+    super.textAlign,
+    super.waitDuration,
+    super.showDuration,
+    super.exitDuration,
+    super.enableTapToDismiss,
+    super.triggerMode,
+    super.enableFeedback,
+    super.onTriggered,
+    super.mouseCursor,
+    super.ignorePointer,
+    super.positionDelegate,
+    super.child,
+  });
+
+  @override
+  TooltipState createState() => _GatheringQuietTooltipState();
+}
+
+class _GatheringQuietTooltipState extends TooltipState {
+  @override
+  Widget build(BuildContext context) {
+    final hint = widget as GatheringQuietTooltip;
+    final excluded =
+        hint.excludeFromSemantics ??
+        TooltipTheme.of(context).excludeFromSemantics ??
+        false;
+    return Semantics(
+      tooltip: excluded
+          ? null
+          : hint.message ?? hint.richMessage?.toPlainText(),
+      child: hint.child ?? const SizedBox.shrink(),
+    );
+  }
+}
+
+/// Keeps icon-button action names in accessibility without opening hover text.
+class GatheringQuietIconButton extends IconButton {
+  const GatheringQuietIconButton({
+    super.key,
+    super.iconSize,
+    super.visualDensity,
+    super.padding,
+    super.alignment,
+    super.splashRadius,
+    super.color,
+    super.focusColor,
+    super.hoverColor,
+    super.highlightColor,
+    super.splashColor,
+    super.disabledColor,
+    required super.onPressed,
+    super.onHover,
+    super.onLongPress,
+    super.mouseCursor,
+    super.focusNode,
+    super.autofocus,
+    super.tooltip,
+    super.enableFeedback,
+    super.constraints,
+    super.style,
+    super.isSelected,
+    super.selectedIcon,
+    super.statesController,
+    required super.icon,
+    this.approvedHover = false,
+  });
+
+  final bool approvedHover;
+
+  @override
+  Widget build(BuildContext context) => approvedHover
+      ? super.build(context)
+      : Semantics(
+          tooltip: tooltip,
+          child: TooltipVisibility(visible: false, child: super.build(context)),
+        );
+}
+
 const ink = Color(0xFFF1E8D8);
 const muted = Color(0xFFB9ABB1);
 const canvasColor = Color(0xFF141218);

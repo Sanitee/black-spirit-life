@@ -178,7 +178,7 @@ class _ZoomDockControlState extends State<_ZoomDockControl> {
   @override
   Widget build(BuildContext context) {
     final chrome = context.mapChrome;
-    return Tooltip(
+    return MapQuietTooltip(
       message: widget.tooltip,
       child: Semantics(
         button: true,

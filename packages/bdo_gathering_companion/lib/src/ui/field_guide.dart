@@ -2864,7 +2864,7 @@ class _FieldGuideState extends State<FieldGuide> {
                   : Semantics(
                       label: 'Clear search',
                       button: true,
-                      child: IconButton(
+                      child: GatheringQuietIconButton(
                         key: const ValueKey('spot-clear-search'),
                         onPressed: () {
                           _search.clear();
@@ -2888,7 +2888,7 @@ class _FieldGuideState extends State<FieldGuide> {
           button: true,
           child: _mapContentBox(
             GlassControl(
-              child: IconButton(
+              child: GatheringQuietIconButton(
                 key: const ValueKey('spot-market-refresh'),
                 visualDensity: VisualDensity.compact,
                 constraints: const BoxConstraints.tightFor(
@@ -2915,7 +2915,7 @@ class _FieldGuideState extends State<FieldGuide> {
           button: true,
           child: _mapContentBox(
             GlassControl(
-              child: IconButton(
+              child: GatheringQuietIconButton(
                 key: const ValueKey('bairog-benchmark-details'),
                 visualDensity: VisualDensity.compact,
                 constraints: const BoxConstraints.tightFor(
@@ -4513,7 +4513,7 @@ class _FieldGuideState extends State<FieldGuide> {
         '${performance?.spotId}-${performance?.methodId}';
     final loadingKey = '$modeLabel-$entryId';
     final loading = _calculationLoadingEntries.contains(loadingKey);
-    return IconButton(
+    return GatheringQuietIconButton(
       key: ValueKey('$modeLabel-calculation-info-$entryId'),
       tooltip: 'Show calculation for $title',
       visualDensity: VisualDensity.compact,
@@ -4717,7 +4717,7 @@ class _FieldGuideState extends State<FieldGuide> {
             ),
           ),
         ),
-        IconButton(
+        GatheringQuietIconButton(
           tooltip: 'Close',
           visualDensity: VisualDensity.compact,
           onPressed: () => Navigator.of(dialogContext).pop(),
@@ -5391,7 +5391,7 @@ class _FieldGuideState extends State<FieldGuide> {
       runSpacing: 6,
       children: [
         for (final method in methods)
-          Tooltip(
+          GatheringQuietTooltip(
             message: method.label,
             child: Semantics(
               button: true,
@@ -5432,7 +5432,7 @@ class _FieldGuideState extends State<FieldGuide> {
       },
       child: Text(widget.useLabel, style: const TextStyle(fontSize: 14)),
     );
-    final directions = IconButton(
+    final directions = GatheringQuietIconButton(
       key: const ValueKey('guide-directions'),
       tooltip: 'Directions',
       onPressed: () => _showDirections(spot, media),

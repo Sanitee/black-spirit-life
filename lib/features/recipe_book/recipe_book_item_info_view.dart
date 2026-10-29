@@ -1,6 +1,8 @@
 import 'dart:async';
 import 'dart:math' as math;
 
+import 'package:bdo_craft_planner_flutter/visual/components/app_tooltip.dart';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -84,7 +86,9 @@ class _RecipeBookItemInfoTooltip extends StatelessWidget {
     // which would double-enlarge the card and push it outside the viewport.
     return MediaQuery(
       data: media.copyWith(textScaler: TextScaler.noScaling),
-      child: Tooltip(
+      child: AppTooltip(
+        // The user requested rich reference previews on item artwork only.
+        approvedHover: true,
         triggerMode: triggerMode,
         waitDuration: const Duration(milliseconds: 350),
         showDuration: const Duration(seconds: 12),

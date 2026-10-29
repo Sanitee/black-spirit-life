@@ -1,5 +1,7 @@
 import 'dart:ui' show PointerDeviceKind;
 
+import 'package:bdo_craft_planner_flutter/visual/components/app_tooltip.dart';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart' show ScrollCacheExtent;
 import 'package:flutter/services.dart';
@@ -919,7 +921,7 @@ class _RecipeBookMarketControls extends StatelessWidget {
           semanticLabel: 'Out of stock only',
           onChanged: controller.setOutOfStockOnly,
         ),
-        Tooltip(
+        AppTooltip(
           message:
               'Only show recipes with a positive direct-buy estimate. '
               'Every selected ingredient is priced as bought; owned stock is '
@@ -1473,7 +1475,7 @@ class _RecipeCard extends StatelessWidget {
                                     crossAxisAlignment:
                                         CrossAxisAlignment.start,
                                     children: [
-                                      Tooltip(
+                                      AppTooltip(
                                         message: entry.name,
                                         child: Text(
                                           entry.name,
@@ -1726,7 +1728,7 @@ class _RecipeBookProfitabilityPill extends StatelessWidget {
     return Semantics(
       label: '$label. $details',
       excludeSemantics: true,
-      child: Tooltip(
+      child: AppTooltip(
         message: details,
         waitDuration: const Duration(milliseconds: 350),
         child: DecoratedBox(
@@ -1769,7 +1771,7 @@ class _RecipeBookStockPill extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final spec = context.visualTheme;
-    return Tooltip(
+    return AppTooltip(
       message: stock == null
           ? 'Stock has not been checked.'
           : '${formatQuantity(stock!)} listed on the Central Market.',
@@ -2400,7 +2402,7 @@ class _PreviewQualitySwatch extends StatelessWidget {
       ),
       _ => (const Color(0xAA909090), const Color(0xB9CBCBCB), 'Normal'),
     };
-    return Tooltip(
+    return AppTooltip(
       message: '$label grade',
       child: Semantics(
         button: true,

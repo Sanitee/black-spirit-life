@@ -1,3 +1,4 @@
+import 'package:bdo_craft_planner_flutter/visual/components/app_tooltip.dart';
 import 'package:flutter/material.dart';
 
 import '../../domain/formatting/planner_formatters.dart';
@@ -157,7 +158,7 @@ class PlannerIngredientRowLayout extends StatelessWidget {
             ),
     );
     final totalWidget = showQuantityBadge
-        ? Tooltip(message: 'Total needed for this craft step', child: amount)
+        ? AppTooltip(message: 'Total needed for this craft step', child: amount)
         : Semantics(
             label: '${total.data} total needed for this craft step',
             excludeSemantics: true,

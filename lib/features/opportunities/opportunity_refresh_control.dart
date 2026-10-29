@@ -1,5 +1,7 @@
 import 'dart:async';
 
+import 'package:bdo_craft_planner_flutter/visual/components/app_tooltip.dart';
+
 import 'package:flutter/material.dart';
 
 import '../../data/market/shared_market_repository.dart';
@@ -196,7 +198,7 @@ class _OpportunityRefreshControlState extends State<OpportunityRefreshControl>
       runSpacing: 8,
       children: [
         if (scanWaiting)
-          Tooltip(
+          AppTooltip(
             message:
                 'Market requests are paced to avoid a block. '
                 'The check continues automatically; loaded results stay available.',

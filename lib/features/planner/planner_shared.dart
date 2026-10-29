@@ -1,5 +1,7 @@
 import 'dart:async';
 
+import 'package:bdo_craft_planner_flutter/visual/components/app_tooltip.dart';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -3072,7 +3074,7 @@ class _AfkLoadCardState extends State<_AfkLoadCard> {
             '${formatQuantity(startWeight)} LT',
             'planner-afk-total-weight',
           ),
-          Tooltip(
+          AppTooltip(
             message: expectedOutput == null
                 ? 'No supported average is available for this recipe.'
                 : 'About ${formatQuantity(expectedOutput.quantity.toDouble())} '
@@ -3092,7 +3094,7 @@ class _AfkLoadCardState extends State<_AfkLoadCard> {
             'planner-afk-reserved-weight',
           ),
           const SizedBox(height: 4),
-          Tooltip(
+          AppTooltip(
             message: conservative
                 ? 'The load uses a conservative main-output allowance because '
                       'output data is incomplete. Higher-grade results and '
@@ -4249,7 +4251,7 @@ class _IngredientRow extends StatelessWidget {
                           child: perCraftValue,
                         ),
                       )
-                    : Tooltip(
+                    : AppTooltip(
                         message: 'Needed for 1 craft',
                         child: PlannerQuantityBadge(child: perCraftValue!),
                       ),
@@ -5502,7 +5504,7 @@ class _SubstituteNameAnchorState extends State<_SubstituteNameAnchor> {
         ),
       ),
     );
-    control = Tooltip(
+    control = AppTooltip(
       message:
           widget.tooltip ??
           'Other ingredients can be used.\n'
@@ -5801,7 +5803,7 @@ class _ProcessingAcquisitionOptions extends StatelessWidget {
       runSpacing: 8,
       children: [
         for (final process in [false, true])
-          Tooltip(
+          AppTooltip(
             message: process
                 ? tooltip
                 : 'Use the finished item. Market or workers.',
@@ -6134,7 +6136,7 @@ class _QualityButton extends StatelessWidget {
     final outerRadius = BorderRadius.circular(ledger ? 2 : 5);
     final innerRadius = BorderRadius.circular(ledger ? 1 : 3);
 
-    return Tooltip(
+    return AppTooltip(
       message: label,
       child: Semantics(
         button: true,
@@ -6241,7 +6243,7 @@ class _MarketPills extends StatelessWidget {
     );
     final stock = vendor
         ? text('Vendor item')
-        : Tooltip(
+        : AppTooltip(
             message: !market.stockKnown
                 ? 'Stock has not been checked.'
                 : '${formatQuantity(market.stock)} listed on the Central Market.',

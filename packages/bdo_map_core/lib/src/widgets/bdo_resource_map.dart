@@ -7910,7 +7910,7 @@ class _BdoResourceMapState extends State<BdoResourceMap> {
             rebuildPlan: page == _NodeNetworkPlannerPage.review,
           );
     final settings = market && widget.workerEconomics != null
-        ? IconButton(
+        ? MapQuietIconButton(
             key: const ValueKey<String>('resource-map-worker-income-settings'),
             tooltip: 'Estimate settings',
             onPressed: _openWorkerIncomeSettings,
@@ -8422,7 +8422,7 @@ class _BdoResourceMapState extends State<BdoResourceMap> {
                 children: <Widget>[
                   Row(
                     children: <Widget>[
-                      IconButton(
+                      MapQuietIconButton(
                         key: backKey,
                         onPressed: backAction,
                         tooltip: backTooltip,
@@ -10148,7 +10148,7 @@ class _BdoResourceMapState extends State<BdoResourceMap> {
           padding: const EdgeInsets.fromLTRB(7, 7, 10, 7),
           child: Row(
             children: <Widget>[
-              IconButton(
+              MapQuietIconButton(
                 key: const ValueKey<String>('resource-map-vendor-lookup-back'),
                 tooltip: 'Back to the previous map view',
                 visualDensity: VisualDensity.compact,
@@ -12197,7 +12197,7 @@ class _BdoResourceMapState extends State<BdoResourceMap> {
                                     ),
                                   ),
                                   if (hasLocation)
-                                    IconButton(
+                                    MapQuietIconButton(
                                       key: ValueKey<String>(
                                         'resource-map-gather-checklist-locate-'
                                         '${entry.resourceId}',
@@ -12221,7 +12221,7 @@ class _BdoResourceMapState extends State<BdoResourceMap> {
                                       ),
                                     ),
                                   ),
-                                  IconButton(
+                                  MapQuietIconButton(
                                     key: ValueKey<String>(
                                       'resource-map-gather-checklist-remove-'
                                       '${entry.resourceId}',
@@ -12896,7 +12896,7 @@ class _BdoResourceMapState extends State<BdoResourceMap> {
                   ),
                   if (workerCount > 0 && workerResource != null) ...[
                     const SizedBox(width: 5),
-                    Tooltip(
+                    MapQuietTooltip(
                       message: 'Plan worker nodes for ${workerResource.name}',
                       child: TextButton(
                         key: ValueKey<String>(
@@ -13361,7 +13361,7 @@ class _BdoResourceMapState extends State<BdoResourceMap> {
               prefixIconConstraints: const BoxConstraints(minWidth: 34),
               suffixIcon: _nodeTargetSearchController.text.isEmpty
                   ? null
-                  : IconButton(
+                  : MapQuietIconButton(
                       tooltip: 'Clear target search',
                       onPressed: () {
                         _nodeTargetSearchController.clear();
@@ -13387,7 +13387,7 @@ class _BdoResourceMapState extends State<BdoResourceMap> {
           toggled: _nodeTargetSettingsExpanded,
           label: 'Network settings, $budget CP available',
           excludeSemantics: true,
-          child: Tooltip(
+          child: MapQuietTooltip(
             message: 'Network settings',
             child: TextButton.icon(
               key: const ValueKey<String>(
@@ -13464,7 +13464,7 @@ class _BdoResourceMapState extends State<BdoResourceMap> {
                   label: const Text('Use my setup'),
                 ),
               if (_nodeNetworkPreferences.currentNodeIds.isNotEmpty)
-                IconButton(
+                MapQuietIconButton(
                   key: const ValueKey<String>(
                     'resource-map-clear-saved-node-network',
                   ),
@@ -13607,7 +13607,7 @@ class _BdoResourceMapState extends State<BdoResourceMap> {
             ),
           ),
         ),
-        IconButton(
+        MapQuietIconButton(
           key: const ValueKey<String>('resource-map-node-apply-cp'),
           tooltip: 'Apply CP budget',
           onPressed: _commitNodeBudget,
@@ -13617,7 +13617,7 @@ class _BdoResourceMapState extends State<BdoResourceMap> {
         ),
       ],
     );
-    Widget buildRouteAction() => Tooltip(
+    Widget buildRouteAction() => MapQuietTooltip(
       message: selectedCount == 0
           ? 'Choose at least one material first'
           : 'Build the best shared route for $selectedCount '
@@ -13909,7 +13909,7 @@ class _BdoResourceMapState extends State<BdoResourceMap> {
                   SizedBox(
                     width: 34,
                     height: 34,
-                    child: IconButton(
+                    child: MapQuietIconButton(
                       tooltip: 'Add ${resource.name}',
                       padding: EdgeInsets.zero,
                       onPressed: () => _changeNodeTarget(resource, 1),
@@ -14020,7 +14020,7 @@ class _BdoResourceMapState extends State<BdoResourceMap> {
                 const SizedBox(height: 4),
                 Align(
                   alignment: Alignment.centerLeft,
-                  child: Tooltip(
+                  child: MapQuietTooltip(
                     message: plan.usesScalableOptimization
                         ? 'Best route found; lowest CP is not guaranteed.'
                         : 'Show route',
@@ -15310,7 +15310,7 @@ class _BdoResourceMapState extends State<BdoResourceMap> {
                       ),
                     ),
                   ),
-                  IconButton(
+                  MapQuietIconButton(
                     key: const ValueKey<String>(
                       'resource-map-compact-checklist-back',
                     ),
@@ -15363,7 +15363,7 @@ class _BdoResourceMapState extends State<BdoResourceMap> {
                       ),
                     ),
                   ),
-                  IconButton(
+                  MapQuietIconButton(
                     key: const ValueKey<String>(
                       'resource-map-compact-worker-back',
                     ),
@@ -15461,12 +15461,12 @@ class _BdoResourceMapState extends State<BdoResourceMap> {
               child: _buildMapSearchScopeMenu(context),
             ),
             suffixIcon: queryActive
-                ? IconButton(
+                ? MapQuietIconButton(
                     tooltip: 'Clear search',
                     onPressed: _openMapHome,
                     icon: const Icon(Icons.close_rounded),
                   )
-                : Tooltip(
+                : MapQuietTooltip(
                     message: 'Focus search (Ctrl+F)',
                     child: SizedBox(
                       width: 50,
@@ -16243,7 +16243,7 @@ class _BdoResourceMapState extends State<BdoResourceMap> {
         eyebrow: '',
         title: resource.name,
         actions: <Widget>[
-          IconButton(
+          MapQuietIconButton(
             key: ValueKey<String>(
               'resource-map-detail-favorite-${resource.id}',
             ),
@@ -16256,7 +16256,7 @@ class _BdoResourceMapState extends State<BdoResourceMap> {
                   : context.mapChrome.muted,
             ),
           ),
-          IconButton(
+          MapQuietIconButton(
             key: ValueKey<String>(
               'resource-map-detail-checklist-${resource.id}',
             ),
@@ -16275,7 +16275,7 @@ class _BdoResourceMapState extends State<BdoResourceMap> {
           if (checklistEntry != null &&
               (!checklistEntry.isCompleted ||
                   _gatherChecklist.remainingCount > 0))
-            IconButton(
+            MapQuietIconButton(
               key: ValueKey<String>(
                 'resource-map-detail-checklist-next-${resource.id}',
               ),
@@ -16285,7 +16285,7 @@ class _BdoResourceMapState extends State<BdoResourceMap> {
               icon: const Icon(Icons.done_all_rounded),
             ),
           if (_gatherChecklist.isNotEmpty)
-            IconButton(
+            MapQuietIconButton(
               key: const ValueKey<String>('resource-map-detail-open-checklist'),
               tooltip: 'Open to-do list',
               onPressed: _openGatherChecklist,
@@ -16396,7 +16396,7 @@ class _BdoResourceMapState extends State<BdoResourceMap> {
             saved: _favoriteResourceIds.contains(sourceFavoriteKey),
             onPressed: () => _toggleFavoriteKey(sourceFavoriteKey),
           ),
-          IconButton(
+          MapQuietIconButton(
             key: ValueKey<String>('resource-map-fit-field-source-${source.id}'),
             tooltip: 'Show every location',
             onPressed: () => _fitFieldSource(source.id),
@@ -16949,7 +16949,7 @@ class _BdoResourceMapState extends State<BdoResourceMap> {
               ),
             ),
             if (selectedResource != null)
-              IconButton(
+              MapQuietIconButton(
                 key: ValueKey<String>(
                   'resource-map-detail-favorite-${selectedResource.id}',
                 ),
@@ -16967,7 +16967,7 @@ class _BdoResourceMapState extends State<BdoResourceMap> {
                       : context.mapChrome.muted,
                 ),
               ),
-            IconButton(
+            MapQuietIconButton(
               key: ValueKey<String>(
                 'resource-map-fit-field-source-${source.id}',
               ),
@@ -17074,7 +17074,7 @@ class _BdoResourceMapState extends State<BdoResourceMap> {
             Positioned(
               right: 0,
               top: 0,
-              child: IconButton(
+              child: MapQuietIconButton(
                 key: ValueKey<String>(
                   'resource-map-detail-favorite-${resource.id}',
                 ),
@@ -17672,7 +17672,7 @@ class _BdoResourceMapState extends State<BdoResourceMap> {
                   ),
                 ),
                 if (onClose != null)
-                  IconButton(
+                  MapQuietIconButton(
                     key: ValueKey<String>(
                       'resource-map-close-house-${house.id}',
                     ),
@@ -18335,7 +18335,7 @@ class _BdoResourceMapState extends State<BdoResourceMap> {
       label: 'Map status: ${status.$1}',
       hint: 'Show map status details',
       child: ExcludeSemantics(
-        child: Tooltip(
+        child: MapQuietTooltip(
           message: 'Show map status details',
           child: SizedBox.square(
             dimension: 48,
@@ -18490,7 +18490,7 @@ class _BdoResourceMapState extends State<BdoResourceMap> {
                                       ),
                                     ),
                                   ),
-                                  IconButton(
+                                  MapQuietIconButton(
                                     tooltip: 'Close',
                                     onPressed: _closeSourceNotice,
                                     icon: const Icon(Icons.close_rounded),
@@ -18767,7 +18767,7 @@ class _MapDashboardTileState extends State<_MapDashboardTile> {
     final semanticLabel = widget.badge == null
         ? '${widget.title}. ${widget.semanticHint}'
         : '${widget.title}, ${widget.badge}. ${widget.semanticHint}';
-    return Tooltip(
+    return MapQuietTooltip(
       message: widget.semanticHint,
       waitDuration: const Duration(milliseconds: 420),
       child: Semantics(
@@ -19868,7 +19868,7 @@ class _NodeCountButton extends StatelessWidget {
     return SizedBox(
       width: ResourceMapPanelMetrics.controlTarget,
       height: ResourceMapPanelMetrics.controlTarget,
-      child: IconButton(
+      child: MapQuietIconButton(
         tooltip: tooltip,
         padding: EdgeInsets.zero,
         constraints: const BoxConstraints.tightFor(
@@ -20516,7 +20516,7 @@ class _RecipeNodeCountControl extends StatelessWidget {
       required VoidCallback? onPressed,
     }) => SizedBox.square(
       dimension: ResourceMapPanelMetrics.controlTarget,
-      child: IconButton(
+      child: MapQuietIconButton(
         key: key,
         tooltip: tooltip,
         padding: EdgeInsets.zero,
@@ -21521,7 +21521,7 @@ class _VendorClusterPickerCard extends StatelessWidget {
                         ],
                       ),
                     ),
-                    IconButton(
+                    MapQuietIconButton(
                       key: const ValueKey<String>(
                         'resource-map-close-vendor-cluster-picker',
                       ),
@@ -21886,7 +21886,7 @@ class _VendorNpcMapCard extends StatelessWidget {
                           ],
                         ),
                       ),
-                      IconButton(
+                      MapQuietIconButton(
                         key: ValueKey<String>(
                           'resource-map-close-vendor-details-${vendor.id}',
                         ),
@@ -22322,7 +22322,7 @@ class _PlannedLodgingSummary extends StatelessWidget {
                     ),
                   ),
                 ),
-                IconButton(
+                MapQuietIconButton(
                   key: ValueKey<String>(
                     'resource-map-close-planned-lodging-summary-'
                     '${town.townNodeId}',
@@ -23675,7 +23675,7 @@ class _MapLayerToggleButton extends StatelessWidget {
         clipBehavior: Clip.antiAlias,
         child: SizedBox.square(
           dimension: 44,
-          child: IconButton(
+          child: MapQuietIconButton(
             tooltip: tooltip,
             onPressed: onPressed,
             style: IconButton.styleFrom(
@@ -23817,7 +23817,7 @@ class _StatusHitButton extends StatelessWidget {
     return SizedBox(
       width: 48,
       height: 48,
-      child: IconButton(
+      child: MapQuietIconButton(
         tooltip: tooltip,
         onPressed: onPressed,
         padding: EdgeInsets.zero,
@@ -24039,7 +24039,7 @@ class _LocationGuideLightboxState extends State<_LocationGuideLightbox> {
                                     fontWeight: FontWeight.w700,
                                   ),
                                 ),
-                                IconButton(
+                                MapQuietIconButton(
                                   key: const ValueKey<String>(
                                     'resource-map-location-guide-close',
                                   ),

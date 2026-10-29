@@ -12,6 +12,8 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../../support/action_hint_finder.dart';
+
 import '../shared/custom_icon_test_support.dart';
 import 'inventory_test_fixture.dart';
 
@@ -89,7 +91,7 @@ void main() {
       findsOneWidget,
     );
 
-    final clearSearch = find.byTooltip('Clear inventory search');
+    final clearSearch = findActionHint('Clear inventory search');
     expect(clearSearch, findsOneWidget);
     await tester.tap(clearSearch);
     await tester.pump(const Duration(milliseconds: 200));

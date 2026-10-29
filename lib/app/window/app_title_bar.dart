@@ -1,5 +1,7 @@
 import 'dart:async';
 
+import 'package:bdo_craft_planner_flutter/visual/components/app_tooltip.dart';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/semantics.dart';
 
@@ -206,7 +208,7 @@ class AppTitleTabStrip extends StatelessWidget {
                   ? const SizedBox(width: 0, height: 40)
                   : Material(
                       color: Colors.transparent,
-                      child: IconButton(
+                      child: QuietIconButton(
                         key: returnButtonKey,
                         tooltip: returnLabel,
                         onPressed: onReturn,
@@ -332,7 +334,7 @@ class _AppTitleTabButtonState extends State<_AppTitleTabButton> {
             MediaQuery.accessibleNavigationOf(context)
         ? Duration.zero
         : spec.motion.interactionDuration;
-    final result = Tooltip(
+    final result = AppTooltip(
       message: widget.tab.label,
       excludeFromSemantics: true,
       child: Semantics(
@@ -896,7 +898,7 @@ class _AppTitleBarState extends State<AppTitleBar> {
                                   ),
                                   const SizedBox(width: 10),
                                   Flexible(
-                                    child: Tooltip(
+                                    child: AppTooltip(
                                       message: AppIdentity.displayName,
                                       child: Text(
                                         AppIdentity.displayName,
@@ -1093,7 +1095,7 @@ class _CaptionButtonState extends State<_CaptionButton> {
                   SakuraNightGardenSpec.warmIvory,
                 _ => const Color(0xFFFFF8EA),
               };
-    return Tooltip(
+    return AppTooltip(
       message: widget.label,
       child: Semantics(
         button: true,
@@ -1122,7 +1124,7 @@ class _CaptionButtonState extends State<_CaptionButton> {
                   : spec?.motion.interactionDuration ??
                         const Duration(milliseconds: 90),
               decoration: decoration,
-              child: IconButton(
+              child: QuietIconButton(
                 style: ButtonStyle(
                   fixedSize: const WidgetStatePropertyAll(Size(52, 40)),
                   minimumSize: const WidgetStatePropertyAll(Size.zero),

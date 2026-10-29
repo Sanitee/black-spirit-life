@@ -619,9 +619,7 @@ function updateProfileButton() {
   els.profileButton.setAttribute("aria-label", profile ? `Fishing profile: ${profile.name}` : "Create a fishing profile");
   els.profileButtonTool.className = `profile-button-tool grade-frame ${meta.gradeClass}`;
   $("img", els.profileButtonTool).src = `/icon/${meta.icon}.webp`;
-  els.profileButton.title = profile
-    ? `${profile.name} · ${number(profile.mastery)} mastery${profile.fishingRank ? ` · ${profile.fishingRank} ${profile.fishingLevel}` : ""}`
-    : "Create a fishing profile";
+  els.profileButton.removeAttribute("title");
 }
 
 function updateCaptureProfilePreview() {
@@ -920,7 +918,7 @@ function renderProfileList() {
     const meta = setupToolMeta(profile.equipment, profile.method);
     const active = profile.id === state.activeProfileId;
     const selected = profile.id === state.profileEditingId;
-    return `<button type="button" class="profile-list-item ${active ? "is-active" : ""} ${selected ? "is-selected" : ""}" data-profile-edit="${escapeHtml(profile.id)}" title="${escapeHtml(profile.name)}"><span class="profile-list-icon grade-frame ${meta.gradeClass}"><img src="/icon/${meta.icon}.webp" alt=""></span><span><strong>${escapeHtml(labels.get(profile.id) || profile.name)}</strong><small>${number(profile.mastery)} mastery${profile.method === "rod" && profile.autoFishingDelaySeconds ? ` · ${profile.autoFishingDelaySeconds}s` : ""}</small></span>${active ? `<em>Active</em>` : ""}</button>`;
+    return `<button type="button" class="profile-list-item ${active ? "is-active" : ""} ${selected ? "is-selected" : ""}" data-profile-edit="${escapeHtml(profile.id)}"><span class="profile-list-icon grade-frame ${meta.gradeClass}"><img src="/icon/${meta.icon}.webp" alt=""></span><span><strong>${escapeHtml(labels.get(profile.id) || profile.name)}</strong><small>${number(profile.mastery)} mastery${profile.method === "rod" && profile.autoFishingDelaySeconds ? ` · ${profile.autoFishingDelaySeconds}s` : ""}</small></span>${active ? `<em>Active</em>` : ""}</button>`;
   }).join("");
   $$('[data-profile-edit]', els.profileList).forEach(button => button.addEventListener("click", () => editProfile(button.dataset.profileEdit)));
 }
@@ -3224,7 +3222,7 @@ function bindMapFilters() {
   els.settlementToggle.addEventListener("click", () => {
     state.settlementVisible = !state.settlementVisible;
     els.settlementToggle.setAttribute("aria-pressed", String(state.settlementVisible));
-    els.settlementToggle.title = state.settlementVisible ? "Hide towns and cities" : "Show towns and cities";
+    els.settlementToggle.setAttribute("aria-label", state.settlementVisible ? "Hide towns and cities" : "Show towns and cities");
     renderSettlementMarkers();
   });
 }
@@ -3233,7 +3231,7 @@ function renderRegions() {
   const available = Boolean(state.data?.fishingRegionLayer?.tileUrlTemplate);
   els.regionToggle.disabled = !available;
   els.regionToggle.setAttribute("aria-pressed", String(available && state.regionVisible));
-  els.regionToggle.title = available ? (state.regionVisible ? "Hide FishyStuff zone-assignment colours" : "Show FishyStuff zone-assignment colours (not a fishable-water mask)") : "Fishing-region colours are unavailable";
+  els.regionToggle.setAttribute("aria-label", available ? (state.regionVisible ? "Hide FishyStuff zone-assignment colours" : "Show FishyStuff zone-assignment colours (not a fishable-water mask)") : "Fishing-region colours are unavailable");
   els.regionLayer.style.display = available && state.regionVisible ? "block" : "none";
   if (els.regionOpacityControl) els.regionOpacityControl.hidden = !available || !state.regionVisible;
   updateRegionOpacity();
@@ -4536,16 +4534,16 @@ function renderJournal() {
       : `<div class="journal-value is-tank"><span>Fish tank value</span><strong title="${number(rawValue)} silver">${silver(rawValue)} <em>silver</em></strong></div><div class="journal-value is-sale${sale ? "" : " is-empty"}"><span>Recorded sale</span>${sale ? `<strong title="${number(sale.finalAmount)} silver">${silver(sale.finalAmount)} <em>silver</em></strong>` : `<strong aria-label="No recorded sale">&mdash;</strong>`}</div>`;
     const actions = legacyAggregate
       ? `<span class="journal-legacy-lock" title="This v0.1.7 entry contains aggregate totals, not editable fish species or a recalculable sale."><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 10V8a5 5 0 0 1 10 0v2h2v12H5V10h2Zm2 0h6V8a3 3 0 0 0-6 0v2Zm3 4a2 2 0 0 0-1 3.73V20h2v-2.27A2 2 0 0 0 12 14Z"/></svg><span>Read-only import</span></span>`
-      : `<button type="button" class="journal-sale-button" title="${sale ? "Open recorded sale" : "Compare places to sell"}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16v3H4V5Zm1 5h14l-1 9H6l-1-9Zm5 2v5h4v-5h-4Z"/></svg><span>${sale ? "Sale details" : "Where to sell?"}</span></button><button type="button" class="journal-edit-button" title="Edit this saved haul"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15.7 3.3 5 5L8.9 20.1 3 21l.9-5.9L15.7 3.3Zm0 2.8L5.8 16l-.3 2.5L8 18.2l9.9-9.9-2.2-2.2Z"/></svg><span>Edit</span></button>`;
+      : `<button type="button" class="journal-sale-button"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16v3H4V5Zm1 5h14l-1 9H6l-1-9Zm5 2v5h4v-5h-4Z"/></svg><span>${sale ? "Sale details" : "Where to sell?"}</span></button><button type="button" class="journal-edit-button"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15.7 3.3 5 5L8.9 20.1 3 21l.9-5.9L15.7 3.3Zm0 2.8L5.8 16l-.3 2.5L8 18.2l9.9-9.9-2.2-2.2Z"/></svg><span>Edit</span></button>`;
     return `<article class="journal-row${legacyAggregate ? " is-legacy-aggregate" : ""}" data-id="${escapeHtml(session.id)}">
       <div class="journal-entry-info">
-        <div class="journal-entry-heading"><span class="journal-method-icon grade-frame ${tool.gradeClass}" title="${escapeHtml(equipmentName)}"><img src="/icon/${tool.icon}.webp" alt=""></span><div><strong title="${escapeHtml(locationName)}">${escapeHtml(locationName)}</strong><small>${escapeHtml(formatDate(session.caughtAt || session.caught_at || session.createdAt || session.created_at))}</small></div></div>
+        <div class="journal-entry-heading"><span class="journal-method-icon grade-frame ${tool.gradeClass}" title="${escapeHtml(equipmentName)}"><img src="/icon/${tool.icon}.webp" alt=""></span><div><strong>${escapeHtml(locationName)}</strong><small>${escapeHtml(formatDate(session.caughtAt || session.caught_at || session.createdAt || session.created_at))}</small></div></div>
         <div class="journal-setup">${setup.map(value => `<span>${escapeHtml(value)}</span>`).join("")}</div>
         ${notes ? `<p class="journal-session-note"><strong>Note</strong><span>${escapeHtml(notes)}</span></p>` : ""}
       </div>
       <div class="fish-peek${legacyAggregate ? " is-legacy" : ""}"><span class="fish-peek-count"><strong>${number(total)}</strong><small>fish</small></span><div class="fish-peek-icons">${fishDetails}</div></div>
       <div class="journal-values">${values}</div>
-      <div class="journal-actions${legacyAggregate ? " is-legacy" : ""}"><button type="button" class="journal-map-button" title="Show this haul's location"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 4 6-2v16l-6 2-6-2-6 2V4l6-2 6 2Zm-5 .2v12l4 1.33v-12L10 4.2ZM5 6v11.23l3-1V5L5 6Zm11-.23v12l3-1V5.1l-3 .67Z"/></svg><span>Location</span></button>${actions}<button type="button" class="delete-session" title="Delete haul" aria-label="Delete haul"><svg viewBox="0 0 24 24"><path d="M8 4V2h8v2h5v2H3V4h5Zm-3 4h14l-1 14H6L5 8Zm4 3v8h2v-8H9Zm4 0v8h2v-8h-2Z"/></svg></button></div>
+      <div class="journal-actions${legacyAggregate ? " is-legacy" : ""}"><button type="button" class="journal-map-button"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 4 6-2v16l-6 2-6-2-6 2V4l6-2 6 2Zm-5 .2v12l4 1.33v-12L10 4.2ZM5 6v11.23l3-1V5L5 6Zm11-.23v12l3-1V5.1l-3 .67Z"/></svg><span>Location</span></button>${actions}<button type="button" class="delete-session" aria-label="Delete haul"><svg viewBox="0 0 24 24"><path d="M8 4V2h8v2h5v2H3V4h5Zm-3 4h14l-1 14H6L5 8Zm4 3v8h2v-8H9Zm4 0v8h2v-8h-2Z"/></svg></button></div>
     </article>`;
   }).join("");
   $$(".journal-row", els.journalList).forEach(row => {

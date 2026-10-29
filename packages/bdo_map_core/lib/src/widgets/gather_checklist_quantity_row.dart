@@ -193,7 +193,7 @@ class _GatherChecklistQuantityRowState
                         onPressed: _busy ? null : _record,
                         child: Text(_busy ? 'Saving…' : 'Record'),
                       ),
-                      IconButton(
+                      MapQuietIconButton(
                         tooltip: 'Cancel',
                         onPressed: _busy
                             ? null

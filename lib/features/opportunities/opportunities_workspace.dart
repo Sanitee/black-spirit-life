@@ -1,6 +1,8 @@
 import 'dart:async';
 import 'dart:math' as math;
 
+import 'package:bdo_craft_planner_flutter/visual/components/app_tooltip.dart';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/semantics.dart';
@@ -1739,7 +1741,7 @@ Widget _sales(BuildContext context, OpportunityMarketItem? item, DateTime now) {
           : 'Last sale ${age.inHours}h ago';
     }
   }
-  return Tooltip(
+  return AppTooltip(
     message:
         'Sales activity needs two checks at least an hour apart. This is completed sales, not lifetime trades or a promise of future sales.',
     child: Text(
@@ -3819,7 +3821,7 @@ Widget _marketTimestamp(
     if (first == null || time.isBefore(first)) first = time;
     if (last == null || time.isAfter(last)) last = time;
   }
-  return Tooltip(
+  return AppTooltip(
     message: first == null
         ? 'Refresh to load prices and stock.'
         : 'Oldest price check: ${_date(first)}\nLatest price check: ${_date(last)}\nShared across tabs for five minutes. While you stay in Opportunities, data is reused for 30 minutes and checked only when needed. Buy/sell orders keep their own check date.',

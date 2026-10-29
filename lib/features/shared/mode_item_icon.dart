@@ -1,6 +1,8 @@
 import 'dart:collection';
 import 'dart:typed_data';
 
+import 'package:bdo_craft_planner_flutter/visual/components/app_tooltip.dart';
+
 import 'package:flutter/material.dart';
 
 import '../../app/state/planner_application_controller.dart';
@@ -255,7 +257,7 @@ class _IconFailure extends StatelessWidget {
   final IconData? fallbackIcon;
 
   @override
-  Widget build(BuildContext context) => Tooltip(
+  Widget build(BuildContext context) => AppTooltip(
     message: message,
     child: Semantics(
       label: message,

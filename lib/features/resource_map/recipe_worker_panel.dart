@@ -1,5 +1,7 @@
 import 'dart:async';
 import 'dart:math' as math;
+
+import 'package:bdo_craft_planner_flutter/visual/components/app_tooltip.dart';
 import 'package:bdo_map_core/bdo_map_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -201,7 +203,7 @@ class _RecipeWorkerPanelState extends State<RecipeWorkerPanel> {
                                   ),
                                 ),
                               ),
-                              IconButton(
+                              QuietIconButton(
                                 key: ValueKey('recipe-extra-${r.id}'),
                                 tooltip: 'Add ${r.name} node',
                                 onPressed:
@@ -275,7 +277,7 @@ class _RecipeWorkerPanelState extends State<RecipeWorkerPanel> {
                     label: const Text('Gathering checklist'),
                   ),
                 if (widget.onSetup != null)
-                  IconButton(
+                  QuietIconButton(
                     tooltip: 'Worker settings',
                     onPressed: widget.onSetup,
                     icon: const Icon(Icons.settings_outlined, size: 19),
@@ -296,7 +298,7 @@ class _RecipeWorkerPanelState extends State<RecipeWorkerPanel> {
     return Row(
       children: [
         if (page != RecipeWorkerPage.recipe)
-          IconButton(
+          QuietIconButton(
             tooltip: 'Back',
             onPressed: c.back,
             icon: const Icon(Icons.arrow_back, size: 20),
@@ -320,7 +322,7 @@ class _RecipeWorkerPanelState extends State<RecipeWorkerPanel> {
             style: TextStyle(fontSize: 13, color: p.muted),
           ),
         if (widget.checklist && widget.onClose != null)
-          IconButton(
+          QuietIconButton(
             tooltip: 'Close checklist',
             onPressed: widget.onClose,
             icon: const Icon(Icons.close, size: 20),
@@ -458,7 +460,7 @@ class _RecipeWorkerPanelState extends State<RecipeWorkerPanel> {
           children: [
             Semantics(
               expanded: _recipesExpanded,
-              child: Tooltip(
+              child: AppTooltip(
                 message: [label, ...c.targets].join('\n'),
                 child: SizedBox(
                   height: 38,
@@ -531,7 +533,7 @@ class _RecipeWorkerPanelState extends State<RecipeWorkerPanel> {
               ),
             ),
             Divider(height: 1, thickness: 1, color: p.divider),
-            Tooltip(
+            AppTooltip(
               message: 'Add recipe',
               child: SizedBox(
                 height: 22,
@@ -657,7 +659,7 @@ class _RecipeWorkerPanelState extends State<RecipeWorkerPanel> {
                   ),
                   Padding(
                     padding: const EdgeInsets.only(right: 4),
-                    child: IconButton(
+                    child: QuietIconButton(
                       key: ValueKey('recipe-remove-$name'),
                       tooltip: 'Remove $name from selection',
                       constraints: const BoxConstraints(
@@ -841,7 +843,7 @@ class _RecipeWorkerPanelState extends State<RecipeWorkerPanel> {
                         Positioned(
                           top: 0,
                           right: 0,
-                          child: IconButton(
+                          child: QuietIconButton(
                             key: ValueKey('recipe-remove-$name'),
                             tooltip: 'Remove $name',
                             constraints: const BoxConstraints(
@@ -912,7 +914,7 @@ class _RecipeWorkerPanelState extends State<RecipeWorkerPanel> {
               decoration: InputDecoration(
                 hintText: 'Find a recipe',
                 prefixIcon: const Icon(Icons.search),
-                suffixIcon: IconButton(
+                suffixIcon: QuietIconButton(
                   tooltip: 'Close recipe choices',
                   onPressed: () => setState(() => _pickerOpen = false),
                   icon: const Icon(Icons.close),
@@ -1004,7 +1006,7 @@ class _RecipeWorkerPanelState extends State<RecipeWorkerPanel> {
                           runSpacing: 3,
                           children: [
                             for (final name in group.recipes)
-                              Tooltip(
+                              AppTooltip(
                                 message: name,
                                 child: widget.artwork(name, 23),
                               ),
@@ -1065,8 +1067,9 @@ class _RecipeWorkerPanelState extends State<RecipeWorkerPanel> {
               ),
             ),
             if (_gardenNotes.containsKey(leaf.name))
-              IconButton(
+              QuietIconButton(
                 tooltip: 'Plant in garden',
+                approvedHover: true,
                 onPressed: () => showDialog<void>(
                   context: context,
                   builder: (context) => AlertDialog(
@@ -1086,7 +1089,7 @@ class _RecipeWorkerPanelState extends State<RecipeWorkerPanel> {
                   height: 23,
                 ),
               ),
-            IconButton(
+            QuietIconButton(
               tooltip: widget.hasSpot?.call(leaf.name) == true
                   ? 'Show gathering spot'
                   : 'No mapped spot',
@@ -1147,7 +1150,7 @@ class _RecipeWorkerPanelState extends State<RecipeWorkerPanel> {
               style: TextStyle(color: p.muted, fontSize: 12),
             ),
             if (widget.onNode != null)
-              IconButton(
+              QuietIconButton(
                 tooltip: 'Show node',
                 onPressed: () => widget.onNode!(node.id),
                 icon: const Icon(Icons.location_on_outlined, size: 20),
@@ -1172,7 +1175,7 @@ class _RecipeWorkerPanelState extends State<RecipeWorkerPanel> {
       final controls = Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          IconButton(
+          QuietIconButton(
             key: ValueKey('recipe-workers-minus-${demand.id}'),
             tooltip: 'Remove ${demand.name} node',
             constraints: const BoxConstraints(minWidth: 32, minHeight: 36),
@@ -1203,7 +1206,7 @@ class _RecipeWorkerPanelState extends State<RecipeWorkerPanel> {
                         c.available(demand.id)
                 ? () => _deny(demand.id)
                 : null,
-            child: IconButton(
+            child: QuietIconButton(
               key: ValueKey('recipe-workers-plus-${demand.id}'),
               tooltip: c.canAdd(demand.id)
                   ? 'Add ${demand.name} node'
@@ -1289,7 +1292,7 @@ class _RecipeWorkerPanelState extends State<RecipeWorkerPanel> {
             height: labelHeight,
             child: Align(
               alignment: Alignment.bottomLeft,
-              child: Tooltip(
+              child: AppTooltip(
                 message: label == 'CP budget'
                     ? 'CP for production nodes and their connections. Worker lodging is separate in Worker settings.'
                     : 'CP remaining after these nodes and connections.',
