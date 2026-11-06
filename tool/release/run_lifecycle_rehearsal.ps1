@@ -614,30 +614,31 @@ function Get-TestProcessRecords([string]$InstallRoot) {
 function Get-TestFishListener([string]$InstallRoot) {
     $records = @(Get-TestProcessRecords $InstallRoot | Where-Object Name -eq 'fish_companion_service.exe')
     foreach ($record in $records) {
-        $listeners = @(Get-NetTCPConnection -OwningProcess $record.ProcessId -State Listen -ErrorAction SilentlyContinue)
-        foreach ($listener in $listeners) {
-            if ($listener.LocalAddress -eq '127.0.0.1') {
-                if ($record.CommandLine -notmatch '--api-token') { continue }
-                return [pscustomobject]@{
-                    ListenerPid = [int]$record.ProcessId
-                    Port = [int]$listener.LocalPort
-                    CommandLine = [string]$record.CommandLine
-                }
-            }
+        # Standard Windows accounts can establish and use a localhost listener
+        # while CIM's TCP inventory omits it. Bind to the scoped executable's
+        # arguments and require its secret-authenticated health response instead.
+        $port = [regex]::Match([string]$record.CommandLine, '(?:^|\s)"?--port"?\s+"?(\d+)"?(?=\s|$)')
+        if (-not $port.Success -or [int]$port.Groups[1].Value -lt 8765 -or [int]$port.Groups[1].Value -gt 8795) { continue }
+        $service = [pscustomobject]@{
+            ServiceProcessId = [int]$record.ProcessId
+            Port = [int]$port.Groups[1].Value
+            CommandLine = [string]$record.CommandLine
+            discovery = 'scoped-process-and-authenticated-localhost-health'
         }
+        try { $health = Invoke-TestFishHealth $service }
+        catch { continue }
+        if ($health.StatusCode -eq 200) { return $service }
     }
     $null
 }
 
 function Invoke-TestFishHealth([pscustomobject]$Service) {
-    $match = [regex]::Match($Service.CommandLine, '--api-token\s+(?:"([A-Za-z0-9_-]+)"|([A-Za-z0-9_-]+))')
-    Assert-True ($match.Success) 'Disposable Fish service command line has no API token.'
-    $token = if ($match.Groups[1].Success) { $match.Groups[1].Value } else { $match.Groups[2].Value }
+    $token = Get-TestFishToken $Service
     Invoke-WebRequest -Uri "http://127.0.0.1:$($Service.Port)/api/health" -Headers @{ 'X-BSL-API-Token' = $token } -UseBasicParsing -TimeoutSec 5
 }
 
 function Get-TestFishToken([pscustomobject]$Service) {
-    $match = [regex]::Match($Service.CommandLine, '--api-token\s+(?:"([A-Za-z0-9_-]+)"|([A-Za-z0-9_-]+))')
+    $match = [regex]::Match($Service.CommandLine, '(?:^|\s)"?--api-token"?\s+(?:"([A-Za-z0-9_-]+)"|([A-Za-z0-9_-]+))(?=\s|$)')
     Assert-True ($match.Success) 'Disposable Fish service command line has no API token.'
     if ($match.Groups[1].Success) { return $match.Groups[1].Value }
     $match.Groups[2].Value
@@ -1009,11 +1010,12 @@ try {
             $newApp.Refresh()
             Assert-True (-not $newApp.HasExited -and $newApp.Responding) 'The installed app did not stay responsive while its Fish service and embedded WebView started.'
             $Results.fishTab = [ordered]@{
-                listenerPid = $fishService.ListenerPid
+                serviceProcessId = $fishService.ServiceProcessId
+                discovery = $fishService.discovery
                 port = $fishService.Port
                 embeddedWebViewPids = @($fishWebViewPids)
             }
-            Write-Step "FISH_SERVICE_AND_EMBEDDED_WEBVIEW_STARTED pid=$($fishService.ListenerPid) port=$($fishService.Port)"
+            Write-Step "FISH_SERVICE_AND_EMBEDDED_WEBVIEW_STARTED pid=$($fishService.ServiceProcessId) port=$($fishService.Port)"
         }
         Start-Sleep -Seconds 3
         $closeStarted = [DateTime]::UtcNow
@@ -1023,7 +1025,7 @@ try {
         $normalCloseRuns.Add([ordered]@{
             run = $normalIndex
             servicePort = $fishService.Port
-            servicePid = $fishService.ListenerPid
+            servicePid = $fishService.ServiceProcessId
             closeMilliseconds = [int]([DateTime]::UtcNow - $closeStarted).TotalMilliseconds
             exitCode = $newApp.ExitCode
         })
