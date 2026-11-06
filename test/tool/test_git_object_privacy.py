@@ -90,6 +90,67 @@ class GitPrivacyTests(unittest.TestCase):
         path.write_bytes(raw)
         return path, scanner.sha(raw)
 
+    def historical_exception(self, content=None):
+        content = (MACHINE_PATH + '\n').encode() if content is None else content
+        self.write('docs/old.md', content)
+        self.commit()
+        published = self.git('rev-parse', 'HEAD')
+        self.git('tag', 'published-history', published)
+        oid = self.git('rev-parse', 'HEAD:docs/old.md')
+        self.write('docs/old.md', b'redacted current source\n')
+        self.commit()
+        review = {'schemaVersion': 1, 'exceptions': [{
+            'oid': oid, 'sha256': scanner.sha(content), 'path': 'docs/old.md',
+            'publicRef': 'refs/tags/published-history', 'publicCommit': published,
+            'reason': 'Explicit synthetic approval of these exact historical bytes.'}]}
+        path = self.base / 'reviewed-history.json'
+        raw = scanner.canonical(review)
+        path.write_bytes(raw)
+        return review, path, scanner.sha(raw)
+
+    def test_exact_reviewed_historical_machine_path_only(self):
+        review, path, digest = self.historical_exception()
+        with self.assertRaisesRegex(scanner.ScanError, 'machine-path-content'):
+            self.scan()
+        result, receipt = self.scan(exceptions_path=path, exceptions_sha256=digest)
+        self.assertEqual(result['result'], 'passed')
+        with self.assertRaisesRegex(scanner.ScanError, 'receipt-identity'):
+            self.scan(receipt)
+        self.write('docs/alias.md', (MACHINE_PATH + '\n').encode())
+        self.commit()
+        with self.assertRaisesRegex(scanner.ScanError, 'exception-not-historical-blob'):
+            self.scan(exceptions_path=path, exceptions_sha256=digest)
+        (self.repo / 'docs/alias.md').unlink()
+        self.commit()
+        with self.assertRaisesRegex(scanner.ScanError, 'exception-path-mismatch'):
+            self.scan(exceptions_path=path, exceptions_sha256=digest)
+
+    def test_historical_exception_cannot_exempt_secret(self):
+        _, path, digest = self.historical_exception((MACHINE_PATH + '\n' + SECRET).encode())
+        with self.assertRaisesRegex(scanner.ScanError, 'secret-content'):
+            self.scan(exceptions_path=path, exceptions_sha256=digest)
+
+    def test_historical_exception_cannot_exempt_private_marker(self):
+        _, path, digest = self.historical_exception((MACHINE_PATH + '\n' + PRIVATE_MARKER).encode())
+        with self.assertRaisesRegex(scanner.ScanError, 'private-content'):
+            self.scan(exceptions_path=path, exceptions_sha256=digest)
+
+    def test_historical_exception_hash_path_and_content_are_bound(self):
+        review, path, digest = self.historical_exception()
+        with self.assertRaisesRegex(scanner.ScanError, 'exception-hash-mismatch'):
+            self.scan(exceptions_path=path, exceptions_sha256='0' * 64)
+        for field, value, error in (
+            ('path', 'docs/another.md', 'exception-path-mismatch'),
+            ('sha256', '0' * 64, 'exception-content-mismatch'),
+            ('publicCommit', '0' * 40, 'exception-public-ref-mismatch'),
+        ):
+            changed = copy.deepcopy(review)
+            changed['exceptions'][0][field] = value
+            raw = scanner.canonical(changed)
+            path.write_bytes(raw)
+            with self.assertRaisesRegex(scanner.ScanError, error):
+                self.scan(exceptions_path=path, exceptions_sha256=scanner.sha(raw))
+
     def test_cold_warm_100_blobs_measurement_and_subset(self):
         for i in range(100):
             self.write(f'lib/item-{i}.txt', (f'reference {i}\n' * 100).encode())

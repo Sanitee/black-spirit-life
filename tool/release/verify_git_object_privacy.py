@@ -331,11 +331,30 @@ def receipt_entries(receipt, identity):
 
 def scan(root, expected_commit, expected_tag, expected_refs, policy, policy_hash,
          receipt_path, markers=None, prior_path=None, prior_sha256=None, git_executable='git',
-         policy_source_path=None):
+         policy_source_path=None, exceptions_path=None, exceptions_sha256=None):
     started = time.monotonic()
     markers = sorted(set(m for m in (markers if markers is not None else
                          [os.environ.get('USERPROFILE', '')]) if m and m.strip()))
     require(bool(markers), 'private-marker-required')
+    require(bool(exceptions_path) == bool(exceptions_sha256), 'exception-hash-required')
+    exceptions = []
+    if exceptions_path:
+        raw_exceptions = checked_file(exceptions_path).read_bytes()
+        require(digest_ok(exceptions_sha256.lower()) and
+                sha(raw_exceptions) == exceptions_sha256.lower(), 'exception-hash-mismatch')
+        review = json_read(raw_exceptions)
+        require(isinstance(review, dict) and set(review) == {'schemaVersion', 'exceptions'} and
+                review['schemaVersion'] == 1 and isinstance(review['exceptions'], list) and
+                bool(review['exceptions']), 'exception-shape')
+        exceptions = review['exceptions']
+        for entry in exceptions:
+            require(isinstance(entry, dict) and set(entry) == {
+                'oid', 'sha256', 'path', 'publicRef', 'publicCommit', 'reason'} and
+                all(isinstance(v, str) and v for v in entry.values()) and
+                re.fullmatch('[a-f0-9]{40}|[a-f0-9]{64}', entry['oid']) and
+                re.fullmatch('[a-f0-9]{40}|[a-f0-9]{64}', entry['publicCommit']) and
+                digest_ok(entry['sha256']) and entry['publicRef'].startswith('refs/tags/'),
+                'exception-shape')
     for ancestor in (Path(root).absolute(), *Path(root).absolute().parents):
         require(ancestor.is_dir() and not ancestor.is_symlink() and not
                 (getattr(ancestor.stat(), 'st_file_attributes', 0) & 0x400),
@@ -348,7 +367,8 @@ def scan(root, expected_commit, expected_tag, expected_refs, policy, policy_hash
                 'private_markers_sha256': sha(canonical(markers)),
                 'runtime': {'python': sys.version, 'git': git.text('--version'),
                             'powershell': policy.get('_bridgeRuntime')},
-                'semantics': 'reachable-history-all-contexts-v2'}
+                'semantics': 'reachable-history-all-contexts-v2',
+                'reviewed_historical_machine_paths_sha256': sha(canonical(exceptions))}
     prior = {}
     require(bool(prior_path) == bool(prior_sha256), 'receipt-hash-required')
     if prior_path:
@@ -426,6 +446,26 @@ def scan(root, expected_commit, expected_tag, expected_refs, policy, policy_hash
     require({x[0] for x in contexts} ==
             {oid for oid, obj in objects.items() if obj['type'] == 'blob'},
             'uncontextualized-blob')
+    # An approval covers only exact, already-published historical bytes at one
+    # exact path. It cannot exempt current source, metadata, aliases, secrets or
+    # the operator's real profile marker. No default exception is embedded here.
+    head_blobs = {row.split(b'\t', 1)[0].split()[-1].decode('ascii')
+                  for row in git.run('ls-tree', '-r', '-z', 'HEAD').split(b'\x00') if row}
+    reviewed_oids = set()
+    for entry in exceptions:
+        oid = entry['oid']
+        require(oid not in reviewed_oids and oid in objects and
+                objects[oid]['type'] == 'blob' and oid not in head_blobs,
+                'exception-not-historical-blob')
+        require(entry['publicRef'] in refs and git.text('rev-parse', entry['publicRef'] + '^{commit}') ==
+                entry['publicCommit'], 'exception-public-ref-mismatch')
+        published_objects = set(git.text('rev-list', '--objects', '--no-object-names',
+                                        entry['publicCommit']).splitlines())
+        require(oid in published_objects, 'exception-not-published-history')
+        require({path_hash for context_oid, path_hash, _ in contexts if context_oid == oid} ==
+                {sha(entry['path'].encode('utf-8'))}, 'exception-path-mismatch')
+        require(sha(git.run('cat-file', 'blob', oid)) == entry['sha256'], 'exception-content-mismatch')
+        reviewed_oids.add(oid)
     wanted = {(oid, mode) for oid, _, mode in contexts}
     wanted.update((oid, 'metadata-text') for oid, obj in objects.items()
                   if obj['type'] in ('commit', 'tag'))
@@ -442,7 +482,10 @@ def scan(root, expected_commit, expected_tag, expected_refs, policy, policy_hash
             else:
                 if batch is None:
                     batch = BatchReader(git)
-                content_hash = batch.read(oid, objects[oid]['type'], size, mode, policy, markers)
+                content_policy = policy
+                if oid in reviewed_oids:
+                    content_policy = dict(policy, machinePathPattern=r'(?!)')
+                content_hash = batch.read(oid, objects[oid]['type'], size, mode, content_policy, markers)
                 entry = {'oid': oid, 'mode': mode, 'size': size,
                          'sha256': content_hash, 'result': 'passed'}
                 scanned_bytes += size
@@ -459,6 +502,9 @@ def scan(root, expected_commit, expected_tag, expected_refs, policy, policy_hash
     if policy_source_path is not None:
         require(sha(checked_file(policy_source_path).read_bytes()) == policy_hash,
                 'policy-changed')
+    if exceptions_path:
+        require(sha(checked_file(exceptions_path).read_bytes()) == exceptions_sha256.lower(),
+                'exceptions-changed')
     receipt = {'schema': 2, 'kind': 'git-object-privacy', 'complete': True,
                'result': 'passed', 'identity': identity, 'refs': refs,
                'head': expected_commit, 'tag': expected_tag, 'objects': objects,
@@ -499,6 +545,8 @@ def main():
     parser.add_argument('--receipt', required=True)
     parser.add_argument('--prior-receipt')
     parser.add_argument('--prior-receipt-sha256')
+    parser.add_argument('--reviewed-historical-exceptions')
+    parser.add_argument('--approved-historical-exceptions-sha256')
     args = parser.parse_args()
     try:
         policy, policy_hash = load_policy(args.policy, args.policy_sha256, args.powershell)
@@ -507,7 +555,9 @@ def main():
             json_read(checked_file(args.expected_refs).read_bytes()), policy, policy_hash,
             args.receipt, prior_path=args.prior_receipt,
             prior_sha256=args.prior_receipt_sha256, git_executable=args.git,
-            policy_source_path=args.policy)
+            policy_source_path=args.policy,
+            exceptions_path=args.reviewed_historical_exceptions,
+            exceptions_sha256=args.approved_historical_exceptions_sha256)
         print(json.dumps({'result': 'passed', 'receipt_sha256': receipt_hash,
                           'metrics': result['metrics']}, sort_keys=True))
         return 0

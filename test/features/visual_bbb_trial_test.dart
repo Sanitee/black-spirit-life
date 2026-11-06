@@ -190,13 +190,16 @@ void main() {
                         )
                         .decoration
                     as BoxDecoration;
-            expect(decoration.border, isNull);
+            expect(decoration.border, isA<Border>());
+            expect((decoration.border! as Border).top.width, 1);
             expect(decoration.gradient, isA<LinearGradient>());
-            expect(decoration.borderRadius, BorderRadius.circular(7));
+            expect(decoration.borderRadius, BorderRadius.circular(9));
+            expect(decoration.boxShadow, hasLength(1));
+            expect(decoration.boxShadow!.single.offset, const Offset(0, 4));
             final icon = find.byKey(
               const ValueKey('recipe-card-icon:Perfume of Courage'),
             );
-            expect(tester.getSize(icon), const Size(50, 50));
+            expect(tester.getSize(icon), const Size(60, 60));
             expect(
               tester.getCenter(icon).dy,
               closeTo(tester.getCenter(recipe).dy, .5),
