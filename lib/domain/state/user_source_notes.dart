@@ -26,6 +26,10 @@ String? sanitizeDisplayableSourceNote(String? value) {
   final folded = note.toLowerCase();
   if (folded.startsWith('imported from bdolytics') ||
       folded.startsWith('imported from bdo codex') ||
+      folded.startsWith('reviewed against four current grinding routes') ||
+      folded.startsWith('reviewed against the four current grinding routes') ||
+      folded.startsWith('exact member of bdo material group') ||
+      RegExp(r'^current bdo item \d+;').hasMatch(folded) ||
       folded.contains('icons and item ids checked through bdo codex') ||
       folded.contains('remaining variants stay in import metadata')) {
     return null;

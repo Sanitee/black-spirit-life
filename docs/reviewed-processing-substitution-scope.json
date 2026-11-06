@@ -1,0 +1,13 @@
+{
+  "reviewed": "2026-11-03",
+  "status": "IMPLEMENTED_SCOPED_CORRECTION_NOT_FULL_AUDIT_COMPLETION",
+  "rule": "Only residence Alchemy and Cooking receive generic shared blood/Worth substitutions. Processing retains its explicitly declared complete recipes and alternatives.",
+  "affected": ["Concentrated Herbal Juice", "Highly Concentrated Herbal Juice", "Elixir of Regeneration", "Grape-scented Herbal Wine", "Black Gem Fragment"],
+  "evidence": [
+    {"url": "https://www.naeu.playblackdesert.com/en-US/Wiki?wikiNo=325", "scope": "Current Sailing guide: exact Elixir of Regeneration Troll Blood x2 and Grape x4 inputs", "archiveSha256": "a7b4e0671abbae0999bcb3609b468dcd2a1ff24f8e5bb9695f4c902ff7a00608"},
+    {"scope": "Installed PC item descriptions explicitly distinguish high-quality and Special herb juice routes; exact strict manufacture rows corroborate the declared grades and inputs", "itemMetadataSha256": "a54b5735052c990e189ff1a50afb6d5442cc80e0ba8dabff995979bc8d35c821", "strictManufactureSha256": "6ea9fe596123bff8ff7ef4df656553ea5aefd1bf5591795a649a4945ab4b1631"}
+  ],
+  "preserved": ["Explicit custom recipe alternatives", "Explicit draught and lightstone substitutions", "Residence blood/Worth groups", "Saved records and inventory", "Yield estimates and recipe roles", "Shared einheitlich layouts and stock freshness"],
+  "limits": ["Grape-scented Herbal Wine current event availability is not certified", "Black Gem Fragment remains noncraftable; no legacy recipe is activated", "Exact juice output distribution and skill thresholds remain under review", "Client metadata corroborates identity and input restrictions, not complete current server mechanics"],
+  "auditReceipt": "resumed-processing-substitution-resolution.json"
+}

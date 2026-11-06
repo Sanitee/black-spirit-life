@@ -1,0 +1,10 @@
+{
+  "reviewedAt": "2026-11-03",
+  "source": "https://www.naeu.playblackdesert.com/en-US/Wiki?wikiNo=233",
+  "sourceRetrieved": "2026-11-03",
+  "sourceSha256": "a267c72bcad744cfedc5c57774a63cfa523bb372f65b140c05d28e3f52e6a3f6",
+  "scope": "All ten current Resplendent Boss Weapon/Armor Reform Stones I–V can be ground to return their original crafting materials. All50 exact ingredient identities/amounts match current PC descriptions and the NA/EU table. Adds short acquisition lines to15 materials and a recycling note to10 stones through shared reference projection.",
+  "restrictions": "Consumes an unused stone, not reformed equipment. No reverse recipe is added to the planning graph: this is destructive multi-output recovery, not free production. No invented stock, market identity, EXP, probability or independent salvage profit.",
+  "evidence": "audit/correctness-review-20261102/resumed-reform-recycling-review.json",
+  "samePattern": "Existing shared How to Obtain/Notes text, themes, stock pills, scrolling and copy behavior remain. All exact-ID/name guards apply in every mode."
+}

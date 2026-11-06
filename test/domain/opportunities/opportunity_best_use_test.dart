@@ -22,11 +22,22 @@ void main() {
     );
     final repository = CatalogRepository(catalog);
     expect(repository.npcPurchasePrices['tears of the falling moon'], 100000);
+    // Match the controller's mode-local assembly. Normal elixirs may be leaf
+    // ingredients rather than standalone Processing recipes; using the raw
+    // catalog omits those valid alternatives from the planner's candidates.
+    final recipes = const PlannerAssembly().assembleRecipes(
+      catalog: catalog.processing,
+      state: f.state(),
+      supportingData: catalog.supportingData,
+      sharedMetadata: catalog.alchemy.metadata,
+      mode: CraftMode.processing,
+      processingRecipes: catalog.processing.items,
+    );
     final result = evaluateOpportunityBestUse(
       itemName: 'Abyssal Essence',
-      recipe: catalog.processing.items['Frenzy Draught']!,
+      recipe: recipes['Frenzy Draught']!,
       mode: CraftMode.processing,
-      recipes: catalog.processing.items,
+      recipes: recipes,
       rules: const PlannerAssembly().plannerRules(catalog.supportingData),
       state: f.state(),
       marketTax: MarketTax(valuePack: true),
@@ -55,6 +66,11 @@ void main() {
     )!;
     final tears = result.quote.ingredients.singleWhere(
       (input) => input.name == 'Tears of the Falling Moon',
+    );
+    expect(
+      result.quote.ingredients.map((input) => input.name),
+      containsAll(['Elixir of Frenzy', 'Elixir of Demihuman Hunt']),
+      reason: 'Unpriced blue alternatives must not displace priced inputs.',
     );
     final elixir = result.quote.ingredients.singleWhere(
       (input) => input.name == 'Elixir of Demihuman Hunt',

@@ -237,6 +237,222 @@ void main() {
     });
   });
 
+  for (final ignoreOwned in [true, false]) {
+    test(
+      'actual output credits exact amount; final shortfall stays queued ($ignoreOwned)',
+      () async {
+        final controller = _controller();
+        final mode = controller.active;
+        mode.setFullTargetAmount(ignoreOwned);
+        mode.setIgnoreOwnedIngredients(ignoreOwned);
+        mode.commitInventory('Base', '250');
+        expect(_completeBatch(mode, 100, actualOutput: 85), isTrue);
+        expect(mode.state.value.inventory['Potion'], 85);
+        expect(mode.state.value.inventory['Base'], 50);
+        expect(mode.state.value.completedSteps, isEmpty);
+        expect(mode.plan.value.steps.single.count, 15);
+        expect(_completeBatch(mode, 15, actualOutput: 17), isTrue);
+        expect(mode.state.value.inventory['Potion'], 102);
+        expect(mode.state.value.inventory['Base'], 20);
+        expect(mode.plan.value.steps, isEmpty);
+        expect(mode.undoCompletion(), isTrue);
+        expect(mode.state.value.inventory['Potion'], 85);
+        expect(mode.plan.value.steps.single.count, 15);
+        expect(mode.undoCompletion(), isTrue);
+        expect(mode.state.value.inventory['Potion'] ?? 0, 0);
+        expect(mode.state.value.inventory['Base'], 250);
+        expect(mode.plan.value.steps.single.count, 100);
+        await controller.dispose();
+      },
+    );
+  }
+
+  test('Undo review is read-only and uses actual receipt amounts', () async {
+    final controller = _controller();
+    final mode = controller.active;
+    mode.commitInventory('Base', '250');
+    expect(_completeBatch(mode, 100, actualOutput: 85), isTrue);
+    final before = controller.documentSnapshot.toJson();
+    final review = mode.completionReview!;
+    expect(review.remove, {'Potion': 85});
+    expect(review.restore, {'Base': 200});
+    expect(() => review.restore['Base'] = 999, throwsUnsupportedError);
+    expect(controller.documentSnapshot.toJson(), before);
+    expect(mode.undoCompletion(expectedReceipt: review.token), isTrue);
+    expect(mode.state.value.inventory['Base'], 250);
+    expect(mode.state.value.inventory['Potion'] ?? 0, 0);
+    await controller.dispose();
+  });
+
+  test(
+    'Undo review refuses a newer receipt and later inventory edits',
+    () async {
+      final controller = _controller();
+      final mode = controller.active;
+      mode.commitInventory('Base', '300');
+      expect(_completeBatch(mode, 50, actualOutput: 45), isTrue);
+      final first = mode.completionReview!;
+      expect(_completeBatch(mode, 50, actualOutput: 45), isTrue);
+      final second = mode.completionReview!;
+      final current = controller.documentSnapshot.toJson();
+      expect(mode.undoCompletion(expectedReceipt: first.token), isFalse);
+      expect(controller.documentSnapshot.toJson(), current);
+      mode.commitInventory('Base', '999');
+      final edited = controller.documentSnapshot.toJson();
+      expect(mode.undoCompletion(expectedReceipt: second.token), isFalse);
+      expect(controller.documentSnapshot.toJson(), edited);
+      await controller.dispose();
+    },
+  );
+
+  test(
+    'Undo review counts only clamped stock and respects frozen edits',
+    () async {
+      final controller = _controller();
+      final mode = controller.active;
+      mode.commitInventory('Base', '7');
+      expect(_completeBatch(mode, 100, actualOutput: 90), isTrue);
+      final review = mode.completionReview!;
+      expect(review.restore, {'Base': 7});
+      expect(review.remove, {'Potion': 90});
+      controller.freezeMutationsForRestart();
+      expect(mode.undoCompletion(expectedReceipt: review.token), isFalse);
+      controller.resumeMutationsAfterRestartFailure();
+      expect(mode.undoCompletion(expectedReceipt: review.token), isTrue);
+      expect(mode.state.value.inventory['Base'], 7);
+      await controller.dispose();
+    },
+  );
+
+  test(
+    'low actual output needs confirmation; invalid output never commits',
+    () async {
+      final controller = _controller();
+      final mode = controller.active;
+      final before = controller.documentSnapshot;
+      for (final actual in [-1, 1000000000000, 79]) {
+        expect(_completeBatch(mode, 100, actualOutput: actual), isFalse);
+        expect(controller.documentSnapshot, same(before));
+      }
+      expect(
+        _completeBatch(mode, 100, actualOutput: 79, confirmed: true),
+        isTrue,
+      );
+      expect(mode.state.value.inventory['Potion'], 79);
+      expect(mode.plan.value.steps.single.count, 21);
+      expect(mode.undoCompletion(), isTrue);
+      expect(_completeBatch(mode, 100, actualOutput: 80), isTrue);
+      expect(mode.plan.value.steps.single.count, 20);
+      await controller.dispose();
+    },
+  );
+
+  test(
+    'zero uses estimate and partial overproduction can finish a goal',
+    () async {
+      final controller = _controller();
+      final mode = controller.active;
+      mode.commitInventory('Base', '250');
+      expect(_completeBatch(mode, 40, actualOutput: 0), isTrue);
+      expect(mode.state.value.inventory['Potion'], 40);
+      expect(_completeBatch(mode, 40, actualOutput: 65), isTrue);
+      expect(mode.state.value.inventory['Potion'], 105);
+      expect(mode.state.value.inventory['Base'], 90);
+      expect(mode.plan.value.steps, isEmpty);
+      expect(mode.undoCompletion(), isTrue);
+      expect(mode.plan.value.steps.single.count, 60);
+      await controller.dispose();
+    },
+  );
+
+  test(
+    'actual completion survives codec reload and restores exact inventory',
+    () async {
+      final first = _controller();
+      first.active.commitInventory('Base', '250');
+      expect(_completeBatch(first.active, 40, actualOutput: 37), isTrue);
+      const codec = PlannerStateJsonCodec();
+      final saved = codec.decode(codec.encode(first.documentSnapshot));
+      await first.dispose();
+      final controller = PlannerApplicationController(
+        catalog: _catalog(),
+        initialState: saved,
+        saveState: (state) async => state,
+      );
+      expect(controller.active.plan.value.steps.single.count, 63);
+      expect(controller.active.undoCompletion(), isTrue);
+      for (final mode in controller.modes.values) {
+        expect(mode.state.value.inventory['Base'], 250);
+        expect(mode.state.value.inventory['Potion'] ?? 0, 0);
+      }
+      await controller.dispose();
+    },
+  );
+
+  test(
+    'intermediate actual output replans downstream inputs and undo restores them',
+    () async {
+      final controller = PlannerApplicationController(
+        catalog: _queueInventoryCatalog(),
+        initialState: _document().copyWith(
+          alchemy: _mode(CraftMode.alchemy, 'Final'),
+        ),
+        saveState: (state) async => state,
+      );
+      final mode = controller.active;
+      mode.commitInventory('Ancient Spirit Dust', '1000');
+      mode.commitInventory('Black Stone', '1000');
+      final before = mode.plan.value.steps.first;
+      expect(before.name, 'Caphras Stone');
+      expect(_completeBatch(mode, 40, actualOutput: 35), isTrue);
+      expect(mode.state.value.inventory['Caphras Stone'], 35);
+      expect(mode.state.value.inventory['Ancient Spirit Dust'], 800);
+      expect(mode.state.value.inventory['Black Stone'], 960);
+      expect(mode.plan.value.steps.first.net, before.net - 35);
+      expect(mode.undoCompletion(), isTrue);
+      expect(mode.plan.value.steps.first.net, before.net);
+      expect(mode.state.value.inventory['Ancient Spirit Dust'], 1000);
+      await controller.dispose();
+    },
+  );
+
+  test(
+    'confirmed actual output cannot bypass stale or frozen completion guards',
+    () async {
+      final controller = _controller();
+      final mode = controller.active;
+      final step = mode.plan.value.steps.single;
+      final progress = mode.inventoryBatchProgress(
+        step: step,
+        target: 'Potion',
+        want: 100,
+        progressKey: AfkCraftProgress.sessionKeyFor(
+          targetName: 'Potion',
+          recipeName: 'Potion',
+        ),
+        attemptsPerRound: 40,
+      );
+      bool click() => mode.completeInventoryBatch(
+        step: step,
+        progress: progress,
+        completedBefore: 0,
+        completedAfter: 40,
+        actualOutput: 20,
+        lowOutputConfirmed: true,
+      );
+      controller.freezeMutationsForRestart();
+      expect(click(), isFalse);
+      controller.resumeMutationsAfterRestartFailure();
+      expect(click(), isTrue);
+      expect(click(), isFalse);
+      expect(mode.state.value.inventory['Potion'], 20);
+      expect(mode.undoCompletion(), isTrue);
+      mode.commitAmount('200');
+      expect(click(), isFalse);
+      await controller.dispose();
+    },
+  );
+
   test(
     'Bonus batches keep their own credits without erasing the main queue',
     () async {
@@ -2201,7 +2417,12 @@ PlannerApplicationController _controller() => PlannerApplicationController(
   saveDebounce: Duration.zero,
 );
 
-bool _completeBatch(ModeFeatureController mode, int attempts) {
+bool _completeBatch(
+  ModeFeatureController mode,
+  int attempts, {
+  int? actualOutput,
+  bool confirmed = false,
+}) {
   final step = mode.plan.value.steps.first;
   final progress = mode.inventoryBatchProgress(
     step: step,
@@ -2218,6 +2439,8 @@ bool _completeBatch(ModeFeatureController mode, int attempts) {
     progress: progress,
     completedBefore: progress.completedAttempts,
     completedAfter: progress.completedAttempts + attempts,
+    actualOutput: actualOutput,
+    lowOutputConfirmed: confirmed,
   );
 }
 

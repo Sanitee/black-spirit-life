@@ -2,20 +2,29 @@ import 'package:bdo_craft_planner_flutter/data/opportunities/market_eligibility.
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  test(
-    'the 298 audited client identities retain their separate classification',
-    () {
-      expect(reviewedNonMarketableOpportunityIds, hasLength(298));
-      for (final id in ['9001', '9002', '9005', '9059', '16080', '8901']) {
-        expect(isOpportunityMarketRequestEligible(id), isFalse, reason: id);
-      }
-      // Actual market alternatives must survive, even for purchasable inputs.
-      for (final id in ['7702', '9064', '50006', '5205', '5960']) {
-        expect(isOpportunityMarketRequestEligible(id), isTrue, reason: id);
-      }
-      expect(isOpportunityMarketRequestEligible('999999999'), isTrue);
-    },
-  );
+  test('the original, sea and bound Khan identities remain excluded', () {
+    expect(reviewedNonMarketableOpportunityIds, hasLength(306));
+    expect(isOpportunityMarketRequestEligible('45517'), isFalse);
+    for (final id in ['9001', '9002', '9005', '9059', '16080', '8901']) {
+      expect(isOpportunityMarketRequestEligible(id), isFalse, reason: id);
+    }
+    // Actual market alternatives must survive, even for purchasable inputs.
+    for (final id in ['7702', '9064', '50006', '5205', '5960']) {
+      expect(isOpportunityMarketRequestEligible(id), isTrue, reason: id);
+    }
+    expect(isOpportunityMarketRequestEligible('999999999'), isTrue);
+    for (final id in [
+      '8106',
+      '756425',
+      '756427',
+      '756501',
+      '756511',
+      '756521',
+      '756531',
+    ]) {
+      expect(isOpportunityMarketRequestEligible(id), isFalse, reason: id);
+    }
+  });
 
   test('a failed request alone never excludes marketable IDs', () {
     for (final id in [

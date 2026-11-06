@@ -1,0 +1,47 @@
+{
+  "reviewedAt": "2026-11-02",
+  "status": "SCOPED_CORRECTIONS; WHOLE_APP_AUDIT_STILL_OPEN",
+  "energy": {
+    "mellow": "25 Energy per three minutes = 500/hour, not the upstream calculator's 600.",
+    "xlPotion": "50 Energy per ten minutes = 300/hour under continuous-use assumption; costs also use six doses/hour. Old 275/hour was unsupported while billing six doses.",
+    "miraculous": "One planned dose adds its 500 usable-Energy reserve and at most one hour of +30/tick recovery. Session calculation removes its recovery after expiry and no longer implies indefinite gathering or hourly reuse. Session cost bills one dose. 22-hour cooldown is stated, not an automatic scheduler.",
+    "exclusivity": "Mystical and Mellow cannot both contribute, including direct/legacy calculator callers. Checkbox selection replaces the conflicting medicine; invalid saved IDs are not silently erased.",
+    "limitations": "Continuous-rate approximation assumes refills are ready and fully usable, with no tick timing, max-Energy overflow, owned-quantity or cooldown schedule. Other selected Energy buffs remain included by the user in Recovery / 3 min, explicitly excluding the mapped medicines. Costs/hour include the single Miraculous dose in the first hour. A session beyond 22 hours still plans only one dose."
+  },
+  "evergreen": {
+    "identity": "821469 / calculator item type 27",
+    "correction": "procs_with_minigame false -> true, supported by official September 3 PC notes and the current public BDO Workshop table.",
+    "unchanged": "Other bundled drop rates and historical route benchmark evidence remain unchanged. All 20 routes across three minigame modes were checked: only shard ordinary/minigame contribution and its silver value change, not pet or other loot contributions.",
+    "currentPublicComparison": "12 Gathering types, 118 item types, 286 drop-rate rows and 20 routes match current public calculator fields after the narrow correction. This is not independent server drop-rate certification.",
+    "datasetSha256": "d617cab5791a5ee6b672f820bc8d984b8d33012084487fd5eb3289db165e73d5"
+  },
+  "buffs": {
+    "coverage": "All 77 curated buffs: 71 exact native item identities, 199 listed numeric effects found in current item descriptions, and six official Lightstone combinations plus component totals. Two Mercenary strength suffixes intentionally disambiguate same-named items.",
+    "stones": "Treant's Tear, Life Spirit Stone, Stella's Spirit Stone, Khan's Heart: Life and Destruction Spirit Stone now say While equipped, without retired 5/10-minute activation or cooldown claims. Stella uses its current seven-day name/restriction. Khan includes current +25 mastery. Historical decoded active-effect records are retained explicitly as historical evidence.",
+    "preparation": "Selected stone bonuses must be excluded from base stats, like other selected contributions. Older saved Khan setups require a visible base-stat recheck; stored numbers and choices are preserved, never guessed or subtracted. Preparation schema 2 retains this review request until explicit confirmation. Unaffected setups remain confirmed.",
+    "history": "New stone snapshots retain While equipped wording; existing recorded session values are not recalculated. No personal profiles or sessions were opened.",
+    "limits": "Description matching does not prove conditional server behavior, buff stacking beyond reviewed rules, hidden proc distributions, every possible buff, or current event availability. Full current native numeric buff decoding remains unavailable."
+  },
+  "evidence": [
+    "https://www.naeu.playblackdesert.com/en-US/News/Detail?groupContentNo=10550&countryType=en-US (2026-09-03, equipment integration / Evergreen / Lightstone combinations)",
+    "https://www.naeu.playblackdesert.com/en-US/Wiki?wikiNo=424 (Royal guide, last edited 2025-02-07; herbal rates and durations, not current price caps)",
+    "https://www.naeu.playblackdesert.com/en-US/Wiki?wikiNo=23 (Energy guide, last edited 2025-07-29; online three-minute ticks)",
+    "PC client exact item descriptions through 2026-10-31: client-2026-11-02-unresolved-research/research-items-NO-EFFECTS.json",
+    "https://bdoworkshop.com/gathering-calculator (public tables and script captured 2026-11-02; corroboration, not game authority)",
+    "audit/correctness-review-20261102/gathering-current-source-check.json",
+    "audit/correctness-review-20261102/gathering-buff-comparison.json"
+  ],
+  "verificationSoFar": {
+    "expandedDataCalculationUiHistoryChecks": 248,
+    "separateKhanReviewUiChecks": 7,
+    "marketProjectionHostChecksBeforeStoneChanges": 39,
+    "nativeSetupCaptureChecksBeforeStoneChanges": 17,
+    "nativeSetupCaptures": 26,
+    "analysis": "Scoped changed source and tests pass.",
+    "fullPackageRecheck": "563 pass, zero fail, zero skip after quiet-control accessibility, standalone selected-material contrast and inherited fixture review. See shared-accessibility-recheck-20261102.json for exact test replacements and limits. This is the Gathering package only, not the whole application.",
+    "sharedPropagation": "31 current stone/heart references and eight confirmed removals are now covered by the common item-information/availability layer. See equipment-availability-correctness-20261102.json.",
+    "hostedStoneReview": "Caught and corrected the hosted notice omission during self-review. Six theme/scale checks and 18 native captures cover map, compact buffs and stats editor; cancel leaves saved values unchanged. Final notice uses theme ink for readability.",
+    "pending": "Whole-app/map regression, remaining factual coverage, final build and preservation checks. Counts overlap and are not a whole-repository pass."
+  },
+  "safety": "Isolated candidate only. No visible app/game launch, personal-data access, installed replacement, shortcut change, publication or success checkpoint."
+}

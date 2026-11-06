@@ -1,0 +1,40 @@
+{
+  "reviewedAt": "2026-11-02",
+  "status": "SCOPED_CORRECTIONS; FULL_CURRENT_MECHANIC_AUDIT_OPEN",
+  "laterWorkerOutputCorrection": "The labels-only snapshot below is historical. On 2026-11-03, exact Marak grain identities and removed Dallae Starlight Powder were corrected in three production rows. See reviewed-worker-output-identities.json; all other node fields and 349 other rows remain unchanged.",
+  "workerIdentityCorrection": {
+    "issue": "Generator reversed Human/Goblin names and used generic Worker type labels for regional species.",
+    "profilesReviewed": 88,
+    "towns": 30,
+    "uniqueCharacterIds": 14,
+    "changedLabels": 66,
+    "evidence": "Pinned upstream worker_static species plus English PC client loc section 6 exact character names through October 31; all 88 labels now match by ID.",
+    "unchanged": "Every numeric profile field, workerType, characterKey and all 352 production economics records match the complete previous candidate exactly.",
+    "generator": "The already-excluded 14 Inner Edania sites are now explicitly recognized, so regeneration is possible without fabricating missing workloads/yields/distances. Other missing sites still fail."
+  },
+  "royalNumericCorrection": {
+    "issue": "Negative net input previously lost its minus sign. Invalid partial input became zero or retained old hours. Direct invalid values could produce nonfinite income.",
+    "fix": "Signed finite net values survive entry and both current/legacy plan parsing. Unknown inputs remain unknown. Area and aggregate share finite arithmetic; losses subtract from income and use the existing negative-color role.",
+    "scope": "Royal Workshop management is currently deliberately hidden by _royalWorkshopEnabled=false. This corrects preserved dormant code; it does NOT enable the feature or let hidden preferences affect current worker planning."
+  },
+  "alreadyMatches": [
+    "Royal 5 CP access; eight areas; production 5 workshops, processing 3; one initial workshop per area; four named 500-token unlocks and remaining 1000-token unlocks.",
+    "Official eight manager names, Yukjo-only setup, movement speed excluded, user-entered task values rather than invented rare-roll expected profit.",
+    "All 124 Royal goods (40 production, 84 processing) have exact fresh native ID/name matches and Royal Workshop source text. Identity corroboration is not price/probability certification.",
+    "Worker defaults: one town slot, level-40 median estimates with worker skill bonuses explicitly excluded, separate ordinary/giant/luck yields and modeled regional restrictions."
+  ],
+  "sources": [
+    {"url":"https://www.naeu.playblackdesert.com/en-US/Wiki?wikiNo=40","lastEdited":"2026-03-20","scope":"Worker species roles, lodging, promotion and skill behavior"},
+    {"url":"https://www.naeu.playblackdesert.com/en-US/Wiki?wikiNo=376","lastEdited":"2024-03-22","scope":"Promotion probabilities 90/70/50; no new promotion calculator added"},
+    {"url":"https://www.naeu.playblackdesert.com/en-US/Wiki?wikiNo=424","lastEdited":"2025-02-07","scope":"Royal access, unlocks, managers, daily refresh and worker restrictions. Old price caps are NOT adopted as current prices."},
+    {"url":"https://github.com/Thell/bdo-empire/tree/4a24b6f42926543e5f3eae5c8c559ebd689b698c","scope":"Original pinned numeric source, not a refreshed live-game snapshot"}
+  ],
+  "checks": {"workerLabelGenerator":10,"modelDataAndWidget":49,"royalRemainsHidden":1,"scopedAnalysis":"passed"},
+  "unresolved": [
+    "Complete current worker workload, distance, production yield/luck tables and server resource availability; July numeric snapshot is not newly certified by an identity check.",
+    "14 Inner Edania income models remain absent; newer map/graph/CP candidates retain the broader audit's open dispositions.",
+    "Royal full slot eligibility, current processing inputs, material-cost accounting, rare-roll probability and per-worker task duration are not automatically modeled. User-entered net/task values remain required if the preserved management component is used.",
+    "Free-refresh availability is a manual plan flag, not a live synced/reset timer. Royal full production workflow is intentionally disabled, not certified as a finished public feature.",
+    "Royal reference prices are legacy informational metadata, never used as guaranteed sale prices or current market quotes. Current price caps require patch/market-specific evidence."
+  ]
+}

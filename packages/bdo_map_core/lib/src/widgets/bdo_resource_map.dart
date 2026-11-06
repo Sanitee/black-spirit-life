@@ -20743,6 +20743,8 @@ class _WorkerIncomeSettingsDialogState
               key: const ValueKey('resource-map-income-numeric-fields'),
               spacing: 12,
               runSpacing: 12,
+              // Align the inputs even when one label needs an extra line.
+              crossAxisAlignment: WrapCrossAlignment.end,
               children: [
                 _numberField(
                   label: 'Online hours/day',

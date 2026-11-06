@@ -1,0 +1,36 @@
+{
+  "date": "2026-10-31",
+  "request": "Restore the compact, theme-matched copy notification near the top; audit inconsistent item-window source badges and other related surfaces.",
+  "baseline": "[private-source]/Consistent Item Windows 20261031",
+  "source": "[private-source]/Consistent Copy Feedback 20261031",
+  "branch": "codex/consistent-copy-feedback",
+  "implemented": [
+    "Item reference copies use the application clipboard action through a shared InheritedTheme scope, including captured dialog routes and nested hover/pinned overlays.",
+    "Opportunities retains explicit host callbacks and also recognizes the shared scope.",
+    "The existing top notification is placed in the root overlay so nested dialogs do not dim or cover it. Its original theme materials, wording, position, non-interactive semantics and 1350 ms lifetime remain.",
+    "Repeated copies replace one notification; disposal cancels and removes it. Active workspace/theme presentation remains live without restarting its lifetime. Clipboard failures retain the existing themed operation-error path."
+  ],
+  "callerAudit": [
+    {"surface": "Planner names and Inventory names", "result": "Already use the application clipboard action; retain it."},
+    {"surface": "Recipe Book list/preview/Used for artwork windows, hover and pinned", "result": "Previously fell back to the default bottom SnackBar. Now inherit the application copy action."},
+    {"surface": "Planner acquisition item windows", "result": "Share ItemReferenceCard; now inherit the same application action."},
+    {"surface": "Opportunities and exchanges", "result": "Explicit item windows retain their host callback; interactive rich artwork previews now receive the same shared action. Passive previews remain passive."},
+    {"surface": "Standalone feature fixtures outside the application host", "result": "Keep the existing native-clipboard and error fallback. Real application surfaces are tested with the shared scope; no duplicate production clipboard client or notification styling was added."}
+  ],
+  "previewOnly": {
+    "userDecision": "User requested visuals before approving ingredient source badges. Not enabled in the normal source or runnable.",
+    "location": "work/visuals/item-source-badges-preview",
+    "content": "Two actual ItemReferenceCard widgets, current and proposed, at 480 logical pixels wide. Real bundled Citron Juice recipe/artwork and verified bundled Sugar/Mineral Water NPC resolution; explicitly synthetic Citron/Cooking Honey stock counts.",
+    "component": "Existing MarketCountBadges, comfortable density; existing Opportunities availability material, adapted to each theme. Names and beside-name quantities unchanged; rows become taller.",
+    "verification": "Three-theme renders, no overflow, full ingredient recipe visible without scrolling. Temporary preview injection and fixture archived then removed before production build. No market requests, prices or profile data.",
+    "futureDataRequirements": "Any approved implementation must use the existing region/item-ID shared broker, independent quote/book freshness, verified NPC precedence and unknown/stale semantics. No independent market client or polling."
+  },
+  "otherFindingsNotChanged": [
+    {"surface": "Planner shopping Copy list", "file": "lib/features/planner/planner_review_panels.dart", "finding": "Copies directly to the clipboard with no confirmation. Recommend the same small top feedback, pending approval."},
+    {"surface": "Older Opportunities detailed market views", "file": "lib/features/opportunities/opportunities_workspace.dart", "finding": "_marketReading/_MarketStockBadge still combine zero stock and preorders into a negative Stock value, unlike newer separate check/dash/basket badges. Recommend reusing the shared vocabulary while preserving market-detail actions; preview and approval needed."},
+    {"surface": "Item-reference recipe rows", "file": "lib/features/recipe_book/item_reference_joined.dart", "finding": "No NPC/stock badges; visual proposal only. No pricing, stock fetching or recipe layout change included in the runnable."}
+  ],
+  "verification": "See workspace audit/consistent-copy-feedback-20261031/result.json for final test/build/manifest gates. All UI captures use disposable synthetic state; no visible application launch.",
+  "unchanged": ["recipes", "calculations", "catalog", "market brokerage and freshness", "shared Documents storage and writer lease", "native single-instance handoff", "saved profiles", "installed app and shortcuts", "release ownership"],
+  "release": "Separate local runnable only; not installed, handed off, published or user-accepted. Close the currently running application before intentionally testing this build."
+}

@@ -17,11 +17,16 @@ ItemAcquisitionRule? resolveItemAcquisition({
 }
 
 ItemAcquisitionRule _activeGuidance(ItemAcquisitionRule rule) {
+  final removed = isRemovedPcItem(
+    rule.canonicalName,
+    itemId: rule.itemId?.toString(),
+  );
+  final status = removed ? 'removed' : 'temporarily_archived';
   if (!isTemporarilyArchivedItem(
         rule.canonicalName,
         itemId: rule.itemId?.toString(),
       ) ||
-      rule.status == 'temporarily_archived') {
+      rule.status == status) {
     return rule;
   }
   // Preserve historical route facts, but do not present them as confirmed
@@ -29,7 +34,7 @@ ItemAcquisitionRule _activeGuidance(ItemAcquisitionRule rule) {
   return ItemAcquisitionRule(
     canonicalName: rule.canonicalName,
     itemId: rule.itemId,
-    status: 'temporarily_archived',
+    status: status,
     reviewedAt: rule.reviewedAt,
     routes: rule.routes,
   );

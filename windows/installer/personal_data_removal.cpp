@@ -360,6 +360,7 @@ struct RemovalEnvironment {
   std::wstring roaming_app_data;
   std::wstring local_app_data;
   std::wstring journal_directory;
+  std::wstring documents;
 };
 
 enum class FileReadState { missing, valid, invalid };
@@ -642,6 +643,42 @@ bool ParseIdentityJson(const std::vector<char> &bytes,
          channel->second.text == std::wstring(build_config::kChannel);
 }
 
+bool ValidSharedProfileMarker(const std::wstring &directory) {
+  const auto marker = ReadSmallOrdinaryFile(
+      (std::filesystem::path(directory) / L".black-spirit-life-shared.json").wstring());
+  std::wstring json;
+  std::map<std::wstring, JsonScalar> values;
+  if (marker.state != FileReadState::valid || !Utf8ToWide(marker.bytes, &json) ||
+      !JsonReader(json).ReadRootObject(&values)) return false;
+  const auto application = values.find(L"application");
+  const auto requires_state = values.find(L"requiresExistingState");
+  if (application == values.end() || application->second.kind != JsonScalarKind::string ||
+      application->second.text != L"Black Spirit Life" || requires_state == values.end() ||
+      requires_state->second.kind != JsonScalarKind::boolean) return false;
+  for (const auto name : {L"formatVersion", L"minimumReaderVersion", L"minimumWriterVersion"}) {
+    const auto version = values.find(name);
+    if (version == values.end() || version->second.kind != JsonScalarKind::number ||
+        version->second.text != L"1") return false;
+  }
+  return true;
+}
+
+bool SharedLocationRecorded(const RemovalEnvironment &environment) {
+  if (environment.documents.empty()) return false;
+  const auto bootstrap = std::filesystem::path(environment.local_app_data) /
+      kProfileDirectoryName / L"Shared Profile" / kBootstrapDirectoryName;
+  const std::array<std::filesystem::path, 4> records = {
+      bootstrap / kLocatorFileName, bootstrap / kLocatorMirrorFileName,
+      bootstrap / kMoveJournalFileName,
+      std::filesystem::path(environment.documents) / kProfileDirectoryName /
+          L".black-spirit-life-shared.json"};
+  for (const auto &record : records) {
+    if (GetFileAttributesW(record.c_str()) != INVALID_FILE_ATTRIBUTES ||
+        !MissingPathError(GetLastError())) return true;
+  }
+  return false;
+}
+
 bool IsIdentityToken(const std::wstring &value) {
   const std::size_t first = value.find(L'-');
   const std::size_t second =
@@ -765,7 +802,8 @@ std::optional<std::wstring> KnownFolder(REFKNOWNFOLDERID identifier) {
 std::optional<RemovalEnvironment> ProductionEnvironment(std::wstring *error) {
   const auto roaming = KnownFolder(FOLDERID_RoamingAppData);
   const auto local = KnownFolder(FOLDERID_LocalAppData);
-  if (!roaming || !local) {
+  const auto documents = KnownFolder(FOLDERID_Documents);
+  if (!roaming || !local || !documents) {
     if (error)
       *error = L"Windows could not resolve this account's data folders.";
     return std::nullopt;
@@ -776,6 +814,7 @@ std::optional<RemovalEnvironment> ProductionEnvironment(std::wstring *error) {
       .journal_directory =
           (std::filesystem::path(*local) / kRemovalControlDirectoryName)
               .wstring(),
+      .documents = *documents,
   };
 }
 
@@ -786,6 +825,7 @@ NormalizeTestEnvironment(const PersonalDataRemovalTestEnvironment &environment,
       .roaming_app_data = Normalize(environment.roaming_app_data),
       .local_app_data = Normalize(environment.local_app_data),
       .journal_directory = Normalize(environment.journal_directory),
+      .documents = environment.documents.empty() ? L"" : Normalize(environment.documents),
   };
   if (result.roaming_app_data.empty() || result.local_app_data.empty() ||
       result.journal_directory.empty()) {
@@ -1334,8 +1374,13 @@ bool ValidateJournalControlDirectory(const RemovalEnvironment &environment,
 bool ValidateLoadedPlan(const RemovalEnvironment &environment,
                         PersonalDataRemovalPlan *plan,
                         std::wstring *error) {
+  // The consent journal pins its original scheme. Do not re-infer it from
+  // files that may already have entered quarantine during interrupted cleanup.
+  const auto shared_default = std::filesystem::path(environment.documents) / kProfileDirectoryName;
+  const bool shared = !environment.documents.empty() && SamePath(
+      plan->reset_marker_path, (shared_default / kResetMarkerFileName).wstring());
   const std::wstring default_profile =
-      (std::filesystem::path(environment.roaming_app_data) /
+      (std::filesystem::path(shared ? environment.documents : environment.roaming_app_data) /
        kProfileDirectoryName)
           .wstring();
   const std::wstring local_data =
@@ -1781,14 +1826,16 @@ PersonalDataRemovalResult PrepareWithEnvironment(
               L"account's local data folder."
             : error);
   }
+  const bool shared = SharedLocationRecorded(environment);
   const std::filesystem::path default_profile =
-      std::filesystem::path(environment.roaming_app_data) /
+      std::filesystem::path(shared ? environment.documents : environment.roaming_app_data) /
       kProfileDirectoryName;
   const std::filesystem::path local_data =
       std::filesystem::path(environment.local_app_data) /
       kProfileDirectoryName;
   const std::filesystem::path bootstrap =
-      local_data / kBootstrapDirectoryName;
+      shared ? local_data / L"Shared Profile" / kBootstrapDirectoryName
+             : local_data / kBootstrapDirectoryName;
   const DWORD move_attributes =
       GetFileAttributesW((bootstrap / kMoveJournalFileName).c_str());
   if (move_attributes != INVALID_FILE_ATTRIBUTES ||
@@ -1822,6 +1869,12 @@ PersonalDataRemovalResult PrepareWithEnvironment(
     return Failure(PersonalDataRemovalStatus::invalid,
                    L"The saved personal-data location records do not match. "
                    L"Nothing was prepared.");
+  }
+
+  if (shared && GetFileAttributesW(active_profile.c_str()) != INVALID_FILE_ATTRIBUTES &&
+      !ValidSharedProfileMarker(active_profile)) {
+    return Failure(PersonalDataRemovalStatus::invalid,
+                   L"The shared personal-data folder has an incompatible ownership record. Nothing was prepared.");
   }
 
   PersonalDataRemovalPlan plan;
@@ -2331,8 +2384,12 @@ bool WriteResetMarker(const PersonalDataRemovalPlan &plan,
       "\",\"releaseChannel\":\"" + JsonEscapeAscii(build_config::kChannel) +
       "\",\"intentionalReset\":true,\"transactionId\":\"" +
       JsonEscapeAscii(plan.transaction_id) + "\"}";
-  return WriteDurableFile(plan.reset_marker_path, marker, plan.transaction_id,
-                          error);
+  if (!WriteDurableFile(plan.reset_marker_path, marker, plan.transaction_id, error)) return false;
+  const std::string shared_marker =
+      "{\"application\":\"Black Spirit Life\",\"formatVersion\":1,"
+      "\"minimumReaderVersion\":1,\"minimumWriterVersion\":1,\"requiresExistingState\":false}";
+  return WriteDurableFile((directory / L".black-spirit-life-shared.json").wstring(),
+                          shared_marker, plan.transaction_id, error);
 }
 
 bool ResetMarkerMatches(const PersonalDataRemovalPlan &plan) {
@@ -2348,7 +2405,8 @@ bool ResetMarkerMatches(const PersonalDataRemovalPlan &plan) {
          reset->second.kind == JsonScalarKind::boolean &&
          reset->second.boolean && transaction != values.end() &&
          transaction->second.kind == JsonScalarKind::string &&
-         transaction->second.text == plan.transaction_id;
+         transaction->second.text == plan.transaction_id &&
+         ValidSharedProfileMarker(std::filesystem::path(plan.reset_marker_path).parent_path().wstring());
 }
 
 PersonalDataRemovalResult FinalizeWithEnvironment(
@@ -2545,6 +2603,34 @@ PersonalDataRemovalResult PreparePersonalDataRemovalForTesting(
   if (!environment)
     return Failure(PersonalDataRemovalStatus::invalid, error);
   return PrepareWithEnvironment(*environment, install_root, false, plan);
+}
+
+PersonalDataRemovalResult CancelPreparedPersonalDataRemovalForTesting(
+    const PersonalDataRemovalTestEnvironment &test_environment,
+    const PersonalDataRemovalPlan &plan) {
+  std::wstring error;
+  const auto environment = NormalizeTestEnvironment(test_environment, &error);
+  if (!environment) return Failure(PersonalDataRemovalStatus::invalid, error);
+  return CancelWithEnvironment(*environment, plan, false);
+}
+
+PersonalDataRemovalResult MarkPersonalDataApplicationRemovedForTesting(
+    const PersonalDataRemovalTestEnvironment &test_environment,
+    const PersonalDataRemovalPlan &plan) {
+  std::wstring error;
+  const auto environment = NormalizeTestEnvironment(test_environment, &error);
+  if (!environment) return Failure(PersonalDataRemovalStatus::invalid, error);
+  return MarkWithEnvironment(*environment, plan, false);
+}
+
+PersonalDataRemovalResult FinalizePersonalDataRemovalForTesting(
+    const PersonalDataRemovalTestEnvironment &test_environment,
+    const PersonalDataRemovalPlan &plan,
+    const PersonalDataRecycleCallback &recycle) {
+  std::wstring error;
+  const auto environment = NormalizeTestEnvironment(test_environment, &error);
+  if (!environment || !recycle) return Failure(PersonalDataRemovalStatus::invalid, error);
+  return FinalizeWithEnvironment(*environment, plan, false, recycle);
 }
 
 PersonalDataRemovalResult DetectPendingPersonalDataRemovalForTesting(

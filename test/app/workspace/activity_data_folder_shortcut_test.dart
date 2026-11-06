@@ -7,6 +7,7 @@ import 'package:bdo_craft_planner_flutter/features/gathering/gathering_workspace
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../../support/action_hint_finder.dart';
 import '../../support/application_test_harness.dart';
 
 void main() {
@@ -44,7 +45,7 @@ void main() {
       final gatheringElement = tester.element(find.byType(GatheringWorkspace));
       await tester.tap(shortcut);
       await tester.pump();
-      expect(find.byTooltip('Back to Gathering'), findsOneWidget);
+      expect(findActionHint('Back to Gathering'), findsOneWidget);
       await tester.pump(const Duration(milliseconds: 250));
       await tester.tap(find.byKey(AppTitleTabStrip.returnButtonKey));
       await tester.pump();
@@ -86,7 +87,7 @@ void main() {
       );
       final semantics = tester.widget<Semantics>(shortcut);
       expect(semantics.properties.label, label);
-      expect(find.byTooltip(label), findsOneWidget);
+      expect(findActionHint(label), findsOneWidget);
 
       await tester.tap(shortcut);
       await tester.pump();
@@ -95,7 +96,7 @@ void main() {
       expect(find.byType(DataView), findsOneWidget);
       expect(find.text('Personal data'), findsOneWidget);
       expect(shortcut, findsNothing);
-      expect(find.byTooltip('Back to Fish Map'), findsOneWidget);
+      expect(findActionHint('Back to Fish Map'), findsOneWidget);
       await tester.pump(const Duration(milliseconds: 250));
       await tester.tap(back);
       await tester.pump();

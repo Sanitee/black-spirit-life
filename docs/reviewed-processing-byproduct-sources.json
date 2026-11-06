@@ -1,0 +1,28 @@
+{
+  "date": "2026-11-03",
+  "scope": "Six exact chance-only acquisition hints, shared across item-information hosts. No yield, recipe, auto-planning, eligibility or probability changes.",
+  "entries": [
+    {"id": 4052, "name": "Iron Ingot", "source": "Heating Iron Ore at higher Processing levels", "evidence": "Official NA/EU Processing guide wiki28 explicitly gives this example."},
+    {"id": 567, "name": "Concentrated Grain Juice", "parentId": 566, "parent": "Grain Juice", "inputScope": "Raw grain and Mineral Water"},
+    {"id": 568, "name": "Highly Concentrated Grain Juice", "parentId": 567, "parent": "Concentrated Grain Juice", "inputScope": "High-quality grain and Mineral Water, not conversion of existing Grain Juice"},
+    {"id": 570, "name": "Concentrated Herbal Juice", "parentId": 569, "parent": "Herbal Juice", "inputScope": "Raw herbs/Weeds and Mineral Water"},
+    {"id": 571, "name": "Highly Concentrated Herbal Juice", "parentId": 570, "parent": "Concentrated Herbal Juice", "inputScope": "High-quality herbs and Mineral Water, not conversion of existing Herbal Juice"},
+    {"id": 579, "name": "Refined Herbal Juice", "parentId": 571, "parent": "Highly Concentrated Herbal Juice", "inputScope": "Special herbs and Mineral Water, not conversion of existing Concentrated Herbal Juice"}
+  ],
+  "sources": [
+    {"url": "https://www.naeu.playblackdesert.com/en-US/Wiki?wikiNo=28", "archive": "official/processing-guide-naeu-28", "sha256": "d8cde208b6b3cf71329c08b57eb77e8a58e2042e3d51ea3e85af841960c202ee"},
+    {"url": "https://bdocodex.com/us/item/566/", "archive": "official/juice-566-current", "sha256": "0fa6229da5eb35214a58542a8359317d6b99637bc2b5f57e8fe2370713aac692"},
+    {"url": "https://bdocodex.com/us/item/567/", "archive": "official/juice-567-current", "sha256": "67e562aa3ffcb8aeaa09e7213ab95b9d4528cb93ce38c482fa6a504012761a18"},
+    {"url": "https://bdocodex.com/us/item/569/", "archive": "official/juice-569-current", "sha256": "bd933ad3ca54438236a4028c6ba3a66dec1bd91bbc9f82809d2a3d93cd961c1b"},
+    {"url": "https://bdocodex.com/us/item/570/", "archive": "official/juice-570-current", "sha256": "78184809339d5e63ea9a5f7e6af89e50906e0de741ce7b1acec89064898b0a8f"},
+    {"url": "https://bdocodex.com/us/item/571/", "archive": "official/juice-571-current", "sha256": "d5dc4a00d402197088c80eeb977639b9bd07c789651402db10ac9d945970faa5"}
+  ],
+  "corroboration": {"file": "client-2026-11-02-unresolved-research/research-items-NO-EFFECTS.json", "sha256": "a54b5735052c990e189ff1a50afb6d5442cc80e0ba8dabff995979bc8d35c821", "scope": "Exact current client identities and chance wording agree with the published item descriptions. These are related evidence, not independent experimental measurements."},
+  "exceptions": [
+    "Refined Grain Juice is deliberately excluded: parent568 places the chance paragraph after Concentrated Grain Juice conversion, while native byproduct relationships attach it to Special grain. This conflict is not settled by a generic hint.",
+    "Other timber, metals, hides and gems are not inferred from the Iron Ingot example.",
+    "No exact byproduct rates, output count distribution, individual herb/grain eligibility or universal skill threshold certified.",
+    "Processing raw success fields are not byproduct proc probabilities."
+  ],
+  "relatedEligibilityResolution": {"item": "Magical Lightstone Crystal", "id": 766108, "url": "https://www.naeu.playblackdesert.com/en-US/News/Detail?groupContentNo=4655&countryType=en-US", "date": "2023-01-11", "sha256": "9886d29bdc28878616e5115acb4664f1324d9c1a0e9eb7219a250c2236990ff5", "decision": "The Guru1 exchange restriction was explicitly removed. Existing unrestricted acquisition wording is correct. Separate Purified Lightstone residence Alchemy retains Guru1; regression checked in all modes."}
+}

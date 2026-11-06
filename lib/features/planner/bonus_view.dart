@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart' show OverflowBoxFit;
 
 import '../../app/state/planner_application_controller.dart';
 import '../../domain/models/craft_mode.dart';
@@ -284,6 +283,20 @@ class _BonusCommandBand extends StatelessWidget {
         builder: (context, constraints) {
           final textScale = MediaQuery.textScalerOf(context).scale(1);
           final enlargedText = textScale > 1.25;
+          const targetWidth = 490.0;
+          const recipesWidth = 122.0;
+          const amountColumnWidth = 86.0;
+          const amountFieldWidth = 78.0;
+          const rebuildWidth = 68.0;
+          const finalWidth = 206.0;
+          const spacing = 13.0;
+          const referenceWidth =
+              targetWidth +
+              recipesWidth +
+              amountColumnWidth +
+              rebuildWidth +
+              finalWidth +
+              spacing * 4;
           if (enlargedText) {
             return Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -450,27 +463,18 @@ class _BonusCommandBand extends StatelessWidget {
               ],
             );
           }
-          const targetWidth = 490.0;
-          const recipesWidth = 122.0;
-          const amountColumnWidth = 86.0;
-          const amountFieldWidth = 78.0;
-          const rebuildWidth = 68.0;
-          const finalWidth = 206.0;
-          const spacing = 13.0;
-          const referenceWidth =
-              targetWidth +
-              recipesWidth +
-              amountColumnWidth +
-              rebuildWidth +
-              finalWidth +
-              spacing * 4;
+          // Preserve the single desktop command row. Its target field may
+          // yield width, but every action must remain inside the viewport.
+          final availableRowWidth = constraints.maxWidth < referenceWidth
+              ? constraints.maxWidth
+              : referenceWidth;
           final referenceControls = SizedBox(
-            width: referenceWidth,
+            width: availableRowWidth,
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.end,
               children: <Widget>[
                 SizedBox(
-                  width: targetWidth,
+                  width: targetWidth - (referenceWidth - availableRowWidth),
                   child: _targetGroup(context, targetField),
                 ),
                 const SizedBox(width: spacing),
@@ -503,23 +507,9 @@ class _BonusCommandBand extends StatelessWidget {
               ],
             ),
           );
-          if (constraints.maxWidth >= referenceWidth) {
-            return Align(
-              alignment: Alignment.bottomLeft,
-              child: referenceControls,
-            );
-          }
-          // Avalonia retains the same command geometry at 1200x752 and lets
-          // the window edge clip the final action. OverflowBox reproduces that
-          // behavior without a RenderFlex overflow or changing semantics.
-          return ClipRect(
-            child: OverflowBox(
-              alignment: Alignment.bottomLeft,
-              fit: OverflowBoxFit.deferToChild,
-              minWidth: referenceWidth,
-              maxWidth: referenceWidth,
-              child: referenceControls,
-            ),
+          return Align(
+            alignment: Alignment.bottomLeft,
+            child: referenceControls,
           );
         },
       ),

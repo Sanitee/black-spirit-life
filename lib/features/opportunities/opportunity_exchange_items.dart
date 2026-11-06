@@ -10,76 +10,7 @@ RecipeBookItemInfo _exchangeItemInfo(
         mode: controller.modeController.mode,
       ) ??
       RecipeBookItemInfo(title: item.name, kind: 'Item', summary: '');
-  final details = exchangeItemDetails[item.id];
-  final currency = exchangeCatalog
-      .where((c) => c.item.id == item.id)
-      .firstOrNull;
-  if (currency != null) {
-    final locations = currency.routes
-        .where((r) => !r.directVendorSale)
-        .map((r) => r.location)
-        .toSet();
-    return base.copyWith(
-      kind: 'Exchange item',
-      summary: currency.sourceActivity,
-      uses: [for (final location in locations) 'Exchange at $location.'],
-      notes: currency.notes,
-    );
-  }
-  if (details != null) {
-    return base.copyWith(
-      kind: details.kind,
-      summary: details.summary,
-      uses: {...base.uses, ...details.uses}.toList(),
-      effects: base.effects.isEmpty ? details.effects : base.effects,
-      acquisitionNotes: {
-        ...base.acquisitionNotes,
-        ...details.howToObtain,
-      }.toList(),
-      craftUses: [
-        ...base.craftUses,
-        for (final recipe in details.recipes)
-          if (!base.craftUses.any((use) => use.output == recipe.output))
-            RecipeBookCraftUse(
-              output: recipe.output,
-              formulas: [
-                RecipeBookFormula(
-                  outputName: recipe.output,
-                  type: 'Crafted',
-                  method: recipe.method,
-                  baseOutput: 1,
-                  ingredients: [
-                    for (final input in recipe.ingredients.entries)
-                      Ingredient(
-                        name: input.key,
-                        quantity: input.value,
-                        options: const [],
-                        substituteGroup: null,
-                        substituteRatios: const {},
-                      ),
-                  ],
-                ),
-              ],
-            ),
-      ],
-      notes: {...base.notes, ...details.notes}.toList(),
-    );
-  }
-  final valks = RegExp(r'^Advice of Valks \(\+(\d+)\)$').firstMatch(item.name);
-  if (valks != null) {
-    return base.copyWith(
-      kind: 'Enhancement',
-      summary: 'Grants a +${valks[1]} Enhancement Chance.',
-      notes: ['Use when your current Enhancement Chance is 0.'],
-    );
-  }
-  if (item.name.startsWith('[Title] ')) {
-    return base.copyWith(
-      kind: 'Title',
-      summary: 'Unlocks the ${item.name.substring(8)} title.',
-    );
-  }
-  return base;
+  return withExchangeReferenceInformation(base, item);
 }
 
 /// Facts belong inside the open exchange, not behind its item's hover menu.

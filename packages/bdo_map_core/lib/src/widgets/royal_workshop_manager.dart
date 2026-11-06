@@ -7,6 +7,7 @@ import '../royal_workshop/royal_workshop_models.dart';
 import 'readable_select_controls.dart';
 import 'resource_map_chrome_theme.dart';
 import 'resource_map_panel_metrics.dart';
+import 'resource_map_silver_presentation.dart';
 
 class BdoRoyalWorkshopManager extends StatefulWidget {
   const BdoRoyalWorkshopManager({
@@ -248,11 +249,17 @@ class _BdoRoyalWorkshopManagerState extends State<BdoRoyalWorkshopManager> {
             if (estimate.includedAreaCount > 0)
               Tooltip(
                 message: 'Net silver per online hour. Rare rolls excluded.',
-                child: Text(
-                  '${_shortSilver(estimate.netSilverPerOnlineHour)} / h',
-                  key: const ValueKey<String>('royal-workshop-income-summary'),
+                child: _royalSilver(
+                  context,
+                  estimate.netSilverPerOnlineHour,
+                  suffix: ' / h',
+                  textKey: const ValueKey<String>(
+                    'royal-workshop-income-summary',
+                  ),
                   style: TextStyle(
-                    color: context.mapChrome.positive,
+                    color: estimate.netSilverPerOnlineHour < 0
+                        ? context.mapChrome.error
+                        : context.mapChrome.positive,
                     fontSize: ResourceMapPanelMetrics.primary,
                     fontWeight: FontWeight.w600,
                   ),
@@ -298,13 +305,7 @@ class _BdoRoyalWorkshopManagerState extends State<BdoRoyalWorkshopManager> {
         slotPlan.hasRecordedGood &&
         !workshopChangePending &&
         !widget.plan.hasDuplicateWorkerName(workerName);
-    final hourly =
-        !excludedRare &&
-            slotPlan.netSilverPerCycle != null &&
-            slotPlan.hasTimedTask
-        ? (slotPlan.netSilverPerCycle! * slotPlan.repeatCount) /
-              slotPlan.taskHours!
-        : null;
+    final hourly = excludedRare ? null : slotPlan.netSilverPerOnlineHour;
 
     return LayoutBuilder(
       key: ValueKey<String>('royal-workshop-area-${area.id}'),
@@ -1165,12 +1166,20 @@ class _RoyalEstimateEditor extends StatelessWidget {
                     ),
                   ),
                   if (hourly != null)
-                    Text(
-                      _shortSilver(hourly!),
-                      style: TextStyle(
-                        color: context.mapChrome.positive,
-                        fontSize: ResourceMapPanelMetrics.secondary,
-                        fontWeight: FontWeight.w600,
+                    Flexible(
+                      child: Align(
+                        alignment: Alignment.centerRight,
+                        child: _royalSilver(
+                          context,
+                          hourly!,
+                          style: TextStyle(
+                            color: hourly! < 0
+                                ? context.mapChrome.error
+                                : context.mapChrome.positive,
+                            fontSize: ResourceMapPanelMetrics.secondary,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
                       ),
                     ),
                   const SizedBox(width: 6),
@@ -1207,12 +1216,18 @@ class _RoyalEstimateEditor extends StatelessWidget {
                                     RegExp(r'[0-9.]'),
                                   ),
                                 ],
-                                onChanged: (value) => onChanged(
-                                  plan.copyWith(
-                                    taskHours: double.tryParse(value),
-                                    clearTaskHours: value.trim().isEmpty,
-                                  ),
-                                ),
+                                onChanged: (value) {
+                                  final hours = double.tryParse(value);
+                                  onChanged(
+                                    plan.copyWith(
+                                      taskHours: hours,
+                                      clearTaskHours:
+                                          hours == null ||
+                                          !hours.isFinite ||
+                                          hours <= 0,
+                                    ),
+                                  );
+                                },
                                 decoration: const InputDecoration(
                                   labelText: 'Task hours',
                                   isDense: true,
@@ -1233,21 +1248,31 @@ class _RoyalEstimateEditor extends StatelessWidget {
                                 keyboardType:
                                     const TextInputType.numberWithOptions(
                                       decimal: true,
+                                      signed: true,
                                     ),
                                 inputFormatters: <TextInputFormatter>[
-                                  FilteringTextInputFormatter.allow(
-                                    RegExp(r'[0-9.]'),
+                                  TextInputFormatter.withFunction(
+                                    (oldValue, newValue) =>
+                                        RegExp(
+                                          r'^-?\d*\.?\d*$',
+                                        ).hasMatch(newValue.text)
+                                        ? newValue
+                                        : oldValue,
                                   ),
                                 ],
-                                onChanged: (value) => onChanged(
-                                  plan.copyWith(
-                                    netSilverPerCycle:
-                                        (double.tryParse(value) ?? 0) * 1000000,
-                                    clearNetSilverPerCycle: value
-                                        .trim()
-                                        .isEmpty,
-                                  ),
-                                ),
+                                onChanged: (value) {
+                                  final millions = double.tryParse(value);
+                                  final net = millions == null
+                                      ? null
+                                      : millions * 1000000;
+                                  onChanged(
+                                    plan.copyWith(
+                                      netSilverPerCycle: net,
+                                      clearNetSilverPerCycle:
+                                          net == null || !net.isFinite,
+                                    ),
+                                  );
+                                },
                                 decoration: const InputDecoration(
                                   labelText: 'Net / cycle (m)',
                                   isDense: true,
@@ -1517,6 +1542,26 @@ class _RoyalAreaGlyph extends StatelessWidget {
       ),
     );
   }
+}
+
+Widget _royalSilver(
+  BuildContext context,
+  double value, {
+  required TextStyle style,
+  String suffix = '',
+  Key? textKey,
+}) {
+  final presentation = ResourceMapSilverPresentation.maybeOf(context);
+  if (presentation != null) {
+    return presentation.builder(
+      context,
+      value: value,
+      style: style,
+      suffix: suffix,
+      textKey: textKey,
+    );
+  }
+  return Text('${_shortSilver(value)}$suffix', key: textKey, style: style);
 }
 
 String _shortSilver(double value) {

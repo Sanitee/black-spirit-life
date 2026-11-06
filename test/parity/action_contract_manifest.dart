@@ -161,10 +161,9 @@ const _plannerOverlay = ActionAssertion(
 );
 const _plannerSubstituteOverlay = ActionAssertion(
   testPath: 'test/features/planner/planner_view_test.dart',
-  testName:
-      'Ledger substitute chooser expands inline as a two-column authored grid',
+  testName: 'Ledger Need First choices use the approved scrollable owned table',
   proves:
-      'The substitute chooser opens inline, remains aligned, and closes after selection.',
+      'The separate swap action opens one scrollable owned table, preserves queue layout, and closes after selection.',
 );
 const _plannerAcquisition = ActionAssertion(
   testPath: 'test/features/planner/planner_view_test.dart',
@@ -708,19 +707,19 @@ final List<ActionEvidence> actionEvidenceManifest = <ActionEvidence>[
   ),
   _e(
     'P10',
-    'Fixed queue names copy exactly; an upstream-selected queue name uses the P12 choice anchor.',
+    'Queue item names copy exactly; the separate P12 swap action selects a valid incoming substitute.',
     _plannerRows,
     ActionStateContract.clipboard,
   ),
   _e(
     'P11',
-    'Fixed ingredient names copy exactly; interchangeable names use the P12 choice anchor.',
+    'Ingredient names copy exactly, including interchangeable items; their separate swap action opens P12.',
     _plannerRows,
     ActionStateContract.clipboard,
   ),
   _e(
     'P12',
-    'An interchangeable ingredient name with a decorative swap indicator opens one inline chooser.',
+    'The separate swap action opens one shared scrollable substitute table with Owned and Missing values.',
     _plannerSubstituteOverlay,
     ActionStateContract.session,
   ),
@@ -773,7 +772,7 @@ final List<ActionEvidence> actionEvidenceManifest = <ActionEvidence>[
   ),
   _e(
     'P20',
-    'Fixed Need First names copy exactly; interchangeable names use the P12 choice anchor.',
+    'Need First names copy exactly, including interchangeable items; their separate swap action opens P12.',
     _plannerRows,
     ActionStateContract.clipboard,
   ),

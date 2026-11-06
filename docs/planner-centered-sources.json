@@ -1,0 +1,19 @@
+{
+  "date": "2026-10-30",
+  "request": "Center the NPC text rather than placing it at the top left.",
+  "change": "Center shopping source labels horizontally and vertically within their existing rails. Market / gather follows the same alignment for consistency. Wrapped labels remain centered in enlarged layouts.",
+  "unchanged": "Item rows, panel geometry, colors, source grouping, quantities, owned substitutes, Undo labels, calculations and all personal data.",
+  "source": "[private-source]/Planner Centered Sources 20261030",
+  "baseline": "Complete Planner Sculpted Panels working snapshot, not HEAD alone.",
+  "baselineManifestSha256": "C53830DB554D58C4F5F9CC1F5D43015F159E35C8A137E59D4F46E9913B6E9B57",
+  "preservedAt": "[private-source]/Protected Rollback/prior-centered-shopping-20261030-1XetjX",
+  "verification": "Existing 12 synthetic full-app theme/layout cases additionally assert both source-label centers and text alignment; regression, analysis and Windows build evidence is recorded separately.",
+  "audit": "[private-audit]/audit/planner-centered-sources-20261030",
+  "captures": "[private-audit]/work/visuals/planner-centered-sources",
+  "runnable": "build/windows/x64/runner/Release/BlackSpiritLife.exe",
+  "personalDataAccessed": false,
+  "visibleAppLaunched": false,
+  "installedAppChanged": false,
+  "handedOff": false,
+  "published": false
+}

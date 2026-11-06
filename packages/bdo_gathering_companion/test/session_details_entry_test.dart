@@ -15,26 +15,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'action_hint_finder.dart';
 
 const _captureKey = ValueKey('session-details-capture');
-const _lightPalette = CompanionVisualPalette(
-  brightness: Brightness.light,
-  canvas: Color(0xFFECE1C4),
-  canvasDeep: Color(0xFFD7C9A8),
-  surface: Color(0xFFF1E8D3),
-  raised: Color(0xFFFFF8E8),
-  inset: Color(0xFFE2D3B1),
-  ink: Color(0xFF262C32),
-  muted: Color(0xFF645C50),
-  accent: Color(0xFF264D62),
-  accentBright: Color(0xFF3C6A80),
-  gold: Color(0xFF87601F),
-  edge: Color(0xFF92784D),
-  rim: Color(0xFFFFFDF5),
-  positive: Color(0xFF315E42),
-  warning: Color(0xFF87601F),
-  danger: Color(0xFF933A36),
-);
 
 class _MemoryStore extends SessionStore {
   _MemoryStore() : super(directory: Directory.systemTemp);
@@ -95,7 +78,7 @@ Future<_MemoryStore> _mount(
   Catalog catalog, {
   double scale = 1,
   Size viewport = const Size(1200, 752),
-  CompanionVisualPalette palette = CompanionVisualPalette.fieldDesk,
+  CompanionVisualPalette? palette,
 }) async {
   tester.view.devicePixelRatio = 1;
   tester.view.physicalSize = viewport;
@@ -243,7 +226,7 @@ void main() {
         findsNothing,
       );
       expect(find.text('Save session'), findsOneWidget);
-      expect(find.byTooltip('New session'), findsOneWidget);
+      expect(findActionHint('New session'), findsOneWidget);
       await _openDetails(tester);
       expect(tester.widget<TextField>(_duration).enabled, isTrue);
       await tester.enterText(_duration, '45');
@@ -262,7 +245,7 @@ void main() {
       expect(store.saveCalls, 0);
       expect(store.sessions, isEmpty);
 
-      await tester.tap(find.byTooltip('New session'));
+      await tester.tap(findActionHint('New session'));
       await tester.pumpAndSettle();
       expect(find.text('Start a new session?'), findsOneWidget);
       await tester.tap(find.text('Cancel'));
@@ -303,7 +286,7 @@ void main() {
       final store = await _mount(tester, catalog);
       await tester.tap(_key('session-timer-action'));
       await tester.pump(const Duration(milliseconds: 300));
-      expect(find.byTooltip('Pause timer'), findsOneWidget);
+      expect(findActionHint('Pause timer'), findsOneWidget);
       expect(tester.widget<TextButton>(_edit).onPressed, isNotNull);
       await _openDetails(tester);
       expect(tester.widget<TextField>(_duration).enabled, isFalse);
@@ -316,7 +299,7 @@ void main() {
       await _pickFirstOfMonth(tester);
       expect(durationController.text, originalDuration);
       await _finishDetails(tester);
-      expect(find.byTooltip('Pause timer'), findsOneWidget);
+      expect(findActionHint('Pause timer'), findsOneWidget);
       expect(find.text('Pause gathering?'), findsNothing);
       expect(tester.widget<OutlinedButton>(_key('time-30')).onPressed, isNull);
       await _openDetails(tester);
@@ -388,7 +371,7 @@ void main() {
     expect(tester.widget<TextButton>(_edit).onPressed, isNull);
     final newSession = find.descendant(
       of: _key('session-save-actions'),
-      matching: find.byType(IconButton),
+      matching: findActionHint('New session'),
     );
     expect(tester.widget<IconButton>(newSession).onPressed, isNull);
     store.pendingSave!.complete();
@@ -421,7 +404,7 @@ void main() {
       findsOneWidget,
     );
     expect(
-      find.descendant(of: actions, matching: find.byTooltip('New session')),
+      find.descendant(of: actions, matching: findActionHint('New session')),
       findsOneWidget,
     );
     expect(find.text('Start timer'), findsOneWidget);
@@ -493,9 +476,11 @@ void main() {
     },
   );
 
-  for (final palette in {
-    'dark': CompanionVisualPalette.fieldDesk,
-    'light': _lightPalette,
+  // The approved hosted field desk deliberately has no session editor. Its
+  // light/dark navigation and record preservation are covered separately by
+  // hosted_field_desk_test.dart; do not re-enable it to satisfy old fixtures.
+  for (final palette in <String, CompanionVisualPalette?>{
+    'standalone': null,
   }.entries) {
     for (final scale in [1.0, 2.0]) {
       testWidgets(

@@ -15,12 +15,30 @@ gathering-location data in `resource_map.json`.
 
 The generator rejects any source file whose SHA-256 differs from the manifest
 embedded in `generate_worker_economics.mjs`. The reviewed generated asset is
-354,383 bytes and has SHA-256:
+354,475 bytes and has SHA-256:
 
-`64abeda209b82ea1caf6fc8c5eb29ddc8f1007837fa4d13652abe534697c29d7`
+`5eb5905de243757a584e471c9874417db6b59f4467d5dfd7b0102dbb4780926b`
 
 It covers all 352 resource-producing worker sites in the map and 30 worker
 towns.
+
+### Identity correction — 2026-11-02
+
+All 88 town-worker profiles were compared by character ID to the English PC
+client names through October 31. The old generator reversed Goblin (species 0)
+and Human (species 1), and gave species 3–8 generic labels. The generator now
+uses the worker species and names Papu, Fadus, Dwarf, Dokkebi, Dolswe and Shellfolk.
+66 displayed labels changed across 30 towns; every numeric profile input, worker
+type, character ID and all 352 production records remain exactly unchanged.
+
+The 14 Inner Edania sites 2115–2128 remain explicitly unmodeled. Regeneration now
+recognizes that existing exclusion rather than failing on the newer map; it does
+not invent workload, yield or travel-distance records. Any other missing mapped
+site still fails generation. This is an identity correction, not a claim that
+the July economics snapshot is independently certified against all current
+server mechanics. The current official NA/EU Workers guide supports the species
+roles and one free worker slot, but does not provide full numeric yield tables:
+<https://www.naeu.playblackdesert.com/en-US/Wiki?wikiNo=40>.
 
 ## Transformation
 

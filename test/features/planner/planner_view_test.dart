@@ -30,6 +30,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../../support/action_hint_finder.dart';
+import '../../support/availability_badge_finders.dart';
 import '../shared/custom_icon_test_support.dart';
 import 'planner_test_fixture.dart';
 
@@ -101,13 +102,13 @@ void main() {
             (widget) =>
                 widget is PlannerItemIcon &&
                 widget.name == 'Sunrise Herb' &&
-                widget.size == 44,
+                widget.size == 36,
           ),
         ),
         findsOneWidget,
       );
       final headerTitle = find.descendant(
-        of: popover,
+        of: find.byKey(const ValueKey('planner-afk-drag-region')),
         matching: find.text('Intermediate Reagent'),
       );
       expect(tester.widget<Text>(headerTitle).style?.fontSize, 20);
@@ -115,7 +116,7 @@ void main() {
         of: popover,
         matching: find.text('Sunrise Herb'),
       );
-      expect(tester.widget<Text>(ingredientName).style?.fontSize, 15);
+      expect(tester.widget<Text>(ingredientName).style?.fontSize, 14);
       for (final key in const <ValueKey<String>>[
         ValueKey<String>('planner-afk-edit-profile'),
         ValueKey<String>('planner-afk-close'),
@@ -455,6 +456,8 @@ void main() {
         find.byKey(const ValueKey<String>('planner-undo-completion')),
       );
       await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const ValueKey('planner-undo-confirm')));
+      await tester.pumpAndSettle();
       await tester.tap(anchor);
       await tester.pumpAndSettle();
       expectRound('Batch 3 / 3', '10', '20', 'Done');
@@ -467,6 +470,8 @@ void main() {
         await tester.tap(
           find.byKey(const ValueKey<String>('planner-undo-completion')),
         );
+        await tester.pumpAndSettle();
+        await tester.tap(find.byKey(const ValueKey('planner-undo-confirm')));
         await tester.pumpAndSettle();
       }
       expect(
@@ -568,7 +573,7 @@ void main() {
       const ValueKey<String>('planner-afk-item-list:needed:1'),
     );
     final threeRowHeight = tester.getSize(split).height;
-    expect(threeRowHeight, closeTo(414, 1));
+    expect(threeRowHeight, closeTo(476, 1));
     expect(
       find.descendant(
         of: neededList,
@@ -587,8 +592,8 @@ void main() {
     await tester.tap(find.byKey(anchorKey));
     await tester.pumpAndSettle();
     final fiveRowHeight = tester.getSize(split).height;
-    expect(fiveRowHeight, closeTo(546, 1));
-    expect(fiveRowHeight - threeRowHeight, closeTo(132, 1));
+    expect(fiveRowHeight, closeTo(600, 1));
+    expect(fiveRowHeight - threeRowHeight, closeTo(124, 1));
     expect(
       find.descendant(
         of: neededList,
@@ -1446,7 +1451,7 @@ void main() {
             (widget) =>
                 widget is AppVectorGlyph &&
                 widget.name == 'swap' &&
-                widget.size == 11,
+                widget.size == 13,
           ),
         ),
         findsOneWidget,
@@ -1717,11 +1722,24 @@ void main() {
         find.byKey(PlannerActionKeys.row('P20', 'Special Silver Azalea')),
       );
       await tester.pump();
+      expect(harness.copied, contains('Special Silver Azalea'));
+      expect(
+        find.bySemanticsLabel('Substitute choices for Sunrise Herb'),
+        findsNothing,
+      );
+      await tester.tap(
+        find.byKey(
+          PlannerActionKeys.row(
+            'P12',
+            'missing:Special Silver Azalea:Wild Herbs',
+          ),
+        ),
+      );
+      await tester.pump();
       expect(
         find.bySemanticsLabel('Substitute choices for Sunrise Herb'),
         findsOneWidget,
       );
-      expect(harness.copied, isNot(contains('Special Silver Azalea')));
       expect(tester.takeException(), isNull);
       await harness.controller.dispose();
     },
@@ -2038,7 +2056,7 @@ void main() {
       find.text("Can't be registered on the Central Market."),
       findsNothing,
     );
-    expect(find.text('Stock —'), findsNothing);
+    expect(stockBadgeText('—'), findsNothing);
     expect(find.text('No price'), findsNothing);
     expect(find.text('Total -'), findsNothing);
     expect(
@@ -2079,11 +2097,12 @@ void main() {
       await tester.tap(find.byKey(PlannerActionKeys.p15));
       await tester.pump(const Duration(milliseconds: 200));
 
-      expect(find.text('Vendor item'), findsOneWidget);
-      expect(find.text('500 each'), findsOneWidget);
-      expect(find.textContaining('Total '), findsOneWidget);
+      expect(find.text('NPC'), findsOneWidget);
+      expect(find.text('500'), findsOneWidget);
+      expect(find.text('each'), findsOneWidget);
+      expect(find.text('Total'), findsOneWidget);
       expect(find.text('Total -'), findsNothing);
-      expect(find.text('Stock —'), findsNothing);
+      expect(stockBadgeText('—'), findsNothing);
       expect(
         find.text("Can't be registered on the Central Market."),
         findsNothing,
@@ -2121,7 +2140,7 @@ void main() {
         find.text("Can't be registered on the Central Market."),
         findsNothing,
       );
-      expect(find.text('Stock —'), findsNothing);
+      expect(stockBadgeText('—'), findsNothing);
 
       refresh.complete(
         const PlannerMarketRefresh(
@@ -2934,8 +2953,8 @@ void main() {
         PlannerActionKeys.row('P14', 'Intermediate Reagent:Sunrise Herb'),
       ),
     );
-    expect(queueIngredientName.left - queueSubstitute.left, 3);
-    expect(queueSubstitute.right - queueIngredientName.right, 18);
+    expect(queueSubstitute.left - queueIngredientName.right, 6);
+    expect(queueSubstitute.width, 30);
     final queuePerCraft = tester.getRect(
       find.byKey(
         const ValueKey<String>(
@@ -2998,9 +3017,9 @@ void main() {
     expect(ownedField.size, const Size(82, 38));
     expect(add.left - ownedField.right, 15);
     expect(needIcon.size, const Size.square(48));
-    expect(needName.left - needIcon.right, 15);
-    expect(needName.left - needSubstitute.left, 3);
-    expect(needSubstitute.right - needName.right, 18);
+    expect(needName.left - needIcon.right, 12);
+    expect(needSubstitute.left - needName.right, 6);
+    expect(needSubstitute.width, 30);
     expect(needSource.left - needSubstitute.right, 5);
     expect(needSubstitute.center.dy, closeTo(needName.center.dy, .01));
     expect(needSource.center.dy, closeTo(needName.center.dy, .01));
@@ -3233,6 +3252,7 @@ void main() {
       );
       await tester.tap(substituteName);
       await tester.pump();
+      await tester.pump(const Duration(milliseconds: 200));
       final substitute = find.bySemanticsLabel(
         'Substitute choices for Sunrise Herb',
       );
@@ -3245,7 +3265,9 @@ void main() {
       expect(sourceAction, findsOneWidget);
       await tester.tap(sourceAction);
       await tester.pump();
-      expect(substitute, findsOneWidget);
+      // The owned table is a popover, not the former inline chooser. Opening
+      // another surface dismisses it (also verified on the preceding build).
+      expect(substitute, findsNothing);
       final source = find.bySemanticsLabel(
         'Source information for Sunrise Herb',
       );
@@ -3280,9 +3302,12 @@ void main() {
       await tester.tapAt(const Offset(20, 20));
       await tester.pump();
       expect(source, findsNothing);
-      expect(substitute, findsOneWidget);
+      expect(substitute, findsNothing);
 
       await tester.tap(substituteName);
+      await tester.pump();
+      expect(substitute, findsOneWidget);
+      await tester.sendKeyEvent(LogicalKeyboardKey.escape);
       await tester.pump();
       expect(substitute, findsNothing);
 
@@ -3376,7 +3401,7 @@ void main() {
   );
 
   testWidgets(
-    'Ledger substitute chooser expands inline as a two-column authored grid',
+    'Ledger Need First choices use the approved scrollable owned table',
     (tester) async {
       await setPlannerTestSize(tester, const Size(1500, 940));
       final harness = PlannerTestHarness();
@@ -3404,15 +3429,14 @@ void main() {
         PlannerActionKeys.row('P12', 'missing:Sunrise Herb:Wild Herbs'),
       );
       expect(toggle, findsOneWidget);
-      expect(tester.getSize(toggle).width, greaterThan(100));
-      expect(tester.getSize(toggle).height, 23);
+      expect(tester.getSize(toggle), const Size(30, 28));
       final indicator = find.descendant(
         of: toggle,
         matching: find.byWidgetPredicate(
           (widget) =>
               widget is AppVectorGlyph &&
               widget.name == 'swap' &&
-              widget.size == 11,
+              widget.size == 13,
         ),
       );
       expect(indicator, findsOneWidget);
@@ -3447,18 +3471,18 @@ void main() {
       expect(chooser, findsOneWidget);
       expect(tester.getTopLeft(queueName).dy, queueTopBefore);
       final chooserRect = tester.getRect(chooser);
-      final needRect = tester.getRect(needSurface);
-      expect(chooserRect.left - needRect.left, closeTo(63, .01));
-      expect(needRect.right - chooserRect.right, closeTo(11, .01));
+      expect(needSurface, findsOneWidget);
+      _expectInsideViewport(chooserRect, const Size(1500, 940));
+      expect(chooserRect.width, 500);
 
       final first = find.byKey(PlannerActionKeys.row('P13', 'Sunrise Herb'));
       final second = find.byKey(PlannerActionKeys.row('P13', 'Silver Azalea'));
-      expect(tester.getSize(first), const Size(174, 52));
-      expect(tester.getSize(second), const Size(174, 52));
+      expect(tester.getSize(first).height, greaterThanOrEqualTo(48));
+      expect(tester.getSize(second).height, greaterThanOrEqualTo(48));
       final firstRect = tester.getRect(first);
       final secondRect = tester.getRect(second);
-      expect(secondRect.left - firstRect.right, 6);
-      expect(secondRect.top, firstRect.top);
+      expect(secondRect.left, firstRect.left);
+      expect(secondRect.top, firstRect.bottom);
       expect(
         tester
             .widget<PlannerItemIcon>(
@@ -3467,27 +3491,19 @@ void main() {
                   .first,
             )
             .size,
-        26,
+        36,
       );
       expect(find.text('Choose Substitute'), findsNothing);
       expect(find.textContaining('Ratio '), findsNothing);
       expect(find.textContaining('Owned '), findsNothing);
 
-      await tester.sendKeyEvent(LogicalKeyboardKey.enter);
+      await tester.sendKeyEvent(LogicalKeyboardKey.escape);
       await tester.pump();
       expect(chooser, findsNothing);
-      await tester.sendKeyEvent(LogicalKeyboardKey.space);
-      await tester.pump();
-      expect(chooser, findsOneWidget);
-
-      await tester.sendKeyEvent(LogicalKeyboardKey.escape);
+      await tester.tap(toggle);
       await tester.pump();
       expect(chooser, findsOneWidget);
       await tester.tapAt(const Offset(20, 20));
-      await tester.pump();
-      expect(chooser, findsOneWidget);
-
-      await tester.tap(toggle);
       await tester.pump();
       expect(chooser, findsNothing);
       await tester.tap(toggle);

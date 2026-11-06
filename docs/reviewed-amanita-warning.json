@@ -1,0 +1,21 @@
+{
+  "date": "2026-11-03",
+  "scope": "Two exact higher-grade Amanita references gain the confirmed raw-consumption poison warning. No resistance, duration, cooldown, stacking or poison-probability claim is added.",
+  "identities": [
+    {"id": 5462, "name": "High-quality Amanita Mushroom"},
+    {"id": 5482, "name": "Special Amanita Mushroom"}
+  ],
+  "warning": "Eating it raw can poison you.",
+  "evidence": [
+    {"url": "https://bdocodex.com/us/item/5462/", "archive": "official/amanita-hq-20261103", "sha256": "33d8c186a5202f4123516b9c1475344e96e49a004e600e1e64696491e584c9b0"},
+    {"url": "https://bdocodex.com/us/item/5482/", "archive": "official/amanita-special-20261103", "sha256": "318cf06d361bdd0c54bbc63844ebcd3c93cb24dd2cba17119f84e635a6dab131"},
+    {"url": "https://blackdesert.pearlabyss.com/Asia/en-US/News/Notice/Detail?_boardNo=1594", "archive": "official/amanita-pc-20200520", "date": "2020-05-20", "sha256": "77f8678e161d391561ba9128d667d0b9b7996185094a3e83cd1f4d561701b21b", "scope": "Historical PC normal Amanita resistance change; not proof that both higher grades changed."}
+  ],
+  "nativeCorroboration": {
+    "itemsSha256": "a54b5735052c990e189ff1a50afb6d5442cc80e0ba8dabff995979bc8d35c821",
+    "warning": "Both exact current descriptions warn of possible poison when eaten without Cooking.",
+    "conflict": "Normal5419 links Knockdown/Bound50474; higher5462/5482 link Fear50479. Higher-grade chain also includes poison26147. The explicit current PC English/Korean localized buff and effect payload agree with each other but differ from applying the historical normal-grade patch generically."
+  },
+  "remainingDependency": "Exact current PC EU higher-grade resistance behavior needs observed consumption/buff tooltip or an explicit publisher correction covering IDs5462/5482. Public exact-grade item pages only name the usage effect, not its numeric resistance. Broad normal-grade guides do not settle this conflict; repeated generic searches are not evidence. No live game access or item consumption is performed by this audit.",
+  "safety": "Normal Amanita's separately supported effects remain. Higher-grade effects remain absent, not replaced with either disputed numeric effect. Existing formulas, substitutions, acquisition notes, market IDs and saved data unchanged."
+}

@@ -829,6 +829,8 @@ void main() {
       addTearDown(restarted.dispose);
       await restarted.ready;
       expect(restarted.currency.id, 'witchs-delicacy');
+      expect(restarted.preferences.section, 'crafting');
+      restarted.change((p) => p.section = 'exchanges');
       expect(
         restarted.market.items.keys.toSet(),
         _rewardIds('witchs-delicacy'),
@@ -873,6 +875,8 @@ void main() {
       );
       addTearDown(restarted.dispose);
       await restarted.ready;
+      expect(restarted.preferences.section, 'crafting');
+      restarted.change((p) => p.section = 'exchanges');
       expect(restarted.hasChecked, isTrue);
       expect(restarted.lastCheck, checkedAt);
       await _pastDebounce();
@@ -916,6 +920,12 @@ void main() {
       );
       addTearDown(restarted.dispose);
       await restarted.ready;
+      expect(
+        restarted.hasChecked,
+        isFalse,
+        reason: 'Exchange receipts do not certify the fresh Crafting scope.',
+      );
+      restarted.change((p) => p.section = 'exchanges');
       expect(
         restarted.hasChecked,
         isTrue,
@@ -1324,6 +1334,10 @@ final class _Fixture {
       },
     );
     await fixture.controller.ready;
+    // Startup intentionally resets navigation to Crafting. These tests exercise
+    // exchange request scopes, so enter that section as a user would; persisted
+    // section values must not override the approved startup behavior.
+    fixture.controller.change((p) => p.section = 'exchanges');
     return fixture;
   }
 

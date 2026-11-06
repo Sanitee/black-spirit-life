@@ -1,0 +1,6 @@
+{
+  "reviewedAt": "2026-11-03",
+  "scope": "Four restored Mix-elixir inputs lacked weight entries in the shared AFK/planning lookup. Exact current PC IDs766,768,769,770 each weigh0.2LT. All prior active and historical weights are retained.",
+  "evidence": "audit/correctness-review-20261102/resumed-mix-weight-evidence.json",
+  "regression": "item_weight_catalog_coverage_test.dart checks raw and assembled production inputs plus exact identities/weights; recipe_book_alternative_routes_test.dart checks every restored formula. No private inventory involved."
+}

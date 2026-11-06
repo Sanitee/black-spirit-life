@@ -34,6 +34,7 @@ import 'workspace/retained_workspace_viewport.dart';
 /// data directory is available, while the normal app bootstrap continues.
 FishCompanionRuntimeHost createApplicationFishCompanionRuntimeHost({
   required Future<Directory> Function() applicationDirectory,
+  Future<Directory> Function()? webViewDataDirectory,
   Directory? referenceCacheDirectory,
   FishCompanionRuntimeStarter? starter,
 }) {
@@ -45,9 +46,14 @@ FishCompanionRuntimeHost createApplicationFishCompanionRuntimeHost({
     if (starter != null) return starter(cancellation);
     return FishCompanionRuntime(
       personalDataRoot: directory,
-      webViewDataRoot: Directory(
-        '${directory.absolute.path}${Platform.pathSeparator}webview2',
-      ),
+      webViewDataRoot: webViewDataDirectory == null
+          ? Directory(
+              '${directory.absolute.path}${Platform.pathSeparator}webview2',
+            )
+          : await _waitForFishStartupValue(
+              webViewDataDirectory(),
+              cancellation,
+            ),
       referenceCacheRoot:
           referenceCacheDirectory ?? applicationFishReferenceCacheDirectory(),
     ).start(cancellation: cancellation);

@@ -9,6 +9,7 @@ import 'package:bdo_map_core/bdo_map_core.dart'
 import 'package:flutter/foundation.dart';
 
 import '../../data/catalog/catalog_repository.dart';
+import '../../domain/catalog/temporarily_archived_items.dart';
 import '../../domain/formatting/planner_formatters.dart';
 import '../../domain/models/catalog_models.dart';
 import '../../domain/models/craft_mode.dart';
@@ -18,6 +19,7 @@ import '../../domain/planner/planner_models.dart' as planning;
 import '../../domain/planner/recipe_route_economics.dart';
 import '../../domain/planner/reviewed_acquisition_choices.dart';
 import '../../domain/planner/source_resolution.dart';
+import '../../domain/state/actual_batch_output.dart';
 import '../../domain/state/craft_completion.dart';
 import '../../domain/state/inventory_storage.dart';
 import '../../domain/state/planner_content_scale.dart';
@@ -849,7 +851,14 @@ final class ModeFeatureController {
     }
     final names =
         assembled.entries
-            .where((entry) => entry.value.isCraftable)
+            .where(
+              (entry) =>
+                  entry.value.isCraftable &&
+                  !isTemporarilyArchivedItem(
+                    entry.key,
+                    itemId: entry.value.marketId,
+                  ),
+            )
             .map((entry) => entry.key)
             .toList()
           ..sort(_compareNames);
@@ -899,7 +908,11 @@ final class ModeFeatureController {
 
   bool selectTarget(String name) {
     final match = _exactOrFolded(recipes, name);
-    if (match == null || !recipes[match]!.isCraftable) return false;
+    if (match == null ||
+        !recipes[match]!.isCraftable ||
+        isTemporarilyArchivedItem(match, itemId: recipes[match]!.marketId)) {
+      return false;
+    }
     expandedSteps.value = const <String>{};
     _commit(
       state.value.copyWith(target: match, completedSteps: const <String>{}),
@@ -922,7 +935,10 @@ final class ModeFeatureController {
     final match = _exactOrFolded(recipes, name);
     if (match == null) return false;
     final recipe = recipes[match]!;
-    if (!recipe.isCraftable) return false;
+    if (!recipe.isCraftable ||
+        isTemporarilyArchivedItem(match, itemId: recipe.marketId)) {
+      return false;
+    }
 
     RecipeVariant? selected;
     final requestedVariant = variantId?.trim();
@@ -1073,16 +1089,21 @@ final class ModeFeatureController {
   String? get lastCompletionName =>
       latestCraftCompletion(owner.documentSnapshot, mode)?['recipe'] as String?;
 
+  CraftCompletionReview? get completionReview =>
+      CraftCompletionReview.from(owner.documentSnapshot, mode);
+
   bool canUndoCompletion({String? progressKey}) {
     final receipt = latestCraftCompletion(owner.documentSnapshot, mode);
     return receipt != null &&
         (progressKey == null || receipt['progressKey'] == progressKey);
   }
 
-  bool undoCompletion({String? progressKey}) {
+  bool undoCompletion({String? progressKey, String? expectedReceipt}) {
     if (owner._disposed ||
         owner._mutationsFrozen ||
-        !canUndoCompletion(progressKey: progressKey)) {
+        !canUndoCompletion(progressKey: progressKey) ||
+        (expectedReceipt != null &&
+            completionReview?.token != expectedReceipt)) {
       return false;
     }
     final restored = undoCraftCompletion(owner.documentSnapshot, mode);
@@ -1143,8 +1164,14 @@ final class ModeFeatureController {
     required int completedBefore,
     required int completedAfter,
     bool bonus = false,
+    int? actualOutput,
+    bool lowOutputConfirmed = false,
   }) {
     if (owner._disposed || owner._mutationsFrozen) return false;
+    if (actualOutput != null &&
+        (actualOutput < 0 || actualOutput > maxActualBatchOutput)) {
+      return false;
+    }
     final currentPlan = bonus
         ? owner.assembly.build(
             catalog: owner.catalog,
@@ -1178,17 +1205,29 @@ final class ModeFeatureController {
         attempts > progress.attemptsPerRound) {
       return false;
     }
+    final batch = scaleCraftStep(current, attempts.toDouble());
+    if (!lowOutputConfirmed &&
+        actualBatchOutputNeedsConfirmation(actualOutput, batch.produced)) {
+      return false;
+    }
+    final measured = actualOutput != null && actualOutput > 0;
     final nextProgress = expected.copyWith(completedAttempts: completedAfter);
     owner.updateDocument(
       (document) => recordCraftCompletion(
         document: document,
         mode: mode,
-        step: scaleCraftStep(current, attempts.toDouble()),
+        step: batch,
         target: progress.targetName,
         want: progress.targetAmount,
-        markComplete: !bonus && attempts == current.count,
+        // An actual shortfall must remain in the queue, even on the final load.
+        markComplete:
+            !bonus &&
+            (measured
+                ? actualOutput >= current.net
+                : attempts == current.count),
         roundIngredients: true,
         progress: nextProgress,
+        actualOutput: actualOutput,
       ),
       immediate: true,
     );
@@ -1242,6 +1281,44 @@ final class ModeFeatureController {
     choices['recipe:$parentName:${ingredient.substituteGroup ?? ingredient.name}'] =
         selection;
     _commit(state.value.copyWith(substituteChoices: choices), immediate: true);
+  }
+
+  /// Uses the same full-plan projection as selecting this option, without
+  /// committing it, changing Auto/quality, or sharing the active plan cache.
+  ({String name, double owned, double missing, double needed})
+  previewSubstituteAmounts({
+    required String parentName,
+    required Ingredient ingredient,
+    required String selection,
+  }) {
+    final source = state.value.copyWith(
+      substituteChoices: {
+        ...state.value.substituteChoices,
+        owner.assembly.engine.substituteChoiceKey(parentName, ingredient):
+            selection,
+      },
+    );
+    final projected = owner.assembly.engine.buildPlan(
+      mode: mode,
+      recipes: _recipesFor(source),
+      state: owner.assembly.plannerState(source),
+      rules: owner.plannerRules,
+    );
+    final input = projected.steps
+        .where((step) => _fold(step.name) == _fold(parentName))
+        .expand((step) => step.ingredients)
+        .where((row) => _fold(row.original) == _fold(ingredient.name))
+        .firstOrNull;
+    final name = input?.name ?? selection;
+    final missing = projected.missing
+        .where((row) => _fold(row.name) == _fold(name))
+        .firstOrNull;
+    return (
+      name: name,
+      owned: _foldedValue(source.inventory, name) ?? 0,
+      missing: missing?.missing ?? input?.missing ?? 0,
+      needed: missing?.need ?? input?.need ?? 0,
+    );
   }
 
   bool selectRecipeVariant({

@@ -29,6 +29,28 @@ class ExchangeReferenceRecipe {
 }
 
 const exchangeItemDetails = <int, ExchangeItemDetails>{
+  // Official PC exchange 2026-07-23 and exact current item identity 50810.
+  50810: ExchangeItemDetails(
+    'A Courser Training material.',
+    howToObtain: ['Central Market'],
+  ),
+  // Official PC Morning Light update 2023-06-14, corroborated by current
+  // quest text 8801-1/2/3. These are Family-limited choices, not worker hiring.
+  64853: ExchangeItemDetails(
+    'An Artisan Dokkebi worker contract for Dalbeol Village.',
+    howToObtain: ['Exchange · 300 Sangpyeong Coin with Dokkebi Princess'],
+    notes: ['Once per Family; choose the Dalbeol Village contract.'],
+  ),
+  64861: ExchangeItemDetails(
+    'An Artisan Dolswe worker contract for Dalbeol Village.',
+    howToObtain: ['Exchange · 300 Sangpyeong Coin with Honorable Choi (Nolbu)'],
+    notes: ['Once per Family; choose the Dalbeol Village contract.'],
+  ),
+  64857: ExchangeItemDetails(
+    'An Artisan Shellfolk worker contract for Dalbeol Village.',
+    howToObtain: ['Exchange · 300 Sangpyeong Coin with Chulong'],
+    notes: ['Once per Family; choose the Dalbeol Village contract.'],
+  ),
   // Reviewed 2026-10-17. Current in-game time reduction and repair text:
   // https://bdocodex.com/us/item/3743/?sl=1
   // https://bdocodex.com/gl/item/3744/
@@ -295,6 +317,11 @@ const exchangeItemDetails = <int, ExchangeItemDetails>{
   17572: ExchangeItemDetails(
     'Adds time to the Item Collection Increase Gauge.',
     uses: ['Activate the gauge while defeating monsters to increase loot.'],
+    effects: [
+      'Gauge level 1: Item Drop Rate +100%, Item Drop Amount +50%',
+      'Gauge level 2: Item Drop Rate +100%, Item Drop Amount +100%',
+    ],
+    notes: ['Gauge level 0: off.'],
   ),
   768160: ExchangeItemDetails(
     'A sealed crystal that can be opened or processed.',

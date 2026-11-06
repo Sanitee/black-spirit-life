@@ -4,12 +4,14 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import '../../domain/catalog/item_name_presentation.dart';
 import '../../domain/models/craft_mode.dart';
 import '../../shared/overlays/anchored_popover.dart';
 import '../../visual/visual.dart';
 import '../planner/planner_contracts.dart';
 import '../recipe_book/recipe_book_item_info.dart';
 import '../recipe_book/recipe_book_item_info_view.dart';
+import '../shared/item_name_copy_scope.dart';
 import 'opportunities_controller.dart';
 
 /// InheritedTheme keeps the shell's map actions available inside showDialog.
@@ -66,7 +68,7 @@ class OpportunityCopyName extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Semantics(
     button: true,
-    label: 'Copy $name',
+    label: 'Copy ${itemDisplayName(name)}',
     child: Align(
       alignment: Alignment.centerLeft,
       heightFactor: 1,
@@ -76,7 +78,7 @@ class OpportunityCopyName extends StatelessWidget {
         borderRadius: BorderRadius.circular(4),
         hoverColor: Colors.transparent,
         onTap: () => copyOpportunityItemName(context, name),
-        child: Text(displayLabel ?? name, style: style),
+        child: Text(itemDisplayLabel(name, displayLabel), style: style),
       ),
     ),
   );
@@ -85,15 +87,20 @@ class OpportunityCopyName extends StatelessWidget {
 Future<void> copyOpportunityItemName(BuildContext context, String name) async {
   final actions = OpportunityItemActionsScope.maybeOf(context);
   if (actions != null) {
-    await actions.copyName(name);
+    await actions.copyName(itemDisplayName(name));
+    return;
+  }
+  final copy = ItemNameCopyScope.maybeOf(context);
+  if (copy != null) {
+    await copy(itemDisplayName(name));
     return;
   }
   try {
-    await Clipboard.setData(ClipboardData(text: name));
+    await Clipboard.setData(ClipboardData(text: itemDisplayName(name)));
     if (!context.mounted) return;
     ScaffoldMessenger.maybeOf(context)?.showSnackBar(
       SnackBar(
-        content: Text('Copied $name'),
+        content: Text('Copied ${itemDisplayName(name)}'),
         duration: const Duration(milliseconds: 1350),
       ),
     );
@@ -465,7 +472,7 @@ Future<void> _showItemInfo(
         name: name,
         info: resolvedInfo,
         icon: icon,
-        maxWidth: itemReferenceCardWidth(context),
+        maxWidth: itemReferenceCardMaxWidth(context),
         spec: context.visualTheme,
         onClose: () => Navigator.pop(context),
         onCopyItemName: (name) => copyOpportunityItemName(context, name),

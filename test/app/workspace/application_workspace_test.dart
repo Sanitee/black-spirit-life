@@ -24,6 +24,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../../support/application_test_harness.dart';
+import '../../support/availability_badge_finders.dart';
 
 void main() {
   test('Windows runner keeps the proportional 1575x987 launch frame', () {
@@ -369,11 +370,23 @@ void main() {
         findsNothing,
       );
       expect(
-        find.descendant(of: wolfRow, matching: find.text('Stock 20.000')),
+        find.descendant(of: wolfRow, matching: stockBadgeText('20.000')),
         findsOneWidget,
       );
       expect(
-        find.descendant(of: wolfRow, matching: find.text('18.100 each')),
+        find.descendant(of: wolfRow, matching: find.text('18,1k')),
+        findsOneWidget,
+      );
+      expect(
+        find.descendant(of: wolfRow, matching: find.text('each')),
+        findsOneWidget,
+      );
+      await tester.tap(
+        find.descendant(of: wolfRow, matching: find.text('18,1k')),
+      );
+      await tester.pump();
+      expect(
+        find.descendant(of: wolfRow, matching: find.text('18.100')),
         findsOneWidget,
       );
       expect(tester.takeException(), isNull);
@@ -591,7 +604,7 @@ void main() {
       expect(find.byKey(RecipeBookKeys.modal), findsOneWidget);
       expect(
         tester.getRect(find.byKey(RecipeBookKeys.modal)),
-        const Rect.fromLTWH(140, 83, 1220, 814),
+        const Rect.fromLTWH(32, 76, 1436, 828),
       );
       await tester.enterText(
         find.descendant(

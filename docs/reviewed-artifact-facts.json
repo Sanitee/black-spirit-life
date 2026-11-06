@@ -1,0 +1,23 @@
+{
+  "date": "2026-11-03",
+  "status": "SCOPED_INFORMATION_CORRECTION_FULL_AUDIT_ACTIVE",
+  "changes": [
+    "19 exact basic combat artifacts: identify Kratuga as a verified source without implying it is the only zone",
+    "Marsh Monster AP and Lesha Monster DR: exact Black Spirit gift quests, once per family, story-progress condition",
+    "43 exact basic artifacts: intentional spare-only Dalishain exchange yields two generic Purified Lightstones; no automatic equipment use",
+    "Two common Sethra artifacts: bonuses only affect the equipped Life Skill slot",
+    "Generic Purified Lightstone: 3 spare Lightstones to 1 through Dalishain's exchange interface",
+    "Four elemental Purified Lightstones: one matching Imperfect Lightstone plus 20m Silver through Dalishain; separate existing residence Alchemy recipe retained"
+  ],
+  "primarySources": [
+    {"url": "https://www.naeu.playblackdesert.com/en-US/Wiki?wikiNo=250", "sha256": "58a0a50417193c8cf1cc9e2b35ba878470248bd5523951c89baa3f60ee85f1ed", "scope": "Exact basic artifact families at Kratuga; 3:1 Lightstone exchange; 20m Silver purification", "caution": "Other paragraphs, including blanket Season restrictions, are stale and are not imported"},
+    {"url": "https://www.naeu.playblackdesert.com/en-US/News/Detail?groupContentNo=2712&countryType=en-US", "date": "2022-03-02", "sha256": "33b97335355b40e22cd987743c7dd7f338423f042b8c0a55f19248be269fa172", "scope": "Two exact gift rewards and once-per-family condition; current quest identities corroborated separately"},
+    {"url": "https://www.naeu.playblackdesert.com/en-US/News/Detail?groupContentNo=4265", "date": "2022-11-16", "sha256": "85830f2ce175cd08a5a033049586ca36c1048e6724dae0b1d1ae96536aef8006", "scope": "Lightstone exchange/purification UI replaces the old quests; do not import their obsolete Eureka requirement"},
+    {"url": "https://www.naeu.playblackdesert.com/en-US/News/Detail?groupContentNo=10239", "date": "2026-07-02", "sha256": "8d17525ee0e8b0774cbc6f01580ad9e00fd451a2d2c0d46f752a9d99d515a6bf", "scope": "43 explicitly listed basic artifacts: removed Simple Alchemy, guaranteed two Purified Lightstones from Dalishain; socketed-artifact inventory-order restriction"},
+    {"url": "https://www.naeu.playblackdesert.com/en-US/News/Detail?groupContentNo=10550&countryType=en-US", "date": "2026-09-03", "sha256": "2e2e1cfd0feb7240627847d5ba8118c7fdaf1ec2153b0fefd383d7d9dd2a0e2c", "scope": "Common Sethra EXP/Mastery affects only the Life Skill slot it is equipped in"}
+  ],
+  "questCorroboration": ["https://bdocodex.com/us/quest/7542/1/", "https://bdocodex.com/us/quest/7542/4/"],
+  "notUsedAsCurrentRules": ["Old Asia guide artifact Simple Alchemy", "Removed recycling quest 1649/1 retained in databases", "Suspect native quest condition DSL", "Blanket Season exclusion from the current guide", "A draft Eureka prerequisite was withdrawn before build after checking the November 2022 replacement"],
+  "preserved": ["All effects and calculations", "Explicit existing acquisition formulas", "Stock exclusions/freshness", "Shared einheitlich UI", "Personal state"],
+  "open": ["Exhaustive zone-specific artifact loot probabilities and complete quest/source roster are not certified", "Gathering eligibility exclusions and broad all-Life-Skills description need separate dated source review", "Magical Lightstone Crystal exchange roster and Guru condition remain a separate targeted question"]
+}

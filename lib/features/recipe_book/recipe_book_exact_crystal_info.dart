@@ -917,10 +917,9 @@ exactCrystalInfoByName = <String, ExactCrystalInfo>{
   ),
   'fused crystal of emotions': ExactCrystalInfo(
     title: 'Fused Crystal of Emotions',
+    kind: 'Removed item',
     effects: <String>[],
-    uses: <String>[
-      'Crafts Refined Essence of Emotions, which removes a cup from a reformed accessory.',
-    ],
+    uses: <String>[],
   ),
   'fused crystal of decimation': ExactCrystalInfo(
     title: 'Fused Crystal of Decimation',

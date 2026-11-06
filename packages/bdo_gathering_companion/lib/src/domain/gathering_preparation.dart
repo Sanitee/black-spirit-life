@@ -7,9 +7,8 @@ import 'models.dart';
 const gatheringPreparationPreferenceKey = 'gatheringPreparation';
 const _legacyEstimatePreferenceKey = 'gatheringEstimateSetup';
 
-/// These are the exact existing calculator expense records, not new recovery
-/// formulas. In particular, the catalog's Mellow tick value is not substituted
-/// for Bairog's reviewed hourly expense assumptions.
+/// Map shared catalog selections to the calculator's reviewed energy records.
+/// The three medicines must not also be added to natural recovery below.
 const _herbalExpenses = <String, int>{
   'buff-820150': 820150,
   'buff-821144': 821144,
@@ -22,7 +21,7 @@ const gatheringExtraProcPetIds = <String>{
 };
 
 /// One durable preparation profile. Mastery and drop rate in [baseSettings]
-/// explicitly exclude selected buffs; gear, artifacts and crystals are already
+/// explicitly exclude selected buffs and stones; other gear, artifacts and crystals are already
 /// part of those user-entered base values. Other calculator inputs are retained.
 class GatheringPreparation {
   GatheringPreparation({
@@ -32,16 +31,18 @@ class GatheringPreparation {
     Iterable<String> buffIds = const [],
     Iterable<String> petIds = const [],
     this.statsConfirmed = false,
+    this.requiresStoneStatReview = false,
   }) : baseSettings = _immutableSettings(baseSettings),
        buffIds = _immutableIds(buffIds),
        petIds = _immutableIds(petIds);
 
-  static const schemaVersion = 1;
+  static const schemaVersion = 2;
 
   final BairogCalculatorSettings baseSettings;
   final Set<String> buffIds;
   final Set<String> petIds;
   final bool statsConfirmed;
+  final bool requiresStoneStatReview;
 
   factory GatheringPreparation.fromPreferences(
     Map<String, dynamic> preferences, {
@@ -84,13 +85,20 @@ class GatheringPreparation {
         'Gathering preparation has damaged base stats.',
       );
     }
+    final selectedBuffs = _readIds(json['buffIds'], 'buff');
+    final revision = json['schemaVersion'];
+    final needsStoneReview =
+        json['requiresStoneStatReview'] == true ||
+        ((revision is! num || revision < 2) &&
+            selectedBuffs.contains('buff-45514'));
     return GatheringPreparation(
       baseSettings: BairogCalculatorSettings.fromJson(
         Map<String, dynamic>.from(json['baseSettings'] as Map),
       ),
-      buffIds: _readIds(json['buffIds'], 'buff'),
+      buffIds: selectedBuffs,
       petIds: _readIds(json['petIds'], 'pet'),
-      statsConfirmed: json['statsConfirmed'] == true,
+      statsConfirmed: json['statsConfirmed'] == true && !needsStoneReview,
+      requiresStoneStatReview: needsStoneReview,
     );
   }
 
@@ -100,6 +108,7 @@ class GatheringPreparation {
     'buffIds': buffIds.toList(),
     'petIds': petIds.toList(),
     'statsConfirmed': statsConfirmed,
+    if (requiresStoneStatReview) 'requiresStoneStatReview': true,
   };
 
   GatheringPreparation copyWith({
@@ -112,6 +121,9 @@ class GatheringPreparation {
     buffIds: buffIds ?? this.buffIds,
     petIds: petIds ?? this.petIds,
     statsConfirmed: statsConfirmed ?? this.statsConfirmed,
+    requiresStoneStatReview: statsConfirmed == true
+        ? false
+        : requiresStoneStatReview,
   );
 
   bool hasSameValuesAs(GatheringPreparation other) =>

@@ -1,0 +1,72 @@
+{
+  "date": "2026-11-02",
+  "status": "Confirmed corrections implemented and tested in an isolated candidate; comprehensive current-game factual sign-off remains OPEN.",
+  "scope": "All 2255 existing shared references enumerated through the real controllers in Alchemy, Cooking and Processing, plus 1682 catalog records. This is not a claim of 2255 independently web-verified items.",
+  "baseline": "Complete Recipe Fit and Source Labels 20261101 working snapshot, not Git HEAD. Prior full source and runnable are protected separately.",
+  "corrections": [
+    "Gem of Twilight: Caphras Stone 1 -> 20000; Sunset Glow Crystal: 1 -> 10000. Fixed one-output semantics retained; actual Planner quantities tested.",
+    "Elixir of Perforation gains Pine Sap 5; Looney Elixir gains Powder of Flame 3; Defense Elixir uses Ash Sap 6. Actual Opportunities input costs tested.",
+    "Soft Bread uses standard Corn Dough 6; Red Bean Sirutteok replaces Salt 1 with Sugar 1.",
+    "Resplendent Boss Armor Reform Stones I-IV use Concentrated Boss Crystal 60; IV uses Rough Diamond 1.",
+    "Fourteen identical-input yield-display conflicts reconciled; Rice Flour and grain flour copies also retain the same complete grade options.",
+    "Red Pepper Powder has one route family, Hot Pepper 5 / High-Quality 2 / Special 1. Its retained 1-4 processing model is visibly ESTIMATED, not claimed measured or independently proven.",
+    "Nine exact fallback identities corrected: Oatmeal, Refined Oatmeal, Organic Feed, Caphras Essence, Daybreak Blue Coral, Good Feed, Special Honey Jar, Dark Spirit's Greed and Millennial Wild Ginseng. Ginseng previously pointed to a knowledge item; Greed now agrees with the existing Manage Currency catalog.",
+    "Antidote Elixir, Elixir of Burn Removal and Elixir of Hemostasis cooldowns corrected from 30 to 10 seconds; exact PC snapshot descriptions/effects agree.",
+    "Used for no longer silently stops at one consumer. Explicit eligible consumers and alternatives are retained; duplicate/hidden/archived exclusions remain.",
+    "Shared kind, description and acquisition facts no longer depend on the calling crafting tab. Explicit user recipe edits keep their own context.",
+    "Existing exchange facts are shared with normal reference windows, preserving input amounts, reward containers, limits and requirements. Legacy currency routes are not newly offered as current acquisition routes.",
+    "Perilla, Rice, Napa Cabbage and Radish gain short Morning Light gathering and Noyoung starter-seed guidance. Five grains gain exact starter-seed gathering guidance.",
+    "Source generation checks every reference, not just sparse cards: positive native market eligibility plus agreeing current IDs and exclusions; narrowly parsed gathering clauses and minimum Cooking/Alchemy levels retain restrictions.",
+    "Four explicitly reviewed retained aliases share only their exact identity's source facts; canonical and alias names both remain supported. Internal curation language is filtered out of user-facing source notes.",
+    "Sun-Dried Salt gains the documented rare Sea Water heating byproduct route. No new vendor-price or guaranteed-yield claim is introduced."
+  ],
+  "evidence": {
+    "officialPCRecipeAndMorningLightGathering": "https://www.naeu.playblackdesert.com/en-US/News/Detail?countryType=en-US&groupContentNo=7506",
+    "officialPCDate": "2024-09-12",
+    "currentUSRecipeChecks": [
+      "https://bdocodex.com/us/recipe/9/",
+      "https://bdocodex.com/us/recipe/218/",
+      "https://bdocodex.com/us/recipe/27/",
+      "https://bdocodex.com/us/recipe/129/",
+      "https://bdocodex.com/us/recipe/457/",
+      "https://bdocodex.com/us/item/8829/",
+      "https://bdocodex.com/us/mrecipe/1430/"
+    ],
+    "access": "Indexed US content checked 2026-11-01/02; several direct Codex requests are robots-blocked. Stale recipe table 3024 was not preferred over current item 8829.",
+    "seedVendor": "https://grumpygreen.cricket/seed/",
+    "ginsengPCExchange": "https://blackdesert.pearlabyss.com/Asia/en-US/News/Notice/Detail?_boardNo=6446",
+    "nativeItemSnapshotDate": "2026-09-10",
+    "nativeItemsSha256": "8998F94AA44A5DD86DC5F67F4CFA73EF1523E3B051B58D8F0F9DC42E592912E5",
+    "nativeRecipesSha256": "FC5F67025F4643C021889736F3AD5C5E2C2BD2CDAB693C727E49921CC7CB5412",
+    "snapshotLimits": "Native inputs and descriptions are corroboration, not a fully current live reference. The recipe extractor has no rolled processing output quantities. Base product 1 does not establish fixed yield. Hemostasis cooldown confirmation remains snapshot-bound; Global Lab was not adopted as PC live evidence.",
+    "priorAdjudication": "Workspace audit/all-item-information-20261101/adjudicated-findings.json",
+    "finalAudit": "Workspace audit/verified-item-information-20261102: summary.json, findings.json, review-ledger.json, formula-ledger.json, source-review.json, secondary-datasets.json and UNRESOLVED.txt"
+  },
+  "consistency": "Approved Joined item windows, below-name availability pills, adjacent Central Market pills, quantities, copy, stock freshness, cancellation and contained scrolling are retained. No new visual design. Existing shared rendering covers clicked, hovered, nested, pinned, passive and inline hosts in all three themes.",
+  "verification": {
+    "regressionLog": "regression-final.log: catalog, shared item windows, sources, aliases, quantities, Planner engine, market profitability, Opportunities actions and actual 6765-view export",
+    "captureLog": "capture-tests.log: 54 checks, including the new Perilla/Red Pepper Powder real-app synthetic render matrix and existing shared availability/long-list scrolling checks",
+    "fitRecheck": "The old zero-total-scroll assertion assumed Used for was truncated to one recipe. Replaced with exact first Clown's Blood recipe action visibility at scroll offset 0, plus positive scroll extent for the remaining recipes. Narrow/200% scrolling and background containment remain tested.",
+    "visualEvidence": "Workspace work/visuals/verified-item-information: 12 Perilla/Red Pepper Powder captures plus 72 joined full-app captures. Synthetic data only, no personal profile or visible application launch.",
+    "analysis": "Scoped analysis only; not a whole-repository clean-analysis claim.",
+    "build": "Windows Release candidate; not installed, published or routed through a shortcut.",
+    "testsDoNotProve": "No absence of a mechanical audit flag establishes current-game completeness or empirical proc probabilities. The item audit remains open."
+  },
+  "unresolved": [
+    "26 production formula records across 25 names still differ from available native input routes. Fish/seafood grades, reduced high-skill recipes and genuine alternatives must be adjudicated individually; no blanket doubling or deletion was performed.",
+    "Red Pepper Powder's exact output distribution remains unverified and visibly estimated.",
+    "Lean Meat Salad: displayed/native description 90 minutes conflicts with one internal effect duration of 120 minutes. Kept 90; no invented resolution.",
+    "Residual missing/sparse sources, skill/effect metadata, identity/alias/legacy/bound mappings and six console-containing citation chains remain review candidates, not automatically confirmed errors.",
+    "Secondary map, gathering, housing, worker, Royal Workshop and fish data received bounded structural checks, not full current-game validation. Historical gathering points, fish loot IDs 41663/43871, drop/sale formulas and exact NPC/vendor availability are not signed off.",
+    "Personal data migration, instance/lifecycle publication gates and full public-release verification remain separate and unchanged."
+  ],
+  "safety": {
+    "personalProfilesRead": false,
+    "personalDataModified": false,
+    "visibleApplicationLaunched": false,
+    "installedApplicationReplaced": false,
+    "shortcutsChanged": false,
+    "published": false,
+    "newMarketClientOrPolling": false
+  }
+}

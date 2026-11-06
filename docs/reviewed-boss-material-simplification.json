@@ -1,0 +1,612 @@
+{
+  "reviewedAt": "2026-11-03T14:55:11.715Z",
+  "scope": "91 exact superseded identities; current unified boss materials and ten unified reform stones retained",
+  "sources": [
+    {
+      "key": "boss-alchemy-naeu-1895",
+      "url": "https://www.naeu.playblackdesert.com/en-US/News/Detail?countryType=en-US&groupContentNo=1895",
+      "status": 200,
+      "bytes": 220159,
+      "sha256": "0fabd2f5ce9ca979ca2127e65b0ab3876929e27a9a755ed8fda6476d20beb043",
+      "retrievedAt": "2026-11-03T15:00:14.937Z",
+      "artifact": "official/boss-alchemy-naeu-1895.txt",
+      "scope": "October 14, 2021 PC NA/EU: only market-registerable gear can be used in the Simple Alchemy route. Its old boss-specific outputs are superseded by the February 2024 patch."
+    },
+    {
+      "key": "fodder-naeu-20240228",
+      "url": "https://www.naeu.playblackdesert.com/en-US/News/Detail?groupContentNo=6665",
+      "finalUrl": "https://www.naeu.playblackdesert.com/en-US/News/Detail?groupContentNo=6665",
+      "status": 200,
+      "bytes": 162616,
+      "sha256": "9cc92f6d3a20f7c947a3a1f2e1e2629d79a3b7403d84e68f412dab9a061333ba",
+      "retrievedAt": "2026-11-03T08:31:35.365Z",
+      "artifact": "official/fodder-naeu-20240228.txt"
+    },
+    {
+      "key": "reform-guide-naeu",
+      "url": "https://www.naeu.playblackdesert.com/en-US/Wiki?wikiNo=233",
+      "finalUrl": "https://www.naeu.playblackdesert.com/en-US/Wiki?wikiNo=233",
+      "status": 200,
+      "bytes": 212269,
+      "sha256": "a267c72bcad744cfedc5c57774a63cfa523bb372f65b140c05d28e3f52e6a3f6",
+      "retrievedAt": "2026-11-03T06:20:10.134Z",
+      "artifact": "official/reform-guide-naeu.txt"
+    }
+  ],
+  "entries": [
+    {
+      "id": 8905,
+      "name": "Concentrated Offin Tett Crystal",
+      "group": "supersededBossCrystalsById",
+      "replacement": "Concentrated Boss Crystal"
+    },
+    {
+      "id": 8906,
+      "name": "Concentrated Karanda Crystal",
+      "group": "supersededBossCrystalsById",
+      "replacement": "Concentrated Boss Crystal"
+    },
+    {
+      "id": 8907,
+      "name": "Concentrated Nouver Crystal",
+      "group": "supersededBossCrystalsById",
+      "replacement": "Concentrated Boss Crystal"
+    },
+    {
+      "id": 8908,
+      "name": "Concentrated Kutum Crystal",
+      "group": "supersededBossCrystalsById",
+      "replacement": "Concentrated Boss Crystal"
+    },
+    {
+      "id": 8909,
+      "name": "Concentrated Giath Crystal",
+      "group": "supersededBossCrystalsById",
+      "replacement": "Concentrated Boss Crystal"
+    },
+    {
+      "id": 8910,
+      "name": "Concentrated Griffon Crystal",
+      "group": "supersededBossCrystalsById",
+      "replacement": "Concentrated Boss Crystal"
+    },
+    {
+      "id": 8911,
+      "name": "Concentrated Dim Tree Spirit Crystal",
+      "group": "supersededBossCrystalsById",
+      "replacement": "Concentrated Boss Crystal"
+    },
+    {
+      "id": 8912,
+      "name": "Concentrated Red Nose Crystal",
+      "group": "supersededBossCrystalsById",
+      "replacement": "Concentrated Boss Crystal"
+    },
+    {
+      "id": 8913,
+      "name": "Concentrated Bheg Crystal",
+      "group": "supersededBossCrystalsById",
+      "replacement": "Concentrated Boss Crystal"
+    },
+    {
+      "id": 8914,
+      "name": "Concentrated Leebur Crystal",
+      "group": "supersededBossCrystalsById",
+      "replacement": "Concentrated Boss Crystal"
+    },
+    {
+      "id": 8915,
+      "name": "Concentrated Muskan Crystal",
+      "group": "supersededBossCrystalsById",
+      "replacement": "Concentrated Boss Crystal"
+    },
+    {
+      "id": 8916,
+      "name": "Concentrated Urugon Crystal",
+      "group": "supersededBossCrystalsById",
+      "replacement": "Concentrated Boss Crystal"
+    },
+    {
+      "id": 8918,
+      "name": "Concentrated Offin Tett's Aura",
+      "group": "supersededBossAurasById",
+      "replacement": "Contained Boss Aura"
+    },
+    {
+      "id": 8919,
+      "name": "Concentrated Karanda's Aura",
+      "group": "supersededBossAurasById",
+      "replacement": "Contained Boss Aura"
+    },
+    {
+      "id": 8920,
+      "name": "Concentrated Nouver's Aura",
+      "group": "supersededBossAurasById",
+      "replacement": "Contained Boss Aura"
+    },
+    {
+      "id": 8921,
+      "name": "Concentrated Kutum's Aura",
+      "group": "supersededBossAurasById",
+      "replacement": "Contained Boss Aura"
+    },
+    {
+      "id": 8922,
+      "name": "Concentrated Giath's Aura",
+      "group": "supersededBossAurasById",
+      "replacement": "Contained Boss Aura"
+    },
+    {
+      "id": 8923,
+      "name": "Concentrated Griffon's Aura",
+      "group": "supersededBossAurasById",
+      "replacement": "Contained Boss Aura"
+    },
+    {
+      "id": 8924,
+      "name": "Concentrated Dim Tree Spirit's Aura",
+      "group": "supersededBossAurasById",
+      "replacement": "Contained Boss Aura"
+    },
+    {
+      "id": 8925,
+      "name": "Concentrated Red Nose's Aura",
+      "group": "supersededBossAurasById",
+      "replacement": "Contained Boss Aura"
+    },
+    {
+      "id": 8926,
+      "name": "Concentrated Bheg's Aura",
+      "group": "supersededBossAurasById",
+      "replacement": "Contained Boss Aura"
+    },
+    {
+      "id": 8927,
+      "name": "Concentrated Leebur's Aura",
+      "group": "supersededBossAurasById",
+      "replacement": "Contained Boss Aura"
+    },
+    {
+      "id": 8928,
+      "name": "Concentrated Muskan's Aura",
+      "group": "supersededBossAurasById",
+      "replacement": "Contained Boss Aura"
+    },
+    {
+      "id": 8929,
+      "name": "Concentrated Urugon's Aura",
+      "group": "supersededBossAurasById",
+      "replacement": "Contained Boss Aura"
+    },
+    {
+      "id": 42436,
+      "name": "Nouver's Latent Aura",
+      "group": "supersededLatentAurasById",
+      "replacement": "Latent Boss Aura"
+    },
+    {
+      "id": 42437,
+      "name": "Karanda's Latent Aura",
+      "group": "supersededLatentAurasById",
+      "replacement": "Latent Boss Aura"
+    },
+    {
+      "id": 42450,
+      "name": "Kutum's Latent Aura",
+      "group": "supersededLatentAurasById",
+      "replacement": "Latent Boss Aura"
+    },
+    {
+      "id": 42495,
+      "name": "Offin Tett's Light Fragment",
+      "group": "supersededLatentAurasById",
+      "replacement": "Latent Boss Aura"
+    },
+    {
+      "id": 66111,
+      "name": "Giath's Latent Aura",
+      "group": "supersededLatentAurasById",
+      "replacement": "Latent Boss Aura"
+    },
+    {
+      "id": 66112,
+      "name": "Griffon's Latent Aura",
+      "group": "supersededLatentAurasById",
+      "replacement": "Latent Boss Aura"
+    },
+    {
+      "id": 66113,
+      "name": "Dim Tree Spirit's Latent Aura",
+      "group": "supersededLatentAurasById",
+      "replacement": "Latent Boss Aura"
+    },
+    {
+      "id": 66114,
+      "name": "Red Nose's Latent Aura",
+      "group": "supersededLatentAurasById",
+      "replacement": "Latent Boss Aura"
+    },
+    {
+      "id": 66115,
+      "name": "Bheg's Latent Aura",
+      "group": "supersededLatentAurasById",
+      "replacement": "Latent Boss Aura"
+    },
+    {
+      "id": 66116,
+      "name": "Leebur's Latent Aura",
+      "group": "supersededLatentAurasById",
+      "replacement": "Latent Boss Aura"
+    },
+    {
+      "id": 66117,
+      "name": "Muskan's Latent Aura",
+      "group": "supersededLatentAurasById",
+      "replacement": "Latent Boss Aura"
+    },
+    {
+      "id": 66118,
+      "name": "Urugon's Latent Aura",
+      "group": "supersededLatentAurasById",
+      "replacement": "Latent Boss Aura"
+    },
+    {
+      "id": 8806,
+      "name": "Resplendent Offin Tett's Radiant Main Weapon Reform Stone I",
+      "group": "supersededWeaponReformStonesById",
+      "replacement": "Resplendent Boss Weapon Reform Stone I"
+    },
+    {
+      "id": 8807,
+      "name": "Resplendent Offin Tett's Radiant Main Weapon Reform Stone II",
+      "group": "supersededWeaponReformStonesById",
+      "replacement": "Resplendent Boss Weapon Reform Stone II"
+    },
+    {
+      "id": 8808,
+      "name": "Resplendent Offin Tett's Radiant Main Weapon Reform Stone III",
+      "group": "supersededWeaponReformStonesById",
+      "replacement": "Resplendent Boss Weapon Reform Stone III"
+    },
+    {
+      "id": 8809,
+      "name": "Resplendent Offin Tett's Radiant Main Weapon Reform Stone IV",
+      "group": "supersededWeaponReformStonesById",
+      "replacement": "Resplendent Boss Weapon Reform Stone IV"
+    },
+    {
+      "id": 8810,
+      "name": "Resplendent Offin Tett's Radiant Main Weapon Reform Stone V",
+      "group": "supersededWeaponReformStonesById",
+      "replacement": "Resplendent Boss Weapon Reform Stone V"
+    },
+    {
+      "id": 8811,
+      "name": "Resplendent Nouver Sub-weapon Reform Stone I",
+      "group": "supersededWeaponReformStonesById",
+      "replacement": "Resplendent Boss Weapon Reform Stone I"
+    },
+    {
+      "id": 8812,
+      "name": "Resplendent Nouver Sub-weapon Reform Stone II",
+      "group": "supersededWeaponReformStonesById",
+      "replacement": "Resplendent Boss Weapon Reform Stone II"
+    },
+    {
+      "id": 8813,
+      "name": "Resplendent Nouver Sub-weapon Reform Stone III",
+      "group": "supersededWeaponReformStonesById",
+      "replacement": "Resplendent Boss Weapon Reform Stone III"
+    },
+    {
+      "id": 8814,
+      "name": "Resplendent Nouver Sub-weapon Reform Stone IV",
+      "group": "supersededWeaponReformStonesById",
+      "replacement": "Resplendent Boss Weapon Reform Stone IV"
+    },
+    {
+      "id": 8815,
+      "name": "Resplendent Nouver Sub-weapon Reform Stone V",
+      "group": "supersededWeaponReformStonesById",
+      "replacement": "Resplendent Boss Weapon Reform Stone V"
+    },
+    {
+      "id": 8816,
+      "name": "Resplendent Kutum Sub-weapon Reform Stone I",
+      "group": "supersededWeaponReformStonesById",
+      "replacement": "Resplendent Boss Weapon Reform Stone I"
+    },
+    {
+      "id": 8817,
+      "name": "Resplendent Kutum Sub-weapon Reform Stone II",
+      "group": "supersededWeaponReformStonesById",
+      "replacement": "Resplendent Boss Weapon Reform Stone II"
+    },
+    {
+      "id": 8818,
+      "name": "Resplendent Kutum Sub-weapon Reform Stone III",
+      "group": "supersededWeaponReformStonesById",
+      "replacement": "Resplendent Boss Weapon Reform Stone III"
+    },
+    {
+      "id": 8819,
+      "name": "Resplendent Kutum Sub-weapon Reform Stone IV",
+      "group": "supersededWeaponReformStonesById",
+      "replacement": "Resplendent Boss Weapon Reform Stone IV"
+    },
+    {
+      "id": 8820,
+      "name": "Resplendent Kutum Sub-weapon Reform Stone V",
+      "group": "supersededWeaponReformStonesById",
+      "replacement": "Resplendent Boss Weapon Reform Stone V"
+    },
+    {
+      "id": 8821,
+      "name": "Resplendent Dandelion Awakening Weapon Reform Stone I",
+      "group": "supersededWeaponReformStonesById",
+      "replacement": "Resplendent Boss Weapon Reform Stone I"
+    },
+    {
+      "id": 8822,
+      "name": "Resplendent Dandelion Awakening Weapon Reform Stone II",
+      "group": "supersededWeaponReformStonesById",
+      "replacement": "Resplendent Boss Weapon Reform Stone II"
+    },
+    {
+      "id": 8823,
+      "name": "Resplendent Dandelion Awakening Weapon Reform Stone III",
+      "group": "supersededWeaponReformStonesById",
+      "replacement": "Resplendent Boss Weapon Reform Stone III"
+    },
+    {
+      "id": 8824,
+      "name": "Resplendent Dandelion Awakening Weapon Reform Stone IV",
+      "group": "supersededWeaponReformStonesById",
+      "replacement": "Resplendent Boss Weapon Reform Stone IV"
+    },
+    {
+      "id": 8825,
+      "name": "Resplendent Dandelion Awakening Weapon Reform Stone V",
+      "group": "supersededWeaponReformStonesById",
+      "replacement": "Resplendent Boss Weapon Reform Stone V"
+    },
+    {
+      "id": 8831,
+      "name": "Resplendent Griffon's Helmet Reform Stone I",
+      "group": "supersededArmorReformStonesById",
+      "replacement": "Resplendent Boss Armor Reform Stone I"
+    },
+    {
+      "id": 8832,
+      "name": "Resplendent Griffon's Helmet Reform Stone II",
+      "group": "supersededArmorReformStonesById",
+      "replacement": "Resplendent Boss Armor Reform Stone II"
+    },
+    {
+      "id": 8833,
+      "name": "Resplendent Griffon's Helmet Reform Stone III",
+      "group": "supersededArmorReformStonesById",
+      "replacement": "Resplendent Boss Armor Reform Stone III"
+    },
+    {
+      "id": 8834,
+      "name": "Resplendent Griffon's Helmet Reform Stone IV",
+      "group": "supersededArmorReformStonesById",
+      "replacement": "Resplendent Boss Armor Reform Stone IV"
+    },
+    {
+      "id": 8835,
+      "name": "Resplendent Griffon's Helmet Reform Stone V",
+      "group": "supersededArmorReformStonesById",
+      "replacement": "Resplendent Boss Armor Reform Stone V"
+    },
+    {
+      "id": 8836,
+      "name": "Resplendent Dim Tree Spirit's Armor Reform Stone I",
+      "group": "supersededArmorReformStonesById",
+      "replacement": "Resplendent Boss Armor Reform Stone I"
+    },
+    {
+      "id": 8837,
+      "name": "Resplendent Dim Tree Spirit's Armor Reform Stone II",
+      "group": "supersededArmorReformStonesById",
+      "replacement": "Resplendent Boss Armor Reform Stone II"
+    },
+    {
+      "id": 8838,
+      "name": "Resplendent Dim Tree Spirit's Armor Reform Stone III",
+      "group": "supersededArmorReformStonesById",
+      "replacement": "Resplendent Boss Armor Reform Stone III"
+    },
+    {
+      "id": 8839,
+      "name": "Resplendent Dim Tree Spirit's Armor Reform Stone IV",
+      "group": "supersededArmorReformStonesById",
+      "replacement": "Resplendent Boss Armor Reform Stone IV"
+    },
+    {
+      "id": 8840,
+      "name": "Resplendent Dim Tree Spirit's Armor Reform Stone V",
+      "group": "supersededArmorReformStonesById",
+      "replacement": "Resplendent Boss Armor Reform Stone V"
+    },
+    {
+      "id": 8841,
+      "name": "Resplendent Red Nose's Armor Reform Stone I",
+      "group": "supersededArmorReformStonesById",
+      "replacement": "Resplendent Boss Armor Reform Stone I"
+    },
+    {
+      "id": 8842,
+      "name": "Resplendent Red Nose's Armor Reform Stone II",
+      "group": "supersededArmorReformStonesById",
+      "replacement": "Resplendent Boss Armor Reform Stone II"
+    },
+    {
+      "id": 8843,
+      "name": "Resplendent Red Nose's Armor Reform Stone III",
+      "group": "supersededArmorReformStonesById",
+      "replacement": "Resplendent Boss Armor Reform Stone III"
+    },
+    {
+      "id": 8844,
+      "name": "Resplendent Red Nose's Armor Reform Stone IV",
+      "group": "supersededArmorReformStonesById",
+      "replacement": "Resplendent Boss Armor Reform Stone IV"
+    },
+    {
+      "id": 8845,
+      "name": "Resplendent Red Nose's Armor Reform Stone V",
+      "group": "supersededArmorReformStonesById",
+      "replacement": "Resplendent Boss Armor Reform Stone V"
+    },
+    {
+      "id": 8846,
+      "name": "Resplendent Bheg's Gloves Reform Stone I",
+      "group": "supersededArmorReformStonesById",
+      "replacement": "Resplendent Boss Armor Reform Stone I"
+    },
+    {
+      "id": 8847,
+      "name": "Resplendent Bheg's Gloves Reform Stone II",
+      "group": "supersededArmorReformStonesById",
+      "replacement": "Resplendent Boss Armor Reform Stone II"
+    },
+    {
+      "id": 8848,
+      "name": "Resplendent Bheg's Gloves Reform Stone III",
+      "group": "supersededArmorReformStonesById",
+      "replacement": "Resplendent Boss Armor Reform Stone III"
+    },
+    {
+      "id": 8849,
+      "name": "Resplendent Bheg's Gloves Reform Stone IV",
+      "group": "supersededArmorReformStonesById",
+      "replacement": "Resplendent Boss Armor Reform Stone IV"
+    },
+    {
+      "id": 8850,
+      "name": "Resplendent Bheg's Gloves Reform Stone V",
+      "group": "supersededArmorReformStonesById",
+      "replacement": "Resplendent Boss Armor Reform Stone V"
+    },
+    {
+      "id": 8851,
+      "name": "Resplendent Leebur's Gloves Reform Stone I",
+      "group": "supersededArmorReformStonesById",
+      "replacement": "Resplendent Boss Armor Reform Stone I"
+    },
+    {
+      "id": 8852,
+      "name": "Resplendent Leebur's Gloves Reform Stone II",
+      "group": "supersededArmorReformStonesById",
+      "replacement": "Resplendent Boss Armor Reform Stone II"
+    },
+    {
+      "id": 8853,
+      "name": "Resplendent Leebur's Gloves Reform Stone III",
+      "group": "supersededArmorReformStonesById",
+      "replacement": "Resplendent Boss Armor Reform Stone III"
+    },
+    {
+      "id": 8854,
+      "name": "Resplendent Leebur's Gloves Reform Stone IV",
+      "group": "supersededArmorReformStonesById",
+      "replacement": "Resplendent Boss Armor Reform Stone IV"
+    },
+    {
+      "id": 8855,
+      "name": "Resplendent Leebur's Gloves Reform Stone V",
+      "group": "supersededArmorReformStonesById",
+      "replacement": "Resplendent Boss Armor Reform Stone V"
+    },
+    {
+      "id": 8856,
+      "name": "Resplendent Muskan's Shoes Reform Stone I",
+      "group": "supersededArmorReformStonesById",
+      "replacement": "Resplendent Boss Armor Reform Stone I"
+    },
+    {
+      "id": 8857,
+      "name": "Resplendent Muskan's Shoes Reform Stone II",
+      "group": "supersededArmorReformStonesById",
+      "replacement": "Resplendent Boss Armor Reform Stone II"
+    },
+    {
+      "id": 8858,
+      "name": "Resplendent Muskan's Shoes Reform Stone III",
+      "group": "supersededArmorReformStonesById",
+      "replacement": "Resplendent Boss Armor Reform Stone III"
+    },
+    {
+      "id": 8859,
+      "name": "Resplendent Muskan's Shoes Reform Stone IV",
+      "group": "supersededArmorReformStonesById",
+      "replacement": "Resplendent Boss Armor Reform Stone IV"
+    },
+    {
+      "id": 8860,
+      "name": "Resplendent Muskan's Shoes Reform Stone V",
+      "group": "supersededArmorReformStonesById",
+      "replacement": "Resplendent Boss Armor Reform Stone V"
+    },
+    {
+      "id": 8861,
+      "name": "Resplendent Urugon's Shoes Reform Stone I",
+      "group": "supersededArmorReformStonesById",
+      "replacement": "Resplendent Boss Armor Reform Stone I"
+    },
+    {
+      "id": 8862,
+      "name": "Resplendent Urugon's Shoes Reform Stone II",
+      "group": "supersededArmorReformStonesById",
+      "replacement": "Resplendent Boss Armor Reform Stone II"
+    },
+    {
+      "id": 8863,
+      "name": "Resplendent Urugon's Shoes Reform Stone III",
+      "group": "supersededArmorReformStonesById",
+      "replacement": "Resplendent Boss Armor Reform Stone III"
+    },
+    {
+      "id": 8864,
+      "name": "Resplendent Urugon's Shoes Reform Stone IV",
+      "group": "supersededArmorReformStonesById",
+      "replacement": "Resplendent Boss Armor Reform Stone IV"
+    },
+    {
+      "id": 8865,
+      "name": "Resplendent Urugon's Shoes Reform Stone V",
+      "group": "supersededArmorReformStonesById",
+      "replacement": "Resplendent Boss Armor Reform Stone V"
+    }
+  ],
+  "nativeCorroboration": {
+    "path": "[private-source]/Patch Research/client-2026-11-02-unresolved-research/research-items-NO-EFFECTS.json",
+    "sha256": "a54b5735052c990e189ff1a50afb6d5442cc80e0ba8dabff995979bc8d35c821"
+  },
+  "retainedIds": [
+    8904,
+    8917,
+    42435,
+    752014,
+    42471,
+    55056,
+    8801,
+    8802,
+    8803,
+    8804,
+    8805,
+    8826,
+    8827,
+    8828,
+    8829,
+    8830
+  ],
+  "limits": [
+    "The current client retains obsolete descriptions; these cannot override the explicit publisher replacement.",
+    "Concentrated Boss Aura752014 (Heating for Blackstar) remains distinct from Contained Boss Aura8917 (Simple Alchemy for Jetina).",
+    "No saved identities or inventory quantities are converted; no conversion rate or automatic equipment salvage is added.",
+    "Current generic sources are qualified; boss-specific drop probabilities and exhaustive sources remain outside this correction."
+  ]
+}

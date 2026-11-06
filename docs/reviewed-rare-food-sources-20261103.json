@@ -1,0 +1,36 @@
+{
+  "reviewedAt": "2026-11-03",
+  "scope": "Two exact source hints only; no recipe, rate, grade substitution, price or effect change.",
+  "items": [
+    {
+      "id": 820802,
+      "name": "Fresh White Kimchi",
+      "parentId": 820801,
+      "parent": "White Kimchi",
+      "source": "Cooking · Make White Kimchi (rare extra, Skilled 9+)",
+      "decision": "English item text reverses the base and rare names. Korean wording, current PC recipe output classification and matching installed identities/input families corroborate White Kimchi as the base and Fresh as the rare output. Base cooking starts at Apprentice 1; the rare threshold is Skilled 9. No numerical proc probability inferred.",
+      "evidence": [
+        "https://apps.weingchicken.com/bd/makings/2458",
+        "https://bdocodex.com/kr/item/820801/?sl=1",
+        "https://bdocodex.com/us/recipe/439/?sl=1",
+        "Installed PC item/recipe metadata through October 31, extracted November 2"
+      ],
+      "sourceLimit": "Korean full page retrieved; Codex corroboration from indexed search text because direct page retrieval is restricted. No claim of a live controlled batch."
+    },
+    {
+      "id": 9370,
+      "name": "High-quality Eilton Sandwich",
+      "parentId": 9369,
+      "parent": "Eilton Sandwich",
+      "source": "Cooking · Make Eilton Sandwich (rare extra, Master 1+)",
+      "decision": "Installed exact identities and matching recipe inputs, PC crafting output classification and Korean recipe corroboration establish the parent. Current rare tooltip requires Master 1. Keep current 120-minute duration; the older Korean page's 110 minutes is not imported.",
+      "evidence": [
+        "https://bdolytics.com/en/crafting/9369%3Aee9ddb3bffa3",
+        "https://apps.weingchicken.com/bd/makings/2207",
+        "Installed PC item/recipe metadata through October 31, extracted November 2"
+      ],
+      "sourceLimit": "Parent is corroborated; calculator estimates are not used as measured proc data."
+    }
+  ],
+  "notClaimed": ["Exact hidden probabilities", "Exhaustive temporary-event rewards", "Universal server-mechanic certification"]
+}

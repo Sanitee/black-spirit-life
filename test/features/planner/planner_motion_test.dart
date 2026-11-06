@@ -126,9 +126,10 @@ void main() {
       );
       await tester.pump();
       final chooser = find.byKey(
-        const ValueKey('planner-choice-entrance:Sunrise Herb'),
+        const ValueKey('planner-owned-choices-panel'),
       );
-      expect(chooser, reduced ? findsNothing : findsOneWidget);
+      // Both motion settings use the approved shared Owned/Missing picker.
+      expect(chooser, findsOneWidget);
       await tester.tap(
         find.byKey(PlannerActionKeys.row('P13', 'Silver Azalea')),
       );

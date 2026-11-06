@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'support/action_hint_finder.dart';
 
 import 'package:bdo_map_core/bdo_map_core.dart';
 import 'package:flutter/material.dart';
@@ -120,7 +121,7 @@ void main() {
     expect(
       map.mapChrome.paperRaised.a,
       closeTo(
-        base.paperRaised.a * (mapOpacity == 0 ? .02 : mapOpacity),
+        base.withUiOpacity(mapOpacity).paperRaised.a,
         .000001,
       ),
     );
@@ -133,7 +134,7 @@ void main() {
       (town) => town.name.startsWith('Calpheon'),
     );
     await tapKey(tester, 'resource-map-housing-town-${town.townNodeId}');
-    await tester.tap(find.byTooltip('House options'));
+    await tester.tap(findActionHint('House options'));
     await tester.pumpAndSettle();
   }
 

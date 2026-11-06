@@ -1,16 +1,20 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:bdo_craft_planner_flutter/app/planning/planner_assembly.dart';
 import 'package:bdo_craft_planner_flutter/data/catalog/bundled_catalog_parser.dart';
+import 'package:bdo_craft_planner_flutter/domain/catalog/superseded_boss_materials.dart';
 import 'package:bdo_craft_planner_flutter/domain/catalog/temporarily_archived_items.dart';
 import 'package:bdo_craft_planner_flutter/domain/models/catalog_models.dart';
 import 'package:bdo_craft_planner_flutter/domain/models/craft_mode.dart';
 import 'package:bdo_craft_planner_flutter/domain/opportunities/opportunity_calculator.dart';
 import 'package:bdo_craft_planner_flutter/domain/opportunities/opportunity_market_models.dart';
+import 'package:bdo_craft_planner_flutter/domain/opportunities/recipe_experience.dart';
 import 'package:bdo_craft_planner_flutter/domain/planner/item_acquisition_resolution.dart';
 import 'package:bdo_craft_planner_flutter/domain/planner/planner_engine.dart';
 import 'package:bdo_craft_planner_flutter/domain/planner/planner_models.dart';
 import 'package:bdo_craft_planner_flutter/domain/planner/recipe_route_economics.dart';
+import 'package:bdo_craft_planner_flutter/domain/planner/source_resolution.dart';
 import 'package:bdo_craft_planner_flutter/domain/state/planner_state.dart'
     as saved;
 import 'package:flutter_test/flutter_test.dart';
@@ -30,6 +34,84 @@ void main() {
     sharedMetadata: catalog.alchemy.metadata,
     mode: mode,
   );
+
+  test('February boss simplification excludes exact old identities only', () {
+    final review =
+        jsonDecode(
+              File(
+                'docs/reviewed-boss-material-simplification.json',
+              ).readAsStringSync(),
+            )
+            as Map<String, dynamic>;
+    final rows = (review['entries'] as List).cast<Map<String, dynamic>>();
+    expect(rows, hasLength(91));
+    expect(supersededBossMaterialsById, {
+      for (final row in rows) '${row['id']}': row['name'],
+    });
+    for (final row in rows) {
+      final id = '${row['id']}';
+      final name = row['name'] as String;
+      expect(isTemporarilyArchivedMarketItemId(id), isTrue, reason: name);
+      expect(isRemovedPcItem(name, itemId: id), isTrue, reason: name);
+      expect(bossMaterialReplacementFor(name, itemId: id), row['replacement']);
+      expect(
+        bossMaterialReplacementFor('Alias', itemId: '00$id'),
+        row['replacement'],
+      );
+      expect(bossMaterialReplacementFor(name, itemId: '999999'), isNull);
+      expect(
+        bossMaterialReplacementFor(' ${name.toUpperCase()} '),
+        row['replacement'],
+      );
+    }
+    for (final id in (review['retainedIds'] as List).cast<int>()) {
+      expect(isTemporarilyArchivedMarketItemId('$id'), isFalse, reason: '$id');
+      expect(bossMaterialReplacementFor('Alias', itemId: '$id'), isNull);
+    }
+  });
+
+  test('January crystal policy matches the exact official removal review', () {
+    final review =
+        jsonDecode(
+              File(
+                'docs/reviewed-crystal-removals-20261103.json',
+              ).readAsStringSync(),
+            )
+            as Map<String, dynamic>;
+    final rows = (review['removedItems'] as List).cast<Map<String, dynamic>>();
+    expect(removedJanuary2024CrystalsById, hasLength(64));
+    expect(removedJanuary2024CrystalsById, {
+      for (final row in rows) '${row['id']}': row['name'],
+    });
+    for (final entry in removedJanuary2024CrystalsById.entries) {
+      expect(
+        removedPcItemReasonFor(entry.value, itemId: entry.key),
+        removedJanuary2024CrystalReason,
+      );
+      expect(isTemporarilyArchivedMarketItemId(entry.key), isTrue);
+    }
+    for (final entry in const {
+      '15021': 'Magic Crystal of Perfection',
+      '15125': 'Magic Crystal of Infinity - Experience',
+      '15132': 'Magic Crystal of Infinity - Critical Hit',
+      '15136': 'Magic Crystal of Infinity - Max HP',
+      '15138xxx': 'Custom crystal',
+      '15147': 'Magic Crystal of Infinity - Submergence',
+      '768750': 'Magic Crystal of Infinity - Sturdiness',
+      '37116': 'Magic Crystal of Infinity - Sturdiness',
+      '15201': 'Black Magic Crystal - Precision',
+    }.entries) {
+      expect(
+        isRemovedPcItem(entry.value, itemId: entry.key),
+        isFalse,
+        reason: '${entry.key}: ${entry.value}',
+      );
+    }
+    expect(
+      removedPcItemReasonFor('WON Dawn Crystal - Life EXP', itemId: '15278'),
+      removedPcItemReason,
+    );
+  });
 
   test('policy is exact, temporary and identity-aware', () {
     expect(temporarilyArchivedItemsById, {
@@ -68,6 +150,106 @@ void main() {
   });
 
   test(
+    'retired materials do not archive current replacements or event rewards',
+    () {
+      expect(retiredPcItemsById.length, 18);
+      expect(rules.acquisitionInfo['Trace of Despair']!.itemId, 5952);
+      expect(
+        rules.acquisitionInfo['Trace of Despair']!.routes.single.availability,
+        'existing-items-only',
+      );
+      for (final entry in retiredPcItemsById.entries) {
+        expect(isRetiredPcItem(entry.value), isTrue);
+        expect(isRetiredPcItem('Alias', itemId: '00${entry.key}'), isTrue);
+        expect(isRetiredPcItem(entry.value, itemId: '999999'), isFalse);
+        expect(removedPcItemLabelFor(entry.value), 'Retired item');
+        expect(removedPcItemReasonFor(entry.value), 'No longer obtainable.');
+      }
+      for (final name in [
+        'Trace of Nature',
+        'Tidal Black Stone',
+        "Fairy's Breath",
+        '[Event] Enhancement Help Kit III',
+        "[Event] Lara's Warm Black Tea",
+        '[Event] Manos Accessory Box',
+        'Ultimate Weapon Reform Stone',
+        'Ultimate Armor Reform Stone',
+        'Alchemy Stone Shard',
+        'Destruction Spirit Stone',
+        'Guardian Spirit Stone',
+        'Life Spirit Stone',
+        "Vell's Concentrated Magic",
+        "Concentrated Boss's Aura",
+        'Contained Boss Aura',
+      ]) {
+        expect(isTemporarilyArchivedItem(name), isFalse, reason: name);
+      }
+      expect(isTemporarilyArchivedMarketItemId('5960'), isFalse);
+      expect(isTemporarilyArchivedMarketItemId('750490'), isFalse);
+    },
+  );
+
+  test('removed reform and recharge items use the shared exact-ID gate', () {
+    final review =
+        jsonDecode(
+              File(
+                'docs/practical-followthrough-20261104.json',
+              ).readAsStringSync(),
+            )
+            as Map<String, dynamic>;
+    for (final row
+        in (review['removedItems'] as List).cast<Map<String, dynamic>>()) {
+      final name = row['name'] as String;
+      final id = '${row['id']}';
+      expect(retiredPcItemsById[id], name);
+      expect(isRemovedPcItem(name, itemId: id), isTrue);
+      expect(isTemporarilyArchivedMarketItemId(id), isTrue);
+      expect(isTemporarilyArchivedItem(name), isTrue);
+      expect(isRemovedPcItem(name, itemId: '999999'), isFalse);
+    }
+    // The legacy list is not proof of removal. Avoid a broad family/name gate.
+    for (final id in ['6654', '6655', '6207', '37949', '752014', '8917']) {
+      expect(isRemovedPcItem('Alias', itemId: id), isFalse, reason: id);
+    }
+  });
+
+  test(
+    'August cup extraction removals keep the exact dated identity policy',
+    () {
+      expect(removedAugust2026CupMaterialsById, {
+        '820020': 'Fused Crystal of Emotions',
+        '820021': 'Refined Essence of Emotions',
+      });
+      for (final entry in removedAugust2026CupMaterialsById.entries) {
+        expect(
+          removedPcItemReasonFor(entry.value),
+          removedAugust2026CupMaterialReason,
+        );
+        expect(
+          removedPcItemReasonFor('Alias', itemId: entry.key),
+          removedAugust2026CupMaterialReason,
+        );
+        expect(
+          isRemovedAugust2026CupMaterial(entry.value, itemId: '999999'),
+          isFalse,
+        );
+        expect(isTemporarilyArchivedMarketItemId(entry.key), isTrue);
+        // Retain recipes and quantities for old saves, never mutate those saves.
+        final recipe = catalog.processing.items[entry.value]!;
+        expect(recipe.marketId, entry.key);
+        expect(recipe.ingredients, isNotEmpty);
+      }
+      for (final entry in const {
+        '15298': 'Fused Crystal of Decimation',
+        '320060': 'Mirror of Equilibrium',
+        '820011': 'Cup of a Lonely Cloud',
+      }.entries) {
+        expect(isRemovedPcItem(entry.value, itemId: entry.key), isFalse);
+      }
+    },
+  );
+
+  test(
     'shared acquisition guidance suppresses claims but preserves history',
     () {
       for (final entry in temporarilyArchivedItemsById.entries) {
@@ -103,6 +285,64 @@ void main() {
       );
     },
   );
+
+  for (final entry in removedPcItemsById.entries) {
+    test(
+      '${entry.key} ${entry.value} stays historical, not an active plan or source',
+      () {
+        expect(
+          isRemovedPcItem('Different alias', itemId: '00${entry.key}'),
+          isTrue,
+        );
+        expect(isRemovedPcItem(entry.value, itemId: '999999'), isFalse);
+        expect(isRemovedPcItem(' ${entry.value.toUpperCase()} '), isTrue);
+        expect(temporarilyArchivedItemsById.containsKey(entry.key), isFalse);
+        for (final mode in CraftMode.values) {
+          final recipes = assembled(mode);
+          if (!recipes.containsKey(entry.value)) continue;
+          final original = recipes[entry.value]!;
+          final idBefore = original.marketId;
+          final ingredientsBefore = original.ingredients;
+          final state = PlannerState(
+            target: entry.value,
+            want: 1,
+            inventory: {entry.value: 7},
+            marketPrices: {entry.value: 123},
+            marketStock: {entry.value: 100},
+          );
+          final plan = engine.buildPlan(
+            mode: mode,
+            recipes: recipes,
+            state: state,
+            rules: rules,
+          );
+          expect(plan.steps, isEmpty);
+          expect(original.ingredients, same(ingredientsBefore));
+          expect(original.marketId, idBefore);
+          expect(state.inventory[entry.value], 7);
+          final source = resolveSourceInfo(
+            name: entry.value,
+            recipe: original,
+            rules: rules,
+          );
+          expect(
+            source.sourceNote,
+            removedPcItemReasonFor(entry.value, itemId: original.marketId),
+          );
+          expect(source.npcPrice, 0);
+          expect(source.vendor, isNull);
+          final acquisition = resolveItemAcquisition(
+            name: entry.value,
+            rules: rules,
+          );
+          if (acquisition != null) {
+            expect(acquisition.status, 'removed');
+            expect(acquisition.displayableSummaries, isEmpty);
+          }
+        }
+      },
+    );
+  }
 
   for (final scenario in [
     ('Hard Hide', 'Dinosaur Hide', 'Lizard Hide'),
@@ -174,6 +414,62 @@ void main() {
     expect(recipes['Monkey Blood']!.marketId, '6211');
     expect(state.substituteChoices[key], 'Monkey Blood');
   });
+
+  test(
+    'removed and retired materials cannot produce profit or EXP from cached quotes',
+    () {
+      final recipes = assembled(CraftMode.processing);
+      final now = DateTime.utc(2026, 11, 3);
+      final market = OpportunityMarketSnapshot(
+        region: 'eu',
+        items: {
+          for (final id in {
+            ...removedAugust2026CupMaterialsById,
+            ...retiredPcItemsById,
+          }.keys)
+            id: OpportunityMarketItem(
+              itemId: id,
+              basePrice: 1000000,
+              stock: 1000,
+              quoteFetchedAt: now,
+              asks: const [
+                OpportunityMarketLevel(price: 1000000, quantity: 1000),
+              ],
+              bids: const [],
+              bookFetchedAt: now,
+            ),
+        },
+      );
+      for (final entry in {
+        ...removedAugust2026CupMaterialsById,
+        ...retiredPcItemsById,
+      }.entries) {
+        final recipe = recipes[entry.value];
+        if (recipe == null) continue;
+        expect(
+          calculator.marketItemIds(
+            recipe: recipe,
+            recipes: recipes,
+            rules: rules,
+          ),
+          isEmpty,
+        );
+        final quote = calculator.evaluate(
+          recipe: recipe,
+          recipes: recipes,
+          state: _state(CraftMode.processing),
+          rules: rules,
+          marketTax: saved.MarketTax(),
+          market: market,
+          now: now,
+        );
+        expect(quote.listingProfit, isNull);
+        expect(quote.marketReady, isFalse);
+        expect(experienceFor(recipe, CraftMode.processing), isNull);
+        expect(market.items[entry.key]!.basePrice, 1000000);
+      }
+    },
+  );
 
   test('Magical Shard keeps real alternatives and historical variants', () {
     final recipes = assembled(CraftMode.processing);

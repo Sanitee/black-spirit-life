@@ -45,15 +45,34 @@ void main() {
       await tester.tap(find.byKey(RecipeBookKeys.r05SearchByIngredient));
       await tester.pump(const Duration(milliseconds: 120));
 
-      final details = find.byKey(
-        RecipeBookKeys.r13Details('Insectivore Plant Powder'),
+      final details = find.descendant(
+        of: find.byKey(RecipeBookKeys.card('Insectivore Plant Powder')),
+        matching: find.byKey(
+          RecipeBookKeys.r13Details('Insectivore Plant Powder'),
+        ),
       );
       final cardScroll = find.descendant(
         of: find.byKey(RecipeBookKeys.r10CardScroll),
         matching: find.byType(Scrollable),
       );
       expect(cardScroll, findsOneWidget);
-      await tester.scrollUntilVisible(details, 260, scrollable: cardScroll);
+      expect(
+        tester
+            .widget<RecipeBookModal>(find.byType(RecipeBookModal))
+            .controller
+            .snapshot
+            .entries
+            .map((entry) => entry.name),
+        contains('Insectivore Plant Powder'),
+      );
+      // Search now spans every production mode. The same item is further down
+      // the larger virtualized result set, not absent from the current book.
+      await tester.scrollUntilVisible(
+        details,
+        260,
+        scrollable: cardScroll,
+        maxScrolls: 800,
+      );
       await tester.pump();
       expect(details, findsOneWidget);
 

@@ -1,6 +1,9 @@
 import '../../domain/catalog/temporarily_archived_items.dart';
 
-/// Reviewed PC client (2026-09-03) IDs whose Central Market flag is false.
+/// Reviewed PC client IDs whose Central Market flag is false.
+/// The original 298 are from 2026-09-03; seven exact sea-material references
+/// were rechecked against the installed 2026-11-02 PC extraction.
+/// See docs/reviewed-sea-origin-sources.json for that supplemental scope.
 /// Only the normal Opportunities catalog scope was audited. Unknown/custom IDs
 /// remain eligible; server failures never add membership.
 ///
@@ -11,6 +14,16 @@ import '../../domain/catalog/temporarily_archived_items.dart';
 /// Original names and reproduction: docs/opportunities-market-eligibility.md
 /// and Migration Logs/shared-market-20260910/client-eligibility-audit.json.
 const reviewedNonMarketableOpportunityIds = <String>{
+  '45517', // Khan's Dim Magic: bound, one-time Curio quest material.
+  // Current bound sea-material identities omitted from the earlier scope.
+  '8106', // Origin of Serni.
+  '756425', // Eltro Crystal (unopened).
+  '756427', // Zulatia Crystal (unopened).
+  // Generic catalog reference IDs; specific ship stats are never inferred.
+  '756501', // Eltro Sea Crystal.
+  '756511', // Serni Sea Crystal.
+  '756521', // Zulatia Sea Crystal.
+  '756531', // Margoria Sea Crystal.
   '4916',
   '4925',
   '4986',

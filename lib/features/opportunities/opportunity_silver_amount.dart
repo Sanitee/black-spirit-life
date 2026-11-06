@@ -1,22 +1,10 @@
 import 'package:flutter/material.dart';
 
+import '../../domain/formatting/compact_silver.dart';
 import '../../domain/formatting/planner_formatters.dart';
 
-/// Abbreviate toward zero, so a displayed gain never rounds up.
-String formatCompactOpportunitySilver(num value) {
-  if (!value.isFinite) return '—';
-  final magnitude = value.abs();
-  final (unit, suffix) = magnitude >= 1000000000
-      ? (1000000000, 'b')
-      : magnitude >= 1000000
-      ? (1000000, 'm')
-      : magnitude >= 1000
-      ? (1000, 'k')
-      : (1, '');
-  final shortened = (magnitude / unit * 10).floor() / 10;
-  final signed = value < 0 ? -shortened : shortened;
-  return '${formatQuantity(signed)}$suffix';
-}
+/// Shared display-only formatting; the full amount remains available on click.
+String formatCompactOpportunitySilver(num value) => formatCompactSilver(value);
 
 /// Click again to return to the abbreviated value; the amount is read-only.
 class OpportunitySilverAmount extends StatefulWidget {

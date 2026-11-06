@@ -1,0 +1,47 @@
+{
+  "reviewedAt": "2026-11-03",
+  "scope": "Eight existing item references gain exact additional current Golden Seal source guidance. Not a new Opportunities currency or valuation model.",
+  "sources": [
+    {
+      "key": "golden-seal-guide-naeu-20261103",
+      "url": "https://www.naeu.playblackdesert.com/en-US/Wiki?wikiNo=115",
+      "sha256": "85543a5243f5b0c530781bb60fa59dad95deb9fcacb6fda88e61de46242fd9fb",
+      "scope": "Current NA/EU Golden Seal guide: exact Conquest exchange costs 20/50/80 and Work Supervisor Storm Horse Gear Box cost 1000. Existing Cuisine/Alchemy/Fishing/Training sources remain."
+    },
+    {
+      "key": "salvage-notice-6800",
+      "url": "https://www.naeu.playblackdesert.com/en-US/News/Detail?groupContentNo=6800&countryType=en-US",
+      "sha256": "3d3eb7980a7bfa81bad3e65b5c4dbc31dd39830ccc31f05512530d197cfa569f",
+      "scope": "March 27, 2024 PC NA/EU moves the named Golden Seal currencies and exchanges to Manage Currency. This supersedes the guide's old Valks location wording."
+    },
+    {
+      "key": "black-essence-naeu-20241114",
+      "url": "https://www.naeu.playblackdesert.com/en-US/News/Detail?groupContentNo=7815",
+      "sha256": "a31cfdb6a42598df89e1e9b956ee932f3df7e415ae61148b9f8f3588d8728628",
+      "scope": "November 14, 2024 PC NA/EU explicitly corrected Black Essence: Black Spirit Crystal's acquisition description. Current exact item 4990 names Golden Seals and Manage Currency, not the legacy Shiny seal."
+    }
+  ],
+  "entries": [
+    {"id":4988,"name":"Black Essence: Addis","currencyId":1021,"currency":"Golden Seal - [Imperial Conquest]","cost":80,"output":1},
+    {"id":4995,"name":"Black Essence: Carmae","currencyId":1021,"currency":"Golden Seal - [Imperial Conquest]","cost":80,"output":1},
+    {"id":4992,"name":"Black Essence: Cobelinus","currencyId":1021,"currency":"Golden Seal - [Imperial Conquest]","cost":80,"output":1},
+    {"id":4994,"name":"Black Essence: Hystria","currencyId":1021,"currency":"Golden Seal - [Imperial Conquest]","cost":80,"output":1},
+    {"id":4993,"name":"Black Essence: Viper","currencyId":1021,"currency":"Golden Seal - [Imperial Conquest]","cost":80,"output":1},
+    {"id":4990,"name":"Black Essence: Black Spirit Crystal","currencyId":1021,"currency":"Golden Seal - [Imperial Conquest]","cost":20,"output":1},
+    {"id":16181,"name":"Spellbound Tool Box","currencyId":1021,"currency":"Golden Seal - [Imperial Conquest]","cost":50,"output":1},
+    {"id":16069,"name":"Storm Horse Gear Box","currencyId":1022,"currency":"Golden Seal - [Work Supervisor]","cost":1000,"output":1}
+  ],
+  "controls": [
+    "Existing alternative seal exchange amounts and random-container restrictions retained.",
+    "Exact name plus numeric identity required; no change to custom items, marketability, prices or inventory.",
+    "Only the exact generic Black Spirit Crystal essence source sentence is replaced by its more specific current route.",
+    "Imperfect Lightstone of Flora's existing 10000 Work Supervisor source already matches."
+  ],
+  "rejectedEvidenceAndLimits": [
+    "Shiny Golden Seal - [Imperial Conquest] item 460 is an older distinct currency; its 400 cost is not the current Golden Seal item 1021 cost.",
+    "Splendid Golden Seal - [Imperial Conquest] 890066 is a distinct identity, not silently mapped to 1021.",
+    "October 30, 2026 Global Lab planned new seal costs/removals are not live NA/EU PC facts and were not applied.",
+    "The guide still lists removed Guild Special Silk, disproved by January 29, 2026 patch 9634. That reward is not added. Guide acquisition/drop prose is not blanket-certified.",
+    "Current random acquisition rates, exhaustive event sources, and any undisclosed server restrictions remain outside the supported exchange-route claim."
+  ]
+}

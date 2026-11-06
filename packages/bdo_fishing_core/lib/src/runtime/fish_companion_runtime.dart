@@ -12,8 +12,8 @@ const int fishCompanionFirstPort = 8765;
 const int fishCompanionLastPort = 8795;
 
 const String fishCompanionAcceptedPayloadVersion =
-    '9b6dec8288717d4da213f49811f3bab9eb9c5907bcbe1824b87c9178842617e5:'
-    'c0b5c5c84980be389420cf247d7a89ac8c256676b7313ce3a496c933cb0667a9';
+    '469126b32eb617991524ba95758a3d62f44e20edbe5c5e1c71808c15b75f9034:'
+    'b3d4b2617078af3cc2d4f0263a88450728806984d3022e40b1b83f2303750fb3';
 
 /// The credited, noncommercial public release includes the reviewed reference
 /// snapshot accepted from the current Beta so Fish Map retains exact offline
@@ -151,7 +151,7 @@ abstract interface class FishCompanionServiceHandle {
   /// The selected Stable personal-data root used by the Fish journal.
   Directory get personalDataRoot;
 
-  /// Explicit shared WebView2 profile directory beneath [personalDataRoot].
+  /// Explicit WebView2 runtime directory, separate from portable personal data.
   Directory get webViewDataRoot;
 
   Uri get uri;
@@ -539,8 +539,8 @@ class FishCompanionRuntimeHost {
 /// Starts the accepted standalone Fish Companion service.
 ///
 /// Static UI and recognizer code stay in the immutable installed package. The
-/// SQLite journal, durable Fish settings, and explicitly shared WebView2
-/// profile live below [personalDataRoot]. Online-derived reference
+/// SQLite journal and durable Fish settings live below [personalDataRoot].
+/// WebView2 state can use a separate app-owned runtime directory. Reference
 /// acceleration uses a distinct, disposable [referenceCacheRoot] and never the
 /// selected personal-data root.
 class FishCompanionRuntime {
@@ -791,10 +791,15 @@ class FishCompanionRuntime {
   Directory _resolveWebViewDataRoot() {
     final resolved = webViewDataRoot.absolute;
     final personal = personalDataRoot.absolute.path;
-    if (resolved.path == personal || !_isWithin(resolved.path, personal)) {
+    if (resolved.path == personal ||
+        _isWithin(personal, resolved.path) ||
+        _isWithin(
+          resolved.path,
+          (packagedPayloadRoot ?? _locatePackagedPayload()).absolute.path,
+        )) {
       throw StateError(
-        'The shared WebView data directory must be beneath the selected '
-        'personal-data root.',
+        'The WebView runtime directory must not own the personal-data root '
+        'or be inside the installed application.',
       );
     }
     return resolved;

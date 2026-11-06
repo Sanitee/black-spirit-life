@@ -47,31 +47,35 @@ void networkCpReviewTests({
           body: MediaQuery(
             data: MediaQueryData(textScaler: TextScaler.linear(textScale)),
             child: Center(
-              child: ResourceMapChromeTheme(
-                data: material.withUiOpacity(opacity),
-                child: RepaintBoundary(
-                  key: const ValueKey('network-review-capture'),
-                  child: ResourceMapReadingPlane(
-                    child: SizedBox(
-                      width: width,
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          NetworkCpReview(
-                            budgetController: controller,
-                            onCommitBudget: onCommit ?? () {},
-                            breakdown: breakdown,
-                          ),
-                          const SizedBox(height: 8),
-                          NetworkReviewActionShelf(
-                            child: FilledButton.icon(
-                              onPressed: onSave,
-                              icon: const Icon(Icons.bookmark_added_outlined),
-                              label: const Text('Save as current'),
+              // The real review lives in the plan's scrollable content. An
+              // unscrollable 850px fixture incorrectly rejects tall 200% text.
+              child: SingleChildScrollView(
+                child: ResourceMapChromeTheme(
+                  data: material.withUiOpacity(opacity),
+                  child: RepaintBoundary(
+                    key: const ValueKey('network-review-capture'),
+                    child: ResourceMapReadingPlane(
+                      child: SizedBox(
+                        width: width,
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            NetworkCpReview(
+                              budgetController: controller,
+                              onCommitBudget: onCommit ?? () {},
+                              breakdown: breakdown,
                             ),
-                          ),
-                        ],
+                            const SizedBox(height: 8),
+                            NetworkReviewActionShelf(
+                              child: FilledButton.icon(
+                                onPressed: onSave,
+                                icon: const Icon(Icons.bookmark_added_outlined),
+                                label: const Text('Save as current'),
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                     ),
                   ),

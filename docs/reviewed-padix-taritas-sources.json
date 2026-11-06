@@ -1,0 +1,124 @@
+{
+  "date": "2026-11-03",
+  "status": "IMPLEMENTED_AND_VERIFIED_AUDIT_ACTIVE",
+  "evidence": "audit/correctness-review-20261102/resumed-padix-taritas-source-evidence.json",
+  "sources": [
+    {
+      "name": "Ethereal Earring",
+      "id": 11856,
+      "hint": "Monster drops · Padix Island",
+      "url": "https://store.steampowered.com/news/posts/?appids=582660&enddate=1597921975",
+      "date": "2020-08-12"
+    },
+    {
+      "name": "Ocean Haze Ring",
+      "id": 12091,
+      "hint": "Monster drops · Padix Island",
+      "url": "https://www.naeu.playblackdesert.com/en-US/News/Detail?groupContentNo=6579",
+      "date": "2024-02-07"
+    },
+    {
+      "names": [
+        "Taritas Helmet",
+        "Taritas Armor",
+        "Taritas Gloves",
+        "Taritas Shoes"
+      ],
+      "ids": [
+        10813,
+        10814,
+        10815,
+        10816
+      ],
+      "containerId": 757467,
+      "hint": "Open · Taritas Defense Gear Box (chance)",
+      "url": "https://www.naeu.playblackdesert.com/en-US/News/Detail?groupContentNo=1739",
+      "date": "2021-09-15",
+      "laterProbabilityDescription": "https://www.naeu.playblackdesert.com/en-US/News/Detail?groupContentNo=6837",
+      "laterBoxExchange": "https://www.naeu.playblackdesert.com/en-US/News/Detail?groupContentNo=8852"
+    }
+  ],
+  "guards": "Exact ID and canonical name, archived identities excluded, repeated projection idempotent. Ordinary gear only, not Steel Taritas/Honor costumes/714307/714326–28 or bound Ethereal741630. No fixed vendor price, NPC purchase badge, numerical chance or automatic loot calculation added.",
+  "laterChangeScreen": "23 primary archives and current official content searches checked. Later Padix zone/stat/trash changes do not remove the named accessory sources. Obsolete party-zone wording and recommended AP are not imported. Sycrakea removed Ethereal from new boxes in2022: not used as a current source. Enhanced TRI/TET Rare Belongings rewards are distinct from base item drops.",
+  "parallelCorrection": "Withdraw the Life EXP Dawn crystal heating hint under September3,2026 removal. The prior August2025 proof is historical, not current. No original89 Dawn route closure is changed because those extra three inputs were outside that group.",
+  "limits": "Source existence only. Other sources, numerical drop/box probabilities and vendor restrictions stay separately open. No personal data, install, visible launch or publication.",
+  "verification": {
+    "date": "2026-11-03T12:09:54.276Z",
+    "status": "SIX_SOURCE_HINTS_AND_ONE_OBSOLETE_HINT_WITHDRAWAL_VERIFIED_AUDIT_ACTIVE",
+    "sourceEvidence": "resumed-padix-taritas-source-evidence.json",
+    "projection": "resumed-padix-taritas-controller-projection/controller-projection.json",
+    "changed": [
+      "Essence of Dawn",
+      "Ethereal Earring",
+      "Ocean Haze Ring",
+      "Taritas Armor",
+      "Taritas Gloves",
+      "Taritas Helmet",
+      "Taritas Shoes"
+    ],
+    "unchanged": 2257,
+    "views": 6792,
+    "tests": [
+      {
+        "log": "resumed-padix-taritas-contract-tests.jsonl",
+        "passed": 291
+      },
+      {
+        "log": "resumed-padix-taritas-projection-tests.jsonl",
+        "passed": 1
+      },
+      {
+        "log": "resumed-padix-taritas-layout-tests.jsonl",
+        "passed": 66
+      }
+    ],
+    "analysis": "PASS",
+    "windowsRelease": "PASS",
+    "catalogHash": "cf32b360d6cb676c7efe22759043131c6caa9ce0a7a946be156f7c2292de2100",
+    "closed": [
+      "market_only_review:176",
+      "market_only_review:315",
+      "market_only_review:457",
+      "market_only_review:458",
+      "market_only_review:459",
+      "market_only_review:460"
+    ],
+    "partial": [
+      "single_source_review:121",
+      "single_source_review:251",
+      "single_source_review:344",
+      "single_source_review:345",
+      "single_source_review:346",
+      "single_source_review:347",
+      "native_vendor_not_mentioned:51",
+      "native_vendor_not_mentioned:52",
+      "native_vendor_not_mentioned:53",
+      "native_vendor_not_mentioned:54"
+    ],
+    "supersession": {
+      "name": "Essence of Dawn",
+      "removedLine": "Heating · 1 Life EXP Dawn crystal gives 1 (WON), 5 (BON), or 25 (JIN)",
+      "evidence": {
+        "key": "pc-20260903-gathering",
+        "url": "https://www.naeu.playblackdesert.com/en-US/News/Detail?groupContentNo=10550&countryType=en-US",
+        "finalUrl": "https://www.naeu.playblackdesert.com/en-US/News/Detail?groupContentNo=10550&countryType=en-US",
+        "status": 200,
+        "bytes": 358267,
+        "sha256": "2e2e1cfd0feb7240627847d5ba8118c7fdaf1ec2153b0fefd383d7d9dd2a0e2c",
+        "retrievedAt": "2026-11-02T19:19:00.932Z"
+      },
+      "prior": "resumed-dawn-recycling-review.json#extraLifeExp",
+      "reason": "The August2025 source was superseded by September2026 removal. Raw current client descriptions still contain the old route. Earlier extra-source addition is withdrawn, not hidden.",
+      "original89RouteClosuresUnaffected": true
+    },
+    "removedNameScreen": {
+      "scope": "All nonarchived projected references, acquisition/use/note fields, exact retired/held-name substrings.",
+      "matches": 1,
+      "adjudication": "Ancient Magic Crystal of Nature - Adamantine contains the removed lesser crystal name as a substring, but is a separate surviving identity. No other full-name hit. Aliases are not certified by this screen."
+    },
+    "visualReview": [
+      "resumed-padix-taritas-captures/supported-taritas-armor-sakura-night-garden-2.png"
+    ],
+    "limits": "Layouts cover all7changed cards plus4other Dawn essence controls in3themes and normal/200% text. No new style, numerical probability, vendor price, recipe, calculator, personal-data, installation, visible launch or publication change."
+  }
+}

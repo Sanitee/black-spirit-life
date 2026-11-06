@@ -7,6 +7,7 @@ import '../models/catalog_models.dart';
 import '../models/craft_mode.dart';
 
 part 'recipe_experience_data.dart';
+part 'reviewed_recipe_experience_data.dart';
 
 /// Base experience for one successful execution of an audited recipe formula.
 ///
@@ -38,8 +39,11 @@ RecipeExperience? experienceFor(Recipe recipe, CraftMode mode) {
       isTemporarilyArchivedItem(recipe.name, itemId: recipe.marketId)) {
     return null;
   }
+  final key =
+      '${mode.key}|${_fold(recipe.name)}|${recipeExperienceSignature(recipe)}';
   final reference =
-      _recipeExperienceReferences['${mode.key}|${_fold(recipe.name)}|${recipeExperienceSignature(recipe)}'];
+      _reviewedRecipeExperienceReferences[key] ??
+      _recipeExperienceReferences[key];
   if (reference == null || reference.skill != experienceSkillFor(recipe)) {
     return null;
   }

@@ -320,6 +320,12 @@ Recipe _withMetadata(Recipe recipe, stored.IngredientMetadata metadata) =>
       defaultVariantId: recipe.defaultVariantId,
     );
 
+// Residence ingredient families are not a universal Processing rule. Exact
+// Processing alternatives are already declared by each formula (including
+// Simple Alchemy/Cooking); retain those without expanding blood or Worth groups.
+bool _allowsInferredResidenceSubstitutions(String type) =>
+    const {'alchemy', 'cooking'}.contains(_fold(type));
+
 void _applyBloodGroupSubstitutes(
   Map<String, Recipe> recipes,
   Object? groupsValue,
@@ -394,11 +400,15 @@ void _applyBloodGroupSubstitutes(
 
   for (final entry in recipes.entries.toList(growable: false)) {
     final recipe = entry.value;
+    if (!_allowsInferredResidenceSubstitutions(recipe.type)) continue;
     final (ingredients, ingredientsChanged) = hydrate(recipe.ingredients);
     var variantsChanged = false;
     final variants = <RecipeVariant>[
       for (final variant in recipe.variants)
         () {
+          if (!_allowsInferredResidenceSubstitutions(variant.type)) {
+            return variant;
+          }
           final (variantIngredients, changed) = hydrate(variant.ingredients);
           variantsChanged = variantsChanged || changed;
           return RecipeVariant(
@@ -556,6 +566,7 @@ void _applySubstituteWorthRules(
 
   for (final entry in recipes.entries.toList(growable: false)) {
     final recipe = entry.value;
+    if (!_allowsInferredResidenceSubstitutions(recipe.type)) continue;
     if (recipeHasAuthoritativeQualityVariants(recipe.name)) {
       // Tenacious Origin has three authoritative, complete recipes: all-normal,
       // all-high-quality, or all-special herbs. Applying each herb family's
@@ -568,6 +579,9 @@ void _applySubstituteWorthRules(
     final variants = <RecipeVariant>[
       for (final variant in recipe.variants)
         () {
+          if (!_allowsInferredResidenceSubstitutions(variant.type)) {
+            return variant;
+          }
           final (variantIngredients, changed) = apply(variant.ingredients);
           variantsChanged = variantsChanged || changed;
           return RecipeVariant(

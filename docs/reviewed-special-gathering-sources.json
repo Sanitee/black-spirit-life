@@ -1,0 +1,39 @@
+{
+  "date": "2026-11-03",
+  "status": "IMPLEMENTED_AND_TESTED_REBUILD_PENDING",
+  "identities": {
+    "4724": "Caphras Tree Plank",
+    "6168": "Supreme Tough Hide",
+    "6173": "Supreme Lightweight Plume"
+  },
+  "primarySources": [
+    "https://www.naeu.playblackdesert.com/en-US/News/Detail?groupContentNo=8972&countryType=en-US",
+    "https://www.naeu.playblackdesert.com/en-US/News/Detail?groupContentNo=794&countryType=en-US",
+    "https://www.naeu.playblackdesert.com/en-US/News/Detail?groupContentNo=1326&countryType=en-US",
+    "https://www.naeu.playblackdesert.com/en-US/News/Detail?groupContentNo=9510&countryType=en-US"
+  ],
+  "evidence": "August 21, 2025 live NA/EU gathering table explicitly lists Caphras Tree Plank from both Caphras tree types. April 21/July 7, 2021 introduce Breoro/Hyena as rare hunting animals; December 24, 2025 still lists them as hunting targets. Exact current PC collect relationships match.",
+  "secondaryLootReports": [
+    "https://grumpygreen.cricket/breoro/",
+    "https://grumpygreen.cricket/hyena/"
+  ],
+  "secondaryScope": "Author/player first-hand loot reports corroborate the two exact rare-hunting material sources. They are not official loot tables or a current-server probability certification.",
+  "limits": "Only short chance-qualified source hints. No random drop quantities, spawn timers, map coordinates or guarantee added. Existing recipes and market facts preserved.",
+  "verification": {
+    "tests": [
+      {
+        "file": "resumed-special-gathering-tests.jsonl",
+        "passed": 108
+      },
+      {
+        "file": "resumed-special-gathering-projection-tests.jsonl",
+        "passed": 1
+      },
+      {
+        "file": "resumed-special-gathering-layout-tests.jsonl",
+        "passed": 174
+      }
+    ],
+    "changedReferences": 3
+  }
+}

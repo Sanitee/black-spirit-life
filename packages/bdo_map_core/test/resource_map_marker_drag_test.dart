@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'support/action_hint_finder.dart';
 import 'dart:ui' as ui;
 
 import 'package:bdo_map_core/bdo_map_core.dart';
@@ -99,7 +100,7 @@ void main() {
         reason: 'Entering Invest must not save an all-world Layers choice.',
       );
 
-      await tester.tap(find.byTooltip('Close task'));
+      await tester.tap(findActionHint('Close task'));
       await tester.pumpAndSettle();
       expect(
         find.byKey(const ValueKey('resource-map-home-find-material')),

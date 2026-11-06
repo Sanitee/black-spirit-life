@@ -423,9 +423,18 @@ final class SharedMarketRepository {
         if (call.done.isCompleted) break;
         if (!call.pending.contains(part)) continue;
         if (isTemporarilyArchivedMarketItemId(part.key.itemId)) {
-          // User-selected temporary archive, not an assertion that PA removed
-          // the item. Keep stored receipts untouched but do not replay or fetch.
-          _deliver(call, part, null, failure: 'Item temporarily archived');
+          // Separate confirmed removals from temporary source-review holds.
+          // Keep stored receipts untouched but do not replay or fetch.
+          _deliver(
+            call,
+            part,
+            null,
+            failure: isRetiredPcItem('', itemId: part.key.itemId)
+                ? 'Item no longer obtainable'
+                : isRemovedPcItem('', itemId: part.key.itemId)
+                ? 'Item removed from the game'
+                : 'Item temporarily archived',
+          );
           continue;
         }
         final item = _regions[part.key.region]?[part.key.itemId];

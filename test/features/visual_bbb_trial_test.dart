@@ -88,10 +88,15 @@ void main() {
               const ValueKey('planner-need-quantity:Trace of Nature:Need'),
             );
             expect(missing, findsOneWidget);
-            expect(tester.widget<Text>(missing).style!.fontSize, 24);
+            expect(tester.widget<Text>(missing).style!.fontSize, 16);
             expect(
-              tester.getTopLeft(missing).dy,
-              lessThan(tester.getTopLeft(need).dy),
+              tester.widget<Text>(missing).style!.fontWeight,
+              FontWeight.w700,
+            );
+            expect(
+              tester.getRect(missing).overlaps(tester.getRect(need)),
+              isFalse,
+              reason: 'Approved inline quantities may wrap at enlarged text.',
             );
             expect(
               tester.widget<Text>(missing).style!.color,
@@ -120,8 +125,22 @@ void main() {
             final card = find.byKey(const ValueKey('planner-source-info-card'));
             expect(body, findsOneWidget);
             expect(
-              tester.getTopLeft(body).dx - tester.getTopLeft(card).dx,
-              greaterThan(60),
+              tester.widget<AppSurface>(card).padding,
+              const EdgeInsets.all(16),
+            );
+            expect(
+              tester.getTopLeft(body).dx,
+              closeTo(
+                tester
+                    .getTopLeft(
+                      find.descendant(
+                        of: card,
+                        matching: find.text('How to obtain'),
+                      ),
+                    )
+                    .dx,
+                .1,
+              ),
             );
             expect(tester.takeException(), isNull);
             if (scale == 1) await _capture(tester, '3b-source-help-${spec.id}');

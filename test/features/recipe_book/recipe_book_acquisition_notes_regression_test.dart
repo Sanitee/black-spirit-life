@@ -89,7 +89,7 @@ void main() {
     expect(result.acquisitionNotes, ['Price: 15 silver.', 'Max HP -300.']);
   });
 
-  test('exact sentence references deduplicate without losing a new fact', () {
+  test('a route keeps its seller price and new restriction together', () {
     const info = RecipeBookItemInfo(
       title: 'Material',
       kind: 'Material',
@@ -101,7 +101,10 @@ void main() {
           'Price: 5,000 Silver each.\n'
           'Available only after the quest.',
     ]);
-    expect(result.acquisitionNotes, ['Available only after the quest.']);
+    // A purchase and its quest condition are one route, not three alternatives.
+    expect(result.acquisitionNotes, [
+      'BUY FROM Waida in Sand Grain Bazaar. Price: 5,000 Silver each. Available only after the quest.',
+    ]);
   });
 
   test('structured reform removes only the matching inputs and exact effect', () {

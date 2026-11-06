@@ -1,0 +1,32 @@
+{
+  "date": "2026-10-31",
+  "approval": "Apply the latest agreed consistent-control comparisons. Explicitly include NPC/stock pills on the right of Recipe Book item-window ingredient lines.",
+  "source": "[private-source]/Consistent Controls 20261031",
+  "branch": "codex/consistent-controls",
+  "baseline": "Complete Compact Choice Quantities working snapshot, not HEAD alone",
+  "implementation": [
+    "One SourceAvailabilityBadges adapter reuses the established MarketCountBadges vocabulary and Opportunities materials. No negative-stock shorthand: stock and positive preorders are separate.",
+    "Need First NPC/stock indicators and Recipe Book checked-stock pills use that shared presentation. Existing data sources, checked facts and manual refresh behavior are retained.",
+    "Opportunities calculation, Best Use, exchange and substitute availability share the same badges, including exact counts and unknown states. Market details remain reachable.",
+    "Joined item-reference ingredients and alternatives show right-aligned NPC/stock/preorder pills in Recipe and Used for, across all existing callers. At constrained widths or larger text, the badge rail reflows below the name without shrinking text.",
+    "Item references reuse PlannerChoiceMarket and the app-owned region/item-ID broker. Verified NPC sources take precedence; nonmarket/unlisted items do not get invented stock. Quote and book freshness remain independently five minutes. Identity changes and close cancel work. No polling, separate client or saved field was added.",
+    "The market scope is a captured InheritedTheme so references opened through Recipe Book dialogs retain the shared repository. Live region changes invalidate the open reference immediately.",
+    "Need First silver values and total reuse compact comma-decimal k/m/b/t amounts, real Silver art and click-to-expand. Recipe Book profit/route summaries and the remaining Opportunities readouts use the shared formatter. Exact editable fields and price ladders are untouched.",
+    "Shopping list and AFK list copy success use the existing small root-overlay top toast, as do copied names. Clipboard errors remain actionable notices. Exact copied text is unchanged."
+  ],
+  "preserved": [
+    "All three active themes, theme switching and existing appearance settings",
+    "Names copy; separate substitute actions; quantities beside names; auto-height and contained scrolling",
+    "Underlying quantities, silver values, plans, grades, Auto decisions, math and catalog/reference data",
+    "Full inherited native single-instance, shared Documents, writer-lease, migration and update safeguards",
+    "Distinct editable Recipe Book route/grade preview controls and passive noninteractive information semantics"
+  ],
+  "verification": {
+    "fixtures": "Disposable synthetic profiles and a fake shared-market transport; no personal-profile reads or live-market queries",
+    "actualApp": "Citron Juice opened through Recipe Book in all three themes, normal/double text, right-edge alignment, full-recipe fit, copy/toast, EU-to-NA invalidation, cancellation and no unexpected saved-state changes",
+    "regressions": "Shared badge states, enlarged preorder digits, silver expansion, queue selectors, sculpted panels, nested references, routes, actions, scroll containment, repository behavior and freshness",
+    "evidence": "Workspace audit/consistent-controls-20261031 and work/visuals/consistent-controls",
+    "limitations": "Targeted suites, not the entire repository suite. The exploratory sweep found legacy crafting goldens already failing on the unchanged baseline; those unrelated snapshots are not overwritten. Changed exchange/recipe/Best Use/missing-stock goldens were visually reviewed and refreshed."
+  },
+  "deployment": "Separate complete Windows Release runnable only. Not launched, installed, handed off or published. Public migration/lifecycle gates and user review remain separate."
+}

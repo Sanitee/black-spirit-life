@@ -13,6 +13,7 @@ add_executable(${BINARY_NAME} WIN32
   "flutter_window.cpp"
   "gathering_native_bridge.cpp"
   "main.cpp"
+  "single_instance.cpp"
   "utils.cpp"
   "win32_window.cpp"
   "../shared/beta_maintenance_gate.cpp"
@@ -60,6 +61,8 @@ target_include_directories(${BINARY_NAME} SYSTEM PRIVATE
 target_link_libraries(${BINARY_NAME} PRIVATE "${VELOPACK_IMPORT_LIBRARY}")
 target_link_libraries(${BINARY_NAME} PRIVATE
   "dwmapi.lib"
+  "advapi32.lib"
+  "version.lib"
   "comdlg32.lib"
   "comctl32.lib"
   "gdi32.lib"

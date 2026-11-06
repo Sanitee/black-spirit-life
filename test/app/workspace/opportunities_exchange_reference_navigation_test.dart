@@ -123,10 +123,20 @@ void main() {
           find.byType(Dialog, skipOffstage: false),
           findsNWidgets(scenario.nested ? 2 : 1),
         );
-        expect(
-          find.descendant(of: reference, matching: find.text('Used For')),
-          findsOneWidget,
-        );
+        if (fromIcon) {
+          final used = find.descendant(
+            of: reference,
+            matching: find.byKey(const ValueKey('attached-reference-tab:used')),
+          );
+          expect(used, findsOneWidget);
+          await tester.tap(used);
+          await _settle(tester);
+        } else {
+          expect(
+            find.descendant(of: reference, matching: find.text('Used For')),
+            findsOneWidget,
+          );
+        }
         final useRecipe = find.descendant(
           of: reference,
           matching: find.byKey(

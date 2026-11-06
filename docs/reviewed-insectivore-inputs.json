@@ -1,0 +1,83 @@
+{
+  "date": "2026-11-03",
+  "status": "SUPPORTED_CORRECTIONS_IMPLEMENTED_AND_VERIFIED_AUDIT_ACTIVE",
+  "scope": "Current exact PC item5601/5602 description and independently framed manufacture input/method records agree: Grinding five Flowers OR five Leaves for Powder; five Stalks OR five Roots for Sap.",
+  "changes": [
+    "Removed the unsupported ten Tree Spirit Stone Fragments from the Leaves recipe. Preserved its opaque leaves-and-fragments ID for saved selections; visible label is Leaves.",
+    "Alchemy dependencies use the same Flowers/Leaves choices as Processing. Sap gains the documented Roots alternative. Existing defaults and numerical output ranges remain unchanged.",
+    "Both retained1–4 output models are explicitly estimated across shared Recipe/Used for previews; exact output distribution/average remains unresolved.",
+    "Root5443 receives its existing exact Processing artwork in Alchemy, native0.10LT weight, and guarded short source guidance: Poisonous Plants in Naga Marsh, plus Central Market. No live stock is fabricated.",
+    "Leaf5441 and Root5443 have exact normal-grade marketable catalog records, so shared ingredient hosts show their usual stock pills. Both reuse existing exact Processing artwork. Market exclusion, freshness and cancellation guards are unchanged."
+  ],
+  "evidence": "Workspace audit/correctness-review-20261102/resumed-insectivore-stock-evidence.json",
+  "supersession": "The earlier resumed-insectivore-notice-followup.json incorrectly claimed current manufacture corroborated the mixed Leaf+Fragment route. It does not: all current Leaf inputs were checked and only the five-Leaf row exists. That mistaken research assertion is explicitly superseded, not erased.",
+  "limits": [
+    "Current described input/method choices are supported; this is not a complete server mechanics certification.",
+    "Native raw success700000 is not a proc distribution. No odds or EXP for new alternatives are invented.",
+    "No new personal-data fields, selected-ID migration, automatic inventory mutation, visible app/game launch, install or publication."
+  ],
+  "verification": {
+    "date": "2026-11-03T12:53:50.728Z",
+    "status": "SUPPORTED_CORRECTIONS_VERIFIED_AUDIT_ACTIVE",
+    "catalogHash": "0788628cb37dd0c23bd5c014afa6d8fd8f6d5580a2bd712a0cfc5067ba277447",
+    "catalogRecords": 1690,
+    "references": 2265,
+    "views": 6795,
+    "changed": [
+      "Insectivore Plant Flower",
+      "Insectivore Plant Leaf",
+      "Insectivore Plant Powder",
+      "Insectivore Plant Root",
+      "Insectivore Plant Sap",
+      "Insectivore Plant Stalk",
+      "Tree Spirit Stone Fragment"
+    ],
+    "unchangedExistingReferences": 2258,
+    "newReference": "Insectivore Plant Root",
+    "evidence": "resumed-insectivore-stock-evidence.json",
+    "tests": [
+      {
+        "log": "resumed-insectivore-stock-contract-confirmed-tests.jsonl",
+        "passed": 300
+      },
+      {
+        "log": "resumed-insectivore-stock-projection-tests.jsonl",
+        "passed": 1
+      },
+      {
+        "log": "resumed-insectivore-stock-scroll-tests.jsonl",
+        "passed": 42
+      },
+      {
+        "log": "resumed-insectivore-stock-art-tests.jsonl",
+        "passed": 3
+      }
+    ],
+    "generatorChecks": 5,
+    "analysis": "PASS",
+    "windowsRelease": "PASS",
+    "artworkEntriesChecked": 4533,
+    "narrowed": [
+      "catalog_formula_snapshot_input_difference:22",
+      "native_processing_route_not_represented:637",
+      "native_processing_route_not_represented:638"
+    ],
+    "closed": [],
+    "regressionScope": "Saved route ID, exact ingredient counts, no fragment demand, matching mode variants, all-mode stock identities and unlisted exclusions, unknown-stock badges, scroll reachability, Used for, exact artwork/weight, XP remains unknown where unsupported.",
+    "diagnosticCorrections": "An initial command used the wrong test directory; a layout filter omitted the word card and matched no tests. Both logs retained; corrected complete test commands passed. Initial staged count/family assertions were corrected to the actual public API contract. No golden fixtures were updated or assertions waived.",
+    "visualReview": [
+      "resumed-insectivore-stock-captures/supported-insectivore-plant-powder-sakura-night-garden-1.png",
+      "resumed-insectivore-scroll-captures/supported-insectivore-plant-sap-sakura-night-garden-2.png"
+    ],
+    "limits": [
+      "No raw manufacturing success value is a proc distribution.",
+      "This establishes the explicitly described current input/method choices, not every server-side availability condition.",
+      "Existing output range/model remains estimated; no XP or output probabilities invented.",
+      "No personal saved state, user-selected ID or inventory is rewritten."
+    ],
+    "personalProfilesAccessed": false,
+    "installed": false,
+    "published": false,
+    "visibleLaunch": false
+  }
+}

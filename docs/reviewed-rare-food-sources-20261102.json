@@ -1,0 +1,198 @@
+{
+  "reviewedAt": "2026-11-02",
+  "scope": "22 complete native rare clauses and eight pinned localized alias pairs. Exact skill retained; no proc probability, substitution ratio, recipes or pricing changed. Three already-confirmed removed ingredients lose obsolete source-registry hints; raw catalog/history remain.",
+  "registryCount": 1436,
+  "unchanged": 1406,
+  "items": [
+    {
+      "id": 9271,
+      "name": "Crispy Fried Vegetables",
+      "source": "Cooking · Make Fried Vegetables (rare extra, Skilled 5+)",
+      "descriptionAlias": true
+    },
+    {
+      "id": 9281,
+      "name": "Sweet and Sour Pickled Vegetable",
+      "source": "Cooking · Make Pickled Vegetables (rare extra, Skilled 9+)",
+      "descriptionAlias": true
+    },
+    {
+      "id": 9284,
+      "name": "Crispy Stir-Fried Vegetables",
+      "source": "Cooking · Make Stir-Fried Vegetables (rare extra, Skilled 5+)",
+      "descriptionAlias": true
+    },
+    {
+      "id": 9340,
+      "name": "Spicy Chanterelle Stew",
+      "source": "Cooking · Make Chanterelle Stew (rare extra, Professional 6+)",
+      "descriptionAlias": false
+    },
+    {
+      "id": 9342,
+      "name": "Nutritious Chanterelle and Potato Stew",
+      "source": "Cooking · Make Chanterelle and Potato Stew (rare extra, Professional 6+)",
+      "descriptionAlias": false
+    },
+    {
+      "id": 9344,
+      "name": "Hearty Stir-fried Chanterelle and Meat",
+      "source": "Cooking · Make Stir-Fried Chanterelle and Meat (rare extra, Professional 6+)",
+      "descriptionAlias": false
+    },
+    {
+      "id": 9346,
+      "name": "Savory Chanterelle Porridge",
+      "source": "Cooking · Make Chanterelle Porridge (rare extra, Professional 6+)",
+      "descriptionAlias": false
+    },
+    {
+      "id": 9350,
+      "name": "Aromatic Chanterelle Risotto",
+      "source": "Cooking · Make Chanterelle Risotto (rare extra, Master 1+)",
+      "descriptionAlias": false
+    },
+    {
+      "id": 9352,
+      "name": "Sour Citron Cider",
+      "source": "Cooking · Make Citron Cider (rare extra, Professional 6+)",
+      "descriptionAlias": false
+    },
+    {
+      "id": 9356,
+      "name": "Sweet Citron Juice",
+      "source": "Cooking · Make Citron Juice (rare extra, Professional 6+)",
+      "descriptionAlias": false
+    },
+    {
+      "id": 9362,
+      "name": "Crisp Pickled Citron and Onions",
+      "source": "Cooking · Make Pickled Citron and Onions (rare extra, Skilled 9+)",
+      "descriptionAlias": false
+    },
+    {
+      "id": 9368,
+      "name": "Mild Mesima Rice Wine",
+      "source": "Cooking · Make Mesima Rice Wine (rare extra, Artisan 1+)",
+      "descriptionAlias": false
+    },
+    {
+      "id": 9379,
+      "name": "Sour Citron Candy",
+      "source": "Cooking · Make Citron Candy (rare extra, Skilled 9+)",
+      "descriptionAlias": false
+    },
+    {
+      "id": 9433,
+      "name": "Savory Seafood Grilled with Butter",
+      "source": "Cooking · Make Seafood Grilled with Butter (rare extra, Skilled 5+)",
+      "descriptionAlias": true
+    },
+    {
+      "id": 9436,
+      "name": "Appealing Boiled Bird Egg",
+      "source": "Cooking · Make Boiled Bird Eggs (rare extra, Skilled 5+)",
+      "descriptionAlias": true
+    },
+    {
+      "id": 9457,
+      "name": "Chewy Steamed Whale Meat",
+      "source": "Cooking · Make Steamed Whale Meat (rare extra, Professional 1+)",
+      "descriptionAlias": true
+    },
+    {
+      "id": 9641,
+      "name": "Special Eilton Meal",
+      "source": "Cooking · Make Eilton Meal (rare extra, Master 1+)",
+      "descriptionAlias": false
+    },
+    {
+      "id": 820806,
+      "name": "Sour Dongchimi",
+      "source": "Cooking · Make Dongchimi (rare extra, Skilled 9+)",
+      "descriptionAlias": false
+    },
+    {
+      "id": 820812,
+      "name": "Crunchy Bean Sprout Salad",
+      "source": "Cooking · Make Bean Sprout Salad (rare extra, Skilled 9+)",
+      "descriptionAlias": false
+    },
+    {
+      "id": 820816,
+      "name": "Steaming Cooked Rice",
+      "source": "Cooking · Make Cooked Rice (rare extra, Skilled 5+)",
+      "descriptionAlias": false
+    },
+    {
+      "id": 820820,
+      "name": "Savory Soybean Jjigae",
+      "source": "Cooking · Make Soybean Jjigae (rare extra, Professional 7+)",
+      "descriptionAlias": false
+    },
+    {
+      "id": 820822,
+      "name": "Crispy Mungbean Jeon",
+      "source": "Cooking · Make Mungbean Jeon (rare extra, Skilled 9+)",
+      "descriptionAlias": false
+    },
+    {
+      "id": 820824,
+      "name": "Chewy Buckwheat Jelly",
+      "source": "Cooking · Make Buckwheat Jelly (rare extra, Professional 3+)",
+      "descriptionAlias": false
+    },
+    {
+      "id": 820826,
+      "name": "Red Bean Porridge Full of Tteok",
+      "source": "Cooking · Make Red Bean Porridge (rare extra, Skilled 9+)",
+      "descriptionAlias": false
+    },
+    {
+      "id": 820832,
+      "name": "Crispy Nurungji",
+      "source": "Cooking · Make Nurungji (rare extra, Skilled 9+)",
+      "descriptionAlias": false
+    },
+    {
+      "id": 820834,
+      "name": "Savory Sungnyung",
+      "source": "Cooking · Make Sungnyung (rare extra, Skilled 9+)",
+      "descriptionAlias": false
+    },
+    {
+      "id": 820840,
+      "name": "Fragrant Jujube Tea",
+      "source": "Cooking · Make Jujube Tea (rare extra, Skilled 9+)",
+      "descriptionAlias": false
+    },
+    {
+      "id": 820844,
+      "name": "Savory Roasted Silver Apricot",
+      "source": "Cooking · Make Roasted Silver Apricot (rare extra, Skilled 5+)",
+      "descriptionAlias": true
+    },
+    {
+      "id": 820846,
+      "name": "Chewy Garaetteok",
+      "source": "Cooking · Make Garaetteok (rare extra, Skilled 5+)",
+      "descriptionAlias": false
+    },
+    {
+      "id": 820850,
+      "name": "Soft Red Bean Sirutteok",
+      "source": "Cooking · Make Red Bean Sirutteok (rare extra, Skilled 5+)",
+      "descriptionAlias": true
+    }
+  ],
+  "remaining": [
+    "Fresh White Kimchi reversed English source still requires independent confirmation.",
+    "High-quality Eilton Sandwich lacks an explicit rare parent/threshold clause; not inferred from its name."
+  ],
+  "evidence": "audit/correctness-review-20261102/rare-source-supplement-delta.json",
+  "limits": [
+    "Explicit current-PC localized descriptions, cross-checked with exact catalog identities and preceding snapshot; not server probability certification.",
+    "Eight description aliases apply only to the pinned normal/rare pairs, not generic plural matching or substitute eligibility.",
+    "Existing UI, market badges, recipes, quantities, prices and user data unchanged."
+  ]
+}

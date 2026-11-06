@@ -686,7 +686,7 @@ void main() {
     );
     expect(
       find.text(
-        'Leave out the buffs selected in Prepare. They are added automatically.',
+        'Leave out the buffs and stones selected in Prepare. They are added automatically.',
       ),
       findsOneWidget,
     );
@@ -1001,28 +1001,32 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  test(
-    'herbal expense names match the catalog without changing expense math',
-    () {
-      final expected = {
-        821144: ('Mystical Herbal Medicine', 1000.0),
-        821145: ('Mellow Herbal Medicine', 600.0),
-      };
-      for (final entry in expected.entries) {
-        final expense = bairogEnergyExpenses.firstWhere(
-          (e) => e.bdoItemId == entry.key,
-        );
-        expect(expense.name, entry.value.$1);
-        expect(
-          expense.name,
-          catalog.buffs.firstWhere((b) => b.id == 'buff-${entry.key}').name,
-        );
-        expect(expense.durationHours, 3);
-        expect(expense.recoveryPerHour, entry.value.$2);
-        expect(expense.energyBoost, 0);
-      }
-    },
-  );
+  test('herbal expense names and hourly recovery match catalog ticks', () {
+    final expected = {
+      821144: ('Mystical Herbal Medicine', 1000.0),
+      821145: ('Mellow Herbal Medicine', 500.0),
+    };
+    for (final entry in expected.entries) {
+      final expense = bairogEnergyExpenses.firstWhere(
+        (e) => e.bdoItemId == entry.key,
+      );
+      expect(expense.name, entry.value.$1);
+      expect(
+        expense.recoveryPerHour,
+        catalog.buffs
+                .firstWhere((b) => b.id == 'buff-${entry.key}')
+                .effects['energyRecovery']! *
+            20,
+      );
+      expect(
+        expense.name,
+        catalog.buffs.firstWhere((b) => b.id == 'buff-${entry.key}').name,
+      );
+      expect(expense.durationHours, 3);
+      expect(expense.recoveryPerHour, entry.value.$2);
+      expect(expense.energyBoost, 0);
+    }
+  });
 
   for (final variant in [
     (width: 1200.0, scale: 1.0, reduced: false),

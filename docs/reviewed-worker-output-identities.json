@@ -1,0 +1,15 @@
+{
+  "date": "2026-11-03",
+  "status": "IMPLEMENTED_IN_ISOLATED_CORRECTNESS_CANDIDATE",
+  "scope": "Exact output identity reconciliation, not current-server yield certification.",
+  "changes": [
+    {"nodeId": 1673, "name": "Marak Farm Barley Farming", "beforeItem": 7005, "afterItem": 7002, "evidence": "https://bdocodex.com/us/node/1673/"},
+    {"nodeId": 1674, "name": "Marak Farm Corn Farming", "beforeItem": 7002, "afterItem": 7005, "evidence": "https://bdocodex.com/us/node/1674/"},
+    {"nodeId": 1833, "name": "Dallae Pier Quarry", "removedOutput": 8022, "effectiveDate": "2024-05-29", "evidence": "https://www.naeu.playblackdesert.com/en-US/News/Detail?groupContentNo=7050&countryType=en-US"}
+  ],
+  "preserved": ["349 other production records", "30 worker towns and all 88 profiles", "all workloads, distances, lucky bonuses and retained yield means", "14 unmodeled Inner Edania nodes remain unavailable for economic calculations", "all catalog, UI and personal-data behavior"],
+  "regression": ["all 352 modeled output sets exactly agree with Resource Map", "both Marak nodes contribute to the correct recipe demand", "income estimator accepts correct map output mappings", "Starlight Powder cannot enter any worker estimate", "generator applies only pinned exact corrections and rejects source drift"],
+  "verification": {"fiveNewTestsReproducedBeforeFix": true, "focusedPackageChecks": 44, "completeMapPackageChecks": 1006, "mapPackageSkips": 1, "applicationChecks": 18, "generatorChecks": 14, "regeneration": "byte-identical", "all2265References6795ViewsUnchanged": true, "analysis": "PASS", "windowsRelease": "PASS"},
+  "auditEvidence": "audit/correctness-review-20261102/resumed-worker-output-evidence.json",
+  "limits": ["Marak output identities have exact current secondary-page support; current native records corroborate node identity and position but do not provide those product lists.", "Dallae removal is explicit in the PC NA/EU patch; native/current output lists corroborate it.", "Numeric worker yields remain attributed estimates. This correction does not imply independent certification of every worker mechanic or every data row."]
+}

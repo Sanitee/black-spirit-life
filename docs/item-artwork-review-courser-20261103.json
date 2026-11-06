@@ -1,0 +1,36 @@
+{
+  "date": "2026-11-03",
+  "status": "SCOPED_ADDITION_VERIFIED",
+  "priorReview": "docs/item-artwork-review-20261102.json",
+  "evidence": "resumed-courser-artwork-addition.json and resumed-courser-artwork-verification.json in the correctness-review audit; exact installed PC item 50810, grade 1, decoded original artwork. Prior provenance records retained unchanged.",
+  "asset": "assets/opportunities/items/50810.png",
+  "addedEntries": [
+    {
+      "mode": "alchemy",
+      "name": "Deep Blue Hoof Root",
+      "id": 50810,
+      "grade": 1,
+      "source": "New_Icon/03_ETC/09_PetItem/00050810.dds",
+      "sha256": "c7dbfebaa539d125338ed11ae9c3c2b29763632e8360350f833f4246c5ed170d",
+      "referenceSha256": "c7dbfebaa539d125338ed11ae9c3c2b29763632e8360350f833f4246c5ed170d"
+    },
+    {
+      "mode": "cooking",
+      "name": "Deep Blue Hoof Root",
+      "id": 50810,
+      "grade": 1,
+      "source": "New_Icon/03_ETC/09_PetItem/00050810.dds",
+      "sha256": "c7dbfebaa539d125338ed11ae9c3c2b29763632e8360350f833f4246c5ed170d",
+      "referenceSha256": "c7dbfebaa539d125338ed11ae9c3c2b29763632e8360350f833f4246c5ed170d"
+    },
+    {
+      "mode": "processing",
+      "name": "Deep Blue Hoof Root",
+      "id": 50810,
+      "grade": 1,
+      "source": "New_Icon/03_ETC/09_PetItem/00050810.dds",
+      "sha256": "c7dbfebaa539d125338ed11ae9c3c2b29763632e8360350f833f4246c5ed170d",
+      "referenceSha256": "c7dbfebaa539d125338ed11ae9c3c2b29763632e8360350f833f4246c5ed170d"
+    }
+  ]
+}

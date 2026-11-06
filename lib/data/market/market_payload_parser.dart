@@ -49,7 +49,9 @@ abstract final class MarketPayloadParser {
       return ParsedMarketItem(
         id: normalizedRequestId,
         price: _nonnegativeInt(fields[3]) ?? 0,
-        stock: _nonnegativeInt(fields[4]) ?? 0,
+        // Missing/malformed stock is unknown, not a sold-out market. Keep the
+        // same distinction as the shared broker and the Arsha adapter.
+        stock: _firstStrictNonnegativeInt({'stock': fields[4]}, ['stock']),
         apiName: '',
       );
     }
@@ -80,7 +82,7 @@ abstract final class MarketPayloadParser {
                 'minPrice',
               ]) ??
               0,
-          stock: _firstNonnegativeInt(object, stockFieldNames),
+          stock: _firstStrictNonnegativeInt(object, stockFieldNames),
           apiName: _stringValue(object['name']),
           totalTrades: _firstStrictNonnegativeInt(object, const <String>[
             'totalTrades',

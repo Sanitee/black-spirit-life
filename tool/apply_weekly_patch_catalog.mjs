@@ -1195,7 +1195,7 @@ catalog.processing.items['Breath of All Creations'] = exactProcessingRecipe({
   method: 'Simple Alchemy',
   marketId: '56185',
   sourceNote:
-    'September 3, 2026 formula verified against the current game client.',
+    'Simple Alchemy · Processing (L)',
   outputMin: 1,
   outputMax: 1,
   ingredients: [
@@ -1210,7 +1210,7 @@ catalog.processing.items["Elion's Tear"] = exactProcessingRecipe({
   method: 'Simple Alchemy',
   marketId: '17566',
   sourceNote:
-    'September 3, 2026 formula verified against the current game client.',
+    'Simple Alchemy · Processing (L)',
   outputMin: 1,
   outputMax: 1,
   ingredients: [

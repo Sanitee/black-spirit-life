@@ -63,7 +63,9 @@ void main() {
       );
       await _settleImages(tester);
       expect(find.text('How to Obtain'), findsOneWidget);
-      expect(find.text('Buy from the Central Market.'), findsOneWidget);
+      for (final note in original.acquisitionNotes) {
+        expect(find.text(note), findsOneWidget);
+      }
       expect(
         find.text(
           'Heat a Sealed Black Magic Crystal, or buy Magical Shards through the Central Market.',
@@ -72,7 +74,19 @@ void main() {
       );
       expect(
         tester.getTopLeft(find.text('How to Obtain')).dy,
-        lessThan(tester.getTopLeft(find.text('Recipe & materials')).dy),
+        lessThan(
+          tester
+              .getTopLeft(
+                find.byKey(
+                  RecipeBookKeys.itemInfoFormula(
+                    original.acquisitionFormulas.first.outputName,
+                    original.acquisitionFormulas.first.variantId,
+                    original.acquisitionFormulas.first.batchMultiplier,
+                  ),
+                ),
+              )
+              .dy,
+        ),
       );
       expect(
         find.text(
@@ -166,10 +180,12 @@ void main() {
       );
       final originalPanelType = tester.widget(_panel(_essence)).runtimeType;
       final originalText = _panelText(tester, _essence);
-      expect(originalText.join(' '), contains('Heating'));
-      expect(originalText.join(' '), contains('Magical Shard'));
       expect(originalText.join(' '), contains('How to Obtain'));
-      expect(originalText.join(' '), contains('Used For'));
+      expect(originalText.join(' '), contains('Used for'));
+      await _selectUsed(tester, mouse);
+      final originalUses = _panelText(tester, _essence);
+      expect(originalUses.join(' '), contains('Heating'));
+      expect(originalUses.join(' '), contains('Magical Shard'));
       await _leave(tester, mouse);
       await _hover(
         tester,
@@ -178,6 +194,8 @@ void main() {
       );
       expect(tester.widget(_panel(_essence)).runtimeType, originalPanelType);
       expect(_panelText(tester, _essence), originalText);
+      await _selectUsed(tester, mouse);
+      expect(_panelText(tester, _essence), originalUses);
       expect(fixture.transport.requests, isEmpty);
       await _leave(tester, mouse);
       await _dispose(tester, fixture);
@@ -228,7 +246,7 @@ void main() {
   );
 
   testWidgets(
-    'craft hover preserves name copy and icon body recipe navigation',
+    'craft hover preserves name copy, inline comparison and explicit recipe inspection',
     (tester) async {
       final fixture = await _fixture(tester);
       await tester.pumpWidget(_host(fixture));
@@ -253,7 +271,12 @@ void main() {
       expect(find.byType(Dialog), findsNothing);
       await tester.tap(_icon(card, _crystal));
       await _settleImages(tester);
-      expect(find.byType(Dialog), findsOneWidget);
+      expect(find.byType(Dialog), findsNothing);
+      expect(
+        find.byKey(const ValueKey('craft-inline-details:$_crystal')),
+        findsOneWidget,
+      );
+      await _openCrystal(tester);
       expect(_region('opportunity-title:$_crystal'), findsOneWidget);
       await _hover(
         tester,
@@ -265,10 +288,11 @@ void main() {
       await tester.sendKeyEvent(LogicalKeyboardKey.escape);
       await tester.pumpAndSettle();
       expect(find.byType(Dialog), findsNothing);
-      final cardRect = tester.getRect(card);
-      await tester.tapAt(Offset(cardRect.center.dx, cardRect.bottom - 18));
+      await tester.tap(
+        find.byKey(const ValueKey('craft-recipe-button:$_crystal')),
+      );
       await _settleImages(tester);
-      expect(find.byType(Dialog), findsOneWidget);
+      expect(find.byType(Dialog), findsNothing);
       expect(fixture.transport.requests, isEmpty);
       await _dispose(tester, fixture);
     },
@@ -368,6 +392,8 @@ void main() {
       final mouse = await _mouse(tester);
       await _hover(tester, mouse, _icon(ingredient, _essence));
       final panel = _panel(_essence);
+      _expectSectionSpacing(tester, panel, scenario.scale);
+      await _selectUsed(tester, mouse);
       final rect = tester.getRect(panel);
       final scroller = tester.state<ScrollableState>(
         find.descendant(of: panel, matching: find.byType(Scrollable)).first,
@@ -391,7 +417,6 @@ void main() {
         await tester.pump();
       }
       _expectCompleteFormula(tester, panel);
-      _expectSectionSpacing(tester, panel, scenario.scale);
       _expectCompactFormulaGeometry(tester, panel);
       _expectConcreteCrystalEffects(tester, panel);
       if (scenario.scale > 1) {
@@ -462,6 +487,7 @@ void main() {
         find.byKey(const ValueKey('intrinsic-formula-anchor')),
       );
       final panel = _panel(_essence);
+      await _selectUsed(tester, mouse);
       widths.add(tester.getSize(_essenceFormula(panel)).width);
       _expectCompactFormulaGeometry(tester, panel);
       expect(tester.takeException(), isNull);
@@ -575,6 +601,7 @@ void main() {
         find.byKey(const ValueKey('wrapped-formula-anchor')),
       );
       final panel = _panel(_essence);
+      await _selectUsed(tester, mouse);
       final formula = _essenceFormula(panel);
       _expectCompactFormulaGeometry(tester, panel);
       final row = find.descendant(
@@ -584,7 +611,9 @@ void main() {
         ),
       );
       final name = find.descendant(of: row, matching: find.text(_essence));
-      final paragraph = tester.renderObject<RenderParagraph>(name);
+      final paragraph = tester.renderObject<RenderParagraph>(
+        find.descendant(of: name, matching: find.byType(RichText)).first,
+      );
       final painter = TextPainter(
         text: paragraph.text,
         textDirection: paragraph.textDirection,
@@ -627,20 +656,6 @@ Finder _essenceFormula(Finder panel) => find.descendant(
   matching: find.byKey(RecipeBookKeys.itemInfoFormula(_crystal, null, 1)),
 );
 
-double _naturalTextWidth(WidgetTester tester, Finder text) {
-  final paragraph = tester.renderObject<RenderParagraph>(text);
-  final painter = TextPainter(
-    text: paragraph.text,
-    textDirection: paragraph.textDirection,
-    textScaler: paragraph.textScaler,
-  )..layout();
-  try {
-    return painter.width;
-  } finally {
-    painter.dispose();
-  }
-}
-
 void _expectCompactFormulaGeometry(WidgetTester tester, Finder panel) {
   final formula = _essenceFormula(panel);
   final formulaRect = tester.getRect(formula);
@@ -652,12 +667,9 @@ void _expectCompactFormulaGeometry(WidgetTester tester, Finder panel) {
   expect(
     formulaRect.left,
     closeTo(viewport.left, .6),
-    reason: 'Recipes share the section heading left alignment.',
+    reason: 'Joined rows start at the reading area edge.',
   );
-
-  final names = <double>[];
-  final quantities = <double>[];
-  final gaps = <double>[];
+  expect(formulaRect.width, closeTo(viewport.width, .6));
   for (final material in [('Magical Shard', '×300'), (_essence, '×450')]) {
     final row = find.descendant(
       of: formula,
@@ -667,30 +679,15 @@ void _expectCompactFormulaGeometry(WidgetTester tester, Finder panel) {
     );
     final name = find.descendant(of: row, matching: find.text(material.$1));
     final quantity = find.descendant(of: row, matching: find.text(material.$2));
-    final naturalName = _naturalTextWidth(tester, name);
-    names.add(naturalName);
-    quantities.add(_naturalTextWidth(tester, quantity));
-    gaps.add(
-      tester.getRect(quantity).left - tester.getRect(name).left - naturalName,
+    expect(
+      tester.getRect(quantity).left - tester.getRect(name).right,
+      closeTo(8, .6),
+      reason: 'Quantities stay beside names, including wrapped names.',
     );
-  }
-  final longestName = names.reduce((a, b) => a > b ? a : b);
-  final widestQuantity = quantities.reduce((a, b) => a > b ? a : b);
-  final measuredRowWidth = 28 + 36 + 12 + longestName + 12 + widestQuantity;
-  expect(
-    formulaRect.width,
-    lessThanOrEqualTo(measuredRowWidth + 6),
-    reason: 'No window-sized empty area is added after the short recipe rows.',
-  );
-  if (formulaRect.width >= measuredRowWidth - 2) {
-    for (var index = 0; index < names.length; index++) {
-      expect(
-        gaps[index],
-        closeTo(8, .6),
-        reason:
-            'Quantity stays beside its own item name, not in a distant column.',
-      );
-    }
+    expect(
+      tester.getRect(quantity).right,
+      lessThanOrEqualTo(formulaRect.right),
+    );
   }
 }
 
@@ -769,13 +766,22 @@ void _expectSectionSpacing(WidgetTester tester, Finder panel, double scale) {
       ),
     ),
   );
-  final usedFor = tester.getRect(text('Used For'));
-  final output = tester.getRect(text(_crystal));
   final gapScale = scale.clamp(1.0, 1.5);
   expect(note.top - obtain.bottom, greaterThanOrEqualTo(8 * gapScale - .1));
-  expect(usedFor.top - note.bottom, greaterThanOrEqualTo(20 * gapScale - .1));
-  expect(output.top - usedFor.bottom, greaterThanOrEqualTo(8 * gapScale - .1));
-  final paragraph = tester.renderObject<RenderParagraph>(text('How to Obtain'));
+  expect(
+    find.byKey(const ValueKey('attached-reference-tab:used')),
+    findsOneWidget,
+  );
+  expect(
+    text(_crystal),
+    findsNothing,
+    reason: 'Related recipes belong to Used for.',
+  );
+  final paragraph = tester.renderObject<RenderParagraph>(
+    find
+        .descendant(of: text('How to Obtain'), matching: find.byType(RichText))
+        .first,
+  );
   expect(
     paragraph.textScaler.scale(12),
     closeTo(12 * scale, .01),
@@ -827,12 +833,30 @@ Future<void> _leave(WidgetTester tester, TestGesture mouse) async {
   expect(find.byKey(RecipeBookKeys.itemInfo(_crystal)), findsNothing);
 }
 
+Future<void> _selectUsed(WidgetTester tester, TestGesture mouse) async {
+  final tab = find.byKey(const ValueKey('attached-reference-tab:used'));
+  await mouse.moveTo(tester.getCenter(tab));
+  await mouse.down(tester.getCenter(tab));
+  await mouse.up();
+  await tester.pumpAndSettle();
+  final body = find.byKey(const ValueKey('attached-reference-scroll'));
+  await mouse.moveTo(tester.getCenter(body));
+  await tester.pump(const Duration(milliseconds: 400));
+  expect(body, findsOneWidget, reason: 'A tab click must keep the hover open.');
+}
+
 Future<void> _openCrystal(WidgetTester tester) async {
   final icon = _icon(_region('craft-card:$_crystal'), _crystal);
   await tester.ensureVisible(icon);
   await tester.pumpAndSettle();
   expect(icon.hitTestable(), findsOneWidget);
-  await tester.tap(icon);
+  await tester.tap(icon, buttons: kSecondaryMouseButton);
+  await tester.pumpAndSettle();
+  await tester.tap(
+    find.byKey(
+      const ValueKey('opportunity-item-action:craft-card:$_crystal:recipe'),
+    ),
+  );
   await _settleImages(tester);
   expect(_region('ingredient:$_essence'), findsOneWidget);
 }

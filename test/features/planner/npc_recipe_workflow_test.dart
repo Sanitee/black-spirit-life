@@ -17,6 +17,8 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../../support/availability_badge_finders.dart';
+
 const _target = 'Brimming Essence of Aether';
 const _sharp = 'Sharp Black Crystal Shard';
 const _oquilla = 'Oquilla Piece of the Old Moon';
@@ -76,7 +78,7 @@ void main() {
         await tester.pumpAndSettle();
         expect(find.text('Auto'), findsOneWidget);
         expect(find.textContaining('NPC option saves'), findsOneWidget);
-        expect(find.text('Stock —'), findsNothing);
+        expect(stockBadgeText('—'), findsNothing);
 
         await tester.tap(find.byKey(PlannerActionKeys.p15));
         await tester.pumpAndSettle();
@@ -97,8 +99,8 @@ void main() {
         await tester.pumpAndSettle();
         expect(mode.selectedRecipeVariantId(_target), 'oquilla-pieces');
         expect(find.textContaining('Market option is'), findsOneWidget);
-        expect(find.text('Vendor item'), findsOneWidget);
-        expect(find.text('Stock —'), findsNothing);
+        expect(find.text('NPC'), findsOneWidget);
+        expect(stockBadgeText('—'), findsNothing);
 
         await tester.tap(
           find.byKey(RecipeVariantSelector.automaticChoiceKey(_target)),
@@ -146,19 +148,31 @@ void main() {
         );
         await tester.pump(const Duration(seconds: 1));
         await tester.pump(const Duration(milliseconds: 200));
+        expect(find.text('Buying missing materials'), findsNothing);
+        final beforeComparison = mode.state.value.toJson();
+        await tester.tap(find.byKey(const ValueKey('recipe-route-cost-open')));
+        await tester.pumpAndSettle();
         expect(find.text('Buying missing materials'), findsOneWidget);
-        expect(find.text('NPC shop'), findsOneWidget);
-        expect(find.text('Stock ${formatQuantity(10000)}'), findsOneWidget);
-        expect(find.text('Stock —'), findsNothing);
+        expect(mode.state.value.toJson(), beforeComparison);
+        expect(
+          find.descendant(
+            of: find.byKey(const ValueKey('recipe-route-cost-panel')),
+            matching: find.text('NPC'),
+          ),
+          findsOneWidget,
+        );
+        expect(stockBadgeText(formatQuantity(10000)), findsOneWidget);
+        expect(stockBadgeText('—'), findsNothing);
         expect(tester.takeException(), isNull);
         if (const bool.fromEnvironment('CAPTURE_NPC_ROUTE')) {
           await _capture(
             tester,
             captureKey,
-            'npc-route-hover-${width.toInt()}',
+            'npc-route-details-${width.toInt()}',
           );
         }
         await mouse.moveTo(Offset.zero);
+        await tester.sendKeyEvent(LogicalKeyboardKey.escape);
         await tester.pumpAndSettle();
         mode.updateState(
           (state) => state.copyWith(
@@ -172,18 +186,28 @@ void main() {
         );
         await tester.pump(const Duration(seconds: 1));
         await tester.pump(const Duration(milliseconds: 200));
+        expect(find.text('Buying missing materials'), findsNothing);
+        await tester.tap(find.byKey(const ValueKey('recipe-route-cost-open')));
+        await tester.pumpAndSettle();
         expect(find.text('Buying missing materials'), findsOneWidget);
-        expect(find.text('Stock —'), findsOneWidget);
-        expect(find.text('NPC shop'), findsOneWidget);
-        expect(find.text('Stock ${formatQuantity(10000)}'), findsNothing);
+        expect(stockBadgeText('—'), findsOneWidget);
+        expect(
+          find.descendant(
+            of: find.byKey(const ValueKey('recipe-route-cost-panel')),
+            matching: find.text('NPC'),
+          ),
+          findsOneWidget,
+        );
+        expect(stockBadgeText(formatQuantity(10000)), findsNothing);
         if (const bool.fromEnvironment('CAPTURE_NPC_ROUTE')) {
           await _capture(
             tester,
             captureKey,
-            'npc-route-unknown-hover-${width.toInt()}',
+            'npc-route-unknown-details-${width.toInt()}',
           );
         }
         await mouse.removePointer();
+        await tester.sendKeyEvent(LogicalKeyboardKey.escape);
         await tester.pumpAndSettle();
         _price(mode, 6000000);
         await tester.pumpAndSettle();
@@ -211,7 +235,9 @@ void main() {
                     .first,
               )
               .position;
-          expect(position.maxScrollExtent, greaterThan(0));
+          // The approved compact reference can now fit without scrolling.
+          // Both fitted and overflowing cards must keep their end reachable.
+          expect(position.maxScrollExtent, greaterThanOrEqualTo(0));
           position.jumpTo(position.maxScrollExtent);
           await tester.pumpAndSettle();
           expect(position.pixels, position.maxScrollExtent);
@@ -287,9 +313,9 @@ void _expectOquillaAcquisition(String stableId) {
     'Cannot be registered on the Central Market.',
   ]) {
     expect(
-      find.descendant(of: card, matching: find.text(line)),
+      find.descendant(of: card, matching: find.textContaining(line)),
       findsOneWidget,
-      reason: 'Each acquisition fact should have its own readable row.',
+      reason: 'The combined acquisition route must retain every fact.',
     );
   }
 }

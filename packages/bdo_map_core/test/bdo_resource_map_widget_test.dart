@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'support/action_hint_finder.dart';
 import 'dart:math' as math;
 import 'dart:ui' as ui;
 
@@ -8,7 +9,6 @@ import 'package:bdo_map_core/src/widgets/network_cp_breakdown.dart';
 import 'package:bdo_map_core/src/widgets/network_cp_review.dart';
 import 'package:bdo_map_core/src/widgets/resource_map_atlas_shell.dart';
 import 'package:bdo_map_core/src/widgets/resource_map_menu_artwork.dart';
-import 'package:bdo_map_core/src/widgets/resource_map_panel_metrics.dart';
 import 'package:bdo_map_core/src/widgets/town_house_panel.dart';
 import 'package:bdo_map_core/src/widgets/worker_activity_style.dart';
 import 'package:flutter/gestures.dart';
@@ -29,7 +29,7 @@ Finder _townHouseScrollable() => find
     .first;
 
 Future<void> _openHouseOption(WidgetTester tester, String label) async {
-  final menu = find.byTooltip('House options');
+  final menu = findActionHint('House options');
   await tester.ensureVisible(menu);
   await tester.tap(menu);
   await tester.pumpAndSettle();
@@ -1911,7 +1911,7 @@ void main() {
     await tester.enterText(find.byType(TextField), 'cow');
     await tester.pumpAndSettle();
     expect(find.text('Dairy Cow'), findsOneWidget);
-    expect(find.text('Cow / Ox'), findsOneWidget);
+    expect(find.text('Wild Cattle'), findsOneWidget);
     final results = find.byKey(const ValueKey<String>('search'));
     expect(results, findsOneWidget);
     expect(tester.getRect(results).bottom, lessThanOrEqualTo(752));
@@ -1938,14 +1938,14 @@ void main() {
       tester,
       dataset.fieldSourcesById['field-source:dairy-cow']!,
     );
-    expect(find.byTooltip('Milking minigame'), findsOneWidget);
+    expect(findActionHint('Milking minigame'), findsOneWidget);
     var canvas = tester.widget<BdoMapCanvas>(find.byType(BdoMapCanvas));
     expect(canvas.gatheringSpots, hasLength(6));
     expect(canvas.workerNodes, isEmpty);
 
     await tester.enterText(find.byType(TextField), 'cow');
     await tester.pumpAndSettle();
-    await tester.tap(find.text('Cow / Ox'));
+    await tester.tap(find.text('Wild Cattle'));
     await tester.pumpAndSettle();
 
     canvas = tester.widget<BdoMapCanvas>(find.byType(BdoMapCanvas));
@@ -3181,7 +3181,7 @@ void main() {
       ValueKey<String>('resource-map-node-target-remove-${ash.id}'),
     );
     IconButton buttonInside(Finder control) => tester.widget<IconButton>(
-      find.descendant(of: control, matching: find.byType(IconButton)),
+      find.descendant(of: control, matching: find.bySubtype<IconButton>()),
     );
     expect(buttonInside(ashMinus).onPressed, isNull);
     expect(buttonInside(ashPlus).onPressed, isNotNull);
@@ -4206,7 +4206,7 @@ void main() {
                   ),
                   skipOffstage: false,
                 ),
-                matching: find.byType(IconButton, skipOffstage: false),
+                matching: find.bySubtype<IconButton>(skipOffstage: false),
               ),
             )
             .onPressed,
@@ -4603,12 +4603,23 @@ void main() {
       expect(workspaceRect.left, closeTo(mapRect.left + 228, 1));
       expect(incomeSurfaceRect.top, greaterThan(workspaceRect.top));
       expect(incomeSurfaceRect.bottom, lessThanOrEqualTo(workspaceRect.bottom));
-      expect(
-        incomeSurfaceRect.height,
-        lessThan(mapRect.height * .5),
-        reason:
-            'The sparse income result fits its content without a tall empty panel.',
+      // The Ahem test font wraps more action captions than the native font.
+      // Check content-fit without a font-specific half-screen height guess;
+      // the real-font capture below separately pins compact visual density.
+      final lastAction = tester.getRect(
+        find.byKey(
+          const ValueKey('resource-map-toggle-worker-lodging-details'),
+        ),
       );
+      expect(
+        incomeSurfaceRect.bottom - lastAction.bottom,
+        inInclusiveRange(0, 20),
+        reason:
+            'The sparse income result must not reserve empty trailing space.',
+      );
+      if (Platform.environment['MAP_MENU_CAPTURE_DIR'] != null) {
+        expect(incomeSurfaceRect.height, lessThan(mapRect.height * .5));
+      }
       expect(
         find.byKey(
           const ValueKey<String>(
@@ -4655,6 +4666,10 @@ void main() {
       expect(tester.getRect(incomeSurface), incomeSurfaceRect);
       await tester.pumpAndSettle();
       if (Platform.environment['MAP_MENU_CAPTURE_DIR'] == null) {
+        await _settleVisibleGoldenImages(
+          tester,
+          root: find.byType(BdoResourceMap),
+        );
         await expectLater(
           find.byType(BdoResourceMap),
           matchesGoldenFile('goldens/resource_map_worker_income.png'),
@@ -5061,7 +5076,7 @@ void main() {
       await tester.pump();
       expect(find.text('9 slots · 5 free'), findsNothing);
       expect(
-        find.byTooltip(
+        findActionHint(
           '1 base slots\n0 slots from owned lodging\n8 bonus slots\n4 hired workers',
         ),
         findsNothing,
@@ -6183,7 +6198,7 @@ void main() {
         of: find.byKey(
           const ValueKey<String>('resource-map-node-target-remove-x'),
         ),
-        matching: find.byType(IconButton),
+        matching: find.bySubtype<IconButton>(),
       );
       tester.widget<IconButton>(removeX).onPressed!.call();
       await tester.pump();
@@ -6268,7 +6283,7 @@ void main() {
         const ValueKey<String>('resource-map-node-target-plus-x'),
       );
       IconButton buttonInside(Finder control) => tester.widget<IconButton>(
-        find.descendant(of: control, matching: find.byType(IconButton)),
+        find.descendant(of: control, matching: find.bySubtype<IconButton>()),
       );
 
       expect(
@@ -6374,7 +6389,12 @@ void main() {
       );
       final incrementButton = find.descendant(
         of: targetRow,
-        matching: find.widgetWithIcon(IconButton, Icons.add_rounded),
+        matching: find.byWidgetPredicate(
+          (widget) =>
+              widget is IconButton &&
+              widget.icon is Icon &&
+              (widget.icon as Icon).icon == Icons.add_rounded,
+        ),
       );
       final decrementButton = find.byKey(
         const ValueKey<String>('resource-map-node-target-minus-wood'),
@@ -6383,7 +6403,7 @@ void main() {
         const ValueKey<String>('resource-map-node-target-remove-wood'),
       );
       IconButton buttonInside(Finder control) => tester.widget<IconButton>(
-        find.descendant(of: control, matching: find.byType(IconButton)),
+        find.descendant(of: control, matching: find.bySubtype<IconButton>()),
       );
       expect(find.text('1 available worker node'), findsNothing);
       expect(availability, findsNothing);
@@ -6474,14 +6494,14 @@ void main() {
     await _openNodeMaterialTargets(tester);
     await _settleNodeTargetPreview(tester);
 
-    expect(find.byTooltip('Clear saved setup'), findsNothing);
+    expect(findActionHint('Clear saved setup'), findsNothing);
     await tester.tap(
       find.byKey(
         const ValueKey<String>('resource-map-node-target-settings-toggle'),
       ),
     );
     await tester.pump(const Duration(milliseconds: 200));
-    expect(find.byTooltip('Clear saved setup'), findsOneWidget);
+    expect(findActionHint('Clear saved setup'), findsOneWidget);
 
     final clearSaved = find
         .byKey(const ValueKey<String>('resource-map-clear-saved-node-network'))
@@ -6733,9 +6753,14 @@ void main() {
     expect(find.text('Estimated income'), findsNothing);
     final hourly = tester.widget<Text>(find.textContaining('/ hour'));
     expect(hourly.style?.color, ResourceMapChromeThemeData.fieldAtlas.ink);
-    expect(hourly.style?.fontSize, ResourceMapPanelMetrics.primary);
+    // This is the existing income headline, not a utility row label.
+    expect(hourly.style?.fontSize, 22);
     expect(find.text('Recommended route'), findsNothing);
     if (Platform.environment['MAP_MENU_CAPTURE_DIR'] == null) {
+      await _settleVisibleGoldenImages(
+        tester,
+        root: find.byType(BdoResourceMap),
+      );
       await expectLater(
         find.byType(BdoResourceMap),
         matchesGoldenFile('goldens/resource_map_worker_income_compact.png'),
@@ -7846,7 +7871,7 @@ void main() {
       await tester.pumpAndSettle();
       expect(
         tester
-            .getSize(find.byTooltip('Map source and fan-content notice'))
+            .getSize(findActionHint('Map source and fan-content notice'))
             .shortestSide,
         greaterThanOrEqualTo(48),
       );
@@ -7985,7 +8010,7 @@ void main() {
         of: find.byKey(
           const ValueKey<String>('resource-map-layer-menu-toggle'),
         ),
-        matching: find.byType(IconButton),
+        matching: find.bySubtype<IconButton>(),
       );
       await tester.tap(layerMenuToggle);
       await tester.pumpAndSettle();
@@ -9345,7 +9370,7 @@ void main() {
         dataset.fieldSourcesById['field-source:marni-sniper-hunting']!,
       );
       expect(
-        find.byTooltip(
+        findActionHint(
           'Sniper hunt and butcher · Sniper Rifle and Butcher Knife',
         ),
         findsNWidgets(11),
@@ -10094,7 +10119,7 @@ void main() {
     expect(canvas.gatheringSpots, hasLength(1));
     expect(find.text('Exact locations'), findsNothing);
 
-    await tester.tap(find.byTooltip('Clear search'));
+    await tester.tap(findActionHint('Clear search'));
     await tester.pump();
     await tester.enterText(find.byType(TextField), 'not-a-real-bdo-resource');
     await tester.pumpAndSettle();
@@ -10673,7 +10698,7 @@ void main() {
         find.byKey(const ValueKey<String>('resource-map-status-details')),
         findsNothing,
       );
-      expect(find.byTooltip('Map source and fan-content notice'), findsNothing);
+      expect(findActionHint('Map source and fan-content notice'), findsNothing);
       expect(
         find.descendant(of: animation, matching: find.byType(AnimatedSize)),
         findsNothing,
@@ -10695,10 +10720,10 @@ void main() {
         findsOneWidget,
       );
       expect(
-        find.byTooltip('Map source and fan-content notice'),
+        findActionHint('Map source and fan-content notice'),
         findsOneWidget,
       );
-      expect(find.byTooltip('Use cached tiles only'), findsOneWidget);
+      expect(findActionHint('Use cached tiles only'), findsOneWidget);
       expect(tester.widget<Semantics>(toggle).properties.toggled, isTrue);
       expect(
         tester
@@ -10815,7 +10840,7 @@ void main() {
     expect(compactZoomRect.bottom, lessThan(compactDetailsRect.top));
     expect(tester.takeException(), isNull);
 
-    expect(find.byTooltip('Map source and fan-content notice'), findsNothing);
+    expect(findActionHint('Map source and fan-content notice'), findsNothing);
     final statusAnimatedSize = find.descendant(
       of: find.byKey(const ValueKey<String>('resource-map-status-animation')),
       matching: find.byType(AnimatedSize),
@@ -10829,7 +10854,7 @@ void main() {
       find.byKey(const ValueKey<String>('resource-map-status-toggle')),
     );
     await tester.pumpAndSettle();
-    await tester.tap(find.byTooltip('Map source and fan-content notice'));
+    await tester.tap(findActionHint('Map source and fan-content notice'));
     await tester.pump();
     expect(find.text('Map source and usage'), findsOneWidget);
     expect(find.textContaining('Downloaded map tiles:'), findsOneWidget);
@@ -10979,7 +11004,7 @@ void main() {
       await tester.pumpAndSettle();
       expectParentMaterial();
 
-      await tester.tap(find.byTooltip('Clear search'));
+      await tester.tap(findActionHint('Clear search'));
       await tester.pumpAndSettle();
       canvas = tester.widget<BdoMapCanvas>(find.byType(BdoMapCanvas));
       expect(canvas.gatheringPoints, hasLength(657));
@@ -11713,7 +11738,7 @@ void main() {
       find.byKey(const ValueKey<String>('resource-map-status-toggle')),
     );
     await tester.pumpAndSettle();
-    await tester.tap(find.byTooltip('Map source and fan-content notice'));
+    await tester.tap(findActionHint('Map source and fan-content notice'));
     await tester.pump();
 
     expect(find.text('Map source and usage'), findsOneWidget);
@@ -11836,7 +11861,7 @@ void main() {
     expect(find.byKey(const ValueKey<String>('search')), findsNothing);
     expect(canvas.onEmptyTap, isNotNull);
 
-    await tester.tap(find.byTooltip('Show the full world'));
+    await tester.tap(findActionHint('Show the full world'));
     await tester.pumpAndSettle();
     expect(
       tester.widget<TextField>(find.byType(TextField)).controller!.text,
@@ -12714,12 +12739,12 @@ void main() {
       expect(find.text('GATHER'), findsNothing);
 
       final zeroStockStatus = tester.widget<Tooltip>(
-        find.descendant(of: snakeRow, matching: find.byType(Tooltip)),
+        find.descendant(of: snakeRow, matching: find.bySubtype<Tooltip>()),
       );
       expect(zeroStockStatus.message, contains('0 stock at last EU check'));
       expect(zeroStockStatus.message, contains('2026-07-28'));
       final partialStockStatus = tester.widget<Tooltip>(
-        find.descendant(of: truffleRow, matching: find.byType(Tooltip)),
+        find.descendant(of: truffleRow, matching: find.bySubtype<Tooltip>()),
       );
       expect(
         partialStockStatus.message,
@@ -12729,7 +12754,7 @@ void main() {
       expect(partialStockStatus.message, contains('NA'));
       expect(partialStockStatus.message, contains('2026-07-27'));
       final unmarketableStatus = tester.widget<Tooltip>(
-        find.descendant(of: sheepRow, matching: find.byType(Tooltip)),
+        find.descendant(of: sheepRow, matching: find.bySubtype<Tooltip>()),
       );
       expect(
         unmarketableStatus.message,
@@ -12820,7 +12845,7 @@ void main() {
     expect(find.text('Stock —'), findsNothing);
     final row = find.byKey(const ValueKey('resource-map-plan-need-item:7922'));
     final tooltip = tester.widget<Tooltip>(
-      find.descendant(of: row, matching: find.byType(Tooltip)),
+      find.descendant(of: row, matching: find.bySubtype<Tooltip>()),
     );
     expect(tooltip.message, contains('Stock unknown'));
     expect(find.text('Stock 0'), findsNothing);

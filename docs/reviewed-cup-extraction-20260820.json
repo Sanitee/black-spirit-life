@@ -1,0 +1,111 @@
+{
+  "status": "IMPLEMENTED_AND_VERIFIED_AUDIT_ACTIVE",
+  "reviewedAt": "2026-11-03",
+  "region": "PC NA/EU live",
+  "source": {
+    "date": "2026-08-20",
+    "title": "August 20, 2026 Patch Notes — Cup Extraction Change",
+    "url": "https://www.naeu.playblackdesert.com/en-US/News/Detail?groupContentNo=10478",
+    "archive": "official/sea-accessory-naeu-20260820",
+    "htmlSha256": "1ed20bf108aaff62eddc773d127decf1ae2b5df9268b81c29fca5d3a6d2ebdf6"
+  },
+  "removedItems": [
+    {
+      "id": 820020,
+      "name": "Fused Crystal of Emotions"
+    },
+    {
+      "id": 820021,
+      "name": "Refined Essence of Emotions"
+    }
+  ],
+  "findings": [
+    "The PC update replaced Refined Essence of Emotions with Mirror of Equilibrium for the listed cup-reformed accessories, including all eight bundled Ekleta/Apeiron reforms.",
+    "Fused Crystal of Emotions NPC sales and crafting stopped. Owned Fused Crystals and Refined Essences were removed and their materials/Silver refunded.",
+    "Lejenti's recurring cup-extraction quest stopped being acceptable and accepted quests were canceled/refunded.",
+    "The current client still contains historical identities and old descriptions. Those cannot override the explicit PC removal notice."
+  ],
+  "implementation": [
+    "Exact-ID confirmed-removal policy, with August date distinct from January crystal and September Spirit Stone removals.",
+    "Both historical references show Removed item and the replacement extraction material, without active uses, recipes or acquisition sources.",
+    "Planner targets, Opportunities market/profit/EXP, shared ingredient consumers, inventory choices and market requests use the existing shared exclusion gates.",
+    "All eight bundled Ekleta/Apeiron reform source records and the Edania generator use Mirror of Equilibrium with the August source provenance.",
+    "The eight existing reform formulas, effects, item IDs, historical recipes and synthetic saved quantities remain unchanged."
+  ],
+  "scope": {
+    "originalLedgerFlagsClosed": 0,
+    "reason": "These two removed-item defects and eight stale extraction instructions were discovered during the continued audit, not separate original 3880 flags.",
+    "controllerReferencesChanged": 15,
+    "unchangedReferences": 2249,
+    "personalProfilesAccessed": false,
+    "installed": false,
+    "published": false,
+    "visibleLaunch": false
+  },
+  "verification": {
+    "date": "2026-11-03T12:04:41.914Z",
+    "status": "CUP_EXTRACTION_CORRECTION_VERIFIED_AUDIT_ACTIVE",
+    "projection": "resumed-cup-extraction-controller-projection/controller-projection.json",
+    "references": 2264,
+    "views": 6792,
+    "delta": [
+      "Dawnbound Apeiron Necklace",
+      "Dawnbound Ekleta Necklace",
+      "Duskborne Apeiron Belt",
+      "Duskborne Ekleta Belt",
+      "Forest Fury",
+      "Fused Crystal of Emotions",
+      "Magical Shard",
+      "Moonhushed Apeiron Earring",
+      "Moonhushed Ekleta Earring",
+      "Refined Essence of Emotions",
+      "Shard of the Drained Night",
+      "Shard of the Furious Night",
+      "Shard of the Tearful Night",
+      "Sunstarved Apeiron Ring",
+      "Sunstarved Ekleta Ring"
+    ],
+    "retired": [
+      "Fused Crystal of Emotions",
+      "Refined Essence of Emotions"
+    ],
+    "reforms": [
+      "Dawnbound Apeiron Necklace",
+      "Dawnbound Ekleta Necklace",
+      "Duskborne Apeiron Belt",
+      "Duskborne Ekleta Belt",
+      "Moonhushed Apeiron Earring",
+      "Moonhushed Ekleta Earring",
+      "Sunstarved Apeiron Ring",
+      "Sunstarved Ekleta Ring"
+    ],
+    "consumers": [
+      "Forest Fury",
+      "Magical Shard",
+      "Shard of the Drained Night",
+      "Shard of the Furious Night",
+      "Shard of the Tearful Night"
+    ],
+    "unchanged": 2249,
+    "tests": [
+      {
+        "log": "resumed-cup-extraction-contract-final-tests.jsonl",
+        "passed": 389
+      },
+      {
+        "log": "resumed-cup-extraction-projection-tests.jsonl",
+        "passed": 1
+      },
+      {
+        "log": "resumed-cup-extraction-layout-tests.jsonl",
+        "passed": 552
+      }
+    ],
+    "generatorChecks": 8,
+    "analysis": "PASS",
+    "windowsRelease": "PASS",
+    "originalFlagsClosed": 0,
+    "retainedInitialFailure": "A stale exact-icon-count assertion from the previous Scorched Fragment artwork addition failed. Corrected counts to450/614/3467 with explicit shared Scorched identity checks. All seven full test files rerun; no golden/production behavior relaxed.",
+    "limits": "Confirmed removals and extraction replacement only. Not all remaining processing relationships or source completeness. No personal data, install, visible launch or publication."
+  }
+}

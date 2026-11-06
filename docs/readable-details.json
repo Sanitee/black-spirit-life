@@ -1,0 +1,41 @@
+{
+  "date": "2026-11-01",
+  "status": "Approved options 1 and 3 implemented in a separate runnable; option 2 skipped",
+  "branch": "codex/readable-details",
+  "baseline": "Complete Consistent Availability working snapshot, including all inherited staged source; not Git HEAD alone and not the experimental preview copy.",
+  "changes": [
+    "Joined item windows remove doubled section padding for Effects, How to Obtain, Example and Notes. The summary keeps the approved 16px top and 8px bottom inset. Shared hover, pinned, nested and passive hosts inherit the change.",
+    "Embedded item-reference prose deliberately retains its existing leading spacing because it has no outer Joined section inset. Market-backed and plain acquisition sections use the same spacing contract.",
+    "Both Inventory no-results render paths show No matching items and the existing themed Clear search button for a nonempty query. Empty queries do not offer a useless clear action.",
+    "Clear search shares the existing search-field action, cancels its debounce and preserves filters, other-mode searches, selections, inventory and saved state. Keyboard activation and narrow/enlarged empty-state scrolling are retained."
+  ],
+  "unchanged": [
+    "Gathering units and all Gathering source, as explicitly requested.",
+    "Fonts, ingredient row dimensions, item facts, quantities, source pills, copy feedback, recipe activation, contained scrolling, calculations, market broker, storage and native instance/lifecycle guards.",
+    "Other search views and the separately previewed acquisition-line pill placement."
+  ],
+  "verification": {
+    "newFocusedChecks": 59,
+    "regressionRun": {"passed": 192, "failed": 3},
+    "additionalReferenceAndSharedAvailabilityChecks": 97,
+    "nativeCaptureRun": {"passed": 14, "newInventoryCases": 6, "captures": 30},
+    "analysis": "Eight scoped files; no issues",
+    "windowsBuild": "Passed; no full application launch against personal data",
+    "coverage": "All three themes, ordinary and 200% text; shared reference host spacing, plain and market acquisition, copy/tab/scroll behavior, inventory filters/data preservation, keyboard clearing and pending-search cancellation.",
+    "knownBaselineFailures": [
+      "Three pre-existing Clown's Blood full-content fit assertions at 1200x752/100% report 76px of scrolling. The unchanged baseline reproduces the same 76px result; no test was weakened or behavior claimed fixed.",
+      "Unrelated populated Inventory category/subcategory headings overflow at 680px/200% text. Reproduced on the unchanged baseline. The changed empty state separately passes at 680x460/200%; populated tests use sufficient width."
+    ],
+    "scope": "Not a whole-repository test pass. Public release/migration/lifecycle gates remain separate."
+  },
+  "handoff": {
+    "executable": "build/windows/x64/runner/Release/BlackSpiritLife.exe",
+    "audit": "workspace audit/readable-details-20261101",
+    "captures": "workspace work/visuals/readable-details",
+    "personalDataAccessed": false,
+    "visibleApplicationLaunched": false,
+    "installedApplicationReplaced": false,
+    "shortcutChanged": false,
+    "published": false
+  }
+}

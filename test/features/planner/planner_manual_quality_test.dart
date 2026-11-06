@@ -6,6 +6,7 @@ import 'package:bdo_craft_planner_flutter/visual/visual.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../../support/availability_badge_finders.dart';
 import 'planner_test_fixture.dart';
 
 const _ids = {
@@ -77,7 +78,7 @@ void main() {
         await tester.tap(quality(queue, 'Normal'));
         await tester.pumpAndSettle();
         expect(mode.plan.value.missing.single.name, 'Sunrise Herb');
-        expect(find.text('Out of stock'), findsOneWidget);
+        expect(stockBadgeText('0'), findsOneWidget);
         expect(requests.last.forceRefresh, isTrue);
         expect(requests.last.namesForRefresh.toSet(), {'Sunrise Herb'});
         final need = find.byKey(const ValueKey('need-quality:Sunrise Herb'));
@@ -91,7 +92,7 @@ void main() {
         expect(requests.last.namesForRefresh.toSet(), {
           'High-Quality Sunrise Herb',
         });
-        expect(find.text('Stock 15'), findsOneWidget);
+        expect(stockBadgeText('15'), findsOneWidget);
         expect(
           tester
               .widget<Semantics>(quality(queue, 'High Grade'))

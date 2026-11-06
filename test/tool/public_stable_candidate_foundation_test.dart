@@ -46,10 +46,7 @@ void main() {
 
   test('public candidate requires the permanent GitHub stable identity', () {
     expect(wrapper, contains('[string]\$ReleasePlanPath'));
-    expect(
-      wrapper,
-      contains('ReleasePlanPath = \$ReleasePlanPath'),
-    );
+    expect(wrapper, contains('ReleasePlanPath = \$ReleasePlanPath'));
     expect(wrapper, contains('[string]\$ApprovedReleasePlanSha256'));
     expect(
       wrapper,
@@ -57,14 +54,20 @@ void main() {
     );
     expect(builder, contains('Read-ReleasePlan'));
     expect(builder, contains('\$Version = \$ReleasePlan.Version'));
-    expect(builder, contains('\$BuildNumber = [string]\$ReleasePlan.BuildNumber'));
+    expect(
+      builder,
+      contains('\$BuildNumber = [string]\$ReleasePlan.BuildNumber'),
+    );
     expect(
       builder,
       contains('\$PreviousStableVersion = \$ReleasePlan.PreviousVersion'),
     );
     expect(builder, contains('\$UpdateChannel = \$ReleasePlan.Channel'));
     expect(builder, contains('\$UpdateSource = \$ReleasePlan.Repository'));
-    expect(builder, contains('\$sourceCommit -cne \$ReleasePlan.ExpectedCommit'));
+    expect(
+      builder,
+      contains('\$sourceCommit -cne \$ReleasePlan.ExpectedCommit'),
+    );
     expect(builder, contains('tag --points-at HEAD'));
     expect(builder, contains('rev-list --count HEAD'));
     expect(builder, contains('previousSourceTag'));
@@ -116,7 +119,10 @@ void main() {
       contains('\$RemainingBlockers = @(\$ReleasePlan.RemainingBlockers)'),
     );
     expect(builder, contains("'verify_production_source.ps1'"));
-    expect(builder, contains('& \$productionVerifier -ProjectRoot \$ProjectRoot'));
+    expect(
+      builder,
+      contains('& \$productionVerifier -ProjectRoot \$ProjectRoot'),
+    );
   });
 
   test('public candidate prepares artifacts but never publishes', () {
@@ -197,7 +203,7 @@ void main() {
     () {
       final mapData = jsonDecode(mapDataText) as Map<String, dynamic>;
       final manifest = mapData['manifest']! as Map<String, dynamic>;
-      expect(manifest['datasetVersion'], '2026.10.09-beta-v5');
+      expect(manifest['datasetVersion'], '2026.11.03-reviewed-map-v12');
       for (final text in <String>[mapDataText, lodgingText, economicsText]) {
         expect(text, isNot(contains('Redistribution permission unconfirmed')));
         expect(text, isNot(contains('Do not publish or redistribute')));

@@ -11,6 +11,7 @@ import 'package:bdo_craft_planner_flutter/domain/state/planner_state.dart';
 import 'package:bdo_craft_planner_flutter/domain/state/state_copy.dart';
 import 'package:bdo_craft_planner_flutter/features/shared/custom_icon_store_scope.dart';
 import 'package:bdo_craft_planner_flutter/features/shared/mode_item_icon.dart';
+import 'package:bdo_craft_planner_flutter/visual/components/app_tooltip.dart';
 import 'package:bdo_craft_planner_flutter/visual/foundations/theme_spec.dart';
 import 'package:bdo_craft_planner_flutter/visual/standard/standard_spec.dart';
 import 'package:flutter/material.dart';
@@ -164,12 +165,13 @@ void main() {
       expect(image, findsNothing);
       expect(
         tester
-            .widget<Tooltip>(
-              find.descendant(of: failure, matching: find.byType(Tooltip)),
+            .widget<AppTooltip>(
+              find.descendant(of: failure, matching: find.byType(AppTooltip)),
             )
             .message,
         contains('invalid or missing'),
       );
+      expect(find.bySemanticsLabel(RegExp('invalid or missing')), findsWidgets);
 
       await tester.pumpWidget(const SizedBox.shrink());
       await harness.controller.dispose();

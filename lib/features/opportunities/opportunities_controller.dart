@@ -12,6 +12,7 @@ import '../../data/opportunities/market_eligibility.dart';
 import '../../data/opportunities/opportunity_market_cache_store.dart';
 import '../../data/opportunities/opportunity_market_observation_store.dart';
 import '../../data/opportunities/opportunity_market_service.dart';
+import '../../domain/catalog/item_name_presentation.dart';
 import '../../domain/catalog/temporarily_archived_items.dart';
 import '../../domain/market/market_calculations.dart';
 import '../../domain/models/catalog_models.dart';
@@ -942,7 +943,7 @@ class OpportunitiesController extends ChangeNotifier {
     final search = preferences.craftSearch.trim().toLowerCase();
     return quotes.where((quote) {
       if (search.isNotEmpty &&
-          !quote.recipeName.toLowerCase().contains(search)) {
+          !itemDisplayName(quote.recipeName).toLowerCase().contains(search)) {
         return false;
       }
       final profit = quote.profitFor(craftSaleMode);
@@ -1398,9 +1399,10 @@ class OpportunitiesController extends ChangeNotifier {
         fallbackRegion: appController.active.state.value.market.region,
       );
       if (!_disposed) contentScale.value = preferences.contentScale;
-      // Restore filters and balances, but not the previous session's searches.
+      // Start on Crafting with fresh searches; restore filters and balances.
       // Tab/category navigation keeps these values on the current controller.
       preferences
+        ..section = 'crafting'
         ..craftSearch = ''
         ..exchangeSearch = ''
         ..bestUseItem = '';
@@ -1912,13 +1914,15 @@ class OpportunitiesController extends ChangeNotifier {
       quotes = [
         for (final quote in quotes)
           if (!_dirtyRecipeNames.contains(quote.recipeName) ||
-              quote.recipeName.toLowerCase().contains(search))
+              itemDisplayName(quote.recipeName).toLowerCase().contains(search))
             quote,
       ];
     }
     final names = {
       for (final name in _dirtyRecipeNames)
-        if (search.isEmpty || name.toLowerCase().contains(search)) name,
+        if (search.isEmpty ||
+            itemDisplayName(name).toLowerCase().contains(search))
+          name,
     };
     if (names.isNotEmpty) {
       _dirtyRecipeNames.removeAll(names);

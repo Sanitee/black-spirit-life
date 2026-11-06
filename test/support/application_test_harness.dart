@@ -33,6 +33,7 @@ final class ApplicationTestHarness {
     String view = 'plan',
     bool setupCompleted = true,
     bool showDeleteTools = false,
+    bool stablePersonalDataLabel = false,
     List<String> startupNotices = const <String>[],
     SavePlannerState Function(PlannerStateRepository repository)?
     saveStateFactory,
@@ -77,9 +78,11 @@ final class ApplicationTestHarness {
         catalog: catalog,
         stateLoad: load,
         stateRepository: repository,
-        personalDataLocation: PersonalDataLocationService.fixed(
-          repository.paths.applicationDirectory,
-        ),
+        personalDataLocation: stablePersonalDataLabel
+            ? const _GoldenPersonalDataLabel()
+            : PersonalDataLocationService.fixed(
+                repository.paths.applicationDirectory,
+              ),
         controller: controller,
         startupNotices: startupNotices,
       ),
@@ -126,6 +129,27 @@ final class ApplicationTestHarness {
       ),
     );
   }
+}
+
+// Presentation-only fixture. Persistence still uses the unique temporary
+// repository above; no files are read from or written to this display path.
+final class _GoldenPersonalDataLabel implements PersonalDataLocationManager {
+  const _GoldenPersonalDataLabel();
+
+  @override
+  Directory get applicationDirectory =>
+      Directory(r'C:\Black Spirit Life Test Data');
+  @override
+  bool get moveSupported => false;
+  @override
+  bool get requiresExistingProfile => false;
+  @override
+  Future<Directory> resolveApplicationDirectory() => throw UnsupportedError(
+    'Display-only golden fixture cannot resolve data.',
+  );
+  @override
+  Future<PersonalDataMoveResult> moveTo(String destinationPath) =>
+      throw UnsupportedError('Display-only golden fixture cannot move data.');
 }
 
 final class EmptyMarketGateway implements MarketPriceGateway {

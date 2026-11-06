@@ -1096,7 +1096,7 @@ class SessionStore:
         session = self._normalize(payload, catalog_lookup)
         self._write(session, preserve_created=False)
         session["catches"] = session["items"]
-        return session
+        return self._with_value_status(session)
 
     def update(
         self,
@@ -1115,7 +1115,18 @@ class SessionStore:
         session["createdAt"] = existing["createdAt"]
         self._write(session, preserve_created=True)
         session["catches"] = session["items"]
-        return session
+        return self._with_value_status(session)
+
+    @staticmethod
+    def _with_value_status(session: dict[str, Any]) -> dict[str, Any]:
+        # Keep the historical nonnullable totalValue snapshot and database intact.
+        # Consumers need the nullable baseValue for a complete valuation.
+        items = session.get("items", [])
+        unknown = sum(item["count"] for item in items if not item.get("unitPrice"))
+        known = sum(item["count"] * (item.get("unitPrice") or 0) for item in items)
+        complete = not session.get("legacyAggregateOnly") and not unknown
+        return {**session, "knownValue": known, "unknownPriceFish": unknown,
+                "valueComplete": complete, "baseValue": known if complete else None}
 
     def _write(self, session: dict[str, Any], *, preserve_created: bool) -> None:
         with self._connection() as connection:
@@ -1362,7 +1373,7 @@ class SessionStore:
             result["items"] = self._items(connection, [session_id]).get(session_id, [])
             result["catches"] = result["items"]
             result["sale"] = self._sales(connection, [session_id]).get(session_id)
-            return result
+            return self._with_value_status(result)
 
     def list(self, filters: dict[str, str]) -> list[dict[str, Any]]:
         where, parameters = self._where(filters)
@@ -1392,7 +1403,7 @@ class SessionStore:
                 session["items"] = items.get(row["id"], [])
                 session["catches"] = session["items"]
                 session["sale"] = sales.get(row["id"])
-                result.append(session)
+                result.append(self._with_value_status(session))
             return result
 
     @staticmethod
@@ -1577,6 +1588,8 @@ class SessionStore:
         timed_value = 0
         total_value = 0
         total_fish = 0
+        unknown_fish = 0
+        timed_unknown_fish = 0
         for row in sessions:
             key = (row["zone_rgb"], row["zone_name"])
             spot = spots.setdefault(
@@ -1591,25 +1604,34 @@ class SessionStore:
                     "durationSessions": 0,
                     "timedFish": 0,
                     "timedValue": 0,
+                    "unknownPriceFish": 0,
+                    "timedUnknownPriceFish": 0,
                     "items": {},
                 },
             )
             spot["sessions"] += 1
+            items = items_by_session.get(row["id"], [])
+            unknown = sum(item["count"] for item in items if not item["unitPrice"])
+            known = sum(item["count"] * (item["unitPrice"] or 0) for item in items)
+            spot["unknownPriceFish"] += unknown
+            unknown_fish += unknown
             spot["totalFish"] += row["total_fish"]
-            spot["totalValue"] += row["total_value"]
+            spot["totalValue"] += known
             total_fish += row["total_fish"]
-            total_value += row["total_value"]
+            total_value += known
             # Rates use only catches belonging to sessions that supplied a positive duration.
             if row["duration_minutes"] is not None and row["duration_minutes"] > 0:
                 spot["durationMinutes"] += row["duration_minutes"]
                 spot["durationSessions"] += 1
                 spot["timedFish"] += row["total_fish"]
-                spot["timedValue"] += row["total_value"]
+                spot["timedValue"] += known
+                spot["timedUnknownPriceFish"] += unknown
+                timed_unknown_fish += unknown
                 total_duration += row["duration_minutes"]
                 duration_sessions += 1
                 timed_fish += row["total_fish"]
-                timed_value += row["total_value"]
-            for item in items_by_session.get(row["id"], []):
+                timed_value += known
+            for item in items:
                 aggregate = spot["items"].setdefault(
                     item["itemId"],
                     {
@@ -1640,8 +1662,10 @@ class SessionStore:
                     "name": spot["name"],
                     "sessions": spot["sessions"],
                     "totalFish": denominator,
-                    "totalValue": spot["totalValue"],
-                    "averageValuePer100": round(spot["totalValue"] / denominator * 100)
+                    "totalValue": None if spot["unknownPriceFish"] else spot["totalValue"],
+                    "knownValue": spot["totalValue"],
+                    "unknownPriceFish": spot["unknownPriceFish"],
+                    "averageValuePer100": None if spot["unknownPriceFish"] else round(spot["totalValue"] / denominator * 100)
                     if denominator
                     else 0,
                     "durationMinutes": spot["durationMinutes"] if spot["durationSessions"] else None,
@@ -1650,7 +1674,7 @@ class SessionStore:
                     if duration_hours
                     else None,
                     "valuePerHour": round(spot["timedValue"] / duration_hours)
-                    if duration_hours
+                    if duration_hours and not spot["timedUnknownPriceFish"]
                     else None,
                     "items": normalized_items,
                 }
@@ -1677,11 +1701,13 @@ class SessionStore:
             "totals": {
                 "sessions": len(sessions),
                 "fish": total_fish,
-                "value": total_value,
+                "value": None if unknown_fish else total_value,
+                "knownValue": total_value,
+                "unknownPriceFish": unknown_fish,
                 "durationMinutes": total_duration if duration_sessions else None,
                 "durationSessions": duration_sessions,
                 "fishPerHour": round(timed_fish / duration_hours, 2) if duration_hours else None,
-                "valuePerHour": round(timed_value / duration_hours) if duration_hours else None,
+                "valuePerHour": round(timed_value / duration_hours) if duration_hours and not timed_unknown_fish else None,
             },
             "spots": output_spots,
         }

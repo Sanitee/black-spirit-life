@@ -1,5 +1,6 @@
 import 'package:bdo_craft_planner_flutter/app/app.dart';
 import 'package:bdo_craft_planner_flutter/domain/models/craft_mode.dart';
+import 'package:bdo_craft_planner_flutter/features/planner/planner.dart';
 import 'package:bdo_craft_planner_flutter/visual/illuminated_ledger/ledger_spec.dart';
 import 'package:bdo_craft_planner_flutter/visual/sakura_night_garden/sakura_spec.dart';
 import 'package:flutter/material.dart';
@@ -54,6 +55,7 @@ void main() {
             configureApplicationTestSurface(tester, size);
             final harness = (await tester.runAsync(
               () => ApplicationTestHarness.create(
+                stablePersonalDataLabel: true,
                 backgroundId:
                     family.background ??
                     switch (screen.mode) {
@@ -93,6 +95,46 @@ void main() {
                 );
                 await _pumpFrames(tester);
               }
+              // Resolve every visible image, including cold standard-theme
+              // planners. A fixed frame count can capture empty artwork before
+              // the decoder completes and must not become a golden baseline.
+              for (final element
+                  in find
+                      .descendant(
+                        of: find.byKey(goldenRoot),
+                        matching: find.byType(Image),
+                      )
+                      .evaluate()
+                      .toList(growable: false)) {
+                await tester.runAsync(
+                  () => precacheImage((element.widget as Image).image, element),
+                );
+              }
+              await tester.pumpAndSettle();
+              if (screen.view == 'bonus') {
+                final viewport = Offset.zero & size;
+                for (final key in [
+                  BonusActionKeys.b03,
+                  BonusActionKeys.b04,
+                  BonusActionKeys.b05,
+                ]) {
+                  final bounds = tester.getRect(find.byKey(key));
+                  expect(
+                    viewport.contains(bounds.topLeft),
+                    isTrue,
+                    reason: '$key starts outside viewport',
+                  );
+                  expect(
+                    bounds.right,
+                    lessThanOrEqualTo(viewport.right),
+                    reason: '$key clipped at window edge',
+                  );
+                  expect(bounds.bottom, lessThanOrEqualTo(viewport.bottom));
+                }
+              }
+              // Surface layout errors before teardown deactivates their nodes;
+              // never accept a capture that contains an overflow indicator.
+              expect(tester.takeException(), isNull);
               await expectLater(
                 find.byKey(goldenRoot),
                 matchesGoldenFile(

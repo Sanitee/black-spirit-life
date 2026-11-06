@@ -1,0 +1,24 @@
+{
+  "reviewedAt": "2026-11-02",
+  "scope": "Confirmed PC NA/EU exchange-limit correction; not certification of every exchange",
+  "changes": [
+    {
+      "routeId": "morning-token-crystal",
+      "currencyId": 761952,
+      "rewardId": 820935,
+      "oldWeeklyLimit": 4,
+      "newWeeklyLimit": 8,
+      "inputPerExchange": 1,
+      "rewardPerExchange": 8,
+      "sourceDate": "2026-08-06",
+      "source": "https://www.naeu.playblackdesert.com/News/Notice/Detail?groupContentNo=10422&countryType=en-US",
+      "evidence": "The patch explicitly changes the exchange limit from four times to eight times, not the reward quantity.",
+      "preserved": [
+        "Embers of the Primordial remains four exchanges per week.",
+        "Account remaining allowance still requires confirmation; unknown is not full allowance.",
+        "Existing remaining allowance is not automatically replenished or migrated.",
+        "Shared exchange reference sources and calculation use the same catalog route."
+      ]
+    }
+  ]
+}

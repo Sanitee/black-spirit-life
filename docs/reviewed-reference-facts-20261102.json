@@ -1,0 +1,813 @@
+{
+  "reviewedAt": "2026-11-03",
+  "scope": "56 exact-identity source/effect entries below, plus13 qualified quest/worker sources and shared scroll/Divine Coin corrections. All122 prior supported addition flags verified in three actual controller modes; not universal current-game certification.",
+  "additionalSourceEvidence": [
+    {"url":"https://blackdesert.pearlabyss.com/Asia/en-US/News/Notice/Detail?_boardNo=19633","date":"2026-07-30","scope":"Emma reward chapters and four Olvia combat-course Obsidian Hammers; later NA/EU Aug6/Oct22 requirements supersede old prerequisites"},
+    {"workspaceEvidence":"audit/correctness-review-20261102/official/patch-20261022.txt","date":"2026-10-22","scope":"Current Calamity1/300+AP one-time bound armor quests; no inferred tradable IDs"},
+    {"url":"https://blackdesert.pearlabyss.com/Asia/en-US/News/Notice/Detail?_boardNo=3855","date":"2023-06-14","scope":"Three300-Sangpyeong worker contracts, named NPCs and once-per-Family restrictions; current PC quest text corroborates"},
+    {"url":"https://blackdesert.pearlabyss.com/Asia/en-US/News/Notice/Detail?_boardNo=3677","scope":"Item Collection Increase Scroll gauge levels0/1/2, not current event availability"}
+  ],
+  "verification": "Fresh2259-reference/6777-view projection:71 changed references,2188 otherwise unchanged; unchanged catalog/formulas/consumers. Final134 focused checks and24 synthetic captures pass. See docs/correctness-review-20261102.json for broader scope and remaining gaps.",
+  "sources": {
+    "prior": "audit/unresolved-research-20261102/adjudicated-ledger.json",
+    "details": "audit/unresolved-research-20261102/triage-details.json",
+    "client": "Installed PC archives through 2026-10-31; metadata extracted 2026-11-02",
+    "vendor": "Prior official PC Cron Stone and Old Moon Alchemy Catalyst evidence; normal base prices, not event discounts"
+  },
+  "rows": [
+    {
+      "id": 566,
+      "name": "Grain Juice",
+      "sources": [
+        "Simple Cooking · 3 grain + 1 Mineral Water"
+      ],
+      "notes": [
+        "Concentrated Grain Juice can also appear (chance)."
+      ],
+      "effects": [],
+      "flags": [
+        "market_only_review:216",
+        "single_source_review:141"
+      ]
+    },
+    {
+      "id": 569,
+      "name": "Herbal Juice",
+      "sources": [
+        "Simple Alchemy · 3 Wild Herb or 10 Weeds + 1 Mineral Water"
+      ],
+      "notes": [
+        "Concentrated Herbal Juice can also appear (chance)."
+      ],
+      "effects": [],
+      "flags": [
+        "market_only_review:231",
+        "single_source_review:148"
+      ]
+    },
+    {
+      "id": 4260,
+      "name": "Polished Opal",
+      "sources": [
+        "Heating · 5 Rough Opal"
+      ],
+      "notes": [],
+      "effects": [],
+      "flags": [
+        "market_only_review:331",
+        "native_gathering_not_mentioned:53",
+        "single_source_review:268"
+      ]
+    },
+    {
+      "id": 4466,
+      "name": "Translucent Crystal",
+      "sources": [
+        "Heating · 5 Rough Translucent Crystal"
+      ],
+      "notes": [],
+      "effects": [],
+      "flags": [
+        "market_only_review:474",
+        "single_source_review:351"
+      ]
+    },
+    {
+      "id": 4485,
+      "name": "Violet Crystal",
+      "sources": [
+        "Heating · 5 Rough Violet Crystal"
+      ],
+      "notes": [],
+      "effects": [],
+      "flags": [
+        "market_only_review:492",
+        "single_source_review:365"
+      ]
+    },
+    {
+      "id": 7751,
+      "name": "Damaged Hide",
+      "sources": [
+        "Hunting · Butcher hunted wild animals"
+      ],
+      "notes": [],
+      "effects": [],
+      "flags": [
+        "native_gathering_not_mentioned:11"
+      ]
+    },
+    {
+      "id": 7752,
+      "name": "Usable Hide",
+      "sources": [
+        "Hunting · Butcher hunted wild animals"
+      ],
+      "notes": [],
+      "effects": [],
+      "flags": [
+        "native_gathering_not_mentioned:71"
+      ]
+    },
+    {
+      "id": 5409,
+      "name": "Dwarf Mushroom",
+      "sources": [
+        "Gather · Pick Dwarf Mushrooms by hand or with a hoe"
+      ],
+      "notes": [],
+      "effects": [],
+      "flags": [
+        "native_gathering_not_mentioned:13"
+      ]
+    },
+    {
+      "id": 40760,
+      "name": "Blood Wolf's Oath",
+      "sources": [
+        "Monster drops · Blood Wolf Settlement (chance)"
+      ],
+      "notes": [],
+      "effects": [],
+      "flags": [
+        "single_source_review:29"
+      ]
+    },
+    {
+      "id": 40762,
+      "name": "Dragon's Fang",
+      "sources": [
+        "Monster drops · Sherekhan Necropolis (chance)"
+      ],
+      "notes": [],
+      "effects": [],
+      "flags": [
+        "single_source_review:100"
+      ]
+    },
+    {
+      "id": 40752,
+      "name": "Katzvariak's Venom",
+      "sources": [
+        "Monster drops · Tshira Ruins (chance)"
+      ],
+      "notes": [],
+      "effects": [],
+      "flags": [
+        "single_source_review:165"
+      ]
+    },
+    {
+      "id": 40756,
+      "name": "Narc's Solace",
+      "sources": [
+        "Monster drops · Manshaum Forest (chance)"
+      ],
+      "notes": [],
+      "effects": [],
+      "flags": [
+        "single_source_review:245"
+      ]
+    },
+    {
+      "id": 40758,
+      "name": "Tranquil Tinniolum",
+      "sources": [
+        "Monster drops · Forest Ronaros (chance)"
+      ],
+      "notes": [],
+      "effects": [],
+      "flags": [
+        "single_source_review:350"
+      ]
+    },
+    {
+      "id": 40754,
+      "name": "Valtarra's Memory",
+      "sources": [
+        "Tanning · Navarn Steppe animals (chance)"
+      ],
+      "notes": [],
+      "effects": [],
+      "flags": [
+        "single_source_review:362"
+      ]
+    },
+    {
+      "id": 66191,
+      "name": "Powder of Ascension",
+      "sources": [
+        "Gather · Tanning (chance)"
+      ],
+      "notes": [],
+      "effects": [],
+      "flags": [
+        "single_source_review:269"
+      ]
+    },
+    {
+      "id": 820015,
+      "name": "Nadia Rowen's Special Sauce",
+      "sources": [
+        "NPC · Food Vendor"
+      ],
+      "notes": [
+        "Using it for meal batches requires Cooking Skilled 1+."
+      ],
+      "effects": [],
+      "flags": [
+        "single_source_review:242",
+        "native_vendor_not_mentioned:32"
+      ]
+    },
+    {
+      "id": 9008,
+      "name": "Sun-Dried Salt",
+      "sources": [
+        "NPC · Food Vendor or Innkeeper"
+      ],
+      "notes": [],
+      "effects": [],
+      "flags": [
+        "single_source_review:339",
+        "native_vendor_not_mentioned:47"
+      ]
+    },
+    {
+      "id": 16080,
+      "name": "Cron Stone",
+      "sources": [
+        "NPC · Blacksmith · 3,000,000 Silver each"
+      ],
+      "notes": [],
+      "effects": [],
+      "flags": [
+        "native_vendor_not_mentioned:12"
+      ]
+    },
+    {
+      "id": 45162,
+      "name": "Old Moon Alchemy Catalyst",
+      "sources": [
+        "NPC · Old Moon Manager · 3,500,000 Silver each"
+      ],
+      "notes": [],
+      "effects": [],
+      "flags": [
+        "native_vendor_not_mentioned:34"
+      ]
+    },
+    {
+      "id": 766042,
+      "name": "Purified Lightstone",
+      "sources": [
+        "Central Market"
+      ],
+      "notes": [],
+      "effects": [],
+      "flags": [
+        "market_source_omitted:0"
+      ]
+    },
+    {
+      "id": 15112,
+      "name": "Magic Crystal of Infinity - Adamantine",
+      "sources": [],
+      "notes": [
+        "Effects apply while equipped in an active crystal preset.",
+        "High chance of shattering on death."
+      ],
+      "effects": [
+        "Knockback/Floating Resistance +10%"
+      ],
+      "flags": [
+        "native_effects_not_shown:64"
+      ]
+    },
+    {
+      "id": 15124,
+      "name": "Magic Crystal of Infinity - Agility",
+      "sources": [],
+      "notes": [
+        "Effects apply while equipped in an active crystal preset.",
+        "High chance of shattering on death."
+      ],
+      "effects": [
+        "All Evasion +8"
+      ],
+      "flags": [
+        "native_effects_not_shown:65"
+      ]
+    },
+    {
+      "id": 15131,
+      "name": "Magic Crystal of Infinity - Air Attack",
+      "sources": [],
+      "notes": [
+        "Effects apply while equipped in an active crystal preset.",
+        "High chance of shattering on death."
+      ],
+      "effects": [
+        "Air Attack Extra Damage +10%"
+      ],
+      "flags": [
+        "native_effects_not_shown:66"
+      ]
+    },
+    {
+      "id": 15113,
+      "name": "Magic Crystal of Infinity - Ascension",
+      "sources": [],
+      "notes": [
+        "Effects apply while equipped in an active crystal preset.",
+        "High chance of shattering on death."
+      ],
+      "effects": [
+        "Jump Height +35"
+      ],
+      "flags": [
+        "native_effects_not_shown:67"
+      ]
+    },
+    {
+      "id": 15116,
+      "name": "Magic Crystal of Infinity - Assault",
+      "sources": [],
+      "notes": [
+        "Effects apply while equipped in an active crystal preset.",
+        "High chance of shattering on death."
+      ],
+      "effects": [
+        "Attack Speed +2"
+      ],
+      "flags": [
+        "native_effects_not_shown:68"
+      ]
+    },
+    {
+      "id": 15103,
+      "name": "Magic Crystal of Infinity - Carnage",
+      "sources": [],
+      "notes": [
+        "Effects apply while equipped in an active crystal preset.",
+        "High chance of shattering on death."
+      ],
+      "effects": [
+        "Extra AP Against Demihumans +2"
+      ],
+      "flags": [
+        "native_effects_not_shown:69"
+      ]
+    },
+    {
+      "id": 15134,
+      "name": "Magic Crystal of Infinity - Counter Attack",
+      "sources": [],
+      "notes": [
+        "Effects apply while equipped in an active crystal preset.",
+        "High chance of shattering on death."
+      ],
+      "effects": [
+        "Counter Attack Extra Damage +10%"
+      ],
+      "flags": [
+        "native_effects_not_shown:70"
+      ]
+    },
+    {
+      "id": 15114,
+      "name": "Magic Crystal of Infinity - Descent",
+      "sources": [],
+      "notes": [
+        "Effects apply while equipped in an active crystal preset.",
+        "High chance of shattering on death."
+      ],
+      "effects": [
+        "Fall Damage -15%"
+      ],
+      "flags": [
+        "native_effects_not_shown:71"
+      ]
+    },
+    {
+      "id": 15130,
+      "name": "Magic Crystal of Infinity - Down Attack",
+      "sources": [],
+      "notes": [
+        "Effects apply while equipped in an active crystal preset.",
+        "High chance of shattering on death."
+      ],
+      "effects": [
+        "Down Attack Extra Damage +10%"
+      ],
+      "flags": [
+        "native_effects_not_shown:72"
+      ]
+    },
+    {
+      "id": 15126,
+      "name": "Magic Crystal of Infinity - Durability",
+      "sources": [],
+      "notes": [
+        "Effects apply while equipped in an active crystal preset.",
+        "High chance of shattering on death."
+      ],
+      "effects": [
+        "Durability Reduction Resistance +10%"
+      ],
+      "flags": [
+        "native_effects_not_shown:73"
+      ]
+    },
+    {
+      "id": 15115,
+      "name": "Magic Crystal of Infinity - Endurance",
+      "sources": [],
+      "notes": [
+        "Effects apply while equipped in an active crystal preset.",
+        "High chance of shattering on death."
+      ],
+      "effects": [
+        "Max Stamina +150"
+      ],
+      "flags": [
+        "native_effects_not_shown:74"
+      ]
+    },
+    {
+      "id": 15146,
+      "name": "Magic Crystal of Infinity - Energy",
+      "sources": [],
+      "notes": [
+        "Effects apply while equipped in an active crystal preset.",
+        "High chance of shattering on death."
+      ],
+      "effects": [
+        "Max Energy +10"
+      ],
+      "flags": [
+        "native_effects_not_shown:75"
+      ]
+    },
+    {
+      "id": 15119,
+      "name": "Magic Crystal of Infinity - Ensnare",
+      "sources": [],
+      "notes": [
+        "Effects apply while equipped in an active crystal preset.",
+        "High chance of shattering on death."
+      ],
+      "effects": [
+        "All Accuracy +8"
+      ],
+      "flags": [
+        "native_effects_not_shown:76"
+      ]
+    },
+    {
+      "id": 15127,
+      "name": "Magic Crystal of Infinity - HP Recovery",
+      "sources": [],
+      "notes": [
+        "Effects apply while equipped in an active crystal preset.",
+        "High chance of shattering on death."
+      ],
+      "effects": [
+        "Recover 3 HP on Hits"
+      ],
+      "flags": [
+        "native_effects_not_shown:77"
+      ]
+    },
+    {
+      "id": 15109,
+      "name": "Magic Crystal of Infinity - Healing",
+      "sources": [],
+      "notes": [
+        "Effects apply while equipped in an active crystal preset.",
+        "High chance of shattering on death."
+      ],
+      "effects": [
+        "HP Recovery +3"
+      ],
+      "flags": [
+        "native_effects_not_shown:78"
+      ]
+    },
+    {
+      "id": 15122,
+      "name": "Magic Crystal of Infinity - Intimidation",
+      "sources": [],
+      "notes": [
+        "Effects apply while equipped in an active crystal preset.",
+        "High chance of shattering on death."
+      ],
+      "effects": [
+        "Knockdown/Bound Resistance +10%"
+      ],
+      "flags": [
+        "native_effects_not_shown:79"
+      ]
+    },
+    {
+      "id": 15128,
+      "name": "Magic Crystal of Infinity - MP Recovery",
+      "sources": [],
+      "notes": [
+        "Effects apply while equipped in an active crystal preset.",
+        "High chance of shattering on death."
+      ],
+      "effects": [
+        "Recover 3 MP/WP/SP on Hits"
+      ],
+      "flags": [
+        "native_effects_not_shown:80"
+      ]
+    },
+    {
+      "id": 15150,
+      "name": "Magic Crystal of Infinity - Magic Attack",
+      "sources": [],
+      "notes": [
+        "Effects apply while equipped in an active crystal preset.",
+        "High chance of shattering on death."
+      ],
+      "effects": [
+        "Magic AP +2"
+      ],
+      "flags": [
+        "native_effects_not_shown:81"
+      ]
+    },
+    {
+      "id": 15139,
+      "name": "Magic Crystal of Infinity - Magic Defense",
+      "sources": [],
+      "notes": [
+        "Effects apply while equipped in an active crystal preset.",
+        "High chance of shattering on death."
+      ],
+      "effects": [
+        "Magic Damage Reduction +2"
+      ],
+      "flags": [
+        "native_effects_not_shown:82"
+      ]
+    },
+    {
+      "id": 15136,
+      "name": "Magic Crystal of Infinity - Max HP",
+      "sources": [],
+      "notes": [
+        "Effects apply while equipped in an active crystal preset.",
+        "High chance of shattering on death."
+      ],
+      "effects": [
+        "Max HP +750"
+      ],
+      "flags": [
+        "native_effects_not_shown:83"
+      ]
+    },
+    {
+      "id": 15148,
+      "name": "Magic Crystal of Infinity - Melee Attack",
+      "sources": [],
+      "notes": [
+        "Effects apply while equipped in an active crystal preset.",
+        "High chance of shattering on death."
+      ],
+      "effects": [
+        "Melee AP +2"
+      ],
+      "flags": [
+        "native_effects_not_shown:84"
+      ]
+    },
+    {
+      "id": 15137,
+      "name": "Magic Crystal of Infinity - Melee Defense",
+      "sources": [],
+      "notes": [
+        "Effects apply while equipped in an active crystal preset.",
+        "High chance of shattering on death."
+      ],
+      "effects": [
+        "Melee Damage Reduction +2"
+      ],
+      "flags": [
+        "native_effects_not_shown:85"
+      ]
+    },
+    {
+      "id": 15121,
+      "name": "Magic Crystal of Infinity - Memory",
+      "sources": [],
+      "notes": [
+        "Effects apply while equipped in an active crystal preset.",
+        "High chance of shattering on death."
+      ],
+      "effects": [
+        "Casting Speed +2"
+      ],
+      "flags": [
+        "native_effects_not_shown:86"
+      ]
+    },
+    {
+      "id": 15108,
+      "name": "Magic Crystal of Infinity - Patience",
+      "sources": [],
+      "notes": [
+        "Effects apply while equipped in an active crystal preset.",
+        "High chance of shattering on death."
+      ],
+      "effects": [
+        "Max MP/WP/SP +35"
+      ],
+      "flags": [
+        "native_effects_not_shown:87"
+      ]
+    },
+    {
+      "id": 15102,
+      "name": "Magic Crystal of Infinity - Power",
+      "sources": [],
+      "notes": [
+        "Effects apply while equipped in an active crystal preset.",
+        "High chance of shattering on death."
+      ],
+      "effects": [
+        "All AP +2"
+      ],
+      "flags": [
+        "native_effects_not_shown:88"
+      ]
+    },
+    {
+      "id": 15101,
+      "name": "Magic Crystal of Infinity - Precision",
+      "sources": [],
+      "notes": [
+        "Effects apply while equipped in an active crystal preset.",
+        "High chance of shattering on death."
+      ],
+      "effects": [
+        "All Accuracy +8"
+      ],
+      "flags": [
+        "native_effects_not_shown:89"
+      ]
+    },
+    {
+      "id": 15149,
+      "name": "Magic Crystal of Infinity - Ranged Attack",
+      "sources": [],
+      "notes": [
+        "Effects apply while equipped in an active crystal preset.",
+        "High chance of shattering on death."
+      ],
+      "effects": [
+        "Ranged AP +2"
+      ],
+      "flags": [
+        "native_effects_not_shown:90"
+      ]
+    },
+    {
+      "id": 15138,
+      "name": "Magic Crystal of Infinity - Ranged Defense",
+      "sources": [],
+      "notes": [
+        "Effects apply while equipped in an active crystal preset.",
+        "High chance of shattering on death."
+      ],
+      "effects": [
+        "Ranged Damage Reduction +2"
+      ],
+      "flags": [
+        "native_effects_not_shown:91"
+      ]
+    },
+    {
+      "id": 15110,
+      "name": "Magic Crystal of Infinity - Resonance",
+      "sources": [],
+      "notes": [
+        "Effects apply while equipped in an active crystal preset.",
+        "High chance of shattering on death."
+      ],
+      "effects": [
+        "MP/WP/SP Recovery +3"
+      ],
+      "flags": [
+        "native_effects_not_shown:92"
+      ]
+    },
+    {
+      "id": 15133,
+      "name": "Magic Crystal of Infinity - Speed Attack",
+      "sources": [],
+      "notes": [
+        "Effects apply while equipped in an active crystal preset.",
+        "High chance of shattering on death."
+      ],
+      "effects": [
+        "Speed Attack Extra Damage +10%"
+      ],
+      "flags": [
+        "native_effects_not_shown:93"
+      ]
+    },
+    {
+      "id": 15120,
+      "name": "Magic Crystal of Infinity - Strength",
+      "sources": [],
+      "notes": [
+        "Effects apply while equipped in an active crystal preset.",
+        "High chance of shattering on death."
+      ],
+      "effects": [
+        "Weight Limit +15 LT"
+      ],
+      "flags": [
+        "native_effects_not_shown:94"
+      ]
+    },
+    {
+      "id": 15147,
+      "name": "Magic Crystal of Infinity - Submergence",
+      "sources": [],
+      "notes": [
+        "Effects apply while equipped in an active crystal preset.",
+        "High chance of shattering on death."
+      ],
+      "effects": [
+        "Underwater Breathing +15 sec"
+      ],
+      "flags": [
+        "native_effects_not_shown:96"
+      ]
+    },
+    {
+      "id": 15111,
+      "name": "Magic Crystal of Infinity - Swiftness",
+      "sources": [],
+      "notes": [
+        "Effects apply while equipped in an active crystal preset.",
+        "High chance of shattering on death."
+      ],
+      "effects": [
+        "Movement Speed +2"
+      ],
+      "flags": [
+        "native_effects_not_shown:97"
+      ]
+    },
+    {
+      "id": 15118,
+      "name": "Magic Crystal of Infinity - Valor",
+      "sources": [],
+      "notes": [
+        "Effects apply while equipped in an active crystal preset.",
+        "High chance of shattering on death."
+      ],
+      "effects": [
+        "Critical Hit +2"
+      ],
+      "flags": [
+        "native_effects_not_shown:98"
+      ]
+    },
+    {
+      "id": 15107,
+      "name": "Magic Crystal of Infinity - Vigor",
+      "sources": [],
+      "notes": [
+        "Effects apply while equipped in an active crystal preset.",
+        "High chance of shattering on death."
+      ],
+      "effects": [
+        "Max HP +35"
+      ],
+      "flags": [
+        "native_effects_not_shown:99"
+      ]
+    },
+    {
+      "id": 15021,
+      "name": "Magic Crystal of Perfection",
+      "sources": [],
+      "notes": [
+        "Effects apply while equipped in an active crystal preset.",
+        "High chance of shattering on death."
+      ],
+      "effects": [
+        "Luck +1"
+      ],
+      "flags": [
+        "native_effects_not_shown:100"
+      ]
+    }
+  ]
+}

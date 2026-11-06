@@ -19,56 +19,62 @@ void main() {
   });
 
   group('accepted Stable worker-node dataset', () {
-    test('pins the reviewed v17 payload and its public source boundary', () {
-      expect(bundledBytes, hasLength(7544461));
-      expect(
-        sha256.convert(bundledBytes).toString(),
-        'bf9987338be34d61613418448532eb96f463bb345e0f2a86c40d9653a10b8e52',
-        reason:
-            'A data refresh must update the source review, accepted counts, '
-            'and this checksum deliberately.',
-      );
-      expect(dataset.manifest.schemaVersion, 1);
-      expect(dataset.manifest.datasetVersion, '2026.10.09-beta-v5');
+    test(
+      'pins November CP data with the reviewed wild-cattle wording correction',
+      () {
+        // Source-popup followup changes display text only. Graph, product IDs,
+        // marker identities and coordinates retain the accepted dataset.
+        expect(bundledBytes, hasLength(7498248));
+        expect(
+          sha256.convert(bundledBytes).toString(),
+          '6f75659db6a141b8ad46168a3afb7b7402d32cf4aa98a65507c9826cad44602a',
+          reason:
+              'A data refresh must update the source review, accepted counts, '
+              'and this checksum deliberately.',
+        );
+        expect(dataset.manifest.schemaVersion, 1);
+        expect(dataset.manifest.datasetVersion, '2026.11.03-reviewed-map-v12');
 
-      final currentSnapshot = dataset.manifest.provenance.singleWhere(
-        (record) =>
-            record.id ==
-            'bdo-codex-current-worldmap-nodes-2026-08-15-reference',
-      );
-      expect(
-        currentSnapshot.url.toString(),
-        'https://bdocodex.com/us/worldmap/',
-      );
-      expect(
-        currentSnapshot.permittedUse,
-        allOf(
-          contains('1,052 current records'),
-          contains('610 raw exploration-layer records'),
-          contains('442 raw production-layer records'),
-          contains('425 unique parent-linked children'),
-          contains('source research input is excluded'),
-          contains('BDO Codex credited as the retrieval/reference source'),
-        ),
-      );
+        final currentSnapshot = dataset.manifest.provenance.singleWhere(
+          (record) =>
+              record.id ==
+              'bdo-codex-current-worldmap-nodes-2026-08-15-reference',
+        );
+        expect(
+          currentSnapshot.url.toString(),
+          'https://bdocodex.com/us/worldmap/',
+        );
+        expect(
+          currentSnapshot.permittedUse,
+          allOf(
+            contains('1,052 current records'),
+            contains('610 raw exploration-layer records'),
+            contains('442 raw production-layer records'),
+            contains('425 unique parent-linked children'),
+            contains('source research input is excluded'),
+            contains('BDO Codex credited as the retrieval/reference source'),
+          ),
+        );
 
-      final vendorSnapshot = dataset.manifest.provenance.singleWhere(
-        (record) =>
-            record.id == 'bdo-codex-vendor-npc-locations-2026-08-15-reference',
-      );
-      expect(
-        vendorSnapshot.permittedUse,
-        allOf(
-          contains('52 reviewed planner vendor items'),
-          contains('266 NPC location pins'),
-          contains('1243 item-to-location listings'),
-          contains('source research input is excluded'),
-          contains('Positions remain source-recorded'),
-        ),
-      );
-      expect(dataset.vendorNpcs, hasLength(266));
-      expect(dataset.vendorListings, hasLength(1243));
-    });
+        final vendorSnapshot = dataset.manifest.provenance.singleWhere(
+          (record) =>
+              record.id ==
+              'bdo-codex-vendor-npc-locations-2026-08-15-reference',
+        );
+        expect(
+          vendorSnapshot.permittedUse,
+          allOf(
+            contains('52 reviewed planner vendor items'),
+            contains('266 NPC location pins'),
+            contains('1243 item-to-location listings'),
+            contains('source research input is excluded'),
+            contains('Positions remain source-recorded'),
+          ),
+        );
+        expect(dataset.vendorNpcs, hasLength(266));
+        expect(dataset.vendorListings, hasLength(1243));
+      },
+    );
 
     test('retains the complete graph, including every fishing record', () {
       final productionNodes = dataset.workerNodes

@@ -1,11 +1,11 @@
 import 'dart:async';
 
 import 'package:bdo_craft_planner_flutter/visual/components/app_tooltip.dart';
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../../app/state/planner_application_controller.dart';
+import '../../domain/catalog/item_name_presentation.dart';
 import '../../domain/formatting/planner_formatters.dart';
 import '../../visual/components/app_interaction_frame.dart';
 import '../../visual/visual.dart';
@@ -181,7 +181,7 @@ class _InventoryItemRowState extends State<InventoryItemRow> {
     }
     if (event.logicalKey == LogicalKeyboardKey.enter ||
         event.logicalKey == LogicalKeyboardKey.space) {
-      widget.onCopy(widget.item.name);
+      widget.onCopy(itemDisplayName(widget.item.name));
       return KeyEventResult.handled;
     }
     return KeyEventResult.ignored;
@@ -369,14 +369,14 @@ class _InventoryItemRowState extends State<InventoryItemRow> {
     final spec = context.visualTheme;
     final standard = spec.isStandard;
     return Semantics(
-      label: 'I09 Copy exact item name ${widget.item.name}',
+      label: 'I09 Copy exact item name ${itemDisplayName(widget.item.name)}',
       button: true,
       excludeSemantics: true,
       child: AppTooltip(
-        message: 'Copy ${widget.item.name}',
+        message: 'Copy ${itemDisplayName(widget.item.name)}',
         child: TextButton(
           key: InventoryActionKeys.row('I09', widget.item.name),
-          onPressed: () => widget.onCopy(widget.item.name),
+          onPressed: () => widget.onCopy(itemDisplayName(widget.item.name)),
           style: ButtonStyle(
             alignment: Alignment.centerLeft,
             padding: const WidgetStatePropertyAll<EdgeInsetsGeometry>(
@@ -396,7 +396,7 @@ class _InventoryItemRowState extends State<InventoryItemRow> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
               Text(
-                widget.item.name,
+                itemDisplayName(widget.item.name),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 style: spec.typography.body.copyWith(

@@ -108,7 +108,19 @@ struct PersonalDataRemovalTestEnvironment {
   std::wstring roaming_app_data;
   std::wstring local_app_data;
   std::wstring journal_directory;
+  std::wstring documents;
 };
+
+PersonalDataRemovalResult CancelPreparedPersonalDataRemovalForTesting(
+    const PersonalDataRemovalTestEnvironment &environment,
+    const PersonalDataRemovalPlan &plan);
+PersonalDataRemovalResult MarkPersonalDataApplicationRemovedForTesting(
+    const PersonalDataRemovalTestEnvironment &environment,
+    const PersonalDataRemovalPlan &plan);
+PersonalDataRemovalResult FinalizePersonalDataRemovalForTesting(
+    const PersonalDataRemovalTestEnvironment &environment,
+    const PersonalDataRemovalPlan &plan,
+    const PersonalDataRecycleCallback &recycle);
 
 PersonalDataRemovalResult PreparePersonalDataRemovalForTesting(
     const PersonalDataRemovalTestEnvironment &environment,

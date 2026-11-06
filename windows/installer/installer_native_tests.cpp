@@ -441,6 +441,73 @@ bool RunFreshInstallRootTests(const std::filesystem::path &test_root) {
   return passed;
 }
 
+bool RunSharedPersonalDataRemovalTests(const std::filesystem::path &test_root) {
+  using namespace bsl::installer;
+  bool passed = true;
+  const std::string shared_marker =
+      "{\"application\":\"Black Spirit Life\",\"formatVersion\":1,"
+      "\"minimumReaderVersion\":1,\"minimumWriterVersion\":1,\"requiresExistingState\":true}";
+  for (int mode = 0; mode < 5; ++mode) {
+    const auto fixture = test_root / (L"Shared removal " + std::to_wstring(mode));
+    const auto roaming = fixture / L"Roaming";
+    const auto local = fixture / L"Local";
+    const auto documents = fixture / L"Documents";
+    const auto install = fixture / L"Install";
+    const auto legacy = roaming / L"Black Spirit Life";
+    const auto shared = documents / L"Black Spirit Life";
+    const auto bootstrap = local / L"Black Spirit Life" / L"Shared Profile" / L"Bootstrap";
+    const auto active = mode == 1 ? fixture / L"Chosen profile" : (mode == 4 ? legacy : shared);
+    std::filesystem::create_directories(documents);
+    passed &= Require(WriteInstalledRemovalFixture(install, "0.1.16") &&
+        WriteText(active / L"planner-state.json", "{\"synthetic\":true}") &&
+        WriteText(local / L"Black Spirit Life" / L"cache.bin", "cache"),
+        "Shared removal fixture creation failed.");
+    if (mode != 4) {
+      passed &= Require(WriteText(active / L".black-spirit-life-shared.json", mode == 2 ? "{\"formatVersion\":999}" : shared_marker) &&
+          WriteText(legacy / L"keep.txt", "old save stays"), "Shared ownership fixture failed.");
+    }
+    if (mode == 1) {
+      const std::string owned = "{\"schemaVersion\":1,\"packageId\":\"BlackSpiritLife.App\",\"releaseChannel\":\"win-x64-stable\",\"profile\":true,\"profileId\":\"profile-acde-0123456789abcdef0123456789abcdef\",\"transactionId\":\"move-acde-fedcba9876543210fedcba9876543210\"}";
+      const std::string locator = "{\"schemaVersion\":1,\"packageId\":\"BlackSpiritLife.App\",\"releaseChannel\":\"win-x64-stable\",\"applicationDirectory\":\"" + JsonEscape(active.wstring()) + "\"}";
+      passed &= Require(WriteText(active / L".black-spirit-life-profile.json", owned) &&
+          WriteText(bootstrap / L"personal-data-location.json", locator) &&
+          WriteText(bootstrap / L"personal-data-location.committed.json", locator), "Shared custom location fixture failed.");
+    }
+    if (mode == 3) WriteText(bootstrap / L"personal-data-move-journal.json", "unfinished");
+    const PersonalDataRemovalTestEnvironment environment{
+        .roaming_app_data=roaming.wstring(), .local_app_data=local.wstring(),
+        .journal_directory=(local/L"BlackSpiritLife.App.Removal").wstring(),
+        .documents=documents.wstring()};
+    PersonalDataRemovalPlan plan;
+    const auto prepared=PreparePersonalDataRemovalForTesting(environment,install.wstring(),&plan);
+    if (mode == 2 || mode == 3) {
+      passed &= Require(!prepared.success && std::filesystem::exists(active/L"planner-state.json"),
+          "Invalid shared ownership or unfinished move was accepted for removal.");
+      continue;
+    }
+    passed &= Require(prepared.success && plan.active_profile.path == active.wstring() &&
+        plan.custom_profile == (mode == 1), "Uninstall selected the wrong shared/legacy personal-data root.");
+    if (!prepared.success) continue;
+    passed &= Require(CancelPreparedPersonalDataRemovalForTesting(environment,plan).success &&
+        std::filesystem::exists(active/L"planner-state.json"), "Cancel changed shared personal data.");
+    passed &= Require(PreparePersonalDataRemovalForTesting(environment,install.wstring(),&plan).success &&
+        ParkInstalledRemovalFixture(install) && MarkPersonalDataApplicationRemovedForTesting(environment,plan).success,
+        "Shared uninstall postcondition was not committed.");
+    int count=0;
+    const auto recycle=[&](const std::wstring &source,std::wstring *) {
+      std::error_code error; const auto target=fixture/(L"Recycled-"+std::to_wstring(++count));
+      std::filesystem::rename(source,target,error);return !error;
+    };
+    const auto finalized=FinalizePersonalDataRemovalForTesting(environment,plan,recycle);
+    passed &= Require(finalized.success && finalized.removed && count==2 &&
+        !std::filesystem::exists(active/L"planner-state.json") &&
+        std::filesystem::exists(std::filesystem::path(plan.reset_marker_path).parent_path()/L".black-spirit-life-shared.json") &&
+        (mode==4 || std::filesystem::exists(legacy/L"keep.txt")),
+        "Shared removal/reset or legacy preservation failed.");
+  }
+  return passed;
+}
+
 bool RunPersonalDataRemovalTests(const std::filesystem::path &test_root) {
   using namespace bsl::installer;
   bool passed = true;
@@ -1107,6 +1174,7 @@ int wmain(int argc, wchar_t **argv) {
     CloseHandle(fish_host_stop);
 
   passed &= RunPersonalDataRemovalTests(test_root);
+  passed &= RunSharedPersonalDataRemovalTests(test_root);
 
   std::wcout << L"Native installer test artifacts retained at "
              << test_root.wstring() << L'\n';

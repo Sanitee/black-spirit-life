@@ -18,7 +18,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import 'fixtures/resource_map_pill_current_fixture.dart' as current;
+import 'fixtures/resource_map_pill_approved_fixture.dart' as current;
 import 'fixtures/resource_map_pill_earlier_fixture.dart' as earlier;
 
 const _diagnostic = bool.fromEnvironment(
@@ -30,7 +30,7 @@ const _actionKey = ValueKey('pill-diagnostic-action');
 const _artworkKey = ValueKey('pill-diagnostic-artwork');
 const _labelKey = ValueKey('pill-diagnostic-label');
 const _currentSha =
-    '8f33c4cddfb9f88247a3dabf5e38a4673af2ca7dd47dd6b268e1a75dd28b1c6f';
+    'b31aae4fb338e4123a3acfd8f3861ad5f2695cb9fdebfef926d4799a64511543';
 const _earlierSha =
     '775ce9955fbd819bed59da0b6b9ec22371deecf4d61af014189a38ad07fe1143';
 late Uint8List _artwork;
@@ -72,8 +72,15 @@ void main() {
   });
 
   test('independent frozen paint oracles match protected source hashes', () {
+    // Keep the older diagnostic oracle intact. Current production has used the
+    // approved copper finish since before this audit; its independent fixture
+    // and helper painters are pinned to that preserved baseline, not generated
+    // at test runtime from whatever production happens to do.
     for (final (name, expected) in [
-      ('current', _currentSha),
+      (
+        'current',
+        '8f33c4cddfb9f88247a3dabf5e38a4673af2ca7dd47dd6b268e1a75dd28b1c6f',
+      ),
       ('earlier', _earlierSha),
     ]) {
       final text = File(
@@ -93,6 +100,28 @@ void main() {
         isNot(contains('BSL_DIAGNOSTIC_EARLIER_RESOURCE_PILL_PAINT')),
       );
       expect(source, isNot(contains('earlier_resource_pill_paint.dart')));
+    }
+    for (final (file, expected) in [
+      ('resource_map_pill_approved_fixture.dart', _currentSha),
+      (
+        'resource_map_copper_approved_fixture.dart',
+        'add4d54ade4fa0bc3f0a4c56f262417480c16c17365dc335ea02fd7cb467d134',
+      ),
+      (
+        'resource_map_pill_approved_painters_fixture.dart',
+        'bcf9a337449d1381c95012d5a3e2face24683c4bd948ae39895f605f1c15995d',
+      ),
+    ]) {
+      final source = File('test/features/resource_map/fixtures/$file')
+          .readAsStringSync()
+          .replaceAll('\r\n', '\n')
+          .split('// BEGIN FROZEN PILL SOURCE\n')
+          .last;
+      expect(sha256.convert(utf8.encode(source)).toString(), expected);
+      expect(
+        source,
+        isNot(contains('BSL_DIAGNOSTIC_EARLIER_RESOURCE_PILL_PAINT')),
+      );
     }
   });
 
@@ -202,7 +231,10 @@ void main() {
         final bounds = tester.getRect(find.byKey(_pillKey));
         final childElement = tester.element(find.byKey(_actionKey));
         final pillState = tester.state(find.byKey(_pillKey));
-        expect(_container(tester).duration, const Duration(milliseconds: 150));
+        expect(
+          _container(tester).duration,
+          Duration(milliseconds: _diagnostic ? 150 : 140),
+        );
         expect(find.bySemanticsLabel('Iron Ore'), findsOneWidget);
         await tester.tapAt(bounds.centerLeft + const Offset(3, 0));
         await tester.pumpAndSettle();
@@ -241,7 +273,12 @@ void main() {
             reason: 'Opacity must paint its new value in one frame.',
           );
           final gradient = target.gradient! as LinearGradient;
-          final strength = value < .02 ? .02 : value;
+          final material = resourceMapChromeThemeForPlannerTheme(
+            SakuraNightGardenSpec.theme,
+          ).withUiOpacity(value).materialOpacity;
+          final strength = _diagnostic
+              ? (value < .02 ? .02 : value)
+              : (material < .02 ? .02 : material);
           expect(gradient.colors.first.a, closeTo(.96 * strength, .000001));
           expect(gradient.colors.last.a, closeTo(.98 * strength, .000001));
           expect(tester.getRect(find.byKey(_pillKey)), bounds);
@@ -476,7 +513,14 @@ Future<({Uint8List bytes, Map<String, Rect> bounds})> _render(
     }
     await tester.pumpAndSettle();
     expect(tester.getRect(find.byKey(_pillKey)), beforeBounds);
-    expect(_container(tester).duration, const Duration(milliseconds: 150));
+    final copper =
+        configuration.leadingWidth != null &&
+        (implementation == _Implementation.current ||
+            (implementation == _Implementation.actual && !_diagnostic));
+    expect(
+      _container(tester).duration,
+      Duration(milliseconds: copper ? 140 : 150),
+    );
     expect(find.byType(BackdropFilter), findsNothing);
     expect(find.byType(Opacity), findsNothing);
     final art = tester.widget<Image>(find.byKey(_artworkKey));

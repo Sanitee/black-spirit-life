@@ -1,0 +1,45 @@
+{
+  "date": "2026-11-01",
+  "status": "Approved consistency implementation; separate runnable review and public release remain separate.",
+  "approval": "User approved all three consistency comparisons and the revised ingredient badge placement beneath names.",
+  "branch": "codex/consistent-availability",
+  "baseline": "Complete Item Source Stock working snapshot, including inherited uncommitted source; HEAD alone is not the candidate.",
+  "scope": [
+    "Shared joined item-reference and embedded exchange recipe ingredients and alternatives use the same NPC/stock/preorder badges, left-aligned beneath names with a 6px gap. Quantities stay beside names.",
+    "Gathering Value and Demand contribution rows and calculation details use the application's actual shared badges and silver presentation. Totals retain estimate markers and per-hour units. Vendor sale outputs are not mislabelled as purchasable from an NPC.",
+    "Royal Workshop overview and area income use real bundled Silver artwork and the same comma-decimal rounded k/m/b/t convention. Click reveals the exact amount; editable inputs are unchanged.",
+    "Package-owned optional presentation adapters avoid circular app/package dependencies. Standalone package hosts intentionally retain their existing fallback presentation.",
+    "Map presentation survives nested dialogs and follows live Appearance changes. All retained themes and enlarged text retain normal wrapping and bounded scrolling."
+  ],
+  "marketSafety": [
+    "No new client, polling, saved field or market calculation. Existing shared broker, region identity, request cancellation, exact IDs and independent quote/book freshness remain.",
+    "Inline formulas resolve cross-mode identities only for exact canonical names with one unambiguous numeric ID. Origin and fallback unlisted exclusions remain authoritative; unresolved identities have no invented badge.",
+    "Stock zero, positive preorders and unknown stock remain separate. Gathering uses its existing fresh stock/preorder coverage."
+  ],
+  "unchanged": [
+    "How to Obtain acquisition-line placement; the separately explored adjacent-line layout is not part of these three approved comparisons.",
+    "Catalog, source facts, recipes, yields, formulas, inventory, storage, profiles, native startup/instance routing, shared Documents, writer lease, migration and lifecycle guards."
+  ],
+  "verification": {
+    "applicationTests": 396,
+    "gatheringProjectionTests": 29,
+    "captureInputs": "Synthetic in-memory app state and fake market responses only; captures are actual native Flutter widgets, not live market quotes.",
+    "coverage": "Recipe Book nested hover/pin/copy/scroll/activation; inline exchange cross-mode stock and cancellation; Gathering Value/Demand/detail; Royal overview/area amount expansion; normal and 200% text in all themes; live map themes.",
+    "testMaintenance": [
+      "The nested reference fit assertion now checks every ingredient fits without scrolling; additional Notes may scroll after the complete recipe.",
+      "The legacy Gathering calculation Close test now finds the existing close icon, not the intentionally removed ordinary hover tooltip. No close behavior changed."
+    ],
+    "releaseCaveat": "The production-source publication verifier still flags inherited absolute private-workspace paths in historical documentation. Baseline and candidate findings are compared in the external audit; this is not a public-ready release claim."
+  },
+  "handoff": {
+    "executable": "build/windows/x64/runner/Release/BlackSpiritLife.exe",
+    "previousSnapshot": "Protected Rollback/prior-consistent-availability-20261101-5diVdk",
+    "audit": "workspace audit/consistent-availability-20261101",
+    "captures": "workspace work/visuals/consistent-availability",
+    "personalDataAccessed": false,
+    "visibleApplicationLaunched": false,
+    "installedAppReplaced": false,
+    "shortcutChanged": false,
+    "published": false
+  }
+}

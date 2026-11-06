@@ -249,14 +249,113 @@ RecipeBookItemInfo withReadableRecipeBookSections(RecipeBookItemInfo info) {
     };
   }
 
+  final sources = compactReviewedAcquisitionSources(
+    info.title,
+    readable(info.acquisitionNotes),
+  ).where((note) => !repeatsFormula(note)).toList(growable: false);
   return info.copyWith(
+    // Keep the fact under How to Obtain, not twice on the same card. Compare
+    // complete text only: a longer condition or a different amount is not a duplicate.
+    summary:
+        !info.isTemporarilyArchived && sources.contains(info.summary.trim())
+        ? ''
+        : info.summary,
     effects: readable(info.effects),
     uses: readable(info.uses),
-    acquisitionNotes: readable(
-      info.acquisitionNotes,
-    ).where((note) => !repeatsFormula(note)).toList(growable: false),
+    acquisitionNotes: sources,
     notes: readable(info.notes),
   );
+}
+
+/// Only discard a reviewed shorter statement when the complete fact is already
+/// present. Word-set similarity is unsafe for quantities, NPCs and restrictions.
+List<String> compactReviewedAcquisitionSources(
+  String title,
+  List<String> lines,
+) {
+  final redundant = <String>{};
+  for (final line in lines) {
+    final simpleExchange = RegExp(
+      r'^(Exchange · \d+ .+ → \d+ .+) with ([A-Za-z][A-Za-z \x27-]*)$',
+    ).firstMatch(line);
+    if (simpleExchange != null &&
+        lines.any(
+          (other) => other.startsWith(
+            '${simpleExchange[1]} · ${simpleExchange[2]} · ',
+          ),
+        )) {
+      redundant.add(line);
+    }
+  }
+  void coveredBy(String complete, Iterable<String> shorter) {
+    if (lines.contains(complete)) redundant.addAll(shorter);
+  }
+
+  switch (title) {
+    case 'Primordial Crystal':
+      coveredBy('Morning Light World Boss subjugation rewards.', [
+        'World bosses · Morning Light',
+      ]);
+    case 'Embers of the Primordial':
+      coveredBy(
+        'Obtain Embers of the Primordial from Morning Light World Boss subjugation rewards.',
+        ['World bosses · Morning Light'],
+      );
+    case 'Reforge Stone - All AP':
+    case 'Reforge Stone - All Accuracy':
+    case 'Reforge Stone - All Damage Reduction':
+    case 'Reforge Stone - All Evasion':
+    case 'Reforge Stone - Max HP':
+    case 'Reforge Stone - Critical Hit Rate':
+    case 'Reforge Stone - Back Attack Extra Damage':
+    case 'Reforge Stone - Down Attack Extra Damage':
+    case 'Reforge Stone - Air Attack Extra Damage':
+    case 'Reforge Stone - Critical Hit Extra Damage':
+    case "Reforge Stone - Black Spirit's Rage Recovery":
+      coveredBy(
+        'Obtain $title from eligible Land of the Morning Light World Boss rewards, or buy it through the Central Market.',
+        ['World bosses · Morning Light'],
+      );
+    case 'Essence of Dawn':
+      coveredBy(
+        'Earn Essence of Dawn directly from eligible Black Shrine - Donghae Boss Blitz rewards, or buy it through the Central Market.',
+        [
+          'Earn it from eligible Black Shrine - Donghae Boss Blitz rewards, or buy it from the Central Market.',
+        ],
+      );
+    case 'Insectivore Plant Flower':
+    case 'Insectivore Plant Leaf':
+    case 'Insectivore Plant Stalk':
+      coveredBy(
+        'Defeat Poisonous Swamp Plants in Naga Marsh or Glish Swamp; do not try to gather this drop with a tool.',
+        ["Defeat Naga Marsh's Poisonous Plants."],
+      );
+    case 'Magical Lightstone Crystal':
+      coveredBy(
+        'Exchange unwanted or Imperfect Lightstones with Dalishain in major towns; the amount received depends on the lightstone.',
+        [
+          'Exchange unwanted Lightstones with the Wandering Alchemist Dalishain in a major city or town.',
+          'The amount received depends on the Lightstone.',
+        ],
+      );
+    case 'Pile of Sunrise Herbs':
+      coveredBy(
+        'Gather · Wild Herbs (hands or hoe; depends on Gathering level)',
+        [
+          'Gather Wild Herbs with bare hands or a hoe (depends on Gathering level).',
+        ],
+      );
+    case 'Mass of Pure Magic':
+      coveredBy(
+        "In Manage Currency, exchange 1 Dark Spirit's Greed or 5 Hunter's Seals for 10 Masses of Pure Magic.",
+        [
+          "Exchange · 1 Dark Spirit's Greed → 10 Mass of Pure Magic · Manage Currency",
+        ],
+      );
+  }
+  return lines
+      .where((line) => !redundant.contains(line))
+      .toList(growable: false);
 }
 
 /// Projects readable, currently eligible alternatives without mutating the
@@ -268,6 +367,12 @@ RecipeBookItemInfo withVisibleRecipeBookFormulas(
   bool archived(String name) =>
       isTemporarilyArchivedItem(name, itemId: itemIdFor?.call(name));
   RecipeBookFormula? project(RecipeBookFormula formula) {
+    if (isRemovedPcItem(
+      formula.outputName,
+      itemId: itemIdFor?.call(formula.outputName),
+    )) {
+      return null;
+    }
     final ingredients = <Ingredient>[];
     for (final ingredient in formula.ingredients) {
       final available = <String>{
@@ -312,6 +417,10 @@ RecipeBookItemInfo withVisibleRecipeBookFormulas(
   return info.copyWith(
     acquisitionFormulas: projectAll(info.acquisitionFormulas),
     craftUses: info.craftUses
+        .where(
+          (use) =>
+              !isRemovedPcItem(use.output, itemId: itemIdFor?.call(use.output)),
+        )
         .map((use) => use.copyWith(formulas: projectAll(use.formulas)))
         .toList(growable: false),
   );
@@ -341,10 +450,10 @@ RecipeBookItemInfo withResearchedAcquisition(
   ).map(_acquisitionReferenceIdentity).toSet();
   final routes =
       composeAcquisitionNotes(
+            routes: researchedRoutes,
             notes: <String?>[
-              ...researchedRoutes,
               ...info.acquisitionNotes,
-              sourceNote,
+              sanitizeDisplayableSourceNote(sourceNote),
             ],
             vendor: vendor,
             location: location,
@@ -990,9 +1099,15 @@ _curatedInfo = <String, RecipeBookItemInfo>{
   ),
   'refined essence of emotions': RecipeBookItemInfo(
     title: 'Refined Essence of Emotions',
-    kind: 'Accessory reform material',
-    summary: 'An extraction material for reformed accessories.',
-    uses: <String>['Removes and recovers a cup from a reformed accessory.'],
+    kind: removedPcItemLabel,
+    summary: removedAugust2026CupMaterialReason,
+    notes: <String>['Cups now use Mirror of Equilibrium for extraction.'],
+  ),
+  'fused crystal of emotions': RecipeBookItemInfo(
+    title: 'Fused Crystal of Emotions',
+    kind: removedPcItemLabel,
+    summary: removedAugust2026CupMaterialReason,
+    notes: <String>['Cups now use Mirror of Equilibrium for extraction.'],
   ),
   "krogdalo's origin stone": RecipeBookItemInfo(
     title: "Krogdalo's Origin Stone",
@@ -1195,7 +1310,7 @@ RecipeBookItemInfo _exactBuffHoverInfo(
     kind: _buffKind(foldedName, ''),
     summary: '',
     effects: info.effects,
-    craftUses: _compactCraftUses(consumers, limit: 1),
+    craftUses: _compactCraftUses(consumers),
     acquisitionFormulas: recipeBookFormulas(recipe),
     acquisitionNotes: _compactAcquisitionNotes(recipe),
     notes: <String>[
@@ -1224,7 +1339,7 @@ RecipeBookItemInfo _exactFoodHoverInfo(
     kind: info.kind,
     summary: info.description,
     effects: info.effects,
-    craftUses: _compactCraftUses(consumers, limit: 1),
+    craftUses: _compactCraftUses(consumers),
     acquisitionFormulas: recipeBookFormulas(recipe),
     acquisitionNotes: _compactAcquisitionNotes(recipe),
     notes: <String>[
@@ -1283,11 +1398,7 @@ List<RecipeBookCraftUse> _mergeCraftUses(
   Iterable<Recipe> consumers,
 ) {
   final result = <RecipeBookCraftUse>[...curated];
-  final consumerList = consumers.toList(growable: false);
-  final candidateUses = _compactCraftUses(
-    consumerList,
-    limit: consumerList.length,
-  );
+  final candidateUses = _compactCraftUses(consumers);
   for (final use in candidateUses) {
     final existingIndex = result.indexWhere(
       (existing) => _sameName(existing.output, use.output),
@@ -1306,7 +1417,6 @@ List<RecipeBookCraftUse> _mergeCraftUses(
     );
     if (alreadyIncluded) continue;
     result.add(use);
-    break;
   }
   return List<RecipeBookCraftUse>.unmodifiable(result);
 }
@@ -1367,16 +1477,25 @@ RecipeBookItemInfo _finishItemInfo(
       : purpose.example?.trim();
 
   final archived = isTemporarilyArchivedItem(name, itemId: recipe?.marketId);
+  final removed = isRemovedPcItem(name, itemId: recipe?.marketId);
+  final removedCrystal = isRemovedJanuary2024Crystal(
+    name,
+    itemId: recipe?.marketId,
+  );
   return RecipeBookItemInfo(
     title: info.title.trim().isEmpty ? name : info.title,
-    kind: archived
+    kind: removed
+        ? removedPcItemLabelFor(name, itemId: recipe?.marketId)
+        : archived
         ? temporarilyArchivedItemLabel
         : (kind.isEmpty ? 'Item' : kind),
-    summary: description,
+    summary: removed
+        ? removedPcItemReasonFor(name, itemId: recipe?.marketId)
+        : description,
     effectsTitle: purpose.effectsTitle ?? info.effectsTitle,
-    effects: List<String>.unmodifiable(effects),
-    uses: List<String>.unmodifiable(uses),
-    craftUses: info.craftUses,
+    effects: removedCrystal ? const [] : List<String>.unmodifiable(effects),
+    uses: removedCrystal ? const [] : List<String>.unmodifiable(uses),
+    craftUses: removed ? const [] : info.craftUses,
     acquisitionFormulas: archived
         ? const <RecipeBookFormula>[]
         : List<RecipeBookFormula>.unmodifiable(acquisitionFormulas),
@@ -1385,8 +1504,8 @@ RecipeBookItemInfo _finishItemInfo(
         : List<String>.unmodifiable(acquisitionNotes),
     example: example?.isEmpty ?? true ? null : example,
     notes: List<String>.unmodifiable(<String>[
-      if (archived) temporarilyArchivedItemReason,
-      ...notes,
+      if (archived && !removed) temporarilyArchivedItemReason,
+      if (!removedCrystal) ...notes,
     ]),
     isTemporarilyArchived: archived,
   );
@@ -1397,7 +1516,7 @@ RecipeBookItemInfo _compactItemInfo({
   required Recipe? recipe,
   required List<Recipe> consumers,
 }) {
-  final craftUses = _compactCraftUses(consumers, limit: 1);
+  final craftUses = _compactCraftUses(consumers);
   return RecipeBookItemInfo(
     title: name,
     kind: _compactKind(name, recipe),
@@ -1534,18 +1653,15 @@ List<Recipe> _distinctConsumers(
 ) {
   final seen = <String>{};
   return consumerRecipes
+      .where((consumer) => consumer.isCraftable)
       .where((consumer) => !_sameName(consumer.name, itemName))
       .where((consumer) => seen.add(_fold(consumer.name)))
       .toList(growable: false);
 }
 
-List<RecipeBookCraftUse> _compactCraftUses(
-  Iterable<Recipe> consumers, {
-  required int limit,
-}) {
+List<RecipeBookCraftUse> _compactCraftUses(Iterable<Recipe> consumers) {
   return consumers
       .where((consumer) => consumer.isCraftable)
-      .take(limit)
       .map(
         (consumer) => RecipeBookCraftUse(
           output: consumer.name,
@@ -1743,7 +1859,7 @@ RecipeBookItemInfo _exactCrystalHoverInfo(
     effectsTitle: info.effectsTitle,
     effects: info.effects,
     uses: _compactExactUses(info.uses),
-    craftUses: _compactCraftUses(consumers, limit: 1),
+    craftUses: _compactCraftUses(consumers),
     acquisitionFormulas: recipeBookFormulas(recipe),
     acquisitionNotes: _compactAcquisitionNotes(recipe),
   );

@@ -95,7 +95,9 @@ void main() {
       expect(find.text('Base mastery'), findsOneWidget);
       expect(find.text('Base drop rate %'), findsOneWidget);
       expect(
-        find.textContaining('Leave out the buffs selected in Prepare'),
+        find.textContaining(
+          'Leave out selected buffs and stones.',
+        ),
         findsOneWidget,
       );
       expect(find.text('LIGHTSTONES'), findsNothing);
@@ -395,6 +397,29 @@ void main() {
       expect(tester.takeException(), isNull);
     },
   );
+  testWidgets('Royal medicine selection replaces the conflicting medicine', (
+    tester,
+  ) async {
+    final previews = <BairogCalculatorSettings>[];
+    await open(tester, onPreview: previews.add);
+    await advanced(tester);
+    for (final name in ['Mystical Herbal Medicine', 'Mellow Herbal Medicine']) {
+      final target = find.text(name);
+      await tester.ensureVisible(target);
+      await tester.pumpAndSettle();
+      await tester.tap(target);
+      await tester.pumpAndSettle();
+      final id = name.startsWith('Mystical') ? 821144 : 821145;
+      expect(previews.last.enabledExpenseItemIds, contains(id));
+      expect(
+        previews.last.enabledExpenseItemIds,
+        isNot(contains(id == 821144 ? 821145 : 821144)),
+      );
+    }
+    expect(find.text('1 dose · 1 hour · 22-hour cooldown'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
+
   for (final size in const [
     Size(1500, 950),
     Size(1200, 752),
@@ -441,6 +466,12 @@ void main() {
             await tester.ensureVisible(lastExpense);
             await tester.pumpAndSettle();
             expect(lastExpense.hitTestable(), findsOneWidget);
+            final assumptions = find.byKey(
+              const ValueKey('gathering-energy-estimate-assumptions'),
+            );
+            await tester.ensureVisible(assumptions);
+            await tester.pumpAndSettle();
+            expect(assumptions.hitTestable(), findsOneWidget);
             expect(find.text('Save stats').hitTestable(), findsOneWidget);
             expect(tester.takeException(), isNull);
             if (capture) {
@@ -502,6 +533,10 @@ Future<void> _loadSetupCaptureFonts() async {
     flutterRoot = parent;
   }
   final files = <String, List<String>>{
+    'Georgia': [
+      for (final name in ['georgia.ttf', 'georgiab.ttf'])
+        '$windowsRoot/Fonts/$name',
+    ],
     'Segoe UI': [
       for (final name in ['segoeui.ttf', 'seguisb.ttf', 'segoeuib.ttf'])
         '$windowsRoot/Fonts/$name',

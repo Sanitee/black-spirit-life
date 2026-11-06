@@ -16,6 +16,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../../support/application_test_harness.dart';
+import '../../support/availability_badge_finders.dart';
 
 const _target = 'HAN Reforge Stone - All AP';
 const _capture = bool.fromEnvironment('CAPTURE_PLANNER_OWNED_TRIAL');
@@ -145,6 +146,16 @@ void main() {
             );
             await tester.tap(
               find.byKey(const ValueKey('planner-undo-completion')),
+            );
+            await tester.pumpAndSettle();
+            // Undo opens the approved material review; opening it is read-only.
+            expect(find.text('Completed 2'), findsOneWidget);
+            expect(
+              find.byKey(const ValueKey('planner-undo-review-panel')),
+              findsOneWidget,
+            );
+            await tester.tap(
+              find.byKey(const ValueKey('planner-undo-confirm')),
             );
             await tester.pumpAndSettle();
             expect(find.text('Completed 1'), findsOneWidget);
@@ -282,6 +293,9 @@ void main() {
             find.byKey(const ValueKey('planner-undo-completion')),
           );
           await tester.pumpAndSettle();
+          expect(find.text('Completed 5'), findsOneWidget);
+          await tester.tap(find.byKey(const ValueKey('planner-undo-confirm')));
+          await tester.pumpAndSettle();
           expect(find.text('Completed 4'), findsOneWidget);
           expect(mode.state.value.completedSteps.toList(), names);
           expect(
@@ -322,6 +336,9 @@ void main() {
           expect(mode.state.value.inventory[step.name], step.produced);
           await _captureIfRequested(tester, 'completion-undo-${spec.id}');
           await tester.tap(undo);
+          await tester.pumpAndSettle();
+          expect(mode.state.value.inventory[step.name], step.produced);
+          await tester.tap(find.byKey(const ValueKey('planner-undo-confirm')));
           await tester.pumpAndSettle();
           expect(mode.state.value.inventory, inventoryBefore);
           expect(
@@ -372,7 +389,7 @@ void main() {
               expect(
                 find.descendant(
                   of: _need(name),
-                  matching: find.text('Out of stock'),
+                  matching: stockBadgeText('0'),
                 ),
                 findsOneWidget,
               );
@@ -721,7 +738,8 @@ void _expectQueueGeometryAndQuantities(WidgetTester tester, PlanStep step) {
       // A compact header wraps whole quantity groups on narrow layouts.
       expect(field.top - previous.bottom, greaterThanOrEqualTo(5.9));
     } else {
-      expect(field.left - previous.right, greaterThanOrEqualTo(19.9));
+      // Approved quantity ribbons have 8px between their whole backed groups.
+      expect(field.left - previous.right, closeTo(8, .1));
     }
   }
 }

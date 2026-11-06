@@ -339,44 +339,33 @@ class PlannerIngredientIdentity extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (PlannerQuantityLayout.of(context)) {
-      return LayoutBuilder(
-        builder: (context, constraints) {
-          final inlineQuality =
-              constraints.maxWidth >=
-              MediaQuery.textScalerOf(context).scale(330);
-          return Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Row(
-                children: [
-                  Flexible(child: name),
-                  if (quantity != null) ...[
-                    const SizedBox(width: 6),
-                    quantity!,
-                  ],
-                  if (inlineQuality && quality != null) ...[
-                    const SizedBox(width: 6),
-                    quality!,
-                  ],
+    // Bonus and other shared ingredient hosts need the same narrow/enlarged
+    // reflow as Planner; quality controls must not squeeze the name to zero.
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final inlineQuality =
+            constraints.maxWidth >= MediaQuery.textScalerOf(context).scale(330);
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Row(
+              children: [
+                Flexible(child: name),
+                if (quantity != null) ...[const SizedBox(width: 6), quantity!],
+                if (inlineQuality && quality != null) ...[
+                  const SizedBox(width: 6),
+                  quality!,
                 ],
-              ),
-              if (!inlineQuality && quality != null) ...[
-                const SizedBox(height: 5),
-                quality!,
               ],
+            ),
+            if (!inlineQuality && quality != null) ...[
+              const SizedBox(height: 5),
+              quality!,
             ],
-          );
-        },
-      );
-    }
-    return Row(
-      children: [
-        Flexible(child: name),
-        if (quantity != null) ...[const SizedBox(width: 6), quantity!],
-        if (quality != null) ...[const SizedBox(width: 6), quality!],
-      ],
+          ],
+        );
+      },
     );
   }
 }

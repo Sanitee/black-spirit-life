@@ -7,6 +7,43 @@ import 'package:bdo_craft_planner_flutter/features/recipe_book/recipe_book_item_
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
+  test(
+    'an exact source is shown once without losing a restriction or description',
+    () {
+      const source = 'Geowan (Byeot County) · 1,000 Sangpyeong Coins per chest';
+      const original = RecipeBookItemInfo(
+        title: 'Sangpyeong Coin Chest',
+        kind: 'Exchange item',
+        summary: source,
+        acquisitionNotes: [source],
+        notes: ["Two chests for Miss Myo's quest (once per family)."],
+      );
+      final result = withReadableRecipeBookSections(original);
+      expect(result.summary, isEmpty);
+      expect(result.acquisitionNotes, [source]);
+      expect(result.notes, original.notes);
+      expect(withReadableRecipeBookSections(result).summary, isEmpty);
+      for (final summary in [
+        '$source (before the quest).',
+        'A quest currency.',
+        'Geowan · 2,000 coins',
+      ]) {
+        expect(
+          withReadableRecipeBookSections(
+            original.copyWith(summary: summary),
+          ).summary,
+          summary,
+        );
+      }
+      expect(
+        withReadableRecipeBookSections(
+          original.copyWith(isTemporarilyArchived: true),
+        ).summary,
+        source,
+      );
+    },
+  );
+
   test('shared sections remove blank lines without hiding useful sources', () {
     final info = withReadableRecipeBookSections(
       const RecipeBookItemInfo(
@@ -183,7 +220,7 @@ void main() {
       expect(purpose.kind, 'Farming ingredient', reason: name);
       expect(
         purpose.description,
-        'A higher-grade Farming product obtained through Farming or Plant Breeding.',
+        'A higher-grade crop used in cooking or alchemy.',
         reason: name,
       );
       expect(purpose.uses, <String>[
@@ -336,8 +373,6 @@ void main() {
       'Sharp Black Crystal Shard':
           'Makes Concentrated Magical Black Stone, Concentrated Magical Black Gem, and several late-game materials.',
       'Primordial Black Stone': 'Enhances Sovereign weapons.',
-      'Refined Essence of Emotions':
-          'Removes and recovers a cup from a reformed accessory.',
       "Krogdalo's Origin Stone":
           'Courser Awakening attempts for a Dream Horse, such as Arduanatt.',
     };
@@ -659,11 +694,11 @@ void main() {
     final remedy = infoFor('Elixir of Burn Removal');
     expect(remedy?.kind, 'Recovery consumable');
     expect(remedy?.effects, contains('Cures Burns'));
-    expect(remedy?.notes, contains(contains('Cooldown: 30 sec.')));
+    expect(remedy?.notes, contains(contains('Cooldown: 10 sec.')));
 
     final spiritStone = infoFor('Guardian Spirit Stone');
     expect(spiritStone?.kind, 'Spirit stone');
-    expect(spiritStone?.summary, contains('activatable'));
+    expect(spiritStone?.summary, contains('while equipped'));
     expect(spiritStone?.summary.toLowerCase(), isNot(contains('charge')));
     expect(
       spiritStone?.effects,
@@ -677,7 +712,7 @@ void main() {
     final alchemyStone = infoFor('Splendid Alchemy Stone of Destruction');
     expect(alchemyStone?.kind, 'Alchemy stone');
     expect(alchemyStone?.effects, contains('All AP +13'));
-    expect(alchemyStone?.summary, contains('activatable'));
+    expect(alchemyStone?.summary, contains('while equipped'));
     expect(alchemyStone?.summary.toLowerCase(), isNot(contains('recharg')));
 
     final heart = infoFor("Vell's Heart");
@@ -778,7 +813,7 @@ void main() {
     }
   });
 
-  test('combined Vell and Khan stones show heart and timed effects', () {
+  test('combined Vell and Khan stones show passive equipped effects', () {
     RecipeBookItemInfo? infoFor(String name) => recipeBookInfoFor(
       name: name,
       recipe: null,
@@ -860,7 +895,8 @@ void main() {
         containsAll(grade.value['Destruction']!),
         reason: "${grade.key} Vell's Heart",
       );
-      expect(vell?.notes, contains(contains('Duration: 5 min.')));
+      expect(vell?.uses, contains('All listed effects apply while equipped.'));
+      expect(vell?.notes.join(' '), isNot(contains('Duration:')));
 
       for (final role in grade.value.entries) {
         final khan = infoFor("${grade.key} Khan's Heart: ${role.key}");
@@ -879,13 +915,10 @@ void main() {
           reason: "${grade.key} Khan's Heart: ${role.key}",
         );
         expect(
-          khan?.notes,
-          contains(
-            contains(
-              role.key == 'Life' ? 'Duration: 10 min.' : 'Duration: 5 min.',
-            ),
-          ),
+          khan?.uses,
+          contains('All listed effects apply while equipped.'),
         );
+        expect(khan?.notes.join(' '), isNot(contains('Duration:')));
       }
     }
   });
@@ -1016,7 +1049,7 @@ void main() {
         String
       >[
         'Reform Ekleta Necklace with Cup of Destined Dawn to gain Max HP +300. '
-            'Extract with Refined Essence of Emotions to recover the original '
+            'Extract with Mirror of Equilibrium to recover the original '
             'accessory and cup.',
       ]);
       expect(
@@ -1027,14 +1060,14 @@ void main() {
       expect(
         researchedReform.notes,
         contains(
-          'Extract with Refined Essence of Emotions to recover the original '
+          'Extract with Mirror of Equilibrium to recover the original '
           'accessory and cup.',
         ),
       );
 
       final uniqueRoute = withResearchedAcquisition(reformed, const <String>[
         'Speak with the Ynix Remnant after completing the prerequisite quest. '
-            'Extract with Refined Essence of Emotions to recover the original '
+            'Extract with Mirror of Equilibrium to recover the original '
             'accessory and cup.',
       ]);
       expect(uniqueRoute.acquisitionNotes, <String>[
@@ -1190,7 +1223,7 @@ void main() {
       ),
       reason: 'Concrete effects replace the generic Lightstone instruction.',
     );
-    expect(draught?.summary, 'A temporary combat draught.');
+    expect(draught?.summary, 'A temporary draught buff.');
     expect(draught?.effects, contains('All AP +13'));
   });
 

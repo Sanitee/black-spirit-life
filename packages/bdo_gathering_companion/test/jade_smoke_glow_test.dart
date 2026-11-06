@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 import 'dart:typed_data';
 import 'dart:ui' as ui;
 
@@ -27,7 +28,7 @@ const _foregrounds = {
 };
 
 void main() {
-  for (final percent in [0, 60, 100]) {
+  for (final percent in [0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100]) {
     for (final modal in [false, true]) {
       final mode = modal ? 'dialog' : 'main';
       testWidgets('$mode glass retains readable text at $percent% opacity', (
@@ -80,6 +81,16 @@ void main() {
                   as RenderRepaintBoundary;
           final image = await boundary.toImage(pixelRatio: 1);
           try {
+            const directory = String.fromEnvironment('JADE_REVIEW_CAPTURES');
+            if (directory.isNotEmpty) {
+              await Directory(directory).create(recursive: true);
+              final png = await image.toByteData(
+                format: ui.ImageByteFormat.png,
+              );
+              await File(
+                '$directory/$mode-$percent.png',
+              ).writeAsBytes(png!.buffer.asUint8List());
+            }
             final bytes = await image.toByteData(
               format: ui.ImageByteFormat.rawRgba,
             );
@@ -157,9 +168,12 @@ void main() {
           // Lock the expedition panel's light-to-dark face, not only its
           // contrast. Exact opaque preview tones are separately palette-tested;
           // these rendered default tones include native blur and modal layering.
+          // Reviewed 2026-11-02 against the preserved candidate: the current
+          // approved segmented glass has these same tones on both builds. Keep
+          // the rendered contrast and raised-state assertions below independent.
           final expectedShades = modal
-              ? const [Color(0xFF231D26), Color(0xFF211C24), Color(0xFF1F1A23)]
-              : const [Color(0xFF261F26), Color(0xFF221C24), Color(0xFF201A22)];
+              ? const [Color(0xFF2E262D), Color(0xFF2B232B), Color(0xFF282129)]
+              : const [Color(0xFF2E252D), Color(0xFF292129), Color(0xFF261F27)];
           const points = [Offset(750, 60), Offset(750, 230), Offset(750, 420)];
           debugPrint(
             '$mode panel shades: ${points.map((p) => _hex(pixels.at(p))).join(', ')}',

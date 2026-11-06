@@ -12,6 +12,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'action_hint_finder.dart';
 
 const _receiptDirectory = r'C:\fixture\gathering\session-import-inbox';
 
@@ -227,7 +228,7 @@ void main() {
     expect(find.text('Garmoth Upload'), findsNothing);
     expect(find.byTooltip('Garmoth Upload'), findsNothing);
     expect(find.byKey(const ValueKey('open-minigame-helper')), findsOneWidget);
-    expect(find.byTooltip('Help'), findsOneWidget);
+    expect(findActionHint('Help'), findsOneWidget);
     expect(calls, isEmpty);
     expect(tester.takeException(), isNull);
   });

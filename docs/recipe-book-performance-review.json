@@ -1,0 +1,18 @@
+{
+  "date": "2026-11-04",
+  "scope": "Recipe Book opening delay and missing substitute availability",
+  "opening": {
+    "cause": "RecipeBookItemIcon and hover wrappers eagerly projected full item references for visible icons even while their previews were closed.",
+    "fix": "Resolve references only when the Tooltip overlay or pinned popover builds. Keep existing controller revision-aware caching, hover delays, keyboard actions and shared card layout.",
+    "measurement": "Synthetic Windows Flutter widget test, not a live release frame-time guarantee. Cooking first-frame work: baseline 761733 microseconds, corrected standalone run 131392 microseconds. Timing assertions are diagnostic; the regression enforces zero item projections on opening and one after clicking an item."
+  },
+  "availability": {
+    "cause": "Imported High-quality labels did not match High-Quality recipe keys. The old fallback also rejected registry-only references and NPC availability suppressed market information.",
+    "fix": "Resolve exact normalized names using immutable per-recipe-map indexes and the bundled identity registry. Reject conflicting numeric identities; preserve market eligibility/exclusions. Show NPC and market badges together when both apply. Request through the existing shared broker; unknown and stale counts stay unknown.",
+    "coverage": "3813 mode/name identity checks across 1271 eligible ingredient and grade labels; actual Wheat Flour and dual-source Paprika cards in three themes at 100% and 200% text.",
+    "shared_surfaces": "Recipe Book, Planner, Opportunities item-reference cards and previews, plus the Planner's shared substitute chooser.",
+    "layout": "Processing alternatives retain inline badges; quality columns retain badges underneath. No new grade conversion, ingredient, price preference or recipe calculation."
+  },
+  "inherited_test_expectations": "Two source-copy tests also failed on the preserved previous source. Updated only their exact expected grouping to the already-approved single-route bullets (seller, price and restriction stay together). No acquisition text or game facts changed in this delivery.",
+  "safety": "Synthetic profiles and mock market only. Prior source/runnable and accepted rollback preserved, no user-state access. Local Beta-by-Codex side-by-side delivery only; no normal-app update or publication."
+}

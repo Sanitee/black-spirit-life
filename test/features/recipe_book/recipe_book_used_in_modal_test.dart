@@ -16,6 +16,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../../support/availability_badge_finders.dart';
 import 'recipe_book_test_support.dart' show testIconDataUri;
 
 typedef _ThemeCase = ({String name, ThemeSpec spec});
@@ -946,10 +947,19 @@ void main() {
 
         final stockText = find.descendant(
           of: card,
-          matching: find.text('Stock 125'),
+          matching: stockBadgeText('125'),
         );
         expect(stockText, findsOneWidget);
-        expect(tester.getRect(stockText).top, greaterThan(usedInRect.bottom));
+        final outputRect = tester.getRect(
+          find.byKey(ValueKey('recipe-output-stock:$_source')),
+        );
+        final methodRect = tester.getRect(
+          find.byKey(RecipeBookKeys.productionMethod(_source)),
+        );
+        expect(outputRect.top, greaterThan(methodRect.bottom));
+        expect(outputRect.bottom, lessThan(targetRect.top));
+        expect(outputRect.left, closeTo(methodRect.left, .1));
+        _expectContained(cardRect, outputRect);
         expect(
           tester.renderObject<RenderParagraph>(stockText).didExceedMaxLines,
           isFalse,

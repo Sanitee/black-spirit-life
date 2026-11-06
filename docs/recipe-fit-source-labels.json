@@ -1,0 +1,38 @@
+{
+  "date": "2026-11-01",
+  "status": "Approved recipe-fit and adjacent source-badge changes implemented; Inventory heading proposal explicitly skipped",
+  "branch": "codex/recipe-fit-source-labels",
+  "baseline": "Complete Readable Details working snapshot, not Git HEAD alone and not either experimental preview source.",
+  "changes": [
+    "Shared Joined item windows use the approved tighter header, Used for summary, formula, ingredient and footer padding. Text sizes, art, facts, alternatives, beside-name quantities and under-name source badges are unchanged.",
+    "Clown's Blood's complete recipe now fits without scrolling at 1200x752 and normal text in all three themes. Content-sized height, fixed actions and contained scrolling remain for shorter windows, enlarged text and longer recipes. This is a spacing correction, not a guarantee that every recipe can fit on every screen.",
+    "How to Obtain stock/preorder badges follow the Central Market label with a 12px gap. Limited widths and long restrictions reflow beneath it with a 6px gap and left alignment. The same acquisition section serves clicked, hovered, nested, pinned, passive and inline references.",
+    "Long and multiline purchase restrictions retain the original text, hanging bullets and semantics. Only the existing exact generic market qualifiers shorten to Central Market."
+  ],
+  "unchanged": [
+    "All Inventory source, including the one-line section headings and the previously approved empty-search action. The new Inventory wrapping preview was rejected and is not included.",
+    "Gathering, shared badge artwork/materials, typography, quantities, calculations, catalog, ingredient selection, profiles, storage and native lifecycle guards.",
+    "The existing shared region/item broker, request exclusions, independent quote/book freshness, cancellation and unknown-versus-zero meanings. No polling, client, network feature or saved field was added.",
+    "Embedded exchange prose remains embedded without a new header, container or scroll area; it inherits adjacent acquisition badges, not the external Joined window's padding."
+  ],
+  "verification": {
+    "initialFitSpacingAndSourceChecks": {"passed": 92, "failed": 0},
+    "sharedReferenceAndAvailabilityChecks": {"passed": 110, "failed": 0, "newTests": 36, "newLayoutCases": 108},
+    "additionalModalCopyActionAndSearchChecks": {"passed": 149, "failed": 0},
+    "nativeCaptureChecks": {"passed": 32, "failed": 0, "images": 72},
+    "coverage": "All three themes; normal, 125%-zoom, 200%-text and constrained layouts; long/multiline acquisition wording; recipe fit, alternatives, tab/scroll/copy/activation, passive art, nested Recipe Book and live theme changes.",
+    "analysis": "Three scoped source/test files, no issues.",
+    "windowsBuild": "Passed in 154.6s. Existing NuGet availability and .NET library-search warnings were non-fatal. No application launch against personal data.",
+    "limits": "Not a whole-repository test pass. The rejected Inventory narrow/enlarged heading issue is intentionally untouched. Inherited public source-cleanup and migration/lifecycle release gates remain separate."
+  },
+  "handoff": {
+    "executable": "build/windows/x64/runner/Release/BlackSpiritLife.exe",
+    "audit": "workspace audit/recipe-fit-source-labels-20261101",
+    "captures": "workspace work/visuals/recipe-fit-source-labels",
+    "personalDataAccessed": false,
+    "visibleApplicationLaunched": false,
+    "installedApplicationReplaced": false,
+    "shortcutChanged": false,
+    "published": false
+  }
+}

@@ -18,6 +18,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart' show RenderRepaintBoundary;
 import 'package:flutter/services.dart' show FontLoader;
 import 'package:flutter_test/flutter_test.dart';
+import 'recipe_book_scroll_support.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -309,6 +310,13 @@ void main() {
       final originalProcessingTarget = processing.state.value.target;
       await tester.enterText(_search(), name);
       await tester.pumpAndSettle();
+      await revealBookControl(
+        tester,
+        find.descendant(
+          of: find.byKey(RecipeBookKeys.card(name)),
+          matching: find.byKey(RecipeBookKeys.r13Details(name)),
+        ),
+      );
       await tester.tap(
         find.descendant(
           of: find.byKey(RecipeBookKeys.card(name)),
@@ -395,7 +403,7 @@ void main() {
       await _capture(tester, 'sakura-ekleta-search');
 
       const name = 'Causality Shardstone - Ring';
-      await tester.tap(find.byKey(RecipeBookKeys.r13Details(name)));
+      await tapBookDetails(tester, name);
       await tester.pumpAndSettle();
       _expectPreviewFits(tester);
       expect(_previewText('Twilight of the End - Ring'), findsOneWidget);
@@ -569,8 +577,8 @@ void main() {
         await tester.pumpAndSettle();
         final residenceCard = find.byKey(RecipeBookKeys.card(name));
         final processingCard = _foreignCard(name);
+        await revealBookControl(tester, residenceCard);
         expect(residenceCard, findsOneWidget);
-        expect(processingCard, findsOneWidget);
         expect(
           find.descendant(
             of: residenceCard,
@@ -578,6 +586,8 @@ void main() {
           ),
           findsOneWidget,
         );
+        await revealBookControl(tester, processingCard);
+        expect(processingCard, findsOneWidget);
         expect(
           find.descendant(
             of: processingCard,
@@ -586,7 +596,7 @@ void main() {
           findsOneWidget,
         );
         expect(tester.takeException(), isNull);
-
+        await revealBookControl(tester, residenceCard);
         await tester.tap(
           find.descendant(
             of: residenceCard,

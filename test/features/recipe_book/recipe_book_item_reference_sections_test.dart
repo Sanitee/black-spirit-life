@@ -33,7 +33,7 @@ void main() {
   for (final spec in RetainedThemeRegistry.themes) {
     for (final scale in [1.0, 2.0]) {
       testWidgets(
-        '${spec.id} inline facts retain card typography and spacing at $scale',
+        '${spec.id} inline facts retain readable shared type without a nested window at $scale',
         (tester) async {
           configureApplicationTestSurface(
             tester,
@@ -61,6 +61,7 @@ void main() {
                     maxWidth: 440,
                     spec: spec,
                     icon: const SizedBox.square(dimension: 48),
+                    interactive: false,
                   ),
                 ),
                 const SizedBox(width: 32),
@@ -107,20 +108,12 @@ void main() {
             ),
             findsNothing,
           );
-          final originalOrigin = tester.getTopLeft(
-            find.descendant(of: original, matching: find.text('Description')),
-          );
-          final inlineOrigin = tester.getTopLeft(
-            find.descendant(of: inline, matching: find.text('Description')),
-          );
           for (final text in [
-            'Description',
             _facts.summary,
             'Effects',
             ..._facts.effects,
             'How to Obtain',
             ..._facts.acquisitionNotes,
-            'Used For',
             ..._facts.uses,
             'Example',
             _facts.example!,
@@ -131,16 +124,27 @@ void main() {
             final b = find.descendant(of: inline, matching: find.text(text));
             expect(a, findsOneWidget);
             expect(b, findsOneWidget);
-            expect(tester.widget<Text>(b).style, tester.widget<Text>(a).style);
+            // Inline prose does not acquire another frame/header/scroll view.
+            // It retains the same readable font metrics as the shared window.
+            TextStyle effective(Finder f) => DefaultTextStyle.of(
+              tester.element(f),
+            ).style.merge(tester.widget<Text>(f).style);
+            expect(effective(b).fontFamily, effective(a).fontFamily);
+            expect(effective(b).fontSize, effective(a).fontSize);
             expect(tester.getSize(b), tester.getSize(a), reason: text);
-            expect(
-              ((tester.getTopLeft(b) - inlineOrigin) -
-                      (tester.getTopLeft(a) - originalOrigin))
-                  .distance,
-              lessThan(0.000001),
-              reason: text,
-            );
           }
+          expect(
+            find.descendant(of: inline, matching: find.text('Description')),
+            findsOneWidget,
+          );
+          expect(
+            find.descendant(of: inline, matching: find.text('Used For')),
+            findsOneWidget,
+          );
+          expect(
+            find.descendant(of: original, matching: find.text('Used for')),
+            findsOneWidget,
+          );
           expect(tester.takeException(), isNull);
           await tester.pumpWidget(const SizedBox.shrink());
         },

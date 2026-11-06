@@ -28,8 +28,8 @@ void main() {
     'source_popover',
     'copy_toast',
     'data_profile',
-    'inventory_add_item_menu',
-    'titlebar_tooltip',
+    'inventory_search_quantity',
+    'titlebar_quiet_hover',
     'keyboard_focus',
   ];
   const families = <_Family>[
@@ -61,6 +61,7 @@ void main() {
             );
             final harness = (await tester.runAsync(
               () => ApplicationTestHarness.create(
+                stablePersonalDataLabel: true,
                 backgroundId: family.background ?? 'greenhouse',
                 activeMode: CraftMode.alchemy,
                 view: _initialView(state),
@@ -91,7 +92,7 @@ void main() {
               if (family.background == IlluminatedLedgerSpec.backgroundId ||
                   family.background == SakuraNightGardenSpec.backgroundId ||
                   (family.background == null &&
-                      (state == 'inventory_add_item_menu' ||
+                      (state == 'inventory_search_quantity' ||
                           state.startsWith('data_')))) {
                 await tester.runAsync(
                   () => Future<void>.delayed(const Duration(milliseconds: 160)),
@@ -119,7 +120,7 @@ void main() {
 
 String _initialView(String state) => switch (state) {
   'data_profile' || 'data_import_preview' || 'data_validation_error' => 'data',
-  'inventory_add_item_menu' => 'inventory',
+  'inventory_search_quantity' => 'inventory',
   _ => 'plan',
 };
 
@@ -257,7 +258,7 @@ Future<void> _prepareState(
         find.textContaining('Import failed; no state changed'),
       );
       break;
-    case 'inventory_add_item_menu':
+    case 'inventory_search_quantity':
       await harness.bundle.controller.updateDocumentDurably(
         (document) => document.copyWith(
           showDeleteTools: true,
@@ -270,39 +271,39 @@ Future<void> _prepareState(
         ),
       );
       await _pumpFrames(tester);
-      await tester.tap(find.byKey(InventoryActionKeys.addItem));
+      expect(find.byKey(InventoryActionKeys.addItem), findsNothing);
+      await tester.enterText(find.byKey(InventoryActionKeys.i01), 'Ash Sap');
+      await tester.pump(const Duration(milliseconds: 250));
+      final quantity = find.byKey(InventoryActionKeys.row('I10', 'Ash Sap'));
+      expect(quantity.hitTestable(), findsOneWidget);
+      await tester.enterText(quantity, '250');
+      await tester.testTextInput.receiveAction(TextInputAction.done);
       await _pumpFrames(tester);
-      final itemDialog = find.byType(Dialog);
-      expect(itemDialog, findsOneWidget);
-      final itemSelect = find.byKey(
-        const ValueKey<String>('inventory-manual-item-select'),
-      );
-      expect(itemSelect, findsOneWidget);
-      await tester.tap(
-        find.descendant(of: itemSelect, matching: find.byType(TextField)),
-      );
-      await tester.pump();
-      await tester.pump(const Duration(milliseconds: 240));
-      expect(find.byType(MenuItemButton).hitTestable(), findsWidgets);
+      for (final mode in CraftMode.values) {
+        expect(
+          harness
+              .bundle
+              .controller
+              .modes[mode]!
+              .state
+              .value
+              .inventory['Ash Sap'],
+          250,
+        );
+      }
+      expect(find.byType(Dialog), findsNothing);
       break;
-    case 'titlebar_tooltip':
+    case 'titlebar_quiet_hover':
       final close = find.bySemanticsLabel('Close');
       final mouse = await tester.createGesture(kind: PointerDeviceKind.mouse);
       await mouse.addPointer(location: Offset.zero);
       await mouse.moveTo(tester.getCenter(close));
       await tester.pump(const Duration(milliseconds: 680));
-      // The wait timer inserts the overlay at the end of the first pump; a
-      // second pump is required for the tooltip's fade to become visible.
+      // Ordinary hover text is intentionally quiet; accessible labels remain.
       await tester.pump(const Duration(milliseconds: 180));
-      expect(find.text('Close'), findsOneWidget);
-      final tooltipRect = tester.getRect(find.text('Close'));
-      expect(tooltipRect.width, greaterThan(0));
-      expect(tooltipRect.height, greaterThan(0));
-      expect(tooltipRect.top, greaterThanOrEqualTo(0));
-      expect(
-        tooltipRect.bottom,
-        lessThanOrEqualTo(tester.view.physicalSize.height),
-      );
+      expect(find.text('Close'), findsNothing);
+      expect(close.hitTestable(), findsOneWidget);
+      expect(tester.getRect(close).top, greaterThanOrEqualTo(0));
       addTearDown(mouse.removePointer);
       break;
     case 'keyboard_focus':

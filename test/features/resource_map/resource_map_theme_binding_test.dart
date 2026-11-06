@@ -4,6 +4,8 @@ import 'package:bdo_craft_planner_flutter/domain/models/craft_mode.dart';
 import 'package:bdo_craft_planner_flutter/domain/state/planner_state.dart';
 import 'package:bdo_craft_planner_flutter/domain/state/state_copy.dart';
 import 'package:bdo_craft_planner_flutter/features/resource_map/resource_map_theme_adapter.dart';
+import 'package:bdo_craft_planner_flutter/features/shared/shared_silver_amount.dart';
+import 'package:bdo_craft_planner_flutter/visual/foundations/theme_spec.dart';
 import 'package:bdo_craft_planner_flutter/visual/illuminated_ledger/ledger_spec.dart';
 import 'package:bdo_craft_planner_flutter/visual/sakura_night_garden/sakura_spec.dart';
 import 'package:bdo_map_core/bdo_map_core.dart';
@@ -63,6 +65,14 @@ void main() {
         expect(context.mapChrome.chromeRaised.a, 1);
       }
       controller.setResourceMapUiOpacity(0);
+      expect(
+        tester
+            .element(find.byType(SharedSilverAmount))
+            .visualTheme
+            .palette
+            .text,
+        IlluminatedLedgerSpec.theme.palette.text,
+      );
       await tester.pumpAndSettle();
       expect(stateKey.currentContext!.mapChrome.uiOpacity, 0);
       expect(
@@ -76,6 +86,14 @@ void main() {
       await tester.pumpAndSettle();
       expect(
         tester.element(find.byKey(const ValueKey('nested'))).mapChrome.ink,
+        SakuraNightGardenSpec.theme.palette.text,
+      );
+      expect(
+        tester
+            .element(find.byType(SharedSilverAmount))
+            .visualTheme
+            .palette
+            .text,
         SakuraNightGardenSpec.theme.palette.text,
       );
       expect(tester.takeException(), isNull);
@@ -158,7 +176,11 @@ class _Dialog extends StatelessWidget {
             builder: (context) => AlertDialog(
               key: const ValueKey('nested'),
               backgroundColor: context.mapChrome.paper,
-              content: const Text('Nested'),
+              content: ResourceMapSilverPresentation.maybeOf(context)!.builder(
+                context,
+                value: 1100000,
+                style: TextStyle(color: context.mapChrome.positive),
+              ),
             ),
           ),
           child: const Text('Open nested dialog'),

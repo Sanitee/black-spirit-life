@@ -1,10 +1,12 @@
 import 'dart:convert';
 import 'dart:io';
+import 'support/action_hint_finder.dart';
 import 'dart:ui' as ui;
 
 import 'package:bdo_map_core/bdo_map_core.dart';
 import 'package:bdo_map_core/src/widgets/map_canvas.dart';
 import 'package:bdo_map_core/src/widgets/resource_map_atlas_shell.dart';
+import 'package:bdo_map_core/src/widgets/resource_map_panel_metrics.dart';
 import 'package:bdo_map_core/src/widgets/worker_activity_style.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -283,7 +285,7 @@ void main() {
         expect(
           find.descendant(
             of: row,
-            matching: find.byTooltip('Plan worker nodes for Coral Piece'),
+            matching: findActionHint('Plan worker nodes for Coral Piece'),
           ),
           findsOneWidget,
         );
@@ -365,7 +367,7 @@ void main() {
           );
           final plusButton = find.descendant(
             of: plus,
-            matching: find.byType(IconButton),
+            matching: find.bySubtype<IconButton>(),
           );
           expect(tester.widget<IconButton>(plusButton).onPressed, isNull);
           _expectNoOverflow(tester);
@@ -463,7 +465,10 @@ void main() {
                 of: row,
                 matching: find.text(resource.name),
               );
-              expect(tester.getSize(item), const Size.square(36));
+              expect(
+                tester.getSize(item),
+                const Size.square(ResourceMapPanelMetrics.artwork),
+              );
               expect(
                 tester.getRect(item).right,
                 lessThan(tester.getRect(label).left),
@@ -483,7 +488,7 @@ void main() {
                 bdoGatheringToolCatalogItemName(BdoGatheringToolKind.milking),
                 isNull,
               );
-              expect(find.byTooltip('Milking minigame'), findsOneWidget);
+              expect(findActionHint('Milking minigame'), findsOneWidget);
               expect(
                 find.bySemanticsLabel('Interaction: Milking minigame'),
                 findsOneWidget,
@@ -515,14 +520,19 @@ void main() {
         expect(
           find.descendant(
             of: acaciaRow,
-            matching: find.byTooltip('Plan worker nodes for Acacia Sap'),
+            matching: findActionHint('Plan worker nodes for Acacia Sap'),
           ),
           findsOneWidget,
         );
-        _expectReadableOriginalRow(tester, acaciaRow, acacia.name);
+        _expectReadableOriginalRow(
+          tester,
+          acaciaRow,
+          acacia.name,
+          artworkSize: ResourceMapPanelMetrics.optionArtwork,
+        );
         final shortcut = find.descendant(
           of: acaciaRow,
-          matching: find.byTooltip('Plan worker nodes for Acacia Sap'),
+          matching: findActionHint('Plan worker nodes for Acacia Sap'),
         );
         final favorite = find.byKey(
           ValueKey('resource-map-favorite-source-${acacia.id}'),
@@ -555,7 +565,12 @@ void main() {
             reason:
                 'No product subtitle, category, point count or Region focus copy.',
           );
-          _expectReadableOriginalRow(tester, row, source.name);
+          _expectReadableOriginalRow(
+            tester,
+            row,
+            source.name,
+            artworkSize: ResourceMapPanelMetrics.optionArtwork,
+          );
         }
         _expectBounded(tester, _browser, const Size(1200, 800));
         _expectNoOverflow(tester);
@@ -710,7 +725,7 @@ void main() {
             expect(
               find.descendant(
                 of: tool,
-                matching: find.byTooltip('Defeat and mine · Pickaxe'),
+                matching: findActionHint('Defeat and mine · Pickaxe'),
               ),
               findsOneWidget,
               reason:
@@ -721,13 +736,13 @@ void main() {
         final checklist = find.byKey(
           ValueKey('resource-map-detail-checklist-${resource.id}'),
         );
-        expect(find.byTooltip('Add to to-do list'), findsOneWidget);
+        expect(findActionHint('Add to to-do list'), findsOneWidget);
         await tester.tap(checklist);
         await tester.pumpAndSettle();
-        expect(find.byTooltip('Remove from to-do list'), findsOneWidget);
+        expect(findActionHint('Remove from to-do list'), findsOneWidget);
         await tester.tap(checklist);
         await tester.pumpAndSettle();
-        expect(find.byTooltip('Add to to-do list'), findsOneWidget);
+        expect(findActionHint('Add to to-do list'), findsOneWidget);
         final favorite = find.byKey(
           ValueKey('resource-map-detail-favorite-${resource.id}'),
         );
@@ -820,7 +835,12 @@ Future<void> _scrollBrowserTo(WidgetTester tester, Finder row) async {
   await tester.pumpAndSettle();
 }
 
-void _expectReadableOriginalRow(WidgetTester tester, Finder row, String name) {
+void _expectReadableOriginalRow(
+  WidgetTester tester,
+  Finder row,
+  String name, {
+  double artworkSize = ResourceMapPanelMetrics.artwork,
+}) {
   final label = find.descendant(of: row, matching: find.text(name));
   expect(label, findsOneWidget);
   final text = tester.widget<Text>(label);
@@ -848,7 +868,7 @@ void _expectReadableOriginalRow(WidgetTester tester, Finder row, String name) {
   );
   expect(artwork, findsOneWidget);
   expect(tester.widget<Image>(artwork).image, isA<MemoryImage>());
-  expect(tester.getSize(artwork), const Size.square(36));
+  expect(tester.getSize(artwork), Size.square(artworkSize));
   expect(tester.getSize(row).height, greaterThanOrEqualTo(50));
 }
 

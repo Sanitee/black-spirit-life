@@ -103,18 +103,63 @@ void main() {
     );
     final effective = preparation.effectiveSettings(catalog);
     expect(preparation.buffTotals(catalog)['gatheringMastery'], 25);
-    expect(preparation.buffTotals(catalog)['lifeMastery'], 75);
-    expect(effective.mastery, 1100);
+    expect(preparation.buffTotals(catalog)['lifeMastery'], 100);
+    expect(effective.mastery, 1125);
     expect(effective.gatheringDropRatePercent, 37);
     expect(
       effective.toJson(),
-      customized.copyWith(mastery: 1100, gatheringDropRatePercent: 37).toJson(),
+      customized.copyWith(mastery: 1125, gatheringDropRatePercent: 37).toJson(),
     );
     expect(
       preparation.baseSettings.mastery,
       1000,
       reason: 'Derivation never writes totals back into the base.',
     );
+  });
+
+  test('old Khan setups require rechecking, without guessing base values', () {
+    final json = GatheringPreparation(
+      baseSettings: customized,
+      buffIds: {'buff-45514'},
+      statsConfirmed: true,
+    ).toJson()..['schemaVersion'] = 1;
+    final restored = GatheringPreparation.fromJson(json);
+    expect(restored.statsConfirmed, isFalse);
+    expect(restored.requiresStoneStatReview, isTrue);
+    expect(restored.baseSettings.toJson(), customized.toJson());
+    expect(restored.buffIds, {'buff-45514'});
+    final reread = GatheringPreparation.fromJson(restored.toJson());
+    expect(reread.requiresStoneStatReview, isTrue);
+    final confirmed = restored.withBaseSettings(
+      customized,
+      catalog,
+      statsConfirmed: true,
+    );
+    expect(confirmed.statsConfirmed, isTrue);
+    expect(confirmed.requiresStoneStatReview, isFalse);
+    expect(
+      GatheringPreparation.fromJson(confirmed.toJson()).statsConfirmed,
+      isTrue,
+    );
+  });
+
+  test('unaffected old setups keep their confirmed stats', () {
+    final json = GatheringPreparation(
+      baseSettings: customized,
+      buffIds: {'buff-721092'},
+      statsConfirmed: true,
+    ).toJson()..['schemaVersion'] = 1;
+    final restored = GatheringPreparation.fromJson(json);
+    expect(restored.statsConfirmed, isTrue);
+    expect(restored.requiresStoneStatReview, isFalse);
+    expect(restored.baseSettings.toJson(), customized.toJson());
+  });
+
+  test('equipped stone snapshots preserve their own duration wording', () {
+    final stone = catalog.buffs.singleWhere((b) => b.id == 'buff-45514');
+    expect(stone.snapshot()['durationMinutes'], isNull);
+    expect(stone.snapshot()['durationNote'], 'While equipped');
+    expect((stone.snapshot()['effects'] as Map)['lifeMastery'], 25);
   });
 
   test(

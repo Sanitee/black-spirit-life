@@ -1,0 +1,19 @@
+{
+  "reviewedAt":"2026-11-03",
+  "scope":"Exact drying source labels and the shared on-land restriction. No fish ratios, yield distributions, prices, identities or automatic processing recipes changed.",
+  "corrections":[
+    {"id":6520,"name":"Dried Pearl Oyster Flesh","inputId":6509,"input":"Giant Pearl Clam","knowledgeId":7900,"before":"Dry Pearl Oyster Flesh","after":"Dry Giant Pearl Clam"},
+    {"id":8565,"name":"Dried Silver Stripe Round Herring","inputId":8265,"input":"Silver-Stripe Round Herring","knowledgeId":7501,"before":"Dry Silver Stripe Round Herring","after":"Dry Silver-Stripe Round Herring"}
+  ],
+  "sharedGuidance":"Dry <input> · Clear weather, on land",
+  "officialSource":{"url":"https://www.naeu.playblackdesert.com/en-US/Wiki?wikiNo=28","key":"processing-guide-naeu-20261103","retrievedAt":"2026-11-03T15:35:46.459Z","sha256":"0fd4565d28ab2ebf48a35fec00c2e3acc4caace8e42de052bbbb16389e231998","supports":"Dry fish by Processing; clear days and on land. The guide does not give exact per-species output probabilities."},
+  "nativeKnowledge":{"snapshot":"PC installed archives through October 31,2026","locale":"en","category":34,"locSha256":"be8364a658d08888ffe0c4e02764755de5c806c16b477c89dacf6f94ed3c1e92","itemsSha256":"a54b5735052c990e189ff1a50afb6d5442cc80e0ba8dabff995979bc8d35c821","supports":"Exact material names and explicit Drying prose corroborate 140 relationship records. This is not inference from an unvalidated manufacturing success field."},
+  "exceptions":[
+    "Dried Flower Icefish 8660 has explicit Drying item prose and current Flower Icefish 8372 input. It is distinct from Dried Cherry Icefish 8649; no name or ID merger.",
+    "Balenos Mullet 8431 to Dried Mullet 8536 has a current native route and an old player report, but no exact publisher text found. Keep this additional-input relationship explicitly unresolved; regular Mullet source remains.",
+    "The knowledge template's obsolete processing-knowledge acquisition prose is not copied into the application. NA/EU January3,2024 removed advanced-processing knowledge prerequisites."
+  ],
+  "regeneration":"tool/apply_reviewed_drying_sources_20261103.mjs applies only two exact acquisition corrections, is idempotent and rejects identity/name drift.",
+  "catalogSha256":"294bcfffb80ba7ba7d38f12fdbd015ac4595604eb47a305c342b8eafd523ff16",
+  "catalogBytes":31546467
+}

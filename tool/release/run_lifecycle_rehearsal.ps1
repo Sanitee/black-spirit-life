@@ -16,6 +16,8 @@ param(
     [ValidateSet('LocalFeed', 'PublicRoute')][string]$Mode = 'LocalFeed',
     [string]$LocalFeedReceiptPath,
     [string]$ApprovedLocalFeedReceiptSha256,
+    [string]$IsolatedAccountReceiptPath,
+    [string]$ApprovedIsolatedAccountReceiptSha256,
     [switch]$PreflightOnly,
     [switch]$ConfirmDisposableLifecycle
 )
@@ -23,6 +25,13 @@ param(
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
 $ProgressPreference = 'SilentlyContinue'
+# Fail before any installation or OS mutation unless the actual Windows user
+# and native known folders match the separately approved disposable account.
+$IsolatedFolders = $null
+if (Test-Path -LiteralPath (Join-Path $ProjectRoot 'lib/data/persistence/shared_profile_guard.dart')) {
+    . (Join-Path $PSScriptRoot 'isolated_known_folders.ps1')
+    $IsolatedFolders = Initialize-IsolatedKnownFolders $IsolatedAccountReceiptPath $ApprovedIsolatedAccountReceiptSha256
+}
 . (Join-Path $PSScriptRoot 'verified_input_cache.ps1')
 . (Join-Path $PSScriptRoot 'release_plan.ps1')
 . (Join-Path $PSScriptRoot 'prepared_dependencies.ps1')
@@ -295,6 +304,7 @@ $GatheringDependencyEvidence = Assert-ReleasePreparedDependencies -PackageRoot $
 $LifecycleContext = Get-LifecycleContext @{
     'release-plan-loader' = (Join-Path $PSScriptRoot 'release_plan.ps1')
     'lifecycle-harness' = $MyInvocation.MyCommand.Path
+    'isolated-known-folders' = (Join-Path $PSScriptRoot 'isolated_known_folders.ps1')
     'personal-verifier' = $PersonalVerifier
     'fresh-verifier' = $FreshVerifier
     'package-comparator' = $PackageComparator
@@ -412,7 +422,9 @@ $StressRoaming = Join-Path $DisposableBase 'stress-env\Roaming'
 $StressLocal = Join-Path $DisposableBase 'stress-env\Local'
 $StressTemp = Join-Path $DisposableBase 'stress-env\Temp'
 $SelectedRoot = Join-Path $DisposableBase 'upgrade-personal-selected'
-$FreshPersonalRoot = Join-Path $FreshRoaming 'Black Spirit Life'
+$FreshPersonalRoot = if ($null -ne $IsolatedFolders) {
+    Join-Path (Split-Path -Parent $FreshRoaming) 'Documents\Black Spirit Life'
+} else { Join-Path $FreshRoaming 'Black Spirit Life' }
 $StressPersonalRoot = Join-Path $DisposableBase 'stress-personal-selected'
 $CompositePersonalRoot = Join-Path $DisposableBase 'composite-personal-copy'
 $EdgeUserData = Join-Path $DisposableBase 'edge-profile'
@@ -433,6 +445,7 @@ $Results = [ordered]@{
     syntheticFixtureSha256 = $FixtureSha256
     lifecycleContextSha256 = $LifecycleContext.Sha256
     lifecycleContext = $LifecycleContext.Evidence
+    isolatedAccountReceiptSha256 = if ($null -ne $IsolatedFolders) { $IsolatedFolders.ReceiptSha256 } else { $null }
     localFeedReceiptSha256 = if ($null -eq $LocalFeedReceipt) { $null } else { $ApprovedLocalFeedReceiptSha256.ToUpperInvariant() }
     success = $false
     steps = [System.Collections.Generic.List[string]]::new()
@@ -493,6 +506,10 @@ function Wait-Until([scriptblock]$Condition, [int]$TimeoutSeconds, [string]$Desc
 }
 
 function Set-TestEnvironment([string]$Roaming, [string]$Local, [string]$Temporary) {
+    if ($null -ne $IsolatedFolders) {
+        $documents = Join-Path (Split-Path -Parent $Roaming) 'Documents'
+        Set-IsolatedKnownFolders $IsolatedFolders $DisposableBase $documents $Roaming $Local
+    }
     foreach ($directory in @($Roaming, $Local, $Temporary)) {
         New-Item -ItemType Directory -Path $directory -Force | Out-Null
     }
@@ -1149,6 +1166,7 @@ try {
 
     Set-TestEnvironment $StressRoaming $StressLocal $StressTemp
     New-Item -ItemType Directory -Path $StressPersonalRoot -Force | Out-Null
+    Copy-Item -LiteralPath $PriorSyntheticPlanner -Destination (Join-Path $StressPersonalRoot 'planner-state.json')
     $stressMarker = [ordered]@{
         schemaVersion = 1; packageId = $ReleasePlan.PackageId; releaseChannel = $ReleasePlan.Channel; profile = $true
         profileId = 'profile-acde-0123456789abcdef0123456789abcdef'
@@ -1287,6 +1305,10 @@ try {
 
     foreach ($name in $OriginalEnvironment.Keys) {
         [Environment]::SetEnvironmentVariable($name, $OriginalEnvironment[$name], [EnvironmentVariableTarget]::Process)
+    }
+    if ($null -ne $IsolatedFolders) {
+        try { Restore-IsolatedKnownFolders $IsolatedFolders }
+        catch { $RestorationErrors.Add("native known-folder restoration: $($_.Exception.Message)") }
     }
 
     $registryRestored = $false

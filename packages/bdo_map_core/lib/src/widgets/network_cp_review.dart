@@ -165,9 +165,15 @@ class NetworkCpReview extends StatelessWidget {
             children: [
               label,
               const SizedBox(height: 8),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [input, const SizedBox(width: 6), apply],
+              Align(
+                alignment: Alignment.centerRight,
+                child: Wrap(
+                  alignment: WrapAlignment.end,
+                  crossAxisAlignment: WrapCrossAlignment.center,
+                  spacing: 6,
+                  runSpacing: 8,
+                  children: [input, apply],
+                ),
               ),
             ],
           );

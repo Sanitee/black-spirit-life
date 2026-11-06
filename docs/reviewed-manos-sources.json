@@ -1,0 +1,31 @@
+{
+  "reviewedAt": "2026-11-03",
+  "scope": "Manufacturing source and equipment category for the nine existing Manos exchange references. All existing sources remain. No new automatic gear crafting, output multiplier, enhancement stats, or market identities.",
+  "guidance": "Manufacture · Processing (L)",
+  "entries": [
+    {"id":705047,"name":"Manos Alchemist's Clothes","inputs":[[4256,200],[4915,5],[5206,20],[5870,15]]},
+    {"id":16487,"name":"Manos Butcher Knife","inputs":[[4076,15],[4915,5],[4918,50],[16831,1]]},
+    {"id":705037,"name":"Manos Cook's Clothes","inputs":[[4492,15],[4915,10],[5865,15],[5867,10]]},
+    {"id":705052,"name":"Manos Fisher's Clothes","inputs":[[4456,30],[4915,5],[4918,50],[5864,30]]},
+    {"id":16482,"name":"Manos Fluid Collector","inputs":[[4076,15],[4915,5],[4918,50],[16830,1]]},
+    {"id":16479,"name":"Manos Hoe","inputs":[[4076,15],[4915,5],[4918,50],[16833,1]]},
+    {"id":705156,"name":"Manos Riding Crop","inputs":[[4915,5],[4918,50],[6169,15],[50801,1]]},
+    {"id":16486,"name":"Manos Tanning Knife","inputs":[[4076,15],[4915,5],[4918,50],[16834,1]]},
+    {"id":705015,"name":"Manos Trainer's Clothes","inputs":[[4915,5],[4918,40],[5863,1],[50801,1]]}
+  ],
+  "sources": [
+    {"key":"manos-steam-20190925","region":"NA/EU PC publisher Steam archive","date":"2019-09-25","url":"https://store.steampowered.com/news/posts/?appids=582660&enddate=1569690299","sha256":"6fb7474d4d0cd8e7973bc310e3e2497f45cd6a0b8ea349c644842a57c385c66b","supports":"Manufacturing introduction and exact equipment names. Recipe table is image-based, so HTML prose alone is not numerical evidence."},
+    {"key":"manos-sea-20190925","region":"SEA PC","date":"2019-09-25","url":"https://blackdesert.pearlabyss.com/Asia/en-US/News/Notice/Detail?_boardNo=1170","sha256":"ddedafbe704defe2a5e02c313bfdbab8f8c9e4fbdc68935bf5c4ac3726e5a239","supports":"Exact historical materials for eight items; excludes Hoe. Tool and Essence inputs are superseded below."},
+    {"key":"resplendent-lakiaro-guide-naeu","region":"NA/EU PC","date":"2025-04-28 guide revision","url":"https://www.naeu.playblackdesert.com/en-US/Wiki?wikiNo=324","sha256":"e6df57f971df8eee6fca1750b3d208ebe41999372cb5b65fa4bb3777435edc74","supports":"Manos Hoe manufacturing and exact Magic Hoe 1, Magical Shard 50, Metal Solvent 15, Manos Stone 5."},
+    {"key":"manos-tool-change-mena-20240117","region":"Turkey/MENA PC","date":"2024-01-17","url":"https://blackdesert.pearlabyss.com/TR/en-US/News/Notice/Detail?_boardNo=16716","sha256":"8d0086defb67c8f4623df9774e5b755b8d5541b07bb9e2c5859b45f90bffdecd","supports":"Explicit Shining-to-Magic input replacement. Regional corroboration, not by itself EU proof; exact current EU-client relationships and NA/EU Hoe guide agree."},
+    {"key":"simplification-naeu-20240417","region":"NA/EU PC","date":"2024-04-17","url":"https://www.naeu.playblackdesert.com/en-US/News/Detail?groupContentNo=6891&countryType=en-US","sha256":"cd5ef6c1e34a47b6aa6b2f64f7bb7e97e2e2a90e959454802b433cb699fee773","supports":"Essences consolidated into Essence of Nature; Manos Alchemist's Clothes explicitly listed."},
+    {"key":"training-naeu-20261103","region":"NA/EU PC current guide","url":"https://www.naeu.playblackdesert.com/en-US/Wiki?wikiNo=72","sha256":"dfceee9725509c1c7de971d73f2749df6c41bf6c770b00d6b3d99cca21129629","supports":"Lump of Raw Sugar Heating: Raw Sugar 10 + Mineral Water 1. Already displayed correctly in all modes; no production change."}
+  ],
+  "currentCorroboration": {"itemsSha256":"a54b5735052c990e189ff1a50afb6d5442cc80e0ba8dabff995979bc8d35c821","methodValidation":"resumed-manufacture-framing-comparison.json","scope":"All nine exact current input sets retain CRAFT manufacturing. Lump of Raw Sugar retains HEAT. Client framing fields are not server proc probabilities."},
+  "limits": [
+    "Source-route and category correction only. Exact gear output distributions, success odds, enhancement-dependent effects, and exhaustive acquisition lists are not certified.",
+    "No knowledge-purchase requirement inferred: the 2019 notice says crafting grants knowledge, not that knowledge must be purchased first.",
+    "No obsolete Shining tools or Essence of Perfection are recommended. No Console/Global Lab mechanics applied as PC live facts.",
+    "Manufacturing guidance does not add gear crafting to Planner/Opportunities. This preserves the established reference-only scope of these exchange rewards."
+  ]
+}

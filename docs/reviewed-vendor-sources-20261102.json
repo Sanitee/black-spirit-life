@@ -1,0 +1,74 @@
+{
+  "reviewedAt": "2026-11-02",
+  "scope": "Reference hints only; no silver vendor rules, exchange calculations or personal data changes.",
+  "sources": [
+    {
+      "url": "https://www.naeu.playblackdesert.com/News/Notice/Detail?groupContentNo=10081&countryType=en-US",
+      "date": "2026-05-21",
+      "region": "NA/EU PC",
+      "sha256": "af091f1e6b36e973bbe59879aafaf97cc889e6b59563c23988c2a66e89aad416",
+      "supports": "Six Crow Coin costs; existing four other in-scope costs already match."
+    },
+    {
+      "snapshot": "PC metadata extracted 2026-11-02 from installed archives through October 31",
+      "supports": "Star Anise Tea 9306 named General Goods locations; exact normal market crystal 15021 versus nonmarket unprocessible vendor crystal 768715."
+    }
+  ],
+  "implemented": [
+    {
+      "id": 5827,
+      "name": "Moon Scale Plywood",
+      "coins": 15
+    },
+    {
+      "id": 5809,
+      "name": "Moon Vein Flax Fabric",
+      "coins": 40
+    },
+    {
+      "id": 5810,
+      "name": "Tide-Dyed Standardized Timber Square",
+      "coins": 80
+    },
+    {
+      "id": 5812,
+      "name": "Deep Tide-Dyed Standardized Timber Square",
+      "coins": 80
+    },
+    {
+      "id": 8021,
+      "name": "Wave Residue Adhesive",
+      "coins": 300
+    },
+    {
+      "id": 5821,
+      "name": "Tear of the Ocean",
+      "coins": 400
+    },
+    {
+      "id": 9306,
+      "name": "Star Anise Tea",
+      "locations": [
+        "Sand Grain Bazaar",
+        "Muiquun",
+        "Arehaza"
+      ]
+    }
+  ],
+  "existingMatches": [
+    "Khan's Scale: 160 Crow Coins",
+    "Khan's Tendon: 400 Crow Coins",
+    "Starlight Hardener: 200 Crow Coins",
+    "Starlight Emulsifier: 200 Crow Coins",
+    "Existing May 21 Crow Coin exchange boxes and limits"
+  ],
+  "exclusions": [
+    "No fixed silver cost or ordinary NPC availability badge inferred for Crow Coin materials.",
+    "No unlimited purchase guarantee inferred.",
+    "Historical native vendor relationships do not prove current sales.",
+    "Magic Crystal of Perfection 768715 shop guidance must not leak to processible market item 15021.",
+    "The other 17 of 27 materials in the official price table have no current reference entry; no new product/calculator scope added."
+  ],
+  "formatting": "Shared sentence splitting keeps Lv. and its number together. Applies to all callers; exact wording and genuine sentence boundaries preserved.",
+  "verification": "Generator checks 12 exact registry changes: seven sources above plus five separately verified EU Edania market identities; prior registry lines and unrelated records retained. Actual controller tests cover all three modes."
+}

@@ -1,0 +1,22 @@
+{
+  "reviewedAt": "2026-11-03",
+  "scope": "Replace six vague Crafting Notes directions with exact short method/input guidance; retain all other sources and shared hosts. No automatic recipe, output probability or market eligibility changes.",
+  "sources": [
+    {"id":15628,"name":"Black Magic Crystal - Harphia","method":"Heating","inputs":[[4991,"Black Essence: Harphia",1],[15601,"Ancient Magic Crystal - Harphia",1]],"text":"Heat Black Essence: Harphia ×1 + Ancient Magic Crystal - Harphia ×1.","flag":"native_processing_route_not_represented:64"},
+    {"id":15629,"name":"Black Magic Crystal - Cobelinus","method":"Heating","inputs":[[4992,"Black Essence: Cobelinus",1],[15602,"Ancient Magic Crystal - Cobelinus",1]],"text":"Heat Black Essence: Cobelinus ×1 + Ancient Magic Crystal - Cobelinus ×1.","flag":"native_processing_route_not_represented:62"},
+    {"id":15630,"name":"Black Magic Crystal - Viper","method":"Heating","inputs":[[4993,"Black Essence: Viper",1],[15603,"Ancient Magic Crystal - Viper",1]],"text":"Heat Black Essence: Viper ×1 + Ancient Magic Crystal - Viper ×1.","flag":"native_processing_route_not_represented:68"},
+    {"id":15631,"name":"Black Magic Crystal - Hystria","method":"Heating","inputs":[[4994,"Black Essence: Hystria",1],[15604,"Ancient Magic Crystal - Hystria",1]],"text":"Heat Black Essence: Hystria ×1 + Ancient Magic Crystal - Hystria ×1.","flag":"native_processing_route_not_represented:66"},
+    {"id":15632,"name":"Black Magic Crystal - Carmae","method":"Heating","inputs":[[4995,"Black Essence: Carmae",1],[15605,"Ancient Magic Crystal - Carmae",1]],"text":"Heat Black Essence: Carmae ×1 + Ancient Magic Crystal - Carmae ×1.","flag":"native_processing_route_not_represented:60"},
+    {"id":8125,"name":"Passion of Valtarra","method":"Simple Alchemy","inputs":[[8124,"Valtarra's Flame",100],[9768,"Garmoth's Scale",100]],"text":"Simple Alchemy · Valtarra's Flame ×100 + Garmoth's Scale ×100","flag":"native_processing_route_not_represented:1461"}
+  ],
+  "evidence": [
+    {"url":"https://www.naeu.playblackdesert.com/en-US/News/Detail?groupContentNo=9763","date":"2026-02-26","archive":"specialties-naeu-20260226","scope":"Official PC patch explicitly updates the six Black Magic Crystal descriptions to show required materials; exact inputs corroborated by each current item's How to Obtain prose."},
+    {"url":"https://www.naeu.playblackdesert.com/en-US/News/Detail?countryType=en-us&groupContentNo=466","date":"2021-03-03","archive":"creation-naeu-20210303","scope":"Exact Passion of Valtarra recipe, corroborated by current PC item description."},
+    {"source":"Installed PC descriptions through October 31, extracted November 2, 2026","file":"research-items-NO-EFFECTS.json","sha256":"a54b5735052c990e189ff1a50afb6d5442cc80e0ba8dabff995979bc8d35c821","scope":"Exact canonical item/input identities, explicit method and input quantities. Not raw manufactured success fields or server probability certification."}
+  ],
+  "limits": [
+    "No new automatic crafting or output distribution is inferred from these source hints.",
+    "The five separate generic Black Essence (4996) routes are not silently equated to the named essences or certified by this change.",
+    "Source guidance is practical, not an exhaustive list of all historical events or containers."
+  ]
+}

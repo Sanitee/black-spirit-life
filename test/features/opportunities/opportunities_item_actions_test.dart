@@ -358,7 +358,11 @@ void main() {
       await _rightClick(tester);
       await tester.tap(find.text('Item info'));
       await tester.pumpAndSettle();
-      expect(find.text('Recipe & materials'), findsOneWidget);
+      expect(find.text('Recipe & materials'), findsNothing);
+      expect(
+        find.byKey(const ValueKey('attached-reference-scroll')),
+        findsOneWidget,
+      );
       final card = tester.widget<ItemReferenceCard>(
         find.byType(ItemReferenceCard),
       );
@@ -389,7 +393,7 @@ void main() {
           find.descendant(of: row, matching: find.byType(ModeItemIcon)),
         );
         expect(icon.name, ingredient.name);
-        expect(icon.size, 36);
+        expect(icon.size, 32);
         expect(icon.searchAcrossModes, isTrue);
       }
       for (final formula in info.acquisitionFormulas) {

@@ -9,6 +9,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'action_hint_finder.dart';
 
 const _captureKey = ValueKey('dialog-clarity-capture');
 const _triggerKey = ValueKey('open-buff-details');
@@ -202,12 +203,13 @@ void main() {
     try {
       final triggerFocus = await _open(tester, catalog, item);
       _assertHeader(tester, item);
-      expect(find.byTooltip('Close'), findsOneWidget);
+      expect(findActionHint('Close'), findsOneWidget);
       final accessibleClose = find.semantics.byPredicate(
         (node) =>
             node.tooltip == 'Close' &&
-            node.flagsCollection.isButton &&
-            node.flagsCollection.isEnabled == ui.Tristate.isTrue &&
+            node.getSemanticsData().flagsCollection.isButton &&
+            node.getSemanticsData().flagsCollection.isEnabled ==
+                ui.Tristate.isTrue &&
             node.getSemanticsData().hasAction(ui.SemanticsAction.tap),
       );
       expect(accessibleClose.evaluate(), hasLength(1));

@@ -10,6 +10,7 @@ import '../../app/state/planner_application_controller.dart';
 import '../../app/window/native_file_dialog_service.dart';
 import '../../data/catalog/catalog_repository.dart';
 import '../../data/icons/custom_icon_store.dart';
+import '../../domain/catalog/item_name_presentation.dart';
 import '../../domain/models/craft_mode.dart';
 import '../../domain/state/planner_state.dart';
 import '../../domain/state/state_copy.dart';
@@ -982,7 +983,7 @@ class _RecipeEditorViewState extends State<RecipeEditorView> {
                   mainAxisSize: MainAxisSize.min,
                   children: <Widget>[
                     Text(
-                      item.name,
+                      itemDisplayName(item.name),
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                       style: TextStyle(
@@ -1264,8 +1265,10 @@ class _RecipeEditorViewState extends State<RecipeEditorView> {
   Widget _buildEditorForm(RecipeEditorDraft draft, double width) {
     final wide = width >= 760;
     final recipeOuterWidth = wide ? width - 392 : width;
+    // AppSurface's one-pixel border also consumes space on both sides.
+    // Match _editorCard's padding plus that border before sizing select pairs.
     final recipeContentWidth =
-        recipeOuterWidth - (context.visualTheme.isStandard ? 28 : 24);
+        recipeOuterWidth - (context.visualTheme.isStandard ? 30 : 26);
     final recipe = _editorCard(
       'Recipe',
       _buildRecipeFields(draft, recipeContentWidth),

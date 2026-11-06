@@ -1,4 +1,5 @@
 import 'package:bdo_craft_planner_flutter/features/planner/planner.dart';
+import 'package:bdo_craft_planner_flutter/features/planner/planner_map_menu_presentation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart' show RenderParagraph;
@@ -125,11 +126,23 @@ void main() {
         find.byKey(PlannerActionKeys.row('P20', 'Sunrise Herb')),
       );
       await tester.pump();
+      expect(harness.copied, ['Sunrise Herb']);
+      expect(
+        find.byKey(const ValueKey('planner-owned-choices-panel')),
+        findsNothing,
+      );
+      // The name copies; its separate swap arrow opens the shared picker.
+      await tester.tap(
+        find.byKey(
+          PlannerActionKeys.row('P12', 'missing:Sunrise Herb:Wild Herbs'),
+        ),
+      );
+      await tester.pump();
       expect(
         find.bySemanticsLabel('Substitute choices for Sunrise Herb'),
         findsOneWidget,
       );
-      expect(harness.copied, isEmpty);
+      expect(harness.copied, ['Sunrise Herb']);
     },
   );
 
@@ -265,7 +278,11 @@ void main() {
     expect(
       find.descendant(
         of: vendorAction,
-        matching: find.byIcon(Icons.storefront_rounded),
+        matching: find.byWidgetPredicate(
+          (widget) =>
+              widget is PlannerMapActionEmblem &&
+              widget.emblem == PlannerMapEmblem.npc,
+        ),
       ),
       findsOneWidget,
     );
@@ -343,17 +360,20 @@ void main() {
           'addToPlannedNetwork',
         ),
       );
-      for (final iconCase in <(Finder, IconData)>[
-        (manualAction, Icons.location_on_rounded),
-        (checklistAction, Icons.checklist_rounded),
-        (networkAction, Icons.account_tree_rounded),
+      for (final iconCase in <(Finder, PlannerMapEmblem)>[
+        (manualAction, PlannerMapEmblem.gathering),
+        (checklistAction, PlannerMapEmblem.checklist),
+        (networkAction, PlannerMapEmblem.network),
       ]) {
-        final icon = tester.widget<Icon>(
-          find.descendant(of: iconCase.$1, matching: find.byIcon(iconCase.$2)),
+        final icon = tester.widget<PlannerMapActionEmblem>(
+          find.descendant(
+            of: iconCase.$1,
+            matching: find.byType(PlannerMapActionEmblem),
+          ),
         );
-        expect(icon.size, 23);
+        expect(icon.emblem, iconCase.$2);
       }
-      expect(find.byType(PopupMenuDivider), findsOneWidget);
+      expect(find.byType(PopupMenuDivider), findsNWidgets(2));
 
       await tester.tap(
         find.byKey(

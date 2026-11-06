@@ -40,7 +40,9 @@ enum ProcessingRecipeGroup {
 }
 
 enum RecipeBookMarketSort {
-  none('Sort ↕'),
+  none('Name A–Z'),
+  availability('Availability'),
+  availabilityProfit('Availability + profit'),
   stockLowToHigh('Stock ↑'),
   stockHighToLow('Stock ↓'),
   profitLowToHigh('Profit/ea ↑'),
@@ -51,8 +53,13 @@ enum RecipeBookMarketSort {
   final String label;
 
   bool get sortsProfit =>
+      this == RecipeBookMarketSort.availabilityProfit ||
       this == RecipeBookMarketSort.profitLowToHigh ||
       this == RecipeBookMarketSort.profitHighToLow;
+
+  bool get sortsAvailability =>
+      this == RecipeBookMarketSort.availability ||
+      this == RecipeBookMarketSort.availabilityProfit;
 }
 
 final class RecipeBookGroupCount {

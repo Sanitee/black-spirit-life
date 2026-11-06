@@ -14,6 +14,8 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../../support/availability_badge_finders.dart';
+
 void main() {
   late CatalogSnapshot catalog;
   setUpAll(() async {
@@ -103,7 +105,7 @@ void main() {
         await tester.pumpAndSettle();
         await tester.tap(find.byKey(PlannerActionKeys.p15));
         await tester.pumpAndSettle();
-        expect(find.text('Stock 5'), findsOneWidget);
+        expect(stockBadgeText('5'), findsOneWidget);
         expect(marketChecks, 1);
 
         final anchor = find.byKey(
@@ -129,8 +131,8 @@ void main() {
         expect(mode.state.value.substituteChoices, {
           'recipe:${fixture.name}:Weeds': 'Wild Grass',
         });
-        expect(find.text('Stock 100'), findsOneWidget);
-        expect(find.text('Stock 5'), findsNothing);
+        expect(stockBadgeText('100'), findsOneWidget);
+        expect(stockBadgeText('5'), findsNothing);
         expect(
           marketChecks,
           2,

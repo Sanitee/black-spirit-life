@@ -9,6 +9,72 @@ void main() {
   const calculator = RecipeProfitabilityCalculator();
 
   test(
+    'resolved card quantities and live prices bypass repeated selection only',
+    () {
+      final product = _recipe(
+        'Product',
+        baseOutput: 2,
+        ingredients: [_ingredient('Material', 5)],
+      );
+      final quote = calculator.calculate(
+        recipe: product,
+        recipes: {
+          'Product': product,
+          'Material': _leaf('Material'),
+          'Special Material': _leaf('Special Material'),
+        },
+        state: _state(
+          market: MarketState(prices: {'Product': 1, 'Material': 1}),
+        ),
+        rules: PlannerRules(),
+        marketTax: MarketTax(valuePack: true),
+        resolvedIngredients: const [
+          RecipeProfitabilityInput(
+            originalName: 'Material',
+            selectedName: 'Special Material',
+            grade: 'special',
+            quantity: 1,
+          ),
+        ],
+        marketPriceFor: (name) => name == 'Product'
+            ? 1000
+            : name == 'Special Material'
+            ? 200
+            : null,
+      );
+      expect(quote.ingredientCosts.single.selectedName, 'Special Material');
+      expect(quote.ingredientCosts.single.quantity, 1);
+      expect(quote.outputPerCraft, 2);
+      expect(quote.profitPerCraft, closeTo(1490, .001));
+    },
+  );
+  test(
+    'an authoritative missing live price never falls back to saved prices',
+    () {
+      final product = _recipe(
+        'Product',
+        ingredients: [_ingredient('Material', 1)],
+      );
+      for (final price in [null, double.nan, -1.0, 0.0]) {
+        final quote = calculator.calculate(
+          recipe: product,
+          recipes: {'Product': product},
+          state: _state(
+            market: MarketState(prices: {'Product': 1000, 'Material': 1}),
+          ),
+          rules: PlannerRules(),
+          marketTax: MarketTax(),
+          marketPriceFor: (_) => price,
+        );
+        expect(
+          quote.unavailableReason,
+          RecipeProfitabilityUnavailableReason.outputPriceUnavailable,
+        );
+      }
+    },
+  );
+
+  test(
     'prices direct inputs, prefers vendors, and reports per-piece return',
     () {
       final product = _recipe(

@@ -1,0 +1,13 @@
+{
+  "date": "2026-11-03",
+  "status": "EXACT_CURRENT_ARTWORK_SCOPED_VERIFIED",
+  "verification": "All4531 bundled icon entries/grades match combined provenance. Scorched Fragment image asserted in all themes at normal/200% text; original missing-icon capture retained. Full current container/quest test,analysis and build receipts are in resumed-container-quest-resolution.json. No golden fixtures changed.",
+  "asset": "assets/opportunities/items/5862.png",
+  "id": 5862,
+  "name": "Scorched Fragment",
+  "grade": 0,
+  "source": "New_Icon/03_ETC/07_ProductMaterial/00005862.dds",
+  "sha256": "414f86e7a494f0f2bb9012eb4752704c40a63347814d3116dd460a3d903afb6a",
+  "modes": ["alchemy", "cooking", "processing"],
+  "evidence": "resumed-scorched-artwork-addition.json in correctness audit. Exact current native5862 metadata; original DDS decoded to PNG by isolated read-only extractor. Existing grade-by-ID0 preserved. Prior artwork provenance unchanged. No synthetic art or changed game data."
+}

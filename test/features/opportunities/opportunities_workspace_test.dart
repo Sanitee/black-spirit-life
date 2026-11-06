@@ -42,6 +42,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../../support/application_test_harness.dart';
+import '../../support/availability_badge_finders.dart';
 
 void _glassTestWidgets(
   String description,
@@ -386,7 +387,10 @@ void main() {
           expect(tester.getSize(card).height, lessThanOrEqualTo(320));
         }
         expect(
-          find.descendant(of: card, matching: find.text('Stock −123.456.789')),
+          find.descendant(
+            of: card,
+            matching: find.text('Orders 123.456.789'),
+          ),
           findsOneWidget,
         );
         expect(tester.takeException(), isNull);
@@ -830,7 +834,7 @@ void main() {
                 bestUse
                     ? find.descendant(
                         of: card,
-                        matching: find.textContaining('Stock '),
+                        matching: stockBadgeText(),
                       )
                     : find.byKey(ValueKey('craft-market-counts:$name')),
                 if (bestUse) find.byKey(ValueKey('best-use-equation:$name')),
@@ -910,7 +914,7 @@ void main() {
         );
         final stock = find.descendant(
           of: card,
-          matching: find.textContaining('Stock '),
+          matching: stockBadgeText(),
         );
         await _expectIconOnlyCardHover(
           tester,
@@ -1544,16 +1548,14 @@ void main() {
           await tester.pumpWidget(_host(controller));
           await _settleImages(tester);
           final text = scenario.age > 0
-              ? 'Stock —'
+              ? '—'
               : scenario.stock > 0
-              ? 'Stock ${formatQuantity(scenario.stock.toDouble())}'
-              : scenario.summary || scenario.buyers == 0
-              ? 'Stock 0'
-              : 'Stock −${formatQuantity(scenario.buyers.toDouble())}';
+              ? formatQuantity(scenario.stock.toDouble())
+              : '0';
           final card = find.byKey(const ValueKey('craft-card:Pickled Fish'));
           final cardStock = find.descendant(
             of: card,
-            matching: find.text(text.replaceFirst('Stock −', 'Preorders ')),
+            matching: stockBadgeText(text),
           );
           expect(cardStock, findsOneWidget);
           final cardStyle = tester.widget<Text>(cardStock).style!;
@@ -1567,32 +1569,29 @@ void main() {
                   ? OpportunityStockTone.unknown
                   : scenario.stock == 0
                   ? OpportunityStockTone.outOfStock
-                  : scenario.summary || scenario.buyers == 0
-                  ? OpportunityStockTone.available
-                  : OpportunityStockTone.mixed,
+                  : OpportunityStockTone.available,
             ).badgeInk,
           );
           await _openCalculation(tester, 'Pickled Fish');
           final summary = find.byKey(const ValueKey('craft-money-summary'));
           final summaryStock = find.descendant(
             of: summary,
-            matching: find.text(text),
+            matching: stockBadgeText(text),
           );
           expect(summaryStock, findsOneWidget);
           final summaryStyle = tester.widget<Text>(summaryStock).style!;
-          expect(summaryStyle.fontSize, 16);
-          expect(summaryStyle.fontWeight, FontWeight.w700);
+          expect(summaryStyle.fontSize, 12);
           final spec = tester.element(summaryStock).visualTheme;
           expect(
             summaryStyle.color,
-            OpportunitiesVisualSpec.readableValueColor(
+            OpportunityCraftCardMaterial.forSpec(
               spec,
-              scenario.age > 0 || scenario.summary || scenario.buyers == 0
-                  ? spec.palette.textMuted
-                  : scenario.stock > 0
-                  ? spec.palette.success
-                  : spec.palette.danger,
-            ),
+              scenario.age > 0
+                  ? OpportunityStockTone.unknown
+                  : scenario.stock == 0
+                  ? OpportunityStockTone.outOfStock
+                  : OpportunityStockTone.available,
+            ).badgeInk,
           );
           final marketDetails = find.byKey(
             const ValueKey('craft-market-details'),
@@ -1618,20 +1617,14 @@ void main() {
           await tester.ensureVisible(ingredient);
           await _settleImages(tester);
           expect(tester.widget<Text>(ingredient).data, text);
-          expect(tester.widget<Text>(ingredient).style?.fontSize, 16);
-          expect(
-            tester.widget<Text>(ingredient).style?.fontWeight,
-            FontWeight.w700,
-          );
+          expect(tester.widget<Text>(ingredient).style?.fontSize, 12);
           BoxDecoration badgeDecoration(Finder label) =>
               tester
                       .widget<DecoratedBox>(
                         find
                             .ancestor(
                               of: label,
-                              matching: find.byKey(
-                                const ValueKey('market-stock-badge'),
-                              ),
+                              matching: find.byType(DecoratedBox),
                             )
                             .first,
                       )
@@ -1650,12 +1643,18 @@ void main() {
             expect(find.byKey(ValueKey('ingredient-stock:$npc')), findsNothing);
           }
           if (scenario.scale == 2) {
-            final value = tester.widget<Text>(ingredient).data!;
-            final paragraph = tester.renderObject<RenderParagraph>(ingredient);
+            final preorder = find.descendant(
+              of: summary,
+              matching: find.text(
+                'Orders ${formatQuantity(scenario.buyers.toDouble())}',
+              ),
+            );
+            final value = tester.widget<Text>(preorder).data!;
+            final paragraph = tester.renderObject<RenderParagraph>(preorder);
             expect(
               paragraph.getBoxesForSelection(
                 TextSelection(
-                  baseOffset: value.indexOf('−'),
+                  baseOffset: value.indexOf(' ') + 1,
                   extentOffset: value.length,
                 ),
               ),
@@ -1681,12 +1680,15 @@ void main() {
             await _settleCalculation(tester, controller);
             await _settleImages(tester);
             expect(
-              find.descendant(of: summary, matching: find.text('Stock −1.290')),
+              find.descendant(
+                of: summary,
+                matching: find.text('Orders 1.290'),
+              ),
               findsOneWidget,
             );
             expect(
               tester.widget<Text>(ingredient).data,
-              'Stock −1.290',
+              '0',
               reason:
                   'Open details update when the checked preorder receipt arrives.',
             );
@@ -1760,15 +1762,15 @@ void main() {
           expect(badge, findsOneWidget);
           final text = find.descendant(
             of: badge,
-            matching: find.text('Stock −1.234'),
+            matching: find.text('Orders 1.234'),
           );
           expect(text, findsOneWidget);
           expect(
             tester.widget<Text>(text).style?.color,
-            OpportunitiesVisualSpec.readableValueColor(
+            OpportunityCraftCardMaterial.forSpec(
               tester.element(text).visualTheme,
-              tester.element(text).visualTheme.palette.danger,
-            ),
+              OpportunityStockTone.mixed,
+            ).badgeInk,
           );
           expect(
             find.descendant(of: row, matching: find.text('Fill remaining')),
@@ -2681,8 +2683,8 @@ void main() {
       );
       expect(
         find.descendant(
-          of: find.byType(Dialog),
-          matching: find.textContaining('Stock '),
+          of: find.byKey(const ValueKey('exchange-detail-summary')),
+          matching: stockBadgeText(),
         ),
         findsOneWidget,
       );
@@ -3438,7 +3440,7 @@ void main() {
                 if (find
                     .descendant(
                       of: card,
-                      matching: find.textContaining('Stock '),
+                      matching: stockBadgeText(),
                     )
                     .evaluate()
                     .isNotEmpty)
@@ -3851,7 +3853,7 @@ void main() {
           findsNothing,
         );
         expect(
-          find.descendant(of: forest, matching: find.textContaining('Stock ')),
+          find.descendant(of: forest, matching: stockBadgeText()),
           findsNothing,
         );
         expect(
@@ -3947,7 +3949,7 @@ void main() {
           findsOneWidget,
         );
         expect(
-          find.descendant(of: trace, matching: find.text('Stock —')),
+          find.descendant(of: trace, matching: stockBadgeText('—')),
           findsOneWidget,
         );
         expect(
@@ -4276,7 +4278,7 @@ void main() {
             quote.listingProfit! / quote.expectedOutput!,
             signed: true,
           ),
-          'Preorders 100.000',
+          'Orders 100.000',
         ]) {
           final text = find.descendant(of: card, matching: find.text(value));
           expect(text, findsOneWidget);
@@ -4993,7 +4995,7 @@ void main() {
           findsOneWidget,
         );
         expect(
-          find.descendant(of: water, matching: find.textContaining('Stock ')),
+          find.descendant(of: water, matching: stockBadgeText()),
           findsNothing,
         );
         expect(
@@ -5018,7 +5020,7 @@ void main() {
         expect(
           find.descendant(
             of: purified,
-            matching: find.textContaining('Stock '),
+            matching: stockBadgeText(),
           ),
           findsOneWidget,
         );
@@ -5244,7 +5246,7 @@ void main() {
       );
       if (scenario.item != 4) {
         expect(
-          find.descendant(of: summary, matching: find.textContaining('Stock ')),
+          find.descendant(of: summary, matching: stockBadgeText()),
           findsOneWidget,
         );
         expect(
@@ -5268,7 +5270,7 @@ void main() {
         expect(
           find.descendant(
             of: dialog,
-            matching: find.text(scenario.missing ? 'Stock −15' : 'Stock 6'),
+            matching: stockBadgeText(scenario.missing ? '0' : '6'),
           ),
           findsOneWidget,
         );
@@ -5288,11 +5290,20 @@ void main() {
         }
       } else {
         expect(
-          find.descendant(of: dialog, matching: find.textContaining('Stock ')),
+          find.descendant(of: dialog, matching: stockBadgeText()),
           findsNothing,
         );
       }
       expect(tester.takeException(), isNull);
+      if (scenario.item == 705037) {
+        expect(
+          find.descendant(
+            of: dialog,
+            matching: find.text('Manufacture · Processing (L)'),
+          ),
+          findsOneWidget,
+        );
+      }
       if (Platform.isWindows) {
         await expectLater(
           find.byKey(const ValueKey('opportunities-capture')),
@@ -5346,11 +5357,11 @@ void main() {
         findsNothing,
       );
       expect(
-        find.descendant(of: summary, matching: find.text('Stock 0')),
+        find.descendant(of: summary, matching: stockBadgeText('0')),
         findsOneWidget,
       );
       expect(
-        find.descendant(of: summary, matching: find.text('Stock −100.000')),
+        find.descendant(of: summary, matching: find.text('Orders 100.000')),
         findsNothing,
       );
       await _expectPassiveCraftEstimates(tester, estimate);
@@ -5896,7 +5907,7 @@ void main() {
               beer.listingProfit! / beer.expectedOutput!,
               signed: true,
             ),
-            'Preorders 100.000',
+            'Orders 100.000',
           ]) {
             // At 200% text the viewport can be shorter than one card. Each
             // value remains reachable instead of forcing fixed card heights.
@@ -6089,23 +6100,21 @@ void main() {
       expect(
         badge.data,
         unknown
-            ? 'Stock —'
+            ? '—'
             : scenario.stock == 0
-            ? 'Stock −100.000'
-            : 'Stock ${scenario.stock}',
+            ? '0'
+            : '${scenario.stock}',
       );
       expect(
         badge.style?.color,
-        OpportunitiesVisualSpec.readableValueColor(
+        OpportunityCraftCardMaterial.forSpec(
           spec,
           unknown
-              ? spec.palette.textMuted
+              ? OpportunityStockTone.unknown
               : scenario.stock == 0
-              ? spec.palette.danger
-              : scenario.stock < 450
-              ? spec.palette.warning
-              : spec.palette.success,
-        ),
+              ? OpportunityStockTone.outOfStock
+              : OpportunityStockTone.available,
+        ).badgeInk,
       );
       expect(
         find.byKey(const ValueKey('ingredient-stock:Sugar')),
@@ -6151,13 +6160,13 @@ void main() {
     final badge = tester.widget<Text>(
       find.byKey(const ValueKey('ingredient-stock:Milk')),
     );
-    expect(badge.data, 'Stock −100.000');
+    expect(badge.data, '0');
     expect(
       badge.style?.color,
-      OpportunitiesVisualSpec.readableValueColor(
+      OpportunityCraftCardMaterial.forSpec(
         tester.element(subtitle).visualTheme,
-        tester.element(subtitle).visualTheme.palette.danger,
-      ),
+        OpportunityStockTone.outOfStock,
+      ).badgeInk,
     );
     expect(tester.takeException(), isNull);
     await tester.pumpWidget(const SizedBox.shrink());
@@ -6269,7 +6278,7 @@ void main() {
         findsNothing,
         reason: 'All window widths use the approved card layout.',
       );
-      for (final prefix in ['Preorders ', 'Stock ']) {
+      for (final prefix in ['Orders ', '']) {
         const value = '123.456.789';
         final number = find.descendant(
           of: find.byKey(const PageStorageKey('craft-opportunities')),
@@ -6829,9 +6838,23 @@ void main() {
       );
       await tester.tap(find.byKey(const ValueKey('ingredient-recipe-back')));
       await _settleImages(tester);
+      // A child depth request can refresh a shared input of the newly added
+      // Immortal formulas. Verify the parent's calculation, not cache identity.
+      final restored = controller.quotes.firstWhere(
+        (q) => q.recipeName == parent.recipeName,
+      );
+      expect(restored.selectedVariantId, parent.selectedVariantId);
+      expect(restored.batchMultiplier, parent.batchMultiplier);
+      expect(restored.crafts, parent.crafts);
+      expect(restored.expectedOutput, parent.expectedOutput);
+      expect(restored.customSalePrice, parent.customSalePrice);
+      expect(restored.totalCost, parent.totalCost);
+      expect(restored.listingRevenue, parent.listingRevenue);
+      expect(restored.extraCostPerRun, parent.extraCostPerRun);
+      expect(restored.extraCostPerCraft, parent.extraCostPerCraft);
       expect(
-        controller.quotes.firstWhere((q) => q.recipeName == parent.recipeName),
-        same(parent),
+        restored.ingredients.map((i) => (i.name, i.quantity)),
+        parent.ingredients.map((i) => (i.name, i.quantity)),
       );
       expect(fixture.harness.bundle.controller.documentSnapshot, same(saved));
       expect(controller.preferences.mode, CraftMode.processing);
@@ -7080,7 +7103,7 @@ void main() {
       expect(quote.exchanges, 1);
       expect(quote.netProceeds, isNotNull);
       expect(quote.hasListingEstimate, isFalse);
-      expect(find.text('Stock −1'), findsWidgets);
+      expect(find.text('Orders 1'), findsWidgets);
       expect(find.text('Estimate · not enough buyers'), findsNothing);
       expect(find.textContaining('no buyers'), findsNothing);
       expect(tester.takeException(), isNull);
@@ -8570,7 +8593,7 @@ Future<void> _expectPassiveCraftEstimates(
 
 String _cardSilver(double value, {bool signed = false}) {
   final rounded = value.round();
-  return '${signed && rounded > 0 ? '+' : ''}${formatQuantity(rounded.toDouble())}'
+  return '${signed && rounded > 0 ? '+' : ''}${formatCompactOpportunitySilver(rounded)}'
       .replaceFirst('-', '−');
 }
 
@@ -8833,14 +8856,9 @@ Recipe _recipeWithIngredients(
   outputMaximum: recipe.outputMaximum,
 );
 
-String _testSilver(double value) {
-  for (final unit in [(1000000000, 'B'), (1000000, 'M'), (10000, 'K')]) {
-    if (value.abs() >= unit.$1) {
-      return '${formatQuantity(value / (unit.$2 == 'K' ? 1000 : unit.$1))}${unit.$2}';
-    }
-  }
-  return formatQuantity(value);
-}
+// The shared formatter has separate boundary/rounding tests. Host assertions
+// verify that the unchanged quote uses its approved lowercase k/m/b/t display.
+String _testSilver(double value) => formatCompactOpportunitySilver(value);
 
 void _expectExchangeHeaderSpacing(WidgetTester tester) {
   final toolbar = tester.getRect(
@@ -9149,7 +9167,7 @@ void _expectOverviewCardTypography(
     if (label == 'Stock') {
       final stock = find.descendant(
         of: card,
-        matching: find.textContaining('Stock '),
+        matching: stockBadgeText(),
       );
       expect(stock, findsOneWidget);
       expect(tester.widget<Text>(stock).style?.fontSize, 16);
@@ -9302,7 +9320,7 @@ void _expectCraftCardLayout(
 void _expectMarketNumberOnOneLine(WidgetTester tester) {
   final value = find.descendant(
     of: find.byKey(const PageStorageKey('craft-opportunities')),
-    matching: find.text('Preorders 100.000'),
+    matching: find.text('Orders 100.000'),
   );
   expect(value, findsWidgets);
   for (var index = 0; index < value.evaluate().length; index++) {

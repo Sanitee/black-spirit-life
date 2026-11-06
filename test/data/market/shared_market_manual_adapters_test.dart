@@ -61,7 +61,9 @@ void main() {
         expect(await load(false), isFalse);
         expect(transport.calls, 1);
         expect(await load(true), isTrue);
-        expect(transport.calls, adapter == 'Planner/Map' ? 2 : 3);
+        // The successful fixture quote is sold out. Planner/Map now shares the
+        // preorder enrichment contract, so all three adapters read its book.
+        expect(transport.calls, 3);
         expect(repository.pauseFor('eu'), isNull);
       },
     );

@@ -15,6 +15,7 @@ import '../widgets/spot_media_gallery.dart';
 import 'buff_picker.dart';
 import 'field_desk_materials.dart';
 import 'item_artwork.dart';
+import 'market_presentation.dart';
 import 'theme.dart';
 
 typedef SpotMarketPriceLoader =
@@ -2260,12 +2261,7 @@ class _FieldGuideState extends State<FieldGuide> {
     final costLines = <_MarketCostLine>[];
     final missingCostItemIds = <String>{};
     if (projection != null) {
-      for (final expense in bairogEnergyExpenses) {
-        if (!benchmark.settings.enabledExpenseItemIds.contains(
-          expense.bdoItemId,
-        )) {
-          continue;
-        }
+      for (final expense in benchmark.settings.activeEnergyExpenses) {
         final itemId = expense.bdoItemId.toString();
         final quotePrice = _marketQuotes[itemId]?.price;
         final unitPrice = quotePrice != null && quotePrice > 0
@@ -3481,7 +3477,8 @@ class _FieldGuideState extends State<FieldGuide> {
             Text(
               'Gathering Item Drop Rate (GDR) is your final total chance bonus. '
               'Yields use the same public BDO Workshop mastery, drop, minigame, '
-              'pet, proc, Agris, energy, tax, and route-speed model. Route speed, '
+              'pet, proc, Agris, tax, and route-speed model. Energy rates use '
+              'reviewed item effects; Miraculous is limited to one dose. Route speed, '
               'sessions, hours, videos, and locations remain Bairog Haan source '
               'evidence.',
               style: const TextStyle(fontSize: 14),
@@ -3887,7 +3884,7 @@ class _FieldGuideState extends State<FieldGuide> {
         '${displayedContributions.map((entry) => entry.itemId).join('-')}',
       ),
       label: _valueCardAccessibility(summary, evidence, performance),
-      excludeSemantics: true,
+      excludeSemantics: GatheringMarketPresentation.maybeOf(context) == null,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
@@ -3918,6 +3915,21 @@ class _FieldGuideState extends State<FieldGuide> {
       );
     }
     final prefix = _valuePrefix(summary, performance);
+    if (GatheringMarketPresentation.maybeOf(context) case final presentation?) {
+      return presentation.silverBuilder(
+        context,
+        value: summary.total,
+        prefix: prefix,
+        suffix: ' / h',
+        textKey: const ValueKey('value-card-total'),
+        style: TextStyle(
+          fontSize: 17,
+          height: 1.1,
+          color: context.gatheringColors.positive,
+          fontWeight: FontWeight.w700,
+        ),
+      );
+    }
     return Row(
       key: const ValueKey('value-card-total'),
       children: [
@@ -4033,55 +4045,174 @@ class _FieldGuideState extends State<FieldGuide> {
         '${preorders == null ? (_marketLoading ? 'Updating…' : 'Not available') : _groupedWholeNumber(preorders)}';
   }
 
-  Widget _contributionRow(_MarketContribution contribution) => Padding(
-    key: ValueKey('value-contribution-row-${contribution.itemId}'),
-    padding: const EdgeInsets.only(bottom: 3),
-    child: Row(
-      children: [
-        GameIcon(
-          contribution.icon,
-          key: ValueKey('value-contribution-icon-${contribution.itemId}'),
-          size: 24,
-        ),
-        const SizedBox(width: 6),
-        Expanded(
-          flex: 3,
-          child: Text(
-            contribution.name,
-            key: ValueKey('value-contribution-name-${contribution.itemId}'),
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: const TextStyle(fontSize: 12.5, height: 1.1),
+  Widget _contributionRow(_MarketContribution contribution) {
+    if (GatheringMarketPresentation.maybeOf(context) case final presentation?) {
+      return _sharedContributionRow(contribution, presentation, 'value');
+    }
+    return Padding(
+      key: ValueKey('value-contribution-row-${contribution.itemId}'),
+      padding: const EdgeInsets.only(bottom: 3),
+      child: Row(
+        children: [
+          GameIcon(
+            contribution.icon,
+            key: ValueKey('value-contribution-icon-${contribution.itemId}'),
+            size: 24,
           ),
-        ),
-        const SizedBox(width: 6),
-        Expanded(
-          flex: 2,
-          child: FittedBox(
-            fit: BoxFit.scaleDown,
-            alignment: Alignment.centerRight,
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  _silverText(contribution.netValuePerHour),
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: context.gatheringColors.positive,
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-                if (!contribution.vendorPrice) ...[
-                  const SizedBox(width: 5),
-                  _valueStockCount(contribution),
-                ],
-              ],
+          const SizedBox(width: 6),
+          Expanded(
+            flex: 3,
+            child: Text(
+              contribution.name,
+              key: ValueKey('value-contribution-name-${contribution.itemId}'),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(fontSize: 12.5, height: 1.1),
             ),
           ),
-        ),
-      ],
-    ),
-  );
+          const SizedBox(width: 6),
+          Expanded(
+            flex: 2,
+            child: FittedBox(
+              fit: BoxFit.scaleDown,
+              alignment: Alignment.centerRight,
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    _silverText(contribution.netValuePerHour),
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: context.gatheringColors.positive,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  if (!contribution.vendorPrice) ...[
+                    const SizedBox(width: 5),
+                    _valueStockCount(contribution),
+                  ],
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// The application supplies its actual shared widgets. No market work or
+  /// independently computed counts are introduced by this presentation.
+  Widget _sharedContributionRow(
+    _MarketContribution contribution,
+    GatheringMarketPresentation presentation,
+    String purpose, {
+    bool details = false,
+  }) {
+    final stock = _freshDemandStock(contribution);
+    final preorders = _freshPreorderCount(
+      contribution.itemId,
+      _marketQuotes[contribution.itemId],
+    );
+    final name = Text(
+      contribution.name,
+      key: ValueKey('$purpose-contribution-name-${contribution.itemId}'),
+      style: const TextStyle(
+        fontSize: 14,
+        height: 1.2,
+        fontWeight: FontWeight.w600,
+      ),
+    );
+    final value = presentation.silverBuilder(
+      context,
+      value: contribution.missingPrice ? null : contribution.netValuePerHour,
+      suffix: details ? ' / h' : '',
+      textKey: ValueKey('$purpose-value-${contribution.itemId}'),
+      style: TextStyle(
+        fontSize: 14,
+        color: context.gatheringColors.positive,
+        fontWeight: FontWeight.w600,
+      ),
+    );
+    return Padding(
+      key: ValueKey('$purpose-contribution-row-${contribution.itemId}'),
+      padding: const EdgeInsets.only(bottom: 8),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          GameIcon(
+            contribution.icon,
+            key: ValueKey('$purpose-contribution-icon-${contribution.itemId}'),
+            size: 30,
+          ),
+          const SizedBox(width: 8),
+          Expanded(
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                final scale = MediaQuery.textScalerOf(context).scale(14) / 14;
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    if (constraints.maxWidth >= 220 * scale)
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Expanded(flex: 2, child: name),
+                          const SizedBox(width: 8),
+                          Flexible(
+                            child: Align(
+                              alignment: Alignment.centerRight,
+                              child: value,
+                            ),
+                          ),
+                        ],
+                      )
+                    else ...[
+                      name,
+                      const SizedBox(height: 4),
+                      value,
+                    ],
+                    const SizedBox(height: 6),
+                    if (!contribution.vendorPrice)
+                      presentation.stockBuilder(
+                        context,
+                        stock: stock,
+                        preorders: preorders,
+                        stockKey: ValueKey(
+                          '$purpose-stock-${contribution.itemId}',
+                        ),
+                      )
+                    else
+                      Text(
+                        'Vendor sale',
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: context.gatheringColors.muted,
+                        ),
+                      ),
+                    if (details) ...[
+                      const SizedBox(height: 6),
+                      Text(
+                        contribution.perHour > 0 && contribution.perHour < .01
+                            ? '< 0,01 / h'
+                            : '≈ ${_fullSilverNumber(contribution.perHour)} / h',
+                        key: ValueKey(
+                          'calculation-quantity-${contribution.itemId}',
+                        ),
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: context.gatheringColors.muted,
+                        ),
+                      ),
+                    ],
+                  ],
+                );
+              },
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 
   Widget _valueStockCount(
     _MarketContribution contribution, {
@@ -4227,6 +4358,21 @@ class _FieldGuideState extends State<FieldGuide> {
       );
     }
     final prefix = _valuePrefix(summary, performance);
+    if (GatheringMarketPresentation.maybeOf(context) case final presentation?) {
+      return presentation.silverBuilder(
+        context,
+        value: summary.total,
+        prefix: prefix,
+        suffix: ' / h',
+        textKey: const ValueKey('demand-card-total'),
+        style: TextStyle(
+          fontSize: 17,
+          height: 1.1,
+          color: context.gatheringColors.positive,
+          fontWeight: FontWeight.w700,
+        ),
+      );
+    }
     return Row(
       key: const ValueKey('demand-card-total'),
       children: [
@@ -4304,7 +4450,7 @@ class _FieldGuideState extends State<FieldGuide> {
         evidence,
         null,
       ),
-      excludeSemantics: true,
+      excludeSemantics: GatheringMarketPresentation.maybeOf(context) == null,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
@@ -4361,64 +4507,71 @@ class _FieldGuideState extends State<FieldGuide> {
         'Preorders\n${preorders == null ? (_marketLoading ? 'Updating…' : 'Not available') : _groupedWholeNumber(preorders)}';
   }
 
-  Widget _demandContributionRow(_MarketContribution contribution) => Padding(
-    key: ValueKey('demand-contribution-row-${contribution.itemId}'),
-    padding: const EdgeInsets.only(bottom: 3),
-    child: Tooltip(
-      key: ValueKey('demand-contribution-tooltip-${contribution.itemId}'),
-      message: _demandContributionTooltip(contribution),
-      child: Semantics(
-        key: ValueKey('demand-semantics-${contribution.itemId}'),
-        label: _demandContributionAccessibility(contribution),
-        excludeSemantics: true,
-        child: Row(
-          children: [
-            GameIcon(
-              contribution.icon,
-              key: ValueKey('demand-contribution-icon-${contribution.itemId}'),
-              size: 24,
-            ),
-            const SizedBox(width: 6),
-            Expanded(
-              flex: 3,
-              child: Text(
-                contribution.name,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: const TextStyle(fontSize: 12.5, height: 1.1),
+  Widget _demandContributionRow(_MarketContribution contribution) {
+    if (GatheringMarketPresentation.maybeOf(context) case final presentation?) {
+      return _sharedContributionRow(contribution, presentation, 'demand');
+    }
+    return Padding(
+      key: ValueKey('demand-contribution-row-${contribution.itemId}'),
+      padding: const EdgeInsets.only(bottom: 3),
+      child: Tooltip(
+        key: ValueKey('demand-contribution-tooltip-${contribution.itemId}'),
+        message: _demandContributionTooltip(contribution),
+        child: Semantics(
+          key: ValueKey('demand-semantics-${contribution.itemId}'),
+          label: _demandContributionAccessibility(contribution),
+          excludeSemantics: true,
+          child: Row(
+            children: [
+              GameIcon(
+                contribution.icon,
+                key: ValueKey(
+                  'demand-contribution-icon-${contribution.itemId}',
+                ),
+                size: 24,
               ),
-            ),
-            const SizedBox(width: 6),
-            Expanded(
-              flex: 2,
-              child: FittedBox(
-                fit: BoxFit.scaleDown,
-                alignment: Alignment.centerRight,
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      _silverText(contribution.netValuePerHour),
-                      key: ValueKey('demand-value-${contribution.itemId}'),
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: context.gatheringColors.positive,
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                    if (!contribution.vendorPrice) ...[
-                      const SizedBox(width: 5),
-                      _demandMarketCounts(contribution),
-                    ],
-                  ],
+              const SizedBox(width: 6),
+              Expanded(
+                flex: 3,
+                child: Text(
+                  contribution.name,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(fontSize: 12.5, height: 1.1),
                 ),
               ),
-            ),
-          ],
+              const SizedBox(width: 6),
+              Expanded(
+                flex: 2,
+                child: FittedBox(
+                  fit: BoxFit.scaleDown,
+                  alignment: Alignment.centerRight,
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        _silverText(contribution.netValuePerHour),
+                        key: ValueKey('demand-value-${contribution.itemId}'),
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: context.gatheringColors.positive,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                      if (!contribution.vendorPrice) ...[
+                        const SizedBox(width: 5),
+                        _demandMarketCounts(contribution),
+                      ],
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
-    ),
-  );
+    );
+  }
 
   Widget _demandMarketCounts(
     _MarketContribution contribution, {
@@ -4728,6 +4881,7 @@ class _FieldGuideState extends State<FieldGuide> {
   );
 
   Widget _calculationIncomeRow(_MarketContribution contribution) {
+    final presentation = GatheringMarketPresentation.maybeOf(context);
     final valueText = contribution.missingPrice
         ? 'Value unavailable'
         : _fullSilverText(contribution.netValuePerHour);
@@ -4743,84 +4897,93 @@ class _FieldGuideState extends State<FieldGuide> {
         borderRadius: BorderRadius.circular(10),
         border: Border.all(color: context.glass.insetLine),
       ),
-      child: Semantics(
-        label:
-            '${contribution.name}. Expected quantity per hour: ${contribution.perHour}. '
-            'Value per hour: $valueText. '
-            '${_calculationMarketAccessibility(contribution)}',
-        excludeSemantics: true,
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            GameIcon(
-              contribution.icon,
-              key: ValueKey('calculation-icon-${contribution.itemId}'),
-              size: 34,
-            ),
-            const SizedBox(width: 7),
-            Expanded(
-              child: Column(
+      child: presentation != null
+          ? _sharedContributionRow(
+              contribution,
+              presentation,
+              'calculation',
+              details: true,
+            )
+          : Semantics(
+              label:
+                  '${contribution.name}. Expected quantity per hour: ${contribution.perHour}. '
+                  'Value per hour: $valueText. '
+                  '${_calculationMarketAccessibility(contribution)}',
+              excludeSemantics: true,
+              child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    contribution.name,
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(
-                      fontSize: 13.5,
-                      height: 1.1,
-                      fontWeight: FontWeight.w700,
-                    ),
+                  GameIcon(
+                    contribution.icon,
+                    key: ValueKey('calculation-icon-${contribution.itemId}'),
+                    size: 34,
                   ),
-                  const SizedBox(height: 3),
-                  Text(
-                    contribution.perHour > 0 && contribution.perHour < .01
-                        ? '< 0,01 / h'
-                        : '≈ ${_fullSilverNumber(contribution.perHour)} / h',
-                    key: ValueKey(
-                      'calculation-quantity-${contribution.itemId}',
-                    ),
-                    style: TextStyle(
-                      fontSize: 12,
-                      height: 1.15,
-                      color: context.gatheringColors.muted,
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Expanded(
-                        child: _calculationFact(
-                          'Value / h',
-                          displayedValue,
-                          valueColor: contribution.missingPrice
-                              ? context.gatheringColors.muted
-                              : context.gatheringColors.positive,
-                          scaleDown: true,
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      SizedBox(
-                        width: 72,
-                        child: _calculationFact(
-                          'Stock',
-                          marketText,
-                          valueKey: ValueKey(
-                            'calculation-market-${contribution.itemId}',
+                  const SizedBox(width: 7),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          contribution.name,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(
+                            fontSize: 13.5,
+                            height: 1.1,
+                            fontWeight: FontWeight.w700,
                           ),
-                          valueColor: _calculationMarketColor(contribution),
-                          scaleDown: true,
                         ),
-                      ),
-                    ],
+                        const SizedBox(height: 3),
+                        Text(
+                          contribution.perHour > 0 && contribution.perHour < .01
+                              ? '< 0,01 / h'
+                              : '≈ ${_fullSilverNumber(contribution.perHour)} / h',
+                          key: ValueKey(
+                            'calculation-quantity-${contribution.itemId}',
+                          ),
+                          style: TextStyle(
+                            fontSize: 12,
+                            height: 1.15,
+                            color: context.gatheringColors.muted,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Expanded(
+                              child: _calculationFact(
+                                'Value / h',
+                                displayedValue,
+                                valueColor: contribution.missingPrice
+                                    ? context.gatheringColors.muted
+                                    : context.gatheringColors.positive,
+                                scaleDown: true,
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            SizedBox(
+                              width: 72,
+                              child: _calculationFact(
+                                'Stock',
+                                marketText,
+                                valueKey: ValueKey(
+                                  'calculation-market-${contribution.itemId}',
+                                ),
+                                valueColor: _calculationMarketColor(
+                                  contribution,
+                                ),
+                                scaleDown: true,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
                   ),
                 ],
               ),
             ),
-          ],
-        ),
-      ),
     );
   }
 
@@ -5048,11 +5211,16 @@ class _FieldGuideState extends State<FieldGuide> {
         ? '${_rateText(net)} net Energy/h'
         : 'no net Energy drain';
     final session = energy.sessionHours.isFinite
-        ? ' · ${_rateText(energy.sessionHours)}h from '
+        ? ' · ~${_rateText(energy.sessionHours)}h from '
               '${_rateText(energy.startingEnergy + energy.energyBoost)} Energy'
         : '';
+    final after = energy.netEnergyDrainAfterTemporaryRecovery;
+    final temporary = after == null
+        ? ''
+        : ' initially; after ${_rateText(energy.temporaryRecoveryHours)}h: '
+              '${after > 0 ? '${_rateText(after)} net Energy/h' : 'no net Energy drain'}';
     return '${_rateText(energy.energyUsePerHour)} Energy used/h · '
-        '$drain$session';
+        '$drain$temporary$session';
   }
 
   String _hoursText(double value) => value >= 10

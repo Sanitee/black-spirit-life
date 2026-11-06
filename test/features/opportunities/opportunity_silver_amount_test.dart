@@ -33,22 +33,29 @@ void main() {
     },
   );
   test(
-    'compact silver truncates rather than rounding into the next amount',
+    'compact silver rounds and carries to the next unit',
     () {
       for (final (amount, expected) in <(num, String)>[
         (40148062.5, '40,1m'),
-        (40999999, '40,9m'),
-        (999999, '999,9k'),
+        (40999999, '41m'),
+        (999999, '1m'),
+        (999949, '999,9k'),
+        (999950, '1m'),
         (1000000, '1m'),
         (1000000000, '1b'),
-        (1999, '1,9k'),
-        (999.99, '999,9'),
+        (1999, '2k'),
+        (999.99, '1k'),
+        (1100000000, '1,1b'),
+        (1100000000000, '1,1t'),
+        (-8118, '-8,1k'),
+        (-0.01, '0'),
         (0, '0'),
         (-40148062.5, '-40,1m'),
       ]) {
         expect(formatCompactOpportunitySilver(amount), expected);
       }
       expect(formatCompactOpportunitySilver(double.nan), '—');
+      expect(formatCompactOpportunitySilver(double.infinity), '—');
     },
   );
 

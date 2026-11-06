@@ -1,6 +1,7 @@
 #include <flutter/dart_project.h>
 #include <flutter/flutter_view_controller.h>
 #include <shobjidl.h>
+#include <shlobj.h>
 #include <windows.h>
 
 #include <algorithm>
@@ -10,6 +11,7 @@
 #include "../shared/beta_maintenance_gate.h"
 #include "Velopack.h"
 #include "flutter_window.h"
+#include "single_instance.h"
 #include "utils.h"
 
 int APIENTRY wWinMain(_In_ HINSTANCE instance, _In_opt_ HINSTANCE prev,
@@ -23,13 +25,43 @@ int APIENTRY wWinMain(_In_ HINSTANCE instance, _In_opt_ HINSTANCE prev,
       std::find(command_line_arguments.begin(), command_line_arguments.end(),
                 "--reference") != command_line_arguments.end();
 
+  // Keep Velopack's install/update hooks ahead of ordinary UI routing.
+  // Reference helpers are independent and never claim the primary window.
+  if (!reference_mode) {
+    vpkc_app_set_auto_apply_on_startup(false);
+    vpkc_app_run(nullptr);
+  }
+  bsl::windows::SingleInstance single_instance;
+  if (!reference_mode) {
+    const auto result = single_instance.AcquireOrActivate();
+    if (result == bsl::windows::SingleInstance::Result::forwarded) {
+      return EXIT_SUCCESS;
+    }
+    if (result != bsl::windows::SingleInstance::Result::primary) {
+      MessageBoxW(nullptr,
+                  L"Black Spirit Life is still opening or closing. Try again in a moment.",
+                  L"Black Spirit Life", MB_OK | MB_ICONINFORMATION);
+      return EXIT_FAILURE;
+    }
+    // Resolve Windows' redirected Documents folder, never USERPROFILE guessing
+    // or an inherited override. Every compatible build uses this same root.
+    PWSTR documents = nullptr;
+    if (FAILED(SHGetKnownFolderPath(FOLDERID_Documents, KF_FLAG_DEFAULT, nullptr,
+                                  &documents)) || documents == nullptr) {
+      MessageBoxW(nullptr, L"Your Documents folder could not be found. No saved data was opened.",
+                  L"Black Spirit Life", MB_OK | MB_ICONERROR);
+      return EXIT_FAILURE;
+    }
+    const BOOL set = SetEnvironmentVariableW(L"BSL_DOCUMENTS_DIR", documents);
+    CoTaskMemFree(documents);
+    if (!set) return EXIT_FAILURE;
+  }
+
   bsl::windows::BetaMaintenanceGate startup_gate;
   if (!reference_mode) {
     // Velopack lifecycle hooks and the maintenance gate belong to the primary
     // application only. The standalone-compatible Minigame Helper is an
     // independent child process and never owns or updates application files.
-    vpkc_app_set_auto_apply_on_startup(false);
-    vpkc_app_run(nullptr);
     std::wstring maintenance_error;
     if (!startup_gate.TryAcquire(&maintenance_error)) {
       MessageBoxW(nullptr, maintenance_error.c_str(), L"Black Spirit Life",
@@ -73,6 +105,9 @@ int APIENTRY wWinMain(_In_ HINSTANCE instance, _In_opt_ HINSTANCE prev,
     return EXIT_FAILURE;
   }
   window.SetQuitOnClose(true);
+  if (!reference_mode && !single_instance.AttachWindow(window.GetHandle())) {
+    return EXIT_FAILURE;
+  }
   // The process is now visible with its final executable path. Releasing the
   // startup gate lets maintenance acquire it and then reliably discover this
   // running planner before Velopack is allowed to replace application files.

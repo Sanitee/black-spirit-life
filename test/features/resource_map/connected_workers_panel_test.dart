@@ -5,6 +5,8 @@ import 'package:bdo_craft_planner_flutter/features/resource_map/recipe_worker_pa
 import 'package:bdo_map_core/bdo_map_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+
+import '../../support/action_hint_finder.dart';
 import 'recipe_worker_fixture.dart';
 
 void main() {
@@ -113,7 +115,7 @@ void main() {
       await tester.tap(find.byKey(const ValueKey('recipe-extra-B')));
       await tester.pumpAndSettle();
       expect(c.plan!.spent, 8); // refused; no extra budget
-      await tester.tap(find.byTooltip('Back'));
+      await tester.tap(findActionHint('Back'));
       await tester.pumpAndSettle();
       await tester.ensureVisible(
         find.byKey(const ValueKey('recipe-workers-nodes')),

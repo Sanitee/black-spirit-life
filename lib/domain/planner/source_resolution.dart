@@ -1,3 +1,4 @@
+import '../catalog/temporarily_archived_items.dart';
 import '../models/catalog_models.dart';
 import 'planner_models.dart';
 
@@ -13,6 +14,17 @@ ResolvedSourceInfo resolveSourceInfo({
   required Recipe? recipe,
   required PlannerRules rules,
 }) {
+  if (isRemovedPcItem(
+    name,
+    itemId: recipe?.marketId ?? _sourceRule(rules.marketIds, name, rules),
+  )) {
+    return ResolvedSourceInfo(
+      sourceNote: removedPcItemReasonFor(
+        name,
+        itemId: recipe?.marketId ?? _sourceRule(rules.marketIds, name, rules),
+      ),
+    );
+  }
   final vendorRule = _vendorRule(name, rules);
   final npcPrice =
       _positivePrice(recipe?.npcPrice) ??

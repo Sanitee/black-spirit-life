@@ -1,8 +1,10 @@
+import 'package:bdo_craft_planner_flutter/domain/formatting/planner_formatters.dart';
 import 'package:bdo_craft_planner_flutter/domain/models/craft_mode.dart';
 import 'package:bdo_craft_planner_flutter/domain/state/planner_state.dart';
 import 'package:bdo_craft_planner_flutter/domain/state/state_copy.dart';
 import 'package:bdo_craft_planner_flutter/features/planner/planner_contracts.dart';
 import 'package:bdo_craft_planner_flutter/features/recipe_book/recipe_book.dart';
+import 'package:bdo_craft_planner_flutter/features/recipe_book/recipe_ingredient_line.dart';
 import 'package:bdo_craft_planner_flutter/features/shared/mode_item_icon.dart';
 import 'package:bdo_craft_planner_flutter/features/shared/recipe_variant_selector.dart';
 import 'package:bdo_craft_planner_flutter/visual/visual.dart';
@@ -88,8 +90,7 @@ void main() {
         await tester.tap(expand);
         await _settleGoldenImages(tester, root: golden, spec: family.spec);
 
-        expect(find.text('Used In'), findsOneWidget);
-        expect(find.textContaining('15 recipe paths'), findsOneWidget);
+        expect(find.text('Used in 15 recipes'), findsOneWidget);
         final expandedResult = find.byKey(
           RecipeBookKeys.usedInResult(
             _source,
@@ -105,7 +106,7 @@ void main() {
           findsOneWidget,
         );
         expect(
-          find.descendant(of: expandedResult, matching: find.text('Need 2')),
+          find.descendant(of: expandedResult, matching: find.text('×2')),
           findsOneWidget,
         );
         expect(
@@ -113,14 +114,11 @@ void main() {
           findsOneWidget,
         );
         expect(
-          find.descendant(of: expandedResult, matching: find.text('Need 3')),
+          find.descendant(of: expandedResult, matching: find.text('×3')),
           findsOneWidget,
         );
         expect(
-          find.descendant(
-            of: expandedResult,
-            matching: find.text('Makes 1 Elixir of Life'),
-          ),
+          find.descendant(of: expandedResult, matching: find.text('Output ×1')),
           findsOneWidget,
         );
         const selectorNamespace =
@@ -255,19 +253,18 @@ void main() {
         expect(
           find.descendant(
             of: preview,
-            matching: find.byWidgetPredicate(
-              (widget) =>
-                  widget is Text && (widget.data?.startsWith('Need ') ?? false),
-            ),
+            matching: find.byType(RecipeIngredientLine),
           ),
           findsNWidgets(recipe.ingredients.length),
         );
         for (final ingredient in recipe.ingredients) {
+          final quantity = find.byKey(
+            RecipeBookKeys.previewQuantity(_source, ingredient.name),
+          );
+          expect(quantity, findsOneWidget);
           expect(
-            find.byKey(
-              RecipeBookKeys.previewQuantity(_source, ingredient.name),
-            ),
-            findsNothing,
+            tester.widget<Text>(quantity).data,
+            '×${formatQuantity(ingredient.quantity)}',
           );
         }
         expect(tester.takeException(), isNull);

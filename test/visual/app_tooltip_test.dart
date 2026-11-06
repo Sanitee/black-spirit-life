@@ -250,6 +250,28 @@ void main() {
     expect(find.text('Item reference'), findsNothing);
   });
 
+  test(
+    'hover opt-ins stay limited to specifically user-approved exceptions',
+    () {
+      // Shortened/icon-only labels do not imply approval for new hover text.
+      // Change this list only after an explicit user request for that hint.
+      const approved = {
+        'lib/features/recipe_book/recipe_book_item_info_view.dart': 1,
+        'lib/features/resource_map/recipe_worker_panel.dart': 1,
+      };
+      final found = <String, int>{};
+      final optIn = RegExp(r'approvedHover\s*:\s*true\b');
+      for (final file in Directory(
+        'lib',
+      ).listSync(recursive: true).whereType<File>()) {
+        if (!file.path.endsWith('.dart')) continue;
+        final count = optIn.allMatches(file.readAsStringSync()).length;
+        if (count > 0) found[file.path.replaceAll('\\', '/')] = count;
+      }
+      expect(found, approved);
+    },
+  );
+
   test('native app hover hints must be an explicit opt-in', () {
     final bare = RegExp(r'\b(?:Tooltip|IconButton)\(');
     for (final file in Directory(

@@ -20,6 +20,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
 
+import '../../support/action_hint_finder.dart';
 import 'recipe_worker_fixture.dart';
 
 class _MemoryStore extends SessionStore {
@@ -101,7 +102,7 @@ void main() {
         find.byKey(const ValueKey('test-harmony-artwork')),
         findsOneWidget,
       );
-      expect(find.byTooltip('Show map status details'), findsNothing);
+      expect(findActionHint('Show map status details'), findsNothing);
       expect(
         find.byKey(const ValueKey('resource-map-status-toggle')),
         findsNothing,
@@ -123,9 +124,9 @@ void main() {
       expect(canvas.nodeNetworkChangeKinds.keys.toSet(), c.plan!.nodeIds);
       expect(canvas.nodeNetworkEdgeChanges, isNotEmpty);
       expect(find.text('Nodes'), findsOneWidget);
-      expect(find.byTooltip('Worker settings'), findsOneWidget);
+      expect(findActionHint('Worker settings'), findsOneWidget);
       expect(find.text('Specific items'), findsNothing);
-      await tester.tap(find.byTooltip('Worker settings'));
+      await tester.tap(findActionHint('Worker settings'));
       await tester.pumpAndSettle();
       expect(find.byType(TownShopLodgingDialog), findsOneWidget);
       Navigator.of(tester.element(find.byType(TownShopLodgingDialog))).pop();
@@ -261,10 +262,10 @@ void main() {
         ),
       );
       await tester.pumpAndSettle();
-      expect(find.byTooltip('Close checklist'), findsOneWidget);
+      expect(findActionHint('Close checklist'), findsOneWidget);
       await tester.tap(find.byKey(const ValueKey('test-show-spot')));
       await tester.pumpAndSettle();
-      expect(find.byTooltip('Close checklist'), findsNothing);
+      expect(findActionHint('Close checklist'), findsNothing);
       final guide = tester.widget<FieldGuide>(find.byType(FieldGuide));
       expect(guide.initialSpot, isNotNull);
       expect(guide.initialSpot!.mapped, isTrue);
@@ -296,7 +297,7 @@ void main() {
         find.byKey(ValueKey('recipe-location-${recorded.id}')),
         findsOneWidget,
       );
-      await tester.tap(find.byTooltip('Back to checklist'));
+      await tester.tap(findActionHint('Back to checklist'));
       await tester.pumpAndSettle();
       expect(find.byKey(const ValueKey('test-show-spot')), findsOneWidget);
       expect(store.preferences['sentinel'], 'keep');

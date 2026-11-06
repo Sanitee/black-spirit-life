@@ -74,6 +74,24 @@ void main() {
       expect(parsed.single.lastSoldAtEpochSeconds, isNull);
     });
 
+    test('malformed stock never becomes sold out in either adapter', () {
+      for (final stock in ['', 'unknown', 'NaN', 'Infinity']) {
+        final item = MarketPayloadParser.parsePearlAbyssItem(
+          jsonEncode({'resultMsg': '42-0-0-123456-$stock|'}),
+          '42',
+        )!;
+        expect(item.price, 123456);
+        expect(item.stock, isNull, reason: stock);
+      }
+      for (final stock in [-1, 'unknown', 'NaN', 'Infinity']) {
+        final item = MarketPayloadParser.parseArshaItems(
+          jsonEncode({'id': 42, 'price': 123456, 'stock': stock}),
+        ).single;
+        expect(item.price, 123456);
+        expect(item.stock, isNull, reason: '$stock');
+      }
+    });
+
     test('prefers canonical cumulative trades and ignores empty sale time', () {
       final parsed = MarketPayloadParser.parseArshaItems(
         '[{"id":55,"price":900,"totalTrades":12,'

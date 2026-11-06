@@ -234,6 +234,7 @@ const sessionCatches = session => session.catches || [];
 const statsGradeKey = () => "yellow";
 const STATS_GRADE_DEFINITIONS = [{ key: "yellow", label: "Yellow fish" }];
 const resourceLabel = value => value;
+${script.substring(script.indexOf('function fishValueSummary(items)'), script.indexOf('function fishValueDescription(value)'))}
 ${script.substring(helperStart, helperEnd)}
 const spot = buildPersonalStats()[0];
 process.stdout.write(JSON.stringify({

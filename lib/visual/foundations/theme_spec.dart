@@ -38,6 +38,7 @@ final class ThemePalette {
 
   final Color canvas;
   final Color canvasDeep;
+
   /// The map backdrop need not use the darkest shared panel-recess colour.
   /// Other workspaces continue to consume their existing canvas roles.
   final Color resourceMapCanvas;
@@ -182,20 +183,15 @@ final class ThemeSpec {
   final ThemeMotionCapabilities motion;
 
   // Availability must remain distinguishable from decorative pink/red trim.
-  // These accents are scoped to Planner; other market surfaces stay neutral.
+  // The same green/red availability meaning applies to cards and badges.
   Color get plannerAvailableAccent {
     if (brightness != Brightness.dark) return const Color(0xFF306947);
-    // Lift green/teal-themed surfaces toward pale aqua, independently of
-    // theme identity, so their availability edge does not blend into trim.
-    final hue = HSLColor.fromColor(palette.trim).hue;
-    return hue >= 70 && hue <= 190
-        ? const Color(0xFFA6E3EA)
-        : const Color(0xFF77C7AE);
+    return const Color(0xFF9ED6AC);
   }
 
   Color get plannerOutOfStockAccent => brightness == Brightness.dark
-      ? const Color(0xFFF0BE73)
-      : const Color(0xFF865509);
+      ? const Color(0xFFE9A7B5)
+      : const Color(0xFF7D4858);
   Color get plannerOutOfStockBadgeText => brightness == Brightness.dark
       ? const Color(0xFF302310)
       : const Color(0xFFFFFFFF);

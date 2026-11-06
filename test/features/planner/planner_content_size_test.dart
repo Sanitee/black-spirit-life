@@ -432,7 +432,7 @@ Map<String, Object> _layoutSignature(WidgetTester tester) {
       matching: find.byType(Column),
     );
     final firstColumn = tester.widget<Column>(columns.first);
-    final name = widget.name.key.toString();
+    final name = _qualityIdentity(element);
     result['quality:$name:inline'] = firstColumn.children.length == 1;
   }
   for (final element in find.byType(PlannerCraftQuantities).evaluate()) {
@@ -469,9 +469,27 @@ void _expectColumns(WidgetTester tester) {
 Map<String, double> _qualityWidths(WidgetTester tester) => {
   for (final element in find.byType(PlannerIngredientIdentity).evaluate())
     if ((element.widget as PlannerIngredientIdentity).quality != null)
-      (element.widget as PlannerIngredientIdentity).name.key.toString():
+      _qualityIdentity(element):
           (element.findRenderObject()! as RenderBox).size.width,
 };
+
+String _qualityIdentity(Element element) {
+  String? identity;
+  element.visitAncestorElements((ancestor) {
+    final widget = ancestor.widget;
+    if (widget is PlannerIngredientRowLayout) {
+      identity = widget.total.key.toString();
+      return false;
+    }
+    return true;
+  });
+  if (identity == null || identity == 'null') {
+    throw StateError(
+      'Ingredient quality requires a stable recipe/ingredient key.',
+    );
+  }
+  return identity!;
+}
 
 void _expectRealQuantities(WidgetTester tester) {
   final step = tester

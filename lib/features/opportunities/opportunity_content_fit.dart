@@ -59,8 +59,7 @@ double _opportunitiesMaximum(
       now,
       maxAge: controller.cachedMarketMaxAge,
     );
-    return measure('Stock ${badge.text}', 16, FontWeight.w700).ceilToDouble() +
-        18;
+    return badge.minimumWidth(context);
   }
 
   if (p.section == 'best-use') {

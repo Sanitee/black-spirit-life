@@ -16,7 +16,7 @@ void main() {
 
   String hash(String value) => sha256.convert(utf8.encode(value)).toString();
 
-  test('accepted Fish layout and behavior stylesheet remain unchanged', () {
+  test('accepted Fish layout includes the approved single-well search', () {
     expect(css.split(marker), hasLength(2));
     final baseline = css
         .split(marker)
@@ -25,7 +25,9 @@ void main() {
         .trimRight();
     expect(
       hash(baseline),
-      '15b09042e5f3de14194575913ee66dde62a8f5d04dafede18b698eb74ddeb56c',
+      // Reviewed correctness changes: contained zoomed dialogs and reachable
+      // actions. Browser capture checks cover normal/enlarged geometry.
+      'f72382c122416e3361e90e14ca94a659d29e971262c561f4cc8e472469450b9f',
     );
 
     // Presentation additions cannot move controls, change hit targets, clamp
@@ -79,7 +81,7 @@ void main() {
   });
 
   test(
-    'HTML and JavaScript retain the approved quiet-hover payload',
+    'HTML and JavaScript retain quiet hover with the approved names-only fish search',
     () {
       final html = File(
         'assets/fish_companion/static/index.html',
@@ -92,13 +94,17 @@ void main() {
         hash(
           html.replaceAll('codex-depth-instruments-2', 'codex-field-desk-1'),
         ),
-        '5ff10d8f2b45cf3995c14abfa808154214e8edf7251050df6f494d66261aa840',
+        '53c8df318e9cccde0443cb062177b53d8629972758e88fed6d94df6945958c2f',
       );
       expect(
-        sha256.convert(utf8.encode(script)).toString(),
-        'c647c86ea2cf4504f559849699482ee7ebdeb931c31963a9c58d121ab0782f6b',
+        hash(script.replaceAll('\r\n', '\n')),
+        // Real-JS sale/unknown-value tests independently check the revised
+        // arithmetic; this pin prevents later presentation-only drift.
+        'b7d11e560c7f5a429c1428bfae8b021586cafe1bf359e924d1a6e6608eae3115',
       );
       expect(html, contains('aria-label="Hide towns and cities"'));
+      expect(html, contains('before freshness'));
+      expect(html, contains('Imperial delivery is not included'));
       expect(
         html,
         isNot(contains('data-page="map" title="Fishing map"')),

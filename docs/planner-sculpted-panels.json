@@ -1,0 +1,41 @@
+{
+  "date": "2026-10-30",
+  "status": "isolated implementation; user runnable review and publication are separate",
+  "approval": "User selected option 2 Sculpted header, then explicitly requested implementation.",
+  "source": "[private-source]/Planner Sculpted Panels 20261030",
+  "baseline": {
+    "source": "[private-source]/Actual Batch Output 20261030",
+    "manifestSha256": "CF472E1E6CA8164F2E1DE499F8F336C7997BC25B894A22533DDAE25EDB08F0C4",
+    "snapshot": "Entire working snapshot, including staged Fresh Searches, Open Emblems, content-sized item windows and Actual Batch Output; HEAD alone is insufficient.",
+    "preservedAt": "[private-source]/Protected Rollback/prior-planner-panels-20261030-SBNhSK"
+  },
+  "interfaces": {
+    "ownedSubstitutes": "Fine dividers table opens from a substitutable ingredient name in Need First. Shows existing selected option first, real art, owned and missing quantities; preserves the existing chooser elsewhere and Processing Buy/Process controls.",
+    "shopping": "Click Need First to open the Source rail shopping popup. Existing Need First remains in place. Only missing quantities from the current plan appear; verified NPC inputs are grouped separately from Market / gather. Copy list uses exactly these rows.",
+    "undo": "Craft Queue Undo opens Action rail review of the existing latest completion receipt. Remove and Return show actual inventory deltas, not estimated consumption or yield. Undo this craft performs the existing atomic undo after checking that the displayed receipt is still current. Existing AFK-local Undo remains unchanged."
+  },
+  "behavior": [
+    "Opening a popup does not change inventory, plan selections or completion state.",
+    "Substitute previews use the existing engine with cloned state, preserving grades, recorded ratios and inventory settings.",
+    "Undo retains manual-edit, stale-receipt and mutation-freeze guards.",
+    "One shared sculpted header, recessed seam and theme-owned body materials; Sakura Recessed ink is not imposed on other themes.",
+    "Body content grows within the existing popover viewport cap and scrolls independently; close, Escape, dragging and fixed footer actions remain usable.",
+    "No new hover labels, settings, schema, catalog data, formulas, service ports or update behavior."
+  ],
+  "verification": {
+    "regressionTestsPassed": 176,
+    "fullApplicationCases": 12,
+    "themes": ["sakura-night-garden", "illuminated-ledger", "standard"],
+    "layouts": ["1200x752 text 1.0", "960x600 text 1.0", "1200x752 text 2.0", "1500x940 text 1.25"],
+    "otherChecks": ["Theme switching/reopening", "Exact copy text", "Wheel isolation", "Escape/outside dismissal", "Substitute ratios and quality", "Actual/clamped receipt deltas", "Stale receipt/manual edit/frozen undo", "Focused analysis", "Windows Release build"],
+    "scope": "Focused regression suite. Previously recorded unrelated baseline failures are not resolved or represented as fixed.",
+    "audit": "[private-audit]/audit/planner-sculpted-panels-20261030",
+    "captures": "[private-audit]/work/visuals/planner-sculpted-panels"
+  },
+  "runnable": "build/windows/x64/runner/Release/BlackSpiritLife.exe",
+  "personalDataAccessed": false,
+  "visibleAppLaunched": false,
+  "installedAppChanged": false,
+  "handedOff": false,
+  "published": false
+}

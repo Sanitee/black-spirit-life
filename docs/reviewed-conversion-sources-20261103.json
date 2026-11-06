@@ -1,0 +1,15 @@
+{
+  "date": "2026-11-03",
+  "status": "Scoped implementation; whole factual audit remains active",
+  "scope": "Three exact acquisition records and the direct Old Moon Censer usage name. No formula, inventory identity, cost, yield or automatic-planning changes.",
+  "changes": [
+    {"id":8196,"name":"Melody of the Stars","fact":"Heat an eligible blue-grade accessory: PRI 1, DUO 5, TRI 25. Consumes the accessory. The app still excludes this enhancement-dependent conversion from automatic planning.","source":"https://www.naeu.playblackdesert.com/en-US/News/Detail?groupContentNo=4655&countryType=en-US","date":"2023-01-11","corroboration":"Current PC item 8196 explicitly lists the same yields and 27 eligible accessory names; fresh 81 relationships cover those 27 identities at three enhancement levels."},
+    {"ids":[8108,821169],"names":["Origin of Margoria","Origin of Rusalka"],"fact":"Deep Sea Crystal Box can give 1–3 of either Origin; not guaranteed and no probability inferred. Boxes are Blue Battlefield rewards and can be exchanged for 30 Wavelit Crystals, one box weekly through Manage Currency.","sources":["https://www.naeu.playblackdesert.com/en-us/News/Detail?countryType=en-us&groupContentNo=9334","https://www.naeu.playblackdesert.com/en-US/News/Detail?groupContentNo=9683&countryType=en-US"],"dates":["2025-11-20","2026-02-05"],"corroboration":"Current PC Deep Sea Crystal Box ID761708 explicitly lists the same random contents. Existing destructive-conversion sources remain."}
+  ],
+  "preserved": ["All recipe fields and enhancement eligibility exclusions", "No automatic consumption of equipped or enhanced gear", "No exact Sea Crystal recycling proc probability claim", "Existing shared source-line formatting, themes and stock badges"],
+  "generator": "tool/apply_reviewed_conversion_sources_20261103.mjs",
+  "catalogSha256": "65cd4d2eb852e5ee086f61f1f08dd696a5c6554ec7c775b077913266980d85ca",
+  "catalogBytes": 30267979,
+  "verification": "118 source/catalog checks pass. EXP generator reproduces the retained entries byte-for-byte with the new source-only catalog hash. Whole-controller recheck and full rebuild are separate pending steps.",
+  "evidence": "External audit/correctness-review-20261102/official and resumed-conversion-source-recheck-tests.jsonl"
+}

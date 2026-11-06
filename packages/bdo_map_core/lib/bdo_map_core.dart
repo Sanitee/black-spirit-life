@@ -45,6 +45,7 @@ export 'src/widgets/active_node_recording_import_dialog.dart';
 export 'src/widgets/gathering_tool_icon.dart';
 export 'src/widgets/resource_map_controller.dart';
 export 'src/widgets/resource_map_chrome_theme.dart';
+export 'src/widgets/resource_map_silver_presentation.dart';
 export 'src/widgets/resource_map_pill.dart';
 export 'src/widgets/royal_workshop_manager.dart';
 export 'src/widgets/setup_screenshot_import_dialog.dart';

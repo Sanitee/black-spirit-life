@@ -9,6 +9,38 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   testWidgets(
+    'party names display and copy current spelling without altering action keys',
+    (tester) async {
+      final copied = <String>[];
+      await tester.pumpWidget(
+        OpportunityItemActionsScope(
+          externalActions: PlannerExternalActions(
+            openRecipeBook: (_) {},
+            copyName: (name) async => copied.add(name),
+            checkPrices: (_) async => throw StateError('No network'),
+          ),
+          child: const MaterialApp(
+            home: Scaffold(
+              body: OpportunityCopyName(
+                name: 'Harmony Draught - Human',
+                displayLabel: '10× Harmony Draught - Human',
+              ),
+            ),
+          ),
+        ),
+      );
+      expect(find.text('10× [Party] Harmony Draught - Human'), findsOneWidget);
+      await tester.tap(
+        find.byKey(
+          const ValueKey('opportunity-copy-name:Harmony Draught - Human'),
+        ),
+      );
+      await tester.pump();
+      expect(copied, ['[Party] Harmony Draught - Human']);
+      expect(tester.takeException(), isNull);
+    },
+  );
+  testWidgets(
     'name hover has no highlight or tooltip; keyboard focus remains',
     (tester) async {
       const captureKey = ValueKey('copy-name-capture');

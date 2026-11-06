@@ -1,0 +1,19 @@
+{
+  "reviewedAt":"2026-11-03",
+  "purpose":"Make13existing artifact bonus-quest source lines short and explicitly chance-qualified. No new loot source, probability, effect, item ID, recipe or market eligibility.",
+  "groups":[
+    {"ids":[735360,735371],"suffixes":["Alchemy EXP","Alchemy Mastery"],"text":"Imperial Alchemy · Bonus quest reward (chance)","officialTrigger":"Imperial Delivery of Medicine Boxes"},
+    {"ids":[735359,735370],"suffixes":["Cooking EXP","Cooking Mastery"],"text":"Imperial Cooking · Bonus quest reward (chance)","officialTrigger":"Imperial Delivery of Cooking Boxes"},
+    {"ids":[735357,735368],"suffixes":["Fishing EXP","Fishing Mastery"],"text":"Imperial Fishing · Bonus quest reward (chance)","officialTrigger":"Imperial Fishing Delivery"},
+    {"ids":[735355,735362,735373],"suffixes":["Mount EXP","Training EXP","Training Mastery"],"text":"Imperial Horse Delivery · Bonus quest reward (chance)","officialTrigger":"Imperial Horse Delivery"},
+    {"ids":[735361,735372,735354],"suffixes":["Processing EXP","Processing Mastery","Processing Success Rate"],"text":"Imperial Delivery · Cooking/medicine boxes or processed trade goods (bonus quest chance)","officialTrigger":"Imperial Delivery of Medicine Boxes, Cooking Boxes, or processed trade goods"},
+    {"ids":[735363],"suffixes":["Trading EXP"],"text":"Trading · Bonus quest when selling trade goods (chance)","officialTrigger":"selling trade goods"}
+  ],
+  "evidence":[
+    {"key":"artifacts-naeu-20220302","date":"2022-03-02","url":"https://www.naeu.playblackdesert.com/en-US/News/Detail?groupContentNo=2712&countryType=en-US","sha256":"33b97335355b40e22cd987743c7dd7f338423f042b8c0a55f19248be269fa172","supports":"Bonus quest is obtained by chance;completing it rewards Sethra artifacts or Imperfect Lightstone of Flora. Do not infer a guaranteed quest per delivery."},
+    {"key":"padix-naeu-20251113","date":"2025-11-13","url":"https://www.naeu.playblackdesert.com/en-US/News/Detail?groupContentNo=9299","sha256":"720fff3ee8485fe9601d9923664c4f81bcb32d7b183c47b8f482b960bd8adf3c","supports":"Official PC table explicitly assigns each of the13artifact variants to its delivery/trading bonus-quest trigger. Current item descriptions corroborate exact identities."}
+  ],
+  "clientItemsSha256":"a54b5735052c990e189ff1a50afb6d5442cc80e0ba8dabff995979bc8d35c821",
+  "catalogSha256":"c0fb5d9ad69295f0491060f7b72507d65b58e47088d551d77f1eb27d11256ff0",
+  "limits":["No exact proc odds claimed.","No exhaustive seasonal/event-reward inventory claim.","No new claim about old quest-slot limits or conflicting historical regional Gathering exclusions.","Original richer/custom source text is not shortened by substring matching."]
+}

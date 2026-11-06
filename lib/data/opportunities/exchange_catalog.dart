@@ -5,6 +5,10 @@ const _loml = ExchangeSource(
   'Official Land of the Morning Light exchanges',
   'https://blackdesert.pearlabyss.com/Asia/fr-FR/News/Notice/Detail?_boardNo=3855',
 );
+const _sangpyeongChest = ExchangeSource(
+  'Sangpyeong Coin Chest quest exchange',
+  'https://www.blackdesertfoundry.com/sangpyeong-coins-guide/',
+);
 const _life = ExchangeSource(
   'Official life byproduct exchanges',
   'https://blackdesert.pearlabyss.com/TR/en-US/News/Notice/Detail?_boardNo=16789',
@@ -16,6 +20,10 @@ const _fairy = ExchangeSource(
 const _boss = ExchangeSource(
   'Official Morning Light Boss Token exchanges',
   'https://blackdesert.pearlabyss.com/Asia/en-us/News/Notice/Detail?_boardNo=12696',
+);
+const _bossCrystalLimit = ExchangeSource(
+  'Official Primordial Crystal exchange limit · 6 August 2026',
+  'https://www.naeu.playblackdesert.com/News/Notice/Detail?groupContentNo=10422&countryType=en-US',
 );
 const _greed = ExchangeSource(
   'Official Dark Spirit’s Greed update · 3 September 2026',
@@ -56,6 +64,10 @@ const _battlefield = ExchangeSource(
 const _royalWorkshop = ExchangeSource(
   'Royal Workshop token exchanges',
   'https://www.blackdesertfoundry.com/royal-workshop-guide/',
+);
+const _courserMaterials = ExchangeSource(
+  'Official Royal Fern Root exchanges · 23 July 2026',
+  'https://www.naeu.playblackdesert.com/en-US/News/Detail?groupContentNo=10342',
 );
 
 /// IDs, names, market eligibility and NPC sell prices come from the reviewed
@@ -1006,6 +1018,13 @@ const exchangeItems = <int, ExchangeItem>{
     marketable: true,
     vendorSellPrice: 50000,
   ),
+  50810: ExchangeItem(
+    id: 50810,
+    name: 'Deep Blue Hoof Root',
+    iconAsset: 'assets/opportunities/items/50810.png',
+    marketable: true,
+    vendorSellPrice: 50000,
+  ),
   54031: ExchangeItem(
     id: 54031,
     name: "Laila's Petal",
@@ -1305,8 +1324,8 @@ final List<ExchangeCurrency> exchangeCatalog = List.unmodifiable([
   _currency(
     id: 'sangpyeong-chest',
     itemId: 66783,
-    activity: 'Land of the Morning Light',
-    sources: [_loml],
+    activity: 'Geowan (Byeot County) · 1,000 Sangpyeong Coins per chest',
+    sources: [_loml, _sangpyeongChest],
     routes: [
       _route(
         'sangpyeong-chest-harmony',
@@ -1318,10 +1337,7 @@ final List<ExchangeCurrency> exchangeCatalog = List.unmodifiable([
         notes: const ['Also gives 100 Contribution EXP.'],
       ),
     ],
-    notes: const [
-      'This uses two Coin Chests, not two coins.',
-      'Coin Chest redemption is not included: its quest condition differs between the old patch notes and current item text.',
-    ],
+    notes: const ["Two chests for Miss Myo's quest (once per family)."],
   ),
   _currency(
     id: 'witchs-delicacy',
@@ -1475,6 +1491,18 @@ final List<ExchangeCurrency> exchangeCatalog = List.unmodifiable([
     ],
   ),
   _currency(
+    id: 'royal-fern-root',
+    itemId: 757004,
+    activity: 'Training quests · Liana or Wapra',
+    sources: [_courserMaterials],
+    notes: const ['Each row is a separate choice.'],
+    routes: [
+      _route('fern-fodder', 3, 50804, 1, 'Wapra · Stonetail Horse Ranch'),
+      _route('fern-conch', 3, 50809, 1, 'Wapra · Stonetail Horse Ranch'),
+      _route('fern-hoof-root', 3, 50810, 1, 'Wapra · Stonetail Horse Ranch'),
+    ],
+  ),
+  _currency(
     id: 'wildspark',
     itemId: 9799,
     activity: 'Hunting',
@@ -1587,7 +1615,7 @@ final List<ExchangeCurrency> exchangeCatalog = List.unmodifiable([
     id: 'morning-light-boss-token',
     itemId: 761952,
     activity: 'Land of the Morning Light world bosses',
-    sources: [_boss],
+    sources: [_boss, _bossCrystalLimit],
     routes: [
       _route(
         'morning-token-gold',
@@ -1612,8 +1640,8 @@ final List<ExchangeCurrency> exchangeCatalog = List.unmodifiable([
         820935,
         8,
         'Manage Currency',
-        limit: const ExchangeLimit.weekly(4),
-        sources: [_boss],
+        limit: const ExchangeLimit.weekly(8),
+        sources: [_boss, _bossCrystalLimit],
       ),
     ],
   ),
@@ -1621,10 +1649,7 @@ final List<ExchangeCurrency> exchangeCatalog = List.unmodifiable([
     id: 'hunters-seal',
     itemId: 44186,
     activity: 'Bosses and combat rewards',
-    notes: const [
-      'Only the current repeatable exchanges are included.',
-      'Older daily Sharp quests are not included without a verified current limit.',
-    ],
+    notes: const ['Only the current repeatable exchanges are included.'],
     routes: [
       _route('hunter-black-stone', 3, 16001, 1, 'Manage Currency'),
       _route('hunter-weapon-reform', 5, 4910, 1, 'Manage Currency'),
@@ -1959,7 +1984,7 @@ final List<ExchangeCurrency> exchangeCatalog = List.unmodifiable([
   _currency(
     id: 'divine-coin',
     itemId: 980170,
-    activity: 'Inner Edania monster-zone loot',
+    activity: 'Exchange Inner Edania monster loot with Lafi Bedmountain',
     sources: [_divine],
     notes: const [
       'Take one of these to Lafi Bedmountain, Storage Keeper at Angavu Outpost, for 1 Divine Coin:',

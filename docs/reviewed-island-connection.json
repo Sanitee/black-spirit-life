@@ -1,0 +1,11 @@
+{
+  "date": "2026-11-03",
+  "status": "IMPLEMENTED_SCOPED_CORRECTION_VERIFIED_AUDIT_ACTIVE",
+  "verification": "Map v12 contains only the two reciprocal link halves plus provenance/version changes relative to v11.1001 map tests pass; one portrait case skipped in this run has separate executed coverage. Path regression confirms incremental2CP versus3CP from the tested Narvo branch, with fresh Velia9CP unchanged. Scoped analysis and Windows Release pass; bundled map hash matches source.",
+  "edge": [1054,1055],
+  "names": ["Lisz Island","Narvo Island"],
+  "official": {"url":"https://www.naeu.playblackdesert.com/en-US/News/Detail?groupContentNo=2227","published":"2021-12-01","supports":"Explicitly enabled the connection between these two named nodes."},
+  "corroboration": {"url":"https://blackdesert.pearlabyss.com/Asia/en-US/News/Notice/Detail?_boardNo=2682","published":"2021-12-01","currentClient":"Both exact nodes are enabled, main, CP1 and have reciprocal waypoint links. Current positions match the bundled identities. No ID/name ambiguity or parent inference."},
+  "downstream": "Resource Map links, production-node CP path cost and network planning consume this connection. An already-connected Narvo branch can reach Lisz's first fish yard with2 newCP instead of3; a fresh Velia route remains9CP.",
+  "limits": "One independently supported edge only. No blanket import of sea adjacency or other unresolved parent/graph candidates. No output, coordinates, worker yields, inventory or saved-network mutation."
+}

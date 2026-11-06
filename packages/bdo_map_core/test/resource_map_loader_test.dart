@@ -31,9 +31,9 @@ void main() {
     radiusWorld: 10000,
   );
 
-  test('loads the attributed October 9 Beta dataset', () {
+  test('loads the scoped November CP correction over the attributed map', () {
     expect(dataset.manifest.schemaVersion, 1);
-    expect(dataset.manifest.datasetVersion, '2026.10.09-beta-v5');
+    expect(dataset.manifest.datasetVersion, '2026.11.03-reviewed-map-v12');
     expect(dataset.manifest.provenance, isNotEmpty);
     expect(dataset.workerNodes.length, 1050);
     expect(dataset.resources.length, 358);

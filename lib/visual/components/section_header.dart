@@ -14,6 +14,7 @@ class SectionHeader extends StatelessWidget {
     this.trailing,
     this.padding = EdgeInsets.zero,
     this.prioritizeTitle = false,
+    this.titleBuilder,
     super.key,
   });
 
@@ -24,6 +25,7 @@ class SectionHeader extends StatelessWidget {
   final Widget? trailing;
   final EdgeInsetsGeometry padding;
   final bool prioritizeTitle;
+  final Widget Function(Widget label)? titleBuilder;
 
   static const Key titleKey = ValueKey<String>('section-header-title');
   static const Key ruleKey = ValueKey<String>('section-header-rule');
@@ -46,32 +48,37 @@ class SectionHeader extends StatelessWidget {
         sectionFontSize;
     final enlargedText = textScale > 1.25;
 
-    Text titleLabel() => Text(
-      displayTitle,
-      key: titleKey,
-      // Avalonia's Ledger TextBlock is a single no-wrap row. Retain a second
-      // line only for the enlarged-text responsive layout.
-      maxLines: tokens.usesDenseSplitLayout && !enlargedText ? 1 : 2,
-      overflow: TextOverflow.ellipsis,
-      style: switch (tokens.family) {
-        RetainedVisualFamily.illuminatedLedger =>
-          tokens.typography.section.copyWith(color: tokens.palette.primary),
-        RetainedVisualFamily.sakuraNightGarden =>
-          tokens.typography.section.copyWith(
-            color: tokens.palette.text,
+    Text titleText() {
+      final label = Text(
+        displayTitle,
+        key: titleKey,
+        // Avalonia's Ledger TextBlock is a single no-wrap row. Retain a second
+        // line only for the enlarged-text responsive layout.
+        maxLines: tokens.usesDenseSplitLayout && !enlargedText ? 1 : 2,
+        overflow: TextOverflow.ellipsis,
+        style: switch (tokens.family) {
+          RetainedVisualFamily.illuminatedLedger =>
+            tokens.typography.section.copyWith(color: tokens.palette.primary),
+          RetainedVisualFamily.sakuraNightGarden =>
+            tokens.typography.section.copyWith(
+              color: tokens.palette.text,
+              fontFamily: 'Georgia',
+              fontWeight: FontWeight.w600,
+            ),
+          RetainedVisualFamily.standard => tokens.typography.section.copyWith(
+            color: const Color(0xFFFFF1BB),
             fontFamily: 'Georgia',
-            fontWeight: FontWeight.w600,
+            fontSize: 28,
+            fontWeight: FontWeight.w700,
+            letterSpacing: 0,
+            height: 1.08,
           ),
-        RetainedVisualFamily.standard => tokens.typography.section.copyWith(
-          color: const Color(0xFFFFF1BB),
-          fontFamily: 'Georgia',
-          fontSize: 28,
-          fontWeight: FontWeight.w700,
-          letterSpacing: 0,
-          height: 1.08,
-        ),
-      },
-    );
+        },
+      );
+      return label;
+    }
+
+    Widget titleLabel() => titleBuilder?.call(titleText()) ?? titleText();
 
     Widget metaLabel(String value) => ConstrainedBox(
       constraints: const BoxConstraints(maxWidth: 220),
@@ -245,7 +252,7 @@ class SectionHeader extends StatelessWidget {
       builder: (context, constraints) {
         final label = titleLabel();
         final measure = TextPainter(
-          text: TextSpan(text: displayTitle, style: label.style),
+          text: TextSpan(text: displayTitle, style: titleText().style),
           textDirection: Directionality.of(context),
           textScaler: MediaQuery.textScalerOf(context),
           maxLines: 1,

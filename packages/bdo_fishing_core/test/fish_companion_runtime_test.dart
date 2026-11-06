@@ -1283,24 +1283,43 @@ void main() {
   });
 
   test(
-    'shared WebView data must remain beneath the selected personal root',
+    'shared WebView runtime can live outside portable personal data',
     () async {
       final fixture = await _Fixture.create();
       addTearDown(fixture.dispose);
       await fixture.writeAcceptedPayload();
 
-      await expectLater(
-        FishCompanionRuntime(
-          personalDataRoot: fixture.personalRoot,
-          packagedPayloadRoot: fixture.packagedRoot,
-          referenceCacheRoot: fixture.referenceRoot,
-          webViewDataRoot: Directory(
-            _path(fixture.root.path, 'outside-webview'),
-          ),
-        ).install(),
-        throwsStateError,
-      );
+      final installed = await FishCompanionRuntime(
+        personalDataRoot: fixture.personalRoot,
+        packagedPayloadRoot: fixture.packagedRoot,
+        referenceCacheRoot: fixture.referenceRoot,
+        webViewDataRoot: Directory(_path(fixture.root.path, 'outside-webview')),
+      ).install();
+      expect(installed.path, fixture.packagedRoot.absolute.path);
       expect(await fixture.personalRoot.list().isEmpty, isTrue);
+    },
+  );
+  test(
+    'WebView runtime cannot own the profile or write inside the app',
+    () async {
+      final fixture = await _Fixture.create();
+      addTearDown(fixture.dispose);
+      await fixture.writeAcceptedPayload();
+      for (final directory in [
+        fixture.personalRoot,
+        fixture.root,
+        Directory(_path(fixture.packagedRoot.path, 'webview2')),
+      ]) {
+        await expectLater(
+          FishCompanionRuntime(
+            personalDataRoot: fixture.personalRoot,
+            packagedPayloadRoot: fixture.packagedRoot,
+            referenceCacheRoot: fixture.referenceRoot,
+            webViewDataRoot: directory,
+          ).install(),
+          throwsStateError,
+        );
+      }
     },
   );
 }

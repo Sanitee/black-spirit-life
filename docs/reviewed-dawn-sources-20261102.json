@@ -1,0 +1,40 @@
+{
+  "reviewedAt": "2026-11-02",
+  "region": "NA/EU PC",
+  "primary": {
+    "url": "https://www.naeu.playblackdesert.com/en-US/News/Detail?groupContentNo=10422&countryType=en-US",
+    "date": "2026-08-06",
+    "sha256": "96df2b11f7eb544ae2f38dcfb842f7708963a99ea01656a7a774e219d85ce446",
+    "section": "Dark Bonghwang: four Simple Alchemy routes and 10x batch instruction"
+  },
+  "implemented": "Exact-ID source hints for the four specialized essences. Requires a starting essence, with gross output 30 and net +29; bulk gross 300 and net +290. Qualified Heating source retained.",
+  "identities": [
+    {
+      "id": 820980,
+      "name": "Essence of Dawn - Black Spirit's Rage"
+    },
+    {
+      "id": 820981,
+      "name": "Essence of Dawn - Accuracy"
+    },
+    {
+      "id": 820982,
+      "name": "Essence of Dawn - Damage Reduction"
+    },
+    {
+      "id": 820983,
+      "name": "Essence of Dawn - Evasion"
+    }
+  ],
+  "exclusions": [
+    "The plain Essence of Dawn 820979 is not an eligible multiplication input.",
+    "No new Planner production recipe enabled. Existing manual-conversion exclusion prevents incomplete Heating inputs or self-output recursion.",
+    "No drop probability inferred for Dark Bonghwang's Tear."
+  ],
+  "remaining": [
+    "Automatic self-output/seed-aware Planner support is not implemented.",
+    "Every enhanced accessory's eligibility and individual Heating yield is not certified by these short source hints.",
+    "Dark Bonghwang's Tear 890011 is identified in current native text but remains unmapped in the application's generic identity maps; market eligibility is not inferred."
+  ],
+  "verification": "Shared controller checks cover every mode and guard the plain essence exclusion; generated source preservation checks retain all older facts."
+}

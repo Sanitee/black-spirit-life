@@ -322,87 +322,93 @@ void main() {
     },
   );
 
-  test(
-    'searches reset on restart while Best use stays session-only through navigation and saves',
-    () async {
-      final harness = await ApplicationTestHarness.create();
-      addTearDown(harness.dispose);
-      final directory = Directory(
-        '${harness.temporaryDirectory.path}/opportunities',
-      );
-      final saved = _preferences()
-        ..section = 'best-use'
-        ..useInventory = true
-        ..bestUseItem = 'Milk';
-      await OpportunitiesPreferenceStore(directory).save(saved);
-      final fileBefore = await _settingsFile(directory).readAsBytes();
-      final plannerBefore = harness.bundle.controller.documentSnapshot;
-      final expected = saved.toJson()
-        ..['craftSearch'] = ''
-        ..['exchangeSearch'] = ''
-        ..['bestUseItem'] = '';
+  for (final section in ['exchanges', 'best-use']) {
+    test(
+      'restart from $section opens Crafting with fresh searches without resetting session navigation or Planner',
+      () async {
+        final harness = await ApplicationTestHarness.create();
+        addTearDown(harness.dispose);
+        final directory = Directory(
+          '${harness.temporaryDirectory.path}/opportunities',
+        );
+        final saved = _preferences()
+          ..section = section
+          ..useInventory = true
+          ..bestUseItem = 'Milk';
+        await OpportunitiesPreferenceStore(directory).save(saved);
+        final fileBefore = await _settingsFile(directory).readAsBytes();
+        final plannerBefore = harness.bundle.controller.documentSnapshot;
+        final expected = saved.toJson()
+          ..['section'] = 'crafting'
+          ..['craftSearch'] = ''
+          ..['exchangeSearch'] = ''
+          ..['bestUseItem'] = '';
 
-      final first = _controller(harness, directory);
-      try {
-        await first.ready;
-        expect(first.preferences.toJson(), expected);
-        // Startup must not rewrite the user's file just to clear visible search.
-        expect(await _settingsFile(directory).readAsBytes(), fileBefore);
-        await first.flush();
-        expect(await _settingsFile(directory).readAsBytes(), fileBefore);
-        first.selectBestUseItem('Aloe');
-        first.change((p) {
-          p.section = 'best-use';
-          p.craftSearch = 'Vinegar';
-          p.exchangeSearch = 'Milk';
-        });
-        await first.calculationSettled;
-        expect(first.preferences.bestUseItem, 'Aloe');
-        for (final mode in CraftMode.values) {
+        final first = _controller(harness, directory);
+        try {
+          await first.ready;
+          expect(first.preferences.toJson(), expected);
+          // Startup must not rewrite the user's file just to clear visible search.
+          expect(await _settingsFile(directory).readAsBytes(), fileBefore);
+          await first.flush();
+          expect(await _settingsFile(directory).readAsBytes(), fileBefore);
+          first.selectBestUseItem('Aloe');
           first.change((p) {
-            p.section = 'crafting';
-            p.mode = mode;
-          }, assemble: true);
+            p.section = 'best-use';
+            p.craftSearch = 'Vinegar';
+            p.exchangeSearch = 'Milk';
+          });
           await first.calculationSettled;
+          expect(first.preferences.bestUseItem, 'Aloe');
+          for (final mode in CraftMode.values) {
+            first.change((p) {
+              p.section = 'crafting';
+              p.mode = mode;
+            }, assemble: true);
+            await first.calculationSettled;
+            expect(first.preferences.craftSearch, 'Vinegar');
+            expect(first.preferences.exchangeSearch, 'Milk');
+            expect(first.preferences.bestUseItem, 'Aloe');
+          }
+          first.change((p) => p.section = 'exchanges');
+          expect(first.preferences.bestUseItem, 'Aloe');
+          first.change((p) => p.section = 'best-use');
+          await first.flush();
           expect(first.preferences.craftSearch, 'Vinegar');
           expect(first.preferences.exchangeSearch, 'Milk');
           expect(first.preferences.bestUseItem, 'Aloe');
+          final disk = await OpportunitiesPreferenceStore(directory).load();
+          expect(
+            disk.toJson(),
+            first.preferences.toJson()..['bestUseItem'] = '',
+            reason:
+                'Saving removes only the session selection from the snapshot.',
+          );
+          expect(
+            (jsonDecode(await _settingsFile(directory).readAsString())
+                as Map<String, dynamic>)['bestUseItem'],
+            isEmpty,
+          );
+        } finally {
+          first.dispose();
         }
-        first.change((p) => p.section = 'exchanges');
-        expect(first.preferences.bestUseItem, 'Aloe');
-        first.change((p) => p.section = 'best-use');
-        await first.flush();
-        expect(first.preferences.craftSearch, 'Vinegar');
-        expect(first.preferences.exchangeSearch, 'Milk');
-        expect(first.preferences.bestUseItem, 'Aloe');
-        final disk = await OpportunitiesPreferenceStore(directory).load();
-        expect(
-          disk.toJson(),
-          first.preferences.toJson()..['bestUseItem'] = '',
-          reason:
-              'Saving removes only the session selection from the snapshot.',
-        );
-        expect(
-          (jsonDecode(await _settingsFile(directory).readAsString())
-              as Map<String, dynamic>)['bestUseItem'],
-          isEmpty,
-        );
-      } finally {
-        first.dispose();
-      }
 
-      final restarted = _controller(harness, directory);
-      try {
-        await restarted.ready;
-        expect(restarted.preferences.toJson(), expected);
-        expect(harness.bundle.controller.documentSnapshot, same(plannerBefore));
-        expect(restarted.notice, isNull);
-      } finally {
-        await restarted.flush();
-        restarted.dispose();
-      }
-    },
-  );
+        final restarted = _controller(harness, directory);
+        try {
+          await restarted.ready;
+          expect(restarted.preferences.toJson(), expected);
+          expect(
+            harness.bundle.controller.documentSnapshot,
+            same(plannerBefore),
+          );
+          expect(restarted.notice, isNull);
+        } finally {
+          await restarted.flush();
+          restarted.dispose();
+        }
+      },
+    );
+  }
 
   test(
     'unchanged controller flush leaves an unreadable settings file untouched',

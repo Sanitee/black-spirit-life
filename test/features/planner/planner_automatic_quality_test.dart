@@ -4,6 +4,7 @@ import 'package:bdo_craft_planner_flutter/visual/visual.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../../support/availability_badge_finders.dart';
 import 'planner_test_fixture.dart';
 
 void main() {
@@ -68,7 +69,7 @@ void main() {
           find.byKey(const ValueKey('need:Special Sunrise Herb')),
           findsOneWidget,
         );
-        expect(find.text('Stock 2'), findsOneWidget);
+        expect(stockBadgeText('2'), findsOneWidget);
         expect(find.text('Out of stock'), findsNothing);
         expect(mode.state.value.ingredientGrades, isEmpty);
 

@@ -20,6 +20,7 @@ import 'package:bdo_craft_planner_flutter/features/planner/planner.dart';
 import 'package:bdo_craft_planner_flutter/features/resource_map/resource_map_workspace.dart';
 import 'package:bdo_craft_planner_flutter/visual/visual.dart';
 import 'package:bdo_map_core/bdo_map_core.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
@@ -27,6 +28,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
 
+import '../../support/action_hint_finder.dart';
 import '../../support/application_test_harness.dart';
 
 const _capture = ValueKey('active-chrome-capture');
@@ -69,7 +71,7 @@ void main() {
           tester,
           () => find.byType(BdoResourceMap).evaluate().isNotEmpty,
         );
-        expect(find.byTooltip('Back to Planner'), findsOneWidget);
+        expect(findActionHint('Back to Planner'), findsOneWidget);
         await _captureImage(tester, 'return-arrow-resource-map', height: 120);
         // A second lookup within the map must not add a duplicate return step.
         actions.openMapLookup!(
@@ -115,7 +117,15 @@ void main() {
         await _select(tester, 'opportunities');
         final card = find.byKey(const ValueKey('craft-card:$_whale'));
         await _until(tester, () => card.evaluate().isNotEmpty);
-        await tester.tap(card);
+        // A normal card click expands inline. The retained full recipe dialog
+        // is opened by its existing secondary action, not the old card click.
+        await tester.tap(card, buttons: kSecondaryMouseButton);
+        final viewRecipe = find.byKey(
+          const ValueKey('opportunity-item-action:craft-card:$_whale:recipe'),
+        );
+        await _until(tester, () => viewRecipe.evaluate().isNotEmpty);
+        await _pump(tester);
+        await tester.tap(viewRecipe);
         await _pump(tester);
         final dialog = tester.element(find.byType(Dialog));
         final opportunities = tester.element(
@@ -142,7 +152,7 @@ void main() {
           ),
         );
         await _pump(tester);
-        expect(find.byTooltip('Back to Opportunities'), findsOneWidget);
+        expect(findActionHint('Back to Opportunities'), findsOneWidget);
         await _captureImage(tester, 'return-arrow-planner', height: 120);
         expect(processing.state.value.target, _whale);
         expect(processing.state.value.want, 73);
@@ -157,10 +167,10 @@ void main() {
           tester,
           () => find.byType(BdoResourceMap).evaluate().isNotEmpty,
         );
-        expect(find.byTooltip('Back to Planner'), findsOneWidget);
+        expect(findActionHint('Back to Planner'), findsOneWidget);
         await tester.tap(find.byKey(AppTitleTabStrip.returnButtonKey));
         await _pump(tester);
-        expect(find.byTooltip('Back to Opportunities'), findsOneWidget);
+        expect(findActionHint('Back to Opportunities'), findsOneWidget);
         expect(find.byType(PlannerView), findsOneWidget);
         await tester.tap(find.byKey(AppTitleTabStrip.returnButtonKey));
         await _pump(tester);

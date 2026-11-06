@@ -17,220 +17,275 @@ import '../../support/application_test_harness.dart';
 
 void main() {
   setUpAll(_loadFonts);
-  for (final spec in [
-    SakuraNightGardenSpec.theme,
-    StandardSpec.theme,
-    IlluminatedLedgerSpec.theme,
+  for (final (target, source) in [
+    ("Tyrant's Blood", 'Pure Powder Reagent'),
+    ("Clown's Blood", 'Clear Liquid Reagent'),
   ]) {
-    for (final scenario in [
-      (const Size(1200, 752), 1.0, 1.0),
-      (const Size(1500, 940), 1.0, 1.25),
-      (const Size(1200, 752), 2.0, 1.0),
+    for (final spec in [
+      SakuraNightGardenSpec.theme,
+      StandardSpec.theme,
+      IlluminatedLedgerSpec.theme,
     ]) {
-      final (size, textScale, zoom) = scenario;
-      testWidgets(
-        'Attached popup ${spec.id} ${size.width} text $textScale zoom $zoom',
-        (tester) async {
-          configureApplicationTestSurface(
-            tester,
-            size,
-            textScaleFactor: textScale,
-          );
-          final original = (await tester.runAsync(
-            () => ApplicationTestHarness.create(
-              backgroundId: spec.isStandard ? 'greenhouse' : spec.id,
-              activeMode: CraftMode.alchemy,
-            ),
-          ))!;
-          final harness = original.rebindControllerInCurrentZone();
-          await tester.runAsync(original.disposeControllerOnly);
-          harness.bundle.controller.previewPlannerContentScale(zoom);
-          final mode = harness.bundle.controller.active;
-          expect(mode.selectTarget("Tyrant's Blood"), isTrue);
-          mode.updateState(
-            (state) => state.copyWith(want: 100),
-            immediate: true,
-          );
-          final beforeState = mode.state.value.toJson();
-          try {
-            await tester.pumpWidget(
-              RepaintBoundary(
-                key: const ValueKey('popup-scroll-capture'),
-                child: BdoCraftPlannerApp(
-                  enableOpportunityAutoCheck: false,
-                  applicationFuture: Future.value(harness.bundle),
-                  marketGateway: const EmptyMarketGateway(),
-                ),
-              ),
+      for (final scenario in [
+        (const Size(1200, 752), 1.0, 1.0),
+        (const Size(1200, 600), 1.0, 1.0),
+        (const Size(1500, 940), 1.0, 1.25),
+        (const Size(1200, 752), 2.0, 1.0),
+      ]) {
+        final (size, textScale, zoom) = scenario;
+        testWidgets(
+          'Attached popup $target ${spec.id} ${size.width}x${size.height} text $textScale zoom $zoom',
+          (tester) async {
+            configureApplicationTestSurface(
+              tester,
+              size,
+              textScaleFactor: textScale,
             );
-            await tester.pumpAndSettle();
-            final anchor = find.byKey(
-              PlannerActionKeys.row(
-                'P22',
-                "Tyrant's Blood:Pure Powder Reagent",
+            final original = (await tester.runAsync(
+              () => ApplicationTestHarness.create(
+                backgroundId: spec.isStandard ? 'greenhouse' : spec.id,
+                activeMode: CraftMode.alchemy,
               ),
+            ))!;
+            final harness = original.rebindControllerInCurrentZone();
+            await tester.runAsync(original.disposeControllerOnly);
+            harness.bundle.controller.previewPlannerContentScale(zoom);
+            final mode = harness.bundle.controller.active;
+            expect(mode.selectTarget(target), isTrue);
+            mode.updateState(
+              (state) => state.copyWith(want: 100),
+              immediate: true,
             );
-            final queue = find
-                .descendant(
-                  of: find.byKey(
-                    const PageStorageKey<String>('planner-craft-queue'),
+            final beforeState = mode.state.value.toJson();
+            try {
+              await tester.pumpWidget(
+                RepaintBoundary(
+                  key: const ValueKey('popup-scroll-capture'),
+                  child: BdoCraftPlannerApp(
+                    enableOpportunityAutoCheck: false,
+                    applicationFuture: Future.value(harness.bundle),
+                    marketGateway: const EmptyMarketGateway(),
                   ),
-                  matching: find.byType(Scrollable),
-                )
-                .first;
-            final expand = find.byKey(
-              PlannerActionKeys.row('P09', "Tyrant's Blood"),
-            );
-            if (anchor.evaluate().isEmpty) {
-              await tester.scrollUntilVisible(expand, 180, scrollable: queue);
+                ),
+              );
               await tester.pumpAndSettle();
-              await tester.tap(expand);
+              final anchor = find.byKey(
+                PlannerActionKeys.row('P22', '$target:$source'),
+              );
+              final queue = find
+                  .descendant(
+                    of: find.byKey(
+                      const PageStorageKey<String>('planner-craft-queue'),
+                    ),
+                    matching: find.byType(Scrollable),
+                  )
+                  .first;
+              final expand = find.byKey(PlannerActionKeys.row('P09', target));
+              if (anchor.evaluate().isEmpty) {
+                await tester.scrollUntilVisible(expand, 180, scrollable: queue);
+                await tester.pumpAndSettle();
+                await tester.tap(expand);
+                await tester.pumpAndSettle();
+              }
+              await tester.scrollUntilVisible(anchor, 180, scrollable: queue);
+              expect(anchor, findsOneWidget);
+              await tester.ensureVisible(anchor);
               await tester.pumpAndSettle();
-            }
-            await tester.scrollUntilVisible(anchor, 180, scrollable: queue);
-            expect(anchor, findsOneWidget);
-            await tester.ensureVisible(anchor);
-            await tester.pumpAndSettle();
-            final background = tester
-                .stateList<ScrollableState>(find.byType(Scrollable))
-                .toList();
-            final offsets = [
-              for (final state in background) state.position.pixels,
-            ];
-            await tester.tap(anchor);
-            await tester.pumpAndSettle();
-            final popup = find.byType(ItemReferenceCard);
-            expect(popup, findsOneWidget);
-            final rect = tester.getRect(popup);
-            expect(rect.top, greaterThanOrEqualTo(0));
-            expect(rect.bottom, lessThanOrEqualTo(size.height));
-            expect(rect.left, greaterThanOrEqualTo(0));
-            expect(rect.right, lessThanOrEqualTo(size.width));
-            final recipeTab = find.byKey(
-              const ValueKey('attached-reference-tab:recipe'),
-            );
-            final usedTab = find.byKey(
-              const ValueKey('attached-reference-tab:used'),
-            );
-            expect(recipeTab, findsOneWidget);
-            expect(usedTab, findsOneWidget);
-            final headerBefore = tester.getRect(usedTab);
-            await _capture(
-              tester,
-              '${spec.id}-${size.width.toInt()}-text${textScale.toInt()}-recipe',
-            );
-            await tester.tap(usedTab);
-            await tester.pumpAndSettle();
-            expect(tester.getRect(usedTab), headerBefore);
-            final popupScroll = tester.state<ScrollableState>(
-              find.descendant(of: popup, matching: find.byType(Scrollable)),
-            );
-            expect(popupScroll.position.maxScrollExtent, greaterThan(0));
-            await _capture(
-              tester,
-              '${spec.id}-${size.width.toInt()}-text${textScale.toInt()}-used',
-            );
-            Future<void> wheel(Offset point, double delta) async {
+              final background = tester
+                  .stateList<ScrollableState>(find.byType(Scrollable))
+                  .toList();
+              final offsets = [
+                for (final state in background) state.position.pixels,
+              ];
+              await tester.tap(anchor);
+              await tester.pumpAndSettle();
+              final popup = find.byType(ItemReferenceCard);
+              expect(popup, findsOneWidget);
+              var rect = tester.getRect(popup);
+              expect(rect.top, greaterThanOrEqualTo(0));
+              expect(rect.bottom, lessThanOrEqualTo(size.height));
+              expect(rect.left, greaterThanOrEqualTo(0));
+              expect(rect.right, lessThanOrEqualTo(size.width));
+              final recipeTab = find.byKey(
+                const ValueKey('attached-reference-tab:recipe'),
+              );
+              final usedTab = find.byKey(
+                const ValueKey('attached-reference-tab:used'),
+              );
+              expect(recipeTab, findsOneWidget);
+              expect(usedTab, findsOneWidget);
+              await _capture(
+                tester,
+                '${target.startsWith('Clown') ? 'clowns' : 'tyrants'}-${spec.id}-${size.width.toInt()}x${size.height.toInt()}-text${textScale.toInt()}-recipe',
+              );
+              await tester.tap(usedTab);
+              await tester.pumpAndSettle();
+              // Tab contents may change the height, but scrolling never moves
+              // the header or the page behind the popup.
+              rect = tester.getRect(popup);
+              final headerBefore = tester.getRect(usedTab);
+              expect(rect.top, greaterThanOrEqualTo(0));
+              expect(rect.bottom, lessThanOrEqualTo(size.height));
+              final popupScroll = tester.state<ScrollableState>(
+                find.descendant(
+                  of: popup,
+                  matching: find.byWidgetPredicate(
+                    (w) =>
+                        w is Scrollable &&
+                        w.axisDirection == AxisDirection.down,
+                  ),
+                ),
+              );
+              if (target == "Clown's Blood" &&
+                  textScale == 1 &&
+                  size.height >= 752) {
+                expect(popupScroll.position.pixels, 0);
+                final firstRecipeAction = find.byKey(
+                  const ValueKey(
+                    "item-info-use-recipe:alchemy:Clown's Blood:base:1",
+                  ),
+                );
+                expect(firstRecipeAction, findsOneWidget);
+                expect(
+                  tester.getRect(firstRecipeAction).bottom,
+                  lessThanOrEqualTo(rect.bottom),
+                  reason:
+                      'The entire first recipe, including its action, must fit. Later consumers remain scrollable.',
+                );
+                expect(
+                  popupScroll.position.maxScrollExtent,
+                  greaterThan(0),
+                  reason:
+                      'Used for must include the other recipes, not silently truncate at one.',
+                );
+                expect(rect.height, greaterThan(548));
+                expect(rect.height, lessThan(size.height - 40));
+              }
+              final canScroll = popupScroll.position.maxScrollExtent > 0;
+              if (textScale == 2 || size.height < 700) {
+                expect(
+                  canScroll,
+                  isTrue,
+                  reason: 'Constrained content must remain scrollable.',
+                );
+              }
+              await _capture(
+                tester,
+                '${target.startsWith('Clown') ? 'clowns' : 'tyrants'}-${spec.id}-${size.width.toInt()}x${size.height.toInt()}-text${textScale.toInt()}-used',
+              );
+              Future<void> wheel(Offset point, double delta) async {
+                await tester.sendEventToBinding(
+                  PointerScrollEvent(
+                    viewId: tester.view.viewId,
+                    kind: PointerDeviceKind.mouse,
+                    position: point,
+                    scrollDelta: Offset(0, delta),
+                  ),
+                );
+                await tester.pumpAndSettle();
+                expect(
+                  popup,
+                  findsOneWidget,
+                  reason: 'Scrolling the popup must not dismiss it.',
+                );
+                expect(tester.getRect(usedTab), headerBefore);
+                expect(
+                  [for (final state in background) state.position.pixels],
+                  offsets,
+                  reason: 'The popup must never scroll the underlying Planner.',
+                );
+              }
+
+              final wheelStep = (popupScroll.position.maxScrollExtent / 4)
+                  .clamp(1.0, 80.0);
+              await wheel(rect.center, wheelStep);
+              expect(
+                popupScroll.position.pixels,
+                canScroll ? greaterThan(0) : 0,
+              );
+              final firstOffset = popupScroll.position.pixels;
+              await wheel(rect.center, wheelStep);
+              expect(
+                popupScroll.position.pixels,
+                canScroll ? greaterThan(firstOffset) : 0,
+              );
+              await wheel(rect.center, 100000);
+              expect(
+                popupScroll.position.pixels,
+                popupScroll.position.maxScrollExtent,
+              );
+              final finalText = find
+                  .descendant(of: popup, matching: find.byType(Text))
+                  .last;
+              expect(
+                tester.getRect(finalText).bottom,
+                lessThanOrEqualTo(rect.bottom),
+              );
+              await _capture(
+                tester,
+                '${target.startsWith('Clown') ? 'clowns' : 'tyrants'}-${spec.id}-${size.width.toInt()}x${size.height.toInt()}-text${textScale.toInt()}-bottom',
+              );
+              await wheel(rect.center, 120);
+              await wheel(rect.center, -100000);
+              expect(popupScroll.position.pixels, 0);
+              await wheel(rect.center, -120);
+              await wheel(Offset(rect.left + 3, rect.center.dy), 120);
+              await tester.drag(
+                find.descendant(
+                  of: popup,
+                  matching: find.byKey(
+                    const ValueKey('attached-reference-scroll'),
+                  ),
+                ),
+                const Offset(0, -120),
+              );
+              await tester.pumpAndSettle();
+              expect(popup, findsOneWidget);
+              expect(
+                popupScroll.position.pixels,
+                canScroll ? greaterThan(0) : 0,
+              );
+              expect([
+                for (final state in background) state.position.pixels,
+              ], offsets);
+              final usedOffset = popupScroll.position.pixels;
+              await tester.tap(recipeTab);
+              await tester.pumpAndSettle();
+              expect(popupScroll.position.pixels, 0);
+              await tester.tap(usedTab);
+              await tester.pumpAndSettle();
+              expect(popupScroll.position.pixels, usedOffset);
+              await tester.sendKeyEvent(LogicalKeyboardKey.escape);
+              await tester.pumpAndSettle();
+              expect(popup, findsNothing);
+              // Closing a popup must not leave its owner locked or unable to scroll.
+              final queuePosition = tester
+                  .state<ScrollableState>(queue)
+                  .position;
+              final beforeQueue = queuePosition.pixels;
+              final delta = beforeQueue > 0 ? -120.0 : 120.0;
               await tester.sendEventToBinding(
                 PointerScrollEvent(
                   viewId: tester.view.viewId,
                   kind: PointerDeviceKind.mouse,
-                  position: point,
+                  position: tester.getRect(queue).center,
                   scrollDelta: Offset(0, delta),
                 ),
               );
               await tester.pumpAndSettle();
-              expect(
-                popup,
-                findsOneWidget,
-                reason: 'Scrolling the popup must not dismiss it.',
-              );
-              expect(tester.getRect(usedTab), headerBefore);
-              expect(
-                [for (final state in background) state.position.pixels],
-                offsets,
-                reason: 'The popup must never scroll the underlying Planner.',
+              expect(queuePosition.pixels, isNot(beforeQueue));
+              expect(mode.state.value.toJson(), beforeState);
+              expect(tester.takeException(), isNull);
+            } finally {
+              await tester.pumpWidget(const SizedBox.shrink());
+              await harness.disposeControllerOnly();
+              await tester.runAsync(
+                () => harness.temporaryDirectory.delete(recursive: true),
               );
             }
-
-            final wheelStep = (popupScroll.position.maxScrollExtent / 4).clamp(
-              1.0,
-              80.0,
-            );
-            await wheel(rect.center, wheelStep);
-            expect(popupScroll.position.pixels, greaterThan(0));
-            final firstOffset = popupScroll.position.pixels;
-            await wheel(rect.center, wheelStep);
-            expect(popupScroll.position.pixels, greaterThan(firstOffset));
-            await wheel(rect.center, 100000);
-            expect(
-              popupScroll.position.pixels,
-              popupScroll.position.maxScrollExtent,
-            );
-            final finalText = find
-                .descendant(of: popup, matching: find.byType(Text))
-                .last;
-            expect(
-              tester.getRect(finalText).bottom,
-              lessThanOrEqualTo(rect.bottom),
-            );
-            await _capture(
-              tester,
-              '${spec.id}-${size.width.toInt()}-text${textScale.toInt()}-bottom',
-            );
-            await wheel(rect.center, 120);
-            await wheel(rect.center, -100000);
-            expect(popupScroll.position.pixels, 0);
-            await wheel(rect.center, -120);
-            await wheel(Offset(rect.left + 3, rect.center.dy), 120);
-            await tester.drag(
-              find.descendant(
-                of: popup,
-                matching: find.byType(SingleChildScrollView),
-              ),
-              const Offset(0, -120),
-            );
-            await tester.pumpAndSettle();
-            expect(popup, findsOneWidget);
-            expect(popupScroll.position.pixels, greaterThan(0));
-            expect([
-              for (final state in background) state.position.pixels,
-            ], offsets);
-            final usedOffset = popupScroll.position.pixels;
-            await tester.tap(recipeTab);
-            await tester.pumpAndSettle();
-            expect(popupScroll.position.pixels, 0);
-            await tester.tap(usedTab);
-            await tester.pumpAndSettle();
-            expect(popupScroll.position.pixels, usedOffset);
-            await tester.sendKeyEvent(LogicalKeyboardKey.escape);
-            await tester.pumpAndSettle();
-            expect(popup, findsNothing);
-            // Closing a popup must not leave its owner locked or unable to scroll.
-            final queuePosition = tester.state<ScrollableState>(queue).position;
-            final beforeQueue = queuePosition.pixels;
-            final delta = beforeQueue > 0 ? -120.0 : 120.0;
-            await tester.sendEventToBinding(
-              PointerScrollEvent(
-                viewId: tester.view.viewId,
-                kind: PointerDeviceKind.mouse,
-                position: tester.getRect(queue).center,
-                scrollDelta: Offset(0, delta),
-              ),
-            );
-            await tester.pumpAndSettle();
-            expect(queuePosition.pixels, isNot(beforeQueue));
-            expect(mode.state.value.toJson(), beforeState);
-            expect(tester.takeException(), isNull);
-          } finally {
-            await tester.pumpWidget(const SizedBox.shrink());
-            await harness.disposeControllerOnly();
-            await tester.runAsync(
-              () => harness.temporaryDirectory.delete(recursive: true),
-            );
-          }
-        },
-      );
+          },
+        );
+      }
     }
   }
 }

@@ -1,0 +1,24 @@
+{
+  "date": "2026-11-03",
+  "status": "VERIFIED_SCOPED_SOURCE_CORRECTION_NOT_COMPLETENESS",
+  "verification": "110 focused checks;2264 references/6792 mode views;282 themed layouts plus12 final carrot-wording layouts; scoped analysis and Windows Release pass. Final Sakura normal/200% captures inspected. Exact crop identity guards and existing recipe/effect/market behavior retained.",
+  "scope": "Two existing mount-food crop references that still had market-only guidance. No new UI pattern, catalog recipe, source stock query, yield, inventory or market identity.",
+  "official": {
+    "url": "https://www.naeu.playblackdesert.com/en-US/Wiki?wikiNo=33",
+    "retrieved": "2026-11-03",
+    "section": "Harvesting / Mysterious and Magical Seeds",
+    "supports": "Harvest crops from planted seeds. Breeding may produce seeds of the same or better quality; a better grade is not guaranteed."
+  },
+  "exactCurrentIdentities": [
+    {"id": 54004, "name": "High-quality Carrot", "seedId": 6716, "seed": "High-quality Carrot Seed", "marketableSeed": true},
+    {"id": 54005, "name": "Special Carrot", "seedId": 6723, "seed": "Special Carrot Seed", "marketableSeed": true},
+    {"id": 6756, "name": "Magical Carrot Seed", "descriptionProduct": "Special Carrot", "marketableSeed": false},
+    {"id": 6856, "name": "Mysterious Carrot Seed", "descriptionProduct": "Special Carrot", "marketableSeed": false}
+  ],
+  "additionalOfficialChecks": [
+    {"url": "https://www.naeu.playblackdesert.com/en-US/News/Detail?groupContentNo=10137", "published": "2026-06-04", "supports": "Normal, high-quality, special and magical Carrot seeds are included in the live crop-growth/yield update. No outdated 4-hour growth estimate is added."},
+    {"url": "https://www.naeu.playblackdesert.com/en-US/News/Detail?groupContentNo=9993", "published": "2026-04-23", "supports": "Mysterious Carrot Seed is explicitly included in the harvest/breeding improvement. Relative yield multipliers are not turned into an invented absolute harvest range."}
+  ],
+  "corroboration": "Current installed PC archive item descriptions, exact IDs and market eligibility in research-items-NO-EFFECTS.json. Carrot crop IDs are not same-name knowledge IDs. The two marketable ordinary seed grades are distinguished from unmarketable magical/mysterious seeds. The shared source supplement requires exact crop ID and name.",
+  "limits": "No guaranteed breeding upgrade, harvest distribution, precise crop-growth time, new seed-tier eligibility, or full acquisition certification. Mysterious seeds are made by Shaking, not claimed to be obtained by breeding; the starter-seed line specifically names Special Carrot seeds. Existing source completeness records remain partial until their separate questions are settled. Bountiful Carrot Seed 821191 has incomplete current metadata in the research export and is not silently added as live guidance."
+}

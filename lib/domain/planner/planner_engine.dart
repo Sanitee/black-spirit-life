@@ -5,6 +5,7 @@ import 'ingredient_quality.dart';
 import 'mastery_yields.dart';
 import 'planner_models.dart';
 import 'recipe_route_economics.dart';
+import 'reviewed_recipe_yields.dart';
 import 'source_resolution.dart';
 
 final class PlannerEngine {
@@ -31,6 +32,7 @@ final class PlannerEngine {
   }
 
   double outputPerCraft({required Recipe recipe, required PlannerState state}) {
+    if (usesReviewedLightstoneBaseOutput(recipe)) return 1;
     final baseOutput = effectiveBaseOutput(recipe.baseOutput);
     return switch (recipe.type) {
       'alchemy' =>
@@ -629,6 +631,7 @@ final class _PlannerContext {
       const PlannerEngine().outputPerCraft(recipe: recipe, state: state);
 
   bool _isCraftable(String name) {
+    if (_isTemporarilyArchived(name)) return false;
     final recipe = items[name];
     return recipe?.isCraftable ?? false;
   }

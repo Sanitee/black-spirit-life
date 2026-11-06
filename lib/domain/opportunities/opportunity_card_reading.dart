@@ -36,7 +36,14 @@ final class OpportunityPerItemQuote {
   }
 }
 
+// `mixed` retains the amber material for preorders, not in-stock cards.
 enum OpportunityStockTone { unknown, available, outOfStock, mixed }
+
+OpportunityStockTone marketStockTone(int? stock) => stock == null
+    ? OpportunityStockTone.unknown
+    : stock <= 0
+    ? OpportunityStockTone.outOfStock
+    : OpportunityStockTone.available;
 
 enum OpportunityCraftDecision { unknown, equal, craft, sell }
 
@@ -93,11 +100,5 @@ final class OpportunityCardStock {
           : null;
 
   final int? stock, preorders;
-  OpportunityStockTone get tone => stock == null
-      ? OpportunityStockTone.unknown
-      : stock == 0
-      ? OpportunityStockTone.outOfStock
-      : (preorders ?? 0) > 0
-      ? OpportunityStockTone.mixed
-      : OpportunityStockTone.available;
+  OpportunityStockTone get tone => marketStockTone(stock);
 }

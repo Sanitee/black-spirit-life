@@ -25,6 +25,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../../support/application_test_harness.dart';
+import '../../support/availability_badge_finders.dart';
 
 const _captureKey = ValueKey('artwork-alignment-capture');
 Finder _card(String name) => find.byKey(ValueKey('craft-card:$name'));
@@ -72,6 +73,7 @@ void main() {
           if (view.$2 == 1) {
             expect(before.height, lessThan(160));
             expect(before.width, lessThanOrEqualTo(332));
+            expect(tester.getRect(card).height, lessThan(200));
           }
           final icons = find.descendant(
             of: card,
@@ -215,7 +217,9 @@ void main() {
             expect(
               find.descendant(
                 of: row,
-                matching: find.byIcon(npc ? Icons.person_outline : Icons.check),
+                matching: find.byKey(
+                  ValueKey('availability-game-icon:${npc ? 'npc' : 'stock'}'),
+                ),
               ),
               findsOneWidget,
             );
@@ -305,9 +309,9 @@ void main() {
   }
 
   for (final state in [
-    (0, 25, false, OpportunityStockTone.outOfStock, Icons.remove),
-    (100000, 25, false, OpportunityStockTone.mixed, Icons.check),
-    (100000, 25, true, OpportunityStockTone.unknown, Icons.help_outline),
+    (0, 25, false, OpportunityStockTone.outOfStock),
+    (100000, 25, false, OpportunityStockTone.available),
+    (100000, 25, true, OpportunityStockTone.unknown),
   ]) {
     testWidgets(
       'recipe availability ${state.$4.name} never confuses NPC or stale data',
@@ -351,14 +355,18 @@ void main() {
             expect(
               find.descendant(
                 of: row,
-                matching: find.byIcon(npc ? Icons.person_outline : state.$5),
+                matching: find.byKey(
+                  ValueKey('availability-game-icon:${npc ? 'npc' : 'stock'}'),
+                ),
               ),
               findsOneWidget,
             );
             expect(
               find.descendant(
                 of: row,
-                matching: find.byIcon(Icons.shopping_basket_outlined),
+                matching: find.byKey(
+                  const ValueKey('availability-game-icon:preorders'),
+                ),
               ),
               npc || state.$3 ? findsNothing : findsOneWidget,
             );
@@ -368,7 +376,7 @@ void main() {
             );
             if (!npc && state.$3) {
               expect(
-                find.descendant(of: row, matching: find.text('Stock —')),
+                find.descendant(of: row, matching: stockBadgeText('—')),
                 findsOneWidget,
               );
             }
@@ -426,8 +434,11 @@ void main() {
           )
           .map((t) => t.data)
           .toList();
-      expect(initialCounts.any((s) => s!.startsWith('Stock ')), isTrue);
-      expect(initialCounts.any((s) => s!.startsWith('Preorders ')), isTrue);
+      expect(
+        find.descendant(of: counts, matching: stockBadgeText()),
+        findsOneWidget,
+      );
+      expect(initialCounts.any((s) => s!.startsWith('Orders ')), isTrue);
       await tester.tap(find.byKey(const ValueKey('craft-expand-button:Beer')));
       await tester.pumpAndSettle();
       expect(find.text('Your inventory'), findsOneWidget);
@@ -543,7 +554,7 @@ void main() {
     (tester) async {
       for (final state in [
         (100, 0, 1000, OpportunityStockTone.available),
-        (100, 25, 100, OpportunityStockTone.mixed),
+        (100, 25, 100, OpportunityStockTone.available),
         (0, 25, 1000, OpportunityStockTone.outOfStock),
         (0, 0, 763, OpportunityStockTone.outOfStock),
         (null, 0, 1000, OpportunityStockTone.unknown),
@@ -587,11 +598,11 @@ void main() {
             find.descendant(of: counts, matching: find.byType(Text)).first,
           );
           expect(label.style!.color, material.badgeInk);
-          if (state.$1 == null) expect(label.data, 'Stock —');
-          if (state.$1 == 0) expect(label.data, 'Stock 0');
+          if (state.$1 == null) expect(label.data, '—');
+          if (state.$1 == 0) expect(label.data, '0');
           if ((state.$1 ?? 0) > 0 && state.$2 > 0) {
             expect(
-              find.descendant(of: counts, matching: find.text('Preorders 25')),
+              find.descendant(of: counts, matching: find.text('Orders 25')),
               findsOneWidget,
             );
           }

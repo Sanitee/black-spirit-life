@@ -1,0 +1,18 @@
+{
+  "reviewedAt":"2026-11-03",
+  "corrections":[
+    {"id":4267,"name":"Black Gold Ingot","knowledgeId":7917,"inputs":[{"id":9981,"name":"[Guild] Ocean Stalker's Skin","quantity":10},{"id":4259,"name":"Pure Platinum Crystal","quantity":2}],"decision":"Restore the exact guild ingredient name. Current knowledge and the input item's own description explicitly retain the Guild qualification. Output item description omits the prefix; it is not a distinct non-guild ingredient."},
+    {"id":15650,"name":"Black Magic Crystal - Addis","knowledgeId":15024,"inputs":[{"id":4988,"name":"Black Essence: Addis","quantity":1},{"id":15649,"name":"Ancient Magic Crystal - Addis","quantity":1}],"decision":"Replace generic Crafting Notes direction with the current exact Heating input set. Existing other sources and random-container qualifications retained; no automatic crystal recipe or output probability added."},
+    {"id":5605,"name":"Delotia Powder","knowledgeId":9991,"inputId":5538,"decision":"Current explicit knowledge identifies ordinary Delotia as a Grinding source. Add short source guidance while keeping both existing higher-grade formulas unchanged. Exact normal output quantity remains unverified; do not assume the ordinary1–4 model or generic grade substitutions."}
+  ],
+  "wordingOnly":["Breath of All Creations","Elion's Tear","Ten Melted Shard references and three Pure Crystal references retain equipment-recycling exclusion in shorter words.","Ancient Spirit Dust keeps qualified blue-accessory recycling and its manual-planning exclusion."],
+  "sharedCondition":{"text":"Filtering requires wind.","scope":"All displayed Filtering formulas plus exact Fine Lightweight Plume6165 source-only record;archived identities excluded;idempotent.","sourceKey":"processing-guide-naeu-20261103","url":"https://www.naeu.playblackdesert.com/en-US/Wiki?wikiNo=28","sha256":"0fd4565d28ab2ebf48a35fec00c2e3acc4caace8e42de052bbbb16389e231998"},
+  "officialSources":[
+    {"key":"processing-descriptions-naeu-20250213","date":"2025-02-13","url":"https://www.naeu.playblackdesert.com/en-US/News/Detail?groupContentNo=8159","sha256":"e9c247f7da767a3237e792e3a09a6a6f837d1f8722ebd7b4b812ee614093819c","supports":"Publisher description update covering Black Gold Ingot;exact inputs separately come from current explicit client item/knowledge prose."},
+    {"key":"specialties-naeu-20260226","date":"2026-02-26","url":"https://www.naeu.playblackdesert.com/en-US/News/Detail?groupContentNo=9763","sha256":"5ff5c404870e8472fb970ad784e3d41a071028851c6ef6a6674e0fc10869d4cd","supports":"Publisher improved required-material descriptions for Black Magic Crystal - Addis;current item and knowledge prose independently state Heating plus both1-count inputs."}
+  ],
+  "clientEvidence":{"source":"Installed PC archives throughOctober31,2026","locSha256":"be8364a658d08888ffe0c4e02764755de5c806c16b477c89dacf6f94ed3c1e92","itemsSha256":"a54b5735052c990e189ff1a50afb6d5442cc80e0ba8dabff995979bc8d35c821","limits":"Explicit prose supports scoped source guidance. Native raw success fields are not used as output probabilities or server certification."},
+  "catalogSha256":"c0fb5d9ad69295f0491060f7b72507d65b58e47088d551d77f1eb27d11256ff0",
+  "catalogBytes":31546504,
+  "unchanged":"All1690recipe inputs/outputs/roles/IDs,212exchanges,market rules,inventory and calculations.Only five raw source fields change;additional short wording and wind note use shared reference projection."
+}

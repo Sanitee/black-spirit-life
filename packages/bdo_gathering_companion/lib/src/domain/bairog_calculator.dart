@@ -612,6 +612,7 @@ class BairogEnergyExpense {
     required this.energyBoost,
     this.usesPerHour,
     this.durationHours,
+    this.singleUsePerSession = false,
   }) : assert(usesPerHour != null || durationHours != null);
 
   final int bdoItemId;
@@ -620,13 +621,17 @@ class BairogEnergyExpense {
   final double energyBoost;
   final double? usesPerHour;
   final double? durationHours;
+
+  /// A selected Miraculous dose is not renewable after its one-hour buff.
+  /// Its 22-hour cooldown is deliberately not an automatic consumption plan.
+  final bool singleUsePerSession;
 }
 
 const bairogEnergyExpenses = <BairogEnergyExpense>[
   BairogEnergyExpense(
     bdoItemId: 589,
     name: 'Energy Potion (Extra Large)',
-    recoveryPerHour: 275,
+    recoveryPerHour: 300,
     energyBoost: 0,
     usesPerHour: 6,
   ),
@@ -636,6 +641,7 @@ const bairogEnergyExpenses = <BairogEnergyExpense>[
     recoveryPerHour: 600,
     energyBoost: 500,
     durationHours: 1,
+    singleUsePerSession: true,
   ),
   BairogEnergyExpense(
     bdoItemId: 821144,
@@ -647,7 +653,7 @@ const bairogEnergyExpenses = <BairogEnergyExpense>[
   BairogEnergyExpense(
     bdoItemId: 821145,
     name: 'Mellow Herbal Medicine',
-    recoveryPerHour: 600,
+    recoveryPerHour: 500,
     energyBoost: 0,
     durationHours: 3,
   ),
@@ -699,6 +705,16 @@ class BairogCalculatorSettings {
   final Set<int> hiddenDropItemTypeIds;
   final Map<int, int> customGathersPerHour;
   final Map<int, double> customItemPrices;
+
+  /// Defend direct/legacy callers too: the two Royal medicines cannot stack.
+  /// Preserve saved choices, but prefer Mystical when an invalid pair arrives.
+  Iterable<BairogEnergyExpense> get activeEnergyExpenses =>
+      bairogEnergyExpenses.where(
+        (expense) =>
+            enabledExpenseItemIds.contains(expense.bdoItemId) &&
+            !(expense.bdoItemId == 821145 &&
+                enabledExpenseItemIds.contains(821144)),
+      );
 
   factory BairogCalculatorSettings.fromJsonString(String source) {
     final decoded = jsonDecode(source);
@@ -1263,6 +1279,8 @@ class BairogEnergyMetrics {
     required this.sessionHours,
     required this.hourlyExpenseSilver,
     required this.energyDumpExpenseSilver,
+    this.temporaryRecoveryHours = 0,
+    this.netEnergyDrainAfterTemporaryRecovery,
   });
 
   final double energyUsePerHour;
@@ -1274,6 +1292,8 @@ class BairogEnergyMetrics {
   final double sessionHours;
   final double hourlyExpenseSilver;
   final double energyDumpExpenseSilver;
+  final double temporaryRecoveryHours;
+  final double? netEnergyDrainAfterTemporaryRecovery;
 }
 
 class BairogRouteProjection {
@@ -1732,8 +1752,8 @@ class BairogCalculator {
     var selectedRecovery = 0.0;
     var energyBoost = 0.0;
     var hourlyExpense = 0.0;
-    for (final expense in bairogEnergyExpenses) {
-      if (!settings.enabledExpenseItemIds.contains(expense.bdoItemId)) continue;
+    final activeExpenses = settings.activeEnergyExpenses.toList();
+    for (final expense in activeExpenses) {
       selectedRecovery += expense.recoveryPerHour;
       energyBoost += expense.energyBoost;
       final expensePrice = marketPricesByBdoItemId[expense.bdoItemId] ?? 0;
@@ -1744,9 +1764,23 @@ class BairogCalculator {
     final naturalRecovery = settings.naturalEnergyRecoveryPerThreeMinutes * 20;
     final netDrain = energyUse - (naturalRecovery + selectedRecovery);
     final availableEnergy = settings.yourEnergy + energyBoost;
-    final sessionHours = netDrain > 0
+    var sessionHours = netDrain > 0
         ? availableEnergy / netDrain
         : double.infinity;
+    // This is a continuous-rate estimate, not a consumable/tick scheduler.
+    // One Miraculous dose can add at most one hour of recovery. Removing it
+    // after expiry prevents a temporary buff from implying infinite gathering.
+    final temporary = activeExpenses
+        .where((expense) => expense.singleUsePerSession)
+        .firstOrNull;
+    final temporaryHours = temporary?.durationHours ?? 0.0;
+    final drainAfterTemporary = netDrain + (temporary?.recoveryPerHour ?? 0);
+    if (temporary != null && sessionHours > temporaryHours) {
+      final energyAtExpiry = availableEnergy - netDrain * temporaryHours;
+      sessionHours = drainAfterTemporary > 0
+          ? temporaryHours + energyAtExpiry / drainAfterTemporary
+          : double.infinity;
+    }
     final totalSilver =
         baseSilver +
         hedgehogSilver +
@@ -1756,14 +1790,14 @@ class BairogCalculator {
         feverTimeSilver;
     var dumpExpense = 0.0;
     if (sessionHours.isFinite) {
-      for (final expense in bairogEnergyExpenses) {
-        if (!settings.enabledExpenseItemIds.contains(expense.bdoItemId)) {
-          continue;
-        }
+      for (final expense in activeExpenses) {
         final expensePrice = marketPricesByBdoItemId[expense.bdoItemId] ?? 0;
         dumpExpense += expense.usesPerHour != null
             ? expense.usesPerHour! * sessionHours * expensePrice
-            : (sessionHours / expense.durationHours!).ceil() * expensePrice;
+            : (expense.singleUsePerSession
+                      ? 1
+                      : (sessionHours / expense.durationHours!).ceil()) *
+                  expensePrice;
       }
     }
     final energyDumpSilver = sessionHours.isFinite
@@ -1808,6 +1842,10 @@ class BairogCalculator {
         sessionHours: sessionHours,
         hourlyExpenseSilver: hourlyExpense,
         energyDumpExpenseSilver: dumpExpense,
+        temporaryRecoveryHours: temporaryHours,
+        netEnergyDrainAfterTemporaryRecovery: temporary == null
+            ? null
+            : drainAfterTemporary,
       ),
     );
   }

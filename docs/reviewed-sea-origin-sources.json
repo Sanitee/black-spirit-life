@@ -1,0 +1,18 @@
+{
+  "date": "2026-11-03",
+  "changes": [
+    {"id":8108,"name":"Origin of Margoria","fact":"Simple Alchemy consumes one unwanted Margoria Sea Crystal and gives 1–2 Origins. Does not assert a mean or equal probability, or generalize to unopened Margoria Crystal."},
+    {"ids":[8107,8108,821169],"names":["Origin of Zulatia","Origin of Margoria","Origin of Rusalka"],"fact":"Each can be a random 1–2 result from Blue Sea Crystal Box. Crow Coin Shop price 5,000; weekly limit three boxes. Distinct from Deep Sea Crystal Box's 1–3 range and Wavelit exchange."}
+  ],
+  "sources": [
+    {"url":"https://www.naeu.playblackdesert.com/en-US/News/Detail?groupContentNo=8129&countryType=en-US","date":"2025-02-06","scope":"PC NA/EU explicit Margoria recycling range and replacement of low-stat sea crystals."},
+    {"record":"audit/correctness-review-20261102/official/crow-20260521-naeu.fetch.json","date":"2026-05-21","scope":"PC NA/EU current Blue Sea Crystal Box price, weekly limit and random contents."},
+    {"record":"Current installed PC item 890055","scope":"Corroborates exact three Origin identities and chance-qualified contents."}
+  ],
+  "marketExclusions": {
+    "ids": [8106,756425,756427,756501,756511,756521,756531],
+    "evidence": "Each exact-name record exists in current installed PC research-items-NO-EFFECTS.json with marketable false (omitted false per extractor schema). These seven scoped reference IDs were missing from the shared exclusion set. No failure-based exclusions or new polling.",
+    "genericShipReferenceCaveat": "Four historical representative IDs name multi-ID ship-crystal families. Generic cards deliberately state that stats depend on the individual crystal and never expose old representative stats or a market offer. Their historical IDs are not migrated into user data."
+  },
+  "preserved": "No automatic destructive processing, probability/average, source for unopened crystals, catalog identity migration, market quote or personal data change. Exact stale source lines replaced; other sources retained."
+}

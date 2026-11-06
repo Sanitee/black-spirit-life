@@ -10,6 +10,7 @@ import 'package:flutter/gestures.dart' show kSecondaryMouseButton;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'action_hint_finder.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -249,7 +250,7 @@ void main() {
         );
         expect(tester.takeException(), isNull);
         await tester.tap(
-          find.descendant(of: pinned, matching: find.text('Close')),
+          find.descendant(of: pinned, matching: findActionHint('Close')),
         );
         await tester.pumpAndSettle();
         expect(pinned, findsNothing);

@@ -1093,6 +1093,8 @@ class _BuffDetailsSections extends StatelessWidget {
           Text(
             buff.duration != null
                 ? 'Duration  ${formatDurationMinutes(buff.duration!)}'
+                : buff.durationNote.isNotEmpty
+                ? buff.durationNote
                 : 'Duration varies',
             style: const TextStyle(fontSize: 14),
           ),

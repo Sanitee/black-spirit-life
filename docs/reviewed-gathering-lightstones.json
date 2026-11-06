@@ -1,0 +1,109 @@
+{
+  "at": "2026-11-03T07:03:14.688Z",
+  "status": "IMPLEMENTED_VERIFICATION_PENDING",
+  "sources": [
+    {
+      "key": "gathering-guide-naeu",
+      "url": "https://www.naeu.playblackdesert.com/en-US/Wiki?wikiNo=34",
+      "finalUrl": "https://www.naeu.playblackdesert.com/en-US/Wiki?wikiNo=34",
+      "status": 200,
+      "bytes": 204012,
+      "sha256": "91121b4bc3d5ec750dce477ca33636b499128aa4539088c505f97d5459e7e466",
+      "retrievedAt": "2026-11-03T06:49:45.312Z",
+      "scope": "Only the explicit chance-qualified gathering sources; other guide sections are not blanket certified."
+    },
+    {
+      "key": "gathering-profit-naeu-20260514",
+      "url": "https://www.naeu.playblackdesert.com/en-US/News/Detail?groupContentNo=10064&countryType=en-US",
+      "finalUrl": "https://www.naeu.playblackdesert.com/en-US/News/Detail?groupContentNo=10064&countryType=en-US",
+      "status": 200,
+      "bytes": 190420,
+      "sha256": "8b6a9617fd46d25a5487aed59701412e29ec8f0810deeb30c6f506ac07c99602",
+      "retrievedAt": "2026-11-03T07:00:36.407Z",
+      "scope": "Dated PC NA/EU support for gathered Trace of Nature and Caphras; does not derive present absolute drop probabilities."
+    },
+    {
+      "key": "hunting-guide-naeu",
+      "url": "https://www.naeu.playblackdesert.com/en-US/Wiki?wikiNo=74",
+      "finalUrl": "https://www.naeu.playblackdesert.com/en-US/Wiki?wikiNo=74",
+      "status": 200,
+      "bytes": 283894,
+      "sha256": "279e1853ad3bea1fffffcc07011ee1403866f566a55dbd61b1ee00478e94004f",
+      "retrievedAt": "2026-11-03T06:52:58.142Z",
+      "scope": "Black Gem and Concentrated Magical Black Gem explicitly listed as hunting loot; not every named historical spawn or a guaranteed drop."
+    },
+    {
+      "key": "artifacts-guide-naeu",
+      "url": "https://www.naeu.playblackdesert.com/en-US/Wiki?wikiNo=250",
+      "finalUrl": "https://www.naeu.playblackdesert.com/en-US/Wiki?wikiNo=250",
+      "status": 200,
+      "bytes": 228355,
+      "sha256": "58a0a50417193c8cf1cc9e2b35ba878470248bd5523951c89baa3f60ee85f1ed",
+      "retrievedAt": "2026-11-03T06:59:19.432Z",
+      "scope": "Four exact catalyst substitutions; Flora gathering exclusions and 10,000 Work Supervisor seals."
+    }
+  ],
+  "items": [
+    {
+      "id": 5960,
+      "name": "Trace of Nature",
+      "currentDescription": "{TextBind:TRACE_OF_FOREST_CURRENT}",
+      "scope": "Short contextual source only; native locations and unpublished drop probabilities are not certified.",
+      "nativeGatheringNameCount": 368
+    },
+    {
+      "id": 721003,
+      "name": "Caphras Stone",
+      "currentDescription": "The immortal alchemist Caphras used stones as these as the ultimate catalyst. Sometimes referred to as the solar stone, the stone emits an intense and pure energy. It can be used to unlock the full potential of a gear without the risk of experiencing any dark, corrosive side effects.\n\n- Usage: Increases the power of TRI (III) or higher gear via Caphras Enhancement\n\n- {TextBind:KAFURAS_CLICK_RMB}\n\n- How to Obtain: Quests, defeating monsters, Gathering, or Processing ({KeyBind:Manufacture}) - Simple Alchemy with the following materials\n\n- Crafting Materials: \nAncient Spirit Dust x5\nBlack Stone x1\n\n- Materials for x10: \nAncient Spirit Dust x50\nBlack Stone x10\nBlack Stone Powder x1\n\n- Materials for x100:\nAncient Spirit Dust x500\nBlack Stone x100\nPure Powder Reagent x1",
+      "scope": "Short contextual source only; native locations and unpublished drop probabilities are not certified.",
+      "nativeGatheringNameCount": 433
+    },
+    {
+      "id": 5000,
+      "name": "Black Gem",
+      "currentDescription": "A crystallized form of dark energy. It is used for enhancing a certain type of special equipment. More black gems are required for enhancement at higher enhancement levels.\n\n- Usage: Enhance Life Skill gear or accessories\n\n- How to Obtain: Gathering, Hunting or Processing ({KeyBind:Manufacture}) - Simple Alchemy with the following materials\n\n- Materials #1:\nBlack Gem Fragment x1\nBlack Stone x2\n\n- Materials #2: \nBlack Gem Fragment x10\nBlack Stone x20\nBlack Stone Powder x1\n\n- Materials #3: \nBlack Gem Fragment x100\nBlack Stone x200\nPure Powder Reagent x1",
+      "scope": "Short contextual source only; native locations and unpublished drop probabilities are not certified.",
+      "nativeGatheringNameCount": 64
+    },
+    {
+      "id": 4987,
+      "name": "Concentrated Magical Black Gem",
+      "currentDescription": "A crystallized form of concentrated dark energy. It is used for enhancing a certain type of equipment. More black gems are required for enhancement at higher enhancement levels.\n\n- Usage: Enhance Life Skill gear and accessories\n\n- Enhancements with this item will not be affected by your Enhancement Chance.\n\n- How to Obtain: Processing ({KeyBind:Manufacture}) - Simple Alchemy with the following materials\n\n- Materials #1: \nBlack Gem x5\nSharp Black Crystal Shard x2\n\n- Materials #2:\nBlack Gem x50\nSharp Black Crystal Shard x20\nBlack Stone Powder x1\n\n- Materials #3: \nBlack Gem x500\nSharp Black Crystal Shard x200\nPure Powder Reagent x1",
+      "scope": "Short contextual source only; native locations and unpublished drop probabilities are not certified.",
+      "nativeGatheringNameCount": 64
+    },
+    {
+      "id": 766107,
+      "name": "Imperfect Lightstone of Flora",
+      "currentDescription": "A lightstone that contains imperfect flora energy.\n\n- Usage: Craft Purified Lightstone of Flora\n\n- Crafting Method #1: Alchemy in your residence if at least Alchemy Guru 1\n\n- Crafting Materials:\nImperfect Lightstone of Flora x1\nBlack Gem Fragment or Magical Lightstone Crystal x10\nBlack Stone x10\nPowder of Time x50\nPure Powder Reagent x50\n\n- Crafting Method #2: Hand over Imperfect Lightstone of Flora x1 and 20,000,000 Silver to  Dalishain located in major cities and towns.\n\n- How to Obtain: Life Skill activities according to a set probability",
+      "scope": "Short contextual source only; native locations and unpublished drop probabilities are not certified.",
+      "nativeGatheringNameCount": 414
+    }
+  ],
+  "recipeAlternatives": [
+    {
+      "name": "Purified Lightstone of Fire",
+      "id": 766001,
+      "scope": "10 Black Gem Fragment or 10 Magical Lightstone Crystal; all other input/output/default/EXP data unchanged."
+    },
+    {
+      "name": "Purified Lightstone of Earth",
+      "id": 766011,
+      "scope": "10 Black Gem Fragment or 10 Magical Lightstone Crystal; all other input/output/default/EXP data unchanged."
+    },
+    {
+      "name": "Purified Lightstone of Wind",
+      "id": 766021,
+      "scope": "10 Black Gem Fragment or 10 Magical Lightstone Crystal; all other input/output/default/EXP data unchanged."
+    },
+    {
+      "name": "Purified Lightstone of Flora",
+      "id": 766031,
+      "scope": "10 Black Gem Fragment or 10 Magical Lightstone Crystal; all other input/output/default/EXP data unchanged."
+    }
+  ],
+  "beforeSha256": "141d579b6d043d22b38dfcce8005487331a1ded54ea098ecabc9864d2eef68bb",
+  "afterSha256": "bbba2856d127145774a60f8eebac3bf103d9e73eb96943681c8759567fe7aa45",
+  "bytes": 30304564,
+  "limits": "Only these five contextual source hints and four catalyst alternatives reviewed. No personal state, map coordinates, gathering rates, output/EXP model, live price or source completeness certification."
+}

@@ -341,7 +341,7 @@ RecipeBookItemPurpose? _edaniaReformedAccessoryPurpose(String foldedName) {
     effects: <String>[reform.effect],
     uses: <String>['Equip it in its matching accessory slot.'],
     notes: const <String>[
-      'Extract with Refined Essence of Emotions to recover the original accessory and cup.',
+      'Extract with Mirror of Equilibrium to recover the original accessory and cup.',
     ],
   );
 }
@@ -455,50 +455,44 @@ _verifiedEffectPurposes = <String, RecipeBookItemPurpose>{
     effects: <String>['Recover 500 Energy', 'Energy Recovery +30'],
     notes: <String>['Buff duration: 60 min. Cooldown: 22 hr.'],
   ),
-  'destruction spirit stone': _activeStonePurpose(
+  'destruction spirit stone': _equippedStonePurpose(
     kind: 'Spirit stone',
-    description:
-        'An activatable combat stone equipped in the alchemy-stone slot.',
-    effects: <String>['All AP +6', 'All Accuracy +8'],
-    duration: '5 min',
-    cooldown: '5 min',
+    description: 'A combat stone with effects that stay on while equipped.',
+    effects: <String>[
+      'All AP +6',
+      'All Accuracy +8',
+      'Attack Speed +4%',
+      'Casting Speed +4%',
+    ],
   ),
-  'guardian spirit stone': _activeStonePurpose(
+  'guardian spirit stone': _equippedStonePurpose(
     kind: 'Spirit stone',
-    description:
-        'An activatable defense stone equipped in the alchemy-stone slot.',
+    description: 'A defense stone with effects that stay on while equipped.',
     effects: <String>[
       'All Damage Reduction +6',
       'All Evasion +8',
       'Max HP +110',
     ],
-    duration: '5 min',
-    cooldown: '5 min',
   ),
-  'life spirit stone': _activeStonePurpose(
+  'life spirit stone': _equippedStonePurpose(
     kind: 'Spirit stone',
-    description:
-        'An activatable Life Skill stone equipped in the alchemy-stone slot.',
+    description: 'A Life Skill stone with effects that stay on while equipped.',
     effects: <String>[
       'Alchemy/Cooking Time -1.1 sec',
       'Processing Success Rate +11%',
       'Gathering/Fishing Speed +2',
       'Gathering Item Drop Rate +10%',
     ],
-    duration: '10 min',
-    cooldown: '10 min',
   ),
-  'imperfect alchemy stone of destruction': _activeStonePurpose(
+  'imperfect alchemy stone of destruction': _equippedStonePurpose(
     effects: <String>[
       'All AP +2',
       'All Accuracy +2',
       'Attack Speed +1%',
       'Casting Speed +1%',
     ],
-    duration: '5 min',
-    cooldown: '5 min',
   ),
-  'imperfect alchemy stone of life': _activeStonePurpose(
+  'imperfect alchemy stone of life': _equippedStonePurpose(
     effects: <String>[
       'Alchemy/Cooking Time -0.5 sec',
       'Processing Success Rate +5%',
@@ -506,30 +500,24 @@ _verifiedEffectPurposes = <String, RecipeBookItemPurpose>{
       'Gathering/Fishing Speed +1',
       'Gathering Item Drop Rate +3%',
     ],
-    duration: '10 min',
-    cooldown: '10 min',
   ),
-  'imperfect alchemy stone of protection': _activeStonePurpose(
+  'imperfect alchemy stone of protection': _equippedStonePurpose(
     effects: <String>[
       'All Damage Reduction +2',
       'All Evasion +2',
       'Max HP +50',
       'All Resistance +1%',
     ],
-    duration: '5 min',
-    cooldown: '5 min',
   ),
-  'resplendent alchemy stone of destruction': _activeStonePurpose(
+  'resplendent alchemy stone of destruction': _equippedStonePurpose(
     effects: <String>[
       'All AP +10',
       'All Accuracy +12',
       'Attack Speed +6%',
       'Casting Speed +6%',
     ],
-    duration: '5 min',
-    cooldown: '5 min',
   ),
-  'resplendent alchemy stone of life': _activeStonePurpose(
+  'resplendent alchemy stone of life': _equippedStonePurpose(
     effects: <String>[
       'Alchemy/Cooking Time -1.7 sec',
       'Processing Success Rate +17%',
@@ -537,30 +525,24 @@ _verifiedEffectPurposes = <String, RecipeBookItemPurpose>{
       'Gathering/Fishing Speed +2',
       'Gathering Item Drop Rate +16%',
     ],
-    duration: '10 min',
-    cooldown: '10 min',
   ),
-  'resplendent alchemy stone of protection': _activeStonePurpose(
+  'resplendent alchemy stone of protection': _equippedStonePurpose(
     effects: <String>[
       'All Damage Reduction +10',
       'All Evasion +12',
       'Max HP +170',
       'All Resistance +6%',
     ],
-    duration: '5 min',
-    cooldown: '5 min',
   ),
-  'shining alchemy stone of destruction': _activeStonePurpose(
+  'shining alchemy stone of destruction': _equippedStonePurpose(
     effects: <String>[
       'All AP +16',
       'All Accuracy +16',
       'Attack Speed +10%',
       'Casting Speed +10%',
     ],
-    duration: '5 min',
-    cooldown: '5 min',
   ),
-  'shining alchemy stone of life': _activeStonePurpose(
+  'shining alchemy stone of life': _equippedStonePurpose(
     effects: <String>[
       'Alchemy/Cooking Time -2.5 sec',
       'Processing Success Rate +25%',
@@ -568,30 +550,24 @@ _verifiedEffectPurposes = <String, RecipeBookItemPurpose>{
       'Gathering/Fishing Speed +3',
       'Gathering Item Drop Rate +25%',
     ],
-    duration: '10 min',
-    cooldown: '10 min',
   ),
-  'shining alchemy stone of protection': _activeStonePurpose(
+  'shining alchemy stone of protection': _equippedStonePurpose(
     effects: <String>[
       'All Damage Reduction +16',
       'All Evasion +16',
       'Max HP +250',
       'All Resistance +8%',
     ],
-    duration: '5 min',
-    cooldown: '5 min',
   ),
-  'splendid alchemy stone of destruction': _activeStonePurpose(
+  'splendid alchemy stone of destruction': _equippedStonePurpose(
     effects: <String>[
       'All AP +13',
       'All Accuracy +14',
       'Attack Speed +8%',
       'Casting Speed +8%',
     ],
-    duration: '5 min',
-    cooldown: '5 min',
   ),
-  'splendid alchemy stone of life': _activeStonePurpose(
+  'splendid alchemy stone of life': _equippedStonePurpose(
     effects: <String>[
       'Alchemy/Cooking Time -2 sec',
       'Processing Success Rate +20%',
@@ -599,32 +575,27 @@ _verifiedEffectPurposes = <String, RecipeBookItemPurpose>{
       'Gathering/Fishing Speed +3',
       'Gathering Item Drop Rate +20%',
     ],
-    duration: '10 min',
-    cooldown: '10 min',
   ),
-  'splendid alchemy stone of protection': _activeStonePurpose(
+  'splendid alchemy stone of protection': _equippedStonePurpose(
     effects: <String>[
       'All Damage Reduction +13',
       'All Evasion +14',
       'Max HP +210',
       'All Resistance +7%',
     ],
-    duration: '5 min',
-    cooldown: '5 min',
   ),
-  "khan's heart: destruction": _activeStonePurpose(
+  "khan's heart: destruction": _equippedStonePurpose(
     kind: "Khan's Heart",
     description: "A Khan's Heart equipped in the alchemy-stone slot.",
     effects: <String>[
+      'Displayed AP +2 (while equipped)',
       'All AP +7',
       'All Accuracy +9',
       'Attack Speed +4%',
       'Casting Speed +4%',
     ],
-    duration: '5 min',
-    cooldown: '5 min',
   ),
-  "khan's heart: life": _activeStonePurpose(
+  "khan's heart: life": _equippedStonePurpose(
     kind: "Khan's Heart",
     description: "A Khan's Heart equipped in the alchemy-stone slot.",
     effects: <String>[
@@ -634,43 +605,42 @@ _verifiedEffectPurposes = <String, RecipeBookItemPurpose>{
       'Weight Limit +70 LT',
       'Gathering/Fishing Speed +2',
       'Gathering Item Drop Rate +12%',
+      'All Life Skill Mastery +25',
     ],
-    duration: '10 min',
-    cooldown: '10 min',
   ),
-  "khan's heart: protection": _activeStonePurpose(
+  "khan's heart: protection": _equippedStonePurpose(
     kind: "Khan's Heart",
     description: "A Khan's Heart equipped in the alchemy-stone slot.",
     effects: <String>[
+      'Displayed DP +2 (while equipped)',
       'All Damage Reduction +7',
       'All Evasion +9',
       'All Resistance +4%',
       'Max HP +130',
     ],
-    duration: '5 min',
-    cooldown: '5 min',
   ),
-  "vell's heart": _activeStonePurpose(
+  "vell's heart": _equippedStonePurpose(
     kind: "Vell's Heart",
     description: "Vell's Heart equipped in the alchemy-stone slot.",
     effects: <String>[
+      'Displayed AP +3 (while equipped)',
       'All AP +8',
       'All Accuracy +10',
       'Attack Speed +5%',
       'Casting Speed +5%',
     ],
-    duration: '5 min',
-    cooldown: '5 min',
   ),
 };
 
-// Reference copy only; this does not archive catalog records or change their
-// planner/market eligibility. Pearl Abyss removed these three crystals:
+// Reference copy only; shared availability policy separately excludes these
+// from active recipes/market requests while preserving their historical data.
+// Pearl Abyss removed these three crystals:
 // https://www.naeu.playblackdesert.com/en-US/News/Detail?groupContentNo=10550
 const _removedDawnLifeExpPurpose = RecipeBookItemPurpose(
   kind: 'Legacy crystal',
-  description: 'Removed September 3, 2026; replaced with Evergreen Shards.',
+  description: 'Removed in the September 3, 2026 PC update.',
   effectsTitle: 'Former effects',
+  notes: ['Replaced with Evergreen Shards.'],
 );
 
 final Map<String, RecipeBookItemPurpose>
@@ -1055,8 +1025,10 @@ _exactPurposes = <String, RecipeBookItemPurpose>{
     description:
         'A reform heart for high-grade Hunting matchlocks and sniper rifles.',
     uses: <String>[
-      'Upgrades a Hunting Master Matchlock or Hunting Marni Sniper Rifle and adds Max Durability +50.',
+      'First reform: Hunting Master Matchlock or Marni Sniper Rifle, Max Durability +200.',
+      'Second reform: Gauche version, Max Durability +250 (600 total).',
     ],
+    notes: <String>['Each reform uses 1 heart.'],
   ),
   'damaged hide': const RecipeBookItemPurpose(
     kind: 'Handcraft material',
@@ -1207,7 +1179,7 @@ _exactPurposes = <String, RecipeBookItemPurpose>{
     description:
         'A material recovered by heating certain enhanced blue-grade accessories.',
     uses: <String>[
-      "Crafts Vaha's Dawn, the Mythical Censer, and Musical Spirit Wall Lamp.",
+      "Crafts Vaha's Dawn, Old Moon Censer, and Musical Spirit Wall Lamp.",
     ],
   ),
   'terrashard': const RecipeBookItemPurpose(
@@ -1269,16 +1241,9 @@ _exactPurposes = <String, RecipeBookItemPurpose>{
     notes: <String>['Duration: 30 min. Cooldown: 30 min.'],
   ),
   'splendid spirit stone of destruction': const RecipeBookItemPurpose(
-    kind: 'Combat spirit stone',
-    description:
-        'An activatable combat stone equipped in the alchemy-stone slot.',
-    effects: <String>[
-      'All AP +13',
-      'All Accuracy +14',
-      'Attack Speed +8%',
-      'Casting Speed +8%',
-    ],
-    notes: <String>['Duration: 5 min. Cooldown: 5 min.'],
+    kind: 'Legacy spirit stone',
+    description: 'Removed in the September 3, 2026 PC update.',
+    notes: <String>['Removed stones were compensated with Silver.'],
   ),
   'sturdy whale tendon potion': const RecipeBookItemPurpose(
     kind: 'Recovery item',
@@ -1334,21 +1299,20 @@ RecipeBookItemPurpose _recoveryPurpose({
   notes: <String>['Instant effect. Cooldown: $cooldown.'],
 );
 
-RecipeBookItemPurpose _activeStonePurpose({
+// Official September 3, 2026 PC equipment integration: stones apply while
+// equipped, without activation, duration, cooldown or durability consumption.
+RecipeBookItemPurpose _equippedStonePurpose({
   String kind = 'Alchemy stone',
   String description =
-      'An activatable alchemy stone equipped in the alchemy-stone slot.',
+      'An equipped alchemy stone; its effects stay on while equipped.',
   required List<String> effects,
-  required String duration,
-  required String cooldown,
 }) => RecipeBookItemPurpose(
   kind: kind,
   description: description,
   effects: effects,
   uses: const <String>[
-    'Equip it in the alchemy-stone slot, then press U to activate its effects.',
+    'Effects apply while equipped in the matching alchemy-stone slot.',
   ],
-  notes: <String>['Duration: $duration. Cooldown: $cooldown.'],
 );
 
 RecipeBookItemPurpose? _jetinaReformStonePurpose(
@@ -1415,9 +1379,7 @@ RecipeBookItemPurpose? _combinedAlchemyStonePurpose(
       if (!isVell && role == 'life') 'Life EXP +30%',
       ...baseStone.effects,
     ],
-    uses: <String>[
-      'Equip it for the heart item effect, then press U to activate the listed timed effects.',
-    ],
+    uses: <String>['All listed effects apply while equipped.'],
     notes: <String>[
       ...baseStone.notes,
       'It can be separated again with Brimming Essence of Aether if the stone has not been upgraded.',
@@ -1448,11 +1410,14 @@ RecipeBookItemPurpose? _qualityFarmMaterialPurpose(String foldedName) {
 
   return const RecipeBookItemPurpose(
     kind: 'Farming ingredient',
-    description:
-        'A higher-grade Farming product obtained through Farming or Plant Breeding.',
+    description: 'A higher-grade crop used in cooking or alchemy.',
     uses: <String>['Used as a higher-grade ingredient in Cooking or Alchemy.'],
   );
 }
+
+/// Exact, previously reviewed farming identities, not a name-prefix guess.
+bool isReviewedQualityFarmMaterial(String name) =>
+    _verifiedQualityFarmMaterials.contains(_fold(name));
 
 const Set<String> _verifiedQualityFarmMaterials = <String>{
   'high-quality amanita mushroom',
@@ -1949,7 +1914,7 @@ String _derivedDescription({
     return 'An ingredient used in cooking recipes.';
   }
   if (foldedKind == 'draught') {
-    return 'A temporary combat draught.';
+    return 'A temporary draught buff.';
   }
   if (foldedKind == 'elixir') {
     return 'A temporary elixir buff.';

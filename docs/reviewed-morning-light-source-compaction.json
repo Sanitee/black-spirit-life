@@ -1,0 +1,9 @@
+{
+  "date": "2026-11-03",
+  "status": "VERIFIED_SCOPED_FIX_FULL_FACTUAL_AUDIT_ACTIVE",
+  "scope": "Remove only the exact short World bosses · Morning Light line when its complete already-present statement exists for Primordial Crystal, Embers of the Primordial, or eleven exact Reforge Stone titles.",
+  "reason": "Actual all-mode controller projection showed thirteen duplicate source facts after independent curated and native-description additions were merged.",
+  "preserved": "The longer statement, its eligible qualification, embedded Central Market alternative, exchange costs/limits, Patrigio conditions, effects, recipes, yields and all other sources remain byte-identical. A qualified short line, changed boss type or unrelated title is not removed. Applying the projection twice is idempotent.",
+  "sharedScope": "Existing compactReviewedAcquisitionSources projection, already used by shared item-reference/inline presentation. No UI redesign, widget duplication, badge/freshness change, saved-data write or personal-profile access.",
+  "evidence": "audit/correctness-review-20261102/resumed-morning-light-compaction-review.json: thirteen baseline reproductions, 6792 views checked, exactly thirteen references lose only one duplicate source in each mode; recipes, exchanges and all other projected fields unchanged. Focused tests, 318 all-theme normal/enlarged layout cases, analysis and Windows Release pass. Two representative Sakura captures visually inspected. Existing official source provenance is unchanged; this is deduplication, not a new game-fact inference."
+}

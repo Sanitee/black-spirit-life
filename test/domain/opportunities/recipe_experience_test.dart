@@ -67,30 +67,70 @@ void main() {
     );
   });
 
-  test('only the approved eleven comparisons are marked estimates', () {
-    const cases = <CraftMode, Map<String, double>>{
-      CraftMode.alchemy: {
-        'Elixir of Edania': 920,
-        'Perfume of Insight': 2000,
-        'Perfume of Verdure': 2000,
-        'Oil of Enchantment': 1400,
-        'Elixir of Persistence': 1610,
-        'Elixir of Brawn': 1610,
-      },
-      CraftMode.processing: {
-        'Rice Flour': 70,
-        'Snowfield Cedar Plank': 200,
-        'Pure Gold Crystal': 1500,
-        'Pure Platinum Crystal': 1500,
-        'Pure Silver Crystal': 1500,
-      },
-    };
-    for (final mode in cases.keys) {
-      for (final entry in cases[mode]!.entries) {
-        final result = experienceFor(recipe(entry.key, mode), mode)!;
-        expect(result.value, entry.value, reason: entry.key);
-        expect(result.estimated, isTrue, reason: entry.key);
-        expect(result.sourceReference, startsWith('Estimate:'));
+  test(
+    'remaining comparisons stay estimates after exact formula re-review',
+    () {
+      const cases = <CraftMode, Map<String, double>>{
+        CraftMode.alchemy: {
+          'Elixir of Edania': 920,
+          'Perfume of Insight': 2000,
+          'Perfume of Verdure': 2000,
+          'Oil of Enchantment': 1400,
+          'Elixir of Persistence': 1610,
+          'Elixir of Brawn': 1610,
+        },
+        CraftMode.processing: {'Rice Flour': 70, 'Snowfield Cedar Plank': 200},
+      };
+      for (final mode in cases.keys) {
+        for (final entry in cases[mode]!.entries) {
+          final result = experienceFor(recipe(entry.key, mode), mode)!;
+          expect(result.value, entry.value, reason: entry.key);
+          expect(result.estimated, isTrue, reason: entry.key);
+          expect(result.sourceReference, startsWith('Estimate:'));
+        }
+      }
+    },
+  );
+
+  test('reviewed corrected formulas match without guessing Red Bean EXP', () {
+    for (final row in [
+      (CraftMode.alchemy, 'Defense Elixir', 460.0),
+      (CraftMode.alchemy, 'Elixir of Perforation', 1610.0),
+      (CraftMode.alchemy, 'Looney Elixir', 920.0),
+      (CraftMode.cooking, 'Soft Bread', 400.0),
+      (CraftMode.processing, 'Pure Gold Crystal', 1500.0),
+      (CraftMode.processing, 'Pure Silver Crystal', 1500.0),
+      (CraftMode.processing, 'Pure Platinum Crystal', 1500.0),
+      (CraftMode.processing, 'Pure Copper Crystal', 1000.0),
+    ]) {
+      for (final r in [recipe(row.$2, row.$1), assembled[row.$1]![row.$2]!]) {
+        final value = experienceFor(r, row.$1)!;
+        expect(value.value, row.$3);
+        expect(value.estimated, isFalse);
+        expect(value.sourceReference, contains('reviewed=2026-11-02'));
+        // Fresh values remain exact-formula guarded, never name fallbacks.
+        expect(
+          experienceFor(copy(r, baseOutput: r.baseOutput + 1), row.$1),
+          isNull,
+        );
+      }
+    }
+    for (final name in ['Red Bean Porridge', 'Red Bean Sirutteok']) {
+      for (final r in [
+        recipe(name, CraftMode.cooking),
+        assembled[CraftMode.cooking]![name]!,
+      ]) {
+        expect(experienceFor(r, CraftMode.cooking), isNull);
+      }
+    }
+    for (final name in ['Perfume of Resolve', 'Immortal: Perfume of Resolve']) {
+      final r = recipe(name, CraftMode.processing);
+      expect(experienceFor(r, CraftMode.processing), isNull);
+      for (final variant in r.variants) {
+        expect(
+          experienceFor(r.resolveVariant(variant.id), CraftMode.processing),
+          isNull,
+        );
       }
     }
   });
@@ -260,8 +300,11 @@ void main() {
   test('raw and clean assembled catalogs retain audited default coverage', () {
     const expected = <CraftMode, (int, int)>{
       CraftMode.alchemy: (79, 6),
-      CraftMode.cooking: (150, 0),
-      CraftMode.processing: (145, 5),
+      // Two corrected Red Bean formulas lack a current exact EXP reference.
+      CraftMode.cooking: (148, 0),
+      // Ten pure-crystal defaults now match exact fresh secondary records;
+      // three were former estimates, seven lacked a default formula match.
+      CraftMode.processing: (155, 2),
     };
     for (final mode in CraftMode.values) {
       for (final recipes in [catalog.forMode(mode).items, assembled[mode]!]) {

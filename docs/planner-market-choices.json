@@ -1,0 +1,36 @@
+{
+  "date": "2026-10-31",
+  "status": "Separate local candidate for user review; not installed or published",
+  "baseline": "[private-source]/Planner Ingredient Choices 20261030",
+  "source": "[private-source]/Planner Market Choices 20261031",
+  "branch": "codex/planner-market-choices",
+  "changes": [
+    "Substitute tables retain exact Owned and Missing, adding Opportunities' shared check/dash/basket/NPC badges and real Silver artwork.",
+    "Silver estimates buy the full projected requirement for the displayed grade, not only the missing quantity. Verified NPC prices take precedence; otherwise use a fresh shared quote. This is a price estimate, not a promise of available order-book depth.",
+    "Names copy; adjacent compact swap buttons retain ingredient, queue-title and Buy/Process choice actions. No ordinary hover labels were added.",
+    "Table headings omit Choose. Blood Group titles are capitalized; identity and substitution keys are unchanged.",
+    "Silver uses rounded comma-decimal k/m/b/t formatting, carrying at unit boundaries. Opportunities starts compact too. Click toggles the full amount; calculation and quantity precision are unchanged.",
+    "Popover drag positions notify the layout delegate, not the widget builder; a repaint boundary retains the panel painting. Existing viewport, scrolling and dismissal contracts remain."
+  ],
+  "market": {
+    "owner": "Existing application SharedMarketRepository, region and canonical item ID scoped",
+    "freshness": "Five-minute shared quote/book policy, independently evaluated; no periodic fetching",
+    "unknown": "Missing/stale/incomplete market evidence stays unknown, never fabricated zero",
+    "lifecycle": "Requests and receipt subscription are canceled on close or identity change; shared broker throttling, coalescing and pause policy are retained",
+    "profileChanges": false
+  },
+  "verification": {
+    "data": "Disposable synthetic profiles and fake market transport only; no personal inventory/profile access",
+    "coverage": "Three themes, ordinary/narrow/200%-text/125%-zoom layouts, long-list scrolling, exact counts, copy without opening, full-requirement prices with owned inventory, click-to-full without selecting, region changes, cancellation, stale data, NPC exclusion, drag builder count, existing Planner/Opportunities/overlay regressions",
+    "baselineTestNote": "An old P17 test still expected the former inline substitute list to remain open beside a second surface. The same failure was reproduced on the preceding build (p17-baseline.log). The test now follows the existing one-popover dismissal behavior; no P17 production behavior was changed.",
+    "buildNote": "Windows build retains existing C# LIB-path environment warnings; no new compiler error",
+    "audit": "[private-audit]/audit/planner-market-choices-20261031",
+    "screenshots": "[private-audit]/work/visuals/planner-market-choices"
+  },
+  "preserved": [
+    "Complete prior source and runnable, hash-verified before and after",
+    "Mastery, grade/Auto selection, yields, plan math, inventory semantics and all existing actions",
+    "Shared Documents data location, writer lease and migration guards",
+    "Existing Live Release ownership and public migration/lifecycle gates"
+  ]
+}

@@ -1,0 +1,44 @@
+{
+  "date": "2026-11-01",
+  "request": "Replace generic Central Market availability prose in item information with the existing stock and positive-preorder pills. Treat visual consistency as a prerequisite.",
+  "consistencyPriority": "For UI work, identify the latest approved shared pattern and every matching host first. Apply through shared components, audit clicked/hovered/nested/pinned/passive/inline variants and all themes/text scales; preserve genuine context differences and behavior. Do not wait for repeated requests. New designs still need visual approval.",
+  "standingRule": "[private-audit]/AGENTS.md: UI consistency is a prerequisite",
+  "source": "[private-source]/Item Source Stock 20261101",
+  "branch": "codex/item-source-stock",
+  "baseline": "Complete Broader Item Sources 20261101 working snapshot, including uncommitted inherited changes; not HEAD alone.",
+  "presentation": {
+    "sourceLabel": "Central Market",
+    "stock": "Existing check/dash/question stock-count badge; known zero is Stock 0, unknown is Stock —.",
+    "preorders": "Existing basket badge only for a fresh positive preorder count.",
+    "alignment": "Right side of source line; same shared SourceAvailabilityLine as ingredient rows, wrapping below when space is constrained without shrinking type.",
+    "wording": "Only exact generic Central Market, When in stock and When listed notes are shortened. Positive compound purchase sources retain all prose and restrictions alongside badges. Prohibitions and archived notes are not decorated or fetched.",
+    "unchanged": "Source facts, other acquisition lines, recipes, substitutions, icons, tabs, copy/activation/scrolling, catalog and quantities remain unchanged. No ordinary hover text added."
+  },
+  "callerAudit": [
+    {"path": "lib/features/recipe_book/recipe_book_item_info_view.dart", "hosts": "Recipe Book clicked and nested/hovered/pinned item artwork references; shared inline sections"},
+    {"path": "lib/features/planner/planner_shared.dart", "hosts": "Planner Need First and Craft Queue item references via ItemReferenceCard"},
+    {"path": "lib/features/opportunities/opportunities_item_actions.dart", "hosts": "Opportunities shared item dialogs and hover references"},
+    {"path": "lib/features/opportunities/opportunity_exchange_items.dart", "hosts": "Passive artwork references and embedded exchange information via shared sections"}
+  ],
+  "dataLifecycle": {
+    "broker": "Existing PlannerChoiceMarketScope and app-owned SharedMarketRepository. No separate client, cache, profile fields or polling.",
+    "identity": "Existing exact catalog market ID, EU/NA region, current request exclusions and user-unlisted checks. Unknown or excluded identities never become zero stock.",
+    "npc": "Explicit Central Market source lines request market stock even when the item also has an NPC source. Existing ingredient/chooser callers retain NPC precedence by default.",
+    "freshness": "Existing separate five-minute quote and complete-order-book validity. Fresh order-book asks can supply stock if the quote is stale; stale bids never become current preorders. No valid stock observation means —.",
+    "cancellation": "Existing shared request cancellation and subscription cleanup on close or identity/region change. No stale-region flash; other consumers retain their request leases."
+  },
+  "verification": {
+    "syntheticOnly": true,
+    "newTests": "20 state/layout/host tests plus 12 actual-workspace theme/text-scale cases; existing Recipe Book, ingredient-pill, copy, scrolling, Opportunities item-action and Planner badge regressions also run.",
+    "captures": "[private-audit]/work/visuals/item-source-stock",
+    "captureData": "Synthetic stock/preorder receipts, never live market claims or personal profiles.",
+    "evidence": "[private-audit]/audit/item-source-stock-20261101"
+  },
+  "preservation": "Prior source and full runnable preserved at [private-source]/Protected Rollback/prior-item-source-stock-20261101-o2dfLT; full before/after hash verification required. Native instance, shared Documents, writer-lease, format and migration guards retained.",
+  "release": {"visibleAppLaunch": false, "personalDataAccess": false, "installedReplacement": false, "shortcutChange": false, "handedOff": false, "published": false},
+  "limitations": [
+    "Targeted tests and synthetic rendering, not a whole-repository test pass or personal/live-network verification.",
+    "Separate runnable user review and public migration/lifecycle release gates remain pending.",
+    "Prior source-research gaps remain as documented in broader-item-sources.json; this is a presentation change, not a new acquisition-data audit."
+  ]
+}

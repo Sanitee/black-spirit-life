@@ -1,0 +1,12 @@
+{
+  "date": "2026-11-03",
+  "status": "Scoped source corrections; factual audit remains active",
+  "scope": "Four exact-ID shared source entries. No formula, yield, identity, auto-planning or UI layout changes.",
+  "changes": [
+    {"id":5601,"name":"Insectivore Plant Powder","source":"Current installed PC item5601; https://bdocodex.com/us/item/5601/","facts":"Grind5Flowers OR5Leaves. Direct gathering uses hands/hoe and requires high Gathering Mastery. Do not invent a numerical mastery threshold or guarantee1output from normalized base data."},
+    {"id":5602,"name":"Insectivore Plant Sap","source":"Current installed PC item5602; https://bdocodex.com/us/item/5602/","facts":"Grind5Stalks OR5Roots. Direct gathering uses a fluid collector and requires high Gathering Mastery."},
+    {"ids":[4998,752023],"names":["Sharp Black Crystal Shard","Mass of Pure Magic"],"sources":["https://www.naeu.playblackdesert.com/en-US/News/Detail?groupContentNo=2596&countryType=en-US","current installed PC items757117/757118"],"facts":"Grinding Guild Drill Pilgrim stones can yield these items; chance-qualified. Current descriptions list Sharp2–5 for whole stone,1–2 for cracked, or Mass1. No exact probability modeled and old retired Hard Shard not restored.","historicalPatchDate":"2022-02-09"}
+  ],
+  "stillOpen": ["Insectivore mixed leaf-plus-fragment route validity and exact yields", "Pilgrim stone random outcome probabilities", "Universal source completeness"],
+  "presentation": "Latest shared under-name and adjacent-source badges, themes and stock freshness preserved. Exact old Insectivore gathering line replaced, not duplicated."
+}

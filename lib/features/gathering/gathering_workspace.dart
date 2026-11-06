@@ -5,6 +5,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
 import '../../visual/foundations/theme_spec.dart';
+import '../shared/shared_silver_amount.dart';
+import '../shared/source_availability_badges.dart';
 
 CompanionVisualPalette gatheringPaletteForTheme(ThemeSpec theme) {
   final p = theme.palette;
@@ -55,13 +57,22 @@ class GatheringWorkspace extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final source = theme;
-    if (source == null) return _feature(null);
+    if (source == null) {
+      return ThemeSpecScope.maybeOf(context) == null
+          ? _feature(null)
+          : _presentedFeature(null);
+    }
     return ValueListenableBuilder<ThemeSpec>(
       valueListenable: source,
-      builder: (context, value, child) =>
-          _feature(gatheringPaletteForTheme(value)),
+      builder: (context, value, child) => ThemeSpecScope(
+        spec: value,
+        child: _presentedFeature(gatheringPaletteForTheme(value)),
+      ),
     );
   }
+
+  Widget _presentedFeature(CompanionVisualPalette? palette) =>
+      GatheringSharedMarketStyle(child: _feature(palette));
 
   Widget _feature(CompanionVisualPalette? palette) => GatheringCompanionFeature(
     recipeChecklistBuilder: recipeChecklistBuilder,
@@ -72,8 +83,38 @@ class GatheringWorkspace extends StatelessWidget {
     sharedMarketLoader: sharedMarketLoader,
     sharedMarketUpdates: sharedMarketUpdates,
     marketFreshFor: marketFreshFor,
-    // The independent experiment starts clean. Importing a standalone journal
-    // must remain a deliberate user action, never an implicit startup read.
+    // Importing a standalone journal remains an explicit user action.
+  );
+}
+
+/// Presentation adapter shared by the hosted feature and native review fixtures.
+class GatheringSharedMarketStyle extends StatelessWidget {
+  const GatheringSharedMarketStyle({required this.child, super.key});
+  final Widget child;
+  @override
+  Widget build(BuildContext context) => GatheringMarketPresentation(
+    stockBuilder: (context, {required stock, preorders, stockKey}) =>
+        SourceAvailabilityBadges(
+          stock: stock,
+          preorders: preorders,
+          stockKey: stockKey,
+        ),
+    silverBuilder:
+        (
+          context, {
+          required value,
+          required style,
+          prefix = '',
+          suffix = '',
+          textKey,
+        }) => SharedSilverAmount(
+          value: value,
+          style: style.copyWith(color: context.visualTheme.palette.text),
+          prefix: prefix,
+          suffix: suffix,
+          textKey: textKey,
+        ),
+    child: child,
   );
 }
 

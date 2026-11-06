@@ -16,51 +16,40 @@ import 'package:flutter_test/flutter_test.dart';
 import 'recipe_book_test_support.dart';
 
 void main() {
-  test(
-    'reviewed NPC acquisition notes do not repeat generated vendor copy',
-    () {
-      final environment = _aetherEnvironment(
-        sharpPrice: 6_000_000,
-        sharpStock: 10000,
-      );
-      final mode = environment.application.modes[CraftMode.processing]!;
-      final book = RecipeBookController(
-        modeController: mode,
-        catalogRepository: environment.catalogRepository,
-        callingContext: RecipeBookCallingContext.planner,
-        allowedTargets: mode.craftableNames,
-      );
-      addTearDown(book.dispose);
-      addTearDown(environment.dispose);
+  test('reviewed NPC acquisition notes do not repeat generated vendor copy', () {
+    final environment = _aetherEnvironment(
+      sharpPrice: 6_000_000,
+      sharpStock: 10000,
+    );
+    final mode = environment.application.modes[CraftMode.processing]!;
+    final book = RecipeBookController(
+      modeController: mode,
+      catalogRepository: environment.catalogRepository,
+      callingContext: RecipeBookCallingContext.planner,
+      allowedTargets: mode.craftableNames,
+    );
+    addTearDown(book.dispose);
+    addTearDown(environment.dispose);
 
-      final oquilla = book.itemInfoFor('Oquilla Piece of the Old Moon')!;
-      expect(
-        oquilla.acquisitionNotes.where(
-          (line) => line.contains('Old Moon Manager'),
-        ),
-        hasLength(1),
-      );
-      expect(
-        oquilla.acquisitionNotes,
-        contains('Price: 50,000,000 Silver each.'),
-      );
-      expect(
-        oquilla.acquisitionNotes,
-        contains('Cannot be registered on the Central Market.'),
-      );
+    final oquilla = book.itemInfoFor('Oquilla Piece of the Old Moon')!;
+    expect(
+      oquilla.acquisitionNotes.where(
+        (line) => line.contains('Old Moon Manager'),
+      ),
+      hasLength(1),
+    );
+    expect(oquilla.acquisitionNotes, [
+      'Buy from an Old Moon Manager in major cities. Price: 50,000,000 Silver each. Cannot be registered on the Central Market.',
+    ]);
 
-      final water = book.itemInfoFor('Purified Water')!;
-      final waterNotes = water.acquisitionNotes.join('\n');
-      expect(waterNotes, contains('Waida at Sand Grain Bazaar'));
-      expect(waterNotes, contains('Yasum in Arehaza'));
-      expect(waterNotes, contains('5,000 Silver'));
-      expect(
-        waterNotes,
-        isNot(contains('Buy from Waida in Sand Grain Bazaar.')),
-      );
-      expect(water.howToObtain.join('\n'), contains('Filtering'));
-    },
-  );
+    final water = book.itemInfoFor('Purified Water')!;
+    final waterNotes = water.acquisitionNotes.join('\n');
+    expect(waterNotes, contains('Waida at Sand Grain Bazaar'));
+    expect(waterNotes, contains('Yasum in Arehaza'));
+    expect(waterNotes, contains('5,000 Silver'));
+    expect(waterNotes, isNot(contains('Buy from Waida in Sand Grain Bazaar.')));
+    expect(water.howToObtain.join('\n'), contains('Filtering'));
+  });
 
   test(
     'Recipe Book quote follows the active Auto route at full plan demand',
@@ -92,8 +81,13 @@ void main() {
         book.profitabilityFor(name)!.selectedVariantId,
         book.selectedRecipeVariantId(name),
       );
+      final routeQuote = book.profitabilityFor(name)!;
+      // This output is in the shared nonmarketable-ID registry. A synthetic
+      // saved price must not invent market profit, but route selection remains.
+      expect(routeQuote.isAvailable, isFalse);
+      expect(routeQuote.profitPerCraft, isNull);
       expect(
-        book.profitabilityFor(name)!.ingredientCosts.first.selectedName,
+        book.availabilityFor(name).ingredients.first.name,
         'Oquilla Piece of the Old Moon',
       );
     },
@@ -186,13 +180,15 @@ void main() {
 
       final info = book.itemInfoFor('Elixir of Seal');
 
-      expect(info?.howToObtain, hasLength(1));
+      expect(info?.howToObtain, hasLength(3));
       expect(
-        info?.howToObtain.single,
+        info?.howToObtain.first,
         'Alchemy: 3 Dwarf Mushroom + 1 Birch Sap + '
         '4 Wolf Blood (or substitute) + 5 Purified Water.',
       );
       expect(info?.howToObtain.join(' '), isNot(contains('Gathering')));
+      expect(info?.howToObtain, contains('Central Market · When in stock'));
+      expect(info?.howToObtain.last, 'Alchemy · Beginner 1+');
     },
   );
 
@@ -1041,7 +1037,7 @@ void main() {
           ingredientMeta: <String, IngredientMetadata>{
             'Clear Liquid Reagent': IngredientMetadata(marketId: '5301'),
             'Pure Powder Reagent': IngredientMetadata(marketId: '5302'),
-            'Elixir of Life': IngredientMetadata(marketId: '5303'),
+            'Elixir of Life': IngredientMetadata(marketId: '708'),
           },
         ),
         immediate: true,
@@ -1126,9 +1122,9 @@ void main() {
       const ids = <String, String>{
         'Clear Liquid Reagent': '5301',
         'Pure Powder Reagent': '5302',
-        'Elixir of Life': '5303',
-        'Wild Grass': '5304',
-        'Sunflower': '5305',
+        'Elixir of Life': '708',
+        'Wild Grass': '5439',
+        'Sunflower': '7308',
         'Trace of Earth': '5306',
       };
       mode.updateState(
@@ -1251,7 +1247,7 @@ void main() {
           ingredientMeta: <String, IngredientMetadata>{
             'Clear Liquid Reagent': IngredientMetadata(marketId: '5301'),
             'Wild Grass': IngredientMetadata(marketId: '5302'),
-            'Sunflower': IngredientMetadata(marketId: '5303'),
+            'Sunflower': IngredientMetadata(marketId: '7308'),
           },
           market: state.market.copyWith(
             prices: const <String, double>{

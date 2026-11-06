@@ -518,7 +518,7 @@ void main() {
         'Custom no ID': _recipe('Custom no ID', null, input: 'Raw input'),
         'Reviewed nonmarket': _recipe(
           'Reviewed nonmarket',
-          '5303',
+          '4916',
           input: 'Raw input',
         ),
         'Archived': _recipe('Archived', '6211', input: 'Raw input'),
@@ -527,7 +527,7 @@ void main() {
       await f.controller.calculationSettled;
       // Simulate imported/synthetic cached bids. A source-reviewed nonmarket
       // identity is still not an eligible Demand result or request target.
-      await f.seedBooks(['5303']);
+      await f.seedBooks(['4916']);
       final nonmarket = f.controller.quotes.singleWhere(
         (quote) => quote.recipeName == 'Reviewed nonmarket',
       );
@@ -541,7 +541,7 @@ void main() {
         () => !f.controller.scanning && f.controller.detailStatus.complete,
       );
       await f.settle();
-      expect(f.transport.books, ['5303', f.ids.single]);
+      expect(f.transport.books, ['4916', f.ids.single]);
       expect(f.controller.detailStatus.total, 1);
       expect(f.controller.demandPendingCount, 0);
       expect(f.controller.visibleQuotes.single.recipeName, 'Recipe 000');
@@ -781,7 +781,7 @@ final class _Transport implements OpportunityMarketTransport {
     }
     int price(String id) => id == '20001'
         ? 10
-        : id == '5303' || id == '705037'
+        : id == '4916' || id == '705037'
         ? 1000
         : (int.parse(id) - 990000) * 1000;
     final text = ids.length > 1

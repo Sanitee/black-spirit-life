@@ -1,0 +1,1631 @@
+{
+  "reviewedAt": "2026-11-04T03:58:31.975Z",
+  "status": "SUPPORTED_CHANGES_VERIFIED_SEE_PRACTICAL_COMPLETION_AUDIT",
+  "official": [
+    {
+      "key": "salvage-notice-6072",
+      "url": "https://www.naeu.playblackdesert.com/en-US/News/Detail?groupContentNo=6072&countryType=en-US",
+      "sha256": "8f309b52adbc5490b443cc7bea03b0c8d8f2f2c96274f4406a5131d6709aa203",
+      "retrievedAt": "2026-11-03T10:33:30.991Z"
+    },
+    {
+      "key": "lara-followup-naeu-20240417",
+      "url": "https://www.naeu.playblackdesert.com/en-US/News/Detail?groupContentNo=6891",
+      "sha256": "1fa660ad95039044aa955619dee4467bd4669ed300d89ce8d8a38cbc99cd713a",
+      "retrievedAt": "2026-11-03T11:09:15.476Z"
+    },
+    {
+      "key": "lightstone-guru-naeu-20230111",
+      "url": "https://www.naeu.playblackdesert.com/en-US/News/Detail?groupContentNo=4655&countryType=en-US",
+      "sha256": "9886d29bdc28878616e5115acb4664f1324d9c1a0e9eb7219a250c2236990ff5",
+      "retrievedAt": "2026-11-03T14:09:49.002Z"
+    },
+    {
+      "key": "investment-naeu-20260430",
+      "url": "https://www.naeu.playblackdesert.com/en-US/News/Detail?groupContentNo=10022",
+      "sha256": "fa04ed8a8cef0f8a426a5fd3a91e3c8506268cf378fe456fb3d208cb7fc1e4b5",
+      "retrievedAt": "2026-11-03T09:07:55.330Z"
+    },
+    {
+      "key": "cooking-guide-naeu",
+      "url": "https://www.naeu.playblackdesert.com/en-US/Wiki?wikiNo=27",
+      "sha256": "0cee9b4da0b4fdcaf9791baf7f255bcdd18f894b85d4f7f9b9718a8fd9233451",
+      "retrievedAt": "2026-11-03T07:51:05.236Z"
+    },
+    {
+      "key": "advanced-alchemy-guide-naeu",
+      "url": "https://www.naeu.playblackdesert.com/en-US/Wiki?wikiNo=71",
+      "sha256": "2fdefe3f5e43dd7ad346a635cb90707c238c258c657d6a332438212c0275d685",
+      "retrievedAt": "2026-11-03T07:51:04.679Z"
+    },
+    {
+      "key": "hunting-guide-naeu",
+      "url": "https://www.naeu.playblackdesert.com/en-US/Wiki?wikiNo=74",
+      "sha256": "279e1853ad3bea1fffffcc07011ee1403866f566a55dbd61b1ee00478e94004f",
+      "retrievedAt": "2026-11-03T06:52:58.142Z"
+    },
+    {
+      "key": "rare-hunting-naeu-20251224",
+      "url": "https://www.naeu.playblackdesert.com/en-US/News/Detail?groupContentNo=9510&countryType=en-US",
+      "sha256": "518334cca5826f7e7747401f919da81a340ed8a3e27f288e486d91d8f97957c5",
+      "retrievedAt": "2026-11-03T07:29:20.127Z"
+    },
+    {
+      "key": "artifacts-guide-asia-current",
+      "url": "https://blackdesert.pearlabyss.com/ASIA/en-US/Game/Wiki?_masterWikiNo=151",
+      "sha256": "92b76dc32c9eb9143ce512431c07259b1840d31153c79aca251c8e82ade1298c",
+      "retrievedAt": "2026-11-03T13:50:29.945Z"
+    },
+    {
+      "key": "padix-naeu-20251113",
+      "url": "https://www.naeu.playblackdesert.com/en-US/News/Detail?groupContentNo=9299",
+      "sha256": "720fff3ee8485fe9601d9923664c4f81bcb32d7b183c47b8f482b960bd8adf3c",
+      "retrievedAt": "2026-11-03T11:59:54.997Z"
+    },
+    {
+      "key": "juice-rice-naeu-20230614",
+      "url": "https://www.naeu.playblackdesert.com/en-US/News/Detail?groupContentNo=5387&countryType=en-US",
+      "sha256": "363ae1ad49819d50371e0e42cb677a6d3c6c7a275f427561164d1a3074920fd2",
+      "retrievedAt": "2026-11-03T10:16:38.140Z"
+    },
+    {
+      "key": "support-naeu-20261022",
+      "url": "https://www.naeu.playblackdesert.com/en-US/News/Detail?groupContentNo=10726&countryType=en-US",
+      "sha256": "43f8c6cb947d8c1382676651dd084f0271a149012b250f24563ebf010deb3fd3",
+      "retrievedAt": "2026-11-03T07:41:02.634Z"
+    },
+    {
+      "key": "resplendent-lakiaro-guide-naeu",
+      "url": "https://www.naeu.playblackdesert.com/en-US/Wiki?wikiNo=324",
+      "sha256": "e6df57f971df8eee6fca1750b3d208ebe41999372cb5b65fa4bb3777435edc74",
+      "retrievedAt": "2026-11-03T14:20:30.313Z"
+    }
+  ],
+  "native": {
+    "file": "[private-source]/Patch Research/client-2026-11-02-unresolved-research/research-items-NO-EFFECTS.json",
+    "sha256": "a54b5735052c990e189ff1a50afb6d5442cc80e0ba8dabff995979bc8d35c821",
+    "items": [
+      {
+        "urn": "urn::item:575",
+        "id": 575,
+        "name": "Whale Tendon Potion",
+        "description": "A special potion for hunters.\n\n- <PAColor0xff96d4fc>Usage<PAOldColor>: Gain the following effects\n\n- Effects: \n<PAColor0xffe9bd23>   Recover 1,200 HP<PAOldColor>\n<PAColor0xffe9bd23>   Recover 300 MP/WP/SP<PAOldColor>\n\n- Duration: <PAColor0xffe9bd23>Instant<PAOldColor>\n- Cooldown: <PAColor0xffe9bd23>30 sec<PAOldColor>\n\n- <PAColor0xff57f426>How to Obtain<PAOldColor>: Craft via an Alchemy Tool in your residence with the following materials if at least Alchemy <PAColor0xffe9bd23>Apprentice 1<PAOldColor> \n<PAColor0xffe9bd23>Blue Whale Tendon x1<PAOldColor>\n<PAColor0xffe9bd23>HP Potion (Medium) x3<PAOldColor>\n<PAColor0xffe9bd23>MP Potion (Medium) x3<PAOldColor>\n<PAColor0xffe9bd23>Purified Water x8<PAOldColor>\n\n※ Craft <PAColor0xffe9bd23>Whale Tendon Potion<PAOldColor> for a low chance to obtain <PAColor0xffe9bd23>Superior Whale Tendon Potion<PAOldColor> if at least Alchemy <PAColor0xffe9bd23>Skilled 5<PAOldColor>.",
+        "icon": "New_Icon/03_ETC/08_Potion/00000575.dds",
+        "grade": 1,
+        "category": "Potion",
+        "itemType": 2,
+        "marketable": true,
+        "weight": 0.3,
+        "buyPrice": 0,
+        "sellPrice": 0,
+        "repairPrice": 0
+      },
+      {
+        "urn": "urn::item:576",
+        "id": 576,
+        "name": "Superior Whale Tendon Potion",
+        "description": "A special potion for hunters.\n\n- <PAColor0xff96d4fc>Usage<PAOldColor>: Gain the following effects\n\n- Effects: \n   <PAColor0xffe9bd23>Recover 1,800 HP<PAOldColor>\n   <PAColor0xffe9bd23>Recover 500 MP/WP/SP<PAOldColor>\n\n- Duration: <PAColor0xffe9bd23>Instant<PAOldColor>\n- Cooldown: <PAColor0xffe9bd23>30 sec<PAOldColor>\n\n- <PAColor0xff57f426>How to Obtain<PAOldColor>: Craft <PAColor0xffe9bd23>Whale Tendon Potion<PAOldColor> for a low chance to obtain in your residence with the following materials if at least Alchemy <PAColor0xffe9bd23>Skilled 5<PAOldColor>\n<PAColor0xffe9bd23>Blue Whale Tendon x1<PAOldColor>\n<PAColor0xffe9bd23>HP Potion (Medium) x3<PAOldColor>\n<PAColor0xffe9bd23>MP Potion (Medium) x3<PAOldColor>\n<PAColor0xffe9bd23>Purified Water x8<PAOldColor>",
+        "icon": "New_Icon/03_ETC/08_Potion/00000576.dds",
+        "grade": 2,
+        "category": "Potion",
+        "itemType": 2,
+        "marketable": true,
+        "weight": 0.3,
+        "buyPrice": 0,
+        "sellPrice": 0,
+        "repairPrice": 0
+      },
+      {
+        "urn": "urn::item:732",
+        "id": 732,
+        "name": "Whale Tendon Elixir",
+        "description": "An elixir with a defensive function.\n\n- <PAColor0xff96d4fc>Usage<PAOldColor>: Gain the following effect\n\n- Effect:\n<PAColor0xffe9bd23>   All Damage Reduction +100<PAOldColor>\n\n- Duration: <PAColor0xffe9bd23>20 sec<PAOldColor>\n- Cooldown: <PAColor0xffe9bd23>10 min<PAOldColor>\n\n- <PAColor0xff57f426>How to Obtain<PAOldColor>: Craft via an Alchemy Tool in your residence with the following materials if at least Alchemy <PAColor0xffe9bd23>Skilled 1<PAOldColor>.\n<PAColor0xffe9bd23>Blue Whale Tendon x1<PAOldColor>\n<PAColor0xffe9bd23>Clown's Blood x1<PAOldColor>\n<PAColor0xffe9bd23>Ash Sap x12<PAOldColor>\n<PAColor0xffe9bd23>Purified Water x5<PAOldColor>\n<PAColor0xffe9bd23>Clear Liquid Reagent x2<PAOldColor>\n\n ※ Craft <PAColor0xffe9bd23>Whale Tendon Elixir<PAOldColor> for a low chance to obtain <PAColor0xffe9bd23>Tough Whale Tendon Elixir<PAOldColor> if at least Alchemy <PAColor0xffe9bd23>Professional 1<PAOldColor>.",
+        "icon": "New_Icon/03_ETC/07_ProductMaterial/00000732.dds",
+        "grade": 2,
+        "category": "Potion",
+        "itemType": 2,
+        "marketable": true,
+        "weight": 0.2,
+        "buyPrice": 0,
+        "sellPrice": 0,
+        "repairPrice": 0
+      },
+      {
+        "urn": "urn::item:733",
+        "id": 733,
+        "name": "Tough Whale Tendon Elixir",
+        "description": "An elixir with a defensive function.\n\n- <PAColor0xff96d4fc>Usage<PAOldColor>: Gain the following effect\n\n- Effect:\n<PAColor0xffe9bd23>   All Damage Reduction +125<PAOldColor>\n\n- Duration: <PAColor0xffe9bd23>30 sec<PAOldColor>\n- Cooldown: <PAColor0xffe9bd23>10 min<PAOldColor>\n\n- <PAColor0xff57f426>How to Obtain<PAOldColor>: Craft <PAColor0xffe9bd23>Whale Tendon Elixir<PAOldColor> in your residence with the following materials for a low chance to obtain if at least Alchemy <PAColor0xffe9bd23>Professional 1<PAOldColor>\n<PAColor0xffe9bd23>Blue Whale Tendon x1<PAOldColor>\n<PAColor0xffe9bd23>Clown's Blood x1<PAOldColor>\n<PAColor0xffe9bd23>Ash Sap x12<PAOldColor>\n<PAColor0xffe9bd23>Purified Water x5<PAOldColor>\n<PAColor0xffe9bd23>Clear Liquid Reagent x2<PAOldColor>",
+        "icon": "New_Icon/03_ETC/07_ProductMaterial/00000733.dds",
+        "grade": 3,
+        "category": "Potion",
+        "itemType": 2,
+        "marketable": true,
+        "weight": 0.2,
+        "buyPrice": 0,
+        "sellPrice": 0,
+        "repairPrice": 0
+      },
+      {
+        "urn": "urn::item:1360",
+        "id": 1360,
+        "name": "Sturdy Whale Tendon Potion",
+        "description": "A potion filled with the strong energy of life. The energy of the steadfast forest was infused into the special potion drunk by hunters.\n\n- <PAColor0xff96d4fc>Usage<PAOldColor>: Gain the following effects\n\n- Effects:\n   <PAColor0xffe9bd23>Recover 3,000 HP<PAOldColor>\n   <PAColor0xffe9bd23>Recover 750 MP/WP/SP<PAOldColor>\n\n- Duration: <PAColor0xffe9bd23>Instant<PAOldColor>\n- Cooldown: <PAColor0xffe9bd23>30 sec<PAOldColor>\n\n- <PAColor0xff57f426>How to Obtain<PAOldColor>: Processing ({KeyBind:Manufacture}) - <PAColor0xffe9bd23>Simple Alchemy<PAOldColor>\n\n- Materials #1:\n<PAColor0xffe9bd23>Sturdy Forest Tread x1<PAOldColor>\n<PAColor0xffe9bd23>Whale Tendon Potion x3<PAOldColor>\n\n- Materials #2:\n<PAColor0xffe9bd23>Sturdy Forest Tread x1<PAOldColor>\n<PAColor0xffe9bd23>Superior Whale Tendon Potion x1<PAOldColor>",
+        "icon": "New_Icon/03_ETC/08_Potion/00001360.dds",
+        "grade": 3,
+        "category": "Potion",
+        "itemType": 2,
+        "marketable": true,
+        "weight": 0.3,
+        "buyPrice": 0,
+        "sellPrice": 0,
+        "repairPrice": 0
+      },
+      {
+        "urn": "urn::item:1361",
+        "id": 1361,
+        "name": "Sturdy Whale Tendon Elixir",
+        "description": "An elixir filled with the energy of the sturdy forest that enhances your defenses.\n\n- <PAColor0xff96d4fc>Usage<PAOldColor>: Gain the following effect\n\n- Effect:\n<PAColor0xffe9bd23>   All Damage Reduction +175<PAOldColor>\n\n- Duration: <PAColor0xffe9bd23>30 sec<PAOldColor>\n- Cooldown: <PAColor0xffe9bd23>10 min<PAOldColor>\n\n- <PAColor0xff57f426>How to Obtain<PAOldColor>: Processing ({KeyBind:Manufacture}) - <PAColor0xffe9bd23>Simple Alchemy<PAOldColor>\n\n- Materials #1:\n<PAColor0xffe9bd23>Sturdy Forest Tread x2<PAOldColor>\n<PAColor0xffe9bd23>Whale Tendon Elixir x3<PAOldColor>\n\n- Materials #2:\n<PAColor0xffe9bd23>Sturdy Forest Tread x2<PAOldColor>\n<PAColor0xffe9bd23>Tough Whale Tendon Elixir x1<PAOldColor>",
+        "icon": "New_Icon/03_ETC/08_Potion/00001361.dds",
+        "grade": 3,
+        "category": "Potion",
+        "itemType": 2,
+        "marketable": true,
+        "weight": 0.2,
+        "buyPrice": 0,
+        "sellPrice": 0,
+        "repairPrice": 0
+      },
+      {
+        "urn": "urn::item:1412",
+        "id": 1412,
+        "name": "Immortal: Perfume of Envy",
+        "description": "A perfume with an offensive function.\n\n- <PAColor0xff96d4fc>Usage<PAOldColor>: <PAColor0xffe9bd23>Gain the following effects<PAOldColor>\n\n- Effects:\n<PAColor0xffe9bd23>   All AP +25<PAOldColor>\n<PAColor0xffe9bd23>   Max HP +500<PAOldColor>\n<PAColor0xffe9bd23>   Attack Speed +5<PAOldColor>\n<PAColor0xffe9bd23>   Casting Speed +5<PAOldColor>\n<PAColor0xffe9bd23>   Movement Speed +5<PAOldColor>\n\n- Duration: <PAColor0xffe9bd23>20 min<PAOldColor>\n- Cooldown: <PAColor0xffe9bd23>10 sec<PAOldColor>\n\n<PAColor0xffb793ff>※ Type: Perfume<PAOldColor>\n<PAColor0xffb793ff>※ Only the effects of the last perfume used will be applied.<PAOldColor>\n<PAColor0xffb793ff>※ By the power of immortality, the effects persist even if you die.<PAOldColor>\n\n- <PAColor0xff57f426>How to Obtain<PAOldColor>: Processing ({KeyBind:Manufacture}) - <PAColor0xffe9bd23>Simple Alchemy <PAOldColor>with the following materials\n\n- Materials:\n<PAColor0xffe9bd23>Corrupt Oil of Immortality x6<PAOldColor>\n<PAColor0xffe9bd23>Perfume of Envy x1<PAOldColor>",
+        "icon": "New_Icon/03_ETC/08_Potion/00001413.dds",
+        "grade": 3,
+        "category": "Potion",
+        "itemType": 2,
+        "marketable": true,
+        "weight": 0.2,
+        "buyPrice": 0,
+        "sellPrice": 0,
+        "repairPrice": 0
+      },
+      {
+        "urn": "urn::item:1414",
+        "id": 1414,
+        "name": "Immortal: Perfume of Tenacity",
+        "description": "A perfume with an offensive function.\n\n- <PAColor0xff96d4fc>Usage<PAOldColor>: <PAColor0xffe9bd23>Gain the following effects<PAOldColor>\n\n- Effects:\n<PAColor0xffe9bd23>   All AP +15<PAOldColor>\n<PAColor0xffe9bd23>   Max Stamina +100<PAOldColor>\n<PAColor0xffe9bd23>   Max HP +400<PAOldColor>\n<PAColor0xffe9bd23>   Back Attack Extra Damage +10%<PAOldColor>\n<PAColor0xffe9bd23>   Down Attack Extra Damage +10%<PAOldColor>\n<PAColor0xffe9bd23>   Air Attack Extra Damage +10%<PAOldColor>\n\n- Duration: <PAColor0xffe9bd23>20 min<PAOldColor>\n- Cooldown: <PAColor0xffe9bd23>10 sec<PAOldColor>\n\n<PAColor0xffb793ff>※ Type: Perfume<PAOldColor>\n<PAColor0xffb793ff>※ Only the effects of the last perfume used will be applied.<PAOldColor>\n<PAColor0xffb793ff>※ By the power of immortality, the effects persist even if you die.<PAOldColor>\n\n- <PAColor0xff57f426>How to Obtain<PAOldColor>: Processing ({KeyBind:Manufacture}) - <PAColor0xffe9bd23>Simple Alchemy <PAOldColor>with the following materials\n\n- Materials:\n<PAColor0xffe9bd23>Corrupt Oil of Immortality x6<PAOldColor>\n<PAColor0xffe9bd23>Perfume of Tenacity x1<PAOldColor>",
+        "icon": "New_Icon/03_ETC/08_Potion/00001414.dds",
+        "grade": 3,
+        "category": "Potion",
+        "itemType": 2,
+        "marketable": true,
+        "weight": 0.2,
+        "buyPrice": 0,
+        "sellPrice": 0,
+        "repairPrice": 0
+      },
+      {
+        "urn": "urn::item:4917",
+        "id": 4917,
+        "name": "Forest Fury",
+        "description": "The fury of the forest pent up over the years is contained within.\n\n※ <PAColor0xffe9bd23>Use Simple Alchemy in Processing to combine Black Magic Crystal - Harphia, Black Magic Crystal - Cobelinus, Black Magic Crystal - Viper, Black Magic Crystal - Hystria, Black Magic Crystal - Carmae, or Black Magic Crystal - Addis with Magical Shard to turn the crystal into a JIN, BON, or WON.<PAOldColor>\n\n<PAColor0xffff721d>※ Category: Material<PAOldColor>\n<PAColor0xffff721d>※ Main Usage: Craft crystals that can be transfused into gear for additional effects<PAOldColor>",
+        "icon": "New_Icon/03_ETC/07_ProductMaterial/00004917.dds",
+        "grade": 3,
+        "category": "Etc",
+        "itemType": 8,
+        "marketable": true,
+        "weight": 0.1,
+        "buyPrice": 0,
+        "sellPrice": 0,
+        "repairPrice": 0
+      },
+      {
+        "urn": "urn::item:9780",
+        "id": 9780,
+        "name": "Witch's Delicacy",
+        "description": "A dish with a horrifyingly unappetizing look. It is known as the witch's delicacy as people believe it is something only enjoyed by witches. Finto says one must train their taste buds with the witch's delicacy in order to become a true chef.\n\n- <PAColor0xff96d4fc>Usage<PAOldColor>: <PAColor0xffe9bd23>Item Exchange<PAOldColor>\n\n<PAColor0xffe9bd23>※ Exchange NPC<PAOldColor>\n<PAColor0xffe9bd23>- Major City = Liana<PAOldColor>\n<PAColor0xffe9bd23>- Olvia = Nadia Rowen<PAOldColor>\n\n※ Exchange List\n<PAColor0xffe9bd23>- x10 = Beer x500<PAOldColor>\n<PAColor0xffe9bd23>- x10 = Milk x120<PAOldColor>\n<PAColor0xffe9bd23>- x10 = 900 Contribution EXP + Cooking EXP x30<PAOldColor>\n\n- <PAColor0xff57f426>How to Obtain<PAOldColor>: <PAColor0xffe9bd23>Cooking<PAOldColor>\n\n <PAColor0xffe9bd23>({TextBind:LOCATE_CLICK_RMB})<PAOldColor>",
+        "icon": "New_Icon/03_ETC/07_ProductMaterial/00009780.dds",
+        "grade": 3,
+        "category": "Etc",
+        "itemType": 0,
+        "weight": 0.01,
+        "buyPrice": 0,
+        "sellPrice": 0,
+        "repairPrice": 0
+      },
+      {
+        "urn": "urn::item:9781",
+        "id": 9781,
+        "name": "Mysterious Catalyst",
+        "description": "A catalyst without a known recipe, synthesized rarely as a byproduct when performing alchemy. Many alchemists conducted experiments with this catalyst, but were not able to find any substances known in this world that reacted to it. The alchemist Freharau, waiting for a substance that reacts to this catalyst to be discovered, says alchemy is about transformation and fluidity of nature. Thus, this mysterious catalyst which does not have a set recipe, represents the essence of alchemy.\n\n- <PAColor0xff96d4fc>Usage<PAOldColor>: <PAColor0xffe9bd23>Item Exchange<PAOldColor>\n\n<PAColor0xffe9bd23>※ Exchange NPC<PAOldColor>\n<PAColor0xffe9bd23>- Major City = Dalishain<PAOldColor>\n<PAColor0xffe9bd23>- Olvia = Bofin<PAOldColor>\n\n※ Exchange List\n<PAColor0xffe9bd23>- x10 = Clear Liquid Reagent x200<PAOldColor>\n<PAColor0xffe9bd23>- x10 = Powder of Darkness x200<PAOldColor>\n<PAColor0xffe9bd23>- x10 = Powder of Flame x200<PAOldColor>\n<PAColor0xffe9bd23>- x10 = Powder of Rifts x200<PAOldColor>\n<PAColor0xffe9bd23>- x10 = Powder of Earth x200<PAOldColor>\n<PAColor0xffe9bd23>- x10 = Powder of Time x200<PAOldColor>\n<PAColor0xffe9bd23>- x10 = Shining Powder x5<PAOldColor>\n<PAColor0xffe9bd23>- x10 = 900 Contribution EXP + Alchemy EXP x30<PAOldColor>\n\n- <PAColor0xff57f426>How to Obtain<PAOldColor>: <PAColor0xffe9bd23>Alchemy<PAOldColor>\n\n <PAColor0xffe9bd23>({TextBind:LOCATE_CLICK_RMB})<PAOldColor>",
+        "icon": "New_Icon/03_ETC/07_ProductMaterial/00009781.dds",
+        "grade": 3,
+        "category": "Etc",
+        "itemType": 0,
+        "weight": 0.01,
+        "buyPrice": 0,
+        "sellPrice": 0,
+        "repairPrice": 0
+      },
+      {
+        "urn": "urn::item:9795",
+        "id": 9795,
+        "name": "Blush Leaf",
+        "description": "A light pinkish leaf discovered whilst Farming. It's somewhat difficult to find due to usually being smothered in piles of dirt. \n\n- <PAColor0xff96d4fc>Usage<PAOldColor>: <PAColor0xffe9bd23>Item Exchange<PAOldColor>\n\n<PAColor0xffe9bd23>※ Exchange NPC<PAOldColor>\n<PAColor0xffe9bd23>- Major City = Liana<PAOldColor>\n<PAColor0xffe9bd23>- Loggia Farm = Camellia Loggia <PAOldColor>\n\n※ Exchange List\n<PAColor0xffe9bd23>- x20 = Special Pepper Seed x4<PAOldColor>\n<PAColor0xffe9bd23>- x20 = Stonetail Fodder x1<PAOldColor>\n<PAColor0xffe9bd23>- x20 = 900 Contribution EXP + 30 Farming EXP<PAOldColor>\n\n- <PAColor0xff57f426>How to Obtain<PAOldColor>: <PAColor0xffe9bd23>Farming<PAOldColor>\n\n <PAColor0xffe9bd23>({TextBind:LOCATE_CLICK_RMB})<PAOldColor>",
+        "icon": "New_Icon/03_ETC/07_ProductMaterial/00009795.dds",
+        "grade": 3,
+        "category": "Etc",
+        "itemType": 0,
+        "weight": 0.01,
+        "buyPrice": 0,
+        "sellPrice": 0,
+        "repairPrice": 0
+      },
+      {
+        "urn": "urn::item:9799",
+        "id": 9799,
+        "name": "Wildspark",
+        "description": "A substance that Ganelle and Vedir have coined as the Wildspark, as all wild animals possess them. Ferricas/Ferrinas and Salun Bears, furry allies of the Ganelle and the Ahib, respectively, savor this delicacy, as it is sought after in Kamasylvia and O'dyllita.\n\n- <PAColor0xff96d4fc>Usage<PAOldColor>: <PAColor0xffe9bd23>Item Exchange<PAOldColor>\n\n<PAColor0xffe9bd23>※ Exchange NPC<PAOldColor>\n<PAColor0xffe9bd23>- Major City = Liana<PAOldColor>\n\n※ Exchange List\n<PAColor0xffe9bd23>- x10 = Spirit Pouch of Ferocious Beast x1<PAOldColor>\n<PAColor0xffe9bd23>- x10 = Black Gem Fragment x5<PAOldColor>\n<PAColor0xffe9bd23>- x10 = 900 Contribution EXP + Hunting EXP x30<PAOldColor>\n\n- <PAColor0xff57f426>How to Obtain<PAOldColor>: <PAColor0xffe9bd23>Hunting<PAOldColor>",
+        "icon": "New_Icon/03_ETC/10_Free_TradeItem/00800107.dds",
+        "grade": 3,
+        "category": "Etc",
+        "itemType": 0,
+        "weight": 0.01,
+        "buyPrice": 0,
+        "sellPrice": 0,
+        "repairPrice": 0
+      },
+      {
+        "urn": "urn::item:42497",
+        "id": 42497,
+        "name": "Energy of Lakiaro",
+        "description": "The Energy of Lakiaro. When combined, its essence coalesces into formidable armor, unmatched in strength.",
+        "icon": "New_Icon/03_ETC/03_Quest_Item/00042497.dds",
+        "grade": 3,
+        "category": "SpecialGoods",
+        "itemType": 2,
+        "weight": 0.0001,
+        "buyPrice": 0,
+        "sellPrice": 0,
+        "repairPrice": 0
+      },
+      {
+        "urn": "urn::item:45503",
+        "id": 45503,
+        "name": "Khan's Heart: Destruction",
+        "description": "An alchemy stone condensed with the destructive power of Khan's magic.\n\n- Effects:\n<PAColor0xffe9bd23>   All AP +7<PAOldColor>\n<PAColor0xffe9bd23>   All Accuracy +9<PAOldColor>\n<PAColor0xffe9bd23>   Attack Speed +4%<PAOldColor>\n<PAColor0xffe9bd23>   Casting Speed +4%<PAOldColor>",
+        "icon": "New_Icon/03_ETC/00045503.dds",
+        "grade": 3,
+        "category": "Etc",
+        "itemType": 1,
+        "marketable": true,
+        "weight": 0.05,
+        "buyPrice": 0,
+        "sellPrice": 0,
+        "repairPrice": 0
+      },
+      {
+        "urn": "urn::item:45513",
+        "id": 45513,
+        "name": "Khan's Heart: Protection",
+        "description": "An alchemy stone condensed with the protective power of Khan's magic.\n\n- Effects:\n<PAColor0xffe9bd23>   All Damage Reduction +7<PAOldColor>\n<PAColor0xffe9bd23>   All Evasion +9<PAOldColor>\n<PAColor0xffe9bd23>   All Resistance +4%<PAOldColor>\n<PAColor0xffe9bd23>   Max HP +130<PAOldColor>",
+        "icon": "New_Icon/03_ETC/00045513.dds",
+        "grade": 3,
+        "category": "Etc",
+        "itemType": 1,
+        "marketable": true,
+        "weight": 0.05,
+        "buyPrice": 0,
+        "sellPrice": 0,
+        "repairPrice": 0
+      },
+      {
+        "urn": "urn::item:45514",
+        "id": 45514,
+        "name": "Khan's Heart: Life",
+        "description": "An alchemy stone condensed with the life force of Khan's magic.\n\n- Effects:\n<PAColor0xffe9bd23>   Life EXP +30%<PAOldColor>\n<PAColor0xffe9bd23>   Alchemy/Cooking Time -1.3 sec<PAOldColor>\n<PAColor0xffe9bd23>   Processing Success Rate +13%<PAOldColor>\n<PAColor0xffe9bd23>   Weight Limit +70 LT<PAOldColor>\n<PAColor0xffe9bd23>   Gathering/Fishing Speed +2<PAOldColor>\n<PAColor0xffe9bd23>   Gathering Item Drop Rate +12%<PAOldColor>\n<PAColor0xffe9bd23>   All Life Skill Mastery +25<PAOldColor>",
+        "icon": "New_Icon/03_ETC/00045514.dds",
+        "grade": 3,
+        "category": "Etc",
+        "itemType": 20,
+        "marketable": true,
+        "weight": 0.05,
+        "buyPrice": 0,
+        "sellPrice": 0,
+        "repairPrice": 0
+      },
+      {
+        "urn": "urn::item:45517",
+        "id": 45517,
+        "name": "Khan's Dim Magic",
+        "description": "A dimmed form of Khan's magical power.\nMany alchemists are studying it in search of an alchemical method to control the power of Khan's magic.\n\nCrafting Method: Processing ({KeyBind:Manufacture}) - <PAColor0xffe9bd24>Simple Alchemy <PAOldColor>with the following materials\n\n- <PAColor0xff96d4fc>Usage #1<PAOldColor>: Craft <PAColor0xffe9bd23>Khan's Heart: Destruction<PAOldColor>\n\n- Crafting Materials:\n<PAColor0xffe9bd23>Magical Shard x200<PAOldColor>\n<PAColor0xffe9bd23>Trace of Nature x100<PAOldColor>\n<PAColor0xffe9bd23>Alchemy Stone Shard x400<PAOldColor>\n<PAColor0xffe9bd23>Khan's Dim Magic x3<PAOldColor>\n<PAColor0xffe9bd23>Destruction Spirit Stone<PAOldColor>\n\n- <PAColor0xff96d4fc>Usage #2<PAOldColor>: Craft <PAColor0xffe9bd23>Khan's Heart: Protection<PAOldColor>\n\n- Crafting Materials:\n<PAColor0xffe9bd23>Magical Shard x200<PAOldColor>\n<PAColor0xffe9bd23>Trace of Nature x100<PAOldColor>\n<PAColor0xffe9bd23>Alchemy Stone Shard x400<PAOldColor>\n<PAColor0xffe9bd23>Khan's Dim Magic x3<PAOldColor>\n<PAColor0xffe9bd23>Guardian Spirit Stone<PAOldColor>\n\n- <PAColor0xff96d4fc>Usage #3<PAOldColor>: Craft <PAColor0xffe9bd23>Khan's Heart: Life<PAOldColor>\n\n- Crafting Materials:\n<PAColor0xffe9bd23>Magical Shard x200<PAOldColor>\n<PAColor0xffe9bd23>Trace of Nature x100<PAOldColor>\n<PAColor0xffe9bd23>Alchemy Stone Shard x400<PAOldColor>\n<PAColor0xffe9bd23>Khan's Dim Magic x3<PAOldColor>\n<PAColor0xffe9bd23>Life Spirit Stone<PAOldColor>\n\n- <PAColor0xff57f426>How to Obtain<PAOldColor>: Complete quest via Curio at Oquilla's Eye",
+        "icon": "New_Icon/03_ETC/00045517.dds",
+        "grade": 3,
+        "category": "Etc",
+        "itemType": 0,
+        "weight": 0.1,
+        "buyPrice": 0,
+        "sellPrice": 0,
+        "repairPrice": 0
+      },
+      {
+        "urn": "urn::item:59878",
+        "id": 59878,
+        "name": "Tear of Illusion",
+        "description": "{TextBind:TEXTBIND_MORNINGLAND_DIVIDE_HWAN}",
+        "icon": "New_Icon/03_ETC/04_DropItem/00059878.dds",
+        "grade": 3,
+        "category": "Etc",
+        "itemType": 0,
+        "weight": 0.3,
+        "buyPrice": 0,
+        "sellPrice": 0,
+        "repairPrice": 0
+      },
+      {
+        "urn": "urn::item:66771",
+        "id": 66771,
+        "name": "Sangpyeong Coin",
+        "description": "A currency minted for currency-based transactions in the barter economy.\nIts name means \"a treasure that is used widely and equally by all with pride\".\n\n<PAColor0xffe9bd23>※ 1 Exchange per Family<PAOldColor>\n<Dohoon> x500 = Embers of Hongik x30\n<Dokkebi Princess> x300 = Artisan Dokkebi Worker Contract x1 \n<Honorable Choi> x300 = Artisan Dolswe Worker Contract x1\n<Chulong> x300 = Artisan Shellfolk Worker Contract x1\n<Miss Myo> Sangpyeong Coin Chest x2 = Crystal of Harmony x1\n<PAColor0xffe9bd23>※ You can exchange Sangpyeong Coin Chest x1 for Sangpyeong Coin x1,000 via central market director Geowan of Byeot County after you complete the [EXC] Crystal of Harmony x1 quest from Miss Myo.<PAOldColor>\n\n<PAColor0xffe9bd23>※ Exchanged at All Times<PAOldColor>\n<Wolim, Maksoon, Ahryung>\nx500 = Live Meat x1\nx100 = Morning Light Traditional Cooking Utensil x1\nx50 = Iridescent Maehwa x1\nx10 = Strange and Beautiful Rice x1 \n\n<Deokpal>\nx100 = Morning Light Traditional Alchemy Tool x1\nx10 = Strange and Beautiful Herb x1\n\n<Yooan>\nx10 = Finely Polished Pine Plywood x1\n\n<Hyunyong>\nx2,000 = Crystal of Harmony x1\nx1,500 = Girin's Fragment x1\nx1,500 = Bonghwang's Fragment x1\nx1,500 = Haetae's Fragment x1\nx1,000 = Forest Crystal x1",
+        "icon": "New_Icon/03_ETC/00066771.dds",
+        "grade": 0,
+        "category": "Etc",
+        "itemType": 0,
+        "weight": 0.01,
+        "buyPrice": 0,
+        "sellPrice": 0,
+        "repairPrice": 0
+      },
+      {
+        "urn": "urn::item:66783",
+        "id": 66783,
+        "name": "Sangpyeong Coin Chest",
+        "description": "A chest that stores Sangpyeong Coin x1,000 for your convenience in transportation.\n\n<PAColor0xffe9bd23>※ Can be exchanged for Sangpyeong Coin with Geowan, the central market director of Byeot County.<PAOldColor>",
+        "icon": "New_Icon/03_ETC/00779322_1.dds",
+        "grade": 0,
+        "category": "Etc",
+        "itemType": 0,
+        "weight": 0.5,
+        "buyPrice": 0,
+        "sellPrice": 0,
+        "repairPrice": 0
+      },
+      {
+        "urn": "urn::item:721003",
+        "id": 721003,
+        "name": "Caphras Stone",
+        "description": "The immortal alchemist Caphras used stones as these as the ultimate catalyst. Sometimes referred to as the solar stone, the stone emits an intense and pure energy. It can be used to unlock the full potential of a gear without the risk of experiencing any dark, corrosive side effects.\n\n- <PAColor0xff96d4fc>Usage<PAOldColor>: Increases the power of TRI (III) or higher gear via Caphras Enhancement\n\n- <PAColor0xffe9bd23>{TextBind:KAFURAS_CLICK_RMB}<PAOldColor>\n\n- <PAColor0xff57f426>How to Obtain<PAOldColor>: Quests, defeating monsters, Gathering, or Processing ({KeyBind:Manufacture}) - <PAColor0xffe9bd23>Simple Alchemy <PAOldColor>with the following materials\n\n- Crafting Materials: \n<PAColor0xffe9bd23>Ancient Spirit Dust x5<PAOldColor>\n<PAColor0xffe9bd23>Black Stone x1<PAOldColor>\n\n- Materials for x10: \n<PAColor0xffe9bd23>Ancient Spirit Dust x50<PAOldColor>\n<PAColor0xffe9bd23>Black Stone x10<PAOldColor>\n<PAColor0xffe9bd23>Black Stone Powder x1<PAOldColor>\n\n- Materials for x100:\n<PAColor0xffe9bd23>Ancient Spirit Dust x500<PAOldColor>\n<PAColor0xffe9bd23>Black Stone x100<PAOldColor>\n<PAColor0xffe9bd23>Pure Powder Reagent x1<PAOldColor>",
+        "icon": "New_Icon/03_ETC/00721003.dds",
+        "grade": 2,
+        "category": "SpecialGoods",
+        "itemType": 0,
+        "marketable": true,
+        "weight": 0.0001,
+        "buyPrice": 0,
+        "sellPrice": 0,
+        "repairPrice": 0,
+        "vendors": {
+          "urns": [
+            "urn::npc:40068",
+            "urn::npc:41048",
+            "urn::npc:42015",
+            "urn::npc:44631",
+            "urn::npc:45032",
+            "urn::npc:45562",
+            "urn::npc:46042",
+            "urn::npc:47023",
+            "urn::npc:47446",
+            "urn::npc:47447",
+            "urn::npc:47448",
+            "urn::npc:47673",
+            "urn::npc:47771",
+            "urn::npc:50800",
+            "urn::npc:50974"
+          ]
+        },
+        "unresolvedVendors": [
+          "Dipados"
+        ],
+        "gatheredFrom": [
+          "Acacia Tree",
+          "Agar",
+          "Aloe",
+          "Amanita Mushroom",
+          "Ancient Mushroom",
+          "Ancient Troll",
+          "Ancient Troll Elite Warrior",
+          "Ancient Troll Shaman",
+          "Ancient Troll Thrower",
+          "Ancient Troll Warrior",
+          "Andesite",
+          "Apple Tree",
+          "Arrow Mushroom",
+          "Ash Tree",
+          "Atrocious Bear",
+          "Atrocious Boar",
+          "Atrocious Tiger",
+          "Audria",
+          "Autumn Bellflower",
+          "Baby Belladonna Elephant",
+          "Baby Boar",
+          "Baby Stone Rhino",
+          "Baby Valencian Lion",
+          "Baby Waragon",
+          "Balenos Bear",
+          "Bamboo Sprout",
+          "Barley",
+          "Basalt",
+          "Bat",
+          "Bear",
+          "Beetle Stoneback Crab",
+          "Belladonna Elephant",
+          "Beryl",
+          "Big Horn Triangle Head Salamander",
+          "Big Horned Wild Boar",
+          "Birch",
+          "Black Bear",
+          "Black Leopard",
+          "Black Moss Stoneback Crab",
+          "Black Quartz",
+          "Blind Pugnose",
+          "Bloodstone",
+          "Blue Coral",
+          "Blue Crystal",
+          "Blue Flower",
+          "Blue Lizard",
+          "Blue Rose",
+          "Blue Umbrella Mushroom",
+          "Bluffer Mushroom",
+          "Boar",
+          "Boss Wolf",
+          "Bouquet Mushroom",
+          "Bracken",
+          "Brown Bear",
+          "Brown Raccoon",
+          "Brown Seaweed",
+          "Bryophyte",
+          "Bush",
+          "Cabbage",
+          "Cactus",
+          "Calpheon Worm",
+          "Caphras Tree",
+          "Cave Flytrap Worm",
+          "Cedar Tree",
+          "Chanterelle",
+          "Cinnamon",
+          "Citron Tree",
+          "Clam",
+          "Clear Quartz",
+          "Cliffside Mountain Sheep",
+          "Cloud Mushroom",
+          "Coal",
+          "Coco Bird",
+          "Colossal Stone Waragon",
+          "Copper",
+          "Coral Stoneback Crab",
+          "Corn",
+          "Cotton",
+          "Dalvenia Alrea",
+          "Date Palm Tree",
+          "Dead Coral",
+          "Deer",
+          "Delotia",
+          "Desert Fox",
+          "Desert Herb",
+          "Desert Iguana",
+          "Desert Kuku Bird",
+          "Desert Scorpion",
+          "Despair-Consumed Gargoyle",
+          "Despair-Consumed Khalk",
+          "Diamond",
+          "Dictyophora",
+          "Diorite",
+          "Dried Old Tree",
+          "Drieghan Female Goat",
+          "Drieghan Male Goat",
+          "Dry Mane Grass",
+          "Dry Moss Tree",
+          "Dry Thicket",
+          "Dwarf Mushroom",
+          "Elder Tree",
+          "Elk",
+          "Emperor Mushroom",
+          "Evening Primrose",
+          "Everlasting Herb",
+          "Explosive Waragon",
+          "Eyelash Cup",
+          "Fan Flamingo",
+          "Farm Boar",
+          "Farm Stoneback Crab",
+          "Faust Forest Herb Stoneback Crab",
+          "Faust Forest Scrub Stoneback Crab",
+          "Faust Forest Tiny Stoneback Crab",
+          "Faust Forest Tough Stoneback Crab",
+          "Feather Weasel",
+          "Feather Wolf",
+          "Feldspar",
+          "Female Elk",
+          "Ferocious Weasel",
+          "Ferrica",
+          "Ferrina",
+          "Fig Tree",
+          "Fir",
+          "Fire Flake Flower",
+          "Fog Mushroom",
+          "Forest Bat",
+          "Fortune Teller Mushroom",
+          "Fox",
+          "Freekeh",
+          "Frost Wolf",
+          "Frost-tail Weasel",
+          "Fruit Tree",
+          "Fugitive Khalk",
+          "Gazelle",
+          "Ghost Mushroom",
+          "Giant Boar",
+          "Giant Brown Bear",
+          "Giant Desert Scorpion",
+          "Giant Elk",
+          "Giant Fish Carcass",
+          "Giant Fox",
+          "Giant Lion",
+          "Giant Lioness",
+          "Giant Mountain Sheep",
+          "Giant Pearl Clam",
+          "Giant Wolf",
+          "Gold",
+          "Golden Leaf Snake",
+          "Goldfield Scarecrow",
+          "Goosefoot",
+          "Gorgo Cobra",
+          "Granite",
+          "Grape",
+          "Grass Rhino",
+          "Grassback Crab",
+          "Gravestone Golem",
+          "Gray Boar",
+          "Gray Fox",
+          "Gray Highland Wolf",
+          "Gray Wolf",
+          "Gray Wolf Alpha",
+          "Green Coral",
+          "Green Pendulous Mushroom",
+          "Green Quartz",
+          "Griffon",
+          "Guenon",
+          "Hard Sandstone",
+          "Hawk",
+          "Hazel Tree",
+          "Herb Sack",
+          "High Head Stoneback Crab",
+          "High-quality Lakiaro for Research",
+          "Highland Stoneback Crab",
+          "Horned Rock Lizard",
+          "Hump Mushroom",
+          "Iguana",
+          "Insectivore Plant",
+          "Iron",
+          "Jadeite",
+          "Jujube Tree",
+          "Kamasylvia Brown Bear",
+          "Kamasylvia Female Horn Deer",
+          "Kamasylvia Herb Stoneback Crab",
+          "Kamasylvia Horn Deer",
+          "Kamasylvia Mountain Lamb",
+          "Kamasylvia Mountain Sheep",
+          "Kamasylvia Rough Stoneback Crab",
+          "Kamasylvia Scrub Stoneback Crab",
+          "Kamasylvia Small Lizard",
+          "Kamasylvia Small Stoneback Crab",
+          "Kamasylvia Weasel",
+          "Kamasylvia Young Horn Deer",
+          "Kelp",
+          "King Brown Bear",
+          "King Griffon",
+          "King Starfish",
+          "KkoKko",
+          "Kuku Bird",
+          "Lakiaro",
+          "Lamb",
+          "Lapis Lazuli Crab",
+          "Lava Bull",
+          "Lavender Kuku Bird",
+          "Lead",
+          "Leccinum",
+          "Llama",
+          "Loah Snake",
+          "Long-haired Water Buffalo",
+          "Longtail Salamander",
+          "Loopy Tree",
+          "Lunar Hare",
+          "Maehwa",
+          "Mandragora",
+          "Maple",
+          "Maple Tree",
+          "Marble",
+          "Marmot",
+          "Maroon Raccoon",
+          "Mature Rock Spirit",
+          "Mediah Mountain Lamb",
+          "Mediah Mountain Sheep",
+          "Medicinal Herb Kettle",
+          "Mesima",
+          "Miker Newt",
+          "Mimosa",
+          "Mining",
+          "Mischievous Raccoon",
+          "Moonlight Stone",
+          "Moss Stoneback Crab",
+          "Moss Tree",
+          "Mountain Lamb",
+          "Mountain Sheep",
+          "Muddy Quartz",
+          "Mudstone",
+          "Mulberry",
+          "Mythril Ore",
+          "Napa Cabbage",
+          "Nightshade",
+          "Noc Rock",
+          "Nolina",
+          "Nutmeg Tree",
+          "Ogre",
+          "Old Tree",
+          "Olive Tree",
+          "Opal",
+          "Oyster",
+          "Palm Tree",
+          "Paprika",
+          "Penestraria",
+          "Perilla",
+          "Persimmon Tree",
+          "Phnyl",
+          "Pie Mushroom",
+          "Pine Mushroom",
+          "Pine Tree",
+          "Pink Rosebay",
+          "Pink Tentacle Sea Anemone",
+          "Pink Trumpet Mushroom",
+          "Pistachio Tree",
+          "Plain Stoneback Crab",
+          "Platinum",
+          "Potato",
+          "Primitive Lakiaro for Research",
+          "Pumpkin",
+          "Purple Mushroom",
+          "Purple Pink Flower",
+          "Queen Stoneback Crab",
+          "Raccoon",
+          "Radish",
+          "Rainbow Button Mushroom",
+          "Rainbow Coral",
+          "Rainbow Fox",
+          "Rainbow Lizard",
+          "Rainbow Stone",
+          "Red Bear",
+          "Red Boar",
+          "Red Coral",
+          "Red Quartz",
+          "Red-spotted Amanita",
+          "Reed",
+          "Rhino Lizard",
+          "Rhyolite",
+          "Rice Stalk",
+          "Rock",
+          "Rock Box",
+          "Rock Elephant",
+          "Rock Head Bison",
+          "Rock Rhino",
+          "Rock Scorpion",
+          "Rockskin Boar",
+          "Rose",
+          "Rough Stoneback Crab",
+          "Rounded Purple Coral",
+          "Ruby",
+          "Ruins Stoneback Crab",
+          "Saffron",
+          "Sandceratops",
+          "Sandstone",
+          "Sapphire",
+          "Scarlet Rosebay",
+          "Scary Salamander",
+          "Sea Anemone",
+          "Sea Fan",
+          "Sea Lion",
+          "Seagull",
+          "Seaweed",
+          "Sensitive Bear",
+          "Sensitive Boar",
+          "Sensitive Giant Elk",
+          "Sensitive Hawk",
+          "Sensitive Seagull",
+          "Serendia Bear",
+          "Serendia Elk",
+          "Serendia Mountain Sheep",
+          "Serendia Wolf",
+          "Shadow Lion",
+          "Shadow Wolf",
+          "Sharp Stoneback Crab",
+          "Sheep",
+          "Shellfish",
+          "Shrub",
+          "Silk Honey Grass",
+          "Silk Shade Flamingo",
+          "Silver",
+          "Silver Apricot Tree",
+          "Silver Azalea",
+          "Silver Fox",
+          "Sky Blue Flower",
+          "Sky Mushroom",
+          "Small Salamander",
+          "Small Stone Head Bison",
+          "Snow Leopard",
+          "Snowfield Black Yak",
+          "Snowfield Cedar Tree",
+          "Snowfield Ili Pika",
+          "Snowfield Markhor",
+          "Snowfield Yak",
+          "Soft Sandstone",
+          "Spiked Rock Lizard",
+          "Spirit-laden Caphras Tree",
+          "Spotted Coral",
+          "Spotted Deer",
+          "Spotted Hyena",
+          "Star Anise Mushroom",
+          "Star Anise Tree",
+          "Starfish",
+          "Steel Rhino",
+          "Stone Cobra",
+          "Stone Golem",
+          "Stone Head Bison",
+          "Stone Hole Worm",
+          "Stone Prickle Lizard",
+          "Stone Rhino",
+          "Stone Worm",
+          "Stoneback Crab",
+          "Stonetail Bison",
+          "Strange Rock",
+          "Sulfur",
+          "Sunflower",
+          "Sunrise Herb",
+          "Sweet Potato",
+          "Tangleweed",
+          "Teff",
+          "Thick Lakiaro for Research",
+          "Thicket",
+          "Thin Lakiaro for Research",
+          "Thornwood",
+          "Thuja",
+          "Tiger",
+          "Tiger Mushroom",
+          "Tigerflower",
+          "Tin",
+          "Titanium Ore",
+          "Tomato",
+          "Tombback Crab",
+          "Topaz",
+          "Toxic Desert Scorpion",
+          "Toxic Watermelon",
+          "Trained Wolf",
+          "Triangle Head Lizard",
+          "Tridana Giant Clam",
+          "Troll",
+          "Troll Cow",
+          "Troll Elite Warrior",
+          "Troll Porter",
+          "Troll Shaman",
+          "Troll Siege Soldier",
+          "Troll Thrower",
+          "Troll Warrior",
+          "Truffle Mushroom",
+          "Trumpet Coral",
+          "Tulip",
+          "Turban Shell",
+          "Valencia Female Elephant",
+          "Valencia Mountain Sheep",
+          "Valencian Bison",
+          "Valencian Lion",
+          "Valencian Lioness",
+          "Vanadium Ore",
+          "Vedelona",
+          "Verdure Buck",
+          "Verdure Doe",
+          "Viola",
+          "Violet Crystal",
+          "Violet Flower",
+          "Volcanic Rock",
+          "Volcanic Umbrella Mushroom",
+          "Waragon",
+          "Wasteland Cheetah Dragon",
+          "Wasteland Iguana",
+          "Water Buffalo",
+          "Water Thyme",
+          "Weasel",
+          "Weeds",
+          "Wheat",
+          "White Cedar",
+          "White Flower Mushroom",
+          "White Tin",
+          "White Umbrella Mushroom",
+          "Wild Berry",
+          "Wild Flax",
+          "Wild Herb",
+          "Wilderness Golem",
+          "Winter Bear",
+          "Wolf",
+          "Yak",
+          "Yellow Flower",
+          "Young Elk",
+          "Young Lakiaro for Research",
+          "Young Red Boar",
+          "Young Troll Ox",
+          "Youngji Mushroom",
+          "Zinc"
+        ]
+      },
+      {
+        "urn": "urn::item:735351",
+        "id": 735351,
+        "name": "Sethra's Artifact - Life EXP",
+        "description": "An artifact imbued with the power of Sethra, Witch of Rifts, born from Labreska's first death. It's been designed to hold a powerful item within. \"Sethra, Witch of Rifts, is the third gift granted by the owner of the Golden Mountain. She splits the scales of dragons.\"\n\n- <PAColor0xff96d4fc>Usage #1<PAOldColor>: Equip\n\n- <PAColor0xff96d4fc>Usage #2<PAOldColor>: Exchange for <PAColor0xffe9bd23>Purified Lightstone x2<PAOldColor> with <PAColor0xffe9bd23>Dalishain<PAOldColor> in major cities and towns\n\n- <PAColor0xff57f426>How to Obtain<PAOldColor>: All Life Skill activities",
+        "icon": "New_Icon/06_PC_EquipItem/00_Common/00_ETC/00735351_1.dds",
+        "grade": 3,
+        "category": "Armor",
+        "itemType": 20,
+        "weight": 1,
+        "buyPrice": 0,
+        "sellPrice": 0,
+        "repairPrice": 0
+      },
+      {
+        "urn": "urn::item:735352",
+        "id": 735352,
+        "name": "Sethra's Artifact - Life Skill Mastery",
+        "description": "An artifact imbued with the power of Sethra, Witch of Rifts, born from Labreska's first death. It's been designed to hold a powerful item within. \"Sethra, Witch of Rifts, is the third gift granted by the owner of the Golden Mountain. She splits the scales of dragons.\"\n\n- <PAColor0xff96d4fc>Usage #1<PAOldColor>: Equip\n\n- <PAColor0xff96d4fc>Usage #2<PAOldColor>: Exchange for <PAColor0xffe9bd23>Purified Lightstone x2<PAOldColor> with <PAColor0xffe9bd23>Dalishain<PAOldColor> in major cities and towns\n\n- <PAColor0xff57f426>How to Obtain<PAOldColor>: All Life Skill activities",
+        "icon": "New_Icon/06_PC_EquipItem/00_Common/00_ETC/00735352_1.dds",
+        "grade": 3,
+        "category": "Armor",
+        "itemType": 20,
+        "weight": 1,
+        "buyPrice": 0,
+        "sellPrice": 0,
+        "repairPrice": 0
+      },
+      {
+        "urn": "urn::item:735353",
+        "id": 735353,
+        "name": "Sethra's Artifact - Gathering Item Drop Rate",
+        "description": "An artifact imbued with the power of Sethra, Witch of Rifts, born from Labreska's first death. It's been designed to hold a powerful item within. \"Sethra, Witch of Rifts, is the third gift granted by the owner of the Golden Mountain. She splits the scales of dragons.\"\n\n- <PAColor0xff96d4fc>Usage #1<PAOldColor>: Equip\n\n- <PAColor0xff96d4fc>Usage #2<PAOldColor>: Exchange for <PAColor0xffe9bd23>Purified Lightstone x1-2<PAOldColor> with <PAColor0xffe9bd23>Dalishain<PAOldColor> in major cities and towns\n\n- <PAColor0xff57f426>How to Obtain<PAOldColor>: All Gathering activities",
+        "icon": "New_Icon/06_PC_EquipItem/00_Common/00_ETC/00735353_1.dds",
+        "grade": 3,
+        "category": "Armor",
+        "itemType": 20,
+        "weight": 1,
+        "buyPrice": 0,
+        "sellPrice": 0,
+        "repairPrice": 0
+      },
+      {
+        "urn": "urn::item:735356",
+        "id": 735356,
+        "name": "Sethra's Artifact - Gathering EXP",
+        "description": "An artifact imbued with the power of Sethra, Witch of Rifts, born from Labreska's first death. It's been designed to hold a powerful item within. \"Sethra, Witch of Rifts, is the third gift granted by the owner of the Golden Mountain. She splits the scales of dragons.\"\n\n- <PAColor0xff96d4fc>Usage #1<PAOldColor>: Equip\n\n- <PAColor0xff96d4fc>Usage #2<PAOldColor>: Exchange for <PAColor0xffe9bd23>Purified Lightstone x1-2<PAOldColor> with <PAColor0xffe9bd23>Dalishain<PAOldColor> in major cities and towns\n\n- <PAColor0xff57f426>How to Obtain<PAOldColor>: All Gathering activities",
+        "icon": "New_Icon/06_PC_EquipItem/00_Common/00_ETC/00735356_1.dds",
+        "grade": 3,
+        "category": "Armor",
+        "itemType": 20,
+        "weight": 1,
+        "buyPrice": 0,
+        "sellPrice": 0,
+        "repairPrice": 0
+      },
+      {
+        "urn": "urn::item:735358",
+        "id": 735358,
+        "name": "Sethra's Artifact - Hunting EXP",
+        "description": "An artifact imbued with the power of Sethra, Witch of Rifts, born from Labreska's first death. It's been designed to hold a powerful item within. \"Sethra, Witch of Rifts, is the third gift granted by the owner of the Golden Mountain. She splits the scales of dragons.\"\n\n- <PAColor0xff96d4fc>Usage #1<PAOldColor>: Equip\n\n- <PAColor0xff96d4fc>Usage #2<PAOldColor>: Exchange for <PAColor0xffe9bd23>Purified Lightstone x1-2<PAOldColor> with <PAColor0xffe9bd23>Dalishain<PAOldColor> in major cities and towns\n\n- <PAColor0xff57f426>How to Obtain<PAOldColor>: All Hunting activities",
+        "icon": "New_Icon/06_PC_EquipItem/00_Common/00_ETC/00735358_1.dds",
+        "grade": 3,
+        "category": "Armor",
+        "itemType": 20,
+        "weight": 1,
+        "buyPrice": 0,
+        "sellPrice": 0,
+        "repairPrice": 0
+      },
+      {
+        "urn": "urn::item:735367",
+        "id": 735367,
+        "name": "Sethra's Artifact - Gathering Mastery",
+        "description": "An artifact imbued with the power of Sethra, Witch of Rifts, born from Labreska's first death. It's been designed to hold a powerful item within. \"Sethra, Witch of Rifts, is the third gift granted by the owner of the Golden Mountain. She splits the scales of dragons.\"\n\n- <PAColor0xff96d4fc>Usage #1<PAOldColor>: Equip\n\n- <PAColor0xff96d4fc>Usage #2<PAOldColor>: Exchange for <PAColor0xffe9bd23>Purified Lightstone x1-2<PAOldColor> with <PAColor0xffe9bd23>Dalishain<PAOldColor> in major cities and towns\n\n- <PAColor0xff57f426>How to Obtain<PAOldColor>: All Gathering activities",
+        "icon": "New_Icon/06_PC_EquipItem/00_Common/00_ETC/00735367_1.dds",
+        "grade": 3,
+        "category": "Armor",
+        "itemType": 20,
+        "weight": 1,
+        "buyPrice": 0,
+        "sellPrice": 0,
+        "repairPrice": 0
+      },
+      {
+        "urn": "urn::item:735369",
+        "id": 735369,
+        "name": "Sethra's Artifact - Hunting Mastery",
+        "description": "An artifact imbued with the power of Sethra, Witch of Rifts, born from Labreska's first death. It's been designed to hold a powerful item within. \"Sethra, Witch of Rifts, is the third gift granted by the owner of the Golden Mountain. She splits the scales of dragons.\"\n\n- <PAColor0xff96d4fc>Usage #1<PAOldColor>: Equip\n\n- <PAColor0xff96d4fc>Usage #2<PAOldColor>: Exchange for <PAColor0xffe9bd23>Purified Lightstone x1-2<PAOldColor> with <PAColor0xffe9bd23>Dalishain<PAOldColor> in major cities and towns\n\n- <PAColor0xff57f426>How to Obtain<PAOldColor>: All Hunting activities",
+        "icon": "New_Icon/06_PC_EquipItem/00_Common/00_ETC/00735369_1.dds",
+        "grade": 3,
+        "category": "Armor",
+        "itemType": 20,
+        "weight": 1,
+        "buyPrice": 0,
+        "sellPrice": 0,
+        "repairPrice": 0
+      },
+      {
+        "urn": "urn::item:752530",
+        "id": 752530,
+        "name": "Atanis' Element",
+        "description": "Bears the wishes of Atanis and can be found wherever the light of Atanis touches. \n\n- <PAColor0xff57f426>How to Obtain<PAOldColor>: Certain monster zones\n<PAColor0xffe9bd23> ※ This item will automatically be stored in your Manage Currency UI.<PAOldColor>",
+        "icon": "New_Icon/03_ETC/07_ProductMaterial/00820906.dds",
+        "grade": 3,
+        "category": "Etc",
+        "itemType": 2,
+        "weight": 0.0001,
+        "buyPrice": 0,
+        "sellPrice": 0,
+        "repairPrice": 0
+      },
+      {
+        "urn": "urn::item:757031",
+        "id": 757031,
+        "name": "Fiery Celerity Draught",
+        "description": "A draught made by mixing the Celerity Draught with the Stonetail Tonic. One swig of this draught and it is said your untapped equestrian potential will awaken while mounted atop even the fastest of horses.\n\n- <PAColor0xff96d4fc>Usage<PAOldColor>: Gain the draught's effects\n\n- Effects:\n<PAColor0xffe9bd23>  Mount EXP +30%<PAOldColor>\n<PAColor0xffe9bd23>  Training EXP +30%<PAOldColor>\n\n- Duration: <PAColor0xffe9bd23>600 min<PAOldColor>\n- Cooldown: <PAColor0xffe9bd23>10 sec<PAOldColor>\n\n<PAColor0xffb793ff>※ Type: Draught<PAOldColor>\n\n※ Draught effects do not stack with <PAColor0xffe9bd23>other elixir/draught effects<PAOldColor>, except with <PAColor0xffe9bd23>perfumes, Whale Tendon Elixir, and Tough Whale Tendon Elixir<PAOldColor>.\n<PAColor0xffb793ff>※ Only the effects of the last draught used will be applied.<PAOldColor>\n\n- <PAColor0xff57f426>How to Obtain<PAOldColor>: Processing ({KeyBind:Manufacture}) - <PAColor0xffe9bd23>Simple Alchemy <PAOldColor>with the following materials\n\n- Materials #1:\n<PAColor0xffe9bd23>Stonetail Tonic x1<PAOldColor>\n<PAColor0xffe9bd23>Celerity Draught x4<PAOldColor>\n\n- Materials #2:\n<PAColor0xffe9bd23>Stonetail Tonic x1<PAOldColor>\n<PAColor0xffe9bd23>Unbridled Celerity Draught x2<PAOldColor>",
+        "icon": "New_Icon/03_ETC/08_Potion/00757031.dds",
+        "grade": 3,
+        "category": "Potion",
+        "itemType": 2,
+        "marketable": true,
+        "weight": 0.2,
+        "buyPrice": 0,
+        "sellPrice": 0,
+        "repairPrice": 0
+      },
+      {
+        "urn": "urn::item:820034",
+        "id": 820034,
+        "name": "Essence of Taebaek",
+        "description": "{TextBind:TEXTBIND_MORNINGLAND_DIVIDE_TABAEK}",
+        "icon": "New_Icon/03_ETC/11_Enchant_Material/00015237_1.dds",
+        "grade": 3,
+        "category": "SpecialGoods",
+        "itemType": 0,
+        "weight": 0.1,
+        "buyPrice": 0,
+        "sellPrice": 0,
+        "repairPrice": 0
+      },
+      {
+        "urn": "urn::item:821259",
+        "id": 821259,
+        "name": "Caphras Essence",
+        "description": "An essence formed from spirit powder that flowed from Aetherion and crystallized upon the Caphras Tree.\n\n- <PAColor0xff96d4fc>Usage<PAOldColor>: Craft <PAColor0xffe9bd23>Perfume of Envy,<PAOldColor> <PAColor0xffe9bd23>Perfume of Tenacity<PAOldColor>\n\n- Crafting Method: Processing ({KeyBind:Manufacture}) - <PAColor0xffe9bd23>Simple Alchemy<PAOldColor>\n\n- Perfume of Envy\n<PAColor0xffe9bd23>Perfume of Courage x1<PAOldColor> or <PAColor0xffe9bd23>Immortal: Perfume of Courage x1 <PAOldColor>\n<PAColor0xffe9bd23>Shining Powder x3<PAOldColor>\n<PAColor0xffe9bd23>Caphras Essence x10<PAOldColor>\n\n- Perfume of Tenacity\n<PAColor0xffe9bd23>Perfume of Deep Sea x1<PAOldColor> or <PAColor0xffe9bd23>Immortal: Perfume of Deep Sea x1<PAOldColor>\n<PAColor0xffe9bd23>Shining Powder x3<PAOldColor>\n<PAColor0xffe9bd23>Caphras Essence x10<PAOldColor>\n\n※ You can <PAColor0xffe9bd23>Mass Process<PAOldColor> with <PAColor0xffe9bd23>10x the usual amount of materials<PAOldColor> and <PAColor0xffe9bd23>1 Ibellab's Essence<PAOldColor> per batch.\n\n- <PAColor0xff57f426>How to Obtain<PAOldColor>: Caphras Tree Lumbering or Fluid Collecting",
+        "icon": "New_Icon/03_ETC/07_ProductMaterial/00821271.dds",
+        "grade": 0,
+        "category": "Wood",
+        "itemType": 8,
+        "marketable": true,
+        "weight": 0.1,
+        "buyPrice": 0,
+        "sellPrice": 0,
+        "repairPrice": 0,
+        "gatheredFrom": [
+          "Golden Leaf Snake",
+          "Spirit-laden Caphras Tree"
+        ]
+      }
+    ]
+  },
+  "alternatives": [
+    {
+      "name": "Khan's Heart: Destruction",
+      "id": "45503",
+      "primary": "Khan's Concentrated Magic",
+      "alternative": "Khan's Dim Magic",
+      "quantity": 1,
+      "ratio": 3,
+      "group": "Khan's Concentrated Magic"
+    },
+    {
+      "name": "Khan's Heart: Protection",
+      "id": "45513",
+      "primary": "Khan's Concentrated Magic",
+      "alternative": "Khan's Dim Magic",
+      "quantity": 1,
+      "ratio": 3,
+      "group": "Khan's Concentrated Magic"
+    },
+    {
+      "name": "Khan's Heart: Life",
+      "id": "45514",
+      "primary": "Khan's Concentrated Magic",
+      "alternative": "Khan's Dim Magic",
+      "quantity": 1,
+      "ratio": 3,
+      "group": "Khan's Concentrated Magic"
+    },
+    {
+      "name": "Sturdy Whale Tendon Elixir",
+      "id": "1361",
+      "primary": "Tough Whale Tendon Elixir",
+      "alternative": "Whale Tendon Elixir",
+      "quantity": 1,
+      "ratio": 3,
+      "group": "Whale Tendon Elixir"
+    },
+    {
+      "name": "Sturdy Whale Tendon Potion",
+      "id": "1360",
+      "primary": "Whale Tendon Potion",
+      "alternative": "Superior Whale Tendon Potion",
+      "quantity": 3,
+      "ratio": 0.3333333333333333,
+      "group": "Whale Tendon Potion"
+    },
+    {
+      "name": "Fiery Celerity Draught",
+      "id": "757031",
+      "primary": "Unbridled Celerity Draught",
+      "alternative": "Celerity Draught",
+      "quantity": 2,
+      "ratio": 2,
+      "group": "Celerity Draught"
+    }
+  ],
+  "immortalConversions": [
+    {
+      "name": "Immortal: Perfume of Envy",
+      "id": "1412",
+      "input": "Immortal: Perfume of Courage"
+    },
+    {
+      "name": "Immortal: Perfume of Tenacity",
+      "id": "1414",
+      "input": "Immortal: Perfume of Deep Sea"
+    }
+  ],
+  "scope": {
+    "sourceSteps": [
+      "Blush Leaf",
+      "Witch's Delicacy",
+      "Mysterious Catalyst",
+      "Wildspark",
+      "Atanis' Element",
+      "Sangpyeong Coin",
+      "Khan's Dim Magic",
+      "Essence of Taebaek",
+      "Tear of Illusion",
+      "Energy of Lakiaro",
+      "Forest Fury",
+      "Caphras Stone"
+    ],
+    "artifactSourceQualifications": [
+      735351,
+      735352,
+      735353,
+      735356,
+      735358,
+      735367,
+      735369
+    ],
+    "boundMarketIdentity": 45517,
+    "questSourceLimit": "Three sequential Curio quests, once per family; not a renewable supply.",
+    "immortalProof": "Official NA/EU PC April30,2026 explicitly specifies both normal output1 and bulk output10 input sets. Exact native Caphras Essence821259 corroborates; quest-only namesake65582 is not used.",
+    "whaleProof": "Official NA/EU PC January11,2023 exact two alternatives, current exact1360/1361 descriptions and raw relationship inputs corroborate. Existing outputs/batch catalysts unchanged.",
+    "fieryProof": "Current exact757031 description lists Celerity4 or Unbridled2 with StonetailTonic1; not inferred from generic elixir grade rules.",
+    "artifacts": "Current publisher PC guide distinguishes eligible activities and Gathering exclusions; Asia guide is cross-region corroboration, not a new NA/EU update. No proc odds or general server drop certificate.",
+    "removedUiAuditStatements": [
+      "Black Essence4996 no-source verification text",
+      "Rhutum Belt12207 no-source verification text",
+      "Hunter Seal daily-quest research note",
+      "Sangpyeong Coin Chest conditional audit note"
+    ],
+    "preservedWarnings": "Random contents, nonvalued random resale, material consumption, calculator scope and real quest/delivery limits retained.",
+    "shrineProof": "October22,2026 NA/EU PC reward tables specify solo Donghae weekly boss bundles. Taebaek remains chance-based; Tear rewards vary with boss/difficulty. No guarantee for every difficulty or active Calamity10 is asserted.",
+    "lakiaroProof": "Publisher NA/EU guide324, updated April28,2025, names Drieghan/Kamasylvia and Manos/Dostter/Dostter Steel Hoes. Only location/tool/minigame guidance is reused, not old enhancement-material prose.",
+    "commonMonsterProof": "Forest Fury exact4917 current keyed Monster Zone Info includes Fadus/Manshaum and other Kamasylvia zones; only two ordinary examples are named. Caphras exact721003 current description explicitly lists monster and quest sources, independently corroborated by current zone membership. No odds or automatic salvage inputs inferred."
+  },
+  "limits": [
+    "No undisclosed odds or blanket quality-substitution rule inferred.",
+    "No guessed market prices; missing bound quest stock cannot be bought.",
+    "Sangpyeong Coin Chest redemption direction/eligibility remains an audit dependency; no automatic conversion or cost is added. Geowan location and downstream two-chest once-family Miss Myo route are documented.",
+    "No data/profile migration, installation, publication or visible native launch.",
+    "Duplicate Teff Flour internal records are already deduplicated by the real card; regression added, no unnecessary UI rewrite."
+  ],
+  "zoneSourceProof": {
+    "file": "[private-audit]/audit/correctness-review-20261102/resumed-zone-strict-probe.json",
+    "sha256": "9672f2b8255412bb2ac1204edf29c799b42af4ef43f302f845a01676440db0ce",
+    "framing": "key/category/subcategories/nameIndex; ecology/recurring/region/loot/tags/topography/titles; navigation; stat block; trailing unassigned u32/u8. Sequential parsing consumes every byte, with 112 unique localized keys, ordered string indexes and independently matched stat anchors.",
+    "limits": [
+      "Current client UI drop-list membership only, not drop probabilities, complete server loot tables or factual certification of every field.",
+      "Unknown trailing fields remain unnamed; no numerical mechanics inferred.",
+      "No original extractor, game archives or application data modified."
+    ],
+    "items": [
+      {
+        "id": 4917,
+        "zones": [
+          {
+            "key": 105,
+            "name": "Lv. 67 Gyfin Rhasia Temple (Upper) [Dehkia's Lantern]",
+            "node": 1626
+          },
+          {
+            "key": 106,
+            "name": "Lv. 66 Mirumok Ruins [Dehkia's Lantern]",
+            "node": 1613
+          },
+          {
+            "key": 47,
+            "name": "Lv. 62 Gyfin Rhasia Temple (Underground)",
+            "node": 1626
+          },
+          {
+            "key": 46,
+            "name": "Lv. 59 Gyfin Rhasia Temple (Upper)",
+            "node": 1626
+          },
+          {
+            "key": 44,
+            "name": "Lv. 57 Forest Ronaros Area",
+            "node": 1619
+          },
+          {
+            "key": 45,
+            "name": "Lv. 57 Mirumok Ruins",
+            "node": 1613
+          },
+          {
+            "key": 43,
+            "name": "Lv. 57 Manshaum Forest",
+            "node": 1608
+          },
+          {
+            "key": 41,
+            "name": "Lv. 56 Fadus Habitat",
+            "node": 1618
+          }
+        ]
+      },
+      {
+        "id": 721003,
+        "zones": [
+          {
+            "key": 118,
+            "name": "Lv. 75 Event Horizon",
+            "node": 2112
+          },
+          {
+            "key": 117,
+            "name": "Lv. 74 Aresion Temple",
+            "node": 2110
+          },
+          {
+            "key": 119,
+            "name": "Lv. 74 Scales of Judgment",
+            "node": 2102
+          },
+          {
+            "key": 116,
+            "name": "Lv. 73 Magaia Temple",
+            "node": 2108
+          },
+          {
+            "key": 115,
+            "name": "Lv. 72 Hermesia Inner Castle",
+            "node": 2109
+          },
+          {
+            "key": 114,
+            "name": "Lv. 71 Aphrodon Temple",
+            "node": 2111
+          },
+          {
+            "key": 113,
+            "name": "Lv. 71 Gavinya Coastal Cliff",
+            "node": 1389
+          },
+          {
+            "key": 104,
+            "name": "Lv. 70 Zephyros Castle",
+            "node": 2004
+          },
+          {
+            "key": 55,
+            "name": "Lv. 70 Sycraia Ruins Lower Zone",
+            "node": 1008
+          },
+          {
+            "key": 56,
+            "name": "Lv. 70 Star's End",
+            "node": 1704
+          },
+          {
+            "key": 102,
+            "name": "Lv. 69 Tenebraum Castle",
+            "node": 2005
+          },
+          {
+            "key": 111,
+            "name": "Lv. 69 Dark Energy Floodlands (Zephyros)",
+            "node": 2032
+          },
+          {
+            "key": 109,
+            "name": "Lv. 69 Dark Energy Floodlands (Orbita)",
+            "node": 2032
+          },
+          {
+            "key": 110,
+            "name": "Lv. 69 Dark Energy Floodlands (Great Red Spot)",
+            "node": 2032
+          },
+          {
+            "key": 103,
+            "name": "Lv. 68 Orbita Castle",
+            "node": 2003
+          },
+          {
+            "key": 101,
+            "name": "Lv. 67 Nymphamaré Castle",
+            "node": 2006
+          },
+          {
+            "key": 105,
+            "name": "Lv. 67 Gyfin Rhasia Temple (Upper) [Dehkia's Lantern]",
+            "node": 1626
+          },
+          {
+            "key": 99,
+            "name": "Lv. 66 Orzekea",
+            "node": 0
+          },
+          {
+            "key": 100,
+            "name": "Lv. 66 Aetherion Castle",
+            "node": 2002
+          },
+          {
+            "key": 106,
+            "name": "Lv. 66 Mirumok Ruins [Dehkia's Lantern]",
+            "node": 1613
+          },
+          {
+            "key": 97,
+            "name": "Lv. 65 Fortunate Golden Pig Cave",
+            "node": 1789
+          },
+          {
+            "key": 91,
+            "name": "Lv. 65 Ash Forest [Dehkia's Lantern II]",
+            "node": 1630
+          },
+          {
+            "key": 92,
+            "name": "Lv. 65 Olun's Valley [Dehkia's Lantern II]",
+            "node": 1703
+          },
+          {
+            "key": 98,
+            "name": "Lv. 65 Golden Pig Cave",
+            "node": 1789
+          },
+          {
+            "key": 94,
+            "name": "Lv. 64 Cadry Ruins [Dehkia's Lantern]",
+            "node": 1306
+          },
+          {
+            "key": 96,
+            "name": "Lv. 64 Dokkebi Forest",
+            "node": 1788
+          },
+          {
+            "key": 82,
+            "name": "Lv. 63 Tunkuta [Dehkia's Lantern]",
+            "node": 1700
+          },
+          {
+            "key": 93,
+            "name": "Lv. 63 Crescent Shrine [Dehkia's Lantern]",
+            "node": 1345
+          },
+          {
+            "key": 88,
+            "name": "Lv. 63 Yzrahid Highlands",
+            "node": 1845
+          },
+          {
+            "key": 78,
+            "name": "Lv. 63 Cyclops Land [Dehkia's Lantern]",
+            "node": 719
+          },
+          {
+            "key": 81,
+            "name": "Lv. 63 Olun's Valley [Dehkia's Lantern]",
+            "node": 1703
+          },
+          {
+            "key": 77,
+            "name": "Lv. 63 Quint Hill [Elvia]",
+            "node": 622
+          },
+          {
+            "key": 80,
+            "name": "Lv. 63 Thornwood Forest [Dehkia's Lantern]",
+            "node": 1693
+          },
+          {
+            "key": 87,
+            "name": "Lv. 62 Hystria Ruins [Dehkia's Lantern]",
+            "node": 1332
+          },
+          {
+            "key": 76,
+            "name": "Lv. 62 Hexe Sanctuary [Elvia]",
+            "node": 724
+          },
+          {
+            "key": 89,
+            "name": "Lv. 62 Pila Ku Jail [Dehkia's Lantern]",
+            "node": 1384
+          },
+          {
+            "key": 79,
+            "name": "Lv. 63 Ash Forest [Dehkia's Lantern]",
+            "node": 1630
+          },
+          {
+            "key": 57,
+            "name": "Lv. 62 Ash Forest",
+            "node": 1630
+          },
+          {
+            "key": 60,
+            "name": "Lv. 62 Olun's Valley",
+            "node": 1703
+          },
+          {
+            "key": 72,
+            "name": "Lv. 62 Erethea's Limbo",
+            "node": 0
+          },
+          {
+            "key": 86,
+            "name": "Lv. 62 Aakman Temple [Dehkia's Lantern]",
+            "node": 1375
+          },
+          {
+            "key": 54,
+            "name": "Lv. 62 Sycraia Ruins Upper Zone",
+            "node": 1008
+          },
+          {
+            "key": 61,
+            "name": "Lv. 62 Crypt of Resting Thoughts",
+            "node": 1694
+          },
+          {
+            "key": 90,
+            "name": "Lv. 62 Roud Sulfur Mine [Dehkia's Lantern]",
+            "node": 1648
+          },
+          {
+            "key": 47,
+            "name": "Lv. 62 Gyfin Rhasia Temple (Underground)",
+            "node": 1626
+          },
+          {
+            "key": 95,
+            "name": "Lv. 61 Honglim Base",
+            "node": 1793
+          },
+          {
+            "key": 69,
+            "name": "Lv. 61 Jade Starlight Forest",
+            "node": 1755
+          },
+          {
+            "key": 75,
+            "name": "Lv. 61 Primal Giant Post [Elvia]",
+            "node": 656
+          },
+          {
+            "key": 70,
+            "name": "Lv. 60 Murrowak's Labyrinth",
+            "node": 1759
+          },
+          {
+            "key": 74,
+            "name": "Lv. 60 Rhutum Outstation [Elvia]",
+            "node": 706
+          },
+          {
+            "key": 71,
+            "name": "Lv. 60 Winter Tree Fossil",
+            "node": 0
+          },
+          {
+            "key": 12,
+            "name": "Lv. 59 Padix Island",
+            "node": 1093
+          },
+          {
+            "key": 59,
+            "name": "Lv. 59 Tunkuta",
+            "node": 1700
+          },
+          {
+            "key": 108,
+            "name": "Lv. 59 Vessel of Inquisition",
+            "node": 1704
+          },
+          {
+            "key": 107,
+            "name": "Lv. 59 Bumblin' Buccaneers",
+            "node": 2052
+          },
+          {
+            "key": 73,
+            "name": "Lv. 59 Saunil Camp [Elvia]",
+            "node": 655
+          },
+          {
+            "key": 46,
+            "name": "Lv. 59 Gyfin Rhasia Temple (Upper)",
+            "node": 1626
+          },
+          {
+            "key": 39,
+            "name": "Lv. 58 Hystria Ruins",
+            "node": 1332
+          },
+          {
+            "key": 26,
+            "name": "Lv. 58 Kratuga Ancient Ruins",
+            "node": 1172
+          },
+          {
+            "key": 38,
+            "name": "Lv. 58 Aakman",
+            "node": 1375
+          },
+          {
+            "key": 24,
+            "name": "Lv. 58 Shultz Guard",
+            "node": 1166
+          },
+          {
+            "key": 52,
+            "name": "Lv. 58 Sherekhan Necropolis (Night)",
+            "node": 1655
+          },
+          {
+            "key": 6,
+            "name": "Lv. 58 Traitor's Graveyard",
+            "node": 716
+          },
+          {
+            "key": 58,
+            "name": "Lv. 58 Thornwood Forest",
+            "node": 1693
+          },
+          {
+            "key": 36,
+            "name": "Lv. 57 Pila Ku Jail",
+            "node": 1384
+          },
+          {
+            "key": 53,
+            "name": "Lv. 57 Protty Cave",
+            "node": 1010
+          },
+          {
+            "key": 40,
+            "name": "Lv. 57 Polly's Forest",
+            "node": 1624
+          },
+          {
+            "key": 48,
+            "name": "Lv. 57 Tshira Ruins",
+            "node": 1668
+          },
+          {
+            "key": 34,
+            "name": "Lv. 57 Centaurus Herd",
+            "node": 1315
+          },
+          {
+            "key": 32,
+            "name": "Lv. 57 Cadry Ruins",
+            "node": 1306
+          },
+          {
+            "key": 33,
+            "name": "Lv. 57 Crescent Shrine",
+            "node": 1345
+          },
+          {
+            "key": 30,
+            "name": "Lv. 57 Waragon Nest",
+            "node": 1311
+          },
+          {
+            "key": 44,
+            "name": "Lv. 57 Forest Ronaros Area",
+            "node": 1619
+          },
+          {
+            "key": 51,
+            "name": "Lv. 57 Sherekhan Necropolis (Day)",
+            "node": 1655
+          },
+          {
+            "key": 50,
+            "name": "Lv. 57 Blood Wolf Settlement",
+            "node": 1669
+          },
+          {
+            "key": 35,
+            "name": "Lv. 57 Basilisk Den",
+            "node": 0
+          },
+          {
+            "key": 45,
+            "name": "Lv. 57 Mirumok Ruins",
+            "node": 1613
+          },
+          {
+            "key": 43,
+            "name": "Lv. 57 Manshaum Forest",
+            "node": 1608
+          },
+          {
+            "key": 37,
+            "name": "Lv. 57 Roud Sulfur Mine",
+            "node": 1648
+          },
+          {
+            "key": 42,
+            "name": "Lv. 57 Navarn Steppe",
+            "node": 1606
+          },
+          {
+            "key": 31,
+            "name": "Lv. 57 Gahaz Bandits' Lair",
+            "node": 1327
+          },
+          {
+            "key": 41,
+            "name": "Lv. 56 Fadus Habitat",
+            "node": 1618
+          },
+          {
+            "key": 28,
+            "name": "Lv. 55 Titium Valley",
+            "node": 1347
+          },
+          {
+            "key": 29,
+            "name": "Lv. 55 Desert Naga Temple",
+            "node": 1322
+          },
+          {
+            "key": 27,
+            "name": "Lv. 55 Bashim Base",
+            "node": 1310
+          }
+        ]
+      }
+    ]
+  }
+}

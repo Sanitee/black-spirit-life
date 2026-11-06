@@ -37,7 +37,7 @@ final Map<String, ExactBuffInfo> exactBuffInfoByName = <String, ExactBuffInfo>{
     title: 'Antidote Elixir',
     effects: <String>['Cures Intoxication'],
     duration: 'Instant',
-    cooldown: '30 sec',
+    cooldown: '10 sec',
   ),
   'armor draught': ExactBuffInfo(
     title: 'Armor Draught',
@@ -229,7 +229,7 @@ final Map<String, ExactBuffInfo> exactBuffInfoByName = <String, ExactBuffInfo>{
     title: 'Elixir of Burn Removal',
     effects: <String>['Cures Burns'],
     duration: 'Instant',
-    cooldown: '30 sec',
+    cooldown: '10 sec',
   ),
   'elixir of carnage': ExactBuffInfo(
     title: 'Elixir of Carnage',
@@ -386,7 +386,7 @@ final Map<String, ExactBuffInfo> exactBuffInfoByName = <String, ExactBuffInfo>{
     title: 'Elixir of Hemostasis',
     effects: <String>['Cures Bleeding'],
     duration: 'Instant',
-    cooldown: '30 sec',
+    cooldown: '10 sec',
   ),
   'elixir of human hunt': ExactBuffInfo(
     title: 'Elixir of Human Hunt',
@@ -1119,6 +1119,20 @@ final Map<String, ExactBuffInfo> exactBuffInfoByName = <String, ExactBuffInfo>{
     duration: '20 min',
     cooldown: '10 sec',
   ),
+  // Official NA/EU PC update 2026-10-29 (groupContentNo=10753),
+  // corroborated by the exact client identities 1418 and 1419.
+  'immortal: perfume of resolve': ExactBuffInfo(
+    title: 'Immortal: Perfume of Resolve',
+    effects: <String>[
+      'All Resistance +10%',
+      'All Damage Reduction +15',
+      'Max HP +300',
+      'Movement Speed +5%',
+      'Max Stamina +300',
+    ],
+    duration: '20 min',
+    cooldown: '10 sec',
+  ),
   'immortal: perfume of spirits': ExactBuffInfo(
     title: 'Immortal: Perfume of Spirits',
     effects: <String>[
@@ -1308,6 +1322,18 @@ final Map<String, ExactBuffInfo> exactBuffInfoByName = <String, ExactBuffInfo>{
       'All Damage Reduction +15',
       'Max HP +100',
       'Movement Speed 5%',
+    ],
+    duration: '20 min',
+    cooldown: '10 sec',
+  ),
+  'perfume of resolve': ExactBuffInfo(
+    title: 'Perfume of Resolve',
+    effects: <String>[
+      'All Resistance +10%',
+      'All Damage Reduction +15',
+      'Max HP +300',
+      'Movement Speed +5%',
+      'Max Stamina +300',
     ],
     duration: '20 min',
     cooldown: '10 sec',

@@ -1,0 +1,216 @@
+{
+  "date": "2026-11-03",
+  "beforeSha256": "5312d5da36565c25218e29269baea15b0e308f9123ce020d19c547d89b2b3b1c",
+  "afterSha256": "f74ebf4a38d50f86f0c827d09c24a640c1f9198823d16b21d526336500c709f6",
+  "bytes": 30303465,
+  "changes": [
+    {
+      "name": "Beast's Draught",
+      "outputId": 792,
+      "batch": 1,
+      "matchedKeys": [
+        "native_processing_route_not_represented:26",
+        "native_processing_route_not_represented:27"
+      ],
+      "variant": {
+        "id": "mixed-elixirs",
+        "label": "Mixed elixirs",
+        "routeId": "mixed-elixirs",
+        "batchMultiplier": 1,
+        "baseOutput": 0.4,
+        "outputMin": 1,
+        "outputMax": 1,
+        "ingredients": [
+          {
+            "name": "[Mix] EXP-Reaper Elixir",
+            "qty": 1
+          },
+          {
+            "name": "[Mix] Swiftness-Wind-Spell Elixir",
+            "qty": 1,
+            "options": [
+              "[Mix] Swiftness-Wind-Spell Elixir",
+              "[Mix] Thorn-Defense Elixir"
+            ],
+            "substituteGroup": "Mixed Elixir",
+            "substituteRatios": {
+              "[Mix] Swiftness-Wind-Spell Elixir": 1,
+              "[Mix] Thorn-Defense Elixir": 1
+            }
+          },
+          {
+            "name": "Tears of the Falling Moon",
+            "qty": 1
+          }
+        ]
+      },
+      "descriptionEvidence": "An elixir with an offensive function.\n\n- Usage: Gain the following effects or craft Beast's Draught\n\n- Effects: \n   Recover 9 HP on Hits \n   Combat EXP +15%\n\n- Duration: 8 min\n- Cooldown: 10 sec\n\n- Crafting Method: Processing ({KeyBind:Manufacture}) - Simple Alchemy\n\n- Ingredients #1: \n[Mix] EXP-Reaper Elixir x1\n[Mix] Swiftness-Wind-Spell Elixir x1\nTears of the Falling Moon x1\n\n- Ingredients #2: \n[Mix] EXP-Reaper Elixir x1\n[Mix] Thorn-Defense Elixir x1\nTears of the Falling Moon x1\n\n- How to Obtain: n/a"
+    },
+    {
+      "name": "Beast's Draught",
+      "outputId": 792,
+      "batch": 10,
+      "matchedKeys": [
+        "native_processing_route_not_represented:36",
+        "native_processing_route_not_represented:37"
+      ],
+      "variant": {
+        "id": "mixed-elixirs-10x",
+        "label": "Mixed elixirs",
+        "routeId": "mixed-elixirs",
+        "batchMultiplier": 10,
+        "baseOutput": 4,
+        "outputMin": 10,
+        "outputMax": 10,
+        "ingredients": [
+          {
+            "name": "[Mix] EXP-Reaper Elixir",
+            "qty": 10
+          },
+          {
+            "name": "[Mix] Swiftness-Wind-Spell Elixir",
+            "qty": 10,
+            "options": [
+              "[Mix] Swiftness-Wind-Spell Elixir",
+              "[Mix] Thorn-Defense Elixir"
+            ],
+            "substituteGroup": "Mixed Elixir",
+            "substituteRatios": {
+              "[Mix] Swiftness-Wind-Spell Elixir": 1,
+              "[Mix] Thorn-Defense Elixir": 1
+            }
+          },
+          {
+            "name": "Tears of the Falling Moon",
+            "qty": 10
+          },
+          {
+            "name": "Ibellab's Essence",
+            "qty": 1
+          }
+        ]
+      },
+      "descriptionEvidence": "An elixir with an offensive function.\n\n- Usage: Gain the following effects or craft Beast's Draught\n\n- Effects: \n   Recover 9 HP on Hits \n   Combat EXP +15%\n\n- Duration: 8 min\n- Cooldown: 10 sec\n\n- Crafting Method: Processing ({KeyBind:Manufacture}) - Simple Alchemy\n\n- Ingredients #1: \n[Mix] EXP-Reaper Elixir x1\n[Mix] Swiftness-Wind-Spell Elixir x1\nTears of the Falling Moon x1\n\n- Ingredients #2: \n[Mix] EXP-Reaper Elixir x1\n[Mix] Thorn-Defense Elixir x1\nTears of the Falling Moon x1\n\n- How to Obtain: n/a"
+    },
+    {
+      "name": "Giant's Draught",
+      "outputId": 793,
+      "batch": 1,
+      "matchedKeys": [
+        "native_processing_route_not_represented:554",
+        "native_processing_route_not_represented:555"
+      ],
+      "variant": {
+        "id": "mixed-elixirs",
+        "label": "Mixed elixirs",
+        "routeId": "mixed-elixirs",
+        "batchMultiplier": 1,
+        "baseOutput": 0.4,
+        "outputMin": 1,
+        "outputMax": 1,
+        "ingredients": [
+          {
+            "name": "[Mix] Manhunt-Rage Elixir",
+            "qty": 1
+          },
+          {
+            "name": "[Mix] Swiftness-Wind-Spell Elixir",
+            "qty": 1,
+            "options": [
+              "[Mix] Swiftness-Wind-Spell Elixir",
+              "[Mix] Thorn-Defense Elixir"
+            ],
+            "substituteGroup": "Mixed Elixir",
+            "substituteRatios": {
+              "[Mix] Swiftness-Wind-Spell Elixir": 1,
+              "[Mix] Thorn-Defense Elixir": 1
+            }
+          },
+          {
+            "name": "Tears of the Falling Moon",
+            "qty": 1
+          }
+        ]
+      },
+      "descriptionEvidence": "An elixir with an offensive function. \n\n- Usage: Gain the following effects or craft Giant's Draught\n\n- Effects: \nExtra AP Against Adventurers +11\nExtra AP Against Humans +11\nAll AP +8\n\n- Duration: 8 min\n- Cooldown: 10 sec\n\n- Crafting Method: Processing ({KeyBind:Manufacture}) - Simple Alchemy\n\n- Ingredients #1:\n[Mix] Manhunt-Rage Elixir x1\n[Mix] Swiftness-Wind-Spell Elixir x1\nTears of the Falling Moon x1\n\n- Ingredients #2:\n[Mix] Manhunt-Rage Elixir x1\n[Mix] Thorn-Defense Elixir x1\nTears of the Falling Moon x1\n\n- How to Obtain: -"
+    },
+    {
+      "name": "Giant's Draught",
+      "outputId": 793,
+      "batch": 10,
+      "matchedKeys": [
+        "native_processing_route_not_represented:564",
+        "native_processing_route_not_represented:565"
+      ],
+      "variant": {
+        "id": "mixed-elixirs-10x",
+        "label": "Mixed elixirs",
+        "routeId": "mixed-elixirs",
+        "batchMultiplier": 10,
+        "baseOutput": 4,
+        "outputMin": 10,
+        "outputMax": 10,
+        "ingredients": [
+          {
+            "name": "[Mix] Manhunt-Rage Elixir",
+            "qty": 10
+          },
+          {
+            "name": "[Mix] Swiftness-Wind-Spell Elixir",
+            "qty": 10,
+            "options": [
+              "[Mix] Swiftness-Wind-Spell Elixir",
+              "[Mix] Thorn-Defense Elixir"
+            ],
+            "substituteGroup": "Mixed Elixir",
+            "substituteRatios": {
+              "[Mix] Swiftness-Wind-Spell Elixir": 1,
+              "[Mix] Thorn-Defense Elixir": 1
+            }
+          },
+          {
+            "name": "Tears of the Falling Moon",
+            "qty": 10
+          },
+          {
+            "name": "Ibellab's Essence",
+            "qty": 1
+          }
+        ]
+      },
+      "descriptionEvidence": "An elixir with an offensive function. \n\n- Usage: Gain the following effects or craft Giant's Draught\n\n- Effects: \nExtra AP Against Adventurers +11\nExtra AP Against Humans +11\nAll AP +8\n\n- Duration: 8 min\n- Cooldown: 10 sec\n\n- Crafting Method: Processing ({KeyBind:Manufacture}) - Simple Alchemy\n\n- Ingredients #1:\n[Mix] Manhunt-Rage Elixir x1\n[Mix] Swiftness-Wind-Spell Elixir x1\nTears of the Falling Moon x1\n\n- Ingredients #2:\n[Mix] Manhunt-Rage Elixir x1\n[Mix] Thorn-Defense Elixir x1\nTears of the Falling Moon x1\n\n- How to Obtain: -"
+    }
+  ],
+  "evidence": [
+    {
+      "source": "Current installed PC item descriptions 766 and 769",
+      "scope": "Each explicitly documents both complete single-batch input sets and named output."
+    },
+    {
+      "source": "https://bdocodex.com/us/mrecipe/1709/avd/?sl=1",
+      "scope": "PC single Beast recipe, output one."
+    },
+    {
+      "source": "https://bdocodex.com/us/mrecipe/1711/",
+      "scope": "PC single Giant recipe, output one."
+    },
+    {
+      "source": "https://bdocodex.com/us/mrecipe/4078/",
+      "scope": "PC Beast Thorn-Defense bulk, output ten."
+    },
+    {
+      "source": "https://bdocodex.com/us/mrecipe/4079/",
+      "scope": "PC Beast Swiftness bulk, output ten, Alchemy Skilled 1."
+    },
+    {
+      "source": "https://bdocodex.com/us/mrecipe/4086/",
+      "scope": "PC Giant Thorn-Defense bulk, output ten."
+    },
+    {
+      "source": "https://blackdesert.pearlabyss.com/Asia/en-US/News/Notice/Detail?_boardNo=738",
+      "date": "2019-01-09",
+      "scope": "Official PC Ibellab bulk support; current item 4986 retains 10x inputs plus one catalyst and Alchemy Skilled 1 requirement."
+    }
+  ],
+  "limitations": "Single routes are expressly documented in current PC text, with native complete-input matches for all eight variants. Bulk corroborates the official Ibellab rule; no Global Lab/console source used. Do not infer how mixed elixirs are acquired from their n/a source text; no vendor source, crafting recipe, free cost, new XP or market-stock claim is added. Standard route remains default."
+}

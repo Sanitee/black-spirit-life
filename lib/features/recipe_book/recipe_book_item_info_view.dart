@@ -2,23 +2,32 @@ import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:bdo_craft_planner_flutter/visual/components/app_tooltip.dart';
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import '../../domain/catalog/item_name_presentation.dart';
 import '../../domain/catalog/temporarily_archived_items.dart';
+import '../../domain/market/shared_market_models.dart';
 import '../../domain/models/catalog_models.dart';
 import '../../domain/models/craft_mode.dart';
+import '../../domain/opportunities/opportunity_market_models.dart';
+import '../../domain/planner/ingredient_quality.dart';
 import '../../shared/overlays/anchored_popover.dart';
 import '../../visual/visual.dart';
+import '../planner/planner_choice_market.dart';
+import '../shared/item_name_copy_scope.dart';
 import '../shared/mode_item_icon.dart';
+import '../shared/source_availability_badges.dart';
 import '../shared/workshop_presentation.dart';
 import 'recipe_book_controller.dart';
 import 'recipe_book_item_info.dart';
 import 'recipe_book_keys.dart';
 import 'recipe_book_preview_routes.dart';
 
+part 'item_reference_ingredient_sources.dart';
 part 'item_reference_joined.dart';
+part 'item_reference_sources.dart';
+part 'item_reference_quality_choices.dart';
 
 /// The Recipe Book's reference preview, without taking over its child's clicks.
 class RecipeBookItemInfoHover extends StatelessWidget {
@@ -44,8 +53,7 @@ class RecipeBookItemInfoHover extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final itemMode = mode ?? controller.modeController.mode;
-    final info = this.info ?? controller.itemInfoFor(name, mode: itemMode);
-    if (info == null || !info.hasBody) return child;
+    if (info != null && !info!.hasBody) return child;
     return _RecipeBookItemInfoTooltip(
       controller: controller,
       name: name,
@@ -64,7 +72,7 @@ class _RecipeBookItemInfoTooltip extends StatelessWidget {
     required this.controller,
     required this.name,
     required this.mode,
-    required this.info,
+    this.info,
     required this.child,
     this.triggerMode,
     this.referenceIcon,
@@ -74,7 +82,7 @@ class _RecipeBookItemInfoTooltip extends StatelessWidget {
   final RecipeBookController controller;
   final String name;
   final CraftMode mode;
-  final RecipeBookItemInfo info;
+  final RecipeBookItemInfo? info;
   final Widget child;
   final TooltipTriggerMode? triggerMode;
   final Widget? referenceIcon;
@@ -83,7 +91,7 @@ class _RecipeBookItemInfoTooltip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final media = MediaQuery.of(context);
-    final width = itemReferenceCardWidth(context);
+    final width = itemReferenceCardMaxWidth(context);
     // The panel scales its own text. Do not also scale the entire WidgetSpan,
     // which would double-enlarge the card and push it outside the viewport.
     return MediaQuery(
@@ -97,6 +105,8 @@ class _RecipeBookItemInfoTooltip extends StatelessWidget {
         exitDuration: const Duration(milliseconds: 300),
         preferBelow: false,
         ignorePointer: !interactivePreview,
+        // Tabs, copying and scrolling inside the preview must not dismiss it.
+        enableTapToDismiss: !interactivePreview,
         decoration: BoxDecoration(
           color: Colors.transparent,
           borderRadius: BorderRadius.circular(6),
@@ -107,15 +117,35 @@ class _RecipeBookItemInfoTooltip extends StatelessWidget {
           alignment: PlaceholderAlignment.middle,
           child: MediaQuery(
             data: media,
-            child: ItemReferenceCard(
-              key: RecipeBookKeys.itemInfo(name),
-              controller: controller,
-              mode: mode,
-              name: name,
-              info: info,
-              maxWidth: width,
-              spec: context.visualTheme,
-              icon: referenceIcon,
+            child: TapRegion(
+              onTapOutside: interactivePreview
+                  ? (_) => Tooltip.dismissAllToolTips()
+                  : null,
+              // Tooltip builds this child only when its overlay is shown.
+              // Browsing icons must not project every item's full reference.
+              child: Builder(
+                builder: (context) {
+                  final details =
+                      info ?? controller.itemInfoFor(name, mode: mode);
+                  if (details == null || !details.hasBody) {
+                    return const SizedBox.shrink();
+                  }
+                  return ItemReferenceCard(
+                    key: RecipeBookKeys.itemInfo(name),
+                    controller: controller,
+                    mode: mode,
+                    name: name,
+                    info: details,
+                    maxWidth: width,
+                    spec: context.visualTheme,
+                    icon: referenceIcon,
+                    interactive: interactivePreview,
+                    onClose: interactivePreview
+                        ? () => Tooltip.dismissAllToolTips()
+                        : null,
+                  );
+                },
+              ),
             ),
           ),
         ),
@@ -125,8 +155,63 @@ class _RecipeBookItemInfoTooltip extends StatelessWidget {
   }
 }
 
-double itemReferenceCardWidth(BuildContext context) =>
-    ItemDetailStyle.width(context);
+double itemReferenceCardMaxWidth(BuildContext context) =>
+    math.max(0, MediaQuery.sizeOf(context).width - 48);
+
+double itemReferenceCardWidth(
+  BuildContext context, {
+  RecipeBookController? controller,
+  RecipeBookItemInfo? info,
+  CraftMode? mode,
+  bool usedFor = false,
+  bool includeAllSections = false,
+}) {
+  var width = ItemDetailStyle.width(context);
+  if (controller != null && info != null) {
+    for (final formula in [
+      if (!usedFor || includeAllSections) ...info.acquisitionFormulas,
+      if (usedFor || includeAllSections)
+        for (final use in info.craftUses)
+          ..._matchingReferenceFormulas(use, info.title.trim().toLowerCase()),
+    ]) {
+      for (final ingredient in formula.ingredients) {
+        final rows = _qualityChoiceRows(
+          controller,
+          formula,
+          ingredient,
+          mode ?? controller.modeController.mode,
+        );
+        if (rows.isEmpty) continue;
+        final sizes = _qualityColumnWidths(context, rows);
+        width = math.max(
+          width,
+          sizes.reduce((a, b) => a + b) +
+              (sizes.length - 1) * _qualitySeparatorWidth(context) +
+              82,
+        );
+      }
+    }
+  }
+  return math.min(width, itemReferenceCardMaxWidth(context));
+}
+
+List<RecipeBookFormula> _matchingReferenceFormulas(
+  RecipeBookCraftUse use,
+  String source,
+) {
+  final matching = use.formulas
+      .where(
+        (f) => f.ingredients.any(
+          (i) => [
+            i.name,
+            ...i.options,
+            ...i.substituteRatios.keys,
+          ].any((n) => n.trim().toLowerCase() == source),
+        ),
+      )
+      .toList();
+  return _distinctReferenceFormulas(matching.isEmpty ? use.formulas : matching);
+}
 
 double itemReferenceCardHeight(BuildContext context) {
   final overlay = Overlay.maybeOf(context)?.context.findRenderObject();
@@ -198,13 +283,13 @@ class _RecipeBookItemIconState extends State<RecipeBookItemIcon> {
       name: name,
       size: widget.size,
     );
-    final info = controller.itemInfoFor(name, mode: itemMode);
-    if (info == null || !info.hasBody) return icon;
     final spec = context.visualTheme;
-    final panelWidth = itemReferenceCardWidth(context);
+    final panelWidth = itemReferenceCardMaxWidth(context);
     return AnchoredPopover(
       overlayId: 'recipe-book-item-info:$anchorId:$name',
       preferredWidth: panelWidth,
+      preferredWidthBuilder: itemReferenceCardMaxWidth,
+      contentSizedWidth: true,
       maximumHeight: itemReferenceCardHeight(context),
       alignEnd: false,
       placement: AnchoredPopoverPlacement.beside,
@@ -240,30 +325,33 @@ class _RecipeBookItemIconState extends State<RecipeBookItemIcon> {
                 controller: controller,
                 name: name,
                 mode: itemMode,
-                info: info,
                 child: icon,
               ),
             ),
           ),
         ),
       ),
-      popoverBuilder: (context, close) => ItemReferenceCard(
-        key: RecipeBookKeys.pinnedItemInfo(name, anchorId),
-        controller: controller,
-        mode: itemMode,
-        name: name,
-        info: info,
-        maxWidth: panelWidth,
-        spec: spec,
-        onClose: close,
-        closeKey: RecipeBookKeys.closePinnedItemInfo(name, anchorId),
-      ),
+      popoverBuilder: (context, close) {
+        final info = controller.itemInfoFor(name, mode: itemMode);
+        if (info == null || !info.hasBody) return const SizedBox.shrink();
+        return ItemReferenceCard(
+          key: RecipeBookKeys.pinnedItemInfo(name, anchorId),
+          controller: controller,
+          mode: itemMode,
+          name: name,
+          info: info,
+          maxWidth: panelWidth,
+          spec: spec,
+          onClose: close,
+          closeKey: RecipeBookKeys.closePinnedItemInfo(name, anchorId),
+        );
+      },
     );
   }
 }
 
 /// One item-reference surface for previews and pinned views in every workspace.
-class ItemReferenceCard extends StatefulWidget {
+class ItemReferenceCard extends StatelessWidget {
   const ItemReferenceCard({
     required this.controller,
     required this.mode,
@@ -277,6 +365,7 @@ class ItemReferenceCard extends StatefulWidget {
     this.onCopyItemName,
     this.onUseFormula,
     this.icon,
+    this.interactive = true,
     super.key,
   });
 
@@ -293,142 +382,27 @@ class ItemReferenceCard extends StatefulWidget {
   final ValueChanged<RecipeBookFormula>? onUseFormula;
   final Widget? icon;
 
-  @override
-  State<ItemReferenceCard> createState() => _ItemReferenceCardState();
-}
-
-class _ItemReferenceCardState extends State<ItemReferenceCard> {
-  // A preview must not restore the enclosing recipe's saved scroll position.
-  final _scrollController = ScrollController(keepScrollOffset: false);
+  /// Passive previews show all sections without unusable tabs or actions.
+  final bool interactive;
 
   @override
-  void dispose() {
-    _scrollController.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    if (widget.onClose != null) {
-      return _JoinedItemReference(card: widget);
-    }
-    final controller = widget.controller;
-    final mode = widget.mode;
-    final name = widget.name;
-    final info = withReadableRecipeBookSections(widget.info);
-    final maxWidth = widget.maxWidth;
-    final spec = widget.spec;
-    final onClose = widget.onClose;
-    final closeKey = widget.closeKey;
-    final heading = ItemDetailStyle.title(spec);
-    final meta = ItemDetailStyle.meta(spec);
-    final body = ItemDetailStyle.body(spec);
-    final maxHeight = itemReferenceCardHeight(context);
-    return ConstrainedBox(
-      constraints: BoxConstraints(maxWidth: maxWidth, maxHeight: maxHeight),
-      child: _ItemReferenceCopyScope(
-        onCopyItemName: widget.onCopyItemName,
-        onRecipeActivated: onClose,
-        onUseFormula: widget.onUseFormula,
-        child: AppSurface(
-          role: AppSurfaceRole.tooltip,
-          tone: AppSurfaceTone.info,
-          padding: const EdgeInsets.all(16),
-          child: ScrollConfiguration(
-            behavior: const _RecipeBookItemInfoScrollBehavior(),
-            child: SingleChildScrollView(
-              controller: _scrollController,
-              primary: false,
-              physics: const ClampingScrollPhysics(),
-              child: _ReferenceSelection(
-                enabled: onClose != null,
-                child: DefaultTextStyle(
-                  style: body,
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: <Widget>[
-                      Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: <Widget>[
-                          WorkshopItemMount(
-                            child:
-                                widget.icon ??
-                                ModeItemIcon(
-                                  controller: controller
-                                      .modeController
-                                      .owner
-                                      .modes[mode]!,
-                                  catalogRepository:
-                                      controller.catalogRepository,
-                                  name: name,
-                                  size: ItemDetailStyle.headerIcon,
-                                  searchAcrossModes: true,
-                                ),
-                          ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: AnchoredPopoverDragRegion(
-                              key: widget.headerDragKey,
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: <Widget>[
-                                  _ReferenceItemName(
-                                    name: name,
-                                    label: info.title,
-                                    style: heading,
-                                  ),
-                                  SizedBox(
-                                    height: _itemInfoSpacing(context, 6),
-                                  ),
-                                  Text(info.kind, style: meta),
-                                ],
-                              ),
-                            ),
-                          ),
-                          if (onClose != null) ...<Widget>[
-                            const SizedBox(width: 8),
-                            AppButton(
-                              key: closeKey,
-                              role: AppButtonRole.optionPill,
-                              minimumSize: const Size.square(30),
-                              padding: EdgeInsets.zero,
-                              semanticLabel: 'Close $name information',
-                              tooltip: 'Close information',
-                              onPressed: onClose,
-                              child: const AppVectorGlyph('close', size: 9),
-                            ),
-                          ],
-                        ],
-                      ),
-                      ..._itemReferenceSectionWidgets(
-                        context,
-                        controller: controller,
-                        mode: mode,
-                        name: name,
-                        info: info,
-                        spec: spec,
-                      ),
-                      if (info.summary.trim().isEmpty &&
-                          info.effects.isEmpty &&
-                          info.acquisitionFormulas.isEmpty &&
-                          info.acquisitionNotes.isEmpty &&
-                          info.uses.isEmpty &&
-                          info.craftUses.isEmpty &&
-                          info.notes.isEmpty) ...[
-                        SizedBox(height: _itemInfoSpacing(context, 20)),
-                        Text('No source details recorded yet.', style: body),
-                      ],
-                    ],
-                  ),
-                ),
-              ),
-            ),
-          ),
+  Widget build(BuildContext context) => ThemeSpecScope(
+    // Overlay hosts can retain another ambient theme. The explicitly supplied
+    // card finish must also own its headings, actions and availability badges.
+    spec: spec,
+    child: NotificationListener<ScrollNotification>(
+      // Hover overlays retain their anchor ancestry, just like pinned popovers.
+      // Do not let their scrolling dismiss or move a containing recipe panel.
+      onNotification: (_) => true,
+      child: IgnorePointer(
+        ignoring: !interactive,
+        child: ExcludeFocus(
+          excluding: !interactive,
+          child: _JoinedItemReference(card: this),
         ),
       ),
-    );
-  }
+    ),
+  );
 }
 
 /// The same structured item facts used by hover and pinned reference cards,
@@ -474,16 +448,19 @@ class ItemReferenceSections extends StatelessWidget {
     if (children.isEmpty) return const SizedBox.shrink();
     final inherited = context
         .dependOnInheritedWidgetOfExactType<_ItemReferenceCopyScope>();
-    return _ItemReferenceCopyScope(
-      onCopyItemName: onCopyItemName ?? inherited?.onCopyItemName,
-      onRecipeActivated: onRecipeActivated ?? inherited?.onRecipeActivated,
-      onUseFormula: onUseFormula ?? inherited?.onUseFormula,
-      child: DefaultTextStyle(
-        style: ItemDetailStyle.body(spec),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: children,
+    return ThemeSpecScope(
+      spec: spec,
+      child: _ItemReferenceCopyScope(
+        onCopyItemName: onCopyItemName ?? inherited?.onCopyItemName,
+        onRecipeActivated: onRecipeActivated ?? inherited?.onRecipeActivated,
+        onUseFormula: onUseFormula ?? inherited?.onUseFormula,
+        child: DefaultTextStyle(
+          style: ItemDetailStyle.body(spec),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: children,
+          ),
         ),
       ),
     );
@@ -517,9 +494,11 @@ List<Widget> _itemReferenceSectionWidgets(
         style: accent,
       ),
     if (info.acquisitionNotes.isNotEmpty)
-      _InfoSection(
-        title: 'How to Obtain',
-        values: info.acquisitionNotes,
+      _AcquisitionSection(
+        controller: controller,
+        mode: mode,
+        name: name,
+        info: info,
         style: body,
       ),
     if (info.acquisitionFormulas.isNotEmpty)
@@ -592,7 +571,7 @@ class _ReferenceItemName extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Semantics(
     button: true,
-    label: 'Copy $name',
+    label: 'Copy ${itemDisplayName(name)}',
     value: label != null && label != name ? label : null,
     child: InkWell(
       key: ValueKey('item-reference-copy:$name'),
@@ -604,23 +583,30 @@ class _ReferenceItemName extends StatelessWidget {
             .dependOnInheritedWidgetOfExactType<_ItemReferenceCopyScope>()
             ?.onCopyItemName;
         if (copy != null) {
-          copy(name);
+          copy(itemDisplayName(name));
         } else {
           unawaited(_copyReferenceName(context, name));
         }
       },
-      child: ExcludeSemantics(child: Text(label ?? name, style: style)),
+      child: ExcludeSemantics(
+        child: Text(itemDisplayLabel(name, label), style: style),
+      ),
     ),
   );
 }
 
 Future<void> _copyReferenceName(BuildContext context, String name) async {
+  final copy = ItemNameCopyScope.maybeOf(context);
+  if (copy != null) {
+    await copy(itemDisplayName(name));
+    return;
+  }
   try {
-    await Clipboard.setData(ClipboardData(text: name));
+    await Clipboard.setData(ClipboardData(text: itemDisplayName(name)));
     if (!context.mounted) return;
     ScaffoldMessenger.maybeOf(context)?.showSnackBar(
       SnackBar(
-        content: Text('Copied $name'),
+        content: Text('Copied ${itemDisplayName(name)}'),
         duration: const Duration(milliseconds: 1350),
       ),
     );
@@ -730,121 +716,130 @@ class _FormulaCard extends StatelessWidget {
       height: 1.3,
     );
     final output = _formulaOutputLabel(formula);
-    return LayoutBuilder(
-      builder: (context, constraints) => Align(
-        alignment: Alignment.centerLeft,
-        child: SizedBox(
-          width: math.min(
-            constraints.maxWidth,
-            _formulaContentWidth(
-              context,
-              controller,
-              formulaMode,
-              formula,
-              style,
-              meta,
-              showUseRecipe: canActivate,
-            ),
-          ),
-          child: Semantics(
-            container: true,
-            explicitChildNodes: true,
-            child: ItemDetailGroup(
-              key: RecipeBookKeys.itemInfoFormula(
-                formula.outputName,
-                formula.variantId,
-                formula.batchMultiplier,
+    return _ReferenceFormulaMarket(
+      book: controller,
+      mode: formulaMode,
+      formula: formula,
+      child: LayoutBuilder(
+        builder: (context, constraints) => Align(
+          alignment: Alignment.centerLeft,
+          child: SizedBox(
+            width: math.min(
+              constraints.maxWidth,
+              _formulaContentWidth(
+                context,
+                controller,
+                formulaMode,
+                formula,
+                style,
+                meta,
+                showUseRecipe: canActivate,
               ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: <Widget>[
-                  Semantics(
-                    label: <String>[formula.method, ...tags, output].join(', '),
-                    explicitChildNodes: true,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: <Widget>[
-                        Text(
-                          formula.method,
-                          style: style.copyWith(
-                            fontSize: 15,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                        SizedBox(height: _itemInfoSpacing(context, 6)),
-                        Wrap(
-                          spacing: 14,
-                          runSpacing: 4,
-                          children: [
-                            for (final tag in tags) Text(tag, style: meta),
-                            _ReferenceItemName(
-                              name: formula.outputName,
-                              label: output,
-                              style: meta.copyWith(
-                                color: _referenceAccent(spec),
-                              ),
+            ),
+            child: Semantics(
+              container: true,
+              explicitChildNodes: true,
+              child: ItemDetailGroup(
+                key: RecipeBookKeys.itemInfoFormula(
+                  formula.outputName,
+                  formula.variantId,
+                  formula.batchMultiplier,
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: <Widget>[
+                    Semantics(
+                      label: <String>[
+                        formula.method,
+                        ...tags,
+                        output,
+                      ].join(', '),
+                      explicitChildNodes: true,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: <Widget>[
+                          Text(
+                            formula.method,
+                            style: style.copyWith(
+                              fontSize: 15,
+                              fontWeight: FontWeight.w600,
                             ),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ),
-                  SizedBox(height: _itemInfoSpacing(context, 12)),
-                  for (
-                    var index = 0;
-                    index < formula.ingredients.length;
-                    index++
-                  )
-                    _FormulaMaterialRow(
-                      controller: controller,
-                      mode: formulaMode,
-                      formula: formula,
-                      ingredient: formula.ingredients[index],
-                      style: style,
-                      topSpacing: _itemInfoSpacing(
-                        context,
-                        index == 0 ? 0 : 12,
+                          ),
+                          SizedBox(height: _itemInfoSpacing(context, 6)),
+                          Wrap(
+                            spacing: 14,
+                            runSpacing: 4,
+                            children: [
+                              for (final tag in tags) Text(tag, style: meta),
+                              _ReferenceItemName(
+                                name: formula.outputName,
+                                label: output,
+                                style: meta.copyWith(
+                                  color: _referenceAccent(spec),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
                       ),
                     ),
-                  if (canActivate) ...<Widget>[
-                    SizedBox(height: _itemInfoSpacing(context, 14)),
-                    Align(
-                      alignment: Alignment.centerLeft,
-                      child: AppButton(
-                        key: ValueKey<String>(
-                          'item-info-use-recipe:${formulaMode.key}:'
-                          '${formula.outputName}:${formula.variantId ?? 'base'}:'
-                          '${formula.batchMultiplier}',
+                    SizedBox(height: _itemInfoSpacing(context, 12)),
+                    for (
+                      var index = 0;
+                      index < formula.ingredients.length;
+                      index++
+                    )
+                      _FormulaMaterialRow(
+                        controller: controller,
+                        mode: formulaMode,
+                        formula: formula,
+                        ingredient: formula.ingredients[index],
+                        style: style,
+                        topSpacing: _itemInfoSpacing(
+                          context,
+                          index == 0 ? 0 : 12,
                         ),
-                        role: AppButtonRole.optionPill,
-                        minimumSize: const Size(0, 34),
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 10,
-                          vertical: 5,
-                        ),
-                        semanticLabel:
-                            'Use ${formula.outputName}, ${formula.method}'
-                            '${tags.isEmpty ? '' : ', ${tags.join(', ')}'}',
-                        onPressed: () {
-                          if (!controller.canActivateFormula(formula)) return;
-                          final scope = context
-                              .dependOnInheritedWidgetOfExactType<
-                                _ItemReferenceCopyScope
-                              >();
-                          Tooltip.dismissAllToolTips();
-                          final onUseFormula = scope?.onUseFormula;
-                          if (onUseFormula != null) {
-                            onUseFormula(formula);
-                          } else {
-                            scope?.onRecipeActivated?.call();
-                            controller.activateFormula(formula);
-                          }
-                        },
-                        child: const Text('Use recipe'),
                       ),
-                    ),
+                    if (canActivate) ...<Widget>[
+                      SizedBox(height: _itemInfoSpacing(context, 14)),
+                      Align(
+                        alignment: Alignment.centerLeft,
+                        child: AppButton(
+                          key: ValueKey<String>(
+                            'item-info-use-recipe:${formulaMode.key}:'
+                            '${formula.outputName}:${formula.variantId ?? 'base'}:'
+                            '${formula.batchMultiplier}',
+                          ),
+                          role: AppButtonRole.optionPill,
+                          minimumSize: const Size(0, 34),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 10,
+                            vertical: 5,
+                          ),
+                          semanticLabel:
+                              'Use ${formula.outputName}, ${formula.method}'
+                              '${tags.isEmpty ? '' : ', ${tags.join(', ')}'}',
+                          onPressed: () {
+                            if (!controller.canActivateFormula(formula)) return;
+                            final scope = context
+                                .dependOnInheritedWidgetOfExactType<
+                                  _ItemReferenceCopyScope
+                                >();
+                            Tooltip.dismissAllToolTips();
+                            final onUseFormula = scope?.onUseFormula;
+                            if (onUseFormula != null) {
+                              onUseFormula(formula);
+                            } else {
+                              scope?.onRecipeActivated?.call();
+                              controller.activateFormula(formula);
+                            }
+                          },
+                          child: const Text('Use recipe'),
+                        ),
+                      ),
+                    ],
                   ],
-                ],
+                ),
               ),
             ),
           ),
@@ -875,6 +870,7 @@ double _formulaContentWidth(
     return width;
   }
 
+  final availability = _ReferenceFormulaMarketData.of(context);
   final nameStyle = style.copyWith(fontSize: 15, fontWeight: FontWeight.w600);
   final quantityStyle = style.copyWith(
     fontSize: 13,
@@ -917,6 +913,29 @@ double _formulaContentWidth(
           textWidth('×${_displayQuantity(ingredient.quantity)}', quantityStyle),
     );
   }
+  for (final ingredient in formula.ingredients) {
+    for (final name in [
+      ingredient.name,
+      ..._formulaAlternatives(
+        ingredient,
+        recipes: controller.modeController.owner.modes[mode]!.recipes,
+      ).map((item) => item.name),
+    ]) {
+      final badge = _referenceIngredientBadge(
+        book: controller,
+        mode: mode,
+        name: name,
+        market: availability.marketFor(name),
+        now: availability.now,
+      );
+      if (badge != null) {
+        width = math.max(
+          width,
+          48 + badge.presentation(context).preferredWidth(context),
+        );
+      }
+    }
+  }
   // Include the content insets and the leading rule. The width is
   // independent of the outer description, while bounded layouts still wrap.
   return (width + 28).ceilToDouble();
@@ -957,6 +976,17 @@ class _FormulaMaterialRow extends StatelessWidget {
       fontSize: 13,
       height: 1.35,
     );
+    final availability = _ReferenceFormulaMarketData.of(context);
+    Widget sourceLine(String name, Widget label, {bool inline = false}) =>
+        _referenceIngredientSourceLine(
+          book: controller,
+          mode: mode,
+          name: name,
+          label: label,
+          market: availability.marketFor(name),
+          now: availability.now,
+          inline: inline,
+        );
     return Padding(
       padding: EdgeInsets.only(top: topSpacing),
       child: Semantics(
@@ -981,42 +1011,65 @@ class _FormulaMaterialRow extends StatelessWidget {
             const SizedBox(width: 12),
             Expanded(
               child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: <Widget>[
-                  Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Flexible(
-                        child: _ReferenceItemName(
-                          name: ingredient.name,
-                          style: style.copyWith(
-                            fontSize: 15,
-                            fontWeight: FontWeight.w600,
+                  if (_qualityChoiceRows(
+                    controller,
+                    formula,
+                    ingredient,
+                    mode,
+                  ).isNotEmpty)
+                    _ReferenceQualityChoices(
+                      book: controller,
+                      formula: formula,
+                      ingredient: ingredient,
+                      mode: mode,
+                      marketFor: availability.marketFor,
+                      now: availability.now,
+                    )
+                  else ...[
+                    sourceLine(
+                      ingredient.name,
+                      Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Flexible(
+                            child: _ReferenceItemName(
+                              name: ingredient.name,
+                              style: style.copyWith(
+                                fontSize: 15,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
                           ),
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      Text(
-                        '×$quantity',
-                        style: style.copyWith(
-                          color: spec.palette.textMuted,
-                          fontSize: 13,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                    ],
-                  ),
-                  for (final alternative in alternatives)
-                    Padding(
-                      padding: const EdgeInsets.only(top: 4),
-                      child: _ReferenceItemName(
-                        name: alternative.name,
-                        label:
-                            'or ${_displayQuantity(alternative.quantity)} '
-                            '${alternative.name}',
-                        style: alternateStyle,
+                          const SizedBox(width: 8),
+                          Text(
+                            '×$quantity',
+                            style: style.copyWith(
+                              color: spec.palette.textMuted,
+                              fontSize: 13,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
+                    for (final alternative in alternatives)
+                      Padding(
+                        padding: const EdgeInsets.only(top: 4),
+                        child: sourceLine(
+                          alternative.name,
+                          _ReferenceItemName(
+                            name: alternative.name,
+                            label:
+                                'or ${_displayQuantity(alternative.quantity)} '
+                                '${alternative.name}',
+                            style: alternateStyle,
+                          ),
+                          inline: true,
+                        ),
+                      ),
+                  ],
                 ],
               ),
             ),
@@ -1285,11 +1338,14 @@ class _InfoSection extends StatelessWidget {
     required this.title,
     required this.values,
     required this.style,
+    this.leadingSpacing = 20,
   });
 
   final String title;
   final List<String> values;
   final TextStyle style;
+  // Joined windows supply their own section insets. Embedded prose does not.
+  final double leadingSpacing;
 
   @override
   Widget build(BuildContext context) {
@@ -1297,7 +1353,7 @@ class _InfoSection extends StatelessWidget {
     final readable = values.where((value) => value.trim().isNotEmpty).toList();
     if (readable.isEmpty) return const SizedBox.shrink();
     return Padding(
-      padding: EdgeInsets.only(top: _itemInfoSpacing(context, 20)),
+      padding: EdgeInsets.only(top: _itemInfoSpacing(context, leadingSpacing)),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[

@@ -1,0 +1,20 @@
+cmake_minimum_required(VERSION 3.14)
+project(single_instance_tests LANGUAGES CXX RC)
+if(NOT WIN32)
+  message(FATAL_ERROR "Native Windows tests only")
+endif()
+set(BSL_COORDINATOR_ROOT "${CMAKE_CURRENT_LIST_DIR}/../../../windows/runner" CACHE PATH
+  "Coordinator implementation under test")
+option(BSL_TEST_LEGACY_DISCOVERY "Implementation exposes legacy metadata discovery" ON)
+add_executable(single_instance_test single_instance_test.cpp legacy_fixture.rc
+  "${BSL_COORDINATOR_ROOT}/single_instance.cpp")
+target_compile_features(single_instance_test PRIVATE cxx_std_17)
+target_compile_definitions(single_instance_test PRIVATE NOMINMAX UNICODE _UNICODE)
+target_compile_definitions(single_instance_test PRIVATE
+  BSL_TEST_LEGACY_DISCOVERY=$<BOOL:${BSL_TEST_LEGACY_DISCOVERY}>)
+target_compile_options(single_instance_test PRIVATE /W4 /WX /wd4100 /EHsc)
+target_include_directories(single_instance_test PRIVATE "${BSL_COORDINATOR_ROOT}")
+target_link_libraries(single_instance_test PRIVATE advapi32 comctl32 user32 version)
+enable_testing()
+add_test(NAME single_instance_native COMMAND single_instance_test)
+set_tests_properties(single_instance_native PROPERTIES TIMEOUT 45)

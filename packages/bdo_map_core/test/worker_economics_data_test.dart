@@ -17,10 +17,10 @@ void main() {
           as Map<String, Object?>,
     );
 
-    expect(bytes, hasLength(354383));
+    expect(bytes, hasLength(355138));
     expect(
       sha256.convert(bytes).toString(),
-      '64abeda209b82ea1caf6fc8c5eb29ddc8f1007837fa4d13652abe534697c29d7',
+      'e4c25d7252953115133dbb6490fb23f7b0db214c4f7f358557d3ae2542e1c6cb',
     );
     expect(dataset.manifest.sourcePackageVersion, '0.8.1');
     expect(dataset.manifest.sourceLicenseExpression, 'Unlicense');
@@ -28,6 +28,39 @@ void main() {
     expect(dataset.manifest.permittedUse, contains('no separate Workerman'));
     expect(dataset.townsByNodeId, hasLength(30));
     expect(dataset.productionNodesById, hasLength(352));
+
+    // Exact character identities, not an assumed Human/Goblin enum order.
+    const expectedLabels = <int, String>{
+      7571: 'Giant',
+      7572: 'Goblin',
+      7573: 'Human',
+      8003: 'Papu',
+      8006: 'Fadus',
+      8031: 'Human',
+      8027: 'Giant',
+      8023: 'Dwarf',
+      8035: 'Goblin',
+      8043: 'Human',
+      8039: 'Giant',
+      8050: 'Dokkebi',
+      8054: 'Dolswe',
+      8058: 'Shellfolk',
+    };
+    final profiles = dataset.townsByNodeId.values.expand(
+      (town) => town.profiles,
+    );
+    expect(profiles, hasLength(88));
+    expect(
+      profiles.map((profile) => profile.characterKey).toSet(),
+      expectedLabels.keys.toSet(),
+    );
+    for (final profile in profiles) {
+      expect(
+        profile.label,
+        expectedLabels[profile.characterKey],
+        reason: profile.id,
+      );
+    }
 
     final productionResourceIds = map.workerNodes
         .where((node) => node.isProductionNode && node.isResourceNode)
@@ -43,7 +76,7 @@ void main() {
           'stay unavailable until exact workload, yield, and town-distance '
           'records are independently verified.',
     );
-    expect(dataset.verifiedFreeNetworkRootNodeIds(map), hasLength(28));
+    expect(dataset.verifiedFreeNetworkRootNodeIds(map), hasLength(29));
     final verifiedFreeRoots = dataset.verifiedFreeNetworkRootNodeIds(map);
     expect(
       verifiedFreeRoots,
@@ -52,10 +85,10 @@ void main() {
     );
     expect(
       verifiedFreeRoots,
-      isNot(contains('1604')),
+      contains('1604'),
       reason:
-          'Old Wisdom Tree is a verified worker town, but its map node costs '
-          'CP.',
+          'Old Wisdom Tree is a free blue town; do not charge three CP or '
+          'exclude it from worker-network starting points.',
     );
 
     final potato = dataset.productionNodesById['131']!;

@@ -244,6 +244,9 @@ void main() {
           'Essence of Dawn - Accuracy',
           'Perfume of Tenacity',
           'Milk',
+          "Khan's Heart: Life",
+          'Destruction Spirit Stone',
+          'Splendid Spirit Stone of Destruction',
         ]) {
           final info = book.itemInfoFor(name)!;
           await tester.pumpWidget(
@@ -302,8 +305,9 @@ void main() {
               find.byKey(const ValueKey('attached-reference-tab:used')),
             );
             await _settleImages(tester);
-            expect(find.text('100× batch'), findsOneWidget);
-            expect(find.text('10× batch'), findsNothing);
+            // Every applicable consumer is now shown, not only Fury Draught.
+            expect(find.text('100× batch'), findsNWidgets(9));
+            expect(find.text('10× batch'), findsNWidgets(4));
             final catalystRecipe = find.byKey(
               RecipeBookKeys.itemInfoFormula(
                 'Fury Draught',
@@ -315,10 +319,22 @@ void main() {
             expect(
               find.descendant(
                 of: catalystRecipe,
+                matching: find.text('100× batch'),
+              ),
+              findsOneWidget,
+            );
+            expect(
+              find.descendant(
+                of: catalystRecipe,
                 matching: find.text(_catalyst),
               ),
               findsOneWidget,
             );
+          }
+          if (name == 'Splendid Spirit Stone of Destruction') {
+            expect(find.text('Use recipe'), findsNothing);
+            expect(find.text('Removed item'), findsOneWidget);
+            expect(find.text('Simple Alchemy'), findsNothing);
           }
           expect(tester.takeException(), isNull);
           await _captureImage(

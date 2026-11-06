@@ -1,0 +1,537 @@
+{
+  "date": "2026-11-04",
+  "scope": "Exact imported gathering wording, not a blanket certification of every source or hidden yield.",
+  "sources": [
+    "https://www.naeu.playblackdesert.com/en-US/Wiki?wikiNo=34",
+    "https://blackdesert.pearlabyss.com/TR/Game/Wiki?_masterWikiNo=128",
+    "https://www.blackdesertfoundry.com/gathering-guide/",
+    "https://bdocodex.com/us/item/7906/",
+    "https://bdocodex.com/us/quest/4500/92/",
+    "https://bdocodex.com/us/npc/1245/",
+    "https://bdocodex.com/us/item/7023/",
+    "https://www.blackdesertfoundry.com/farming/",
+    "https://www.reddit.com/r/blackdesertonline/comments/eal292",
+    "https://garmoth.com/grind-tracker/curry/spot/61",
+    "https://grumpygreen.cricket/sniper-guide/",
+    "https://garmoth.com/grind-tracker/1NW5Q72Ngr/spot/140"
+  ],
+  "method": "Retain exact existing animal identities; make ordinary combat plus gathering tool explicit. Preserve actual Hunting-specific routes. Wild cattle/bison distinguish Beef/Ox sources from Dairy Cows; haystack product table supports Beef and Ox Hide as extras. Historical map positions and product IDs are unchanged.",
+  "records": [
+    {
+      "name": "Bat Blood",
+      "id": 6219,
+      "old": "Hunt Bat, then collect its blood.",
+      "next": "Defeat Bat, then collect blood (Fluid Collector)."
+    },
+    {
+      "name": "Bear Blood",
+      "id": 6213,
+      "old": "Hunt Bear, then collect its blood.",
+      "next": "Defeat Bear, then collect blood (Fluid Collector)."
+    },
+    {
+      "name": "Bear Hide",
+      "id": 6013,
+      "old": "Hunt Bear, then tan the carcass.",
+      "next": "Defeat Bear, then gather hide (Tanning Knife)."
+    },
+    {
+      "name": "Bear Meat",
+      "id": 7912,
+      "old": "Hunt a bear and butcher it.",
+      "next": "Defeat a bear, then butcher it (Butcher Knife)."
+    },
+    {
+      "name": "Beef",
+      "id": 7906,
+      "old": "Hunt a cow and butcher it.",
+      "next": "Defeat wild bison, then butcher them (Butcher Knife)."
+    },
+    {
+      "name": "Black Leopard Hide",
+      "id": 6022,
+      "old": "Hunt Black Leopard, then tan the carcass.",
+      "next": "Defeat Black Leopard, then gather hide (Tanning Knife)."
+    },
+    {
+      "name": "Cheetah Dragon Blood",
+      "id": 6216,
+      "old": "Hunt Cheetah Dragon, then collect its blood.",
+      "next": "Defeat Cheetah Dragon, then collect blood (Fluid Collector)."
+    },
+    {
+      "name": "Cheetah Dragon Hide",
+      "id": 6016,
+      "old": "Hunt Cheetah Dragon, then tan the carcass.",
+      "next": "Defeat Cheetah Dragon, then gather hide (Tanning Knife)."
+    },
+    {
+      "name": "Cheetah Dragon Meat",
+      "id": 7915,
+      "old": "Hunt a Cheetah Dragon and butcher it.",
+      "next": "Defeat a Cheetah Dragon, then butcher it (Butcher Knife)."
+    },
+    {
+      "name": "Cobra Blood",
+      "id": 6222,
+      "old": "Hunt Cobra, then collect its blood.",
+      "next": "Defeat Cobra, then collect blood (Fluid Collector)."
+    },
+    {
+      "name": "Deer Blood",
+      "id": 6201,
+      "old": "Hunt Deer, then collect its blood.",
+      "next": "Defeat Deer, then collect blood (Fluid Collector)."
+    },
+    {
+      "name": "Deer Hide",
+      "id": 6001,
+      "old": "Hunt Deer, then tan the carcass.",
+      "next": "Defeat Deer, then gather hide (Tanning Knife)."
+    },
+    {
+      "name": "Deer Meat",
+      "id": 7901,
+      "old": "Hunt a deer and butcher it.",
+      "next": "Defeat a deer, then butcher it (Butcher Knife)."
+    },
+    {
+      "name": "Dinosaur Blood",
+      "id": 6207,
+      "old": "Hunt Dinosaur, then collect its blood.",
+      "next": "Defeat Dinosaur, then collect blood (Fluid Collector)."
+    },
+    {
+      "name": "Dinosaur Hide",
+      "id": 6007,
+      "old": "Hunt Dinosaur, then tan the carcass.",
+      "next": "Defeat Dinosaur, then gather hide (Tanning Knife)."
+    },
+    {
+      "name": "Elephant Hide",
+      "id": 6026,
+      "old": "Hunt Elephant, then tan the carcass.",
+      "next": "Defeat Elephant, then gather hide (Tanning Knife)."
+    },
+    {
+      "name": "Feather Wolf Hide",
+      "id": 6021,
+      "old": "Hunt Feather Wolf, then tan the carcass.",
+      "next": "Defeat Feather Wolf, then gather feathers (Tanning Knife)."
+    },
+    {
+      "name": "Flamingo Blood",
+      "id": 6218,
+      "old": "Hunt Flamingo, then collect its blood.",
+      "next": "Defeat Flamingo, then collect blood (Fluid Collector)."
+    },
+    {
+      "name": "Flamingo Meat",
+      "id": 7917,
+      "old": "Hunt a flamingo and butcher it.",
+      "next": "Defeat a flamingo, then butcher it (Butcher Knife)."
+    },
+    {
+      "name": "Flamingo Plume",
+      "id": 6018,
+      "old": "Hunt Flamingo, then tan the carcass.",
+      "next": "Defeat Flamingo, then gather feathers (Tanning Knife)."
+    },
+    {
+      "name": "Fox Blood",
+      "id": 6203,
+      "old": "Hunt Fox, then collect its blood.",
+      "next": "Defeat Fox, then collect blood (Fluid Collector)."
+    },
+    {
+      "name": "Fox Hide",
+      "id": 6003,
+      "old": "Hunt Fox, then tan the carcass.",
+      "next": "Defeat Fox, then gather hide (Tanning Knife)."
+    },
+    {
+      "name": "Fox Meat",
+      "id": 7903,
+      "old": "Hunt a fox and butcher it.",
+      "next": "Defeat a fox, then butcher it (Butcher Knife)."
+    },
+    {
+      "name": "Gazelle Hide",
+      "id": 6023,
+      "old": "Hunt Gazelle, then tan the carcass.",
+      "next": "Defeat Gazelle, then gather hide (Tanning Knife)."
+    },
+    {
+      "name": "Goat Blood",
+      "id": 6228,
+      "old": "Hunt Goat, then collect its blood.",
+      "next": "Defeat Goat, then collect blood (Fluid Collector)."
+    },
+    {
+      "name": "Goat Hide",
+      "id": 6030,
+      "old": "Hunt Goat, then tan the carcass.",
+      "next": "Defeat Goat, then gather hide (Tanning Knife)."
+    },
+    {
+      "name": "Goat Meat",
+      "id": 7957,
+      "old": "Hunt a goat and butcher it.",
+      "next": "Defeat a goat, then butcher it (Butcher Knife)."
+    },
+    {
+      "name": "Griffon Feather",
+      "id": 6024,
+      "old": "Hunt Griffon, then tan the carcass.",
+      "next": "Defeat Griffon, then gather feathers (Tanning Knife)."
+    },
+    {
+      "name": "Kuku Bird Blood",
+      "id": 6217,
+      "old": "Hunt Kuku Bird, then collect its blood.",
+      "next": "Defeat Kuku Bird, then collect blood (Fluid Collector)."
+    },
+    {
+      "name": "Kuku Bird Meat",
+      "id": 7916,
+      "old": "Hunt a Kuku Bird and butcher it.",
+      "next": "Defeat a Kuku Bird, then butcher it (Butcher Knife)."
+    },
+    {
+      "name": "Lamb Meat",
+      "id": 7902,
+      "old": "Hunt a sheep and butcher it.",
+      "next": "Defeat a sheep, then butcher it (Butcher Knife)."
+    },
+    {
+      "name": "Lion Blood",
+      "id": 6223,
+      "old": "Hunt Lion, then collect its blood.",
+      "next": "Defeat Lion, then collect blood (Fluid Collector)."
+    },
+    {
+      "name": "Lion Hide",
+      "id": 6020,
+      "old": "Hunt Lion, then tan the carcass.",
+      "next": "Defeat Lion, then gather hide (Tanning Knife)."
+    },
+    {
+      "name": "Lion Meat",
+      "id": 7923,
+      "old": "Hunt a lion and butcher it.",
+      "next": "Defeat a lion, then butcher it (Butcher Knife)."
+    },
+    {
+      "name": "Lizard Blood",
+      "id": 6208,
+      "old": "Hunt Lizard, then collect its blood.",
+      "next": "Defeat Lizard, then collect blood (Fluid Collector)."
+    },
+    {
+      "name": "Lizard Hide",
+      "id": 6008,
+      "old": "Hunt Lizard, then tan the carcass.",
+      "next": "Defeat Lizard, then gather hide (Tanning Knife)."
+    },
+    {
+      "name": "Lizard Meat",
+      "id": 7908,
+      "old": "Hunt a lizard and butcher it.",
+      "next": "Defeat a lizard, then butcher it (Butcher Knife)."
+    },
+    {
+      "name": "Llama Blood",
+      "id": 6227,
+      "old": "Hunt Llama, then collect its blood.",
+      "next": "Defeat Llama, then collect blood (Fluid Collector)."
+    },
+    {
+      "name": "Llama Hide",
+      "id": 6029,
+      "old": "Hunt Llama, then tan the carcass.",
+      "next": "Defeat Llama, then gather hide (Tanning Knife)."
+    },
+    {
+      "name": "Llama Meat",
+      "id": 7956,
+      "old": "Hunt a llama and butcher it.",
+      "next": "Defeat a llama, then butcher it (Butcher Knife)."
+    },
+    {
+      "name": "Marmot Blood",
+      "id": 6226,
+      "old": "Hunt Marmot, then collect its blood.",
+      "next": "Defeat Marmot, then collect blood (Fluid Collector)."
+    },
+    {
+      "name": "Marmot Hide",
+      "id": 6028,
+      "old": "Hunt Marmot, then tan the carcass.",
+      "next": "Defeat Marmot, then gather hide (Tanning Knife)."
+    },
+    {
+      "name": "Marmot Meat",
+      "id": 7955,
+      "old": "Hunt a marmot and butcher it.",
+      "next": "Defeat a marmot, then butcher it (Butcher Knife)."
+    },
+    {
+      "name": "Monkey Blood",
+      "id": 6211,
+      "old": "Hunt Monkey, then collect its blood with a Fluid Collector.",
+      "next": "Defeat Monkey, then collect blood (Fluid Collector)."
+    },
+    {
+      "name": "Monkey Hide",
+      "id": 6011,
+      "old": "Hunt Monkey, then tan the carcass.",
+      "next": "Defeat Monkey, then gather hide (Tanning Knife)."
+    },
+    {
+      "name": "Ogre Blood",
+      "id": 6221,
+      "old": "Hunt Ogre, then collect its blood.",
+      "next": "Defeat Ogre, then collect blood (Fluid Collector)."
+    },
+    {
+      "name": "Ox Blood",
+      "id": 6206,
+      "old": "Hunt Cow, then collect its blood.",
+      "next": "Defeat wild bison, then collect blood (Fluid Collector)."
+    },
+    {
+      "name": "Ox Hide",
+      "id": 6006,
+      "old": "Hunt Cow, then tan the carcass.",
+      "next": "Defeat wild bison, then gather hide (Tanning Knife)."
+    },
+    {
+      "name": "Pig Blood",
+      "id": 6205,
+      "old": "Hunt Pig, then collect its blood.",
+      "next": "Defeat Pig, then collect blood (Fluid Collector)."
+    },
+    {
+      "name": "Pig Hide",
+      "id": 6005,
+      "old": "Hunt Pig, then tan the carcass.",
+      "next": "Defeat Pig, then gather hide (Tanning Knife)."
+    },
+    {
+      "name": "Pork",
+      "id": 7905,
+      "old": "Hunt a pig and butcher it.",
+      "next": "Defeat a pig, then butcher it (Butcher Knife)."
+    },
+    {
+      "name": "Raccoon Blood",
+      "id": 6210,
+      "old": "Hunt Raccoon, then collect its blood.",
+      "next": "Defeat Raccoon, then collect blood (Fluid Collector)."
+    },
+    {
+      "name": "Raccoon Hide",
+      "id": 6010,
+      "old": "Hunt Raccoon, then tan the carcass.",
+      "next": "Defeat Raccoon, then gather hide (Tanning Knife)."
+    },
+    {
+      "name": "Raccoon Meat",
+      "id": 7910,
+      "old": "Hunt a raccoon and butcher it.",
+      "next": "Defeat a raccoon, then butcher it (Butcher Knife)."
+    },
+    {
+      "name": "Rhino Blood",
+      "id": 6204,
+      "old": "Hunt Rhino, then collect its blood.",
+      "next": "Defeat Rhino, then collect blood (Fluid Collector)."
+    },
+    {
+      "name": "Rhino Hide",
+      "id": 6004,
+      "old": "Hunt Rhino, then tan the carcass.",
+      "next": "Defeat Rhino, then gather hide (Tanning Knife)."
+    },
+    {
+      "name": "Rhino Meat",
+      "id": 7904,
+      "old": "Hunt a rhino and butcher it.",
+      "next": "Defeat a rhino, then butcher it (Butcher Knife)."
+    },
+    {
+      "name": "Scorpion Blood",
+      "id": 6224,
+      "old": "Hunt Scorpion, then collect its blood.",
+      "next": "Defeat Scorpion, then collect blood (Fluid Collector)."
+    },
+    {
+      "name": "Scorpion Meat",
+      "id": 7924,
+      "old": "Hunt a scorpion and butcher it.",
+      "next": "Defeat a scorpion, then butcher it (Butcher Knife)."
+    },
+    {
+      "name": "Sheep Blood",
+      "id": 6202,
+      "old": "Hunt Sheep, then collect its blood.",
+      "next": "Defeat Sheep, then collect blood (Fluid Collector)."
+    },
+    {
+      "name": "Sheep Hide",
+      "id": 6002,
+      "old": "Hunt Sheep, then tan the carcass.",
+      "next": "Defeat Sheep, then gather hide (Tanning Knife)."
+    },
+    {
+      "name": "Snake Skin",
+      "id": 6019,
+      "old": "Hunt Cobra, then tan the carcass.",
+      "next": "Defeat Cobra, then gather hide (Tanning Knife)."
+    },
+    {
+      "name": "Snow Leopard Hide",
+      "id": 6038,
+      "old": "Hunt Snow Leopard, then tan the carcass.",
+      "next": "Defeat Snow Leopard, then gather hide (Tanning Knife)."
+    },
+    {
+      "name": "Soft Ferri Feather",
+      "id": 6025,
+      "old": "Hunt Ferri, then tan the carcass.",
+      "next": "Defeat Ferri, then gather feathers (Tanning Knife)."
+    },
+    {
+      "name": "Soft Kuku Bird Plume",
+      "id": 6017,
+      "old": "Hunt Kuku Bird, then tan the carcass.",
+      "next": "Defeat Kuku Bird, then gather feathers (Tanning Knife)."
+    },
+    {
+      "name": "Troll Blood",
+      "id": 6220,
+      "old": "Hunt Troll, then collect its blood.",
+      "next": "Defeat Troll, then collect blood (Fluid Collector)."
+    },
+    {
+      "name": "Waragon Blood",
+      "id": 6215,
+      "old": "Hunt Waragon, then collect its blood.",
+      "next": "Defeat Waragon, then collect blood (Fluid Collector)."
+    },
+    {
+      "name": "Waragon Hide",
+      "id": 6015,
+      "old": "Hunt Waragon, then tan the carcass.",
+      "next": "Defeat Waragon, then gather hide (Tanning Knife)."
+    },
+    {
+      "name": "Waragon Meat",
+      "id": 7914,
+      "old": "Hunt a Waragon and butcher it.",
+      "next": "Defeat a Waragon, then butcher it (Butcher Knife)."
+    },
+    {
+      "name": "Weasel Blood",
+      "id": 6212,
+      "old": "Hunt Weasel, then collect its blood.",
+      "next": "Defeat Weasel, then collect blood (Fluid Collector)."
+    },
+    {
+      "name": "Weasel Hide",
+      "id": 6012,
+      "old": "Hunt Weasel, then tan the carcass.",
+      "next": "Defeat Weasel, then gather hide (Tanning Knife)."
+    },
+    {
+      "name": "Weasel Meat",
+      "id": 7911,
+      "old": "Hunt a weasel and butcher it.",
+      "next": "Defeat a weasel, then butcher it (Butcher Knife)."
+    },
+    {
+      "name": "Wolf Blood",
+      "id": 6214,
+      "old": "Hunt Wolf, then collect its blood.",
+      "next": "Defeat Wolf, then collect blood (Fluid Collector)."
+    },
+    {
+      "name": "Wolf Hide",
+      "id": 6014,
+      "old": "Hunt Wolf, then tan the carcass.",
+      "next": "Defeat Wolf, then gather hide (Tanning Knife)."
+    },
+    {
+      "name": "Wolf Meat",
+      "id": 7913,
+      "old": "Hunt a wolf and butcher it.",
+      "next": "Defeat a wolf, then butcher it (Butcher Knife)."
+    },
+    {
+      "name": "Worm Blood",
+      "id": 6209,
+      "old": "Hunt Worm, then collect its blood.",
+      "next": "Defeat Worm, then collect blood (Fluid Collector)."
+    },
+    {
+      "name": "Worm Hide",
+      "id": 6009,
+      "old": "Hunt Worm, then tan the carcass.",
+      "next": "Defeat Worm, then gather hide (Tanning Knife)."
+    },
+    {
+      "name": "Worm Meat",
+      "id": 7909,
+      "old": "Hunt a Worm and butcher it.",
+      "next": "Defeat a Worm, then butcher it (Butcher Knife)."
+    },
+    {
+      "name": "Yak Blood",
+      "id": 6225,
+      "old": "Hunt Yak, then collect its blood.",
+      "next": "Defeat Yak, then collect blood (Fluid Collector)."
+    },
+    {
+      "name": "Yak Hide",
+      "id": 6027,
+      "old": "Hunt Yak, then tan the carcass.",
+      "next": "Defeat Yak, then gather hide (Tanning Knife)."
+    },
+    {
+      "name": "Yak Meat",
+      "id": 7954,
+      "old": "Hunt a yak and butcher it.",
+      "next": "Defeat a yak, then butcher it (Butcher Knife)."
+    },
+    {
+      "name": "Blue Whale Meat",
+      "id": 9726,
+      "old": "Hunt whales, then butcher their corpses.",
+      "next": "Hunting · Butcher Blue Whales (Butcher Knife)"
+    },
+    {
+      "name": "Blue Whale Tendon",
+      "id": 9729,
+      "old": "Hunt whales, then butcher their corpses.",
+      "next": "Hunting · Butcher Blue Whales (Butcher Knife)"
+    },
+    {
+      "name": "Snake Meat",
+      "id": 7922,
+      "old": "Hunting & Butchering (Snake).",
+      "next": "Defeat a Snake, then butcher it (Butcher Knife)."
+    },
+    {
+      "name": "Crocodile Meat",
+      "id": 9732,
+      "old": "Hunt a Freshwater Crocodile and butcher it.",
+      "next": "Hunting · Butcher Freshwater Crocodiles (Butcher Knife)"
+    },
+    {
+      "name": "Tiger Blood",
+      "id": 6356,
+      "old": "Hunt tigers and collect their blood with a Fluid Collector.",
+      "next": "Sniper Hunting · Butcher Atrocious Tigers in Morning Light (Butcher Knife)"
+    }
+  ]
+}

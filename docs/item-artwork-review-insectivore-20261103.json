@@ -1,0 +1,27 @@
+{
+  "date": "2026-11-03",
+  "status": "EXACT_EXISTING_ARTWORK_REUSED",
+  "sourceManifest": "docs/item-artwork-provenance.json",
+  "scope": "Add Alchemy reference aliases for Leaf5441 and Root5443 using the exact existing Processing reference bytes. Existing global clean-art bytes and historical manifest are unchanged; separate clean/reference hashes are retained.",
+  "evidence": "Workspace audit/correctness-review-20261102/resumed-insectivore-stock-evidence.json",
+  "addedEntries": [
+    {
+      "mode": "alchemy",
+      "name": "Insectivore Plant Leaf",
+      "id": 5441,
+      "grade": 0,
+      "source": "New_Icon/03_ETC/07_ProductMaterial/00005441.dds",
+      "sha256": "44acda8b73e2725a06f5cdcd250056146c82a5e62c76feb11de8fd69ba00c666",
+      "referenceSha256": "c64ee97f5d7b2da3b45c33de93719617b105bafcc79b8a39bb82995b07716291"
+    },
+    {
+      "mode": "alchemy",
+      "name": "Insectivore Plant Root",
+      "id": 5443,
+      "grade": 0,
+      "source": "New_Icon/03_ETC/07_ProductMaterial/00005443.dds",
+      "sha256": "1e3f6df3b07df2d6b325be804cbd65ece1311eb79db91e8b5467ad1139001a8f",
+      "referenceSha256": "34ee1d0b26d1d74c594d494d164f418607ee54a509843dee10aacbb630cface5"
+    }
+  ]
+}

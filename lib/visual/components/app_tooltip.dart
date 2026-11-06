@@ -91,8 +91,13 @@ class QuietIconButton extends IconButton {
   @override
   Widget build(BuildContext context) => approvedHover
       ? super.build(context)
-      : Semantics(
-          tooltip: tooltip,
-          child: TooltipVisibility(visible: false, child: super.build(context)),
+      : MergeSemantics(
+          child: Semantics(
+            tooltip: tooltip,
+            child: TooltipVisibility(
+              visible: false,
+              child: super.build(context),
+            ),
+          ),
         );
 }

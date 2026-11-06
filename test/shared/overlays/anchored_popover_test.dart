@@ -241,6 +241,7 @@ void main() {
         ..physicalSize = const Size(520, 360);
       addTearDown(tester.view.reset);
       var actionCount = 0;
+      var panelBuilds = 0;
 
       await tester.pumpWidget(
         AppOverlayCoordinatorHost(
@@ -254,6 +255,7 @@ void main() {
                     child: _DraggableTestPopover(
                       id: 'draggable',
                       onAction: () => actionCount += 1,
+                      onPanelBuild: () => panelBuilds++,
                     ),
                   ),
                 ],
@@ -277,11 +279,17 @@ void main() {
       expect(moveRegion.cursor, SystemMouseCursors.move);
 
       final initialRect = tester.getRect(popover);
+      final initialBuilds = panelBuilds;
       await tester.drag(handle, const Offset(60, 36));
       await tester.pump();
       final movedRect = tester.getRect(popover);
       expect(movedRect.left, closeTo(initialRect.left + 60, 0.01));
       expect(movedRect.top, closeTo(initialRect.top + 36, 0.01));
+      expect(
+        panelBuilds,
+        initialBuilds,
+        reason: 'Dragging must only relayout, not rebuild recipe projections',
+      );
 
       await tester.tap(find.byKey(const ValueKey<String>('draggable-action')));
       await tester.pump();
@@ -382,10 +390,15 @@ void main() {
 }
 
 class _DraggableTestPopover extends StatelessWidget {
-  const _DraggableTestPopover({required this.id, required this.onAction});
+  const _DraggableTestPopover({
+    required this.id,
+    required this.onAction,
+    this.onPanelBuild,
+  });
 
   final String id;
   final VoidCallback onAction;
+  final VoidCallback? onPanelBuild;
 
   @override
   Widget build(BuildContext context) => AnchoredPopover(
@@ -402,55 +415,58 @@ class _DraggableTestPopover extends StatelessWidget {
         child: Text(isShowing ? 'Open' : 'Closed'),
       ),
     ),
-    popoverBuilder: (context, close) => SizedBox(
-      height: 190,
-      child: ColoredBox(
-        color: Colors.black,
-        child: Column(
-          children: <Widget>[
-            SizedBox(
-              height: 42,
-              child: Row(
-                children: <Widget>[
-                  const Expanded(
-                    child: AnchoredPopoverDragRegion(
-                      key: ValueKey<String>('draggable-handle'),
-                      child: Padding(
-                        padding: EdgeInsets.symmetric(horizontal: 12),
-                        child: Align(
-                          alignment: Alignment.centerLeft,
-                          child: Text('Move this panel'),
+    popoverBuilder: (context, close) {
+      onPanelBuild?.call();
+      return SizedBox(
+        height: 190,
+        child: ColoredBox(
+          color: Colors.black,
+          child: Column(
+            children: <Widget>[
+              SizedBox(
+                height: 42,
+                child: Row(
+                  children: <Widget>[
+                    const Expanded(
+                      child: AnchoredPopoverDragRegion(
+                        key: ValueKey<String>('draggable-handle'),
+                        child: Padding(
+                          padding: EdgeInsets.symmetric(horizontal: 12),
+                          child: Align(
+                            alignment: Alignment.centerLeft,
+                            child: Text('Move this panel'),
+                          ),
                         ),
                       ),
                     ),
-                  ),
-                  IconButton(
-                    key: const ValueKey<String>('draggable-close'),
-                    onPressed: close,
-                    icon: const Icon(Icons.close),
-                  ),
-                ],
-              ),
-            ),
-            Expanded(
-              child: SingleChildScrollView(
-                key: const ValueKey<String>('draggable-scroll'),
-                child: Column(
-                  children: <Widget>[
-                    TextButton(
-                      key: const ValueKey<String>('draggable-action'),
-                      onPressed: onAction,
-                      child: const Text('Action'),
+                    IconButton(
+                      key: const ValueKey<String>('draggable-close'),
+                      onPressed: close,
+                      icon: const Icon(Icons.close),
                     ),
-                    const SizedBox(height: 300),
                   ],
                 ),
               ),
-            ),
-          ],
+              Expanded(
+                child: SingleChildScrollView(
+                  key: const ValueKey<String>('draggable-scroll'),
+                  child: Column(
+                    children: <Widget>[
+                      TextButton(
+                        key: const ValueKey<String>('draggable-action'),
+                        onPressed: onAction,
+                        child: const Text('Action'),
+                      ),
+                      const SizedBox(height: 300),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
-      ),
-    ),
+      );
+    },
   );
 }
 

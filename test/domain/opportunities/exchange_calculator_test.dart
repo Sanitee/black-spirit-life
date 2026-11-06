@@ -63,8 +63,8 @@ void main() {
   test(
     'catalog IDs, names, positive whole quantities and route IDs are unique',
     () {
-      expect(exchangeCatalog, hasLength(27));
-      expect(exchangeCatalog.map((item) => item.id).toSet(), hasLength(27));
+      expect(exchangeCatalog, hasLength(28));
+      expect(exchangeCatalog.map((item) => item.id).toSet(), hasLength(28));
       final routeIds = <String>{};
       for (final currency in exchangeCatalog) {
         expect(currency.sources, isNotEmpty);
@@ -79,9 +79,56 @@ void main() {
           }
         }
       }
-      expect(routeIds, hasLength(237));
+      expect(routeIds, hasLength(241));
     },
   );
+
+  test('Royal Fern Root exchanges are three separate exact 3:1 choices', () {
+    final fern = currency('royal-fern-root');
+    expect(fern.item.id, 757004);
+    expect(fern.item.marketable, isFalse);
+    expect(fern.sources.any((s) => s.url.contains('10342')), isTrue);
+    final choices = fern.routes.where((r) => !r.directVendorSale).toList();
+    expect(choices.map((r) => r.rewards.single.item!.id), [
+      50804,
+      50809,
+      50810,
+    ]);
+    for (final choice in choices) {
+      expect(choice.inputCount, 3);
+      expect(choice.rewards.single.quantity, 1);
+      expect(choice.location, 'Wapra · Stonetail Horse Ranch');
+      expect(choice.limit.isRepeatable, isTrue);
+      expect(choice.rewardContainer, isNull);
+    }
+    final market = OpportunityMarketSnapshot(
+      region: 'eu',
+      items: {
+        for (final id in [50804, 50809, 50810])
+          '$id': marketItem(id, price: 100000),
+      },
+    );
+    final quotes = evaluate('royal-fern-root', owned: 10, market: market);
+    for (final id in ['fern-fodder', 'fern-conch', 'fern-hoof-root']) {
+      final q = route(quotes, id);
+      expect(q.possibleExchanges, 3);
+      expect(q.rewardQuotes.single.quantity, 3);
+      expect(q.netProceeds, closeTo(253500, 0.001));
+    }
+    expect(route(quotes, 'royal-fern-root-vendor').netProceeds, 100000);
+    final insufficient = evaluate('royal-fern-root', owned: 2, market: market);
+    expect(route(insufficient, 'fern-fodder').possibleExchanges, 0);
+    expect(
+      route(insufficient, 'fern-fodder').availability,
+      ExchangeAvailability.notEnoughCurrency,
+    );
+    final unknown = evaluate('royal-fern-root', owned: 3);
+    expect(route(unknown, 'fern-hoof-root').netProceeds, isNull);
+    expect(
+      route(unknown, 'fern-hoof-root').availability,
+      ExchangeAvailability.marketUnknown,
+    );
+  });
 
   test('full reward lists retain the 24 selected consumable choices', () {
     final expected = <String, List<(int, int, int, int?)>>{
@@ -114,8 +161,9 @@ void main() {
         (1, 733, 2, 5),
       ],
     };
-    expect(exchangeCatalog.skip(22).map((c) => c.id), expected.keys);
-    expect(exchangeCatalog.skip(22).map((c) => c.item.id), [
+    final selected = exchangeCatalog.where((c) => expected.containsKey(c.id));
+    expect(selected.map((c) => c.id), expected.keys);
+    expect(selected.map((c) => c.item.id), [
       761321,
       65396,
       42497,
@@ -212,13 +260,19 @@ void main() {
         (1, 4, 1, repeat, null),
       ],
     };
-    expect(exchangeCatalog.skip(22).map((c) => c.routes.length), [
-      5,
-      26,
-      13,
-      20,
-      15,
-    ]);
+    for (final entry in const {
+      'mornings-gratitude-token': 5,
+      'seal-of-solare': 26,
+      'energy-of-lakiaro': 13,
+      'medal-of-glory': 20,
+      'battlefield-token': 15,
+    }.entries) {
+      expect(
+        currency(entry.key).routes,
+        hasLength(entry.value),
+        reason: entry.key,
+      );
+    }
     for (final entry in additional.entries) {
       expect(
         currency(entry.key).routes.map(
@@ -1189,6 +1243,50 @@ void main() {
     expect(meat.netProceeds, isNull);
     expect(meat.hasUnpricedRewards, isTrue);
     expect(meat.isRankable, isFalse);
+  });
+
+  test('August crystal allowance is eight, separate from four Embers', () {
+    final token = currency('morning-light-boss-token');
+    final crystal = token.routes.singleWhere(
+      (r) => r.id == 'morning-token-crystal',
+    );
+    final ember = token.routes.singleWhere(
+      (r) => r.id == 'morning-token-ember',
+    );
+    expect(crystal.limit.kind, ExchangeLimitKind.weekly);
+    expect(crystal.limit.maximum, 8);
+    expect(crystal.limit.label, 'Up to 8 per week');
+    expect(crystal.inputCount, 1);
+    expect(crystal.rewards.single.item!.id, 820935);
+    expect(crystal.rewards.single.quantity, 8);
+    expect(ember.limit.maximum, 4);
+    expect(
+      crystal.sources.map((source) => source.url),
+      contains(contains('groupContentNo=10422')),
+    );
+    for (final remaining in [0, 1, 5, 8, 99]) {
+      final quotes = evaluate(
+        'morning-light-boss-token',
+        owned: 20,
+        market: OpportunityMarketSnapshot(
+          region: 'eu',
+          items: {'820935': marketItem(820935), '767079': marketItem(767079)},
+        ),
+        limits: {'morning-token-crystal': remaining, 'morning-token-ember': 99},
+      );
+      final result = route(quotes, 'morning-token-crystal');
+      final allowed = remaining > 8 ? 8 : remaining;
+      expect(result.exchanges, allowed);
+      expect(result.consumed, allowed);
+      expect(result.remainder, 20 - allowed);
+      expect(result.rewardQuotes.single.quantity, allowed * 8);
+      expect(route(quotes, 'morning-token-ember').exchanges, 4);
+    }
+    final unconfirmed = route(
+      evaluate('morning-light-boss-token'),
+      'morning-token-crystal',
+    );
+    expect(unconfirmed.availability, ExchangeAvailability.confirmationNeeded);
   });
 
   test('weekly and family limits require confirmation and cap separately', () {

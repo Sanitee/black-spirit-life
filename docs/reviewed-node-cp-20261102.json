@@ -1,0 +1,1267 @@
+{
+  "reviewedAt": "2026-11-03",
+  "scope": "170 reviewed CP corrections:156 official-PC-supported, including four investment-bank no-node-investment costs;14 secondary plus installed-PC corroboration. Four separately documented node-parent corrections. Not a full map certification.",
+  "sources": [
+    "https://www.blackdesertfoundry.com/nodes-guide/",
+    "https://www.naeu.playblackdesert.com/en-US/Wiki?wikiNo=20",
+    "https://blackdesert.pearlabyss.com/ASIA/en-US/News/Notice/Detail?_boardNo=3664",
+    "https://blackdesert.pearlabyss.com/Asia/en-US/News/Notice/Detail?_boardNo=13267",
+    "https://www.naeu.playblackdesert.com/en-US/News/Detail?countryType=en-US&groupContentNo=8572",
+    "https://bdocodex.com/us/node/1600/",
+    "https://bdocodex.com/us/node/1609/",
+    "https://bdocodex.com/us/node/1634/",
+    "https://bdocodex.com/us/node/1695/",
+    "https://bdocodex.com/us/node/1696/",
+    "https://bdocodex.com/us/node/1697/",
+    "https://bdocodex.com/us/node/1699/",
+    "https://bdocodex.com/us/node/1701/",
+    "https://bdocodex.com/us/node/1702/",
+    "https://bdocodex.com/us/node/1707/",
+    "https://bdocodex.com/us/node/1708/",
+    "https://bdocodex.com/us/node/1715/",
+    "https://bdocodex.com/us/node/1746/",
+    "https://blackdesert.pearlabyss.com/asia/en-US/Game/Wiki?_masterWikiNo=33",
+    "https://www.naeu.playblackdesert.com/en-US/Wiki?wikiNo=40"
+  ],
+  "rows": [
+    {
+      "id": "1189",
+      "name": "Altinova - Zigmund Investment Bank",
+      "previous": 1,
+      "corrected": 0,
+      "sourceDate": "2026-11-03",
+      "evidenceGrade": "OFFICIAL_PC_NO_NODE_INVESTMENT_RULE_PLUS_CURRENT_IDENTITY"
+    },
+    {
+      "id": "1190",
+      "name": "Altinova - Gulabi Investment Bank",
+      "previous": 1,
+      "corrected": 0,
+      "sourceDate": "2026-11-03",
+      "evidenceGrade": "OFFICIAL_PC_NO_NODE_INVESTMENT_RULE_PLUS_CURRENT_IDENTITY"
+    },
+    {
+      "id": "1191",
+      "name": "Altinova - Quina Investment Bank",
+      "previous": 1,
+      "corrected": 0,
+      "sourceDate": "2026-11-03",
+      "evidenceGrade": "OFFICIAL_PC_NO_NODE_INVESTMENT_RULE_PLUS_CURRENT_IDENTITY"
+    },
+    {
+      "id": "1192",
+      "name": "Altinova - Neruda Shen Investment Bank",
+      "previous": 1,
+      "corrected": 0,
+      "sourceDate": "2026-11-03",
+      "evidenceGrade": "OFFICIAL_PC_NO_NODE_INVESTMENT_RULE_PLUS_CURRENT_IDENTITY"
+    },
+    {
+      "id": "1604",
+      "name": "Old Wisdom Tree",
+      "previous": 3,
+      "corrected": 0,
+      "sourceDate": "2026-11-03",
+      "evidenceGrade": "SECONDARY_EXPLICIT_RULE_PLUS_CURRENT_PC_IDENTITY",
+      "reason": "BDFoundry names Old Wisdom Tree as a blue town and explicitly states that these cost zero CP. NA/EU guide independently describes automatic town roots but does not name this town; current PC1604 is enabled/main/Town and has no CP field. Absence alone was not used as proof."
+    },
+    {
+      "id": "1204",
+      "name": "Omar Lava Cave - Mining",
+      "previous": 3,
+      "corrected": 2,
+      "sourceDate": "2023-02-22"
+    },
+    {
+      "id": "1210",
+      "name": "Elric Shrine - Gathering",
+      "previous": 3,
+      "corrected": 1,
+      "sourceDate": "2023-02-22"
+    },
+    {
+      "id": "1213",
+      "name": "Ancient Fissure - Mining",
+      "previous": 3,
+      "corrected": 2,
+      "sourceDate": "2023-02-22"
+    },
+    {
+      "id": "1217",
+      "name": "Ancient Fissure - Gathering",
+      "previous": 3,
+      "corrected": 1,
+      "sourceDate": "2023-02-22"
+    },
+    {
+      "id": "1376",
+      "name": "Derko Island",
+      "previous": 5,
+      "corrected": 2,
+      "sourceDate": "2023-02-22"
+    },
+    {
+      "id": "1508",
+      "name": "Bashim Base - Mining",
+      "previous": 3,
+      "corrected": 1,
+      "sourceDate": "2023-02-22"
+    },
+    {
+      "id": "1509",
+      "name": "Capotia - Gathering",
+      "previous": 3,
+      "corrected": 1,
+      "sourceDate": "2023-02-22"
+    },
+    {
+      "id": "1513",
+      "name": "Pilgrim's Haven - Mining",
+      "previous": 3,
+      "corrected": 1,
+      "sourceDate": "2023-02-22"
+    },
+    {
+      "id": "1514",
+      "name": "Bambu Valley - Gathering",
+      "previous": 3,
+      "corrected": 1,
+      "sourceDate": "2023-02-22"
+    },
+    {
+      "id": "1518",
+      "name": "Kmach Canyon - Gathering",
+      "previous": 3,
+      "corrected": 1,
+      "sourceDate": "2023-02-22"
+    },
+    {
+      "id": "1519",
+      "name": "Aakman - Gathering",
+      "previous": 3,
+      "corrected": 1,
+      "sourceDate": "2023-02-22"
+    },
+    {
+      "id": "1520",
+      "name": "Crescent Shrine - Gathering",
+      "previous": 3,
+      "corrected": 1,
+      "sourceDate": "2023-02-22"
+    },
+    {
+      "id": "1522",
+      "name": "Crescent Mountains - Mining",
+      "previous": 3,
+      "corrected": 1,
+      "sourceDate": "2023-02-22"
+    },
+    {
+      "id": "1523",
+      "name": "Crescent Mountains - Mining",
+      "previous": 3,
+      "corrected": 1,
+      "sourceDate": "2023-02-22"
+    },
+    {
+      "id": "1524",
+      "name": "Titium Valley - Gathering",
+      "previous": 3,
+      "corrected": 1,
+      "sourceDate": "2023-02-22"
+    },
+    {
+      "id": "1525",
+      "name": "Titium Valley - Gathering",
+      "previous": 3,
+      "corrected": 1,
+      "sourceDate": "2023-02-22"
+    },
+    {
+      "id": "1527",
+      "name": "Bazaar Farmland - Nutmeg",
+      "previous": 3,
+      "corrected": 1,
+      "sourceDate": "2023-02-22"
+    },
+    {
+      "id": "1528",
+      "name": "Bazaar Farmland - Teff",
+      "previous": 3,
+      "corrected": 1,
+      "sourceDate": "2023-02-22"
+    },
+    {
+      "id": "1529",
+      "name": "Shakatu Farmland - Fig",
+      "previous": 3,
+      "corrected": 1,
+      "sourceDate": "2023-02-22"
+    },
+    {
+      "id": "1530",
+      "name": "Shakatu Farmland - Fig",
+      "previous": 3,
+      "corrected": 1,
+      "sourceDate": "2023-02-22"
+    },
+    {
+      "id": "1531",
+      "name": "Shakatu Farmland - Star Anise",
+      "previous": 3,
+      "corrected": 1,
+      "sourceDate": "2023-02-22"
+    },
+    {
+      "id": "1532",
+      "name": "Altas Farmland - Teff",
+      "previous": 3,
+      "corrected": 1,
+      "sourceDate": "2023-02-22"
+    },
+    {
+      "id": "1533",
+      "name": "Altas Farmland - Teff",
+      "previous": 3,
+      "corrected": 1,
+      "sourceDate": "2023-02-22"
+    },
+    {
+      "id": "1534",
+      "name": "Erdal Farm - Pistachio",
+      "previous": 3,
+      "corrected": 1,
+      "sourceDate": "2023-02-22"
+    },
+    {
+      "id": "1535",
+      "name": "Erdal Farm - Date Palm",
+      "previous": 3,
+      "corrected": 1,
+      "sourceDate": "2023-02-22"
+    },
+    {
+      "id": "1536",
+      "name": "Valencia Plantation - Pistachio",
+      "previous": 3,
+      "corrected": 1,
+      "sourceDate": "2023-02-22"
+    },
+    {
+      "id": "1537",
+      "name": "Valencia Plantation - Date Palm",
+      "previous": 3,
+      "corrected": 1,
+      "sourceDate": "2023-02-22"
+    },
+    {
+      "id": "1538",
+      "name": "Valencia Plantation - Freekeh",
+      "previous": 3,
+      "corrected": 1,
+      "sourceDate": "2023-02-22"
+    },
+    {
+      "id": "1539",
+      "name": "Fohalam Farm - Teff",
+      "previous": 3,
+      "corrected": 1,
+      "sourceDate": "2023-02-22"
+    },
+    {
+      "id": "1540",
+      "name": "Fohalam Farm - Teff",
+      "previous": 3,
+      "corrected": 1,
+      "sourceDate": "2023-02-22"
+    },
+    {
+      "id": "1565",
+      "name": "Erdal Farm - Silk Culture",
+      "previous": 3,
+      "corrected": 1,
+      "sourceDate": "2023-02-22"
+    },
+    {
+      "id": "1566",
+      "name": "Roud Sulfur Works - Excavation",
+      "previous": 5,
+      "corrected": 2,
+      "sourceDate": "2023-02-22"
+    },
+    {
+      "id": "1671",
+      "name": "Duvencrune Farmland - Farming",
+      "previous": 3,
+      "corrected": 1,
+      "sourceDate": "2023-02-22"
+    },
+    {
+      "id": "1672",
+      "name": "Duvencrune Farmland - Farming",
+      "previous": 3,
+      "corrected": 1,
+      "sourceDate": "2023-02-22"
+    },
+    {
+      "id": "1673",
+      "name": "Marak Farm - Farming",
+      "previous": 3,
+      "corrected": 1,
+      "sourceDate": "2023-02-22"
+    },
+    {
+      "id": "1674",
+      "name": "Marak Farm - Farming",
+      "previous": 3,
+      "corrected": 1,
+      "sourceDate": "2023-02-22"
+    },
+    {
+      "id": "1679",
+      "name": "Akum Rocky Mountain - Mining",
+      "previous": 5,
+      "corrected": 3,
+      "sourceDate": "2023-02-22"
+    },
+    {
+      "id": "1680",
+      "name": "Akum Rocky Mountain - Mining",
+      "previous": 5,
+      "corrected": 3,
+      "sourceDate": "2023-02-22"
+    },
+    {
+      "id": "1681",
+      "name": "Khalk Canyon - Mining",
+      "previous": 5,
+      "corrected": 3,
+      "sourceDate": "2023-02-22"
+    },
+    {
+      "id": "1682",
+      "name": "Khalk Canyon - Mining",
+      "previous": 5,
+      "corrected": 3,
+      "sourceDate": "2023-02-22"
+    },
+    {
+      "id": "1683",
+      "name": "Dormann Lumber Camp - Lumbering",
+      "previous": 5,
+      "corrected": 3,
+      "sourceDate": "2023-02-22"
+    },
+    {
+      "id": "1684",
+      "name": "Dormann Lumber Camp - Lumbering",
+      "previous": 5,
+      "corrected": 3,
+      "sourceDate": "2023-02-22"
+    },
+    {
+      "id": "1685",
+      "name": "Khimut Lumber Camp - Lumbering",
+      "previous": 5,
+      "corrected": 3,
+      "sourceDate": "2023-02-22"
+    },
+    {
+      "id": "1686",
+      "name": "Khimut Lumber Camp - Lumbering",
+      "previous": 5,
+      "corrected": 3,
+      "sourceDate": "2023-02-22"
+    },
+    {
+      "id": "1687",
+      "name": "Sherekhan Necropolis - Excavation",
+      "previous": 3,
+      "corrected": 2,
+      "sourceDate": "2023-02-22"
+    },
+    {
+      "id": "1688",
+      "name": "Fountain of Origin - Excavation",
+      "previous": 3,
+      "corrected": 2,
+      "sourceDate": "2023-02-22"
+    },
+    {
+      "id": "1716",
+      "name": "Mountain of Division - Excavation",
+      "previous": 3,
+      "corrected": 2,
+      "sourceDate": "2023-02-22"
+    },
+    {
+      "id": "1767",
+      "name": "Mountain of Eternal Winter - Mining",
+      "previous": 5,
+      "corrected": 2,
+      "sourceDate": "2023-02-22"
+    },
+    {
+      "id": "1772",
+      "name": "Jade Starlight Forest - Mining",
+      "previous": 5,
+      "corrected": 2,
+      "sourceDate": "2023-02-22"
+    },
+    {
+      "id": "62",
+      "name": "Florin Gateway",
+      "previous": 3,
+      "corrected": 1,
+      "sourceDate": "2026-06-04"
+    },
+    {
+      "id": "1627",
+      "name": "Krogdalo's Trace",
+      "previous": 2,
+      "corrected": 1,
+      "sourceDate": "2026-06-04"
+    },
+    {
+      "id": "1624",
+      "name": "Polly's Forest",
+      "previous": 2,
+      "corrected": 1,
+      "sourceDate": "2026-06-04"
+    },
+    {
+      "id": "1741",
+      "name": "Salanar Pond",
+      "previous": 2,
+      "corrected": 1,
+      "sourceDate": "2026-06-04"
+    },
+    {
+      "id": "1742",
+      "name": "Delmira Plantation",
+      "previous": 2,
+      "corrected": 1,
+      "sourceDate": "2026-06-04"
+    },
+    {
+      "id": "1347",
+      "name": "Titium Valley",
+      "previous": 3,
+      "corrected": 1,
+      "sourceDate": "2026-06-04"
+    },
+    {
+      "id": "1344",
+      "name": "Aakman",
+      "previous": 5,
+      "corrected": 1,
+      "sourceDate": "2026-06-04"
+    },
+    {
+      "id": "1316",
+      "name": "Basilisk Den",
+      "previous": 4,
+      "corrected": 1,
+      "sourceDate": "2026-06-04"
+    },
+    {
+      "id": "1526",
+      "name": "Titium Valley - Lumbering",
+      "previous": 3,
+      "corrected": 2,
+      "sourceDate": "2026-06-04"
+    },
+    {
+      "id": "1554",
+      "name": "Areha Palm Forest - Lumbering",
+      "previous": 3,
+      "corrected": 2,
+      "sourceDate": "2026-06-04"
+    },
+    {
+      "id": "1555",
+      "name": "Areha Palm Forest - Lumbering",
+      "previous": 3,
+      "corrected": 2,
+      "sourceDate": "2026-06-04"
+    },
+    {
+      "id": "1506",
+      "name": "Leical Falls - Gathering",
+      "previous": 3,
+      "corrected": 1,
+      "sourceDate": "2026-06-04"
+    },
+    {
+      "id": "4",
+      "name": "Western Gateway",
+      "previous": 3,
+      "corrected": 2,
+      "sourceDate": "2025-05-22"
+    },
+    {
+      "id": "5",
+      "name": "Bandit's Den Byway",
+      "previous": 3,
+      "corrected": 2,
+      "sourceDate": "2025-05-22"
+    },
+    {
+      "id": "6",
+      "name": "Heidel Pass",
+      "previous": 3,
+      "corrected": 2,
+      "sourceDate": "2025-05-22"
+    },
+    {
+      "id": "21",
+      "name": "Bartali Farm",
+      "previous": 2,
+      "corrected": 1,
+      "sourceDate": "2025-05-22"
+    },
+    {
+      "id": "303",
+      "name": "Northern Guard Camp",
+      "previous": 3,
+      "corrected": 2,
+      "sourceDate": "2025-05-22"
+    },
+    {
+      "id": "304",
+      "name": "Central Guard Camp",
+      "previous": 3,
+      "corrected": 2,
+      "sourceDate": "2025-05-22"
+    },
+    {
+      "id": "305",
+      "name": "Southern Guard Camp",
+      "previous": 3,
+      "corrected": 2,
+      "sourceDate": "2025-05-22"
+    },
+    {
+      "id": "306",
+      "name": "Northwestern Gateway",
+      "previous": 3,
+      "corrected": 2,
+      "sourceDate": "2025-05-22"
+    },
+    {
+      "id": "307",
+      "name": "Southwestern Gateway",
+      "previous": 3,
+      "corrected": 2,
+      "sourceDate": "2025-05-22"
+    },
+    {
+      "id": "308",
+      "name": "Eastern Border",
+      "previous": 3,
+      "corrected": 2,
+      "sourceDate": "2025-05-22"
+    },
+    {
+      "id": "309",
+      "name": "Eastern Gateway",
+      "previous": 3,
+      "corrected": 2,
+      "sourceDate": "2025-05-22"
+    },
+    {
+      "id": "321",
+      "name": "Alejandro Farm",
+      "previous": 2,
+      "corrected": 1,
+      "sourceDate": "2025-05-22"
+    },
+    {
+      "id": "371",
+      "name": "Biraghi Den",
+      "previous": 3,
+      "corrected": 2,
+      "sourceDate": "2025-05-22"
+    },
+    {
+      "id": "373",
+      "name": "Southern Neutral Zone",
+      "previous": 3,
+      "corrected": 2,
+      "sourceDate": "2025-05-22"
+    },
+    {
+      "id": "374",
+      "name": "Orc Camp",
+      "previous": 3,
+      "corrected": 2,
+      "sourceDate": "2025-05-22"
+    },
+    {
+      "id": "375",
+      "name": "Delphe Knights Castle",
+      "previous": 3,
+      "corrected": 2,
+      "sourceDate": "2025-05-22"
+    },
+    {
+      "id": "623",
+      "name": "Anti-Troll Fortification",
+      "previous": 3,
+      "corrected": 2,
+      "sourceDate": "2025-05-22"
+    },
+    {
+      "id": "626",
+      "name": "Delphe Outpost",
+      "previous": 3,
+      "corrected": 2,
+      "sourceDate": "2025-05-22"
+    },
+    {
+      "id": "628",
+      "name": "Northern Wheat Plantation",
+      "previous": 2,
+      "corrected": 1,
+      "sourceDate": "2025-05-22"
+    },
+    {
+      "id": "632",
+      "name": "Isolated Sentry Post",
+      "previous": 3,
+      "corrected": 2,
+      "sourceDate": "2025-05-22"
+    },
+    {
+      "id": "634",
+      "name": "Epheria Sentry Post",
+      "previous": 3,
+      "corrected": 2,
+      "sourceDate": "2025-05-22"
+    },
+    {
+      "id": "637",
+      "name": "Elder's Bridge Post",
+      "previous": 3,
+      "corrected": 2,
+      "sourceDate": "2025-05-22"
+    },
+    {
+      "id": "651",
+      "name": "Marni Cave Path",
+      "previous": 3,
+      "corrected": 2,
+      "sourceDate": "2025-05-22"
+    },
+    {
+      "id": "658",
+      "name": "Trina Fort",
+      "previous": 3,
+      "corrected": 2,
+      "sourceDate": "2025-05-22"
+    },
+    {
+      "id": "659",
+      "name": "Trina Beacon Towers",
+      "previous": 3,
+      "corrected": 2,
+      "sourceDate": "2025-05-22"
+    },
+    {
+      "id": "666",
+      "name": "Beacon Entrance Post",
+      "previous": 3,
+      "corrected": 2,
+      "sourceDate": "2025-05-22"
+    },
+    {
+      "id": "671",
+      "name": "Serendia Western Gateway",
+      "previous": 3,
+      "corrected": 2,
+      "sourceDate": "2025-05-22"
+    },
+    {
+      "id": "702",
+      "name": "Calpheon Castle",
+      "previous": 3,
+      "corrected": 2,
+      "sourceDate": "2025-05-22"
+    },
+    {
+      "id": "704",
+      "name": "North Kaia Pier",
+      "previous": 3,
+      "corrected": 2,
+      "sourceDate": "2025-05-22"
+    },
+    {
+      "id": "707",
+      "name": "Rhutum Sentry Post",
+      "previous": 3,
+      "corrected": 2,
+      "sourceDate": "2025-05-22"
+    },
+    {
+      "id": "708",
+      "name": "Abandoned Monastery",
+      "previous": 3,
+      "corrected": 2,
+      "sourceDate": "2025-05-22"
+    },
+    {
+      "id": "711",
+      "name": "South Kaia Pier",
+      "previous": 3,
+      "corrected": 2,
+      "sourceDate": "2025-05-22"
+    },
+    {
+      "id": "723",
+      "name": "Behr Downstream",
+      "previous": 3,
+      "corrected": 2,
+      "sourceDate": "2025-05-22"
+    },
+    {
+      "id": "1091",
+      "name": "Kuit Islands",
+      "previous": 3,
+      "corrected": 2,
+      "sourceDate": "2025-05-22"
+    },
+    {
+      "id": "1704",
+      "name": "Star's End",
+      "previous": 3,
+      "corrected": 2,
+      "sourceDate": "2025-05-22"
+    },
+    {
+      "id": "1705",
+      "name": "Calpheon Northwestern Outpost",
+      "previous": 3,
+      "corrected": 2,
+      "sourceDate": "2025-05-22"
+    },
+    {
+      "id": "1131",
+      "name": "Mediah Northern Gateway",
+      "previous": 3,
+      "corrected": 2,
+      "sourceDate": "2025-05-22"
+    },
+    {
+      "id": "1302",
+      "name": "Altinova Gateway",
+      "previous": 3,
+      "corrected": 2,
+      "sourceDate": "2025-05-22"
+    },
+    {
+      "id": "1303",
+      "name": "Rock Post",
+      "previous": 3,
+      "corrected": 2,
+      "sourceDate": "2025-05-22"
+    },
+    {
+      "id": "1309",
+      "name": "Pujiya Canyon",
+      "previous": 3,
+      "corrected": 2,
+      "sourceDate": "2025-05-22"
+    },
+    {
+      "id": "1313",
+      "name": "Runn Gateway Intersection",
+      "previous": 3,
+      "corrected": 2,
+      "sourceDate": "2025-05-22"
+    },
+    {
+      "id": "1317",
+      "name": "Barhan Gateway",
+      "previous": 3,
+      "corrected": 2,
+      "sourceDate": "2025-05-22"
+    },
+    {
+      "id": "1322",
+      "name": "Desert Naga Temple",
+      "previous": 3,
+      "corrected": 2,
+      "sourceDate": "2025-05-22"
+    },
+    {
+      "id": "1325",
+      "name": "Pilgrim's Haven",
+      "previous": 3,
+      "corrected": 2,
+      "sourceDate": "2025-05-22"
+    },
+    {
+      "id": "1331",
+      "name": "Ibellab Oasis",
+      "previous": 3,
+      "corrected": 2,
+      "sourceDate": "2025-05-22"
+    },
+    {
+      "id": "1332",
+      "name": "Pilgrim's Sanctum: Obedience",
+      "previous": 3,
+      "corrected": 2,
+      "sourceDate": "2025-05-22"
+    },
+    {
+      "id": "1333",
+      "name": "Pilgrim's Sanctum: Abstinence",
+      "previous": 3,
+      "corrected": 2,
+      "sourceDate": "2025-05-22"
+    },
+    {
+      "id": "1334",
+      "name": "Pilgrim's Sanctum: Sharing",
+      "previous": 3,
+      "corrected": 2,
+      "sourceDate": "2025-05-22"
+    },
+    {
+      "id": "1335",
+      "name": "Pilgrim's Sanctum: Sincerity",
+      "previous": 3,
+      "corrected": 2,
+      "sourceDate": "2025-05-22"
+    },
+    {
+      "id": "1336",
+      "name": "Pilgrim's Sanctum: Humility",
+      "previous": 3,
+      "corrected": 2,
+      "sourceDate": "2025-05-22"
+    },
+    {
+      "id": "1337",
+      "name": "Pilgrim's Sanctum: Purity",
+      "previous": 3,
+      "corrected": 2,
+      "sourceDate": "2025-05-22"
+    },
+    {
+      "id": "1338",
+      "name": "Pilgrim's Sanctum: Fast",
+      "previous": 3,
+      "corrected": 2,
+      "sourceDate": "2025-05-22"
+    },
+    {
+      "id": "1339",
+      "name": "Rakshan Observatory",
+      "previous": 3,
+      "corrected": 2,
+      "sourceDate": "2025-05-22"
+    },
+    {
+      "id": "1346",
+      "name": "Crescent Mountains",
+      "previous": 3,
+      "corrected": 2,
+      "sourceDate": "2025-05-22"
+    },
+    {
+      "id": "1384",
+      "name": "Pila Ku Jail",
+      "previous": 3,
+      "corrected": 2,
+      "sourceDate": "2025-05-22"
+    },
+    {
+      "id": "1387",
+      "name": "Gavinya Volcano Zone",
+      "previous": 3,
+      "corrected": 2,
+      "sourceDate": "2025-05-22"
+    },
+    {
+      "id": "1563",
+      "name": "Arehaza - Specialties",
+      "previous": 3,
+      "corrected": 1,
+      "sourceDate": "2025-05-22"
+    },
+    {
+      "id": "1606",
+      "name": "Navarn Steppe",
+      "previous": 3,
+      "corrected": 2,
+      "sourceDate": "2025-05-22"
+    },
+    {
+      "id": "1608",
+      "name": "Manshaum Forest",
+      "previous": 3,
+      "corrected": 2,
+      "sourceDate": "2025-05-22"
+    },
+    {
+      "id": "1613",
+      "name": "Mirumok Ruins",
+      "previous": 3,
+      "corrected": 2,
+      "sourceDate": "2025-05-22"
+    },
+    {
+      "id": "1615",
+      "name": "Kamasylvia Castle",
+      "previous": 2,
+      "corrected": 1,
+      "sourceDate": "2025-05-22"
+    },
+    {
+      "id": "1617",
+      "name": "Acher Guard Post",
+      "previous": 3,
+      "corrected": 2,
+      "sourceDate": "2025-05-22"
+    },
+    {
+      "id": "1619",
+      "name": "Tooth Fairy Forest",
+      "previous": 3,
+      "corrected": 2,
+      "sourceDate": "2025-05-22"
+    },
+    {
+      "id": "1620",
+      "name": "Tooth Fairy Cabin",
+      "previous": 2,
+      "corrected": 1,
+      "sourceDate": "2025-05-22"
+    },
+    {
+      "id": "1622",
+      "name": "Lake Flondor",
+      "previous": 3,
+      "corrected": 2,
+      "sourceDate": "2025-05-22"
+    },
+    {
+      "id": "1626",
+      "name": "Gyfin Rhasia Temple",
+      "previous": 3,
+      "corrected": 2,
+      "sourceDate": "2025-05-22"
+    },
+    {
+      "id": "1630",
+      "name": "Ash Forest",
+      "previous": 3,
+      "corrected": 2,
+      "sourceDate": "2025-05-22"
+    },
+    {
+      "id": "1646",
+      "name": "Acher Western Camp",
+      "previous": 2,
+      "corrected": 1,
+      "sourceDate": "2025-05-22"
+    },
+    {
+      "id": "1738",
+      "name": "Grándiha",
+      "previous": 2,
+      "corrected": 1,
+      "sourceDate": "2025-05-22"
+    },
+    {
+      "id": "1655",
+      "name": "Sherekhan Necropolis",
+      "previous": 3,
+      "corrected": 2,
+      "sourceDate": "2025-05-22"
+    },
+    {
+      "id": "1661",
+      "name": "Marcha Outpost",
+      "previous": 3,
+      "corrected": 2,
+      "sourceDate": "2025-05-22"
+    },
+    {
+      "id": "1665",
+      "name": "Dormann Lumber Camp",
+      "previous": 2,
+      "corrected": 1,
+      "sourceDate": "2025-05-22"
+    },
+    {
+      "id": "1669",
+      "name": "Blood Wolf Settlement",
+      "previous": 3,
+      "corrected": 2,
+      "sourceDate": "2025-05-22"
+    },
+    {
+      "id": "1693",
+      "name": "Thornwood Forest",
+      "previous": 3,
+      "corrected": 2,
+      "sourceDate": "2025-05-22"
+    },
+    {
+      "id": "1694",
+      "name": "Crypt of Resting Thoughts",
+      "previous": 3,
+      "corrected": 2,
+      "sourceDate": "2025-05-22"
+    },
+    {
+      "id": "1698",
+      "name": "Starry Midnight Port",
+      "previous": 3,
+      "corrected": 2,
+      "sourceDate": "2025-05-22"
+    },
+    {
+      "id": "1700",
+      "name": "Tunkuta",
+      "previous": 3,
+      "corrected": 2,
+      "sourceDate": "2025-05-22"
+    },
+    {
+      "id": "1703",
+      "name": "Olun's Valley",
+      "previous": 3,
+      "corrected": 2,
+      "sourceDate": "2025-05-22"
+    },
+    {
+      "id": "1714",
+      "name": "Starry Midnight Port - Fish Drying Yard",
+      "previous": 3,
+      "corrected": 1,
+      "sourceDate": "2025-05-22"
+    },
+    {
+      "id": "1748",
+      "name": "Wind Nol's Perch",
+      "previous": 3,
+      "corrected": 2,
+      "sourceDate": "2025-05-22"
+    },
+    {
+      "id": "1752",
+      "name": "Snowstorm Guard Post",
+      "previous": 3,
+      "corrected": 2,
+      "sourceDate": "2025-05-22"
+    },
+    {
+      "id": "1755",
+      "name": "Jade Starlight Forest",
+      "previous": 3,
+      "corrected": 2,
+      "sourceDate": "2025-05-22"
+    },
+    {
+      "id": "1757",
+      "name": "Tori Woods",
+      "previous": 3,
+      "corrected": 2,
+      "sourceDate": "2025-05-22"
+    },
+    {
+      "id": "1759",
+      "name": "Sherekhan Iron Mine",
+      "previous": 3,
+      "corrected": 2,
+      "sourceDate": "2025-05-22"
+    },
+    {
+      "id": "1760",
+      "name": "Derelict Trade Post",
+      "previous": 3,
+      "corrected": 2,
+      "sourceDate": "2025-05-22"
+    },
+    {
+      "id": "1763",
+      "name": "Camp Balacs",
+      "previous": 3,
+      "corrected": 2,
+      "sourceDate": "2025-05-22"
+    },
+    {
+      "id": "1209",
+      "name": "Abandoned Iron Mine - Mining",
+      "previous": 3,
+      "corrected": 1,
+      "sourceDate": "2023-02-22",
+      "evidence": "OFFICIAL_PC_PLUS_EXACT_CURRENT_ID"
+    },
+    {
+      "id": "1515",
+      "name": "Iris Canyon - Gathering",
+      "previous": 3,
+      "corrected": 1,
+      "sourceDate": "2023-02-22",
+      "evidence": "OFFICIAL_PC_PLUS_EXACT_CURRENT_ID"
+    },
+    {
+      "id": "1505",
+      "name": "Kunid's Vacation Spot - Gathering",
+      "previous": 3,
+      "corrected": 1,
+      "sourceDate": "2026-06-04",
+      "evidence": "OFFICIAL_PC_PLUS_EXACT_CURRENT_ID"
+    },
+    {
+      "id": "1711",
+      "name": "Olun's Valley - Mining",
+      "previous": 3,
+      "corrected": 2,
+      "sourceDate": "2023-02-22",
+      "evidence": "OFFICIAL_PC_PLUS_EXACT_CURRENT_ID"
+    },
+    {
+      "id": "1713",
+      "name": "Narcion - Chicken Meat Production",
+      "previous": 3,
+      "corrected": 1,
+      "sourceDate": "2026-06-04",
+      "evidence": "OFFICIAL_PC_PLUS_EXACT_CURRENT_ID"
+    },
+    {
+      "id": "1600",
+      "name": "Kamasylvia Vicinity",
+      "previous": 1,
+      "corrected": 2,
+      "sourceDate": "2026-11-02",
+      "evidence": "EXPLICIT_CURRENT_SECONDARY_PLUS_PC_NATIVE",
+      "source": "https://bdocodex.com/us/node/1600/"
+    },
+    {
+      "id": "1609",
+      "name": "Holo Forest",
+      "previous": 1,
+      "corrected": 2,
+      "sourceDate": "2026-11-02",
+      "evidence": "EXPLICIT_CURRENT_SECONDARY_PLUS_PC_NATIVE",
+      "source": "https://bdocodex.com/us/node/1609/"
+    },
+    {
+      "id": "1634",
+      "name": "Atanis Pond - Specialties",
+      "previous": 3,
+      "corrected": 1,
+      "sourceDate": "2026-11-02",
+      "evidence": "EXPLICIT_CURRENT_SECONDARY_PLUS_PC_NATIVE",
+      "source": "https://bdocodex.com/us/node/1634/"
+    },
+    {
+      "id": "1695",
+      "name": "Narcion",
+      "previous": 3,
+      "corrected": 2,
+      "sourceDate": "2026-11-02",
+      "evidence": "EXPLICIT_CURRENT_SECONDARY_PLUS_PC_NATIVE",
+      "source": "https://bdocodex.com/us/node/1695/"
+    },
+    {
+      "id": "1696",
+      "name": "Talibahr's Rope",
+      "previous": 3,
+      "corrected": 2,
+      "sourceDate": "2026-11-02",
+      "evidence": "EXPLICIT_CURRENT_SECONDARY_PLUS_PC_NATIVE",
+      "source": "https://bdocodex.com/us/node/1696/"
+    },
+    {
+      "id": "1697",
+      "name": "La O'delle",
+      "previous": 3,
+      "corrected": 2,
+      "sourceDate": "2026-11-02",
+      "evidence": "EXPLICIT_CURRENT_SECONDARY_PLUS_PC_NATIVE",
+      "source": "https://bdocodex.com/us/node/1697/"
+    },
+    {
+      "id": "1699",
+      "name": "O'dyllita Castle Vicinity",
+      "previous": 3,
+      "corrected": 2,
+      "sourceDate": "2026-11-02",
+      "evidence": "EXPLICIT_CURRENT_SECONDARY_PLUS_PC_NATIVE",
+      "source": "https://bdocodex.com/us/node/1699/"
+    },
+    {
+      "id": "1701",
+      "name": "Salun's Border",
+      "previous": 3,
+      "corrected": 1,
+      "sourceDate": "2026-11-02",
+      "evidence": "EXPLICIT_CURRENT_SECONDARY_PLUS_PC_NATIVE",
+      "source": "https://bdocodex.com/us/node/1701/"
+    },
+    {
+      "id": "1702",
+      "name": "Bahit Sanctum",
+      "previous": 3,
+      "corrected": 1,
+      "sourceDate": "2026-11-02",
+      "evidence": "EXPLICIT_CURRENT_SECONDARY_PLUS_PC_NATIVE",
+      "source": "https://bdocodex.com/us/node/1702/"
+    },
+    {
+      "id": "1707",
+      "name": "Delmira Plantation - Grape Farming",
+      "previous": 3,
+      "corrected": 2,
+      "sourceDate": "2026-11-02",
+      "evidence": "EXPLICIT_CURRENT_SECONDARY_PLUS_PC_NATIVE",
+      "source": "https://bdocodex.com/us/node/1707/"
+    },
+    {
+      "id": "1708",
+      "name": "Delmira Plantation - Potato Farming",
+      "previous": 3,
+      "corrected": 2,
+      "sourceDate": "2026-11-02",
+      "evidence": "EXPLICIT_CURRENT_SECONDARY_PLUS_PC_NATIVE",
+      "source": "https://bdocodex.com/us/node/1708/"
+    },
+    {
+      "id": "1715",
+      "name": "Shiv Valley Road - Lumbering",
+      "previous": 3,
+      "corrected": 2,
+      "sourceDate": "2026-11-02",
+      "evidence": "EXPLICIT_CURRENT_SECONDARY_PLUS_PC_NATIVE",
+      "source": "https://bdocodex.com/us/node/1715/"
+    },
+    {
+      "id": "1746",
+      "name": "Crow's Nest",
+      "previous": 0,
+      "corrected": 1,
+      "sourceDate": "2026-11-02",
+      "evidence": "EXPLICIT_CURRENT_SECONDARY_PLUS_PC_NATIVE",
+      "source": "https://bdocodex.com/us/node/1746/"
+    }
+  ],
+  "downstream": [
+    "production node minimum/incremental path cost",
+    "network CP budget and route selection",
+    "worker route CP and income/CP displays"
+  ],
+  "preserved": [
+    "all node IDs",
+    "all links and parents",
+    "all node outputs",
+    "all node geometry",
+    "all historical gathering positions"
+  ]
+}

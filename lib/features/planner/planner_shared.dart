@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:bdo_craft_planner_flutter/visual/components/app_tooltip.dart';
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -10,18 +9,22 @@ import '../../app/workspace/planner_gather_checklist_bridge.dart'
     show gatherNeededForPlan;
 import '../../data/catalog/catalog_repository.dart';
 import '../../data/opportunities/market_eligibility.dart';
+import '../../domain/catalog/item_name_presentation.dart';
 import '../../domain/catalog/temporarily_archived_items.dart';
 import '../../domain/formatting/planner_formatters.dart';
 import '../../domain/models/catalog_models.dart';
 import '../../domain/planner/afk_weight_calculator.dart';
 import '../../domain/planner/ingredient_quality.dart';
 import '../../domain/planner/planner_models.dart';
+import '../../domain/planner/reviewed_recipe_yields.dart';
+import '../../domain/state/actual_batch_output.dart';
 import '../../domain/state/craft_completion.dart';
 import '../../domain/state/planner_state.dart';
 import '../../shared/overlays/anchored_popover.dart';
 import '../../visual/components/app_interaction_frame.dart';
 import '../../visual/illuminated_ledger/ledger_ornament_painters.dart';
 import '../../visual/visual.dart';
+import '../opportunities/opportunity_silver_amount.dart';
 import '../recipe_book/recipe_book_controller.dart';
 import '../recipe_book/recipe_book_item_info.dart';
 import '../recipe_book/recipe_book_item_info_view.dart';
@@ -29,14 +32,17 @@ import '../shared/market_region_selector.dart';
 import '../shared/mode_item_icon.dart';
 import '../shared/profile_game_icon.dart';
 import '../shared/recipe_variant_selector.dart';
+import '../shared/source_availability_badges.dart';
 import '../shared/workshop_presentation.dart';
 import 'need_material_order.dart';
 import 'planner_completed_projection.dart';
 import 'planner_contracts.dart';
 import 'planner_inventory_input.dart';
 import 'planner_keys.dart';
+import 'planner_map_menu_presentation.dart';
 import 'planner_market_summary.dart';
 import 'planner_quantity_layout.dart';
+import 'planner_review_panels.dart';
 
 typedef SelectPlannerTarget = bool Function(String name);
 
@@ -124,7 +130,7 @@ class _PlannerTargetChooserState extends State<PlannerTargetChooser> {
   final LayerLink _link = LayerLink();
   final OverlayPortalController _portal = OverlayPortalController();
   late final TextEditingController _text = TextEditingController(
-    text: widget.target.value,
+    text: itemDisplayName(widget.target.value),
   );
   late final FocusNode _focus = FocusNode()..addListener(_focusChanged);
   int _highlighted = 0;
@@ -134,15 +140,16 @@ class _PlannerTargetChooserState extends State<PlannerTargetChooser> {
     final query = _text.text.trim().toLowerCase();
     if (query.isEmpty) return widget.target.names;
     return widget.target.names
-        .where((name) => name.toLowerCase().contains(query))
+        .where((name) => itemDisplayName(name).toLowerCase().contains(query))
         .toList(growable: false);
   }
 
   @override
   void didUpdateWidget(PlannerTargetChooser oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (!_focus.hasFocus && _text.text != widget.target.value) {
-      _text.text = widget.target.value;
+    if (!_focus.hasFocus &&
+        _text.text != itemDisplayName(widget.target.value)) {
+      _text.text = itemDisplayName(widget.target.value);
     }
   }
 
@@ -169,8 +176,8 @@ class _PlannerTargetChooserState extends State<PlannerTargetChooser> {
   }
 
   void _commitOrRestore() {
-    final selected = widget.target.onSelected(_text.text);
-    if (!selected) _text.text = widget.target.value;
+    final selected = widget.target.onSelected(stableItemName(_text.text));
+    if (!selected) _text.text = itemDisplayName(widget.target.value);
   }
 
   void _show() {
@@ -197,8 +204,8 @@ class _PlannerTargetChooserState extends State<PlannerTargetChooser> {
       _suppressAutomaticShow = false;
       return;
     }
-    _text.text = name;
-    _text.selection = TextSelection.collapsed(offset: name.length);
+    _text.text = itemDisplayName(name);
+    _text.selection = TextSelection.collapsed(offset: _text.text.length);
     _portal.hide();
     if (!_focus.hasFocus) _focus.requestFocus();
   }
@@ -248,7 +255,8 @@ class _PlannerTargetChooserState extends State<PlannerTargetChooser> {
     }
     final matches = _matches;
     final exact = widget.target.names.where(
-      (name) => name.toLowerCase() == value.trim().toLowerCase(),
+      (name) =>
+          name.toLowerCase() == stableItemName(value).trim().toLowerCase(),
     );
     if (exact.isNotEmpty) {
       _select(exact.first);
@@ -344,7 +352,7 @@ class _PlannerTargetChooserState extends State<PlannerTargetChooser> {
                                           const SizedBox(width: 10),
                                           Expanded(
                                             child: Text(
-                                              name,
+                                              itemDisplayName(name),
                                               maxLines: 2,
                                               overflow: TextOverflow.ellipsis,
                                               style: spec.typography.body
@@ -1542,19 +1550,19 @@ class _QueuePanelState extends State<_QueuePanel> {
                 setState(() => _completedExpanded = !_completedExpanded),
           ),
         if (controller.canUndoCompletion())
-          AppButton.label(
-            'Undo',
-            key: const ValueKey<String>('planner-undo-completion'),
-            minimumSize: const Size(0, 38),
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-            semanticLabel:
-                'Undo completion of ${controller.lastCompletionName}',
-            tooltip: 'Undo ${controller.lastCompletionName}',
-            onPressed: () {
-              if (!controller.undoCompletion()) {
-                _showCompletionUndoConflict(context);
-              }
-            },
+          PlannerUndoReview(
+            controller: controller,
+            onConflict: () => _showCompletionUndoConflict(context),
+            anchorBuilder: (context, toggle, showing) => AppButton.label(
+              'Undo',
+              key: const ValueKey<String>('planner-undo-completion'),
+              minimumSize: const Size(0, 38),
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+              semanticLabel:
+                  'Undo completion of ${controller.lastCompletionName}',
+              tooltip: 'Undo ${controller.lastCompletionName}',
+              onPressed: toggle,
+            ),
           ),
         if (allowCompletion)
           AppButton.label(
@@ -2028,6 +2036,7 @@ class _QueueStepCard extends StatelessWidget {
         : null;
     final hasAutomaticRoutes = routeSelection?.hasComparison ?? false;
     final showTotalIngredients = recipe?.type == 'processing';
+    final outputNote = recipe == null ? null : reviewedRecipeYieldNote(recipe);
     final ownedLayout = PlannerQuantityLayout.of(context);
     final cardInset = denseLayout ? 10.0 : 14.0;
     final variants = hasVariants
@@ -2150,9 +2159,9 @@ class _QueueStepCard extends StatelessWidget {
                             children: <Widget>[
                               if (primaryTitleChoice != null ||
                                   processingChoice != null)
-                                _SubstituteNameAnchor(
-                                  controller: controller,
-                                  key: PlannerActionKeys.row(
+                                _CopyAndSwapName(
+                                  onCopy: externalActions.copyName,
+                                  swapKey: PlannerActionKeys.row(
                                     'P12',
                                     titleAnchor!,
                                   ),
@@ -2161,12 +2170,6 @@ class _QueueStepCard extends StatelessWidget {
                                     step.name,
                                   ),
                                   name: step.name,
-                                  currentName:
-                                      primaryTitleChoice?.source.baseName ??
-                                      step.name,
-                                  ingredient:
-                                      primaryTitleChoice?.ingredient ??
-                                      _acquisitionAnchorIngredient(step.name),
                                   fontSize: denseLayout ? 18 : 19,
                                   isShowing: titleChooserOpen,
                                   semanticLabel: primaryTitleChoice == null
@@ -2176,13 +2179,6 @@ class _QueueStepCard extends StatelessWidget {
                                             '${step.name}; ${titleChoices.length} '
                                             'choices; '
                                             '${titleChooserOpen ? 'open' : 'closed'}'
-                                      : null,
-                                  tooltip: primaryTitleChoice == null
-                                      ? 'Buy or process'
-                                      : titleChoices.length > 1
-                                      ? 'More than one recipe choice contributes to '
-                                            '${step.name}. Click to choose which one '
-                                            'to change.'
                                       : null,
                                   onToggle: () => onChoiceAnchorChanged(
                                     titleChooserOpen ? null : titleAnchor,
@@ -2255,6 +2251,18 @@ class _QueueStepCard extends StatelessWidget {
                                         ? FontStyle.normal
                                         : null,
                                     height: denseLayout ? 1.15 : null,
+                                  ),
+                                ),
+                              ],
+                              if (outputNote != null) ...[
+                                const SizedBox(height: 6),
+                                Text(
+                                  outputNote,
+                                  key: ValueKey(
+                                    'planner-output-note:${step.name}',
+                                  ),
+                                  style: spec.typography.meta.copyWith(
+                                    color: spec.palette.textMuted,
                                   ),
                                 ),
                               ],
@@ -2617,6 +2625,22 @@ class _AfkLoadCard extends StatefulWidget {
 
 class _AfkLoadCardState extends State<_AfkLoadCard> {
   _AfkLoadMode _mode = _AfkLoadMode.needed;
+  final _actualOutput = TextEditingController();
+  String? _draftBatchKey;
+  String? _outputError;
+  bool _confirmLowOutput = false;
+
+  @override
+  void dispose() {
+    _actualOutput.dispose();
+    super.dispose();
+  }
+
+  void _clearOutput() {
+    _actualOutput.clear();
+    _outputError = null;
+    _confirmLowOutput = false;
+  }
 
   ModeFeatureController get controller => widget.controller;
   PlanStep get step => widget.step;
@@ -2653,26 +2677,52 @@ class _AfkLoadCardState extends State<_AfkLoadCard> {
             : null,
       );
 
-  void _completeLoad(AfkWeightSessionLoad load) {
+  void _completeLoad(AfkWeightSessionLoad load, {bool confirmed = false}) {
+    final actual = parseActualBatchOutput(_actualOutput.text);
+    if (actual == null) {
+      setState(() => _outputError = 'Enter a whole amount, or leave blank.');
+      return;
+    }
+    final expected = step.produced / step.count * load.attempts;
+    if (!confirmed && actualBatchOutputNeedsConfirmation(actual, expected)) {
+      setState(() => _confirmLowOutput = true);
+      return;
+    }
     final session = _calculate(completedAttempts: 0);
-    controller.completeInventoryBatch(
+    final saved = controller.completeInventoryBatch(
       step: step,
       progress: _progress(attemptsPerRound: session.maxAttemptsPerLoad),
       completedBefore: load.completedAttemptsBefore,
       completedAfter: load.completedAttemptsAfter,
       bonus: widget.bonusPlan,
+      actualOutput: actual,
+      lowOutputConfirmed: confirmed,
     );
+    if (mounted) {
+      setState(() {
+        if (saved) {
+          _clearOutput();
+        } else {
+          _confirmLowOutput = false;
+          _outputError = 'The batch changed. Check the amount and try again.';
+        }
+      });
+    }
   }
 
   void _undoLoad() {
     if (!controller.undoCompletion(progressKey: _progressKey)) {
       _showCompletionUndoConflict(context);
+    } else {
+      setState(_clearOutput);
     }
   }
 
   void _resetProgress() {
     if (!controller.undoAllInventoryBatches(_progressKey)) {
       _showCompletionUndoConflict(context);
+    } else {
+      setState(_clearOutput);
     }
   }
 
@@ -2754,6 +2804,14 @@ class _AfkLoadCardState extends State<_AfkLoadCard> {
     final completed = progress?.completedAttempts ?? 0;
     final total = session.requestedAttempts;
     final load = session.loadAt(0);
+    final batchKey =
+        '$_progressKey:${widget.sessionTargetAmount}:'
+        '${controller.afkPlanSignature(step)}:${step.count}:${step.net}:'
+        '$completed:${session.maxAttemptsPerLoad}:${load.attempts}';
+    if (_draftBatchKey != batchKey) {
+      _draftBatchKey = batchKey;
+      _clearOutput();
+    }
     final capacity = session.maximumCapacity;
     final stacks = needed ? load.ingredientStacks : capacity.ingredientStacks;
     final crafts = needed ? load.attempts : capacity.safeAttempts;
@@ -2767,14 +2825,14 @@ class _AfkLoadCardState extends State<_AfkLoadCard> {
         ? load.expectedOutputStack
         : capacity.expectedOutputStack;
     final perAttemptQuantities = _perAttemptQuantities();
-    final visibleRows = stacks.length.clamp(3, 6);
+    final visibleRows = stacks.length.clamp(2, 6);
     final textScale = MediaQuery.textScalerOf(context).scale(1);
     final scalingReserve = ((textScale - 1).clamp(0.0, 1.0)) * 260.0;
-    final desiredHeight = 414.0 + (visibleRows - 3) * 66.0 + scalingReserve;
+    final desiredHeight = 414.0 + (visibleRows - 2) * 62.0 + scalingReserve;
     final maxHeight = availableHeight.isFinite && availableHeight > 0
         ? availableHeight
         : 680.0;
-    final height = desiredHeight.clamp(360.0, maxHeight).toDouble();
+    final height = desiredHeight.clamp(0.0, maxHeight).toDouble();
     final spec = context.visualTheme;
     final divider = spec.palette.trim.withAlpha(100);
 
@@ -2861,13 +2919,12 @@ class _AfkLoadCardState extends State<_AfkLoadCard> {
                     Expanded(
                       child: SingleChildScrollView(
                         key: ValueKey<String>(
-                          'planner-afk-item-list:${_mode.name}:'
-                          '${load.number}',
+                          'planner-afk-item-list:${_mode.name}:${load.number}',
                         ),
                         primary: false,
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.stretch,
-                          children: <Widget>[
+                          children: [
                             for (final stack in stacks)
                               _afkIngredientRow(
                                 context,
@@ -2881,6 +2938,10 @@ class _AfkLoadCardState extends State<_AfkLoadCard> {
                         ),
                       ),
                     ),
+                    if (needed) ...[
+                      const SizedBox(height: 10),
+                      _actualOutputRow(context, load),
+                    ],
                     const SizedBox(height: 10),
                     _splitFooter(
                       needed: needed,
@@ -2907,7 +2968,7 @@ class _AfkLoadCardState extends State<_AfkLoadCard> {
           const SizedBox(width: 12),
           Expanded(
             child: Text(
-              recipe.name,
+              itemDisplayName(recipe.name),
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
               style: spec.typography.section.copyWith(
@@ -3181,7 +3242,7 @@ class _AfkLoadCardState extends State<_AfkLoadCard> {
       letterSpacing: .35,
     );
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 9),
+      padding: const EdgeInsets.symmetric(horizontal: 10),
       child: Row(
         children: <Widget>[
           Expanded(child: Text('ITEM', style: style)),
@@ -3191,7 +3252,7 @@ class _AfkLoadCardState extends State<_AfkLoadCard> {
           ),
           const SizedBox(width: 10),
           SizedBox(
-            width: 92,
+            width: 100,
             child: Text(totalHeading, textAlign: TextAlign.right, style: style),
           ),
         ],
@@ -3204,9 +3265,46 @@ class _AfkLoadCardState extends State<_AfkLoadCard> {
     required AfkWeightSessionLoad load,
     required int completed,
   }) {
+    if (needed && _confirmLowOutput) {
+      final expected = step.produced / step.count * load.attempts;
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            'Below 80% of the estimate (${formatQuantity(expected)}). Keep this amount?',
+            key: const ValueKey('planner-afk-output-warning'),
+            style: context.visualTheme.typography.body.copyWith(
+              color: context.visualTheme.palette.warning,
+            ),
+          ),
+          const SizedBox(height: 10),
+          Wrap(
+            alignment: WrapAlignment.end,
+            spacing: 8,
+            runSpacing: 8,
+            children: [
+              AppButton.label(
+                'Back',
+                key: const ValueKey('planner-afk-output-back'),
+                onPressed: () => setState(() => _confirmLowOutput = false),
+              ),
+              AppButton.label(
+                'Keep amount',
+                key: const ValueKey('planner-afk-output-confirm'),
+                role: AppButtonRole.primary,
+                onPressed: () => _completeLoad(load, confirmed: true),
+              ),
+            ],
+          ),
+        ],
+      );
+    }
     final finalAction = !needed || load.isFinal;
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.end,
+    return Wrap(
+      alignment: WrapAlignment.end,
+      spacing: 8,
+      runSpacing: 8,
       children: <Widget>[
         if (needed && completed > 0) ...<Widget>[
           AppButton.label(
@@ -3217,7 +3315,6 @@ class _AfkLoadCardState extends State<_AfkLoadCard> {
                 ? _undoLoad
                 : null,
           ),
-          const SizedBox(width: 8),
         ],
         SizedBox(
           width: 132,
@@ -3248,6 +3345,119 @@ class _AfkLoadCardState extends State<_AfkLoadCard> {
     );
   }
 
+  TextStyle _batchQuantityStyle(BuildContext context) => context
+      .visualTheme
+      .typography
+      .body
+      .copyWith(fontSize: 16, height: 1.2, fontWeight: FontWeight.w600);
+
+  Widget _batchBand(BuildContext context, {required Widget child, Key? key}) =>
+      Container(
+        key: key,
+        constraints: const BoxConstraints(minHeight: 54),
+        color: Color.alphaBlend(
+          context.visualTheme.palette.primary.withAlpha(16),
+          context.visualTheme.palette.surfaceRaised.withAlpha(160),
+        ),
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+        child: child,
+      );
+
+  Widget _actualOutputRow(BuildContext context, AfkWeightSessionLoad load) {
+    final spec = context.visualTheme;
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Text(
+          'Actually made',
+          style: spec.typography.body.copyWith(
+            fontSize: 14,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+        const SizedBox(height: 8),
+        _batchBand(
+          context,
+          key: const ValueKey('planner-afk-output-band'),
+          child: Row(
+            children: [
+              PlannerItemIcon(
+                controller: controller,
+                name: recipe.name,
+                size: 36,
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Text(
+                  itemDisplayName(recipe.name),
+                  style: spec.typography.body.copyWith(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                    height: 1.18,
+                  ),
+                ),
+              ),
+              const SizedBox(width: 10),
+              SizedBox(
+                width: 100,
+                child: Semantics(
+                  label:
+                      'Actually made ${recipe.name}. Blank or zero uses the estimate.',
+                  child: TextField(
+                    key: const ValueKey('planner-afk-actual-output'),
+                    controller: _actualOutput,
+                    keyboardType: TextInputType.number,
+                    textAlign: TextAlign.right,
+                    textAlignVertical: TextAlignVertical.center,
+                    style: _batchQuantityStyle(context),
+                    cursorColor: spec.palette.primaryBright,
+                    decoration: InputDecoration(
+                      hintText: '0',
+                      hintStyle: _batchQuantityStyle(
+                        context,
+                      ).copyWith(color: spec.palette.textMuted),
+                      isDense: true,
+                      filled: false,
+                      contentPadding: const EdgeInsets.symmetric(vertical: 8),
+                      border: InputBorder.none,
+                      enabledBorder: UnderlineInputBorder(
+                        borderSide: BorderSide(
+                          color: spec.palette.trim.withAlpha(160),
+                        ),
+                      ),
+                      focusedBorder: UnderlineInputBorder(
+                        borderSide: BorderSide(
+                          color: spec.palette.primaryBright,
+                        ),
+                      ),
+                    ),
+                    onChanged: (_) => setState(() {
+                      _outputError = null;
+                      _confirmLowOutput = false;
+                    }),
+                    // Enter finishes editing, never the batch. Completion is explicit.
+                    onSubmitted: (_) =>
+                        FocusManager.instance.primaryFocus?.unfocus(),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+        if (_outputError != null)
+          Padding(
+            padding: const EdgeInsets.only(top: 6),
+            child: Text(
+              _outputError!,
+              key: const ValueKey('planner-afk-output-error'),
+              style: spec.typography.body.copyWith(color: spec.palette.warning),
+            ),
+          ),
+      ],
+    );
+  }
+
   Widget _header(BuildContext context) {
     final spec = context.visualTheme;
     return Row(
@@ -3265,7 +3475,7 @@ class _AfkLoadCardState extends State<_AfkLoadCard> {
                 const SizedBox(width: 11),
                 Expanded(
                   child: Text(
-                    recipe.name,
+                    itemDisplayName(recipe.name),
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                     style: spec.typography.body.copyWith(
@@ -3354,16 +3564,16 @@ class _AfkLoadCardState extends State<_AfkLoadCard> {
       child: Padding(
         padding: const EdgeInsets.only(bottom: 8),
         child: ConstrainedBox(
-          constraints: const BoxConstraints(minHeight: 62),
-          child: AppSurface(
-            role: AppSurfaceRole.row,
-            padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 8),
+          constraints: const BoxConstraints(minHeight: 54),
+          child: _batchBand(
+            context,
+            key: ValueKey('planner-afk-ingredient-band:${stack.itemName}'),
             child: Row(
               children: <Widget>[
                 PlannerItemIcon(
                   controller: controller,
                   name: stack.itemName,
-                  size: 44,
+                  size: 36,
                 ),
                 const SizedBox(width: 10),
                 Expanded(
@@ -3372,8 +3582,8 @@ class _AfkLoadCardState extends State<_AfkLoadCard> {
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                     style: spec.typography.body.copyWith(
-                      fontSize: 15,
-                      fontWeight: FontWeight.w700,
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
                       height: 1.18,
                     ),
                   ),
@@ -3388,15 +3598,12 @@ class _AfkLoadCardState extends State<_AfkLoadCard> {
                     ),
                     maxLines: 1,
                     textAlign: TextAlign.right,
-                    style: spec.typography.section.copyWith(
-                      fontSize: 17,
-                      fontWeight: FontWeight.w700,
-                    ),
+                    style: _batchQuantityStyle(context),
                   ),
                 ),
                 const SizedBox(width: 10),
                 SizedBox(
-                  width: 92,
+                  width: 100,
                   child: Text(
                     formatQuantity(stack.quantity.toDouble()),
                     key: ValueKey<String>(
@@ -3404,10 +3611,7 @@ class _AfkLoadCardState extends State<_AfkLoadCard> {
                     ),
                     maxLines: 1,
                     textAlign: TextAlign.right,
-                    style: spec.typography.section.copyWith(
-                      fontSize: 17,
-                      fontWeight: FontWeight.w700,
-                    ),
+                    style: _batchQuantityStyle(context),
                   ),
                 ),
               ],
@@ -3800,7 +4004,7 @@ class _PlannerMapQuickLookupRegionState
     ).overlay?.context.findRenderObject();
     if (overlay is! RenderBox || !overlay.hasSize) return;
     final spec = context.visualTheme;
-    final menuWidth = _plannerMapLookupMenuWidth(
+    final menuWidth = plannerMapLookupMenuWidth(
       context: context,
       viewportSize: overlay.size,
       actionLabels: <String>[
@@ -3839,14 +4043,15 @@ class _PlannerMapQuickLookupRegionState
               PlannerMapLookupSource.npcVendors.name,
             ),
             value: _PlannerMapQuickAction.npcVendors,
-            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
-            child: _PlannerMapLookupMenuLabel(
-              icon: Icons.storefront_rounded,
-              tone: AppSurfaceTone.info,
+            padding: const EdgeInsets.symmetric(horizontal: 6),
+            child: PlannerMapMenuLabel(
+              emblem: PlannerMapEmblem.npc,
               label: 'Show NPC vendors',
               detail: npcVendorDetail,
             ),
           ),
+        if (canOpenNpcVendors && canOpenManual)
+          const PopupMenuDivider(height: 1),
         if (canOpenManual)
           PopupMenuItem<_PlannerMapQuickAction>(
             key: PlannerActionKeys.mapLookupAction(
@@ -3854,17 +4059,16 @@ class _PlannerMapQuickLookupRegionState
               PlannerMapLookupSource.manualGathering.name,
             ),
             value: _PlannerMapQuickAction.manualGathering,
-            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
-            child: _PlannerMapLookupMenuLabel(
-              icon: Icons.location_on_rounded,
-              tone: AppSurfaceTone.warning,
+            padding: const EdgeInsets.symmetric(horizontal: 6),
+            child: PlannerMapMenuLabel(
+              emblem: PlannerMapEmblem.gathering,
               label: manualActionLabel,
               detail: manualDetail,
             ),
           ),
         if ((canOpenNpcVendors || canOpenManual) &&
             (canAddToChecklist || canAddToPlannedNetwork))
-          const PopupMenuDivider(height: 8),
+          const PopupMenuDivider(height: 1),
         if (canAddToChecklist)
           PopupMenuItem<_PlannerMapQuickAction>(
             key: PlannerActionKeys.mapLookupAction(
@@ -3872,14 +4076,15 @@ class _PlannerMapQuickLookupRegionState
               'addToGatherChecklist',
             ),
             value: _PlannerMapQuickAction.addToGatherChecklist,
-            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
-            child: const _PlannerMapLookupMenuLabel(
-              icon: Icons.checklist_rounded,
-              tone: AppSurfaceTone.success,
+            padding: const EdgeInsets.symmetric(horizontal: 6),
+            child: const PlannerMapMenuLabel(
+              emblem: PlannerMapEmblem.checklist,
               label: 'Add to to-do list',
               detail: checklistDetail,
             ),
           ),
+        if (canAddToChecklist && canAddToPlannedNetwork)
+          const PopupMenuDivider(height: 1),
         if (canAddToPlannedNetwork)
           PopupMenuItem<_PlannerMapQuickAction>(
             key: PlannerActionKeys.mapLookupAction(
@@ -3887,10 +4092,9 @@ class _PlannerMapQuickLookupRegionState
               'addToPlannedNetwork',
             ),
             value: _PlannerMapQuickAction.addToPlannedNetwork,
-            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
-            child: _PlannerMapLookupMenuLabel(
-              icon: Icons.account_tree_rounded,
-              tone: AppSurfaceTone.info,
+            padding: const EdgeInsets.symmetric(horizontal: 6),
+            child: PlannerMapMenuLabel(
+              emblem: PlannerMapEmblem.network,
               label: 'Add to planned network',
               detail: plannedNetworkDetail,
             ),
@@ -3925,165 +4129,6 @@ class _PlannerMapQuickLookupRegionState
             : availability.materialName,
         resourceId: availability.resourceIdFor(source),
         source: source,
-      ),
-    );
-  }
-}
-
-const _plannerMapLookupMenuHorizontalChrome = 104.0;
-const _plannerMapLookupMenuViewportPadding = 8.0;
-
-TextStyle _plannerMapLookupActionStyle(ThemeSpec spec) =>
-    spec.typography.body.copyWith(fontSize: 13.5, fontWeight: FontWeight.w800);
-
-TextStyle _plannerMapLookupDetailStyle(ThemeSpec spec) => spec.typography.meta
-    .copyWith(color: spec.palette.textMuted, fontSize: 10.5);
-
-double _plannerMapLookupMenuWidth({
-  required BuildContext context,
-  required Size viewportSize,
-  required Iterable<String> actionLabels,
-  required Iterable<String> actionDetails,
-}) {
-  final spec = context.visualTheme;
-  final textScaler = MediaQuery.textScalerOf(context);
-  final textDirection = Directionality.of(context);
-
-  double measure(String text, TextStyle style) {
-    final painter = TextPainter(
-      text: TextSpan(text: text, style: style),
-      textDirection: textDirection,
-      textScaler: textScaler,
-      maxLines: 1,
-    )..layout();
-    return painter.width;
-  }
-
-  var widestText = 0.0;
-  for (final label in actionLabels) {
-    final width = measure(label, _plannerMapLookupActionStyle(spec));
-    if (width > widestText) widestText = width;
-  }
-  for (final detail in actionDetails) {
-    final width = measure(detail, _plannerMapLookupDetailStyle(spec));
-    if (width > widestText) widestText = width;
-  }
-
-  final viewportLimit =
-      (viewportSize.width - 2 * _plannerMapLookupMenuViewportPadding).clamp(
-        0.0,
-        double.infinity,
-      );
-  if (viewportLimit == 0) return 0;
-  final minimumWidth = viewportLimit < 286.0 ? viewportLimit : 286.0;
-  return (widestText + _plannerMapLookupMenuHorizontalChrome)
-      .clamp(minimumWidth, viewportLimit)
-      .toDouble();
-}
-
-class _PlannerMapLookupMenuLabel extends StatefulWidget {
-  const _PlannerMapLookupMenuLabel({
-    required this.icon,
-    required this.tone,
-    required this.label,
-    this.detail,
-  });
-
-  final IconData icon;
-  final AppSurfaceTone tone;
-  final String label;
-  final String? detail;
-
-  @override
-  State<_PlannerMapLookupMenuLabel> createState() =>
-      _PlannerMapLookupMenuLabelState();
-}
-
-class _PlannerMapLookupMenuLabelState
-    extends State<_PlannerMapLookupMenuLabel> {
-  bool _hovered = false;
-
-  @override
-  Widget build(BuildContext context) {
-    final spec = context.visualTheme;
-    final focused = Focus.of(context).hasFocus;
-    final highlighted = _hovered || focused;
-    final accent = spec.palette.forTone(widget.tone);
-    return MouseRegion(
-      onEnter: (_) => setState(() => _hovered = true),
-      onExit: (_) => setState(() => _hovered = false),
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 130),
-        curve: Curves.easeOutCubic,
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            colors: <Color>[
-              accent.withAlpha(highlighted ? 48 : 22),
-              accent.withAlpha(highlighted ? 14 : 0),
-            ],
-          ),
-          borderRadius: BorderRadius.circular(spec.geometry.buttonRadius),
-          border: Border.all(
-            color: highlighted
-                ? accent.withAlpha(168)
-                : spec.palette.trim.withAlpha(76),
-          ),
-          boxShadow: highlighted
-              ? <BoxShadow>[
-                  BoxShadow(
-                    color: accent.withAlpha(46),
-                    blurRadius: 12,
-                    spreadRadius: 1,
-                  ),
-                ]
-              : const <BoxShadow>[],
-        ),
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: <Widget>[
-            AnimatedContainer(
-              duration: const Duration(milliseconds: 130),
-              width: 40,
-              height: 40,
-              alignment: Alignment.center,
-              decoration: BoxDecoration(
-                color: accent.withAlpha(highlighted ? 78 : 42),
-                borderRadius: BorderRadius.circular(10),
-                border: Border.all(
-                  color: accent.withAlpha(highlighted ? 210 : 132),
-                ),
-                boxShadow: <BoxShadow>[
-                  BoxShadow(
-                    color: accent.withAlpha(highlighted ? 62 : 26),
-                    blurRadius: highlighted ? 10 : 6,
-                  ),
-                ],
-              ),
-              child: Icon(widget.icon, size: 23, color: accent),
-            ),
-            const SizedBox(width: 11),
-            Expanded(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: <Widget>[
-                  Text(widget.label, style: _plannerMapLookupActionStyle(spec)),
-                  if (widget.detail case final detail?) ...<Widget>[
-                    const SizedBox(height: 1),
-                    Text(detail, style: _plannerMapLookupDetailStyle(spec)),
-                  ],
-                ],
-              ),
-            ),
-            const SizedBox(width: 8),
-            Icon(
-              Icons.chevron_right_rounded,
-              size: 18,
-              color: highlighted ? accent : spec.palette.textMuted,
-            ),
-          ],
-        ),
       ),
     );
   }
@@ -4136,7 +4181,6 @@ class _IngredientRow extends StatelessWidget {
                 selectedIngredient: ingredient,
               )
               .need;
-    final chooserOpen = openChoiceAnchor == anchor;
     final stableId = '${ingredient.parentName}:${ingredient.key}';
     // Keep the right-aligned amount comfortably inside the card. Sakura's
     // fixed corner blossom occupies the final 54 px of the lowest row, so its
@@ -4204,25 +4248,44 @@ class _IngredientRow extends StatelessWidget {
               ),
               identity: PlannerIngredientIdentity(
                 name: hasSubstitutes
-                    ? _SubstituteNameAnchor(
+                    ? PlannerOwnedChoices(
                         controller: controller,
-                        key: PlannerActionKeys.row('P12', anchor),
-                        nameKey: PlannerActionKeys.row(
-                          'P11',
-                          '${ingredient.parentName}:${ingredient.key}',
-                        ),
-                        name: ingredient.name,
-                        currentName: ingredient.baseName,
+                        parentName: ingredient.parentName,
                         ingredient: domainIngredient,
-                        fontSize: 17,
-                        color: !spec.isStandard
-                            ? null
-                            : ingredient.missing > 0
-                            ? const Color(0xFFFFE6C8)
-                            : const Color(0xFFD8FFE2),
-                        isShowing: chooserOpen,
-                        onToggle: () =>
-                            onChoiceAnchorChanged(chooserOpen ? null : anchor),
+                        overlayScope: 'queue:$stableId',
+                        options: _visibleSubstituteOptions(
+                          controller,
+                          domainIngredient,
+                        ),
+                        selected: _selectedSubstituteFor(
+                          controller: controller,
+                          parentName: ingredient.parentName,
+                          currentName: ingredient.baseName,
+                          ingredient: domainIngredient,
+                        ),
+                        beforeSelection: (selection) =>
+                            onSubstituteSelected(ingredient, selection),
+                        anchorBuilder: (context, toggle, showing) =>
+                            _CopyAndSwapName(
+                              onCopy: externalActions.copyName,
+                              swapKey: PlannerActionKeys.row('P12', anchor),
+                              nameKey: PlannerActionKeys.row(
+                                'P11',
+                                '${ingredient.parentName}:${ingredient.key}',
+                              ),
+                              name: ingredient.name,
+                              fontSize: 17,
+                              color: !spec.isStandard
+                                  ? null
+                                  : ingredient.missing > 0
+                                  ? const Color(0xFFFFE6C8)
+                                  : const Color(0xFFD8FFE2),
+                              isShowing: showing,
+                              onToggle: () {
+                                onChoiceAnchorChanged(null);
+                                toggle();
+                              },
+                            ),
                       )
                     : _CopyNameButton(
                         key: PlannerActionKeys.row(
@@ -4272,21 +4335,6 @@ class _IngredientRow extends StatelessWidget {
               ),
             ),
           ),
-          if (chooserOpen && hasSubstitutes) ...<Widget>[
-            SizedBox(height: denseLayout ? 4 : 6),
-            Padding(
-              padding: EdgeInsets.only(left: denseLayout ? 44 : 50),
-              child: _InlineSubstituteChooser(
-                controller: controller,
-                parentName: ingredient.parentName,
-                currentName: ingredient.baseName,
-                ingredient: domainIngredient,
-                onBeforeSelection: (selection) =>
-                    onSubstituteSelected(ingredient, selection),
-                onClose: () => onChoiceAnchorChanged(null),
-              ),
-            ),
-          ],
         ],
       ),
     );
@@ -4318,7 +4366,8 @@ class _ItemAcquisitionPopover extends StatelessWidget {
         '$overlayScope-acquisition:$stableId:${name.toLowerCase()}';
     return AnchoredPopover(
       overlayId: overlayId,
-      preferredWidth: itemReferenceCardWidth(context),
+      preferredWidthBuilder: itemReferenceCardMaxWidth,
+      contentSizedWidth: true,
       maximumHeight: itemReferenceCardHeight(context),
       margin: 24,
       gap: 12,
@@ -4477,7 +4526,7 @@ class _IngredientAcquisitionCardState
           mode: mode,
           name: widget.name,
           info: info,
-          maxWidth: itemReferenceCardWidth(context),
+          maxWidth: itemReferenceCardMaxWidth(context),
           spec: context.visualTheme,
           onClose: widget.onClose,
           headerDragKey: ValueKey<String>(
@@ -4562,6 +4611,12 @@ class _NeedPanel extends StatelessWidget {
           return Padding(
             padding: EdgeInsets.only(right: denseLayout ? 8 : 0),
             child: PlannerMarketSummary(
+              silverIcon: PlannerItemIcon(
+                controller: controller,
+                name: 'Silver',
+                size: 21,
+                showFrame: false,
+              ),
               hasUnknownPrices: plan.missing.any(
                 (row) =>
                     row.missing > 0 &&
@@ -4648,6 +4703,23 @@ class _NeedPanel extends StatelessWidget {
                       title: title,
                       prioritizeTitle: true,
                       trailing: stacked ? null : headerActions,
+                      titleBuilder: title == 'Need First'
+                          ? (label) => PlannerShoppingList(
+                              controller: controller,
+                              anchorBuilder: (context, toggle, showing) =>
+                                  InkWell(
+                                    key: const ValueKey(
+                                      'planner-shopping-open',
+                                    ),
+                                    onTap: toggle,
+                                    child: Semantics(
+                                      button: true,
+                                      label: 'Open shopping list',
+                                      child: label,
+                                    ),
+                                  ),
+                            )
+                          : null,
                     ),
                     if (stacked) ...[
                       const SizedBox(height: 6),
@@ -4804,30 +4876,75 @@ class _NeedRow extends StatelessWidget {
                         children: <Widget>[
                           Flexible(
                             child: hasSubstitutes
-                                ? _SubstituteNameAnchor(
-                                    controller: controller,
-                                    key: PlannerActionKeys.row('P12', anchor),
-                                    nameKey: PlannerActionKeys.row(
-                                      'P20',
-                                      row.name,
-                                    ),
-                                    name: row.name,
-                                    currentName: choice?.baseName ?? row.name,
-                                    ingredient: domainIngredient,
-                                    semanticLabel: choice == null
-                                        ? 'Choose how to get ${row.name}'
-                                        : null,
-                                    tooltip: choice == null
-                                        ? 'Buy or process'
-                                        : null,
-                                    fontSize: denseLayout ? 16.5 : 17.5,
-                                    isShowing: openChoiceAnchor == anchor,
-                                    onToggle: () => onChoiceAnchorChanged(
-                                      openChoiceAnchor == anchor
-                                          ? null
-                                          : anchor,
-                                    ),
-                                  )
+                                ? choice != null && processingChoice == null
+                                      ? PlannerOwnedChoices(
+                                          controller: controller,
+                                          parentName: choice.parentName,
+                                          ingredient: domainIngredient,
+                                          options: _visibleSubstituteOptions(
+                                            controller,
+                                            domainIngredient,
+                                          ),
+                                          selected: _selectedSubstituteFor(
+                                            controller: controller,
+                                            parentName: choice.parentName,
+                                            currentName: choice.baseName,
+                                            ingredient: domainIngredient,
+                                          ),
+                                          beforeSelection: (selection) =>
+                                              onSubstituteSelected(
+                                                row,
+                                                selection,
+                                              ),
+                                          anchorBuilder:
+                                              (
+                                                context,
+                                                toggle,
+                                                showing,
+                                              ) => _CopyAndSwapName(
+                                                onCopy:
+                                                    externalActions.copyName,
+                                                swapKey: PlannerActionKeys.row(
+                                                  'P12',
+                                                  anchor,
+                                                ),
+                                                nameKey: PlannerActionKeys.row(
+                                                  'P20',
+                                                  row.name,
+                                                ),
+                                                name: row.name,
+                                                fontSize: denseLayout
+                                                    ? 16.5
+                                                    : 17.5,
+                                                isShowing: showing,
+                                                onToggle: () {
+                                                  onChoiceAnchorChanged(null);
+                                                  toggle();
+                                                },
+                                              ),
+                                        )
+                                      : _CopyAndSwapName(
+                                          onCopy: externalActions.copyName,
+                                          swapKey: PlannerActionKeys.row(
+                                            'P12',
+                                            anchor,
+                                          ),
+                                          nameKey: PlannerActionKeys.row(
+                                            'P20',
+                                            row.name,
+                                          ),
+                                          name: row.name,
+                                          semanticLabel: choice == null
+                                              ? 'Choose how to get ${row.name}'
+                                              : null,
+                                          fontSize: denseLayout ? 16.5 : 17.5,
+                                          isShowing: openChoiceAnchor == anchor,
+                                          onToggle: () => onChoiceAnchorChanged(
+                                            openChoiceAnchor == anchor
+                                                ? null
+                                                : anchor,
+                                          ),
+                                        )
                                 : _CopyNameButton(
                                     key: PlannerActionKeys.row('P20', row.name),
                                     name: row.name,
@@ -4879,6 +4996,7 @@ class _NeedRow extends StatelessWidget {
                             suppressCentralMarket: confirmedMarketUnlisted,
                           )
                       ? _MarketPills(
+                          controller: controller,
                           row: row,
                           suppressCentralMarket: confirmedMarketUnlisted,
                         )
@@ -4938,7 +5056,7 @@ class _CompletedCraftRow extends StatelessWidget {
         const SizedBox(width: 10),
         Expanded(
           child: Text(
-            name,
+            itemDisplayName(name),
             style: spec.typography.body.copyWith(fontWeight: FontWeight.w600),
           ),
         ),
@@ -5343,177 +5461,55 @@ class _SourceInfoCloseButton extends StatelessWidget {
   );
 }
 
-class _SubstituteNameAnchor extends StatefulWidget {
-  const _SubstituteNameAnchor({
-    required this.controller,
+class _CopyAndSwapName extends StatelessWidget {
+  const _CopyAndSwapName({
     required this.name,
     required this.nameKey,
-    required this.currentName,
-    required this.ingredient,
+    required this.swapKey,
+    required this.onCopy,
     required this.fontSize,
     required this.isShowing,
     required this.onToggle,
     this.color,
     this.semanticLabel,
-    this.tooltip,
-    super.key,
   });
-
-  final ModeFeatureController controller;
   final String name;
   final Key nameKey;
-  final String currentName;
-  final Ingredient ingredient;
+  final Key swapKey;
+  final CopyPlannerName onCopy;
   final double fontSize;
-  final Color? color;
-  final String? semanticLabel;
-  final String? tooltip;
   final bool isShowing;
   final VoidCallback onToggle;
+  final Color? color;
+  final String? semanticLabel;
 
   @override
-  State<_SubstituteNameAnchor> createState() => _SubstituteNameAnchorState();
-}
-
-class _SubstituteNameAnchorState extends State<_SubstituteNameAnchor> {
-  late final FocusNode _focus = FocusNode();
-  bool _hovered = false;
-  bool _pressed = false;
-  bool _focused = false;
-
-  @override
-  void dispose() {
-    _focus.dispose();
-    super.dispose();
-  }
-
-  void _activate() {
-    if (mounted) setState(() => _pressed = false);
-    widget.onToggle();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final spec = context.visualTheme;
-    final ledger = spec.isIlluminatedLedger;
-    final sakura = spec.isSakuraNightGarden;
-    final standard = context.standardVisual;
-    final highlighted = _hovered || _focused || widget.isShowing;
-    final focusColor = ledger
-        ? const Color(0xFFD6B45A)
-        : sakura
-        ? spec.palette.primaryBright
-        : StandardSpec.accentBrush(standard.accentHue, neon: standard.neon);
-    final indicatorColor = highlighted
-        ? focusColor
-        : ledger
-        ? const Color(0xFF9B7832)
-        : sakura
-        ? spec.palette.textMuted
-        : StandardSpec.accentBrush(
-            standard.accentHue,
-            alpha: .5,
-            neon: standard.neon,
-          );
-    final outlineColor = _focused
-        ? ledger
-              ? const Color(0xFFB9903E)
-              : focusColor
-        : Colors.transparent;
-    final interactionOverlay = _pressed
-        ? const Color(0x28000000)
-        : _hovered
-        ? const Color(0x16FFFFFF)
-        : Colors.transparent;
-    final options = _visibleSubstituteOptions(
-      widget.controller,
-      widget.ingredient,
-    );
-    Widget control = Semantics(
-      button: true,
-      toggled: widget.isShowing,
-      label:
-          widget.semanticLabel ??
-          'Choose substitute for ${widget.ingredient.name}; current ${widget.currentName}; ${widget.isShowing ? 'open' : 'closed'}',
-      child: FocusableActionDetector(
-        focusNode: _focus,
-        mouseCursor: SystemMouseCursors.click,
-        onShowHoverHighlight: (value) => setState(() => _hovered = value),
-        onShowFocusHighlight: (value) => setState(() => _focused = value),
-        shortcuts: const <ShortcutActivator, Intent>{
-          SingleActivator(LogicalKeyboardKey.enter): ActivateIntent(),
-          SingleActivator(LogicalKeyboardKey.space): ActivateIntent(),
-        },
-        actions: <Type, Action<Intent>>{
-          ActivateIntent: CallbackAction<ActivateIntent>(
-            onInvoke: (_) {
-              _activate();
-              return null;
-            },
-          ),
-        },
-        child: GestureDetector(
-          behavior: HitTestBehavior.opaque,
-          onTapDown: (_) {
-            _focus.requestFocus();
-            setState(() => _pressed = true);
-          },
-          onTapUp: (_) => setState(() => _pressed = false),
-          onTapCancel: () => setState(() => _pressed = false),
-          onTap: _activate,
-          child: AnimatedContainer(
-            duration: spec.motion.interactionDuration,
-            padding: const EdgeInsets.symmetric(horizontal: 2, vertical: 1),
-            decoration: BoxDecoration(
-              color: interactionOverlay,
-              borderRadius: BorderRadius.circular(4),
-              border: Border.all(color: outlineColor),
-            ),
-            child: ExcludeSemantics(
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: <Widget>[
-                  Flexible(
-                    child: Text(
-                      widget.name,
-                      key: widget.nameKey,
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                      style: spec.typography.body.copyWith(
-                        color: ledger ? const Color(0xFF6B2E29) : widget.color,
-                        fontSize: widget.fontSize,
-                        fontWeight: FontWeight.w700,
-                        height: spec.usesDenseSplitLayout ? 1.15 : null,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 4),
-                  IgnorePointer(
-                    child: ExcludeSemantics(
-                      child: AppVectorGlyph(
-                        'swap',
-                        size: 11,
-                        color: indicatorColor,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
+  Widget build(BuildContext context) => Row(
+    mainAxisSize: MainAxisSize.min,
+    children: [
+      Flexible(
+        child: _CopyNameButton(
+          key: nameKey,
+          name: name,
+          semanticPrefix: 'Copy ingredient',
+          onCopy: onCopy,
+          fontSize: fontSize,
+          color: color,
         ),
       ),
-    );
-    control = AppTooltip(
-      message:
-          widget.tooltip ??
-          'Other ingredients can be used.\n'
-              'Current: ${widget.currentName}\n'
-              '${options.join(', ')}',
-      child: control,
-    );
-    return control;
-  }
+      const SizedBox(width: 6),
+      AppButton(
+        key: swapKey,
+        role: AppButtonRole.icon,
+        semanticLabel: semanticLabel ?? 'Change ingredient $name',
+        selected: isShowing,
+        minimumSize: const Size(30, 28),
+        padding: const EdgeInsets.all(5),
+        onPressed: onToggle,
+        child: const AppVectorGlyph('swap', size: 13),
+      ),
+    ],
+  );
 }
 
 class _QueueTitleSubstituteChooser extends StatelessWidget {
@@ -6220,8 +6216,13 @@ const _ledgerRaisedVellumGradient = LinearGradient(
 };
 
 class _MarketPills extends StatelessWidget {
-  const _MarketPills({required this.row, required this.suppressCentralMarket});
+  const _MarketPills({
+    required this.controller,
+    required this.row,
+    required this.suppressCentralMarket,
+  });
 
+  final ModeFeatureController controller;
   final MissingMaterial row;
   final bool suppressCentralMarket;
 
@@ -6241,20 +6242,36 @@ class _MarketPills extends StatelessWidget {
         height: 1.25,
       ),
     );
-    final stock = vendor
-        ? text('Vendor item')
-        : AppTooltip(
-            message: !market.stockKnown
-                ? 'Stock has not been checked.'
-                : '${formatQuantity(market.stock)} listed on the Central Market.',
-            child: market.stockKnown && market.stock <= 0
-                ? const _OutOfStockBadge()
-                : text(
-                    market.stockKnown
-                        ? 'Stock ${formatQuantity(market.stock)}'
-                        : 'Stock —',
-                  ),
-          );
+    final stock = SourceAvailabilityBadges(
+      npc: vendor,
+      stock: market.stockKnown ? market.stock.toInt() : null,
+    );
+    Widget amount(double? value, String label) => Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        if (label == 'Total') ...[text(label), const SizedBox(width: 5)],
+        PlannerItemIcon(
+          controller: controller,
+          name: 'Silver',
+          size: 18,
+          showFrame: false,
+        ),
+        const SizedBox(width: 5),
+        Flexible(
+          child: OpportunitySilverAmount(
+            value: value,
+            wholeSilver: true,
+            style: spec.typography.meta.copyWith(
+              color: spec.palette.text,
+              fontSize: 16,
+              fontWeight: FontWeight.w600,
+              fontStyle: FontStyle.normal,
+            ),
+          ),
+        ),
+        if (label == 'each') ...[const SizedBox(width: 5), text(label)],
+      ],
+    );
     return Wrap(
       alignment: WrapAlignment.start,
       crossAxisAlignment: WrapCrossAlignment.center,
@@ -6262,43 +6279,9 @@ class _MarketPills extends StatelessWidget {
       runSpacing: 6,
       children: [
         stock,
-        text(
-          market.price > 0 ? '${formatSilver(market.price)} each' : 'No price',
-        ),
-        text(
-          market.price > 0 ? 'Total ${formatSilver(market.total)}' : 'Total -',
-          strong: true,
-        ),
+        amount(market.price > 0 ? market.price : null, 'each'),
+        amount(market.price > 0 ? market.total : null, 'Total'),
       ],
-    );
-  }
-}
-
-class _OutOfStockBadge extends StatelessWidget {
-  const _OutOfStockBadge();
-
-  @override
-  Widget build(BuildContext context) {
-    final spec = context.visualTheme;
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        color: spec.plannerOutOfStockAccent,
-        border: Border.all(color: spec.plannerOutOfStockAccent),
-        borderRadius: BorderRadius.circular(3),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1),
-        child: Text(
-          'Out of stock',
-          style: spec.typography.meta.copyWith(
-            color: spec.plannerOutOfStockBadgeText,
-            fontSize: 11,
-            fontWeight: FontWeight.w700,
-            fontStyle: FontStyle.normal,
-            height: 1.15,
-          ),
-        ),
-      ),
     );
   }
 }
@@ -6517,14 +6500,14 @@ class _CopyNameButton extends StatelessWidget {
     final ledger = spec.isIlluminatedLedger;
     return Semantics(
       button: true,
-      label: '$semanticPrefix $name',
+      label: '$semanticPrefix ${itemDisplayName(name)}',
       child: InkWell(
-        onTap: () async => onCopy(name),
+        onTap: () async => onCopy(itemDisplayName(name)),
         borderRadius: BorderRadius.circular(4),
         child: Padding(
           padding: EdgeInsets.zero,
           child: Text(
-            name,
+            itemDisplayName(name),
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
             style: spec.typography.body.copyWith(

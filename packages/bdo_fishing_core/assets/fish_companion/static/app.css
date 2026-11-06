@@ -968,7 +968,7 @@ option { background: #1c1e22; color: var(--text); }
 .save-button { width: auto; min-width: 112px; min-height: 42px; margin: 0; padding: 0 18px; }
 
 .profile-backdrop { position: fixed; inset: 0; z-index: 180; display: grid; place-items: center; padding: 20px; background: rgba(4,6,7,.76); backdrop-filter: blur(10px); }
-.profile-modal { width: min(1080px,calc(100vw - 40px)); height: min(760px,calc(100vh - 40px)); display: grid; grid-template-rows: 70px minmax(0,1fr); overflow: hidden; border-color: rgba(255,255,255,.14); box-shadow: 0 30px 90px rgba(0,0,0,.62); }
+.profile-modal { width: min(1080px,100%); height: min(760px,100%); display: grid; grid-template-rows: 70px minmax(0,1fr); overflow: hidden; border-color: rgba(255,255,255,.14); box-shadow: 0 30px 90px rgba(0,0,0,.62); }
 .profile-modal-header { min-width: 0; display: flex; align-items: center; justify-content: space-between; gap: 20px; padding: 0 20px 0 22px; border-bottom: 1px solid var(--line); background: linear-gradient(105deg,rgba(223,180,93,.07),rgba(82,214,202,.025) 42%,transparent); }
 .profile-modal-header h2 { margin: 2px 0 0; font-size: 22px; letter-spacing: -.025em; }
 .profile-modal-header-actions { display: flex; align-items: center; gap: 10px; }
@@ -978,7 +978,7 @@ option { background: #1c1e22; color: var(--text); }
 .profile-modal-header-actions svg { width: 21px; height: 21px; }
 
 .time-picker-backdrop { position: fixed; inset: 0; z-index: 190; display: grid; place-items: center; padding: 14px; background: rgba(4,6,7,.72); backdrop-filter: blur(7px); }
-.time-picker { width: min(330px,calc(100vw - 28px)); overflow: hidden; border-color: rgba(255,255,255,.15); box-shadow: 0 28px 80px rgba(0,0,0,.68); }
+.time-picker { width: min(330px,100%); max-height: 100%; overflow: auto; border-color: rgba(255,255,255,.15); box-shadow: 0 28px 80px rgba(0,0,0,.68); }
 .time-picker-header { min-height: 58px; display: flex; align-items: center; justify-content: space-between; padding: 0 13px 0 17px; border-bottom: 1px solid var(--line); background: linear-gradient(110deg,rgba(82,214,202,.07),rgba(223,180,93,.04),transparent 72%); }
 .time-picker-header > div { display: grid; gap: 2px; }
 .time-picker-header span { color: var(--muted-2); font-size: 8px; font-weight: 750; letter-spacing: .1em; text-transform: uppercase; }
@@ -1267,7 +1267,14 @@ option { background: #1c1e22; color: var(--text); }
 .empty-chart i:nth-child(1) { height: 22px; }.empty-chart i:nth-child(2) { height: 42px; }.empty-chart i:nth-child(3) { height: 31px; }
 
 .sale-backdrop { position: fixed; inset: 0; z-index: 185; display: grid; place-items: center; padding: 20px; background: rgba(4,6,7,.78); backdrop-filter: blur(10px); }
-.sale-modal { width: min(1280px,calc(100vw - 40px)); max-height: calc(100vh - 40px); overflow: auto; border-color: rgba(255,255,255,.13); box-shadow: 0 32px 90px rgba(0,0,0,.72); scrollbar-width: thin; }
+.sale-modal { width: min(1280px,100%); max-height: 100%; overflow: auto; border-color: rgba(255,255,255,.13); box-shadow: 0 32px 90px rgba(0,0,0,.72); scrollbar-width: thin; }
+/* Use the backdrop's actual available size, including browser/text zoom.
+   Viewport-unit children otherwise grow beyond it and strand dialog actions. */
+.profile-backdrop, .sale-backdrop, .time-picker-backdrop {
+  grid-template: minmax(0,1fr) / minmax(0,1fr);
+}
+.sale-modal { container: fish-sale / inline-size; }
+.profile-modal { container: fish-profile / inline-size; }
 .sale-modal-header { min-height: 76px; display: flex; align-items: center; justify-content: space-between; gap: 20px; padding: 15px 18px 14px 22px; border-bottom: 1px solid var(--line); background: linear-gradient(110deg,rgba(82,214,202,.06),rgba(223,180,93,.045),transparent 72%); }
 .sale-modal-header h2 { margin: 3px 0 0; font-size: 22px; letter-spacing: -.025em; }
 .sale-modal-header > button { width: 44px; height: 44px; display: grid; place-items: center; border: 1px solid var(--line); border-radius: 10px; background: rgba(255,255,255,.025); color: var(--muted); cursor: pointer; }
@@ -1615,7 +1622,7 @@ input[type="datetime-local"]::-webkit-calendar-picker-indicator:hover {
   .profile-button { grid-template-columns: 36px minmax(0,1fr) 14px; }
   .profile-button-tool { width: 36px; height: 36px; }
   .profile-backdrop { padding: 8px; }
-  .profile-modal { width: calc(100vw - 16px); height: calc(100vh - 16px); grid-template-rows: 62px minmax(0,1fr); }
+  .profile-modal { width: 100%; height: 100%; grid-template-rows: 62px minmax(0,1fr); }
   .profile-workspace { grid-template-columns: 1fr; grid-template-rows: 132px minmax(0,1fr); }
   .profile-sidebar { display: grid; grid-template-columns: 130px minmax(0,1fr); gap: 8px; overflow: hidden; border-right: 0; border-bottom: 1px solid var(--line); }
   .profile-new-button { margin: 0; }
@@ -1659,7 +1666,7 @@ input[type="datetime-local"]::-webkit-calendar-picker-indicator:hover {
   .review-footer { grid-template-columns: minmax(0,1fr) auto; }
   .manual-add { grid-column: 1/-1; }
   .sale-backdrop { padding: 8px; }
-  .sale-modal { width: calc(100vw - 16px); max-height: calc(100vh - 16px); }
+  .sale-modal { width: 100%; max-height: 100%; }
   .sale-overview, .sale-modal-body { grid-template-columns: 1fr; }
   .sale-record-panel { grid-template-columns: 1fr; align-items: stretch; }
   .sale-quote-grid { min-width: 860px; }
@@ -2391,6 +2398,55 @@ option { background: #25212a; }
   #page-map.is-active:has(.spot-drawer.is-closed), #page-map.map-expanded:has(.spot-drawer.is-closed) { grid-template-columns: minmax(0,1fr); grid-template-areas: "finder" "map"; grid-template-rows: max-content 440px; }
 }
 @media (prefers-reduced-motion: reduce) { *, *::before, *::after { transition: none !important; animation: none !important; } }
+
+/* Zoom reduces dialog content space without changing media-query viewport size.
+   Reuse the existing narrow layouts based on that actual content space. */
+@container fish-sale (max-width: 820px) {
+  .sale-overview, .sale-modal-body, .sale-record-panel { grid-template-columns: minmax(0,1fr); }
+  .sale-record-panel { align-items: stretch; }
+  .sale-section-heading { flex-wrap: wrap; }
+  .sale-modal-actions { flex-wrap: wrap; }
+  .sale-modal-actions > span { display: block; flex-basis: 100%; height: 0; order: 2; }
+  .sale-modal-actions .quiet-button, .sale-modal-actions .primary-button { flex: 1; order: 3; }
+}
+@container fish-profile (max-width: 820px) {
+  .profile-workspace { grid-template-columns: minmax(0,1fr); grid-template-rows: 100px minmax(0,1fr); }
+  .profile-sidebar { display: grid; grid-template-columns: 130px minmax(0,1fr); gap: 8px; overflow: auto; border-right: 0; border-bottom: 1px solid var(--line); }
+  .profile-new-button { margin: 0; }
+  .profile-list { display: flex; gap: 6px; overflow: auto; }
+  .profile-list-item { min-width: 190px; }
+  .profile-migration-notice, .profile-form-grid { grid-template-columns: minmax(0,1fr); }
+  .profile-migration-actions { justify-content: flex-start; }
+  .profile-form { display: block; }
+  .profile-section + .profile-section { margin-top: 12px; }
+  .profile-form-actions { position: sticky; bottom: -18px; margin-top: 12px; padding: 12px 0 2px; background: var(--surface); }
+}
+
+/* Fish search is one input well; keyboard focus belongs to its outer frame. */
+#page-map .map-fish-search { position: relative; min-width: 0; margin-bottom: 12px; }
+#page-map .map-fish-search .search-field { margin: 0; }
+#page-map #mapSearch,
+#page-map #mapSearch:focus,
+#page-map #mapSearch:focus-visible {
+  appearance: none; min-width: 0; height: 100%; padding: 0;
+  border: 0; border-radius: 0; outline: none; box-shadow: none; background: transparent;
+}
+.map-fish-suggestions {
+  position: absolute; z-index: 60; top: calc(100% + 6px); left: 0; right: 0;
+  max-height: min(280px, 45vh); overflow: auto; overscroll-behavior: contain;
+  padding: 4px; border: 1px solid var(--line-strong); border-radius: 8px;
+  background-color: #211c25; background-image: var(--glass-surface);
+  color: var(--text); box-shadow: 0 7px 18px #0006, var(--glass-highlight);
+  scrollbar-width: thin;
+}
+.map-fish-suggestions[hidden] { display: none; }
+.map-fish-option {
+  display: flex; align-items: center; gap: 9px; min-height: 40px; padding: 5px 8px;
+  border-radius: 4px; cursor: pointer; font-size: 13px; line-height: 1.4;
+}
+.map-fish-option img { flex: none; width: 28px; height: 28px; object-fit: contain; }
+.map-fish-option span { min-width: 0; overflow-wrap: anywhere; }
+.map-fish-option:hover, .map-fish-option[aria-selected="true"] { background: var(--glass-selected); }
 
 /* Codex all-tabs trial — tide instruments. Presentation only: the accepted
    atlas geometry, opacity controls, data and interaction targets stay intact. */

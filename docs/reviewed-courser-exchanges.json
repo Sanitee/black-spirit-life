@@ -1,0 +1,22 @@
+{
+  "date": "2026-11-03",
+  "status": "IMPLEMENTED_SCOPED_CHECKS_AND_RELEASE_BUILD_PASS_AUDIT_ACTIVE",
+  "scope": "Exact permanent Royal Fern Root exchange choices already mentioned by the item's use text; shared Opportunities registry and item sources.",
+  "official": {
+    "published": "2026-07-23",
+    "url": "https://www.naeu.playblackdesert.com/en-US/News/Detail?groupContentNo=10342",
+    "section": "Royal Fern Root Exchange",
+    "location": "Wapra at Stonetail Horse Ranch",
+    "inputId": 757004,
+    "inputCount": 3,
+    "choices": [
+      {"outputId": 50804, "name": "Stonetail Fodder", "count": 1},
+      {"outputId": 50809, "name": "Breezy Conch Seaweed", "count": 1},
+      {"outputId": 50810, "name": "Deep Blue Hoof Root", "count": 1}
+    ]
+  },
+  "corroboration": "Exact current PC item names, exchange usage, market eligibility, seller proceeds and icons; research archive 3493. Royal Fern Root is not marketable. Each reward is marketable; no market price is hardcoded. NPC sale proceeds use SellPriceToNpc, never the purchase field.",
+  "behavior": "Each row is one choice, not three simultaneous rewards. Existing whole-exchange, leftover currency, market freshness, tax and vendor-sale calculations are reused. No Planner crafting recipe, profile change or new UI pattern.",
+  "verification": "294 focused catalog/calculation/reference/artwork checks, 6792 actual-controller views, 270 themed layouts, 217 golden checks (two private-profile previews excluded), scoped analysis and Windows Release pass. Original icon bytes are in the shared catalog as well as the exchange asset. Normal/200% Sakura captures visually inspected; all themes assert image success. No golden fixtures changed. Evidence: resumed-courser-artwork-verification.json in the correctness audit.",
+  "limits": "Official exchange has no per-day/week/family cap stated. It is represented as a normal repeatable exchange; training-quest acquisition limits are not limits on spending saved roots. Old farming-byproduct processing is a separate question and is not certified by this exchange addition. No claim to cover every training source or current server mechanic."
+}

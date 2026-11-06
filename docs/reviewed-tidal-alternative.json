@@ -1,0 +1,13 @@
+{
+  "reviewedAt":"2026-11-03",
+  "item":{"id":767695,"name":"Deep Blue Tidal Draught"},
+  "method":"Simple Alchemy",
+  "inputs":[{"id":767693,"name":"Tidal Draught","quantity":4},{"id":767694,"name":"Blue Tidal Draught","quantity":2}],
+  "fixedCatalyst":{"id":767696,"name":"Essence of Tides","quantity":1},
+  "implementation":"One explicit ingredient alternative with ratio0.5; primary Tidal4 remains. Existing fixed output1, multiplier normalization, default choices, catalyst and all other recipes unchanged. Shared Planner/Opportunities/reference consumers receive the same exact input choice, not a generic grade substitution.",
+  "official":{"date":"2025-04-30","region":"NA/EU PC","url":"https://www.naeu.playblackdesert.com/en-US/News/Detail?groupContentNo=8501&countryType=en-US","archiveKey":"patrigio-roster-notice-8501","sha256":"35f886204472fd6866c7897405b02496b4472ebfc2f133892a749ccc693a7b23","supports":"The two explicit Simple Alchemy input sets in the Tidal Draught introduction."},
+  "corroboration":{"source":"Installed PC items through October31,2026","itemId":767695,"sha256":"a54b5735052c990e189ff1a50afb6d5442cc80e0ba8dabff995979bc8d35c821","supports":"Current description independently lists both exact material sets; native current relationship retains BlueTidal2 plus Essence1."},
+  "catalogSha256":"7c76a4ed1bc79e9acd0f2a21d7d5acebf8f02ca246ea043e7e5d8ab2cf689626",
+  "catalogBytes":31546654,
+  "limits":["No new EXP claim; signature change must not inherit unverified EXP.","This is not the generic blue-elixir1:3 rule. Only this recipe has the exact4:2 alternative.","No live quote or availability is hardcoded; existing region-scoped market and inventory behavior remains."]
+}

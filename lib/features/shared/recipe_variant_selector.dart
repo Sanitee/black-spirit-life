@@ -1,10 +1,15 @@
 import 'package:bdo_craft_planner_flutter/visual/components/app_tooltip.dart';
 import 'package:flutter/material.dart';
 
+import '../../domain/formatting/compact_silver.dart';
 import '../../domain/formatting/planner_formatters.dart';
 import '../../domain/models/catalog_models.dart';
 import '../../domain/planner/planner_models.dart';
+import '../../shared/overlays/anchored_popover.dart';
+import '../../visual/components/sculpted_panel.dart';
 import '../../visual/visual.dart';
+import 'shared_silver_amount.dart';
+import 'source_availability_badges.dart';
 
 /// Compact, theme-aware selector for complete recipe formulas.
 ///
@@ -331,7 +336,7 @@ class RecipeRouteCostComparison extends StatelessWidget {
     if (recommended.variantId != chosen.variantId) {
       final saving = chosen.purchaseCost! - recommended.purchaseCost!;
       if (saving > 0) {
-        return '$source is ${formatSilver(saving)} silver cheaper';
+        return '$source is ${formatCompactSilver(saving)} silver cheaper';
       }
       return '$source can cover what you need';
     }
@@ -343,7 +348,9 @@ class RecipeRouteCostComparison extends StatelessWidget {
       (left, right) => left.purchaseCost! < right.purchaseCost! ? left : right,
     );
     final saving = alternative.purchaseCost! - chosen.purchaseCost!;
-    if (saving > 0) return '$source saves ${formatSilver(saving)} silver';
+    if (saving > 0) {
+      return '$source saves ${formatCompactSilver(saving)} silver';
+    }
     if (saving == 0) return 'Both options cost the same';
     return '$source can cover what you need';
   }
@@ -352,108 +359,167 @@ class RecipeRouteCostComparison extends StatelessWidget {
   Widget build(BuildContext context) {
     if (!selection.hasComparison) return const SizedBox.shrink();
     final spec = context.visualTheme;
-    final tooltipWidth = (MediaQuery.sizeOf(context).width - 48)
-        .clamp(180.0, 360.0)
-        .toDouble();
-    return AppTooltip(
-      constraints: BoxConstraints(maxWidth: tooltipWidth + 20),
-      richMessage: WidgetSpan(
-        child: SizedBox(
-          width: tooltipWidth,
-          child: DefaultTextStyle(
-            style: spec.typography.meta.copyWith(
-              color: spec.palette.text,
-              fontSize: 12,
-            ),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: <Widget>[
-                Text(
-                  'Buying missing materials',
-                  style: TextStyle(fontWeight: FontWeight.w800),
-                ),
-                const SizedBox(height: 3),
-                Text(
-                  'The other ingredients are the same.',
-                  style: TextStyle(color: spec.palette.textMuted),
-                ),
-                for (final option in selection.options) ...<Widget>[
-                  const SizedBox(height: 10),
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: <Widget>[
-                      itemIconBuilder(option.ingredientName, 30),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: <Widget>[
-                            Text(
-                              option.ingredientName,
-                              style: const TextStyle(
-                                fontWeight: FontWeight.w700,
-                              ),
-                            ),
-                            Text(
-                              option.npcBuyable
-                                  ? 'NPC shop'
-                                  : option.stockKnown
-                                  ? 'Stock ${formatQuantity(option.availableStock)}'
-                                  : 'Stock —',
-                              style: TextStyle(color: spec.palette.textMuted),
-                            ),
-                            if (option.ownedQuantity > 0)
-                              Text(
-                                'Already owned: ${formatQuantity(option.ownedQuantity)}',
-                              ),
-                            Text(
-                              option.missingQuantity == 0
-                                  ? 'No purchase needed'
-                                  : option.unitPrice == null
-                                  ? 'Buy ${formatQuantity(option.missingQuantity)} — price not checked'
-                                  : 'Buy ${formatQuantity(option.missingQuantity)} × ${formatQuantity(option.unitPrice!, fractionDigits: 0)} silver',
-                            ),
-                            Text(
-                              option.purchaseCost == null
-                                  ? 'Total: —'
-                                  : 'Total: ${formatQuantity(option.purchaseCost!, fractionDigits: 0)} silver',
-                              style: const TextStyle(
-                                fontWeight: FontWeight.w700,
-                              ),
-                            ),
-                            if (!option.canCoverNeed && option.stockKnown)
-                              Text(
-                                'Not enough listed for this amount',
-                                style: TextStyle(color: spec.palette.textMuted),
-                              ),
-                          ],
-                        ),
-                      ),
-                    ],
+    return AnchoredPopover(
+      overlayId: 'recipe-route-cost-comparison',
+      preferredWidth: 480,
+      maximumHeight: 560,
+      consumeOutsideTap: true,
+      anchorBuilder: (context, toggle, showing) => Semantics(
+        button: true,
+        label: 'Compare buying options',
+        expanded: showing,
+        child: InkWell(
+          key: const ValueKey('recipe-route-cost-open'),
+          onTap: toggle,
+          borderRadius: BorderRadius.circular(4),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(Icons.info_outline, size: 14, color: spec.palette.textMuted),
+              const SizedBox(width: 5),
+              Flexible(
+                child: Text(
+                  _summary,
+                  style: spec.typography.meta.copyWith(
+                    color: spec.palette.textMuted,
+                    fontSize: 12,
+                    height: 1.2,
                   ),
-                ],
-              ],
-            ),
+                ),
+              ),
+            ],
           ),
         ),
       ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: <Widget>[
-          Icon(Icons.info_outline, size: 14, color: spec.palette.textMuted),
-          const SizedBox(width: 5),
-          Flexible(
-            child: Text(
-              _summary,
-              style: spec.typography.meta.copyWith(
-                color: spec.palette.textMuted,
-                fontSize: 12,
-                height: 1.2,
-              ),
+      popoverBuilder: (context, close) => _RecipeRouteCostDetails(
+        selection: selection,
+        itemIconBuilder: itemIconBuilder,
+        onClose: close,
+      ),
+    );
+  }
+}
+
+/// Informational only: opening or dismissing the comparison never selects a
+/// route, refreshes the market or changes inventory. The shared overlay updates
+/// with the current selection and uses its own current theme context.
+class _RecipeRouteCostDetails extends StatelessWidget {
+  const _RecipeRouteCostDetails({
+    required this.selection,
+    required this.itemIconBuilder,
+    required this.onClose,
+  });
+  final RecipeRouteSelection selection;
+  final Widget Function(String name, double size) itemIconBuilder;
+  final VoidCallback onClose;
+
+  @override
+  Widget build(BuildContext context) {
+    final spec = context.visualTheme;
+    final style = spec.typography.body.copyWith(
+      fontSize: 14,
+      color: spec.palette.text,
+    );
+    return SculptedPanel(
+      key: const ValueKey('recipe-route-cost-panel'),
+      title: 'Buying missing materials',
+      onClose: onClose,
+      body: Padding(
+        padding: const EdgeInsets.all(14),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Text(
+              'The other ingredients are the same.',
+              style: style.copyWith(color: spec.palette.textMuted),
             ),
-          ),
-        ],
+            for (final option in selection.options) ...[
+              const SizedBox(height: 14),
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  itemIconBuilder(option.ingredientName, 30),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        SourceAvailabilityBelowLabel(
+                          label: Text(
+                            option.ingredientName,
+                            style: style.copyWith(fontWeight: FontWeight.w700),
+                          ),
+                          badge: SourceAvailabilityBadges(
+                            npc: option.npcBuyable,
+                            stock: option.stockKnown
+                                ? option.availableStock.round()
+                                : null,
+                          ),
+                        ),
+                        if (option.ownedQuantity > 0)
+                          Text(
+                            'Already owned: ${formatQuantity(option.ownedQuantity)}',
+                            style: style,
+                          ),
+                        const SizedBox(height: 6),
+                        if (option.missingQuantity == 0)
+                          Text('No purchase needed', style: style)
+                        else if (option.unitPrice == null)
+                          Text(
+                            'Buy ${formatQuantity(option.missingQuantity)} — price not checked',
+                            style: style,
+                          )
+                        else
+                          Wrap(
+                            spacing: 5,
+                            runSpacing: 3,
+                            crossAxisAlignment: WrapCrossAlignment.center,
+                            children: [
+                              Text(
+                                'Buy ${formatQuantity(option.missingQuantity)} ×',
+                                style: style,
+                              ),
+                              SharedSilverAmount(
+                                value: option.unitPrice,
+                                style: style,
+                              ),
+                            ],
+                          ),
+                        const SizedBox(height: 3),
+                        Wrap(
+                          spacing: 5,
+                          runSpacing: 3,
+                          crossAxisAlignment: WrapCrossAlignment.center,
+                          children: [
+                            Text(
+                              'Total',
+                              style: style.copyWith(
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                            SharedSilverAmount(
+                              value: option.purchaseCost,
+                              style: style.copyWith(
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                          ],
+                        ),
+                        if (!option.canCoverNeed && option.stockKnown)
+                          Text(
+                            'Not enough listed for this amount',
+                            style: style.copyWith(
+                              color: spec.palette.textMuted,
+                            ),
+                          ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ],
+        ),
       ),
     );
   }

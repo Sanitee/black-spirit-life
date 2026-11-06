@@ -1,10 +1,20 @@
 import {currentApeironReference, currentApeironAcquisition} from './apply_twilight_patch_20260917.mjs';
+import {currentCupReformAcquisition} from './apply_cup_extraction_patch_20260820.mjs';
 
 export const EDANIA_PART_II_SOURCE =
   'https://www.naeu.playblackdesert.com/en-US/News/Detail?groupContentNo=10451&countryType=en-US';
 export const EDANIA_PART_II_ASIA_SOURCE =
   'https://blackdesert.pearlabyss.com/Asia/en-US/News/Notice/Detail?_boardNo=19693';
 export const EDANIA_PART_II_REVIEWED_AT = '2026-08-15';
+
+// Exact IDs positively returned by the official EU market on 2026-11-02.
+// Absence from that response does not establish that another item is untradeable.
+export const EDANIA_MARKET_VERIFIED_20261102 = new Set([4016, 4096, 4017, 4098, 4099]);
+const novemberMarketSource = {
+  title: 'Official EU Central Market positive listing, 2026-11-02',
+  url: 'https://eu-trade.naeu.playblackdesert.com/Trademarket/GetWorldMarketSearchList',
+  supports: ['identity', 'market-eligibility'],
+};
 
 const codexItem = (id) => `https://bdocodex.com/us/item/${id}/`;
 const codexIcon = (path) => `https://bdocodex.com${path}`;
@@ -16,7 +26,7 @@ const item = ({
   path,
   sha256,
   mode = 'processing',
-  marketVerification = 'pending',
+  marketVerification = EDANIA_MARKET_VERIFIED_20261102.has(id) ? 'verified' : 'pending',
 }) => ({
   name,
   id,
@@ -806,6 +816,7 @@ export const EDANIA_PART_II_PROCESSING_RECIPES = Object.fromEntries([
     'Polished Marble',
     fixedProcessingRecipe({
       method: 'Grinding',
+      marketId: 4096,
       outputMin: 1,
       outputMax: 4,
       ingredients: [ingredient('Rough Marble', 10)],
@@ -825,6 +836,7 @@ export const EDANIA_PART_II_PROCESSING_RECIPES = Object.fromEntries([
     'Melted Magnetite Shard',
     fixedProcessingRecipe({
       method: 'Heating',
+      marketId: 4098,
       outputMin: 1,
       outputMax: 4,
       ingredients: [ingredient('Magnetite Ore', 5)],
@@ -834,6 +846,7 @@ export const EDANIA_PART_II_PROCESSING_RECIPES = Object.fromEntries([
     'Magnetite Ingot',
     fixedProcessingRecipe({
       method: 'Heating',
+      marketId: 4099,
       outputMin: 1,
       outputMax: 4,
       ingredients: [ingredient('Melted Magnetite Shard', 10)],
@@ -1104,12 +1117,12 @@ export const EDANIA_PART_II_ACQUISITION_INFO = Object.fromEntries([
       const record = recordByName[reformedName];
       return [
         reformedName,
-        acquisition(
+        currentCupReformAcquisition(acquisition(
           record,
           'item_reform',
           `Reform ${baseName} with ${entry.cup} to gain ${entry.effect}. Extract with Refined Essence of Emotions to recover the original accessory and cup.`,
           ['item-reform', 'reform-effect', 'extraction'],
-        ),
+        )),
       ];
     }),
   ),
@@ -1223,6 +1236,17 @@ export const EDANIA_PART_II_PENDING_MARKET_VERIFICATION =
   EDANIA_PART_II_ITEMS.filter(
     (record) => record.marketVerification === 'pending',
   ).map((record) => ({ name: record.name, itemId: record.id }));
+
+for (const record of EDANIA_PART_II_ITEMS) {
+  if (!EDANIA_MARKET_VERIFIED_20261102.has(record.id)) continue;
+  EDANIA_PART_II_ACQUISITION_INFO[record.name].routes.push({
+    kind: 'central_market',
+    summary: 'Buy through the Central Market.',
+    availability: 'permanent',
+    confidence: 'high',
+    sources: [novemberMarketSource],
+  });
+}
 
 export const EDANIA_PART_II_INFERRED_PROCESSING_OUTPUTS = [
   ['Polished Marble', 1, 4],

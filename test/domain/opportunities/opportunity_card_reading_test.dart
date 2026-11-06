@@ -210,30 +210,33 @@ void main() {
   const age = Duration(minutes: 5);
   OpportunityCardStock read(OpportunityMarketItem? item) =>
       OpportunityCardStock(item, f.now, age);
-  test('four stock states use both independently checked quantities', () {
-    expect(read(null).tone, OpportunityStockTone.unknown);
-    expect(
-      read(f.marketItem('1', stock: 10)).tone,
-      OpportunityStockTone.available,
-    );
-    expect(
-      read(f.marketItem('1', stock: 10, bids: [f.level(10, 4)])).tone,
-      OpportunityStockTone.mixed,
-    );
-    for (final bids in [
-      <OpportunityMarketLevel>[],
-      [f.level(10, 4)],
-    ]) {
+  test(
+    'stock tone remains available even with independently checked preorders',
+    () {
+      expect(read(null).tone, OpportunityStockTone.unknown);
       expect(
-        read(f.marketItem('1', stock: 0, bids: bids)).tone,
-        OpportunityStockTone.outOfStock,
+        read(f.marketItem('1', stock: 10)).tone,
+        OpportunityStockTone.available,
       );
-    }
-    final unchecked = read(f.marketItem('1', stock: 10, unknownBook: true));
-    expect(unchecked.tone, OpportunityStockTone.available);
-    expect(unchecked.preorders, isNull);
-    expect(read(f.marketItem('1')).preorders, 0);
-  });
+      expect(
+        read(f.marketItem('1', stock: 10, bids: [f.level(10, 4)])).tone,
+        OpportunityStockTone.available,
+      );
+      for (final bids in [
+        <OpportunityMarketLevel>[],
+        [f.level(10, 4)],
+      ]) {
+        expect(
+          read(f.marketItem('1', stock: 0, bids: bids)).tone,
+          OpportunityStockTone.outOfStock,
+        );
+      }
+      final unchecked = read(f.marketItem('1', stock: 10, unknownBook: true));
+      expect(unchecked.tone, OpportunityStockTone.available);
+      expect(unchecked.preorders, isNull);
+      expect(read(f.marketItem('1')).preorders, 0);
+    },
+  );
   test('stale books do not imply mixed or zero preorders', () {
     final stale = read(
       f.marketItem(

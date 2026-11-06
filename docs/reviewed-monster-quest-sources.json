@@ -1,0 +1,1323 @@
+{
+  "date": "2026-11-03T11:38:42.635Z",
+  "status": "IMPLEMENTED_AND_VERIFIED_SHARED_SOURCES_AUDIT_STILL_ACTIVE",
+  "facts": [
+    {
+      "id": 11613,
+      "name": "Ancient Guardian's Seal",
+      "added": [
+        "Monster drops · Helms Post"
+      ],
+      "removed": [],
+      "evidence": [
+        {
+          "name": "Ancient Guardian's Seal",
+          "id": "11613",
+          "key": "monster-sources-mediah-naeu-current",
+          "section": "Helms Post",
+          "url": "https://www.naeu.playblackdesert.com/en-US/Wiki?wikiNo=70",
+          "sha256": "49b6fb9f4420ca2381c8d06751b229a310dca8c2ef44f92b400d4a3421a5f150",
+          "context": "for the Golems Hunting Satisfaction ★★★★☆ Quite high! Unique Drops Asula's Crimson Eye Ring Asula's Crimson Eye Earring Ancient Guardian's Seal Scarla Necklace Mediah Merchants Union Helm Mount Parking Location Park at NPC Bolero in front of the Helms Post 1. Monster Types and Level 1) Basic Information • Mostly Lv. 50 ~ 59 monsters (most human type) ",
+          "fetch": {
+            "key": "monster-sources-mediah-naeu-current",
+            "url": "https://www.naeu.playblackdesert.com/en-US/Wiki?wikiNo=70",
+            "finalUrl": "https://www.naeu.playblackdesert.com/en-US/Wiki?wikiNo=70",
+            "status": 200,
+            "bytes": 247256,
+            "sha256": "49b6fb9f4420ca2381c8d06751b229a310dca8c2ef44f92b400d4a3421a5f150",
+            "retrievedAt": "2026-11-03T11:29:45.558Z"
+          }
+        }
+      ]
+    },
+    {
+      "id": 12220,
+      "name": "Ancient Weapon Core",
+      "added": [
+        "Monster drops · Hasrah Ancient Ruins"
+      ],
+      "removed": [],
+      "evidence": [
+        {
+          "name": "Ancient Weapon Core",
+          "id": "12220",
+          "key": "monster-sources-mediah-naeu-current",
+          "section": "Hasrah Ancient Ruins",
+          "url": "https://www.naeu.playblackdesert.com/en-US/Wiki?wikiNo=70",
+          "sha256": "49b6fb9f4420ca2381c8d06751b229a310dca8c2ef44f92b400d4a3421a5f150",
+          "context": "he recommended stats Hunting Satisfaction ★★★★☆ Battling against the Ancient Weapons will never get boring Unique Drops Ancient Weapon Core Mount Parking Location At the entrance to the ancient ruins 1. Monster Types and Level 1) Basic Information • Mostly Lv. 55 monsters • Melee/Ranged: Kamol, Balten, Ruins Stoneback Crab • Melee: Kukuri, Kamel •",
+          "fetch": {
+            "key": "monster-sources-mediah-naeu-current",
+            "url": "https://www.naeu.playblackdesert.com/en-US/Wiki?wikiNo=70",
+            "finalUrl": "https://www.naeu.playblackdesert.com/en-US/Wiki?wikiNo=70",
+            "status": 200,
+            "bytes": 247256,
+            "sha256": "49b6fb9f4420ca2381c8d06751b229a310dca8c2ef44f92b400d4a3421a5f150",
+            "retrievedAt": "2026-11-03T11:29:45.558Z"
+          }
+        }
+      ]
+    },
+    {
+      "id": 12211,
+      "name": "Belt of Shultz the Gladiator",
+      "added": [
+        "Monster drops · Wandering Rogue Den, Manes Hideout or Shultz Guard"
+      ],
+      "removed": [],
+      "evidence": [
+        {
+          "name": "Belt of Shultz the Gladiator",
+          "id": "12211",
+          "key": "monster-sources-mediah-naeu-current",
+          "section": "Wandering Rogue Den",
+          "url": "https://www.naeu.playblackdesert.com/en-US/Wiki?wikiNo=70",
+          "sha256": "49b6fb9f4420ca2381c8d06751b229a310dca8c2ef44f92b400d4a3421a5f150",
+          "context": "tisfaction ★★★☆☆ The thrill of hunting a group of giant monsters is great Unique Drops Necklace of Shultz the Gladiator Belt of Shultz the Gladiator Mount Parking Location In front of the Highland Junction Exploration Node Manager 1. Monster Types and Level 1) Basic Information • Mostly Lv. 50 ~ 54 monsters • Melee: Wandering Rogue, Wandering Rogue Fighter",
+          "fetch": {
+            "key": "monster-sources-mediah-naeu-current",
+            "url": "https://www.naeu.playblackdesert.com/en-US/Wiki?wikiNo=70",
+            "finalUrl": "https://www.naeu.playblackdesert.com/en-US/Wiki?wikiNo=70",
+            "status": 200,
+            "bytes": 247256,
+            "sha256": "49b6fb9f4420ca2381c8d06751b229a310dca8c2ef44f92b400d4a3421a5f150",
+            "retrievedAt": "2026-11-03T11:29:45.558Z"
+          }
+        },
+        {
+          "name": "Belt of Shultz the Gladiator",
+          "id": "12211",
+          "key": "monster-sources-mediah-naeu-current",
+          "section": "Manes Hideout",
+          "url": "https://www.naeu.playblackdesert.com/en-US/Wiki?wikiNo=70",
+          "sha256": "49b6fb9f4420ca2381c8d06751b229a310dca8c2ef44f92b400d4a3421a5f150",
+          "context": " Together with the hyena family Hunting Satisfaction ★★★☆☆ The cute little Manes are pretty interesting... Unique Drops Belt of Shultz the Gladiator Necklace of Shultz the Gladiator Mount Parking Location Wherever is fine. Don't worry. 1. Monster Types and Level 1) Basic Information • Mostly Lv. 50 ~ 54 monsters • Melee: Small Mane, Big Mane, Giant Mane • ",
+          "fetch": {
+            "key": "monster-sources-mediah-naeu-current",
+            "url": "https://www.naeu.playblackdesert.com/en-US/Wiki?wikiNo=70",
+            "finalUrl": "https://www.naeu.playblackdesert.com/en-US/Wiki?wikiNo=70",
+            "status": 200,
+            "bytes": 247256,
+            "sha256": "49b6fb9f4420ca2381c8d06751b229a310dca8c2ef44f92b400d4a3421a5f150",
+            "retrievedAt": "2026-11-03T11:29:45.558Z"
+          }
+        },
+        {
+          "name": "Belt of Shultz the Gladiator",
+          "id": "12211",
+          "key": "monster-sources-mediah-naeu-current",
+          "section": "Shultz Guard",
+          "url": "https://www.naeu.playblackdesert.com/en-US/Wiki?wikiNo=70",
+          "sha256": "49b6fb9f4420ca2381c8d06751b229a310dca8c2ef44f92b400d4a3421a5f150",
+          "context": "e of the most difficult monster zones in Mediah Hunting Satisfaction ★★★★☆ Strong monsters, great rewards! Unique Drops Belt of Shultz the Gladiator Necklace of Shultz the Gladiator Mount Parking Location Try to find a nice and quiet spot for your horse 1. Monster Types and Level 1) Basic Information • Mostly Lv. 58 monsters (human type) • Melee: Shultz Gu",
+          "fetch": {
+            "key": "monster-sources-mediah-naeu-current",
+            "url": "https://www.naeu.playblackdesert.com/en-US/Wiki?wikiNo=70",
+            "finalUrl": "https://www.naeu.playblackdesert.com/en-US/Wiki?wikiNo=70",
+            "status": 200,
+            "bytes": 247256,
+            "sha256": "49b6fb9f4420ca2381c8d06751b229a310dca8c2ef44f92b400d4a3421a5f150",
+            "retrievedAt": "2026-11-03T11:29:45.558Z"
+          }
+        }
+      ]
+    },
+    {
+      "id": 11853,
+      "name": "Black Distortion Earring",
+      "added": [
+        "Monster drops · Star's End"
+      ],
+      "removed": [],
+      "evidence": [
+        {
+          "name": "Black Distortion Earring",
+          "id": "11853",
+          "key": "monster-sources-calpheon-naeu-current",
+          "section": "Star's End",
+          "url": "https://www.naeu.playblackdesert.com/en-US/Wiki?wikiNo=69",
+          "sha256": "b37e896d6d7133b9e5f7cdb873a9726dc1263efbb66dfd98825a36997972c1e2",
+          "context": "t crowded Difficulty ★★★★★ The highest difficulty Hunting Satisfaction ★★★★★ The best spot, if you can win Unique Drops Black Distortion Earring Mount Parking Location Park far away as the area is densely populated by monsters 1. Monster Types and Level 1) Basic Information • Monsters are mostly around Lv. 61~65 • Melee: Harbinger of Corruption, Apostl",
+          "fetch": {
+            "key": "monster-sources-calpheon-naeu-current",
+            "url": "https://www.naeu.playblackdesert.com/en-US/Wiki?wikiNo=69",
+            "finalUrl": "https://www.naeu.playblackdesert.com/en-US/Wiki?wikiNo=69",
+            "status": 200,
+            "bytes": 212510,
+            "sha256": "b37e896d6d7133b9e5f7cdb873a9726dc1263efbb66dfd98825a36997972c1e2",
+            "retrievedAt": "2026-11-03T11:29:45.568Z"
+          }
+        }
+      ]
+    },
+    {
+      "id": 11855,
+      "name": "Dawn Earring",
+      "added": [
+        "Monster drops · Abandoned Monastery (Restricted Territory)"
+      ],
+      "removed": [],
+      "evidence": [
+        {
+          "name": "Dawn Earring",
+          "id": "11855",
+          "key": "monster-sources-calpheon-naeu-current",
+          "section": "Abandoned Monastery (Restricted Territory)",
+          "url": "https://www.naeu.playblackdesert.com/en-US/Wiki?wikiNo=69",
+          "sha256": "b37e896d6d7133b9e5f7cdb873a9726dc1263efbb66dfd98825a36997972c1e2",
+          "context": "ty ★☆☆☆☆ Low Difficulty ★★★★★ The highest difficulty Hunting Satisfaction ★★★☆☆ They do not move in groups Unique Drops Dawn Earring Mount Parking Location Abandoned Monastery 1. Monster Types and Level 1) Basic Information • Mostly Lv. 65~66 monsters (human-type) • Melee: Calpheon Shadow Knight, Calpheon Elite Shadow Knight, Calpheon Elite",
+          "fetch": {
+            "key": "monster-sources-calpheon-naeu-current",
+            "url": "https://www.naeu.playblackdesert.com/en-US/Wiki?wikiNo=69",
+            "finalUrl": "https://www.naeu.playblackdesert.com/en-US/Wiki?wikiNo=69",
+            "status": 200,
+            "bytes": 212510,
+            "sha256": "b37e896d6d7133b9e5f7cdb873a9726dc1263efbb66dfd98825a36997972c1e2",
+            "retrievedAt": "2026-11-03T11:29:45.568Z"
+          }
+        }
+      ]
+    },
+    {
+      "id": 11653,
+      "name": "Deboreka Necklace",
+      "added": [
+        "Monster drops · Ash Forest"
+      ],
+      "removed": [],
+      "evidence": [
+        {
+          "name": "Deboreka Necklace",
+          "id": "11653",
+          "key": "spirit-stones-kamasylvia-naeu-current",
+          "section": "Ash Forest",
+          "url": "https://www.naeu.playblackdesert.com/en-US/Wiki?wikiNo=357",
+          "sha256": "9b61cea67cdf2942456034dc2fbdaacdc8c2959f2c9edd7343563f49f46f4100",
+          "context": " ★★★★★ Are you afraid of ghosts? Hunting Satisfaction ★★★★☆ They may be tough, but once you can beat them… Unique Drops Deboreka Necklace Mount Parking Location Park outside the forest. 1. Monster Types and Level 1) Basic Information • Mostly Lv. 66 monsters • Melee: Volkras, Gairas • Melee/Ranged: Barnas 2) Features A dark forest engulfed by mi",
+          "fetch": {
+            "key": "spirit-stones-kamasylvia-naeu-current",
+            "url": "https://www.naeu.playblackdesert.com/en-US/Wiki?wikiNo=357",
+            "finalUrl": "https://www.naeu.playblackdesert.com/en-US/Wiki?wikiNo=357",
+            "status": 200,
+            "bytes": 223434,
+            "sha256": "9b61cea67cdf2942456034dc2fbdaacdc8c2959f2c9edd7343563f49f46f4100",
+            "retrievedAt": "2026-11-03T09:27:19.988Z"
+          }
+        }
+      ]
+    },
+    {
+      "id": 44305,
+      "name": "Earth Spirit Stone Fragment",
+      "added": [
+        "Main quests · Kamasylvia"
+      ],
+      "removed": [
+        "Defeat monsters in Kamasylvia."
+      ],
+      "evidence": [
+        {
+          "key": "tree-fragment-naeu-20221116",
+          "fetch": {
+            "key": "tree-fragment-naeu-20221116",
+            "url": "https://www.naeu.playblackdesert.com/en-US/News/Detail?groupContentNo=4265",
+            "finalUrl": "https://www.naeu.playblackdesert.com/en-US/News/Detail?groupContentNo=4265",
+            "status": 200,
+            "bytes": 192268,
+            "sha256": "85830f2ce175cd08a5a033049586ca36c1048e6724dae0b1d1ae96536aef8006",
+            "retrievedAt": "2026-11-03T11:20:30.722Z"
+          },
+          "decision": "Exact quest reward names reviewed; no repeatability, server probability or hidden conditions inferred from decoded quest DSL."
+        }
+      ]
+    },
+    {
+      "id": 12060,
+      "name": "Eye of the Ruins Ring",
+      "added": [
+        "Monster drops · Tshira Ruins"
+      ],
+      "removed": [],
+      "evidence": [
+        {
+          "name": "Eye of the Ruins Ring",
+          "id": "12060",
+          "key": "monster-sources-drieghan-naeu-current",
+          "section": "Tshira Ruins",
+          "url": "https://www.naeu.playblackdesert.com/en-US/Wiki?wikiNo=356",
+          "sha256": "760dc184b25126e3d7d848de0e1445514f7e6187729ceb2063020c345c527dad",
+          "context": "attacks and you should be fine. Hunting Satisfaction ★★★★☆ Dashing between huge monsters is such a thrill! Unique Drops Eye of the Ruins Ring Mount Parking Location By the node manager. 1. Monster Types and Level 1) Basic Information • Mostly Lv. 56 ~ 59 monsters • Melee: Leaf Keeper, Vine Keeper, Grove Keeper, Murky Swamp Caller, Tree Hermit, Tree ",
+          "fetch": {
+            "key": "monster-sources-drieghan-naeu-current",
+            "url": "https://www.naeu.playblackdesert.com/en-US/Wiki?wikiNo=356",
+            "finalUrl": "https://www.naeu.playblackdesert.com/en-US/Wiki?wikiNo=356",
+            "status": 200,
+            "bytes": 180908,
+            "sha256": "760dc184b25126e3d7d848de0e1445514f7e6187729ceb2063020c345c527dad",
+            "retrievedAt": "2026-11-03T11:29:45.561Z"
+          }
+        }
+      ]
+    },
+    {
+      "id": 12042,
+      "name": "Forest Ronaros Ring",
+      "added": [
+        "Monster drops · Forest Ronaros, Tooth Fairy Forest"
+      ],
+      "removed": [],
+      "evidence": [
+        {
+          "name": "Forest Ronaros Ring",
+          "id": "12042",
+          "key": "spirit-stones-kamasylvia-naeu-current",
+          "section": "Forest Ronaros Area",
+          "url": "https://www.naeu.playblackdesert.com/en-US/Wiki?wikiNo=357",
+          "sha256": "9b61cea67cdf2942456034dc2fbdaacdc8c2959f2c9edd7343563f49f46f4100",
+          "context": " thought you were fighting. Hunting Satisfaction ★★★☆☆ Find a good spot to get the most out of this place. Unique Drops Forest Ronaros Ring Mount Parking Location Parking location will depend on the route. 1. Monster Types and Level 1) Basic Information • Mostly Lv. 60 ~ 63 monsters • Melee: Forest Ronaros Scout, Forest Ronaros Guardian • Melee/Ra",
+          "fetch": {
+            "key": "spirit-stones-kamasylvia-naeu-current",
+            "url": "https://www.naeu.playblackdesert.com/en-US/Wiki?wikiNo=357",
+            "finalUrl": "https://www.naeu.playblackdesert.com/en-US/Wiki?wikiNo=357",
+            "status": 200,
+            "bytes": 223434,
+            "sha256": "9b61cea67cdf2942456034dc2fbdaacdc8c2959f2c9edd7343563f49f46f4100",
+            "retrievedAt": "2026-11-03T09:27:19.988Z"
+          }
+        }
+      ]
+    },
+    {
+      "id": 12059,
+      "name": "Kagtum Submission Ring",
+      "added": [
+        "Monster drops · Blood Wolf Settlement"
+      ],
+      "removed": [],
+      "evidence": [
+        {
+          "name": "Kagtum Submission Ring",
+          "id": "12059",
+          "key": "monster-sources-drieghan-naeu-current",
+          "section": "Blood Wolf Settlement",
+          "url": "https://www.naeu.playblackdesert.com/en-US/Wiki?wikiNo=356",
+          "sha256": "760dc184b25126e3d7d848de0e1445514f7e6187729ceb2063020c345c527dad",
+          "context": "a. There are plenty of daily quests to earn contribution experience and there are Marni's stones that can be used here. Kagtum Submission Ring (stats: AP +5, Accuracy +2) drops here. It also has the Extra Damage against Monsters effect. Kagtum Guard When you break enough of the jails where the traitors to their kin are imprisoned, a Kagtum guard with",
+          "fetch": {
+            "key": "monster-sources-drieghan-naeu-current",
+            "url": "https://www.naeu.playblackdesert.com/en-US/Wiki?wikiNo=356",
+            "finalUrl": "https://www.naeu.playblackdesert.com/en-US/Wiki?wikiNo=356",
+            "status": 200,
+            "bytes": 180908,
+            "sha256": "760dc184b25126e3d7d848de0e1445514f7e6187729ceb2063020c345c527dad",
+            "retrievedAt": "2026-11-03T11:29:45.561Z"
+          }
+        }
+      ]
+    },
+    {
+      "id": 11630,
+      "name": "Laytenn's Power Stone",
+      "added": [
+        "Monster drops · Kratuga Ancient Ruins"
+      ],
+      "removed": [],
+      "evidence": [
+        {
+          "name": "Laytenn's Power Stone",
+          "id": "11630",
+          "key": "monster-sources-mediah-naeu-current",
+          "section": "Kratuga Ancient Ruins",
+          "url": "https://www.naeu.playblackdesert.com/en-US/Wiki?wikiNo=70",
+          "sha256": "49b6fb9f4420ca2381c8d06751b229a310dca8c2ef44f92b400d4a3421a5f150",
+          "context": "lt monster zones in Mediah Hunting Satisfaction ★★★★☆ Did you like Hasrah? This is better! Unique Drops Tungrad Earring Laytenn's Power Stone Mount Parking Location At the entrance of the Hasrah Ancient Ruins 1. Monster Types and Level 1) Basic Information • Mostly Lv. 60 ~ 65 monsters • Melee: Kimel, Elqueesh, Belloten, Bamole, Laytenn • Ranged: Pu",
+          "fetch": {
+            "key": "monster-sources-mediah-naeu-current",
+            "url": "https://www.naeu.playblackdesert.com/en-US/Wiki?wikiNo=70",
+            "finalUrl": "https://www.naeu.playblackdesert.com/en-US/Wiki?wikiNo=70",
+            "status": 200,
+            "bytes": 247256,
+            "sha256": "49b6fb9f4420ca2381c8d06751b229a310dca8c2ef44f92b400d4a3421a5f150",
+            "retrievedAt": "2026-11-03T11:29:45.558Z"
+          }
+        }
+      ]
+    },
+    {
+      "id": 12007,
+      "name": "Mark of Shadow",
+      "added": [
+        "World boss · Nightmarish Kzarka (server top 50; deal at least 0.01% of boss HP)"
+      ],
+      "removed": [],
+      "evidence": [
+        {
+          "name": "Mark of Shadow",
+          "id": "12007",
+          "key": "monster-sources-world-boss-naeu-current",
+          "section": "Kzarka",
+          "url": "https://www.naeu.playblackdesert.com/en-US/Wiki?wikiNo=83",
+          "sha256": "e24e6338d2d02f78a0c331a6ff47ec62aafb051276ee624787e4cbd53839f0ec",
+          "context": "of Valks (+80) Advice of Valks (+100) Rare Belongings of an Adventurer Kzarka's Bloodstone x1-3 Chilling Fragment x5-10 Mark of Shadow Ancient Magic Crystal - Harphia Ancient Magic Crystal - Viper Ancient Magic Crystal - Addis Ancient Magic Crystal - Carmae Shrine Guardian Token Gold Bar 1,000G x1-4 Gold Bar 1,000G Gold Bar 100G x5-10 Lacklus",
+          "fetch": {
+            "key": "monster-sources-world-boss-naeu-current",
+            "url": "https://www.naeu.playblackdesert.com/en-US/Wiki?wikiNo=83",
+            "finalUrl": "https://www.naeu.playblackdesert.com/en-US/Wiki?wikiNo=83",
+            "status": 200,
+            "bytes": 554939,
+            "sha256": "e24e6338d2d02f78a0c331a6ff47ec62aafb051276ee624787e4cbd53839f0ec",
+            "retrievedAt": "2026-11-03T11:29:45.704Z"
+          },
+          "decision": "Only Nightmarish Kzarka server ranks1–20 and21–50 list this item. The same section requires0.01% global HP damage. Both conditions retained; ordinary Kzarka or every participant not asserted."
+        }
+      ]
+    },
+    {
+      "id": 11810,
+      "name": "Mesto Earring",
+      "added": [
+        "Monster drops · Soldier's Cemetery"
+      ],
+      "removed": [],
+      "evidence": [
+        {
+          "name": "Mesto Earring",
+          "id": "11810",
+          "key": "monster-sources-mediah-naeu-current",
+          "section": "Soldier's Cemetery",
+          "url": "https://www.naeu.playblackdesert.com/en-US/Wiki?wikiNo=70",
+          "sha256": "49b6fb9f4420ca2381c8d06751b229a310dca8c2ef44f92b400d4a3421a5f150",
+          "context": "a matter of how quickly you can adapt Hunting Satisfaction ★★★★☆ High monster density, so it's pretty fun! Unique Drops Mesto Earring Mount Parking Location In front of the Exploration Node Manager NPC 1. Monster Types and Level 1) Basic Information • Mostly Lv. 54 ~ 57 monsters • Melee: Frenzied Skeleton, Frenzied Skeleton Axeman, Grudged S",
+          "fetch": {
+            "key": "monster-sources-mediah-naeu-current",
+            "url": "https://www.naeu.playblackdesert.com/en-US/Wiki?wikiNo=70",
+            "finalUrl": "https://www.naeu.playblackdesert.com/en-US/Wiki?wikiNo=70",
+            "status": 200,
+            "bytes": 247256,
+            "sha256": "49b6fb9f4420ca2381c8d06751b229a310dca8c2ef44f92b400d4a3421a5f150",
+            "retrievedAt": "2026-11-03T11:29:45.558Z"
+          }
+        }
+      ]
+    },
+    {
+      "id": 11834,
+      "name": "Narc Ear Accessory",
+      "added": [
+        "Monster drops · Manshaum Forest"
+      ],
+      "removed": [],
+      "evidence": [
+        {
+          "name": "Narc Ear Accessory",
+          "id": "11834",
+          "key": "spirit-stones-kamasylvia-naeu-current",
+          "section": "Manshaum Forest",
+          "url": "https://www.naeu.playblackdesert.com/en-US/Wiki?wikiNo=357",
+          "sha256": "9b61cea67cdf2942456034dc2fbdaacdc8c2959f2c9edd7343563f49f46f4100",
+          "context": "eal threat to look out for. Hunting Satisfaction ★★★☆☆ Find a good spot to get the most out of this place. Unique Drops Narc Ear Accessory Mount Parking Location There are a few safe spots to park. 1. Monster Types and Level 1) Basic Information • Mostly Lv. 58 monsters • Melee: Manshaum Hunter, Manshaum Fighter, Manshaum Warrior, Manshaum Great ",
+          "fetch": {
+            "key": "spirit-stones-kamasylvia-naeu-current",
+            "url": "https://www.naeu.playblackdesert.com/en-US/Wiki?wikiNo=357",
+            "finalUrl": "https://www.naeu.playblackdesert.com/en-US/Wiki?wikiNo=357",
+            "status": 200,
+            "bytes": 223434,
+            "sha256": "9b61cea67cdf2942456034dc2fbdaacdc8c2959f2c9edd7343563f49f46f4100",
+            "retrievedAt": "2026-11-03T09:27:19.988Z"
+          }
+        }
+      ]
+    },
+    {
+      "id": 11631,
+      "name": "Necklace of Shultz the Gladiator",
+      "added": [
+        "Monster drops · Wandering Rogue Den, Manes Hideout or Shultz Guard"
+      ],
+      "removed": [],
+      "evidence": [
+        {
+          "name": "Necklace of Shultz the Gladiator",
+          "id": "11631",
+          "key": "monster-sources-mediah-naeu-current",
+          "section": "Wandering Rogue Den",
+          "url": "https://www.naeu.playblackdesert.com/en-US/Wiki?wikiNo=70",
+          "sha256": "49b6fb9f4420ca2381c8d06751b229a310dca8c2ef44f92b400d4a3421a5f150",
+          "context": " the Giant Soldiers... Hunting Satisfaction ★★★☆☆ The thrill of hunting a group of giant monsters is great Unique Drops Necklace of Shultz the Gladiator Belt of Shultz the Gladiator Mount Parking Location In front of the Highland Junction Exploration Node Manager 1. Monster Types and Level 1) Basic Information • Mostly Lv. 50 ~ 54 monsters • Melee: Wandering R",
+          "fetch": {
+            "key": "monster-sources-mediah-naeu-current",
+            "url": "https://www.naeu.playblackdesert.com/en-US/Wiki?wikiNo=70",
+            "finalUrl": "https://www.naeu.playblackdesert.com/en-US/Wiki?wikiNo=70",
+            "status": 200,
+            "bytes": 247256,
+            "sha256": "49b6fb9f4420ca2381c8d06751b229a310dca8c2ef44f92b400d4a3421a5f150",
+            "retrievedAt": "2026-11-03T11:29:45.558Z"
+          }
+        },
+        {
+          "name": "Necklace of Shultz the Gladiator",
+          "id": "11631",
+          "key": "monster-sources-mediah-naeu-current",
+          "section": "Manes Hideout",
+          "url": "https://www.naeu.playblackdesert.com/en-US/Wiki?wikiNo=70",
+          "sha256": "49b6fb9f4420ca2381c8d06751b229a310dca8c2ef44f92b400d4a3421a5f150",
+          "context": "ly Hunting Satisfaction ★★★☆☆ The cute little Manes are pretty interesting... Unique Drops Belt of Shultz the Gladiator Necklace of Shultz the Gladiator Mount Parking Location Wherever is fine. Don't worry. 1. Monster Types and Level 1) Basic Information • Mostly Lv. 50 ~ 54 monsters • Melee: Small Mane, Big Mane, Giant Mane • Ranged: Agile Mane • Violent: Gia",
+          "fetch": {
+            "key": "monster-sources-mediah-naeu-current",
+            "url": "https://www.naeu.playblackdesert.com/en-US/Wiki?wikiNo=70",
+            "finalUrl": "https://www.naeu.playblackdesert.com/en-US/Wiki?wikiNo=70",
+            "status": 200,
+            "bytes": 247256,
+            "sha256": "49b6fb9f4420ca2381c8d06751b229a310dca8c2ef44f92b400d4a3421a5f150",
+            "retrievedAt": "2026-11-03T11:29:45.558Z"
+          }
+        },
+        {
+          "name": "Necklace of Shultz the Gladiator",
+          "id": "11631",
+          "key": "monster-sources-mediah-naeu-current",
+          "section": "Shultz Guard",
+          "url": "https://www.naeu.playblackdesert.com/en-US/Wiki?wikiNo=70",
+          "sha256": "49b6fb9f4420ca2381c8d06751b229a310dca8c2ef44f92b400d4a3421a5f150",
+          "context": "er zones in Mediah Hunting Satisfaction ★★★★☆ Strong monsters, great rewards! Unique Drops Belt of Shultz the Gladiator Necklace of Shultz the Gladiator Mount Parking Location Try to find a nice and quiet spot for your horse 1. Monster Types and Level 1) Basic Information • Mostly Lv. 58 monsters (human type) • Melee: Shultz Guard Gladiator, Shultz Guard Armor",
+          "fetch": {
+            "key": "monster-sources-mediah-naeu-current",
+            "url": "https://www.naeu.playblackdesert.com/en-US/Wiki?wikiNo=70",
+            "finalUrl": "https://www.naeu.playblackdesert.com/en-US/Wiki?wikiNo=70",
+            "status": 200,
+            "bytes": 247256,
+            "sha256": "49b6fb9f4420ca2381c8d06751b229a310dca8c2ef44f92b400d4a3421a5f150",
+            "retrievedAt": "2026-11-03T11:29:45.558Z"
+          }
+        }
+      ]
+    },
+    {
+      "id": 12068,
+      "name": "Ominous Ring",
+      "added": [
+        "Monster drops · Thornwood Forest"
+      ],
+      "removed": [],
+      "evidence": [
+        {
+          "name": "Ominous Ring",
+          "id": "12068",
+          "key": "monster-sources-odyllita-naeu-current",
+          "section": "Thornwood Forest",
+          "url": "https://www.naeu.playblackdesert.com/en-US/Wiki?wikiNo=349",
+          "sha256": "96e04d7486a38784e9a5e6f77e1d7a22f14f75c44fb1553e07b7911f84aca4f4",
+          "context": "off items and manage your inventory weight. 4. Major Item Drops Specter Energy Quturan's Left Lung Quturan's Black Leaf Ominous Ring Marsh's Artifact - Magic Accuracy Marsh's Artifact - Ranged Accuracy Marsh's Artifact - Melee Accuracy • Specter's Energy is used to create Blackstar Gear. Please check the [Blackstar Gear] page for more infor",
+          "fetch": {
+            "key": "monster-sources-odyllita-naeu-current",
+            "url": "https://www.naeu.playblackdesert.com/en-US/Wiki?wikiNo=349",
+            "finalUrl": "https://www.naeu.playblackdesert.com/en-US/Wiki?wikiNo=349",
+            "status": 200,
+            "bytes": 206469,
+            "sha256": "96e04d7486a38784e9a5e6f77e1d7a22f14f75c44fb1553e07b7911f84aca4f4",
+            "retrievedAt": "2026-11-03T11:29:45.353Z"
+          }
+        }
+      ]
+    },
+    {
+      "id": 12251,
+      "name": "Orkinrad's Belt",
+      "added": [
+        "Monster drops · Sherekhan Necropolis"
+      ],
+      "removed": [],
+      "evidence": [
+        {
+          "name": "Orkinrad's Belt",
+          "id": "12251",
+          "key": "monster-sources-drieghan-naeu-current",
+          "section": "Sherekhan Necropolis",
+          "url": "https://www.naeu.playblackdesert.com/en-US/Wiki?wikiNo=356",
+          "sha256": "760dc184b25126e3d7d848de0e1445514f7e6187729ceb2063020c345c527dad",
+          "context": " your hands do the work! Hunting Satisfaction ★★★★☆ Have the fight of your life against the five warriors! Unique Drops Orkinrad's Belt Mount Parking Location By the node manager. 1. Monster Types and Level 1) Basic Information • Monsters are mostly around Lv. 60 ~ during the day and Lv. 65 ~ at night • Melee: Garud, Nybrica, Lateh, Federik, B",
+          "fetch": {
+            "key": "monster-sources-drieghan-naeu-current",
+            "url": "https://www.naeu.playblackdesert.com/en-US/Wiki?wikiNo=356",
+            "finalUrl": "https://www.naeu.playblackdesert.com/en-US/Wiki?wikiNo=356",
+            "status": 200,
+            "bytes": 180908,
+            "sha256": "760dc184b25126e3d7d848de0e1445514f7e6187729ceb2063020c345c527dad",
+            "retrievedAt": "2026-11-03T11:29:45.561Z"
+          }
+        }
+      ]
+    },
+    {
+      "id": 12012,
+      "name": "Outlaw's Ring",
+      "added": [
+        "Monster drops · Elric Shrine"
+      ],
+      "removed": [],
+      "evidence": [
+        {
+          "name": "Outlaw's Ring",
+          "id": "12012",
+          "key": "monster-sources-mediah-naeu-current",
+          "section": "Elric Shrine",
+          "url": "https://www.naeu.playblackdesert.com/en-US/Wiki?wikiNo=70",
+          "sha256": "49b6fb9f4420ca2381c8d06751b229a310dca8c2ef44f92b400d4a3421a5f150",
+          "context": "ifficulty ★★★☆☆ As long as you have the recommended stats Hunting Satisfaction ★★★★☆ A trembling sensation Unique Drops Outlaw's Ring Asula's Crimson Eye Belt Derek's Light Leather Shoes Mount Parking Location The stairs up to the Elric Shrine 1. Monster Types and Level 1) Basic Information • Mostly Lv. 51 ~ 54 monsters • Melee: Elric Layper",
+          "fetch": {
+            "key": "monster-sources-mediah-naeu-current",
+            "url": "https://www.naeu.playblackdesert.com/en-US/Wiki?wikiNo=70",
+            "finalUrl": "https://www.naeu.playblackdesert.com/en-US/Wiki?wikiNo=70",
+            "status": 200,
+            "bytes": 247256,
+            "sha256": "49b6fb9f4420ca2381c8d06751b229a310dca8c2ef44f92b400d4a3421a5f150",
+            "retrievedAt": "2026-11-03T11:29:45.558Z"
+          }
+        }
+      ]
+    },
+    {
+      "id": 12045,
+      "name": "Rainbow Coral Ring",
+      "added": [
+        "Monster drops · Protty Cave"
+      ],
+      "removed": [],
+      "evidence": [
+        {
+          "name": "Rainbow Coral Ring",
+          "id": "12045",
+          "key": "monster-sources-underwater-naeu-current",
+          "section": "Protty Cave",
+          "url": "https://www.naeu.playblackdesert.com/en-US/Wiki?wikiNo=355",
+          "sha256": "1f979ad58c58a66191b708017767220bc38872534ae7f97463122cc3339a3ef5",
+          "context": "y ★★☆☆☆ Relatively easy. Hunting Satisfaction ★★★★☆ Monsters are in tight groups so they are easy to kill. Unique Drops Rainbow Coral Ring Mount Parking Location None. 1. Monster Types and Level 1) Basic Information • Mostly Lv. 59 ~ 61 monsters • Melee: Sid Protty, Protty, Kaz Protty, Zera Protty • Others: Black Crystal Seaweed, Ocean Crystal Se",
+          "fetch": {
+            "key": "monster-sources-underwater-naeu-current",
+            "url": "https://www.naeu.playblackdesert.com/en-US/Wiki?wikiNo=355",
+            "finalUrl": "https://www.naeu.playblackdesert.com/en-US/Wiki?wikiNo=355",
+            "status": 200,
+            "bytes": 181923,
+            "sha256": "1f979ad58c58a66191b708017767220bc38872534ae7f97463122cc3339a3ef5",
+            "retrievedAt": "2026-11-03T11:29:45.461Z"
+          }
+        }
+      ]
+    },
+    {
+      "id": 43786,
+      "name": "Remnants of the Rift",
+      "added": [
+        "Dark Rift bosses · Chance from rewards"
+      ],
+      "removed": [],
+      "evidence": [
+        {
+          "key": "rift-remnants-naeu-20251218",
+          "fetch": {
+            "key": "rift-remnants-naeu-20251218",
+            "url": "https://www.naeu.playblackdesert.com/en-US/News/Detail?groupContentNo=9476",
+            "finalUrl": "https://www.naeu.playblackdesert.com/en-US/News/Detail?groupContentNo=9476",
+            "status": 200,
+            "bytes": 227774,
+            "sha256": "d8cfbcc89d70fced8cf0e218c7eb3c5badbf34729a169423c98cb3a12339177d",
+            "retrievedAt": "2026-11-03T11:31:51.989Z"
+          },
+          "decision": "All six current Dark Rift boss tables retain Remnants as a random reward, not the removed Dead boxes."
+        }
+      ]
+    },
+    {
+      "id": 12208,
+      "name": "Rhutum Elite Belt",
+      "added": [
+        "Monster drops · Rhutum Outstation"
+      ],
+      "removed": [],
+      "evidence": [
+        {
+          "name": "Rhutum Elite Belt",
+          "id": "12208",
+          "key": "monster-sources-calpheon-naeu-current",
+          "section": "Rhutum Outstation",
+          "url": "https://www.naeu.playblackdesert.com/en-US/Wiki?wikiNo=69",
+          "sha256": "b37e896d6d7133b9e5f7cdb873a9726dc1263efbb66dfd98825a36997972c1e2",
+          "context": "e to yourself! Difficulty ★☆☆☆☆ Easy and Fun! Hunting Satisfaction ★★★★☆ Rhutums will endlessly attack you Unique Drops Rhutum Elite Belt Treant Spirit's Hope Belt Mount Parking Location Park at the outskirts of the post 1. Monster Types and Level 1) Basic Information • Mostly Lv. 50 monsters • Melee: Rhutum Soldier, Rhutum Elite Warrior, Rhutum",
+          "fetch": {
+            "key": "monster-sources-calpheon-naeu-current",
+            "url": "https://www.naeu.playblackdesert.com/en-US/Wiki?wikiNo=69",
+            "finalUrl": "https://www.naeu.playblackdesert.com/en-US/Wiki?wikiNo=69",
+            "status": 200,
+            "bytes": 212510,
+            "sha256": "b37e896d6d7133b9e5f7cdb873a9726dc1263efbb66dfd98825a36997972c1e2",
+            "retrievedAt": "2026-11-03T11:29:45.568Z"
+          }
+        }
+      ]
+    },
+    {
+      "id": 11811,
+      "name": "Ridell Earring",
+      "added": [
+        "Monster drops · Abandoned Iron Mine"
+      ],
+      "removed": [],
+      "evidence": [
+        {
+          "name": "Ridell Earring",
+          "id": "11811",
+          "key": "monster-sources-mediah-naeu-current",
+          "section": "Abandoned Iron Mine",
+          "url": "https://www.naeu.playblackdesert.com/en-US/Wiki?wikiNo=70",
+          "sha256": "49b6fb9f4420ca2381c8d06751b229a310dca8c2ef44f92b400d4a3421a5f150",
+          "context": "big and the small ones... Unique Drops Manos Craftsman's Clothes Beia's Black Magic Gloves Asula's Crimson Eye Necklace Ridell Earring Mount Parking Location Depends on the starting point 1. Monster Types and Level 1) Basic Information • Mostly Lv. 50 ~ 53 monsters • Melee: Rhutum Guard, Red Orc Guard, Red Orc Sentinel, Saunil Guard, Khuruto ",
+          "fetch": {
+            "key": "monster-sources-mediah-naeu-current",
+            "url": "https://www.naeu.playblackdesert.com/en-US/Wiki?wikiNo=70",
+            "finalUrl": "https://www.naeu.playblackdesert.com/en-US/Wiki?wikiNo=70",
+            "status": 200,
+            "bytes": 247256,
+            "sha256": "49b6fb9f4420ca2381c8d06751b229a310dca8c2ef44f92b400d4a3421a5f150",
+            "retrievedAt": "2026-11-03T11:29:45.558Z"
+          }
+        }
+      ]
+    },
+    {
+      "id": 11610,
+      "name": "Scarla Necklace",
+      "added": [
+        "Monster drops · Helms Post"
+      ],
+      "removed": [],
+      "evidence": [
+        {
+          "name": "Scarla Necklace",
+          "id": "11610",
+          "key": "monster-sources-mediah-naeu-current",
+          "section": "Helms Post",
+          "url": "https://www.naeu.playblackdesert.com/en-US/Wiki?wikiNo=70",
+          "sha256": "49b6fb9f4420ca2381c8d06751b229a310dca8c2ef44f92b400d4a3421a5f150",
+          "context": "atisfaction ★★★★☆ Quite high! Unique Drops Asula's Crimson Eye Ring Asula's Crimson Eye Earring Ancient Guardian's Seal Scarla Necklace Mediah Merchants Union Helm Mount Parking Location Park at NPC Bolero in front of the Helms Post 1. Monster Types and Level 1) Basic Information • Mostly Lv. 50 ~ 59 monsters (most human type) • Melee: Helm Mi",
+          "fetch": {
+            "key": "monster-sources-mediah-naeu-current",
+            "url": "https://www.naeu.playblackdesert.com/en-US/Wiki?wikiNo=70",
+            "finalUrl": "https://www.naeu.playblackdesert.com/en-US/Wiki?wikiNo=70",
+            "status": 200,
+            "bytes": 247256,
+            "sha256": "49b6fb9f4420ca2381c8d06751b229a310dca8c2ef44f92b400d4a3421a5f150",
+            "retrievedAt": "2026-11-03T11:29:45.558Z"
+          }
+        }
+      ]
+    },
+    {
+      "id": 12008,
+      "name": "Shrine Guardian Token",
+      "added": [
+        "World boss · Nightmarish Kzarka (server top 50; deal at least 0.01% of boss HP)"
+      ],
+      "removed": [],
+      "evidence": [
+        {
+          "name": "Shrine Guardian Token",
+          "id": "12008",
+          "key": "monster-sources-world-boss-naeu-current",
+          "section": "Kzarka",
+          "url": "https://www.naeu.playblackdesert.com/en-US/Wiki?wikiNo=83",
+          "sha256": "e24e6338d2d02f78a0c331a6ff47ec62aafb051276ee624787e4cbd53839f0ec",
+          "context": "ient Magic Crystal - Harphia Ancient Magic Crystal - Viper Ancient Magic Crystal - Addis Ancient Magic Crystal - Carmae Shrine Guardian Token Gold Bar 1,000G x1-4 Gold Bar 1,000G Gold Bar 100G x5-10 Lackluster Crystal Fragment Black Stone x22-30 Concentrated Boss Crystal x5 Latent Boss Aura x20-30 Stabilized Magical Black Stone x3-5 Cleansed Magical",
+          "fetch": {
+            "key": "monster-sources-world-boss-naeu-current",
+            "url": "https://www.naeu.playblackdesert.com/en-US/Wiki?wikiNo=83",
+            "finalUrl": "https://www.naeu.playblackdesert.com/en-US/Wiki?wikiNo=83",
+            "status": 200,
+            "bytes": 554939,
+            "sha256": "e24e6338d2d02f78a0c331a6ff47ec62aafb051276ee624787e4cbd53839f0ec",
+            "retrievedAt": "2026-11-03T11:29:45.704Z"
+          },
+          "decision": "Only Nightmarish Kzarka server ranks1–20 and21–50 list this item. The same section requires0.01% global HP damage. Both conditions retained; ordinary Kzarka or every participant not asserted."
+        }
+      ]
+    },
+    {
+      "id": 12210,
+      "name": "Tree Spirit Belt",
+      "added": [
+        "Monster drops · Mutant Tree Spirits, North Kaia Mountain"
+      ],
+      "removed": [],
+      "evidence": [
+        {
+          "name": "Tree Spirit Belt",
+          "id": "12210",
+          "key": "monster-sources-calpheon-naeu-current",
+          "section": "North Kaia Mountain (Mutant Tree Spirit)",
+          "url": "https://www.naeu.playblackdesert.com/en-US/Wiki?wikiNo=69",
+          "sha256": "b37e896d6d7133b9e5f7cdb873a9726dc1263efbb66dfd98825a36997972c1e2",
+          "context": " must learn their attack patterns Hunting Satisfaction ★★★★★ It is the best if you can have it to yourself Unique Drops Tree Spirit Belt Mount Parking Location Park near North Kaia Mountain 1. Monster Types and Level 1) Basic Information • Mostly Lv. 60 monsters • Melee/Ranged: Mutant Tree Spirit 2) Features There are not that many monsters, bu",
+          "fetch": {
+            "key": "monster-sources-calpheon-naeu-current",
+            "url": "https://www.naeu.playblackdesert.com/en-US/Wiki?wikiNo=69",
+            "finalUrl": "https://www.naeu.playblackdesert.com/en-US/Wiki?wikiNo=69",
+            "status": 200,
+            "bytes": 212510,
+            "sha256": "b37e896d6d7133b9e5f7cdb873a9726dc1263efbb66dfd98825a36997972c1e2",
+            "retrievedAt": "2026-11-03T11:29:45.568Z"
+          }
+        }
+      ]
+    },
+    {
+      "id": 44311,
+      "name": "Tree Spirit Stone Fragment",
+      "added": [
+        "Main quests · Kamasylvia",
+        "World boss · Mirumok Destroyer Offin"
+      ],
+      "removed": [],
+      "evidence": [
+        {
+          "key": "tree-fragment-naeu-20221116",
+          "fetch": {
+            "key": "tree-fragment-naeu-20221116",
+            "url": "https://www.naeu.playblackdesert.com/en-US/News/Detail?groupContentNo=4265",
+            "finalUrl": "https://www.naeu.playblackdesert.com/en-US/News/Detail?groupContentNo=4265",
+            "status": 200,
+            "bytes": 192268,
+            "sha256": "85830f2ce175cd08a5a033049586ca36c1048e6724dae0b1d1ae96536aef8006",
+            "retrievedAt": "2026-11-03T11:20:30.722Z"
+          },
+          "decision": "Exact quest reward names reviewed; no repeatability, server probability or hidden conditions inferred from decoded quest DSL."
+        },
+        {
+          "key": "tree-fragment-naeu-20231011",
+          "fetch": {
+            "key": "tree-fragment-naeu-20231011",
+            "url": "https://www.naeu.playblackdesert.com/en-US/News/Detail?groupContentNo=6029",
+            "finalUrl": "https://www.naeu.playblackdesert.com/en-US/News/Detail?groupContentNo=6029",
+            "status": 200,
+            "bytes": 124952,
+            "sha256": "e6bbd9ef64615f0e9663ffd392637f3a63df8da774a204ac7052afa412841d0a",
+            "retrievedAt": "2026-11-03T11:20:30.091Z"
+          },
+          "decision": "Offin loot amount change explicitly establishes this item in the boss loot table. No numerical yield/rate imported."
+        }
+      ]
+    },
+    {
+      "id": 12237,
+      "name": "Tungrad Belt",
+      "added": [
+        "Monster drops · Gyfin Rhasia Temple"
+      ],
+      "removed": [],
+      "evidence": [
+        {
+          "name": "Tungrad Belt",
+          "id": "12237",
+          "key": "spirit-stones-kamasylvia-naeu-current",
+          "section": "Gyfin Rhasia Temple",
+          "url": "https://www.naeu.playblackdesert.com/en-US/Wiki?wikiNo=357",
+          "sha256": "9b61cea67cdf2942456034dc2fbdaacdc8c2959f2c9edd7343563f49f46f4100",
+          "context": "★★☆ Some of the strongest foes in Kamasylvia. Hunting Satisfaction ★★★☆☆ If you can adapt to their rhythm. Unique Drops Tungrad Belt Tungrad Necklace Mount Parking Location It is better to park outside the temple. 1. Monster Types and Level 1) Basic Information • Mostly Lv. 64 ~ 66 monsters • Melee: Gyfin Rhasia Guard, Gyfin Rhasia Crusher,",
+          "fetch": {
+            "key": "spirit-stones-kamasylvia-naeu-current",
+            "url": "https://www.naeu.playblackdesert.com/en-US/Wiki?wikiNo=357",
+            "finalUrl": "https://www.naeu.playblackdesert.com/en-US/Wiki?wikiNo=357",
+            "status": 200,
+            "bytes": 223434,
+            "sha256": "9b61cea67cdf2942456034dc2fbdaacdc8c2959f2c9edd7343563f49f46f4100",
+            "retrievedAt": "2026-11-03T09:27:19.988Z"
+          }
+        }
+      ]
+    },
+    {
+      "id": 11828,
+      "name": "Tungrad Earring",
+      "added": [
+        "Monster drops · Aakman Temple or Kratuga Ancient Ruins"
+      ],
+      "removed": [],
+      "evidence": [
+        {
+          "name": "Tungrad Earring",
+          "id": "11828",
+          "key": "monster-sources-mediah-naeu-current",
+          "section": "Kratuga Ancient Ruins",
+          "url": "https://www.naeu.playblackdesert.com/en-US/Wiki?wikiNo=70",
+          "sha256": "49b6fb9f4420ca2381c8d06751b229a310dca8c2ef44f92b400d4a3421a5f150",
+          "context": "the most difficult monster zones in Mediah Hunting Satisfaction ★★★★☆ Did you like Hasrah? This is better! Unique Drops Tungrad Earring Laytenn's Power Stone Mount Parking Location At the entrance of the Hasrah Ancient Ruins 1. Monster Types and Level 1) Basic Information • Mostly Lv. 60 ~ 65 monsters • Melee: Kimel, Elqueesh, Belloten, Bamole",
+          "fetch": {
+            "key": "monster-sources-mediah-naeu-current",
+            "url": "https://www.naeu.playblackdesert.com/en-US/Wiki?wikiNo=70",
+            "finalUrl": "https://www.naeu.playblackdesert.com/en-US/Wiki?wikiNo=70",
+            "status": 200,
+            "bytes": 247256,
+            "sha256": "49b6fb9f4420ca2381c8d06751b229a310dca8c2ef44f92b400d4a3421a5f150",
+            "retrievedAt": "2026-11-03T11:29:45.558Z"
+          }
+        },
+        {
+          "name": "Tungrad Earring",
+          "id": "11828",
+          "key": "monster-sources-valencia-naeu-current",
+          "section": "Aakman Temple",
+          "url": "https://www.naeu.playblackdesert.com/en-US/Wiki?wikiNo=358",
+          "sha256": "a4fd7992284b346a0a6af6843939f939e42c5273276752ecab31c0f8364965c8",
+          "context": " ★★★★★ Easier than Hystria Ruins, but… Hunting Satisfaction ★★★★★ It feels like fighting a powerful enemy. Unique Drops Tungrad Earring Mount Parking Location None Area Classification It is in the desert, but you won't get desert illnesses here. 1. Monster Types and Level 1) Basic Information • Mostly Lv. 59 ~ 62 monsters • Melee: Aakman Guard",
+          "fetch": {
+            "key": "monster-sources-valencia-naeu-current",
+            "url": "https://www.naeu.playblackdesert.com/en-US/Wiki?wikiNo=358",
+            "finalUrl": "https://www.naeu.playblackdesert.com/en-US/Wiki?wikiNo=358",
+            "status": 200,
+            "bytes": 271520,
+            "sha256": "a4fd7992284b346a0a6af6843939f939e42c5273276752ecab31c0f8364965c8",
+            "retrievedAt": "2026-11-03T11:29:45.589Z"
+          }
+        }
+      ]
+    },
+    {
+      "id": 11629,
+      "name": "Tungrad Necklace",
+      "added": [
+        "Monster drops · Hystria Ruins or Gyfin Rhasia Temple (Underground)"
+      ],
+      "removed": [],
+      "evidence": [
+        {
+          "name": "Tungrad Necklace",
+          "id": "11629",
+          "key": "monster-sources-valencia-naeu-current",
+          "section": "Hystria Ruins",
+          "url": "https://www.naeu.playblackdesert.com/en-US/Wiki?wikiNo=358",
+          "sha256": "a4fd7992284b346a0a6af6843939f939e42c5273276752ecab31c0f8364965c8",
+          "context": "★★★★ Hunt or be Hunted Hunting Satisfaction ★★★★★ One of the best places if you can handle the difficulty. Unique Drops Tungrad Necklace Mount Parking Location None Area Classification It is in the desert, but you won't get desert illnesses here. 1. Monster Types and Level 1) Basic Information • Mostly Lv. 64 ~ 65 monsters • Melee/Ranged: Elten",
+          "fetch": {
+            "key": "monster-sources-valencia-naeu-current",
+            "url": "https://www.naeu.playblackdesert.com/en-US/Wiki?wikiNo=358",
+            "finalUrl": "https://www.naeu.playblackdesert.com/en-US/Wiki?wikiNo=358",
+            "status": 200,
+            "bytes": 271520,
+            "sha256": "a4fd7992284b346a0a6af6843939f939e42c5273276752ecab31c0f8364965c8",
+            "retrievedAt": "2026-11-03T11:29:45.589Z"
+          }
+        },
+        {
+          "name": "Tungrad Necklace",
+          "id": "11629",
+          "key": "spirit-stones-kamasylvia-naeu-current",
+          "section": "Gyfin Rhasia Temple",
+          "url": "https://www.naeu.playblackdesert.com/en-US/Wiki?wikiNo=357",
+          "sha256": "9b61cea67cdf2942456034dc2fbdaacdc8c2959f2c9edd7343563f49f46f4100",
+          "context": "he strongest foes in Kamasylvia. Hunting Satisfaction ★★★☆☆ If you can adapt to their rhythm. Unique Drops Tungrad Belt Tungrad Necklace Mount Parking Location It is better to park outside the temple. 1. Monster Types and Level 1) Basic Information • Mostly Lv. 64 ~ 66 monsters • Melee: Gyfin Rhasia Guard, Gyfin Rhasia Crusher, Gyfin Rhasia Dec",
+          "fetch": {
+            "key": "spirit-stones-kamasylvia-naeu-current",
+            "url": "https://www.naeu.playblackdesert.com/en-US/Wiki?wikiNo=357",
+            "finalUrl": "https://www.naeu.playblackdesert.com/en-US/Wiki?wikiNo=357",
+            "status": 200,
+            "bytes": 223434,
+            "sha256": "9b61cea67cdf2942456034dc2fbdaacdc8c2959f2c9edd7343563f49f46f4100",
+            "retrievedAt": "2026-11-03T09:27:19.988Z"
+          }
+        }
+      ]
+    },
+    {
+      "id": 12061,
+      "name": "Tungrad Ring",
+      "added": [
+        "Monster drops · Sycraia Ruins (Upper or Lower)"
+      ],
+      "removed": [],
+      "evidence": [
+        {
+          "name": "Tungrad Ring",
+          "id": "12061",
+          "key": "monster-sources-underwater-naeu-current",
+          "section": "Sycraia Ruins (Upper Zone)",
+          "url": "https://www.naeu.playblackdesert.com/en-US/Wiki?wikiNo=355",
+          "sha256": "1f979ad58c58a66191b708017767220bc38872534ae7f97463122cc3339a3ef5",
+          "context": "ut here, as you will be very far from shore. 4. Major Item Drops Rich Merchant's Ring Piece Sycrid's Song Deboreka Ring Tungrad Ring Marni's Research Box Forgotten Limbo Box Abyssal Essence Sealed Black Magic Crystal Note that there is also an increased chance of obtaining Specter's Energy in this monster zone.",
+          "fetch": {
+            "key": "monster-sources-underwater-naeu-current",
+            "url": "https://www.naeu.playblackdesert.com/en-US/Wiki?wikiNo=355",
+            "finalUrl": "https://www.naeu.playblackdesert.com/en-US/Wiki?wikiNo=355",
+            "status": 200,
+            "bytes": 181923,
+            "sha256": "1f979ad58c58a66191b708017767220bc38872534ae7f97463122cc3339a3ef5",
+            "retrievedAt": "2026-11-03T11:29:45.461Z"
+          }
+        },
+        {
+          "name": "Tungrad Ring",
+          "id": "12061",
+          "key": "monster-sources-underwater-naeu-current",
+          "section": "Sycraia Ruins (Lower Zone)",
+          "url": "https://www.naeu.playblackdesert.com/en-US/Wiki?wikiNo=355",
+          "sha256": "1f979ad58c58a66191b708017767220bc38872534ae7f97463122cc3339a3ef5",
+          "context": "Monster Zones (Primordial Pigments, Corrupt Oil of Immortality, Refined Origin of Hunger, Refined Essence of Devouring) Tungrad Ring (up to III) Deboreka Ring (up to III) Rich Merchant's Ring Piece Sycraia Shard 5. User Density However, that goes without saying, this place is a challenge even for the best out there. Many will die at the han",
+          "fetch": {
+            "key": "monster-sources-underwater-naeu-current",
+            "url": "https://www.naeu.playblackdesert.com/en-US/Wiki?wikiNo=355",
+            "finalUrl": "https://www.naeu.playblackdesert.com/en-US/Wiki?wikiNo=355",
+            "status": 200,
+            "bytes": 181923,
+            "sha256": "1f979ad58c58a66191b708017767220bc38872534ae7f97463122cc3339a3ef5",
+            "retrievedAt": "2026-11-03T11:29:45.461Z"
+          }
+        }
+      ]
+    },
+    {
+      "id": 44461,
+      "name": "Turo Heart",
+      "added": [
+        "Monster drops · Tunkuta"
+      ],
+      "removed": [],
+      "evidence": [
+        {
+          "name": "Turo Heart",
+          "id": "44461",
+          "key": "monster-sources-odyllita-naeu-current",
+          "section": "Tunkuta",
+          "url": "https://www.naeu.playblackdesert.com/en-US/Wiki?wikiNo=349",
+          "sha256": "96e04d7486a38784e9a5e6f77e1d7a22f14f75c44fb1553e07b7911f84aca4f4",
+          "context": "t Lung (needed to obtain the much sought-after La Orzeca outfit), Thick Turo Blood (an ingredient for new elixirs), and Turo Heart (an ingredient for Corrupt Oil of Immortality). But most important of all, Adventurers who wish to craft the Fallen God's Armor will need to brave this forest, as the essential Flame of Despair drops from thes",
+          "fetch": {
+            "key": "monster-sources-odyllita-naeu-current",
+            "url": "https://www.naeu.playblackdesert.com/en-US/Wiki?wikiNo=349",
+            "finalUrl": "https://www.naeu.playblackdesert.com/en-US/Wiki?wikiNo=349",
+            "status": 200,
+            "bytes": 206469,
+            "sha256": "96e04d7486a38784e9a5e6f77e1d7a22f14f75c44fb1553e07b7911f84aca4f4",
+            "retrievedAt": "2026-11-03T11:29:45.353Z"
+          }
+        }
+      ]
+    },
+    {
+      "id": 12257,
+      "name": "Turo's Belt",
+      "added": [
+        "Monster drops · Tunkuta"
+      ],
+      "removed": [],
+      "evidence": [
+        {
+          "name": "Turo's Belt",
+          "id": "12257",
+          "key": "monster-sources-odyllita-naeu-current",
+          "section": "Tunkuta",
+          "url": "https://www.naeu.playblackdesert.com/en-US/Wiki?wikiNo=349",
+          "sha256": "96e04d7486a38784e9a5e6f77e1d7a22f14f75c44fb1553e07b7911f84aca4f4",
+          "context": "lt unless you are in a party of two. Hunting Satisfaction ★★★★☆ Great if you are able to defeat the Turos. Unique Drops Turo's Belt Flame of Despair Mount Parking Location At any of the entrances. 1. Monster Types and Level 1) Basic Information • Mostly Lv. 64 monsters • Melee: Turo Berserker • Melee/Ranged: Turo Pike Warrior, Turo Scout •",
+          "fetch": {
+            "key": "monster-sources-odyllita-naeu-current",
+            "url": "https://www.naeu.playblackdesert.com/en-US/Wiki?wikiNo=349",
+            "finalUrl": "https://www.naeu.playblackdesert.com/en-US/Wiki?wikiNo=349",
+            "status": 200,
+            "bytes": 206469,
+            "sha256": "96e04d7486a38784e9a5e6f77e1d7a22f14f75c44fb1553e07b7911f84aca4f4",
+            "retrievedAt": "2026-11-03T11:29:45.353Z"
+          }
+        }
+      ]
+    },
+    {
+      "id": 12236,
+      "name": "Valtarra Eclipsed Belt",
+      "added": [
+        "Monster drops · Mirumok Ruins"
+      ],
+      "removed": [],
+      "evidence": [
+        {
+          "name": "Valtarra Eclipsed Belt",
+          "id": "12236",
+          "key": "spirit-stones-kamasylvia-naeu-current",
+          "section": "Mirumok Ruins",
+          "url": "https://www.naeu.playblackdesert.com/en-US/Wiki?wikiNo=357",
+          "sha256": "9b61cea67cdf2942456034dc2fbdaacdc8c2959f2c9edd7343563f49f46f4100",
+          "context": "ry to not get hit too much. Hunting Satisfaction ★★★☆☆ Find a good spot to get the most out of this place. Unique Drops Valtarra Eclipsed Belt Mount Parking Location Parking location will depend on the route. 1. Monster Types and Level 1) Basic Information • Mostly Lv. 60 ~ 62 monsters • Melee: Voraro, Old Mirumok • Melee/Ranged: Degraded Old Tree Tr",
+          "fetch": {
+            "key": "spirit-stones-kamasylvia-naeu-current",
+            "url": "https://www.naeu.playblackdesert.com/en-US/Wiki?wikiNo=357",
+            "finalUrl": "https://www.naeu.playblackdesert.com/en-US/Wiki?wikiNo=357",
+            "status": 200,
+            "bytes": 223434,
+            "sha256": "9b61cea67cdf2942456034dc2fbdaacdc8c2959f2c9edd7343563f49f46f4100",
+            "retrievedAt": "2026-11-03T09:27:19.988Z"
+          }
+        }
+      ]
+    },
+    {
+      "id": 44335,
+      "name": "Vell's Concentrated Magic",
+      "added": [
+        "World boss · Vell (chance from rewards)"
+      ],
+      "removed": [],
+      "evidence": [
+        {
+          "name": "Vell's Concentrated Magic",
+          "id": "44335",
+          "key": "monster-sources-world-boss-naeu-current",
+          "section": "Vell",
+          "url": "https://www.naeu.playblackdesert.com/en-US/Wiki?wikiNo=83",
+          "sha256": "e24e6338d2d02f78a0c331a6ff47ec62aafb051276ee624787e4cbd53839f0ec",
+          "context": " you defeat Vell, you can obtain \"Vell's Heart\" if you are lucky, a rechargeable offensive alchemy stone. If you obtain Vell's Concentrated Magic, you can process it via Simple Alchemy with x1,500 Alchemy Stone Shards to obtain a Vell's Heart.",
+          "fetch": {
+            "key": "monster-sources-world-boss-naeu-current",
+            "url": "https://www.naeu.playblackdesert.com/en-US/Wiki?wikiNo=83",
+            "finalUrl": "https://www.naeu.playblackdesert.com/en-US/Wiki?wikiNo=83",
+            "status": 200,
+            "bytes": 554939,
+            "sha256": "e24e6338d2d02f78a0c331a6ff47ec62aafb051276ee624787e4cbd53839f0ec",
+            "retrievedAt": "2026-11-03T11:29:45.704Z"
+          }
+        }
+      ]
+    },
+    {
+      "id": 44306,
+      "name": "Water Spirit Stone Fragment",
+      "added": [
+        "Main quests · Kamasylvia"
+      ],
+      "removed": [
+        "Defeat monsters in Kamasylvia."
+      ],
+      "evidence": [
+        {
+          "key": "tree-fragment-naeu-20221116",
+          "fetch": {
+            "key": "tree-fragment-naeu-20221116",
+            "url": "https://www.naeu.playblackdesert.com/en-US/News/Detail?groupContentNo=4265",
+            "finalUrl": "https://www.naeu.playblackdesert.com/en-US/News/Detail?groupContentNo=4265",
+            "status": 200,
+            "bytes": 192268,
+            "sha256": "85830f2ce175cd08a5a033049586ca36c1048e6724dae0b1d1ae96536aef8006",
+            "retrievedAt": "2026-11-03T11:20:30.722Z"
+          },
+          "decision": "Exact quest reward names reviewed; no repeatability, server probability or hidden conditions inferred from decoded quest DSL."
+        }
+      ]
+    },
+    {
+      "id": 44304,
+      "name": "Wind Spirit Stone Fragment",
+      "added": [
+        "Main quests · Kamasylvia"
+      ],
+      "removed": [
+        "Defeat monsters in Kamasylvia."
+      ],
+      "evidence": [
+        {
+          "key": "tree-fragment-naeu-20221116",
+          "fetch": {
+            "key": "tree-fragment-naeu-20221116",
+            "url": "https://www.naeu.playblackdesert.com/en-US/News/Detail?groupContentNo=4265",
+            "finalUrl": "https://www.naeu.playblackdesert.com/en-US/News/Detail?groupContentNo=4265",
+            "status": 200,
+            "bytes": 192268,
+            "sha256": "85830f2ce175cd08a5a033049586ca36c1048e6724dae0b1d1ae96536aef8006",
+            "retrievedAt": "2026-11-03T11:20:30.722Z"
+          },
+          "decision": "Exact quest reward names reviewed; no repeatability, server probability or hidden conditions inferred from decoded quest DSL."
+        }
+      ]
+    },
+    {
+      "id": 11808,
+      "name": "Witch's Earring",
+      "added": [
+        "Monster drops · Hexe Sanctuary"
+      ],
+      "removed": [],
+      "evidence": [
+        {
+          "name": "Witch's Earring",
+          "id": "11808",
+          "key": "monster-sources-calpheon-naeu-current",
+          "section": "Hexe Sanctuary",
+          "url": "https://www.naeu.playblackdesert.com/en-US/Wiki?wikiNo=69",
+          "sha256": "b37e896d6d7133b9e5f7cdb873a9726dc1263efbb66dfd98825a36997972c1e2",
+          "context": "y ★★★☆☆ May be the scariest place in Calpheon? Hunting Satisfaction ★★★★☆ The first battle with the undead Unique Drops Witch's Earring Mount Parking Location Depends on your route 1. Monster Types and Level 1) Basic Information • Mostly Level 50~52 monsters • Melee: Skeleton, Skeleton Warrior, Skeleton Wolf, Skeleton Lizard, Skeleton Witmirth",
+          "fetch": {
+            "key": "monster-sources-calpheon-naeu-current",
+            "url": "https://www.naeu.playblackdesert.com/en-US/Wiki?wikiNo=69",
+            "finalUrl": "https://www.naeu.playblackdesert.com/en-US/Wiki?wikiNo=69",
+            "status": 200,
+            "bytes": 212510,
+            "sha256": "b37e896d6d7133b9e5f7cdb873a9726dc1263efbb66dfd98825a36997972c1e2",
+            "retrievedAt": "2026-11-03T11:29:45.568Z"
+          }
+        }
+      ]
+    }
+  ],
+  "nativeHash": "a54b5735052c990e189ff1a50afb6d5442cc80e0ba8dabff995979bc8d35c821",
+  "projection": "resumed-monster-quest-final-projection/controller-projection.json",
+  "unchangedReferences": 2227,
+  "patchScreen": [
+    {
+      "key": "monster-loot-naeu-20260319",
+      "fetch": {
+        "key": "monster-loot-naeu-20260319",
+        "url": "https://www.naeu.playblackdesert.com/en-US/News/Detail?groupContentNo=9853",
+        "finalUrl": "https://www.naeu.playblackdesert.com/en-US/News/Detail?groupContentNo=9853",
+        "status": 200,
+        "bytes": 133841,
+        "sha256": "0a4d04094e5c6257710bc8668ff0ab578e09ae5fcfbb539f84ab400e73d1c58d",
+        "retrievedAt": "2026-11-03T11:31:51.903Z"
+      }
+    },
+    {
+      "key": "monster-loot-naeu-20260702",
+      "fetch": {
+        "key": "monster-loot-naeu-20260702",
+        "url": "https://www.naeu.playblackdesert.com/en-US/News/Detail?groupContentNo=10239",
+        "finalUrl": "https://www.naeu.playblackdesert.com/en-US/News/Detail?groupContentNo=10239",
+        "status": 200,
+        "bytes": 229319,
+        "sha256": "8d17525ee0e8b0774cbc6f01580ad9e00fd451a2d2c0d46f752a9d99d515a6bf",
+        "retrievedAt": "2026-11-03T11:31:52.072Z"
+      }
+    },
+    {
+      "key": "rift-remnants-naeu-20240626",
+      "fetch": {
+        "key": "rift-remnants-naeu-20240626",
+        "url": "https://www.naeu.playblackdesert.com/en-US/News/Detail?groupContentNo=7189",
+        "finalUrl": "https://www.naeu.playblackdesert.com/en-US/News/Detail?groupContentNo=7189",
+        "status": 200,
+        "bytes": 143492,
+        "sha256": "ffc1d4f6f09262e5914878ea25f841b09164dfbc9a266b00ca5501be24ab8700",
+        "retrievedAt": "2026-11-03T11:31:52.072Z"
+      }
+    }
+  ],
+  "excludedFalseMatches": [
+    "Mark of Shadow and Shrine Guardian Token in Dawn Earring crafting notes are not zone drop evidence.",
+    "Eye of the Ruins Ring comparison in Blood Wolf Settlement is not a second drop source.",
+    "Tungrad Ring combination note in Protty Cave is not a direct Protty drop.",
+    "Gyfin Necklace is underground-only; Belt source spans the temple.",
+    "Named source existence does not prove exhaustive source coverage, numerical chance, trash value or enhanced grade distribution."
+  ],
+  "limits": "Current official PC guide source hints, exact native identities and targeted later notices only. Old gear/Black Stone wording elsewhere in guides is not imported. No automatic loot, gear consumption, recipe, quantity, price, rate or saved-state change.",
+  "verification": {
+    "date": "2026-11-03T11:44:57.316Z",
+    "status": "37_SHARED_SOURCE_CORRECTIONS_VERIFIED_AUDIT_ACTIVE",
+    "evidence": "resumed-monster-quest-source-evidence.json",
+    "changedReferences": 37,
+    "unchangedReferences": 2227,
+    "modeViews": 6792,
+    "tests": [
+      {
+        "log": "resumed-monster-quest-contract-final-tests.jsonl",
+        "passed": 282
+      },
+      {
+        "log": "resumed-monster-quest-final-projection-tests.jsonl",
+        "passed": 1
+      },
+      {
+        "log": "resumed-monster-quest-layout-tests.jsonl",
+        "passed": 540
+      },
+      {
+        "log": "resumed-monster-quest-compaction-layout-tests.jsonl",
+        "passed": 24
+      }
+    ],
+    "analysis": "PASS",
+    "windowsRelease": "PASS",
+    "catalogHash": "217a53e66f0182581e64431354ce391d01774acfafed41e1bf6147497832cb72",
+    "closed": [
+      "market_only_review:36",
+      "market_only_review:37",
+      "market_only_review:49",
+      "market_only_review:53",
+      "market_only_review:123",
+      "market_only_review:126",
+      "market_only_review:178",
+      "market_only_review:193",
+      "market_only_review:276",
+      "market_only_review:280",
+      "market_only_review:291",
+      "market_only_review:299",
+      "market_only_review:307",
+      "market_only_review:309",
+      "market_only_review:319",
+      "market_only_review:323",
+      "market_only_review:324",
+      "market_only_review:349",
+      "market_only_review:368",
+      "market_only_review:375",
+      "market_only_review:378",
+      "market_only_review:387",
+      "market_only_review:389",
+      "market_only_review:475",
+      "market_only_review:476",
+      "market_only_review:477",
+      "market_only_review:478",
+      "market_only_review:479",
+      "market_only_review:480",
+      "market_only_review:481",
+      "market_only_review:487",
+      "market_only_review:490",
+      "market_only_review:508"
+    ],
+    "partial": [
+      "single_source_review:7",
+      "single_source_review:8",
+      "single_source_review:20",
+      "single_source_review:22",
+      "single_source_review:90",
+      "single_source_review:92",
+      "single_source_review:122",
+      "single_source_review:126",
+      "single_source_review:164",
+      "single_source_review:170",
+      "single_source_review:220",
+      "single_source_review:229",
+      "single_source_review:243",
+      "single_source_review:247",
+      "single_source_review:255",
+      "single_source_review:262",
+      "single_source_review:263",
+      "single_source_review:271",
+      "single_source_review:278",
+      "single_source_review:280",
+      "single_source_review:281",
+      "single_source_review:291",
+      "single_source_review:322",
+      "single_source_review:352",
+      "single_source_review:353",
+      "single_source_review:354",
+      "single_source_review:355",
+      "single_source_review:356",
+      "single_source_review:357",
+      "single_source_review:358",
+      "single_source_review:359",
+      "single_source_review:361",
+      "single_source_review:363",
+      "single_source_review:370"
+    ],
+    "visualReview": [
+      "resumed-monster-quest-captures/supported-mark-of-shadow-sakura-night-garden-2.png",
+      "resumed-monster-quest-final-captures/supported-tree-spirit-stone-fragment-sakura-night-garden-2.png"
+    ],
+    "retainedFailures": {
+      "projectionInitial": "Missing isolated output directory, corrected before final export; original failure retained.",
+      "contractInitial": "Three cases exposed original text re-added by the later plain-information projection. Fixed exact shared wording conversion, verified all modes and24 final layout cases. No tests weakened."
+    },
+    "limits": "The full layout run compiled immediately before the final exact Kamasylvia wording normalization; all24 affected spirit-fragment layouts rechecked after it. All other changed sources are identical. No recipe, exchange, calculation, catalog, personal-data, installation, visible launch or publication change."
+  }
+}

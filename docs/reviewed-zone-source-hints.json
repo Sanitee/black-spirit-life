@@ -1,0 +1,283 @@
+{
+  "date": "2026-11-03",
+  "status": "IMPLEMENTED_AND_VERIFIED_AUDIT_ACTIVE",
+  "scope": "Five exact ordinary accessory source omissions, using the current installed PC Monster Zone Info table with keyed identities, not numerical server drop tables.",
+  "facts": [
+    {
+      "id": 11816,
+      "name": "Blue Coral Earring",
+      "sources": [
+        "Monster drops · Pirate Island or Padix Island"
+      ],
+      "zoneKeys": [
+        112,
+        12
+      ]
+    },
+    {
+      "id": 11817,
+      "name": "Red Coral Earring",
+      "sources": [
+        "Monster drops · Pirate Island or Padix Island"
+      ],
+      "zoneKeys": [
+        112,
+        12
+      ]
+    },
+    {
+      "id": 12017,
+      "name": "Blue Coral Ring",
+      "sources": [
+        "Monster drops · Pirate Island"
+      ],
+      "zoneKeys": [
+        112
+      ]
+    },
+    {
+      "id": 12018,
+      "name": "Red Coral Ring",
+      "sources": [
+        "Monster drops · Pirate Island"
+      ],
+      "zoneKeys": [
+        112
+      ]
+    },
+    {
+      "id": 11807,
+      "name": "Token of Friendship",
+      "sources": [
+        "Monster drops · Cyclops Land"
+      ],
+      "zoneKeys": [
+        9
+      ]
+    }
+  ],
+  "evidence": {
+    "rawProbe": "Workspace audit/correctness-review-20261102/resumed-zone-raw-probe.json",
+    "strictDecode": "Workspace audit/correctness-review-20261102/resumed-zone-strict-probe.json",
+    "redCoralPadix": "https://www.naeu.playblackdesert.com/en-US/News/Detail?groupContentNo=5961",
+    "redCoralPadixDate": "2023-09-20",
+    "pirateUiAddition": "https://www.naeu.playblackdesert.com/en-US/News/Detail?groupContentNo=10210",
+    "pirateUiAdditionDate": "2026-06-25"
+  },
+  "researchCorrection": "The old research-only zone export had shifted headers and index-based English labels. The isolated read-only parser now consumes all 112 records exactly, matches independent stat offsets and joins 112 unique localization keys. The obsolete mislabeled export is not source evidence. Original extractor and game archives remain unchanged.",
+  "limits": [
+    "The native UI supports named obtainable-item membership, not drop odds or exhaustive source completeness.",
+    "Ordinary Cyclops Land only; no Dehkia route is added.",
+    "No obsolete Mysterious Accessory NPC sales, enhanced-item box routes or Special Barter hand-in requirements are treated as sources.",
+    "Bensho's Necklace, Gartner Belt, Nert Ring and Necklace of Good Deeds have no matches in this UI table; absence does not prove no monster source.",
+    "No recipe, calculation, random output model, price, saved data, layout or market behavior is changed."
+  ],
+  "verification": {
+    "date": "2026-11-03T12:26:05.004Z",
+    "status": "FIVE_SOURCE_OMISSIONS_FIXED_AUDIT_ACTIVE",
+    "facts": [
+      {
+        "id": 11816,
+        "name": "Blue Coral Earring",
+        "sources": [
+          "Monster drops · Pirate Island or Padix Island"
+        ],
+        "zoneKeys": [
+          112,
+          12
+        ]
+      },
+      {
+        "id": 11817,
+        "name": "Red Coral Earring",
+        "sources": [
+          "Monster drops · Pirate Island or Padix Island"
+        ],
+        "zoneKeys": [
+          112,
+          12
+        ]
+      },
+      {
+        "id": 12017,
+        "name": "Blue Coral Ring",
+        "sources": [
+          "Monster drops · Pirate Island"
+        ],
+        "zoneKeys": [
+          112
+        ]
+      },
+      {
+        "id": 12018,
+        "name": "Red Coral Ring",
+        "sources": [
+          "Monster drops · Pirate Island"
+        ],
+        "zoneKeys": [
+          112
+        ]
+      },
+      {
+        "id": 11807,
+        "name": "Token of Friendship",
+        "sources": [
+          "Monster drops · Cyclops Land"
+        ],
+        "zoneKeys": [
+          9
+        ]
+      }
+    ],
+    "sources": [
+      {
+        "key": "salvage-canonical-5961",
+        "url": "https://www.naeu.playblackdesert.com/en-US/News/Detail?groupContentNo=5961",
+        "finalUrl": "https://www.naeu.playblackdesert.com/en-US/News/Detail?groupContentNo=5961",
+        "status": 200,
+        "bytes": 274143,
+        "sha256": "87e9b9b95d83a848f281368f45ea0927a666aa14b26ee372555377390ad18bd5",
+        "retrievedAt": "2026-11-03T10:36:21.574Z"
+      },
+      {
+        "key": "creation-naeu-20260625",
+        "url": "https://www.naeu.playblackdesert.com/en-US/News/Detail?groupContentNo=10210",
+        "finalUrl": "https://www.naeu.playblackdesert.com/en-US/News/Detail?groupContentNo=10210",
+        "status": 200,
+        "bytes": 330815,
+        "sha256": "ca08eefb9f0deba0e5de31ead8e399c8262cdf5676678644f29a1c744bd773b2",
+        "retrievedAt": "2026-11-03T08:38:52.370Z"
+      },
+      {
+        "key": "cyclops-naeu-20261008",
+        "url": "https://www.naeu.playblackdesert.com/en-US/News/Detail?groupContentNo=10678",
+        "finalUrl": "https://www.naeu.playblackdesert.com/en-US/News/Detail?groupContentNo=10678",
+        "status": 200,
+        "bytes": 221688,
+        "sha256": "632eb903dc3f66c8d06b9e2bf9235c12a33625dddbeb37911a431c7ee73d6d16",
+        "retrievedAt": "2026-11-03T12:23:36.752Z"
+      },
+      {
+        "key": "cyclops-naeu-20260716",
+        "url": "https://www.naeu.playblackdesert.com/en-US/News/Detail?groupContentNo=10313",
+        "finalUrl": "https://www.naeu.playblackdesert.com/en-US/News/Detail?groupContentNo=10313",
+        "status": 200,
+        "bytes": 135302,
+        "sha256": "9dc92f67f52307811e042bce370a9d90c0b184be037b5353c103ef784c8d90d2",
+        "retrievedAt": "2026-11-03T12:23:36.654Z"
+      },
+      {
+        "key": "cyclops-naeu-20251127",
+        "url": "https://www.naeu.playblackdesert.com/en-US/News/Detail?groupContentNo=9371",
+        "finalUrl": "https://www.naeu.playblackdesert.com/en-US/News/Detail?groupContentNo=9371",
+        "status": 200,
+        "bytes": 204809,
+        "sha256": "e0cefe8203ee3f0788c0e47b8e0d2b0b719a5aacf73c4b056388295472097187",
+        "retrievedAt": "2026-11-03T12:23:36.668Z"
+      },
+      {
+        "key": "coral-naeu-20260108",
+        "url": "https://www.naeu.playblackdesert.com/en-US/News/Detail?groupContentNo=9557",
+        "finalUrl": "https://www.naeu.playblackdesert.com/en-US/News/Detail?groupContentNo=9557",
+        "status": 200,
+        "bytes": 165037,
+        "sha256": "a208635486d4e6e63ee907d94b084ed7cab88ca81fb908665b19a9fefab9ec41",
+        "retrievedAt": "2026-11-03T12:23:36.680Z"
+      },
+      {
+        "key": "coral-cyclops-naeu-20240313",
+        "url": "https://www.naeu.playblackdesert.com/en-US/News/Detail?groupContentNo=6729",
+        "finalUrl": "https://www.naeu.playblackdesert.com/en-US/News/Detail?groupContentNo=6729",
+        "status": 200,
+        "bytes": 177122,
+        "sha256": "375ee8f8a5aa66a76c3140ed9d621f9a61076833e13a76c3431fd5d18cc2b8de",
+        "retrievedAt": "2026-11-03T12:23:36.942Z"
+      },
+      {
+        "key": "monster-loot-naeu-20260702",
+        "url": "https://www.naeu.playblackdesert.com/en-US/News/Detail?groupContentNo=10239",
+        "finalUrl": "https://www.naeu.playblackdesert.com/en-US/News/Detail?groupContentNo=10239",
+        "status": 200,
+        "bytes": 229319,
+        "sha256": "8d17525ee0e8b0774cbc6f01580ad9e00fd451a2d2c0d46f752a9d99d515a6bf",
+        "retrievedAt": "2026-11-03T11:31:52.072Z"
+      },
+      {
+        "key": "salvage-notice-6579",
+        "url": "https://www.naeu.playblackdesert.com/News/Notice/Detail?groupContentNo=6579&countryType=en-US",
+        "finalUrl": "https://www.naeu.playblackdesert.com/en-US/News/Detail?groupContentNo=6579&countryType=en-US",
+        "status": 200,
+        "bytes": 205495,
+        "sha256": "fb579eb9c3f1f2a271098342d8412f2c3bb9a470db7a379ca8d75c9c36375f7b",
+        "retrievedAt": "2026-11-03T10:33:30.536Z"
+      }
+    ],
+    "changed": [
+      "Blue Coral Earring",
+      "Blue Coral Ring",
+      "Red Coral Earring",
+      "Red Coral Ring",
+      "Token of Friendship"
+    ],
+    "unchanged": 2259,
+    "views": 6792,
+    "tests": [
+      {
+        "log": "resumed-zone-sources-contract-final-tests.jsonl",
+        "passed": 296
+      },
+      {
+        "log": "resumed-zone-sources-projection-tests.jsonl",
+        "passed": 1
+      },
+      {
+        "log": "resumed-zone-sources-layout-tests.jsonl",
+        "passed": 30
+      }
+    ],
+    "analysis": "PASS",
+    "windowsRelease": "PASS",
+    "catalogHash": "cf32b360d6cb676c7efe22759043131c6caa9ce0a7a946be156f7c2292de2100",
+    "closed": [
+      "market_only_review:63",
+      "market_only_review:64",
+      "market_only_review:359",
+      "market_only_review:360",
+      "market_only_review:471"
+    ],
+    "partial": [
+      "single_source_review:31",
+      "single_source_review:32",
+      "single_source_review:275",
+      "single_source_review:276",
+      "single_source_review:349"
+    ],
+    "native": {
+      "table": "dropuihuntinggroundinfo.bss",
+      "sha256": "cd8c20bb61d40f2fd0ff2e43813cf3a3d073efec65aaced2195a718062b18f4d",
+      "strictRecords": 112,
+      "legacyMismatchedLabels": 112,
+      "probe": "resumed-zone-strict-probe.json",
+      "october8MagaiaRemovalControl": "PASS"
+    },
+    "searchReceipts": [
+      "coral-blue-current-notices",
+      "coral-red-current-notices",
+      "token-friendship-current-notices",
+      "pirate-source-current-notices",
+      "cyclops-source-current-notices"
+    ],
+    "laterScreen": "Jan2026 blue-coral matches concern material/furniture identities. March2024 Cyclops matches are Elvia variants; July2026 Dehkia and wild-horse changes do not replace ordinary Cyclops. October8 explicitly improves Cyclops navigation and corrects Magaia obtainable-item UI; current raw table matches that removal. February2024 discontinued Mysterious Accessory vendors stay excluded.",
+    "harnessCorrection": "First contract command used the wrong path for plain_item_sources_view_test.dart. Failed loader log retained; complete corrected three-file run passes. No assertion or fixture weakened.",
+    "visualReview": [
+      "resumed-zone-sources-captures/supported-token-of-friendship-sakura-night-garden-2.png"
+    ],
+    "limits": [
+      "The native UI supports named obtainable-item membership, not drop odds or exhaustive source completeness.",
+      "Ordinary Cyclops Land only; no Dehkia route is added.",
+      "No obsolete Mysterious Accessory NPC sales, enhanced-item box routes or Special Barter hand-in requirements are treated as sources.",
+      "Bensho's Necklace, Gartner Belt, Nert Ring and Necklace of Good Deeds have no matches in this UI table; absence does not prove no monster source.",
+      "No recipe, calculation, random output model, price, saved data, layout or market behavior is changed."
+    ]
+  }
+}

@@ -1,0 +1,14 @@
+{
+  "date": "2026-11-03",
+  "status": "IMPLEMENTED_SCOPED_CORRECTION_VERIFIED_AUDIT_ACTIVE",
+  "verification": "111 focused checks,6792 mode views,300 full themed layout checks and18 additional source-scroll checks pass; final200% Sakura source visibility manually reviewed. Scoped analysis and Windows Release pass. Three market-only omission flags closed; three source-completeness records remain open.",
+  "scope": "Add one short Kamasylvia monster-drop source to the three existing ordinary blue-grade Spirit Stone references. Exact current identities45298/45300/45302; no effects, grade, permanence, recipe, price or market-query change.",
+  "sourceLine": "Monster drops · Kamasylvia",
+  "official": [
+    {"url": "https://www.naeu.playblackdesert.com/en-US/Wiki?wikiNo=65", "retrieved": "2026-11-03", "section": "Spirit Stones", "supports": "Destruction, Guardian and Life Spirit Stones are monster drops in Kamasylvia, in both ordinary green and blue grades."},
+    {"url": "https://www.naeu.playblackdesert.com/en-US/Wiki?wikiNo=357", "retrieved": "2026-11-03", "section": "Major Item Drops", "supports": "Fadus lists Destruction/Guardian; Polly's lists Life. The concise source line does not claim these are the only zones."},
+    {"url": "https://www.naeu.playblackdesert.com/en-US/News/Detail?groupContentNo=9583", "published": "2026-01-15", "supports": "The separately named crafted Sharp/Resplendent/Splendid/Shining Spirit Stone grade changes are not a blanket removal of these three ordinary stones."}
+  ],
+  "corroboration": "Current installed PC descriptions preserve exact three names, IDs, blue grades and market eligibility. These are not Sharp Spirit Stone of Destruction/Protection or ordinary Alchemy Stones.",
+  "limitations": "The official guide contains stale duration/recharge and crafted-grade prose elsewhere. Only its ordinary monster-source statement, separately repeated by the regional monster guide, is used. Existing current passive effects are retained. No exact drop chance, complete zone roster, current Alchemy byproduct probability, event reward or source-completeness certification is inferred. Remaining single-source completeness records retain those questions."
+}

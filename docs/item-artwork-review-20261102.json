@@ -1,0 +1,144 @@
+{
+  "date": "2026-11-02",
+  "catalogSha256": "27b203792ab00e08fda966a240b5848346bcf3d1dca30ca75ad7bd2ecaf97a56",
+  "catalogBytes": 30265592,
+  "historicalManifest": "docs/item-artwork-provenance.json",
+  "historicalManifestSha256": "2727c7ff8310ab88243377395108920e3328964e42c2de534075f4ea90d74a65",
+  "historicalManifestScope": "Restored unchanged from earlier audit. Its facts/non-icon hashes describe that historical snapshot, not this current catalog.",
+  "currentIconRows": 4525,
+  "historicalRows": 4517,
+  "unchangedHistoricalDisplayAndReferenceRows": 4515,
+  "retainedOverrides": [
+    {
+      "mode": "alchemy",
+      "name": "Tiger Blood",
+      "id": 6356,
+      "grade": 0,
+      "sha256": "1a39cbe1a3b3027745f4e7ebd60dae62ca99178eb3242728ca893e60fbfa318f",
+      "referenceSha256": "4424e2951ff2d2371a62096fbca991dcc5df364ed040438a2cda99ca929b809b",
+      "status": "RETAINED_ENCODING_PROVENANCE_PARTIAL",
+      "source": "New_Icon/03_ETC/07_ProductMaterial/00006356.dds",
+      "note": "Present before this audit. Exact current client identity, grade and artwork path agree; retained display encoding differs from the older audit hash. Visual identity inspected. Encoding derivation remains unverified; do not call these original-byte-certified."
+    },
+    {
+      "mode": "processing",
+      "name": "Olivine Ore",
+      "id": 4415,
+      "grade": 0,
+      "sha256": "cde761fb5f50df80d9a4f32ac6c87c4d08a09821d1f6bc314d781520931c6370",
+      "referenceSha256": "460a6cc2ae202b78212f4db6f8b540ee6d340ae313d5464ef93c2e77f780c521",
+      "status": "RETAINED_ENCODING_PROVENANCE_PARTIAL",
+      "source": "New_Icon/03_ETC/07_ProductMaterial/00004415.dds",
+      "note": "Present before this audit. Exact current client identity, grade and artwork path agree; retained display encoding differs from the older audit hash. Visual identity inspected. Encoding derivation remains unverified; do not call these original-byte-certified."
+    }
+  ],
+  "addedEntries": [
+    {
+      "mode": "alchemy",
+      "name": "Perfume of Resolve",
+      "id": 1418,
+      "grade": 3,
+      "source": "New_Icon/03_ETC/08_Potion/00001415.dds",
+      "sha256": "6c208c7532012af798c9459fd35209e3d3a267091b796bd8a058dddbf12708f2",
+      "referenceSha256": "6c208c7532012af798c9459fd35209e3d3a267091b796bd8a058dddbf12708f2",
+      "status": "EXACT_DDS_RGBA_VERIFIED",
+      "ddsSha256": "79dbfff0f45df56f6b7e19c348c954ba186e193fdb20605922f937f27b938152",
+      "rgbaSha256": "f373bb52332b43d7476172736551c36ba4d9ee93c9e4407fd0a93c06cdb66fd0",
+      "decoderSpecification": "https://learn.microsoft.com/en-us/windows/uwp/graphics-concepts/block-compression"
+    },
+    {
+      "mode": "alchemy",
+      "name": "Immortal: Perfume of Resolve",
+      "id": 1419,
+      "grade": 3,
+      "source": "New_Icon/03_ETC/08_Potion/00001416.dds",
+      "sha256": "665ae1df16d033277edf7941d793594e745807ce6e084e4a76fa8c19d92c1ae1",
+      "referenceSha256": "665ae1df16d033277edf7941d793594e745807ce6e084e4a76fa8c19d92c1ae1",
+      "status": "EXACT_DDS_RGBA_VERIFIED",
+      "ddsSha256": "5835a7b147760860e3014a51bf9a59abcc9e1a21af1e3d8bb525cac1a1a23112",
+      "rgbaSha256": "2d4e8a706676ca43dc2197cbe9c7fecdb12c27de337612e75d16a42f8640b0b6",
+      "decoderSpecification": "https://learn.microsoft.com/en-us/windows/uwp/graphics-concepts/block-compression"
+    },
+    {
+      "mode": "alchemy",
+      "name": "Khalk Blood",
+      "id": 6360,
+      "grade": 0,
+      "source": "New_Icon/03_ETC/07_ProductMaterial/00006207.dds",
+      "sha256": "6ca423fb88fc4b362ab6a8a4c2a2ea9cad5f973ec31c1712cb3bee029fc863de",
+      "referenceSha256": "6ca423fb88fc4b362ab6a8a4c2a2ea9cad5f973ec31c1712cb3bee029fc863de",
+      "status": "SHARED_EXACT_CLIENT_ARTWORK_PATH_WITH_RETAINED_ENCODING",
+      "inheritedArtwork": "alchemy|Dinosaur Blood",
+      "note": "Khalk Blood and Dinosaur Blood use the same current client icon path. Existing lossy encoding retained; not a fresh pixel-exact DDS claim."
+    },
+    {
+      "mode": "alchemy",
+      "name": "Tainted Khalk Fluid",
+      "id": 821472,
+      "grade": 3,
+      "source": "New_Icon/03_ETC/07_ProductMaterial/00821472.dds",
+      "sha256": "c201d8ecb402fd1396356c978dce896173f5b3d01d3df04d2237c9b1ed563a71",
+      "referenceSha256": "c201d8ecb402fd1396356c978dce896173f5b3d01d3df04d2237c9b1ed563a71",
+      "status": "EXACT_DDS_RGBA_VERIFIED",
+      "ddsSha256": "5811134490f02def3a4360c86b3a6bf38b03ccc3a26462c9c5f4d744e24eac79",
+      "rgbaSha256": "8fdbc63a6c274983a87c53635aa451a9b83ecc2f172c074046de3f48ff828274",
+      "decoderSpecification": "https://learn.microsoft.com/en-us/windows/uwp/graphics-concepts/block-compression"
+    },
+    {
+      "mode": "processing",
+      "name": "Perfume of Resolve",
+      "id": 1418,
+      "grade": 3,
+      "source": "New_Icon/03_ETC/08_Potion/00001415.dds",
+      "sha256": "6c208c7532012af798c9459fd35209e3d3a267091b796bd8a058dddbf12708f2",
+      "referenceSha256": "6c208c7532012af798c9459fd35209e3d3a267091b796bd8a058dddbf12708f2",
+      "status": "EXACT_DDS_RGBA_VERIFIED",
+      "ddsSha256": "79dbfff0f45df56f6b7e19c348c954ba186e193fdb20605922f937f27b938152",
+      "rgbaSha256": "f373bb52332b43d7476172736551c36ba4d9ee93c9e4407fd0a93c06cdb66fd0",
+      "decoderSpecification": "https://learn.microsoft.com/en-us/windows/uwp/graphics-concepts/block-compression"
+    },
+    {
+      "mode": "processing",
+      "name": "Immortal: Perfume of Resolve",
+      "id": 1419,
+      "grade": 3,
+      "source": "New_Icon/03_ETC/08_Potion/00001416.dds",
+      "sha256": "665ae1df16d033277edf7941d793594e745807ce6e084e4a76fa8c19d92c1ae1",
+      "referenceSha256": "665ae1df16d033277edf7941d793594e745807ce6e084e4a76fa8c19d92c1ae1",
+      "status": "EXACT_DDS_RGBA_VERIFIED",
+      "ddsSha256": "5835a7b147760860e3014a51bf9a59abcc9e1a21af1e3d8bb525cac1a1a23112",
+      "rgbaSha256": "2d4e8a706676ca43dc2197cbe9c7fecdb12c27de337612e75d16a42f8640b0b6",
+      "decoderSpecification": "https://learn.microsoft.com/en-us/windows/uwp/graphics-concepts/block-compression"
+    },
+    {
+      "mode": "processing",
+      "name": "Khalk Blood",
+      "id": 6360,
+      "grade": 0,
+      "source": "New_Icon/03_ETC/07_ProductMaterial/00006207.dds",
+      "sha256": "6ca423fb88fc4b362ab6a8a4c2a2ea9cad5f973ec31c1712cb3bee029fc863de",
+      "referenceSha256": "6ca423fb88fc4b362ab6a8a4c2a2ea9cad5f973ec31c1712cb3bee029fc863de",
+      "status": "SHARED_EXACT_CLIENT_ARTWORK_PATH_WITH_RETAINED_ENCODING",
+      "inheritedArtwork": "alchemy|Dinosaur Blood",
+      "note": "Khalk Blood and Dinosaur Blood use the same current client icon path. Existing lossy encoding retained; not a fresh pixel-exact DDS claim."
+    },
+    {
+      "mode": "processing",
+      "name": "Tainted Khalk Fluid",
+      "id": 821472,
+      "grade": 3,
+      "source": "New_Icon/03_ETC/07_ProductMaterial/00821472.dds",
+      "sha256": "c201d8ecb402fd1396356c978dce896173f5b3d01d3df04d2237c9b1ed563a71",
+      "referenceSha256": "c201d8ecb402fd1396356c978dce896173f5b3d01d3df04d2237c9b1ed563a71",
+      "status": "EXACT_DDS_RGBA_VERIFIED",
+      "ddsSha256": "5811134490f02def3a4360c86b3a6bf38b03ccc3a26462c9c5f4d744e24eac79",
+      "rgbaSha256": "8fdbc63a6c274983a87c53635aa451a9b83ecc2f172c074046de3f48ff828274",
+      "decoderSpecification": "https://learn.microsoft.com/en-us/windows/uwp/graphics-concepts/block-compression"
+    }
+  ],
+  "limits": [
+    "Two retained display encodings have incomplete provenance; their identity/grade/source path and untouched screenshot-reference bytes are checked.",
+    "Legacy lossy artwork is not claimed pixel-identical to current DDS.",
+    "No historical icon art or old screenshot-matching references changed."
+  ]
+}

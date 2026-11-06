@@ -3,23 +3,23 @@
   "immutableFiles": [
     {
       "path": "runtime/fish_companion_service.exe",
-      "byteCount": 28781551,
-      "sha256": "c0b5c5c84980be389420cf247d7a89ac8c256676b7313ce3a496c933cb0667a9"
+      "byteCount": 28782836,
+      "sha256": "b3d4b2617078af3cc2d4f0263a88450728806984d3022e40b1b83f2303750fb3"
     },
     {
       "path": "static/app.css",
-      "byteCount": 199996,
-      "sha256": "e37b025313153257a324c66a5f356a1f8de621b7959a42fd45ea2e5cbcdb6a1b"
+      "byteCount": 203075,
+      "sha256": "810c4dfe73e0f2518510803ca3ad38f7465891643d6b4f031c25775d66cfc966"
     },
     {
       "path": "static/app.js",
-      "byteCount": 263429,
-      "sha256": "c647c86ea2cf4504f559849699482ee7ebdeb931c31963a9c58d121ab0782f6b"
+      "byteCount": 271096,
+      "sha256": "b7d11e560c7f5a429c1428bfae8b021586cafe1bf359e924d1a6e6608eae3115"
     },
     {
       "path": "static/index.html",
-      "byteCount": 40525,
-      "sha256": "027b8db5f900b038a4d82f31070d74135cc268f963fd8b3f8af61f1afefafc2f"
+      "byteCount": 40949,
+      "sha256": "568024d196082265c1febbccf2cd455625e03805f6b330136b69f41b88b8400e"
     }
   ],
   "snapshotFiles": [

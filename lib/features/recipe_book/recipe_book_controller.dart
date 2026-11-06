@@ -6,20 +6,33 @@ import 'package:flutter/widgets.dart' show WidgetsBinding;
 
 import '../../app/state/planner_application_controller.dart';
 import '../../data/catalog/catalog_repository.dart';
+import '../../data/market/shared_market_repository.dart';
+import '../../data/opportunities/exchange_catalog.dart';
+import '../../domain/catalog/item_name_presentation.dart';
 import '../../domain/catalog/temporarily_archived_items.dart';
+import '../../domain/market/market_calculations.dart';
+import '../../domain/market/recipe_craft_comparison.dart';
 import '../../domain/market/recipe_profitability.dart';
 import '../../domain/models/catalog_models.dart';
 import '../../domain/models/craft_mode.dart';
 import '../../domain/planner/acquisition_recipe_resolution.dart';
+import '../../domain/planner/planner_engine.dart';
+import '../../domain/planner/planner_models.dart' as planning;
 import '../../domain/planner/planner_models.dart' show ResolvedSourceInfo;
 import '../../domain/state/planner_state.dart';
 import '../../domain/state/state_copy.dart';
 import '../../domain/state/transactions/state_transactions.dart';
+import '../planner/planner_choice_market.dart';
 import '../planner/planner_contracts.dart';
+import 'exchange_reference_information.dart';
+import 'plain_item_information.dart';
 import 'recipe_book_item_info.dart';
 import 'recipe_book_models.dart';
 import 'recipe_book_preview_routes.dart';
 import 'recipe_book_usage.dart';
+import 'reviewed_reference_facts.dart';
+
+part 'recipe_book_availability.dart';
 
 final Expando<Map<String, List<String>>> _processingConsumerIndexes =
     Expando<Map<String, List<String>>>('processing consumer indexes');
@@ -71,6 +84,21 @@ final class RecipeBookController extends ChangeNotifier {
   int _scrollResetRevision = 0;
   String? _previewName;
   final Set<String> _manualSearchSubstituteKeys = <String>{};
+  ModeState? _availabilityState;
+  Map<String, Recipe>? _availabilityRecipes;
+  PreparedIngredientPreview? _ingredientPreview;
+  final Map<String, RecipeBookAvailability> _availabilityCache = {};
+  final Map<String, RecipeProfitabilityQuote> _profitCache = {};
+  final Map<String, List<RecipeBookIngredientChoice>> _selectionCache = {};
+  final Map<(String, Ingredient, String), bool> _alternativesCache = {};
+  final Map<String, ({Recipe? recipe, bool npc, String? marketId})>
+  _identityCache = {};
+  final Map<SharedMarketKey, Set<String>> _marketDependents = {};
+  bool _marketRefreshPending = false;
+  Timer? _scrollIdle;
+  SharedMarketRepository? _availabilityMarket;
+  StreamSubscription<SharedMarketReceipt>? _availabilitySubscription;
+  Timer? _availabilityRefresh, _availabilityExpiry;
   final Set<String> _manualSearchVariantNames = <String>{};
   bool _deleteSelectionMode = false;
   final Set<String> _selectedForDeletion = <String>{};
@@ -107,6 +135,8 @@ final class RecipeBookController extends ChangeNotifier {
   final Map<(String, CraftMode, bool), RecipeBookItemInfo?> _itemInfoCache = {};
   final Map<CraftMode, Map<String, Recipe>> _itemInfoRecipeSources = {};
   static const _itemInfoCacheLimit = 512;
+  @visibleForTesting
+  int get debugCachedItemInfoCount => _itemInfoCache.length;
   final Map<CraftMode, RecipeBookController> _routeControllers = {};
   RecipeBookController? _routeHost;
   CraftMode? _previewMode;
@@ -150,6 +180,7 @@ final class RecipeBookController extends ChangeNotifier {
       child._clearManualSearchSelections();
     }
     child
+      ..connectAvailabilityMarket(_availabilityMarket)
       .._search = _search
       .._searchByIngredientOverride = searchByIngredient
       .._favoritesOnlyOverride = favoritesOnly
@@ -169,13 +200,19 @@ final class RecipeBookController extends ChangeNotifier {
       !showHidden &&
       !deleteSelectionMode;
 
-  RecipeBookActivation? activateInMode(String name, CraftMode mode) {
+  RecipeBookActivation? activateInMode(
+    String name,
+    CraftMode mode, {
+    bool useDisplayedIngredients = false,
+  }) {
     if (_activationSuppressed) return null;
     if (callingContext == RecipeBookCallingContext.bonus &&
         mode != modeController.mode) {
       return null;
     }
-    final activation = controllerForMode(mode).activate(name);
+    final activation = controllerForMode(
+      mode,
+    ).activate(name, useDisplayedIngredients: useDisplayedIngredients);
     if (activation == null) return null;
     if (mode != modeController.mode) {
       modeController.owner.modes[mode]!.navigate('plan');
@@ -323,13 +360,24 @@ final class RecipeBookController extends ChangeNotifier {
     ];
     final entries = snapshots.expand((value) => value.entries).toList();
     entries.sort((a, b) {
-      if (_marketSort != RecipeBookMarketSort.none && marketControlsVisible) {
+      if (_marketSort.sortsAvailability) {
+        final compared = controllerForMode(a.mode!)
+            .availabilityFor(a.name)
+            .compareTo(controllerForMode(b.mode!).availabilityFor(b.name));
+        if (compared != 0) return compared;
+      }
+      if (_marketSort != RecipeBookMarketSort.none &&
+          _marketSort != RecipeBookMarketSort.availability) {
         final compared = _compareOptionalNumber(
           _marketSort.sortsProfit
-              ? a.profitability?.profitPerPiece
+              ? _marketSort.sortsAvailability
+                    ? a.profitability?.profitPerCraft
+                    : a.profitability?.profitPerPiece
               : a.marketStock,
           _marketSort.sortsProfit
-              ? b.profitability?.profitPerPiece
+              ? _marketSort.sortsAvailability
+                    ? b.profitability?.profitPerCraft
+                    : b.profitability?.profitPerPiece
               : b.marketStock,
           ascending:
               _marketSort == RecipeBookMarketSort.stockLowToHigh ||
@@ -422,6 +470,7 @@ final class RecipeBookController extends ChangeNotifier {
         final quote = quoteFor(name, recipe);
         if (!quote.isProfitable) continue;
       }
+      if (!hidden && _marketSort.sortsProfit) quoteFor(name, recipe);
       filtered.add(name);
     }
     filtered.sort((left, right) {
@@ -459,7 +508,8 @@ final class RecipeBookController extends ChangeNotifier {
             marketStock: !isHidden && marketControlsVisible
                 ? marketStockFor(name)
                 : null,
-            profitability: !isHidden && _profitableOnly
+            profitability:
+                !isHidden && (_profitableOnly || _marketSort.sortsProfit)
                 ? quoteFor(name, recipe)
                 : null,
           );
@@ -647,6 +697,7 @@ final class RecipeBookController extends ChangeNotifier {
       _foldedEntry(_hiddenRecipeMap(), name) != null;
 
   RecipeBookItemInfo? itemInfoFor(String name, {CraftMode? mode}) {
+    if (!modeController.recipes.containsKey(name)) name = stableItemName(name);
     final preferredMode = mode ?? modeController.mode;
     var changed = false;
     for (final sourceMode in CraftMode.values) {
@@ -688,10 +739,10 @@ final class RecipeBookController extends ChangeNotifier {
     final resolved = _itemInfoRecipe(
       name,
       recipesByMode,
-      preferredMode: preferredMode,
+      preferredMode: _sharedInformationMode(name, recipesByMode, preferredMode),
     );
     final resolvedName = resolved?.name ?? name;
-    final resolvedMode = resolved?.mode ?? preferredMode;
+    final resolvedMode = resolved?.mode ?? CraftMode.alchemy;
     final resolvedController = modeController.owner.modes[resolvedMode]!;
     final resolvedSource = resolvedController.resolveItemSource(
       resolvedName,
@@ -742,6 +793,20 @@ final class RecipeBookController extends ChangeNotifier {
           ),
       ],
     );
+    final itemId =
+        acquisitionRecipe?.marketId ??
+        catalogRepository.bundledMarketId(resolvedName);
+    var acquisition = resolvedController.resolveItemAcquisition(resolvedName);
+    if (acquisition == null && itemId != null) {
+      final matches = modeController.owner.plannerRules.acquisitionInfo.values
+          .where((entry) => entry.itemId?.toString() == itemId)
+          .toList(growable: false);
+      if (matches.length == 1) {
+        acquisition = resolvedController.resolveItemAcquisition(
+          matches.single.canonicalName,
+        );
+      }
+    }
     final researched = withResearchedAcquisition(
       withVisibleRecipeBookFormulas(
         completeInfo,
@@ -752,15 +817,69 @@ final class RecipeBookController extends ChangeNotifier {
             )?.value.marketId ??
             catalogRepository.bundledMarketId(candidate),
       ),
-      resolvedController
-              .resolveItemAcquisition(resolvedName)
-              ?.displayableSummaries ??
-          const <String>[],
+      acquisition?.displayableSummaries ?? const <String>[],
       vendor: resolvedSource.vendor,
       location: resolvedSource.location,
       sourceNote: resolvedSource.sourceNote,
     );
-    return withEstimatedRecipeBookOutputs(researched, _estimatedOutputNames);
+    final exchangeMatches = exchangeItems.values
+        .where(
+          (item) =>
+              _fold(item.name) == _fold(resolvedName) &&
+              (itemId == null || item.id.toString() == itemId),
+        )
+        .toList();
+    final shared = exchangeMatches.length == 1
+        ? withExchangeReferenceInformation(researched, exchangeMatches.single)
+        : researched;
+    return withEstimatedRecipeBookOutputs(
+      withPlainItemInformation(
+        withReviewedReferenceFacts(
+          withReadableRecipeBookSections(
+            withReviewedUnlistedReferenceSources(
+              shared,
+              recipe: resolved?.recipe,
+            ),
+          ),
+          itemId: itemId,
+        ),
+        itemId: itemId,
+        reviewedRoutes: acquisition?.displayableSummaries,
+      ),
+      _estimatedOutputNames,
+    );
+  }
+
+  // Bundled facts must not depend on which tab opened the shared item card.
+  // Keep explicit per-mode edits/deletions and hidden-reference review local.
+  CraftMode _sharedInformationMode(
+    String name,
+    Map<CraftMode, Map<String, Recipe>> recipesByMode,
+    CraftMode preferredMode,
+  ) {
+    if (showHidden ||
+        CraftMode.values.any(
+          (mode) => modeController
+              .owner
+              .modes[mode]!
+              .state
+              .value
+              .recipeEdits
+              .keys
+              .any((key) => _fold(key) == _fold(name)),
+        )) {
+      return preferredMode;
+    }
+    for (final mode in CraftMode.values) {
+      final recipe = _foldedEntry(recipesByMode[mode]!, name)?.value;
+      if (recipe != null &&
+          recipe.isCraftable &&
+          (recipe.type == mode.key ||
+              mode == CraftMode.processing && recipe.method != null)) {
+        return mode;
+      }
+    }
+    return CraftMode.alchemy;
   }
 
   ResolvedAcquisitionRecipe? _itemInfoRecipe(
@@ -942,9 +1061,7 @@ final class RecipeBookController extends ChangeNotifier {
   }
 
   void setMarketSort(RecipeBookMarketSort value) {
-    if (!marketControlsVisible ||
-        (!profitableOnly && value.sortsProfit) ||
-        _marketSort == value) {
+    if (_marketSort == value) {
       return;
     }
     _marketSort = value;
@@ -976,10 +1093,7 @@ final class RecipeBookController extends ChangeNotifier {
 
   RecipeProfitabilityQuote? profitabilityFor(String name) {
     final recipe = recipeDefinitionFor(name);
-    if (recipe == null ||
-        !_hasProfitabilityMarketIds(recipe, modeController.recipes)) {
-      return null;
-    }
+    if (recipe == null) return null;
     return _calculateProfitability(recipe);
   }
 
@@ -1029,6 +1143,8 @@ final class RecipeBookController extends ChangeNotifier {
           request.key.replaceMarketValues(
             prices: result.prices,
             stock: result.stock,
+            preorderPrices: result.preorderPrices,
+            preorderObservedAt: result.preorderObservedAt,
             tradeMarketIds: result.tradeMarketIds,
             totalTrades: result.totalTrades,
             tradeObservedAt: result.tradeObservedAt,
@@ -1068,6 +1184,17 @@ final class RecipeBookController extends ChangeNotifier {
   void recordScrollOffset(double value) {
     if (!value.isFinite || value < 0) return;
     _scrollOffset = value;
+    if (_availabilityMarket == null ||
+        !(_marketSort.sortsAvailability ||
+            _marketSort.sortsProfit ||
+            _profitableOnly)) {
+      return;
+    }
+    _scrollIdle?.cancel();
+    _scrollIdle = Timer(const Duration(milliseconds: 250), () {
+      _scrollIdle = null;
+      _flushMarketRefresh();
+    });
   }
 
   void openPreview(String name, {CraftMode? mode}) {
@@ -1129,7 +1256,10 @@ final class RecipeBookController extends ChangeNotifier {
     notifyListeners();
   }
 
-  RecipeBookActivation? activate(String name) {
+  RecipeBookActivation? activate(
+    String name, {
+    bool useDisplayedIngredients = false,
+  }) {
     if (_activationSuppressed) return null;
     final exact = _poolExactName(name);
     if (exact == null || _foldedEntry(_hiddenRecipeMap(), exact) != null) {
@@ -1142,6 +1272,16 @@ final class RecipeBookController extends ChangeNotifier {
     final previewVariant = _previewVariantOverrides[_fold(exact)];
     if (gradeMatch != null) {
       return activateUsedIn(gradeMatch, variantId: previewVariant);
+    }
+    if (useDisplayedIngredients) {
+      final selected = _pricingStateFor(exact);
+      modeController.updateState(
+        (state) => state.copyWith(
+          substituteChoices: selected.substituteChoices,
+          ingredientGrades: selected.ingredientGrades,
+        ),
+        immediate: true,
+      );
     }
     final methodVariant = previewVariant ?? _methodSearchVariantId(recipe);
     final ingredientSelections = context == null
@@ -1343,9 +1483,7 @@ final class RecipeBookController extends ChangeNotifier {
           ? const <String>[]
           : <String>[ingredient.name];
     }
-    final unavailable = modeController.owner.assembly
-        .plannerRules(modeController.owner.catalog.supportingData)
-        .legacyUnavailableItems
+    final unavailable = modeController.owner.plannerRules.legacyUnavailableItems
         .map(_fold)
         .toSet();
     final seen = <String>{};
@@ -1586,6 +1724,10 @@ final class RecipeBookController extends ChangeNotifier {
   @override
   void dispose() {
     _disposed = true;
+    _availabilitySubscription?.cancel();
+    _availabilityRefresh?.cancel();
+    _availabilityExpiry?.cancel();
+    _scrollIdle?.cancel();
     for (final child in _routeControllers.values) {
       child.dispose();
     }
@@ -1972,6 +2114,10 @@ final class RecipeBookController extends ChangeNotifier {
       '${_fold(parentName)}\u0000${_fold(ingredient.substituteGroup ?? ingredient.name)}';
 
   void _clearManualSearchSelections() {
+    _availabilityCache.clear();
+    _profitCache.clear();
+    _selectionCache.clear();
+    _alternativesCache.clear();
     _manualSearchSubstituteKeys.clear();
     _manualSearchVariantNames.clear();
   }
@@ -2001,7 +2147,11 @@ final class RecipeBookController extends ChangeNotifier {
           _typeLabel(variant.type),
         ],
     ];
-    if (direct.any((value) => _fold(value).contains(query))) {
+    if (direct.any(
+      (value) =>
+          _fold(value).contains(query) ||
+          itemDisplayName(value).toLowerCase().contains(query),
+    )) {
       return const _RecipeSearchEvaluation(matches: true);
     }
     if (modeController.mode == CraftMode.processing &&
@@ -2031,7 +2181,11 @@ final class RecipeBookController extends ChangeNotifier {
             ),
           ),
         ];
-        if (values.any((value) => _fold(value).contains(query))) {
+        if (values.any(
+          (value) =>
+              _fold(value).contains(query) ||
+              itemDisplayName(value).toLowerCase().contains(query),
+        )) {
           ingredientVisible = true;
           continue;
         }
@@ -2086,7 +2240,6 @@ final class RecipeBookController extends ChangeNotifier {
     final namesByFolded = <String, String>{};
     for (final name in pool) {
       final recipe = recipes[name]!;
-      if (!_hasMarketId(name, recipe)) continue;
       if (favoritesOnly && !favorites.contains(_fold(name))) continue;
       if ((usesProcessingPaging ||
               (_routeHost?.usesProcessingPaging ?? false)) &&
@@ -2098,7 +2251,7 @@ final class RecipeBookController extends ChangeNotifier {
       for (final marketName in _profitabilityCalculator.directMarketItemNames(
         recipe: recipe,
         recipes: recipes,
-        state: modeController.state.value,
+        state: _pricingStateFor(name),
         rules: modeController.owner.plannerRules,
         selectedVariantId: selectedRecipeVariantId(name),
       )) {
@@ -2123,17 +2276,26 @@ final class RecipeBookController extends ChangeNotifier {
     String right,
     Map<String, RecipeProfitabilityQuote> profitability,
   ) {
-    if (!marketControlsVisible || _marketSort == RecipeBookMarketSort.none) {
+    if (_marketSort == RecipeBookMarketSort.none) {
       return _compareExactNames(left, right);
+    }
+    if (_marketSort.sortsAvailability) {
+      final compared = availabilityFor(left).compareTo(availabilityFor(right));
+      if (compared != 0) return compared;
+      if (!_marketSort.sortsProfit) return _compareExactNames(left, right);
     }
     if (_marketSort.sortsProfit) {
       final leftQuote = profitability[left];
       final rightQuote = profitability[right];
       final leftProfit = leftQuote?.isAvailable == true
-          ? leftQuote!.profitPerPiece!
+          ? _marketSort.sortsAvailability
+                ? leftQuote!.profitPerCraft!
+                : leftQuote!.profitPerPiece!
           : null;
       final rightProfit = rightQuote?.isAvailable == true
-          ? rightQuote!.profitPerPiece!
+          ? _marketSort.sortsAvailability
+                ? rightQuote!.profitPerCraft!
+                : rightQuote!.profitPerPiece!
           : null;
       final compared = _compareOptionalNumber(
         leftProfit,
@@ -2152,28 +2314,39 @@ final class RecipeBookController extends ChangeNotifier {
     return _compareExactNames(left, right);
   }
 
-  RecipeProfitabilityQuote _calculateProfitability(Recipe recipe) =>
-      _profitabilityCalculator.calculate(
+  RecipeProfitabilityQuote _calculateProfitability(Recipe recipe) {
+    _prepareAvailability();
+    final key =
+        '${recipe.name}:${selectedRecipeVariantId(recipe.name)}:$searchByIngredient:$_search';
+    return _profitCache.putIfAbsent(
+      key,
+      () => _profitabilityCalculator.calculate(
         recipe: recipe,
         recipes: modeController.recipes,
         state: modeController.state.value,
         rules: modeController.owner.plannerRules,
-        marketTax: modeController.owner.documentSnapshot.marketTax,
+        marketTax: modeController.owner.marketTax.value,
         selectedVariantId: selectedRecipeVariantId(recipe.name),
-      );
+        resolvedIngredients: [
+          for (final row in availabilityFor(recipe.name).ingredients)
+            RecipeProfitabilityInput(
+              originalName: row.ingredient.name,
+              selectedName: row.name,
+              grade: row.grade,
+              quantity: row.quantity,
+            ),
+        ],
+        marketPriceFor: (name) =>
+            _cardMarketPrice(name, dependent: recipe.name),
+      ),
+    );
+  }
 
   bool _hasProfitabilityMarketIds(Recipe recipe, Map<String, Recipe> recipes) =>
-      _profitabilityCalculator
-          .directMarketItemNames(
-            recipe: recipe,
-            recipes: recipes,
-            state: modeController.state.value,
-            rules: modeController.owner.plannerRules,
-            selectedVariantId: selectedRecipeVariantId(recipe.name),
-          )
-          .every(
-            (name) => _hasMarketId(name, _foldedEntry(recipes, name)?.value),
-          );
+      _cardIdentity(recipe.name).marketId != null &&
+      availabilityFor(
+        recipe.name,
+      ).ingredients.every((row) => row.npc || row.marketable);
 
   bool _hasMarketId(String name, Recipe? recipe) {
     bool valid(String? value) {
@@ -2238,6 +2411,7 @@ final class RecipeBookController extends ChangeNotifier {
     String name, {
     CraftMode? mode,
   }) sync* {
+    if (itemDisplayName(name) != name) yield itemDisplayName(name);
     final alias = _processingAlias(name);
     if (alias.isNotEmpty) yield alias;
     final metadataController =
@@ -2300,6 +2474,13 @@ final class RecipeBookController extends ChangeNotifier {
   }
 
   void _documentStateChanged() {
+    // Cross-mode identity edits also affect the shared card resolver.
+    _identityCache.clear();
+    _selectionCache.clear();
+    _alternativesCache.clear();
+    _availabilityCache.clear();
+    _profitCache.clear();
+    _marketDependents.clear();
     if (_usageIndex != null &&
         CraftMode.values.any(
           (mode) => !identical(
@@ -2336,7 +2517,12 @@ final class RecipeBookController extends ChangeNotifier {
     notifyListeners();
   }
 
-  void _marketTaxChanged() => _documentStateChanged();
+  void _marketTaxChanged() {
+    _profitCache.clear();
+    _documentStateChanged();
+  }
+
+  void _availabilityChanged() => notifyListeners();
 
   Set<String> get _estimatedOutputNames {
     final cached = _estimatedOutputNamesCache;
@@ -2347,6 +2533,16 @@ final class RecipeBookController extends ChangeNotifier {
         ? review['inferredProcessingOutputs']
         : null;
     final names = <String>{};
+    final informationReview = modeController
+        .owner
+        .catalog
+        .supportingData['verifiedItemInformationReview'];
+    final estimated = informationReview is Map<String, Object?>
+        ? informationReview['estimatedOutputs']
+        : null;
+    if (estimated is List<Object?>) {
+      names.addAll(estimated.whereType<String>().map(_fold));
+    }
     if (inferred is List<Object?>) {
       for (final record in inferred) {
         if (record is! Map<String, Object?>) continue;
@@ -2529,7 +2725,7 @@ String _typeLabel(String type) => type
     .map((part) => '${part[0].toUpperCase()}${part.substring(1)}')
     .join(' ');
 
-String _fold(String value) => value.trim().toLowerCase();
+String _fold(String value) => stableItemName(value).trim().toLowerCase();
 
 bool _sameName(String left, String right) => _fold(left) == _fold(right);
 

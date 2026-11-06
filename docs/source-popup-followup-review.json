@@ -1,0 +1,29 @@
+{
+  "date": "2026-11-04",
+  "scope": "Practical cross-catalog acquisition-copy audit prompted by the Beef instruction. Not a new exhaustive facts/probabilities audit.",
+  "inventory": {"names": 2266, "modeViews": 6798, "uniqueAcquisitionLines": 1439},
+  "review": [
+    "Screened all unique acquisition lines for the reported copied-target/tool ambiguity, uses disguised as sources, event-only guidance and disconnected instructions. Reviewed flagged families together; no claim every hidden game fact was independently re-proven.",
+    "86 exact imported animal instructions are explicitly corrected. Most clarify ordinary defeat-plus-gathering, not 86 newly proved wrong animals. True Hunting-specific whale/crocodile routes remain Hunting.",
+    "Tiger Blood: the imported fluid-collector tooltip is not treated as practical proof. Use the independently documented Atrocious Tiger sniper-butchering route; any separate ordinary fluid-collection route remains outside this claim.",
+    "Beef and Ox Hide include harvesting Haystacks as a chance source. Milk's dairy-cow route remains separate. All map coordinates, saved IDs and product relationships are retained; only wild-cattle labels/instructions change.",
+    "Full map-index regeneration also restores the already-reviewed Insectivore Plant Root drop hint; no new recipe or inferred gathering route.",
+    "Embers of the Primordial, Nadia Rowen's Special Sauce and Primordial Hammer: move exact spending instructions to Used for. Remove the Hammer's unspecified past-event hint; keep its permanent Atoraxxion source.",
+    "Four Embers of Ynix cards: move the 100-ember exchange to Used for and give the actual Broken Vestige/weekly Inner Edania reward-chest route. No new quantities or probability assumptions.",
+    "Eltro/Serni/Margoria Sea Crystal instructions now say to right-click the corresponding crystal, yielding a random Sea Crystal. Stat and grade models unchanged.",
+    "Window width is measured from the visible tab's formulas, clamped to available space. Existing fallback horizontal scrolling remains on narrow screens. Shared Recipe Book, Planner, Opportunities and artwork previews use it. No new fonts, badge design or section-header redesign."
+  ],
+  "additionalSources": [
+    "https://www.blackdesertfoundry.com/edania-inner-monster-zones-guide/",
+    "https://garmoth.com/guides/post/edania-part-2",
+    "https://www.naeu.playblackdesert.com/en-US/News/Detail?groupContentNo=10451&countryType=en-US",
+    "https://bdocodex.com/us/quest/9402/12/",
+    "https://www.blackdesertfoundry.com/ships-guide/",
+    "https://bdocodex.com/us/item/756506/"
+  ],
+  "limitations": [
+    "The official Edania article and some Codex pages were intermittently inaccessible; current matching guide tables corroborate the concise source families. No reliance on unreleased Global Lab changes.",
+    "All previous broader evidence dependencies remain recorded; this scoped wording audit does not certify every hidden chance, every animal spawn or every optional source.",
+    "No new audit labels or research status are added to app screens. No personal profiles or live game accessed."
+  ]
+}

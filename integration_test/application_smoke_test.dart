@@ -18,6 +18,7 @@ import 'package:bdo_craft_planner_flutter/features/inventory/inventory.dart';
 import 'package:bdo_craft_planner_flutter/features/planner/planner.dart';
 import 'package:bdo_craft_planner_flutter/features/recipe_book/recipe_book.dart';
 import 'package:bdo_craft_planner_flutter/features/shell/shell.dart';
+import 'package:bdo_fishing_core/bdo_fishing_core.dart';
 import 'package:crypto/crypto.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -41,9 +42,12 @@ void main() {
   });
 
   testWidgets(
-    'first launch Import Copy is explicit, source-safe, and one-shot in isolated APPDATA',
+    'opted-in legacy Import Copy is explicit, source-safe, and one-shot in isolated APPDATA',
     (tester) async {
-      final profile = await _IsolatedProfile.create('migration');
+      final profile = await _IsolatedProfile.create(
+        'migration',
+        allowLegacyMigration: true,
+      );
       final legacy = profile.paths.legacyStateFile;
       await legacy.parent.create(recursive: true);
       await File(
@@ -69,6 +73,9 @@ void main() {
 
         await tester.pumpWidget(
           BdoCraftPlannerApp(
+            fishCompanionRuntimeHost: profile.createFishHost(),
+            enableBetaUpdates: false,
+            enableOpportunityAutoCheck: false,
             applicationFuture: Future<ApplicationBundle>.value(pending),
             marketGateway: const _EmptyMarketGateway(),
           ),
@@ -183,6 +190,9 @@ void main() {
         expect(first.stateLoad.origin, PlannerStateLoadOrigin.fresh);
         await tester.pumpWidget(
           BdoCraftPlannerApp(
+            fishCompanionRuntimeHost: profile.createFishHost(),
+            enableBetaUpdates: false,
+            enableOpportunityAutoCheck: false,
             applicationFuture: Future<ApplicationBundle>.value(first),
             marketGateway: const _EmptyMarketGateway(),
           ),
@@ -272,13 +282,8 @@ void main() {
 
         await _navigate(tester, ShellDestination.inventory);
         expect(find.byType(InventoryView), findsOneWidget);
-        final sunriseCategory = InventoryProjection.assemble(
-          first.controller.active,
-        ).items.singleWhere((item) => item.name == 'Sunrise Herb').category;
-        await tester.tap(
-          find.byKey(InventoryActionKeys.group(sunriseCategory)),
-        );
-        await _pumpFrames(tester, count: 2);
+        // The current inventory searches all human material sections directly;
+        // the old category rail is no longer part of this layout.
         await tester.enterText(
           find.byKey(InventoryActionKeys.i01),
           'Sunrise Herb',
@@ -296,6 +301,23 @@ void main() {
           4,
         );
 
+        await _navigate(tester, ShellDestination.data);
+        final buildLabel = find.byKey(
+          const ValueKey<String>('data-editor-unlock-build'),
+        );
+        await tester.ensureVisible(buildLabel);
+        for (
+          var tap = 0;
+          tap < DataSessionController.editorUnlockTapCount;
+          tap++
+        ) {
+          await tester.tap(buildLabel);
+        }
+        await _pumpFrames(tester);
+        final showEditor = find.byKey(const ValueKey<String>('D13'));
+        await tester.ensureVisible(showEditor);
+        await tester.tap(showEditor);
+        await _pumpFrames(tester);
         await _navigate(tester, ShellDestination.recipeEditor);
         expect(find.byType(RecipeEditorView), findsOneWidget);
         await tester.tap(find.byKey(EditorActionKeys.e03));
@@ -444,6 +466,9 @@ void main() {
 
           await tester.pumpWidget(
             BdoCraftPlannerApp(
+              fishCompanionRuntimeHost: profile.createFishHost(),
+              enableBetaUpdates: false,
+              enableOpportunityAutoCheck: false,
               applicationFuture: Future<ApplicationBundle>.value(restarted),
               marketGateway: const _EmptyMarketGateway(),
             ),
@@ -451,20 +476,32 @@ void main() {
           await _pumpFrames(tester);
           await _skipVersionSetupIfVisible(tester);
           expect(find.byType(AppearanceView), findsOneWidget);
-          await tester.tap(
-            find.byKey(ShellActionKeys.mode(CraftMode.processing)),
-          );
+          final processingTab = find
+              .byKey(ShellActionKeys.mode(CraftMode.processing))
+              .hitTestable();
+          expect(processingTab, findsOneWidget);
+          await tester.tap(processingTab);
           await _pumpFrames(tester);
           expect(restarted.controller.activeMode.value, CraftMode.processing);
           expect(
             restarted.controller.active.state.value.appearance.background,
             'illuminated-ledger',
           );
+          if (Platform.environment['BSL_NATIVE_REVIEW_HOLD'] == '1') {
+            await _navigate(tester, ShellDestination.planner);
+            stdout.writeln('NATIVE_SYNTHETIC_VISUAL_REVIEW_READY');
+            await tester.runAsync(
+              () => Future<void>.delayed(const Duration(seconds: 25)),
+            );
+          }
         } finally {
           await tester.pumpWidget(const SizedBox.shrink());
           await _pumpFrames(tester, count: 2);
           await restarted.controller.dispose();
         }
+      } catch (error, stack) {
+        printOnFailure('Original native workflow failure: $error\n$stack');
+        rethrow;
       } finally {
         if (dialogBridgeInstalled) {
           TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
@@ -522,7 +559,7 @@ Future<void> _exerciseNativeMaximizeRestore(WidgetTester tester) async {
   if (!Platform.isWindows) return;
   const windowHost = WindowHostService();
   final initial = await windowHost.isMaximized();
-  final captionButton = find.byTooltip('Maximize or restore');
+  final captionButton = find.bySemanticsLabel('Maximize or restore');
   expect(captionButton, findsOneWidget);
 
   await tester.tap(captionButton);
@@ -587,27 +624,50 @@ Future<void> _pumpFrames(WidgetTester tester, {int count = 5}) async {
 }
 
 final class _IsolatedProfile {
-  const _IsolatedProfile({required this.root, required this.paths});
+  _IsolatedProfile({required this.root, required this.paths});
 
   final Directory root;
   final PlannerStatePathPolicy paths;
+  final List<FishCompanionRuntimeHost> _fishHosts = [];
 
-  static Future<_IsolatedProfile> create(String label) async {
+  FishCompanionRuntimeHost createFishHost() {
+    final host = createApplicationFishCompanionRuntimeHost(
+      applicationDirectory: () async => paths.applicationDirectory,
+      referenceCacheDirectory: Directory('${root.path}/reference-cache'),
+    );
+    _fishHosts.add(host);
+    return host;
+  }
+
+  static Future<_IsolatedProfile> create(
+    String label, {
+    bool allowLegacyMigration = false,
+  }) async {
     final root = await Directory.systemTemp.createTemp(
       'bdo-windows-integration-$label-',
     );
     final roaming = Directory(
       '${root.path}${Platform.pathSeparator}AppData${Platform.pathSeparator}Roaming',
     );
-    final paths = PlannerStatePathPolicy.fromEnvironment(<String, String>{
+    final defaults = PlannerStatePathPolicy.fromEnvironment(<String, String>{
       'APPDATA': roaming.path,
     });
+    final paths = PlannerStatePathPolicy(
+      applicationDirectory: defaults.applicationDirectory,
+      legacyStateFile: defaults.legacyStateFile,
+      formerNativeApplicationDirectory:
+          defaults.formerNativeApplicationDirectory,
+      allowLegacyMigration: allowLegacyMigration,
+    );
     expect(paths.applicationDirectory.path, startsWith(roaming.path));
     expect(paths.legacyStateFile.path, startsWith(roaming.path));
     return _IsolatedProfile(root: root, paths: paths);
   }
 
   Future<void> dispose() async {
+    for (final host in _fishHosts) {
+      await host.shutdown();
+    }
     if (await root.exists()) await root.delete(recursive: true);
   }
 }

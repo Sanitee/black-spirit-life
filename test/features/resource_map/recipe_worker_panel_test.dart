@@ -13,6 +13,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import '../../support/action_hint_finder.dart';
 import '../../support/application_test_harness.dart';
 import 'recipe_worker_fixture.dart';
 
@@ -139,7 +140,7 @@ void main() {
       await tester.tap(find.byType(Checkbox));
       await tester.pump();
       expect(saved!.checkedItems, {'Milk'});
-      await tester.tap(find.byTooltip('Show gathering spot'));
+      await tester.tap(findActionHint('Show gathering spot'));
       expect(shown, 'Milk');
       expect(c.plan!.spent, 8);
       expect(tester.takeException(), isNull);

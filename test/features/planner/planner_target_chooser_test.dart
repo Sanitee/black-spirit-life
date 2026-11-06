@@ -14,6 +14,40 @@ import 'package:flutter_test/flutter_test.dart';
 import 'planner_test_fixture.dart';
 
 void main() {
+  testWidgets(
+    'party display and pasted selection preserve the original target key',
+    (tester) async {
+      await setPlannerTestSize(tester, const Size(900, 700));
+      final harness = PlannerTestHarness();
+      addTearDown(harness.controller.dispose);
+      final selected = <String>[];
+      const stable = 'Harmony Draught - Human';
+      const display = '[Party] Harmony Draught - Human';
+      await tester.pumpWidget(
+        _host(
+          harness,
+          names: const [stable],
+          onSelected: (name) {
+            selected.add(name);
+            return true;
+          },
+        ),
+      );
+      final field = find.byType(TextField);
+      await tester.enterText(field, '[Party] Harmony');
+      await tester.pumpAndSettle();
+      expect(find.text(display), findsOneWidget);
+      await tester.testTextInput.receiveAction(TextInputAction.done);
+      await tester.pumpAndSettle();
+      expect(selected.last, stable);
+      expect(tester.widget<TextField>(field).controller!.text, display);
+      await tester.enterText(field, display);
+      await tester.testTextInput.receiveAction(TextInputAction.done);
+      await tester.pumpAndSettle();
+      expect(selected.every((x) => x == stable), isTrue);
+      expect(tester.takeException(), isNull);
+    },
+  );
   testWidgets('optional clear keeps Tab empty but retains arrow selection', (
     tester,
   ) async {

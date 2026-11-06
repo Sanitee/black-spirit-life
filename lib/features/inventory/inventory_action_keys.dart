@@ -27,6 +27,9 @@ abstract final class InventoryActionKeys {
   static const renameStorage = ValueKey<String>('inventory-rename-storage');
   static const addItem = ValueKey<String>('inventory-add-item');
   static const emptyInventory = ValueKey<String>('inventory-empty-inventory');
+  static const clearSearchResults = ValueKey<String>(
+    'inventory-clear-search-results',
+  );
   static const confirmEmptyInventory = ValueKey<String>(
     'inventory-confirm-empty-inventory',
   );

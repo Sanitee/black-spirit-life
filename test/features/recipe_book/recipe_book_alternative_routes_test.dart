@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:bdo_craft_planner_flutter/app/state/planner_application_controller.dart';
@@ -58,52 +59,60 @@ void main() {
     await application.dispose();
   });
 
-  test('Alchemy ingredient search discovers both Caphras perfume recipes', () {
-    book.setSearchByIngredient(true);
-    book.setSearch('Caphras Essence');
+  test(
+    'Alchemy ingredient search discovers normal and Immortal Caphras perfumes',
+    () {
+      book.setSearchByIngredient(true);
+      book.setSearch('Caphras Essence');
 
-    final entries = book.snapshot.entries;
-    expect(
-      entries.map((entry) => entry.name),
-      unorderedEquals(['Perfume of Envy', 'Perfume of Tenacity']),
-      reason: 'An unrelated Essence alias must not match Caphras Essence.',
-    );
-    for (final name in ['Perfume of Envy', 'Perfume of Tenacity']) {
-      final entry = entries.singleWhere(
-        (entry) => entry.name == name && entry.mode == CraftMode.processing,
-      );
-      expect(entry.recipe.method, 'Simple Alchemy');
-      final source = book.controllerForMode(entry.mode!);
+      final entries = book.snapshot.entries;
       expect(
-        source
-            .recipeFor(name)!
-            .ingredients
-            .map((ingredient) => ingredient.name),
-        contains('Caphras Essence'),
+        entries.map((entry) => entry.name),
+        unorderedEquals([
+          'Perfume of Envy',
+          'Perfume of Tenacity',
+          'Immortal: Perfume of Envy',
+          'Immortal: Perfume of Tenacity',
+        ]),
+        reason: 'An unrelated Essence alias must not match Caphras Essence.',
       );
-      expect(source.selectedRecipeVariantId(name), 'standard');
-    }
-    expect(
-      entries.where(
-        (entry) =>
-            entry.name == 'Perfume of Tenacity' &&
-            entry.mode == CraftMode.alchemy,
-      ),
-      isEmpty,
-      reason: 'The residence formula does not use Caphras Essence.',
-    );
-    expect(application.activeMode.value, CraftMode.alchemy);
+      for (final name in ['Perfume of Envy', 'Perfume of Tenacity']) {
+        final entry = entries.singleWhere(
+          (entry) => entry.name == name && entry.mode == CraftMode.processing,
+        );
+        expect(entry.recipe.method, 'Simple Alchemy');
+        final source = book.controllerForMode(entry.mode!);
+        expect(
+          source
+              .recipeFor(name)!
+              .ingredients
+              .map((ingredient) => ingredient.name),
+          contains('Caphras Essence'),
+        );
+        expect(source.selectedRecipeVariantId(name), 'standard');
+      }
+      expect(
+        entries.where(
+          (entry) =>
+              entry.name == 'Perfume of Tenacity' &&
+              entry.mode == CraftMode.alchemy,
+        ),
+        isEmpty,
+        reason: 'The residence formula does not use Caphras Essence.',
+      );
+      expect(application.activeMode.value, CraftMode.alchemy);
 
-    final activation = book.activateInMode(
-      'Perfume of Envy',
-      CraftMode.processing,
-    );
-    expect(activation?.mode, CraftMode.processing);
-    expect(activation?.variantId, 'standard');
-    expect(application.activeMode.value, CraftMode.processing);
-    expect(application.active.state.value.target, 'Perfume of Envy');
-    expect(_step(application.active, 'Perfume of Envy').produced, 11);
-  });
+      final activation = book.activateInMode(
+        'Perfume of Envy',
+        CraftMode.processing,
+      );
+      expect(activation?.mode, CraftMode.processing);
+      expect(activation?.variantId, 'standard');
+      expect(application.activeMode.value, CraftMode.processing);
+      expect(application.active.state.value.target, 'Perfume of Envy');
+      expect(_step(application.active, 'Perfume of Envy').produced, 11);
+    },
+  );
 
   test('Tenacity detail retains residence and both Simple Alchemy batches', () {
     final formulas = book
@@ -262,6 +271,7 @@ void main() {
     var referenceRecipes = 0;
     var referenceFormulas = 0;
     var browsableReferenceFormulas = 0;
+    final reviewedRows = <Map<String, Object>>[];
     final repository = CatalogRepository(catalog);
 
     for (final mode in CraftMode.values) {
@@ -277,12 +287,20 @@ void main() {
         if (recorded.variants.isEmpty) continue;
         final source = controller.recipeDefinition(recorded.name)!;
         final context = '${mode.key} / ${source.name}';
-        if (!source.isCraftable) {
+        reviewedRows.add({
+          'mode': mode.key,
+          'name': source.name,
+          'active': source.isCraftable && !archived(source.name),
+          'rawVariants': recorded.variants.length,
+        });
+        if (!source.isCraftable || archived(source.name)) {
           referenceRecipes++;
           // Planner assembly intentionally strips unbrowsable reference routes.
           // Count raw catalog variants separately from curated visible formulas.
           referenceFormulas += recorded.variants.length;
-          final browsable = recipeBookFormulas(source, mode: mode);
+          final browsable = archived(source.name)
+              ? book.itemInfoFor(source.name, mode: mode)!.acquisitionFormulas
+              : recipeBookFormulas(source, mode: mode);
           browsableReferenceFormulas += browsable.length;
           for (final formula in browsable) {
             expect(book.canActivateFormula(formula), isFalse, reason: context);
@@ -374,10 +392,29 @@ void main() {
         }
       }
     }
-    expect(productionRecipes, 146);
-    expect(productionFormulas, 344);
-    expect(referenceRecipes, 10);
-    expect(referenceFormulas, 27);
+    final reviewDirectory = Platform.environment['CATALOG_COVERAGE_REVIEW_DIR'];
+    if (reviewDirectory != null) {
+      File('$reviewDirectory/formula-coverage.json').writeAsStringSync(
+        jsonEncode({
+          'productionRecipes': productionRecipes,
+          'productionFormulas': productionFormulas,
+          'referenceRecipes': referenceRecipes,
+          'referenceFormulas': referenceFormulas,
+          'browsableReferenceFormulas': browsableReferenceFormulas,
+          'rows': reviewedRows,
+        }),
+      );
+    }
+    // Tenacious Origin's three variants remain historical. The two October 29
+    // perfume records add six selectable Processing formulas.
+    // Beast/Giant now each have standard and mixed routes, single and10x.
+    // Two verified Immortal conversions add four formulas each: ordinary and
+    // Caphras inputs, both normal and10x. Khan's Dim Magic and Blue Tidal
+    // alternatives do not duplicate recipe records.
+    expect(productionRecipes, 151);
+    expect(productionFormulas, 363);
+    expect(referenceRecipes, 11);
+    expect(referenceFormulas, 30);
     expect(browsableReferenceFormulas, 8);
   });
 

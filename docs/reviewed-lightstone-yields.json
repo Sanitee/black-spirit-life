@@ -1,0 +1,38 @@
+{
+  "date": "2026-11-03",
+  "status": "IMPLEMENTED_AND_TESTED_REBUILD_PENDING",
+  "identities": {
+    "766001": "Purified Lightstone of Fire",
+    "766011": "Purified Lightstone of Earth",
+    "766021": "Purified Lightstone of Wind",
+    "766031": "Purified Lightstone of Flora"
+  },
+  "source": "https://www.naeu.playblackdesert.com/en-US/Wiki?wikiNo=250",
+  "sourceRetrievedAt": "2026-11-03T06:59:19.432Z",
+  "sourceSha256": "58a0a50417193c8cf1cc9e2b35ba878470248bd5523951c89baa3f60ee85f1ed",
+  "evidence": "Alchemy Guru 1; a successful purification gives its purified lightstone with a low chance for one additional lightstone of the same type. The four complete recipes accept either catalyst at 1:1.",
+  "correction": "Record actual 1–2 bounds rather than implicit 1–4. Exact standard recipes count their base result of 1; do not feed these rare-extra recipes through the ordinary uniform-range/mastery average.",
+  "calculationPolicy": "Conservative base output, not a claimed expected average. Unknown random extras excluded, with the same explanatory note in Planner, Recipe Book profit and Opportunities calculation details. Ordinary recipes and changed custom formulas retain their original calculation.",
+  "beforeSha256": "bbba2856d127145774a60f8eebac3bf103d9e73eb96943681c8759567fe7aa45",
+  "afterSha256": "7a343a18aa8de2f7b03a38ceed2c04d8065234334219a6cf29c702eab6ad0fe2",
+  "bytes": 30304740,
+  "unresolved": "Exact additional-output probability and any server-side interaction with mastery; not invented as 50%, not certified by raw manufacturing success fields. Existing unknown EXP remains unknown.",
+  "scope": "Only four exact IDs/names, Alchemy, baseOutput 1, bounds 1–2 and complete reviewed five-input formulas. No personal state, default ingredient, input quantity or market request changes. Requires rebuilt candidate before use.",
+  "verification": {
+    "tests": [
+      {
+        "file": "resumed-lightstone-yield-tests.jsonl",
+        "passed": 194
+      },
+      {
+        "file": "resumed-lightstone-yield-projection-tests.jsonl",
+        "passed": 1
+      },
+      {
+        "file": "resumed-lightstone-yield-layout-tests.jsonl",
+        "passed": 132
+      }
+    ],
+    "changedReferences": 17
+  }
+}

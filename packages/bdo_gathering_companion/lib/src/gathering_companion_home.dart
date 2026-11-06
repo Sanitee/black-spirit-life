@@ -18,6 +18,7 @@ import 'ui/field_desk_materials.dart';
 import 'ui/field_guide.dart';
 import 'ui/gathering_setup_dialog.dart';
 import 'ui/gathering_preparation_panel.dart';
+import 'ui/gathering_stone_stat_review.dart';
 import 'ui/loot_panel.dart';
 import 'ui/stable_v017_loadout_notes_card.dart';
 import 'ui/theme.dart';
@@ -300,6 +301,7 @@ class _CompanionHomeState extends State<CompanionHome> {
       catalog: catalog,
       initial: previous.baseSettings,
       preparationLabel: _hostedFieldDesk ? 'Buffs' : 'Prepare',
+      requiresStoneStatReview: previous.requiresStoneStatReview,
       onPreview: (draft) {
         if (mounted) {
           setState(() {
@@ -590,6 +592,8 @@ class _CompanionHomeState extends State<CompanionHome> {
                         baseSettings: _preparation.baseSettings,
                         effectiveSettings: _estimateSetup,
                         statsConfirmed: _preparation.statsConfirmed,
+                        requiresStoneStatReview:
+                            _preparation.requiresStoneStatReview,
                         onToggleBuff: _toggleBuff,
                         onTogglePet: _togglePet,
                         onPreset: _preset,
@@ -1845,6 +1849,12 @@ class _CompanionHomeState extends State<CompanionHome> {
                     _workspaceHeader(rail: rail),
                     if (!rail)
                       _hostedFieldDesk ? _fieldDeskToolbar() : _workflowBar(),
+                    if (_hostedFieldDesk &&
+                        _preparation.requiresStoneStatReview)
+                      const Padding(
+                        padding: EdgeInsets.fromLTRB(18, 0, 18, 10),
+                        child: GatheringStoneStatReview(),
+                      ),
                     if (_page == 2 && !rail && !_hostedFieldDesk)
                       Padding(
                         padding: const EdgeInsets.fromLTRB(14, 0, 14, 10),
@@ -2032,6 +2042,8 @@ class _CompanionHomeState extends State<CompanionHome> {
                       baseSettings: _preparation.baseSettings,
                       effectiveSettings: _estimateSetup,
                       statsConfirmed: _preparation.statsConfirmed,
+                      requiresStoneStatReview:
+                          _preparation.requiresStoneStatReview,
                       onToggleBuff: _toggleBuff,
                       onTogglePet: _togglePet,
                       onPreset: _preset,
@@ -2145,11 +2157,17 @@ class _CompanionHomeState extends State<CompanionHome> {
         _estimateSetupButton(),
         if (!_preparation.statsConfirmed)
           Tooltip(
-            message: 'Enter your stats for personal estimates.',
+            message: _preparation.requiresStoneStatReview
+                ? "Khan's Heart now includes +25 mastery. Re-enter base stats without selected buffs and stones."
+                : 'Enter your stats for personal estimates.',
             child: Text(
-              'Example stats',
+              _preparation.requiresStoneStatReview
+                  ? 'Recheck base stats · Khan’s Heart +25 mastery'
+                  : 'Example stats',
               style: TextStyle(
-                color: context.gatheringColors.gold,
+                color: _preparation.requiresStoneStatReview
+                    ? context.gatheringColors.ink
+                    : context.gatheringColors.gold,
                 fontSize: 13,
               ),
             ),
@@ -3348,6 +3366,9 @@ class _CompanionHomeState extends State<CompanionHome> {
         ),
     if (buff['durationMinutes'] is num)
       formatDurationMinutes(buff['durationMinutes'] as num),
+    if (buff['durationMinutes'] is! num &&
+        textOf(buff, 'durationNote').isNotEmpty)
+      textOf(buff, 'durationNote'),
     'Recorded session values',
   ].join('\n');
 

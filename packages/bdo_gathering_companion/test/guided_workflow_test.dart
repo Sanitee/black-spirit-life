@@ -11,6 +11,7 @@ import 'package:bdo_gathering_companion/src/ui/loot_panel.dart';
 import 'package:bdo_gathering_companion/src/ui/theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'action_hint_finder.dart';
 
 class _WorkflowStore extends SessionStore {
   _WorkflowStore(Directory directory) : super(directory: directory);
@@ -115,13 +116,13 @@ void main() {
       await tester.tap(start);
       await tester.pump(const Duration(milliseconds: 300));
       expect(find.byType(LootPanel), findsOneWidget);
-      expect(find.byTooltip('Pause timer'), findsOneWidget);
+      expect(findActionHint('Pause timer'), findsOneWidget);
       await tester.tap(find.byKey(const ValueKey('workflow-spots')));
       await tester.pump(const Duration(milliseconds: 200));
       await tester.tap(find.byKey(const ValueKey('workflow-gather')));
       await tester.pump(const Duration(milliseconds: 200));
-      expect(find.byTooltip('Pause timer'), findsOneWidget);
-      await tester.tap(find.byTooltip('Pause timer'));
+      expect(findActionHint('Pause timer'), findsOneWidget);
+      await tester.tap(findActionHint('Pause timer'));
       await tester.pumpAndSettle();
       await tester.tap(find.byKey(const ValueKey('time-30')));
       await tester.pumpAndSettle();
@@ -244,7 +245,7 @@ void main() {
       expect(tester.widget<TextField>(dropRate).controller!.text, '47');
 
       await tap('record-results');
-      expect(find.byTooltip('Pause timer'), findsNothing);
+      expect(findActionHint('Pause timer'), findsNothing);
       final quantity = lootTotals().first;
       await tester.ensureVisible(quantity);
       await tester.enterText(quantity, '29');
@@ -311,7 +312,7 @@ void main() {
       await mount(tester, store);
       await tester.tap(find.byKey(const ValueKey('workflow-history')));
       await tester.pumpAndSettle();
-      await tester.tap(find.byTooltip('Edit session'));
+      await tester.tap(findActionHint('Edit session'));
       await tester.pumpAndSettle();
       final quantity = find.byKey(ValueKey('loot-total-${item.id}'));
       await tester.ensureVisible(quantity);
@@ -353,7 +354,7 @@ void main() {
       await tester.ensureVisible(record);
       await tester.tap(record);
       await tester.pumpAndSettle();
-      expect(find.byTooltip('Pause timer'), findsNothing);
+      expect(findActionHint('Pause timer'), findsNothing);
       expect(find.byKey(const ValueKey('paste-screenshot')), findsOneWidget);
       final quantity = lootTotals().first;
       final quantityKey = tester.widget(quantity).key!;
@@ -366,7 +367,7 @@ void main() {
       expect(store.sessions, hasLength(1));
       final savedId = store.sessions.single.id;
       final savedDuration = store.sessions.single.durationSeconds;
-      await tester.tap(find.byTooltip('Edit session'));
+      await tester.tap(findActionHint('Edit session'));
       await tester.pumpAndSettle();
       expect(
         tester.widget<TextField>(find.byKey(quantityKey)).controller!.text,

@@ -140,6 +140,72 @@ void main() {
       });
     }
   }
+
+  for (final mode in [CraftMode.cooking, CraftMode.alchemy]) {
+    for (final scale in [1.0, 2.0]) {
+      testWidgets(
+        '${mode.key} actual output keeps mastery forecast and ingredient use ($scale)',
+        (tester) async {
+          final controller = await pumpPlan(
+            tester,
+            mode: mode,
+            size: const Size(1200, 752),
+            scale: scale,
+          );
+          final feature = controller.active;
+          final target = feature.state.value.target;
+          final step = feature.plan.value.steps.singleWhere(
+            (s) => s.name == target,
+          );
+          final initialMastery = (
+            feature.state.value.cookingMastery,
+            feature.state.value.alchemyMastery,
+          );
+          final input = find.byKey(const ValueKey('planner-afk-actual-output'));
+          Future<void> reveal(Finder finder) async {
+            final element = tester.element(finder);
+            final scroll = Scrollable.maybeOf(element);
+            if (scroll != null) {
+              await scroll.position.ensureVisible(element.findRenderObject()!);
+            }
+            await tester.pumpAndSettle();
+          }
+
+          await reveal(input);
+          await tester.enterText(input, '85');
+          await tester.testTextInput.receiveAction(TextInputAction.done);
+          await tester.pumpAndSettle();
+          await capture(tester, '${mode.key}-actual-$scale');
+          final done = find.byKey(const ValueKey('planner-afk-complete-round'));
+          await reveal(done);
+          await tester.tap(done);
+          await tester.pumpAndSettle();
+          expect(feature.state.value.inventory[target], 85);
+          expect(feature.state.value.completedSteps, isNot(contains(target)));
+          final remainder = feature.plan.value.steps.singleWhere(
+            (s) => s.name == target,
+          );
+          expect(remainder.net, 15);
+          expect(
+            remainder.produced / remainder.count,
+            closeTo(step.produced / step.count, 1e-10),
+          );
+          expect((
+            feature.state.value.cookingMastery,
+            feature.state.value.alchemyMastery,
+          ), initialMastery);
+          expect(feature.undoCompletion(), isTrue);
+          expect(feature.state.value.inventory[target] ?? 0, 0);
+          expect(
+            feature.plan.value.steps.singleWhere((s) => s.name == target).count,
+            step.count,
+          );
+          expect(tester.takeException(), isNull);
+          await controller.dispose();
+        },
+      );
+    }
+  }
 }
 
 String? value(WidgetTester tester, String key) =>

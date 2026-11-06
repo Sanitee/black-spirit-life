@@ -486,7 +486,10 @@ void main() {
       final mapState = tester.state(find.byType(FieldGuide));
       await tester.tap(find.byKey(const ValueKey('open-gathering-setup')));
       await tester.pumpAndSettle();
-      expect(find.textContaining('selected in Buffs'), findsOneWidget);
+      expect(
+        find.textContaining('Leave out selected buffs and stones'),
+        findsOneWidget,
+      );
       await tester.enterText(
         find.byKey(const ValueKey('gathering-setup-mastery')),
         '2000',
@@ -542,6 +545,90 @@ void main() {
       await tester.pumpWidget(const SizedBox.shrink());
     },
   );
+
+  for (final fixture in [
+    (width: 1500.0, height: 950.0, scale: 1.0),
+    (width: 1200.0, height: 1000.0, scale: 2.0),
+  ]) {
+    testWidgets(
+      'old Khan review reaches hosted map, buffs and stats at ${fixture.scale}',
+      (tester) async {
+        addTearDown(tester.view.reset);
+        final memory = store();
+        memory.preferences[gatheringPreparationPreferenceKey] =
+            GatheringPreparation(
+              baseSettings: const BairogCalculatorSettings(
+                mastery: 1800,
+                gatheringDropRatePercent: 40,
+                enabledExpenseItemIds: {},
+              ),
+              buffIds: {'buff-45514'},
+              statsConfirmed: true,
+            ).toJson()..['schemaVersion'] = 1;
+        final original = jsonEncode(memory.preferences);
+        await pump(
+          tester,
+          memory,
+          size: Size(fixture.width, fixture.height),
+          scale: fixture.scale,
+        );
+        final warning = find.byKey(
+          const ValueKey('gathering-stone-stat-review'),
+        );
+        expect(warning.hitTestable(), findsOneWidget);
+        expect(memory.writes, 0);
+        expect(jsonEncode(memory.preferences), original);
+        await capture(tester, 'khan-review-home-${fixture.scale}');
+
+        await tester.tap(find.byKey(const ValueKey('open-gathering-buffs')));
+        await tester.pumpAndSettle();
+        final buffsWarning = find.descendant(
+          of: find.byKey(const ValueKey('gathering-buffs-dialog')),
+          matching: warning,
+        );
+        expect(buffsWarning.hitTestable(), findsOneWidget);
+        await capture(tester, 'khan-review-buffs-${fixture.scale}');
+        await tester.tap(find.byKey(const ValueKey('close-gathering-buffs')));
+        await tester.pumpAndSettle();
+
+        await tester.tap(find.byKey(const ValueKey('open-gathering-setup')));
+        await tester.pumpAndSettle();
+        final statsWarning = find.descendant(
+          of: find.byKey(const ValueKey('gathering-setup-frame')),
+          matching: warning,
+        );
+        expect(statsWarning.hitTestable(), findsOneWidget);
+        await capture(tester, 'khan-review-stats-${fixture.scale}');
+        await tester.tap(find.text('Cancel'));
+        await tester.pumpAndSettle();
+        expect(warning.hitTestable(), findsOneWidget);
+        expect(memory.writes, 0);
+        expect(jsonEncode(memory.preferences), original);
+
+        await tester.tap(find.byKey(const ValueKey('open-gathering-setup')));
+        await tester.pumpAndSettle();
+        await tester.enterText(
+          find.byKey(const ValueKey('gathering-setup-mastery')),
+          '1775',
+        );
+        await tester.tap(find.byKey(const ValueKey('apply-gathering-setup')));
+        await tester.pumpAndSettle();
+        final saved = GatheringPreparation.fromPreferences(
+          memory.preferences,
+          catalog: catalog,
+        );
+        expect(saved.requiresStoneStatReview, isFalse);
+        expect(saved.statsConfirmed, isTrue);
+        expect(saved.baseSettings.mastery, 1775);
+        expect(saved.effectiveSettings(catalog).mastery, 1800);
+        expect(saved.buffIds, {'buff-45514'});
+        expect(warning, findsNothing);
+        expect(memory.preferences['unrelated-sentinel'], 'preserved');
+        expect(tester.takeException(), isNull);
+        await tester.pumpWidget(const SizedBox.shrink());
+      },
+    );
+  }
 
   for (final fixture in [
     (width: 1500.0, height: 950.0, scale: 1.0),

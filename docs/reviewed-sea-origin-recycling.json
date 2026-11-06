@@ -1,0 +1,12 @@
+{
+  "date": "2026-11-03",
+  "status": "SCOPED_REFERENCE_LAYOUT_AND_BUILD_VERIFIED_AUDIT_ACTIVE",
+  "scope": "Exact147 current sea-crystal input identities:35 each Eltro/Serni/Zulatia/Margoria plus7 Rusalka; single-crystal Simple Alchemy recycling. Existing Margoria guidance already correct, four other shared references clarified.",
+  "sources": [
+    "https://www.naeu.playblackdesert.com/en-US/News/Detail?groupContentNo=4945",
+    "https://www.naeu.playblackdesert.com/en-US/News/Detail?groupContentNo=8129&countryType=en-US"
+  ],
+  "evidence": "Official PC February28,2023 increases lower-tier Origins from1 to1–2 (Zulatia misspelled Zuliata in English); February6,2025 explicitly confirms Margoria1–2 and Rusalka1. Exact current PC identities/descriptions plus corrected manufacturing relationships corroborate eligibility. Evidence: resumed-sea-origin-route-evidence.json,147 rows.",
+  "implementation": "Shared exact-ID/name guarded source text with consumed-crystal warning; existing box costs, limits and chance quantities preserved. No automatic equipment consumption, planner/profit formula or probability assumption. Existing all-theme card pattern unchanged.",
+  "remaining": "Four distinct unopened crystal relationships remain unresolved, not treated as eligible. Chance of1 versus2 for the lower four families is not published in the reviewed evidence. Broader source completeness remains separate. No per-grade odds or average introduced."
+}

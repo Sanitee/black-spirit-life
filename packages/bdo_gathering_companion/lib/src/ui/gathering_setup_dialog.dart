@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import '../domain/bairog_calculator.dart';
 import '../domain/models.dart';
 import 'buff_picker.dart';
+import 'gathering_stone_stat_review.dart';
 import 'theme.dart';
 
 const gatheringEstimatePreferenceKey = 'gatheringEstimateSetup';
@@ -56,6 +57,7 @@ Future<BairogCalculatorSettings?> showGatheringSetupDialog({
   required BairogCalculatorSettings initial,
   ValueChanged<BairogCalculatorSettings>? onPreview,
   String preparationLabel = 'Prepare',
+  bool requiresStoneStatReview = false,
 }) => showDialog<BairogCalculatorSettings>(
   context: context,
   barrierDismissible: false,
@@ -64,6 +66,7 @@ Future<BairogCalculatorSettings?> showGatheringSetupDialog({
     initial: initial,
     onPreview: onPreview,
     preparationLabel: preparationLabel,
+    requiresStoneStatReview: requiresStoneStatReview,
   ),
 );
 
@@ -82,6 +85,7 @@ class _GatheringSetupDialog extends StatefulWidget {
     this.advancedRequest = 0,
     this.onAdvancedExpandedChanged,
     this.preparationLabel = 'Prepare',
+    this.requiresStoneStatReview = false,
   });
 
   final Catalog catalog;
@@ -95,6 +99,7 @@ class _GatheringSetupDialog extends StatefulWidget {
   final int advancedRequest;
   final ValueChanged<bool>? onAdvancedExpandedChanged;
   final String preparationLabel;
+  final bool requiresStoneStatReview;
 
   @override
   State<_GatheringSetupDialog> createState() => _GatheringSetupDialogState();
@@ -464,7 +469,7 @@ class _GatheringSetupDialogState extends State<_GatheringSetupDialog> {
                     Text('Include your gear, artifacts and crystals.'),
                     SizedBox(height: 10),
                     Text(
-                      'Leave out the buffs selected in Prepare. They are added automatically.',
+                      'Leave out the buffs and stones selected in Prepare. They are added automatically.',
                     ),
                   ],
                 ),
@@ -568,9 +573,14 @@ class _GatheringSetupDialogState extends State<_GatheringSetupDialog> {
     key: const ValueKey('gathering-setup-inputs'),
     crossAxisAlignment: CrossAxisAlignment.stretch,
     children: [
+      if (widget.requiresStoneStatReview)
+        const Padding(
+          padding: EdgeInsets.only(bottom: 12),
+          child: GatheringStoneStatReview(),
+        ),
       if (!widget.inline)
         Text(
-          'Include your gear, artifacts and crystals.\nLeave out the buffs selected in ${widget.preparationLabel}.',
+          'Include gear, artifacts and crystals.\nLeave out selected buffs and stones.',
           key: ValueKey('gathering-base-stats-note'),
           style: TextStyle(
             fontSize: 14,
@@ -770,7 +780,8 @@ class _GatheringSetupDialogState extends State<_GatheringSetupDialog> {
       _sectionHeader('ENERGY RECOVERY'),
       const SizedBox(height: 10),
       Text(
-        'Energy use assumes Gathering Professional 3+.',
+        'Estimated for Gathering Professional 3+. Enter your recovery without '
+        'the medicines below; include other active buffs.',
         style: TextStyle(
           fontSize: 13,
           color: context.gatheringColors.muted,
@@ -800,6 +811,18 @@ class _GatheringSetupDialogState extends State<_GatheringSetupDialog> {
         children: [
           for (final expense in bairogEnergyExpenses) _expenseToggle(expense),
         ],
+      ),
+      const SizedBox(height: 10),
+      Text(
+        'Assumes refills are ready and fully used; tick timing and wasted '
+        'Energy are not modeled. Miraculous: one dose, 1-hour buff, '
+        '22-hour cooldown. Costs/h include that dose in the first hour.',
+        key: const ValueKey('gathering-energy-estimate-assumptions'),
+        style: TextStyle(
+          fontSize: 12.5,
+          color: context.gatheringColors.muted,
+          height: 1.4,
+        ),
       ),
     ],
   );
@@ -1064,9 +1087,13 @@ class _GatheringSetupDialogState extends State<_GatheringSetupDialog> {
         borderRadius: BorderRadius.circular(9),
         onTap: widget.enabled
             ? () => _updateDraft(() {
-                selected
-                    ? _expenses.remove(expense.bdoItemId)
-                    : _expenses.add(expense.bdoItemId);
+                if (selected) {
+                  _expenses.remove(expense.bdoItemId);
+                } else {
+                  _expenses.add(expense.bdoItemId);
+                  if (expense.bdoItemId == 821144) _expenses.remove(821145);
+                  if (expense.bdoItemId == 821145) _expenses.remove(821144);
+                }
               })
             : null,
         child: Padding(
@@ -1087,7 +1114,9 @@ class _GatheringSetupDialogState extends State<_GatheringSetupDialog> {
                       ),
                     ),
                     Text(
-                      expense.usesPerHour != null
+                      expense.singleUsePerSession
+                          ? '1 dose · 1 hour · 22-hour cooldown'
+                          : expense.usesPerHour != null
                           ? '${_plainNumber(expense.usesPerHour!)} uses/hour'
                           : '${_plainNumber(expense.durationHours!)} hour duration',
                       style: TextStyle(

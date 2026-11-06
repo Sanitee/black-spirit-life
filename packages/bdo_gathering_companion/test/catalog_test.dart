@@ -131,6 +131,11 @@ void main() {
     expect(calculatorItem.item.name, 'Evergreen Shard');
     expect(calculatorItem.globalDrop, isTrue);
     expect(
+      calculatorItem.procsWithMinigame,
+      isTrue,
+      reason: 'Official PC September 3 explicitly adds Evergreen to minigames.',
+    );
+    expect(
       objectList(
         rawSpots['commonLoot'],
       ).where((entry) => objectMap(entry)['itemId'] == 821469),
@@ -212,13 +217,16 @@ void main() {
         'Mystical Spirit Powder',
         "Vell's Fine Powder",
         'Recharge/Polish/Grow',
-        'Use Grinding',
-        'cannot use Grinding',
         'spirit is used up',
         'essence is depleted',
+        '- How to Use:',
+        '- Duration:',
+        '- Cooldown:',
       ];
       for (final stoneId in stoneIds) {
         final stone = rawItem(stoneId);
+        expect(item(stoneId).duration, isNull);
+        expect(item(stoneId).durationNote, 'While equipped');
         final description = <String>[
           textOf(stone, 'effectText'),
           textOf(stone, 'notes'),
@@ -282,10 +290,11 @@ void main() {
       expect(item(17583).effects['lifeExpPct'], 30);
       expect(item(45514).effects['lifeExpPct'], 30);
       expect(
-        item(45514).effects.containsKey('lifeMastery'),
-        isFalse,
-        reason: 'Do not restore the old guide-listed Khan mastery bonus.',
+        item(45514).effects['lifeMastery'],
+        25,
+        reason: 'Current equipped item description includes +25 mastery.',
       );
+      expect(item(750472).name, "[Event] Stella's Spirit Stone (7 Days)");
     });
   });
 
@@ -1072,6 +1081,9 @@ void main() {
           expect(buff.effects, isNotEmpty, reason: buff.name);
           if (buff.components.isNotEmpty) {
             expect(buff.duration, isNull);
+          } else if (buff.durationNote == 'While equipped') {
+            expect(buff.duration, isNull);
+            expect(buff.durationNote, 'While equipped');
           } else {
             expect(buff.duration, greaterThan(0), reason: buff.name);
           }

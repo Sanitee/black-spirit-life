@@ -1,0 +1,13 @@
+{
+  "date": "2026-11-03",
+  "status": "IMPLEMENTED_SCOPED_VERIFICATION_PASS_NOT_FULL_AUDIT_COMPLETION",
+  "verification": "49 exact source-only reference deltas; all other fields/recipes/exchanges unchanged. Full contract/artwork,6792 controller views,468 layout cases,scoped analysis and Windows Release pass. Twelve market-only omissions closed; twelve broader source records remain. See resumed-container-quest-resolution.json.",
+  "sources": [
+    "https://www.naeu.playblackdesert.com/en-US/Wiki?wikiNo=384",
+    "https://www.naeu.playblackdesert.com/en-US/News/Detail?groupContentNo=6254",
+    "https://www.naeu.playblackdesert.com/en-US/News/Detail?groupContentNo=6415"
+  ],
+  "scope": "43 exact shared references gain named monster-drop container sources; 6 gain qualified Lara/Black Spirit quest sources. Container outcomes are chance-qualified, except the explicit25–50 Black Stone bundle. Lara is weekly, Lv16+, requires crafting and delivering700 Potato Dough, and gives a reward choice. Clover exchange is also a choice. Black Spirit knowledge quests are once each per Family, not repeatable production.",
+  "evidence": "resumed-container-quest-source-evidence.json and exact table/native identity screen in the correctness audit. Current native quest text corroborates weekly Potato Dough and Black Spirit gift sources; questionable decoded DSL was excluded. Curly apostrophe in official Sicil label maps only to the exact11625 identity.",
+  "limits": "No changes to recipes, quantities, output odds, market eligibility, containers, live stock, taxes, saved profiles or calculations. No equipment consumed automatically. Not exhaustive drop locations or source certification. Current shared widgets/themes/source badges remain. Other original research records remain open."
+}

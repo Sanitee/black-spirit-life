@@ -2,15 +2,14 @@ import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:bdo_craft_planner_flutter/visual/components/app_tooltip.dart';
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/semantics.dart';
 import 'package:flutter/services.dart';
 
 import '../../data/opportunities/exchange_catalog.dart';
-import '../../data/opportunities/exchange_item_details.dart';
 import '../../data/opportunities/market_eligibility.dart';
+import '../../domain/catalog/item_name_presentation.dart';
 import '../../domain/formatting/planner_formatters.dart';
 import '../../domain/market/market_calculations.dart';
 import '../../domain/market/market_price_models.dart'
@@ -34,10 +33,13 @@ import '../planner/planner_contracts.dart'
     show PlannerTargetRequest, PlannerGatherDemand;
 import '../planner/planner_shared.dart'
     show PlannerTargetChooser, PlannerCommandTarget;
+import '../recipe_book/exchange_reference_information.dart';
 import '../recipe_book/recipe_book_item_info.dart';
 import '../recipe_book/recipe_book_item_info_view.dart';
+import '../shared/market_count_badges.dart';
 import '../shared/mode_item_icon.dart';
 import '../shared/profile_game_icon.dart';
+import '../shared/source_availability_badges.dart';
 import 'opportunities_content_viewport.dart';
 import 'opportunities_controller.dart';
 import 'opportunities_item_actions.dart';
@@ -51,14 +53,14 @@ import 'opportunity_recipe_controls.dart';
 import 'opportunity_refresh_control.dart';
 import 'opportunity_silver_amount.dart';
 
-part 'opportunity_substitutes.dart';
-part 'opportunity_detail_inputs.dart';
-part 'opportunity_crafting_toolbar.dart';
-part 'opportunity_best_use_pane.dart';
 part 'opportunity_best_use_details.dart';
-part 'opportunity_exchange_items.dart';
+part 'opportunity_best_use_pane.dart';
 part 'opportunity_content_fit.dart';
+part 'opportunity_crafting_toolbar.dart';
+part 'opportunity_detail_inputs.dart';
+part 'opportunity_exchange_items.dart';
 part 'opportunity_expanding_card.dart';
+part 'opportunity_substitutes.dart';
 
 class OpportunitiesWorkspace extends StatefulWidget {
   const OpportunitiesWorkspace({
@@ -1376,9 +1378,7 @@ String _percent(num value) =>
 String _silver(num? value) {
   if (value == null || !value.isFinite) return '—';
   final abs = value.abs();
-  if (abs >= 1000000000) return '${_quantity(value / 1000000000)}B';
-  if (abs >= 1000000) return '${_quantity(value / 1000000)}M';
-  if (abs >= 10000) return '${_quantity(value / 1000)}K';
+  if (abs >= 1000) return formatCompactOpportunitySilver(value);
   if (abs > 0 && abs < 100) {
     return formatGroupedEditableQuantity(
       value.toDouble(),
@@ -1589,24 +1589,6 @@ Widget _ingredientGrid(BuildContext context, List<Widget> cards) =>
       },
     );
 
-(String, bool) _marketReading(
-  OpportunityMarketItem? item,
-  DateTime now,
-  Duration maxAge,
-) {
-  final stock = item?.stockFor(now, maxAge);
-  final bids = item?.bookIsFresh(now, maxAge) == true
-      ? item?.preorderCount
-      : null;
-  final negative = stock == 0 && bids != null && bids > 0;
-  final text = negative
-      ? '−${_quantity(bids)}'
-      : stock == null
-      ? '—'
-      : _quantity(stock);
-  return (text, negative);
-}
-
 _MarketStockBadge _market(
   BuildContext context,
   OpportunityMarketItem? item,
@@ -1614,21 +1596,13 @@ _MarketStockBadge _market(
   VoidCallback? onDetails,
   Duration maxAge = OpportunitiesController.maxMarketAge,
 }) {
-  final spec = context.visualTheme;
-  final (text, negative) = _marketReading(item, now, maxAge);
   final stock = item?.stockFor(now, maxAge);
   final preorders = item?.bookIsFresh(now, maxAge) == true
       ? item?.preorderCount
       : null;
   return _MarketStockBadge(
-    text: text,
-    color: negative
-        ? spec.palette.danger
-        : stock != null && stock > 0
-        ? spec.palette.success
-        : spec.palette.textMuted,
-    semanticDescription:
-        'Stock: ${stock == null ? 'Not checked' : _quantity(stock)}\nPreorders: ${preorders == null ? 'Not checked' : _quantity(preorders)}${negative ? '\nThe red negative count shows preorders when nothing is listed.' : ''}',
+    stock: stock,
+    preorders: preorders,
     onDetails: onDetails,
   );
 }
@@ -1636,90 +1610,54 @@ _MarketStockBadge _market(
 // One content-sized stock treatment for outputs, ingredients and substitutes.
 class _MarketStockBadge extends StatelessWidget {
   const _MarketStockBadge({
-    required this.text,
-    required this.color,
-    required this.semanticDescription,
+    required this.stock,
+    this.preorders,
     this.textKey,
     this.onDetails,
   });
-  final String text;
-  final Color color;
-  final String semanticDescription;
+  final int? stock, preorders;
   final Key? textKey;
   final VoidCallback? onDetails;
-  TextStyle _valueStyle(BuildContext context) =>
-      context.visualTheme.typography.body.copyWith(
-        fontSize: 16,
-        fontWeight: FontWeight.w700,
-        color: OpportunitiesVisualSpec.readableValueColor(
-          context.visualTheme,
-          color,
-        ),
-      );
-  double minimumWidth(BuildContext context) {
-    final painter = TextPainter(
-      text: TextSpan(text: 'Stock $text', style: _valueStyle(context)),
-      textScaler: MediaQuery.textScalerOf(context),
-      textDirection: Directionality.of(context),
-    )..layout();
-    final width =
-        painter.width.ceilToDouble() + 18 + (onDetails == null ? 0 : 27);
-    painter.dispose();
-    return width;
-  }
+  SourceAvailabilityBadges get _badges => SourceAvailabilityBadges(
+    stock: stock,
+    preorders: preorders,
+    stockKey: textKey,
+  );
+  double minimumWidth(BuildContext context) =>
+      _badges.presentation(context).preferredWidth(context) +
+      (onDetails == null ? 0 : 27);
 
   @override
   Widget build(BuildContext context) {
     return Align(
       alignment: Alignment.centerLeft,
       widthFactor: 1,
-      child: DecoratedBox(
+      child: Wrap(
         key: const ValueKey('market-stock-badge'),
-        decoration: BoxDecoration(
-          color: color.withAlpha(25),
-          border: Border.all(color: color.withAlpha(95)),
-          borderRadius: BorderRadius.circular(5),
-        ),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-          child: Wrap(
-            spacing: 4,
-            runSpacing: 2,
-            crossAxisAlignment: WrapCrossAlignment.center,
-            children: [
-              Semantics(
-                label: semanticDescription,
-                excludeSemantics: true,
-                child: Text(
-                  'Stock $text',
-                  key: textKey,
-                  style: _valueStyle(context),
-                ),
-              ),
-              if (onDetails != null)
-                Semantics(
-                  button: true,
-                  label: 'Market details',
-                  child: InkResponse(
-                    key: const ValueKey('craft-market-details'),
-                    onTap: onDetails,
-                    radius: 16,
-                    child: Padding(
-                      padding: const EdgeInsets.all(3),
-                      child: Icon(
-                        Icons.info_outline,
-                        size: 17,
-                        color: OpportunitiesVisualSpec.readableValueColor(
-                          context.visualTheme,
-                          color,
-                        ),
-                      ),
-                    ),
+        spacing: 4,
+        runSpacing: 4,
+        crossAxisAlignment: WrapCrossAlignment.center,
+        children: [
+          _badges,
+          if (onDetails != null)
+            Semantics(
+              button: true,
+              label: 'Market details',
+              child: InkResponse(
+                key: const ValueKey('craft-market-details'),
+                onTap: onDetails,
+                radius: 16,
+                child: Padding(
+                  padding: const EdgeInsets.all(3),
+                  child: Icon(
+                    Icons.info_outline,
+                    size: 17,
+                    color: context.visualTheme.palette.textMuted,
                   ),
                 ),
-            ],
-          ),
-        ),
+              ),
+            ),
+        ],
       ),
     );
   }
@@ -2788,7 +2726,7 @@ Widget _craftCalculationBody(
               resolveGatherDemand: () => PlannerGatherDemand(
                 sourceId:
                     'opportunity:${inspection?.sourceMode.key ?? controller.preferences.mode.key}:${quote.recipeName}:${quote.selectedVariantId ?? 'standard'}',
-                sourceLabel: quote.recipeName,
+                sourceLabel: itemDisplayName(quote.recipeName),
                 materialName: ingredient.name,
                 neededQuantity: ingredient.quantity.toDouble(),
               ),
@@ -3068,49 +3006,17 @@ Widget _ingredientStockBadge(
   OpportunitiesController controller,
   OpportunityIngredientQuote ingredient,
 ) {
-  final spec = context.visualTheme;
   final now = controller.clock();
   final stock = ingredient.market?.stockFor(now, controller.cachedMarketMaxAge);
-  final (text, negative) = _marketReading(
-    ingredient.market,
-    now,
-    controller.cachedMarketMaxAge,
-  );
-  final color = negative
-      ? spec.palette.danger
-      : stock == null
-      ? spec.palette.textMuted
-      : stock == 0
-      ? spec.palette.danger
-      : _ingredientStockShortage(controller, ingredient)
-      ? spec.palette.warning
-      : spec.palette.success;
   final preorders =
       ingredient.market?.bookIsFresh(now, controller.cachedMarketMaxAge) == true
       ? ingredient.market?.preorderCount
       : null;
   return _MarketStockBadge(
-    text: text,
-    color: color,
+    stock: stock,
+    preorders: preorders,
     textKey: ValueKey('ingredient-stock:${ingredient.name}'),
-    semanticDescription: stock == null
-        ? 'Current stock has not been checked.'
-        : 'Stock: ${_quantity(stock)}${preorders == null ? '' : '\nPreorders: ${_quantity(preorders)}'}',
   );
-}
-
-bool _ingredientStockShortage(
-  OpportunitiesController controller,
-  OpportunityIngredientQuote ingredient,
-) {
-  if (!_ingredientHasMarket(ingredient)) return false;
-  final marketNeeded = ingredient.purchaseQuantity - ingredient.npcQuantity;
-  if (marketNeeded <= 0) return false;
-  final stock = ingredient.market?.stockFor(
-    controller.clock(),
-    controller.cachedMarketMaxAge,
-  );
-  return stock != null && stock < marketNeeded;
 }
 
 bool _ingredientHasMarket(OpportunityIngredientQuote ingredient) =>
@@ -3175,6 +3081,7 @@ Future<void> _craftAbout(
       const SizedBox(height: 12),
       for (final text in [
         'These totals are for the whole batch, not one item.',
+        if (quote.outputNote != null) quote.outputNote!,
         if (inspection?.isRareOutput == true)
           '${inspection!.itemName} is a rare result of ${inspection.recipe.name}. These are the ingredient costs for ${quote.crafts == 1 ? 'one craft' : '${quote.crafts} complete crafts'}. Profit is left blank because its chance to appear is not known.'
         else
@@ -3617,20 +3524,16 @@ Widget _bookDetails(
             item.quoteIsFresh(now, maxAge) ? 'Price' : 'Earlier price',
             item.basePrice == null ? '—' : _quantity(item.basePrice!),
           ),
-          _MarketStockBadge(
-            text: stock == null ? '—' : _quantity(stock),
-            color: stock != null && stock > 0
-                ? spec.palette.success
-                : spec.palette.textMuted,
-            semanticDescription:
-                'Listed stock: ${stock == null ? 'Not checked' : _quantity(stock)}',
-          ),
+          _MarketStockBadge(stock: stock),
           _metric(
             context,
             'Preorders',
             preorders == null ? '—' : _quantity(preorders),
             color: preorders != null && preorders > 0
-                ? spec.palette.danger
+                ? OpportunityCraftCardMaterial.forSpec(
+                    spec,
+                    OpportunityStockTone.mixed,
+                  ).badgeInk
                 : spec.palette.textMuted,
           ),
         ],
@@ -3682,7 +3585,10 @@ Widget _bookDetails(
                                   (sum, level) => sum + level.quantity,
                                 ),
                           ),
-                          spec.palette.textMuted,
+                          OpportunityCraftCardMaterial.forSpec(
+                            spec,
+                            OpportunityStockTone.available,
+                          ).badgeInk,
                         ),
                         (
                           _quantity(
@@ -3693,7 +3599,10 @@ Widget _bookDetails(
                                   (sum, level) => sum + level.quantity,
                                 ),
                           ),
-                          spec.palette.danger,
+                          OpportunityCraftCardMaterial.forSpec(
+                            spec,
+                            OpportunityStockTone.mixed,
+                          ).badgeInk,
                         ),
                       ])
                         Padding(
@@ -3779,7 +3688,10 @@ Widget _exchangePreorders(
                     child: Text(
                       _quantity(bids[index].quantity),
                       style: spec.typography.body.copyWith(
-                        color: spec.palette.danger,
+                        color: OpportunityCraftCardMaterial.forSpec(
+                          spec,
+                          OpportunityStockTone.mixed,
+                        ).badgeInk,
                       ),
                     ),
                   ),

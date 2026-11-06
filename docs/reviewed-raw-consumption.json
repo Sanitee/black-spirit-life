@@ -1,0 +1,2016 @@
+{
+  "reviewedAt": "2026-11-03T05:06:04.720Z",
+  "scope": "Research metadata only. Player-facing projection withdrawn on 2026-11-04: mapped client buffs and legacy tooltip prose do not establish current item usability. No calculator, recipe, price or saved-profile changes.",
+  "presentationStatus": "withdrawn",
+  "evidence": [
+    "resumed-buff-validated-index-probe.json",
+    "resumed-current-effect-review.json",
+    "official/amanita-pc-20200520.fetch.json",
+    "Steam PC 2019 Strawberry Casting Speed -1 fix"
+  ],
+  "validation": {
+    "indexRows": 44732,
+    "completeIndexTiling": true,
+    "u32Keys": true,
+    "allSelectedSkillChainsZeroTerminated": true,
+    "englishBuffLabelsAgreeWithTypedValues": true,
+    "rawDurationMs": 30000,
+    "cooldownMs": 600000
+  },
+  "limits": [
+    "Client metadata is not independent live-server testing.",
+    "No poison probability inferred. Descriptions warning of poison are retained even if the raw chain lacks a poison row.",
+    "High-Quality/Special Amanita and Infinity Sturdiness remain disputed."
+  ],
+  "excluded": [
+    {
+      "key": "native_effects_not_shown:20",
+      "id": 5462,
+      "name": "High-Quality Amanita Mushroom",
+      "reason": "Conflicting effect text/metadata; do not auto-apply"
+    },
+    {
+      "key": "native_effects_not_shown:95",
+      "id": 15117,
+      "name": "Magic Crystal of Infinity - Sturdiness",
+      "reason": "Conflicting effect text/metadata; do not auto-apply"
+    },
+    {
+      "key": "native_effects_not_shown:111",
+      "id": 5482,
+      "name": "Special Amanita Mushroom",
+      "reason": "Conflicting effect text/metadata; do not auto-apply"
+    },
+    {
+      "key": "native_effects_not_shown:148",
+      "id": 757032,
+      "name": "Stonetail Wind's Meal",
+      "reason": "Handled separately with food stacking rules"
+    },
+    {
+      "key": "native_effects_not_shown:149",
+      "id": 757032,
+      "name": "Stonetail Wind's Meal",
+      "reason": "Handled separately with food stacking rules"
+    },
+    {
+      "key": "native_effects_not_shown:150",
+      "id": 757032,
+      "name": "Stonetail Wind's Meal",
+      "reason": "Handled separately with food stacking rules"
+    },
+    {
+      "key": "native_effects_not_shown:151",
+      "id": 757032,
+      "name": "Stonetail Wind's Meal",
+      "reason": "Handled separately with food stacking rules"
+    }
+  ],
+  "records": [
+    {
+      "id": 5401,
+      "name": "Sunrise Herb",
+      "effects": [
+        "All AP +1",
+        "May poison you (5 damage ×3 over 9 sec)."
+      ],
+      "notes": [
+        "Duration: 30 sec.",
+        "Cooldown: 10 min."
+      ],
+      "buffIds": [
+        50462,
+        26147
+      ],
+      "flags": [
+        "native_effects_not_shown:154"
+      ]
+    },
+    {
+      "id": 5402,
+      "name": "Silver Azalea",
+      "effects": [
+        "Movement Speed +1",
+        "May poison you (5 damage ×3 over 9 sec)."
+      ],
+      "notes": [
+        "Duration: 30 sec.",
+        "Cooldown: 10 min."
+      ],
+      "buffIds": [
+        50463,
+        26147
+      ],
+      "flags": [
+        "native_effects_not_shown:109"
+      ]
+    },
+    {
+      "id": 5403,
+      "name": "Fire Flake Flower",
+      "effects": [
+        "Attack Speed +1",
+        "May poison you (5 damage ×3 over 9 sec)."
+      ],
+      "notes": [
+        "Duration: 30 sec.",
+        "Cooldown: 10 min."
+      ],
+      "buffIds": [
+        50464,
+        26147
+      ],
+      "flags": [
+        "native_effects_not_shown:14"
+      ]
+    },
+    {
+      "id": 5404,
+      "name": "Dry Mane Grass",
+      "effects": [
+        "Max HP +30",
+        "May poison you (5 damage ×3 over 9 sec)."
+      ],
+      "notes": [
+        "Duration: 30 sec.",
+        "Cooldown: 10 min."
+      ],
+      "buffIds": [
+        50465,
+        26147
+      ],
+      "flags": [
+        "native_effects_not_shown:7"
+      ]
+    },
+    {
+      "id": 5405,
+      "name": "Silk Honey Grass",
+      "effects": [
+        "Critical Hit +1",
+        "May poison you (5 damage ×3 over 9 sec)."
+      ],
+      "notes": [
+        "Duration: 30 sec.",
+        "Cooldown: 10 min."
+      ],
+      "buffIds": [
+        50466,
+        26147
+      ],
+      "flags": [
+        "native_effects_not_shown:108"
+      ]
+    },
+    {
+      "id": 5406,
+      "name": "Everlasting Herb",
+      "effects": [
+        "All AP +1",
+        "Movement Speed +1",
+        "Attack Speed +1",
+        "Max HP +30",
+        "May poison you."
+      ],
+      "notes": [
+        "Duration: 30 sec.",
+        "Cooldown: 10 min."
+      ],
+      "buffIds": [
+        50462,
+        50463,
+        50464,
+        50465
+      ],
+      "flags": [
+        "native_effects_not_shown:10",
+        "native_effects_not_shown:11",
+        "native_effects_not_shown:12",
+        "native_effects_not_shown:13"
+      ]
+    },
+    {
+      "id": 5407,
+      "name": "Fortune Teller Mushroom",
+      "effects": [
+        "All Accuracy +1",
+        "May poison you (5 damage ×3 over 9 sec)."
+      ],
+      "notes": [
+        "Duration: 30 sec.",
+        "Cooldown: 10 min."
+      ],
+      "buffIds": [
+        50467,
+        26147
+      ],
+      "flags": [
+        "native_effects_not_shown:16"
+      ]
+    },
+    {
+      "id": 5408,
+      "name": "Arrow Mushroom",
+      "effects": [
+        "MP/WP/SP Recovery +1",
+        "May poison you (5 damage ×3 over 9 sec)."
+      ],
+      "notes": [
+        "Duration: 30 sec.",
+        "Cooldown: 10 min."
+      ],
+      "buffIds": [
+        50468,
+        26147
+      ],
+      "flags": [
+        "native_effects_not_shown:2"
+      ]
+    },
+    {
+      "id": 5409,
+      "name": "Dwarf Mushroom",
+      "effects": [
+        "MP/WP/SP Recovery +2",
+        "May poison you (5 damage ×3 over 9 sec)."
+      ],
+      "notes": [
+        "Duration: 30 sec.",
+        "Cooldown: 10 min."
+      ],
+      "buffIds": [
+        50469,
+        26147
+      ],
+      "flags": [
+        "native_effects_not_shown:8"
+      ]
+    },
+    {
+      "id": 5410,
+      "name": "Cloud Mushroom",
+      "effects": [
+        "All Evasion +2",
+        "May poison you (5 damage ×3 over 9 sec)."
+      ],
+      "notes": [
+        "Duration: 30 sec.",
+        "Cooldown: 10 min."
+      ],
+      "buffIds": [
+        50470,
+        26147
+      ],
+      "flags": [
+        "native_effects_not_shown:5"
+      ]
+    },
+    {
+      "id": 5411,
+      "name": "Sky Mushroom",
+      "effects": [
+        "All AP +1",
+        "May poison you (5 damage ×3 over 9 sec)."
+      ],
+      "notes": [
+        "Duration: 30 sec.",
+        "Cooldown: 10 min."
+      ],
+      "buffIds": [
+        50471,
+        26147
+      ],
+      "flags": [
+        "native_effects_not_shown:110"
+      ]
+    },
+    {
+      "id": 5412,
+      "name": "Tiger Mushroom",
+      "effects": [
+        "All Damage Reduction +1",
+        "May poison you (5 damage ×3 over 9 sec)."
+      ],
+      "notes": [
+        "Duration: 30 sec.",
+        "Cooldown: 10 min."
+      ],
+      "buffIds": [
+        50472,
+        26147
+      ],
+      "flags": [
+        "native_effects_not_shown:155"
+      ]
+    },
+    {
+      "id": 5413,
+      "name": "Emperor Mushroom",
+      "effects": [
+        "Knockback/Floating Resistance +5%",
+        "May poison you (5 damage ×3 over 9 sec)."
+      ],
+      "notes": [
+        "Duration: 30 sec.",
+        "Cooldown: 10 min."
+      ],
+      "buffIds": [
+        50473,
+        26147
+      ],
+      "flags": [
+        "native_effects_not_shown:9"
+      ]
+    },
+    {
+      "id": 5414,
+      "name": "Ghost Mushroom",
+      "effects": [
+        "Knockdown/Bound Resistance +5%",
+        "May poison you (5 damage ×3 over 9 sec)."
+      ],
+      "notes": [
+        "Duration: 30 sec.",
+        "Cooldown: 10 min."
+      ],
+      "buffIds": [
+        50474,
+        26147
+      ],
+      "flags": [
+        "native_effects_not_shown:18"
+      ]
+    },
+    {
+      "id": 5415,
+      "name": "Fog Mushroom",
+      "effects": [
+        "Knockdown/Bound Resistance +5%",
+        "May poison you (5 damage ×3 over 9 sec)."
+      ],
+      "notes": [
+        "Duration: 30 sec.",
+        "Cooldown: 10 min."
+      ],
+      "buffIds": [
+        50475,
+        26147
+      ],
+      "flags": [
+        "native_effects_not_shown:15"
+      ]
+    },
+    {
+      "id": 5416,
+      "name": "Hump Mushroom",
+      "effects": [
+        "Stun/Stiffness/Freezing Resistance +5%",
+        "May poison you (5 damage ×3 over 9 sec)."
+      ],
+      "notes": [
+        "Duration: 30 sec.",
+        "Cooldown: 10 min."
+      ],
+      "buffIds": [
+        50476,
+        26147
+      ],
+      "flags": [
+        "native_effects_not_shown:61"
+      ]
+    },
+    {
+      "id": 5417,
+      "name": "Bluffer Mushroom",
+      "effects": [
+        "Stun/Stiffness/Freezing Resistance +5%",
+        "May poison you (5 damage ×3 over 9 sec)."
+      ],
+      "notes": [
+        "Duration: 30 sec.",
+        "Cooldown: 10 min."
+      ],
+      "buffIds": [
+        50477,
+        26147
+      ],
+      "flags": [
+        "native_effects_not_shown:3"
+      ]
+    },
+    {
+      "id": 5418,
+      "name": "Ancient Mushroom",
+      "effects": [
+        "Knockdown/Bound Resistance +5%",
+        "May poison you (5 damage ×3 over 9 sec)."
+      ],
+      "notes": [
+        "Duration: 30 sec.",
+        "Cooldown: 10 min."
+      ],
+      "buffIds": [
+        50478,
+        26147
+      ],
+      "flags": [
+        "native_effects_not_shown:1"
+      ]
+    },
+    {
+      "id": 5419,
+      "name": "Amanita Mushroom",
+      "effects": [
+        "Knockdown/Bound Resistance +5%",
+        "May poison you (5 damage ×3 over 9 sec)."
+      ],
+      "notes": [
+        "Duration: 30 sec.",
+        "Cooldown: 10 min."
+      ],
+      "buffIds": [
+        50474,
+        26147
+      ],
+      "flags": [
+        "native_effects_not_shown:0"
+      ]
+    },
+    {
+      "id": 5420,
+      "name": "Truffle Mushroom",
+      "effects": [
+        "All AP +1",
+        "Movement Speed +1",
+        "Attack Speed +1",
+        "Max HP +30",
+        "May poison you."
+      ],
+      "notes": [
+        "Duration: 30 sec.",
+        "Cooldown: 10 min."
+      ],
+      "buffIds": [
+        50462,
+        50463,
+        50464,
+        50465
+      ],
+      "flags": [
+        "native_effects_not_shown:157",
+        "native_effects_not_shown:158",
+        "native_effects_not_shown:159",
+        "native_effects_not_shown:160"
+      ]
+    },
+    {
+      "id": 5444,
+      "name": "High-quality Sunrise Herb",
+      "effects": [
+        "All AP +1",
+        "May poison you (5 damage ×3 over 9 sec)."
+      ],
+      "notes": [
+        "Duration: 30 sec.",
+        "Cooldown: 10 min."
+      ],
+      "buffIds": [
+        50462,
+        26147
+      ],
+      "flags": [
+        "native_effects_not_shown:45",
+        "native_effects_not_shown:59"
+      ]
+    },
+    {
+      "id": 5445,
+      "name": "High-quality Silver Azalea",
+      "effects": [
+        "Movement Speed +1",
+        "May poison you (5 damage ×3 over 9 sec)."
+      ],
+      "notes": [
+        "Duration: 30 sec.",
+        "Cooldown: 10 min."
+      ],
+      "buffIds": [
+        50463,
+        26147
+      ],
+      "flags": [
+        "native_effects_not_shown:41",
+        "native_effects_not_shown:58"
+      ]
+    },
+    {
+      "id": 5446,
+      "name": "High-quality Fire Flake Flower",
+      "effects": [
+        "Attack Speed +1",
+        "May poison you (5 damage ×3 over 9 sec)."
+      ],
+      "notes": [
+        "Duration: 30 sec.",
+        "Cooldown: 10 min."
+      ],
+      "buffIds": [
+        50464,
+        26147
+      ],
+      "flags": [
+        "native_effects_not_shown:29",
+        "native_effects_not_shown:54"
+      ]
+    },
+    {
+      "id": 5447,
+      "name": "High-quality Dry Mane Grass",
+      "effects": [
+        "Max HP +30",
+        "May poison you (5 damage ×3 over 9 sec)."
+      ],
+      "notes": [
+        "Duration: 30 sec.",
+        "Cooldown: 10 min."
+      ],
+      "buffIds": [
+        50465,
+        26147
+      ],
+      "flags": [
+        "native_effects_not_shown:26",
+        "native_effects_not_shown:49"
+      ]
+    },
+    {
+      "id": 5448,
+      "name": "High-quality Silk Honey Grass",
+      "effects": [
+        "Critical Hit +1",
+        "May poison you (5 damage ×3 over 9 sec)."
+      ],
+      "notes": [
+        "Duration: 30 sec.",
+        "Cooldown: 10 min."
+      ],
+      "buffIds": [
+        50466,
+        26147
+      ],
+      "flags": [
+        "native_effects_not_shown:40",
+        "native_effects_not_shown:57"
+      ]
+    },
+    {
+      "id": 5449,
+      "name": "High-quality Everlasting Herb",
+      "effects": [
+        "All AP +1",
+        "Movement Speed +1",
+        "Attack Speed +1",
+        "Max HP +30",
+        "May poison you."
+      ],
+      "notes": [
+        "Duration: 30 sec.",
+        "Cooldown: 10 min."
+      ],
+      "buffIds": [
+        50462,
+        50463,
+        50464,
+        50465
+      ],
+      "flags": [
+        "native_effects_not_shown:50",
+        "native_effects_not_shown:51",
+        "native_effects_not_shown:52",
+        "native_effects_not_shown:53"
+      ]
+    },
+    {
+      "id": 5450,
+      "name": "High-quality Fortune Teller Mushroom",
+      "effects": [
+        "All Accuracy +1",
+        "May poison you (5 damage ×3 over 9 sec)."
+      ],
+      "notes": [
+        "Duration: 30 sec.",
+        "Cooldown: 10 min."
+      ],
+      "buffIds": [
+        50467,
+        26147
+      ],
+      "flags": [
+        "native_effects_not_shown:30"
+      ]
+    },
+    {
+      "id": 5451,
+      "name": "High-quality Arrow Mushroom",
+      "effects": [
+        "MP/WP/SP Recovery +1",
+        "May poison you (5 damage ×3 over 9 sec)."
+      ],
+      "notes": [
+        "Duration: 30 sec.",
+        "Cooldown: 10 min."
+      ],
+      "buffIds": [
+        50468,
+        26147
+      ],
+      "flags": [
+        "native_effects_not_shown:22"
+      ]
+    },
+    {
+      "id": 5452,
+      "name": "High-quality Dwarf Mushroom",
+      "effects": [
+        "MP/WP/SP Recovery +2",
+        "May poison you (5 damage ×3 over 9 sec)."
+      ],
+      "notes": [
+        "Duration: 30 sec.",
+        "Cooldown: 10 min."
+      ],
+      "buffIds": [
+        50469,
+        26147
+      ],
+      "flags": [
+        "native_effects_not_shown:27"
+      ]
+    },
+    {
+      "id": 5453,
+      "name": "High-quality Cloud Mushroom",
+      "effects": [
+        "All Evasion +2",
+        "May poison you (5 damage ×3 over 9 sec)."
+      ],
+      "notes": [
+        "Duration: 30 sec.",
+        "Cooldown: 10 min."
+      ],
+      "buffIds": [
+        50470,
+        26147
+      ],
+      "flags": [
+        "native_effects_not_shown:24"
+      ]
+    },
+    {
+      "id": 5454,
+      "name": "High-quality Sky Mushroom",
+      "effects": [
+        "All AP +1",
+        "May poison you (5 damage ×3 over 9 sec)."
+      ],
+      "notes": [
+        "Duration: 30 sec.",
+        "Cooldown: 10 min."
+      ],
+      "buffIds": [
+        50471,
+        26147
+      ],
+      "flags": [
+        "native_effects_not_shown:42"
+      ]
+    },
+    {
+      "id": 5455,
+      "name": "High-quality Tiger Mushroom",
+      "effects": [
+        "All Damage Reduction +1",
+        "May poison you (5 damage ×3 over 9 sec)."
+      ],
+      "notes": [
+        "Duration: 30 sec.",
+        "Cooldown: 10 min."
+      ],
+      "buffIds": [
+        50472,
+        26147
+      ],
+      "flags": [
+        "native_effects_not_shown:46"
+      ]
+    },
+    {
+      "id": 5456,
+      "name": "High-quality Emperor Mushroom",
+      "effects": [
+        "Knockback/Floating Resistance +5%",
+        "May poison you (5 damage ×3 over 9 sec)."
+      ],
+      "notes": [
+        "Duration: 30 sec.",
+        "Cooldown: 10 min."
+      ],
+      "buffIds": [
+        50473,
+        26147
+      ],
+      "flags": [
+        "native_effects_not_shown:28"
+      ]
+    },
+    {
+      "id": 5457,
+      "name": "High-quality Ghost Mushroom",
+      "effects": [
+        "Knockdown/Bound Resistance +5%",
+        "May poison you (5 damage ×3 over 9 sec)."
+      ],
+      "notes": [
+        "Duration: 30 sec.",
+        "Cooldown: 10 min."
+      ],
+      "buffIds": [
+        50474,
+        26147
+      ],
+      "flags": [
+        "native_effects_not_shown:32"
+      ]
+    },
+    {
+      "id": 5459,
+      "name": "High-quality Hump Mushroom",
+      "effects": [
+        "Stun/Stiffness/Freezing Resistance +5%",
+        "May poison you (5 damage ×3 over 9 sec)."
+      ],
+      "notes": [
+        "Duration: 30 sec.",
+        "Cooldown: 10 min."
+      ],
+      "buffIds": [
+        50476,
+        26147
+      ],
+      "flags": [
+        "native_effects_not_shown:35"
+      ]
+    },
+    {
+      "id": 5460,
+      "name": "High-quality Bluffer Mushroom",
+      "effects": [
+        "Stun/Stiffness/Freezing Resistance +5%",
+        "May poison you (5 damage ×3 over 9 sec)."
+      ],
+      "notes": [
+        "Duration: 30 sec.",
+        "Cooldown: 10 min."
+      ],
+      "buffIds": [
+        50477,
+        26147
+      ],
+      "flags": [
+        "native_effects_not_shown:23"
+      ]
+    },
+    {
+      "id": 5461,
+      "name": "High-quality Ancient Mushroom",
+      "effects": [
+        "Knockdown/Bound Resistance +5%",
+        "May poison you (5 damage ×3 over 9 sec)."
+      ],
+      "notes": [
+        "Duration: 30 sec.",
+        "Cooldown: 10 min."
+      ],
+      "buffIds": [
+        50478,
+        26147
+      ],
+      "flags": [
+        "native_effects_not_shown:21"
+      ]
+    },
+    {
+      "id": 5464,
+      "name": "Special Sunrise Herb",
+      "effects": [
+        "All AP +1",
+        "May poison you (5 damage ×3 over 9 sec)."
+      ],
+      "notes": [
+        "Duration: 30 sec.",
+        "Cooldown: 10 min."
+      ],
+      "buffIds": [
+        50462,
+        26147
+      ],
+      "flags": [
+        "native_effects_not_shown:145"
+      ]
+    },
+    {
+      "id": 5465,
+      "name": "Special Silver Azalea",
+      "effects": [
+        "Movement Speed +1",
+        "May poison you (5 damage ×3 over 9 sec)."
+      ],
+      "notes": [
+        "Duration: 30 sec.",
+        "Cooldown: 10 min."
+      ],
+      "buffIds": [
+        50463,
+        26147
+      ],
+      "flags": [
+        "native_effects_not_shown:141"
+      ]
+    },
+    {
+      "id": 5466,
+      "name": "Special Fire Flake Flower",
+      "effects": [
+        "Attack Speed +1",
+        "May poison you (5 damage ×3 over 9 sec)."
+      ],
+      "notes": [
+        "Duration: 30 sec.",
+        "Cooldown: 10 min."
+      ],
+      "buffIds": [
+        50464,
+        26147
+      ],
+      "flags": [
+        "native_effects_not_shown:125"
+      ]
+    },
+    {
+      "id": 5467,
+      "name": "Special Dry Mane Grass",
+      "effects": [
+        "Max HP +30",
+        "May poison you (5 damage ×3 over 9 sec)."
+      ],
+      "notes": [
+        "Duration: 30 sec.",
+        "Cooldown: 10 min."
+      ],
+      "buffIds": [
+        50465,
+        26147
+      ],
+      "flags": [
+        "native_effects_not_shown:118"
+      ]
+    },
+    {
+      "id": 5468,
+      "name": "Special Silk Honey Grass",
+      "effects": [
+        "Critical Hit +1",
+        "May poison you (5 damage ×3 over 9 sec)."
+      ],
+      "notes": [
+        "Duration: 30 sec.",
+        "Cooldown: 10 min."
+      ],
+      "buffIds": [
+        50466,
+        26147
+      ],
+      "flags": [
+        "native_effects_not_shown:140"
+      ]
+    },
+    {
+      "id": 5469,
+      "name": "Special Everlasting Herb",
+      "effects": [
+        "All AP +1",
+        "Movement Speed +1",
+        "Attack Speed +1",
+        "Max HP +30",
+        "May poison you."
+      ],
+      "notes": [
+        "Duration: 30 sec.",
+        "Cooldown: 10 min."
+      ],
+      "buffIds": [
+        50462,
+        50463,
+        50464,
+        50465
+      ],
+      "flags": [
+        "native_effects_not_shown:121",
+        "native_effects_not_shown:122",
+        "native_effects_not_shown:123",
+        "native_effects_not_shown:124"
+      ]
+    },
+    {
+      "id": 5470,
+      "name": "Special Fortune Teller Mushroom",
+      "effects": [
+        "All Accuracy +1",
+        "May poison you (5 damage ×3 over 9 sec)."
+      ],
+      "notes": [
+        "Duration: 30 sec.",
+        "Cooldown: 10 min."
+      ],
+      "buffIds": [
+        50467,
+        26147
+      ],
+      "flags": [
+        "native_effects_not_shown:127"
+      ]
+    },
+    {
+      "id": 5471,
+      "name": "Special Arrow Mushroom",
+      "effects": [
+        "MP/WP/SP Recovery +1",
+        "May poison you (5 damage ×3 over 9 sec)."
+      ],
+      "notes": [
+        "Duration: 30 sec.",
+        "Cooldown: 10 min."
+      ],
+      "buffIds": [
+        50468,
+        26147
+      ],
+      "flags": [
+        "native_effects_not_shown:113"
+      ]
+    },
+    {
+      "id": 5472,
+      "name": "Special Dwarf Mushroom",
+      "effects": [
+        "MP/WP/SP Recovery +2",
+        "May poison you (5 damage ×3 over 9 sec)."
+      ],
+      "notes": [
+        "Duration: 30 sec.",
+        "Cooldown: 10 min."
+      ],
+      "buffIds": [
+        50469,
+        26147
+      ],
+      "flags": [
+        "native_effects_not_shown:119"
+      ]
+    },
+    {
+      "id": 5473,
+      "name": "Special Cloud Mushroom",
+      "effects": [
+        "All Evasion +2",
+        "May poison you (5 damage ×3 over 9 sec)."
+      ],
+      "notes": [
+        "Duration: 30 sec.",
+        "Cooldown: 10 min."
+      ],
+      "buffIds": [
+        50470,
+        26147
+      ],
+      "flags": [
+        "native_effects_not_shown:116"
+      ]
+    },
+    {
+      "id": 5474,
+      "name": "Special Sky Mushroom",
+      "effects": [
+        "All AP +1",
+        "May poison you (5 damage ×3 over 9 sec)."
+      ],
+      "notes": [
+        "Duration: 30 sec.",
+        "Cooldown: 10 min."
+      ],
+      "buffIds": [
+        50471,
+        26147
+      ],
+      "flags": [
+        "native_effects_not_shown:142"
+      ]
+    },
+    {
+      "id": 5475,
+      "name": "Special Tiger Mushroom",
+      "effects": [
+        "All Damage Reduction +1",
+        "May poison you (5 damage ×3 over 9 sec)."
+      ],
+      "notes": [
+        "Duration: 30 sec.",
+        "Cooldown: 10 min."
+      ],
+      "buffIds": [
+        50472,
+        26147
+      ],
+      "flags": [
+        "native_effects_not_shown:146"
+      ]
+    },
+    {
+      "id": 5476,
+      "name": "Special Emperor Mushroom",
+      "effects": [
+        "Knockback/Floating Resistance +5%",
+        "May poison you (5 damage ×3 over 9 sec)."
+      ],
+      "notes": [
+        "Duration: 30 sec.",
+        "Cooldown: 10 min."
+      ],
+      "buffIds": [
+        50473,
+        26147
+      ],
+      "flags": [
+        "native_effects_not_shown:120"
+      ]
+    },
+    {
+      "id": 5477,
+      "name": "Special Ghost Mushroom",
+      "effects": [
+        "Knockdown/Bound Resistance +5%",
+        "May poison you (5 damage ×3 over 9 sec)."
+      ],
+      "notes": [
+        "Duration: 30 sec.",
+        "Cooldown: 10 min."
+      ],
+      "buffIds": [
+        50474,
+        26147
+      ],
+      "flags": [
+        "native_effects_not_shown:129"
+      ]
+    },
+    {
+      "id": 5478,
+      "name": "Special Fog Mushroom",
+      "effects": [
+        "Knockdown/Bound Resistance +5%",
+        "May poison you (5 damage ×3 over 9 sec)."
+      ],
+      "notes": [
+        "Duration: 30 sec.",
+        "Cooldown: 10 min."
+      ],
+      "buffIds": [
+        50475,
+        26147
+      ],
+      "flags": [
+        "native_effects_not_shown:126"
+      ]
+    },
+    {
+      "id": 5479,
+      "name": "Special Hump Mushroom",
+      "effects": [
+        "Stun/Stiffness/Freezing Resistance +5%",
+        "May poison you (5 damage ×3 over 9 sec)."
+      ],
+      "notes": [
+        "Duration: 30 sec.",
+        "Cooldown: 10 min."
+      ],
+      "buffIds": [
+        50476,
+        26147
+      ],
+      "flags": [
+        "native_effects_not_shown:132"
+      ]
+    },
+    {
+      "id": 5480,
+      "name": "Special Bluffer Mushroom",
+      "effects": [
+        "Stun/Stiffness/Freezing Resistance +5%",
+        "May poison you (5 damage ×3 over 9 sec)."
+      ],
+      "notes": [
+        "Duration: 30 sec.",
+        "Cooldown: 10 min."
+      ],
+      "buffIds": [
+        50477,
+        26147
+      ],
+      "flags": [
+        "native_effects_not_shown:114"
+      ]
+    },
+    {
+      "id": 5481,
+      "name": "Special Ancient Mushroom",
+      "effects": [
+        "Knockdown/Bound Resistance +5%",
+        "May poison you (5 damage ×3 over 9 sec)."
+      ],
+      "notes": [
+        "Duration: 30 sec.",
+        "Cooldown: 10 min."
+      ],
+      "buffIds": [
+        50478,
+        26147
+      ],
+      "flags": [
+        "native_effects_not_shown:112"
+      ]
+    },
+    {
+      "id": 5544,
+      "name": "Chanterelle",
+      "effects": [
+        "Movement Speed +1",
+        "May poison you (5 damage ×3 over 9 sec)."
+      ],
+      "notes": [
+        "Duration: 30 sec.",
+        "Cooldown: 10 min."
+      ],
+      "buffIds": [
+        50484,
+        26147
+      ],
+      "flags": [
+        "native_effects_not_shown:4"
+      ]
+    },
+    {
+      "id": 5546,
+      "name": "Red-spotted Amanita",
+      "effects": [
+        "Max HP +15",
+        "May poison you (5 damage ×3 over 9 sec)."
+      ],
+      "notes": [
+        "Duration: 30 sec.",
+        "Cooldown: 10 min."
+      ],
+      "buffIds": [
+        50485,
+        26147
+      ],
+      "flags": [
+        "native_effects_not_shown:107"
+      ]
+    },
+    {
+      "id": 5548,
+      "name": "Mesima",
+      "effects": [
+        "HP Recovery +2",
+        "May poison you (5 damage ×3 over 9 sec)."
+      ],
+      "notes": [
+        "Duration: 30 sec.",
+        "Cooldown: 10 min."
+      ],
+      "buffIds": [
+        50486,
+        26147
+      ],
+      "flags": [
+        "native_effects_not_shown:101"
+      ]
+    },
+    {
+      "id": 5550,
+      "name": "Dictyophora",
+      "effects": [
+        "Critical Hit +1",
+        "May poison you (5 damage ×3 over 9 sec)."
+      ],
+      "notes": [
+        "Duration: 30 sec.",
+        "Cooldown: 10 min."
+      ],
+      "buffIds": [
+        50487,
+        26147
+      ],
+      "flags": [
+        "native_effects_not_shown:6"
+      ]
+    },
+    {
+      "id": 5552,
+      "name": "High-quality Chanterelle",
+      "effects": [
+        "Movement Speed +1",
+        "May poison you (5 damage ×3 over 9 sec)."
+      ],
+      "notes": [
+        "Duration: 30 sec.",
+        "Cooldown: 10 min."
+      ],
+      "buffIds": [
+        50484,
+        26147
+      ],
+      "flags": [
+        "native_effects_not_shown:48"
+      ]
+    },
+    {
+      "id": 5553,
+      "name": "Special Chanterelle",
+      "effects": [
+        "Movement Speed +1",
+        "May poison you (5 damage ×3 over 9 sec)."
+      ],
+      "notes": [
+        "Duration: 30 sec.",
+        "Cooldown: 10 min."
+      ],
+      "buffIds": [
+        50484,
+        26147
+      ],
+      "flags": [
+        "native_effects_not_shown:115"
+      ]
+    },
+    {
+      "id": 5554,
+      "name": "High-quality Red-spotted Amanita",
+      "effects": [
+        "Max HP +15",
+        "May poison you (5 damage ×3 over 9 sec)."
+      ],
+      "notes": [
+        "Duration: 30 sec.",
+        "Cooldown: 10 min."
+      ],
+      "buffIds": [
+        50485,
+        26147
+      ],
+      "flags": [
+        "native_effects_not_shown:56"
+      ]
+    },
+    {
+      "id": 5555,
+      "name": "Special Red-spotted Amanita",
+      "effects": [
+        "Max HP +15",
+        "May poison you (5 damage ×3 over 9 sec)."
+      ],
+      "notes": [
+        "Duration: 30 sec.",
+        "Cooldown: 10 min."
+      ],
+      "buffIds": [
+        50485,
+        26147
+      ],
+      "flags": [
+        "native_effects_not_shown:139"
+      ]
+    },
+    {
+      "id": 5556,
+      "name": "High-quality Mesima",
+      "effects": [
+        "HP Recovery +2",
+        "May poison you (5 damage ×3 over 9 sec)."
+      ],
+      "notes": [
+        "Duration: 30 sec.",
+        "Cooldown: 10 min."
+      ],
+      "buffIds": [
+        50486,
+        26147
+      ],
+      "flags": [
+        "native_effects_not_shown:55"
+      ]
+    },
+    {
+      "id": 5557,
+      "name": "Special Mesima",
+      "effects": [
+        "HP Recovery +2",
+        "May poison you (5 damage ×3 over 9 sec)."
+      ],
+      "notes": [
+        "Duration: 30 sec.",
+        "Cooldown: 10 min."
+      ],
+      "buffIds": [
+        50486,
+        26147
+      ],
+      "flags": [
+        "native_effects_not_shown:133"
+      ]
+    },
+    {
+      "id": 5558,
+      "name": "High-quality Dictyophora",
+      "effects": [
+        "Critical Hit +1",
+        "May poison you (5 damage ×3 over 9 sec)."
+      ],
+      "notes": [
+        "Duration: 30 sec.",
+        "Cooldown: 10 min."
+      ],
+      "buffIds": [
+        50487,
+        26147
+      ],
+      "flags": [
+        "native_effects_not_shown:25"
+      ]
+    },
+    {
+      "id": 5559,
+      "name": "Special Dictyophora",
+      "effects": [
+        "Critical Hit +1",
+        "May poison you (5 damage ×3 over 9 sec)."
+      ],
+      "notes": [
+        "Duration: 30 sec.",
+        "Cooldown: 10 min."
+      ],
+      "buffIds": [
+        50487,
+        26147
+      ],
+      "flags": [
+        "native_effects_not_shown:117"
+      ]
+    },
+    {
+      "id": 7301,
+      "name": "Pepper",
+      "effects": [
+        "All AP +1",
+        "Also causes pain (5 damage ×3 over 9 sec)."
+      ],
+      "notes": [
+        "Duration: 30 sec.",
+        "Cooldown: 10 min."
+      ],
+      "buffIds": [
+        50450,
+        26747
+      ],
+      "flags": [
+        "native_effects_not_shown:105"
+      ]
+    },
+    {
+      "id": 7302,
+      "name": "Garlic",
+      "effects": [
+        "Movement Speed +1",
+        "Also causes pain (5 damage ×3 over 9 sec)."
+      ],
+      "notes": [
+        "Duration: 30 sec.",
+        "Cooldown: 10 min."
+      ],
+      "buffIds": [
+        50451,
+        26747
+      ],
+      "flags": [
+        "native_effects_not_shown:17"
+      ]
+    },
+    {
+      "id": 7303,
+      "name": "Onion",
+      "effects": [
+        "Attack Speed +1",
+        "Also causes pain (5 damage ×3 over 9 sec)."
+      ],
+      "notes": [
+        "Duration: 30 sec.",
+        "Cooldown: 10 min."
+      ],
+      "buffIds": [
+        50452,
+        26747
+      ],
+      "flags": [
+        "native_effects_not_shown:103"
+      ]
+    },
+    {
+      "id": 7304,
+      "name": "Strawberry",
+      "effects": [
+        "Casting Speed -1",
+        "Also causes pain (5 damage ×3 over 9 sec)."
+      ],
+      "notes": [
+        "Duration: 30 sec.",
+        "Cooldown: 10 min."
+      ],
+      "buffIds": [
+        50453,
+        26747
+      ],
+      "flags": [
+        "native_effects_not_shown:152"
+      ]
+    },
+    {
+      "id": 7305,
+      "name": "Hot Pepper",
+      "effects": [
+        "Critical Hit +1",
+        "Also causes pain (5 damage ×3 over 9 sec)."
+      ],
+      "notes": [
+        "Duration: 30 sec.",
+        "Cooldown: 10 min."
+      ],
+      "buffIds": [
+        50454,
+        26747
+      ],
+      "flags": [
+        "native_effects_not_shown:60"
+      ]
+    },
+    {
+      "id": 7306,
+      "name": "Pumpkin",
+      "effects": [
+        "All Accuracy +1",
+        "Also causes pain (5 damage ×3 over 9 sec)."
+      ],
+      "notes": [
+        "Duration: 30 sec.",
+        "Cooldown: 10 min."
+      ],
+      "buffIds": [
+        50455,
+        26747
+      ],
+      "flags": [
+        "native_effects_not_shown:106"
+      ]
+    },
+    {
+      "id": 7307,
+      "name": "Grape",
+      "effects": [
+        "HP Recovery +1",
+        "Also causes pain (5 damage ×3 over 9 sec)."
+      ],
+      "notes": [
+        "Duration: 30 sec.",
+        "Cooldown: 10 min."
+      ],
+      "buffIds": [
+        50456,
+        26747
+      ],
+      "flags": [
+        "native_effects_not_shown:19"
+      ]
+    },
+    {
+      "id": 7308,
+      "name": "Sunflower",
+      "effects": [
+        "HP Recovery +2",
+        "Also causes pain (5 damage ×3 over 9 sec)."
+      ],
+      "notes": [
+        "Duration: 30 sec.",
+        "Cooldown: 10 min."
+      ],
+      "buffIds": [
+        50457,
+        26747
+      ],
+      "flags": [
+        "native_effects_not_shown:153"
+      ]
+    },
+    {
+      "id": 7309,
+      "name": "Olive",
+      "effects": [
+        "All Evasion +1",
+        "Also causes pain (5 damage ×3 over 9 sec)."
+      ],
+      "notes": [
+        "Duration: 30 sec.",
+        "Cooldown: 10 min."
+      ],
+      "buffIds": [
+        50458,
+        26747
+      ],
+      "flags": [
+        "native_effects_not_shown:102"
+      ]
+    },
+    {
+      "id": 7311,
+      "name": "Tomato",
+      "effects": [
+        "All Damage Reduction +1",
+        "Also causes pain (5 damage ×3 over 9 sec)."
+      ],
+      "notes": [
+        "Duration: 30 sec.",
+        "Cooldown: 10 min."
+      ],
+      "buffIds": [
+        50460,
+        26747
+      ],
+      "flags": [
+        "native_effects_not_shown:156"
+      ]
+    },
+    {
+      "id": 7312,
+      "name": "Paprika",
+      "effects": [
+        "Max HP +15",
+        "Also causes pain (5 damage ×3 over 9 sec)."
+      ],
+      "notes": [
+        "Duration: 30 sec.",
+        "Cooldown: 10 min."
+      ],
+      "buffIds": [
+        50461,
+        26747
+      ],
+      "flags": [
+        "native_effects_not_shown:104"
+      ]
+    },
+    {
+      "id": 7321,
+      "name": "High-quality Strawberry",
+      "effects": [
+        "Casting Speed -1",
+        "Also causes pain (5 damage ×3 over 9 sec)."
+      ],
+      "notes": [
+        "Duration: 30 sec.",
+        "Cooldown: 10 min."
+      ],
+      "buffIds": [
+        50453,
+        26747
+      ],
+      "flags": [
+        "native_effects_not_shown:43"
+      ]
+    },
+    {
+      "id": 7322,
+      "name": "Special Strawberry",
+      "effects": [
+        "Casting Speed -1",
+        "Also causes pain (5 damage ×3 over 9 sec)."
+      ],
+      "notes": [
+        "Duration: 30 sec.",
+        "Cooldown: 10 min."
+      ],
+      "buffIds": [
+        50453,
+        26747
+      ],
+      "flags": [
+        "native_effects_not_shown:143"
+      ]
+    },
+    {
+      "id": 7324,
+      "name": "High-quality Garlic",
+      "effects": [
+        "Movement Speed +1",
+        "Also causes pain (5 damage ×3 over 9 sec)."
+      ],
+      "notes": [
+        "Duration: 30 sec.",
+        "Cooldown: 10 min."
+      ],
+      "buffIds": [
+        50451,
+        26747
+      ],
+      "flags": [
+        "native_effects_not_shown:31"
+      ]
+    },
+    {
+      "id": 7325,
+      "name": "High-quality Onion",
+      "effects": [
+        "Attack Speed +1",
+        "Also causes pain (5 damage ×3 over 9 sec)."
+      ],
+      "notes": [
+        "Duration: 30 sec.",
+        "Cooldown: 10 min."
+      ],
+      "buffIds": [
+        50452,
+        26747
+      ],
+      "flags": [
+        "native_effects_not_shown:37"
+      ]
+    },
+    {
+      "id": 7327,
+      "name": "High-quality Hot Pepper",
+      "effects": [
+        "Critical Hit +1",
+        "Also causes pain (5 damage ×3 over 9 sec)."
+      ],
+      "notes": [
+        "Duration: 30 sec.",
+        "Cooldown: 10 min."
+      ],
+      "buffIds": [
+        50454,
+        26747
+      ],
+      "flags": [
+        "native_effects_not_shown:34"
+      ]
+    },
+    {
+      "id": 7328,
+      "name": "High-quality Pumpkin",
+      "effects": [
+        "All Accuracy +1",
+        "Also causes pain (5 damage ×3 over 9 sec)."
+      ],
+      "notes": [
+        "Duration: 30 sec.",
+        "Cooldown: 10 min."
+      ],
+      "buffIds": [
+        50455,
+        26747
+      ],
+      "flags": [
+        "native_effects_not_shown:39"
+      ]
+    },
+    {
+      "id": 7329,
+      "name": "High-quality Grape",
+      "effects": [
+        "HP Recovery +1",
+        "Also causes pain (5 damage ×3 over 9 sec)."
+      ],
+      "notes": [
+        "Duration: 30 sec.",
+        "Cooldown: 10 min."
+      ],
+      "buffIds": [
+        50456,
+        26747
+      ],
+      "flags": [
+        "native_effects_not_shown:33"
+      ]
+    },
+    {
+      "id": 7330,
+      "name": "High-quality Sunflower",
+      "effects": [
+        "HP Recovery +2",
+        "Also causes pain (5 damage ×3 over 9 sec)."
+      ],
+      "notes": [
+        "Duration: 30 sec.",
+        "Cooldown: 10 min."
+      ],
+      "buffIds": [
+        50457,
+        26747
+      ],
+      "flags": [
+        "native_effects_not_shown:44"
+      ]
+    },
+    {
+      "id": 7331,
+      "name": "High-quality Olive",
+      "effects": [
+        "All Evasion +1",
+        "Also causes pain (5 damage ×3 over 9 sec)."
+      ],
+      "notes": [
+        "Duration: 30 sec.",
+        "Cooldown: 10 min."
+      ],
+      "buffIds": [
+        50458,
+        26747
+      ],
+      "flags": [
+        "native_effects_not_shown:36"
+      ]
+    },
+    {
+      "id": 7333,
+      "name": "High-quality Tomato",
+      "effects": [
+        "All Damage Reduction +1",
+        "Also causes pain (5 damage ×3 over 9 sec)."
+      ],
+      "notes": [
+        "Duration: 30 sec.",
+        "Cooldown: 10 min."
+      ],
+      "buffIds": [
+        50460,
+        26747
+      ],
+      "flags": [
+        "native_effects_not_shown:47"
+      ]
+    },
+    {
+      "id": 7334,
+      "name": "High-quality Paprika",
+      "effects": [
+        "Max HP +15",
+        "Also causes pain (5 damage ×3 over 9 sec)."
+      ],
+      "notes": [
+        "Duration: 30 sec.",
+        "Cooldown: 10 min."
+      ],
+      "buffIds": [
+        50461,
+        26747
+      ],
+      "flags": [
+        "native_effects_not_shown:38"
+      ]
+    },
+    {
+      "id": 7335,
+      "name": "Special Pepper",
+      "effects": [
+        "All AP +1",
+        "Also causes pain (5 damage ×3 over 9 sec)."
+      ],
+      "notes": [
+        "Duration: 30 sec.",
+        "Cooldown: 10 min."
+      ],
+      "buffIds": [
+        50450,
+        26747
+      ],
+      "flags": [
+        "native_effects_not_shown:137"
+      ]
+    },
+    {
+      "id": 7336,
+      "name": "Special Garlic",
+      "effects": [
+        "Movement Speed +1",
+        "Also causes pain (5 damage ×3 over 9 sec)."
+      ],
+      "notes": [
+        "Duration: 30 sec.",
+        "Cooldown: 10 min."
+      ],
+      "buffIds": [
+        50451,
+        26747
+      ],
+      "flags": [
+        "native_effects_not_shown:128"
+      ]
+    },
+    {
+      "id": 7337,
+      "name": "Special Onion",
+      "effects": [
+        "Attack Speed +1",
+        "Also causes pain (5 damage ×3 over 9 sec)."
+      ],
+      "notes": [
+        "Duration: 30 sec.",
+        "Cooldown: 10 min."
+      ],
+      "buffIds": [
+        50452,
+        26747
+      ],
+      "flags": [
+        "native_effects_not_shown:135"
+      ]
+    },
+    {
+      "id": 7339,
+      "name": "Special Hot Pepper",
+      "effects": [
+        "Critical Hit +1",
+        "Also causes pain (5 damage ×3 over 9 sec)."
+      ],
+      "notes": [
+        "Duration: 30 sec.",
+        "Cooldown: 10 min."
+      ],
+      "buffIds": [
+        50454,
+        26747
+      ],
+      "flags": [
+        "native_effects_not_shown:131"
+      ]
+    },
+    {
+      "id": 7340,
+      "name": "Special Pumpkin",
+      "effects": [
+        "All Accuracy +1",
+        "Also causes pain (5 damage ×3 over 9 sec)."
+      ],
+      "notes": [
+        "Duration: 30 sec.",
+        "Cooldown: 10 min."
+      ],
+      "buffIds": [
+        50455,
+        26747
+      ],
+      "flags": [
+        "native_effects_not_shown:138"
+      ]
+    },
+    {
+      "id": 7341,
+      "name": "Special Grape",
+      "effects": [
+        "HP Recovery +1",
+        "Also causes pain (5 damage ×3 over 9 sec)."
+      ],
+      "notes": [
+        "Duration: 30 sec.",
+        "Cooldown: 10 min."
+      ],
+      "buffIds": [
+        50456,
+        26747
+      ],
+      "flags": [
+        "native_effects_not_shown:130"
+      ]
+    },
+    {
+      "id": 7342,
+      "name": "Special Sunflower",
+      "effects": [
+        "HP Recovery +2",
+        "Also causes pain (5 damage ×3 over 9 sec)."
+      ],
+      "notes": [
+        "Duration: 30 sec.",
+        "Cooldown: 10 min."
+      ],
+      "buffIds": [
+        50457,
+        26747
+      ],
+      "flags": [
+        "native_effects_not_shown:144"
+      ]
+    },
+    {
+      "id": 7343,
+      "name": "Special Olive",
+      "effects": [
+        "All Evasion +1",
+        "Also causes pain (5 damage ×3 over 9 sec)."
+      ],
+      "notes": [
+        "Duration: 30 sec.",
+        "Cooldown: 10 min."
+      ],
+      "buffIds": [
+        50458,
+        26747
+      ],
+      "flags": [
+        "native_effects_not_shown:134"
+      ]
+    },
+    {
+      "id": 7345,
+      "name": "Special Tomato",
+      "effects": [
+        "All Damage Reduction +1",
+        "Also causes pain (5 damage ×3 over 9 sec)."
+      ],
+      "notes": [
+        "Duration: 30 sec.",
+        "Cooldown: 10 min."
+      ],
+      "buffIds": [
+        50460,
+        26747
+      ],
+      "flags": [
+        "native_effects_not_shown:147"
+      ]
+    },
+    {
+      "id": 7346,
+      "name": "Special Paprika",
+      "effects": [
+        "Max HP +15",
+        "Also causes pain (5 damage ×3 over 9 sec)."
+      ],
+      "notes": [
+        "Duration: 30 sec.",
+        "Cooldown: 10 min."
+      ],
+      "buffIds": [
+        50461,
+        26747
+      ],
+      "flags": [
+        "native_effects_not_shown:136"
+      ]
+    },
+    {
+      "id": 820909,
+      "name": "White Truffle Mushroom",
+      "effects": [
+        "All AP +1",
+        "Movement Speed +1",
+        "Attack Speed +1",
+        "Max HP +30",
+        "May poison you."
+      ],
+      "notes": [
+        "Duration: 30 sec.",
+        "Cooldown: 10 min."
+      ],
+      "buffIds": [
+        50462,
+        50463,
+        50464,
+        50465
+      ],
+      "flags": [
+        "native_effects_not_shown:161",
+        "native_effects_not_shown:162",
+        "native_effects_not_shown:163",
+        "native_effects_not_shown:164"
+      ]
+    }
+  ]
+}

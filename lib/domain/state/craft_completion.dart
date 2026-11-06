@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import '../models/craft_mode.dart';
 import '../planner/planner_models.dart' as planning;
+import 'actual_batch_output.dart';
 import 'inventory_storage.dart';
 import 'planner_state.dart';
 import 'state_copy.dart';
@@ -94,7 +95,12 @@ PlannerState recordCraftCompletion({
   required bool markComplete,
   bool roundIngredients = false,
   AfkCraftProgress? progress,
+  int? actualOutput,
 }) {
+  if (actualOutput != null &&
+      (actualOutput < 0 || actualOutput > maxActualBatchOutput)) {
+    throw ArgumentError.value(actualOutput, 'actualOutput');
+  }
   final before = document.forMode(mode);
   final deltas = <String, double>{};
   void add(String name, double quantity) {
@@ -110,7 +116,12 @@ PlannerState recordCraftCompletion({
       deltas[name] = -(-deltas[name]!).ceilToDouble();
     }
   }
-  add(step.name, step.produced);
+  add(
+    step.name,
+    actualOutput != null && actualOutput > 0
+        ? actualOutput.toDouble()
+        : step.produced,
+  );
   var adjusted = applySharedInventoryDeltas(document, deltas);
   final activeContext = _contextKey(target, want);
   for (final craftMode in CraftMode.values) {
@@ -209,6 +220,40 @@ Map? latestCraftCompletion(PlannerState document, CraftMode mode) {
   final history = _history(document);
   if (history.isEmpty || history.last['mode'] != mode.key) return null;
   return history.last;
+}
+
+/// Read-only review of the exact persisted transaction, not today's recipe.
+final class CraftCompletionReview {
+  CraftCompletionReview._(this.token, this.recipe, this.remove, this.restore);
+  final String token;
+  final String recipe;
+  final Map<String, double> remove;
+  final Map<String, double> restore;
+
+  static CraftCompletionReview? from(PlannerState document, CraftMode mode) {
+    final receipt = latestCraftCompletion(document, mode);
+    if (receipt == null || receipt['recipe'] is! String) return null;
+    final before = _amounts(receipt['inventoryBefore']);
+    final after = _amounts(receipt['inventoryAfter']);
+    if (before.isEmpty ||
+        before.length != after.length ||
+        !before.keys.every(after.containsKey)) {
+      return null;
+    }
+    final remove = <String, double>{};
+    final restore = <String, double>{};
+    for (final name in before.keys) {
+      final delta = after[name]! - before[name]!;
+      if (delta > .000001) remove[name] = delta;
+      if (delta < -.000001) restore[name] = -delta;
+    }
+    return CraftCompletionReview._(
+      jsonEncode(receipt),
+      receipt['recipe'] as String,
+      Map.unmodifiable(remove),
+      Map.unmodifiable(restore),
+    );
+  }
 }
 
 /// Refuse an undo that would overwrite a later manual edit. Unrelated settings,

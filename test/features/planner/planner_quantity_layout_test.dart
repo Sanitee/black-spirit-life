@@ -12,6 +12,7 @@ import 'package:bdo_craft_planner_flutter/domain/state/state_copy.dart';
 import 'package:bdo_craft_planner_flutter/features/planner/planner.dart';
 import 'package:bdo_craft_planner_flutter/features/planner/planner_quantity_layout.dart';
 import 'package:bdo_craft_planner_flutter/features/shared/recipe_variant_selector.dart';
+import 'package:bdo_craft_planner_flutter/features/shared/source_availability_badges.dart';
 import 'package:bdo_craft_planner_flutter/features/shared/workshop_presentation.dart';
 import 'package:bdo_craft_planner_flutter/shared/overlays/anchored_popover.dart';
 import 'package:bdo_craft_planner_flutter/visual/visual.dart';
@@ -22,6 +23,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../../support/application_test_harness.dart';
+import '../../support/availability_badge_finders.dart';
 import 'planner_test_fixture.dart';
 
 const _removedToggleKey = ValueKey('planner-readability-preview-toggle');
@@ -284,8 +286,9 @@ void main() {
             );
             final needRow = find.byType(PlannerNeedQuantities).first;
             for (final detail in [
-              find.text('Out of stock'),
-              find.text('1.200 each'),
+              stockBadgeText('0'),
+              find.text('1,2k'),
+              find.text('each'),
             ]) {
               final bounds = tester.getRect(
                 find.descendant(of: needRow, matching: detail),
@@ -835,12 +838,27 @@ void main() {
           .first;
       final stock = find.descendant(
         of: row,
-        matching: find.text('Vendor item'),
+        matching: find.byType(SourceAvailabilityBadges),
       );
-      final price = find.descendant(of: row, matching: find.text('500 each'));
-      final total = find.descendant(
+      Finder amountRow(String label) => find.descendant(
         of: row,
-        matching: find.textContaining('Total '),
+        matching: find.byWidgetPredicate(
+          (widget) =>
+              widget is Row &&
+              widget.children.any(
+                (child) => child is Text && child.data == label,
+              ),
+        ),
+      );
+      final price = amountRow('each');
+      final total = amountRow('Total');
+      expect(
+        find.descendant(of: stock, matching: find.text('NPC')),
+        findsOneWidget,
+      );
+      expect(
+        find.descendant(of: price, matching: find.text('500')),
+        findsOneWidget,
       );
       final missing = _needQuantity('Sunrise Herb', 'Missing');
       expect(

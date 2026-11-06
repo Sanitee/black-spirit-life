@@ -1,0 +1,85 @@
+{
+  "date": "2026-11-01",
+  "status": "Implemented in an isolated review candidate; not published",
+  "source": "[private-source]/Broader Item Sources 20261101",
+  "branch": "codex/broader-item-sources",
+  "baseline": "[private-source]/Consistent Controls 20261031",
+  "backup": "[private-source]/Protected Rollback/prior-broader-item-sources-20261101-PrEsjh",
+  "summary": "Short additional How to Obtain lines in the shared item-information projection. Bean Sprouts and related fermented ingredients explain worker workshops; crops explain starter seeds and applicable grade exchanges. Other reviewed additions cover gathering, farming, material exchanges, workshop equipment, documented monster sources and rare Cooking outputs with their minimum skill.",
+  "scope": {
+    "catalogEntriesCrossChecked": 2255,
+    "sparseReferencesReviewed": 984,
+    "changedReferenceEntries": 473,
+    "registryIds": 476,
+    "idsWithNonMarketAdditions": 213,
+    "rareCookingOutputs": 88
+  },
+  "behavior": [
+    "All existing item-reference hosts consume the same projection. Existing theme-adaptive layout, copy actions, recipe tabs, source pills and scrolling are unchanged.",
+    "Require both exact item ID and normalized canonical name; do not transfer replacement-item facts to legacy aliases, a different grade or an unresolved ID.",
+    "Market supplements require positive native marketability, exact current catalog name/ID agreement and current exclusions. Preserve existing richer restrictions; market eligibility is not live stock.",
+    "Special Cooking source text requires an explicit native description, exact output name and matching existing recipe or special-output mapping. Preserve rare chance and the documented minimum skill; no proc-rate calculation changes.",
+    "Retain region, tool, quantity and other qualifications. Milk's existing long instruction is shortened, retaining its 10 Energy cost, without a duplicate milking line.",
+    "Do not modify app-data.json, worker/fishing maps, calculations, grade decisions, vendor prices, exchange logic, market broker, profiles, storage contract or lifecycle safeguards."
+  ],
+  "provenance": {
+    "nativeItems": {
+      "snapshot": "2026-09-10 PC export",
+      "sha256": "8998F94AA44A5DD86DC5F67F4CFA73EF1523E3B051B58D8F0F9DC42E592912E5"
+    },
+    "nativeWorkerRecipes": {
+      "snapshot": "2026-09-10 PC export",
+      "sha256": "FC5F67025F4643C021889736F3AD5C5E2C2BD2CDAB693C727E49921CC7CB5412"
+    },
+    "official": [
+      {
+        "date": "2023-06-14",
+        "url": "https://blackdesert.pearlabyss.com/Asia/en-US/News/Notice/Detail?_boardNo=3855",
+        "supports": "Jangdokdae products, including Bean Sprouts, Meju, Soybean Paste and Soy Sauce byproduct."
+      },
+      {
+        "date": "2022-09-21",
+        "url": "https://blackdesert.pearlabyss.com/Asia/en-us/News/Notice/Detail?_boardNo=3298",
+        "supports": "Four special spice crops exchange for normal/high-quality crops through Seed Vendors; milk interaction."
+      },
+      {
+        "date": "2026-05-14",
+        "url": "https://blackdesert.pearlabyss.com/TR/en-us/News/Notice/Detail?_boardNo=17842",
+        "supports": "Gathering Fruit of Nature and the current Fairy's Breath exchanges."
+      },
+      {
+        "url": "https://blackdesert.pearlabyss.com/asia/en-us/Game/Wiki?_masterWikiNo=31",
+        "supports": "Farming and seed breeding, cows/haystacks. Historical timings and level changes are not imported."
+      },
+      {
+        "url": "https://blackdesert.pearlabyss.com/TR/en-US/Game/Wiki?_masterWikiNo=128",
+        "supports": "Gathering methods and tools."
+      }
+    ],
+    "corroborating": [
+      {
+        "url": "https://grumpygreen.cricket/alchemy/",
+        "supports": "Ahr's specific normal seed inventory; herb seeds from matching plants."
+      }
+    ],
+    "generator": "tool/review_item_source_additions.mjs; curated manifest and narrow native-description rules kept in tool/. Raw client exports stay outside the source."
+  },
+  "verification": {
+    "flutterTestsPassed": 352,
+    "generatorTestsPassed": 6,
+    "syntheticThemeAndTextSizeCases": 12,
+    "focusedAnalysis": "passed",
+    "windowsReleaseBuild": "See audit result.json for final verified build",
+    "personalProfileAccess": false,
+    "visibleAppLaunch": false
+  },
+  "evidence": "Workspace audit/broader-item-sources-20261101 (all-entry source-review.json and catalog-after.json, test/build logs, manifests); work/visuals/broader-item-sources.",
+  "limitations": [
+    "Systematic cross-check is not independent fresh verification of every possible route. Native metadata/worker recipes date from 2026-09-10; targeted sources were browsed on 2026-11-01.",
+    "62 sparse references lack an exact native identity match; they receive no inferred native source. Some are exchange-only placeholders rather than invalid items.",
+    "108 non-recipe entries still show only a market source. They are not asserted to be market-exclusive. Unresolved native text binds, missing named sources and ambiguous legacy aliases remain follow-up work.",
+    "Carrot's existing catalog market mapping is 37256, while the crop's native ID is 54001. This identity discrepancy is recorded, not repaired by a presentation-only change. Seed text for 54001 is suppressed for the wrong ID.",
+    "No Console, Global Lab previews, expired event rewards, inferred drop rates or unverified NPC purchases were imported.",
+    "User review of the separate runnable and public migration/lifecycle release gates remain separate; no handoff or publication."
+  ]
+}

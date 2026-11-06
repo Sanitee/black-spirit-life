@@ -1,8 +1,8 @@
 {
-  "source": "Black Spirit Life 0.1.14 Fish payload with local-only empty-on-first-run personal storage and quiet action hovers",
+  "source": "Black Spirit Life 0.1.12 Fish payload with local-only empty-on-first-run personal storage",
   "sourceFileCount": 3561,
-  "sourceByteCount": 554221657,
-  "sourceAggregateSha256": "9b6dec8288717d4da213f49811f3bab9eb9c5907bcbe1824b87c9178842617e5",
-  "serviceByteCount": 28781551,
-  "serviceSha256": "c0b5c5c84980be389420cf247d7a89ac8c256676b7313ce3a496c933cb0667a9"
+  "sourceByteCount": 554235017,
+  "sourceAggregateSha256": "469126b32eb617991524ba95758a3d62f44e20edbe5c5e1c71808c15b75f9034",
+  "serviceByteCount": 28782836,
+  "serviceSha256": "b3d4b2617078af3cc2d4f0263a88450728806984d3022e40b1b83f2303750fb3"
 }

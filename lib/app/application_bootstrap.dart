@@ -21,12 +21,17 @@ final class ApplicationBundle {
     required this.controller,
     this.startupNotices = const <String>[],
     this.firstLaunchMigration,
+    this.runtimeDirectory,
   });
 
   final CatalogSnapshot catalog;
   final PlannerStateLoadResult stateLoad;
   final PlannerStateRepository stateRepository;
   final PersonalDataLocationManager personalDataLocation;
+  final Directory? runtimeDirectory;
+  Directory get runtimeRoot =>
+      runtimeDirectory ??
+      Directory('${stateRepository.paths.applicationDirectory.path}/.runtime');
   final PlannerApplicationController controller;
   final List<String> startupNotices;
   final ApplicationFirstLaunchMigration? firstLaunchMigration;
@@ -89,6 +94,7 @@ final class ApplicationBootstrapService {
     PlannerStatePathPolicy? pathPolicy,
     PersonalDataLocationManager? personalDataLocation,
     void Function(Directory directory)? onApplicationDirectoryResolved,
+    void Function(Directory directory)? onRuntimeDirectoryResolved,
   }) async {
     final pendingCatalog = catalogFuture ?? BundledDataService().load();
     // Personal-data resolution now runs alongside catalog loading so Fish can
@@ -122,6 +128,7 @@ final class ApplicationBootstrapService {
         (pathPolicy == null
             ? PersonalDataLocationService.fromEnvironment(
                 Platform.environment,
+                shared: true,
                 additionalProtectedDirectories: <Directory>[
                   ?formerApplicationDirectory,
                 ],
@@ -153,6 +160,12 @@ final class ApplicationBootstrapService {
         );
       }
     }
+    final runtimeDirectory = location is PersonalDataLocationService
+        ? location.runtimeDirectory
+        : null;
+    onRuntimeDirectoryResolved?.call(
+      runtimeDirectory ?? Directory('${activeDirectory.path}/.runtime'),
+    );
     onApplicationDirectoryResolved?.call(activeDirectory);
     final catalog = await pendingCatalog;
     final paths = PlannerStatePathPolicy(
@@ -169,6 +182,9 @@ final class ApplicationBootstrapService {
       catalog,
       requireExistingProfile: location.requiresExistingProfile,
     );
+    if (location is PersonalDataLocationService) {
+      await location.sharedProfileGuard?.markInitialized(activeDirectory);
+    }
     final startupState = _withEditorToolsDisabled(stateLoad.state);
     final controller = PlannerApplicationController(
       catalog: catalog,
@@ -182,6 +198,7 @@ final class ApplicationBootstrapService {
         stateLoad: stateLoad,
         stateRepository: repository,
         personalDataLocation: location,
+        runtimeDirectory: runtimeDirectory,
         controller: controller,
         startupNotices: _personalDataStartupNotices(location),
         firstLaunchMigration: ApplicationFirstLaunchMigration(
@@ -208,6 +225,7 @@ final class ApplicationBootstrapService {
       stateLoad: stateLoad,
       stateRepository: repository,
       personalDataLocation: location,
+      runtimeDirectory: runtimeDirectory,
       controller: controller,
       startupNotices: _personalDataStartupNotices(location),
     );
@@ -287,6 +305,9 @@ final class ApplicationBootstrapService {
     stateLoad: stateLoad,
     stateRepository: repository,
     personalDataLocation: personalDataLocation,
+    runtimeDirectory: personalDataLocation is PersonalDataLocationService
+        ? personalDataLocation.runtimeDirectory
+        : null,
     startupNotices: _personalDataStartupNotices(personalDataLocation),
     controller: PlannerApplicationController(
       catalog: catalog,

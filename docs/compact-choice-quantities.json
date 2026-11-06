@@ -1,0 +1,39 @@
+{
+  "date": "2026-10-31",
+  "request": "Shorten the substitute picker's numbers after exact million-sized Owned counts wrapped their last digit onto a new line.",
+  "source": "[private-source]/Compact Choice Quantities 20261031",
+  "branch": "codex/compact-choice-quantities",
+  "baseline": "Complete Consistent Copy Feedback 20261031 working snapshot and full runnable, not Git HEAD alone",
+  "baselineManifestSha256": "F3F12F8EE8A2D6C068EDB4007A0714FE6568A76B1F23EF33A3F4611A2B029E58",
+  "implementation": [
+    "Shared Need First and Craft Queue substitute picker Owned and Missing labels use comma-decimal rounded k/m/b/t notation, matching existing compact silver: 1100000 -> 1,1m; 1500000 -> 1,5m; 10800 -> 10,8k.",
+    "Values below 1000 retain existing quantity formatting, including small fractional values. Non-finite display values show an em dash.",
+    "Large count formatting delegates to the existing compact silver formatter; silver behavior itself is unchanged.",
+    "One-line quantities retain the Planner typography. Shared numeric columns measure actual formatted labels at the active text scale; constrained layouts retain the existing labeled reflow without shrinking or clipping.",
+    "Exact inventory, missing projections, selection, grades, calculations and saved state are unchanged. Existing accessible row descriptions retain full formatted quantities.",
+    "Stock and preorder counts remain exact. NPC badges, market freshness, copy/swap actions, drag behavior and theme materials are unchanged. No new hover text or setting."
+  ],
+  "verification": {
+    "formatterAndActualAppCasesPassed": 11,
+    "regressionsPassed": 61,
+    "actualAppCoverage": "Both picker hosts, all three themes, 100/150/200 percent text, million counts and large stress values; rendered width assertions, exact semantics, unchanged state on viewing and exact inventory after selecting.",
+    "captures": "work/visuals/compact-choice-quantities (18 synthetic full-app captures)",
+    "analysis": "No issues found in changed production/tests",
+    "buildAndManifest": "See audit/compact-choice-quantities-20261031/result.json",
+    "baselineVerification": "Complete prior source and runnable hashes unchanged after implementation"
+  },
+  "preservedRollback": "[private-source]/Protected Rollback/prior-compact-choice-quantities-20261031-WzHVDY",
+  "safety": {
+    "personalProfilesAccessed": false,
+    "visibleApplicationLaunched": false,
+    "installedApplicationChanged": false,
+    "shortcutsChanged": false,
+    "handedOffOrPublished": false,
+    "nativeInstanceAndSharedStorageSafeguards": "Inherited unchanged"
+  },
+  "pendingSeparateScope": [
+    "Recipe ingredient NPC/stock badges remain an unapproved visual proposal and are not enabled.",
+    "Existing unrelated shortcut-navigation baseline failures and other previously recorded findings are not addressed by this display-only change.",
+    "Public release and migration/lifecycle gates remain separate."
+  ]
+}

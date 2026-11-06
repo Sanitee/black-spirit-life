@@ -4,6 +4,7 @@ import 'dart:ui' as ui;
 
 import 'package:bdo_craft_planner_flutter/data/catalog/bundled_catalog_parser.dart';
 import 'package:bdo_craft_planner_flutter/data/catalog/catalog_repository.dart';
+import 'package:bdo_craft_planner_flutter/data/opportunities/exchange_catalog.dart';
 import 'package:bdo_craft_planner_flutter/domain/models/craft_mode.dart';
 import 'package:bdo_craft_planner_flutter/features/shared/mode_item_icon.dart';
 import 'package:bdo_craft_planner_flutter/visual/visual.dart';
@@ -36,13 +37,172 @@ void main() {
     }
   });
 
-  test('every bundled icon retains verified original bytes and grade', () {
+  test('all bundled icon bytes and grades match scoped provenance records', () {
     final provenance =
         jsonDecode(File('docs/item-artwork-provenance.json').readAsStringSync())
             as Map;
     final entries = provenance['entries'] as List;
     expect(entries, hasLength(4517));
-    for (final row in entries.cast<Map>()) {
+    final review =
+        jsonDecode(
+              File('docs/item-artwork-review-20261102.json').readAsStringSync(),
+            )
+            as Map;
+    final overrides = (review['retainedOverrides'] as List).cast<Map>();
+    expect(overrides.map((row) => row['name']).toSet(), {
+      'Tiger Blood',
+      'Olivine Ore',
+    });
+    expect(
+      overrides.every(
+        (row) => row['status'] == 'RETAINED_ENCODING_PROVENANCE_PARTIAL',
+      ),
+      isTrue,
+    );
+    final additions = (review['addedEntries'] as List).cast<Map>();
+    expect(additions, hasLength(8));
+    final courserReview =
+        jsonDecode(
+              File(
+                'docs/item-artwork-review-courser-20261103.json',
+              ).readAsStringSync(),
+            )
+            as Map;
+    final courserAdditions = (courserReview['addedEntries'] as List)
+        .cast<Map>();
+    expect(courserAdditions, hasLength(3));
+    expect(courserAdditions.map((r) => r['mode']).toSet(), {
+      'alchemy',
+      'cooking',
+      'processing',
+    });
+    final courserAssetHash = sha256
+        .convert(File(courserReview['asset'] as String).readAsBytesSync())
+        .toString();
+    for (final row in courserAdditions) {
+      expect(row['name'], 'Deep Blue Hoof Root');
+      expect(row['id'], 50810);
+      expect(row['grade'], 1);
+      expect(row['source'], 'New_Icon/03_ETC/09_PetItem/00050810.dds');
+      expect(row['sha256'], courserAssetHash);
+      expect(row['referenceSha256'], courserAssetHash);
+    }
+    final scorchedReview =
+        jsonDecode(
+              File(
+                'docs/item-artwork-review-scorched-20261103.json',
+              ).readAsStringSync(),
+            )
+            as Map;
+    expect(scorchedReview['name'], 'Scorched Fragment');
+    expect(scorchedReview['id'], 5862);
+    expect(scorchedReview['grade'], 0);
+    expect(
+      scorchedReview['source'],
+      'New_Icon/03_ETC/07_ProductMaterial/00005862.dds',
+    );
+    final scorchedHash = sha256
+        .convert(File(scorchedReview['asset'] as String).readAsBytesSync())
+        .toString();
+    expect(scorchedHash, scorchedReview['sha256']);
+    expect((scorchedReview['modes'] as List).toSet(), {
+      'alchemy',
+      'cooking',
+      'processing',
+    });
+    final scorchedAdditions = [
+      for (final mode in scorchedReview['modes'] as List)
+        {...scorchedReview, 'mode': mode, 'referenceSha256': scorchedHash},
+    ];
+    final insectivoreReview =
+        jsonDecode(
+              File(
+                'docs/item-artwork-review-insectivore-20261103.json',
+              ).readAsStringSync(),
+            )
+            as Map;
+    final insectivoreAdditions = (insectivoreReview['addedEntries'] as List)
+        .cast<Map>();
+    expect(insectivoreAdditions, hasLength(2));
+    expect(insectivoreAdditions.map((r) => r['id']).toSet(), {5441, 5443});
+    for (final row in insectivoreAdditions) {
+      expect(row['mode'], 'alchemy');
+      final original = entries.cast<Map>().singleWhere(
+        (e) => e['mode'] == 'processing' && e['id'] == row['id'],
+      );
+      expect(row, {...original, 'mode': 'alchemy'});
+    }
+    final exchangeReview =
+        jsonDecode(
+              File(
+                'docs/item-artwork-review-shared-exchanges-20261103.json',
+              ).readAsStringSync(),
+            )
+            as Map;
+    final exchangeAdditions = (exchangeReview['addedEntries'] as List)
+        .cast<Map>();
+    expect(exchangeAdditions, hasLength(345));
+    expect(exchangeAdditions.map((r) => r['id']).toSet(), hasLength(115));
+    for (final row in exchangeAdditions) {
+      final item = exchangeItems[row['id']]!;
+      expect(row['name'], item.name);
+      expect(row['asset'], item.iconAsset);
+      expect(
+        exchangeItems.values.where((i) => i.name == item.name),
+        hasLength(1),
+      );
+      expect(
+        sha256.convert(File(item.iconAsset).readAsBytesSync()).toString(),
+        row['sha256'],
+      );
+      expect(row['referenceSha256'], row['sha256']);
+    }
+    // The bound alternative reuses the already-reviewed Processing artwork in
+    // the two other modes. Keep both display and screenshot-recognition hashes;
+    // these are different encodings of the same exact45517 game icon.
+    final khanOriginal = entries.cast<Map>().singleWhere(
+      (row) => row['mode'] == 'processing' && row['id'] == 45517,
+    );
+    expect(khanOriginal['name'], "Khan's Dim Magic");
+    expect(khanOriginal['source'], 'New_Icon/03_ETC/00045517.dds');
+    expect(khanOriginal['grade'], 3);
+    final khanAdditions = [
+      for (final mode in ['alchemy', 'cooking']) {...khanOriginal, 'mode': mode},
+    ];
+    // Multiple box identities share this name, but have different grades.
+    expect(
+      catalog.iconDataUriAcrossModes(CraftMode.alchemy, 'Gold Bar Box'),
+      isNull,
+    );
+    expect(catalog.itemIconGrade('Gold Bar Box'), isNull);
+    final rows = [
+      for (final row in entries.cast<Map>())
+        overrides
+                .where(
+                  (o) => o['mode'] == row['mode'] && o['name'] == row['name'],
+                )
+                .firstOrNull ??
+            row,
+      ...additions,
+      ...courserAdditions,
+      ...scorchedAdditions,
+      ...insectivoreAdditions,
+      ...exchangeAdditions,
+      ...khanAdditions,
+    ];
+    final expectedKeys = rows.map((r) => '${r['mode']}|${r['name']}').toSet();
+    final actualKeys = {
+      for (final mode in CraftMode.values)
+        for (final name in catalog.snapshot.forMode(mode).iconDataUris.keys)
+          '${mode.key}|$name',
+    };
+    expect(
+      actualKeys,
+      expectedKeys,
+      reason: 'No new artwork may evade provenance review.',
+    );
+    expect(actualKeys, hasLength(4880));
+    for (final row in rows) {
       final mode = CraftMode.values.singleWhere(
         (mode) => mode.key == row['mode'],
       );
@@ -76,6 +236,67 @@ void main() {
     expect(catalog.isEmptyIconArtwork('[Event] Drieghan Fragments'), isTrue);
     expect(catalog.isEmptyIconArtwork('Egg'), isFalse);
   });
+
+  testWidgets(
+    'all unambiguous exchange artwork decodes in shared item widgets',
+    (tester) async {
+      final harness = PlannerTestHarness();
+      addTearDown(harness.controller.dispose);
+      final unique = exchangeItems.values
+          .where(
+            (item) =>
+                exchangeItems.values
+                    .where((other) => other.name == item.name)
+                    .length ==
+                1,
+          )
+          .toList();
+      expect(unique, hasLength(209));
+      for (final item in unique) {
+        expect(
+          catalog.iconDataUriAcrossModes(CraftMode.alchemy, item.name),
+          isNotNull,
+          reason: '${item.id}: ${item.name}',
+        );
+      }
+      for (final spec in [
+        SakuraNightGardenSpec.theme,
+        StandardSpec.theme,
+        IlluminatedLedgerSpec.theme,
+      ]) {
+        await tester.pumpWidget(
+          MaterialApp(
+            home: ThemeSpecScope(
+              spec: spec,
+              child: Material(
+                child: Wrap(
+                  children: [
+                    for (final item in unique)
+                      ModeItemIcon(
+                        controller: harness.controller.active,
+                        catalogRepository: catalog,
+                        name: item.name,
+                        size: 24,
+                        searchAcrossModes: true,
+                      ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        );
+        await tester.pumpAndSettle();
+        await tester.runAsync(() async {
+          for (final element in find.byType(Image).evaluate()) {
+            await precacheImage((element.widget as Image).image, element);
+          }
+        });
+        await tester.pumpAndSettle();
+        expect(find.byType(Image), findsNWidgets(209));
+        expect(tester.takeException(), isNull);
+      }
+    },
+  );
 
   testWidgets('clean art has transparent corners, not a baked square frame', (
     tester,

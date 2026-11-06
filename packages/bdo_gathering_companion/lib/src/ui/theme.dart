@@ -94,9 +94,14 @@ class GatheringQuietIconButton extends IconButton {
   @override
   Widget build(BuildContext context) => approvedHover
       ? super.build(context)
-      : Semantics(
-          tooltip: tooltip,
-          child: TooltipVisibility(visible: false, child: super.build(context)),
+      : MergeSemantics(
+          child: Semantics(
+            tooltip: tooltip,
+            child: TooltipVisibility(
+              visible: false,
+              child: super.build(context),
+            ),
+          ),
         );
 }
 
@@ -262,11 +267,13 @@ class CompanionGlassTheme extends ThemeExtension<CompanionGlassTheme> {
   Color get insetLine => colors.edge.withValues(alpha: .47 * effectStrength);
   Color get active => _litTint(
     adapt(
-      const Color(0xFF51343D),
+      const Color(0xFF4D3039),
       Color.lerp(colors.surface, colors.accent, .20)!,
     ),
     adapt(
-      const Color(0xFF63404A),
+      // Preserve the standalone rose selection while keeping muted text above
+      // 4.5:1 after the actual translucent face and clearcoat are composited.
+      const Color(0xFF5C3A44),
       Color.lerp(colors.surface, colors.accent, .20)!,
     ),
     selectedOpacity,

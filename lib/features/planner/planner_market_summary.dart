@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../domain/formatting/planner_formatters.dart';
 import '../../visual/visual.dart';
+import '../opportunities/opportunity_silver_amount.dart';
 
 /// The compact, trailing total below the Need First list.
 class PlannerMarketSummary extends StatelessWidget {
@@ -12,6 +13,7 @@ class PlannerMarketSummary extends StatelessWidget {
     required this.region,
     this.hasUnknownPrices = false,
     this.message,
+    this.silverIcon,
     super.key,
   });
 
@@ -21,6 +23,7 @@ class PlannerMarketSummary extends StatelessWidget {
   final String region;
   final bool hasUnknownPrices;
   final String? message;
+  final Widget? silverIcon;
 
   static const surfaceKey = ValueKey('planner-market-summary-surface');
 
@@ -55,9 +58,21 @@ class PlannerMarketSummary extends StatelessWidget {
                 hasUnknownPrices && total > 0 ? 'Known Cost' : 'Estimated Cost',
                 style: spec.typography.label,
               ),
-              Text(
-                hasUnknownPrices && total <= 0 ? '—' : formatSilver(total),
-                style: spec.typography.section.copyWith(fontSize: 21),
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  if (silverIcon != null) ...[
+                    silverIcon!,
+                    const SizedBox(width: 6),
+                  ],
+                  Flexible(
+                    child: OpportunitySilverAmount(
+                      value: hasUnknownPrices && total <= 0 ? null : total,
+                      wholeSilver: true,
+                      style: spec.typography.section.copyWith(fontSize: 21),
+                    ),
+                  ),
+                ],
               ),
               if (time.isNotEmpty)
                 Container(

@@ -1,0 +1,22 @@
+{
+  "date": "2026-10-30",
+  "request": "Fix internal-looking group names and make Craft Queue ingredient selection inventory-aware like Need First; explain mixed grain qualities.",
+  "labels": "Display-only labels cover all 40 raw BDO group IDs in bundled ingredients, plus numbered fruit/herb worth labels. Structured recipe/processing slot keys and unknown raw IDs use Ingredient instead of exposing internal identifiers. Custom readable names are retained. Blood labels match the bundled Blood Group 1-5 definitions.",
+  "queue": "Craft Queue ingredient-name actions now open the same theme-aware, scroll-contained Owned/Missing popover used by Need First. Real artwork, current selection, full-plan projected amounts, mouse/keyboard dismissal and existing callbacks are preserved. Queue and Need First anchors have distinct overlay scopes.",
+  "unchanged": "Substitute IDs, saved keys, options, ratios, quality rules, calculations, inventory and all personal data. Existing Processing Buy/Process and ancestor/title inline controls are not redesigned. No ordinary hover text or new settings.",
+  "grainExplanation": "Each base option is previewed through the real full-plan engine while retaining grade preferences. With Auto, the engine enumerates normal/high/special candidates, ranks availability, then remaining purchase cost and owned coverage. Consequently different base options may show different grades, including a high-quality option with zero owned. A regression fixture verifies mixed normal/high previews and manual Normal overriding them. No claim is made about the user's exact active prices/preferences; no personal profile was inspected.",
+  "verification": "Catalog-wide label coverage; pure projection and mixed-quality regression; actual-app synthetic queue interactions in three themes at ordinary/small/200-percent/enlarged sizes; long fish list last-row reachability and background scroll containment; existing Planner regressions; focused analysis and Windows Release build. Captures are synthetic, not personal.",
+  "source": "[private-source]/Planner Ingredient Choices 20261030",
+  "branch": "codex/planner-ingredient-choices",
+  "baseline": "Complete Shared Personal Data working snapshot, not HEAD alone. Shared Documents, writer lease and release safety guards remain unchanged.",
+  "baselineManifestSha256": "9099882B4EB13CDD82B827530B163FE44834F7EFCC9F787E3B27B90EE545E7AD",
+  "preservedAt": "[private-source]/Protected Rollback/prior-ingredient-choices-20261030-QC9mST",
+  "runnable": "build/windows/x64/runner/Release/BlackSpiritLife.exe",
+  "audit": "audit/planner-ingredient-choices-20261030",
+  "captures": "work/visuals/planner-ingredient-choices",
+  "personalDataAccessed": false,
+  "visibleAppLaunched": false,
+  "installedAppChanged": false,
+  "handedOff": false,
+  "published": false
+}

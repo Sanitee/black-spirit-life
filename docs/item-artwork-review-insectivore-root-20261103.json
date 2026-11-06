@@ -1,0 +1,15 @@
+{
+  "date": "2026-11-03",
+  "status": "EXACT_EXISTING_ARTWORK_REUSED",
+  "name": "Insectivore Plant Root",
+  "id": 5443,
+  "grade": 0,
+  "addedMode": "alchemy",
+  "copiedFromMode": "processing",
+  "source": "New_Icon/03_ETC/07_ProductMaterial/00005443.dds",
+  "actualCopiedSha256": "34ee1d0b26d1d74c594d494d164f418607ee54a509843dee10aacbb630cface5",
+  "historicalManifest": "docs/item-artwork-provenance.json",
+  "matchedHistoricalField": "referenceSha256",
+  "scope": "Existing exact unframed reference artwork copied for the newly reachable Alchemy ingredient. Historical framed-icon digest is a different representation; no image redrawing, cropping or new game extraction. Current native5443 name/icon path/grade agree. Original historical manifest remains unchanged.",
+  "evidence": "Workspace audit/correctness-review-20261102/resumed-insectivore-complete-evidence.json"
+}

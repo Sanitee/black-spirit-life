@@ -93,7 +93,13 @@ void main() {
           );
           await tester.pumpAndSettle();
           expect(find.text('Estimated Cost'), findsOneWidget);
-          expect(find.text('7.6M'), findsOneWidget);
+          expect(find.text('7,6m'), findsOneWidget);
+          await tester.tap(find.text('7,6m'));
+          await tester.pump();
+          expect(find.text('7.600.000'), findsOneWidget);
+          await tester.tap(find.text('7.600.000'));
+          await tester.pump();
+          expect(find.text('7,6m'), findsOneWidget);
           expect(find.text('14:33'), findsOneWidget);
           expect(find.textContaining('Last fetched'), findsNothing);
           expect(find.textContaining('Region'), findsNothing);
@@ -163,7 +169,7 @@ void main() {
         expect(find.text('—'), findsOneWidget);
         expect(find.text('0'), findsNothing);
       } else {
-        expect(find.text('500M'), findsOneWidget);
+        expect(find.text('500m'), findsOneWidget);
       }
       expect(
         tester

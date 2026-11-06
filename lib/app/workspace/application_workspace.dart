@@ -2,7 +2,6 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:bdo_craft_planner_flutter/visual/components/app_tooltip.dart';
-
 import 'package:bdo_gathering_companion/bdo_gathering_companion.dart';
 import 'package:bdo_map_core/bdo_map_core.dart';
 import 'package:flutter/foundation.dart';
@@ -18,6 +17,7 @@ import '../../data/opportunities/opportunity_market_cache_store.dart';
 import '../../data/opportunities/opportunity_market_service.dart';
 import '../../data/persistence/personal_data_location_service.dart';
 import '../../data/portable/portable_custom_icon_bridge.dart';
+import '../../domain/catalog/item_name_presentation.dart';
 import '../../domain/catalog/temporarily_archived_items.dart';
 import '../../domain/market/market_price_gateway.dart';
 import '../../domain/market/market_price_models.dart';
@@ -38,6 +38,7 @@ import '../../features/opportunities/opportunities_item_actions.dart';
 import '../../features/opportunities/opportunities_size_title_action.dart';
 import '../../features/opportunities/opportunities_workspace.dart';
 import '../../features/planner/planner.dart';
+import '../../features/planner/planner_choice_market.dart';
 import '../../features/planner/planner_content_viewport.dart';
 import '../../features/recipe_book/recipe_book.dart';
 import '../../features/resource_map/diagnostics/resource_map_frame_capture.dart';
@@ -48,6 +49,7 @@ import '../../features/resource_map/recipe_worker_panel.dart';
 import '../../features/resource_map/resource_map_theme_adapter.dart';
 import '../../features/resource_map/resource_map_workspace.dart';
 import '../../features/shared/custom_icon_store_scope.dart';
+import '../../features/shared/item_name_copy_scope.dart';
 import '../../features/shared/mode_item_icon.dart';
 import '../../features/shell/shell.dart';
 import '../../shared/overlays/anchored_popover.dart';
@@ -364,7 +366,7 @@ class _ApplicationWorkspaceState extends State<ApplicationWorkspace>
   _ToastRequest? _activeToast;
   int _toastPresentation = 0;
   Timer? _copyToastTimer;
-  String _copyToastText = '';
+  OverlayEntry? _copyToastOverlay;
   late final ApplicationWorkspacePresentationController _presentation;
   late final ApplicationAppearanceThemeController _appearanceTheme;
   _TopWorkspaceDestination _topWorkspace = _TopWorkspaceDestination.planner;
@@ -402,7 +404,7 @@ class _ApplicationWorkspaceState extends State<ApplicationWorkspace>
         SharedMarketRepository.application(
           cacheStore: OpportunityMarketCacheStore(
             directory: Directory(
-              '${widget.bundle.stateRepository.paths.applicationDirectory.path}'
+              '${widget.bundle.runtimeRoot.path}'
               '${Platform.pathSeparator}opportunities',
             ),
           ),
@@ -790,6 +792,7 @@ class _ApplicationWorkspaceState extends State<ApplicationWorkspace>
     _activeToast = null;
     _toastPresentation += 1;
     _copyToastTimer?.cancel();
+    _removeCopyToast();
     _appearanceTheme.dispose();
     _presentation.dispose();
     for (final maximum in _plannerMaximums.values) {
@@ -828,6 +831,19 @@ class _ApplicationWorkspaceState extends State<ApplicationWorkspace>
         _ordinaryClosePending ||
         _restartAndApplyPending ||
         _personalDataMovePending;
+    return PlannerChoiceMarketScope(
+      repository: widget.sharedMarket != null || widget.marketGateway == null
+          ? _sharedMarket
+          : null,
+      child: ItemNameCopyScope(
+        copyName: _copyName,
+        copyText: _copyText,
+        child: _buildOverlayHost(active, restartPending),
+      ),
+    );
+  }
+
+  Widget _buildOverlayHost(CraftMode active, bool restartPending) {
     return AppOverlayCoordinatorHost(
       child: ScaffoldMessenger(
         key: _messengerKey,
@@ -968,20 +984,6 @@ class _ApplicationWorkspaceState extends State<ApplicationWorkspace>
                   ),
                 ),
               ),
-              if (_copyToastText.isNotEmpty)
-                Positioned.fill(
-                  child:
-                      ValueListenableBuilder<ApplicationWorkspacePresentation>(
-                        valueListenable: _presentation,
-                        builder: (context, presentation, _) =>
-                            ApplicationCopyToastOverlay(
-                              message: _copyToastText,
-                              spec: presentation.spec,
-                              standardSettings: presentation.standardSettings,
-                              workspaceVisual: presentation.titleVisual,
-                            ),
-                      ),
-                ),
               if (_personalDataRestartRequired)
                 Positioned.fill(
                   child: BlockSemantics(
@@ -1247,6 +1249,9 @@ class _ApplicationWorkspaceState extends State<ApplicationWorkspace>
           : null,
       appController: _controller,
       catalog: _catalogRepository,
+      marketCacheStore: OpportunityMarketCacheStore(
+        directory: Directory('${widget.bundle.runtimeRoot.path}/opportunities'),
+      ),
       directory: Directory(
         '${widget.bundle.stateRepository.paths.applicationDirectory.path}'
         '${Platform.pathSeparator}opportunities',
@@ -1426,8 +1431,8 @@ class _ApplicationWorkspaceState extends State<ApplicationWorkspace>
 
   Future<void> _copyName(String exactName) async {
     try {
-      await Clipboard.setData(ClipboardData(text: exactName));
-      _showCopyToast(exactName);
+      await Clipboard.setData(ClipboardData(text: itemDisplayName(exactName)));
+      _showCopyToast('Copied ${itemDisplayName(exactName)}');
     } on Object catch (error) {
       _showToast(
         '“$exactName” could not be copied because the Windows clipboard is unavailable. $error',
@@ -1439,11 +1444,23 @@ class _ApplicationWorkspaceState extends State<ApplicationWorkspace>
   Future<void> _copyAfkLoad(String text) async {
     try {
       await Clipboard.setData(ClipboardData(text: text));
-      _showToast('AFK load list copied.');
+      _showCopyToast('AFK load list copied');
     } on Object catch (error) {
       _showToast(
         'The AFK load list could not be copied because the Windows clipboard '
         'is unavailable. $error',
+        error: true,
+      );
+    }
+  }
+
+  Future<void> _copyText(String text, String confirmation) async {
+    try {
+      await Clipboard.setData(ClipboardData(text: text));
+      _showCopyToast(confirmation);
+    } on Object catch (error) {
+      _showToast(
+        'The list could not be copied because the Windows clipboard is unavailable. $error',
         error: true,
       );
     }
@@ -1460,15 +1477,42 @@ class _ApplicationWorkspaceState extends State<ApplicationWorkspace>
     _controller.active.navigate('data');
   }
 
-  void _showCopyToast(String exactName) {
+  void _showCopyToast(String message) {
     _copyToastTimer?.cancel();
     if (!mounted) return;
-    setState(() => _copyToastText = 'Copied $exactName');
+    _removeCopyToast();
+    // Above dialog barriers and item hover overlays, not behind them in the
+    // workspace's Stack. IgnorePointer in the surface preserves all input.
+    final entry = _copyToastOverlay = OverlayEntry(
+      builder: (_) => Positioned.fill(
+        child: IgnorePointer(
+          child: Material(
+            type: MaterialType.transparency,
+            child: ValueListenableBuilder<ApplicationWorkspacePresentation>(
+              valueListenable: _presentation,
+              builder: (context, presentation, _) =>
+                  ApplicationCopyToastOverlay(
+                    message: message,
+                    spec: presentation.spec,
+                    standardSettings: presentation.standardSettings,
+                    workspaceVisual: presentation.titleVisual,
+                  ),
+            ),
+          ),
+        ),
+      ),
+    );
+    Overlay.of(context, rootOverlay: true).insert(entry);
     _copyToastTimer = Timer(const Duration(milliseconds: 1350), () {
       _copyToastTimer = null;
-      if (!mounted) return;
-      setState(() => _copyToastText = '');
+      _removeCopyToast();
     });
+  }
+
+  void _removeCopyToast() {
+    _copyToastOverlay?.remove();
+    _copyToastOverlay?.dispose();
+    _copyToastOverlay = null;
   }
 
   void _plannerMarketStateChanged(CraftMode mode) {

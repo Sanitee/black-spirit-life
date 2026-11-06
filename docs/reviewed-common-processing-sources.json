@@ -1,0 +1,37 @@
+{
+  "reviewedAt": "2026-11-03",
+  "scope": "Short source guidance and the official Drying condition. No new automatic recipes, yields, item identities or market eligibility.",
+  "sources": [
+    {"id":4068,"name":"Polished Stone","knowledgeId":7593,"inputId":4006,"input":"Rough Stone","quantity":10,"method":"Grinding","text":"Grind Rough Stone ×10.","decision":"Replace generic Crafting Notes instruction using explicit current item description and matching knowledge."},
+    {"id":6159,"name":"Fine Soft Hide","knowledgeId":7427,"inputId":6151,"input":"Soft Hide","quantity":10,"method":"Drying","text":"Dry Soft Hide ×10.","decision":"Add normal material source;retain existing Snow Leopard/Llama formulas unchanged."},
+    {"id":4722,"name":"Snowfield Cedar Plywood","knowledgeId":11001,"inputId":4721,"input":"Snowfield Cedar Plank","quantity":10,"method":"Chopping","text":"Chop Snowfield Cedar Plank ×10.","decision":"Add normal plank source;retain existing direct Timber formula unchanged."},
+    {"id":4254,"name":"Melted Gold Shard","inputId":4902,"input":"Alluvial Gold","method":"Heating","text":"Heat Alluvial Gold (not included in planning).","decision":"Current quest localization category18 ID3044 field16777217 explicitly makes Melted Gold Shards from Alluvial Gold. Item4902 independently says it can be heated to create gold. Raw current input/method corroboration has AlluvialGold5 but no reliable output distribution. The hint intentionally gives neither input quantity nor output promise;normal Ore planner stays unchanged. This is not equipment recycling."}
+  ],
+  "alreadyRepresented": [
+    {"id":6164,"name":"Fine Fancy Reptile Skin","knowledgeId":7432,"inputId":6156,"input":"Fancy Reptile Skin","quantity":10,"method":"Drying","text":"Drying (Fancy Reptile Skin ×10)."},
+    {"id":6163,"name":"Fine Thick Fur","knowledgeId":7431,"inputId":6155,"input":"Thick Fur","quantity":10,"method":"Drying","text":"Drying (Thick Fur ×10)."},
+    {"id":4491,"name":"Resplendent Lapis Lazuli","knowledgeId":9207,"inputId":4490,"input":"Lapis Lazuli","quantity":5,"method":"Grinding","text":"Grind (Lapis Lazuli ×5)."},
+    {"id":4669,"name":"Usable Scantling","knowledgeId":7420,"inputId":4605,"input":"Log","quantity":10,"method":"Chopping","text":"Chop 10 Logs in the Processing window."}
+  ],
+  "dryingCondition": {
+    "text":"Drying: clear weather, on land.",
+    "newNotes":16,
+    "existingDriedFishSources":145,
+    "url":"https://www.naeu.playblackdesert.com/en-US/Wiki?wikiNo=28",
+    "archive":"processing-guide-naeu-20261103",
+    "sha256":"0fd4565d28ab2ebf48a35fec00c2e3acc4caace8e42de052bbbb16389e231998",
+    "policy":"Exact ID/name guards, archived entries excluded, idempotent. Dried-fish hints already state the same restriction inline and do not gain a redundant note. Full projection checks every displayed Drying formula and source."
+  },
+  "clientEvidence": {
+    "scope":"Installed PC archives through October31,2026; exact current item/knowledge/quest prose. No old knowledge Amity requirements copied: processing prerequisites were removed January3,2024.",
+    "locSha256":"be8364a658d08888ffe0c4e02764755de5c806c16b477c89dacf6f94ed3c1e92",
+    "itemsSha256":"a54b5735052c990e189ff1a50afb6d5442cc80e0ba8dabff995979bc8d35c821"
+  },
+  "catalogSha256":"c0fb5d9ad69295f0491060f7b72507d65b58e47088d551d77f1eb27d11256ff0",
+  "limits":[
+    "Source-existence review is not certification of server proc distributions or new automatic recipe yields.",
+    "Alluvial Gold's exact output distribution remains an explicit dependency before automatic planning; no guessed1–4.",
+    "Existing higher-grade direct processing formulas are preserved; this batch does not claim independent verification of their distributions.",
+    "No sources are characterized as exhaustive or the only way to obtain an item."
+  ]
+}

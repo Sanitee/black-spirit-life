@@ -103,15 +103,18 @@ void main() {
       };
       for (final entry in removed.entries) {
         final info = _info(entry.key);
-        expect(info.kind, 'Legacy crystal', reason: entry.key);
+        expect(info.kind, 'Removed item', reason: entry.key);
         expect(info.effectsTitle, 'Former effects', reason: entry.key);
         expect(info.effects, <String>[entry.value], reason: entry.key);
         expect(
           info.summary,
-          'Removed September 3, 2026; replaced with Evergreen Shards.',
+          'Removed in the September 3, 2026 PC update.',
           reason: entry.key,
         );
-        expect(info.isTemporarilyArchived, isFalse);
+        expect(info.notes, contains('Replaced with Evergreen Shards.'));
+        expect(info.isTemporarilyArchived, isTrue);
+        expect(info.acquisitionFormulas, isEmpty);
+        expect(info.acquisitionNotes, isEmpty);
         expect(info.uses, isEmpty);
       }
       final accuracy = _info('JIN Dawn Crystal - Accuracy');

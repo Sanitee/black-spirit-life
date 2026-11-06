@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../domain/catalog/item_name_presentation.dart';
 
 import '../../domain/formatting/planner_formatters.dart';
 import '../../visual/visual.dart';
@@ -49,7 +50,10 @@ class RecipeIngredientLine extends StatelessWidget {
                       Flexible(
                         child:
                             nameControl ??
-                            Text(name, style: ItemDetailStyle.ingredient(spec)),
+                            Text(
+                              itemDisplayName(name),
+                              style: ItemDetailStyle.ingredient(spec),
+                            ),
                       ),
                       const SizedBox(width: 8),
                       Text(

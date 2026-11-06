@@ -1,0 +1,46 @@
+{
+  "reviewedAt": "2026-11-02",
+  "status": "SCOPED_CORRECTIONS; WHOLE_APP_AUDIT_STILL_OPEN",
+  "equipment": {
+    "coverage": "31 current stone/heart references in all three actual controllers. 139 numerical description effects match fresh exact PC identities; 12 displayed AP/DP values separately match current PC BDO Codex equipment panels (secondary corroboration).",
+    "corrections": "Removed press-U activation, retired 5/10-minute durations and cooldowns. All effects apply while equipped. Destruction Spirit Stone includes Attack/Casting Speed +4%; Khan's Heart: Life includes +25 mastery. Base Vell/Khan combat hearts now also show displayed AP +3/AP +2/DP +2, as their combined versions already did.",
+    "retained": "Existing recipes, legitimate grade alternatives, source restrictions, shared theme/layout/badges and combined-stone separation note. No AP/DP calculator is introduced.",
+    "separationRecheck": "Official NA/EU PC January 15 patch 9583 explicitly supports Brimming Essence Simple Alchemy separation with the retained upgrade restriction, with all twelve Vell/Khan combinations listed. See combined-stone-separation-review.json. No wording change was needed; translated upgrade wording is not expanded into guessed growth/extraction mechanics.",
+    "limits": "Current native description comparison does not prove hidden effect execution; equipment panel values are secondary corroboration, not newly decoded native fields. The January rule plus reviewed current coverage is not an exhaustive intervening-notice certification."
+  },
+  "removedItems": {
+    "source": "https://www.naeu.playblackdesert.com/en-US/News/Detail?groupContentNo=10550&countryType=en-US",
+    "date": "2026-09-03",
+    "identities": {
+      "5303": "Tenacious Origin of Life",
+      "5304": "Rough Opulent Crystal",
+      "5305": "Flawless Spirit Stone",
+      "45122": "Splendid Spirit Stone of Destruction Fragment",
+      "45338": "Splendid Spirit Stone of Destruction",
+      "15276": "JIN Dawn Crystal - Life EXP",
+      "15277": "BON Dawn Crystal - Life EXP",
+      "15278": "WON Dawn Crystal - Life EXP"
+    },
+    "behavior": "Raw records, historical formulas, quantities, saved choices and market receipts are preserved. Current target suggestions/activation, planning expansion, source prose, Recipe Book formulas/consumers and market fetch/replay are suppressed by the common identity-aware policy. Explicit different custom IDs remain distinct. Removed item wording is separate from temporary source-review holds.",
+    "compensation": "Removed Splendid Spirit Stones were compensated with Silver, not equivalent Alchemy Stones. Dawn Life EXP crystals retain their established Evergreen compensation note.",
+    "implementation": "The legacy-named archive predicates/flag remain compatibility gates for inactive identities; removedPcItemsById/isRemovedPcItem distinguish confirmed removals from the original eight temporary holds. No saved schema migration or destructive catalog deletion."
+  },
+  "provenance": {
+    "change": "Eight existing acquisition routes gain current PC secondary identity/source corroboration. Primary official patch/API evidence remains authoritative. Rawr's secondary Hunt Rawr-Rawr prose is explicitly NOT evidence of the new weekly-box route, level or chance.",
+    "scope": "Evidence-only catalog delta; parsed gameplay facts/IDs/prices/formulas verified unchanged. Source records state exactly what they support. Two citations do not imply independent proof of every clause.",
+    "catalogSha256": "9a43f75ad44e3c88a53b527ef4c96f5086aa4a2a0cb556c391e463bf1a9ee0b1",
+    "catalogBytes": 30265736,
+    "generator": "Source index and reviewed EXP regenerate byte-exactly. EXP formula/value records unchanged; only its guarded catalog SHA header changed."
+  },
+  "verification": {
+    "itemSourceControllerChecks": 184,
+    "separateRemovedPolicyMarketInventoryChecks": 114,
+    "nativeLayoutChecks": 9,
+    "captures": "64 native synthetic reference captures: all three themes at 100/150/200% text, including 27 equipment/retirement captures. Representative Sakura normal/enlarged/removed cards manually reviewed.",
+    "projection": "2,259 references / 6,777 mode views. All 24 removed-item views have no acquisition/formula/consumer claims, and no remaining current Used for entry outputs one of these eight retired items.",
+    "analysis": "Scoped changed code and tests pass without issues.",
+    "limits": "Overlapping scoped counts, not a whole-repository pass. First recheck intentionally failed on catalog fingerprint until the reviewed evidence-only hash/size and generator guards were updated. Subsequent 184 checks pass. Final whole-app tests/build/preservation still pending."
+  },
+  "audit": "audit/correctness-review-20261102/equipment-projection-review.json; acquisition-provenance-review.json; shared-stone-comparison.json; post-equipment-projection/; equipment-reference-captures/",
+  "safety": "Isolated candidate only. No personal-profile access, visible app/game launch, installed replacement, shortcut modification, publication or full-review checkpoint."
+}

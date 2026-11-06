@@ -1,0 +1,85 @@
+{
+  "date": "2026-11-03",
+  "status": "IMPLEMENTED_WITH_LIFE_EXP_HINT_WITHDRAWN_20261103_RECHECK_PASSED",
+  "supersession": "The extra Life EXP Dawn recycling hint was erroneous current advice: September 3, 2026 removed all three crystals, after the August 2025 heating addition. Withdrawn from shared source hints. The 89 original route closures did not include those three extra relationships and are unchanged. Historical receipts are retained, not rewritten as proof of current availability.",
+  "scope": "Six exact shared references gain short Dawn-crystal recycling guidance, including grade-specific essence yields and the separate HAN Endtimes return. Essence of Ascent - Accessory and one-way Dalishain exchange are included. Existing source restrictions and seed/net-yield handling for Dark Bonghwang's Tear remain.",
+  "identityIds": [
+    820979,
+    820980,
+    820981,
+    820982,
+    820983,
+    821252
+  ],
+  "primarySources": [
+    {
+      "url": "https://www.naeu.playblackdesert.com/en-US/Wiki?wikiNo=419",
+      "scope": "Current Kharazad guide: exact accessory eligibility/grade/yields and crystal recycling; only specialized essences exchange into normal essence, not the reverse."
+    },
+    {
+      "url": "https://www.naeu.playblackdesert.com/en-US/News/Detail?groupContentNo=7759&countryType=en-US",
+      "date": "2024-10-31",
+      "scope": "Exact TET/PEN accessory and JIN/BON/WON crystal recycling tables."
+    },
+    {
+      "url": "https://www.naeu.playblackdesert.com/en-US/News/Detail?groupContentNo=8972&countryType=en-US",
+      "date": "2025-08-21",
+      "scope": "HAN crystal recycling returns matching essence and 100 Crystallized Energy of Endtimes."
+    },
+    {
+      "url": "https://www.naeu.playblackdesert.com/en-US/News/Detail?groupContentNo=8996&countryType=en-US",
+      "date": "2025-08-28",
+      "scope": "HISTORICAL ONLY: Life EXP Dawn recycling was later invalidated by removal of all three crystals on September 3, 2026. Not a current source."
+    },
+    {
+      "url": "https://www.naeu.playblackdesert.com/en-US/News/Detail?groupContentNo=10550",
+      "date": "2026-09-03",
+      "scope": "Removed JIN/BON/WON Dawn Crystal - Life EXP and sent Evergreen Shard compensation. Supersedes the August 2025 Life EXP crystal source, not the separate All AP crystals."
+    },
+    {
+      "url": "https://www.naeu.playblackdesert.com/en-US/News/Detail?groupContentNo=8000&countryType=en-US",
+      "date": "2024-12-24",
+      "scope": "An unwanted Essence of Ascent - Accessory can be heated into 30 Essence of Dawn."
+    },
+    {
+      "url": "https://www.naeu.playblackdesert.com/en-US/News/Detail?groupContentNo=10422&countryType=en-US",
+      "date": "2026-08-06",
+      "scope": "Four specialized essences +Dark Bonghwang's Tear produce30; tenfold recipe plus1 Black Stone Powder produces300. The input essence is consumed: net29/290."
+    }
+  ],
+  "preserved": "No automatic recycling recipes, recursive expansion, inventory/enhancement-state assumptions, market IDs, prices, or calculated proc rates added. All source changes use existing shared reference components. HAN's two outputs are not counted as alternatives. Existing catalog/engine unchanged.",
+  "verification": {
+    "tests": [
+      {
+        "file": "resumed-dawn-recycling-wording-tests.jsonl",
+        "passed": 111
+      },
+      {
+        "file": "resumed-dawn-recycling-projection-tests.jsonl",
+        "passed": 1
+      },
+      {
+        "file": "resumed-dawn-recycling-layout-tests.jsonl",
+        "passed": 234
+      }
+    ],
+    "changedReferences": 6,
+    "scopedRelationshipFlagsClosed": 89
+  },
+  "latestSupersession": {
+    "name": "Essence of Dawn",
+    "removedLine": "Heating · 1 Life EXP Dawn crystal gives 1 (WON), 5 (BON), or 25 (JIN)",
+    "evidence": {
+      "key": "pc-20260903-gathering",
+      "url": "https://www.naeu.playblackdesert.com/en-US/News/Detail?groupContentNo=10550&countryType=en-US",
+      "finalUrl": "https://www.naeu.playblackdesert.com/en-US/News/Detail?groupContentNo=10550&countryType=en-US",
+      "status": 200,
+      "bytes": 358267,
+      "sha256": "2e2e1cfd0feb7240627847d5ba8118c7fdaf1ec2153b0fefd383d7d9dd2a0e2c",
+      "retrievedAt": "2026-11-02T19:19:00.932Z"
+    },
+    "prior": "resumed-dawn-recycling-review.json#extraLifeExp",
+    "reason": "The August2025 source was superseded by September2026 removal. Raw current client descriptions still contain the old route. Earlier extra-source addition is withdrawn, not hidden.",
+    "original89RouteClosuresUnaffected": true
+  }
+}

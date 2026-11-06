@@ -192,6 +192,8 @@ for (const [name, information] of Object.entries(
 }
 
 catalog.edaniaPartIiReview = {
+  // Preserve independently reviewed later supplements when checking/regenerating.
+  ...catalog.edaniaPartIiReview,
   reviewedAt: EDANIA_PART_II_REVIEWED_AT,
   officialSource: EDANIA_PART_II_SOURCE,
   officialSources: [EDANIA_PART_II_SOURCE, EDANIA_PART_II_ASIA_SOURCE],

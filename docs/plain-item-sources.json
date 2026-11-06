@@ -1,0 +1,65 @@
+{
+  "date": "2026-10-31",
+  "status": "Implemented in an isolated test build; not published",
+  "source": "[private-source]/Plain Item Sources 20261031",
+  "branch": "codex/plain-item-sources",
+  "baseline": "Complete Planner Readable Choices working snapshot, not HEAD alone",
+  "request": "Check the existing item information broadly, add useful short acquisition sources and use plain language.",
+  "changes": [
+    "Shared item windows now show general worker source types, matched by exact item ID against bundled node outputs.",
+    "Trace of Nature: excavation nodes; Egg: chicken farms; powders: relevant mining nodes; other mapped materials use the corresponding source types.",
+    "Market, vendor, gathering, garden and processing wording is shorter where it can be safely shortened. Named NPCs, tools, quantities, skills, chance and other restrictions remain.",
+    "Existing reviewed farming identities now have a short garden source. Twenty-six crop acquisition summaries and the higher-grade crop description distinguish harvesting produce from breeding seeds.",
+    "Cold Draft Beer shows its verified rare cooking source and Skilled 1 requirement.",
+    "Exact-ID fallback recovers an existing acquisition record for alternate names such as Griffon Claw. Ambiguous IDs are not combined.",
+    "Themes, layout, icons, recipes, quantities, yields, saved notes, profiles, storage, updater and all calculations remain unchanged. No new hover text or runtime network requests."
+  ],
+  "coverage": {
+    "catalogAndReferenceNames": 2255,
+    "acquisitionEntries": 1002,
+    "exchangeDetailEntries": 52,
+    "wordingOrSourceProjectionChanges": 600,
+    "workerSourceCards": 189,
+    "indexedMapItems": 252,
+    "mapSnapshot": "2026.10.09-beta-v5",
+    "mapSha256": "bf9987338be34d61613418448532eb96f463bb345e0f2a86c40d9653a10b8e52",
+    "catalogCorrectionSummaries": 26,
+    "remainingSourceGaps": 154,
+    "qualification": "Systematic review of existing reference data and its presentation, not an independent fresh verification of every game fact. The report includes outputs, ingredients, options, substitute ratios, acquisition/vendor entries, exact food/buff/crystal registries and exchange items. Exchange-specific facts and routes are included separately."
+  },
+  "uncertainty": [
+    "Remaining gaps include special cooking outputs whose skill requirements have not been checked, older aliases and bound/reference-only entries. They remain unchanged rather than receiving guessed sources.",
+    "Map sources inherit the documented regional and snapshot limits. Node IDs 1826–1829 are excluded. A category does not mean every node in that category produces the item.",
+    "Unverified vendor map listings are not promoted into acquisition facts. The existing reviewed farming whitelist is reused, not represented as 46 newly researched item pages.",
+    "The existing acquisition and exact-info registries were not all independently re-researched against current official patches. Complex conditions and effects are preserved."
+  ],
+  "sources": [
+    {"url": "https://blackdesert.pearlabyss.com/asia/en-us/Game/Wiki?_masterWikiNo=31", "supports": "Harvesting produce versus Plant Breeding seeds"},
+    {"url": "https://bdocodex.com/us/item/7336/", "supports": "Special Garlic garden source"},
+    {"url": "https://bdocodex.com/us/item/7324/", "supports": "High-quality Garlic garden source"},
+    {"url": "https://bdocodex.com/us/item/9283/", "supports": "Cold Draft Beer rare extra and Cooking Skilled 1"},
+    {"url": "https://bdocodex.com/us/item/5960/", "supports": "Trace of Nature excavation source"},
+    {"url": "https://blackdesert.pearlabyss.com/tr/en-US/News/Notice/Detail?_boardNo=18735", "date": "2026-06-04", "supports": "Cross-regional official PC production-node corroboration"},
+    {"path": "docs/resource-map/current-worker-node-provenance.md", "supports": "Provenance and regional limits of exact bundled worker output records"}
+  ],
+  "verification": {
+    "recipeBookCatalogAndFormattingChecks": 334,
+    "newSourceChecksLatest": 8,
+    "actualFlutterLayoutChecks": 12,
+    "additionalSurfaceSuite": "39 passed, one pre-existing failure reproduced on an isolated complete preceding snapshot: an Opportunities test still expects the removed Recipe & materials heading.",
+    "analysis": "No issues found",
+    "windowsReleaseBuild": "Passed; existing MSVC LIB-path warnings recorded",
+    "captures": "work/visuals/plain-item-sources in the workspace",
+    "evidence": "audit/plain-item-sources-20261031 in the workspace",
+    "syntheticDataOnly": true
+  },
+  "release": {
+    "appLaunched": false,
+    "personalDataAccessed": false,
+    "installedAppChanged": false,
+    "shortcutChanged": false,
+    "handedOff": false,
+    "published": false,
+    "note": "Keep shared Documents, writer lease and format guards. Public per-user migration and isolated known-folder lifecycle gates remain separate; Live Release owns publication."
+  }
+}

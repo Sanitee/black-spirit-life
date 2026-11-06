@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:ui' show PointerDeviceKind;
 
 import 'package:flutter/material.dart';
+import '../../domain/catalog/item_name_presentation.dart';
 
 import '../../domain/formatting/planner_formatters.dart';
 import '../../domain/models/craft_mode.dart';
@@ -191,7 +192,10 @@ class _RecipeBookUsedInPanelState extends State<RecipeBookUsedInPanel> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
-              Text(widget.sourceName, style: ItemDetailStyle.title(spec)),
+              Text(
+                itemDisplayName(widget.sourceName),
+                style: ItemDetailStyle.title(spec),
+              ),
               const SizedBox(height: 5),
               Text(
                 _resultSummary(widget.snapshot),
@@ -335,7 +339,10 @@ class _UsedInResultCard extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(entry.name, style: ItemDetailStyle.recipe(spec)),
+              Text(
+                itemDisplayName(entry.name),
+                style: ItemDetailStyle.recipe(spec),
+              ),
               const SizedBox(height: 6),
               Wrap(
                 spacing: 12,

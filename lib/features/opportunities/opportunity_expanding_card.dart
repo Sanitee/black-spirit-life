@@ -93,7 +93,7 @@ class _ExpandingCraftCardState extends State<_ExpandingCraftCard> {
         OpportunitySilverAmount(
           value: value,
           textKey: textKey,
-          initiallyExpanded: true,
+          initiallyExpanded: false,
           wholeSilver: true,
           unicodeMinus: true,
           showPlus: headline,
@@ -267,8 +267,6 @@ class _ExpandingCraftCardState extends State<_ExpandingCraftCard> {
                                         const SizedBox(height: 6),
                                         _CraftMarketCounts(
                                           stock: stock,
-                                          color: material.badgeInk,
-                                          fill: material.badgeFill,
                                           name: quote.recipeName,
                                         ),
                                         const SizedBox(height: 9),
@@ -660,76 +658,20 @@ class _ExpandingCraftCardState extends State<_ExpandingCraftCard> {
 class _CraftMarketCounts extends StatelessWidget {
   const _CraftMarketCounts({
     required this.stock,
-    required this.color,
-    required this.fill,
     required this.name,
     this.npc = false,
   });
   final bool npc;
   final OpportunityCardStock stock;
-  final Color color;
-  final Color fill;
   final String name;
 
   @override
-  Widget build(BuildContext context) {
-    final labels = <(IconData, String)>[
-      if (npc)
-        (Icons.person_outline, 'NPC')
-      else ...[
-        (
-          stock.stock == null
-              ? Icons.help_outline
-              : stock.stock! > 0
-              ? Icons.check
-              : Icons.remove,
-          'Stock ${stock.stock == null ? '—' : _quantity(stock.stock!)}',
-        ),
-        if ((stock.preorders ?? 0) > 0)
-          (
-            Icons.shopping_basket_outlined,
-            'Preorders ${_quantity(stock.preorders!)}',
-          ),
-      ],
-    ];
-    return Semantics(
-      label: npc
-          ? 'Available from an NPC'
-          : 'Stock: ${stock.stock == null ? 'not checked' : _quantity(stock.stock!)}\nPreorders: ${stock.preorders == null ? 'not checked' : _quantity(stock.preorders!)}',
-      child: Wrap(
-        key: ValueKey('craft-market-counts:$name'),
-        spacing: 6,
-        runSpacing: 4,
-        children: [
-          for (final entry in labels)
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
-              decoration: BoxDecoration(
-                color: fill,
-                border: Border.all(color: color.withAlpha(100)),
-                borderRadius: BorderRadius.circular(3),
-              ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(entry.$1, size: 13, color: color),
-                  const SizedBox(width: 4),
-                  Flexible(
-                    child: Text(
-                      entry.$2,
-                      style: context.visualTheme.typography.meta.copyWith(
-                        fontSize: 12,
-                        color: color,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-        ],
-      ),
-    );
-  }
+  Widget build(BuildContext context) => MarketCountBadges(
+    stock: stock.stock,
+    preorders: stock.preorders,
+    npc: npc,
+    wrapKey: ValueKey('craft-market-counts:$name'),
+  );
 }
 
 /// Availability describes the source, never ownership or profitability.
@@ -756,7 +698,6 @@ class _CraftIngredientInlay extends StatelessWidget {
       spec,
       npc ? OpportunityStockTone.available : stock.tone,
     );
-    final npcInk = material.readable(spec.palette.warning, badge: true);
     return OpportunityItemRegion(
       controller: controller,
       name: ingredient.name,
@@ -824,10 +765,6 @@ class _CraftIngredientInlay extends StatelessWidget {
                     _CraftMarketCounts(
                       stock: stock,
                       npc: npc,
-                      color: npc ? npcInk : material.badgeInk,
-                      fill: npc
-                          ? npcInk.withValues(alpha: .07)
-                          : material.badgeFill,
                       name: '$recipeName:${ingredient.name}',
                     ),
                   ],

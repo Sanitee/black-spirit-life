@@ -128,8 +128,10 @@ List<double> plannerQueueFitBreakpoints(
           : 18.0;
       final totalWidth =
           measure(formatQuantity(ingredient.need), ingredientValueStyle) +
-          12 +
           rightInset;
+      // Planner's shared rows use plain quantities (showQuantityBadge: false).
+      // Reserving the old badge's 12px could place the computed threshold above
+      // an already-inline row, skip that boundary, then reflow it during zoom.
       // PlannerIngredientRowLayout's exact stacked-total branch.
       final totalBoundary = icon + 21 + scaler.scale(100) + totalWidth;
       addCardBoundary(totalBoundary);
@@ -150,7 +152,6 @@ List<double> plannerQueueFitBreakpoints(
             formatQuantity(ingredient.need),
             inherited.merge(ingredientValueStyle),
           ) +
-          12 +
           rightInset;
       final inlineBoundary = icon + 21 + renderedTotalWidth + scaler.scale(330);
       addCardBoundary(inlineBoundary);

@@ -1,0 +1,32 @@
+{
+  "date": "2026-10-31",
+  "request": "Make the approved item-reference design consistent everywhere it applies, including the older Elixir of Detection preview inside Recipe Book.",
+  "cause": "ItemReferenceCard selected the new Joined copper design only when onClose was provided. Artwork tooltips omitted that callback and rendered a separate legacy all-in-one card.",
+  "implementation": [
+    "ItemReferenceCard now always renders the shared Joined reference. No appearance switch based on close-callback presence and no duplicate legacy popup renderer.",
+    "Interactive artwork previews use the same attached Recipe/Details and Used for tabs, theme-adaptive finish, artwork rows, quantities beside names, actual-content height and scroll limit as opened windows.",
+    "Hover tab/copy interactions do not trigger Tooltip's default tap dismissal. Leaving, an outside tap or the close control dismisses the preview. Existing pin actions, host navigation and explicit recipe activation remain.",
+    "The shared card contains scroll notifications, including nested tooltip overlays, so scrolling does not dismiss or move its containing recipe panel.",
+    "Explicitly passive exchange hovers retain all reference facts in one reading body with the same finish/rows, without unusable tabs, recipe actions or focus targets. Click still opens the full interactive window. Exact supplied exchange artwork is retained.",
+    "Preserve the neutral unknown-item message and quantity/alternative accessibility labels in the unified renderer. No new ordinary hover labels, settings, saved-data fields, formulas or reference-data changes."
+  ],
+  "surfaceAudit": [
+    {"source": "lib/features/recipe_book/recipe_book_modal.dart", "surfaces": "Recipe list artwork, recipe-preview title artwork and ingredient artwork", "route": "RecipeBookItemIcon -> hover/pinned ItemReferenceCard"},
+    {"source": "lib/features/recipe_book/recipe_book_used_in_panel.dart", "surfaces": "Used-in title, related-result and ingredient artwork", "route": "RecipeBookItemIcon -> hover/pinned ItemReferenceCard"},
+    {"source": "lib/features/planner/planner_shared.dart", "surfaces": "Need First and Craft Queue acquisition windows", "route": "_IngredientAcquisitionCard -> ItemReferenceCard"},
+    {"source": "lib/features/opportunities/opportunities_workspace.dart", "surfaces": "Shared craft, Best use, inspection-title and ingredient artwork", "route": "_itemIcon -> RecipeBookItemInfoHover -> ItemReferenceCard"},
+    {"source": "lib/features/opportunities/opportunities_item_actions.dart", "surfaces": "Item info from context menus and explicitly opted-in icons", "route": "_showItemInfo -> ItemReferenceCard"},
+    {"source": "lib/features/opportunities/opportunity_exchange_items.dart", "surfaces": "Exact-ID currency/reward artwork previews and opened item windows", "route": "Passive RecipeBookItemInfoHover / OpportunityItemRegion -> ItemReferenceCard"},
+    {"source": "lib/features/opportunities/opportunity_exchange_items.dart", "surfaces": "Inline reference prose already inside exchange details", "route": "ItemReferenceSections retained without adding another window/header/scroll region"}
+  ],
+  "scope": "All shared item-reference windows and existing artwork previews; not a redesign of unrelated Inventory editors, map panels or other application dialogs.",
+  "verification": {
+    "evidence": "audit/consistent-item-windows-20261031 in the task workspace",
+    "captures": "work/visuals/consistent-item-windows in the task workspace",
+    "syntheticOnly": true,
+    "coverage": "Real app -> Planner -> Recipe Book -> nested Elixir of Detection hover/pin in every supported theme and 100%/200% text; live theme switching; passive custom-art facts; hover tab interaction; viewport, wheel limits and background offsets; copying, formula identity/activation and host navigation.",
+    "testMaintenance": "Replaced legacy-layout assertions with tab-aware checks and retained exact facts, quantities, artwork and actions. Six stale Opportunities-hover failures reproduced on the unchanged preceding snapshot; tests now use the existing explicit View recipe action instead of expecting the newer Craft or sell icon to open a dialog. No Opportunities navigation code was changed."
+  },
+  "preservation": "Complete Legacy Instance Handoff source snapshot and runnable preserved before edits. All native instance handling, shared Documents/writer lease/format/migration guards and previous changes are inherited unchanged. HEAD alone is not the candidate.",
+  "releaseStatus": "Separate test build only. No personal profile access, visible app launch, installed replacement, shortcut change, handoff or publication."
+}

@@ -21,11 +21,13 @@ void runBdoCraftPlanner({
   };
   runZonedGuarded(() {
     final applicationDirectory = Completer<Directory>();
+    Directory? runtimeDirectory;
     if (launchOptions.diagnosticDeferFishPrewarm) {
       // Startup already reports this error; deferred Fish may never await it.
       applicationDirectory.future.ignore();
     }
     final applicationFuture = const ApplicationBootstrapService().load(
+      onRuntimeDirectoryResolved: (directory) => runtimeDirectory = directory,
       onApplicationDirectoryResolved: (directory) {
         if (!applicationDirectory.isCompleted) {
           applicationDirectory.complete(directory);
@@ -50,6 +52,10 @@ void runBdoCraftPlanner({
     );
     final fishCompanionRuntimeHost = createApplicationFishCompanionRuntimeHost(
       applicationDirectory: () => applicationDirectory.future,
+      webViewDataDirectory: () async {
+        await applicationDirectory.future;
+        return Directory('${runtimeDirectory!.path}/webview2');
+      },
     );
     // Loading, migration, and first-run setup all mount Fish Map offstage so
     // it is ready when selected. Replace the initial no-op close handler

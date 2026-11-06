@@ -1,0 +1,36 @@
+{
+  "date": "2026-11-03",
+  "status": "IMPLEMENTED_AND_TESTED_REBUILD_PENDING",
+  "scope": "45 exact material source additions in the shared item-information projection; not all possible sources, probabilities or spawn locations.",
+  "source": "https://www.naeu.playblackdesert.com/en-US/Wiki?wikiNo=148",
+  "section": "Gathering Item Quantity Increase for Gathering / Affected Gathering Items",
+  "sourceRetrievedAt": "2026-11-03T07:04:50.555Z",
+  "sourceSha256": "fe066b8cb1bb2dea5ed29a4ab62df1cbc51cfd7f892171f374e30b7ec8da21f9",
+  "identityCorroboration": "Current PC metadata: exact normal item ID/name and nonempty collect resources. Shared IDs checked in all three modes. Historical collect-resource locations and props are not individually certified.",
+  "families": {
+    "planks": 15,
+    "meltedShards": 13,
+    "gems": 5,
+    "fibers": 4,
+    "hidesAndFeathers": 8
+  },
+  "behavior": "Add short chance-qualified source hints. Preserve existing market, node, processing and other facts; no new formulas, rates, eligibility, market requests, saved data or layout pattern.",
+  "excluded": "Caphras Tree Plank, Supreme Lightweight Plume, Supreme Tough Hide, four potion records and six processed cloth/fiber records still require independent contextual review. Do not promote collect-table interactable props to ordinary gathering drops.",
+  "verification": {
+    "tests": [
+      {
+        "file": "resumed-gathering-material-tests.jsonl",
+        "passed": 125
+      },
+      {
+        "file": "resumed-gathering-material-projection-tests.jsonl",
+        "passed": 1
+      },
+      {
+        "file": "resumed-gathering-material-layout-tests.jsonl",
+        "passed": 156
+      }
+    ],
+    "changedReferences": 45
+  }
+}

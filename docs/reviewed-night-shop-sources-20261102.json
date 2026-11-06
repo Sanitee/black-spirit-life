@@ -1,0 +1,33 @@
+{
+  "reviewedAt": "2026-11-02",
+  "scope": "Two exact item sources, not complete current Secret Shop roster certification",
+  "records": [
+    {
+      "id": 757010,
+      "name": "Mythical Feather",
+      "sourceDate": "2023-07-19",
+      "source": "https://blackdesert.pearlabyss.com/TR/en-US/News/Notice/Detail?_boardNo=17267",
+      "finding": "PC patch explicitly adds Mythical Feather to Patrigio, explains 22:00–07:00 in-game hours, variable Silver prices and 50 Energy per offer. Not a future announcement or temporary shop event."
+    },
+    {
+      "id": 820935,
+      "name": "Primordial Crystal",
+      "sourceDate": "2024-09-12",
+      "source": "https://www.naeu.playblackdesert.com/en-US/News/Detail?countryType=en-US&groupContentNo=7506",
+      "finding": "NA/EU PC Sovereign-material table explicitly lists Patrigio's Secret Shop as a source, separately from Morning Light world-boss rewards."
+    }
+  ],
+  "corroboration": [
+    "Exact item identities and Patrigio relationships remain in installed PC archives through 2026-10-31; relationships alone were not used to authorize additions.",
+    "Current NA/EU NPC Shops guide describes random night-only offers, energy per refresh and variable prices: https://www.naeu.playblackdesert.com/en-US/Wiki?wikiNo=17"
+  ],
+  "guards": [
+    "No fixed Silver price, automatic purchasing route, ordinary NPC availability badge or guaranteed stock added.",
+    "Temporary 25-Energy special-shop events are not permanent rules.",
+    "Previously removed items and unverified other shop links are not imported.",
+    "Existing sources remain; shared facts are tested across all three modes."
+  ],
+  "unresolved": [
+    "Complete current item roster and offer probabilities, including remaining historical native links, are not certified by this change."
+  ]
+}

@@ -1,0 +1,3481 @@
+{
+  "date": "2026-11-03T14:33:54.128Z",
+  "scope": "115 unambiguous exact native/exchange identities receive existing bundled Opportunities artwork in all three shared icon maps. No new image drawing/cropping, network fetch, market ID, calculation, source fact or saved-state change. Existing94 exchange identities already resolve across modes. Three Gold Bar Box IDs remain deliberately excluded from name-only grade inference.",
+  "nativeSha256": "a54b5735052c990e189ff1a50afb6d5442cc80e0ba8dabff995979bc8d35c821",
+  "beforeSha256": "0788628cb37dd0c23bd5c014afa6d8fd8f6d5580a2bd712a0cfc5067ba277447",
+  "afterSha256": "298a346a6157346ec8e42972b5fa7d6ba3dc418cd36513811c4c2e4ebe1680f0",
+  "afterByteCount": 31545105,
+  "addedEntries": [
+    {
+      "mode": "alchemy",
+      "name": "Main Weapon Exchange Coupon",
+      "id": 320009,
+      "grade": 3,
+      "source": "New_Icon/09_Cash/00018973.dds",
+      "asset": "assets/opportunities/items/320009.webp",
+      "sha256": "986e33c94c4689970b21b63b46eb28efb2ce8f0475b75ce8dffdfb843e28d38f",
+      "referenceSha256": "986e33c94c4689970b21b63b46eb28efb2ce8f0475b75ce8dffdfb843e28d38f"
+    },
+    {
+      "mode": "cooking",
+      "name": "Main Weapon Exchange Coupon",
+      "id": 320009,
+      "grade": 3,
+      "source": "New_Icon/09_Cash/00018973.dds",
+      "asset": "assets/opportunities/items/320009.webp",
+      "sha256": "986e33c94c4689970b21b63b46eb28efb2ce8f0475b75ce8dffdfb843e28d38f",
+      "referenceSha256": "986e33c94c4689970b21b63b46eb28efb2ce8f0475b75ce8dffdfb843e28d38f"
+    },
+    {
+      "mode": "processing",
+      "name": "Main Weapon Exchange Coupon",
+      "id": 320009,
+      "grade": 3,
+      "source": "New_Icon/09_Cash/00018973.dds",
+      "asset": "assets/opportunities/items/320009.webp",
+      "sha256": "986e33c94c4689970b21b63b46eb28efb2ce8f0475b75ce8dffdfb843e28d38f",
+      "referenceSha256": "986e33c94c4689970b21b63b46eb28efb2ce8f0475b75ce8dffdfb843e28d38f"
+    },
+    {
+      "mode": "alchemy",
+      "name": "Awakening Weapon Exchange Coupon",
+      "id": 320011,
+      "grade": 3,
+      "source": "New_Icon/09_Cash/00018949.dds",
+      "asset": "assets/opportunities/items/320011.webp",
+      "sha256": "00f69f1f98b4fcc762ab103f21d06078cf5e734747d35c2a3436155a1d51f8be",
+      "referenceSha256": "00f69f1f98b4fcc762ab103f21d06078cf5e734747d35c2a3436155a1d51f8be"
+    },
+    {
+      "mode": "cooking",
+      "name": "Awakening Weapon Exchange Coupon",
+      "id": 320011,
+      "grade": 3,
+      "source": "New_Icon/09_Cash/00018949.dds",
+      "asset": "assets/opportunities/items/320011.webp",
+      "sha256": "00f69f1f98b4fcc762ab103f21d06078cf5e734747d35c2a3436155a1d51f8be",
+      "referenceSha256": "00f69f1f98b4fcc762ab103f21d06078cf5e734747d35c2a3436155a1d51f8be"
+    },
+    {
+      "mode": "processing",
+      "name": "Awakening Weapon Exchange Coupon",
+      "id": 320011,
+      "grade": 3,
+      "source": "New_Icon/09_Cash/00018949.dds",
+      "asset": "assets/opportunities/items/320011.webp",
+      "sha256": "00f69f1f98b4fcc762ab103f21d06078cf5e734747d35c2a3436155a1d51f8be",
+      "referenceSha256": "00f69f1f98b4fcc762ab103f21d06078cf5e734747d35c2a3436155a1d51f8be"
+    },
+    {
+      "mode": "alchemy",
+      "name": "Sub-weapon Exchange Coupon",
+      "id": 320010,
+      "grade": 3,
+      "source": "New_Icon/09_Cash/00017987.dds",
+      "asset": "assets/opportunities/items/320010.webp",
+      "sha256": "f0a891857411f41a7bd47182d6c0a57522f88cd610621b17bbe1039a9c5dd665",
+      "referenceSha256": "f0a891857411f41a7bd47182d6c0a57522f88cd610621b17bbe1039a9c5dd665"
+    },
+    {
+      "mode": "cooking",
+      "name": "Sub-weapon Exchange Coupon",
+      "id": 320010,
+      "grade": 3,
+      "source": "New_Icon/09_Cash/00017987.dds",
+      "asset": "assets/opportunities/items/320010.webp",
+      "sha256": "f0a891857411f41a7bd47182d6c0a57522f88cd610621b17bbe1039a9c5dd665",
+      "referenceSha256": "f0a891857411f41a7bd47182d6c0a57522f88cd610621b17bbe1039a9c5dd665"
+    },
+    {
+      "mode": "processing",
+      "name": "Sub-weapon Exchange Coupon",
+      "id": 320010,
+      "grade": 3,
+      "source": "New_Icon/09_Cash/00017987.dds",
+      "asset": "assets/opportunities/items/320010.webp",
+      "sha256": "f0a891857411f41a7bd47182d6c0a57522f88cd610621b17bbe1039a9c5dd665",
+      "referenceSha256": "f0a891857411f41a7bd47182d6c0a57522f88cd610621b17bbe1039a9c5dd665"
+    },
+    {
+      "mode": "alchemy",
+      "name": "[Event] Enhancement Help Kit III",
+      "id": 45912,
+      "grade": 3,
+      "source": "New_Icon/03_ETC/00045912.dds",
+      "asset": "assets/opportunities/items/45912.webp",
+      "sha256": "95600a51878f869b6caa26c2a0df2b664a8bfed45666a3a5938b0e130b319de7",
+      "referenceSha256": "95600a51878f869b6caa26c2a0df2b664a8bfed45666a3a5938b0e130b319de7"
+    },
+    {
+      "mode": "cooking",
+      "name": "[Event] Enhancement Help Kit III",
+      "id": 45912,
+      "grade": 3,
+      "source": "New_Icon/03_ETC/00045912.dds",
+      "asset": "assets/opportunities/items/45912.webp",
+      "sha256": "95600a51878f869b6caa26c2a0df2b664a8bfed45666a3a5938b0e130b319de7",
+      "referenceSha256": "95600a51878f869b6caa26c2a0df2b664a8bfed45666a3a5938b0e130b319de7"
+    },
+    {
+      "mode": "processing",
+      "name": "[Event] Enhancement Help Kit III",
+      "id": 45912,
+      "grade": 3,
+      "source": "New_Icon/03_ETC/00045912.dds",
+      "asset": "assets/opportunities/items/45912.webp",
+      "sha256": "95600a51878f869b6caa26c2a0df2b664a8bfed45666a3a5938b0e130b319de7",
+      "referenceSha256": "95600a51878f869b6caa26c2a0df2b664a8bfed45666a3a5938b0e130b319de7"
+    },
+    {
+      "mode": "alchemy",
+      "name": "Chilling Fragment",
+      "id": 761018,
+      "grade": 3,
+      "source": "New_Icon/03_ETC/0000001_19.dds",
+      "asset": "assets/opportunities/items/761018.webp",
+      "sha256": "dd9f6bfa567ff8fd64e1e2f21cf3d44f36d75f347beb6cfe11da8886230245f8",
+      "referenceSha256": "dd9f6bfa567ff8fd64e1e2f21cf3d44f36d75f347beb6cfe11da8886230245f8"
+    },
+    {
+      "mode": "cooking",
+      "name": "Chilling Fragment",
+      "id": 761018,
+      "grade": 3,
+      "source": "New_Icon/03_ETC/0000001_19.dds",
+      "asset": "assets/opportunities/items/761018.webp",
+      "sha256": "dd9f6bfa567ff8fd64e1e2f21cf3d44f36d75f347beb6cfe11da8886230245f8",
+      "referenceSha256": "dd9f6bfa567ff8fd64e1e2f21cf3d44f36d75f347beb6cfe11da8886230245f8"
+    },
+    {
+      "mode": "processing",
+      "name": "Chilling Fragment",
+      "id": 761018,
+      "grade": 3,
+      "source": "New_Icon/03_ETC/0000001_19.dds",
+      "asset": "assets/opportunities/items/761018.webp",
+      "sha256": "dd9f6bfa567ff8fd64e1e2f21cf3d44f36d75f347beb6cfe11da8886230245f8",
+      "referenceSha256": "dd9f6bfa567ff8fd64e1e2f21cf3d44f36d75f347beb6cfe11da8886230245f8"
+    },
+    {
+      "mode": "alchemy",
+      "name": "Resplendent Lightstone of Fire",
+      "id": 59858,
+      "grade": 3,
+      "source": "New_Icon/03_ETC/00766005.dds",
+      "asset": "assets/opportunities/items/59858.webp",
+      "sha256": "2dfbfe80d93f316f1d4223dec313b0cdfe3cac0323391aacd83bf23974e502c4",
+      "referenceSha256": "2dfbfe80d93f316f1d4223dec313b0cdfe3cac0323391aacd83bf23974e502c4"
+    },
+    {
+      "mode": "cooking",
+      "name": "Resplendent Lightstone of Fire",
+      "id": 59858,
+      "grade": 3,
+      "source": "New_Icon/03_ETC/00766005.dds",
+      "asset": "assets/opportunities/items/59858.webp",
+      "sha256": "2dfbfe80d93f316f1d4223dec313b0cdfe3cac0323391aacd83bf23974e502c4",
+      "referenceSha256": "2dfbfe80d93f316f1d4223dec313b0cdfe3cac0323391aacd83bf23974e502c4"
+    },
+    {
+      "mode": "processing",
+      "name": "Resplendent Lightstone of Fire",
+      "id": 59858,
+      "grade": 3,
+      "source": "New_Icon/03_ETC/00766005.dds",
+      "asset": "assets/opportunities/items/59858.webp",
+      "sha256": "2dfbfe80d93f316f1d4223dec313b0cdfe3cac0323391aacd83bf23974e502c4",
+      "referenceSha256": "2dfbfe80d93f316f1d4223dec313b0cdfe3cac0323391aacd83bf23974e502c4"
+    },
+    {
+      "mode": "alchemy",
+      "name": "Resplendent Lightstone of Earth",
+      "id": 59859,
+      "grade": 3,
+      "source": "New_Icon/03_ETC/00766025.dds",
+      "asset": "assets/opportunities/items/59859.webp",
+      "sha256": "1f0faca7b6482dc5ddaca6565a723b40b3dc79c417fef7e0ffcfa10c218b8ecb",
+      "referenceSha256": "1f0faca7b6482dc5ddaca6565a723b40b3dc79c417fef7e0ffcfa10c218b8ecb"
+    },
+    {
+      "mode": "cooking",
+      "name": "Resplendent Lightstone of Earth",
+      "id": 59859,
+      "grade": 3,
+      "source": "New_Icon/03_ETC/00766025.dds",
+      "asset": "assets/opportunities/items/59859.webp",
+      "sha256": "1f0faca7b6482dc5ddaca6565a723b40b3dc79c417fef7e0ffcfa10c218b8ecb",
+      "referenceSha256": "1f0faca7b6482dc5ddaca6565a723b40b3dc79c417fef7e0ffcfa10c218b8ecb"
+    },
+    {
+      "mode": "processing",
+      "name": "Resplendent Lightstone of Earth",
+      "id": 59859,
+      "grade": 3,
+      "source": "New_Icon/03_ETC/00766025.dds",
+      "asset": "assets/opportunities/items/59859.webp",
+      "sha256": "1f0faca7b6482dc5ddaca6565a723b40b3dc79c417fef7e0ffcfa10c218b8ecb",
+      "referenceSha256": "1f0faca7b6482dc5ddaca6565a723b40b3dc79c417fef7e0ffcfa10c218b8ecb"
+    },
+    {
+      "mode": "alchemy",
+      "name": "Resplendent Lightstone of Wind",
+      "id": 59860,
+      "grade": 3,
+      "source": "New_Icon/03_ETC/00766035.dds",
+      "asset": "assets/opportunities/items/59860.webp",
+      "sha256": "ae56b276b68e8e25196e59291f902835886fbf9865ea63ccc7de8ed2370869ab",
+      "referenceSha256": "ae56b276b68e8e25196e59291f902835886fbf9865ea63ccc7de8ed2370869ab"
+    },
+    {
+      "mode": "cooking",
+      "name": "Resplendent Lightstone of Wind",
+      "id": 59860,
+      "grade": 3,
+      "source": "New_Icon/03_ETC/00766035.dds",
+      "asset": "assets/opportunities/items/59860.webp",
+      "sha256": "ae56b276b68e8e25196e59291f902835886fbf9865ea63ccc7de8ed2370869ab",
+      "referenceSha256": "ae56b276b68e8e25196e59291f902835886fbf9865ea63ccc7de8ed2370869ab"
+    },
+    {
+      "mode": "processing",
+      "name": "Resplendent Lightstone of Wind",
+      "id": 59860,
+      "grade": 3,
+      "source": "New_Icon/03_ETC/00766035.dds",
+      "asset": "assets/opportunities/items/59860.webp",
+      "sha256": "ae56b276b68e8e25196e59291f902835886fbf9865ea63ccc7de8ed2370869ab",
+      "referenceSha256": "ae56b276b68e8e25196e59291f902835886fbf9865ea63ccc7de8ed2370869ab"
+    },
+    {
+      "mode": "alchemy",
+      "name": "Marni's Unstable Fuel",
+      "id": 45026,
+      "grade": 3,
+      "source": "New_Icon/03_ETC/00045026.dds",
+      "asset": "assets/opportunities/items/45026.webp",
+      "sha256": "faa1cd895e9864cf91cefb157aef4ac65ded87fa330c7767c0c05e74a720ac9b",
+      "referenceSha256": "faa1cd895e9864cf91cefb157aef4ac65ded87fa330c7767c0c05e74a720ac9b"
+    },
+    {
+      "mode": "cooking",
+      "name": "Marni's Unstable Fuel",
+      "id": 45026,
+      "grade": 3,
+      "source": "New_Icon/03_ETC/00045026.dds",
+      "asset": "assets/opportunities/items/45026.webp",
+      "sha256": "faa1cd895e9864cf91cefb157aef4ac65ded87fa330c7767c0c05e74a720ac9b",
+      "referenceSha256": "faa1cd895e9864cf91cefb157aef4ac65ded87fa330c7767c0c05e74a720ac9b"
+    },
+    {
+      "mode": "processing",
+      "name": "Marni's Unstable Fuel",
+      "id": 45026,
+      "grade": 3,
+      "source": "New_Icon/03_ETC/00045026.dds",
+      "asset": "assets/opportunities/items/45026.webp",
+      "sha256": "faa1cd895e9864cf91cefb157aef4ac65ded87fa330c7767c0c05e74a720ac9b",
+      "referenceSha256": "faa1cd895e9864cf91cefb157aef4ac65ded87fa330c7767c0c05e74a720ac9b"
+    },
+    {
+      "mode": "alchemy",
+      "name": "Millennial Wild Ginseng",
+      "id": 820152,
+      "grade": 4,
+      "source": "New_Icon/03_ETC/07_ProductMaterial/00820152.dds",
+      "asset": "assets/opportunities/items/820152.webp",
+      "sha256": "920a91ddbb8bb5b01007f0c19f23186c8842b6f105c6718a950edb90285f07da",
+      "referenceSha256": "920a91ddbb8bb5b01007f0c19f23186c8842b6f105c6718a950edb90285f07da"
+    },
+    {
+      "mode": "cooking",
+      "name": "Millennial Wild Ginseng",
+      "id": 820152,
+      "grade": 4,
+      "source": "New_Icon/03_ETC/07_ProductMaterial/00820152.dds",
+      "asset": "assets/opportunities/items/820152.webp",
+      "sha256": "920a91ddbb8bb5b01007f0c19f23186c8842b6f105c6718a950edb90285f07da",
+      "referenceSha256": "920a91ddbb8bb5b01007f0c19f23186c8842b6f105c6718a950edb90285f07da"
+    },
+    {
+      "mode": "processing",
+      "name": "Millennial Wild Ginseng",
+      "id": 820152,
+      "grade": 4,
+      "source": "New_Icon/03_ETC/07_ProductMaterial/00820152.dds",
+      "asset": "assets/opportunities/items/820152.webp",
+      "sha256": "920a91ddbb8bb5b01007f0c19f23186c8842b6f105c6718a950edb90285f07da",
+      "referenceSha256": "920a91ddbb8bb5b01007f0c19f23186c8842b6f105c6718a950edb90285f07da"
+    },
+    {
+      "mode": "alchemy",
+      "name": "[Event] Manos Accessory Box",
+      "id": 752825,
+      "grade": 3,
+      "source": "New_Icon/03_ETC/00752825.dds",
+      "asset": "assets/opportunities/items/752825.webp",
+      "sha256": "51d31b91ec550fcfe652d0d8d059f693e709c329779904fd51e48ac0f51f5ec2",
+      "referenceSha256": "51d31b91ec550fcfe652d0d8d059f693e709c329779904fd51e48ac0f51f5ec2"
+    },
+    {
+      "mode": "cooking",
+      "name": "[Event] Manos Accessory Box",
+      "id": 752825,
+      "grade": 3,
+      "source": "New_Icon/03_ETC/00752825.dds",
+      "asset": "assets/opportunities/items/752825.webp",
+      "sha256": "51d31b91ec550fcfe652d0d8d059f693e709c329779904fd51e48ac0f51f5ec2",
+      "referenceSha256": "51d31b91ec550fcfe652d0d8d059f693e709c329779904fd51e48ac0f51f5ec2"
+    },
+    {
+      "mode": "processing",
+      "name": "[Event] Manos Accessory Box",
+      "id": 752825,
+      "grade": 3,
+      "source": "New_Icon/03_ETC/00752825.dds",
+      "asset": "assets/opportunities/items/752825.webp",
+      "sha256": "51d31b91ec550fcfe652d0d8d059f693e709c329779904fd51e48ac0f51f5ec2",
+      "referenceSha256": "51d31b91ec550fcfe652d0d8d059f693e709c329779904fd51e48ac0f51f5ec2"
+    },
+    {
+      "mode": "alchemy",
+      "name": "Mythical Feather",
+      "id": 757010,
+      "grade": 3,
+      "source": "New_Icon/03_ETC/00757010.dds",
+      "asset": "assets/opportunities/items/757010.webp",
+      "sha256": "53d2bc07149c084e882eb2aa07df27e9a49d2235255c0e477e205d0e2fe4453a",
+      "referenceSha256": "53d2bc07149c084e882eb2aa07df27e9a49d2235255c0e477e205d0e2fe4453a"
+    },
+    {
+      "mode": "cooking",
+      "name": "Mythical Feather",
+      "id": 757010,
+      "grade": 3,
+      "source": "New_Icon/03_ETC/00757010.dds",
+      "asset": "assets/opportunities/items/757010.webp",
+      "sha256": "53d2bc07149c084e882eb2aa07df27e9a49d2235255c0e477e205d0e2fe4453a",
+      "referenceSha256": "53d2bc07149c084e882eb2aa07df27e9a49d2235255c0e477e205d0e2fe4453a"
+    },
+    {
+      "mode": "processing",
+      "name": "Mythical Feather",
+      "id": 757010,
+      "grade": 3,
+      "source": "New_Icon/03_ETC/00757010.dds",
+      "asset": "assets/opportunities/items/757010.webp",
+      "sha256": "53d2bc07149c084e882eb2aa07df27e9a49d2235255c0e477e205d0e2fe4453a",
+      "referenceSha256": "53d2bc07149c084e882eb2aa07df27e9a49d2235255c0e477e205d0e2fe4453a"
+    },
+    {
+      "mode": "alchemy",
+      "name": "Resplendent Lightstone of Flora",
+      "id": 59861,
+      "grade": 3,
+      "source": "New_Icon/03_ETC/00766015.dds",
+      "asset": "assets/opportunities/items/59861.webp",
+      "sha256": "7ec22b9e9bea2a2ba28e0583d3a49e485f23ee751571cab3e88089b551a4cd0d",
+      "referenceSha256": "7ec22b9e9bea2a2ba28e0583d3a49e485f23ee751571cab3e88089b551a4cd0d"
+    },
+    {
+      "mode": "cooking",
+      "name": "Resplendent Lightstone of Flora",
+      "id": 59861,
+      "grade": 3,
+      "source": "New_Icon/03_ETC/00766015.dds",
+      "asset": "assets/opportunities/items/59861.webp",
+      "sha256": "7ec22b9e9bea2a2ba28e0583d3a49e485f23ee751571cab3e88089b551a4cd0d",
+      "referenceSha256": "7ec22b9e9bea2a2ba28e0583d3a49e485f23ee751571cab3e88089b551a4cd0d"
+    },
+    {
+      "mode": "processing",
+      "name": "Resplendent Lightstone of Flora",
+      "id": 59861,
+      "grade": 3,
+      "source": "New_Icon/03_ETC/00766015.dds",
+      "asset": "assets/opportunities/items/59861.webp",
+      "sha256": "7ec22b9e9bea2a2ba28e0583d3a49e485f23ee751571cab3e88089b551a4cd0d",
+      "referenceSha256": "7ec22b9e9bea2a2ba28e0583d3a49e485f23ee751571cab3e88089b551a4cd0d"
+    },
+    {
+      "mode": "alchemy",
+      "name": "Brilliant Crimson Fire Flower",
+      "id": 50815,
+      "grade": 2,
+      "source": "New_Icon/03_ETC/09_PetItem/00050815.dds",
+      "asset": "assets/opportunities/items/50815.webp",
+      "sha256": "315f0f77845a3c1936b47d45878389ac279c3e66d2bbfe3131bf8a5737f5a38d",
+      "referenceSha256": "315f0f77845a3c1936b47d45878389ac279c3e66d2bbfe3131bf8a5737f5a38d"
+    },
+    {
+      "mode": "cooking",
+      "name": "Brilliant Crimson Fire Flower",
+      "id": 50815,
+      "grade": 2,
+      "source": "New_Icon/03_ETC/09_PetItem/00050815.dds",
+      "asset": "assets/opportunities/items/50815.webp",
+      "sha256": "315f0f77845a3c1936b47d45878389ac279c3e66d2bbfe3131bf8a5737f5a38d",
+      "referenceSha256": "315f0f77845a3c1936b47d45878389ac279c3e66d2bbfe3131bf8a5737f5a38d"
+    },
+    {
+      "mode": "processing",
+      "name": "Brilliant Crimson Fire Flower",
+      "id": 50815,
+      "grade": 2,
+      "source": "New_Icon/03_ETC/09_PetItem/00050815.dds",
+      "asset": "assets/opportunities/items/50815.webp",
+      "sha256": "315f0f77845a3c1936b47d45878389ac279c3e66d2bbfe3131bf8a5737f5a38d",
+      "referenceSha256": "315f0f77845a3c1936b47d45878389ac279c3e66d2bbfe3131bf8a5737f5a38d"
+    },
+    {
+      "mode": "alchemy",
+      "name": "Fruit of Yianaros",
+      "id": 50816,
+      "grade": 2,
+      "source": "New_Icon/03_ETC/09_PetItem/00050816.dds",
+      "asset": "assets/opportunities/items/50816.webp",
+      "sha256": "f721693cc44e7a82c37eb7f25774adf647466f4d557c59d70aca9fc2b34cd47a",
+      "referenceSha256": "f721693cc44e7a82c37eb7f25774adf647466f4d557c59d70aca9fc2b34cd47a"
+    },
+    {
+      "mode": "cooking",
+      "name": "Fruit of Yianaros",
+      "id": 50816,
+      "grade": 2,
+      "source": "New_Icon/03_ETC/09_PetItem/00050816.dds",
+      "asset": "assets/opportunities/items/50816.webp",
+      "sha256": "f721693cc44e7a82c37eb7f25774adf647466f4d557c59d70aca9fc2b34cd47a",
+      "referenceSha256": "f721693cc44e7a82c37eb7f25774adf647466f4d557c59d70aca9fc2b34cd47a"
+    },
+    {
+      "mode": "processing",
+      "name": "Fruit of Yianaros",
+      "id": 50816,
+      "grade": 2,
+      "source": "New_Icon/03_ETC/09_PetItem/00050816.dds",
+      "asset": "assets/opportunities/items/50816.webp",
+      "sha256": "f721693cc44e7a82c37eb7f25774adf647466f4d557c59d70aca9fc2b34cd47a",
+      "referenceSha256": "f721693cc44e7a82c37eb7f25774adf647466f4d557c59d70aca9fc2b34cd47a"
+    },
+    {
+      "mode": "alchemy",
+      "name": "Mysterious Blue Conch",
+      "id": 50817,
+      "grade": 2,
+      "source": "New_Icon/03_ETC/09_PetItem/00050817.dds",
+      "asset": "assets/opportunities/items/50817.webp",
+      "sha256": "10be60309126c454b08b7a5bb70fd07893e949045580cba7517a00e1f1be6157",
+      "referenceSha256": "10be60309126c454b08b7a5bb70fd07893e949045580cba7517a00e1f1be6157"
+    },
+    {
+      "mode": "cooking",
+      "name": "Mysterious Blue Conch",
+      "id": 50817,
+      "grade": 2,
+      "source": "New_Icon/03_ETC/09_PetItem/00050817.dds",
+      "asset": "assets/opportunities/items/50817.webp",
+      "sha256": "10be60309126c454b08b7a5bb70fd07893e949045580cba7517a00e1f1be6157",
+      "referenceSha256": "10be60309126c454b08b7a5bb70fd07893e949045580cba7517a00e1f1be6157"
+    },
+    {
+      "mode": "processing",
+      "name": "Mysterious Blue Conch",
+      "id": 50817,
+      "grade": 2,
+      "source": "New_Icon/03_ETC/09_PetItem/00050817.dds",
+      "asset": "assets/opportunities/items/50817.webp",
+      "sha256": "10be60309126c454b08b7a5bb70fd07893e949045580cba7517a00e1f1be6157",
+      "referenceSha256": "10be60309126c454b08b7a5bb70fd07893e949045580cba7517a00e1f1be6157"
+    },
+    {
+      "mode": "alchemy",
+      "name": "Secret Scroll of Pure Equilibrium",
+      "id": 607185,
+      "grade": 3,
+      "source": "New_Icon/03_ETC/00752164.dds",
+      "asset": "assets/opportunities/items/607185.webp",
+      "sha256": "35f20affe3e91031c890f5e37f9027bda8fb8869a827303b488521b2a1c8b5f4",
+      "referenceSha256": "35f20affe3e91031c890f5e37f9027bda8fb8869a827303b488521b2a1c8b5f4"
+    },
+    {
+      "mode": "cooking",
+      "name": "Secret Scroll of Pure Equilibrium",
+      "id": 607185,
+      "grade": 3,
+      "source": "New_Icon/03_ETC/00752164.dds",
+      "asset": "assets/opportunities/items/607185.webp",
+      "sha256": "35f20affe3e91031c890f5e37f9027bda8fb8869a827303b488521b2a1c8b5f4",
+      "referenceSha256": "35f20affe3e91031c890f5e37f9027bda8fb8869a827303b488521b2a1c8b5f4"
+    },
+    {
+      "mode": "processing",
+      "name": "Secret Scroll of Pure Equilibrium",
+      "id": 607185,
+      "grade": 3,
+      "source": "New_Icon/03_ETC/00752164.dds",
+      "asset": "assets/opportunities/items/607185.webp",
+      "sha256": "35f20affe3e91031c890f5e37f9027bda8fb8869a827303b488521b2a1c8b5f4",
+      "referenceSha256": "35f20affe3e91031c890f5e37f9027bda8fb8869a827303b488521b2a1c8b5f4"
+    },
+    {
+      "mode": "alchemy",
+      "name": "Advice of Valks (+350)",
+      "id": 289250,
+      "grade": 3,
+      "source": "New_Icon/03_ETC/15_Advice/00000350_11.dds",
+      "asset": "assets/opportunities/items/289250.webp",
+      "sha256": "19922fb1d17f612a31efc5fe6f048b82f6bb96670642364703cbdc6b9b10922b",
+      "referenceSha256": "19922fb1d17f612a31efc5fe6f048b82f6bb96670642364703cbdc6b9b10922b"
+    },
+    {
+      "mode": "cooking",
+      "name": "Advice of Valks (+350)",
+      "id": 289250,
+      "grade": 3,
+      "source": "New_Icon/03_ETC/15_Advice/00000350_11.dds",
+      "asset": "assets/opportunities/items/289250.webp",
+      "sha256": "19922fb1d17f612a31efc5fe6f048b82f6bb96670642364703cbdc6b9b10922b",
+      "referenceSha256": "19922fb1d17f612a31efc5fe6f048b82f6bb96670642364703cbdc6b9b10922b"
+    },
+    {
+      "mode": "processing",
+      "name": "Advice of Valks (+350)",
+      "id": 289250,
+      "grade": 3,
+      "source": "New_Icon/03_ETC/15_Advice/00000350_11.dds",
+      "asset": "assets/opportunities/items/289250.webp",
+      "sha256": "19922fb1d17f612a31efc5fe6f048b82f6bb96670642364703cbdc6b9b10922b",
+      "referenceSha256": "19922fb1d17f612a31efc5fe6f048b82f6bb96670642364703cbdc6b9b10922b"
+    },
+    {
+      "mode": "alchemy",
+      "name": "Advice of Valks (+300)",
+      "id": 289200,
+      "grade": 3,
+      "source": "New_Icon/03_ETC/15_Advice/00000300_11.dds",
+      "asset": "assets/opportunities/items/289200.webp",
+      "sha256": "9a1578b2ed5d49e6ae2dc663c63070be035cccc57a392ded95b0284e6ec90cac",
+      "referenceSha256": "9a1578b2ed5d49e6ae2dc663c63070be035cccc57a392ded95b0284e6ec90cac"
+    },
+    {
+      "mode": "cooking",
+      "name": "Advice of Valks (+300)",
+      "id": 289200,
+      "grade": 3,
+      "source": "New_Icon/03_ETC/15_Advice/00000300_11.dds",
+      "asset": "assets/opportunities/items/289200.webp",
+      "sha256": "9a1578b2ed5d49e6ae2dc663c63070be035cccc57a392ded95b0284e6ec90cac",
+      "referenceSha256": "9a1578b2ed5d49e6ae2dc663c63070be035cccc57a392ded95b0284e6ec90cac"
+    },
+    {
+      "mode": "processing",
+      "name": "Advice of Valks (+300)",
+      "id": 289200,
+      "grade": 3,
+      "source": "New_Icon/03_ETC/15_Advice/00000300_11.dds",
+      "asset": "assets/opportunities/items/289200.webp",
+      "sha256": "9a1578b2ed5d49e6ae2dc663c63070be035cccc57a392ded95b0284e6ec90cac",
+      "referenceSha256": "9a1578b2ed5d49e6ae2dc663c63070be035cccc57a392ded95b0284e6ec90cac"
+    },
+    {
+      "mode": "alchemy",
+      "name": "Advice of Valks (+250)",
+      "id": 289150,
+      "grade": 3,
+      "source": "New_Icon/03_ETC/15_Advice/00000250_11.dds",
+      "asset": "assets/opportunities/items/289150.webp",
+      "sha256": "c9933e77a5b19b50211f161e8cc7fe93c7fcbb088a642c13fb0c7d27a71bf463",
+      "referenceSha256": "c9933e77a5b19b50211f161e8cc7fe93c7fcbb088a642c13fb0c7d27a71bf463"
+    },
+    {
+      "mode": "cooking",
+      "name": "Advice of Valks (+250)",
+      "id": 289150,
+      "grade": 3,
+      "source": "New_Icon/03_ETC/15_Advice/00000250_11.dds",
+      "asset": "assets/opportunities/items/289150.webp",
+      "sha256": "c9933e77a5b19b50211f161e8cc7fe93c7fcbb088a642c13fb0c7d27a71bf463",
+      "referenceSha256": "c9933e77a5b19b50211f161e8cc7fe93c7fcbb088a642c13fb0c7d27a71bf463"
+    },
+    {
+      "mode": "processing",
+      "name": "Advice of Valks (+250)",
+      "id": 289150,
+      "grade": 3,
+      "source": "New_Icon/03_ETC/15_Advice/00000250_11.dds",
+      "asset": "assets/opportunities/items/289150.webp",
+      "sha256": "c9933e77a5b19b50211f161e8cc7fe93c7fcbb088a642c13fb0c7d27a71bf463",
+      "referenceSha256": "c9933e77a5b19b50211f161e8cc7fe93c7fcbb088a642c13fb0c7d27a71bf463"
+    },
+    {
+      "mode": "alchemy",
+      "name": "[Title] Field Master",
+      "id": 1000509,
+      "grade": 2,
+      "source": "New_Icon/09_Cash/00054701.dds",
+      "asset": "assets/opportunities/items/1000509.webp",
+      "sha256": "99f3e5a8749658b02281f0481d10505479855d29eaa526dfcaba516d9d7928ec",
+      "referenceSha256": "99f3e5a8749658b02281f0481d10505479855d29eaa526dfcaba516d9d7928ec"
+    },
+    {
+      "mode": "cooking",
+      "name": "[Title] Field Master",
+      "id": 1000509,
+      "grade": 2,
+      "source": "New_Icon/09_Cash/00054701.dds",
+      "asset": "assets/opportunities/items/1000509.webp",
+      "sha256": "99f3e5a8749658b02281f0481d10505479855d29eaa526dfcaba516d9d7928ec",
+      "referenceSha256": "99f3e5a8749658b02281f0481d10505479855d29eaa526dfcaba516d9d7928ec"
+    },
+    {
+      "mode": "processing",
+      "name": "[Title] Field Master",
+      "id": 1000509,
+      "grade": 2,
+      "source": "New_Icon/09_Cash/00054701.dds",
+      "asset": "assets/opportunities/items/1000509.webp",
+      "sha256": "99f3e5a8749658b02281f0481d10505479855d29eaa526dfcaba516d9d7928ec",
+      "referenceSha256": "99f3e5a8749658b02281f0481d10505479855d29eaa526dfcaba516d9d7928ec"
+    },
+    {
+      "mode": "alchemy",
+      "name": "[Title] Flame Tower",
+      "id": 1000510,
+      "grade": 2,
+      "source": "New_Icon/09_Cash/00054701.dds",
+      "asset": "assets/opportunities/items/1000510.webp",
+      "sha256": "99f3e5a8749658b02281f0481d10505479855d29eaa526dfcaba516d9d7928ec",
+      "referenceSha256": "99f3e5a8749658b02281f0481d10505479855d29eaa526dfcaba516d9d7928ec"
+    },
+    {
+      "mode": "cooking",
+      "name": "[Title] Flame Tower",
+      "id": 1000510,
+      "grade": 2,
+      "source": "New_Icon/09_Cash/00054701.dds",
+      "asset": "assets/opportunities/items/1000510.webp",
+      "sha256": "99f3e5a8749658b02281f0481d10505479855d29eaa526dfcaba516d9d7928ec",
+      "referenceSha256": "99f3e5a8749658b02281f0481d10505479855d29eaa526dfcaba516d9d7928ec"
+    },
+    {
+      "mode": "processing",
+      "name": "[Title] Flame Tower",
+      "id": 1000510,
+      "grade": 2,
+      "source": "New_Icon/09_Cash/00054701.dds",
+      "asset": "assets/opportunities/items/1000510.webp",
+      "sha256": "99f3e5a8749658b02281f0481d10505479855d29eaa526dfcaba516d9d7928ec",
+      "referenceSha256": "99f3e5a8749658b02281f0481d10505479855d29eaa526dfcaba516d9d7928ec"
+    },
+    {
+      "mode": "alchemy",
+      "name": "[Title] Hwacha",
+      "id": 1000511,
+      "grade": 2,
+      "source": "New_Icon/09_Cash/00054701.dds",
+      "asset": "assets/opportunities/items/1000511.webp",
+      "sha256": "99f3e5a8749658b02281f0481d10505479855d29eaa526dfcaba516d9d7928ec",
+      "referenceSha256": "99f3e5a8749658b02281f0481d10505479855d29eaa526dfcaba516d9d7928ec"
+    },
+    {
+      "mode": "cooking",
+      "name": "[Title] Hwacha",
+      "id": 1000511,
+      "grade": 2,
+      "source": "New_Icon/09_Cash/00054701.dds",
+      "asset": "assets/opportunities/items/1000511.webp",
+      "sha256": "99f3e5a8749658b02281f0481d10505479855d29eaa526dfcaba516d9d7928ec",
+      "referenceSha256": "99f3e5a8749658b02281f0481d10505479855d29eaa526dfcaba516d9d7928ec"
+    },
+    {
+      "mode": "processing",
+      "name": "[Title] Hwacha",
+      "id": 1000511,
+      "grade": 2,
+      "source": "New_Icon/09_Cash/00054701.dds",
+      "asset": "assets/opportunities/items/1000511.webp",
+      "sha256": "99f3e5a8749658b02281f0481d10505479855d29eaa526dfcaba516d9d7928ec",
+      "referenceSha256": "99f3e5a8749658b02281f0481d10505479855d29eaa526dfcaba516d9d7928ec"
+    },
+    {
+      "mode": "alchemy",
+      "name": "[Title] Cannoneer",
+      "id": 1000512,
+      "grade": 2,
+      "source": "New_Icon/09_Cash/00054701.dds",
+      "asset": "assets/opportunities/items/1000512.webp",
+      "sha256": "99f3e5a8749658b02281f0481d10505479855d29eaa526dfcaba516d9d7928ec",
+      "referenceSha256": "99f3e5a8749658b02281f0481d10505479855d29eaa526dfcaba516d9d7928ec"
+    },
+    {
+      "mode": "cooking",
+      "name": "[Title] Cannoneer",
+      "id": 1000512,
+      "grade": 2,
+      "source": "New_Icon/09_Cash/00054701.dds",
+      "asset": "assets/opportunities/items/1000512.webp",
+      "sha256": "99f3e5a8749658b02281f0481d10505479855d29eaa526dfcaba516d9d7928ec",
+      "referenceSha256": "99f3e5a8749658b02281f0481d10505479855d29eaa526dfcaba516d9d7928ec"
+    },
+    {
+      "mode": "processing",
+      "name": "[Title] Cannoneer",
+      "id": 1000512,
+      "grade": 2,
+      "source": "New_Icon/09_Cash/00054701.dds",
+      "asset": "assets/opportunities/items/1000512.webp",
+      "sha256": "99f3e5a8749658b02281f0481d10505479855d29eaa526dfcaba516d9d7928ec",
+      "referenceSha256": "99f3e5a8749658b02281f0481d10505479855d29eaa526dfcaba516d9d7928ec"
+    },
+    {
+      "mode": "alchemy",
+      "name": "[Title] Strike Force",
+      "id": 1000513,
+      "grade": 2,
+      "source": "New_Icon/09_Cash/00054701.dds",
+      "asset": "assets/opportunities/items/1000513.webp",
+      "sha256": "99f3e5a8749658b02281f0481d10505479855d29eaa526dfcaba516d9d7928ec",
+      "referenceSha256": "99f3e5a8749658b02281f0481d10505479855d29eaa526dfcaba516d9d7928ec"
+    },
+    {
+      "mode": "cooking",
+      "name": "[Title] Strike Force",
+      "id": 1000513,
+      "grade": 2,
+      "source": "New_Icon/09_Cash/00054701.dds",
+      "asset": "assets/opportunities/items/1000513.webp",
+      "sha256": "99f3e5a8749658b02281f0481d10505479855d29eaa526dfcaba516d9d7928ec",
+      "referenceSha256": "99f3e5a8749658b02281f0481d10505479855d29eaa526dfcaba516d9d7928ec"
+    },
+    {
+      "mode": "processing",
+      "name": "[Title] Strike Force",
+      "id": 1000513,
+      "grade": 2,
+      "source": "New_Icon/09_Cash/00054701.dds",
+      "asset": "assets/opportunities/items/1000513.webp",
+      "sha256": "99f3e5a8749658b02281f0481d10505479855d29eaa526dfcaba516d9d7928ec",
+      "referenceSha256": "99f3e5a8749658b02281f0481d10505479855d29eaa526dfcaba516d9d7928ec"
+    },
+    {
+      "mode": "alchemy",
+      "name": "Morning's Gratitude Token",
+      "id": 761321,
+      "grade": 1,
+      "source": "New_Icon/03_ETC/00016024.dds",
+      "asset": "assets/opportunities/items/761321.webp",
+      "sha256": "3afad5fdd40e54c2f2fad658a329ed15aaea76e02587a3d74d6f0d513b2663c2",
+      "referenceSha256": "3afad5fdd40e54c2f2fad658a329ed15aaea76e02587a3d74d6f0d513b2663c2"
+    },
+    {
+      "mode": "cooking",
+      "name": "Morning's Gratitude Token",
+      "id": 761321,
+      "grade": 1,
+      "source": "New_Icon/03_ETC/00016024.dds",
+      "asset": "assets/opportunities/items/761321.webp",
+      "sha256": "3afad5fdd40e54c2f2fad658a329ed15aaea76e02587a3d74d6f0d513b2663c2",
+      "referenceSha256": "3afad5fdd40e54c2f2fad658a329ed15aaea76e02587a3d74d6f0d513b2663c2"
+    },
+    {
+      "mode": "processing",
+      "name": "Morning's Gratitude Token",
+      "id": 761321,
+      "grade": 1,
+      "source": "New_Icon/03_ETC/00016024.dds",
+      "asset": "assets/opportunities/items/761321.webp",
+      "sha256": "3afad5fdd40e54c2f2fad658a329ed15aaea76e02587a3d74d6f0d513b2663c2",
+      "referenceSha256": "3afad5fdd40e54c2f2fad658a329ed15aaea76e02587a3d74d6f0d513b2663c2"
+    },
+    {
+      "mode": "alchemy",
+      "name": "Seal of Solare",
+      "id": 65396,
+      "grade": 3,
+      "source": "New_Icon/03_ETC/00752378.dds",
+      "asset": "assets/opportunities/items/65396.webp",
+      "sha256": "875ff01d3dfe020500266a371796d3d060f3d98ae7018bddd60f54944ad943d0",
+      "referenceSha256": "875ff01d3dfe020500266a371796d3d060f3d98ae7018bddd60f54944ad943d0"
+    },
+    {
+      "mode": "cooking",
+      "name": "Seal of Solare",
+      "id": 65396,
+      "grade": 3,
+      "source": "New_Icon/03_ETC/00752378.dds",
+      "asset": "assets/opportunities/items/65396.webp",
+      "sha256": "875ff01d3dfe020500266a371796d3d060f3d98ae7018bddd60f54944ad943d0",
+      "referenceSha256": "875ff01d3dfe020500266a371796d3d060f3d98ae7018bddd60f54944ad943d0"
+    },
+    {
+      "mode": "processing",
+      "name": "Seal of Solare",
+      "id": 65396,
+      "grade": 3,
+      "source": "New_Icon/03_ETC/00752378.dds",
+      "asset": "assets/opportunities/items/65396.webp",
+      "sha256": "875ff01d3dfe020500266a371796d3d060f3d98ae7018bddd60f54944ad943d0",
+      "referenceSha256": "875ff01d3dfe020500266a371796d3d060f3d98ae7018bddd60f54944ad943d0"
+    },
+    {
+      "mode": "alchemy",
+      "name": "Energy of Lakiaro",
+      "id": 42497,
+      "grade": 3,
+      "source": "New_Icon/03_ETC/03_Quest_Item/00042497.dds",
+      "asset": "assets/opportunities/items/42497.webp",
+      "sha256": "03cb15e8ced6586aea060114bb023ef463781aedfb7ca849f73395b60d24b93a",
+      "referenceSha256": "03cb15e8ced6586aea060114bb023ef463781aedfb7ca849f73395b60d24b93a"
+    },
+    {
+      "mode": "cooking",
+      "name": "Energy of Lakiaro",
+      "id": 42497,
+      "grade": 3,
+      "source": "New_Icon/03_ETC/03_Quest_Item/00042497.dds",
+      "asset": "assets/opportunities/items/42497.webp",
+      "sha256": "03cb15e8ced6586aea060114bb023ef463781aedfb7ca849f73395b60d24b93a",
+      "referenceSha256": "03cb15e8ced6586aea060114bb023ef463781aedfb7ca849f73395b60d24b93a"
+    },
+    {
+      "mode": "processing",
+      "name": "Energy of Lakiaro",
+      "id": 42497,
+      "grade": 3,
+      "source": "New_Icon/03_ETC/03_Quest_Item/00042497.dds",
+      "asset": "assets/opportunities/items/42497.webp",
+      "sha256": "03cb15e8ced6586aea060114bb023ef463781aedfb7ca849f73395b60d24b93a",
+      "referenceSha256": "03cb15e8ced6586aea060114bb023ef463781aedfb7ca849f73395b60d24b93a"
+    },
+    {
+      "mode": "alchemy",
+      "name": "Medal of Glory",
+      "id": 767325,
+      "grade": 3,
+      "source": "New_Icon/03_ETC/00767325.dds",
+      "asset": "assets/opportunities/items/767325.webp",
+      "sha256": "f79f80b16ea59df426ed2321d9e33a09178cf691881ad5f7768aeb3ef9417a05",
+      "referenceSha256": "f79f80b16ea59df426ed2321d9e33a09178cf691881ad5f7768aeb3ef9417a05"
+    },
+    {
+      "mode": "cooking",
+      "name": "Medal of Glory",
+      "id": 767325,
+      "grade": 3,
+      "source": "New_Icon/03_ETC/00767325.dds",
+      "asset": "assets/opportunities/items/767325.webp",
+      "sha256": "f79f80b16ea59df426ed2321d9e33a09178cf691881ad5f7768aeb3ef9417a05",
+      "referenceSha256": "f79f80b16ea59df426ed2321d9e33a09178cf691881ad5f7768aeb3ef9417a05"
+    },
+    {
+      "mode": "processing",
+      "name": "Medal of Glory",
+      "id": 767325,
+      "grade": 3,
+      "source": "New_Icon/03_ETC/00767325.dds",
+      "asset": "assets/opportunities/items/767325.webp",
+      "sha256": "f79f80b16ea59df426ed2321d9e33a09178cf691881ad5f7768aeb3ef9417a05",
+      "referenceSha256": "f79f80b16ea59df426ed2321d9e33a09178cf691881ad5f7768aeb3ef9417a05"
+    },
+    {
+      "mode": "alchemy",
+      "name": "Battlefield Token",
+      "id": 890002,
+      "grade": 3,
+      "source": "New_Icon/03_ETC/00890002.dds",
+      "asset": "assets/opportunities/items/890002.webp",
+      "sha256": "22a93828e723c1bce25fbc067eaec7bf1c1cea05ce7658cad969414286e94c85",
+      "referenceSha256": "22a93828e723c1bce25fbc067eaec7bf1c1cea05ce7658cad969414286e94c85"
+    },
+    {
+      "mode": "cooking",
+      "name": "Battlefield Token",
+      "id": 890002,
+      "grade": 3,
+      "source": "New_Icon/03_ETC/00890002.dds",
+      "asset": "assets/opportunities/items/890002.webp",
+      "sha256": "22a93828e723c1bce25fbc067eaec7bf1c1cea05ce7658cad969414286e94c85",
+      "referenceSha256": "22a93828e723c1bce25fbc067eaec7bf1c1cea05ce7658cad969414286e94c85"
+    },
+    {
+      "mode": "processing",
+      "name": "Battlefield Token",
+      "id": 890002,
+      "grade": 3,
+      "source": "New_Icon/03_ETC/00890002.dds",
+      "asset": "assets/opportunities/items/890002.webp",
+      "sha256": "22a93828e723c1bce25fbc067eaec7bf1c1cea05ce7658cad969414286e94c85",
+      "referenceSha256": "22a93828e723c1bce25fbc067eaec7bf1c1cea05ce7658cad969414286e94c85"
+    },
+    {
+      "mode": "alchemy",
+      "name": "Refined Feast",
+      "id": 821137,
+      "grade": 3,
+      "source": "New_Icon/03_ETC/07_ProductMaterial/00009647.dds",
+      "asset": "assets/opportunities/items/821137.webp",
+      "sha256": "22eea9fcf102d0840361f04d6b7f2b6d699d025a2b4aef0c1e7570828f4ee64f",
+      "referenceSha256": "22eea9fcf102d0840361f04d6b7f2b6d699d025a2b4aef0c1e7570828f4ee64f"
+    },
+    {
+      "mode": "cooking",
+      "name": "Refined Feast",
+      "id": 821137,
+      "grade": 3,
+      "source": "New_Icon/03_ETC/07_ProductMaterial/00009647.dds",
+      "asset": "assets/opportunities/items/821137.webp",
+      "sha256": "22eea9fcf102d0840361f04d6b7f2b6d699d025a2b4aef0c1e7570828f4ee64f",
+      "referenceSha256": "22eea9fcf102d0840361f04d6b7f2b6d699d025a2b4aef0c1e7570828f4ee64f"
+    },
+    {
+      "mode": "processing",
+      "name": "Refined Feast",
+      "id": 821137,
+      "grade": 3,
+      "source": "New_Icon/03_ETC/07_ProductMaterial/00009647.dds",
+      "asset": "assets/opportunities/items/821137.webp",
+      "sha256": "22eea9fcf102d0840361f04d6b7f2b6d699d025a2b4aef0c1e7570828f4ee64f",
+      "referenceSha256": "22eea9fcf102d0840361f04d6b7f2b6d699d025a2b4aef0c1e7570828f4ee64f"
+    },
+    {
+      "mode": "alchemy",
+      "name": "Assorted Tteok",
+      "id": 821139,
+      "grade": 3,
+      "source": "New_Icon/03_ETC/07_ProductMaterial/00820858.dds",
+      "asset": "assets/opportunities/items/821139.webp",
+      "sha256": "01b6df398b9fc201d6761bd658c12e3390ca0987c0dce97c1975801d86d82cf6",
+      "referenceSha256": "01b6df398b9fc201d6761bd658c12e3390ca0987c0dce97c1975801d86d82cf6"
+    },
+    {
+      "mode": "cooking",
+      "name": "Assorted Tteok",
+      "id": 821139,
+      "grade": 3,
+      "source": "New_Icon/03_ETC/07_ProductMaterial/00820858.dds",
+      "asset": "assets/opportunities/items/821139.webp",
+      "sha256": "01b6df398b9fc201d6761bd658c12e3390ca0987c0dce97c1975801d86d82cf6",
+      "referenceSha256": "01b6df398b9fc201d6761bd658c12e3390ca0987c0dce97c1975801d86d82cf6"
+    },
+    {
+      "mode": "processing",
+      "name": "Assorted Tteok",
+      "id": 821139,
+      "grade": 3,
+      "source": "New_Icon/03_ETC/07_ProductMaterial/00820858.dds",
+      "asset": "assets/opportunities/items/821139.webp",
+      "sha256": "01b6df398b9fc201d6761bd658c12e3390ca0987c0dce97c1975801d86d82cf6",
+      "referenceSha256": "01b6df398b9fc201d6761bd658c12e3390ca0987c0dce97c1975801d86d82cf6"
+    },
+    {
+      "mode": "alchemy",
+      "name": "Tricolor Namul",
+      "id": 821141,
+      "grade": 3,
+      "source": "New_Icon/03_ETC/07_ProductMaterial/00820859.dds",
+      "asset": "assets/opportunities/items/821141.webp",
+      "sha256": "ff61892dc03b8cc92e7005f898dea6963974fb894674f29f65094a94b4fc57fe",
+      "referenceSha256": "ff61892dc03b8cc92e7005f898dea6963974fb894674f29f65094a94b4fc57fe"
+    },
+    {
+      "mode": "cooking",
+      "name": "Tricolor Namul",
+      "id": 821141,
+      "grade": 3,
+      "source": "New_Icon/03_ETC/07_ProductMaterial/00820859.dds",
+      "asset": "assets/opportunities/items/821141.webp",
+      "sha256": "ff61892dc03b8cc92e7005f898dea6963974fb894674f29f65094a94b4fc57fe",
+      "referenceSha256": "ff61892dc03b8cc92e7005f898dea6963974fb894674f29f65094a94b4fc57fe"
+    },
+    {
+      "mode": "processing",
+      "name": "Tricolor Namul",
+      "id": 821141,
+      "grade": 3,
+      "source": "New_Icon/03_ETC/07_ProductMaterial/00820859.dds",
+      "asset": "assets/opportunities/items/821141.webp",
+      "sha256": "ff61892dc03b8cc92e7005f898dea6963974fb894674f29f65094a94b4fc57fe",
+      "referenceSha256": "ff61892dc03b8cc92e7005f898dea6963974fb894674f29f65094a94b4fc57fe"
+    },
+    {
+      "mode": "alchemy",
+      "name": "Gujeolpan",
+      "id": 821143,
+      "grade": 3,
+      "source": "New_Icon/03_ETC/07_ProductMaterial/00820866.dds",
+      "asset": "assets/opportunities/items/821143.webp",
+      "sha256": "5944eddd803b4143fd1abae5ce41050abaaa7868114ac59378f2e638fcf7dec0",
+      "referenceSha256": "5944eddd803b4143fd1abae5ce41050abaaa7868114ac59378f2e638fcf7dec0"
+    },
+    {
+      "mode": "cooking",
+      "name": "Gujeolpan",
+      "id": 821143,
+      "grade": 3,
+      "source": "New_Icon/03_ETC/07_ProductMaterial/00820866.dds",
+      "asset": "assets/opportunities/items/821143.webp",
+      "sha256": "5944eddd803b4143fd1abae5ce41050abaaa7868114ac59378f2e638fcf7dec0",
+      "referenceSha256": "5944eddd803b4143fd1abae5ce41050abaaa7868114ac59378f2e638fcf7dec0"
+    },
+    {
+      "mode": "processing",
+      "name": "Gujeolpan",
+      "id": 821143,
+      "grade": 3,
+      "source": "New_Icon/03_ETC/07_ProductMaterial/00820866.dds",
+      "asset": "assets/opportunities/items/821143.webp",
+      "sha256": "5944eddd803b4143fd1abae5ce41050abaaa7868114ac59378f2e638fcf7dec0",
+      "referenceSha256": "5944eddd803b4143fd1abae5ce41050abaaa7868114ac59378f2e638fcf7dec0"
+    },
+    {
+      "mode": "alchemy",
+      "name": "Mellow Herbal Medicine",
+      "id": 821145,
+      "grade": 3,
+      "source": "New_Icon/03_ETC/03_Quest_Item/00066671.dds",
+      "asset": "assets/opportunities/items/821145.webp",
+      "sha256": "39dc00122582c332dad7129f35bdcd76d0f6cf73edb4684a3a268e7bb4b914bf",
+      "referenceSha256": "39dc00122582c332dad7129f35bdcd76d0f6cf73edb4684a3a268e7bb4b914bf"
+    },
+    {
+      "mode": "cooking",
+      "name": "Mellow Herbal Medicine",
+      "id": 821145,
+      "grade": 3,
+      "source": "New_Icon/03_ETC/03_Quest_Item/00066671.dds",
+      "asset": "assets/opportunities/items/821145.webp",
+      "sha256": "39dc00122582c332dad7129f35bdcd76d0f6cf73edb4684a3a268e7bb4b914bf",
+      "referenceSha256": "39dc00122582c332dad7129f35bdcd76d0f6cf73edb4684a3a268e7bb4b914bf"
+    },
+    {
+      "mode": "processing",
+      "name": "Mellow Herbal Medicine",
+      "id": 821145,
+      "grade": 3,
+      "source": "New_Icon/03_ETC/03_Quest_Item/00066671.dds",
+      "asset": "assets/opportunities/items/821145.webp",
+      "sha256": "39dc00122582c332dad7129f35bdcd76d0f6cf73edb4684a3a268e7bb4b914bf",
+      "referenceSha256": "39dc00122582c332dad7129f35bdcd76d0f6cf73edb4684a3a268e7bb4b914bf"
+    },
+    {
+      "mode": "alchemy",
+      "name": "Box of 3 Whale Tendon Potions",
+      "id": 65401,
+      "grade": 1,
+      "source": "New_Icon/03_ETC/00752882.dds",
+      "asset": "assets/opportunities/items/65401.webp",
+      "sha256": "8030ae953a7710194e6726b879fc9c2c00349080ef3a1287b4a5344fd126e2e3",
+      "referenceSha256": "8030ae953a7710194e6726b879fc9c2c00349080ef3a1287b4a5344fd126e2e3"
+    },
+    {
+      "mode": "cooking",
+      "name": "Box of 3 Whale Tendon Potions",
+      "id": 65401,
+      "grade": 1,
+      "source": "New_Icon/03_ETC/00752882.dds",
+      "asset": "assets/opportunities/items/65401.webp",
+      "sha256": "8030ae953a7710194e6726b879fc9c2c00349080ef3a1287b4a5344fd126e2e3",
+      "referenceSha256": "8030ae953a7710194e6726b879fc9c2c00349080ef3a1287b4a5344fd126e2e3"
+    },
+    {
+      "mode": "processing",
+      "name": "Box of 3 Whale Tendon Potions",
+      "id": 65401,
+      "grade": 1,
+      "source": "New_Icon/03_ETC/00752882.dds",
+      "asset": "assets/opportunities/items/65401.webp",
+      "sha256": "8030ae953a7710194e6726b879fc9c2c00349080ef3a1287b4a5344fd126e2e3",
+      "referenceSha256": "8030ae953a7710194e6726b879fc9c2c00349080ef3a1287b4a5344fd126e2e3"
+    },
+    {
+      "mode": "alchemy",
+      "name": "[Event] Lara's Warm Black Tea",
+      "id": 750490,
+      "grade": 2,
+      "source": "New_Icon/03_ETC/00750490.dds",
+      "asset": "assets/opportunities/items/750490.webp",
+      "sha256": "0ed252aac23d3816e8048711ba3788cbe6359bc2513289c9ee42fbbb44b8a76f",
+      "referenceSha256": "0ed252aac23d3816e8048711ba3788cbe6359bc2513289c9ee42fbbb44b8a76f"
+    },
+    {
+      "mode": "cooking",
+      "name": "[Event] Lara's Warm Black Tea",
+      "id": 750490,
+      "grade": 2,
+      "source": "New_Icon/03_ETC/00750490.dds",
+      "asset": "assets/opportunities/items/750490.webp",
+      "sha256": "0ed252aac23d3816e8048711ba3788cbe6359bc2513289c9ee42fbbb44b8a76f",
+      "referenceSha256": "0ed252aac23d3816e8048711ba3788cbe6359bc2513289c9ee42fbbb44b8a76f"
+    },
+    {
+      "mode": "processing",
+      "name": "[Event] Lara's Warm Black Tea",
+      "id": 750490,
+      "grade": 2,
+      "source": "New_Icon/03_ETC/00750490.dds",
+      "asset": "assets/opportunities/items/750490.webp",
+      "sha256": "0ed252aac23d3816e8048711ba3788cbe6359bc2513289c9ee42fbbb44b8a76f",
+      "referenceSha256": "0ed252aac23d3816e8048711ba3788cbe6359bc2513289c9ee42fbbb44b8a76f"
+    },
+    {
+      "mode": "alchemy",
+      "name": "Divine Coin",
+      "id": 980170,
+      "grade": 3,
+      "source": "New_Icon/03_ETC/01000818.dds",
+      "asset": "assets/opportunities/items/980170.webp",
+      "sha256": "fd72f1c415cade51ce72c8d329011c26f319512486b10ede564b829a9f0768e5",
+      "referenceSha256": "fd72f1c415cade51ce72c8d329011c26f319512486b10ede564b829a9f0768e5"
+    },
+    {
+      "mode": "cooking",
+      "name": "Divine Coin",
+      "id": 980170,
+      "grade": 3,
+      "source": "New_Icon/03_ETC/01000818.dds",
+      "asset": "assets/opportunities/items/980170.webp",
+      "sha256": "fd72f1c415cade51ce72c8d329011c26f319512486b10ede564b829a9f0768e5",
+      "referenceSha256": "fd72f1c415cade51ce72c8d329011c26f319512486b10ede564b829a9f0768e5"
+    },
+    {
+      "mode": "processing",
+      "name": "Divine Coin",
+      "id": 980170,
+      "grade": 3,
+      "source": "New_Icon/03_ETC/01000818.dds",
+      "asset": "assets/opportunities/items/980170.webp",
+      "sha256": "fd72f1c415cade51ce72c8d329011c26f319512486b10ede564b829a9f0768e5",
+      "referenceSha256": "fd72f1c415cade51ce72c8d329011c26f319512486b10ede564b829a9f0768e5"
+    },
+    {
+      "mode": "alchemy",
+      "name": "Golden Seal - [Imperial Fishing]",
+      "id": 1019,
+      "grade": 3,
+      "source": "New_Icon/06_PC_EquipItem/00_Common/00_ETC/00001019.dds",
+      "asset": "assets/opportunities/items/1019.webp",
+      "sha256": "1dc93735fde049638a4400a43453b952de5c43619d5e52c769346d5c5c16cce6",
+      "referenceSha256": "1dc93735fde049638a4400a43453b952de5c43619d5e52c769346d5c5c16cce6"
+    },
+    {
+      "mode": "cooking",
+      "name": "Golden Seal - [Imperial Fishing]",
+      "id": 1019,
+      "grade": 3,
+      "source": "New_Icon/06_PC_EquipItem/00_Common/00_ETC/00001019.dds",
+      "asset": "assets/opportunities/items/1019.webp",
+      "sha256": "1dc93735fde049638a4400a43453b952de5c43619d5e52c769346d5c5c16cce6",
+      "referenceSha256": "1dc93735fde049638a4400a43453b952de5c43619d5e52c769346d5c5c16cce6"
+    },
+    {
+      "mode": "processing",
+      "name": "Golden Seal - [Imperial Fishing]",
+      "id": 1019,
+      "grade": 3,
+      "source": "New_Icon/06_PC_EquipItem/00_Common/00_ETC/00001019.dds",
+      "asset": "assets/opportunities/items/1019.webp",
+      "sha256": "1dc93735fde049638a4400a43453b952de5c43619d5e52c769346d5c5c16cce6",
+      "referenceSha256": "1dc93735fde049638a4400a43453b952de5c43619d5e52c769346d5c5c16cce6"
+    },
+    {
+      "mode": "alchemy",
+      "name": "Gold Key",
+      "id": 44164,
+      "grade": 1,
+      "source": "New_Icon/03_ETC/04_DropItem/00044164.dds",
+      "asset": "assets/opportunities/items/44164.webp",
+      "sha256": "c53629226e1b4696404d869aa4c0d205dd7f1434ac11249fdba35676bb2b7e2b",
+      "referenceSha256": "c53629226e1b4696404d869aa4c0d205dd7f1434ac11249fdba35676bb2b7e2b"
+    },
+    {
+      "mode": "cooking",
+      "name": "Gold Key",
+      "id": 44164,
+      "grade": 1,
+      "source": "New_Icon/03_ETC/04_DropItem/00044164.dds",
+      "asset": "assets/opportunities/items/44164.webp",
+      "sha256": "c53629226e1b4696404d869aa4c0d205dd7f1434ac11249fdba35676bb2b7e2b",
+      "referenceSha256": "c53629226e1b4696404d869aa4c0d205dd7f1434ac11249fdba35676bb2b7e2b"
+    },
+    {
+      "mode": "processing",
+      "name": "Gold Key",
+      "id": 44164,
+      "grade": 1,
+      "source": "New_Icon/03_ETC/04_DropItem/00044164.dds",
+      "asset": "assets/opportunities/items/44164.webp",
+      "sha256": "c53629226e1b4696404d869aa4c0d205dd7f1434ac11249fdba35676bb2b7e2b",
+      "referenceSha256": "c53629226e1b4696404d869aa4c0d205dd7f1434ac11249fdba35676bb2b7e2b"
+    },
+    {
+      "mode": "alchemy",
+      "name": "Epheria Sailboat: Brass Figurehead",
+      "id": 49705,
+      "grade": 1,
+      "source": "New_Icon/03_ETC/09_PetItem/00049705.dds",
+      "asset": "assets/opportunities/items/49705.webp",
+      "sha256": "f9de25ba47e974459466550b0d6173e091e26de3a4bf24872be6fef1cadb5f71",
+      "referenceSha256": "f9de25ba47e974459466550b0d6173e091e26de3a4bf24872be6fef1cadb5f71"
+    },
+    {
+      "mode": "cooking",
+      "name": "Epheria Sailboat: Brass Figurehead",
+      "id": 49705,
+      "grade": 1,
+      "source": "New_Icon/03_ETC/09_PetItem/00049705.dds",
+      "asset": "assets/opportunities/items/49705.webp",
+      "sha256": "f9de25ba47e974459466550b0d6173e091e26de3a4bf24872be6fef1cadb5f71",
+      "referenceSha256": "f9de25ba47e974459466550b0d6173e091e26de3a4bf24872be6fef1cadb5f71"
+    },
+    {
+      "mode": "processing",
+      "name": "Epheria Sailboat: Brass Figurehead",
+      "id": 49705,
+      "grade": 1,
+      "source": "New_Icon/03_ETC/09_PetItem/00049705.dds",
+      "asset": "assets/opportunities/items/49705.webp",
+      "sha256": "f9de25ba47e974459466550b0d6173e091e26de3a4bf24872be6fef1cadb5f71",
+      "referenceSha256": "f9de25ba47e974459466550b0d6173e091e26de3a4bf24872be6fef1cadb5f71"
+    },
+    {
+      "mode": "alchemy",
+      "name": "Epheria Sailboat: Enhanced Plating",
+      "id": 49706,
+      "grade": 1,
+      "source": "New_Icon/03_ETC/09_PetItem/00049706.dds",
+      "asset": "assets/opportunities/items/49706.webp",
+      "sha256": "6f7b1b3e5e814b78ef1af4fd983bbca9605ba32320a9cd99339c778bbf364efe",
+      "referenceSha256": "6f7b1b3e5e814b78ef1af4fd983bbca9605ba32320a9cd99339c778bbf364efe"
+    },
+    {
+      "mode": "cooking",
+      "name": "Epheria Sailboat: Enhanced Plating",
+      "id": 49706,
+      "grade": 1,
+      "source": "New_Icon/03_ETC/09_PetItem/00049706.dds",
+      "asset": "assets/opportunities/items/49706.webp",
+      "sha256": "6f7b1b3e5e814b78ef1af4fd983bbca9605ba32320a9cd99339c778bbf364efe",
+      "referenceSha256": "6f7b1b3e5e814b78ef1af4fd983bbca9605ba32320a9cd99339c778bbf364efe"
+    },
+    {
+      "mode": "processing",
+      "name": "Epheria Sailboat: Enhanced Plating",
+      "id": 49706,
+      "grade": 1,
+      "source": "New_Icon/03_ETC/09_PetItem/00049706.dds",
+      "asset": "assets/opportunities/items/49706.webp",
+      "sha256": "6f7b1b3e5e814b78ef1af4fd983bbca9605ba32320a9cd99339c778bbf364efe",
+      "referenceSha256": "6f7b1b3e5e814b78ef1af4fd983bbca9605ba32320a9cd99339c778bbf364efe"
+    },
+    {
+      "mode": "alchemy",
+      "name": "Epheria Sailboat: Julia Cannon",
+      "id": 49707,
+      "grade": 1,
+      "source": "New_Icon/03_ETC/09_PetItem/00049707.dds",
+      "asset": "assets/opportunities/items/49707.webp",
+      "sha256": "9b07ea4336b3a4af33c4d44f1ea7f17635cd76fb240245905a0a9765193e3eb7",
+      "referenceSha256": "9b07ea4336b3a4af33c4d44f1ea7f17635cd76fb240245905a0a9765193e3eb7"
+    },
+    {
+      "mode": "cooking",
+      "name": "Epheria Sailboat: Julia Cannon",
+      "id": 49707,
+      "grade": 1,
+      "source": "New_Icon/03_ETC/09_PetItem/00049707.dds",
+      "asset": "assets/opportunities/items/49707.webp",
+      "sha256": "9b07ea4336b3a4af33c4d44f1ea7f17635cd76fb240245905a0a9765193e3eb7",
+      "referenceSha256": "9b07ea4336b3a4af33c4d44f1ea7f17635cd76fb240245905a0a9765193e3eb7"
+    },
+    {
+      "mode": "processing",
+      "name": "Epheria Sailboat: Julia Cannon",
+      "id": 49707,
+      "grade": 1,
+      "source": "New_Icon/03_ETC/09_PetItem/00049707.dds",
+      "asset": "assets/opportunities/items/49707.webp",
+      "sha256": "9b07ea4336b3a4af33c4d44f1ea7f17635cd76fb240245905a0a9765193e3eb7",
+      "referenceSha256": "9b07ea4336b3a4af33c4d44f1ea7f17635cd76fb240245905a0a9765193e3eb7"
+    },
+    {
+      "mode": "alchemy",
+      "name": "Epheria Sailboat: High Winds Sail",
+      "id": 49708,
+      "grade": 1,
+      "source": "New_Icon/03_ETC/09_PetItem/00049708.dds",
+      "asset": "assets/opportunities/items/49708.webp",
+      "sha256": "6cea6c9a1e67ead87a1a3019d55adb22156b76930e2c852005d9d66699e42252",
+      "referenceSha256": "6cea6c9a1e67ead87a1a3019d55adb22156b76930e2c852005d9d66699e42252"
+    },
+    {
+      "mode": "cooking",
+      "name": "Epheria Sailboat: High Winds Sail",
+      "id": 49708,
+      "grade": 1,
+      "source": "New_Icon/03_ETC/09_PetItem/00049708.dds",
+      "asset": "assets/opportunities/items/49708.webp",
+      "sha256": "6cea6c9a1e67ead87a1a3019d55adb22156b76930e2c852005d9d66699e42252",
+      "referenceSha256": "6cea6c9a1e67ead87a1a3019d55adb22156b76930e2c852005d9d66699e42252"
+    },
+    {
+      "mode": "processing",
+      "name": "Epheria Sailboat: High Winds Sail",
+      "id": 49708,
+      "grade": 1,
+      "source": "New_Icon/03_ETC/09_PetItem/00049708.dds",
+      "asset": "assets/opportunities/items/49708.webp",
+      "sha256": "6cea6c9a1e67ead87a1a3019d55adb22156b76930e2c852005d9d66699e42252",
+      "referenceSha256": "6cea6c9a1e67ead87a1a3019d55adb22156b76930e2c852005d9d66699e42252"
+    },
+    {
+      "mode": "alchemy",
+      "name": "Epheria Frigate: White Horn Figurehead",
+      "id": 49717,
+      "grade": 1,
+      "source": "New_Icon/03_ETC/09_PetItem/00049717.dds",
+      "asset": "assets/opportunities/items/49717.webp",
+      "sha256": "21c78505e762ef63a7c5dec128d59db8ac67271cc3ed048c6c695b5644778caa",
+      "referenceSha256": "21c78505e762ef63a7c5dec128d59db8ac67271cc3ed048c6c695b5644778caa"
+    },
+    {
+      "mode": "cooking",
+      "name": "Epheria Frigate: White Horn Figurehead",
+      "id": 49717,
+      "grade": 1,
+      "source": "New_Icon/03_ETC/09_PetItem/00049717.dds",
+      "asset": "assets/opportunities/items/49717.webp",
+      "sha256": "21c78505e762ef63a7c5dec128d59db8ac67271cc3ed048c6c695b5644778caa",
+      "referenceSha256": "21c78505e762ef63a7c5dec128d59db8ac67271cc3ed048c6c695b5644778caa"
+    },
+    {
+      "mode": "processing",
+      "name": "Epheria Frigate: White Horn Figurehead",
+      "id": 49717,
+      "grade": 1,
+      "source": "New_Icon/03_ETC/09_PetItem/00049717.dds",
+      "asset": "assets/opportunities/items/49717.webp",
+      "sha256": "21c78505e762ef63a7c5dec128d59db8ac67271cc3ed048c6c695b5644778caa",
+      "referenceSha256": "21c78505e762ef63a7c5dec128d59db8ac67271cc3ed048c6c695b5644778caa"
+    },
+    {
+      "mode": "alchemy",
+      "name": "Epheria Frigate: Light Plating",
+      "id": 49718,
+      "grade": 1,
+      "source": "New_Icon/03_ETC/09_PetItem/00049718.dds",
+      "asset": "assets/opportunities/items/49718.webp",
+      "sha256": "cebe7c5a8876645df5bd3e5ab8420f3b93150bfc79e20d4f501cdf6137b7c9e2",
+      "referenceSha256": "cebe7c5a8876645df5bd3e5ab8420f3b93150bfc79e20d4f501cdf6137b7c9e2"
+    },
+    {
+      "mode": "cooking",
+      "name": "Epheria Frigate: Light Plating",
+      "id": 49718,
+      "grade": 1,
+      "source": "New_Icon/03_ETC/09_PetItem/00049718.dds",
+      "asset": "assets/opportunities/items/49718.webp",
+      "sha256": "cebe7c5a8876645df5bd3e5ab8420f3b93150bfc79e20d4f501cdf6137b7c9e2",
+      "referenceSha256": "cebe7c5a8876645df5bd3e5ab8420f3b93150bfc79e20d4f501cdf6137b7c9e2"
+    },
+    {
+      "mode": "processing",
+      "name": "Epheria Frigate: Light Plating",
+      "id": 49718,
+      "grade": 1,
+      "source": "New_Icon/03_ETC/09_PetItem/00049718.dds",
+      "asset": "assets/opportunities/items/49718.webp",
+      "sha256": "cebe7c5a8876645df5bd3e5ab8420f3b93150bfc79e20d4f501cdf6137b7c9e2",
+      "referenceSha256": "cebe7c5a8876645df5bd3e5ab8420f3b93150bfc79e20d4f501cdf6137b7c9e2"
+    },
+    {
+      "mode": "alchemy",
+      "name": "Epheria Frigate: Lillia Cannon",
+      "id": 49719,
+      "grade": 1,
+      "source": "New_Icon/03_ETC/09_PetItem/00049719.dds",
+      "asset": "assets/opportunities/items/49719.webp",
+      "sha256": "f278aba91ba0b761f7971341f85e43dd9d85b469bda5201cb13ec866700aa77d",
+      "referenceSha256": "f278aba91ba0b761f7971341f85e43dd9d85b469bda5201cb13ec866700aa77d"
+    },
+    {
+      "mode": "cooking",
+      "name": "Epheria Frigate: Lillia Cannon",
+      "id": 49719,
+      "grade": 1,
+      "source": "New_Icon/03_ETC/09_PetItem/00049719.dds",
+      "asset": "assets/opportunities/items/49719.webp",
+      "sha256": "f278aba91ba0b761f7971341f85e43dd9d85b469bda5201cb13ec866700aa77d",
+      "referenceSha256": "f278aba91ba0b761f7971341f85e43dd9d85b469bda5201cb13ec866700aa77d"
+    },
+    {
+      "mode": "processing",
+      "name": "Epheria Frigate: Lillia Cannon",
+      "id": 49719,
+      "grade": 1,
+      "source": "New_Icon/03_ETC/09_PetItem/00049719.dds",
+      "asset": "assets/opportunities/items/49719.webp",
+      "sha256": "f278aba91ba0b761f7971341f85e43dd9d85b469bda5201cb13ec866700aa77d",
+      "referenceSha256": "f278aba91ba0b761f7971341f85e43dd9d85b469bda5201cb13ec866700aa77d"
+    },
+    {
+      "mode": "alchemy",
+      "name": "Epheria Frigate: Red Breeze Sail",
+      "id": 49720,
+      "grade": 1,
+      "source": "New_Icon/03_ETC/09_PetItem/00049720.dds",
+      "asset": "assets/opportunities/items/49720.webp",
+      "sha256": "43a16c3c042f99f6fa3870de348a84cf356a432d9f9d72847b665776691487db",
+      "referenceSha256": "43a16c3c042f99f6fa3870de348a84cf356a432d9f9d72847b665776691487db"
+    },
+    {
+      "mode": "cooking",
+      "name": "Epheria Frigate: Red Breeze Sail",
+      "id": 49720,
+      "grade": 1,
+      "source": "New_Icon/03_ETC/09_PetItem/00049720.dds",
+      "asset": "assets/opportunities/items/49720.webp",
+      "sha256": "43a16c3c042f99f6fa3870de348a84cf356a432d9f9d72847b665776691487db",
+      "referenceSha256": "43a16c3c042f99f6fa3870de348a84cf356a432d9f9d72847b665776691487db"
+    },
+    {
+      "mode": "processing",
+      "name": "Epheria Frigate: Red Breeze Sail",
+      "id": 49720,
+      "grade": 1,
+      "source": "New_Icon/03_ETC/09_PetItem/00049720.dds",
+      "asset": "assets/opportunities/items/49720.webp",
+      "sha256": "43a16c3c042f99f6fa3870de348a84cf356a432d9f9d72847b665776691487db",
+      "referenceSha256": "43a16c3c042f99f6fa3870de348a84cf356a432d9f9d72847b665776691487db"
+    },
+    {
+      "mode": "alchemy",
+      "name": "Manos Fisher's Clothes",
+      "id": 705052,
+      "grade": 4,
+      "source": "New_Icon/06_PC_EquipItem/00_Common/09_Upperbody/00705052.dds",
+      "asset": "assets/opportunities/items/705052.webp",
+      "sha256": "cd9a3d9a0387f2bcc4332a4256207a28c5c144e26f2eea432e1343fafa2adae3",
+      "referenceSha256": "cd9a3d9a0387f2bcc4332a4256207a28c5c144e26f2eea432e1343fafa2adae3"
+    },
+    {
+      "mode": "cooking",
+      "name": "Manos Fisher's Clothes",
+      "id": 705052,
+      "grade": 4,
+      "source": "New_Icon/06_PC_EquipItem/00_Common/09_Upperbody/00705052.dds",
+      "asset": "assets/opportunities/items/705052.webp",
+      "sha256": "cd9a3d9a0387f2bcc4332a4256207a28c5c144e26f2eea432e1343fafa2adae3",
+      "referenceSha256": "cd9a3d9a0387f2bcc4332a4256207a28c5c144e26f2eea432e1343fafa2adae3"
+    },
+    {
+      "mode": "processing",
+      "name": "Manos Fisher's Clothes",
+      "id": 705052,
+      "grade": 4,
+      "source": "New_Icon/06_PC_EquipItem/00_Common/09_Upperbody/00705052.dds",
+      "asset": "assets/opportunities/items/705052.webp",
+      "sha256": "cd9a3d9a0387f2bcc4332a4256207a28c5c144e26f2eea432e1343fafa2adae3",
+      "referenceSha256": "cd9a3d9a0387f2bcc4332a4256207a28c5c144e26f2eea432e1343fafa2adae3"
+    },
+    {
+      "mode": "alchemy",
+      "name": "Sea Monster's Bizarre Fang",
+      "id": 756056,
+      "grade": 3,
+      "source": "New_Icon/03_ETC/00756056.dds",
+      "asset": "assets/opportunities/items/756056.webp",
+      "sha256": "2f012c9052efdb0ca1d1c5d11a1a93226677d7e47570abe56d0bb58070fde5b6",
+      "referenceSha256": "2f012c9052efdb0ca1d1c5d11a1a93226677d7e47570abe56d0bb58070fde5b6"
+    },
+    {
+      "mode": "cooking",
+      "name": "Sea Monster's Bizarre Fang",
+      "id": 756056,
+      "grade": 3,
+      "source": "New_Icon/03_ETC/00756056.dds",
+      "asset": "assets/opportunities/items/756056.webp",
+      "sha256": "2f012c9052efdb0ca1d1c5d11a1a93226677d7e47570abe56d0bb58070fde5b6",
+      "referenceSha256": "2f012c9052efdb0ca1d1c5d11a1a93226677d7e47570abe56d0bb58070fde5b6"
+    },
+    {
+      "mode": "processing",
+      "name": "Sea Monster's Bizarre Fang",
+      "id": 756056,
+      "grade": 3,
+      "source": "New_Icon/03_ETC/00756056.dds",
+      "asset": "assets/opportunities/items/756056.webp",
+      "sha256": "2f012c9052efdb0ca1d1c5d11a1a93226677d7e47570abe56d0bb58070fde5b6",
+      "referenceSha256": "2f012c9052efdb0ca1d1c5d11a1a93226677d7e47570abe56d0bb58070fde5b6"
+    },
+    {
+      "mode": "alchemy",
+      "name": "Old Moon Alchemy Catalyst",
+      "id": 45162,
+      "grade": 3,
+      "source": "New_Icon/03_ETC/07_ProductMaterial/00045162.dds",
+      "asset": "assets/opportunities/items/45162.webp",
+      "sha256": "9f899981dffa36a6206614b0991af6f520c22272f26c37d7a14085f6995de963",
+      "referenceSha256": "9f899981dffa36a6206614b0991af6f520c22272f26c37d7a14085f6995de963"
+    },
+    {
+      "mode": "cooking",
+      "name": "Old Moon Alchemy Catalyst",
+      "id": 45162,
+      "grade": 3,
+      "source": "New_Icon/03_ETC/07_ProductMaterial/00045162.dds",
+      "asset": "assets/opportunities/items/45162.webp",
+      "sha256": "9f899981dffa36a6206614b0991af6f520c22272f26c37d7a14085f6995de963",
+      "referenceSha256": "9f899981dffa36a6206614b0991af6f520c22272f26c37d7a14085f6995de963"
+    },
+    {
+      "mode": "processing",
+      "name": "Old Moon Alchemy Catalyst",
+      "id": 45162,
+      "grade": 3,
+      "source": "New_Icon/03_ETC/07_ProductMaterial/00045162.dds",
+      "asset": "assets/opportunities/items/45162.webp",
+      "sha256": "9f899981dffa36a6206614b0991af6f520c22272f26c37d7a14085f6995de963",
+      "referenceSha256": "9f899981dffa36a6206614b0991af6f520c22272f26c37d7a14085f6995de963"
+    },
+    {
+      "mode": "alchemy",
+      "name": "Grand Prix Vera's Scroll",
+      "id": 47594,
+      "grade": 3,
+      "source": "New_Icon/09_Cash/00017576.dds",
+      "asset": "assets/opportunities/items/47594.webp",
+      "sha256": "f70d1a83f95d3419a1dd55ad9cd24aca7504696a20ab56600da85418566151d5",
+      "referenceSha256": "f70d1a83f95d3419a1dd55ad9cd24aca7504696a20ab56600da85418566151d5"
+    },
+    {
+      "mode": "cooking",
+      "name": "Grand Prix Vera's Scroll",
+      "id": 47594,
+      "grade": 3,
+      "source": "New_Icon/09_Cash/00017576.dds",
+      "asset": "assets/opportunities/items/47594.webp",
+      "sha256": "f70d1a83f95d3419a1dd55ad9cd24aca7504696a20ab56600da85418566151d5",
+      "referenceSha256": "f70d1a83f95d3419a1dd55ad9cd24aca7504696a20ab56600da85418566151d5"
+    },
+    {
+      "mode": "processing",
+      "name": "Grand Prix Vera's Scroll",
+      "id": 47594,
+      "grade": 3,
+      "source": "New_Icon/09_Cash/00017576.dds",
+      "asset": "assets/opportunities/items/47594.webp",
+      "sha256": "f70d1a83f95d3419a1dd55ad9cd24aca7504696a20ab56600da85418566151d5",
+      "referenceSha256": "f70d1a83f95d3419a1dd55ad9cd24aca7504696a20ab56600da85418566151d5"
+    },
+    {
+      "mode": "alchemy",
+      "name": "Desperate Crystal of Origin",
+      "id": 761801,
+      "grade": 3,
+      "source": "New_Icon/03_ETC/00761801.dds",
+      "asset": "assets/opportunities/items/761801.webp",
+      "sha256": "089bd468d1a7800f571bd9f1895e4ba548828ed38700854d684eafafdcd11acc",
+      "referenceSha256": "089bd468d1a7800f571bd9f1895e4ba548828ed38700854d684eafafdcd11acc"
+    },
+    {
+      "mode": "cooking",
+      "name": "Desperate Crystal of Origin",
+      "id": 761801,
+      "grade": 3,
+      "source": "New_Icon/03_ETC/00761801.dds",
+      "asset": "assets/opportunities/items/761801.webp",
+      "sha256": "089bd468d1a7800f571bd9f1895e4ba548828ed38700854d684eafafdcd11acc",
+      "referenceSha256": "089bd468d1a7800f571bd9f1895e4ba548828ed38700854d684eafafdcd11acc"
+    },
+    {
+      "mode": "processing",
+      "name": "Desperate Crystal of Origin",
+      "id": 761801,
+      "grade": 3,
+      "source": "New_Icon/03_ETC/00761801.dds",
+      "asset": "assets/opportunities/items/761801.webp",
+      "sha256": "089bd468d1a7800f571bd9f1895e4ba548828ed38700854d684eafafdcd11acc",
+      "referenceSha256": "089bd468d1a7800f571bd9f1895e4ba548828ed38700854d684eafafdcd11acc"
+    },
+    {
+      "mode": "alchemy",
+      "name": "Crow Coin",
+      "id": 10,
+      "grade": 3,
+      "source": "New_Icon/00000010_Special.dds",
+      "asset": "assets/opportunities/items/10.webp",
+      "sha256": "8ec620a826b035032ce42e1a592219ad1da221d6aa349a9c365be975ce45b3b5",
+      "referenceSha256": "8ec620a826b035032ce42e1a592219ad1da221d6aa349a9c365be975ce45b3b5"
+    },
+    {
+      "mode": "cooking",
+      "name": "Crow Coin",
+      "id": 10,
+      "grade": 3,
+      "source": "New_Icon/00000010_Special.dds",
+      "asset": "assets/opportunities/items/10.webp",
+      "sha256": "8ec620a826b035032ce42e1a592219ad1da221d6aa349a9c365be975ce45b3b5",
+      "referenceSha256": "8ec620a826b035032ce42e1a592219ad1da221d6aa349a9c365be975ce45b3b5"
+    },
+    {
+      "mode": "processing",
+      "name": "Crow Coin",
+      "id": 10,
+      "grade": 3,
+      "source": "New_Icon/00000010_Special.dds",
+      "asset": "assets/opportunities/items/10.webp",
+      "sha256": "8ec620a826b035032ce42e1a592219ad1da221d6aa349a9c365be975ce45b3b5",
+      "referenceSha256": "8ec620a826b035032ce42e1a592219ad1da221d6aa349a9c365be975ce45b3b5"
+    },
+    {
+      "mode": "alchemy",
+      "name": "Golden Seal - [Imperial Cuisine]",
+      "id": 1017,
+      "grade": 3,
+      "source": "New_Icon/06_PC_EquipItem/00_Common/00_ETC/00001017.dds",
+      "asset": "assets/opportunities/items/1017.webp",
+      "sha256": "ecdfa11c3ad8b646be74cd309a4522c875f0428f3e8385d5dc9a9106a75add8f",
+      "referenceSha256": "ecdfa11c3ad8b646be74cd309a4522c875f0428f3e8385d5dc9a9106a75add8f"
+    },
+    {
+      "mode": "cooking",
+      "name": "Golden Seal - [Imperial Cuisine]",
+      "id": 1017,
+      "grade": 3,
+      "source": "New_Icon/06_PC_EquipItem/00_Common/00_ETC/00001017.dds",
+      "asset": "assets/opportunities/items/1017.webp",
+      "sha256": "ecdfa11c3ad8b646be74cd309a4522c875f0428f3e8385d5dc9a9106a75add8f",
+      "referenceSha256": "ecdfa11c3ad8b646be74cd309a4522c875f0428f3e8385d5dc9a9106a75add8f"
+    },
+    {
+      "mode": "processing",
+      "name": "Golden Seal - [Imperial Cuisine]",
+      "id": 1017,
+      "grade": 3,
+      "source": "New_Icon/06_PC_EquipItem/00_Common/00_ETC/00001017.dds",
+      "asset": "assets/opportunities/items/1017.webp",
+      "sha256": "ecdfa11c3ad8b646be74cd309a4522c875f0428f3e8385d5dc9a9106a75add8f",
+      "referenceSha256": "ecdfa11c3ad8b646be74cd309a4522c875f0428f3e8385d5dc9a9106a75add8f"
+    },
+    {
+      "mode": "alchemy",
+      "name": "Golden Seal - [Imperial Alchemy]",
+      "id": 1018,
+      "grade": 3,
+      "source": "New_Icon/06_PC_EquipItem/00_Common/00_ETC/00001018.dds",
+      "asset": "assets/opportunities/items/1018.webp",
+      "sha256": "c7088d91bfa83e3ba03adb9d728c107affaf9f320fc076c98025051c5d2b0648",
+      "referenceSha256": "c7088d91bfa83e3ba03adb9d728c107affaf9f320fc076c98025051c5d2b0648"
+    },
+    {
+      "mode": "cooking",
+      "name": "Golden Seal - [Imperial Alchemy]",
+      "id": 1018,
+      "grade": 3,
+      "source": "New_Icon/06_PC_EquipItem/00_Common/00_ETC/00001018.dds",
+      "asset": "assets/opportunities/items/1018.webp",
+      "sha256": "c7088d91bfa83e3ba03adb9d728c107affaf9f320fc076c98025051c5d2b0648",
+      "referenceSha256": "c7088d91bfa83e3ba03adb9d728c107affaf9f320fc076c98025051c5d2b0648"
+    },
+    {
+      "mode": "processing",
+      "name": "Golden Seal - [Imperial Alchemy]",
+      "id": 1018,
+      "grade": 3,
+      "source": "New_Icon/06_PC_EquipItem/00_Common/00_ETC/00001018.dds",
+      "asset": "assets/opportunities/items/1018.webp",
+      "sha256": "c7088d91bfa83e3ba03adb9d728c107affaf9f320fc076c98025051c5d2b0648",
+      "referenceSha256": "c7088d91bfa83e3ba03adb9d728c107affaf9f320fc076c98025051c5d2b0648"
+    },
+    {
+      "mode": "alchemy",
+      "name": "Golden Seal - [Imperial Training]",
+      "id": 1020,
+      "grade": 3,
+      "source": "New_Icon/06_PC_EquipItem/00_Common/00_ETC/00001020.dds",
+      "asset": "assets/opportunities/items/1020.webp",
+      "sha256": "023c9ff1c27dcf481dffba76a9faaa41e15d72135a161ab9a5613e33fa5d8637",
+      "referenceSha256": "023c9ff1c27dcf481dffba76a9faaa41e15d72135a161ab9a5613e33fa5d8637"
+    },
+    {
+      "mode": "cooking",
+      "name": "Golden Seal - [Imperial Training]",
+      "id": 1020,
+      "grade": 3,
+      "source": "New_Icon/06_PC_EquipItem/00_Common/00_ETC/00001020.dds",
+      "asset": "assets/opportunities/items/1020.webp",
+      "sha256": "023c9ff1c27dcf481dffba76a9faaa41e15d72135a161ab9a5613e33fa5d8637",
+      "referenceSha256": "023c9ff1c27dcf481dffba76a9faaa41e15d72135a161ab9a5613e33fa5d8637"
+    },
+    {
+      "mode": "processing",
+      "name": "Golden Seal - [Imperial Training]",
+      "id": 1020,
+      "grade": 3,
+      "source": "New_Icon/06_PC_EquipItem/00_Common/00_ETC/00001020.dds",
+      "asset": "assets/opportunities/items/1020.webp",
+      "sha256": "023c9ff1c27dcf481dffba76a9faaa41e15d72135a161ab9a5613e33fa5d8637",
+      "referenceSha256": "023c9ff1c27dcf481dffba76a9faaa41e15d72135a161ab9a5613e33fa5d8637"
+    },
+    {
+      "mode": "alchemy",
+      "name": "Supreme Cooking Utensil",
+      "id": 3743,
+      "grade": 0,
+      "source": "New_Icon/03_ETC/06_Housing/Crafting_Cooking_06.dds",
+      "asset": "assets/opportunities/items/3743.webp",
+      "sha256": "1b93d84dd2c141c958cc242e5273df2ab8400c025c51673cb099d28074b16c29",
+      "referenceSha256": "1b93d84dd2c141c958cc242e5273df2ab8400c025c51673cb099d28074b16c29"
+    },
+    {
+      "mode": "cooking",
+      "name": "Supreme Cooking Utensil",
+      "id": 3743,
+      "grade": 0,
+      "source": "New_Icon/03_ETC/06_Housing/Crafting_Cooking_06.dds",
+      "asset": "assets/opportunities/items/3743.webp",
+      "sha256": "1b93d84dd2c141c958cc242e5273df2ab8400c025c51673cb099d28074b16c29",
+      "referenceSha256": "1b93d84dd2c141c958cc242e5273df2ab8400c025c51673cb099d28074b16c29"
+    },
+    {
+      "mode": "processing",
+      "name": "Supreme Cooking Utensil",
+      "id": 3743,
+      "grade": 0,
+      "source": "New_Icon/03_ETC/06_Housing/Crafting_Cooking_06.dds",
+      "asset": "assets/opportunities/items/3743.webp",
+      "sha256": "1b93d84dd2c141c958cc242e5273df2ab8400c025c51673cb099d28074b16c29",
+      "referenceSha256": "1b93d84dd2c141c958cc242e5273df2ab8400c025c51673cb099d28074b16c29"
+    },
+    {
+      "mode": "alchemy",
+      "name": "Supreme Alchemy Tool",
+      "id": 3744,
+      "grade": 0,
+      "source": "New_Icon/03_ETC/06_Housing/Crafting_Alchemy_06.dds",
+      "asset": "assets/opportunities/items/3744.webp",
+      "sha256": "1fd6bb105b2d749f256c86b30b4fb85e6891db619427399d6c03e611ffb9a9eb",
+      "referenceSha256": "1fd6bb105b2d749f256c86b30b4fb85e6891db619427399d6c03e611ffb9a9eb"
+    },
+    {
+      "mode": "cooking",
+      "name": "Supreme Alchemy Tool",
+      "id": 3744,
+      "grade": 0,
+      "source": "New_Icon/03_ETC/06_Housing/Crafting_Alchemy_06.dds",
+      "asset": "assets/opportunities/items/3744.webp",
+      "sha256": "1fd6bb105b2d749f256c86b30b4fb85e6891db619427399d6c03e611ffb9a9eb",
+      "referenceSha256": "1fd6bb105b2d749f256c86b30b4fb85e6891db619427399d6c03e611ffb9a9eb"
+    },
+    {
+      "mode": "processing",
+      "name": "Supreme Alchemy Tool",
+      "id": 3744,
+      "grade": 0,
+      "source": "New_Icon/03_ETC/06_Housing/Crafting_Alchemy_06.dds",
+      "asset": "assets/opportunities/items/3744.webp",
+      "sha256": "1fd6bb105b2d749f256c86b30b4fb85e6891db619427399d6c03e611ffb9a9eb",
+      "referenceSha256": "1fd6bb105b2d749f256c86b30b4fb85e6891db619427399d6c03e611ffb9a9eb"
+    },
+    {
+      "mode": "alchemy",
+      "name": "Sunset Dyed Wool",
+      "id": 5861,
+      "grade": 0,
+      "source": "New_Icon/03_ETC/07_ProductMaterial/00005861.dds",
+      "asset": "assets/opportunities/items/5861.webp",
+      "sha256": "13fe572ee442a7692b4f4686e7031bff68d3aebe0ef16559ae9bdea849cededf",
+      "referenceSha256": "13fe572ee442a7692b4f4686e7031bff68d3aebe0ef16559ae9bdea849cededf"
+    },
+    {
+      "mode": "cooking",
+      "name": "Sunset Dyed Wool",
+      "id": 5861,
+      "grade": 0,
+      "source": "New_Icon/03_ETC/07_ProductMaterial/00005861.dds",
+      "asset": "assets/opportunities/items/5861.webp",
+      "sha256": "13fe572ee442a7692b4f4686e7031bff68d3aebe0ef16559ae9bdea849cededf",
+      "referenceSha256": "13fe572ee442a7692b4f4686e7031bff68d3aebe0ef16559ae9bdea849cededf"
+    },
+    {
+      "mode": "processing",
+      "name": "Sunset Dyed Wool",
+      "id": 5861,
+      "grade": 0,
+      "source": "New_Icon/03_ETC/07_ProductMaterial/00005861.dds",
+      "asset": "assets/opportunities/items/5861.webp",
+      "sha256": "13fe572ee442a7692b4f4686e7031bff68d3aebe0ef16559ae9bdea849cededf",
+      "referenceSha256": "13fe572ee442a7692b4f4686e7031bff68d3aebe0ef16559ae9bdea849cededf"
+    },
+    {
+      "mode": "alchemy",
+      "name": "Courser Training Reward Box",
+      "id": 8071,
+      "grade": 3,
+      "source": "New_Icon/03_ETC/00016384.dds",
+      "asset": "assets/opportunities/items/8071.webp",
+      "sha256": "25b7a19f2ffb6bc7e14782c64d4bc5a20dc3590c550fb90986262c7834688427",
+      "referenceSha256": "25b7a19f2ffb6bc7e14782c64d4bc5a20dc3590c550fb90986262c7834688427"
+    },
+    {
+      "mode": "cooking",
+      "name": "Courser Training Reward Box",
+      "id": 8071,
+      "grade": 3,
+      "source": "New_Icon/03_ETC/00016384.dds",
+      "asset": "assets/opportunities/items/8071.webp",
+      "sha256": "25b7a19f2ffb6bc7e14782c64d4bc5a20dc3590c550fb90986262c7834688427",
+      "referenceSha256": "25b7a19f2ffb6bc7e14782c64d4bc5a20dc3590c550fb90986262c7834688427"
+    },
+    {
+      "mode": "processing",
+      "name": "Courser Training Reward Box",
+      "id": 8071,
+      "grade": 3,
+      "source": "New_Icon/03_ETC/00016384.dds",
+      "asset": "assets/opportunities/items/8071.webp",
+      "sha256": "25b7a19f2ffb6bc7e14782c64d4bc5a20dc3590c550fb90986262c7834688427",
+      "referenceSha256": "25b7a19f2ffb6bc7e14782c64d4bc5a20dc3590c550fb90986262c7834688427"
+    },
+    {
+      "mode": "alchemy",
+      "name": "Imperial Trace Box",
+      "id": 8072,
+      "grade": 3,
+      "source": "New_Icon/03_ETC/07_ProductMaterial/00009885.dds",
+      "asset": "assets/opportunities/items/8072.webp",
+      "sha256": "c4396d0fbc6d93494576ed6812f06225b401a09658c7f2a812e041c6aa04aea8",
+      "referenceSha256": "c4396d0fbc6d93494576ed6812f06225b401a09658c7f2a812e041c6aa04aea8"
+    },
+    {
+      "mode": "cooking",
+      "name": "Imperial Trace Box",
+      "id": 8072,
+      "grade": 3,
+      "source": "New_Icon/03_ETC/07_ProductMaterial/00009885.dds",
+      "asset": "assets/opportunities/items/8072.webp",
+      "sha256": "c4396d0fbc6d93494576ed6812f06225b401a09658c7f2a812e041c6aa04aea8",
+      "referenceSha256": "c4396d0fbc6d93494576ed6812f06225b401a09658c7f2a812e041c6aa04aea8"
+    },
+    {
+      "mode": "processing",
+      "name": "Imperial Trace Box",
+      "id": 8072,
+      "grade": 3,
+      "source": "New_Icon/03_ETC/07_ProductMaterial/00009885.dds",
+      "asset": "assets/opportunities/items/8072.webp",
+      "sha256": "c4396d0fbc6d93494576ed6812f06225b401a09658c7f2a812e041c6aa04aea8",
+      "referenceSha256": "c4396d0fbc6d93494576ed6812f06225b401a09658c7f2a812e041c6aa04aea8"
+    },
+    {
+      "mode": "alchemy",
+      "name": "Storm Horse Gear Box",
+      "id": 16069,
+      "grade": 2,
+      "source": "New_Icon/03_ETC/00016069.dds",
+      "asset": "assets/opportunities/items/16069.webp",
+      "sha256": "65078454697f9adda9cb3fa5163575c4ff77f630f027c47e1a7e8aadc5bd3eab",
+      "referenceSha256": "65078454697f9adda9cb3fa5163575c4ff77f630f027c47e1a7e8aadc5bd3eab"
+    },
+    {
+      "mode": "cooking",
+      "name": "Storm Horse Gear Box",
+      "id": 16069,
+      "grade": 2,
+      "source": "New_Icon/03_ETC/00016069.dds",
+      "asset": "assets/opportunities/items/16069.webp",
+      "sha256": "65078454697f9adda9cb3fa5163575c4ff77f630f027c47e1a7e8aadc5bd3eab",
+      "referenceSha256": "65078454697f9adda9cb3fa5163575c4ff77f630f027c47e1a7e8aadc5bd3eab"
+    },
+    {
+      "mode": "processing",
+      "name": "Storm Horse Gear Box",
+      "id": 16069,
+      "grade": 2,
+      "source": "New_Icon/03_ETC/00016069.dds",
+      "asset": "assets/opportunities/items/16069.webp",
+      "sha256": "65078454697f9adda9cb3fa5163575c4ff77f630f027c47e1a7e8aadc5bd3eab",
+      "referenceSha256": "65078454697f9adda9cb3fa5163575c4ff77f630f027c47e1a7e8aadc5bd3eab"
+    },
+    {
+      "mode": "alchemy",
+      "name": "Spellbound Tool Box",
+      "id": 16181,
+      "grade": 3,
+      "source": "New_Icon/06_PC_EquipItem/00_Common/00_ETC/00016175.dds",
+      "asset": "assets/opportunities/items/16181.webp",
+      "sha256": "29ac070c811a0814316b9c4b3ffa9ec9c5605f8311d51950a37eddf8b76ff9ce",
+      "referenceSha256": "29ac070c811a0814316b9c4b3ffa9ec9c5605f8311d51950a37eddf8b76ff9ce"
+    },
+    {
+      "mode": "cooking",
+      "name": "Spellbound Tool Box",
+      "id": 16181,
+      "grade": 3,
+      "source": "New_Icon/06_PC_EquipItem/00_Common/00_ETC/00016175.dds",
+      "asset": "assets/opportunities/items/16181.webp",
+      "sha256": "29ac070c811a0814316b9c4b3ffa9ec9c5605f8311d51950a37eddf8b76ff9ce",
+      "referenceSha256": "29ac070c811a0814316b9c4b3ffa9ec9c5605f8311d51950a37eddf8b76ff9ce"
+    },
+    {
+      "mode": "processing",
+      "name": "Spellbound Tool Box",
+      "id": 16181,
+      "grade": 3,
+      "source": "New_Icon/06_PC_EquipItem/00_Common/00_ETC/00016175.dds",
+      "asset": "assets/opportunities/items/16181.webp",
+      "sha256": "29ac070c811a0814316b9c4b3ffa9ec9c5605f8311d51950a37eddf8b76ff9ce",
+      "referenceSha256": "29ac070c811a0814316b9c4b3ffa9ec9c5605f8311d51950a37eddf8b76ff9ce"
+    },
+    {
+      "mode": "alchemy",
+      "name": "Manos Hoe",
+      "id": 16479,
+      "grade": 4,
+      "source": "New_Icon/06_PC_EquipItem/00_Common/00_ETC/00016479.dds",
+      "asset": "assets/opportunities/items/16479.webp",
+      "sha256": "07e822621ae62cee9bd252862abc55abaab57376865b5e978aae442cec044bda",
+      "referenceSha256": "07e822621ae62cee9bd252862abc55abaab57376865b5e978aae442cec044bda"
+    },
+    {
+      "mode": "cooking",
+      "name": "Manos Hoe",
+      "id": 16479,
+      "grade": 4,
+      "source": "New_Icon/06_PC_EquipItem/00_Common/00_ETC/00016479.dds",
+      "asset": "assets/opportunities/items/16479.webp",
+      "sha256": "07e822621ae62cee9bd252862abc55abaab57376865b5e978aae442cec044bda",
+      "referenceSha256": "07e822621ae62cee9bd252862abc55abaab57376865b5e978aae442cec044bda"
+    },
+    {
+      "mode": "processing",
+      "name": "Manos Hoe",
+      "id": 16479,
+      "grade": 4,
+      "source": "New_Icon/06_PC_EquipItem/00_Common/00_ETC/00016479.dds",
+      "asset": "assets/opportunities/items/16479.webp",
+      "sha256": "07e822621ae62cee9bd252862abc55abaab57376865b5e978aae442cec044bda",
+      "referenceSha256": "07e822621ae62cee9bd252862abc55abaab57376865b5e978aae442cec044bda"
+    },
+    {
+      "mode": "alchemy",
+      "name": "Manos Fluid Collector",
+      "id": 16482,
+      "grade": 4,
+      "source": "New_Icon/06_PC_EquipItem/00_Common/00_ETC/00016482.dds",
+      "asset": "assets/opportunities/items/16482.webp",
+      "sha256": "0a6dee2e608d1b4101d90922b80c3348a3d8e4e813da85c7b13f15a10f9bb98d",
+      "referenceSha256": "0a6dee2e608d1b4101d90922b80c3348a3d8e4e813da85c7b13f15a10f9bb98d"
+    },
+    {
+      "mode": "cooking",
+      "name": "Manos Fluid Collector",
+      "id": 16482,
+      "grade": 4,
+      "source": "New_Icon/06_PC_EquipItem/00_Common/00_ETC/00016482.dds",
+      "asset": "assets/opportunities/items/16482.webp",
+      "sha256": "0a6dee2e608d1b4101d90922b80c3348a3d8e4e813da85c7b13f15a10f9bb98d",
+      "referenceSha256": "0a6dee2e608d1b4101d90922b80c3348a3d8e4e813da85c7b13f15a10f9bb98d"
+    },
+    {
+      "mode": "processing",
+      "name": "Manos Fluid Collector",
+      "id": 16482,
+      "grade": 4,
+      "source": "New_Icon/06_PC_EquipItem/00_Common/00_ETC/00016482.dds",
+      "asset": "assets/opportunities/items/16482.webp",
+      "sha256": "0a6dee2e608d1b4101d90922b80c3348a3d8e4e813da85c7b13f15a10f9bb98d",
+      "referenceSha256": "0a6dee2e608d1b4101d90922b80c3348a3d8e4e813da85c7b13f15a10f9bb98d"
+    },
+    {
+      "mode": "alchemy",
+      "name": "Manos Tanning Knife",
+      "id": 16486,
+      "grade": 4,
+      "source": "New_Icon/06_PC_EquipItem/00_Common/00_ETC/00016486.dds",
+      "asset": "assets/opportunities/items/16486.webp",
+      "sha256": "10d22e445f9850b284670983e87b1b17f51e911315c7eeb1ff48aa38ed621624",
+      "referenceSha256": "10d22e445f9850b284670983e87b1b17f51e911315c7eeb1ff48aa38ed621624"
+    },
+    {
+      "mode": "cooking",
+      "name": "Manos Tanning Knife",
+      "id": 16486,
+      "grade": 4,
+      "source": "New_Icon/06_PC_EquipItem/00_Common/00_ETC/00016486.dds",
+      "asset": "assets/opportunities/items/16486.webp",
+      "sha256": "10d22e445f9850b284670983e87b1b17f51e911315c7eeb1ff48aa38ed621624",
+      "referenceSha256": "10d22e445f9850b284670983e87b1b17f51e911315c7eeb1ff48aa38ed621624"
+    },
+    {
+      "mode": "processing",
+      "name": "Manos Tanning Knife",
+      "id": 16486,
+      "grade": 4,
+      "source": "New_Icon/06_PC_EquipItem/00_Common/00_ETC/00016486.dds",
+      "asset": "assets/opportunities/items/16486.webp",
+      "sha256": "10d22e445f9850b284670983e87b1b17f51e911315c7eeb1ff48aa38ed621624",
+      "referenceSha256": "10d22e445f9850b284670983e87b1b17f51e911315c7eeb1ff48aa38ed621624"
+    },
+    {
+      "mode": "alchemy",
+      "name": "Manos Butcher Knife",
+      "id": 16487,
+      "grade": 4,
+      "source": "New_Icon/06_PC_EquipItem/00_Common/00_ETC/00016487.dds",
+      "asset": "assets/opportunities/items/16487.webp",
+      "sha256": "00bf5709728671746a2a7925766f2dc80f48f8146f06d258a687c7b5af9db8e2",
+      "referenceSha256": "00bf5709728671746a2a7925766f2dc80f48f8146f06d258a687c7b5af9db8e2"
+    },
+    {
+      "mode": "cooking",
+      "name": "Manos Butcher Knife",
+      "id": 16487,
+      "grade": 4,
+      "source": "New_Icon/06_PC_EquipItem/00_Common/00_ETC/00016487.dds",
+      "asset": "assets/opportunities/items/16487.webp",
+      "sha256": "00bf5709728671746a2a7925766f2dc80f48f8146f06d258a687c7b5af9db8e2",
+      "referenceSha256": "00bf5709728671746a2a7925766f2dc80f48f8146f06d258a687c7b5af9db8e2"
+    },
+    {
+      "mode": "processing",
+      "name": "Manos Butcher Knife",
+      "id": 16487,
+      "grade": 4,
+      "source": "New_Icon/06_PC_EquipItem/00_Common/00_ETC/00016487.dds",
+      "asset": "assets/opportunities/items/16487.webp",
+      "sha256": "00bf5709728671746a2a7925766f2dc80f48f8146f06d258a687c7b5af9db8e2",
+      "referenceSha256": "00bf5709728671746a2a7925766f2dc80f48f8146f06d258a687c7b5af9db8e2"
+    },
+    {
+      "mode": "alchemy",
+      "name": "Black Spirit's Claw Piece",
+      "id": 40258,
+      "grade": 2,
+      "source": "New_Icon/03_ETC/03_Quest_Item/00040258.dds",
+      "asset": "assets/opportunities/items/40258.webp",
+      "sha256": "4c927996ae9b4d6ff8ccca59894bd646d0ebd86880aab9256e681fc3671726d2",
+      "referenceSha256": "4c927996ae9b4d6ff8ccca59894bd646d0ebd86880aab9256e681fc3671726d2"
+    },
+    {
+      "mode": "cooking",
+      "name": "Black Spirit's Claw Piece",
+      "id": 40258,
+      "grade": 2,
+      "source": "New_Icon/03_ETC/03_Quest_Item/00040258.dds",
+      "asset": "assets/opportunities/items/40258.webp",
+      "sha256": "4c927996ae9b4d6ff8ccca59894bd646d0ebd86880aab9256e681fc3671726d2",
+      "referenceSha256": "4c927996ae9b4d6ff8ccca59894bd646d0ebd86880aab9256e681fc3671726d2"
+    },
+    {
+      "mode": "processing",
+      "name": "Black Spirit's Claw Piece",
+      "id": 40258,
+      "grade": 2,
+      "source": "New_Icon/03_ETC/03_Quest_Item/00040258.dds",
+      "asset": "assets/opportunities/items/40258.webp",
+      "sha256": "4c927996ae9b4d6ff8ccca59894bd646d0ebd86880aab9256e681fc3671726d2",
+      "referenceSha256": "4c927996ae9b4d6ff8ccca59894bd646d0ebd86880aab9256e681fc3671726d2"
+    },
+    {
+      "mode": "alchemy",
+      "name": "Registration: Light Brown Camel",
+      "id": 50006,
+      "grade": 1,
+      "source": "New_Icon/03_ETC/09_PetItem/00050006.dds",
+      "asset": "assets/opportunities/items/50006.webp",
+      "sha256": "a4bfd20bfa584e66c99a100cc619a46831f7c284e8bc3c8002d7e382501df66e",
+      "referenceSha256": "a4bfd20bfa584e66c99a100cc619a46831f7c284e8bc3c8002d7e382501df66e"
+    },
+    {
+      "mode": "cooking",
+      "name": "Registration: Light Brown Camel",
+      "id": 50006,
+      "grade": 1,
+      "source": "New_Icon/03_ETC/09_PetItem/00050006.dds",
+      "asset": "assets/opportunities/items/50006.webp",
+      "sha256": "a4bfd20bfa584e66c99a100cc619a46831f7c284e8bc3c8002d7e382501df66e",
+      "referenceSha256": "a4bfd20bfa584e66c99a100cc619a46831f7c284e8bc3c8002d7e382501df66e"
+    },
+    {
+      "mode": "processing",
+      "name": "Registration: Light Brown Camel",
+      "id": 50006,
+      "grade": 1,
+      "source": "New_Icon/03_ETC/09_PetItem/00050006.dds",
+      "asset": "assets/opportunities/items/50006.webp",
+      "sha256": "a4bfd20bfa584e66c99a100cc619a46831f7c284e8bc3c8002d7e382501df66e",
+      "referenceSha256": "a4bfd20bfa584e66c99a100cc619a46831f7c284e8bc3c8002d7e382501df66e"
+    },
+    {
+      "mode": "alchemy",
+      "name": "Registration: Deep Brown Camel",
+      "id": 50018,
+      "grade": 1,
+      "source": "New_Icon/03_ETC/09_PetItem/00050006.dds",
+      "asset": "assets/opportunities/items/50018.webp",
+      "sha256": "a4bfd20bfa584e66c99a100cc619a46831f7c284e8bc3c8002d7e382501df66e",
+      "referenceSha256": "a4bfd20bfa584e66c99a100cc619a46831f7c284e8bc3c8002d7e382501df66e"
+    },
+    {
+      "mode": "cooking",
+      "name": "Registration: Deep Brown Camel",
+      "id": 50018,
+      "grade": 1,
+      "source": "New_Icon/03_ETC/09_PetItem/00050006.dds",
+      "asset": "assets/opportunities/items/50018.webp",
+      "sha256": "a4bfd20bfa584e66c99a100cc619a46831f7c284e8bc3c8002d7e382501df66e",
+      "referenceSha256": "a4bfd20bfa584e66c99a100cc619a46831f7c284e8bc3c8002d7e382501df66e"
+    },
+    {
+      "mode": "processing",
+      "name": "Registration: Deep Brown Camel",
+      "id": 50018,
+      "grade": 1,
+      "source": "New_Icon/03_ETC/09_PetItem/00050006.dds",
+      "asset": "assets/opportunities/items/50018.webp",
+      "sha256": "a4bfd20bfa584e66c99a100cc619a46831f7c284e8bc3c8002d7e382501df66e",
+      "referenceSha256": "a4bfd20bfa584e66c99a100cc619a46831f7c284e8bc3c8002d7e382501df66e"
+    },
+    {
+      "mode": "alchemy",
+      "name": "Granverre Feather Champron",
+      "id": 52506,
+      "grade": 2,
+      "source": "New_Icon/03_ETC/09_PetItem/00052506.dds",
+      "asset": "assets/opportunities/items/52506.webp",
+      "sha256": "7f90e859ffdf764193e4947b772f235687eb5a4d31c953e4bc6e237e95302044",
+      "referenceSha256": "7f90e859ffdf764193e4947b772f235687eb5a4d31c953e4bc6e237e95302044"
+    },
+    {
+      "mode": "cooking",
+      "name": "Granverre Feather Champron",
+      "id": 52506,
+      "grade": 2,
+      "source": "New_Icon/03_ETC/09_PetItem/00052506.dds",
+      "asset": "assets/opportunities/items/52506.webp",
+      "sha256": "7f90e859ffdf764193e4947b772f235687eb5a4d31c953e4bc6e237e95302044",
+      "referenceSha256": "7f90e859ffdf764193e4947b772f235687eb5a4d31c953e4bc6e237e95302044"
+    },
+    {
+      "mode": "processing",
+      "name": "Granverre Feather Champron",
+      "id": 52506,
+      "grade": 2,
+      "source": "New_Icon/03_ETC/09_PetItem/00052506.dds",
+      "asset": "assets/opportunities/items/52506.webp",
+      "sha256": "7f90e859ffdf764193e4947b772f235687eb5a4d31c953e4bc6e237e95302044",
+      "referenceSha256": "7f90e859ffdf764193e4947b772f235687eb5a4d31c953e4bc6e237e95302044"
+    },
+    {
+      "mode": "alchemy",
+      "name": "Granverre Leather Barding",
+      "id": 52606,
+      "grade": 2,
+      "source": "New_Icon/03_ETC/09_PetItem/00052606.dds",
+      "asset": "assets/opportunities/items/52606.webp",
+      "sha256": "53572eb5173fb2ae8f3e0016445fcad5422207762193cb284a1ad66ba44ee29e",
+      "referenceSha256": "53572eb5173fb2ae8f3e0016445fcad5422207762193cb284a1ad66ba44ee29e"
+    },
+    {
+      "mode": "cooking",
+      "name": "Granverre Leather Barding",
+      "id": 52606,
+      "grade": 2,
+      "source": "New_Icon/03_ETC/09_PetItem/00052606.dds",
+      "asset": "assets/opportunities/items/52606.webp",
+      "sha256": "53572eb5173fb2ae8f3e0016445fcad5422207762193cb284a1ad66ba44ee29e",
+      "referenceSha256": "53572eb5173fb2ae8f3e0016445fcad5422207762193cb284a1ad66ba44ee29e"
+    },
+    {
+      "mode": "processing",
+      "name": "Granverre Leather Barding",
+      "id": 52606,
+      "grade": 2,
+      "source": "New_Icon/03_ETC/09_PetItem/00052606.dds",
+      "asset": "assets/opportunities/items/52606.webp",
+      "sha256": "53572eb5173fb2ae8f3e0016445fcad5422207762193cb284a1ad66ba44ee29e",
+      "referenceSha256": "53572eb5173fb2ae8f3e0016445fcad5422207762193cb284a1ad66ba44ee29e"
+    },
+    {
+      "mode": "alchemy",
+      "name": "Granverre Leather Saddle",
+      "id": 52706,
+      "grade": 2,
+      "source": "New_Icon/03_ETC/09_PetItem/00052706.dds",
+      "asset": "assets/opportunities/items/52706.webp",
+      "sha256": "f65d308052aff8383abd9526cb5203f4b608ca20cb2d5abb0c53f51f0ec55d83",
+      "referenceSha256": "f65d308052aff8383abd9526cb5203f4b608ca20cb2d5abb0c53f51f0ec55d83"
+    },
+    {
+      "mode": "cooking",
+      "name": "Granverre Leather Saddle",
+      "id": 52706,
+      "grade": 2,
+      "source": "New_Icon/03_ETC/09_PetItem/00052706.dds",
+      "asset": "assets/opportunities/items/52706.webp",
+      "sha256": "f65d308052aff8383abd9526cb5203f4b608ca20cb2d5abb0c53f51f0ec55d83",
+      "referenceSha256": "f65d308052aff8383abd9526cb5203f4b608ca20cb2d5abb0c53f51f0ec55d83"
+    },
+    {
+      "mode": "processing",
+      "name": "Granverre Leather Saddle",
+      "id": 52706,
+      "grade": 2,
+      "source": "New_Icon/03_ETC/09_PetItem/00052706.dds",
+      "asset": "assets/opportunities/items/52706.webp",
+      "sha256": "f65d308052aff8383abd9526cb5203f4b608ca20cb2d5abb0c53f51f0ec55d83",
+      "referenceSha256": "f65d308052aff8383abd9526cb5203f4b608ca20cb2d5abb0c53f51f0ec55d83"
+    },
+    {
+      "mode": "alchemy",
+      "name": "Granverre Leather Stirrups",
+      "id": 52806,
+      "grade": 2,
+      "source": "New_Icon/03_ETC/09_PetItem/00052806.dds",
+      "asset": "assets/opportunities/items/52806.webp",
+      "sha256": "c43439dc551ca88bb02a5098356a776629e1bce22eb5578af380990dd7785f5f",
+      "referenceSha256": "c43439dc551ca88bb02a5098356a776629e1bce22eb5578af380990dd7785f5f"
+    },
+    {
+      "mode": "cooking",
+      "name": "Granverre Leather Stirrups",
+      "id": 52806,
+      "grade": 2,
+      "source": "New_Icon/03_ETC/09_PetItem/00052806.dds",
+      "asset": "assets/opportunities/items/52806.webp",
+      "sha256": "c43439dc551ca88bb02a5098356a776629e1bce22eb5578af380990dd7785f5f",
+      "referenceSha256": "c43439dc551ca88bb02a5098356a776629e1bce22eb5578af380990dd7785f5f"
+    },
+    {
+      "mode": "processing",
+      "name": "Granverre Leather Stirrups",
+      "id": 52806,
+      "grade": 2,
+      "source": "New_Icon/03_ETC/09_PetItem/00052806.dds",
+      "asset": "assets/opportunities/items/52806.webp",
+      "sha256": "c43439dc551ca88bb02a5098356a776629e1bce22eb5578af380990dd7785f5f",
+      "referenceSha256": "c43439dc551ca88bb02a5098356a776629e1bce22eb5578af380990dd7785f5f"
+    },
+    {
+      "mode": "alchemy",
+      "name": "Granverre Metal Horseshoe",
+      "id": 52906,
+      "grade": 2,
+      "source": "New_Icon/03_ETC/09_PetItem/00052906.dds",
+      "asset": "assets/opportunities/items/52906.webp",
+      "sha256": "f9424b892fdde5b2bfa92d5f8ac64a4faf586b66b6aa988eaf77cb3f6dc14245",
+      "referenceSha256": "f9424b892fdde5b2bfa92d5f8ac64a4faf586b66b6aa988eaf77cb3f6dc14245"
+    },
+    {
+      "mode": "cooking",
+      "name": "Granverre Metal Horseshoe",
+      "id": 52906,
+      "grade": 2,
+      "source": "New_Icon/03_ETC/09_PetItem/00052906.dds",
+      "asset": "assets/opportunities/items/52906.webp",
+      "sha256": "f9424b892fdde5b2bfa92d5f8ac64a4faf586b66b6aa988eaf77cb3f6dc14245",
+      "referenceSha256": "f9424b892fdde5b2bfa92d5f8ac64a4faf586b66b6aa988eaf77cb3f6dc14245"
+    },
+    {
+      "mode": "processing",
+      "name": "Granverre Metal Horseshoe",
+      "id": 52906,
+      "grade": 2,
+      "source": "New_Icon/03_ETC/09_PetItem/00052906.dds",
+      "asset": "assets/opportunities/items/52906.webp",
+      "sha256": "f9424b892fdde5b2bfa92d5f8ac64a4faf586b66b6aa988eaf77cb3f6dc14245",
+      "referenceSha256": "f9424b892fdde5b2bfa92d5f8ac64a4faf586b66b6aa988eaf77cb3f6dc14245"
+    },
+    {
+      "mode": "alchemy",
+      "name": "Powder of Ascension",
+      "id": 66191,
+      "grade": 3,
+      "source": "New_Icon/03_ETC/03_Quest_Item/00750903.dds",
+      "asset": "assets/opportunities/items/66191.webp",
+      "sha256": "1d1a1ab317235ae5a94ab12983c687de5ff593ef68ab14bd8f834fde2ffc10de",
+      "referenceSha256": "1d1a1ab317235ae5a94ab12983c687de5ff593ef68ab14bd8f834fde2ffc10de"
+    },
+    {
+      "mode": "cooking",
+      "name": "Powder of Ascension",
+      "id": 66191,
+      "grade": 3,
+      "source": "New_Icon/03_ETC/03_Quest_Item/00750903.dds",
+      "asset": "assets/opportunities/items/66191.webp",
+      "sha256": "1d1a1ab317235ae5a94ab12983c687de5ff593ef68ab14bd8f834fde2ffc10de",
+      "referenceSha256": "1d1a1ab317235ae5a94ab12983c687de5ff593ef68ab14bd8f834fde2ffc10de"
+    },
+    {
+      "mode": "processing",
+      "name": "Powder of Ascension",
+      "id": 66191,
+      "grade": 3,
+      "source": "New_Icon/03_ETC/03_Quest_Item/00750903.dds",
+      "asset": "assets/opportunities/items/66191.webp",
+      "sha256": "1d1a1ab317235ae5a94ab12983c687de5ff593ef68ab14bd8f834fde2ffc10de",
+      "referenceSha256": "1d1a1ab317235ae5a94ab12983c687de5ff593ef68ab14bd8f834fde2ffc10de"
+    },
+    {
+      "mode": "alchemy",
+      "name": "Manos Trainer's Clothes",
+      "id": 705015,
+      "grade": 4,
+      "source": "New_Icon/06_PC_EquipItem/00_Common/09_Upperbody/00705015_1.dds",
+      "asset": "assets/opportunities/items/705015.webp",
+      "sha256": "706bd4114f4419e7ac800762f47fb22d913378a5ebf3565c21928ba2533da22f",
+      "referenceSha256": "706bd4114f4419e7ac800762f47fb22d913378a5ebf3565c21928ba2533da22f"
+    },
+    {
+      "mode": "cooking",
+      "name": "Manos Trainer's Clothes",
+      "id": 705015,
+      "grade": 4,
+      "source": "New_Icon/06_PC_EquipItem/00_Common/09_Upperbody/00705015_1.dds",
+      "asset": "assets/opportunities/items/705015.webp",
+      "sha256": "706bd4114f4419e7ac800762f47fb22d913378a5ebf3565c21928ba2533da22f",
+      "referenceSha256": "706bd4114f4419e7ac800762f47fb22d913378a5ebf3565c21928ba2533da22f"
+    },
+    {
+      "mode": "processing",
+      "name": "Manos Trainer's Clothes",
+      "id": 705015,
+      "grade": 4,
+      "source": "New_Icon/06_PC_EquipItem/00_Common/09_Upperbody/00705015_1.dds",
+      "asset": "assets/opportunities/items/705015.webp",
+      "sha256": "706bd4114f4419e7ac800762f47fb22d913378a5ebf3565c21928ba2533da22f",
+      "referenceSha256": "706bd4114f4419e7ac800762f47fb22d913378a5ebf3565c21928ba2533da22f"
+    },
+    {
+      "mode": "alchemy",
+      "name": "Manos Cook's Clothes",
+      "id": 705037,
+      "grade": 4,
+      "source": "New_Icon/06_PC_EquipItem/00_Common/09_Upperbody/00705037.dds",
+      "asset": "assets/opportunities/items/705037.webp",
+      "sha256": "a7346a8ac27dad986c0825feb7b84f2982c49750fa45a3841d0e7c4c83f2ec1b",
+      "referenceSha256": "a7346a8ac27dad986c0825feb7b84f2982c49750fa45a3841d0e7c4c83f2ec1b"
+    },
+    {
+      "mode": "cooking",
+      "name": "Manos Cook's Clothes",
+      "id": 705037,
+      "grade": 4,
+      "source": "New_Icon/06_PC_EquipItem/00_Common/09_Upperbody/00705037.dds",
+      "asset": "assets/opportunities/items/705037.webp",
+      "sha256": "a7346a8ac27dad986c0825feb7b84f2982c49750fa45a3841d0e7c4c83f2ec1b",
+      "referenceSha256": "a7346a8ac27dad986c0825feb7b84f2982c49750fa45a3841d0e7c4c83f2ec1b"
+    },
+    {
+      "mode": "processing",
+      "name": "Manos Cook's Clothes",
+      "id": 705037,
+      "grade": 4,
+      "source": "New_Icon/06_PC_EquipItem/00_Common/09_Upperbody/00705037.dds",
+      "asset": "assets/opportunities/items/705037.webp",
+      "sha256": "a7346a8ac27dad986c0825feb7b84f2982c49750fa45a3841d0e7c4c83f2ec1b",
+      "referenceSha256": "a7346a8ac27dad986c0825feb7b84f2982c49750fa45a3841d0e7c4c83f2ec1b"
+    },
+    {
+      "mode": "alchemy",
+      "name": "Manos Alchemist's Clothes",
+      "id": 705047,
+      "grade": 4,
+      "source": "New_Icon/06_PC_EquipItem/00_Common/09_Upperbody/00705047.dds",
+      "asset": "assets/opportunities/items/705047.webp",
+      "sha256": "bfffc2bb5b40d53b8b309294b7ebf2803ba500b0dc92b44ea165f89e77cea2fe",
+      "referenceSha256": "bfffc2bb5b40d53b8b309294b7ebf2803ba500b0dc92b44ea165f89e77cea2fe"
+    },
+    {
+      "mode": "cooking",
+      "name": "Manos Alchemist's Clothes",
+      "id": 705047,
+      "grade": 4,
+      "source": "New_Icon/06_PC_EquipItem/00_Common/09_Upperbody/00705047.dds",
+      "asset": "assets/opportunities/items/705047.webp",
+      "sha256": "bfffc2bb5b40d53b8b309294b7ebf2803ba500b0dc92b44ea165f89e77cea2fe",
+      "referenceSha256": "bfffc2bb5b40d53b8b309294b7ebf2803ba500b0dc92b44ea165f89e77cea2fe"
+    },
+    {
+      "mode": "processing",
+      "name": "Manos Alchemist's Clothes",
+      "id": 705047,
+      "grade": 4,
+      "source": "New_Icon/06_PC_EquipItem/00_Common/09_Upperbody/00705047.dds",
+      "asset": "assets/opportunities/items/705047.webp",
+      "sha256": "bfffc2bb5b40d53b8b309294b7ebf2803ba500b0dc92b44ea165f89e77cea2fe",
+      "referenceSha256": "bfffc2bb5b40d53b8b309294b7ebf2803ba500b0dc92b44ea165f89e77cea2fe"
+    },
+    {
+      "mode": "alchemy",
+      "name": "Manos Riding Crop",
+      "id": 705156,
+      "grade": 4,
+      "source": "New_Icon/06_PC_EquipItem/00_Common/00_ETC/00705156.dds",
+      "asset": "assets/opportunities/items/705156.webp",
+      "sha256": "3f81dbb99d3440ecb7cd50c51a2eb3c424fbd31314639fa77706c57519356bab",
+      "referenceSha256": "3f81dbb99d3440ecb7cd50c51a2eb3c424fbd31314639fa77706c57519356bab"
+    },
+    {
+      "mode": "cooking",
+      "name": "Manos Riding Crop",
+      "id": 705156,
+      "grade": 4,
+      "source": "New_Icon/06_PC_EquipItem/00_Common/00_ETC/00705156.dds",
+      "asset": "assets/opportunities/items/705156.webp",
+      "sha256": "3f81dbb99d3440ecb7cd50c51a2eb3c424fbd31314639fa77706c57519356bab",
+      "referenceSha256": "3f81dbb99d3440ecb7cd50c51a2eb3c424fbd31314639fa77706c57519356bab"
+    },
+    {
+      "mode": "processing",
+      "name": "Manos Riding Crop",
+      "id": 705156,
+      "grade": 4,
+      "source": "New_Icon/06_PC_EquipItem/00_Common/00_ETC/00705156.dds",
+      "asset": "assets/opportunities/items/705156.webp",
+      "sha256": "3f81dbb99d3440ecb7cd50c51a2eb3c424fbd31314639fa77706c57519356bab",
+      "referenceSha256": "3f81dbb99d3440ecb7cd50c51a2eb3c424fbd31314639fa77706c57519356bab"
+    },
+    {
+      "mode": "alchemy",
+      "name": "Box of 20 Caphras Stones",
+      "id": 752066,
+      "grade": 3,
+      "source": "New_Icon/03_ETC/00752066.dds",
+      "asset": "assets/opportunities/items/752066.webp",
+      "sha256": "629fe72240fd941e2f0904948ccbdea9891d251710547c53f355b2c2fb3603c0",
+      "referenceSha256": "629fe72240fd941e2f0904948ccbdea9891d251710547c53f355b2c2fb3603c0"
+    },
+    {
+      "mode": "cooking",
+      "name": "Box of 20 Caphras Stones",
+      "id": 752066,
+      "grade": 3,
+      "source": "New_Icon/03_ETC/00752066.dds",
+      "asset": "assets/opportunities/items/752066.webp",
+      "sha256": "629fe72240fd941e2f0904948ccbdea9891d251710547c53f355b2c2fb3603c0",
+      "referenceSha256": "629fe72240fd941e2f0904948ccbdea9891d251710547c53f355b2c2fb3603c0"
+    },
+    {
+      "mode": "processing",
+      "name": "Box of 20 Caphras Stones",
+      "id": 752066,
+      "grade": 3,
+      "source": "New_Icon/03_ETC/00752066.dds",
+      "asset": "assets/opportunities/items/752066.webp",
+      "sha256": "629fe72240fd941e2f0904948ccbdea9891d251710547c53f355b2c2fb3603c0",
+      "referenceSha256": "629fe72240fd941e2f0904948ccbdea9891d251710547c53f355b2c2fb3603c0"
+    },
+    {
+      "mode": "alchemy",
+      "name": "Box of 20 Cron Stones",
+      "id": 752067,
+      "grade": 3,
+      "source": "New_Icon/03_ETC/00752067.dds",
+      "asset": "assets/opportunities/items/752067.webp",
+      "sha256": "7e2c8cf3ed2ab4cd2d9876c5657e0abe43a3c8a38e1d8d49329f0f46fd7a03ed",
+      "referenceSha256": "7e2c8cf3ed2ab4cd2d9876c5657e0abe43a3c8a38e1d8d49329f0f46fd7a03ed"
+    },
+    {
+      "mode": "cooking",
+      "name": "Box of 20 Cron Stones",
+      "id": 752067,
+      "grade": 3,
+      "source": "New_Icon/03_ETC/00752067.dds",
+      "asset": "assets/opportunities/items/752067.webp",
+      "sha256": "7e2c8cf3ed2ab4cd2d9876c5657e0abe43a3c8a38e1d8d49329f0f46fd7a03ed",
+      "referenceSha256": "7e2c8cf3ed2ab4cd2d9876c5657e0abe43a3c8a38e1d8d49329f0f46fd7a03ed"
+    },
+    {
+      "mode": "processing",
+      "name": "Box of 20 Cron Stones",
+      "id": 752067,
+      "grade": 3,
+      "source": "New_Icon/03_ETC/00752067.dds",
+      "asset": "assets/opportunities/items/752067.webp",
+      "sha256": "7e2c8cf3ed2ab4cd2d9876c5657e0abe43a3c8a38e1d8d49329f0f46fd7a03ed",
+      "referenceSha256": "7e2c8cf3ed2ab4cd2d9876c5657e0abe43a3c8a38e1d8d49329f0f46fd7a03ed"
+    },
+    {
+      "mode": "alchemy",
+      "name": "Box of 20 Memory Fragments",
+      "id": 752068,
+      "grade": 3,
+      "source": "New_Icon/03_ETC/00752068.dds",
+      "asset": "assets/opportunities/items/752068.webp",
+      "sha256": "288e9b546d274e055e711ffd0191726d5517172d556670d53985e7232982df8a",
+      "referenceSha256": "288e9b546d274e055e711ffd0191726d5517172d556670d53985e7232982df8a"
+    },
+    {
+      "mode": "cooking",
+      "name": "Box of 20 Memory Fragments",
+      "id": 752068,
+      "grade": 3,
+      "source": "New_Icon/03_ETC/00752068.dds",
+      "asset": "assets/opportunities/items/752068.webp",
+      "sha256": "288e9b546d274e055e711ffd0191726d5517172d556670d53985e7232982df8a",
+      "referenceSha256": "288e9b546d274e055e711ffd0191726d5517172d556670d53985e7232982df8a"
+    },
+    {
+      "mode": "processing",
+      "name": "Box of 20 Memory Fragments",
+      "id": 752068,
+      "grade": 3,
+      "source": "New_Icon/03_ETC/00752068.dds",
+      "asset": "assets/opportunities/items/752068.webp",
+      "sha256": "288e9b546d274e055e711ffd0191726d5517172d556670d53985e7232982df8a",
+      "referenceSha256": "288e9b546d274e055e711ffd0191726d5517172d556670d53985e7232982df8a"
+    },
+    {
+      "mode": "alchemy",
+      "name": "Atanis' Element",
+      "id": 752530,
+      "grade": 3,
+      "source": "New_Icon/03_ETC/07_ProductMaterial/00820906.dds",
+      "asset": "assets/opportunities/items/752530.webp",
+      "sha256": "efc85824024caa8e0c309fe9d7709c25524efe6fcebe191bb0629bbfe9d4a55d",
+      "referenceSha256": "efc85824024caa8e0c309fe9d7709c25524efe6fcebe191bb0629bbfe9d4a55d"
+    },
+    {
+      "mode": "cooking",
+      "name": "Atanis' Element",
+      "id": 752530,
+      "grade": 3,
+      "source": "New_Icon/03_ETC/07_ProductMaterial/00820906.dds",
+      "asset": "assets/opportunities/items/752530.webp",
+      "sha256": "efc85824024caa8e0c309fe9d7709c25524efe6fcebe191bb0629bbfe9d4a55d",
+      "referenceSha256": "efc85824024caa8e0c309fe9d7709c25524efe6fcebe191bb0629bbfe9d4a55d"
+    },
+    {
+      "mode": "processing",
+      "name": "Atanis' Element",
+      "id": 752530,
+      "grade": 3,
+      "source": "New_Icon/03_ETC/07_ProductMaterial/00820906.dds",
+      "asset": "assets/opportunities/items/752530.webp",
+      "sha256": "efc85824024caa8e0c309fe9d7709c25524efe6fcebe191bb0629bbfe9d4a55d",
+      "referenceSha256": "efc85824024caa8e0c309fe9d7709c25524efe6fcebe191bb0629bbfe9d4a55d"
+    },
+    {
+      "mode": "alchemy",
+      "name": "Stonetail Wind's Meal",
+      "id": 757032,
+      "grade": 4,
+      "source": "New_Icon/03_ETC/07_ProductMaterial/00757032.dds",
+      "asset": "assets/opportunities/items/757032.webp",
+      "sha256": "43819878980c794f9c76e2179bc1682a6516f8e7a7907195468e121bc01af6ea",
+      "referenceSha256": "43819878980c794f9c76e2179bc1682a6516f8e7a7907195468e121bc01af6ea"
+    },
+    {
+      "mode": "cooking",
+      "name": "Stonetail Wind's Meal",
+      "id": 757032,
+      "grade": 4,
+      "source": "New_Icon/03_ETC/07_ProductMaterial/00757032.dds",
+      "asset": "assets/opportunities/items/757032.webp",
+      "sha256": "43819878980c794f9c76e2179bc1682a6516f8e7a7907195468e121bc01af6ea",
+      "referenceSha256": "43819878980c794f9c76e2179bc1682a6516f8e7a7907195468e121bc01af6ea"
+    },
+    {
+      "mode": "processing",
+      "name": "Stonetail Wind's Meal",
+      "id": 757032,
+      "grade": 4,
+      "source": "New_Icon/03_ETC/07_ProductMaterial/00757032.dds",
+      "asset": "assets/opportunities/items/757032.webp",
+      "sha256": "43819878980c794f9c76e2179bc1682a6516f8e7a7907195468e121bc01af6ea",
+      "referenceSha256": "43819878980c794f9c76e2179bc1682a6516f8e7a7907195468e121bc01af6ea"
+    },
+    {
+      "mode": "alchemy",
+      "name": "Dark Spirit's Greed",
+      "id": 767887,
+      "grade": 3,
+      "source": "New_Icon/03_ETC/03_Quest_Item/000721023.dds",
+      "asset": "assets/opportunities/items/767887.webp",
+      "sha256": "c81f814fd51f040c9906db4546124267fdb71d61a9522710d37d5c24a7c6f000",
+      "referenceSha256": "c81f814fd51f040c9906db4546124267fdb71d61a9522710d37d5c24a7c6f000"
+    },
+    {
+      "mode": "cooking",
+      "name": "Dark Spirit's Greed",
+      "id": 767887,
+      "grade": 3,
+      "source": "New_Icon/03_ETC/03_Quest_Item/000721023.dds",
+      "asset": "assets/opportunities/items/767887.webp",
+      "sha256": "c81f814fd51f040c9906db4546124267fdb71d61a9522710d37d5c24a7c6f000",
+      "referenceSha256": "c81f814fd51f040c9906db4546124267fdb71d61a9522710d37d5c24a7c6f000"
+    },
+    {
+      "mode": "processing",
+      "name": "Dark Spirit's Greed",
+      "id": 767887,
+      "grade": 3,
+      "source": "New_Icon/03_ETC/03_Quest_Item/000721023.dds",
+      "asset": "assets/opportunities/items/767887.webp",
+      "sha256": "c81f814fd51f040c9906db4546124267fdb71d61a9522710d37d5c24a7c6f000",
+      "referenceSha256": "c81f814fd51f040c9906db4546124267fdb71d61a9522710d37d5c24a7c6f000"
+    },
+    {
+      "mode": "alchemy",
+      "name": "Box of 20 Tidal Black Stones",
+      "id": 890054,
+      "grade": 3,
+      "source": "New_Icon/03_ETC/00752822.dds",
+      "asset": "assets/opportunities/items/890054.webp",
+      "sha256": "9a17469cf985daed5c2cf934e9f94f8e16cd671d47ea5561daa9cfdb4a4ac26b",
+      "referenceSha256": "9a17469cf985daed5c2cf934e9f94f8e16cd671d47ea5561daa9cfdb4a4ac26b"
+    },
+    {
+      "mode": "cooking",
+      "name": "Box of 20 Tidal Black Stones",
+      "id": 890054,
+      "grade": 3,
+      "source": "New_Icon/03_ETC/00752822.dds",
+      "asset": "assets/opportunities/items/890054.webp",
+      "sha256": "9a17469cf985daed5c2cf934e9f94f8e16cd671d47ea5561daa9cfdb4a4ac26b",
+      "referenceSha256": "9a17469cf985daed5c2cf934e9f94f8e16cd671d47ea5561daa9cfdb4a4ac26b"
+    },
+    {
+      "mode": "processing",
+      "name": "Box of 20 Tidal Black Stones",
+      "id": 890054,
+      "grade": 3,
+      "source": "New_Icon/03_ETC/00752822.dds",
+      "asset": "assets/opportunities/items/890054.webp",
+      "sha256": "9a17469cf985daed5c2cf934e9f94f8e16cd671d47ea5561daa9cfdb4a4ac26b",
+      "referenceSha256": "9a17469cf985daed5c2cf934e9f94f8e16cd671d47ea5561daa9cfdb4a4ac26b"
+    },
+    {
+      "mode": "alchemy",
+      "name": "Blue Sea Crystal Box",
+      "id": 890055,
+      "grade": 2,
+      "source": "New_Icon/03_ETC/00761708.dds",
+      "asset": "assets/opportunities/items/890055.webp",
+      "sha256": "e75d52e414e5ead059c67d454dacc7c983bcaa29ebe1cc7f23cf7b42d2ae994f",
+      "referenceSha256": "e75d52e414e5ead059c67d454dacc7c983bcaa29ebe1cc7f23cf7b42d2ae994f"
+    },
+    {
+      "mode": "cooking",
+      "name": "Blue Sea Crystal Box",
+      "id": 890055,
+      "grade": 2,
+      "source": "New_Icon/03_ETC/00761708.dds",
+      "asset": "assets/opportunities/items/890055.webp",
+      "sha256": "e75d52e414e5ead059c67d454dacc7c983bcaa29ebe1cc7f23cf7b42d2ae994f",
+      "referenceSha256": "e75d52e414e5ead059c67d454dacc7c983bcaa29ebe1cc7f23cf7b42d2ae994f"
+    },
+    {
+      "mode": "processing",
+      "name": "Blue Sea Crystal Box",
+      "id": 890055,
+      "grade": 2,
+      "source": "New_Icon/03_ETC/00761708.dds",
+      "asset": "assets/opportunities/items/890055.webp",
+      "sha256": "e75d52e414e5ead059c67d454dacc7c983bcaa29ebe1cc7f23cf7b42d2ae994f",
+      "referenceSha256": "e75d52e414e5ead059c67d454dacc7c983bcaa29ebe1cc7f23cf7b42d2ae994f"
+    },
+    {
+      "mode": "alchemy",
+      "name": "Morning Light Traditional Cooking Utensil",
+      "id": 3749,
+      "grade": 0,
+      "source": "New_Icon/03_ETC/06_Housing/Crafting_Cooking_12.dds",
+      "asset": "assets/opportunities/items/3749.webp",
+      "sha256": "8d61d3c8d71c4ae062defd82e50975d9c55a2a5ccdbd83824d0957c44d7eda15",
+      "referenceSha256": "8d61d3c8d71c4ae062defd82e50975d9c55a2a5ccdbd83824d0957c44d7eda15"
+    },
+    {
+      "mode": "cooking",
+      "name": "Morning Light Traditional Cooking Utensil",
+      "id": 3749,
+      "grade": 0,
+      "source": "New_Icon/03_ETC/06_Housing/Crafting_Cooking_12.dds",
+      "asset": "assets/opportunities/items/3749.webp",
+      "sha256": "8d61d3c8d71c4ae062defd82e50975d9c55a2a5ccdbd83824d0957c44d7eda15",
+      "referenceSha256": "8d61d3c8d71c4ae062defd82e50975d9c55a2a5ccdbd83824d0957c44d7eda15"
+    },
+    {
+      "mode": "processing",
+      "name": "Morning Light Traditional Cooking Utensil",
+      "id": 3749,
+      "grade": 0,
+      "source": "New_Icon/03_ETC/06_Housing/Crafting_Cooking_12.dds",
+      "asset": "assets/opportunities/items/3749.webp",
+      "sha256": "8d61d3c8d71c4ae062defd82e50975d9c55a2a5ccdbd83824d0957c44d7eda15",
+      "referenceSha256": "8d61d3c8d71c4ae062defd82e50975d9c55a2a5ccdbd83824d0957c44d7eda15"
+    },
+    {
+      "mode": "alchemy",
+      "name": "Morning Light Traditional Alchemy Tool",
+      "id": 3750,
+      "grade": 0,
+      "source": "New_Icon/03_ETC/06_Housing/Crafting_Alchemy_12.dds",
+      "asset": "assets/opportunities/items/3750.webp",
+      "sha256": "ff6c074f779df67d36d0d37a302370efbbd1437914ab27adf7038783472da40f",
+      "referenceSha256": "ff6c074f779df67d36d0d37a302370efbbd1437914ab27adf7038783472da40f"
+    },
+    {
+      "mode": "cooking",
+      "name": "Morning Light Traditional Alchemy Tool",
+      "id": 3750,
+      "grade": 0,
+      "source": "New_Icon/03_ETC/06_Housing/Crafting_Alchemy_12.dds",
+      "asset": "assets/opportunities/items/3750.webp",
+      "sha256": "ff6c074f779df67d36d0d37a302370efbbd1437914ab27adf7038783472da40f",
+      "referenceSha256": "ff6c074f779df67d36d0d37a302370efbbd1437914ab27adf7038783472da40f"
+    },
+    {
+      "mode": "processing",
+      "name": "Morning Light Traditional Alchemy Tool",
+      "id": 3750,
+      "grade": 0,
+      "source": "New_Icon/03_ETC/06_Housing/Crafting_Alchemy_12.dds",
+      "asset": "assets/opportunities/items/3750.webp",
+      "sha256": "ff6c074f779df67d36d0d37a302370efbbd1437914ab27adf7038783472da40f",
+      "referenceSha256": "ff6c074f779df67d36d0d37a302370efbbd1437914ab27adf7038783472da40f"
+    },
+    {
+      "mode": "alchemy",
+      "name": "Witch's Delicacy",
+      "id": 9780,
+      "grade": 3,
+      "source": "New_Icon/03_ETC/07_ProductMaterial/00009780.dds",
+      "asset": "assets/opportunities/items/9780.webp",
+      "sha256": "e2f6b6695daf67bce94fc1ac799178d788dcee7adf6964b9e130a088f6be7d1a",
+      "referenceSha256": "e2f6b6695daf67bce94fc1ac799178d788dcee7adf6964b9e130a088f6be7d1a"
+    },
+    {
+      "mode": "cooking",
+      "name": "Witch's Delicacy",
+      "id": 9780,
+      "grade": 3,
+      "source": "New_Icon/03_ETC/07_ProductMaterial/00009780.dds",
+      "asset": "assets/opportunities/items/9780.webp",
+      "sha256": "e2f6b6695daf67bce94fc1ac799178d788dcee7adf6964b9e130a088f6be7d1a",
+      "referenceSha256": "e2f6b6695daf67bce94fc1ac799178d788dcee7adf6964b9e130a088f6be7d1a"
+    },
+    {
+      "mode": "processing",
+      "name": "Witch's Delicacy",
+      "id": 9780,
+      "grade": 3,
+      "source": "New_Icon/03_ETC/07_ProductMaterial/00009780.dds",
+      "asset": "assets/opportunities/items/9780.webp",
+      "sha256": "e2f6b6695daf67bce94fc1ac799178d788dcee7adf6964b9e130a088f6be7d1a",
+      "referenceSha256": "e2f6b6695daf67bce94fc1ac799178d788dcee7adf6964b9e130a088f6be7d1a"
+    },
+    {
+      "mode": "alchemy",
+      "name": "Mysterious Catalyst",
+      "id": 9781,
+      "grade": 3,
+      "source": "New_Icon/03_ETC/07_ProductMaterial/00009781.dds",
+      "asset": "assets/opportunities/items/9781.webp",
+      "sha256": "b01591da0397d497613574f12c280e0e046a178cd88b3d7e7771b0724cab0168",
+      "referenceSha256": "b01591da0397d497613574f12c280e0e046a178cd88b3d7e7771b0724cab0168"
+    },
+    {
+      "mode": "cooking",
+      "name": "Mysterious Catalyst",
+      "id": 9781,
+      "grade": 3,
+      "source": "New_Icon/03_ETC/07_ProductMaterial/00009781.dds",
+      "asset": "assets/opportunities/items/9781.webp",
+      "sha256": "b01591da0397d497613574f12c280e0e046a178cd88b3d7e7771b0724cab0168",
+      "referenceSha256": "b01591da0397d497613574f12c280e0e046a178cd88b3d7e7771b0724cab0168"
+    },
+    {
+      "mode": "processing",
+      "name": "Mysterious Catalyst",
+      "id": 9781,
+      "grade": 3,
+      "source": "New_Icon/03_ETC/07_ProductMaterial/00009781.dds",
+      "asset": "assets/opportunities/items/9781.webp",
+      "sha256": "b01591da0397d497613574f12c280e0e046a178cd88b3d7e7771b0724cab0168",
+      "referenceSha256": "b01591da0397d497613574f12c280e0e046a178cd88b3d7e7771b0724cab0168"
+    },
+    {
+      "mode": "alchemy",
+      "name": "Blush Leaf",
+      "id": 9795,
+      "grade": 3,
+      "source": "New_Icon/03_ETC/07_ProductMaterial/00009795.dds",
+      "asset": "assets/opportunities/items/9795.webp",
+      "sha256": "f42d14d15594eebc0c2065d0fcecc5d52b5dbc759bfff0074db060f2e0b1d092",
+      "referenceSha256": "f42d14d15594eebc0c2065d0fcecc5d52b5dbc759bfff0074db060f2e0b1d092"
+    },
+    {
+      "mode": "cooking",
+      "name": "Blush Leaf",
+      "id": 9795,
+      "grade": 3,
+      "source": "New_Icon/03_ETC/07_ProductMaterial/00009795.dds",
+      "asset": "assets/opportunities/items/9795.webp",
+      "sha256": "f42d14d15594eebc0c2065d0fcecc5d52b5dbc759bfff0074db060f2e0b1d092",
+      "referenceSha256": "f42d14d15594eebc0c2065d0fcecc5d52b5dbc759bfff0074db060f2e0b1d092"
+    },
+    {
+      "mode": "processing",
+      "name": "Blush Leaf",
+      "id": 9795,
+      "grade": 3,
+      "source": "New_Icon/03_ETC/07_ProductMaterial/00009795.dds",
+      "asset": "assets/opportunities/items/9795.webp",
+      "sha256": "f42d14d15594eebc0c2065d0fcecc5d52b5dbc759bfff0074db060f2e0b1d092",
+      "referenceSha256": "f42d14d15594eebc0c2065d0fcecc5d52b5dbc759bfff0074db060f2e0b1d092"
+    },
+    {
+      "mode": "alchemy",
+      "name": "Discarded Glass Bottle",
+      "id": 9796,
+      "grade": 3,
+      "source": "New_Icon/03_ETC/03_Quest_Item/00042349.dds",
+      "asset": "assets/opportunities/items/9796.webp",
+      "sha256": "f610b6913aefc67f823ce5ca9a9c0dbff48e801289f83abe3594bc2ad1bc4d0a",
+      "referenceSha256": "f610b6913aefc67f823ce5ca9a9c0dbff48e801289f83abe3594bc2ad1bc4d0a"
+    },
+    {
+      "mode": "cooking",
+      "name": "Discarded Glass Bottle",
+      "id": 9796,
+      "grade": 3,
+      "source": "New_Icon/03_ETC/03_Quest_Item/00042349.dds",
+      "asset": "assets/opportunities/items/9796.webp",
+      "sha256": "f610b6913aefc67f823ce5ca9a9c0dbff48e801289f83abe3594bc2ad1bc4d0a",
+      "referenceSha256": "f610b6913aefc67f823ce5ca9a9c0dbff48e801289f83abe3594bc2ad1bc4d0a"
+    },
+    {
+      "mode": "processing",
+      "name": "Discarded Glass Bottle",
+      "id": 9796,
+      "grade": 3,
+      "source": "New_Icon/03_ETC/03_Quest_Item/00042349.dds",
+      "asset": "assets/opportunities/items/9796.webp",
+      "sha256": "f610b6913aefc67f823ce5ca9a9c0dbff48e801289f83abe3594bc2ad1bc4d0a",
+      "referenceSha256": "f610b6913aefc67f823ce5ca9a9c0dbff48e801289f83abe3594bc2ad1bc4d0a"
+    },
+    {
+      "mode": "alchemy",
+      "name": "Wildspark",
+      "id": 9799,
+      "grade": 3,
+      "source": "New_Icon/03_ETC/10_Free_TradeItem/00800107.dds",
+      "asset": "assets/opportunities/items/9799.webp",
+      "sha256": "d7bc4e46cdffe7189eb8ec97df5e5c7add326a5b2634a3b4563e3851c3b6207a",
+      "referenceSha256": "d7bc4e46cdffe7189eb8ec97df5e5c7add326a5b2634a3b4563e3851c3b6207a"
+    },
+    {
+      "mode": "cooking",
+      "name": "Wildspark",
+      "id": 9799,
+      "grade": 3,
+      "source": "New_Icon/03_ETC/10_Free_TradeItem/00800107.dds",
+      "asset": "assets/opportunities/items/9799.webp",
+      "sha256": "d7bc4e46cdffe7189eb8ec97df5e5c7add326a5b2634a3b4563e3851c3b6207a",
+      "referenceSha256": "d7bc4e46cdffe7189eb8ec97df5e5c7add326a5b2634a3b4563e3851c3b6207a"
+    },
+    {
+      "mode": "processing",
+      "name": "Wildspark",
+      "id": 9799,
+      "grade": 3,
+      "source": "New_Icon/03_ETC/10_Free_TradeItem/00800107.dds",
+      "asset": "assets/opportunities/items/9799.webp",
+      "sha256": "d7bc4e46cdffe7189eb8ec97df5e5c7add326a5b2634a3b4563e3851c3b6207a",
+      "referenceSha256": "d7bc4e46cdffe7189eb8ec97df5e5c7add326a5b2634a3b4563e3851c3b6207a"
+    },
+    {
+      "mode": "alchemy",
+      "name": "Crio's Sturdy Fishing Chair (7 Days)",
+      "id": 12930,
+      "grade": 2,
+      "source": "New_Icon/06_PC_EquipItem/00_Common/00_ETC/00012831.dds",
+      "asset": "assets/opportunities/items/12930.webp",
+      "sha256": "72c9c15bd26cf7e55757c8779a368aaad36e2292790df22a9f8f6f57ab7247a4",
+      "referenceSha256": "72c9c15bd26cf7e55757c8779a368aaad36e2292790df22a9f8f6f57ab7247a4"
+    },
+    {
+      "mode": "cooking",
+      "name": "Crio's Sturdy Fishing Chair (7 Days)",
+      "id": 12930,
+      "grade": 2,
+      "source": "New_Icon/06_PC_EquipItem/00_Common/00_ETC/00012831.dds",
+      "asset": "assets/opportunities/items/12930.webp",
+      "sha256": "72c9c15bd26cf7e55757c8779a368aaad36e2292790df22a9f8f6f57ab7247a4",
+      "referenceSha256": "72c9c15bd26cf7e55757c8779a368aaad36e2292790df22a9f8f6f57ab7247a4"
+    },
+    {
+      "mode": "processing",
+      "name": "Crio's Sturdy Fishing Chair (7 Days)",
+      "id": 12930,
+      "grade": 2,
+      "source": "New_Icon/06_PC_EquipItem/00_Common/00_ETC/00012831.dds",
+      "asset": "assets/opportunities/items/12930.webp",
+      "sha256": "72c9c15bd26cf7e55757c8779a368aaad36e2292790df22a9f8f6f57ab7247a4",
+      "referenceSha256": "72c9c15bd26cf7e55757c8779a368aaad36e2292790df22a9f8f6f57ab7247a4"
+    },
+    {
+      "mode": "alchemy",
+      "name": "Fairy's Blessing",
+      "id": 18474,
+      "grade": 3,
+      "source": "New_Icon/09_Cash/00018474.dds",
+      "asset": "assets/opportunities/items/18474.webp",
+      "sha256": "26e6ae47995d92e94741e85f72a6a8539cfea9779446d1a41186361e2fe4602c",
+      "referenceSha256": "26e6ae47995d92e94741e85f72a6a8539cfea9779446d1a41186361e2fe4602c"
+    },
+    {
+      "mode": "cooking",
+      "name": "Fairy's Blessing",
+      "id": 18474,
+      "grade": 3,
+      "source": "New_Icon/09_Cash/00018474.dds",
+      "asset": "assets/opportunities/items/18474.webp",
+      "sha256": "26e6ae47995d92e94741e85f72a6a8539cfea9779446d1a41186361e2fe4602c",
+      "referenceSha256": "26e6ae47995d92e94741e85f72a6a8539cfea9779446d1a41186361e2fe4602c"
+    },
+    {
+      "mode": "processing",
+      "name": "Fairy's Blessing",
+      "id": 18474,
+      "grade": 3,
+      "source": "New_Icon/09_Cash/00018474.dds",
+      "asset": "assets/opportunities/items/18474.webp",
+      "sha256": "26e6ae47995d92e94741e85f72a6a8539cfea9779446d1a41186361e2fe4602c",
+      "referenceSha256": "26e6ae47995d92e94741e85f72a6a8539cfea9779446d1a41186361e2fe4602c"
+    },
+    {
+      "mode": "alchemy",
+      "name": "Silver Key",
+      "id": 44165,
+      "grade": 1,
+      "source": "New_Icon/03_ETC/04_DropItem/00044165.dds",
+      "asset": "assets/opportunities/items/44165.webp",
+      "sha256": "76dbdb3811b4a9ca4b6520da9751eadecf5c7d590ce625f05dbce30adc3ff213",
+      "referenceSha256": "76dbdb3811b4a9ca4b6520da9751eadecf5c7d590ce625f05dbce30adc3ff213"
+    },
+    {
+      "mode": "cooking",
+      "name": "Silver Key",
+      "id": 44165,
+      "grade": 1,
+      "source": "New_Icon/03_ETC/04_DropItem/00044165.dds",
+      "asset": "assets/opportunities/items/44165.webp",
+      "sha256": "76dbdb3811b4a9ca4b6520da9751eadecf5c7d590ce625f05dbce30adc3ff213",
+      "referenceSha256": "76dbdb3811b4a9ca4b6520da9751eadecf5c7d590ce625f05dbce30adc3ff213"
+    },
+    {
+      "mode": "processing",
+      "name": "Silver Key",
+      "id": 44165,
+      "grade": 1,
+      "source": "New_Icon/03_ETC/04_DropItem/00044165.dds",
+      "asset": "assets/opportunities/items/44165.webp",
+      "sha256": "76dbdb3811b4a9ca4b6520da9751eadecf5c7d590ce625f05dbce30adc3ff213",
+      "referenceSha256": "76dbdb3811b4a9ca4b6520da9751eadecf5c7d590ce625f05dbce30adc3ff213"
+    },
+    {
+      "mode": "alchemy",
+      "name": "Hunter's Seal",
+      "id": 44186,
+      "grade": 0,
+      "source": "New_Icon/03_ETC/04_DropItem/00044186.dds",
+      "asset": "assets/opportunities/items/44186.webp",
+      "sha256": "f3af599290234c82a09b9a1c545c3dbe76d403772d4a0985ff27a505dac51126",
+      "referenceSha256": "f3af599290234c82a09b9a1c545c3dbe76d403772d4a0985ff27a505dac51126"
+    },
+    {
+      "mode": "cooking",
+      "name": "Hunter's Seal",
+      "id": 44186,
+      "grade": 0,
+      "source": "New_Icon/03_ETC/04_DropItem/00044186.dds",
+      "asset": "assets/opportunities/items/44186.webp",
+      "sha256": "f3af599290234c82a09b9a1c545c3dbe76d403772d4a0985ff27a505dac51126",
+      "referenceSha256": "f3af599290234c82a09b9a1c545c3dbe76d403772d4a0985ff27a505dac51126"
+    },
+    {
+      "mode": "processing",
+      "name": "Hunter's Seal",
+      "id": 44186,
+      "grade": 0,
+      "source": "New_Icon/03_ETC/04_DropItem/00044186.dds",
+      "asset": "assets/opportunities/items/44186.webp",
+      "sha256": "f3af599290234c82a09b9a1c545c3dbe76d403772d4a0985ff27a505dac51126",
+      "referenceSha256": "f3af599290234c82a09b9a1c545c3dbe76d403772d4a0985ff27a505dac51126"
+    },
+    {
+      "mode": "alchemy",
+      "name": "Peridot Petal",
+      "id": 44328,
+      "grade": 0,
+      "source": "New_Icon/03_ETC/04_DropItem/00044328.dds",
+      "asset": "assets/opportunities/items/44328.webp",
+      "sha256": "5c21d42e6695ed25b7c5b34f8eb6ba14060d0a7eb106662e71f66d8ab015cf12",
+      "referenceSha256": "5c21d42e6695ed25b7c5b34f8eb6ba14060d0a7eb106662e71f66d8ab015cf12"
+    },
+    {
+      "mode": "cooking",
+      "name": "Peridot Petal",
+      "id": 44328,
+      "grade": 0,
+      "source": "New_Icon/03_ETC/04_DropItem/00044328.dds",
+      "asset": "assets/opportunities/items/44328.webp",
+      "sha256": "5c21d42e6695ed25b7c5b34f8eb6ba14060d0a7eb106662e71f66d8ab015cf12",
+      "referenceSha256": "5c21d42e6695ed25b7c5b34f8eb6ba14060d0a7eb106662e71f66d8ab015cf12"
+    },
+    {
+      "mode": "processing",
+      "name": "Peridot Petal",
+      "id": 44328,
+      "grade": 0,
+      "source": "New_Icon/03_ETC/04_DropItem/00044328.dds",
+      "asset": "assets/opportunities/items/44328.webp",
+      "sha256": "5c21d42e6695ed25b7c5b34f8eb6ba14060d0a7eb106662e71f66d8ab015cf12",
+      "referenceSha256": "5c21d42e6695ed25b7c5b34f8eb6ba14060d0a7eb106662e71f66d8ab015cf12"
+    },
+    {
+      "mode": "alchemy",
+      "name": "Spirit Pouch of Ferocious Beast",
+      "id": 50806,
+      "grade": 1,
+      "source": "New_Icon/03_ETC/09_PetItem/00050806.dds",
+      "asset": "assets/opportunities/items/50806.webp",
+      "sha256": "f7d375b2d469a7c0bfbc4a749a4efc261abe74d217f54d709205d4ec8b64791d",
+      "referenceSha256": "f7d375b2d469a7c0bfbc4a749a4efc261abe74d217f54d709205d4ec8b64791d"
+    },
+    {
+      "mode": "cooking",
+      "name": "Spirit Pouch of Ferocious Beast",
+      "id": 50806,
+      "grade": 1,
+      "source": "New_Icon/03_ETC/09_PetItem/00050806.dds",
+      "asset": "assets/opportunities/items/50806.webp",
+      "sha256": "f7d375b2d469a7c0bfbc4a749a4efc261abe74d217f54d709205d4ec8b64791d",
+      "referenceSha256": "f7d375b2d469a7c0bfbc4a749a4efc261abe74d217f54d709205d4ec8b64791d"
+    },
+    {
+      "mode": "processing",
+      "name": "Spirit Pouch of Ferocious Beast",
+      "id": 50806,
+      "grade": 1,
+      "source": "New_Icon/03_ETC/09_PetItem/00050806.dds",
+      "asset": "assets/opportunities/items/50806.webp",
+      "sha256": "f7d375b2d469a7c0bfbc4a749a4efc261abe74d217f54d709205d4ec8b64791d",
+      "referenceSha256": "f7d375b2d469a7c0bfbc4a749a4efc261abe74d217f54d709205d4ec8b64791d"
+    },
+    {
+      "mode": "alchemy",
+      "name": "Rainbow Gem Fruit",
+      "id": 50808,
+      "grade": 1,
+      "source": "New_Icon/03_ETC/09_PetItem/00050808.dds",
+      "asset": "assets/opportunities/items/50808.webp",
+      "sha256": "02e3ab89cc7a9767e25f4511d756ad546d570e367d90c407c531bb8bab51c86f",
+      "referenceSha256": "02e3ab89cc7a9767e25f4511d756ad546d570e367d90c407c531bb8bab51c86f"
+    },
+    {
+      "mode": "cooking",
+      "name": "Rainbow Gem Fruit",
+      "id": 50808,
+      "grade": 1,
+      "source": "New_Icon/03_ETC/09_PetItem/00050808.dds",
+      "asset": "assets/opportunities/items/50808.webp",
+      "sha256": "02e3ab89cc7a9767e25f4511d756ad546d570e367d90c407c531bb8bab51c86f",
+      "referenceSha256": "02e3ab89cc7a9767e25f4511d756ad546d570e367d90c407c531bb8bab51c86f"
+    },
+    {
+      "mode": "processing",
+      "name": "Rainbow Gem Fruit",
+      "id": 50808,
+      "grade": 1,
+      "source": "New_Icon/03_ETC/09_PetItem/00050808.dds",
+      "asset": "assets/opportunities/items/50808.webp",
+      "sha256": "02e3ab89cc7a9767e25f4511d756ad546d570e367d90c407c531bb8bab51c86f",
+      "referenceSha256": "02e3ab89cc7a9767e25f4511d756ad546d570e367d90c407c531bb8bab51c86f"
+    },
+    {
+      "mode": "alchemy",
+      "name": "Breezy Conch Seaweed",
+      "id": 50809,
+      "grade": 1,
+      "source": "New_Icon/03_ETC/09_PetItem/00050809.dds",
+      "asset": "assets/opportunities/items/50809.webp",
+      "sha256": "7e09e3d4d266fdcd886bcdc596fff764602cd6939d4cf9a7a127f8bdf00f9a7f",
+      "referenceSha256": "7e09e3d4d266fdcd886bcdc596fff764602cd6939d4cf9a7a127f8bdf00f9a7f"
+    },
+    {
+      "mode": "cooking",
+      "name": "Breezy Conch Seaweed",
+      "id": 50809,
+      "grade": 1,
+      "source": "New_Icon/03_ETC/09_PetItem/00050809.dds",
+      "asset": "assets/opportunities/items/50809.webp",
+      "sha256": "7e09e3d4d266fdcd886bcdc596fff764602cd6939d4cf9a7a127f8bdf00f9a7f",
+      "referenceSha256": "7e09e3d4d266fdcd886bcdc596fff764602cd6939d4cf9a7a127f8bdf00f9a7f"
+    },
+    {
+      "mode": "processing",
+      "name": "Breezy Conch Seaweed",
+      "id": 50809,
+      "grade": 1,
+      "source": "New_Icon/03_ETC/09_PetItem/00050809.dds",
+      "asset": "assets/opportunities/items/50809.webp",
+      "sha256": "7e09e3d4d266fdcd886bcdc596fff764602cd6939d4cf9a7a127f8bdf00f9a7f",
+      "referenceSha256": "7e09e3d4d266fdcd886bcdc596fff764602cd6939d4cf9a7a127f8bdf00f9a7f"
+    },
+    {
+      "mode": "alchemy",
+      "name": "Laila's Petal",
+      "id": 54031,
+      "grade": 2,
+      "source": "New_Icon/03_ETC/09_PetItem/00054031.dds",
+      "asset": "assets/opportunities/items/54031.webp",
+      "sha256": "d78acd53689200cbe3270207fa2cd23ad1cdf300eb3a911239beeb82c895dd4f",
+      "referenceSha256": "d78acd53689200cbe3270207fa2cd23ad1cdf300eb3a911239beeb82c895dd4f"
+    },
+    {
+      "mode": "cooking",
+      "name": "Laila's Petal",
+      "id": 54031,
+      "grade": 2,
+      "source": "New_Icon/03_ETC/09_PetItem/00054031.dds",
+      "asset": "assets/opportunities/items/54031.webp",
+      "sha256": "d78acd53689200cbe3270207fa2cd23ad1cdf300eb3a911239beeb82c895dd4f",
+      "referenceSha256": "d78acd53689200cbe3270207fa2cd23ad1cdf300eb3a911239beeb82c895dd4f"
+    },
+    {
+      "mode": "processing",
+      "name": "Laila's Petal",
+      "id": 54031,
+      "grade": 2,
+      "source": "New_Icon/03_ETC/09_PetItem/00054031.dds",
+      "asset": "assets/opportunities/items/54031.webp",
+      "sha256": "d78acd53689200cbe3270207fa2cd23ad1cdf300eb3a911239beeb82c895dd4f",
+      "referenceSha256": "d78acd53689200cbe3270207fa2cd23ad1cdf300eb3a911239beeb82c895dd4f"
+    },
+    {
+      "mode": "alchemy",
+      "name": "Sealed Fairy Wings",
+      "id": 54033,
+      "grade": 2,
+      "source": "New_Icon/03_ETC/09_PetItem/00054033.dds",
+      "asset": "assets/opportunities/items/54033.webp",
+      "sha256": "e7c17a1fa60d12d5d8b8210e79c304a589e82961ce23b992a33c44c225dcb006",
+      "referenceSha256": "e7c17a1fa60d12d5d8b8210e79c304a589e82961ce23b992a33c44c225dcb006"
+    },
+    {
+      "mode": "cooking",
+      "name": "Sealed Fairy Wings",
+      "id": 54033,
+      "grade": 2,
+      "source": "New_Icon/03_ETC/09_PetItem/00054033.dds",
+      "asset": "assets/opportunities/items/54033.webp",
+      "sha256": "e7c17a1fa60d12d5d8b8210e79c304a589e82961ce23b992a33c44c225dcb006",
+      "referenceSha256": "e7c17a1fa60d12d5d8b8210e79c304a589e82961ce23b992a33c44c225dcb006"
+    },
+    {
+      "mode": "processing",
+      "name": "Sealed Fairy Wings",
+      "id": 54033,
+      "grade": 2,
+      "source": "New_Icon/03_ETC/09_PetItem/00054033.dds",
+      "asset": "assets/opportunities/items/54033.webp",
+      "sha256": "e7c17a1fa60d12d5d8b8210e79c304a589e82961ce23b992a33c44c225dcb006",
+      "referenceSha256": "e7c17a1fa60d12d5d8b8210e79c304a589e82961ce23b992a33c44c225dcb006"
+    },
+    {
+      "mode": "alchemy",
+      "name": "Artisan Dokkebi Worker (Dalbeol Village)",
+      "id": 64853,
+      "grade": 1,
+      "source": "New_Icon/03_ETC/09_PetItem/00064001.dds",
+      "asset": "assets/opportunities/items/64853.webp",
+      "sha256": "5599e0d2bafc237d869f779a957958a0480d2fbfb270dbb7bc7d24581474606a",
+      "referenceSha256": "5599e0d2bafc237d869f779a957958a0480d2fbfb270dbb7bc7d24581474606a"
+    },
+    {
+      "mode": "cooking",
+      "name": "Artisan Dokkebi Worker (Dalbeol Village)",
+      "id": 64853,
+      "grade": 1,
+      "source": "New_Icon/03_ETC/09_PetItem/00064001.dds",
+      "asset": "assets/opportunities/items/64853.webp",
+      "sha256": "5599e0d2bafc237d869f779a957958a0480d2fbfb270dbb7bc7d24581474606a",
+      "referenceSha256": "5599e0d2bafc237d869f779a957958a0480d2fbfb270dbb7bc7d24581474606a"
+    },
+    {
+      "mode": "processing",
+      "name": "Artisan Dokkebi Worker (Dalbeol Village)",
+      "id": 64853,
+      "grade": 1,
+      "source": "New_Icon/03_ETC/09_PetItem/00064001.dds",
+      "asset": "assets/opportunities/items/64853.webp",
+      "sha256": "5599e0d2bafc237d869f779a957958a0480d2fbfb270dbb7bc7d24581474606a",
+      "referenceSha256": "5599e0d2bafc237d869f779a957958a0480d2fbfb270dbb7bc7d24581474606a"
+    },
+    {
+      "mode": "alchemy",
+      "name": "Artisan Shellfolk Worker (Dalbeol Village)",
+      "id": 64857,
+      "grade": 1,
+      "source": "New_Icon/03_ETC/09_PetItem/00064001.dds",
+      "asset": "assets/opportunities/items/64857.webp",
+      "sha256": "5599e0d2bafc237d869f779a957958a0480d2fbfb270dbb7bc7d24581474606a",
+      "referenceSha256": "5599e0d2bafc237d869f779a957958a0480d2fbfb270dbb7bc7d24581474606a"
+    },
+    {
+      "mode": "cooking",
+      "name": "Artisan Shellfolk Worker (Dalbeol Village)",
+      "id": 64857,
+      "grade": 1,
+      "source": "New_Icon/03_ETC/09_PetItem/00064001.dds",
+      "asset": "assets/opportunities/items/64857.webp",
+      "sha256": "5599e0d2bafc237d869f779a957958a0480d2fbfb270dbb7bc7d24581474606a",
+      "referenceSha256": "5599e0d2bafc237d869f779a957958a0480d2fbfb270dbb7bc7d24581474606a"
+    },
+    {
+      "mode": "processing",
+      "name": "Artisan Shellfolk Worker (Dalbeol Village)",
+      "id": 64857,
+      "grade": 1,
+      "source": "New_Icon/03_ETC/09_PetItem/00064001.dds",
+      "asset": "assets/opportunities/items/64857.webp",
+      "sha256": "5599e0d2bafc237d869f779a957958a0480d2fbfb270dbb7bc7d24581474606a",
+      "referenceSha256": "5599e0d2bafc237d869f779a957958a0480d2fbfb270dbb7bc7d24581474606a"
+    },
+    {
+      "mode": "alchemy",
+      "name": "Artisan Dolswe Worker (Dalbeol Village)",
+      "id": 64861,
+      "grade": 1,
+      "source": "New_Icon/03_ETC/09_PetItem/00064001.dds",
+      "asset": "assets/opportunities/items/64861.webp",
+      "sha256": "5599e0d2bafc237d869f779a957958a0480d2fbfb270dbb7bc7d24581474606a",
+      "referenceSha256": "5599e0d2bafc237d869f779a957958a0480d2fbfb270dbb7bc7d24581474606a"
+    },
+    {
+      "mode": "cooking",
+      "name": "Artisan Dolswe Worker (Dalbeol Village)",
+      "id": 64861,
+      "grade": 1,
+      "source": "New_Icon/03_ETC/09_PetItem/00064001.dds",
+      "asset": "assets/opportunities/items/64861.webp",
+      "sha256": "5599e0d2bafc237d869f779a957958a0480d2fbfb270dbb7bc7d24581474606a",
+      "referenceSha256": "5599e0d2bafc237d869f779a957958a0480d2fbfb270dbb7bc7d24581474606a"
+    },
+    {
+      "mode": "processing",
+      "name": "Artisan Dolswe Worker (Dalbeol Village)",
+      "id": 64861,
+      "grade": 1,
+      "source": "New_Icon/03_ETC/09_PetItem/00064001.dds",
+      "asset": "assets/opportunities/items/64861.webp",
+      "sha256": "5599e0d2bafc237d869f779a957958a0480d2fbfb270dbb7bc7d24581474606a",
+      "referenceSha256": "5599e0d2bafc237d869f779a957958a0480d2fbfb270dbb7bc7d24581474606a"
+    },
+    {
+      "mode": "alchemy",
+      "name": "Sangpyeong Coin",
+      "id": 66771,
+      "grade": 0,
+      "source": "New_Icon/03_ETC/00066771.dds",
+      "asset": "assets/opportunities/items/66771.webp",
+      "sha256": "ecb17b336aaa46eb68ab368fbb198cb016c09d495cdd96b0d49e970717e7ce50",
+      "referenceSha256": "ecb17b336aaa46eb68ab368fbb198cb016c09d495cdd96b0d49e970717e7ce50"
+    },
+    {
+      "mode": "cooking",
+      "name": "Sangpyeong Coin",
+      "id": 66771,
+      "grade": 0,
+      "source": "New_Icon/03_ETC/00066771.dds",
+      "asset": "assets/opportunities/items/66771.webp",
+      "sha256": "ecb17b336aaa46eb68ab368fbb198cb016c09d495cdd96b0d49e970717e7ce50",
+      "referenceSha256": "ecb17b336aaa46eb68ab368fbb198cb016c09d495cdd96b0d49e970717e7ce50"
+    },
+    {
+      "mode": "processing",
+      "name": "Sangpyeong Coin",
+      "id": 66771,
+      "grade": 0,
+      "source": "New_Icon/03_ETC/00066771.dds",
+      "asset": "assets/opportunities/items/66771.webp",
+      "sha256": "ecb17b336aaa46eb68ab368fbb198cb016c09d495cdd96b0d49e970717e7ce50",
+      "referenceSha256": "ecb17b336aaa46eb68ab368fbb198cb016c09d495cdd96b0d49e970717e7ce50"
+    },
+    {
+      "mode": "alchemy",
+      "name": "Sangpyeong Coin Chest",
+      "id": 66783,
+      "grade": 0,
+      "source": "New_Icon/03_ETC/00779322_1.dds",
+      "asset": "assets/opportunities/items/66783.webp",
+      "sha256": "1d4fe2a9d9c51a9379c33632a17bea7c48a827cfa0aa3726a9a9af2dedab0ddc",
+      "referenceSha256": "1d4fe2a9d9c51a9379c33632a17bea7c48a827cfa0aa3726a9a9af2dedab0ddc"
+    },
+    {
+      "mode": "cooking",
+      "name": "Sangpyeong Coin Chest",
+      "id": 66783,
+      "grade": 0,
+      "source": "New_Icon/03_ETC/00779322_1.dds",
+      "asset": "assets/opportunities/items/66783.webp",
+      "sha256": "1d4fe2a9d9c51a9379c33632a17bea7c48a827cfa0aa3726a9a9af2dedab0ddc",
+      "referenceSha256": "1d4fe2a9d9c51a9379c33632a17bea7c48a827cfa0aa3726a9a9af2dedab0ddc"
+    },
+    {
+      "mode": "processing",
+      "name": "Sangpyeong Coin Chest",
+      "id": 66783,
+      "grade": 0,
+      "source": "New_Icon/03_ETC/00779322_1.dds",
+      "asset": "assets/opportunities/items/66783.webp",
+      "sha256": "1d4fe2a9d9c51a9379c33632a17bea7c48a827cfa0aa3726a9a9af2dedab0ddc",
+      "referenceSha256": "1d4fe2a9d9c51a9379c33632a17bea7c48a827cfa0aa3726a9a9af2dedab0ddc"
+    },
+    {
+      "mode": "alchemy",
+      "name": "Morning Light Boss Token",
+      "id": 761952,
+      "grade": 3,
+      "source": "New_Icon/03_ETC/00761952.dds",
+      "asset": "assets/opportunities/items/761952.webp",
+      "sha256": "239eca54f406ded01e497f29645f735921beb1fb9c8e3a5d0428e403848f29d5",
+      "referenceSha256": "239eca54f406ded01e497f29645f735921beb1fb9c8e3a5d0428e403848f29d5"
+    },
+    {
+      "mode": "cooking",
+      "name": "Morning Light Boss Token",
+      "id": 761952,
+      "grade": 3,
+      "source": "New_Icon/03_ETC/00761952.dds",
+      "asset": "assets/opportunities/items/761952.webp",
+      "sha256": "239eca54f406ded01e497f29645f735921beb1fb9c8e3a5d0428e403848f29d5",
+      "referenceSha256": "239eca54f406ded01e497f29645f735921beb1fb9c8e3a5d0428e403848f29d5"
+    },
+    {
+      "mode": "processing",
+      "name": "Morning Light Boss Token",
+      "id": 761952,
+      "grade": 3,
+      "source": "New_Icon/03_ETC/00761952.dds",
+      "asset": "assets/opportunities/items/761952.webp",
+      "sha256": "239eca54f406ded01e497f29645f735921beb1fb9c8e3a5d0428e403848f29d5",
+      "referenceSha256": "239eca54f406ded01e497f29645f735921beb1fb9c8e3a5d0428e403848f29d5"
+    },
+    {
+      "mode": "alchemy",
+      "name": "Dormant Fairy's Breath",
+      "id": 820014,
+      "grade": 3,
+      "source": "New_Icon/03_ETC/07_ProductMaterial/000820014.dds",
+      "asset": "assets/opportunities/items/820014.webp",
+      "sha256": "7a747757e0b8f2b277727d568dd12b22f791735e9b51d88482e651b4ff28b6e3",
+      "referenceSha256": "7a747757e0b8f2b277727d568dd12b22f791735e9b51d88482e651b4ff28b6e3"
+    },
+    {
+      "mode": "cooking",
+      "name": "Dormant Fairy's Breath",
+      "id": 820014,
+      "grade": 3,
+      "source": "New_Icon/03_ETC/07_ProductMaterial/000820014.dds",
+      "asset": "assets/opportunities/items/820014.webp",
+      "sha256": "7a747757e0b8f2b277727d568dd12b22f791735e9b51d88482e651b4ff28b6e3",
+      "referenceSha256": "7a747757e0b8f2b277727d568dd12b22f791735e9b51d88482e651b4ff28b6e3"
+    },
+    {
+      "mode": "processing",
+      "name": "Dormant Fairy's Breath",
+      "id": 820014,
+      "grade": 3,
+      "source": "New_Icon/03_ETC/07_ProductMaterial/000820014.dds",
+      "asset": "assets/opportunities/items/820014.webp",
+      "sha256": "7a747757e0b8f2b277727d568dd12b22f791735e9b51d88482e651b4ff28b6e3",
+      "referenceSha256": "7a747757e0b8f2b277727d568dd12b22f791735e9b51d88482e651b4ff28b6e3"
+    },
+    {
+      "mode": "alchemy",
+      "name": "Finely Polished Pine Plywood",
+      "id": 820893,
+      "grade": 3,
+      "source": "New_Icon/03_ETC/07_ProductMaterial/00820893.dds",
+      "asset": "assets/opportunities/items/820893.webp",
+      "sha256": "d5c2f337a90e5e22bdf3db015c7134a93874b21e6e7eb89e6fc4440e186b61e4",
+      "referenceSha256": "d5c2f337a90e5e22bdf3db015c7134a93874b21e6e7eb89e6fc4440e186b61e4"
+    },
+    {
+      "mode": "cooking",
+      "name": "Finely Polished Pine Plywood",
+      "id": 820893,
+      "grade": 3,
+      "source": "New_Icon/03_ETC/07_ProductMaterial/00820893.dds",
+      "asset": "assets/opportunities/items/820893.webp",
+      "sha256": "d5c2f337a90e5e22bdf3db015c7134a93874b21e6e7eb89e6fc4440e186b61e4",
+      "referenceSha256": "d5c2f337a90e5e22bdf3db015c7134a93874b21e6e7eb89e6fc4440e186b61e4"
+    },
+    {
+      "mode": "processing",
+      "name": "Finely Polished Pine Plywood",
+      "id": 820893,
+      "grade": 3,
+      "source": "New_Icon/03_ETC/07_ProductMaterial/00820893.dds",
+      "asset": "assets/opportunities/items/820893.webp",
+      "sha256": "d5c2f337a90e5e22bdf3db015c7134a93874b21e6e7eb89e6fc4440e186b61e4",
+      "referenceSha256": "d5c2f337a90e5e22bdf3db015c7134a93874b21e6e7eb89e6fc4440e186b61e4"
+    },
+    {
+      "mode": "alchemy",
+      "name": "Fairy's Breath",
+      "id": 821371,
+      "grade": 3,
+      "source": "New_Icon/03_ETC/07_ProductMaterial/000820014.dds",
+      "asset": "assets/opportunities/items/821371.webp",
+      "sha256": "7a747757e0b8f2b277727d568dd12b22f791735e9b51d88482e651b4ff28b6e3",
+      "referenceSha256": "7a747757e0b8f2b277727d568dd12b22f791735e9b51d88482e651b4ff28b6e3"
+    },
+    {
+      "mode": "cooking",
+      "name": "Fairy's Breath",
+      "id": 821371,
+      "grade": 3,
+      "source": "New_Icon/03_ETC/07_ProductMaterial/000820014.dds",
+      "asset": "assets/opportunities/items/821371.webp",
+      "sha256": "7a747757e0b8f2b277727d568dd12b22f791735e9b51d88482e651b4ff28b6e3",
+      "referenceSha256": "7a747757e0b8f2b277727d568dd12b22f791735e9b51d88482e651b4ff28b6e3"
+    },
+    {
+      "mode": "processing",
+      "name": "Fairy's Breath",
+      "id": 821371,
+      "grade": 3,
+      "source": "New_Icon/03_ETC/07_ProductMaterial/000820014.dds",
+      "asset": "assets/opportunities/items/821371.webp",
+      "sha256": "7a747757e0b8f2b277727d568dd12b22f791735e9b51d88482e651b4ff28b6e3",
+      "referenceSha256": "7a747757e0b8f2b277727d568dd12b22f791735e9b51d88482e651b4ff28b6e3"
+    }
+  ],
+  "excluded": [
+    {
+      "id": 890001,
+      "name": "Gold Bar Box",
+      "grade": 4,
+      "reason": "Same name identifies multiple grades. Preserve exact-ID exchange presentation."
+    },
+    {
+      "id": 45124,
+      "name": "Gold Bar Box",
+      "grade": 3,
+      "reason": "Same name identifies multiple grades. Preserve exact-ID exchange presentation."
+    },
+    {
+      "id": 890003,
+      "name": "Gold Bar Box",
+      "grade": 4,
+      "reason": "Same name identifies multiple grades. Preserve exact-ID exchange presentation."
+    }
+  ],
+  "representation": "Existing application WebP/PNG bytes; native identity/icon path/grade corroborated. No claim of freshly decoding every asset from archives."
+}

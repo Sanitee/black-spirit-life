@@ -213,6 +213,66 @@ void main() {
       expect(catalog.alchemy.items[name]!.isCraftable, isTrue, reason: name);
     }
   });
+  test(
+    'saved Insectivore leaf route no longer consumes Tree Spirit fragments',
+    () {
+      final state = _state(
+        CraftMode.processing,
+        target: 'Insectivore Plant Powder',
+        want: 10,
+        inventory: {'Tree Spirit Stone Fragment': 1000},
+        choices: {'Insectivore Plant Powder': 'leaves-and-fragments'},
+      );
+      final before = jsonEncode(state.toJson());
+      final plan = assembly.build(
+        catalog: catalog,
+        mode: CraftMode.processing,
+        state: state,
+      );
+      expect(
+        plan.missing.map((row) => row.name),
+        contains('Insectivore Plant Leaf'),
+      );
+      expect(
+        plan.missing.map((row) => row.name),
+        isNot(contains('Tree Spirit Stone Fragment')),
+      );
+      expect(
+        plan.steps.single.ingredients.single.name,
+        'Insectivore Plant Leaf',
+      );
+      expect(jsonEncode(state.toJson()), before);
+    },
+  );
+  test('Alchemy dependencies can use the same leaf and root inputs', () {
+    for (final entry in [
+      (
+        'Insectivore Plant Powder',
+        'leaves-and-fragments',
+        'Insectivore Plant Leaf',
+      ),
+      ('Insectivore Plant Sap', 'roots', 'Insectivore Plant Root'),
+    ]) {
+      final state = _state(
+        CraftMode.alchemy,
+        target: entry.$1,
+        want: 10,
+        choices: {entry.$1: entry.$2},
+      );
+      final before = jsonEncode(state.toJson());
+      final plan = assembly.build(
+        catalog: catalog,
+        mode: CraftMode.alchemy,
+        state: state,
+      );
+      expect(plan.steps.single.ingredients.single.name, entry.$3);
+      expect(
+        plan.steps.single.ingredients.single.need,
+        plan.steps.single.count * 5,
+      );
+      expect(jsonEncode(state.toJson()), before);
+    }
+  });
 }
 
 ModeState _state(

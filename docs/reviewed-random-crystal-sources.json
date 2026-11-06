@@ -1,0 +1,14 @@
+{
+  "date": "2026-11-03",
+  "status": "SCOPED_REFERENCE_AND_CALCULATION_CHECKS_PASS_AUDIT_ACTIVE",
+  "identity": "Exactly 15801–15818: JIN, BON, WON in that order for Harphia, Cobelinus, Viper, Hystria, Carmae, Addis. Exact names must agree; same-name knowledge/bound IDs excluded.",
+  "sources": [
+    "https://store.steampowered.com/news/posts/?appids=582660&enddate=1506534241",
+    "https://www.naeu.playblackdesert.com/en-US/News/Detail?groupContentNo=9763",
+    "Current installed PC descriptions, archive through 2026-10-31: research-items-NO-EFFECTS.json, SHA256 a54b5735052c990e189ff1a50afb6d5442cc80e0ba8dabff995979bc8d35c821"
+  ],
+  "evidence": "Publisher PC September 27, 2017 patch explicitly gives the six input families, 1 black crystal +1 Forest Fury +10 Magical Shards, Simple Alchemy, random matching JIN/BON/WON result. February 26, 2026 PC patch explicitly updates all eighteen material descriptions; the exact current descriptions corroborate inputs and random qualification. No console or Global Lab evidence used.",
+  "correction": "Six imported WON records incorrectly advertised fixed output 1. They now use the existing nonautomatic manual_conversion role; old ingredient lists/identities stay for audit and shared information, guaranteed output bounds removed. Their inherited baseOutput is inert legacy normalization, not a probability or a craft estimate. No guaranteed WON target, auto ingredient expansion, cost/profit route or Use recipe action is allowed.",
+  "presentation": "All eighteen item references receive the exact input list and plain random-result qualification through the shared projection. Eight exact input identities retain a qualified random-crafting usage hint; their six guaranteed WON consumer formulas are removed. Other consumers, market source/stock, art, effects and themes remain. No new layout.",
+  "remaining": "Exact JIN/BON/WON probabilities are not published by these sources and are not inferred as equal. Automatic cost/profit calculation remains disabled unless a separately evidenced model is introduced. This is not whole-item/source completeness certification."
+}

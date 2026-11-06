@@ -1,0 +1,23 @@
+{
+  "reviewedAt": "2026-11-03",
+  "id": 757032,
+  "name": "Stonetail Wind's Meal",
+  "scope": "Shared reference effects and stacking qualification only; existing exchange sources and calculators unchanged.",
+  "facts": {
+    "Mount EXP": "+10%",
+    "Training EXP": "+20%",
+    "All Life Skill Mastery": "+25",
+    "durationMinutes": 600,
+    "cooldownMinutes": 30,
+    "Health EXP": "150 instantly, not while Satiated",
+    "stacking": "Replaces other food effects except Health EXP; only the latest high-quality food applies."
+  },
+  "evidence": [
+    "Current PC item 757032 skill chains: typed buffs 52361/52362/52363, localized wrapper 52360, instant Health EXP 58749 and Satiated 58140.",
+    "https://blackdesert.pearlabyss.com/Asia/en-US/News/Notice/Detail?_boardNo=2046 (2021-01-13, shared Cron Meal cooldown and no overlap)",
+    "https://blackdesert.pearlabyss.com/ASIA/en-us/News/Notice/Detail?_boardNo=3120 (2022-07-06, Satiated Health EXP rule)",
+    "https://bdocodex.com/us/item/757032/ (current exact-item text corroboration)",
+    "audit/correctness-review-20261102/resumed-buff-validated-index-probe.json"
+  ],
+  "limits": "No event-item identity, live stock, new source availability, server-side probability or universal food-stack model inferred."
+}

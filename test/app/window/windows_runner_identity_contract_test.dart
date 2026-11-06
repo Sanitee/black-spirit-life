@@ -7,7 +7,12 @@ void main() {
   test('Windows runner is locked to the public application identity', () {
     expect(AppIdentity.productName, 'Black Spirit Life');
     expect(AppIdentity.displayName, 'Black Spirit Life');
-    expect(AppIdentity.applicationVersion, '0.1.13');
+    final packageVersion = RegExp(
+      r'^version:\s*([^+\s]+)(?:\+[^\s]+)?\s*$',
+      multiLine: true,
+    ).firstMatch(File('pubspec.yaml').readAsStringSync());
+    expect(packageVersion, isNotNull);
+    expect(AppIdentity.applicationVersion, packageVersion!.group(1));
     expect(AppIdentity.inProcessBetaUpdatesEnabled, isFalse);
     expect(AppIdentity.outOfProcessBetaUpdatesEnabled, isTrue);
     expect(AppIdentity.releaseChannel, 'win-x64-stable');

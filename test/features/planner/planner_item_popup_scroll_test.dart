@@ -24,6 +24,7 @@ void main() {
   ]) {
     for (final scenario in [
       (const Size(1200, 752), 1.0, 1.0),
+      (const Size(1200, 600), 1.0, 1.0),
       (const Size(1500, 940), 1.0, 1.25),
       (const Size(1200, 752), 2.0, 1.0),
     ]) {
@@ -101,7 +102,7 @@ void main() {
             await tester.pumpAndSettle();
             final popup = find.byType(ItemReferenceCard);
             expect(popup, findsOneWidget);
-            final rect = tester.getRect(popup);
+            var rect = tester.getRect(popup);
             expect(rect.top, greaterThanOrEqualTo(0));
             expect(rect.bottom, lessThanOrEqualTo(size.height));
             expect(rect.left, greaterThanOrEqualTo(0));
@@ -111,10 +112,24 @@ void main() {
               find.byKey(const ValueKey('attached-reference-tab:used')),
             );
             await tester.pumpAndSettle();
+            rect = tester.getRect(popup);
             final popupScroll = tester.state<ScrollableState>(
-              find.descendant(of: popup, matching: find.byType(Scrollable)),
+              find.descendant(
+                of: popup,
+                matching: find.byWidgetPredicate(
+                  (w) =>
+                      w is Scrollable && w.axisDirection == AxisDirection.down,
+                ),
+              ),
             );
-            expect(popupScroll.position.maxScrollExtent, greaterThan(0));
+            final canScroll = popupScroll.position.maxScrollExtent > 0;
+            if (textScale == 2 || size.height < 700) {
+              expect(
+                canScroll,
+                isTrue,
+                reason: 'Constrained content must remain scrollable.',
+              );
+            }
             await _capture(
               tester,
               '${spec.id}-${size.width.toInt()}-text${textScale.toInt()}-top',
@@ -146,10 +161,13 @@ void main() {
               80.0,
             );
             await wheel(rect.center, wheelStep);
-            expect(popupScroll.position.pixels, greaterThan(0));
+            expect(popupScroll.position.pixels, canScroll ? greaterThan(0) : 0);
             final firstOffset = popupScroll.position.pixels;
             await wheel(rect.center, wheelStep);
-            expect(popupScroll.position.pixels, greaterThan(firstOffset));
+            expect(
+              popupScroll.position.pixels,
+              canScroll ? greaterThan(firstOffset) : 0,
+            );
             await wheel(rect.center, 100000);
             expect(
               popupScroll.position.pixels,
@@ -174,13 +192,15 @@ void main() {
             await tester.drag(
               find.descendant(
                 of: popup,
-                matching: find.byType(SingleChildScrollView),
+                matching: find.byKey(
+                  const ValueKey('attached-reference-scroll'),
+                ),
               ),
               const Offset(0, -120),
             );
             await tester.pumpAndSettle();
             expect(popup, findsOneWidget);
-            expect(popupScroll.position.pixels, greaterThan(0));
+            expect(popupScroll.position.pixels, canScroll ? greaterThan(0) : 0);
             expect([
               for (final state in background) state.position.pixels,
             ], offsets);

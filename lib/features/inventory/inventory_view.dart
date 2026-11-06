@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import '../../app/state/planner_application_controller.dart';
+import '../../domain/catalog/item_name_presentation.dart';
 import '../../domain/models/craft_mode.dart';
 import '../../domain/state/inventory_storage.dart';
 import '../../domain/state/planner_state.dart';
@@ -226,6 +227,11 @@ class _InventoryViewState extends State<InventoryView> {
     setState(() => _session.search = value);
   }
 
+  void _clearSearch() {
+    _searchText.clear();
+    _commitSearch();
+  }
+
   void _selectCategory(String category) {
     final normalized = normalizeInventoryCategory(category);
     if (normalized.isEmpty) return;
@@ -369,7 +375,8 @@ class _InventoryViewState extends State<InventoryView> {
 
   void _groupItemQueryChanged(String query) {
     final selected = _session.groupItemSelection;
-    final clearSelection = selected != null && !_same(selected, query);
+    final clearSelection =
+        selected != null && !_same(selected, stableItemName(query));
     if (_session.groupItemQuery == query && !clearSelection) return;
     setState(() {
       _session.groupItemQuery = query;
@@ -379,7 +386,7 @@ class _InventoryViewState extends State<InventoryView> {
 
   void _selectGroupItem(String itemName) {
     setState(() {
-      _session.groupItemQuery = itemName;
+      _session.groupItemQuery = itemDisplayName(itemName);
       _session.groupItemSelection = itemName;
     });
   }
@@ -389,7 +396,7 @@ class _InventoryViewState extends State<InventoryView> {
     if (requested.isEmpty) return;
     InventoryItemRecord? selected;
     for (final item in projection.items) {
-      if (_same(item.name, requested)) {
+      if (_same(item.name, stableItemName(requested))) {
         selected = item;
         break;
       }
@@ -769,10 +776,7 @@ class _InventoryViewState extends State<InventoryView> {
                             icon: const AppVectorGlyph('close', size: 11),
                             semanticLabel: 'Clear inventory search',
                             tooltip: 'Clear inventory search',
-                            onPressed: () {
-                              _searchText.clear();
-                              _commitSearch();
-                            },
+                            onPressed: _clearSearch,
                           ),
                         ),
                   onChanged: _onSearchChanged,
@@ -851,6 +855,7 @@ class _InventoryViewState extends State<InventoryView> {
                 ? _InventoryEmptyState(
                     category: _activeFilterLabel(),
                     search: _session.search,
+                    onClearSearch: _clearSearch,
                   )
                 : _buildGroupedInventoryItems(context, rows: rows),
           ),
@@ -1331,10 +1336,7 @@ class _InventoryViewState extends State<InventoryView> {
                             padding: EdgeInsets.zero,
                             semanticLabel: 'Clear inventory search',
                             tooltip: 'Clear inventory search',
-                            onPressed: () {
-                              _searchText.clear();
-                              _commitSearch();
-                            },
+                            onPressed: _clearSearch,
                             child: const AppVectorGlyph('close', size: 11),
                           ),
                         ),
@@ -1590,6 +1592,7 @@ class _InventoryViewState extends State<InventoryView> {
                   ? _InventoryEmptyState(
                       category: _session.selectedCategory,
                       search: _session.search,
+                      onClearSearch: _clearSearch,
                     )
                   : FocusTraversalGroup(
                       policy: OrderedTraversalPolicy(),
@@ -1733,7 +1736,7 @@ class _InventoryViewState extends State<InventoryView> {
         controller: _groupItemText,
         items: itemNames,
         value: _session.groupItemSelection,
-        labelFor: (item) => item,
+        labelFor: itemDisplayName,
         hintText: 'Search recipes and items',
         semanticLabel:
             'Select existing item to add to ${_session.selectedCategory}',
@@ -2061,10 +2064,15 @@ class _InventoryColumnHeader extends StatelessWidget {
 }
 
 class _InventoryEmptyState extends StatelessWidget {
-  const _InventoryEmptyState({required this.category, required this.search});
+  const _InventoryEmptyState({
+    required this.category,
+    required this.search,
+    required this.onClearSearch,
+  });
 
   final String category;
   final String search;
+  final VoidCallback onClearSearch;
 
   @override
   Widget build(BuildContext context) {
@@ -2077,7 +2085,42 @@ class _InventoryEmptyState extends StatelessWidget {
       label: search.isEmpty
           ? '$scope are currently empty.'
           : 'No $scope match "$search".',
-      child: const SizedBox.expand(),
+      child: search.isEmpty
+          ? const SizedBox.expand()
+          : LayoutBuilder(
+              builder: (context, constraints) => SingleChildScrollView(
+                primary: false,
+                child: Padding(
+                  padding: EdgeInsets.fromLTRB(
+                    24,
+                    constraints.hasBoundedHeight
+                        ? (constraints.maxHeight * .2).clamp(0.0, 64.0)
+                        : 64,
+                    24,
+                    24,
+                  ),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      ExcludeSemantics(
+                        child: Text(
+                          'No matching items',
+                          style: context.visualTheme.typography.body.copyWith(
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 14),
+                      AppButton.label(
+                        'Clear search',
+                        key: InventoryActionKeys.clearSearchResults,
+                        onPressed: onClearSearch,
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
     );
   }
 }

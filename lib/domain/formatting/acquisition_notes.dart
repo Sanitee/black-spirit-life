@@ -3,11 +3,33 @@
 /// articles in "Buy from") are merged; quantities and restrictions stay intact.
 List<String> composeAcquisitionNotes({
   required Iterable<String?> notes,
+  Iterable<String> routes = const [],
   String? vendor,
   String? location,
 }) {
   final lines = <String>[];
   final identities = <String>{};
+  // A structured route is one way of obtaining the item. Its later steps and
+  // restrictions must not masquerade as independent alternatives.
+  for (final route in routes) {
+    if (!route.contains('\n') && !route.contains('\r')) {
+      for (final fact in _facts(route)) {
+        if (identities.add(_identity(fact))) lines.add(fact);
+      }
+      continue;
+    }
+    final routeLines = route
+        .trim()
+        .split(RegExp(r'[\r\n]+'))
+        .map((s) => s.trim())
+        .toList();
+    final text = routeLines.first.endsWith(':')
+        ? routeLines.join('\n')
+        : routeLines.join(' ');
+    if (text.isEmpty || !identities.add(_identity(text))) continue;
+    lines.add(text);
+    identities.addAll(_facts(route).map(_identity));
+  }
   for (final note in notes) {
     for (final line in _facts(note ?? '')) {
       if (identities.add(_identity(line))) lines.add(line);
@@ -48,6 +70,17 @@ Iterable<String> _facts(String text) sync* {
       if (!'.!?'.contains(paragraph[index])) continue;
       if (index + 1 < paragraph.length &&
           !RegExp(r'\s').hasMatch(paragraph[index + 1])) {
+        continue;
+      }
+      // A level abbreviation is part of its requirement, not a new fact.
+      // Keep the number attached (e.g. "Lv. 5 Barters") without merging real
+      // sentences or changing the source's wording.
+      if (paragraph[index] == '.' &&
+          RegExp(
+            r'\bLv\.$',
+            caseSensitive: false,
+          ).hasMatch(paragraph.substring(start, index + 1)) &&
+          RegExp(r'^\s+\d').hasMatch(paragraph.substring(index + 1))) {
         continue;
       }
       final fact = paragraph.substring(start, index + 1).trim();

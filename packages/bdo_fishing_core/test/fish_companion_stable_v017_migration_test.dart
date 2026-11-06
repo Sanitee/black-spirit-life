@@ -147,6 +147,8 @@ void main() {
           'sessions': 0,
           'fish': 0,
           'value': 0,
+          'knownValue': 0,
+          'unknownPriceFish': 0,
           'durationMinutes': null,
           'durationSessions': 0,
           'fishPerHour': null,

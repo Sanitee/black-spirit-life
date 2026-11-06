@@ -1,0 +1,113 @@
+{
+  "date": "2026-11-03",
+  "beforeSha256": "b5d863817aab69b48335594674d066240bf219afbd4a4e73edf7f10becb0dcd3",
+  "afterSha256": "5312d5da36565c25218e29269baea15b0e308f9123ce020d19c547d89b2b3b1c",
+  "bytes": 30299215,
+  "change": "Restore two absent standard draught recipes, each with exact 1:3 grade alternatives and a separately selectable 10x batch. No inferred EXP or probability.",
+  "sources": [
+    {
+      "url": "https://bdocodex.com/us/mrecipe/1704/",
+      "scope": "Indexed PC standard Beast output one and ingredients, corroborating current exact client text."
+    },
+    {
+      "url": "https://bdocodex.com/us/mrecipe/1705/",
+      "scope": "Indexed PC standard Giant output one and ingredients."
+    },
+    {
+      "url": "https://bdolytics.com/api/trpc/calculator.getCraftingRecipes",
+      "scope": "2026-11-02 retained exact group/ingredient-matched bulk recipes: output ten."
+    },
+    {
+      "url": "https://blackdesert.pearlabyss.com/Asia/en-US/News/Notice/Detail?_boardNo=738",
+      "date": "2019-01-09",
+      "scope": "Official PC introduction of Ibellab bulk catalyst."
+    }
+  ],
+  "limitations": "Mix-elixir routes remain separate review candidates. Current client Ibellab description requires Alchemy Skilled 1 for bulk; neither Processing skill nor an undisclosed EXP value is substituted.",
+  "recipes": [
+    {
+      "id": 792,
+      "name": "Beast's Draught",
+      "description": "A draught with an offensive function.\n\n- Usage: Gain the following effects\n\n- Effects:\n   Extra AP Against Monsters +15\n   Combat EXP +20%\n   Skill EXP +10%\n   Recover 3 HP on Hits\n   Monster Damage Reduction Rate +10%\n   Critical Hit +3\n   Weight Limit +100 LT\n\n- Duration: 20 min\n- Cooldown: 10 sec\n\n※ Type: Draught\n※ Only the effects of the last draught used will be applied.\n※ Draught effects do not stack with other elixir/draught effects, except with perfumes, Whale Tendon Elixir, and Tough Whale Tendon Elixir.\n\n- How to Obtain: Processing ({KeyBind:Manufacture}) - Simple Alchemy with the following materials \n\n- Materials:\nGrim Reaper's Elixir x3\nEXP Elixir x3\nElixir of Will x3\nTears of the Falling Moon x1\n\n※ Higher grade versions of the same elixir can be used as a substitute at a 1:3 ratio.",
+      "bulkReference": {
+        "recipeKey": "792:badb5589a4bd",
+        "productItemId": 792,
+        "processingType": "simple_alchemy",
+        "lifeskillType": "processing",
+        "minProc": 10,
+        "maxProc": 10,
+        "processingTime": 9,
+        "xp": 0,
+        "ingredients": [
+          {
+            "type": "item",
+            "itemId": 4925,
+            "quantity": 10
+          },
+          {
+            "type": "item",
+            "itemId": 4986,
+            "quantity": 1
+          },
+          {
+            "type": "group",
+            "groupId": 7020,
+            "quantity": 30
+          },
+          {
+            "type": "group",
+            "groupId": 7120,
+            "quantity": 30
+          },
+          {
+            "type": "group",
+            "groupId": 7140,
+            "quantity": 30
+          }
+        ]
+      }
+    },
+    {
+      "id": 793,
+      "name": "Giant's Draught",
+      "description": "A draught with an offensive function.\n\n- Usage: Gain the following effects\n\n- Effects: \n   All AP +10\n   Max HP +150\n   All Special Attack Extra Damage +10%\n   Movement Speed +3\n   Critical Hit +3\n   Max Stamina +200\n\n- Duration: 20 min\n- Cooldown: 10 sec\n\n※ Type: Draught\n※ Only the effects of the last draught used will be applied.\n※ Draught effects do not stack with other elixir/draught effects, except with perfumes, Whale Tendon Elixir, and Tough Whale Tendon Elixir.\n\n- How to Obtain: Processing ({KeyBind:Manufacture}) - Simple Alchemy with the following materials\n\n- Materials:\nElixir of Fury x3\nElixir of Shock x3\nElixir of Perforation x3\nTears of the Falling Moon x1\n\n※ Higher-grade versions of the same elixir can be used as a substitute at a 1:3 ratio.",
+      "bulkReference": {
+        "recipeKey": "793:fdeff35111b8",
+        "productItemId": 793,
+        "processingType": "simple_alchemy",
+        "lifeskillType": "processing",
+        "minProc": 10,
+        "maxProc": 10,
+        "processingTime": 9,
+        "xp": 0,
+        "ingredients": [
+          {
+            "type": "item",
+            "itemId": 4925,
+            "quantity": 10
+          },
+          {
+            "type": "item",
+            "itemId": 4986,
+            "quantity": 1
+          },
+          {
+            "type": "group",
+            "groupId": 6800,
+            "quantity": 30
+          },
+          {
+            "type": "group",
+            "groupId": 7040,
+            "quantity": 30
+          },
+          {
+            "type": "group",
+            "groupId": 7620,
+            "quantity": 30
+          }
+        ]
+      }
+    }
+  ]
+}

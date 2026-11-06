@@ -185,9 +185,11 @@ void main() {
               matching: find.byKey(const ValueKey('glass-control-finish')),
             ),
           );
-          alphas.add(
-            (finish.tween.end! as BoxDecoration).gradient!.colors.first.a,
-          );
+          final decoration = finish.tween.end!;
+          final face = decoration is SegmentedGlassDecoration
+              ? decoration.base
+              : decoration as BoxDecoration;
+          alphas.add(face.gradient!.colors.first.a);
           final search = tester.widget<TextField>(
             find.byKey(const ValueKey('spot-search')),
           );
@@ -431,9 +433,9 @@ void main() {
         );
         final markerPoint = tester.getCenter(marker);
         final townPoint = tester.getCenter(town);
-      final labelPoint = tester.getCenter(
-        find.byKey(const ValueKey('map-spot-label-clip-fixture')),
-      );
+        final labelPoint = tester.getCenter(
+          find.byKey(const ValueKey('map-spot-label-clip-fixture')),
+        );
         expect(markerPoint.dx, lessThan(300));
         expect(townPoint.dx, lessThan(300));
         expect(marker.hitTestable(), findsNothing);
@@ -473,7 +475,7 @@ void main() {
         for (final point in [
           markerPoint,
           townPoint,
-        labelPoint,
+          labelPoint,
           Offset(260, townPoint.dy),
         ]) {
           final offset = (point.dy.floor() * 800 + point.dx.floor()) * 4;

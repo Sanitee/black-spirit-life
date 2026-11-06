@@ -55,7 +55,11 @@ void main() {
   test('owned archived items and old choices survive assembly and saving', () {
     final original = inventoryDocument(showDeleteTools: false);
     final owned = <String, double>{
-      for (final name in temporarilyArchivedItemsById.values) name: 7,
+      for (final name in [
+        ...temporarilyArchivedItemsById.values,
+        ...removedPcItemsById.values,
+      ])
+        name: 7,
     };
     final state = original.copyWith(
       alchemy: original.alchemy.copyWith(

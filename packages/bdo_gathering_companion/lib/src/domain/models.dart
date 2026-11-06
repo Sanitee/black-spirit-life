@@ -194,6 +194,7 @@ class Buff {
           .toList(),
     'effects': effects,
     'durationMinutes': duration,
+    if (durationNote.isNotEmpty) 'durationNote': durationNote,
   };
 }
 

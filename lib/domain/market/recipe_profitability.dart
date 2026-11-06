@@ -2,6 +2,7 @@ import '../models/catalog_models.dart';
 import '../planner/planner_engine.dart';
 import '../planner/planner_models.dart' as planning;
 import '../planner/recipe_route_economics.dart';
+import '../planner/reviewed_recipe_yields.dart';
 import '../planner/source_resolution.dart';
 import '../state/planner_state.dart';
 import 'market_calculations.dart';
@@ -55,6 +56,7 @@ final class RecipeProfitabilityQuote {
     required this.marketNetRate,
     required List<RecipeIngredientCost> ingredientCosts,
     required Set<String> directMarketItemNames,
+    this.outputNote,
   }) : ingredientCosts = List<RecipeIngredientCost>.unmodifiable(
          ingredientCosts,
        ),
@@ -64,6 +66,7 @@ final class RecipeProfitabilityQuote {
   final String? unavailableItemName;
   final String? selectedVariantId;
   final double? outputPerCraft;
+  final String? outputNote;
   final double? ingredientCost;
   final double? grossRevenue;
   final double? netRevenue;
@@ -85,8 +88,9 @@ final class RecipeProfitabilityQuote {
 /// The estimate intentionally ignores owned inventory, recursively crafted
 /// inputs, byproducts, utensils, energy, and production time. It uses the
 /// active complete recipe variant plus the user's saved substitute and quality
-/// selections. Only prices in the current mode's market cache are accepted;
-/// bundled fallback prices are never considered current market evidence.
+/// selections. Uses the current mode's price cache unless the caller supplies
+/// a live price resolver. A resolver's null is authoritative, not a request to
+/// fall back to old prices. Bundled fallback prices are never market evidence.
 /// A supplied [calculate] selectedVariantId quotes the formula displayed by the
 /// caller; otherwise equivalent routes are compared for buying one full craft.
 final class RecipeProfitabilityCalculator {
@@ -101,15 +105,31 @@ final class RecipeProfitabilityCalculator {
     required planning.PlannerRules rules,
     required MarketTax marketTax,
     String? selectedVariantId,
+    List<RecipeProfitabilityInput>? resolvedIngredients,
+    double? Function(String name)? marketPriceFor,
   }) {
-    final selection = _resolveSelection(
-      engine: engine,
-      recipe: recipe,
-      recipes: recipes,
-      state: state,
-      rules: rules,
-      selectedVariantId: selectedVariantId,
-    );
+    final selection = resolvedIngredients == null
+        ? _resolveSelection(
+            engine: engine,
+            recipe: recipe,
+            recipes: recipes,
+            state: state,
+            rules: rules,
+            selectedVariantId: selectedVariantId,
+          )
+        : _RecipeSelection(
+            recipe: recipe.resolveVariant(selectedVariantId),
+            selectedVariantId: selectedVariantId,
+            ingredients: resolvedIngredients,
+            alternativeMarketNames: const {},
+          );
+    double? priceFor(String name) {
+      final price = marketPriceFor == null
+          ? _positiveMapValue(state.market.prices, name)
+          : marketPriceFor(name);
+      return price != null && price.isFinite && price > 0 ? price : null;
+    }
+
     final marketItemNames = _directMarketItemNames(
       outputName: recipe.name,
       ingredients: selection.ingredients,
@@ -174,7 +194,7 @@ final class RecipeProfitabilityCalculator {
         netRate: netRate,
       );
     }
-    final outputPrice = _positiveMapValue(state.market.prices, recipe.name);
+    final outputPrice = priceFor(recipe.name);
     if (outputPrice == null) {
       return unavailable(
         RecipeProfitabilityUnavailableReason.outputPriceUnavailable,
@@ -218,10 +238,7 @@ final class RecipeProfitabilityCalculator {
             ingredientCosts: ingredientCosts,
           );
         }
-        final marketPrice = _positiveMapValue(
-          state.market.prices,
-          ingredient.selectedName,
-        );
+        final marketPrice = priceFor(ingredient.selectedName);
         if (marketPrice == null) {
           return unavailable(
             RecipeProfitabilityUnavailableReason.ingredientPriceUnavailable,
@@ -289,6 +306,7 @@ final class RecipeProfitabilityCalculator {
       unavailableItemName: null,
       selectedVariantId: selection.selectedVariantId,
       outputPerCraft: outputPerCraft,
+      outputNote: reviewedRecipeYieldNote(selection.recipe),
       ingredientCost: totalIngredientCost,
       grossRevenue: grossRevenue,
       netRevenue: netRevenue,
@@ -344,12 +362,14 @@ final class _RecipeSelection {
 
   final Recipe recipe;
   final String? selectedVariantId;
-  final List<_SelectedIngredient> ingredients;
+  final List<RecipeProfitabilityInput> ingredients;
   final Set<String> alternativeMarketNames;
 }
 
-final class _SelectedIngredient {
-  const _SelectedIngredient({
+/// A caller may reuse its already-resolved Planner selection for a quote.
+/// Quantities must be those of the actual selected grade for one attempt.
+final class RecipeProfitabilityInput {
+  const RecipeProfitabilityInput({
     required this.originalName,
     required this.selectedName,
     required this.grade,
@@ -381,7 +401,7 @@ _RecipeSelection _resolveSelection({
       recipe.variantById(selectedVariantId)?.id ??
       routeSelection.selectedVariantId;
   final resolvedRecipe = recipe.resolveVariant(effectiveVariantId);
-  final ingredients = <_SelectedIngredient>[];
+  final ingredients = <RecipeProfitabilityInput>[];
   for (final ingredient in resolvedRecipe.ingredients) {
     final selected = engine.previewIngredientSelection(
       recipes: recipes,
@@ -391,7 +411,7 @@ _RecipeSelection _resolveSelection({
       rules: rules,
     );
     ingredients.add(
-      _SelectedIngredient(
+      RecipeProfitabilityInput(
         originalName: ingredient.name,
         selectedName: selected.name,
         grade: selected.grade,
@@ -402,7 +422,7 @@ _RecipeSelection _resolveSelection({
   return _RecipeSelection(
     recipe: resolvedRecipe,
     selectedVariantId: effectiveVariantId,
-    ingredients: List<_SelectedIngredient>.unmodifiable(ingredients),
+    ingredients: List<RecipeProfitabilityInput>.unmodifiable(ingredients),
     alternativeMarketNames: <String>{
       for (final option in routeSelection.options)
         if (!option.npcBuyable) option.ingredientName,
@@ -412,7 +432,7 @@ _RecipeSelection _resolveSelection({
 
 Set<String> _directMarketItemNames({
   required String outputName,
-  required List<_SelectedIngredient> ingredients,
+  required List<RecipeProfitabilityInput> ingredients,
   required Map<String, Recipe> recipes,
   required planning.PlannerRules rules,
 }) {

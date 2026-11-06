@@ -36,7 +36,7 @@ void main() {
       );
       expect(
         glass.selectedGradient.colors.first,
-        Color.alphaBlend(ink.withAlpha(8), const Color(0xFF51343D)),
+        Color.alphaBlend(ink.withAlpha(8), const Color(0xFF4D3039)),
       );
       for (final face in [
         glass.surfaceGradient,

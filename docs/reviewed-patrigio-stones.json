@@ -1,0 +1,47 @@
+{
+  "date": "2026-11-03",
+  "status": "IMPLEMENTED_TESTED_AND_BUILT",
+  "scope": "Black Stone16001 and Sharp Black Crystal Shard4998 gain the existing conditional Patrigio wording already used for Mythical Feather/Primordial Crystal. No fixed Silver vendor, guaranteed stock, or roll probability added.",
+  "primarySources": [
+    {
+      "url": "https://www.naeu.playblackdesert.com/en-US/News/Detail?groupContentNo=6868&countryType=en-US",
+      "date": "2024-04-09",
+      "scope": "Explicitly replaces Patrigio's Black Stone (Armor)/Hard Black Crystal Shard offers with Black Stone/Sharp Black Crystal Shard."
+    },
+    {
+      "url": "https://www.naeu.playblackdesert.com/en-US/News/Detail?groupContentNo=5637&countryType=en-US",
+      "date": "2023-07-19",
+      "scope": "PC NA/EU: random night shop,22:00–07:00 game time,50Energy per check,variable price; Mythical Feather added."
+    },
+    {
+      "url": "https://www.naeu.playblackdesert.com/en-US/Wiki?wikiNo=17",
+      "scope": "Current NPC Shops guide confirms random night-only offers,Energy cost and nonconstant prices. Does not provide a full current roster or per-item roll probabilities."
+    },
+    {
+      "url": "https://www.naeu.playblackdesert.com/en-US/News/Detail?groupContentNo=8804&countryType=en-US",
+      "date": "2025-07-10",
+      "scope": "Energy use can draw from other Family characters; this does not turn shop offers into ordinary fixed-price purchases."
+    }
+  ],
+  "notCertified": "Exact offer probability, quantity/price distribution and exhaustive current roster. These are not inferred from retained NPC relationships or the general item buyPrice field. Existing review records retain those distinct questions.",
+  "preserved": "Existing IDs,prices,source badge precedence,all calculators,catalog data and normal-market freshness remain unchanged. No ordinary NPC route or cost equation added. No personal profile/game access.",
+  "verification": {
+    "tests": [
+      {
+        "file": "resumed-patrigio-stones-tests.jsonl",
+        "passed": 111
+      },
+      {
+        "file": "resumed-patrigio-stones-projection-tests.jsonl",
+        "passed": 1
+      },
+      {
+        "file": "resumed-patrigio-stones-layout-tests.jsonl",
+        "passed": 246
+      }
+    ],
+    "sourceOmissionsCorrected": 2,
+    "scopedFlagsClosed": 0,
+    "buildEvidence": "resumed-patrigio-stones-windows-release-build.txt"
+  }
+}

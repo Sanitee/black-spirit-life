@@ -1,0 +1,41 @@
+{
+  "date": "2026-10-30",
+  "request": "Open Opportunities on Crafting; clear searches after application restart except Planner; simplify Fish search to one field and fish names with game artwork.",
+  "source": "[private-source]/Fresh Searches 20261030",
+  "branch": "codex/fresh-searches",
+  "baseline": "Complete Open Emblems 20261030 source, including its staged content-sized item windows and shared map emblems. HEAD alone is not this candidate.",
+  "changes": [
+    "Opportunities controller initialization chooses Crafting while retaining filters, mode, balances and all non-search settings. Existing startup-only clearing of Crafting, Exchanges and Best use searches remains. Tab round-trips retain the current section and query.",
+    "Fish Map replaces the native datalist with an accessible combobox/listbox: one name and the existing game-art icon per row, with no item ID, duplicate subtitle or tooltip. Place and item-ID search still use existing table filtering.",
+    "Only the outer search frame shows focus. Suggestions scroll within the available pane height, support arrows, Enter, Escape, Tab and pointer selection, and restart at the top for a new query. Images load lazily; absent art leaves no broken-image symbol.",
+    "Fish startup explicitly starts the map query empty. The immutable payload manifests and runtime pin were regenerated, without changing the compiled service, port contract, journal, profiles or reference data."
+  ],
+  "searchAudit": {
+    "Opportunities": "Startup clearing already existed for the three query/selection fields. Section initialization is the new change; startup does not rewrite settings just to clear a query.",
+    "Inventory and storage": "InventorySessionController owns per-mode search and group-item query in memory. New sessions start empty; saved stock and storage imports are unchanged.",
+    "Recipe editor and Recipe Book": "EditorModeSession and RecipeBookController searches, including workspace Recipe Book retention, are memory-only. Custom catalog searchKeywords are reference metadata, not disposable queries.",
+    "Resource Map, housing and worker planning": "Map search and target-search TextEditingControllers start empty. Back history is an in-memory list, not saved search state. Selected worker recipes, node networks, CP, housing, checklist and favorites remain saved.",
+    "Gathering": "Field Guide, history and manual-loot query controls are initialized empty in widget state. Saved session records and calculator configuration are not cleared.",
+    "Fish": "Map query and statistics-location filters are in-memory controls. Browser storage stores opacity, not queries. Session/profile API records are untouched. Shell HTML/CSS/JS already use no-store responses.",
+    "Planner exception": "No Planner state or search lifecycle is changed. A synthetic disk round-trip verifies the saved Planner search and selected recipe remain."
+  },
+  "verification": {
+    "searchInventoryEditorResourceRegression": "84 tests passed",
+    "opportunitiesNavigation": "7 tests passed; earlier run also included 17 preference tests later superseded by the expanded regression run",
+    "fishPackage": "75 tests passed, including payload integrity and isolated compiled service startup",
+    "gathering": "52 passed, 1 existing failure reproduced on unchanged Open Emblems baseline at field_guide_projection_test.dart:2970 (missing expected detail-dialog widget)",
+    "headlessFishBrowser": "9 groups passed with real bundled service/catalog/art: field styling, selection, keyboard dismissal, place/ID queries, long scrolling, 100/150/200 percent layouts, reload and tab retention",
+    "nativeFish": "Two hidden WebView startups on Stable port 8791 with the same disposable synthetic browser profile",
+    "analysis": "Focused analysis passed",
+    "windowsBuild": "Release build passed; full source and runnable manifest is in workspace audit/fresh-searches-20261030",
+    "captures": "Workspace work/visuals/fresh-searches-actual"
+  },
+  "boundaries": {
+    "personalProfilesAccessed": false,
+    "visibleAppLaunched": false,
+    "installedAppChanged": false,
+    "earlierCandidatesChanged": false,
+    "handedToLiveRelease": false,
+    "published": false
+  }
+}

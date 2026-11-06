@@ -85,7 +85,7 @@ class DerivedIndexCacheTest(unittest.TestCase):
         self._temporary.cleanup()
 
     def test_cached_and_uncached_bootstrap_are_exactly_equal(self) -> None:
-        uncached = FishDataRepository(self.root)
+        uncached = FishDataRepository(self.root, self.root / "data" / "cache")
         uncached_output = normalized(uncached.bootstrap())
         cache_path = uncached.cache_root / DERIVED_INDEX_CACHE_NAME
 
@@ -107,12 +107,45 @@ class DerivedIndexCacheTest(unittest.TestCase):
             "_rebuild_indexes",
             side_effect=AssertionError("a valid derived cache must skip rebuilding"),
         ):
-            cached = FishDataRepository(self.root)
+            cached = FishDataRepository(self.root, self.root / "data" / "cache")
 
         self.assertEqual(normalized(cached.bootstrap()), uncached_output)
 
+    def test_mixed_catalog_keeps_other_loot_out_of_fish_projections(self) -> None:
+        # The 2026-11-02 public feed adds catalog_kind=item alongside fish/dried.
+        # Reproduce that contract in an isolated reference cache, not user data.
+        path = self.root / "data" / "cache" / "fish.json"
+        document = json.loads(path.read_text(encoding="utf-8"))
+        document["fish"].extend([
+            {"item_id": 40218, "name": "Ancient Relic Crystal Shard",
+             "catalog_kind": "item", "grade": "Rare", "is_dried": False,
+             "vendor_price": 100000, "catch_methods": ["rod"]},
+            {"item_id": 9000001, "name": "Synthetic fish", "catalog_kind": "fish",
+             "grade": "Rare", "vendor_price": 1000, "catch_methods": ["rod"]},
+            {"item_id": 9000002, "name": "Synthetic unknown type", "catalog_kind": "new-kind",
+             "grade": "Prize", "vendor_price": 999999999, "catch_methods": ["rod"]},
+            {"item_id": 9000003, "name": "Synthetic dried", "catalog_kind": "dried",
+             "is_dried": False, "grade": "Rare", "vendor_price": 1000},
+        ])
+        path.write_text(json.dumps(document), encoding="utf-8")
+        repository = FishDataRepository(self.root, self.root / "data" / "cache")
+        ids = {row["itemId"] for row in repository.bootstrap()["fish"]}
+        self.assertIn(9000001, ids)
+        self.assertIn(8475, ids)  # Old snapshots without catalog_kind remain valid.
+        self.assertIn(8431, ids)  # Explicitly reviewed non-guide Balenos Mullet.
+        for item_id in [40218, 9000002, 9000003]:
+            self.assertNotIn(item_id, ids)
+            self.assertIsNone(repository.catalog_item(item_id))
+            self.assertIn(item_id, repository.fish_by_id)  # Loot/icon facts retained.
+        relics = [item for zone in repository.bootstrap()["zones"]
+                  for item in zone["items"] if item["itemId"] == 40218]
+        self.assertTrue(relics)
+        self.assertTrue(all(not item["isFish"] for item in relics))
+        cached = FishDataRepository(self.root, self.root / "data" / "cache")
+        self.assertEqual(ids, {row["itemId"] for row in cached.bootstrap()["fish"]})
+
     def test_runtime_snapshot_receipt_hashes_one_coherent_cache(self) -> None:
-        repository = FishDataRepository(self.root)
+        repository = FishDataRepository(self.root, self.root / "data" / "cache")
         receipt_path = repository.cache_root / RUNTIME_SNAPSHOT_RECEIPT_NAME
         receipt = json.loads(receipt_path.read_text(encoding="utf-8"))
 
@@ -134,7 +167,7 @@ class DerivedIndexCacheTest(unittest.TestCase):
         )
 
     def test_invalid_cache_fingerprints_rebuild_and_replace_atomically(self) -> None:
-        initial = FishDataRepository(self.root)
+        initial = FishDataRepository(self.root, self.root / "data" / "cache")
         cache_path = initial.cache_root / DERIVED_INDEX_CACHE_NAME
         original_rebuild = FishDataRepository._rebuild_indexes
 
@@ -155,7 +188,7 @@ class DerivedIndexCacheTest(unittest.TestCase):
                 autospec=True,
                 side_effect=counted_rebuild,
             ):
-                FishDataRepository(self.root)
+                FishDataRepository(self.root, self.root / "data" / "cache")
             self.assertEqual(rebuild_count, 1)
             replacement = json.loads(cache_path.read_text(encoding="utf-8"))
             self.assertEqual(
@@ -183,7 +216,7 @@ class DerivedIndexCacheTest(unittest.TestCase):
             autospec=True,
             wraps=original_rebuild,
         ) as rebuild:
-            recovered = FishDataRepository(self.root)
+            recovered = FishDataRepository(self.root, self.root / "data" / "cache")
         self.assertEqual(rebuild.call_count, 1)
         self.assertEqual(
             normalized(recovered.bootstrap()), normalized(initial.bootstrap())
@@ -207,7 +240,7 @@ class DerivedIndexCacheTest(unittest.TestCase):
         with mock.patch.object(
             data_module, "datetime", fixed_datetime(current_time)
         ):
-            fresh = FishDataRepository(self.root)
+            fresh = FishDataRepository(self.root, self.root / "data" / "cache")
         fresh_zone = next(
             zone for zone in fresh._zones if zone.get("rgbU32") == zone_rgb
         )
@@ -225,7 +258,7 @@ class DerivedIndexCacheTest(unittest.TestCase):
                 ),
             ),
         ):
-            cached = FishDataRepository(self.root)
+            cached = FishDataRepository(self.root, self.root / "data" / "cache")
         cached_zone = next(
             zone for zone in cached._zones if zone.get("rgbU32") == zone_rgb
         )
@@ -238,11 +271,11 @@ class DerivedIndexCacheTest(unittest.TestCase):
         with mock.patch.object(
             data_module, "datetime", fixed_datetime(expired_time)
         ):
-            rebuilt = FishDataRepository(self.root)
+            rebuilt = FishDataRepository(self.root, self.root / "data" / "cache")
         self.assertEqual(normalized(rebuilt.bootstrap()), cached_output)
 
     def test_source_change_during_serialization_keeps_last_good_cache(self) -> None:
-        repository = FishDataRepository(self.root)
+        repository = FishDataRepository(self.root, self.root / "data" / "cache")
         cache_path = repository.cache_root / DERIVED_INDEX_CACHE_NAME
         receipt_path = repository.cache_root / RUNTIME_SNAPSHOT_RECEIPT_NAME
         last_good = cache_path.read_bytes()

@@ -155,6 +155,50 @@ void main() {
   }
 
   testWidgets(
+    'old Khan setup visibly requests review without changing values',
+    (tester) async {
+      final store = newStore(
+        profile: GatheringPreparation(
+          baseSettings: const BairogCalculatorSettings(
+            mastery: 1800,
+            gatheringDropRatePercent: 40,
+          ),
+          buffIds: {'buff-45514'},
+          statsConfirmed: true,
+        ),
+      );
+      (store.preferences[gatheringPreparationPreferenceKey]
+              as Map)['schemaVersion'] =
+          1;
+      final before = jsonEncode(
+        store.preferences[gatheringPreparationPreferenceKey],
+      );
+      await open(tester, store);
+      expect(panel(tester).statsConfirmed, isFalse);
+      expect(panel(tester).requiresStoneStatReview, isTrue);
+      expect(
+        find.byKey(const ValueKey('gathering-stone-stat-review')),
+        findsOneWidget,
+      );
+      expect(panel(tester).baseSettings.mastery, 1800);
+      expect(
+        jsonEncode(store.preferences[gatheringPreparationPreferenceKey]),
+        before,
+      );
+      await enter(tester, 'mastery', '1775');
+      await enter(tester, 'drop-rate', '40');
+      expect(panel(tester).statsConfirmed, isTrue);
+      expect(panel(tester).requiresStoneStatReview, isFalse);
+      expect(panel(tester).effectiveSettings.mastery, 1800);
+      expect(
+        find.byKey(const ValueKey('gathering-stone-stat-review')),
+        findsNothing,
+      );
+      expect(tester.takeException(), isNull);
+    },
+  );
+
+  testWidgets(
     'saved base values stay visible and updated values survive a JSON reload',
     (tester) async {
       final store = newStore(
@@ -283,7 +327,9 @@ void main() {
       await open(tester, store, prepare: false);
       await tester.enterText(find.byKey(const ValueKey('spot-search')), 'Wolf');
       await tester.pumpAndSettle();
-      await tester.tap(find.byKey(const ValueKey('spot-filter-compact-control')));
+      await tester.tap(
+        find.byKey(const ValueKey('spot-filter-compact-control')),
+      );
       await tester.pumpAndSettle();
       final rank = find.byKey(const ValueKey('spot-ranking-caphras'));
       await tester.ensureVisible(rank);

@@ -178,6 +178,8 @@ class AnchoredPopover extends StatefulWidget {
     required this.popoverBuilder,
     required this.anchorBuilder,
     this.preferredWidth = 382,
+    this.preferredWidthBuilder,
+    this.contentSizedWidth = false,
     this.maximumHeight = 420,
     this.alignEnd = true,
     this.margin = 12,
@@ -193,6 +195,12 @@ class AnchoredPopover extends StatefulWidget {
   final AnchoredPopoverBuilder popoverBuilder;
   final AnchoredPopoverAnchorBuilder anchorBuilder;
   final double preferredWidth;
+
+  /// Measure expensive reference content only while its popup is open.
+  final double Function(BuildContext)? preferredWidthBuilder;
+
+  /// Opt in to resizing with the content, within the safe overlay width.
+  final bool contentSizedWidth;
   final double maximumHeight;
   final bool alignEnd;
   final double margin;
@@ -220,7 +228,7 @@ class _AnchoredPopoverState extends State<AnchoredPopover> {
   final OverlayPortalController _portal = OverlayPortalController();
   Rect? _anchorRect;
   Size? _viewportSize;
-  Offset? _manualTopLeft;
+  final ValueNotifier<Offset?> _manualTopLeft = ValueNotifier(null);
   Offset? _activeDragTopLeft;
   bool _showing = false;
   AppOverlayCoordinator? _registeredCoordinator;
@@ -245,7 +253,7 @@ class _AnchoredPopoverState extends State<AnchoredPopover> {
   void didUpdateWidget(AnchoredPopover oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.overlayId != widget.overlayId) {
-      _manualTopLeft = null;
+      _manualTopLeft.value = null;
       _activeDragTopLeft = null;
     }
     if (_showing && oldWidget.dismissOnEscape != widget.dismissOnEscape) {
@@ -262,6 +270,7 @@ class _AnchoredPopoverState extends State<AnchoredPopover> {
     if (_showing) {
       _registeredCoordinator?.hide(this);
     }
+    _manualTopLeft.dispose();
     super.dispose();
   }
 
@@ -271,7 +280,7 @@ class _AnchoredPopoverState extends State<AnchoredPopover> {
     final anchorContext = _anchorKey.currentContext;
     final anchorBox = anchorContext?.findRenderObject();
     if (anchorBox is! RenderBox || !anchorBox.hasSize) return;
-    _manualTopLeft = null;
+    _manualTopLeft.value = null;
     _activeDragTopLeft = null;
     _registeredCoordinator?.show(
       owner: this,
@@ -340,10 +349,9 @@ class _AnchoredPopoverState extends State<AnchoredPopover> {
       popoverBox.size,
       widget.margin,
     );
-    setState(() {
-      _activeDragTopLeft = next;
-      _manualTopLeft = next;
-    });
+    _activeDragTopLeft = next;
+    // Layout-only notification: dragging must not rebuild recipe projections.
+    _manualTopLeft.value = next;
   }
 
   void _endDrag(DragEndDetails _) => _activeDragTopLeft = null;
@@ -367,7 +375,11 @@ class _AnchoredPopoverState extends State<AnchoredPopover> {
           final safeWidth = (constraints.maxWidth - widget.margin * 2)
               .clamp(0.0, double.infinity)
               .toDouble();
-          final width = widget.preferredWidth.clamp(0.0, safeWidth).toDouble();
+          final width =
+              (widget.preferredWidthBuilder?.call(context) ??
+                      widget.preferredWidth)
+                  .clamp(0.0, safeWidth)
+                  .toDouble();
           final above = anchor.top - widget.margin - widget.gap;
           final below =
               constraints.maxHeight -
@@ -405,9 +417,12 @@ class _AnchoredPopoverState extends State<AnchoredPopover> {
                   onTapOutside: widget.consumeOutsideTap
                       ? null
                       : (_) => _close(),
-                  child: SizedBox(
+                  child: ConstrainedBox(
                     key: _popoverKey,
-                    width: width,
+                    constraints: BoxConstraints(
+                      minWidth: widget.contentSizedWidth ? 0 : width,
+                      maxWidth: width,
+                    ),
                     child: ConstrainedBox(
                       constraints: BoxConstraints(maxHeight: maxHeight),
                       child: _AnchoredPopoverDragScope(
@@ -415,19 +430,21 @@ class _AnchoredPopoverState extends State<AnchoredPopover> {
                         onUpdate: _updateDrag,
                         onEnd: _endDrag,
                         onCancel: _cancelDrag,
-                        child: MediaQuery.disableAnimationsOf(context)
-                            ? widget.popoverBuilder(context, _close)
-                            : TweenAnimationBuilder<double>(
-                                key: ValueKey<String>(
-                                  'popover-entrance:${widget.overlayId}',
+                        child: RepaintBoundary(
+                          child: MediaQuery.disableAnimationsOf(context)
+                              ? widget.popoverBuilder(context, _close)
+                              : TweenAnimationBuilder<double>(
+                                  key: ValueKey<String>(
+                                    'popover-entrance:${widget.overlayId}',
+                                  ),
+                                  tween: Tween(begin: .84, end: 1),
+                                  duration: const Duration(milliseconds: 140),
+                                  curve: Curves.easeOutCubic,
+                                  child: widget.popoverBuilder(context, _close),
+                                  builder: (context, opacity, child) =>
+                                      Opacity(opacity: opacity, child: child),
                                 ),
-                                tween: Tween(begin: .84, end: 1),
-                                duration: const Duration(milliseconds: 140),
-                                curve: Curves.easeOutCubic,
-                                child: widget.popoverBuilder(context, _close),
-                                builder: (context, opacity, child) =>
-                                    Opacity(opacity: opacity, child: child),
-                              ),
+                        ),
                       ),
                     ),
                   ),
@@ -460,7 +477,7 @@ class _AnchoredPopoverState extends State<AnchoredPopover> {
 }
 
 final class _AnchoredPopoverLayoutDelegate extends SingleChildLayoutDelegate {
-  const _AnchoredPopoverLayoutDelegate({
+  _AnchoredPopoverLayoutDelegate({
     required this.anchor,
     required this.viewport,
     required this.margin,
@@ -468,7 +485,7 @@ final class _AnchoredPopoverLayoutDelegate extends SingleChildLayoutDelegate {
     required this.alignEnd,
     required this.placement,
     required this.manualTopLeft,
-  });
+  }) : super(relayout: manualTopLeft);
 
   final Rect anchor;
   final Size viewport;
@@ -476,7 +493,7 @@ final class _AnchoredPopoverLayoutDelegate extends SingleChildLayoutDelegate {
   final double gap;
   final bool alignEnd;
   final AnchoredPopoverPlacement placement;
-  final Offset? manualTopLeft;
+  final ValueNotifier<Offset?> manualTopLeft;
 
   @override
   BoxConstraints getConstraintsForChild(BoxConstraints constraints) =>
@@ -484,7 +501,7 @@ final class _AnchoredPopoverLayoutDelegate extends SingleChildLayoutDelegate {
 
   @override
   Offset getPositionForChild(Size size, Size childSize) {
-    final manual = manualTopLeft;
+    final manual = manualTopLeft.value;
     if (manual != null) {
       return _clampPopoverPosition(manual, size, childSize, margin);
     }

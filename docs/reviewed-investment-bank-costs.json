@@ -1,0 +1,13 @@
+{
+  "date": "2026-11-03",
+  "status": "VERIFIED_SCOPED_CP_CORRECTION_NOT_FULL_MAP_CERTIFICATION",
+  "verification": "Map package994 passing checks; all four city-to-bank paths assert zero CP, non-resource identity and no economic-table entry. Three Specialty costs remain1. Structural comparison proves only four costs and manifest metadata changed; scoped analysis and Windows Release pass with matching bundled map hash.",
+  "scope": "Four existing Altinova investment banks: 1189 Zigmund, 1190 Gulabi, 1191 Quina, 1192 Neruda Shen. Separate node CP changes from 1 to 0; names, links, outputs, coordinates, eligibility and economic coverage remain unchanged.",
+  "evidence": [
+    {"url": "https://blackdesert.pearlabyss.com/asia/en-US/Game/Wiki?_masterWikiNo=33", "region": "Official PC Asia guide", "supports": "Investment banks belong to their cities and do not require node investment. Gold bars and top-ranked housing are separate requirements."},
+    {"url": "https://www.naeu.playblackdesert.com/en-US/Wiki?wikiNo=40", "region": "Official PC NA/EU guide", "supports": "Investment banks require gold bars and a first-ranked house in their town; not ordinary worker material production."},
+    {"url": "https://www.naeu.playblackdesert.com/en-US/News/Detail?groupContentNo=10022", "published": "2026-04-30", "supports": "Investment-bank tasks still exist in NA/EU; fixed canceling workers in that UI. Not a proof of their payout distribution."},
+    {"source": "Installed current PC archive3493, world.json", "supports": "All four exact names/IDs are enabled Bank kind10, linked to Altinova1101, with zero contribution value. Missing field alone was not sufficient; explicit PC rule supplies independent support."}
+  ],
+  "limitations": "No new bank-income estimate, gold-bar payout, residence eligibility, or probability is invented. These four nodes remain absent from the worker-economics table. The three Specialty-node CP discrepancies110/915/1193 are different and remain open. This is not a blanket zero-cost inference or full graph certification."
+}

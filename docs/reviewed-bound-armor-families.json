@@ -1,0 +1,51 @@
+{
+  "date": "2026-11-03",
+  "status": "IMPLEMENTED_AND_TESTED_REBUILD_PENDING",
+  "decision": "The two generic bound armor entries deliberately cover both reward choices. Make the choice explicit; do not choose a single inventory/market ID or assign stats for one version to the entire family.",
+  "families": {
+    "Dahn's Gloves (Bound)": [
+      930903,
+      930905
+    ],
+    "Ator's Shoes (Bound)": [
+      930904,
+      930906
+    ]
+  },
+  "primarySources": [
+    {
+      "url": "https://www.naeu.playblackdesert.com/en-US/News/Detail?groupContentNo=7147&countryType=en-US",
+      "date": "2024-06-19",
+      "scope": "Both named armor families have Damage Reduction and Evasion versions; this does not establish exchange eligibility for bound rewards."
+    },
+    {
+      "url": "https://www.naeu.playblackdesert.com/en-US/News/Detail?groupContentNo=10401&countryType=en-US",
+      "date": "2026-07-30",
+      "scope": "Black Spirit Support offers unmarketable armor and a Select 1 reward for gloves/shoes."
+    },
+    {
+      "url": "https://www.naeu.playblackdesert.com/en-US/News/Detail?groupContentNo=10726&countryType=en-US",
+      "date": "2026-10-22",
+      "scope": "Current quest rename/objective mapping and 300 AP requirement, already implemented and retained."
+    }
+  ],
+  "currentCorroboration": "Two exact current item IDs for each unmarketable family. Both retain the same nonenhanced Heating-to-1500-Cron restriction; no variant defense/evasion values are projected or calculated by these reference entries.",
+  "preserved": "Existing source/quest/Family restrictions, no market queries or saved-ID migration. No claim that the general tradable-armor exchange applies to bound rewards. No new selection UI or invented stats.",
+  "verification": {
+    "tests": [
+      {
+        "file": "resumed-bound-family-tests.jsonl",
+        "passed": 111
+      },
+      {
+        "file": "resumed-bound-family-projection-tests.jsonl",
+        "passed": 1
+      },
+      {
+        "file": "resumed-bound-family-layout-tests.jsonl",
+        "passed": 198
+      }
+    ],
+    "changedReferences": 2
+  }
+}

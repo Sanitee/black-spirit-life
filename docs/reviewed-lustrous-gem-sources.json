@@ -1,0 +1,14 @@
+{
+  "date": "2026-11-03",
+  "status": "IMPLEMENTED_SCOPED_VERIFICATION_PASS_NOT_FULL_AUDIT_COMPLETION",
+  "verification": "159 focused checks,6792 actual controller mode views,396 all-theme normal/enlarged layout checks,scoped analysis and Windows Release pass. Exactly15 source-only reference changes; all other reference fields, recipes and exchanges unchanged. Two initial fixture compilation errors retained and repaired. See resumed-lustrous-gem-resolution.json.",
+  "sources": [
+    "https://www.naeu.playblackdesert.com/en-US/Wiki?wikiNo=388",
+    "https://www.naeu.playblackdesert.com/en-US/News/Detail?groupContentNo=8852",
+    "https://www.naeu.playblackdesert.com/en-US/News/Detail?groupContentNo=735",
+    "https://www.naeu.playblackdesert.com/en-US/News/Detail?groupContentNo=6160"
+  ],
+  "scope": "15 existing exact-ID/name shared references gain the current Rough Lustrous Gem source. Normal and rare rewards distinguished; existing recipes/effects/source lines preserved. Black Stone Powder's two redundant prose lines become short Grinding/Refinery/Central Market lines, using the existing market badges.",
+  "evidence": "Official current16-row probability table, July17,2025 PC inventory-opening change, exact current gem65972 description. Rough Stone and Black Stone Powder7–13 are guaranteed when opening; other listed rewards are chance-based. Earlier200amity/NPC appraisal is obsolete. See resumed-lustrous-gem-source-evidence.json for exact quantities and probability interpretation.",
+  "limits": "No crafting route, automatic gem consumption, expected-value or gathering-income model added. Table percentages are per quantity, not total item odds; not exposed as an unsupported calculator. Manos Processing Stone is not a shared reference and is not newly modeled. Unrelated native processing flags remain open."
+}

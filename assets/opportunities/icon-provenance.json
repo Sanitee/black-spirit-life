@@ -2,6 +2,13 @@
   "source": "Original Pearl Abyss artwork copied without transformation; Sep 3 and Sep 10, 2026 extracted PC client, with individually sourced updates recorded below",
   "icons": [
     {
+      "id": 50810,
+      "source": "Pearl Abyss PC client extraction (2026-11-03, archive 3493): ui_texture/icon/new_icon/03_etc/09_petitem/00050810.dds decoded losslessly to PNG",
+      "asset": "assets/opportunities/items/50810.png",
+      "sha256": "C7DBFEBAA539D125338ED11AE9C3C2B29763632E8360350F833F4246C5ED170D",
+      "bytes": 2689
+    },
+    {
       "id": 980170,
       "source": "https://bdocodex.com/items/new_icon/03_etc/01000818.webp",
       "itemReference": "https://bdocodex.com/us/item/980170/",

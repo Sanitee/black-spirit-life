@@ -353,7 +353,19 @@ class BdoRoyalWorkshopSlotPlan {
   bool get hasRecordedGood =>
       selectedGoodId != null || recordedGoodName.trim().isNotEmpty;
   bool get hasWorker => workerName.trim().isNotEmpty;
-  bool get hasTimedTask => taskHours != null && taskHours! > 0;
+  bool get hasTimedTask =>
+      taskHours != null && taskHours!.isFinite && taskHours! > 0;
+
+  /// Arithmetic shared by the area preview and aggregate. Net value can be a
+  /// loss; unknown/invalid inputs are not a zero-profit task.
+  double? get netSilverPerOnlineHour {
+    final net = netSilverPerCycle;
+    if (!hasTimedTask || net == null || !net.isFinite || repeatCount <= 0) {
+      return null;
+    }
+    final hourly = (net * repeatCount) / taskHours!;
+    return hourly.isFinite ? hourly : null;
+  }
 
   BdoRoyalWorkshopSlotPlan copyWith({
     int? selectedGoodId,
@@ -405,7 +417,7 @@ class BdoRoyalWorkshopSlotPlan {
       workerName: '${json['workerName'] ?? ''}'.trim(),
       taskHours: _positiveDouble(json['taskHours']),
       repeatCount: _positiveInt(json['repeatCount']) ?? 1,
-      netSilverPerCycle: _nonNegativeDouble(json['netSilverPerCycle']),
+      netSilverPerCycle: _finiteDouble(json['netSilverPerCycle']),
       isRareOrSpecial: json['isRareOrSpecial'] == true,
       isRunning: json['isRunning'] == true,
     );
@@ -658,7 +670,7 @@ class BdoRoyalWorkshopAreaPlan {
         selectedGoodId: _positiveInt(json['selectedGoodId']),
         taskHours: _positiveDouble(json['taskHours']),
         repeatCount: _positiveInt(json['repeatCount']) ?? 1,
-        netSilverPerCycle: _nonNegativeDouble(json['netSilverPerCycle']),
+        netSilverPerCycle: _finiteDouble(json['netSilverPerCycle']),
       );
     }
 
@@ -893,18 +905,16 @@ BdoRoyalWorkshopIncomeEstimate estimateRoyalWorkshopIncome({
       excludedRare += 1;
       continue;
     }
-    final hours = slotPlan.taskHours;
-    final net = slotPlan.netSilverPerCycle;
+    final slotHourly = slotPlan.netSilverPerOnlineHour;
     if (!slotPlan.hasRecordedGood ||
         areaPlan.effectiveWorkerName.isEmpty ||
         plan.hasDuplicateWorkerName(areaPlan.effectiveWorkerName) ||
-        hours == null ||
-        hours <= 0 ||
-        net == null) {
+        slotHourly == null ||
+        !(hourly + slotHourly).isFinite) {
       incomplete += 1;
       continue;
     }
-    hourly += (net * slotPlan.repeatCount) / hours;
+    hourly += slotHourly;
     included += 1;
   }
   return BdoRoyalWorkshopIncomeEstimate(
@@ -930,9 +940,9 @@ double? _positiveDouble(Object? value) {
   return parsed != null && parsed.isFinite && parsed > 0 ? parsed : null;
 }
 
-double? _nonNegativeDouble(Object? value) {
+double? _finiteDouble(Object? value) {
   final parsed = value is num ? value.toDouble() : double.tryParse('$value');
-  return parsed != null && parsed.isFinite && parsed >= 0 ? parsed : null;
+  return parsed != null && parsed.isFinite ? parsed : null;
 }
 
 bool _sameIntSet(Set<int> left, Set<int> right) =>

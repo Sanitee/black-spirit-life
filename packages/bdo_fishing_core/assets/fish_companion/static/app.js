@@ -12,6 +12,9 @@ const state = {
   fish: [],
   zoneByRgb: new Map(),
   fishById: new Map(),
+  mapFishNames: [],
+  mapFishSuggestions: [],
+  mapFishSuggestionIndex: -1,
   method: { map: "rod", capture: "rod", stats: "rod" },
   captureEquipment: { rod: "Balenos Rod", harpoon: "Thin Harpoon" },
   fishingProfiles: [],
@@ -331,9 +334,12 @@ function autoFishingDelaySeconds(reductionPercent) {
 }
 
 function lifeSkillAbsoluteLevel(rank, level) {
-  const offset = LIFE_SKILL_RANK_OFFSETS[String(rank)] ?? null;
+  if (!Object.hasOwn(LIFE_SKILL_RANK_OFFSETS, String(rank))
+      || level == null || typeof level === "boolean" || String(level).trim() === "") return null;
+  const offset = LIFE_SKILL_RANK_OFFSETS[String(rank)];
   const value = Number(level);
-  return offset == null || !Number.isFinite(value) ? null : offset + value;
+  const maximum = rank === "Guru" ? 100 : rank === "Master" ? 30 : 10;
+  return !Number.isInteger(value) || value < 1 || value > maximum ? null : offset + value;
 }
 
 function bargainBonusFromTradingLevel(rank, level) {
@@ -1142,12 +1148,10 @@ function normalizeBootstrap(raw) {
     price: Number(item.price ?? item.priceRaw ?? item.vendorPrice ?? item.buyPrice ?? 0),
   })).filter(item => Number.isFinite(item.itemId));
   state.fishById = new Map(state.fish.map(item => [item.itemId, item]));
-  const fishNames = [...state.fish]
+  state.mapFishNames = [...state.fish]
     .filter(item => item.name && item.itemId)
     .sort((a, b) => a.name.localeCompare(b.name) || a.itemId - b.itemId);
-  if (els.mapFishSuggestions) {
-    els.mapFishSuggestions.innerHTML = fishNames.map(item => `<option value="${escapeHtml(item.name)}" label="${escapeHtml(`${item.name} · item ${item.itemId}`)}"></option>`).join("");
-  }
+  if (els.mapFishSuggestions && !els.mapFishSuggestions.hidden) renderMapFishSuggestions();
   state.data = raw;
 }
 
@@ -3199,10 +3203,116 @@ function updateRegionOpacity(value = state.regionOpacityPercent) {
   if (els.regionLayer) els.regionLayer.style.opacity = String(percent / 100);
 }
 
+function closeMapFishSuggestions() {
+  els.mapFishSuggestions.hidden = true;
+  els.mapSearch.setAttribute("aria-expanded", "false");
+  els.mapSearch.removeAttribute("aria-activedescendant");
+  state.mapFishSuggestionIndex = -1;
+}
+
+function sizeMapFishSuggestions() {
+  const field = els.mapSearch.closest(".map-fish-search");
+  const bounds = field.getBoundingClientRect();
+  const scale = bounds.height / field.offsetHeight || 1;
+  const bottom = Math.min(window.innerHeight, els.mapTools.getBoundingClientRect().bottom);
+  // CSS zoom changes physical space, not vh. Keep the list within its pane.
+  const available = (bottom - bounds.bottom) / scale - 12;
+  els.mapFishSuggestions.style.maxHeight = `${Math.max(40, Math.min(280, available))}px`;
+}
+
+function renderMapFishSuggestions() {
+  const query = normalizeSearchText(els.mapSearch.value);
+  const seen = new Set();
+  state.mapFishSuggestions = query ? state.mapFishNames.filter(item => {
+    const name = normalizeSearchText(item.name);
+    if (seen.has(name) || (!name.includes(query) && !String(item.itemId).includes(query))) return false;
+    seen.add(name);
+    return true;
+  }) : [];
+  state.mapFishSuggestionIndex = -1;
+  els.mapSearch.removeAttribute("aria-activedescendant");
+  els.mapFishSuggestions.innerHTML = state.mapFishSuggestions.map((item, index) =>
+    `<div id="map-fish-option-${index}" class="map-fish-option" role="option" aria-selected="false" data-fish-index="${index}"><img src="/icon/${item.itemId}.webp" alt="" loading="lazy" decoding="async"><span>${escapeHtml(item.name)}</span></div>`
+  ).join("");
+  // Missing artwork must not leave a broken-image symbol beside the name.
+  $$("img", els.mapFishSuggestions).forEach(img => img.addEventListener("error", () => { img.style.visibility = "hidden"; }, { once: true }));
+  const open = state.mapFishSuggestions.length > 0 && document.activeElement === els.mapSearch;
+  els.mapFishSuggestions.hidden = !open;
+  els.mapSearch.setAttribute("aria-expanded", String(open));
+  if (open) {
+    sizeMapFishSuggestions();
+    els.mapFishSuggestions.scrollTop = 0;
+  }
+}
+
+function activateMapFishSuggestion(index) {
+  state.mapFishSuggestionIndex = index;
+  $$(".map-fish-option", els.mapFishSuggestions).forEach((option, current) => {
+    option.setAttribute("aria-selected", String(current === index));
+    if (current === index) {
+      els.mapSearch.setAttribute("aria-activedescendant", option.id);
+      option.scrollIntoView({ block: "nearest" });
+    }
+  });
+}
+
+function selectMapFishSuggestion(index) {
+  const item = state.mapFishSuggestions[index];
+  if (!item) return;
+  els.mapSearch.value = item.name;
+  closeMapFishSuggestions();
+  applyMapFilters();
+}
+
+function bindMapFishSearch() {
+  // Queries belong to this running page, never a restored browser form.
+  els.mapSearch.value = "";
+  closeMapFishSuggestions();
+  els.mapSearch.addEventListener("input", renderMapFishSuggestions);
+  els.mapSearch.addEventListener("focus", renderMapFishSuggestions);
+  els.mapSearch.addEventListener("blur", closeMapFishSuggestions);
+  window.addEventListener("resize", () => {
+    if (!els.mapFishSuggestions.hidden) sizeMapFishSuggestions();
+  });
+  els.mapSearch.addEventListener("keydown", event => {
+    if (event.isComposing) return;
+    if (event.key === "ArrowDown" || event.key === "ArrowUp") {
+      if (els.mapFishSuggestions.hidden) renderMapFishSuggestions();
+      const count = state.mapFishSuggestions.length;
+      if (!count) return;
+      event.preventDefault();
+      const current = state.mapFishSuggestionIndex;
+      const next = current < 0 ? (event.key === "ArrowDown" ? 0 : count - 1)
+        : (current + (event.key === "ArrowDown" ? 1 : -1) + count) % count;
+      activateMapFishSuggestion(next);
+    } else if (event.key === "Enter") {
+      if (!els.mapFishSuggestions.hidden && state.mapFishSuggestionIndex >= 0) {
+        event.preventDefault();
+        selectMapFishSuggestion(state.mapFishSuggestionIndex);
+      } else closeMapFishSuggestions();
+    } else if (event.key === "Escape" && !els.mapFishSuggestions.hidden) {
+      event.preventDefault();
+      closeMapFishSuggestions();
+    }
+  });
+  els.mapFishSuggestions.addEventListener("pointerdown", event => {
+    if (event.target.closest(".map-fish-option")) event.preventDefault();
+  });
+  els.mapFishSuggestions.addEventListener("click", event => {
+    const option = event.target.closest(".map-fish-option");
+    if (option) selectMapFishSuggestion(Number(option.dataset.fishIndex));
+  });
+  document.addEventListener("pointerdown", event => {
+    if (!event.target.closest(".map-fish-search")) closeMapFishSuggestions();
+  });
+}
+
 function bindMapFilters() {
+  bindMapFishSearch();
   [els.mapSearch, els.mapRank, els.mapDepth, els.mapNoRelic].forEach(control => control.addEventListener(control.tagName === "INPUT" && control.type !== "checkbox" ? "input" : "change", applyMapFilters));
   els.mapResetFilters.addEventListener("click", () => {
     els.mapSearch.value = "";
+    closeMapFishSuggestions();
     els.mapRank.value = "red";
     els.mapDepth.value = "all";
     els.mapNoRelic.checked = false;
@@ -3514,7 +3624,7 @@ function totalReviewFish() {
 }
 
 function totalReviewValue() {
-  return state.review?.catches.reduce((sum,item) => sum + Number(item.count || 0) * Number(item.price || 0), 0) || 0;
+  return fishValueSummary(state.review?.catches || []).total;
 }
 
 function reviewState() {
@@ -3544,8 +3654,9 @@ function renderReview() {
   els.reviewEmpty.classList.add("is-hidden");
   els.reviewContent.classList.remove("is-hidden");
   els.reviewCount.textContent = number(totalReviewFish());
-  els.reviewValue.textContent = silver(totalReviewValue());
-  els.reviewValue.title = `${number(totalReviewValue())} silver`;
+  const reviewValue = fishValueSummary(state.review.catches);
+  els.reviewValue.textContent = reviewValue.total == null ? "Unknown" : silver(reviewValue.total);
+  els.reviewValue.title = fishValueDescription(reviewValue);
   const coverage = state.review.scan?.completeTankCoverage;
   const unique = state.review.scan?.uniqueSlotsObserved;
   els.reviewCoverage.textContent = coverage === true ? "Complete" : Number.isFinite(Number(unique)) ? `${number(unique)}/100` : "Reviewed";
@@ -4099,7 +4210,10 @@ function sessionCatches(session) {
   const catches = Array.isArray(session.catches) ? session.catches : Array.isArray(session.items) ? session.items : Array.isArray(session.fish) ? session.fish : [];
   return catches.map(item => {
     const catalog = state.fishById.get(Number(item.itemId)) || {};
-    return { ...item, itemId: Number(item.itemId), name: item.name || catalog.name || String(item.itemId), count: Number(item.count || 0), price: Number(item.price ?? item.unitPrice ?? catalog.price ?? 0), grade: item.grade || catalog.grade || "" };
+    // An explicitly unknown saved price is not permission to reprice history.
+    const price = Object.hasOwn(item, "price") ? item.price
+      : Object.hasOwn(item, "unitPrice") ? item.unitPrice : catalog.price;
+    return { ...item, itemId: Number(item.itemId), name: item.name || catalog.name || String(item.itemId), count: Number(item.count || 0), price: Number(price ?? 0), grade: item.grade || catalog.grade || "" };
   });
 }
 
@@ -4126,7 +4240,32 @@ function sessionTotal(session) {
 }
 
 function sessionValue(session) {
-  return sessionCatches(session).reduce((sum,item) => sum + item.count * item.price,0);
+  // Legacy nonnullable storage records the known subtotal, not a complete estimate.
+  // Presentation must use fishValueSummary so missing prices never become zero.
+  return fishValueSummary(sessionCatches(session)).knownSubtotal;
+}
+
+function fishValueSummary(items) {
+  let knownSubtotal = 0;
+  let unknownFish = 0;
+  for (const item of items) {
+    const count = Number(item.count);
+    if (!Number.isFinite(count) || count <= 0) continue;
+    const price = Number(item.price);
+    if (!Number.isFinite(price) || price <= 0) unknownFish += count;
+    else knownSubtotal += count * price;
+  }
+  return { knownSubtotal, unknownFish, total: unknownFish ? null : knownSubtotal };
+}
+
+function fishValueDescription(value) {
+  return value.total == null
+    ? `${number(value.unknownFish)} fish without prices`
+    : `${number(value.total)} silver`;
+}
+
+function silverOrUnknown(value) {
+  return value == null ? "—" : silver(value);
 }
 
 function sessionBargainBonus(session) {
@@ -4138,6 +4277,12 @@ function sessionBargainBonus(session) {
 
 function sessionSale(session) {
   return session?.sale && typeof session.sale === "object" ? session.sale : null;
+}
+
+function saleBargainBonus(session) {
+  // A recorded sale is a historical observation, not the current profile setup.
+  // Keep an explicit zero too: it can mean the player did not bargain.
+  return sessionSale(session)?.bargainBonusPercent ?? sessionBargainBonus(session);
 }
 
 function saleProjection(tankValue, marketPercent, distanceBonusPercent, bargainBonusPercent) {
@@ -4153,7 +4298,7 @@ function saleItemKey(item) {
 }
 
 function saleItemBaseValue(item) {
-  return Math.max(0, Number(item?.count) || 0) * Math.max(0, Number(item?.price) || 0);
+  return fishValueSummary([item]).total;
 }
 
 function saleQuoteFor(offer, item) {
@@ -4161,8 +4306,10 @@ function saleQuoteFor(offer, item) {
   return Number.isFinite(value) ? Math.max(30, Math.min(130, value)) : 100;
 }
 
-function saleOfferTotal(session, offer, bargainBonus = sessionBargainBonus(session)) {
-  return sessionCatches(session).reduce((sum, item) => (
+function saleOfferTotal(session, offer, bargainBonus = saleBargainBonus(session)) {
+  const items = sessionCatches(session);
+  if (fishValueSummary(items).total == null) return null;
+  return items.reduce((sum, item) => (
     sum + saleProjection(saleItemBaseValue(item), saleQuoteFor(offer, item), offer?.distance, bargainBonus)
   ), 0);
 }
@@ -4202,12 +4349,13 @@ function sessionOriginWorld(session) {
   if (exact) return { ...exact, exact: true };
   const wanted = normalizeSearchText(session?.locationName || session?.location_name || "");
   if (!wanted) return null;
-  const node = state.nodes.find(entry => {
+  const matches = state.nodes.filter(entry => {
     const name = normalizeSearchText(entry.name || "");
     const label = normalizeSearchText(entry.label || "");
-    return name === wanted || label === wanted || name.includes(wanted) || wanted.includes(name);
+    return name === wanted || label === wanted;
   });
-  const world = nodeWorld(node);
+  // A place mentioned inside a user label is not a verified trade origin.
+  const world = matches.length === 1 ? nodeWorld(matches[0]) : null;
   return world ? { ...world, exact: false } : null;
 }
 
@@ -4230,7 +4378,13 @@ function localDateTimeInput(value = new Date()) {
 }
 
 function offerDestinationOptions(selectedName) {
-  return tradeDestinations().map(destination => `<option value="${escapeHtml(destination.name)}"${destination.name === selectedName ? " selected" : ""}>${escapeHtml(destination.name)}</option>`).join("");
+  const destinations = tradeDestinations();
+  // Old/custom destinations can outlive the current map's destination list.
+  // Keep the saved name until the user deliberately chooses a replacement.
+  if (selectedName && !destinations.some(destination => destination.name === selectedName)) {
+    destinations.unshift({name:selectedName});
+  }
+  return destinations.map(destination => `<option value="${escapeHtml(destination.name)}"${destination.name === selectedName ? " selected" : ""}>${escapeHtml(destination.name)}</option>`).join("");
 }
 
 function openSalePlanner(id) {
@@ -4245,13 +4399,14 @@ function openSalePlanner(id) {
   const origin = sessionOriginWorld(session);
   const ranked = tradeDestinations().map(destination => ({ ...destination, distance: distanceBonusBetween(origin, destination) })).sort((a,b) => b.distance - a.distance);
   const defaults = ranked.slice(0, 3);
+  if (existing) {
+    const savedDestination = ranked.find(destination => destination.name === existing.destination)
+      || {name:existing.destination};
+    defaults[0] = { ...savedDestination, distance: Number(existing.distanceBonusPercent) || 0 };
+  }
   if (!defaults.length) {
     showToast("Selling-destination map data is unavailable.", true);
     return;
-  }
-  if (existing) {
-    const savedDestination = ranked.find(destination => destination.name === existing.destination) || defaults[0];
-    defaults[0] = { ...savedDestination, distance: Number(existing.distanceBonusPercent) || 0 };
   }
   state.salePlanner = {
     sessionId: String(session.id),
@@ -4265,11 +4420,11 @@ function openSalePlanner(id) {
   const locationName = session.locationName || session.location_name || session.zoneName || session.zone_name || "Fishing location";
   els.saleTitle.textContent = existing ? `Recorded sale · ${locationName}` : `Sell ${locationName} haul`;
   els.saleOrigin.textContent = `${locationName}${origin?.exact === false ? " · node position" : ""}`;
-  const tankValue = sessionValue(session);
-  els.saleTankValue.dataset.value = String(tankValue);
-  els.saleTankValue.textContent = `${silver(tankValue)} silver`;
-  els.saleTankValue.title = `${number(tankValue)} silver`;
-  els.saleBargain.textContent = `${number(existing?.bargainBonusPercent ?? sessionBargainBonus(session), 1)}%`;
+  const tankValue = fishValueSummary(items);
+  els.saleTankValue.dataset.value = tankValue.total == null ? "" : String(tankValue.total);
+  els.saleTankValue.textContent = tankValue.total == null ? "Unknown" : `${silver(tankValue.total)} silver`;
+  els.saleTankValue.title = fishValueDescription(tankValue);
+  els.saleBargain.textContent = `${number(saleBargainBonus(session), 1)}%`;
   els.saleSoldAt.value = localDateTimeInput(existing?.soldAt || new Date());
   els.saleFinalAmount.value = existing?.finalAmount != null ? String(existing.finalAmount) : "";
   els.saleDelete.classList.toggle("is-hidden", !existing);
@@ -4290,30 +4445,30 @@ function renderSaleOffers() {
   if (!session) return;
   const origin = sessionOriginWorld(session);
   const items = sessionCatches(session).filter(item => item.count > 0);
-  const bargain = sessionSale(session)?.bargainBonusPercent ?? sessionBargainBonus(session);
+  const bargain = saleBargainBonus(session);
   els.saleOffers.innerHTML = `<div class="sale-quote-grid">
     <div class="sale-grid-corner"><strong>Fish in this tank</strong><span>${number(items.length)} kinds · ${number(sessionTotal(session))} retained</span></div>
     ${state.salePlanner.offers.map((offer, index) => `<article class="sale-destination-card" data-sale-column="${index}">
       <button type="button" class="sale-offer-select" data-sale-select="${index}" aria-label="Use ${escapeHtml(offer.destination)} for the sale record"><span></span></button>
       <label><span>Destination</span><select data-sale-destination="${index}">${offerDestinationOptions(offer.destination)}</select></label>
-      <strong class="sale-distance-badge">${number(offer.distance, 1)}% distance</strong>
+      <strong class="sale-distance-badge">${origin || sessionSale(session) ? `~${number(offer.distance, 1)}% distance` : "Distance unknown · using 0%"}</strong>
     </article>`).join("")}
     ${items.map(item => {
       const key = saleItemKey(item);
       const base = saleItemBaseValue(item);
       return `<div class="sale-fish-cell">
         <span class="sale-fish-icon grade-frame ${itemGradeClass(item.grade)}"><img src="/icon/${item.itemId}.webp" alt=""></span>
-        <span><strong>${escapeHtml(item.name)}</strong><small>${number(item.count)} × ${silver(item.price)}</small></span>
-        <b>${silver(base)}</b>
+        <span><strong>${escapeHtml(item.name)}</strong><small>${number(item.count)} × ${base == null ? "price unknown" : silver(item.price)}</small></span>
+        <b>${silverOrUnknown(base)}</b>
       </div>${state.salePlanner.offers.map((offer, index) => `<label class="sale-quote-cell" data-sale-quote-cell="${index}">
         <span class="sale-percent-input"><input data-sale-quote="${index}" data-sale-item="${escapeHtml(key)}" aria-label="${escapeHtml(item.name)} quotation at ${escapeHtml(offer.destination)}" type="number" min="30" max="130" step="0.1" value="${number(saleQuoteFor(offer, item), 1)}"><b>%</b></span>
-        <small data-sale-item-total="${index}:${escapeHtml(key)}">${silver(saleProjection(base, saleQuoteFor(offer, item), offer.distance, bargain))}</small>
+        <small data-sale-item-total="${index}:${escapeHtml(key)}">${base == null ? "—" : silver(saleProjection(base, saleQuoteFor(offer, item), offer.distance, bargain))}</small>
       </label>`).join("")}`;
     }).join("")}
-    <div class="sale-total-label"><strong>Estimated return</strong><span>quotation · distance · bargain</span></div>
+    <div class="sale-total-label"><strong>Estimated return</strong><span>before freshness</span></div>
     ${state.salePlanner.offers.map((offer, index) => `<button type="button" class="sale-total-cell" data-sale-summary="${index}">
       <span data-sale-rank="${index}">Comparison</span>
-      <strong data-sale-total="${index}">${silver(saleOfferTotal(session, offer, bargain))}</strong>
+      <strong data-sale-total="${index}">${silverOrUnknown(saleOfferTotal(session, offer, bargain))}</strong>
       <small data-sale-delta="${index}"></small>
     </button>`).join("")}
   </div>`;
@@ -4361,11 +4516,12 @@ function renderSaleOffers() {
 function updateSaleDecisionTotals() {
   const session = state.sessions.find(entry => String(entry.id) === state.salePlanner.sessionId);
   if (!session || !state.salePlanner.offers.length) return;
-  const bargain = sessionSale(session)?.bargainBonusPercent ?? sessionBargainBonus(session);
+  const bargain = saleBargainBonus(session);
   const items = sessionCatches(session).filter(item => item.count > 0);
   const totals = state.salePlanner.offers.map(offer => saleOfferTotal(session, offer, bargain));
-  const bestTotal = Math.max(...totals);
-  const bestIndex = totals.indexOf(bestTotal);
+  const complete = totals.every(value => value != null);
+  const bestTotal = complete ? Math.max(...totals) : null;
+  const bestIndex = complete ? totals.indexOf(bestTotal) : -1;
   state.salePlanner.offers.forEach((offer, index) => {
     const selected = index === state.salePlanner.selected;
     const best = index === bestIndex;
@@ -4379,17 +4535,18 @@ function updateSaleDecisionTotals() {
     const totalNode = $(`[data-sale-total="${index}"]`, els.saleOffers);
     const rankNode = $(`[data-sale-rank="${index}"]`, els.saleOffers);
     const deltaNode = $(`[data-sale-delta="${index}"]`, els.saleOffers);
-    if (totalNode) totalNode.textContent = silver(totals[index]);
-    if (rankNode) rankNode.textContent = best ? "Best return" : "Compared with best";
+    if (totalNode) totalNode.textContent = silverOrUnknown(totals[index]);
+    if (rankNode) rankNode.textContent = !complete ? "Price unknown" : best ? "Highest estimate" : "Compared with highest";
     if (deltaNode) {
       const difference = Math.max(0, bestTotal - totals[index]);
       const percent = bestTotal > 0 ? difference / bestTotal * 100 : 0;
-      deltaNode.textContent = best ? "Best place to sell" : `${silver(difference)} less · ${number(percent, 1)}%`;
+      deltaNode.textContent = !complete ? "Incomplete fish prices" : best ? "With these inputs" : `${silver(difference)} less · ${number(percent, 1)}%`;
     }
     items.forEach(item => {
-      const itemTotal = saleProjection(saleItemBaseValue(item), saleQuoteFor(offer, item), offer.distance, bargain);
+      const base = saleItemBaseValue(item);
+      const itemTotal = base == null ? null : saleProjection(base, saleQuoteFor(offer, item), offer.distance, bargain);
       const node = $(`[data-sale-item-total="${index}:${CSS.escape(saleItemKey(item))}"]`, els.saleOffers);
-      if (node) node.textContent = silver(itemTotal);
+      if (node) node.textContent = silverOrUnknown(itemTotal);
     });
   });
   renderSaleChosenSummary();
@@ -4399,10 +4556,10 @@ function renderSaleChosenSummary() {
   const offer = state.salePlanner.offers[state.salePlanner.selected];
   const session = state.sessions.find(entry => String(entry.id) === state.salePlanner.sessionId);
   if (!offer || !session) return;
-  const bargain = sessionSale(session)?.bargainBonusPercent ?? sessionBargainBonus(session);
+  const bargain = saleBargainBonus(session);
   const comparison = saleOfferTotal(session, offer, bargain);
   const actual = Number(els.saleFinalAmount.value) || 0;
-  els.saleChosenSummary.innerHTML = `<span>${escapeHtml(offer.destination)}</span><strong>${actual > 0 ? silver(actual) : silver(comparison)}</strong><small>${actual > 0 ? "actual silver" : "comparison only"}</small>`;
+  els.saleChosenSummary.innerHTML = `<span>${escapeHtml(offer.destination)}</span><strong>${actual > 0 ? silver(actual) : silverOrUnknown(comparison)}</strong><small>${actual > 0 ? "actual silver" : comparison == null ? "incomplete fish prices" : "comparison only"}</small>`;
 }
 
 async function saveRecordedSale() {
@@ -4424,7 +4581,7 @@ async function saveRecordedSale() {
         currentTankValue: Math.max(0, Math.round(sessionValue(session))),
         marketPercent: saleOfferEffectiveQuote(session, offer),
         distanceBonusPercent: offer.distance,
-        bargainBonusPercent: sessionBargainBonus(session),
+        bargainBonusPercent: saleBargainBonus(session),
         finalAmount: Math.round(finalAmount),
       }),
     });
@@ -4480,7 +4637,8 @@ function renderJournal() {
   const legacyAggregateCount = sessions.filter(isLegacyAggregateSession).length;
   const valueSessions = sessions.filter(session => !isLegacyAggregateSession(session));
   const totalValue = valueSessions.reduce((sum,session) => sum + sessionValue(session),0);
-  const totalValueKnown = sessions.length === 0 || valueSessions.length > 0;
+  const unknownFish = valueSessions.reduce((sum,session) => sum + fishValueSummary(sessionCatches(session)).unknownFish,0);
+  const totalValueKnown = !unknownFish && (sessions.length === 0 || valueSessions.length > 0);
   const legacyValueSummary = legacyAggregateCount
     ? `<small class="journal-legacy-value-summary">Excludes ${number(legacyAggregateCount)} aggregate-only ${legacyAggregateCount === 1 ? "import" : "imports"}</small>`
     : "";
@@ -4492,7 +4650,7 @@ function renderJournal() {
     ? `<small class="journal-legacy-summary" title="${number(legacyReceivedValue)} silver received in v0.1.7">Legacy received: ${silver(legacyReceivedValue)} silver &middot; ${number(legacyReceivedEntries.length)} imported ${legacyReceivedEntries.length === 1 ? "haul" : "hauls"}</small>`
     : "";
   els.journalStatusField.classList.toggle("is-hidden", state.journalFilters.mode === "sales");
-  els.journalSummary.innerHTML = `<div class="summary-card"><span>${state.journalFilters.mode === "sales" ? "Sold hauls" : "Catches"}</span><strong>${number(sessions.length)}</strong></div><div class="summary-card"><span>Retained fish</span><strong>${number(totalFish)}</strong></div><div class="summary-card value-summary"><span>Fish tank value</span><strong title="${totalValueKnown ? `${number(totalValue)} silver` : "Not recorded for aggregate-only imports"}">${totalValueKnown ? `${silver(totalValue)} <small>silver</small>` : "—"}</strong>${legacyValueSummary}</div><div class="summary-card value-summary recorded-summary"><span>Recorded sales</span><strong title="${number(recordedValue)} silver">${sales.length ? silver(recordedValue) : "—"} ${sales.length ? "<small>silver</small>" : ""}</strong><small>${number(sales.length)} ${sales.length === 1 ? "sale" : "sales"}</small>${legacyReceivedSummary}</div>`;
+  els.journalSummary.innerHTML = `<div class="summary-card"><span>${state.journalFilters.mode === "sales" ? "Sold hauls" : "Catches"}</span><strong>${number(sessions.length)}</strong></div><div class="summary-card"><span>Retained fish</span><strong>${number(totalFish)}</strong></div><div class="summary-card value-summary"><span>Base fish value</span><strong title="${totalValueKnown ? `${number(totalValue)} silver` : unknownFish ? `${number(unknownFish)} fish without prices` : "Not recorded for aggregate-only imports"}">${totalValueKnown ? `${silver(totalValue)} <small>silver</small>` : "—"}</strong>${unknownFish ? `<small>${number(unknownFish)} fish without prices</small>` : ""}${legacyValueSummary}</div><div class="summary-card value-summary recorded-summary"><span>Recorded sales</span><strong title="${number(recordedValue)} silver">${sales.length ? silver(recordedValue) : "—"} ${sales.length ? "<small>silver</small>" : ""}</strong><small>${number(sales.length)} ${sales.length === 1 ? "sale" : "sales"}</small>${legacyReceivedSummary}</div>`;
   if (!sessions.length) {
     const hasFilters = Boolean(state.journalFilters.from || state.journalFilters.to || state.journalFilters.status !== "all" || state.journalFilters.mode === "sales");
     els.journalList.innerHTML = `<div class="surface empty-state"><div class="empty-stack"><span></span><span></span><span></span></div><strong>${hasFilters ? "No matching journal entries" : "No saved hauls yet"}</strong>${hasFilters ? "" : `<button class="primary-button small" data-empty-add style="margin-top:16px">Add your first haul</button>`}</div>`;
@@ -4514,7 +4672,7 @@ function renderJournal() {
     const locationName = String(session.locationName || session.location_name || zoneName);
     const tool = setupToolMeta(session.equipment, session.method);
     const equipmentName = session.equipment || (session.method === "harpoon" ? "Harpoon" : "Fishing rod");
-    const rawValue = sessionValue(session);
+    const rawValue = fishValueSummary(catches);
     const sale = legacyAggregate ? null : sessionSale(session);
     const receivedSilver = legacyReceivedSilver(session);
     const rawNotes = String(session.notes ?? "");
@@ -4530,8 +4688,8 @@ function renderJournal() {
       ? `<span class="journal-legacy-explainer"><strong>Aggregate retained count</strong><small>Fish species were not stored in v0.1.7.</small></span>`
       : catches.map(item => `<span class="fish-peek-item grade-frame ${itemGradeClass(item.grade)}" title="${escapeHtml(item.name)} &middot; ${number(item.count)}"><img src="/icon/${item.itemId}.webp" alt=""><b>${number(item.count)}</b></span>`).join("");
     const values = legacyAggregate
-      ? `<div class="journal-value is-tank is-empty"><span>Fish tank value</span><strong aria-label="Not recorded">&mdash;</strong><small class="journal-value-note">Species were not stored</small></div><div class="journal-value is-sale${receivedSilver == null ? " is-empty" : ""}"><span>Legacy received</span>${receivedSilver == null ? `<strong aria-label="Not recorded">&mdash;</strong>` : `<strong title="${number(receivedSilver)} silver">${silver(receivedSilver)} <em>silver</em></strong>`}</div>`
-      : `<div class="journal-value is-tank"><span>Fish tank value</span><strong title="${number(rawValue)} silver">${silver(rawValue)} <em>silver</em></strong></div><div class="journal-value is-sale${sale ? "" : " is-empty"}"><span>Recorded sale</span>${sale ? `<strong title="${number(sale.finalAmount)} silver">${silver(sale.finalAmount)} <em>silver</em></strong>` : `<strong aria-label="No recorded sale">&mdash;</strong>`}</div>`;
+      ? `<div class="journal-value is-tank is-empty"><span>Base fish value</span><strong aria-label="Not recorded">&mdash;</strong><small class="journal-value-note">Species were not stored</small></div><div class="journal-value is-sale${receivedSilver == null ? " is-empty" : ""}"><span>Legacy received</span>${receivedSilver == null ? `<strong aria-label="Not recorded">&mdash;</strong>` : `<strong title="${number(receivedSilver)} silver">${silver(receivedSilver)} <em>silver</em></strong>`}</div>`
+      : `<div class="journal-value is-tank"><span>Base fish value</span><strong title="${fishValueDescription(rawValue)}">${silverOrUnknown(rawValue.total)}${rawValue.total == null ? "" : " <em>silver</em>"}</strong>${rawValue.total == null ? `<small class="journal-value-note">${fishValueDescription(rawValue)}</small>` : ""}</div><div class="journal-value is-sale${sale ? "" : " is-empty"}"><span>Recorded sale</span>${sale ? `<strong title="${number(sale.finalAmount)} silver">${silver(sale.finalAmount)} <em>silver</em></strong>` : `<strong aria-label="No recorded sale">&mdash;</strong>`}</div>`;
     const actions = legacyAggregate
       ? `<span class="journal-legacy-lock" title="This v0.1.7 entry contains aggregate totals, not editable fish species or a recalculable sale."><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 10V8a5 5 0 0 1 10 0v2h2v12H5V10h2Zm2 0h6V8a3 3 0 0 0-6 0v2Zm3 4a2 2 0 0 0-1 3.73V20h2v-2.27A2 2 0 0 0 12 14Z"/></svg><span>Read-only import</span></span>`
       : `<button type="button" class="journal-sale-button"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16v3H4V5Zm1 5h14l-1 9H6l-1-9Zm5 2v5h4v-5h-4Z"/></svg><span>${sale ? "Sale details" : "Where to sell?"}</span></button><button type="button" class="journal-edit-button"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15.7 3.3 5 5L8.9 20.1 3 21l.9-5.9L15.7 3.3Zm0 2.8L5.8 16l-.3 2.5L8 18.2l9.9-9.9-2.2-2.2Z"/></svg><span>Edit</span></button>`;
@@ -4961,13 +5119,15 @@ function buildPersonalStats() {
     const locationName = String(session.locationName || session.location_name || zoneName).trim() || zoneName;
     const tableKey = Number.isFinite(rgb) ? String(rgb) : zoneName.toLowerCase();
     const key = `${tableKey}|${locationName.toLowerCase()}`;
-    if (!bySpot.has(key)) bySpot.set(key, { key, rgb, name: locationName, tableName: zoneName, depth: session.depth || depthKey({name:zoneName}), sessions: 0, totalFish: 0, totalValue: 0, totalMinutes: 0, timedFish: 0, timedGradeCounts: new Map(), resourceLevels: new Set(), catches: new Map() });
+    if (!bySpot.has(key)) bySpot.set(key, { key, rgb, name: locationName, tableName: zoneName, depth: session.depth || depthKey({name:zoneName}), sessions: 0, totalFish: 0, totalValue: 0, unknownPriceFish: 0, totalMinutes: 0, timedFish: 0, timedGradeCounts: new Map(), resourceLevels: new Set(), catches: new Map() });
     const spot = bySpot.get(key);
     spot.sessions += 1;
     const catches = sessionCatches(session);
     const sessionFish = catches.reduce((sum,item) => sum + item.count,0);
     spot.totalFish += sessionFish;
-    spot.totalValue += catches.reduce((sum,item) => sum + item.count * item.price,0);
+    const value = fishValueSummary(catches);
+    spot.totalValue += value.knownSubtotal;
+    spot.unknownPriceFish += value.unknownFish;
     spot.resourceLevels.add(session.resourceLevel || session.resource_level || "unrecorded");
     const duration = Number((session.durationMinutes ?? session.duration_minutes) || 0);
     if (duration > 0) {
@@ -4985,7 +5145,7 @@ function buildPersonalStats() {
   }
   return [...bySpot.values()].filter(spot => spot.totalFish > 0).map(spot => {
     spot.fish = [...spot.catches.values()].sort((a,b) => b.count - a.count || a.name.localeCompare(b.name)).map(item => ({ ...item, per100: item.count / spot.totalFish * 100, percentage: item.count / spot.totalFish * 100 }));
-    spot.valuePer100 = spot.totalValue / spot.totalFish * 100;
+    spot.valuePer100 = spot.unknownPriceFish ? null : spot.totalValue / spot.totalFish * 100;
     spot.fishPerHour = spot.totalMinutes > 0 ? spot.timedFish / spot.totalMinutes * 60 : null;
     spot.hoursPer100 = spot.totalMinutes > 0 && spot.timedFish > 0 ? (spot.totalMinutes / spot.timedFish * 100) / 60 : null;
     spot.grades = STATS_GRADE_DEFINITIONS.map(definition => {
@@ -5024,7 +5184,7 @@ function renderStats() {
     return `<button class="stats-row ${spot.key === state.statsSelected ? "is-active" : ""}" data-key="${escapeHtml(spot.key)}">
       <span class="stats-spot"><strong>${escapeHtml(spot.name)}</strong><small>${info}</small></span>
       <span class="stats-fishes">${spot.fish.slice(0,5).map(item => `<span class="stats-fish" title="${escapeHtml(item.name)}"><span class="stats-fish-icon grade-frame ${itemGradeClass(item.grade)}"><img src="/icon/${item.itemId}.webp" alt=""><b>${number(item.per100,1)}</b></span></span>`).join("")}</span>
-      <span class="stats-value"><span class="stats-value-metric"><strong>${silver(spot.valuePer100)}</strong><small>Tank value / 100</small></span><span class="stats-value-metric is-time"><strong>${spot.hoursPer100 != null ? formatDuration(Math.round(spot.hoursPer100 * 60)) : "&mdash;"}</strong><small>Time for 100 fish</small></span></span>
+      <span class="stats-value"><span class="stats-value-metric"><strong>${silverOrUnknown(spot.valuePer100)}</strong><small>Base value / 100${spot.unknownPriceFish ? " · incomplete" : ""}</small></span><span class="stats-value-metric is-time"><strong>${spot.hoursPer100 != null ? formatDuration(Math.round(spot.hoursPer100 * 60)) : "&mdash;"}</strong><small>Time for 100 fish</small></span></span>
     </button>`;
   }).join("");
   $$(".stats-row", els.statsList).forEach(row => row.addEventListener("click", () => { state.statsSelected = row.dataset.key; renderStats(); }));
@@ -5056,7 +5216,7 @@ function renderStatsDetail(spot) {
   return;
   els.statsDetail.innerHTML = `<div class="stats-detail-header">
     <h2>${escapeHtml(spot.name)}</h2><p>${number(spot.totalFish)} fish &middot; ${number(spot.sessions)} ${spot.sessions === 1 ? "haul" : "hauls"}${spot.totalMinutes ? ` &middot; ${formatDuration(spot.totalMinutes)}` : ""}</p>
-    <div class="detail-totals"><div class="detail-total"><strong>${silver(spot.valuePer100)}</strong><small>fish tank value / 100</small></div><div class="detail-total"><strong>${spot.fishPerHour ? number(spot.fishPerHour,1) : "—"}</strong><small>${spot.fishPerHour ? "retained fish / hour" : "no time entered"}</small></div></div>
+    <div class="detail-totals"><div class="detail-total"><strong>${silverOrUnknown(spot.valuePer100)}</strong><small>Base value / 100${spot.unknownPriceFish ? " · incomplete" : ""}</small></div><div class="detail-total"><strong>${spot.fishPerHour ? number(spot.fishPerHour,1) : "—"}</strong><small>${spot.fishPerHour ? "retained fish / hour" : "no time entered"}</small></div></div>
   </div><div class="detail-fish-list">${spot.fish.map(item => `<div class="detail-fish-row"><img class="grade-frame ${itemGradeClass(item.grade)}" src="/icon/${item.itemId}.webp" alt=""><div><strong>${escapeHtml(item.name)}</strong><small>${number(item.count)} caught · ${item.price ? silver(item.price) : "value unknown"}</small></div><div class="detail-fish-rate"><strong>${number(item.per100,1)}</strong><small>per 100 · ${number(item.percentage,1)}%</small></div></div>`).join("")}</div>`;
 }
 

@@ -775,7 +775,7 @@ class _BestUseToolbar extends StatelessWidget {
                                         const SizedBox(width: 12),
                                         Expanded(
                                           child: Text(
-                                            name,
+                                            itemDisplayName(name),
                                             style: spec.typography.body
                                                 .copyWith(
                                                   fontSize: 16,

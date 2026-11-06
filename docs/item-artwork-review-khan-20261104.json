@@ -1,0 +1,24 @@
+{
+  "date": "2026-11-04",
+  "scope": "Reuse unchanged exact existing Processing45517 artwork in the other two mode indexes. Existing clean artwork/grade retained.",
+  "addedEntries": [
+    {
+      "mode": "alchemy",
+      "name": "Khan's Dim Magic",
+      "id": 45517,
+      "grade": 3,
+      "source": "New_Icon/03_ETC/00045517.dds",
+      "sha256": "d97110b91aaa354d203ae290370fdb32abc0f7af8dbd760882887caa48f7b128",
+      "referenceSha256": "636eede4811be193b6f812a9fb83c0be189edcfd75af633179c9f64d2c4a16ed"
+    },
+    {
+      "mode": "cooking",
+      "name": "Khan's Dim Magic",
+      "id": 45517,
+      "grade": 3,
+      "source": "New_Icon/03_ETC/00045517.dds",
+      "sha256": "d97110b91aaa354d203ae290370fdb32abc0f7af8dbd760882887caa48f7b128",
+      "referenceSha256": "636eede4811be193b6f812a9fb83c0be189edcfd75af633179c9f64d2c4a16ed"
+    }
+  ]
+}

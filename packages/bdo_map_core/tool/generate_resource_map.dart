@@ -4,6 +4,10 @@ import 'dart:io';
 import 'package:crypto/crypto.dart';
 
 import 'reviewed_node_corrections.dart';
+import 'reviewed_node_cp_corrections.dart';
+import 'reviewed_mushroom_node_parents.dart';
+import 'reviewed_valtarra_node_parents.dart';
+import 'reviewed_island_link.dart';
 
 const _sourceCommit = '289c833d34851dc84f3a647a2d9cf604eda9c93a';
 const _sourceUri =
@@ -151,8 +155,8 @@ const _truffleOfficialOverviewUrls = <String, String>{
       'https://s1.playblackdesert.com/web/CONSOLE/Upload/News/'
       '98c6f1e565a20221123051215139.jpg',
 };
-const _datasetVersion = '2026.10.09-beta-v5';
-const _datasetGeneratedAt = '2026-10-09T08:00:00Z';
+const _datasetVersion = '2026.11.03-reviewed-map-v12';
+const _datasetGeneratedAt = '2026-11-03T09:34:00Z';
 const _expectedResourceSectionCounts = <String, int>{
   'plantsWood': 123,
   'oresMinerals': 58,
@@ -519,8 +523,8 @@ const _gatheringPointSources = <_GatheringPointSource>[
     sourceFilename: 'item-6206.json',
     sha256: '4108457ecc2ee0eefdffe288b0fa55c5de8977f8c5eda85375192a6f6ed5c693',
     overrideOption: '--gathering-6206-source',
-    target: 'Cow / Ox',
-    label: 'Cow / Ox',
+    target: 'Wild Cattle',
+    label: 'Wild Cattle',
     resources: <_GatheringPointResource>[
       _GatheringPointResource(
         itemId: 6006,
@@ -1373,6 +1377,10 @@ Future<void> main(List<String> arguments) async {
       'generatedAt': _datasetGeneratedAt,
       'coordinateReference': 'Black Desert game-world X/Z; render Y = -Z',
       'provenance': <Map<String, Object?>>[
+        reviewedIslandLinkProvenance,
+        reviewedValtarraParentProvenance,
+        reviewedMushroomParentProvenance,
+        novemberReviewedCpProvenance,
         octoberSeaNodeCorrection,
         <String, Object?>{
           'id': _currentNodeProvenanceId,
@@ -3041,7 +3049,13 @@ List<Map<String, Object?>> _buildCurrentWorkerNodes(
       'Current worker-node build did not preserve the pinned node boundary.',
     );
   }
-  return applyReviewedSeaNodeCorrection(result);
+  return applyReviewedIslandLink(
+    applyReviewedValtarraNodeParents(
+      applyReviewedMushroomNodeParents(
+        applyNovemberReviewedNodeCosts(applyReviewedSeaNodeCorrection(result)),
+      ),
+    ),
+  );
 }
 
 void _addEdaniaResources(
@@ -3649,6 +3663,8 @@ List<dynamic> _selectGatheringRows(
 
 String _fieldSourceIdForTarget(String target) {
   return switch (target) {
+    'Wild Cattle' =>
+      'field-source:cow-ox', // Preserve saved selection identity.
     'Snake' || 'Stone Cobra' => 'field-source:snake',
     'Scorpion' || 'Rock Scorpion' => 'field-source:scorpion',
     'Thuja' => 'field-source:thuja-tree',
@@ -3725,7 +3741,7 @@ List<Map<String, Object?>> _buildFieldSources(
         'Interact with a Dairy Cow at one of the named farms and complete '
         'the milking minigame to obtain Milk.',
     'note':
-        'Dairy Cows are separate from ordinary Cow / Ox targets used for '
+        'Dairy Cows are separate from wild cattle used for '
         'meat, blood, and hide. Milking consumes 10 Energy. Farm markers '
         'identify named farm centers rather than individual cow spawn dots.',
     'products': <Map<String, Object?>>[
@@ -4026,7 +4042,7 @@ String _fieldSourceCategory(String target) {
     'Deer',
     'Fox',
     'Pig',
-    'Cow / Ox',
+    'Wild Cattle',
   }.contains(target)) {
     return 'Animals';
   }
@@ -4048,7 +4064,7 @@ List<String> _fieldSourceAliases(String target) {
     'Wasteland Cheetah Dragon' => <String>['cheetah dragon'],
     'Fan Flamingo' => <String>['flamingo'],
     'Stone Rhino' => <String>['rhino'],
-    'Cow / Ox' => <String>['cow', 'cattle', 'ox'],
+    'Wild Cattle' => <String>['cow', 'cattle', 'ox', 'bison', 'cow / ox'],
     'Insectivore Plant' => <String>['carnivorous plant', 'insectivore'],
     _ => <String>[target.toLowerCase()],
   };

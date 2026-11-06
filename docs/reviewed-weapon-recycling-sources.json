@@ -1,0 +1,237 @@
+{
+  "date": "2026-11-03",
+  "status": "IMPLEMENTED_AND_VERIFIED_AUDIT_ACTIVE",
+  "scope": "Eight exact ID/name guarded shared sources. Pure crystal sources say chance and consumes the weapon. Trace uses an example rather than implying all weapons qualify. Existing ingot/solvent recipe limitation moves from How to Obtain into Notes. No equipment recipe, average yield, availability quote or automatic consumption added.",
+  "primary": [
+    {
+      "url": "https://api.steampowered.com/ISteamNews/GetNewsForApp/v2/?appid=582660&count=100&maxlength=0&enddate=1563494399&feeds=steam_community_announcements",
+      "sha256": "c9dd0a065cfd9d56d4828bed9531beee250d6be4c51d66d7d159d256237851da"
+    },
+    {
+      "url": "https://store.steampowered.com/news/posts/?appids=582660&enddate=1563888355",
+      "sha256": "bde94e1ac4159c45aebea985570b5c547114770a7d68ccea7913e08595a1d832"
+    },
+    {
+      "url": "https://www.naeu.playblackdesert.com/en-US/News/Detail?groupContentNo=6912",
+      "sha256": "479bd8144546524c8ae675fa37dc3cd2b41ed0c98e2766aa601d8a952be4cd54"
+    }
+  ],
+  "routes": [
+    {
+      "input": 718506,
+      "name": "Ain Florang",
+      "output": 4062,
+      "outputName": "Pure Tin Crystal",
+      "oldTrace": "Savagery",
+      "currentTrace": 5960,
+      "historicalPublisherValues": {
+        "traceRange": [
+          1,
+          4
+        ],
+        "metalRange": [
+          1,
+          4
+        ],
+        "metalChance": 0.25,
+        "date": "2019-07-17"
+      }
+    },
+    {
+      "input": 718507,
+      "name": "Seleth Florang",
+      "output": 4056,
+      "outputName": "Pure Lead Crystal",
+      "oldTrace": "Death",
+      "currentTrace": 5960,
+      "historicalPublisherValues": {
+        "traceRange": [
+          1,
+          4
+        ],
+        "metalRange": [
+          1,
+          4
+        ],
+        "metalChance": 0.25,
+        "date": "2019-07-17"
+      }
+    },
+    {
+      "input": 718512,
+      "name": "Kalis Florang",
+      "output": 4053,
+      "outputName": "Pure Iron Crystal",
+      "oldTrace": "Violence",
+      "currentTrace": 5960,
+      "historicalPublisherValues": {
+        "traceRange": [
+          1,
+          4
+        ],
+        "metalRange": [
+          1,
+          4
+        ],
+        "metalChance": 0.25,
+        "date": "2019-07-17"
+      }
+    },
+    {
+      "input": 718513,
+      "name": "Bares Florang",
+      "output": 4259,
+      "outputName": "Pure Platinum Crystal",
+      "oldTrace": "Battle",
+      "currentTrace": 5960,
+      "historicalPublisherValues": {
+        "traceRange": [
+          1,
+          4
+        ],
+        "metalRange": [
+          1,
+          4
+        ],
+        "metalChance": 0.25,
+        "date": "2019-07-17"
+      }
+    },
+    {
+      "input": 718514,
+      "name": "Yuria Florang",
+      "output": 4065,
+      "outputName": "Pure Zinc Crystal",
+      "oldTrace": "Ascension",
+      "currentTrace": 5960,
+      "historicalPublisherValues": {
+        "traceRange": [
+          1,
+          4
+        ],
+        "metalRange": [
+          1,
+          4
+        ],
+        "metalChance": 0.25,
+        "date": "2019-07-17"
+      }
+    },
+    {
+      "input": 718520,
+      "name": "Krea Florang",
+      "output": 4253,
+      "outputName": "Pure Silver Crystal",
+      "oldTrace": "Despair",
+      "currentTrace": 5960,
+      "historicalPublisherValues": {
+        "traceRange": [
+          1,
+          4
+        ],
+        "metalRange": [
+          1,
+          4
+        ],
+        "metalChance": 0.25,
+        "date": "2019-07-17"
+      }
+    },
+    {
+      "input": 718521,
+      "name": "Rosar Florang",
+      "output": 4083,
+      "outputName": "Pure Titanium Crystal",
+      "oldTrace": "Memory",
+      "currentTrace": 5960,
+      "historicalPublisherValues": {
+        "traceRange": [
+          1,
+          4
+        ],
+        "metalRange": [
+          1,
+          4
+        ],
+        "metalChance": 0.25,
+        "date": "2019-07-17"
+      }
+    }
+  ],
+  "evidence": "Workspace audit/correctness-review-20261102/resumed-weapon-recycling-evidence.json",
+  "limits": [
+    "2019 publisher values are retained as dated evidence, not promoted to independently verified 2026 server probabilities.",
+    "Current native inputs corroborate exact identity/method only, not output distributions or enhancement restrictions.",
+    "These are selected source additions, not exhaustive acquisition certification.",
+    "Search coverage is bounded and any uncached search result remains explicit.",
+    "Enhanced/reformed eligibility is not asserted; raw manufacturing success is not a proc probability."
+  ],
+  "verification": {
+    "date": "2026-11-03T13:16:36.348Z",
+    "status": "INFORMATIONAL_SOURCE_ADDITIONS_VERIFIED_AUDIT_ACTIVE",
+    "catalogHash": "0788628cb37dd0c23bd5c014afa6d8fd8f6d5580a2bd712a0cfc5067ba277447",
+    "references": 2265,
+    "views": 6795,
+    "changed": [
+      "Pure Iron Crystal",
+      "Pure Lead Crystal",
+      "Pure Platinum Crystal",
+      "Pure Silver Crystal",
+      "Pure Tin Crystal",
+      "Pure Titanium Crystal",
+      "Pure Zinc Crystal",
+      "Trace of Nature"
+    ],
+    "unchangedReferences": 2257,
+    "recipesUnchanged": true,
+    "exchangesUnchanged": true,
+    "tests": [
+      {
+        "log": "resumed-weapon-sources-contract-tests.jsonl",
+        "passed": 268
+      },
+      {
+        "log": "resumed-weapon-sources-projection-tests.jsonl",
+        "passed": 1
+      },
+      {
+        "log": "resumed-weapon-sources-layout-tests.jsonl",
+        "passed": 48
+      }
+    ],
+    "analysis": "PASS",
+    "windowsRelease": "PASS",
+    "narrowed": [
+      "native_processing_route_not_represented:1693",
+      "native_processing_route_not_represented:2019",
+      "native_processing_route_not_represented:1575",
+      "native_processing_route_not_represented:2020",
+      "native_processing_route_not_represented:1528",
+      "native_processing_route_not_represented:2021",
+      "native_processing_route_not_represented:1613",
+      "native_processing_route_not_represented:2022",
+      "native_processing_route_not_represented:1768",
+      "native_processing_route_not_represented:2023",
+      "native_processing_route_not_represented:1653",
+      "native_processing_route_not_represented:2024",
+      "native_processing_route_not_represented:1725",
+      "native_processing_route_not_represented:2025"
+    ],
+    "closed": [],
+    "visualReview": [
+      "resumed-weapon-sources-captures/supported-pure-iron-crystal-sakura-night-garden-1.png",
+      "resumed-weapon-sources-captures/supported-trace-of-nature-sakura-night-garden-2.png"
+    ],
+    "limits": [
+      "2019 publisher values are retained as dated evidence, not promoted to independently verified 2026 server probabilities.",
+      "Current native inputs corroborate exact identity/method only, not output distributions or enhancement restrictions.",
+      "These are selected source additions, not exhaustive acquisition certification.",
+      "Search coverage is bounded and any uncached search result remains explicit.",
+      "Enhanced/reformed eligibility is not asserted; raw manufacturing success is not a proc probability."
+    ],
+    "personalProfilesAccessed": false,
+    "installed": false,
+    "published": false,
+    "visibleLaunch": false
+  }
+}

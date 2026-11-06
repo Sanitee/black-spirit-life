@@ -2,6 +2,25 @@
 
 Snapshot: 2026-07-30
 
+## Current application scope — reviewed 2026-11-02
+
+Royal Workshop management is deliberately hidden in the current map
+(`_royalWorkshopEnabled == false`). Its data and planner are preserved for later
+work; hidden preferences do not reserve CP or add income to the current worker
+network. The behavior described below applies to that preserved component, not
+to a newly enabled public feature.
+
+All 124 goods now have a fresh exact-ID/name corroboration against the installed
+PC reference through October 31. That is not a fresh price or probability audit.
+The current NA/EU guide corroborates access/unlock/manager and worker restrictions:
+<https://www.naeu.playblackdesert.com/en-US/Wiki?wikiNo=424>.
+
+The preserved component now retains signed net losses, treats incomplete numeric
+inputs as unknown, and shares guarded finite arithmetic between area and total
+estimates. Synthetic saved-plan and widget tests cover these corrections; no
+personal plans were opened or migrated. Full limits and evidence are recorded in
+`docs/worker-royal-correctness-20261102.json`.
+
 ## Mechanics and interface
 
 The Royal Workshop is modeled as a distinct Seoul system rather than ordinary

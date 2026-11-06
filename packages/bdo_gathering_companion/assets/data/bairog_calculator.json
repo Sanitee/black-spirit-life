@@ -5,7 +5,7 @@
     "url": "https://bdoworkshop.com/gathering-calculator",
     "capturedAtUtc": "2026-09-03T07:09:57Z",
     "siteVersion": "6cf60d72b2643077b1b3192cf34a781c",
-    "note": "Public calculator inputs. Formula independently implemented and visibly attributed in the app. The Sep. 3 Evergreen Shard identity follows Pearl Abyss's one-for-one replacement of the former WON crystal gathering drop; Bairog's captured hourly rate is retained."
+    "note": "Public calculator inputs. Formula independently implemented and visibly attributed in the app. Evergreen Shard identity and minigame eligibility follow the official Sep. 3, 2026 PC patch. The eligibility flag was corrected on Nov. 2 against that patch and the current public calculator; other captured drop rates and historical route benchmarks are retained. Energy calculations separately use reviewed item effects and a single Miraculous dose."
   },
   "gatheringTypes": [
     {
@@ -554,7 +554,7 @@
     {
       "id": 27,
       "item_type": 1,
-      "procs_with_minigame": false,
+      "procs_with_minigame": true,
       "procs_with_hedgehog": true,
       "multi_drop_factor": 1,
       "global_drop": true,

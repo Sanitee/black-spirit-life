@@ -31,7 +31,7 @@ Finder _summary(String name) => _key('craft-summary:$name');
 Finder _stock(String name, String text) => find.descendant(
   of: _summary(name),
   matching: find.text(
-    text.startsWith('−') ? 'Preorders ${text.substring(1)}' : 'Stock $text',
+    text.startsWith('−') ? 'Orders ${text.substring(1)}' : text,
   ),
 );
 
@@ -39,7 +39,7 @@ void main() {
   setUpAll(_fonts);
   for (final (name, count) in [(_whale, 20691), (_copper, 249)]) {
     testWidgets(
-      '$name confirms red preorders on Profit card without opening details',
+      '$name confirms amber preorders on Profit card without opening details',
       (tester) async {
         final f = await _fixture(tester, search: name);
         try {
@@ -72,7 +72,7 @@ void main() {
             tester.widget<Text>(_stock(name, negative)).style?.color,
             OpportunityCraftCardMaterial.forSpec(
               tester.element(_card(name)).visualTheme,
-              OpportunityStockTone.outOfStock,
+              OpportunityStockTone.mixed,
             ).badgeInk,
           );
           expect(

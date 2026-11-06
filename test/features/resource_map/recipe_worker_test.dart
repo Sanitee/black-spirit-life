@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:bdo_craft_planner_flutter/app/planning/planner_assembly.dart';
 import 'package:bdo_craft_planner_flutter/data/catalog/bundled_catalog_parser.dart';
+import 'package:bdo_craft_planner_flutter/domain/catalog/temporarily_archived_items.dart';
 import 'package:bdo_craft_planner_flutter/domain/models/catalog_models.dart';
 import 'package:bdo_craft_planner_flutter/domain/planner/planner_models.dart';
 import 'package:bdo_craft_planner_flutter/features/resource_map/recipe_worker_catalog.dart';
@@ -10,6 +11,20 @@ import 'package:flutter_test/flutter_test.dart';
 import 'recipe_worker_fixture.dart';
 
 void main() {
+  test('worker recipe choices share the retired-material filter', () {
+    final recipes = {
+      for (final name in retiredPcItemsById.values)
+        name: workerRecipe(name, {'A': 1}),
+      'Current target': workerRecipe('Current target', {'A': 2}),
+    };
+    final catalog = RecipeWorkerCatalog(recipes, PlannerRules());
+    expect(catalog.targets, ['Current target']);
+    expect(catalog.expand('Current target').single.quantity, 2);
+    for (final name in retiredPcItemsById.values) {
+      expect(() => catalog.expand(name), throwsArgumentError);
+      expect(catalog.recipes.containsKey(name), isTrue);
+    }
+  });
   test('full chain sums repeated leaves rather than counting recipes', () {
     final leaves = workerCatalog().expand('Target');
     expect(

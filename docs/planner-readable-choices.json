@@ -1,0 +1,38 @@
+{
+  "date": "2026-10-31",
+  "status": "Separate local test build; user visual review and publication remain separate",
+  "source": "[private-source]/Planner Readable Choices 20261031",
+  "branch": "codex/planner-readable-choices",
+  "baseline": "[private-source]/Planner Market Choices 20261031",
+  "approvedDesign": "Clearer badges, option 1, with typography and materials matching the actual Planner",
+  "presentation": {
+    "preferredWidth": 500,
+    "maximumHeight": 640,
+    "itemNamesAndQuantities": 16,
+    "stockAndPreorders": 14,
+    "silverAmount": 17,
+    "columnLabels": 13,
+    "itemArtwork": 36,
+    "silverArtwork": 21,
+    "materials": "Unchanged SculptedPanel, selected-row finish, theme fonts and dividers. Badge ink blends 18 percent toward the active theme text; no fixed Sakura palette or new visual skin.",
+    "layout": "Existing body scroll, narrow/enlarged reflow, exact quantities and right-aligned normal columns remain. No scaling of the popup to squeeze it into a smaller viewport.",
+    "scope": "All PlannerOwnedChoices entry points share the roomier presentation. Opportunities retains its compact badge geometry and existing symbols. Shopping and Undo panels are unchanged."
+  },
+  "preserved": [
+    "Ingredient identities, grade selection, inventory and calculation semantics",
+    "Full-required-quantity price estimate, shared broker freshness and cancellation",
+    "Copy-name and separate swap controls, click-to-full amounts, no ordinary hover text",
+    "Theme-adaptive materials, dragging, scrolling and dismissal behavior",
+    "Complete preceding source/runnable and shared Documents/writer-lease protections"
+  ],
+  "verification": {
+    "fixtures": "Disposable synthetic profiles and fake market data; no personal-profile access",
+    "coverage": "Three themes and four viewport/text-scale layouts; live theme switching, font-family/palette/size assertions, exact stock/zero/unknown/NPC badges, compact Opportunities density, large counts, copied names, full prices, substitute selection, long-list scroll and existing Planner/overlay regressions",
+    "audit": "[private-audit]/audit/planner-readable-choices-20261031",
+    "screenshots": "[private-audit]/work/visuals/planner-readable-choices",
+    "buildEnvironment": "The local Windows plugin path is a junction into this candidate's vendored plugin. No Developer Mode or other system setting was changed."
+  },
+  "appLaunched": false,
+  "installedAppChanged": false,
+  "published": false
+}

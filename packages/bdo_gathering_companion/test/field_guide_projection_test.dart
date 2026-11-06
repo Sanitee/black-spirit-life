@@ -2965,7 +2965,7 @@ void main() {
         expect(find.text('Deductions'), findsNothing);
         final close = find.descendant(
           of: calculationDialog,
-          matching: find.byTooltip('Close'),
+          matching: find.byIcon(Icons.close_rounded),
         );
         expect(close, findsOneWidget);
         await tester.tap(close);

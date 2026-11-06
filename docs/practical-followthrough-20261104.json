@@ -1,0 +1,17 @@
+{
+  "reviewedAt": "2026-11-04",
+  "scope": "Close the shared availability-policy gap for five confirmed removed identities, not a new full-game certification.",
+  "removedItems": [
+    {"id":4910,"name":"Grade 3 Weapon Reform Stone","source":"https://www.naeu.playblackdesert.com/en-US/News/Detail?groupContentNo=6474&countryType=en-US","patchDate":"2024-01-17"},
+    {"id":4911,"name":"Grade 3 Armor Reform Stone","source":"https://www.naeu.playblackdesert.com/en-US/News/Detail?groupContentNo=6474&countryType=en-US","patchDate":"2024-01-17"},
+    {"id":4924,"name":"Mystical Spirit Powder","source":"https://www.naeu.playblackdesert.com/en-US/News/Detail?groupContentNo=10550&countryType=en-US","patchDate":"2026-09-03"},
+    {"id":44332,"name":"Vell's Fine Powder","source":"https://www.naeu.playblackdesert.com/en-US/News/Detail?groupContentNo=10550&countryType=en-US","patchDate":"2026-09-03"},
+    {"id":45333,"name":"Wild Spirit Stone","source":"https://www.naeu.playblackdesert.com/en-US/News/Detail?groupContentNo=10550&countryType=en-US","patchDate":"2026-09-03"}
+  ],
+  "identityCorroboration": "Exact item IDs/names in the installed PC archive extraction through October 31, 2026. Old descriptions alone are not current availability proof.",
+  "behavior": "Keep raw records and saved quantities, but use the common exclusion for ordinary choices, markets, planning, worker targets and active item-information sources/recipes. The generator reads that same map.",
+  "retained": ["Ultimate Weapon Reform Stone", "Ultimate Armor Reform Stone", "Alchemy Stone Shard", "Destruction Spirit Stone", "Guardian Spirit Stone", "Life Spirit Stone", "Vell's Concentrated Magic", "Concentrated Boss's Aura", "Contained Boss Aura"],
+  "notRemovalEvidence": "The pre-existing legacyUnavailableItems list alone does not establish removal. Bottle of Clean Water, Bottle of Turbid Water and Dinosaur Blood are not blanket retired. Mystical Spirit Powder knowledge identity 37949 is not consumable 4924.",
+  "noChanges": ["recipe quantities", "yields", "exchanges", "market prices", "UI layout", "personal data", "installed application"],
+  "auditLocation": "audit/practical-followthrough-20261103 in the task workspace; folder dates preserve the original checkpoint name."
+}

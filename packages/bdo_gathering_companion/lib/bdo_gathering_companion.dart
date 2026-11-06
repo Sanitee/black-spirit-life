@@ -5,5 +5,6 @@ export 'src/recipe_checklist.dart';
 export 'src/services/gathering_durability_controller.dart';
 export 'src/services/shared_market_loader.dart';
 export 'src/ui/visual_palette.dart' show CompanionVisualPalette;
+export 'src/ui/market_presentation.dart';
 export 'src/reference_feature.dart'
     show isGatheringReferenceMode, runGatheringReferenceMode;

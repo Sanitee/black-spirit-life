@@ -1,11 +1,11 @@
 import 'dart:async';
 
 import 'package:bdo_craft_planner_flutter/visual/components/app_tooltip.dart';
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../../app/state/planner_application_controller.dart';
+import '../../domain/catalog/item_name_presentation.dart';
 import '../../domain/formatting/planner_formatters.dart';
 import '../../visual/components/app_interaction_frame.dart';
 import '../../visual/visual.dart';
@@ -200,7 +200,7 @@ class _InventoryStorageItemRowState extends State<InventoryStorageItemRow> {
       message: widget.item.name,
       child: TextButton(
         key: InventoryActionKeys.row('I09', widget.item.name),
-        onPressed: () => widget.onCopy(widget.item.name),
+        onPressed: () => widget.onCopy(itemDisplayName(widget.item.name)),
         style: ButtonStyle(
           alignment: Alignment.centerLeft,
           padding: const WidgetStatePropertyAll(EdgeInsets.zero),
@@ -210,7 +210,7 @@ class _InventoryStorageItemRowState extends State<InventoryStorageItemRow> {
           overlayColor: const WidgetStatePropertyAll(Colors.transparent),
         ),
         child: Text(
-          widget.item.name,
+          itemDisplayName(widget.item.name),
           maxLines: 2,
           overflow: TextOverflow.ellipsis,
           style: nameStyle,

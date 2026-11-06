@@ -1,23 +1,33 @@
 import 'dart:ui' show PointerDeviceKind;
 
 import 'package:bdo_craft_planner_flutter/visual/components/app_tooltip.dart';
-
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart' show ScrollCacheExtent;
 import 'package:flutter/services.dart';
 
 import '../../data/catalog/catalog_repository.dart';
+import '../../data/market/shared_market_repository.dart';
+import '../../domain/catalog/item_name_presentation.dart';
+import '../../domain/formatting/compact_quantity.dart';
+import '../../domain/formatting/compact_silver.dart';
 import '../../domain/formatting/planner_formatters.dart';
 import '../../domain/market/recipe_profitability.dart';
 import '../../domain/models/catalog_models.dart';
 import '../../domain/models/craft_mode.dart';
+import '../../domain/opportunities/opportunity_card_reading.dart';
 import '../../shared/overlays/anchored_popover.dart';
 import '../../shared/overlays/draggable_overlay_surface.dart';
 import '../../visual/components/app_interaction_frame.dart';
+import '../../visual/components/sculpted_panel.dart';
 import '../../visual/visual.dart';
+import '../opportunities/opportunity_craft_card_material.dart';
+import '../planner/planner_choice_market.dart';
 import '../planner/planner_contracts.dart';
 import '../planner/planner_map_quick_lookup.dart';
+import '../shared/inventory_count_badge.dart';
+import '../shared/market_count_badges.dart';
 import '../shared/recipe_variant_selector.dart';
+import '../shared/source_availability_badges.dart';
 import '../shared/workshop_presentation.dart';
 import 'recipe_book_controller.dart';
 import 'recipe_book_item_info.dart';
@@ -27,6 +37,8 @@ import 'recipe_book_models.dart';
 import 'recipe_book_usage.dart';
 import 'recipe_book_used_in_panel.dart';
 import 'recipe_ingredient_line.dart';
+
+part 'recipe_book_availability_view.dart';
 
 Future<RecipeBookActivation?> showRecipeBookModal({
   required BuildContext context,
@@ -128,8 +140,19 @@ class _RecipeBookModalState extends State<RecipeBookModal> {
     oldWidget.controller.removeListener(_controllerChanged);
     widget.controller.addListener(_controllerChanged);
     _search.text = widget.controller.search;
+    widget.controller.connectAvailabilityMarket(
+      PlannerChoiceMarketScope.of(context),
+    );
     _scrollResetRevision = widget.controller.scrollResetRevision;
     _lastPreviewName = widget.controller.previewName;
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    widget.controller.connectAvailabilityMarket(
+      PlannerChoiceMarketScope.of(context),
+    );
   }
 
   @override
@@ -202,8 +225,16 @@ class _RecipeBookModalState extends State<RecipeBookModal> {
     _closeBook();
   }
 
-  void _activate(String name, CraftMode mode) {
-    final activation = widget.controller.activateInMode(name, mode);
+  void _activate(
+    String name,
+    CraftMode mode, {
+    bool useDisplayedIngredients = false,
+  }) {
+    final activation = widget.controller.activateInMode(
+      name,
+      mode,
+      useDisplayedIngredients: useDisplayedIngredients,
+    );
     if (activation != null) widget.onActivated(activation);
   }
 
@@ -266,15 +297,20 @@ class _RecipeBookModalState extends State<RecipeBookModal> {
                             ? switch (widget.controller.density) {
                                 RecipeBookDensity.fourByThree => 980.0,
                                 _ => 900.0,
-                              }.clamp(760.0, constraints.maxWidth - 92)
-                            : (constraints.maxWidth - 92).clamp(760.0, 1220.0);
-                        final height = compactBonus
-                            ? switch (widget.controller.density) {
-                                RecipeBookDensity.sixByFive => 386.0,
-                                RecipeBookDensity.fiveByFour => 414.0,
-                                RecipeBookDensity.fourByThree => 464.0,
-                              }.clamp(300.0, constraints.maxHeight - 40)
-                            : (constraints.maxHeight - 86).clamp(560.0, 820.0);
+                              }.clamp(
+                                0.0,
+                                (constraints.maxWidth - 48).clamp(0.0, 1440.0),
+                              )
+                            : (constraints.maxWidth - 64).clamp(
+                                0.0,
+                                widget.controller.marketSort.sortsAvailability
+                                    ? 1840.0
+                                    : 1440.0,
+                              );
+                        final height = (constraints.maxHeight - 72).clamp(
+                          0.0,
+                          920.0,
+                        );
                         return DraggableOverlaySurface(
                           overlayId: 'recipe-book',
                           child: SizedBox(
@@ -296,7 +332,14 @@ class _RecipeBookModalState extends State<RecipeBookModal> {
                                   searchFocus: _searchFocus,
                                   scrollController: _scroll,
                                   onClose: _closeBook,
-                                  onActivate: _activate,
+                                  onActivate: (name, mode) => _activate(
+                                    name,
+                                    mode,
+                                    useDisplayedIngredients: widget
+                                        .controller
+                                        .marketSort
+                                        .sortsAvailability,
+                                  ),
                                   onActivateUsedIn: _activateUsedIn,
                                   onPreview: _openPreview,
                                 ),
@@ -703,12 +746,9 @@ class _RecipeBookToolbar extends StatelessWidget {
       final primaryActions = _RecipeBookControlGroup(
         children: <Widget>[browse, const _RecipeBookToolbarDivider(), market],
       );
-      if (deleteControls.isEmpty) {
-        return Align(alignment: Alignment.centerLeft, child: primaryActions);
-      }
       final estimatedMarketWidth = controller.marketControlsVisible
-          ? 730.0
-          : 124.0;
+          ? 860.0
+          : 410.0;
       final estimatedPrimaryWidth =
           estimatedBrowseWidth + 17 + estimatedMarketWidth * layoutScale;
       if (availableWidth < estimatedPrimaryWidth) {
@@ -724,6 +764,9 @@ class _RecipeBookToolbar extends StatelessWidget {
             ],
           ],
         );
+      }
+      if (deleteControls.isEmpty) {
+        return Align(alignment: Alignment.centerLeft, child: primaryActions);
       }
       if (availableWidth >= estimatedPrimaryWidth + 16 + estimatedDeleteWidth) {
         return Row(
@@ -849,15 +892,11 @@ class _RecipeBookControlGroup extends StatelessWidget {
   final List<Widget> children;
 
   @override
-  Widget build(BuildContext context) => Row(
-    mainAxisSize: MainAxisSize.min,
-    crossAxisAlignment: CrossAxisAlignment.center,
-    children: <Widget>[
-      for (var index = 0; index < children.length; index += 1) ...<Widget>[
-        if (index > 0) const SizedBox(width: 6),
-        children[index],
-      ],
-    ],
+  Widget build(BuildContext context) => Wrap(
+    spacing: 6,
+    runSpacing: 6,
+    crossAxisAlignment: WrapCrossAlignment.center,
+    children: children,
   );
 }
 
@@ -908,6 +947,26 @@ class _RecipeBookMarketControls extends StatelessWidget {
       ),
     );
     final commandControls = <Widget>[
+      Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text('Sort by', style: spec.typography.meta),
+          const SizedBox(width: 8),
+          SizedBox(
+            key: RecipeBookKeys.r23MarketSort,
+            width: 212 * MediaQuery.textScalerOf(context).scale(14) / 14,
+            child: AppSelect<RecipeBookMarketSort>(
+              value: controller.marketSort,
+              items: RecipeBookMarketSort.values,
+              labelFor: (sort) => sort.label,
+              semanticLabel: 'Sort recipes',
+              onChanged: (sort) {
+                if (sort != null) controller.setMarketSort(sort);
+              },
+            ),
+          ),
+        ],
+      ),
       marketToggle,
       if (controller.marketControlsVisible) ...<Widget>[
         _MarketRefreshButton(
@@ -933,22 +992,6 @@ class _RecipeBookMarketControls extends StatelessWidget {
             semanticLabel:
                 'Show profitable recipes only, assuming all ingredients are bought',
             onChanged: controller.setProfitableOnly,
-          ),
-        ),
-        SizedBox(
-          key: RecipeBookKeys.r23MarketSort,
-          width: 142,
-          height: 40,
-          child: AppSelect<RecipeBookMarketSort>(
-            value: controller.marketSort,
-            items: RecipeBookMarketSort.values
-                .where((sort) => controller.profitableOnly || !sort.sortsProfit)
-                .toList(growable: false),
-            labelFor: (sort) => sort.label,
-            semanticLabel: 'Recipe Book market sort',
-            onChanged: (sort) {
-              if (sort != null) controller.setMarketSort(sort);
-            },
           ),
         ),
       ],
@@ -1213,16 +1256,23 @@ class _RecipeGrid extends StatelessWidget {
           controller.callingContext == RecipeBookCallingContext.bonus &&
           snapshot.poolCount <= 6;
       final textScale = MediaQuery.textScalerOf(context).scale(16) / 16;
-      final preferredWidth = switch (controller.density) {
-        RecipeBookDensity.sixByFive => 320.0,
-        RecipeBookDensity.fiveByFour => 370.0,
-        RecipeBookDensity.fourByThree => 410.0,
-      };
-      final columns = (constraints.maxWidth / (preferredWidth * textScale))
-          .floor()
-          .clamp(1, controller.density.columns);
+      final availabilityView = controller.marketSort.sortsAvailability;
+      final preferredWidth = availabilityView
+          ? _RecipeAvailabilityTable.minimumWidth(context) + 52
+          : switch (controller.density) {
+              RecipeBookDensity.sixByFive => 360.0 * textScale,
+              RecipeBookDensity.fiveByFour => 410.0 * textScale,
+              RecipeBookDensity.fourByThree => 460.0 * textScale,
+            };
+      final columns = (constraints.maxWidth / preferredWidth).floor().clamp(
+        1,
+        controller.density.columns,
+      );
       final fittedMetrics = _RecipeCardMetrics(
-        cardWidth: (constraints.maxWidth / columns - 12).clamp(0, 560),
+        cardWidth: (constraints.maxWidth / columns - 16).clamp(
+          0,
+          availabilityView ? preferredWidth + 80 * textScale : 620 * textScale,
+        ),
       );
       final scrollView = CustomScrollView(
         controller: scrollController,
@@ -1251,7 +1301,9 @@ class _RecipeGrid extends StatelessWidget {
                                 child: Padding(
                                   padding: EdgeInsets.all(fittedMetrics.margin),
                                   child: Align(
-                                    alignment: compactBonus
+                                    alignment:
+                                        compactBonus ||
+                                            (availabilityView && columns == 1)
                                         ? Alignment.topCenter
                                         : Alignment.topLeft,
                                     heightFactor: 1,
@@ -1406,39 +1458,43 @@ class _RecipeCard extends StatelessWidget {
         child: AppInteractionFrame(
           enabled: !entry.hidden || controller.restoringHiddenName == null,
           selected: active || entry.selectedForDeletion,
-          radius: 7,
+          radius: 9,
           child: DecoratedBox(
             key: ValueKey('recipe-soft-card:${entry.name}'),
             decoration: BoxDecoration(
               gradient: LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                stops: const [0, .22, 1],
                 colors: [
                   Color.lerp(
                     spec.palette.surface,
                     active ? spec.palette.trim : spec.palette.surfaceRaised,
-                    active ? .18 : .12,
+                    active ? .35 : .85,
                   )!,
+                  spec.palette.surface,
                   Color.lerp(
                     spec.palette.surface,
                     spec.palette.surfaceInset,
-                    .3,
+                    .2,
                   )!,
                 ],
               ),
-              borderRadius: BorderRadius.circular(7),
-              border: entry.selectedForDeletion || entry.hidden
-                  ? Border.all(
-                      color: entry.selectedForDeletion
-                          ? spec.palette.danger
-                          : spec.palette.warning,
-                    )
-                  : null,
+              borderRadius: BorderRadius.circular(9),
+              border: Border.all(
+                color: entry.selectedForDeletion
+                    ? spec.palette.danger
+                    : entry.hidden
+                    ? spec.palette.warning
+                    : active
+                    ? spec.palette.trimBright.withAlpha(175)
+                    : spec.palette.trimBright.withAlpha(100),
+              ),
               boxShadow: [
                 BoxShadow(
-                  color: spec.palette.shadow.withValues(alpha: .12),
-                  blurRadius: 4,
-                  offset: const Offset(0, 2),
+                  color: spec.palette.shadow.withValues(alpha: .3),
+                  blurRadius: 12,
+                  offset: const Offset(0, 4),
                 ),
               ],
             ),
@@ -1478,13 +1534,14 @@ class _RecipeCard extends StatelessWidget {
                                       AppTooltip(
                                         message: entry.name,
                                         child: Text(
-                                          entry.name,
+                                          itemDisplayName(entry.name),
                                           maxLines: 2,
                                           overflow: TextOverflow.ellipsis,
                                           style: spec.typography.label.copyWith(
                                             fontSize: metrics.nameSize,
                                             fontWeight: FontWeight.w700,
                                             height: 1.25,
+                                            color: spec.palette.text,
                                           ),
                                         ),
                                       ),
@@ -1540,6 +1597,18 @@ class _RecipeCard extends StatelessWidget {
                                   ),
                               ],
                             ),
+                            if (!entry.hidden &&
+                                controller.showsMarketStockFor(entry.name)) ...[
+                              const SizedBox(height: 8),
+                              KeyedSubtree(
+                                key: ValueKey(
+                                  'recipe-output-stock:${entry.name}',
+                                ),
+                                child: _RecipeBookStockPill(
+                                  stock: entry.marketStock,
+                                ),
+                              ),
+                            ],
                             const Padding(
                               padding: EdgeInsets.only(top: 9, bottom: 8),
                               child: WorkshopSectionRule(),
@@ -1625,9 +1694,17 @@ class _RecipeCard extends StatelessWidget {
                       ),
                     ],
                   ),
+                  if (controller.marketSort.sortsAvailability &&
+                      !entry.hidden &&
+                      !reference &&
+                      !deleteMode)
+                    _RecipeCardIngredients(
+                      controller: controller,
+                      name: entry.name,
+                    ),
                   if (entry.hidden ||
-                      entry.profitability != null ||
-                      controller.showsMarketStockFor(entry.name)) ...[
+                      (!controller.marketSort.sortsAvailability &&
+                          entry.profitability?.isAvailable == true)) ...[
                     const SizedBox(height: 10),
                     Padding(
                       padding: EdgeInsets.only(left: metrics.iconSize + 16),
@@ -1636,15 +1713,13 @@ class _RecipeCard extends StatelessWidget {
                         runSpacing: 4,
                         children: [
                           if (entry.hidden) const _HiddenRecipePill(),
-                          if (!entry.hidden && entry.profitability != null)
+                          if (!entry.hidden &&
+                              !controller.marketSort.sortsAvailability &&
+                              entry.profitability?.isAvailable == true)
                             _RecipeBookProfitabilityPill(
                               key: RecipeBookKeys.profitPill(entry.name),
                               quote: entry.profitability!,
-                              compact: false,
                             ),
-                          if (!entry.hidden &&
-                              controller.showsMarketStockFor(entry.name))
-                            _RecipeBookStockPill(stock: entry.marketStock),
                         ],
                       ),
                     ),
@@ -1691,14 +1766,9 @@ class _HiddenRecipePill extends StatelessWidget {
 }
 
 class _RecipeBookProfitabilityPill extends StatelessWidget {
-  const _RecipeBookProfitabilityPill({
-    required this.quote,
-    this.compact = false,
-    super.key,
-  });
+  const _RecipeBookProfitabilityPill({required this.quote, super.key});
 
   final RecipeProfitabilityQuote quote;
-  final bool compact;
 
   @override
   Widget build(BuildContext context) {
@@ -1713,11 +1783,12 @@ class _RecipeBookProfitabilityPill extends StatelessWidget {
       returnOnCostPercent,
       fractionDigits: returnOnCostPercent.abs() >= 100 ? 0 : 1,
     );
-    final profit = formatSilver(profitPerPiece);
-    final label = '+$roi% · +$profit/ea';
+    final label =
+        'Est. profit ${formatCompactSilver(quote.profitPerCraft!)} / craft';
     final details =
         'Estimated profit when every selected direct ingredient is bought.\n'
         'Expected output: ${formatQuantity(outputPerCraft)} per craft\n'
+        '${quote.outputNote == null ? '' : '${quote.outputNote}\n'}'
         'Ingredient cost: ${formatSilverLabel(ingredientCost)} per craft\n'
         'After-tax revenue: ${formatSilverLabel(netRevenue)} per craft '
         '(${formatQuantity(netRate * 100, fractionDigits: 1)}% net)\n'
@@ -1733,15 +1804,22 @@ class _RecipeBookProfitabilityPill extends StatelessWidget {
         waitDuration: const Duration(milliseconds: 350),
         child: DecoratedBox(
           decoration: BoxDecoration(
-            color: spec.palette.success.withAlpha(92),
-            borderRadius: BorderRadius.circular(999),
-            border: Border.all(color: spec.palette.success.withAlpha(178)),
+            color:
+                (quote.isProfitable
+                        ? spec.palette.success
+                        : spec.palette.danger)
+                    .withAlpha(18),
+            borderRadius: BorderRadius.circular(3),
+            border: Border.all(
+              color:
+                  (quote.isProfitable
+                          ? spec.palette.success
+                          : spec.palette.danger)
+                      .withAlpha(100),
+            ),
           ),
           child: Padding(
-            padding: EdgeInsets.symmetric(
-              horizontal: compact ? 5 : 7,
-              vertical: 3,
-            ),
+            padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
             child: FittedBox(
               fit: BoxFit.scaleDown,
               alignment: Alignment.centerLeft,
@@ -1749,8 +1827,8 @@ class _RecipeBookProfitabilityPill extends StatelessWidget {
                 label,
                 style: spec.typography.meta.copyWith(
                   color: spec.palette.text,
-                  fontSize: compact ? 8.75 : 10.25,
-                  fontWeight: FontWeight.w800,
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
                   height: 1,
                 ),
                 maxLines: 1,
@@ -1770,33 +1848,7 @@ class _RecipeBookStockPill extends StatelessWidget {
   final double? stock;
   @override
   Widget build(BuildContext context) {
-    final spec = context.visualTheme;
-    return AppTooltip(
-      message: stock == null
-          ? 'Stock has not been checked.'
-          : '${formatQuantity(stock!)} listed on the Central Market.',
-      child: DecoratedBox(
-        decoration: BoxDecoration(
-          color: spec.palette.surfaceRaised.withAlpha(86),
-          borderRadius: BorderRadius.circular(999),
-          border: Border.all(color: spec.palette.textMuted.withAlpha(165)),
-        ),
-        child: Padding(
-          padding: EdgeInsets.symmetric(horizontal: 7, vertical: 3),
-          child: Text(
-            stock == null ? 'Stock —' : 'Stock ${formatQuantity(stock!)}',
-            style: spec.typography.meta.copyWith(
-              color: spec.palette.text,
-              fontSize: 10.5,
-              fontWeight: FontWeight.w800,
-              height: 1,
-            ),
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-          ),
-        ),
-      ),
-    );
+    return SourceAvailabilityBadges(stock: stock?.toInt());
   }
 }
 
@@ -1804,13 +1856,13 @@ class _RecipeBookStockPill extends StatelessWidget {
 class _RecipeCardMetrics {
   const _RecipeCardMetrics({required this.cardWidth});
   final double cardWidth;
-  final double iconSize = 50;
-  final double margin = 6;
+  final double iconSize = 60;
+  final double margin = 8;
   final EdgeInsets padding = const EdgeInsets.symmetric(
-    horizontal: 15,
-    vertical: 17,
+    horizontal: 18,
+    vertical: 20,
   );
-  final double nameSize = 18;
+  final double nameSize = 20;
 }
 
 bool _sameRecipeName(String left, String right) =>
@@ -2057,7 +2109,7 @@ class _RecipePreviewOverlay extends StatelessWidget {
                                           CrossAxisAlignment.start,
                                       children: <Widget>[
                                         Text(
-                                          recipeName,
+                                          itemDisplayName(recipeName),
                                           style: ItemDetailStyle.title(spec),
                                         ),
                                         const SizedBox(height: 6),

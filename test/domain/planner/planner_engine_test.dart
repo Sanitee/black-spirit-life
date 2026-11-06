@@ -1,5 +1,6 @@
 import 'package:bdo_craft_planner_flutter/domain/models/catalog_models.dart';
 import 'package:bdo_craft_planner_flutter/domain/models/craft_mode.dart';
+import 'package:bdo_craft_planner_flutter/domain/planner/ingredient_quality.dart';
 import 'package:bdo_craft_planner_flutter/domain/planner/planner_engine.dart';
 import 'package:bdo_craft_planner_flutter/domain/planner/planner_models.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -249,7 +250,7 @@ void main() {
   });
 
   test(
-    'Tenacious exact routes ignore stale per-ingredient quality choices',
+    'retired Tenacious has no active recipe despite saved quality choices',
     () {
       final result = engine.buildPlan(
         mode: CraftMode.alchemy,
@@ -265,6 +266,8 @@ void main() {
         state: PlannerState(
           target: 'Tenacious Origin of Life',
           want: 1,
+          marketPrices: const {'Tenacious Origin of Life': 100},
+          marketStock: const {'Tenacious Origin of Life': 100},
           ingredientGrades: const <String, String>{
             'recipe:Tenacious Origin of Life:Sunrise Herb': 'special',
           },
@@ -282,12 +285,20 @@ void main() {
         ),
       );
 
-      final ingredient = result.steps.single.ingredients.single;
-      expect(ingredient.name, 'Sunrise Herb');
-      expect(ingredient.grade, 'normal');
-      expect(ingredient.need, 50);
-      expect(result.missing.single.name, 'Sunrise Herb');
-      expect(result.missing.single.need, 50);
+      // Historical grade metadata remains meaningful, but no active production
+      // plan may be resurrected for the officially removed item.
+      expect(
+        recipeHasAuthoritativeQualityVariants('Tenacious Origin of Life'),
+        isTrue,
+      );
+      expect(result.steps, isEmpty);
+      // Retain the legacy unsatisfied target, but never buy it or demand its
+      // obsolete ingredients. The application excludes it from active choices.
+      expect(result.missing.single.name, 'Tenacious Origin of Life');
+      expect(result.missing.single.need, 1);
+      expect(result.missing.single.market.marketable, isFalse);
+      expect(result.missing.single.market.buyable, 0);
+      expect(result.missing.single.market.stockKnown, isFalse);
     },
   );
 

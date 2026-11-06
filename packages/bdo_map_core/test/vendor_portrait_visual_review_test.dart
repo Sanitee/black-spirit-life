@@ -44,7 +44,7 @@ void main() {
         vendorListings: <BdoVendorListing>[davidSalt],
       );
       final appData =
-          jsonDecode(File('assets/data/app-data.json').readAsStringSync())
+          jsonDecode(File('../../assets/data/app-data.json').readAsStringSync())
               as Map<String, dynamic>;
       final saltDataUri =
           (appData['itemIcons']! as Map<String, dynamic>)['Salt']! as String;
@@ -148,18 +148,56 @@ void main() {
       expect(find.text('David Finto'), findsOneWidget);
       expect(find.text('Salt'), findsWidgets);
 
+      // Fake-async pumps alone do not complete native image decoding. Capturing
+      // before this would produce empty icon bays despite a passing text test.
+      for (var pass = 0; pass < 3; pass++) {
+        for (final element in find.byType(Image).evaluate().toList()) {
+          final provider = (element.widget as Image).image;
+          if (provider is MemoryImage || provider is AssetImage) {
+            await tester.runAsync(() => precacheImage(provider, element));
+          }
+        }
+        await tester.runAsync(
+          () => Future<void>.delayed(const Duration(milliseconds: 30)),
+        );
+        await tester.pump(const Duration(milliseconds: 100));
+      }
+      for (final bytes in [saltIcon, davidPortrait]) {
+        final artwork = find.byWidgetPredicate(
+          (widget) =>
+              widget is Image &&
+              widget.image is MemoryImage &&
+              identical((widget.image as MemoryImage).bytes, bytes),
+        );
+        expect(artwork, findsWidgets);
+        for (final painted in tester.widgetList<RawImage>(
+          find.descendant(of: artwork, matching: find.byType(RawImage)),
+        )) {
+          expect(
+            painted.image,
+            isNotNull,
+            reason: 'Preview art must be decoded.',
+          );
+        }
+      }
+
       final boundary = tester.renderObject<RenderRepaintBoundary>(
         find.byKey(rootKey),
       );
-      final image = await boundary.toImage(pixelRatio: 1);
-      final bytes = await image.toByteData(format: ui.ImageByteFormat.png);
-      image.dispose();
-      final output = File(
-        'build/private-ui-previews/'
-        'review_sakura_salt_vendor_david_portrait_1200x752.png',
-      );
-      output.parent.createSync(recursive: true);
-      output.writeAsBytesSync(bytes!.buffer.asUint8List(), flush: true);
+      await tester.runAsync(() async {
+        final image = await boundary.toImage(pixelRatio: 1);
+        try {
+          final bytes = await image.toByteData(format: ui.ImageByteFormat.png);
+          final output = File(
+            'build/private-ui-previews/'
+            'review_sakura_salt_vendor_david_portrait_1200x752.png',
+          );
+          output.parent.createSync(recursive: true);
+          output.writeAsBytesSync(bytes!.buffer.asUint8List(), flush: true);
+        } finally {
+          image.dispose();
+        }
+      });
 
       await tester.pumpWidget(const SizedBox.shrink());
       await tester.pump();
@@ -178,10 +216,17 @@ Future<void> _loadReviewFonts() async {
     windowsRoot,
   ).uri.resolve('Fonts/').toFilePath();
   final materialFonts = _flutterMaterialFontsDirectory();
+  await _loadFontFamily('Roboto', <String>[
+    '$materialFonts${Platform.pathSeparator}Roboto-Regular.ttf',
+  ]);
   await _loadFontFamily('Segoe UI', <String>[
     '$windowsFonts${Platform.pathSeparator}segoeui.ttf',
     '$windowsFonts${Platform.pathSeparator}seguisb.ttf',
     '$windowsFonts${Platform.pathSeparator}segoeuib.ttf',
+  ]);
+  await _loadFontFamily('Georgia', <String>[
+    '$windowsFonts${Platform.pathSeparator}georgia.ttf',
+    '$windowsFonts${Platform.pathSeparator}georgiab.ttf',
   ]);
   await _loadFontFamily('MaterialIcons', <String>[
     '$materialFonts${Platform.pathSeparator}materialicons-regular.otf',

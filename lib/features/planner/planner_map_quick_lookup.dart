@@ -4,6 +4,7 @@ import '../../shared/overlays/anchored_popover.dart';
 import '../../visual/visual.dart';
 import 'planner_contracts.dart';
 import 'planner_keys.dart';
+import 'planner_map_menu_presentation.dart';
 
 enum _PlannerMapQuickAction {
   npcVendors,
@@ -109,7 +110,7 @@ class _PlannerMapQuickLookupRegionState
     ).overlay?.context.findRenderObject();
     if (overlay is! RenderBox || !overlay.hasSize) return;
     final spec = context.visualTheme;
-    final menuWidth = _plannerMapLookupMenuWidth(
+    final menuWidth = plannerMapLookupMenuWidth(
       context: context,
       viewportSize: overlay.size,
       actionLabels: <String>[
@@ -148,14 +149,15 @@ class _PlannerMapQuickLookupRegionState
               PlannerMapLookupSource.npcVendors.name,
             ),
             value: _PlannerMapQuickAction.npcVendors,
-            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
-            child: _PlannerMapLookupMenuLabel(
-              icon: Icons.storefront_rounded,
-              tone: AppSurfaceTone.info,
+            padding: const EdgeInsets.symmetric(horizontal: 6),
+            child: PlannerMapMenuLabel(
+              emblem: PlannerMapEmblem.npc,
               label: 'Show NPC vendors',
               detail: npcVendorDetail,
             ),
           ),
+        if (canOpenNpcVendors && canOpenManual)
+          const PopupMenuDivider(height: 1),
         if (canOpenManual)
           PopupMenuItem<_PlannerMapQuickAction>(
             key: PlannerActionKeys.mapLookupAction(
@@ -163,17 +165,16 @@ class _PlannerMapQuickLookupRegionState
               PlannerMapLookupSource.manualGathering.name,
             ),
             value: _PlannerMapQuickAction.manualGathering,
-            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
-            child: _PlannerMapLookupMenuLabel(
-              icon: Icons.location_on_rounded,
-              tone: AppSurfaceTone.warning,
+            padding: const EdgeInsets.symmetric(horizontal: 6),
+            child: PlannerMapMenuLabel(
+              emblem: PlannerMapEmblem.gathering,
               label: manualActionLabel,
               detail: manualDetail,
             ),
           ),
         if ((canOpenNpcVendors || canOpenManual) &&
             (canAddToChecklist || canAddToPlannedNetwork))
-          const PopupMenuDivider(height: 8),
+          const PopupMenuDivider(height: 1),
         if (canAddToChecklist)
           PopupMenuItem<_PlannerMapQuickAction>(
             key: PlannerActionKeys.mapLookupAction(
@@ -181,14 +182,15 @@ class _PlannerMapQuickLookupRegionState
               'addToGatherChecklist',
             ),
             value: _PlannerMapQuickAction.addToGatherChecklist,
-            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
-            child: const _PlannerMapLookupMenuLabel(
-              icon: Icons.checklist_rounded,
-              tone: AppSurfaceTone.success,
+            padding: const EdgeInsets.symmetric(horizontal: 6),
+            child: const PlannerMapMenuLabel(
+              emblem: PlannerMapEmblem.checklist,
               label: 'Add to to-do list',
               detail: checklistDetail,
             ),
           ),
+        if (canAddToChecklist && canAddToPlannedNetwork)
+          const PopupMenuDivider(height: 1),
         if (canAddToPlannedNetwork)
           PopupMenuItem<_PlannerMapQuickAction>(
             key: PlannerActionKeys.mapLookupAction(
@@ -196,10 +198,9 @@ class _PlannerMapQuickLookupRegionState
               'addToPlannedNetwork',
             ),
             value: _PlannerMapQuickAction.addToPlannedNetwork,
-            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
-            child: _PlannerMapLookupMenuLabel(
-              icon: Icons.account_tree_rounded,
-              tone: AppSurfaceTone.info,
+            padding: const EdgeInsets.symmetric(horizontal: 6),
+            child: PlannerMapMenuLabel(
+              emblem: PlannerMapEmblem.network,
               label: 'Add to planned network',
               detail: plannedNetworkDetail,
             ),
@@ -228,165 +229,6 @@ class _PlannerMapQuickLookupRegionState
         materialName: availability.materialName,
         resourceId: availability.resourceIdFor(source),
         source: source,
-      ),
-    );
-  }
-}
-
-const _plannerMapLookupMenuHorizontalChrome = 104.0;
-const _plannerMapLookupMenuViewportPadding = 8.0;
-
-TextStyle _plannerMapLookupActionStyle(ThemeSpec spec) =>
-    spec.typography.body.copyWith(fontSize: 13.5, fontWeight: FontWeight.w800);
-
-TextStyle _plannerMapLookupDetailStyle(ThemeSpec spec) => spec.typography.meta
-    .copyWith(color: spec.palette.textMuted, fontSize: 10.5);
-
-double _plannerMapLookupMenuWidth({
-  required BuildContext context,
-  required Size viewportSize,
-  required Iterable<String> actionLabels,
-  required Iterable<String> actionDetails,
-}) {
-  final spec = context.visualTheme;
-  final textScaler = MediaQuery.textScalerOf(context);
-  final textDirection = Directionality.of(context);
-
-  double measure(String text, TextStyle style) {
-    final painter = TextPainter(
-      text: TextSpan(text: text, style: style),
-      textDirection: textDirection,
-      textScaler: textScaler,
-      maxLines: 1,
-    )..layout();
-    return painter.width;
-  }
-
-  var widestText = 0.0;
-  for (final label in actionLabels) {
-    final width = measure(label, _plannerMapLookupActionStyle(spec));
-    if (width > widestText) widestText = width;
-  }
-  for (final detail in actionDetails) {
-    final width = measure(detail, _plannerMapLookupDetailStyle(spec));
-    if (width > widestText) widestText = width;
-  }
-
-  final viewportLimit =
-      (viewportSize.width - 2 * _plannerMapLookupMenuViewportPadding).clamp(
-        0.0,
-        double.infinity,
-      );
-  if (viewportLimit == 0) return 0;
-  final minimumWidth = viewportLimit < 286.0 ? viewportLimit : 286.0;
-  return (widestText + _plannerMapLookupMenuHorizontalChrome)
-      .clamp(minimumWidth, viewportLimit)
-      .toDouble();
-}
-
-class _PlannerMapLookupMenuLabel extends StatefulWidget {
-  const _PlannerMapLookupMenuLabel({
-    required this.icon,
-    required this.tone,
-    required this.label,
-    this.detail,
-  });
-
-  final IconData icon;
-  final AppSurfaceTone tone;
-  final String label;
-  final String? detail;
-
-  @override
-  State<_PlannerMapLookupMenuLabel> createState() =>
-      _PlannerMapLookupMenuLabelState();
-}
-
-class _PlannerMapLookupMenuLabelState
-    extends State<_PlannerMapLookupMenuLabel> {
-  bool _hovered = false;
-
-  @override
-  Widget build(BuildContext context) {
-    final spec = context.visualTheme;
-    final focused = Focus.of(context).hasFocus;
-    final highlighted = _hovered || focused;
-    final accent = spec.palette.forTone(widget.tone);
-    return MouseRegion(
-      onEnter: (_) => setState(() => _hovered = true),
-      onExit: (_) => setState(() => _hovered = false),
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 130),
-        curve: Curves.easeOutCubic,
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            colors: <Color>[
-              accent.withAlpha(highlighted ? 48 : 22),
-              accent.withAlpha(highlighted ? 14 : 0),
-            ],
-          ),
-          borderRadius: BorderRadius.circular(spec.geometry.buttonRadius),
-          border: Border.all(
-            color: highlighted
-                ? accent.withAlpha(168)
-                : spec.palette.trim.withAlpha(76),
-          ),
-          boxShadow: highlighted
-              ? <BoxShadow>[
-                  BoxShadow(
-                    color: accent.withAlpha(46),
-                    blurRadius: 12,
-                    spreadRadius: 1,
-                  ),
-                ]
-              : const <BoxShadow>[],
-        ),
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: <Widget>[
-            AnimatedContainer(
-              duration: const Duration(milliseconds: 130),
-              width: 40,
-              height: 40,
-              alignment: Alignment.center,
-              decoration: BoxDecoration(
-                color: accent.withAlpha(highlighted ? 78 : 42),
-                borderRadius: BorderRadius.circular(10),
-                border: Border.all(
-                  color: accent.withAlpha(highlighted ? 210 : 132),
-                ),
-                boxShadow: <BoxShadow>[
-                  BoxShadow(
-                    color: accent.withAlpha(highlighted ? 62 : 26),
-                    blurRadius: highlighted ? 10 : 6,
-                  ),
-                ],
-              ),
-              child: Icon(widget.icon, size: 23, color: accent),
-            ),
-            const SizedBox(width: 11),
-            Expanded(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: <Widget>[
-                  Text(widget.label, style: _plannerMapLookupActionStyle(spec)),
-                  if (widget.detail case final detail?) ...<Widget>[
-                    const SizedBox(height: 1),
-                    Text(detail, style: _plannerMapLookupDetailStyle(spec)),
-                  ],
-                ],
-              ),
-            ),
-            const SizedBox(width: 8),
-            Icon(
-              Icons.chevron_right_rounded,
-              size: 18,
-              color: highlighted ? accent : spec.palette.textMuted,
-            ),
-          ],
-        ),
       ),
     );
   }

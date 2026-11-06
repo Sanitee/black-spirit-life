@@ -8,6 +8,7 @@ import 'package:crypto/crypto.dart';
 import '../../app_identity.dart';
 import '../../domain/state/planner_state_json_codec.dart';
 import 'atomic_file_store.dart';
+import 'shared_profile_guard.dart';
 
 enum PersonalDataMoveCheckpoint {
   copiedAndVerified,
@@ -293,6 +294,9 @@ final class PersonalDataLocationService implements PersonalDataLocationManager {
     PersonalDataSourceCleanup? sourceCleanup,
     PersonalDataPhysicalPathResolver? physicalPathResolver,
     AtomicFileCommitter locatorCommitter = const RenameAtomicFileCommitter(),
+    this.sharedProfileGuard,
+    this.runtimeDirectory,
+    this.previousStableLocation,
   }) : protectedDirectories = List<Directory>.unmodifiable(
          protectedDirectories,
        ),
@@ -323,6 +327,7 @@ final class PersonalDataLocationService implements PersonalDataLocationManager {
     Map<String, String> environment, {
     String? resolvedExecutable,
     Iterable<Directory> additionalProtectedDirectories = const <Directory>[],
+    bool shared = false,
   }) {
     final roaming = environment['APPDATA']?.trim();
     final local = environment['LOCALAPPDATA']?.trim();
@@ -336,8 +341,17 @@ final class PersonalDataLocationService implements PersonalDataLocationManager {
         'LOCALAPPDATA is unavailable; the personal-data locator cannot be resolved.',
       );
     }
+    final documents = environment['BSL_DOCUMENTS_DIR']?.trim();
+    if (shared && (documents == null || documents.isEmpty)) {
+      throw const FileSystemException(
+        'The Windows Documents folder could not be resolved. No fallback '
+        'personal-data folder was opened.',
+      );
+    }
     final defaultDirectory = Directory(
-      _join(roaming, AppIdentity.stateDirectoryName),
+      shared
+          ? _join(documents!, 'Black Spirit Life')
+          : _join(roaming, AppIdentity.stateDirectoryName),
     );
     final localIdentityRoot = Directory(
       _join(local, AppIdentity.localCacheDirectoryName),
@@ -378,11 +392,27 @@ final class PersonalDataLocationService implements PersonalDataLocationManager {
         if (environment[key]?.trim() case final value? when value.isNotEmpty)
           Directory(value),
     ];
+    final control = Directory(
+      shared
+          ? _join(_join(local, 'Black Spirit Life'), 'Shared Profile/Bootstrap')
+          : _join(localIdentityRoot.path, bootstrapDirectoryName),
+    );
     return PersonalDataLocationService(
       defaultDirectory: defaultDirectory,
-      controlDirectory: Directory(
-        _join(localIdentityRoot.path, bootstrapDirectoryName),
-      ),
+      controlDirectory: control,
+      sharedProfileGuard: shared ? SharedProfileGuard(control) : null,
+      runtimeDirectory: shared
+          ? Directory(
+              _join(_join(local, 'Black Spirit Life'), 'Shared Runtime'),
+            )
+          : null,
+      previousStableLocation: shared
+          ? PersonalDataLocationService.fromEnvironment(
+              environment,
+              resolvedExecutable: resolvedExecutable,
+              additionalProtectedDirectories: additionalProtectedDirectories,
+            )
+          : null,
       protectedDirectories: protected,
     );
   }
@@ -412,6 +442,9 @@ final class PersonalDataLocationService implements PersonalDataLocationManager {
 
   final Directory defaultDirectory;
   final Directory controlDirectory;
+  final SharedProfileGuard? sharedProfileGuard;
+  final PersonalDataLocationService? previousStableLocation;
+  final Directory? runtimeDirectory;
   final List<Directory> protectedDirectories;
   @override
   final bool moveSupported;
@@ -450,6 +483,72 @@ final class PersonalDataLocationService implements PersonalDataLocationManager {
 
   @override
   Future<Directory> resolveApplicationDirectory() async {
+    await sharedProfileGuard?.acquire();
+    try {
+      await _adoptPreviousStableLocation();
+      final directory = await _resolveApplicationDirectory();
+      await sharedProfileGuard?.verify(directory);
+      return directory;
+    } on Object {
+      await sharedProfileGuard?.release();
+      rethrow;
+    }
+  }
+
+  Future<void> _adoptPreviousStableLocation() async {
+    final previous = previousStableLocation;
+    final guard = sharedProfileGuard;
+    if (previous == null || guard == null || await _readLocator() != null) {
+      return;
+    }
+    // Established shared profiles always win. In particular, never merge an
+    // older Stable save into a newer profile or bypass an incompatible marker.
+    await _rejectLinksInExistingAncestors(defaultDirectory);
+    if (await defaultDirectory.exists() &&
+        !await defaultDirectory.list(followLinks: false).isEmpty) {
+      return;
+    }
+    final existing = await previous.resolveApplicationDirectory();
+    if (!await existing.exists()) return;
+    if (await existing.list(followLinks: false).isEmpty) return;
+    final reset = File(
+      _join(existing.path, AppIdentity.intentionalResetMarkerFileName),
+    );
+    if (await reset.exists() &&
+        !await File(_join(existing.path, 'planner-state.json')).exists()) {
+      final value = await _readIdentityJson(reset, kind: 'intentional reset');
+      if (value['intentionalReset'] != true) {
+        throw const FileSystemException(
+          'The saved reset record is invalid. No new profile was selected.',
+        );
+      }
+      return;
+    }
+    await previous._verifyConfiguredDirectoryIdentity(existing);
+    await _validatePhysicalCurrentSourceLocation(existing);
+    await _verifyProfileDocument(existing);
+    // Keep the complete established folder in place, including SQLite
+    // sidecars, recovery files and custom icons. Only ownership/locator records
+    // are added. A custom data-folder choice must not change during an update.
+    await guard.adoptExistingProfile(existing);
+    if (!await _hasOwnedProfileMarker(existing)) {
+      await AtomicFileStore(
+        directory: existing,
+        fileName: profileMarkerFileName,
+      ).writeJson(
+        _identityJson({
+          'profile': true,
+          'profileId': _newIdentity('profile'),
+          'transactionId': _newIdentity('move'),
+        }),
+        validate: (bytes) =>
+            _decodeIdentityBytes(bytes, kind: 'profile marker'),
+      );
+    }
+    await _writeLocator(existing);
+  }
+
+  Future<Directory> _resolveApplicationDirectory() async {
     _startupNotices.clear();
     final recovered = await _recoverInterruptedMove();
     if (recovered != null) {

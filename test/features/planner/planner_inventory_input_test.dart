@@ -6,6 +6,7 @@ import 'package:bdo_craft_planner_flutter/domain/models/craft_mode.dart';
 import 'package:bdo_craft_planner_flutter/features/planner/planner_inventory_input.dart';
 import 'package:bdo_craft_planner_flutter/features/planner/planner_view.dart';
 import 'package:bdo_craft_planner_flutter/features/shared/recipe_variant_selector.dart';
+import 'package:bdo_craft_planner_flutter/visual/components/app_tooltip.dart';
 import 'package:bdo_craft_planner_flutter/visual/visual.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -47,7 +48,17 @@ void main() {
           expect(find.byType(TextField), findsNothing);
           expect(find.byType(InputDecorator), findsNothing);
           expect(find.text('25.4k'), findsOneWidget);
-          expect(find.byTooltip('25.430'), findsOneWidget);
+          expect(
+            find.byWidgetPredicate(
+              (widget) =>
+                  widget is AppTooltip &&
+                  widget.message == '25.430' &&
+                  !widget.approvedHover,
+            ),
+            findsOneWidget,
+            reason:
+                'Exact amount is accessible without an ordinary hover popup.',
+          );
           expect(find.text('Inventory'), findsNothing);
           final amount = tester.getRect(find.text('25.4k'));
           final icon = tester.getRect(
@@ -221,7 +232,9 @@ void main() {
     },
   );
 
-  testWidgets('hover shows the full amount', (tester) async {
+  testWidgets('hover stays quiet and editing reveals the exact amount', (
+    tester,
+  ) async {
     final h = PlannerTestHarness();
     addTearDown(h.controller.dispose);
     h.controller.active.commitInventory(_name, '25430');
@@ -231,7 +244,12 @@ void main() {
     await mouse.moveTo(tester.getCenter(_amount));
     await tester.pump(const Duration(milliseconds: 700));
     await tester.pump(const Duration(milliseconds: 200));
-    expect(find.text('25.430'), findsOneWidget);
+    expect(find.text('25.430'), findsNothing);
+    await tester.tap(_amount);
+    await tester.pump();
+    expect(_text(tester), '25.430');
+    await tester.sendKeyEvent(LogicalKeyboardKey.escape);
+    await tester.pump();
     await mouse.removePointer();
     await tester.pumpWidget(const SizedBox());
   });

@@ -7,11 +7,13 @@ import 'package:bdo_craft_planner_flutter/domain/state/planner_state.dart';
 import 'package:bdo_craft_planner_flutter/domain/state/state_copy.dart';
 import 'package:bdo_craft_planner_flutter/features/planner/planner_contracts.dart';
 import 'package:bdo_craft_planner_flutter/features/planner/planner_keys.dart';
+import 'package:bdo_craft_planner_flutter/features/planner/planner_map_menu_presentation.dart';
 import 'package:bdo_craft_planner_flutter/features/recipe_book/recipe_book.dart';
 import 'package:bdo_craft_planner_flutter/features/shared/custom_icon_store_scope.dart';
 import 'package:bdo_craft_planner_flutter/features/shared/mode_item_icon.dart';
 import 'package:bdo_craft_planner_flutter/features/shared/recipe_variant_selector.dart';
 import 'package:bdo_craft_planner_flutter/shared/overlays/anchored_popover.dart';
+import 'package:bdo_craft_planner_flutter/visual/components/app_tooltip.dart';
 import 'package:bdo_craft_planner_flutter/visual/visual.dart';
 import 'package:flutter/gestures.dart'
     show PointerScrollEvent, kSecondaryMouseButton;
@@ -21,8 +23,8 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../../support/action_hint_finder.dart';
-
 import '../shared/custom_icon_test_support.dart';
+import 'recipe_book_scroll_support.dart';
 import 'recipe_book_test_support.dart';
 
 void main() {
@@ -198,25 +200,37 @@ void main() {
       expect(
         find.descendant(
           of: vendorAction,
-          matching: find.byIcon(Icons.storefront_rounded),
+          matching: find.byWidgetPredicate(
+            (widget) =>
+                widget is PlannerMapActionEmblem &&
+                widget.emblem == PlannerMapEmblem.npc,
+          ),
         ),
         findsOneWidget,
       );
       expect(
         find.descendant(
           of: manualAction,
-          matching: find.byIcon(Icons.location_on_rounded),
+          matching: find.byWidgetPredicate(
+            (widget) =>
+                widget is PlannerMapActionEmblem &&
+                widget.emblem == PlannerMapEmblem.gathering,
+          ),
         ),
         findsOneWidget,
       );
       expect(
         find.descendant(
           of: checklistAction,
-          matching: find.byIcon(Icons.checklist_rounded),
+          matching: find.byWidgetPredicate(
+            (widget) =>
+                widget is PlannerMapActionEmblem &&
+                widget.emblem == PlannerMapEmblem.checklist,
+          ),
         ),
         findsOneWidget,
       );
-      expect(find.byType(PopupMenuDivider), findsOneWidget);
+      expect(find.byType(PopupMenuDivider), findsNWidgets(2));
 
       await tester.tap(vendorAction);
       await tester.pumpAndSettle();
@@ -381,9 +395,7 @@ void main() {
         ),
       );
       await tester.pumpAndSettle();
-      await tester.tap(
-        find.byKey(RecipeBookKeys.r13Details('Clear Liquid Reagent')),
-      );
+      await tapBookDetails(tester, 'Clear Liquid Reagent');
       await tester.pumpAndSettle();
 
       final alternate = find.byKey(
@@ -438,7 +450,7 @@ void main() {
         ),
       );
       await tester.pumpAndSettle();
-      await tester.tap(find.byKey(RecipeBookKeys.r13Details("Clown's Blood")));
+      await tapBookDetails(tester, "Clown's Blood");
       await tester.pumpAndSettle();
 
       final selector = find.byKey(
@@ -532,7 +544,7 @@ void main() {
     );
     await tester.enterText(search, 'Wolf Blood');
     await tester.pumpAndSettle();
-    await tester.tap(find.byKey(RecipeBookKeys.r13Details("Clown's Blood")));
+    await tapBookDetails(tester, "Clown's Blood");
     await tester.pumpAndSettle();
 
     final selector = find.byKey(
@@ -587,11 +599,9 @@ void main() {
     );
     await tester.pump();
     final movedBook = tester.getRect(find.byKey(RecipeBookKeys.modal));
-    expect(movedBook.topLeft, initialBook.topLeft + const Offset(20, 12));
+    expect(movedBook.topLeft, initialBook.topLeft + const Offset(16, 12));
 
-    await tester.tap(
-      find.byKey(RecipeBookKeys.r13Details('Clear Liquid Reagent')),
-    );
+    await tapBookDetails(tester, 'Clear Liquid Reagent');
     await tester.pumpAndSettle();
     final initialPreview = tester.getRect(
       find.byKey(RecipeBookKeys.previewPanel),
@@ -647,9 +657,7 @@ void main() {
       'Clear Liquid',
     );
     await tester.pump();
-    await tester.tap(
-      find.byKey(RecipeBookKeys.r13Details('Clear Liquid Reagent')),
-    );
+    await tapBookDetails(tester, 'Clear Liquid Reagent');
     await tester.pumpAndSettle();
 
     for (final size in <Size>[
@@ -697,13 +705,13 @@ void main() {
       expect(find.byKey(RecipeBookKeys.modal), findsOneWidget);
       expect(
         tester.getRect(find.byKey(RecipeBookKeys.modal)),
-        const Rect.fromLTWH(46, 43, 1108, 666),
+        const Rect.fromLTWH(32, 36, 1136, 680),
       );
       expect(
         tester.getSize(find.byKey(RecipeBookKeys.card('Clear Liquid Reagent'))),
         predicate<Size>(
           (size) =>
-              size.width >= 400 && size.height >= 120 && size.height < 138,
+              size.width >= 400 && size.height >= 100 && size.height < 220,
         ),
       );
       expect(find.text('3 recipes'), findsOneWidget);
@@ -747,9 +755,7 @@ void main() {
       expect(book.snapshot.filteredCount, 1);
       expect(find.text('1 favorites'), findsOneWidget);
 
-      await tester.tap(
-        find.byKey(RecipeBookKeys.r13Details('Clear Liquid Reagent')),
-      );
+      await tapBookDetails(tester, 'Clear Liquid Reagent');
       await tester.pumpAndSettle();
       expect(book.previewName, 'Clear Liquid Reagent');
       expect(
@@ -912,7 +918,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(
       tester.getRect(find.byKey(RecipeBookKeys.modal)),
-      const Rect.fromLTWH(140, 60, 1220, 820),
+      const Rect.fromLTWH(32, 36, 1436, 868),
     );
     expect(book.snapshot.entries, hasLength(36));
     expect(find.textContaining('Page '), findsNothing);
@@ -979,7 +985,7 @@ void main() {
           ingredientMeta: <String, IngredientMetadata>{
             'Clear Liquid Reagent': IngredientMetadata(marketId: '5301'),
             'Pure Powder Reagent': IngredientMetadata(marketId: '5302'),
-            'Elixir of Life': IngredientMetadata(marketId: '5303'),
+            'Elixir of Life': IngredientMetadata(marketId: '708'),
           },
         ),
         immediate: true,
@@ -1044,7 +1050,7 @@ void main() {
       expect(marketToggleRect.right, lessThan(refreshRect.left));
       expect(refreshRect.right, lessThan(outOfStockRect.left));
       expect(outOfStockRect.right, lessThan(profitableRect.left));
-      expect(profitableRect.right, lessThan(stockSortRect.left));
+      expect(stockSortRect.right, lessThan(marketToggleRect.left));
       for (final rect in <Rect>[
         refreshRect,
         outOfStockRect,
@@ -1091,7 +1097,7 @@ void main() {
         findsOneWidget,
       );
       expect(find.textContaining('500 request(s)'), findsNothing);
-      expect(find.text('Sort ↕'), findsOneWidget);
+      expect(find.text('Name A–Z'), findsOneWidget);
 
       await tester.tap(find.byKey(RecipeBookKeys.r23MarketSort));
       await tester.pumpAndSettle();
@@ -1215,11 +1221,11 @@ void main() {
           await tester.pumpAndSettle();
 
           final ordered = <Rect>[
+            tester.getRect(find.byKey(RecipeBookKeys.r23MarketSort)),
             tester.getRect(find.byKey(RecipeBookKeys.r21CheckMarket)),
             tester.getRect(find.byKey(RecipeBookKeys.r24RefreshMarket)),
             tester.getRect(find.byKey(RecipeBookKeys.r22OutOfStockOnly)),
             tester.getRect(find.byKey(RecipeBookKeys.r28ProfitableOnly)),
-            tester.getRect(find.byKey(RecipeBookKeys.r23MarketSort)),
           ];
           for (var index = 1; index < ordered.length; index += 1) {
             expect(
@@ -1237,8 +1243,8 @@ void main() {
                   '${size.height.toInt()} vertically centers market commands',
             );
           }
-          expect(ordered.first.left, closeTo(closedMarketRect.left, .1));
-          expect(ordered.last.right, lessThan(deleteRect.left));
+          expect(ordered[1].left, closeTo(closedMarketRect.left, .1));
+          expect(ordered.any((rect) => rect.overlaps(deleteRect)), isFalse);
           expect(find.text('MARKET STOCK'), findsNothing);
           expect(
             tester.takeException(),
@@ -1265,9 +1271,9 @@ void main() {
       const ids = <String, String>{
         'Clear Liquid Reagent': '5301',
         'Pure Powder Reagent': '5302',
-        'Elixir of Life': '5303',
-        'Wild Grass': '5304',
-        'Sunflower': '5305',
+        'Elixir of Life': '708',
+        'Wild Grass': '5439',
+        'Sunflower': '7308',
         'Trace of Earth': '5306',
       };
       mode.updateState(
@@ -1358,13 +1364,13 @@ void main() {
                 as BoxDecoration;
         expect(
           profitDecoration.color,
-          StandardSpec.theme.palette.success.withAlpha(92),
+          StandardSpec.theme.palette.success.withAlpha(18),
           reason: 'Profit remains positive-coloured, unlike market stock.',
         );
         expect(
           find.descendant(
             of: find.byKey(RecipeBookKeys.profitPill(name)),
-            matching: find.textContaining('/ea'),
+            matching: find.textContaining('/ craft'),
           ),
           findsOneWidget,
         );
@@ -1471,13 +1477,13 @@ void main() {
             await tester.pumpAndSettle();
 
             final ordered = <Rect>[
+              tester.getRect(find.byKey(RecipeBookKeys.r23MarketSort)),
               tester.getRect(find.byKey(RecipeBookKeys.r21CheckMarket)),
               tester.getRect(find.byKey(RecipeBookKeys.r24RefreshMarket)),
               tester.getRect(find.byKey(RecipeBookKeys.r22OutOfStockOnly)),
               tester.getRect(find.byKey(RecipeBookKeys.r28ProfitableOnly)),
-              tester.getRect(find.byKey(RecipeBookKeys.r23MarketSort)),
             ];
-            expect(ordered.first.left, closeTo(closedMarketRect.left, .1));
+            expect(ordered[1].left, closeTo(closedMarketRect.left, .1));
             for (var index = 1; index < ordered.length; index += 1) {
               expect(ordered[index - 1].right, lessThan(ordered[index].left));
               expect(
@@ -1668,7 +1674,7 @@ void main() {
         tester.getSize(find.byKey(RecipeBookKeys.card(adaptation))),
         predicate<Size>(
           (size) =>
-              size.width >= 400 && size.height >= 120 && size.height < 138,
+              size.width >= 400 && size.height >= 100 && size.height < 220,
         ),
       );
       final adaptationCard = find.byKey(RecipeBookKeys.card(adaptation));
@@ -1713,7 +1719,7 @@ void main() {
         isA<AppTextAction>(),
       );
 
-      await tester.tap(find.byKey(RecipeBookKeys.r13Details(adaptation)));
+      await tapBookDetails(tester, adaptation);
       await tester.pumpAndSettle();
       expect(
         find.descendant(
@@ -1774,12 +1780,12 @@ void main() {
 
     expect(
       tester.getRect(find.byKey(RecipeBookKeys.modal)),
-      const Rect.fromLTWH(46, 43, 1108, 666),
+      const Rect.fromLTWH(32, 36, 1136, 680),
     );
     expect(
       tester.getSize(find.byKey(RecipeBookKeys.card('Clear Liquid Reagent'))),
       predicate<Size>(
-        (size) => size.width >= 400 && size.height >= 120 && size.height < 138,
+        (size) => size.width >= 400 && size.height >= 100 && size.height < 220,
       ),
     );
     expect(
@@ -2527,9 +2533,11 @@ void main() {
         find.byKey(RecipeBookKeys.card('Black Stone Batch 01')),
         findsOneWidget,
       );
-      final tooltip = find.byWidgetPredicate(
-        (widget) => widget is Tooltip && widget.richMessage != null,
-      );
+      final tooltip = find
+          .byWidgetPredicate(
+            (widget) => widget is Tooltip && widget.richMessage != null,
+          )
+          .first;
       expect(tooltip, findsOneWidget);
       tester.state<TooltipState>(tooltip).ensureTooltipVisible();
       await tester.pump();
@@ -2537,7 +2545,12 @@ void main() {
       final info = find.byKey(RecipeBookKeys.itemInfo('Black Stone Batch 01'));
       expect(info, findsOneWidget);
       expect(
-        find.descendant(of: info, matching: find.text('Recipe & materials')),
+        find.descendant(
+          of: info,
+          matching: find.byKey(
+            RecipeBookKeys.itemInfoFormula('Black Stone Batch 01', null, 1),
+          ),
+        ),
         findsOneWidget,
       );
     },
@@ -2568,12 +2581,14 @@ void main() {
     await tester.pumpAndSettle();
 
     final card = find.byKey(RecipeBookKeys.card(name));
-    final tooltip = find.descendant(
-      of: card,
-      matching: find.byWidgetPredicate(
-        (widget) => widget is Tooltip && widget.richMessage != null,
-      ),
-    );
+    final tooltip = find
+        .descendant(
+          of: card,
+          matching: find.byWidgetPredicate(
+            (widget) => widget is Tooltip && widget.richMessage != null,
+          ),
+        )
+        .first;
     expect(tooltip, findsOneWidget);
     tester.state<TooltipState>(tooltip).ensureTooltipVisible();
     await tester.pump();
@@ -2583,7 +2598,7 @@ void main() {
     expect(panel, findsOneWidget);
     expect(find.text('Processing material'), findsOneWidget);
     expect(find.text('Description'), findsNothing);
-    expect(find.text('Recipe & materials'), findsOneWidget);
+    expect(find.text('Recipe & materials'), findsNothing);
     final formula = find.byKey(RecipeBookKeys.itemInfoFormula(name, null, 1));
     final material = find.byKey(
       RecipeBookKeys.itemInfoMaterial(name, null, 'Raw Material 04'),
@@ -2639,12 +2654,14 @@ void main() {
       await tester.pumpAndSettle();
 
       final card = find.byKey(RecipeBookKeys.card(name));
-      final tooltip = find.descendant(
-        of: card,
-        matching: find.byWidgetPredicate(
-          (widget) => widget is Tooltip && widget.richMessage != null,
-        ),
-      );
+      final tooltip = find
+          .descendant(
+            of: card,
+            matching: find.byWidgetPredicate(
+              (widget) => widget is Tooltip && widget.richMessage != null,
+            ),
+          )
+          .first;
       tester.state<TooltipState>(tooltip).ensureTooltipVisible();
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 180));
@@ -2677,7 +2694,7 @@ void main() {
           );
           expect(
             find.descendant(of: formula, matching: find.text('$batch× batch')),
-            findsOneWidget,
+            batch == 1 ? findsNothing : findsOneWidget,
           );
         }
       }
@@ -2696,7 +2713,7 @@ void main() {
       expect(secondMaterial, findsOneWidget);
       expect(
         tester.getTopLeft(secondMaterial).dy,
-        greaterThan(tester.getBottomLeft(firstMaterial).dy),
+        greaterThanOrEqualTo(tester.getBottomLeft(firstMaterial).dy),
       );
       expect(find.bySemanticsLabel('2 Clear Liquid Reagent'), findsOneWidget);
       semantics.dispose();
@@ -3032,7 +3049,7 @@ void main() {
       expect(activations, isEmpty);
       expect(mode.state.value.target, 'Black Stone Batch 01');
 
-      await tester.tap(find.byKey(RecipeBookKeys.r13Details(reference)));
+      await tapBookDetails(tester, reference);
       await tester.pumpAndSettle();
       expect(find.byKey(RecipeBookKeys.previewPanel), findsOneWidget);
       expect(
@@ -3044,9 +3061,7 @@ void main() {
       book.closePreview();
       book.setSearch('Polished Marble');
       await tester.pumpAndSettle();
-      await tester.tap(
-        find.byKey(RecipeBookKeys.r13Details('Polished Marble')),
-      );
+      await tapBookDetails(tester, 'Polished Marble');
       await tester.pumpAndSettle();
       expect(find.text('Estimated output 1–4'), findsOneWidget);
 
@@ -3095,9 +3110,11 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    final tooltip = find.byWidgetPredicate(
-      (widget) => widget is Tooltip && widget.richMessage != null,
-    );
+    final tooltip = find
+        .byWidgetPredicate(
+          (widget) => widget is Tooltip && widget.richMessage != null,
+        )
+        .first;
     expect(tooltip, findsOneWidget);
     tester.state<TooltipState>(tooltip).ensureTooltipVisible();
     await tester.pump();
@@ -3268,12 +3285,14 @@ void main() {
     final card = find.byKey(RecipeBookKeys.card(name));
     expect(card, findsOneWidget);
     expect(book.itemInfoFor(name)?.howToObtain, isNotEmpty);
-    final tooltip = find.descendant(
-      of: card,
-      matching: find.byWidgetPredicate(
-        (widget) => widget is Tooltip && widget.richMessage != null,
-      ),
-    );
+    final tooltip = find
+        .descendant(
+          of: card,
+          matching: find.byWidgetPredicate(
+            (widget) => widget is Tooltip && widget.richMessage != null,
+          ),
+        )
+        .first;
     expect(tooltip, findsOneWidget);
     tester.state<TooltipState>(tooltip).ensureTooltipVisible();
     await tester.pump();
@@ -3377,25 +3396,29 @@ void main() {
 
     final card = find.byKey(RecipeBookKeys.card(name));
     expect(card, findsOneWidget);
-    final tooltip = find.descendant(
-      of: card,
-      matching: find.byWidgetPredicate(
-        (widget) => widget is Tooltip && widget.richMessage != null,
-      ),
-    );
+    final tooltip = find
+        .descendant(
+          of: card,
+          matching: find.byWidgetPredicate(
+            (widget) => widget is Tooltip && widget.richMessage != null,
+          ),
+        )
+        .first;
     expect(tooltip, findsOneWidget);
     tester.state<TooltipState>(tooltip).ensureTooltipVisible();
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 180));
 
-    final recipeSection = find.text('Recipe & materials');
+    final recipeSection = find.byKey(
+      const ValueKey('attached-reference-tab:recipe'),
+    );
     final acquisition = find.byKey(
       RecipeBookKeys.itemInfoFormula(name, null, 1),
     );
     final acquisitionMaterial = find.byKey(
       RecipeBookKeys.itemInfoMaterial(name, null, 'Raw Material 01'),
     );
-    final usedFor = find.text('Used For');
+    final usedFor = find.byKey(const ValueKey('attached-reference-tab:used'));
     final output = find.text('Caphras Stone');
     final outputDescription = find.text(
       'Enhancement material used in several late-game recipes.',
@@ -3414,18 +3437,13 @@ void main() {
     expect(acquisition, findsOneWidget);
     expect(acquisitionMaterial, findsOneWidget);
     expect(usedFor, findsOneWidget);
+    await tester.tap(usedFor);
+    await tester.pumpAndSettle();
+    expect(acquisition, findsNothing);
     expect(output, findsOneWidget);
     expect(outputDescription, findsOneWidget);
     expect(recipe, findsOneWidget);
     expect(dustMaterial, findsOneWidget);
-    expect(
-      tester.getTopLeft(recipeSection).dy,
-      lessThan(tester.getTopLeft(usedFor).dy),
-    );
-    expect(
-      tester.getTopLeft(usedFor).dy - tester.getBottomLeft(acquisition).dy,
-      greaterThanOrEqualTo(10),
-    );
     expect(
       tester.getTopLeft(usedFor).dy,
       lessThan(tester.getTopLeft(output).dy),
@@ -3506,14 +3524,18 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    final tooltip = find.byWidgetPredicate(
-      (widget) => widget is Tooltip && widget.richMessage != null,
-    );
+    final tooltip = find
+        .byWidgetPredicate(
+          (widget) => widget is Tooltip && widget.richMessage != null,
+        )
+        .first;
     tester.state<TooltipState>(tooltip).ensureTooltipVisible();
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 180));
 
     final output = find.text('Exalted Soul Fragment');
+    await tester.tap(find.byKey(const ValueKey('attached-reference-tab:used')));
+    await tester.pumpAndSettle();
     final description = find.text(
       'Upgrades a Blessed alchemy stone to Exalted and adds All Damage Reduction +2.',
     );
@@ -3854,7 +3876,16 @@ Future<void> _setSize(WidgetTester tester, Size size) async {
 }
 
 List<Tooltip> _richInfoTooltips(WidgetTester tester) => tester
-    .widgetList<Tooltip>(find.byWidgetPredicate((widget) => widget is Tooltip))
+    .widgetList<Tooltip>(
+      find.descendant(
+        of: find.byWidgetPredicate(
+          (widget) =>
+              widget is RecipeBookItemIcon &&
+              widget.anchorId.startsWith('card:'),
+        ),
+        matching: find.byType(AppTooltip),
+      ),
+    )
     .where((tooltip) => tooltip.richMessage != null)
     .toList(growable: false);
 

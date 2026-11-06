@@ -83,6 +83,41 @@ void main() {
   });
 
   test(
+    'confirmed removals skip both market parts and use truthful reasons',
+    () async {
+      final keys = [
+        for (final region in ['eu', 'na'])
+          for (final id in removedPcItemsById.keys)
+            SharedMarketKey(region: region, itemId: '00$id'),
+      ];
+      for (final force in [false, true]) {
+        final result = await repository.fetch(
+          quoteKeys: keys,
+          bookKeys: keys,
+          forceRefresh: force,
+        );
+        // Each exact removed ID: NA/EU, quote and book, even on forced refresh.
+        expect(result.failures, hasLength(removedPcItemsById.length * 4));
+        expect(result.failures.values.toSet(), {
+          'Item removed from the game',
+          'Item no longer obtainable',
+        });
+        for (final failure in result.failures.entries) {
+          expect(
+            failure.value,
+            isRetiredPcItem('', itemId: failure.key.key.itemId)
+                ? 'Item no longer obtainable'
+                : 'Item removed from the game',
+          );
+        }
+        expect(result.items, isEmpty);
+      }
+      expect(transport.ids, isEmpty);
+      expect(repository.diagnostics.startedRequests, 0);
+    },
+  );
+
+  test(
     'stored archived receipts survive but are not replayed as active data',
     () async {
       await repository.close();

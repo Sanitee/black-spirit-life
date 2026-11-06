@@ -7,6 +7,7 @@ import '../models/catalog_models.dart';
 import '../planner/ingredient_quality.dart';
 import '../planner/planner_engine.dart';
 import '../planner/planner_models.dart' as planning;
+import '../planner/reviewed_recipe_yields.dart';
 import '../planner/source_resolution.dart';
 import '../state/planner_state.dart';
 import 'opportunity_market_models.dart';
@@ -213,6 +214,7 @@ final class OpportunityQuote {
     this.estimatedInputCost,
     this.customSalePrice,
     this.usesInventory = false,
+    this.outputNote,
   }) : ingredients = List<OpportunityIngredientQuote>.unmodifiable(ingredients),
        issues = Set<OpportunityIssue>.unmodifiable(issues);
 
@@ -222,6 +224,7 @@ final class OpportunityQuote {
   final int batchMultiplier;
   final int crafts;
   final double? outputPerCraft;
+  final String? outputNote;
   final double? expectedOutput;
   final OpportunityMarketItem? outputMarket;
   final List<OpportunityIngredientQuote> ingredients;
@@ -914,6 +917,7 @@ final class OpportunityCalculator {
       batchMultiplier: variant?.batchMultiplier ?? 1,
       crafts: crafts,
       outputPerCraft: outputPerCraft,
+      outputNote: reviewedRecipeYieldNote(formula),
       expectedOutput: expectedOutput,
       outputMarket: output,
       ingredients: inputs,

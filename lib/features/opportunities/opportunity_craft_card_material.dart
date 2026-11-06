@@ -56,8 +56,17 @@ class OpportunityCraftCardMaterial {
     ],
     stops: const [0, .48, .96],
   );
+  // Shared badges also appear outside Opportunities. Measure those against
+  // their own theme surfaces, not the dark glass fallback used by this feature.
   late final List<Color> readingSurfaces = [
-    for (final base in OpportunityGlassFinish.forSpec(spec).cardSurface.colors)
+    for (final base
+        in spec.id.startsWith('opportunities-')
+            ? OpportunityGlassFinish.forSpec(spec).cardSurface.colors
+            : [
+                spec.palette.surface,
+                spec.palette.surfaceRaised,
+                spec.palette.surfaceInset,
+              ])
       for (final opacity in [0.0, washOpacity * (10 / 24), washOpacity])
         Color.alphaBlend(wash.withValues(alpha: opacity), base),
   ];

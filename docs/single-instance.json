@@ -1,0 +1,34 @@
+{
+  "date": "2026-10-31",
+  "request": "Opening the application again should bring its existing window forward instead of showing the shared-data lock error.",
+  "implementation": [
+    "Native, per-Windows-user and interactive-session instance mutex, independent of executable location or release channel.",
+    "Before claiming the new mutex, recognize older main windows by exact window class/title, executable basename, ProductName, Windows user SID and session. Prefer the original process if multiple older windows exist. No profile contents are opened for detection.",
+    "Older copies do not receive an unsupported activation message. Use a bounded Windows restore/foreground request instead. This also works while a preceding candidate has opened its own lock-error window.",
+    "A secondary launch waits briefly for startup, sends a bounded activation request to the marked owner window, and exits before Documents resolution, Flutter bootstrap, saved-data loading, or Fish startup.",
+    "Restore minimized owners; preserve maximization and native modal dialogs. Respect Windows focus policy, with taskbar flashing if foreground activation is denied.",
+    "Normal exit or a process crash releases the OS mutex. There is no persistent single-instance state file.",
+    "Shared-profile writer lease, format verification, location/migration logic, close/save barrier, and maintenance protections remain independent and unchanged.",
+    "Velopack lifecycle hooks run before UI routing; independent --reference Minigame Helper launches do not acquire or publish the primary instance."
+  ],
+  "boundaries": [
+    "Older already-built versions lack the new handshake but can now be brought forward without changing their binaries. Returning to an older running copy does not upgrade it; close it to switch to a newer version.",
+    "The native UI mutex is session-local; the existing file lease still prevents competing writers across Windows sessions. No attempt is made to activate another session's desktop.",
+    "An unresponsive/unready owner exceeding the bounded wait gets a short opening/closing notice, not a competing application startup. Real profile incompatibility and other startup failures remain visible.",
+    "No saved data, installed version, shortcuts, reference/calculation code, or public release changed."
+  ],
+  "verification": {
+    "native": "42 checks using this exact coordinator in synthetic processes on a private, never-activated Windows desktop. Includes an older executable with matching metadata/window identity, no new launch protocol, and a held synthetic file lease; startup races, rapid secondaries, another executable path, minimize/maximize/modal behavior, helper exclusion, timeout, exit and abandoned-mutex recovery.",
+    "baselineReproduction": "The same regression harness, linked to the unchanged preceding coordinator, reproduced five legacy-activation failures (40 checks). The corrected coordinator passed all 42 checks (two additional discovery assertions).",
+    "readOnlyLiveDetection": "The exact new native discovery function identified PID 38052, the previously verified real shared-lock owner. It did not activate, close, launch or modify the real application or read saved data.",
+    "regression": "43 persistence, real multiprocess writer-lease, startup surface and close-handshake checks.",
+    "fullApplicationLaunch": "Not performed against personal data. User testing remains separate; APPDATA-only redirection is not a valid full-app isolation harness.",
+    "evidence": "audit/legacy-instance-20261031 in the task workspace"
+  },
+  "officialApiReferences": [
+    "https://learn.microsoft.com/en-us/windows/win32/api/synchapi/nf-synchapi-createmutexw",
+    "https://learn.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-setforegroundwindow",
+    "https://devblogs.microsoft.com/oldnewthing/?p=19083",
+    "https://learn.microsoft.com/en-us/windows/win32/api/winver/nf-winver-verqueryvaluew"
+  ]
+}

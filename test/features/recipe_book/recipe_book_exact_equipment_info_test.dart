@@ -163,7 +163,7 @@ void main() {
     expect(
       reformed.notes,
       contains(
-        'Extract with Refined Essence of Emotions to recover the original accessory and cup.',
+        'Extract with Mirror of Equilibrium to recover the original accessory and cup.',
       ),
     );
 

@@ -1,0 +1,36 @@
+{
+  "date": "2026-11-03",
+  "status": "IMPLEMENTED_AND_TESTED_REBUILD_PENDING",
+  "source": "https://www.naeu.playblackdesert.com/en-US/News/Detail?groupContentNo=8591&countryType=en-US",
+  "sourceDate": "2025-05-29",
+  "sourceRetrievedAt": "2026-11-03T07:34:18.283Z",
+  "sourceSha256": "6a2a764925fb681f72acc6ccdba647bc2b270eca3562f78db7ce986ae43636aa",
+  "evidence": "Complete all Atoraxxion suggested quests to unlock Final Selection. Its once-per-Family reward includes a selection box: choose Ancient Hammer OR Primordial Hammer. This is not the weekly Kyvela Chest reward.",
+  "currentClientCorroboration": {
+    "quest": "9064-47",
+    "box": 767242,
+    "choices": {
+      "767130": "Primordial Hammer",
+      "767131": "Ancient Hammer"
+    }
+  },
+  "guard": "Existing unlisted reference-only Base item in Reference - Patch Items; exact name, no market ID, not archived. No new tradable identity assigned.",
+  "limits": "No expired coupon, temporary login event or weekly repetition implied. No claim that every historical event source is listed. Prior heating guidance and conversion restrictions retained.",
+  "verification": {
+    "tests": [
+      {
+        "file": "resumed-hammer-source-recheck-tests.jsonl",
+        "passed": 111
+      },
+      {
+        "file": "resumed-hammer-source-projection-tests.jsonl",
+        "passed": 1
+      },
+      {
+        "file": "resumed-hammer-source-layout-tests.jsonl",
+        "passed": 186
+      }
+    ],
+    "changedReferences": 2
+  }
+}

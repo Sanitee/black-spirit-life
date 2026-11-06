@@ -1,0 +1,334 @@
+{
+  "reviewedAt": "2026-11-03",
+  "source": {
+    "url": "https://www.naeu.playblackdesert.com/en-US/News/Detail?groupContentNo=6545&countryType=en-US",
+    "date": "2024-01-31",
+    "sha256": "aa8420c0f582ddfa2b6e769cf4af4debe0c80f43eed0b3f3371af7704769b820"
+  },
+  "removedItems": [
+    {
+      "id": 15022,
+      "name": "Magic Crystal - Crimson Flame",
+      "officialLabel": "Magic Crystal - Crimson Flame"
+    },
+    {
+      "id": 15024,
+      "name": "Magic Crystal - Destruction",
+      "officialLabel": "Magic Crystal - Destruction"
+    },
+    {
+      "id": 15025,
+      "name": "Magic Crystal - Temptation",
+      "officialLabel": "Magic Crystal - Temptation"
+    },
+    {
+      "id": 15032,
+      "name": "Magic Crystal - Meditation",
+      "officialLabel": "Magic Crystal - Meditation"
+    },
+    {
+      "id": 15023,
+      "name": "Magic Crystal - Enchantment",
+      "officialLabel": "Magic Crystal - Enchantment"
+    },
+    {
+      "id": 15026,
+      "name": "Magic Crystal - Agony",
+      "officialLabel": "Magic Crystal - Agony"
+    },
+    {
+      "id": 15003,
+      "name": "Magic Crystal of Crimson Flame - Carnage",
+      "officialLabel": "Magic Crystal of Crimson Flame - Carnage (3 types)"
+    },
+    {
+      "id": 15004,
+      "name": "Magic Crystal of Crimson Flame - Carnage",
+      "officialLabel": "Magic Crystal of Crimson Flame - Carnage (3 types)"
+    },
+    {
+      "id": 15005,
+      "name": "Magic Crystal of Crimson Flame - Carnage",
+      "officialLabel": "Magic Crystal of Crimson Flame - Carnage (3 types)"
+    },
+    {
+      "id": 15001,
+      "name": "Magic Crystal of Crimson Flame - Precision",
+      "officialLabel": "Magic Crystal of Crimson Flame - Precision"
+    },
+    {
+      "id": 15002,
+      "name": "Magic Crystal of Crimson Flame - Power",
+      "officialLabel": "Magic Crystal of Crimson Flame - Power"
+    },
+    {
+      "id": 15009,
+      "name": "Magic Crystal of Abundance - Healing",
+      "officialLabel": "Magic Crystal of Abundance - Healing"
+    },
+    {
+      "id": 15006,
+      "name": "Magic Crystal of Abundance - Armor",
+      "officialLabel": "Magic Crystal of Abundance - Armor"
+    },
+    {
+      "id": 15008,
+      "name": "Magic Crystal of Abundance - Patience",
+      "officialLabel": "Magic Crystal of Abundance - Patience"
+    },
+    {
+      "id": 15010,
+      "name": "Magic Crystal of Abundance - Resonance",
+      "officialLabel": "Magic Crystal of Abundance - Resonance"
+    },
+    {
+      "id": 15007,
+      "name": "Magic Crystal of Abundance - Vigor",
+      "officialLabel": "Magic Crystal of Abundance - Vigor"
+    },
+    {
+      "id": 15029,
+      "name": "Magic Crystal of the Sun - Ensnare",
+      "officialLabel": "Magic Crystal of the Sun - Ensnare"
+    },
+    {
+      "id": 15016,
+      "name": "Magic Crystal of the Sun - Valor",
+      "officialLabel": "Magic Crystal of the Sun - Valor"
+    },
+    {
+      "id": 15015,
+      "name": "Magic Crystal of the Sun - Sturdiness",
+      "officialLabel": "Magic Crystal of the Sun - Sturdiness"
+    },
+    {
+      "id": 15030,
+      "name": "Magic Crystal of the Sun - Boulder",
+      "officialLabel": "Magic Crystal of the Sun - Boulder"
+    },
+    {
+      "id": 15014,
+      "name": "Magic Crystal of the Sun - Assault",
+      "officialLabel": "Magic Crystal of the Sun - Assault"
+    },
+    {
+      "id": 15011,
+      "name": "Magic Crystal of Nature - Swiftness",
+      "officialLabel": "Magic Crystal of Nature - Swiftness"
+    },
+    {
+      "id": 15013,
+      "name": "Magic Crystal of Nature - Ascension",
+      "officialLabel": "Magic Crystal of Nature - Ascension"
+    },
+    {
+      "id": 15027,
+      "name": "Magic Crystal of Nature - Descent",
+      "officialLabel": "Magic Crystal of Nature - Descent"
+    },
+    {
+      "id": 15028,
+      "name": "Magic Crystal of Nature - Endurance",
+      "officialLabel": "Magic Crystal of Nature - Endurance"
+    },
+    {
+      "id": 15012,
+      "name": "Magic Crystal of Nature - Adamantine",
+      "officialLabel": "Magic Crystal of Nature - Adamantine"
+    },
+    {
+      "id": 15018,
+      "name": "Magic Crystal of Enchantment - Intimidation",
+      "officialLabel": "Magic Crystal of Enchantment - Intimidation"
+    },
+    {
+      "id": 15017,
+      "name": "Magic Crystal of Enchantment - Memory",
+      "officialLabel": "Magic Crystal of Enchantment - Memory"
+    },
+    {
+      "id": 15019,
+      "name": "Magic Crystal of Enchantment - Vision",
+      "officialLabel": "Magic Crystal of Enchantment - Vision"
+    },
+    {
+      "id": 15020,
+      "name": "Magic Crystal of Enchantment - Agility",
+      "officialLabel": "Magic Crystal of Enchantment - Agility"
+    },
+    {
+      "id": 15031,
+      "name": "Magic Crystal of Enchantment - Experience",
+      "officialLabel": "Magic Crystal of Enchantment - Experience"
+    },
+    {
+      "id": 15103,
+      "name": "Magic Crystal of Infinity - Carnage",
+      "officialLabel": "Magic Crystal of Infinity - Carnage (3 types)"
+    },
+    {
+      "id": 15104,
+      "name": "Magic Crystal of Infinity - Carnage",
+      "officialLabel": "Magic Crystal of Infinity - Carnage (3 types)"
+    },
+    {
+      "id": 15105,
+      "name": "Magic Crystal of Infinity - Carnage",
+      "officialLabel": "Magic Crystal of Infinity - Carnage (3 types)"
+    },
+    {
+      "id": 15101,
+      "name": "Magic Crystal of Infinity - Precision",
+      "officialLabel": "Magic Crystal of Infinity - Precision"
+    },
+    {
+      "id": 15102,
+      "name": "Magic Crystal of Infinity - Power",
+      "officialLabel": "Magic Crystal of Infinity - Power"
+    },
+    {
+      "id": 15107,
+      "name": "Magic Crystal of Infinity - Vigor",
+      "officialLabel": "Magic Crystal of Infinity - Vigor"
+    },
+    {
+      "id": 15108,
+      "name": "Magic Crystal of Infinity - Patience",
+      "officialLabel": "Magic Crystal of Infinity - Patience"
+    },
+    {
+      "id": 15109,
+      "name": "Magic Crystal of Infinity - Healing",
+      "officialLabel": "Magic Crystal of Infinity - Healing"
+    },
+    {
+      "id": 15110,
+      "name": "Magic Crystal of Infinity - Resonance",
+      "officialLabel": "Magic Crystal of Infinity - Resonance"
+    },
+    {
+      "id": 15111,
+      "name": "Magic Crystal of Infinity - Swiftness",
+      "officialLabel": "Magic Crystal of Infinity - Swiftness"
+    },
+    {
+      "id": 15112,
+      "name": "Magic Crystal of Infinity - Adamantine",
+      "officialLabel": "Magic Crystal of Infinity - Adamantine"
+    },
+    {
+      "id": 15113,
+      "name": "Magic Crystal of Infinity - Ascension",
+      "officialLabel": "Magic Crystal of Infinity - Ascension"
+    },
+    {
+      "id": 15114,
+      "name": "Magic Crystal of Infinity - Descent",
+      "officialLabel": "Magic Crystal of Infinity - Descent"
+    },
+    {
+      "id": 15115,
+      "name": "Magic Crystal of Infinity - Endurance",
+      "officialLabel": "Magic Crystal of Infinity - Endurance"
+    },
+    {
+      "id": 15116,
+      "name": "Magic Crystal of Infinity - Assault",
+      "officialLabel": "Magic Crystal of Infinity - Assault"
+    },
+    {
+      "id": 15117,
+      "name": "Magic Crystal of Infinity - Sturdiness",
+      "officialLabel": "Magic Crystal of Infinity - Sturdiness"
+    },
+    {
+      "id": 15118,
+      "name": "Magic Crystal of Infinity - Valor",
+      "officialLabel": "Magic Crystal of Infinity - Valor"
+    },
+    {
+      "id": 15119,
+      "name": "Magic Crystal of Infinity - Ensnare",
+      "officialLabel": "Magic Crystal of Infinity - Ensnare"
+    },
+    {
+      "id": 15120,
+      "name": "Magic Crystal of Infinity - Strength",
+      "officialLabel": "Magic Crystal of Infinity - Strength"
+    },
+    {
+      "id": 15121,
+      "name": "Magic Crystal of Infinity - Memory",
+      "officialLabel": "Magic Crystal of Infinity - Memory"
+    },
+    {
+      "id": 15122,
+      "name": "Magic Crystal of Infinity - Intimidation",
+      "officialLabel": "Magic Crystal of Infinity - Intimidation"
+    },
+    {
+      "id": 15123,
+      "name": "Magic Crystal of Infinity - Vision",
+      "officialLabel": "Magic Crystal of Infinity - Vision"
+    },
+    {
+      "id": 15124,
+      "name": "Magic Crystal of Infinity - Agility",
+      "officialLabel": "Magic Crystal of Infinity - Agility"
+    },
+    {
+      "id": 15126,
+      "name": "Magic Crystal of Infinity - Durability",
+      "officialLabel": "Magic Crystal of Infinity - Durability"
+    },
+    {
+      "id": 15133,
+      "name": "Magic Crystal of Infinity - Speed Attack",
+      "officialLabel": "Magic Crystal of Infinity - Speed Attack"
+    },
+    {
+      "id": 15134,
+      "name": "Magic Crystal of Infinity - Counter Attack",
+      "officialLabel": "Magic Crystal of Infinity - Counter Attack"
+    },
+    {
+      "id": 15135,
+      "name": "Magic Crystal of Infinity - Siege",
+      "officialLabel": "Magic Crystal of Infinity - Siege"
+    },
+    {
+      "id": 15137,
+      "name": "Magic Crystal of Infinity - Melee Defense",
+      "officialLabel": "Magic Crystal of Infinity - Melee Defense"
+    },
+    {
+      "id": 15138,
+      "name": "Magic Crystal of Infinity - Ranged Defense",
+      "officialLabel": "Magic Crystal of Infinity - Ranged Defense"
+    },
+    {
+      "id": 15139,
+      "name": "Magic Crystal of Infinity - Magic Defense",
+      "officialLabel": "Magic Crystal of Infinity - Magic Defense"
+    },
+    {
+      "id": 15148,
+      "name": "Magic Crystal of Infinity - Melee Attack",
+      "officialLabel": "Magic Crystal of Infinity - Melee Attack"
+    },
+    {
+      "id": 15149,
+      "name": "Magic Crystal of Infinity - Ranged Attack",
+      "officialLabel": "Magic Crystal of Infinity - Ranged Attack"
+    },
+    {
+      "id": 15150,
+      "name": "Magic Crystal of Infinity - Magic Attack",
+      "officialLabel": "Magic Crystal of Infinity - Magic Attack"
+    }
+  ],
+  "scope": "64 exact old crystal identities,60 distinct names. Excludes family headings, retained current crystals, knowledge-only IDs and later same-name bound variants. Current client still retains old descriptions, which do not override explicit official removal.",
+  "implementation": "Shared availability policy blocks current acquisition advice, crafting targets, profit quotes and market requests. Historical catalog IDs, recipes and saved quantities remain intact. Old crystal effects and equip advice no longer appear as current facts. Source supplements consult the same policy. Removal dates are identity-specific.",
+  "alreadyMatches": "Marking Reagent already excludes Magic Crystal of Infinity - Vision from its four-input recipe.",
+  "limitations": "Does not certify remaining crystal mechanics or later same-name unlisted variants."
+}

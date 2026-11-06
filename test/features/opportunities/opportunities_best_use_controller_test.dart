@@ -293,12 +293,23 @@ void main() {
     () async {
       final f = await _Fixture.create(autoCheck: true, prefetchAll: true);
       addTearDown(f.dispose);
+      // Startup intentionally warms Crafting quotes, even offstage. Isolate the
+      // later Best Use selection contract from that separately tested scope.
+      await _until(() => !f.controller.scanning);
+      await f.settle();
+      expect(f.transport.quoteIds, isNotEmpty);
+      f.now = f.now.add(
+        OpportunitiesController.inWorkspaceMarketAge +
+            const Duration(minutes: 1),
+      );
+      f.transport.quoteIds.clear();
       f.controller.setWorkspaceActive(true);
       f.controller.selectBestUseItem(_different);
       f.controller.selectBestUseItem(_material);
       f.controller.selectBestUseItem(_different);
       await _until(
         () => f.transport.quoteIds.isNotEmpty && !f.controller.scanning,
+        phase: 'latest selection: ${f.controller.preferences.section}',
       );
       await f.settle();
       expect(f.transport.quoteIds, {_differentId, _differentOutput, _otherId});
@@ -499,10 +510,15 @@ void main() {
   );
 }
 
-Future<void> _until(bool Function() predicate) async {
+Future<void> _until(
+  bool Function() predicate, {
+  String phase = 'market work',
+}) async {
   final deadline = DateTime.now().add(const Duration(seconds: 15));
   while (!predicate()) {
-    if (DateTime.now().isAfter(deadline)) fail('Best use work did not settle');
+    if (DateTime.now().isAfter(deadline)) {
+      fail('Best use $phase did not settle');
+    }
     await Future<void>.delayed(const Duration(milliseconds: 10));
   }
 }
@@ -670,7 +686,9 @@ final class _Transport implements OpportunityMarketTransport {
         ? 10
         : id == _otherId
         ? 20
-        : 1000 + (int.parse(id) - 990100) * 100;
+        : int.parse(id) >= 990100
+        ? 1000 + (int.parse(id) - 990100) * 100
+        : 1000; // Valid synthetic quotes for the separate Crafting startup scope.
     final text = ids.length > 1
         ? ids
               .map((id) => '$id-${quoteStocks[id] ?? 100}-${price(id)}-500000')

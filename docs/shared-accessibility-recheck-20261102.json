@@ -1,0 +1,28 @@
+{
+  "reviewedAt": "2026-11-02",
+  "status": "SCOPED_CORRECTIONS; WHOLE_APP_AUDIT_OPEN",
+  "quietActions": {
+    "defect": "Quiet icon hints could merge into the neighboring heading/image while the actual actionable semantics node remained unnamed. Reproduced in the actual Gathering buff dialog.",
+    "fix": "Merge the existing icon-button semantics and its quiet hint in the application, Gathering and Resource Map wrappers. Ordinary hover text stays suppressed; explicitly approved hover remains unchanged.",
+    "verification": "Six new enabled/disabled, semantic tap and keyboard tests across three wrappers, plus existing quiet-hover and theme-adapter checks: 27 pass. The actual buff dialog close/focus check passes. No layout or paint change from this fix."
+  },
+  "gatheringContrast": {
+    "defect": "Old exact panel-color pins hid a later real contrast failure: muted text on standalone active/selected glass was below 4.5:1 after rendering at default/intermediate opacity.",
+    "fix": "Only standalone active pigment darkened: opaque #51343D -> #4D3039, translucent #63404A -> #5C3A44. Host-supplied palettes, foregrounds, opacity settings and material structure remain unchanged.",
+    "verification": "22 rendered main/dialog cases at 0 through 100 percent opacity in ten-percent steps retain all 4.5:1 contrast, raised-state, artwork and exact-color assertions. This is bounded rendered coverage, not every terrain pixel/opacity combination.",
+    "fixtureReview": "Default panel pins updated only after baseline and candidate printed identical shades and six native captures were reviewed. No baseline panel paint was changed. The later contrast failure was fixed rather than weakened."
+  },
+  "legacyGatheringTests": {
+    "intentionalNavigation": "The approved hosted field desk has no old Gather/History workflow buttons. Session tests now explicitly mount the retained standalone workflow. Two unreachable light-hosted legacy-editor cases were replaced by the separate hosted light/dark boundary tests; no production navigation was restored, no sessions deleted and no tests marked skipped.",
+    "finders": "Tests now locate quiet IconButton/Tooltip subclasses and exported merged semantics rather than requiring removed hover popups or exact base runtime types. Segmented decoration assertions inspect their actual BoxDecoration base.",
+    "result": "Full Gathering package: 563 pass, zero fail, zero skip. Prior current run was 527 pass/20 fail matching baseline failures. Two inapplicable legacy-hosted cases removed, sixteen extra opacity cases and two hosted Khan cases added. Counts overlap other focused reports."
+  },
+  "khanPropagation": {
+    "selfReviewFinding": "The earlier new review notice existed only in standalone preparation/summary; the hosted map and compact recommendation branch omitted it.",
+    "fix": "One shared plain-text notice now reaches hosted map, compact/full preparation and stats dialog. It uses theme ink after screenshot review exposed weak secondary-accent contrast. The standalone summary uses the same readable foreground.",
+    "dataSafety": "Synthetic old-schema selected-Khan values are unchanged on mount, recommendation inspection and Cancel. Explicit user save confirms the corrected base; selected buffs and unrelated settings remain. No automatic guessed subtraction.",
+    "verification": "28 focused navigation/inline/material checks pass. Two hosted scenarios at normal/200-percent text rerun in Sakura, Ledger and forest: six checks and 18 final captures. Representative normal/enlarged captures manually reviewed. Synthetic map fixtures are not an installed app launch or full geographic imagery review."
+  },
+  "evidence": "audit/correctness-review-20261102: gathering-full-final-scoped-tests.jsonl, gathering-contrast-sweep-recheck-tests.jsonl, shared-quiet-palette-recheck-tests.jsonl, gathering-hosted-stone-readable-*-tests.jsonl, gathering-hosted-stone-readable-captures/; scoped analyses pass.",
+  "remaining": "Map/application regression review, exact remaining factual ledgers, final Windows build and preservation verification. No success checkpoint, installed replacement, visible launch, personal-data access or publication."
+}

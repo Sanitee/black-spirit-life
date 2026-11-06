@@ -1,5 +1,6 @@
 import 'package:bdo_map_core/bdo_map_core.dart';
 
+import '../../domain/catalog/temporarily_archived_items.dart';
 import '../../domain/models/catalog_models.dart';
 import '../../domain/planner/planner_engine.dart';
 import '../../domain/planner/planner_models.dart';
@@ -33,7 +34,9 @@ class RecipeWorkerCatalog {
       recipes.values
           .where(
             (r) =>
-                r.isCraftable && !rules.legacyUnavailableItems.contains(r.name),
+                r.isCraftable &&
+                !rules.legacyUnavailableItems.contains(r.name) &&
+                !isTemporarilyArchivedItem(r.name, itemId: r.marketId),
           )
           .map((r) => r.name)
           .toSet()

@@ -2,13 +2,39 @@ import 'package:bdo_craft_planner_flutter/domain/formatting/acquisition_notes.da
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
+  test('a route retains its dependent steps and restrictions as one source', () {
+    const route =
+        'Shoot beehives with a matchlock.\nCollect them, then grind 3 Wild Beehives.';
+    expect(
+      composeAcquisitionNotes(
+        routes: const [route],
+        notes: const [
+          'Collect them, then grind 3 Wild Beehives.',
+          'Central Market',
+        ],
+      ),
+      [
+        'Shoot beehives with a matchlock. Collect them, then grind 3 Wild Beehives.',
+        'Central Market',
+      ],
+    );
+    expect(
+      composeAcquisitionNotes(
+        routes: const [
+          'Complete the quest.\nThen collect the reward. Weekly limit: 1.',
+        ],
+        notes: const [],
+      ),
+      hasLength(1),
+    );
+  });
   test('explicit vendor and exchange lists keep their heading context', () {
     const vendorList = 'Purchase from:\nSealus\nLebyos\nLylina';
     const exchangeList = 'Exchange 10. Choose one:\n30 Wild Grass\n20 Logs';
-    expect(
-      composeAcquisitionNotes(notes: const [vendorList, exchangeList]),
-      [vendorList, exchangeList],
-    );
+    expect(composeAcquisitionNotes(notes: const [vendorList, exchangeList]), [
+      vendorList,
+      exchangeList,
+    ]);
   });
 
   test('multiline reviewed vendor note retains each fact only once', () {
@@ -126,6 +152,21 @@ void main() {
         notes: const ['Weight: 0.10 LT. Price: 3.5 silver.'],
       ),
       ['Weight: 0.10 LT.', 'Price: 3.5 silver.'],
+    );
+  });
+  test('level numbers stay attached to their source or requirement', () {
+    const first = "Defeat Khan at Oquilla's Eye or obtain from Lv. 5 Barters.";
+    expect(
+      composeAcquisitionNotes(
+        notes: const ['$first Requires Lv. 50+. Buy for 160 Crow Coins.'],
+      ),
+      [first, 'Requires Lv. 50+.', 'Buy for 160 Crow Coins.'],
+    );
+    expect(
+      composeAcquisitionNotes(
+        notes: const ['Reach lv. 2. Then accept the quest.'],
+      ),
+      ['Reach lv. 2.', 'Then accept the quest.'],
     );
   });
 }

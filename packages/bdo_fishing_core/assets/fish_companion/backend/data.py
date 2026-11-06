@@ -102,6 +102,17 @@ def utc_now() -> str:
     return datetime.now(timezone.utc).isoformat(timespec="seconds").replace("+00:00", "Z")
 
 
+def _is_fish_catalog_record(record: dict[str, Any]) -> bool:
+    """Current API includes non-fish loot; older fish-only snapshots lack kind.
+
+    Keep all identities in fish_by_id for loot rows/icons, but only actual fish
+    belong in fish search, recognition lookup and catch-value comparisons.
+    Reviewed non-guide fish supplements deliberately retain legacy eligibility.
+    """
+    kind = record.get("catalog_kind")
+    return not bool(record.get("is_dried")) and kind in (None, "fish")
+
+
 def _fishing_region_display_revision(mask_revision: str) -> str:
     return f"{mask_revision}-display{FISHING_REGION_DISPLAY_VERSION}"
 
@@ -1348,7 +1359,7 @@ class FishDataRepository:
             if item_id is None or not isinstance(name, str) or not name:
                 continue
             fish_by_id[item_id] = dict(record)
-            if bool(record.get("is_dried")):
+            if not _is_fish_catalog_record(record):
                 continue
             icon_item_id = _integer(record.get("icon_item_id")) or item_id
             fish_output.append(
@@ -2804,7 +2815,7 @@ class FishDataRepository:
 
     def catalog_item(self, item_id: int) -> dict[str, Any] | None:
         record = self.fish_by_id.get(item_id)
-        if not record:
+        if not record or not _is_fish_catalog_record(record):
             return None
         return {
             "itemId": item_id,

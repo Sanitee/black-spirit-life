@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:bdo_map_core/bdo_map_core.dart';
 import 'package:bdo_map_core/src/widgets/resource_map_atlas_shell.dart';
+import 'package:bdo_map_core/src/widgets/resource_map_panel_metrics.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -129,7 +130,10 @@ void main() {
             of: row,
             matching: find.byKey(ValueKey('artwork-size-${output.resourceId}')),
           );
-          expect(tester.getSize(artwork), const Size.square(36));
+          expect(
+            tester.getSize(artwork),
+            const Size.square(ResourceMapPanelMetrics.artwork),
+          );
           expect(tester.getSize(row).height, greaterThanOrEqualTo(40));
           expect(
             _fullyVisibleInside(tester, label, panelRect),

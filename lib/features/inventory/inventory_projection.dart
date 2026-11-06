@@ -1,4 +1,5 @@
 import '../../app/state/planner_application_controller.dart';
+import '../../domain/catalog/item_name_presentation.dart';
 import '../../domain/catalog/temporarily_archived_items.dart';
 import '../../domain/models/catalog_models.dart';
 import '../../domain/models/craft_mode.dart';
@@ -48,7 +49,7 @@ final class InventoryItemRecord {
     final normalized = _fold(query);
     if (normalized.isEmpty) return true;
     return <String?>[
-      name,
+      itemDisplayName(name),
       category,
       section,
       subsection,

@@ -7,6 +7,7 @@ import 'buff_picker.dart';
 import 'field_desk_materials.dart';
 import 'gathering_crystal_recommendation.dart';
 import 'gathering_setup_dialog.dart';
+import 'gathering_stone_stat_review.dart';
 import 'hover_pinned_details.dart';
 import 'matchlock_damage_advice.dart';
 import 'pet_recommendations.dart';
@@ -36,6 +37,7 @@ class GatheringPreparationPanel extends StatefulWidget {
     this.statsContextId,
     this.compactRecommendations = false,
     this.onEditStats,
+    this.requiresStoneStatReview = false,
   });
 
   final Catalog catalog;
@@ -45,6 +47,7 @@ class GatheringPreparationPanel extends StatefulWidget {
   final List<PetRecommendation> pets;
   final BairogCalculatorSettings baseSettings, effectiveSettings;
   final bool statsConfirmed;
+  final bool requiresStoneStatReview;
   final ValueChanged<Buff> onToggleBuff;
   final ValueChanged<PetRecommendation> onTogglePet;
   final ValueChanged<Map<String, dynamic>> onPreset;
@@ -136,6 +139,11 @@ class _GatheringPreparationPanelState extends State<GatheringPreparationPanel> {
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
+        if (widget.requiresStoneStatReview)
+          const Padding(
+            padding: EdgeInsets.only(bottom: 12),
+            child: GatheringStoneStatReview(),
+          ),
         _stats(context),
         const SizedBox(height: 26),
         Column(
@@ -320,6 +328,11 @@ class _GatheringPreparationPanelState extends State<GatheringPreparationPanel> {
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
+        if (widget.requiresStoneStatReview)
+          const Padding(
+            padding: EdgeInsets.only(bottom: 12),
+            child: GatheringStoneStatReview(),
+          ),
         _heading(
           'Basic kit',
           action: starter == null
@@ -456,9 +469,11 @@ class _GatheringPreparationPanelState extends State<GatheringPreparationPanel> {
                           color: context.gatheringColors.muted,
                         ),
                       ),
-                    if (buff.duration != null)
+                    if (buff.duration != null || buff.durationNote.isNotEmpty)
                       Text(
-                        formatDurationMinutes(buff.duration!),
+                        buff.duration != null
+                            ? formatDurationMinutes(buff.duration!)
+                            : buff.durationNote,
                         style: TextStyle(
                           fontSize: 12,
                           color: context.gatheringColors.muted,

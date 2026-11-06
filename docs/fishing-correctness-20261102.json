@@ -1,0 +1,39 @@
+{
+  "reviewedAt": "2026-11-02",
+  "status": "SCOPED_CORRECTIONS; FULL_FISHING_AUDIT_OPEN",
+  "scope": "Bundled Fishing importer, sale estimate, synthetic journal and runtime boundary checks. No personal profile or saved journal accessed.",
+  "implemented": [
+    "Incomplete/invalid Trading rank-level pairs no longer invent a frontend bargain bonus; backend already rejects partial saved pairs.",
+    "A recorded sale retains its original bargain percentage, including zero, when edited; current profile level does not replace a historical observation.",
+    "A recorded destination absent from the current map remains selectable and unchanged, including when map destinations are unavailable.",
+    "Catch-location text matches require one exact normalized node name/label; substrings and duplicate names no longer select an arbitrary node.",
+    "All matching tank-value labels say Base fish value. Sale estimates disclose pre-freshness basis, approximate distance, successful-bargain assumption and exclusion of Imperial delivery.",
+    "Current mixed FishyStuff catalog_kind=item rows remain available to other-loot tables/icons, but are excluded from fish search and catch-price lookup. Old kind-less fish snapshots and reviewed Balenos Mullet remain supported.",
+    "Sale, profile and clock dialogs use actual backdrop bounds at enlarged text/zoom; sale/profile fields reuse their existing narrow layouts based on available dialog width. Cancel remains reachable at 100/200%, and sale details no longer force page-wide horizontal overflow. Comparison columns retain their own horizontal scroll.",
+    "Shared fish-value projection keeps missing/zero/nonfinite prices unknown across capture review, journal rows and totals, selling comparisons/ranking and statistics per100. Known fish subtotals are not presented as a full haul. Counts and catch/hour remain independent of prices; actual recorded sales remain authoritative.",
+    "Compiled service API adds derived nullable baseValue, valueComplete, knownValue and unknownPriceFish to session responses without rewriting historical totalValue snapshots or the database schema. Stats totals/per100/hour are null when their own relevant catches include unknown prices. Untimed unknown prices do not invalidate a fully priced timed subset. Explicitly unknown saved prices are not silently repriced from the current catalog."
+  ],
+  "evidence": [
+    {"url": "https://www.naeu.playblackdesert.com/en-US/Wiki?wikiNo=38", "lastEdited": "2026-09-08", "scope": "Fishing basics, price guarantee and resource states"},
+    {"url": "https://www.naeu.playblackdesert.com/en-US/Wiki?wikiNo=73", "lastEdited": "2026-09-08", "scope": "180-second wait after bite; trade origin can differ from catch location; fish sale value decays"},
+    {"url": "https://www.naeu.playblackdesert.com/en-US/Wiki?wikiNo=30", "scope": "Successful bargaining condition and rank dependence; not certification of every numeric formula"},
+    {"url": "https://fishystuff.fish/api/v1/fish?lang=en&", "retrievedAt": "2026-11-02", "sha256": "4989f99fe29a885db9303ae5d4c866d59c8600c026c4ce726ff61e54b95f6479", "scope": "Upstream API contract: 302 fish, 198 dried records, 36 item records. Source compatibility, not current-game certification."}
+  ],
+  "verifiedProjection": {
+    "species": 303,
+    "exactNativeIdentityMatches": 303,
+    "zones": 221,
+    "otherLootRowsRetained": 1610,
+    "bundledVersusFreshCatalog": "Same 303 normalized identities/methods and existing 300 fish base prices. Two Inner Edania additions were already supplied by the reviewed supplement. No fresh mixed world snapshot silently bundled."
+  },
+  "unresolved": [
+    "Distance still uses a capped geometric approximation from the catch point or exact-name map node; current trade-origin region mappings and 14705-units/percent constant are not independently certified. Unknown origin is explicitly shown as an assumption of zero distance, not a proven zero.",
+    "Freshness is not modeled per fish; totals are before freshness. Imperial delivery, quotas and trade EXP are not calculated here.",
+    "NA/EU advanced guide says Imperial distance applies while JP guide and secondary references say otherwise. No conflicting rule imported as a new formula.",
+    "Exact bargain coefficient and 60-second lower timer bound are retained existing models, supported by current secondary sources but not independently proved by official numeric tables in this pass.",
+    "Exact boundaries for Cano Toadfish, Edania Gar, Balenos Mullet and Mako Shark; five hotspot-only species need an unimplemented spawn layer. No coordinates inferred.",
+    "Catch distributions, current server productivity, all event availability and complete freshness of zone data remain separate checks. Current native tables are corroboration, not server truth."
+  ],
+  "verification": {"realJsChecks":101,"pythonChecks":17,"compiledServiceBrowserChecks":18,"fixtures":"Isolated temporary journal/cache and in-memory synthetic sales only; current public catalog is a test fixture, not a bundled replacement.","frozenServiceRebuilt":true,"serviceSha256":"b3d4b2617078af3cc2d4f0263a88450728806984d3022e40b1b83f2303750fb3","sourceAggregateSha256":"469126b32eb617991524ba95758a3d62f44e20edbe5c5e1c71808c15b75f9034","runtimeRecheck":"54 payload/runtime/service/port/migration checks passed after final payload and runtime marker regeneration. Two initial runs exposed stale integrity/marker constants; those failures are retained in audit logs, not hidden."},
+  "behaviorPreserved": "No personal-data schema/migration, polling schedule, fish-price changes, verified table memberships, actual sale amounts or application themes changed. Final whole-application Release build passed. Twenty-two remaining DOM/frame/source-link checks also pass after pins were reconciled with reviewed sale/zoom changes; no DOM identities or action bindings changed. Broader factual gaps remain explicitly open in docs/correctness-review-20261102.json."
+}

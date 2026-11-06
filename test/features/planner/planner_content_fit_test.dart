@@ -69,7 +69,10 @@ void main() {
           )..layout();
           final totalTextWidth = totalPainter.width;
           totalPainter.dispose();
-          final totalWidth = totalTextWidth + 12 + row.totalRightInset;
+          final totalWidth =
+              totalTextWidth +
+              (row.showQuantityBadge ? 12 : 0) +
+              row.totalRightInset;
           final stackAt = row.iconWidth + 21 + textScale * 100 + totalWidth;
           expect(
             thresholds,
@@ -85,7 +88,7 @@ void main() {
           if (hasGrades) {
             final renderedTotalWidth =
                 tester.getSize(find.byWidget(row.total)).width +
-                12 +
+                (row.showQuantityBadge ? 12 : 0) +
                 row.totalRightInset;
             final qualityAt =
                 row.iconWidth + 21 + renderedTotalWidth + textScale * 330;

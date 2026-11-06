@@ -1,0 +1,38 @@
+{
+  "reviewedAt": "2026-11-03",
+  "status": "Confirmed corrections implemented and tested; full current-game factual certification remains OPEN",
+  "candidate": "Complete preceding Verified Item Information working snapshot, not HEAD alone",
+  "region": "PC EU; PC NA/EU official sources preferred, other PC regions identified as corroboration",
+  "scope": ["Planner and shared calculations", "Opportunities and exchanges", "Item information and Recipe Book", "Inventory and storage import", "Resource Map and housing", "Workers and Royal Workshop", "Gathering and equipment/buffs", "Fishing", "Profiles/shared storage/lifecycle", "Session-import integration", "Shared UI/themes/accessibility", "Packaging and current notices"],
+  "implementation": {
+    "referenceProjection": "2259 references / 6777 three-mode views / 1686 catalog records; no shared-fact conflict in the final projection",
+    "priorSupportedFindings": "All122 documented addition flags and9 documented correction flags reconciled with actual implementation. These counts are scoped findings, not whole-item certification.",
+    "referenceAdditions": "71 references updated in the final supported-facts pass;2188 otherwise unchanged; recipes, formulas, consumers and catalog unchanged in that pass",
+    "names": "Four exact Harmony [Party] display/copy/search adapters preserve existing keys and IDs; canonical full and partial search tested",
+    "map": "165 node CP corrections and two mushroom-node parent corrections. Primary/secondary support and remaining conflicts distinguished.",
+    "worker": "66 type labels corrected across88 exact-ID profiles, numerical worker inputs unchanged",
+    "fishing": "Unknown-value completeness and ranking corrected without rewriting journals; recorded actual sale and zero/null history retained; estimate limits explicit",
+    "gathering": "Energy arithmetic/durations/exclusions, Evergreen minigame, shared stone facts and accessible facts corrected",
+    "interface": "Latest approved einheitlich components retained; no unrelated redesign, saved-state migration or new polling"
+  },
+  "verification": {
+    "applicationSafeRun": "3914 pass, zero fail/skip before final supported-source additions; later affected run1890 pass with two source-contract regressions fixed and three reviewed Divine Coin text goldens refreshed; final134 checks plus6 exchange rechecks pass",
+    "map": "984 pass",
+    "gathering": "563 pass",
+    "fishing": "101 real-JS,17 Python,54 runtime/payload,18 browser and22 remaining presentation/frame/link checks pass; counts overlap other runs",
+    "sessionImport": "148 offline actual-script checks pass; no live browser/session",
+    "newNativeCaptures": "24 full-app synthetic captures across3 themes at100/200%; representative images manually inspected",
+    "sharedData": "6 multiprocess lease checks, synthetic shared migration/load/reopen/move and standalone lazy Gathering migration pass; no personal profiles",
+    "build": "Windows Release passed after final production changes (51.7s); scoped analysis clean",
+    "limits": "Not a completely green repository:216 legacy visual/selector failures reproduce on unchanged baseline. Exact coverage and unexecuted integration/manual tests recorded separately. No installed lifecycle rehearsal."
+  },
+  "remaining": {
+    "itemReviewCandidates": "2860 overlapping partial/unresolved records across887 names, NOT2860 confirmed errors; all3880 original keys retained",
+    "exactList": "Workspace audit/correctness-review-20261102/UNRESOLVED.txt and UNRESOLVED-ITEMS.txt; machine ledger research-reconciliation-ledger.json",
+    "notable": ["Exact processing and rare-output distributions", "Fish/seafood input sufficiency and Insectivore route", "Some conditional effects/skill thresholds and Lean Meat Salad per-effect timer conflict", "8 CP values and132 graph candidates", "Current worker/drop/fishing economics and historical locations", "Complete sources, conditional shop restrictions and pending market identities", "Khalk/Dinosaur Blood manual recognition and two historical artwork encodings", "Live integration and publication/migration gates"],
+    "ocr": "Three distinct October icons pass cached/uncached synthetic recognition. Khalk/Dinosaur Blood share artwork unavailable to the sealed helper and unsupported legacy WebP decoding; names/IDs remain available for manual correction, never automatically guessed. Native hub unchanged.",
+    "publication": "38 inherited historical documentation-path findings and existing release gates remain; not release-approved"
+  },
+  "safety": {"personalProfilesAccessed": false, "visibleAppOrGameLaunched": false, "installedReplacement": false, "shortcutsChanged": false, "published": false, "weeklySuccessCheckpointAdvanced": false},
+  "evidence": "Workspace audit/correctness-review-20261102: feature-coverage-final.json, test-coverage-final.json, candidate-manifest.json, preservation-final.json and REVIEW.txt"
+}

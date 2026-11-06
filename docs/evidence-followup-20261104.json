@@ -1,0 +1,57 @@
+{
+  "date": "2026-11-04",
+  "scope": "Short shared source hints and exact-case evidence only. No walkthrough, new feature, automatic conversion or recipe-yield change.",
+  "changes": {
+    "jangdok": [
+      "Bean Sprouts",
+      "Soybean Paste",
+      "Soy Sauce",
+      "Meju registry only"
+    ],
+    "chest": "Geowan (Byeot County), 1,000 Sangpyeong Coins per quest chest; two chests for Miss Myo once per family."
+  },
+  "evidence": {
+    "nativeItemsSha256": "a54b5735052c990e189ff1a50afb6d5442cc80e0ba8dabff995979bc8d35c821",
+    "housingSha256": "096d1205bbb12fd0ed0ad0f9ae1a613c680ae0e037cdaa4af91c7f4ad4efa6f6",
+    "towns": [
+      "Dalbeol Village",
+      "Nampo's Moodle Village",
+      "Nopsae's Byeot County",
+      "Yukjo Street",
+      "Godu Village",
+      "Bukpo"
+    ],
+    "official": [
+      {
+        "file": "audit/correctness-review-20261102/official/juice-rice-naeu-20230614.html",
+        "sha256": "363ae1ad49819d50371e0e42cb677a6d3c6c7a275f427561164d1a3074920fd2"
+      },
+      {
+        "file": "audit/correctness-review-20261102/official/primordial-20240912-naeu.html",
+        "sha256": "e9b56e6d45859159473bae8bad3756329d4cbfd5d4193b6ec2d0e353064fe344"
+      }
+    ],
+    "sources": [
+      {
+        "url": "https://www.blackdesertfoundry.com/sangpyeong-coins-guide/",
+        "status": 200,
+        "sha256": "a0b8dc322fe04f738a8627a8e99b14f7e13ac83706c6a9308d992942260794ea",
+        "archiveUsable": true
+      },
+      {
+        "url": "https://garmoth.com/guides/post/olvia-academy-cooking",
+        "status": 403,
+        "sha256": "98424dc4bde2e1b6c32bb05718057e9c85ed7935f2850abf00d4513b191846d2",
+        "archiveUsable": false
+      }
+    ]
+  },
+  "fishDecision": "Existing exact default recipe is supported at the practical documentary standard. Prior request for repeated live trials was excessive for this exact documented case. No recipe edit needed. This is not proof of every substitute species/grade or another dish, and does not close all fifteen broader records.",
+  "limits": [
+    "June14 2023 official wording says unavailable after the quest; current exact66771 description says available after the quest. This is the reverse direction, not grounds to suppress the supported quest-purchase hint. No return-route or post-quest purchase claim added.",
+    "Other fourteen dishes and non-default substitutes remain evidence-dependent where source quantities differ. Generic item text and older Fried Fish quest are retained; no blanket multiplier inferred.",
+    "November4 fresh public web requests still return an iframe/security challenge. No coverage checkpoint advanced."
+  ],
+  "audit": "audit/evidence-followup-20261104/research.json",
+  "presentationCleanup": "Shared item sections omit a summary only when its complete text is already retained under How to Obtain. Twenty actual exchange references lose duplicate text; richer descriptions, quantities, restrictions, archived text and all sources remain. This is not a new UI feature."
+}

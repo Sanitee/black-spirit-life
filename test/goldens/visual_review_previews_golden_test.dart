@@ -4,6 +4,7 @@ import 'dart:ui' as ui;
 import 'package:bdo_craft_planner_flutter/app/state/planner_application_controller.dart';
 import 'package:bdo_craft_planner_flutter/data/catalog/bundled_catalog_parser.dart';
 import 'package:bdo_craft_planner_flutter/data/catalog/catalog_repository.dart';
+import 'package:bdo_craft_planner_flutter/domain/catalog/superseded_boss_materials.dart';
 import 'package:bdo_craft_planner_flutter/domain/models/craft_mode.dart';
 import 'package:bdo_craft_planner_flutter/domain/state/inventory_storage.dart';
 import 'package:bdo_craft_planner_flutter/domain/state/planner_state.dart';
@@ -769,6 +770,19 @@ void main() {
       await _settleImages(tester, root: golden, spec: spec);
 
       final card = find.byKey(RecipeBookKeys.card(name));
+      // The August 2026 removal also changes the real visible Used for count.
+      final shardUses = book.itemInfoFor('Magical Shard')!.craftUses;
+      // February 2024 unified reform stones replace 44 old Magical Shard
+      // consumers. Keep this factual assertion independent of the image.
+      expect(shardUses, hasLength(118));
+      expect(
+        shardUses.any((use) => bossMaterialReplacementFor(use.output) != null),
+        isFalse,
+      );
+      expect(
+        shardUses.map((use) => use.output),
+        isNot(contains('Refined Essence of Emotions')),
+      );
       final tooltip = find.descendant(
         of: card,
         matching: find.byWidgetPredicate(
@@ -882,6 +896,16 @@ void main() {
       expect(book.snapshot.entries.any((entry) => entry.name == name), isFalse);
       final info = book.itemInfoFor(name)!;
       expect(info.acquisitionFormulas, isNotEmpty);
+      expect(
+        info.notes,
+        contains(
+          'Extract with Mirror of Equilibrium to recover the original accessory and cup.',
+        ),
+      );
+      expect(
+        info.notes.join(' '),
+        isNot(contains('Refined Essence of Emotions')),
+      );
       await tester.pumpWidget(
         RepaintBoundary(
           key: goldenRoot,

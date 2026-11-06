@@ -20,13 +20,29 @@ void main() {
 
     expect(catalog.sourceByteCount, productionCatalogByteCount);
     expect(catalog.sourceSha256, productionCatalogSha256);
-    expect(catalog.totalItemCount, 1682);
-    expect(catalog.totalCraftableCount, 958);
-    expect(catalog.totalIngredientRowCount, 2849);
+    expect(catalog.totalItemCount, 1690);
+    expect(catalog.totalCraftableCount, 962);
+    expect(catalog.totalIngredientRowCount, 2864);
     expect(catalog.collisions, hasLength(20));
-    expect(catalog.alchemy.iconDataUris, hasLength(444));
-    expect(catalog.cooking.iconDataUris, hasLength(612));
-    expect(catalog.processing.iconDataUris, hasLength(3461));
+    // Includes the exact bound Khan's Dim Magic artwork added after the shared
+    // exchange-art pass, without making that quest item marketable.
+    expect(catalog.alchemy.iconDataUris.length, 568);
+    expect(catalog.cooking.iconDataUris.length, 730);
+    expect(catalog.processing.iconDataUris.length, 3582);
+    for (final mode in CraftMode.values) {
+      expect(
+        catalog.forMode(mode).iconDataUris["Khan's Dim Magic"],
+        allOf(isNotNull, isNotEmpty),
+      );
+      expect(
+        catalog.forMode(mode).iconDataUris['Scorched Fragment'],
+        catalog.alchemy.iconDataUris['Scorched Fragment'],
+      );
+      expect(
+        catalog.forMode(mode).iconDataUris.containsKey('Scorched Fragment'),
+        isTrue,
+      );
+    }
     expect(catalog.processing.searchAliases, hasLength(164));
     final bloodGroups =
         catalog.alchemy.metadata['bloodGroups'] as Map<String, Object?>;
@@ -62,8 +78,39 @@ void main() {
         catalog.supportingData['itemWeightIds'] as Map<String, Object?>;
     final itemWeightsLtById =
         catalog.supportingData['itemWeightsLtById'] as Map<String, Object?>;
-    expect(itemWeightIds, hasLength(1748));
-    expect(itemWeightsLtById, hasLength(1747));
+    expect(itemWeightIds, hasLength(1760));
+    expect(itemWeightsLtById, hasLength(1759));
+    expect(itemWeightIds["Khan's Dim Magic"], '45517');
+    expect(itemWeightsLtById['45517'], 0.1);
+    expect(itemWeightIds['Insectivore Plant Root'], '5443');
+    expect(itemWeightsLtById['5443'], 0.1);
+    for (final entry in const {
+      'Insectivore Plant Leaf': '5441',
+      'Insectivore Plant Root': '5443',
+    }.entries) {
+      expect(catalog.alchemy.items[entry.key]!.marketId, entry.value);
+      expect(catalog.alchemy.items[entry.key]!.ingredients, isEmpty);
+      expect(catalog.alchemy.iconDataUris[entry.key], isNotNull);
+      expect(
+        catalog.alchemy.iconDataUris[entry.key] ==
+            catalog.processing.iconDataUris[entry.key],
+        isTrue,
+      );
+    }
+    expect(catalog.alchemy.iconDataUris['Insectivore Plant Root'], isNotNull);
+    expect(
+      catalog.alchemy.iconDataUris['Insectivore Plant Root'],
+      catalog.processing.iconDataUris['Insectivore Plant Root'],
+    );
+    for (final entry in const <String, String>{
+      '[Mix] EXP-Reaper Elixir': '766',
+      '[Mix] Swiftness-Wind-Spell Elixir': '768',
+      '[Mix] Manhunt-Rage Elixir': '769',
+      '[Mix] Thorn-Defense Elixir': '770',
+    }.entries) {
+      expect(itemWeightIds[entry.key], entry.value);
+      expect(itemWeightsLtById[entry.value], 0.2);
+    }
     expect(itemWeightIds['Beer'], '9213');
     expect(itemWeightsLtById['9213'], 0.1);
     expect(itemWeightIds['Acacia Plank'], '4680');
@@ -91,7 +138,8 @@ void main() {
       catalog.alchemy.items['Purified Water']!.role,
       RecipeRole.manualConversion,
     );
-    expect(catalog.processing.plannerCraftableCount, 624);
+    // Six WON routes are random JIN/BON/WON attempts, not guaranteed production.
+    expect(catalog.processing.plannerCraftableCount, 622);
     final endtimes =
         catalog.processing.items['Crystallized Energy of Endtimes'];
     expect(endtimes?.marketId, '821252');
@@ -584,7 +632,6 @@ void main() {
       unorderedEquals(const <String>[
         'Melted Copper Shard',
         'Melted Gold Shard',
-        'Melted Iron Shard',
         'Melted Lead Shard',
         'Melted Platinum Shard',
         'Melted Silver Shard',
@@ -592,16 +639,6 @@ void main() {
         'Melted Titanium Shard',
         'Melted Vanadium Shard',
         'Melted Zinc Shard',
-        'Pure Copper Crystal',
-        'Pure Gold Crystal',
-        'Pure Iron Crystal',
-        'Pure Lead Crystal',
-        'Pure Platinum Crystal',
-        'Pure Silver Crystal',
-        'Pure Tin Crystal',
-        'Pure Titanium Crystal',
-        'Pure Vanadium Crystal',
-        'Pure Zinc Crystal',
       ]),
       reason:
           'new unbounded processing recipes require a reviewed result record',
@@ -935,14 +972,20 @@ void main() {
         'WON Origin Shard',
         'HAN Reforge Stone - All AP',
         'Dawn Black Stone',
-        'Rough Marble',
-        'Polished Marble',
-        'Magnetite Ore',
-        'Melted Magnetite Shard',
-        'Magnetite Ingot',
       ]),
     );
     final marketIds = supporting['marketIds'] as Map<String, Object?>;
+    expect(pending, hasLength(20));
+    for (final row in const <String, String>{
+      'Rough Marble': '4016',
+      'Polished Marble': '4096',
+      'Magnetite Ore': '4017',
+      'Melted Magnetite Shard': '4098',
+      'Magnetite Ingot': '4099',
+    }.entries) {
+      expect(marketIds[row.key], row.value);
+      expect(pending.map((e) => e['name']), isNot(contains(row.key)));
+    }
     for (final name in pending.map((entry) => entry['name']! as String)) {
       expect(marketIds, isNot(contains(name)), reason: name);
     }
@@ -1061,7 +1104,12 @@ void main() {
           .resolveVariant('leaves-and-fragments')
           .ingredients
           .map((ingredient) => ingredient.name),
-      <String>['Insectivore Plant Leaf', 'Tree Spirit Stone Fragment'],
+      <String>['Insectivore Plant Leaf'],
+    );
+    expect(powder.variantRoutes.last.label, 'Leaves');
+    expect(
+      powder.resolveVariant('leaves-and-fragments').ingredients.single.quantity,
+      5,
     );
 
     final blackGemFragment = catalog.processing.items['Black Gem Fragment']!;
@@ -1205,7 +1253,7 @@ void main() {
           .map((entry) => entry.key)
           .toSet();
 
-      expect(actualBatchOutputs, hasLength(132));
+      expect(actualBatchOutputs, hasLength(136));
       expect(actualBatchOutputs, _supportedBatchOutputNames);
 
       final rawRoot = jsonDecode(source) as Map<String, dynamic>;
@@ -1406,6 +1454,10 @@ const _previouslySupportedBatchOutputNames = <String>{
 
 const _supportedBatchOutputNames = <String>{
   ..._previouslySupportedBatchOutputNames,
+  "Beast's Draught",
+  "Giant's Draught",
+  'Perfume of Resolve',
+  'Immortal: Perfume of Resolve',
   'Adaptation Draught',
   'Berserk Draught',
   'Corruption Draught',

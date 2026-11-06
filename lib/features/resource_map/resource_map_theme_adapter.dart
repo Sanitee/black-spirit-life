@@ -4,6 +4,30 @@ import 'package:flutter/material.dart';
 import '../../app/state/planner_application_controller.dart';
 import '../../visual/foundations/application_theme.dart';
 import '../../visual/foundations/theme_spec.dart';
+import '../shared/shared_silver_amount.dart';
+
+Widget _withSharedSilver(
+  ThemeSpec spec,
+  Widget child, {
+  ThemeSpec Function()? resolveSpec,
+}) => ThemeSpecScope(
+  spec: spec,
+  child: ResourceMapSilverPresentation(
+    builder: (context, {required value, required style, suffix = '', textKey}) {
+      final current = resolveSpec?.call() ?? spec;
+      return ThemeSpecScope(
+        spec: current,
+        child: SharedSilverAmount(
+          value: value,
+          style: style.copyWith(fontSize: 16, color: current.palette.text),
+          suffix: suffix,
+          textKey: textKey,
+        ),
+      );
+    },
+    child: child,
+  ),
+);
 
 // Isolated physical-display comparison only; normal builds keep Appearance.
 const _diagnosticLegacyCanvas = bool.fromEnvironment(
@@ -62,7 +86,7 @@ class ResourceMapThemeAdapter extends StatelessWidget {
       spec,
       interfaceStyle: interfaceStyle,
     ).withUiOpacity(uiOpacity),
-    child: child,
+    child: _withSharedSilver(spec, child),
   );
 }
 
@@ -184,7 +208,13 @@ class _ResourceMapThemeBindingState extends State<ResourceMapThemeBinding> {
         builder: (context, data, child) => ResourceMapChromeTheme(
           data: data,
           liveData: _chrome,
-          child: child!,
+          child: _withSharedSilver(
+            applicationThemeForAppearance(_activeMode.state.value.appearance),
+            child!,
+            resolveSpec: () => applicationThemeForAppearance(
+              _activeMode.state.value.appearance,
+            ),
+          ),
         ),
       );
 }

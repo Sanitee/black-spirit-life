@@ -1,6 +1,11 @@
 import { createHash } from 'node:crypto';
 import { readFileSync, writeFileSync } from 'node:fs';
 import { join, resolve } from 'node:path';
+import { workerSpeciesLabel } from './worker_profile_labels.mjs';
+import {
+  applyReviewedWorkerOutputs,
+  reviewedWorkerOutputCorrections,
+} from './worker_output_corrections.mjs';
 
 const expectedSources = Object.freeze({
   'exploration.json':
@@ -50,9 +55,16 @@ const workerStatic = parseSource('worker_static.json');
 const workersByRegion = parseSource('region_workers.json');
 const resourceMap = JSON.parse(readFileSync(mapPath, 'utf8'));
 
+// These newer map sites deliberately have no income model. Do not fabricate
+// yields/distances or fail regeneration of the older independently pinned data.
+const unmodeledProductionNodeIds = new Set(
+  Array.from({ length: 14 }, (_, index) => String(2115 + index)),
+);
+
 const productionResourceIds = new Set(
   resourceMap.workerNodes
-    .filter((node) => node.isProductionNode && node.isResourceNode)
+    .filter((node) => node.isProductionNode && node.isResourceNode &&
+      !unmodeledProductionNodeIds.has(String(node.id)))
     .map((node) => String(node.id)),
 );
 const mapNodeIds = new Set(
@@ -65,19 +77,6 @@ for (const [nodeId, node] of Object.entries(exploration)) {
     townByRegion.set(String(node.region_key), String(nodeId));
   }
 }
-
-const speciesLabel = (workerType) => {
-  switch (Number(workerType)) {
-    case 0:
-      return 'Human';
-    case 1:
-      return 'Goblin';
-    case 2:
-      return 'Giant';
-    default:
-      return `Worker type ${workerType}`;
-  }
-};
 
 const round = (value, digits = 4) => {
   const scale = 10 ** digits;
@@ -103,7 +102,7 @@ const medianLevel40Profile = (workerType, characterKey) => {
   const species = Number(stat.species);
   return {
     id: `${workerType}:${characterKey}`,
-    label: speciesLabel(workerType),
+    label: workerSpeciesLabel(species),
     workerType: Number(workerType),
     characterKey: Number(characterKey),
     isGiant: [2, 4, 8].includes(species),
@@ -188,7 +187,7 @@ for (const nodeId of [...productionResourceIds].sort(
   if (Object.keys(townDistances).length === 0) {
     throw new Error(`No worker-town distance for map node ${nodeId}.`);
   }
-  productionNodes[nodeId] = {
+  productionNodes[nodeId] = applyReviewedWorkerOutputs({
     nodeId,
     baseWorkload: Number(drop.workload),
     workerTypes: [...new Set(exploration[nodeId]?.worker_types ?? [])]
@@ -202,14 +201,23 @@ for (const nodeId of [...productionResourceIds].sort(
         ([left], [right]) => Number(left) - Number(right),
       ),
     ),
-  };
+  });
+  const modeledIds = new Set(['standardYields', 'giantYields', 'luckyBonusYields']
+    .flatMap(field => Object.keys(productionNodes[nodeId][field])));
+  const mappedIds = new Set(resourceMap.workerNodes
+    .find(node => String(node.id) === nodeId).outputs
+    .map(output => String(output.gameItemId)));
+  if (modeledIds.size !== mappedIds.size ||
+      [...modeledIds].some(id => !mappedIds.has(id))) {
+    throw new Error(`Review map/economics output identity mismatch at ${nodeId}.`);
+  }
 }
 
 const output = {
   schemaVersion: 1,
   manifest: {
-    datasetVersion: '2026.07.01-bdo-empire-0.8.1-stable',
-    generatedAt: '2026-07-29T00:00:00.000Z',
+    datasetVersion: '2026.11.03-reviewed-worker-outputs',
+    generatedAt: '2026-11-03T00:00:00.000Z',
     sourceRepository: 'https://github.com/Thell/bdo-empire',
     sourceCommit: '4a24b6f42926543e5f3eae5c8c559ebd689b698c',
     sourcePackageVersion: '0.8.1',
@@ -223,8 +231,10 @@ const output = {
       'credits and respond promptly to any substantiated correction or removal ' +
       'request from Shrddr.',
     sourceSha256: expectedSources,
+    unmodeledProductionNodeIds: [...unmodeledProductionNodeIds],
+    reviewedOutputCorrections: reviewedWorkerOutputCorrections,
     assumptions: [
-      'Expected drop quantities and workload come from the pinned source files.',
+      'Expected quantities and workload are pinned-source estimates, with exact reviewed output identity corrections and removal of an obsolete output.',
       'Worker profiles are arithmetic level-40 medians without skill bonuses.',
       'Every verified town starts with one base worker slot; user availability still needs configuration.',
     ],

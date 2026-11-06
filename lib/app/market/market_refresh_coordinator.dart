@@ -369,7 +369,9 @@ final class MarketRefreshCoordinator {
             code: MarketRefreshDiagnosticCode.temporarilyArchived,
             materialName: name,
             marketId: resolved.id,
-            message: '$name is temporarily archived; saved values were kept.',
+            message: isRemovedPcItem(name, itemId: resolved.id)
+                ? '$name was removed from the game; saved values were kept.'
+                : '$name is temporarily archived; saved values were kept.',
           ),
         );
         continue;
