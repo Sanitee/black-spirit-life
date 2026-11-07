@@ -1,0 +1,6 @@
+name: bdo_number_format
+description: Shared deterministic quantity formatting and user number parsing.
+version: 0.1.0
+publish_to: none
+environment:
+  sdk: ^3.12.2

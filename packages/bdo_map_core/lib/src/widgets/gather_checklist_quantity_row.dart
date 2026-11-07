@@ -1,3 +1,4 @@
+import 'package:bdo_number_format/bdo_number_format.dart';
 import 'package:flutter/material.dart';
 
 import '../checklist/gather_checklist_demand.dart';
@@ -39,7 +40,7 @@ class _GatherChecklistQuantityRowState
 
   Future<void> _record() async {
     if (_busy || widget.onRecord == null) return;
-    final amount = double.tryParse(_amount.text.trim().replaceAll(',', '.'));
+    final amount = parsePlannerNumber(_amount.text);
     if (amount == null || !amount.isFinite || amount <= 0) {
       setState(() => _error = 'Enter an amount above zero.');
       return;
@@ -165,7 +166,12 @@ class _GatherChecklistQuantityRowState
                     crossAxisAlignment: WrapCrossAlignment.center,
                     children: [
                       SizedBox(
-                        width: 110,
+                        width:
+                            110 *
+                            (MediaQuery.textScalerOf(
+                                  context,
+                                ).scale(ResourceMapPanelMetrics.primary) /
+                                ResourceMapPanelMetrics.primary),
                         child: TextField(
                           key: ValueKey(
                             'gather-record-amount:${widget.resourceId}',
@@ -224,9 +230,7 @@ class _GatherChecklistQuantityRowState
 
 String _number(double? value) => value == null
     ? '—'
-    : value == value.roundToDouble()
-    ? value.toInt().toString()
-    : value.toStringAsFixed(2).replaceFirst(RegExp(r'0+$'), '');
+    : formatGroupedEditableQuantity(value, fractionDigits: 2);
 
 String _message(Object error) => error is StateError
     ? error.message

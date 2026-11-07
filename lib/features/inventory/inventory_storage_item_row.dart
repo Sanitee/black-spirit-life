@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math' as math;
 
 import 'package:bdo_craft_planner_flutter/visual/components/app_tooltip.dart';
 import 'package:flutter/material.dart';
@@ -9,6 +10,7 @@ import '../../domain/catalog/item_name_presentation.dart';
 import '../../domain/formatting/planner_formatters.dart';
 import '../../visual/components/app_interaction_frame.dart';
 import '../../visual/visual.dart';
+import '../shared/availability_game_icon.dart';
 import '../shared/mode_item_icon.dart';
 import '../shared/workshop_presentation.dart';
 import 'inventory_action_keys.dart';
@@ -217,33 +219,44 @@ class _InventoryStorageItemRowState extends State<InventoryStorageItemRow> {
         ),
       ),
     );
+    // PopupMenuButton retains a 48px tap target around its 38px artwork.
+    final controlsWidth = (widget.onEdit == null ? 0 : 48) + 58;
+    final amountWidth = math.min(
+      128 * MediaQuery.textScalerOf(context).scale(14) / 14,
+      math.max(0.0, availableWidth - 48 - 9 - controlsWidth),
+    );
     final amount = SizedBox(
-      width: 100,
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text('Owned', style: spec.typography.meta),
-          const SizedBox(height: 4),
-          AppTextField(
-            key: InventoryActionKeys.row('I10', widget.item.name),
-            controller: _amount,
-            focusNode: _amountFocus,
-            semanticLabel: 'Owned amount for ${widget.item.name}',
-            keyboardType: const TextInputType.numberWithOptions(decimal: true),
-            inputFormatters: const <TextInputFormatter>[
-              InventoryAmountInputFormatter(),
-            ],
-            textAlign: TextAlign.right,
-            onSubmitted: _commit,
-            suffixIcon: _error == null
-                ? null
-                : AppTooltip(
-                    message: _error!,
-                    child: const Icon(Icons.error_outline, size: 17),
-                  ),
+      width: amountWidth,
+      child: AppTextField(
+        key: InventoryActionKeys.row('I10', widget.item.name),
+        controller: _amount,
+        focusNode: _amountFocus,
+        semanticLabel: 'Owned amount for ${widget.item.name}',
+        minimumHeight: 38,
+        prefixIcon: Padding(
+          padding: const EdgeInsets.only(left: 10, right: 8),
+          child: Center(
+            widthFactor: 1,
+            heightFactor: 1,
+            child: AvailabilityGameIcon(
+              artwork: AvailabilityArtwork.inventory,
+              color: spec.palette.textMuted,
+              size: 20,
+            ),
           ),
+        ),
+        keyboardType: const TextInputType.numberWithOptions(decimal: true),
+        inputFormatters: const <TextInputFormatter>[
+          InventoryAmountInputFormatter(),
         ],
+        textAlign: TextAlign.right,
+        onSubmitted: _commit,
+        suffixIcon: _error == null
+            ? null
+            : AppTooltip(
+                message: _error!,
+                child: const Icon(Icons.error_outline, size: 17),
+              ),
       ),
     );
     final edit = widget.onEdit == null
@@ -261,30 +274,51 @@ class _InventoryStorageItemRowState extends State<InventoryStorageItemRow> {
               child: const AppVectorGlyph('edit', size: 17),
             ),
           );
-    final remove = PopupMenuButton<String>(
-      key: ValueKey('inventory-more:${widget.item.name}'),
-      tooltip: 'Actions for ${widget.item.name}',
-      icon: Icon(Icons.more_horiz, color: spec.palette.textMuted, size: 22),
-      color: spec.palette.surfaceRaised,
-      onSelected: (_) => widget.onRemove?.call(),
-      itemBuilder: (_) => [
-        PopupMenuItem<String>(
-          key: InventoryActionKeys.row('I15', widget.item.name),
-          value: 'remove',
-          enabled: widget.onRemove != null,
-          child: Text('Remove from Inventory', style: spec.typography.body),
+    final remove = Semantics(
+      container: true,
+      label: 'Actions for ${widget.item.name}',
+      child: PopupMenuButton<String>(
+        key: ValueKey('inventory-more:${widget.item.name}'),
+        tooltip: '',
+        icon: Icon(Icons.more_horiz, color: spec.palette.textMuted, size: 22),
+        color: spec.palette.surfaceRaised,
+        onSelected: (_) => widget.onRemove?.call(),
+        itemBuilder: (_) => [
+          PopupMenuItem<String>(
+            key: InventoryActionKeys.row('I15', widget.item.name),
+            value: 'remove',
+            enabled: widget.onRemove != null,
+            child: Text('Remove from Inventory', style: spec.typography.body),
+          ),
+        ],
+        constraints: const BoxConstraints(minWidth: 190),
+        padding: const EdgeInsets.all(6),
+        style: IconButton.styleFrom(
+          minimumSize: const Size.square(38),
+          maximumSize: const Size.square(38),
         ),
-      ],
-      constraints: const BoxConstraints(minWidth: 190),
-      padding: const EdgeInsets.all(6),
-      style: IconButton.styleFrom(
-        minimumSize: const Size.square(38),
-        maximumSize: const Size.square(38),
       ),
     );
 
+    final controls = Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        amount,
+        if (edit != null) ...[const SizedBox(width: 10), edit],
+        const SizedBox(width: 10),
+        remove,
+      ],
+    );
+
     final inlineNameWidth =
-        availableWidth - 48 - 10 - 14 - 100 - (edit == null ? 0 : 48) - 10 - 38;
+        availableWidth -
+        48 -
+        10 -
+        14 -
+        amountWidth -
+        (edit == null ? 0 : 48) -
+        10 -
+        48;
     var stackControls = availableWidth < 350 || inlineNameWidth <= 0;
     if (!stackControls) {
       final inlineName = TextPainter(
@@ -305,10 +339,7 @@ class _InventoryStorageItemRowState extends State<InventoryStorageItemRow> {
           const SizedBox(width: 10),
           Expanded(child: name),
           const SizedBox(width: 14),
-          amount,
-          if (edit != null) ...<Widget>[const SizedBox(width: 10), edit],
-          const SizedBox(width: 10),
-          remove,
+          controls,
         ],
       );
     }
@@ -326,12 +357,7 @@ class _InventoryStorageItemRowState extends State<InventoryStorageItemRow> {
               const SizedBox(height: 8),
               Row(
                 mainAxisAlignment: MainAxisAlignment.end,
-                children: <Widget>[
-                  amount,
-                  if (edit != null) ...<Widget>[const SizedBox(width: 8), edit],
-                  const SizedBox(width: 10),
-                  remove,
-                ],
+                children: <Widget>[controls],
               ),
             ],
           ),

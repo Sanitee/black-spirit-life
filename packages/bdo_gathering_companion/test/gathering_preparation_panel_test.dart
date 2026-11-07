@@ -511,7 +511,7 @@ void main() {
         expect(key.currentState!.statsValid, isFalse);
         await tester.tap(find.byKey(const ValueKey('inline-stats-reset')));
         await tester.pumpAndSettle();
-        expect(controller.text, '47.25');
+        expect(controller.text, '47,25');
         expect(
           tester.widget<Text>(output).data,
           '${numberText(47.25)}% Drop rate',
@@ -602,7 +602,7 @@ void main() {
         );
       });
       await tester.pumpAndSettle();
-      expect(tester.widget<TextField>(mastery).controller!.text, '1750');
+      expect(tester.widget<TextField>(mastery).controller!.text, '1.750');
       expect(key.currentState!.statsValid, isTrue);
       expect(key.currentState!.edits, 0);
       await tester.enterText(mastery, '3001');
@@ -611,7 +611,7 @@ void main() {
         () => key.currentState!.statsContextId = Object(),
       );
       await tester.pumpAndSettle();
-      expect(tester.widget<TextField>(mastery).controller!.text, '1750');
+      expect(tester.widget<TextField>(mastery).controller!.text, '1.750');
       expect(key.currentState!.statsValid, isTrue);
       key.currentState!.update(() => key.currentState!.statsEnabled = false);
       await tester.pumpAndSettle();
@@ -708,7 +708,7 @@ void main() {
     });
     await tester.pumpAndSettle();
     final drop = find.byKey(const ValueKey('inline-stats-drop-rate'));
-    expect(tester.widget<TextField>(drop).controller!.text, '47.25');
+    expect(tester.widget<TextField>(drop).controller!.text, '47,25');
     await tester.tap(
       find.descendant(
         of: find.byKey(const ValueKey('inline-stats-advanced')),
@@ -725,7 +725,7 @@ void main() {
       47.25,
     );
     expect(key.currentState!.profile.baseSettings.yourEnergy, 500.125);
-    expect(tester.widget<TextField>(drop).controller!.text, '47.25');
+    expect(tester.widget<TextField>(drop).controller!.text, '47,25');
   });
 
   testWidgets('Base stats information is scrollable at420px and200percent', (

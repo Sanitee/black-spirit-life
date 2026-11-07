@@ -73,7 +73,7 @@ run('els.saleFinalAmount.value="123456";renderSaleChosenSummary()');
 includes('els.saleChosenSummary.innerHTML','actual silver');
 includes('els.saleChosenSummary.innerHTML',run('silver(123456)'));
 run('mixed.sale={finalAmount:123456,soldAt:"2026-11-02T12:00:00Z"};renderJournal()');
-includes('els.journalList.innerHTML','123,456 silver');
+includes('els.journalList.innerHTML','123.456 silver');
 // Resolving only the test price restores complete estimates, not counts or actuals.
 run('mixed.catches[1].price=200');
 equal('totalReviewValue()',800);

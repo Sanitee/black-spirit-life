@@ -158,12 +158,15 @@ void main() {
             }),
           );
           for (final entry in {
-            'Citron': '2.532',
+            'Citron': '2,5k',
             'Cooking Honey': '0',
             'Sugar': 'NPC',
             'Mineral Water': 'NPC',
           }.entries) {
-            final badge = k('reference-source:${entry.key}');
+            final badge = find.descendant(
+              of: card,
+              matching: k('reference-source:${entry.key}'),
+            );
             expect(
               find.descendant(of: badge, matching: find.text(entry.value)),
               findsOneWidget,
@@ -174,14 +177,14 @@ void main() {
             );
             expect(
               tester.getRect(badge).left,
-              closeTo(tester.getRect(label).left, 1),
+              greaterThan(tester.getRect(label).right),
             );
             if (scale == 1) {
               expect(
-                tester.getRect(badge).top,
-                greaterThan(tester.getRect(label).bottom),
+                tester.getRect(badge).center.dy,
+                closeTo(tester.getRect(label).center.dy, 1),
               );
-              // Both source pills stay beneath the name/quantity, without overlap.
+              // Source pills occupy separate aligned columns, without overlap.
               expect(
                 tester
                     .getRect(badge)
@@ -192,7 +195,10 @@ void main() {
           }
           expect(
             find.descendant(
-              of: k('reference-source:Cooking Honey'),
+              of: find.descendant(
+                of: card,
+                matching: k('reference-source:Cooking Honey'),
+              ),
               matching: find.text('Orders 84'),
             ),
             findsOneWidget,
@@ -208,11 +214,17 @@ void main() {
             ),
           );
           if (scale == 1) {
-            expect(
-              scroll.position.maxScrollExtent,
-              0,
-              reason: 'A full Citron Juice recipe still fits.',
+            // Grades now have their own aligned inventory/market rows. The
+            // longer table may scroll, but notes must remain reachable.
+            final notes = find.descendant(
+              of: card,
+              matching: find.text('Notes'),
             );
+            await tester.ensureVisible(notes);
+            await tester.pumpAndSettle();
+            expect(notes.hitTestable(), findsOneWidget);
+            scroll.position.jumpTo(0);
+            await tester.pumpAndSettle();
           }
           await capture(tester, '${spec.id}-$scale-citron');
           if (scale == 1) {
@@ -242,7 +254,10 @@ void main() {
           await tester.pump(const Duration(milliseconds: 200));
           expect(
             find.descendant(
-              of: k('reference-source:Citron'),
+              of: find.descendant(
+                of: card,
+                matching: k('reference-source:Citron'),
+              ),
               matching: stockBadgeText('—'),
             ),
             findsOneWidget,

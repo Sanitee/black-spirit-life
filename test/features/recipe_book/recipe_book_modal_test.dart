@@ -1,5 +1,5 @@
 import 'dart:async';
-import 'dart:ui' show PointerDeviceKind;
+import 'dart:ui' show PointerDeviceKind, BoxHeightStyle;
 
 import 'package:bdo_craft_planner_flutter/data/icons/custom_icon_store.dart';
 import 'package:bdo_craft_planner_flutter/domain/models/craft_mode.dart';
@@ -402,7 +402,10 @@ void main() {
         RecipeVariantSelector.choiceKey('Clear Liquid Reagent', 'trace-route'),
       );
       expect(alternate, findsOneWidget);
-      expect(find.text('Wild Grass'), findsWidgets);
+      expect(
+        find.textContaining('Wild Grass', findRichText: true),
+        findsWidgets,
+      );
 
       await tester.tap(alternate);
       await tester.pumpAndSettle();
@@ -410,10 +413,13 @@ void main() {
       expect(mode.state.value.recipeVariantChoices, {
         'Clear Liquid Reagent': 'trace-route',
       });
-      expect(find.text('Trace of Earth'), findsOneWidget);
+      expect(
+        find.textContaining('Trace of Earth', findRichText: true),
+        findsOneWidget,
+      );
       expect(
         find.byKey(
-          RecipeBookKeys.r15Substitute('Clear Liquid Reagent', 'Wild Grass'),
+          ValueKey('recipe-substitutes:Clear Liquid Reagent:Wild Grass'),
         ),
         findsNothing,
       );
@@ -450,38 +456,66 @@ void main() {
         ),
       );
       await tester.pumpAndSettle();
+      book.selectSubstitute(
+        parentName: "Clown's Blood",
+        ingredient: book
+            .recipeFor("Clown's Blood")!
+            .ingredients
+            .firstWhere((row) => row.name == 'Cheetah Dragon Blood'),
+        selection: 'Cheetah Dragon Blood',
+      );
       await tapBookDetails(tester, "Clown's Blood");
       await tester.pumpAndSettle();
 
       final selector = find.byKey(
-        RecipeBookKeys.r15Substitute("Clown's Blood", 'Cheetah Dragon Blood'),
+        ValueKey(
+          "recipe-substitutes:Clown's Blood:Cheetah Dragon Blood",
+        ),
       );
       expect(selector, findsOneWidget);
-      expect(tester.getSize(selector).width, greaterThan(240));
-      final selectedName = find.descendant(
-        of: selector,
-        matching: find.text('Cheetah Dragon Blood'),
-      );
-      expect(selectedName, findsOneWidget);
+      final preview = find.byKey(RecipeBookKeys.previewPanel);
       expect(
-        tester.renderObject<RenderParagraph>(selectedName).didExceedMaxLines,
-        isFalse,
+        find.descendant(
+          of: preview,
+          matching: find.textContaining(
+            'Cheetah Dragon Blood',
+            findRichText: true,
+          ),
+        ),
+        findsOneWidget,
       );
-
       await tester.tap(selector);
       await tester.pumpAndSettle();
-      for (final label in const <String>[
+      for (final label in [
         'Wolf Blood',
         'Flamingo Blood',
         'Rhino Blood',
         'Cheetah Dragon Blood',
       ]) {
-        final option = find.widgetWithText(MenuItemButton, label);
+        final option = find.byKey(
+          ValueKey("recipe-choose:Clown's Blood:$label"),
+        );
         expect(option, findsOneWidget);
-        final text = find.descendant(of: option, matching: find.text(label));
+        final text = find
+            .descendant(of: option, matching: find.byType(RichText))
+            .first;
+        final render = tester.renderObject<RenderParagraph>(text);
         expect(
-          tester.renderObject<RenderParagraph>(text).didExceedMaxLines,
-          isFalse,
+          render
+              .getBoxesForSelection(
+                TextSelection(
+                  baseOffset: 0,
+                  extentOffset: tester
+                      .widget<RichText>(text)
+                      .text
+                      .toPlainText()
+                      .length,
+                ),
+                boxHeightStyle: BoxHeightStyle.max,
+              )
+              .map((box) => box.top)
+              .toSet(),
+          hasLength(1),
         );
         final optionRect = tester.getRect(option);
         expect(optionRect.left, greaterThanOrEqualTo(0));
@@ -489,20 +523,21 @@ void main() {
         expect(optionRect.top, greaterThanOrEqualTo(0));
         expect(optionRect.bottom, lessThanOrEqualTo(752));
       }
-      await tester.tap(find.text('Flamingo Blood').last);
+      await tester.tap(
+        find.byKey(
+          const ValueKey("recipe-choose:Clown's Blood:Flamingo Blood"),
+        ),
+      );
       await tester.pumpAndSettle();
       expect(
-        find.descendant(of: selector, matching: find.text('Flamingo Blood')),
+        find.descendant(
+          of: preview,
+          matching: find.textContaining('Flamingo Blood', findRichText: true),
+        ),
         findsOneWidget,
       );
       expect(
-        tester
-            .getSemantics(
-              find.bySemanticsLabel(
-                "Substitute for Cheetah Dragon Blood in Clown's Blood",
-              ),
-            )
-            .value,
+        mode.state.value.substituteChoices["recipe:Clown's Blood:Blood Group"],
         'Flamingo Blood',
       );
       expect(tester.takeException(), isNull);
@@ -548,10 +583,14 @@ void main() {
     await tester.pumpAndSettle();
 
     final selector = find.byKey(
-      RecipeBookKeys.r15Substitute("Clown's Blood", 'Cheetah Dragon Blood'),
+      ValueKey("recipe-substitutes:Clown's Blood:Cheetah Dragon Blood"),
     );
+    expect(selector, findsOneWidget);
     expect(
-      find.descendant(of: selector, matching: find.text('Wolf Blood')),
+      find.descendant(
+        of: find.byKey(RecipeBookKeys.previewPanel),
+        matching: find.textContaining('Wolf Blood', findRichText: true),
+      ),
       findsOneWidget,
     );
     expect(mode.state.value.substituteChoices, isEmpty);
@@ -761,7 +800,11 @@ void main() {
       expect(
         tester.getSize(find.byKey(RecipeBookKeys.previewPanel)),
         predicate<Size>(
-          (size) => size.width == 430 && size.height > 200 && size.height < 360,
+          (size) =>
+              size.width > 500 &&
+              size.width < 1176 &&
+              size.height > 200 &&
+              size.height < 450,
         ),
       );
       final previewRect = tester.getRect(
@@ -779,17 +822,19 @@ void main() {
       );
       expect(
         find.byKey(
-          RecipeBookKeys.r15Substitute('Clear Liquid Reagent', 'Wild Grass'),
+          ValueKey('recipe-substitutes:Clear Liquid Reagent:Wild Grass'),
         ),
         findsOneWidget,
       );
       await tester.tap(
         find.byKey(
-          RecipeBookKeys.r15Substitute('Clear Liquid Reagent', 'Wild Grass'),
+          ValueKey('recipe-substitutes:Clear Liquid Reagent:Wild Grass'),
         ),
       );
       await tester.pumpAndSettle();
-      await tester.tap(find.text('Weed').last);
+      await tester.tap(
+        find.byKey(const ValueKey('recipe-choose:Clear Liquid Reagent:Weed')),
+      );
       await tester.pumpAndSettle();
       expect(
         mode
@@ -798,28 +843,20 @@ void main() {
             .substituteChoices['recipe:Clear Liquid Reagent:Wild Plants'],
         'Weed',
       );
-      expect(
-        tester.getSize(
-          find.byKey(
-            RecipeBookKeys.r16Quality(
-              'Clear Liquid Reagent',
-              'Sunflower',
-              'special',
-            ),
-          ),
-        ),
-        const Size.square(22),
-      );
       await tester.tap(
         find.byKey(
-          RecipeBookKeys.r16Quality(
-            'Clear Liquid Reagent',
-            'Sunflower',
-            'special',
+          const ValueKey('recipe-substitutes:Clear Liquid Reagent:Sunflower'),
+        ),
+      );
+      await tester.pumpAndSettle();
+      await tester.tap(
+        find.byKey(
+          const ValueKey(
+            'recipe-choose:Clear Liquid Reagent:Special Sunflower',
           ),
         ),
       );
-      await tester.pump();
+      await tester.pumpAndSettle();
       expect(
         mode
             .state
@@ -1379,9 +1416,9 @@ void main() {
 
       await tester.tap(find.byKey(RecipeBookKeys.r23MarketSort));
       await tester.pumpAndSettle();
-      expect(find.text('Profit/ea ↑'), findsOneWidget);
-      expect(find.text('Profit/ea ↓'), findsWidgets);
-      await tester.tap(find.text('Profit/ea ↑'));
+      expect(find.text('Profit/craft ↑'), findsOneWidget);
+      expect(find.text('Profit/craft ↓'), findsWidgets);
+      await tester.tap(find.text('Profit/craft ↑'));
       await tester.pumpAndSettle();
       expect(book.marketSort, RecipeBookMarketSort.profitLowToHigh);
 
@@ -1656,7 +1693,7 @@ void main() {
       );
       expect(
         tester.getSize(find.byKey(RecipeBookKeys.r05SearchByIngredient)).height,
-        38,
+        tester.getSize(find.byKey(RecipeBookKeys.r03Search)).height,
       );
       expect(
         tester
@@ -1736,20 +1773,21 @@ void main() {
             .role,
         AppButtonRole.primary,
       );
-      expect(
-        find.byKey(
-          RecipeBookKeys.previewQuantity(adaptation, 'Elixir of Life'),
+      final table = tester.widget<RecipeIngredientTable>(
+        find.descendant(
+          of: find.byKey(RecipeBookKeys.previewPanel),
+          matching: find.byType(RecipeIngredientTable),
         ),
-        findsOneWidget,
       );
-      expect(find.text('×30'), findsWidgets);
       expect(
-        tester.getSize(
-          find.byKey(
-            RecipeBookKeys.r16Quality(adaptation, 'Sunflower', 'normal'),
-          ),
-        ),
-        const Size.square(26),
+        table.rows
+            .firstWhere((row) => row.ingredient.name == 'Elixir of Life')
+            .quantity,
+        30,
+      );
+      expect(
+        find.byKey(ValueKey('recipe-substitutes:$adaptation:Sunflower')),
+        findsOneWidget,
       );
 
       await tester.pumpWidget(const SizedBox.shrink());
@@ -1883,7 +1921,7 @@ void main() {
             find.descendant(of: control, matching: find.byType(AppButton)),
             findsOneWidget,
           );
-          expect(tester.getSize(control).height, 38);
+          expect(tester.getSize(control).height, tester.getSize(search).height);
         }
         for (final label in <String>[
           'Favorites',
@@ -3056,7 +3094,13 @@ void main() {
         find.byKey(RecipeBookKeys.r11Target('$reference:preview')),
         findsNothing,
       );
-      expect(find.text('Causality Shardstone - Necklace'), findsOneWidget);
+      expect(
+        find.textContaining(
+          'Causality Shardstone - Necklace',
+          findRichText: true,
+        ),
+        findsOneWidget,
+      );
 
       book.closePreview();
       book.setSearch('Polished Marble');

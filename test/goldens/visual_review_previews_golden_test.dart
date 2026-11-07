@@ -804,7 +804,10 @@ void main() {
       final info = find.byKey(RecipeBookKeys.itemInfo(name));
       final scrollable = find.descendant(
         of: info,
-        matching: find.byType(Scrollable),
+        matching: find.byWidgetPredicate(
+          (widget) => widget is Scrollable &&
+              widget.axisDirection == AxisDirection.down,
+        ),
       );
       final position = tester.state<ScrollableState>(scrollable).position;
       position.jumpTo(position.maxScrollExtent);

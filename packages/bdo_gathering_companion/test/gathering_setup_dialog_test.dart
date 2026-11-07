@@ -95,9 +95,7 @@ void main() {
       expect(find.text('Base mastery'), findsOneWidget);
       expect(find.text('Base drop rate %'), findsOneWidget);
       expect(
-        find.textContaining(
-          'Leave out selected buffs and stones.',
-        ),
+        find.textContaining('Leave out selected buffs and stones.'),
         findsOneWidget,
       );
       expect(find.text('LIGHTSTONES'), findsNothing);
@@ -147,7 +145,7 @@ void main() {
       expect(previews.every((draft) => draft.mastery <= 3000), isTrue);
       await tester.tap(find.text('Save stats'));
       await tester.pumpAndSettle();
-      expect(find.text('Mastery must be between 0 and 3,000.'), findsOneWidget);
+      expect(find.text('Mastery must be between 0 and 3.000.'), findsOneWidget);
       expect(receivedResult, isFalse);
       await tester.enterText(
         find.byKey(const ValueKey('gathering-setup-mastery')),
@@ -263,7 +261,7 @@ void main() {
         await tester.tap(find.text('Close'));
         await tester.pumpAndSettle();
         expect(tester.widget<TextField>(field).controller, same(controller));
-        expect(controller!.text, '47.25');
+        expect(controller!.text, '47,25');
         expect(previews, isEmpty);
         expect(tester.takeException(), isNull);
       },
@@ -332,7 +330,7 @@ void main() {
           .widget<TextField>(find.byKey(const ValueKey('gathering-setup-gdr')))
           .controller!
           .text,
-      '47.25',
+      '47,25',
     );
     await advanced(tester);
     await tester.tap(find.byKey(const ValueKey('minigame-event')));

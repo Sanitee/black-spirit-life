@@ -507,8 +507,8 @@ void main() {
       await tester.pumpAndSettle();
       final amount = find.byKey(ValueKey('loot-total-${loot.first.id}'));
       expect(
-        tester.widget<TextField>(amount).controller!.text.replaceAll(',', ''),
-        '12480',
+        tester.widget<TextField>(amount).controller!.text,
+        '12.480',
       );
       final amountController = tester.widget<TextField>(amount).controller;
       final firstRow = find.byKey(ValueKey('loot-row-${loot.first.id}'));

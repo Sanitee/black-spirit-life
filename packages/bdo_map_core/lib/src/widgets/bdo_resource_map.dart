@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 import 'dart:math' as math;
+import 'package:bdo_number_format/bdo_number_format.dart';
 
 import 'package:flutter/foundation.dart'
     show ValueListenable, compute, mapEquals, setEquals, visibleForTesting;
@@ -225,6 +226,7 @@ class BdoResourceMap extends StatefulWidget {
     this.showSourceNotice = true,
     this.tileHttpClient,
     this.plannerNeeds = const <BdoPlannerMaterialNeed>[],
+    this.plannerNeedAvailabilityBuilder,
     this.plannerNeedGroups = const <BdoPlannerNeedGroup>[],
     this.plannerContextLabel,
     this.resourceIconBuilder,
@@ -284,6 +286,8 @@ class BdoResourceMap extends StatefulWidget {
   final bool showSourceNotice;
   final http.Client? tileHttpClient;
   final List<BdoPlannerMaterialNeed> plannerNeeds;
+  final Widget Function(BuildContext, BdoPlannerMaterialNeed)?
+  plannerNeedAvailabilityBuilder;
   final List<BdoPlannerNeedGroup> plannerNeedGroups;
   final String? plannerContextLabel;
   final BdoResourceIconBuilder? resourceIconBuilder;
@@ -696,7 +700,9 @@ class _BdoResourceMapState extends State<BdoResourceMap> {
       widget.nodeNetworkPreferences ?? BdoNodeNetworkPreferences(),
     );
     _nodeBudgetController = TextEditingController(
-      text: '${_nodeNetworkPreferences.contributionPointBudget}',
+      text: formatQuantity(
+        _nodeNetworkPreferences.contributionPointBudget.toDouble(),
+      ),
     );
     _searchFocus = FocusNode(debugLabel: 'Resource-map search');
     _searchFocus.addListener(_handleSearchFocus);
@@ -805,8 +811,9 @@ class _BdoResourceMapState extends State<BdoResourceMap> {
         _nodeNetworkPreferences.desiredResourceNodeCounts,
       );
       _nodeNetworkPreferences = nextNetworkPreferences;
-      _nodeBudgetController.text =
-          '${nextNetworkPreferences.contributionPointBudget}';
+      _nodeBudgetController.text = formatQuantity(
+        nextNetworkPreferences.contributionPointBudget.toDouble(),
+      );
       if (_nodeNetworkPlannerPage == _NodeNetworkPlannerPage.review &&
           targetsChanged) {
         _invalidateNodeNetworkCalculation(clearResult: true);
@@ -4451,7 +4458,7 @@ class _BdoResourceMapState extends State<BdoResourceMap> {
   }
 
   bool _commitNodeBudget({bool rebuildPlan = false}) {
-    final budget = int.tryParse(_nodeBudgetController.text.trim());
+    final budget = parseWholeQuantity(_nodeBudgetController.text.trim());
     if (budget == null || budget < 0) {
       setState(() {
         _nodeNetworkInputError = 'Enter a whole-number CP limit of 0 or more.';
@@ -13109,7 +13116,7 @@ class _BdoResourceMapState extends State<BdoResourceMap> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: <Widget>[
-                      Tooltip(
+                      MapQuietTooltip(
                         message: item.marketStatus,
                         child: Text(
                           item.resource.name,
@@ -13122,13 +13129,17 @@ class _BdoResourceMapState extends State<BdoResourceMap> {
                         ),
                       ),
                       const SizedBox(height: 3),
-                      Text(
-                        'Need ${_formatMapQuantity(item.need.missingQuantity)}',
-                        style: TextStyle(
-                          color: context.mapChrome.muted,
-                          fontSize: ResourceMapPanelMetrics.secondary,
-                        ),
-                      ),
+                      widget.plannerNeedAvailabilityBuilder?.call(
+                            context,
+                            item.need,
+                          ) ??
+                          Text(
+                            'Need ${_formatMapQuantity(item.need.missingQuantity)}',
+                            style: TextStyle(
+                              color: context.mapChrome.muted,
+                              fontSize: ResourceMapPanelMetrics.secondary,
+                            ),
+                          ),
                     ],
                   ),
                 ),
@@ -18668,13 +18679,8 @@ String _formatMarketValueSignal(double value) {
   return value.toStringAsFixed(value < 10 ? 2 : 0);
 }
 
-String _formatCompactNumber(double value) {
-  if (!value.isFinite) return '—';
-  final rounded = value.roundToDouble();
-  return value == rounded
-      ? rounded.toInt().toString()
-      : value.toStringAsFixed(1);
-}
+String _formatCompactNumber(double value) =>
+    value.isFinite ? formatQuantity(value) : '—';
 
 String _formatMapTimestamp(DateTime value) {
   final local = value.toLocal();
@@ -18710,27 +18716,9 @@ String _normalizePlannerMaterialName(String value) {
       .trim();
 }
 
-String _formatMapQuantity(double value) {
-  if (!value.isFinite) {
-    return '—';
-  }
-  final rounded = value.roundToDouble();
-  if ((value - rounded).abs() < .000001) {
-    final digits = rounded.toInt().abs().toString();
-    final grouped = StringBuffer();
-    for (var index = 0; index < digits.length; index += 1) {
-      if (index > 0 && (digits.length - index) % 3 == 0) {
-        grouped.write(',');
-      }
-      grouped.write(digits[index]);
-    }
-    return '${value < 0 ? '-' : ''}$grouped';
-  }
-  return value
-      .toStringAsFixed(2)
-      .replaceFirst(RegExp(r'0+$'), '')
-      .replaceFirst(RegExp(r'\.$'), '');
-}
+String _formatMapQuantity(double value) => value.isFinite
+    ? formatGroupedEditableQuantity(value, fractionDigits: 2)
+    : '—';
 
 class _MapDashboardTile extends StatefulWidget {
   const _MapDashboardTile({
@@ -20659,8 +20647,8 @@ class _WorkerIncomeSettingsDialogState
   }
 
   void _save() {
-    final hours = double.tryParse(_onlineHoursController.text.trim());
-    final availability = double.tryParse(_availabilityController.text.trim());
+    final hours = parsePlannerNumber(_onlineHoursController.text);
+    final availability = parsePlannerNumber(_availabilityController.text);
     if (hours == null ||
         !hours.isFinite ||
         hours <= 0 ||
@@ -20943,8 +20931,8 @@ class _WorkerCapacityDialogState extends State<_WorkerCapacityDialog> {
         values[entry.key] = draft.originalValue;
         continue;
       }
-      final hiredWorkers = int.tryParse(draft.hiredWorkers.text.trim());
-      final bonusLodging = int.tryParse(draft.bonusLodgingSlots.text.trim());
+      final hiredWorkers = parseWholeQuantity(draft.hiredWorkers.text);
+      final bonusLodging = parseWholeQuantity(draft.bonusLodgingSlots.text);
       if (hiredWorkers == null ||
           hiredWorkers < 0 ||
           bonusLodging == null ||
@@ -21230,8 +21218,8 @@ final class _TownCapacityDraft {
       bonusLodgingSlots.text.trim() == _initialBonusText;
 
   bool get hasLodgingToPreserve =>
-      (int.tryParse(_initialBonusText) ?? 0) > 0 ||
-      (int.tryParse(bonusLodgingSlots.text.trim()) ??
+      (parseWholeQuantity(_initialBonusText) ?? 0) > 0 ||
+      (parseWholeQuantity(bonusLodgingSlots.text) ??
               originalValue.effectiveBonusLodgingSlotCount) >
           0;
 

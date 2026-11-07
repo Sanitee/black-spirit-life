@@ -1,3 +1,4 @@
+import 'package:bdo_number_format/bdo_number_format.dart';
 import 'dart:math' as math;
 import 'dart:ui';
 
@@ -2299,7 +2300,7 @@ class GameIcon extends StatelessWidget {
               package: gatheringAssetPackage,
               fit: BoxFit.contain,
               filterQuality: FilterQuality.medium,
-              errorBuilder: (_, error, stack) => Tooltip(
+              errorBuilder: (_, error, stack) => GatheringQuietTooltip(
                 message: 'Game artwork unavailable',
                 child: Center(
                   child: Text(
@@ -2475,10 +2476,9 @@ class SectionCard extends StatelessWidget {
 
 String countText(num n) => n.toInt().toString().replaceAllMapped(
   RegExp(r'(\d)(?=(\d{3})+(?!\d))'),
-  (m) => '${m[1]},',
+  (m) => '${m[1]}.',
 );
-String numberText(num n) =>
-    n == n.roundToDouble() ? n.toInt().toString() : n.toStringAsFixed(1);
+String numberText(num n) => formatQuantity(n.toDouble());
 String formatDurationMinutes(num minutes) => minutes.isFinite && minutes >= 0
     ? durationText((minutes * 60).round())
     : '—';

@@ -323,7 +323,16 @@ function escapeHtml(value) {
 function number(value, maximumFractionDigits = 0) {
   const n = Number(value);
   if (!Number.isFinite(n)) return "—";
-  return new Intl.NumberFormat("en-US", { maximumFractionDigits }).format(n);
+  return new Intl.NumberFormat("de-DE", { maximumFractionDigits }).format(n);
+}
+
+
+// Editable whole counts share the app's dotted grouping. Machine data stays numeric.
+function wholeAmount(text) {
+  const value = String(text ?? "").trim().replace(/\s+/g, "");
+  if (!/^(?:\d+|[1-9]\d{0,2}(?:\.\d{3})+)$/.test(value)) return NaN;
+  const n = Number(value.replace(/\./g, ""));
+  return Number.isSafeInteger(n) ? n : NaN;
 }
 
 const LIFE_SKILL_RANK_OFFSETS = Object.freeze({ Beginner: 0, Apprentice: 10, Skilled: 20, Professional: 30, Artisan: 40, Master: 50, Guru: 80 });
@@ -354,9 +363,9 @@ function resourceLabel(value) {
 function silver(value) {
   const n = Number(value);
   if (!Number.isFinite(n)) return "Unknown";
-  if (Math.abs(n) >= 1e9) return `${(n / 1e9).toFixed(n >= 1e10 ? 1 : 2)}B`;
-  if (Math.abs(n) >= 1e6) return `${(n / 1e6).toFixed(n >= 1e8 ? 0 : 1)}M`;
-  if (Math.abs(n) >= 1e3) return `${(n / 1e3).toFixed(n >= 1e5 ? 0 : 1)}K`;
+  if (Math.abs(n) >= 1e9) return `${(n / 1e9).toFixed(n >= 1e10 ? 1 : 2).replace(".", ",")}B`;
+  if (Math.abs(n) >= 1e6) return `${(n / 1e6).toFixed(n >= 1e8 ? 0 : 1).replace(".", ",")}M`;
+  if (Math.abs(n) >= 1e3) return `${(n / 1e3).toFixed(n >= 1e5 ? 0 : 1).replace(".", ",")}K`;
   return number(n);
 }
 
@@ -473,7 +482,7 @@ function applyCaptureSetup(id) {
       button.setAttribute("aria-pressed", String(active));
     });
   }
-  els.haulMastery.value = setup.mastery;
+  els.haulMastery.value = number(setup.mastery);
   if (setup.method === "rod") {
     els.haulFishingSpeed.value = setup.fishingSpeed ?? "";
     els.haulAutoDelay.value = setup.autoFishingDelaySeconds ?? "";
@@ -500,8 +509,8 @@ function closeCaptureSetupEditor() {
 
 function currentCaptureSetupValues() {
   const method = state.method.capture;
-  const mastery = Number(els.haulMastery.value);
-  if (!Number.isFinite(mastery) || mastery < 0 || mastery > 5000) throw new Error("Enter the exact fishing mastery for this setup.");
+  const mastery = wholeAmount(els.haulMastery.value);
+  if (!Number.isFinite(mastery) || mastery < 0 || mastery > Number(els.haulMastery.max || 3000)) throw new Error("Enter the exact fishing mastery for this setup.");
   let fishingSpeed = null;
   let autoFishingDelaySeconds = null;
   if (method === "rod") {
@@ -807,7 +816,7 @@ function applyProfileToCapture(profile, render = true) {
     button.classList.toggle("is-active", active);
     button.setAttribute("aria-pressed", String(active));
   });
-  els.haulMastery.value = profile.mastery;
+  els.haulMastery.value = number(profile.mastery);
   if (profile.method === "rod") {
     state.captureAutoFishingReductionPercent = Number(profile.autoFishingReductionPercent) || 0;
   }
@@ -935,7 +944,7 @@ function editProfile(id, rerenderList = true) {
   els.profileName.value = profile.name ?? "";
   els.profileEquipment.value = profile.equipment ?? "";
   els.profileEquipmentText.value = profile.equipment ?? "";
-  els.profileMastery.value = String(profile.mastery ?? 0);
+  els.profileMastery.value = number(profile.mastery ?? 0);
   els.profileFishingRank.value = profile.fishingRank || "";
   els.profileFishingLevel.value = profile.fishingLevel == null ? "" : String(profile.fishingLevel);
   els.profileAutoReductionPercent.value = profile.autoFishingReductionPercent == null ? "" : String(profile.autoFishingReductionPercent);
@@ -971,6 +980,8 @@ function closeProfileModal() {
 }
 
 function profileFormValues() {
+  const mastery = wholeAmount(els.profileMastery.value);
+  els.profileMastery.setCustomValidity(Number.isInteger(mastery) && mastery >= 0 && mastery <= 5000 ? "" : "Enter mastery from 0 to 5.000.");
   if (!els.profileForm.reportValidity()) return null;
   const method = els.profileMethod.value;
   const existing = state.fishingProfiles.find(item => item.id === state.profileEditingId) || null;
@@ -984,7 +995,7 @@ function profileFormValues() {
     name: baseline && els.profileName.value === baseline.name ? existing.name : els.profileName.value,
     method,
     equipment: baseline && els.profileEquipmentText.value === baseline.equipment ? existing.equipment : els.profileEquipmentText.value,
-    mastery: Number(els.profileMastery.value),
+    mastery: wholeAmount(els.profileMastery.value),
     fishingRank: els.profileFishingRank.value || null,
     fishingLevel: els.profileFishingRank.value ? Number(els.profileFishingLevel.value) : null,
     autoFishingReductionPercent: method === "rod" && els.profileAutoReductionPercent.value !== "" ? Number(els.profileAutoReductionPercent.value) : null,
@@ -1578,7 +1589,7 @@ async function editSession(id) {
   state.editingSessionId = String(session.id);
   const recordedSale = sessionSale(session);
   const recordedAmount = recordedSale?.finalAmount != null ? String(recordedSale.finalAmount) : "";
-  els.haulSoldAmount.value = recordedAmount;
+  els.haulSoldAmount.value = recordedAmount === "" ? "" : number(recordedAmount);
   els.haulSoldAmount.dataset.original = recordedAmount;
   state.editingProfileDetached = false;
   state.pendingMapLocation = null;
@@ -1586,7 +1597,7 @@ async function editSession(id) {
   state.captureProfileId = state.fishingProfiles.some(profile => profile.id === profileId && profile.method === method) ? profileId : "";
   setCaptureEquipment(method, equipment);
   setCaptureStyle(session.style);
-  els.haulMastery.value = session.mastery ?? "";
+  els.haulMastery.value = session.mastery == null ? "" : number(session.mastery);
   const savedReduction = Number(session.autoFishingReductionPercent ?? session.auto_fishing_reduction_percent);
   const savedDelay = Number(session.autoFishingDelaySeconds ?? session.auto_fishing_delay_seconds);
   state.captureAutoFishingReductionPercent = method === "rod"
@@ -4077,11 +4088,11 @@ async function saveHaul() {
   const zone = location?.zone || null;
   const method = state.method.capture;
   const masteryText = els.haulMastery.value.trim();
-  const mastery = masteryText === "" ? Number.NaN : Number(masteryText);
+  const mastery = wholeAmount(masteryText);
   if (!location) { showToast("Choose a suggested node, fishing spot, or map point.", true); els.haulSpot.focus(); return; }
   if (!zone && location.type === "node") { renderCaptureLocationResolution(); showToast("Choose the node's exact fishing point on the Map before saving.", true); els.haulSpot.focus(); return; }
   if (!zone) { showToast("Choose a fishing spot or an exact point on the map.", true); els.haulSpot.focus(); return; }
-  if (!Number.isFinite(mastery) || mastery < 0) { showToast("Enter the fishing mastery used for this haul.", true); els.haulMastery.focus(); return; }
+  if (!Number.isFinite(mastery) || mastery < 0 || mastery > Number(els.haulMastery.max || 3000)) { showToast("Enter the fishing mastery used for this haul.", true); els.haulMastery.focus(); return; }
   const autoFishingReductionPercent = method === "rod" ? Math.max(0, Math.min(66.67, Number(state.captureAutoFishingReductionPercent) || 0)) : null;
   const autoFishingDelay = method === "rod" && els.haulStyle.value === "afk" ? autoFishingDelaySeconds(autoFishingReductionPercent) : null;
   const resourceLevel = method === "rod" ? (els.haulResourceLevel.value || null) : null;
@@ -4092,7 +4103,7 @@ async function saveHaul() {
     ? state.sessions.find(session => String(session.id) === String(state.editingSessionId)) || null
     : null;
   const soldAmountText = editingSession ? els.haulSoldAmount.value.trim() : "";
-  const soldAmount = soldAmountText ? Number(soldAmountText) : null;
+  const soldAmount = soldAmountText ? wholeAmount(soldAmountText) : null;
   if (soldAmountText && (!Number.isFinite(soldAmount) || soldAmount <= 0 || soldAmount > 100_000_000_000_000)) {
     showToast("Enter the actual silver received, or leave it blank if this haul was not sold.", true);
     els.haulSoldAmount.focus();
@@ -4160,7 +4171,7 @@ async function saveHaul() {
     await request(endpoint, { method: wasEditing ? "PUT" : "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(payload) });
     if (wasEditing) {
       const originalSaleAmount = String(els.haulSoldAmount.dataset.original || "").trim();
-      if (soldAmountText !== originalSaleAmount) {
+      if (soldAmount !== (originalSaleAmount ? wholeAmount(originalSaleAmount) : null)) {
         if (!soldAmountText && originalSaleAmount) {
           await request(`/api/sessions/${encodeURIComponent(editingSession.id)}/sale`, { method: "DELETE" });
         } else if (soldAmountText) {
@@ -4426,7 +4437,7 @@ function openSalePlanner(id) {
   els.saleTankValue.title = fishValueDescription(tankValue);
   els.saleBargain.textContent = `${number(saleBargainBonus(session), 1)}%`;
   els.saleSoldAt.value = localDateTimeInput(existing?.soldAt || new Date());
-  els.saleFinalAmount.value = existing?.finalAmount != null ? String(existing.finalAmount) : "";
+  els.saleFinalAmount.value = existing?.finalAmount != null ? number(existing.finalAmount) : "";
   els.saleDelete.classList.toggle("is-hidden", !existing);
   renderSaleOffers();
   els.saleBackdrop.classList.remove("is-hidden");
@@ -4461,7 +4472,7 @@ function renderSaleOffers() {
         <span><strong>${escapeHtml(item.name)}</strong><small>${number(item.count)} × ${base == null ? "price unknown" : silver(item.price)}</small></span>
         <b>${silverOrUnknown(base)}</b>
       </div>${state.salePlanner.offers.map((offer, index) => `<label class="sale-quote-cell" data-sale-quote-cell="${index}">
-        <span class="sale-percent-input"><input data-sale-quote="${index}" data-sale-item="${escapeHtml(key)}" aria-label="${escapeHtml(item.name)} quotation at ${escapeHtml(offer.destination)}" type="number" min="30" max="130" step="0.1" value="${number(saleQuoteFor(offer, item), 1)}"><b>%</b></span>
+        <span class="sale-percent-input"><input data-sale-quote="${index}" data-sale-item="${escapeHtml(key)}" aria-label="${escapeHtml(item.name)} quotation at ${escapeHtml(offer.destination)}" type="number" min="30" max="130" step="0.1" value="${Number(saleQuoteFor(offer, item)).toFixed(1)}"><b>%</b></span>
         <small data-sale-item-total="${index}:${escapeHtml(key)}">${base == null ? "—" : silver(saleProjection(base, saleQuoteFor(offer, item), offer.distance, bargain))}</small>
       </label>`).join("")}`;
     }).join("")}
@@ -4507,7 +4518,7 @@ function renderSaleOffers() {
       syncQuote(event);
       const index = Number(event.target.dataset.saleQuote);
       const key = String(event.target.dataset.saleItem || "");
-      event.target.value = number(state.salePlanner.offers[index].quotes[key] ?? 100, 1);
+      event.target.value = String(state.salePlanner.offers[index].quotes[key] ?? 100);
     });
   });
   updateSaleDecisionTotals();
@@ -4558,7 +4569,7 @@ function renderSaleChosenSummary() {
   if (!offer || !session) return;
   const bargain = saleBargainBonus(session);
   const comparison = saleOfferTotal(session, offer, bargain);
-  const actual = Number(els.saleFinalAmount.value) || 0;
+  const actual = wholeAmount(els.saleFinalAmount.value) || 0;
   els.saleChosenSummary.innerHTML = `<span>${escapeHtml(offer.destination)}</span><strong>${actual > 0 ? silver(actual) : silverOrUnknown(comparison)}</strong><small>${actual > 0 ? "actual silver" : comparison == null ? "incomplete fish prices" : "comparison only"}</small>`;
 }
 
@@ -4566,10 +4577,10 @@ async function saveRecordedSale() {
   const session = state.sessions.find(entry => String(entry.id) === state.salePlanner.sessionId);
   const offer = state.salePlanner.offers[state.salePlanner.selected];
   const soldAt = new Date(els.saleSoldAt.value);
-  const finalAmount = Number(els.saleFinalAmount.value);
+  const finalAmount = wholeAmount(els.saleFinalAmount.value);
   if (!session || !offer) return;
   if (Number.isNaN(soldAt.getTime())) { showToast("Choose when the fish were sold.", true); return; }
-  if (!Number.isFinite(finalAmount) || finalAmount <= 0) { showToast("Enter the actual silver received in game.", true); els.saleFinalAmount.focus(); return; }
+  if (!Number.isFinite(finalAmount) || finalAmount <= 0 || finalAmount > 100000000000000) { showToast("Enter the actual silver received in game.", true); els.saleFinalAmount.focus(); return; }
   els.saleSave.disabled = true;
   try {
     await request(`/api/sessions/${encodeURIComponent(session.id)}/sale`, {
@@ -4631,6 +4642,10 @@ function filteredJournalSessions() {
   });
 }
 
+function journalSilver(value, description = `${number(value)} silver`) {
+  return `<strong class="journal-silver" aria-label="${escapeHtml(description)}"><img src="/silver.webp" alt="" aria-hidden="true">${silver(value)}</strong>`;
+}
+
 function renderJournal() {
   const sessions = filteredJournalSessions();
   const totalFish = sessions.reduce((sum,session) => sum + sessionTotal(session),0);
@@ -4688,8 +4703,8 @@ function renderJournal() {
       ? `<span class="journal-legacy-explainer"><strong>Aggregate retained count</strong><small>Fish species were not stored in v0.1.7.</small></span>`
       : catches.map(item => `<span class="fish-peek-item grade-frame ${itemGradeClass(item.grade)}" title="${escapeHtml(item.name)} &middot; ${number(item.count)}"><img src="/icon/${item.itemId}.webp" alt=""><b>${number(item.count)}</b></span>`).join("");
     const values = legacyAggregate
-      ? `<div class="journal-value is-tank is-empty"><span>Base fish value</span><strong aria-label="Not recorded">&mdash;</strong><small class="journal-value-note">Species were not stored</small></div><div class="journal-value is-sale${receivedSilver == null ? " is-empty" : ""}"><span>Legacy received</span>${receivedSilver == null ? `<strong aria-label="Not recorded">&mdash;</strong>` : `<strong title="${number(receivedSilver)} silver">${silver(receivedSilver)} <em>silver</em></strong>`}</div>`
-      : `<div class="journal-value is-tank"><span>Base fish value</span><strong title="${fishValueDescription(rawValue)}">${silverOrUnknown(rawValue.total)}${rawValue.total == null ? "" : " <em>silver</em>"}</strong>${rawValue.total == null ? `<small class="journal-value-note">${fishValueDescription(rawValue)}</small>` : ""}</div><div class="journal-value is-sale${sale ? "" : " is-empty"}"><span>Recorded sale</span>${sale ? `<strong title="${number(sale.finalAmount)} silver">${silver(sale.finalAmount)} <em>silver</em></strong>` : `<strong aria-label="No recorded sale">&mdash;</strong>`}</div>`;
+      ? `<div class="journal-value is-tank is-empty"><span>Base fish value</span><strong aria-label="Not recorded">&mdash;</strong><small class="journal-value-note">Species were not stored</small></div><div class="journal-value is-sale${receivedSilver == null ? " is-empty" : ""}"><span>Legacy received</span>${receivedSilver == null ? `<strong aria-label="Not recorded">&mdash;</strong>` : journalSilver(receivedSilver)}</div>`
+      : `<div class="journal-value is-tank"><span>Base fish value</span>${rawValue.total == null ? `<strong aria-label="${escapeHtml(fishValueDescription(rawValue))}">${silverOrUnknown(rawValue.total)}</strong>` : journalSilver(rawValue.total, fishValueDescription(rawValue))}${rawValue.total == null ? `<small class="journal-value-note">${fishValueDescription(rawValue)}</small>` : ""}</div><div class="journal-value is-sale${sale ? "" : " is-empty"}"><span>Recorded sale</span>${sale ? journalSilver(sale.finalAmount) : `<strong aria-label="No recorded sale">&mdash;</strong>`}</div>`;
     const actions = legacyAggregate
       ? `<span class="journal-legacy-lock" title="This v0.1.7 entry contains aggregate totals, not editable fish species or a recalculable sale."><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 10V8a5 5 0 0 1 10 0v2h2v12H5V10h2Zm2 0h6V8a3 3 0 0 0-6 0v2Zm3 4a2 2 0 0 0-1 3.73V20h2v-2.27A2 2 0 0 0 12 14Z"/></svg><span>Read-only import</span></span>`
       : `<button type="button" class="journal-sale-button"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16v3H4V5Zm1 5h14l-1 9H6l-1-9Zm5 2v5h4v-5h-4Z"/></svg><span>${sale ? "Sale details" : "Where to sell?"}</span></button><button type="button" class="journal-edit-button"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15.7 3.3 5 5L8.9 20.1 3 21l.9-5.9L15.7 3.3Zm0 2.8L5.8 16l-.3 2.5L8 18.2l9.9-9.9-2.2-2.2Z"/></svg><span>Edit</span></button>`;

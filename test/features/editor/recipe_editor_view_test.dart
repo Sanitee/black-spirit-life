@@ -582,7 +582,7 @@ void main() {
             )
             .controller
             .text,
-        '2.5',
+        '2,5',
       );
 
       await tester.enterText(

@@ -416,9 +416,9 @@ const state = {
   fishingProfiles: [migrated],
   profileEditorBaseline: { id: migrated.id, name: "Legacy", equipment: "", notes: "legacy note" },
 };
-const field = value => ({ value });
+const field = value => ({ value, validationMessage: "", setCustomValidity(message) { this.validationMessage = message; } });
 const els = {
-  profileForm: { reportValidity: () => true },
+  profileForm: { reportValidity: () => !els.profileMastery.validationMessage },
   profileMethod: field("rod"),
   profileName: field("Legacy"),
   profileEquipmentText: field(""),
@@ -431,6 +431,7 @@ const els = {
   profileNotes: field("legacy note"),
 };
 const newProfileId = () => "unexpected-new-id";
+${script.substring(script.indexOf('function wholeAmount('), script.indexOf('const LIFE_SKILL_RANK_OFFSETS'))}
 ${script.substring(helperStart, helperEnd)}
 process.stdout.write(JSON.stringify(profileFormValues()));
 ''';

@@ -18,6 +18,7 @@ import '../../domain/state/planner_state.dart' show MarketState;
 import '../shared/mode_item_icon.dart';
 import 'recipe_worker_controller.dart';
 import 'recipe_worker_panel.dart';
+import 'resource_map_need_availability.dart';
 import 'worker_output_market_policy.dart';
 
 class ResourceMapWorkspaceConfiguration {
@@ -278,6 +279,13 @@ class _ResourceMapWorkspaceState extends State<ResourceMapWorkspace> {
                             final target = plan.target.trim();
                             return BdoResourceMap(
                               dataset: dataset,
+                              plannerNeedAvailabilityBuilder: (context, need) =>
+                                  ResourceMapNeedAvailability(
+                                    controller: modeController,
+                                    need: need,
+                                    needs: needs,
+                                    ownedFor: _gatherBridge.ownedFor,
+                                  ),
                               recipeWorkerPlan:
                                   widget.recipeWorkers?.plan?.network,
                               recipeWorkerTitle:

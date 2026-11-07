@@ -6,7 +6,6 @@ import 'package:bdo_craft_planner_flutter/domain/state/planner_state.dart';
 import 'package:bdo_craft_planner_flutter/features/planner/planner_contracts.dart';
 import 'package:bdo_craft_planner_flutter/features/recipe_book/recipe_book.dart';
 import 'package:bdo_craft_planner_flutter/features/recipe_book/recipe_book_used_in_panel.dart';
-import 'package:bdo_craft_planner_flutter/features/recipe_book/recipe_ingredient_line.dart';
 import 'package:bdo_craft_planner_flutter/features/shared/mode_item_icon.dart';
 import 'package:bdo_craft_planner_flutter/features/shared/recipe_variant_selector.dart';
 import 'package:bdo_craft_planner_flutter/visual/visual.dart';
@@ -176,7 +175,7 @@ void main() {
       );
       final ingredientLines = find.descendant(
         of: expandedResult,
-        matching: find.byType(RecipeIngredientLine),
+        matching: find.byType(RecipeIngredientTable),
       );
       expect(ingredientLines, findsWidgets);
       expect(
@@ -192,12 +191,22 @@ void main() {
       expect(
         find.descendant(
           of: expandedResult,
-          matching: find.text('Catalyst Core'),
+          matching: find.textContaining('Catalyst Core', findRichText: true),
         ),
         findsOneWidget,
       );
       expect(
-        find.descendant(of: expandedResult, matching: find.text('×2')),
+        find.descendant(
+          of: expandedResult,
+          matching: find.byWidgetPredicate(
+            (w) =>
+                w is Text &&
+                w.textSpan != null &&
+                (w.textSpan?.toPlainText() ?? w.data ?? '').trim().endsWith(
+                  '×2',
+                ),
+          ),
+        ),
         findsOneWidget,
       );
       expect(
@@ -421,11 +430,31 @@ void main() {
       expect(_appButton(tester, catalyst).selected, isTrue);
       expect(_appButton(tester, ten).selected, isTrue);
       expect(
-        find.descendant(of: result, matching: find.text('×2')),
+        find.descendant(
+          of: result,
+          matching: find.byWidgetPredicate(
+            (w) =>
+                w is Text &&
+                w.textSpan != null &&
+                (w.textSpan?.toPlainText() ?? w.data ?? '').trim().endsWith(
+                  '×2',
+                ),
+          ),
+        ),
         findsOneWidget,
       );
       expect(
-        find.descendant(of: result, matching: find.text('×30')),
+        find.descendant(
+          of: result,
+          matching: find.byWidgetPredicate(
+            (w) =>
+                w is Text &&
+                w.textSpan != null &&
+                (w.textSpan?.toPlainText() ?? w.data ?? '').trim().endsWith(
+                  '×30',
+                ),
+          ),
+        ),
         findsNothing,
       );
 
@@ -438,15 +467,38 @@ void main() {
       expect(_appButton(tester, alternate).selected, isTrue);
       expect(_appButton(tester, ten).selected, isTrue);
       expect(
-        find.descendant(of: result, matching: find.text('×30')),
+        find.descendant(
+          of: result,
+          matching: find.byWidgetPredicate(
+            (w) =>
+                w is Text &&
+                w.textSpan != null &&
+                (w.textSpan?.toPlainText() ?? w.data ?? '').trim().endsWith(
+                  '×30',
+                ),
+          ),
+        ),
         findsOneWidget,
       );
       expect(
-        find.descendant(of: result, matching: find.text('Cooking Base')),
+        find.descendant(
+          of: result,
+          matching: find.textContaining('Cooking Base', findRichText: true),
+        ),
         findsOneWidget,
       );
       expect(
-        find.descendant(of: result, matching: find.text('×2')),
+        find.descendant(
+          of: result,
+          matching: find.byWidgetPredicate(
+            (w) =>
+                w is Text &&
+                w.textSpan != null &&
+                (w.textSpan?.toPlainText() ?? w.data ?? '').trim().endsWith(
+                  '×2',
+                ),
+          ),
+        ),
         findsNothing,
       );
 
@@ -459,11 +511,31 @@ void main() {
       expect(_appButton(tester, alternate).selected, isTrue);
       expect(_appButton(tester, single).selected, isTrue);
       expect(
-        find.descendant(of: result, matching: find.text('×3')),
+        find.descendant(
+          of: result,
+          matching: find.byWidgetPredicate(
+            (w) =>
+                w is Text &&
+                w.textSpan != null &&
+                (w.textSpan?.toPlainText() ?? w.data ?? '').trim().endsWith(
+                  '×3',
+                ),
+          ),
+        ),
         findsOneWidget,
       );
       expect(
-        find.descendant(of: result, matching: find.text('×30')),
+        find.descendant(
+          of: result,
+          matching: find.byWidgetPredicate(
+            (w) =>
+                w is Text &&
+                w.textSpan != null &&
+                (w.textSpan?.toPlainText() ?? w.data ?? '').trim().endsWith(
+                  '×30',
+                ),
+          ),
+        ),
         findsNothing,
       );
 
@@ -476,11 +548,24 @@ void main() {
       expect(_appButton(tester, catalyst).selected, isTrue);
       expect(_appButton(tester, single).selected, isTrue);
       expect(
-        find.descendant(of: result, matching: find.text('Cooking Base')),
+        find.descendant(
+          of: result,
+          matching: find.textContaining('Cooking Base', findRichText: true),
+        ),
         findsNothing,
       );
       expect(
-        find.descendant(of: result, matching: find.text('×1')),
+        find.descendant(
+          of: result,
+          matching: find.byWidgetPredicate(
+            (w) =>
+                w is Text &&
+                w.textSpan != null &&
+                (w.textSpan?.toPlainText() ?? w.data ?? '').trim().endsWith(
+                  '×1',
+                ),
+          ),
+        ),
         findsOneWidget,
       );
 
@@ -493,15 +578,16 @@ void main() {
         _crossModeVariant,
       );
 
-      await tester.tap(
-        find.byKey(
-          RecipeBookKeys.targetUsedInResult(
-            _source,
-            CraftMode.cooking.key,
-            _crossModeResult,
-          ),
+      final finalTarget = find.byKey(
+        RecipeBookKeys.targetUsedInResult(
+          _source,
+          CraftMode.cooking.key,
+          _crossModeResult,
         ),
       );
+      await tester.ensureVisible(finalTarget);
+      await tester.pumpAndSettle();
+      await tester.tap(finalTarget);
       await tester.pump();
 
       expect(environment.application.activeMode.value, CraftMode.cooking);

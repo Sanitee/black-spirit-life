@@ -242,7 +242,7 @@ void main() {
         expect(find.byKey(ValueKey(key)), findsNothing);
       }
       expect(find.text('Before buffs'), findsOneWidget);
-      expect(find.text('1,800'), findsOneWidget);
+      expect(find.text('1.800'), findsOneWidget);
       expect(find.text('30%'), findsOneWidget);
       expect(find.byType(GatheringPreparationPanel), findsNothing);
       expect(memory.writes, 0);
@@ -498,7 +498,7 @@ void main() {
       await tester.tap(find.text('Cancel'));
       await tester.pumpAndSettle();
       expect(jsonEncode(memory.preferences), before);
-      expect(find.text('1,800'), findsOneWidget);
+      expect(find.text('1.800'), findsOneWidget);
       await tester.tap(find.byKey(const ValueKey('open-gathering-setup')));
       await tester.pumpAndSettle();
       await tester.enterText(
@@ -514,7 +514,7 @@ void main() {
       expect(saved.baseSettings.mastery, 2000);
       expect(saved.baseSettings.gatheringDropRatePercent, 30);
       expect(saved.buffIds, isEmpty);
-      expect(find.text('2,000'), findsOneWidget);
+      expect(find.text('2.000'), findsOneWidget);
       expect(tester.state(find.byType(FieldGuide)), same(mapState));
       expect(tester.takeException(), isNull);
       await tester.pumpWidget(const SizedBox.shrink());
@@ -528,7 +528,7 @@ void main() {
       final memory = store(confirmed: false);
       await pump(tester, memory);
       expect(find.text('—'), findsNWidgets(2));
-      expect(find.text('1,800'), findsNothing);
+      expect(find.text('1.800'), findsNothing);
       expect(memory.writes, 0);
       await tester.pumpWidget(const SizedBox.shrink());
       await pump(tester, memory, hosted: false);

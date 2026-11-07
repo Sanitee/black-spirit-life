@@ -1,10 +1,8 @@
-import 'package:bdo_craft_planner_flutter/domain/formatting/planner_formatters.dart';
 import 'package:bdo_craft_planner_flutter/domain/models/craft_mode.dart';
 import 'package:bdo_craft_planner_flutter/domain/state/planner_state.dart';
 import 'package:bdo_craft_planner_flutter/domain/state/state_copy.dart';
 import 'package:bdo_craft_planner_flutter/features/planner/planner_contracts.dart';
 import 'package:bdo_craft_planner_flutter/features/recipe_book/recipe_book.dart';
-import 'package:bdo_craft_planner_flutter/features/recipe_book/recipe_ingredient_line.dart';
 import 'package:bdo_craft_planner_flutter/features/shared/mode_item_icon.dart';
 import 'package:bdo_craft_planner_flutter/features/shared/recipe_variant_selector.dart';
 import 'package:bdo_craft_planner_flutter/visual/visual.dart';
@@ -98,25 +96,16 @@ void main() {
             _expandedResult,
           ),
         );
-        expect(
+        final ingredientTable = tester.widget<RecipeIngredientTable>(
           find.descendant(
             of: expandedResult,
-            matching: find.text('Clear Liquid Reagent'),
+            matching: find.byType(RecipeIngredientTable),
           ),
-          findsOneWidget,
         );
-        expect(
-          find.descendant(of: expandedResult, matching: find.text('×2')),
-          findsOneWidget,
-        );
-        expect(
-          find.descendant(of: expandedResult, matching: find.text('Sunflower')),
-          findsOneWidget,
-        );
-        expect(
-          find.descendant(of: expandedResult, matching: find.text('×3')),
-          findsOneWidget,
-        );
+        expect(ingredientTable.rows.map((row) => (row.name, row.quantity)), [
+          ('Clear Liquid Reagent', 2.0),
+          ('Sunflower', 3.0),
+        ]);
         expect(
           find.descendant(of: expandedResult, matching: find.text('Output ×1')),
           findsOneWidget,
@@ -250,23 +239,16 @@ void main() {
 
         final preview = find.byKey(RecipeBookKeys.previewPanel);
         expect(preview, findsOneWidget);
-        expect(
+        final ingredientTable = tester.widget<RecipeIngredientTable>(
           find.descendant(
             of: preview,
-            matching: find.byType(RecipeIngredientLine),
+            matching: find.byType(RecipeIngredientTable),
           ),
-          findsNWidgets(recipe.ingredients.length),
         );
-        for (final ingredient in recipe.ingredients) {
-          final quantity = find.byKey(
-            RecipeBookKeys.previewQuantity(_source, ingredient.name),
-          );
-          expect(quantity, findsOneWidget);
-          expect(
-            tester.widget<Text>(quantity).data,
-            '×${formatQuantity(ingredient.quantity)}',
-          );
-        }
+        expect(
+          ingredientTable.rows.map((row) => (row.name, row.quantity)),
+          recipe.ingredients.map((row) => (row.name, row.quantity)),
+        );
         expect(tester.takeException(), isNull);
         await expectLater(
           golden,

@@ -212,7 +212,7 @@ void main() {
         ),
       );
       await open(tester, store);
-      expect(input(tester, 'mastery'), '1723');
+      expect(input(tester, 'mastery'), '1.723');
       expect(
         double.parse(input(tester, 'drop-rate').replaceAll(',', '.')),
         43.5,
@@ -229,7 +229,7 @@ void main() {
       final restored = store.reload();
       await tester.pumpWidget(const SizedBox.shrink());
       await open(tester, restored);
-      expect(input(tester, 'mastery'), '1850');
+      expect(input(tester, 'mastery'), '1.850');
       expect(
         double.parse(input(tester, 'drop-rate').replaceAll(',', '.')),
         47.5,
@@ -305,7 +305,7 @@ void main() {
       await tester.ensureVisible(reset);
       await tester.tap(reset);
       await tester.pumpAndSettle();
-      expect(input(tester, 'mastery'), '1400');
+      expect(input(tester, 'mastery'), '1.400');
       expect(double.parse(input(tester, 'drop-rate')), 20);
       expectActionsEnabled(tester, true);
     },
@@ -384,7 +384,7 @@ void main() {
         ),
       );
       await open(tester, store);
-      expect(input(tester, 'mastery'), '1000');
+      expect(input(tester, 'mastery'), '1.000');
       expect(panel(tester).effectiveSettings.mastery, 1075);
       expect(panel(tester).effectiveSettings.gatheringDropRatePercent, 15);
       await enter(tester, 'mastery', '1200');
@@ -399,7 +399,7 @@ void main() {
       final restored = store.reload();
       await tester.pumpWidget(const SizedBox.shrink());
       await open(tester, restored);
-      expect(input(tester, 'mastery'), '1200');
+      expect(input(tester, 'mastery'), '1.200');
       expect(panel(tester).effectiveSettings.mastery, 1300);
       expect(panel(tester).effectiveSettings.gatheringDropRatePercent, 17);
     },
@@ -467,7 +467,7 @@ void main() {
       await tester.pumpAndSettle();
       await tester.tap(find.byKey(const ValueKey('workflow-prepare')));
       await tester.pumpAndSettle();
-      expect(input(tester, 'mastery'), '1000');
+      expect(input(tester, 'mastery'), '1.000');
       await enter(tester, 'mastery', '1300');
       await enter(tester, 'drop-rate', '25');
       expect(panel(tester).effectiveSettings.mastery, 1317);
@@ -492,7 +492,7 @@ void main() {
         1317,
       );
       expect(stored(store).hasSameValuesAs(current), isTrue);
-      expect(input(tester, 'mastery'), '2500');
+      expect(input(tester, 'mastery'), '2.500');
     },
   );
 }

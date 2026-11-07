@@ -37,10 +37,12 @@ class _CraftMasteryControlState extends State<_CraftMasteryControl> {
   void _start() {
     _editingMode = widget.controller.preferences.mode;
     _text.value = TextEditingValue(
-      text: '${_mastery(widget.controller)}',
+      text: formatQuantity(_mastery(widget.controller).toDouble()),
       selection: TextSelection(
         baseOffset: 0,
-        extentOffset: '${_mastery(widget.controller)}'.length,
+        extentOffset: formatQuantity(
+          _mastery(widget.controller).toDouble(),
+        ).length,
       ),
     );
     setState(() {
@@ -53,8 +55,7 @@ class _CraftMasteryControlState extends State<_CraftMasteryControl> {
   }
 
   int? get _value {
-    if (!RegExp(r'^[0-9]+$').hasMatch(_text.text)) return null;
-    final value = int.tryParse(_text.text);
+    final value = parseWholeQuantity(_text.text);
     return value != null && value >= 0 && value <= 3000 ? value : null;
   }
 
@@ -200,7 +201,9 @@ class _CraftMasteryControlState extends State<_CraftMasteryControl> {
                       child: Align(
                         alignment: Alignment.centerLeft,
                         child: Text(
-                          '${_mastery(widget.controller)}',
+                          formatQuantity(
+                            _mastery(widget.controller).toDouble(),
+                          ),
                           style: spec.typography.button,
                         ),
                       ),

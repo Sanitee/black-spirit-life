@@ -8,6 +8,7 @@ import 'package:bdo_craft_planner_flutter/data/opportunities/opportunity_market_
 class ChoiceMarketTransport implements OpportunityMarketTransport {
   final requests = <({String region, bool book, List<String> ids})>[];
   final values = <String, ({int price, int stock, int preorders})>{};
+  final bookLevels = <String, String>{};
   Completer<void>? hold;
   bool aborted = false;
   @override
@@ -42,7 +43,8 @@ class ChoiceMarketTransport implements OpportunityMarketTransport {
         values[id] ?? (price: 480, stock: 12594, preorders: 0);
     final value = item(ids.first);
     final result = book
-        ? '${value.price}-${value.stock}-${value.preorders}'
+        ? bookLevels[ids.first] ??
+              '${value.price}-${value.stock}-${value.preorders}'
         : bulk
         ? ids
               .map((id) {

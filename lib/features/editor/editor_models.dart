@@ -1,3 +1,4 @@
+import '../../domain/formatting/planner_formatters.dart';
 import '../../domain/state/planner_state.dart';
 
 final class EditorIngredientDraft {
@@ -104,23 +105,10 @@ final class RecipeEditorDraft {
   String get effectiveMethod => methodIsCustom ? customMethod : method;
 }
 
-double? parseEditorNumber(String text) {
-  final normalized = text.trim().replaceAll(',', '.');
-  if (normalized.isEmpty) return null;
-  final value = double.tryParse(normalized);
-  return value != null && value.isFinite ? value : null;
-}
+double? parseEditorNumber(String text) => parsePlannerNumber(text);
 
-String formatEditorNumber(double value) {
-  if (!value.isFinite) return '0';
-  if ((value - value.roundToDouble()).abs() < .0000001) {
-    return value.round().toString();
-  }
-  return value
-      .toStringAsFixed(6)
-      .replaceFirst(RegExp(r'0+$'), '')
-      .replaceFirst(RegExp(r'\.$'), '');
-}
+String formatEditorNumber(double value) =>
+    formatGroupedEditableQuantity(value, fractionDigits: 6);
 
 String normalizeEditorCategory(String value) => value
     .trim()

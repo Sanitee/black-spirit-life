@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math' as math;
 import 'dart:ui' show PointerDeviceKind;
 
 import 'package:flutter/material.dart';
@@ -9,6 +10,7 @@ import '../../domain/models/craft_mode.dart';
 import '../../shared/overlays/anchored_popover.dart';
 import '../../visual/components/app_interaction_frame.dart';
 import '../../visual/visual.dart';
+import '../planner/planner_choice_market.dart';
 import '../shared/recipe_variant_selector.dart';
 import '../shared/workshop_presentation.dart';
 import 'recipe_book_controller.dart';
@@ -16,7 +18,7 @@ import 'recipe_book_item_info_view.dart';
 import 'recipe_book_keys.dart';
 import 'recipe_book_preview_routes.dart';
 import 'recipe_book_usage.dart';
-import 'recipe_ingredient_line.dart';
+import 'recipe_book_used_in_ingredients.dart';
 
 class RecipeBookUsedInPanel extends StatefulWidget {
   const RecipeBookUsedInPanel({
@@ -52,7 +54,15 @@ class _RecipeBookUsedInPanelState extends State<RecipeBookUsedInPanel> {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context) => ListenableBuilder(
+    listenable: Listenable.merge([
+      for (final mode in widget.controller.modeController.owner.modes.values)
+        mode.state,
+    ]),
+    builder: (context, _) => _buildPanel(context),
+  );
+
+  Widget _buildPanel(BuildContext context) {
     final spec = context.visualTheme;
     final visibleEntries = _visibleEntries();
     final parentOverlays = AppOverlayCoordinatorScope.maybeOf(context);
@@ -63,116 +73,222 @@ class _RecipeBookUsedInPanelState extends State<RecipeBookUsedInPanel> {
           final height = constraints.maxHeight.isFinite
               ? constraints.maxHeight
               : itemReferenceCardHeight(context);
-          return ConstrainedBox(
-            key: RecipeBookKeys.usedInPanel(widget.sourceName),
-            constraints: BoxConstraints(maxHeight: height),
-            child: AppSurface(
-              role: AppSurfaceRole.modal,
-              padding: const EdgeInsets.all(16),
-              clipBehavior: Clip.antiAlias,
-              semanticLabel: '${widget.sourceName} used in recipes',
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: <Widget>[
-                  _header(context, spec),
-                  const Padding(
-                    padding: EdgeInsets.symmetric(
-                      vertical: (ItemDetailStyle.sectionGap - 1) / 2,
-                    ),
-                    child: WorkshopSectionRule(emphasis: true),
-                  ),
-                  if (widget.snapshot.entries.length >= 12) ...<Widget>[
-                    SizedBox(
-                      height: 40,
-                      child: AppTextField(
-                        key: RecipeBookKeys.usedInSearch(widget.sourceName),
-                        controller: _search,
-                        hintText: 'Filter these recipes',
-                        semanticLabel:
-                            'Filter recipes that use ${widget.sourceName}',
-                        minimumHeight: 40,
-                        onChanged: (_) => setState(() {}),
-                        suffixIcon: _search.text.isEmpty
-                            ? null
-                            : AppButton(
-                                role: AppButtonRole.optionPill,
-                                minimumSize: const Size.square(28),
-                                padding: EdgeInsets.zero,
-                                semanticLabel: 'Clear Used In filter',
-                                tooltip: 'Clear',
-                                onPressed: () => setState(_search.clear),
-                                child: const AppVectorGlyph('close', size: 10),
-                              ),
+          return SizedBox(
+            width: math.min(
+              constraints.maxWidth,
+              _contentWidth(context, visibleEntries),
+            ),
+            child: ConstrainedBox(
+              key: RecipeBookKeys.usedInPanel(widget.sourceName),
+              constraints: BoxConstraints(maxHeight: height),
+              child: AppSurface(
+                role: AppSurfaceRole.modal,
+                padding: const EdgeInsets.all(16),
+                clipBehavior: Clip.antiAlias,
+                semanticLabel: '${widget.sourceName} used in recipes',
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: <Widget>[
+                    _header(context, spec),
+                    const Padding(
+                      padding: EdgeInsets.symmetric(
+                        vertical: (ItemDetailStyle.sectionGap - 1) / 2,
                       ),
+                      child: WorkshopSectionRule(emphasis: true),
                     ),
-                    const SizedBox(height: 10),
-                  ],
-                  Flexible(
-                    child: visibleEntries.isEmpty
-                        ? _empty(context, filtered: _search.text.isNotEmpty)
-                        : ScrollConfiguration(
-                            behavior: const _UsedInScrollBehavior(),
-                            child: ListView.separated(
-                              shrinkWrap: true,
-                              key: RecipeBookKeys.usedInScroll(
-                                widget.sourceName,
-                              ),
-                              controller: _scroll,
-                              padding: EdgeInsets.zero,
-                              itemCount: visibleEntries.length,
-                              separatorBuilder: (_, _) => Divider(
-                                height: 25,
-                                thickness: 1,
-                                color: spec.palette.trim.withAlpha(90),
-                              ),
-                              itemBuilder: (context, index) {
-                                final entry = visibleEntries[index];
-                                final entryKey = _entryKey(entry);
-                                return _UsedInResultCard(
-                                  key: RecipeBookKeys.usedInResult(
-                                    widget.sourceName,
-                                    entry.mode.key,
-                                    entry.name,
+                    if (widget.snapshot.entries.length >= 12) ...<Widget>[
+                      SizedBox(
+                        height: 40,
+                        child: AppTextField(
+                          key: RecipeBookKeys.usedInSearch(widget.sourceName),
+                          controller: _search,
+                          hintText: 'Filter these recipes',
+                          semanticLabel:
+                              'Filter recipes that use ${widget.sourceName}',
+                          minimumHeight: 40,
+                          onChanged: (_) => setState(() {}),
+                          suffixIcon: _search.text.isEmpty
+                              ? null
+                              : AppButton(
+                                  role: AppButtonRole.optionPill,
+                                  minimumSize: const Size.square(28),
+                                  padding: EdgeInsets.zero,
+                                  semanticLabel: 'Clear Used In filter',
+                                  tooltip: 'Clear',
+                                  onPressed: () => setState(_search.clear),
+                                  child: const AppVectorGlyph(
+                                    'close',
+                                    size: 10,
                                   ),
-                                  controller: widget.controller,
-                                  sourceName: widget.sourceName,
-                                  entry: entry,
-                                  showWorkstation:
-                                      widget.snapshot.entries
-                                          .where(
-                                            (candidate) =>
-                                                candidate.name == entry.name,
-                                          )
-                                          .length >
-                                      1,
-                                  expanded: _expanded.contains(entryKey),
-                                  selectedVariantId: _selectedVariantFor(entry),
-                                  onToggleExpanded: () => setState(() {
-                                    if (!_expanded.add(entryKey)) {
-                                      _expanded.remove(entryKey);
-                                    }
-                                  }),
-                                  onSelectVariant: (variantId) => setState(() {
-                                    _selectedVariants[entryKey] = variantId;
-                                  }),
-                                  onActivate: (variantId) {
-                                    if (widget.onActivate(entry, variantId)) {
-                                      widget.onClose();
-                                    }
-                                  },
-                                );
-                              },
+                                ),
+                        ),
+                      ),
+                      const SizedBox(height: 10),
+                    ],
+                    Flexible(
+                      child: visibleEntries.isEmpty
+                          ? _empty(context, filtered: _search.text.isNotEmpty)
+                          : ScrollConfiguration(
+                              behavior: const _UsedInScrollBehavior(),
+                              child: ListView.separated(
+                                shrinkWrap: true,
+                                key: RecipeBookKeys.usedInScroll(
+                                  widget.sourceName,
+                                ),
+                                controller: _scroll,
+                                padding: EdgeInsets.zero,
+                                itemCount: visibleEntries.length,
+                                separatorBuilder: (_, _) => Divider(
+                                  height: 25,
+                                  thickness: 1,
+                                  color: spec.palette.trim.withAlpha(90),
+                                ),
+                                itemBuilder: (context, index) {
+                                  final entry = visibleEntries[index];
+                                  final entryKey = _entryKey(entry);
+                                  return _UsedInResultCard(
+                                    key: RecipeBookKeys.usedInResult(
+                                      widget.sourceName,
+                                      entry.mode.key,
+                                      entry.name,
+                                    ),
+                                    controller: widget.controller,
+                                    sourceName: widget.sourceName,
+                                    entry: entry,
+                                    showWorkstation:
+                                        widget.snapshot.entries
+                                            .where(
+                                              (candidate) =>
+                                                  candidate.name == entry.name,
+                                            )
+                                            .length >
+                                        1,
+                                    expanded: _expanded.contains(entryKey),
+                                    selectedVariantId: _selectedVariantFor(
+                                      entry,
+                                    ),
+                                    onToggleExpanded: () => setState(() {
+                                      if (!_expanded.add(entryKey)) {
+                                        _expanded.remove(entryKey);
+                                      }
+                                    }),
+                                    onSelectVariant: (variantId) => setState(
+                                      () {
+                                        _selectedVariants[entryKey] = variantId;
+                                      },
+                                    ),
+                                    onActivate: (variantId) {
+                                      if (widget.onActivate(entry, variantId)) {
+                                        widget.onClose();
+                                      }
+                                    },
+                                  );
+                                },
+                              ),
                             ),
-                          ),
-                  ),
-                ],
+                    ),
+                  ],
+                ),
               ),
             ),
           );
         },
       ),
     );
+  }
+
+  double _contentWidth(BuildContext context, List<RecipeBookUseEntry> entries) {
+    final spec = context.visualTheme;
+    final scale = MediaQuery.textScalerOf(context).scale(14) / 14;
+    double textWidth(String text, TextStyle style) {
+      final painter = TextPainter(
+        text: TextSpan(
+          text: text,
+          style: DefaultTextStyle.of(context).style.merge(style),
+        ),
+        textDirection: Directionality.of(context),
+        textScaler: MediaQuery.textScalerOf(context),
+        maxLines: 1,
+      )..layout();
+      final width = painter.width.ceilToDouble();
+      painter.dispose();
+      return width;
+    }
+
+    var width = math.max(
+      360 * scale,
+      32 +
+          ItemDetailStyle.headerIcon +
+          ItemDetailStyle.itemGap +
+          38 +
+          textWidth(
+            itemDisplayName(widget.sourceName),
+            ItemDetailStyle.title(spec),
+          ),
+    );
+    for (final entry in entries) {
+      final actionWidth =
+          textWidth(
+            entry.hidden ? 'Restore' : 'Target',
+            ItemDetailStyle.body(spec),
+          ) +
+          40 +
+          12 +
+          textWidth('Ingredients', ItemDetailStyle.meta(spec)) +
+          18 +
+          20;
+      width = math.max(
+        width,
+        32 +
+            ItemDetailStyle.recipeIcon +
+            ItemDetailStyle.itemGap +
+            math.max(
+              actionWidth,
+              textWidth(
+                itemDisplayName(entry.name),
+                ItemDetailStyle.recipe(spec),
+              ),
+            ),
+      );
+      if (!_expanded.contains(_entryKey(entry))) continue;
+      final route = entry.preferredRoute(_selectedVariantFor(entry));
+      if (route == null) continue;
+      final rows = recipeBookUsedInIngredients(
+        controller: widget.controller.controllerForMode(entry.mode),
+        route: route,
+      );
+      width = math.max(
+        width,
+        RecipeIngredientTable.contentWidth(context, rows: rows) + 64,
+      );
+    }
+    if (width - 32 >= 580 * scale) {
+      for (final entry in entries) {
+        final actions =
+            textWidth(
+              entry.hidden ? 'Restore' : 'Target',
+              ItemDetailStyle.body(spec),
+            ) +
+            40 +
+            12 +
+            textWidth('Ingredients', ItemDetailStyle.meta(spec)) +
+            38;
+        width = math.max(
+          width,
+          32 +
+              ItemDetailStyle.recipeIcon +
+              ItemDetailStyle.itemGap +
+              textWidth(
+                itemDisplayName(entry.name),
+                ItemDetailStyle.recipe(spec),
+              ) +
+              16 +
+              actions,
+        );
+      }
+    }
+    return width;
   }
 
   Widget _header(BuildContext context, ThemeSpec spec) => Row(
@@ -553,77 +669,40 @@ class _FormulaRoute extends StatelessWidget {
           ).copyWith(color: ItemDetailStyle.accent(spec)),
         ),
         const SizedBox(height: 20),
-        for (
-          var ingredientIndex = 0;
-          ingredientIndex < route.ingredients.length;
-          ingredientIndex++
-        ) ...<Widget>[
-          _FormulaIngredientRow(
-            controller: controller,
-            sourceName: sourceName,
-            mode: mode,
-            outputName: outputName,
-            route: route,
-            ingredientIndex: ingredientIndex,
-          ),
-          if (ingredientIndex + 1 < route.ingredients.length)
-            Divider(
-              height: 12,
-              thickness: 1,
-              color: spec.palette.trim.withValues(alpha: .2),
-            ),
-        ],
+        Builder(
+          builder: (context) {
+            final destination = controller.controllerForMode(mode);
+            final rows = recipeBookUsedInIngredients(
+              controller: destination,
+              route: route,
+            );
+            return PlannerChoiceMarket(
+              controller: destination.modeController,
+              resolveAcrossModes: true,
+              names: rows.map((row) => row.name).toList(growable: false),
+              builder: (context, marketFor, now) => RecipeIngredientTable(
+                controller: destination,
+                parent: outputName,
+                iconMode: mode,
+                iconAnchorBuilder: (row, index) =>
+                    'used-in:$sourceName:${mode.key}:$outputName:${route.id}:ingredient:$index:${row.name}',
+                rows: recipeBookUsedInIngredients(
+                  controller: destination,
+                  route: route,
+                ),
+                marketFor: marketFor,
+                now: now,
+                minimumContentWidth: RecipeIngredientTable.contentWidth(
+                  context,
+                  rows: rows,
+                  marketFor: marketFor,
+                  now: now,
+                ),
+              ),
+            );
+          },
+        ),
       ],
-    );
-  }
-}
-
-class _FormulaIngredientRow extends StatelessWidget {
-  const _FormulaIngredientRow({
-    required this.controller,
-    required this.sourceName,
-    required this.mode,
-    required this.outputName,
-    required this.route,
-    required this.ingredientIndex,
-  });
-
-  final RecipeBookController controller;
-  final String sourceName;
-  final CraftMode mode;
-  final String outputName;
-  final RecipeBookUseRoute route;
-  final int ingredientIndex;
-
-  @override
-  Widget build(BuildContext context) {
-    final ingredient = route.ingredients[ingredientIndex];
-    RecipeBookUseMatch? match;
-    for (final candidate in route.matches) {
-      if (_fold(candidate.ingredientName) == _fold(ingredient.name)) {
-        match = candidate;
-        break;
-      }
-    }
-    final name = match?.sourceName ?? ingredient.name;
-    final quantity = match?.sourceQuantity ?? ingredient.quantity;
-    final substitution =
-        match != null && match.kind != RecipeBookUseKind.requiredIngredient
-        ? ', substitutes for ${match.ingredientName}'
-        : '';
-    return RecipeIngredientLine(
-      semanticLabel: '$name, Need ${formatQuantity(quantity)}$substitution',
-      name: name,
-      quantity: quantity,
-      icon: RecipeBookItemIcon(
-        controller: controller,
-        mode: mode,
-        name: name,
-        size: ItemDetailStyle.ingredientIcon,
-        anchorId:
-            'used-in:$sourceName:${mode.key}:$outputName:'
-            '${route.id}:ingredient:$ingredientIndex:$name',
-      ),
     );
   }
 }

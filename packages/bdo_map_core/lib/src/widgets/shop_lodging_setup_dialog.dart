@@ -1,3 +1,4 @@
+import 'package:bdo_number_format/bdo_number_format.dart';
 import 'package:flutter/material.dart';
 
 import '../lodging/shop_lodging_catalog.dart';
@@ -75,7 +76,7 @@ class _WorkerLodgingShopSetupDialogState
   }
 
   int? get _otherBonus {
-    final parsed = int.tryParse(_otherController.text.trim());
+    final parsed = parseWholeQuantity(_otherController.text);
     return parsed != null && parsed >= 0 ? parsed : null;
   }
 

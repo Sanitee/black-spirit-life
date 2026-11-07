@@ -23,49 +23,72 @@ class _RecipeCardIngredients extends StatelessWidget {
             children: [
               const WorkshopSectionRule(),
               const SizedBox(height: 8),
-              _RecipeAvailabilityTable(
+              RecipeIngredientTable(
                 controller: controller,
                 parent: name,
                 rows: availability.ingredients,
+                switchBuilder: (row) => _RecipeIngredientSwitch(
+                  controller: controller,
+                  parent: name,
+                  row: row,
+                ),
                 marketFor: marketFor,
                 now: now,
               ),
               const SizedBox(height: 8),
               const WorkshopSectionRule(),
               const SizedBox(height: 10),
-              Wrap(
-                spacing: 16,
-                runSpacing: 6,
-                children: [
-                  Text(
-                    'Can craft ${formatCompactQuantity(availability.canCraft)}',
-                    key: ValueKey('recipe-can-craft:$name'),
-                    style: spec.typography.label.copyWith(
-                      fontSize: 16,
-                      color: availability.fullyOwned
-                          ? OpportunityCraftCardMaterial.forSpec(
-                              spec,
-                              OpportunityStockTone.available,
-                            ).badgeInk
-                          : spec.palette.text,
-                    ),
+              if (availability.canCraft > 0)
+                Text(
+                  'Can craft ${formatCompactQuantity(availability.canCraft)}',
+                  key: ValueKey('recipe-can-craft:$name'),
+                  style: spec.typography.label.copyWith(
+                    fontSize: 16,
+                    color: availability.fullyOwned
+                        ? OpportunityCraftCardMaterial.forSpec(
+                            spec,
+                            OpportunityStockTone.available,
+                          ).badgeInk
+                        : spec.palette.text,
                   ),
-                  if (!availability.fullyOwned)
-                    Text(
-                      '${availability.ownedTypes}/${availability.totalTypes} ingredients owned',
-                      style: spec.typography.meta.copyWith(fontSize: 14),
-                    ),
-                ],
-              ),
+                ),
               if (availability.missing.isNotEmpty) ...[
                 const SizedBox(height: 4),
-                Text(
-                  'Missing: ${availability.missing.entries.map((entry) => '${formatQuantity(entry.value)} ${itemDisplayName(entry.key)}').join(' · ')}',
+                Wrap(
                   key: ValueKey('recipe-missing:$name'),
-                  style: spec.typography.meta.copyWith(
-                    fontSize: 14,
-                    height: 1.4,
-                  ),
+                  spacing: 12,
+                  runSpacing: 8,
+                  crossAxisAlignment: WrapCrossAlignment.center,
+                  children: [
+                    Text(
+                      'Missing',
+                      style: spec.typography.meta.copyWith(fontSize: 14),
+                    ),
+                    for (final entry in availability.missing.entries)
+                      Semantics(
+                        key: ValueKey('recipe-missing-item:$name:${entry.key}'),
+                        label:
+                            'Missing ${formatQuantity(entry.value)} ${itemDisplayName(entry.key)}',
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            RecipeBookItemIcon(
+                              controller: controller,
+                              name: entry.key,
+                              size: 36,
+                              anchorId: 'recipe-missing:$name:${entry.key}',
+                            ),
+                            const SizedBox(width: 7),
+                            Text(
+                              '×${formatQuantity(entry.value)}',
+                              style: spec.typography.label.copyWith(
+                                fontSize: 15,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                  ],
                 ),
               ],
               const SizedBox(height: 8),
@@ -124,6 +147,7 @@ class _RecipeCraftValues extends StatelessWidget {
       ),
     ];
     const basis =
+        'Estimated silver per craft, after tax. '
         'Uses the displayed ingredients, expected yield and your market tax settings. '
         'At zero stock, uses the highest current preorder price when available; otherwise the latest market price. '
         'Estimates do not guarantee an immediate purchase or sale. Excludes byproducts, tools and time.';
@@ -163,11 +187,6 @@ class _RecipeCraftValues extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Text(
-          'Est. silver per craft · after tax',
-          style: spec.typography.meta.copyWith(fontSize: 13),
-        ),
-        const SizedBox(height: 8),
         LayoutBuilder(
           builder: (context, constraints) {
             final scale = MediaQuery.textScalerOf(context).scale(14) / 14;
@@ -251,339 +270,6 @@ class _RecipeCraftValues extends StatelessWidget {
   }
 }
 
-/// Cards and substitute pickers deliberately share this exact column layout.
-class _RecipeAvailabilityTable extends StatelessWidget {
-  const _RecipeAvailabilityTable({
-    required this.controller,
-    required this.parent,
-    required this.rows,
-    required this.marketFor,
-    required this.now,
-    this.onChoose,
-    this.selectedName,
-  });
-  static double minimumWidth(BuildContext context) =>
-      _RecipeAvailabilityWidths.measure(context).minimumWidth;
-  final RecipeBookController controller;
-  final String parent;
-  final List<RecipeBookIngredientChoice> rows;
-  final OpportunityMarketItem? Function(String) marketFor;
-  final DateTime now;
-  final ValueChanged<RecipeBookIngredientChoice>? onChoose;
-  final String? selectedName;
-
-  @override
-  Widget build(BuildContext context) {
-    final spec = context.visualTheme;
-    final scale = MediaQuery.textScalerOf(context).scale(14) / 14;
-    Widget heading(String text) => Padding(
-      padding: const EdgeInsets.only(bottom: 6, top: 2),
-      child: Text(
-        text,
-        textAlign: text == 'Ingredients' ? TextAlign.left : TextAlign.center,
-        style: spec.typography.meta.copyWith(
-          fontSize: 13,
-          fontWeight: FontWeight.w600,
-        ),
-      ),
-    );
-    Widget cell(Widget child, {bool left = false}) => Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8),
-      child: Align(
-        alignment: left ? Alignment.centerLeft : Alignment.center,
-        child: child,
-      ),
-    );
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final widths = _RecipeAvailabilityWidths.measure(
-          context,
-          rows: rows,
-          marketFor: marketFor,
-          now: now,
-        );
-        final width = constraints.maxWidth < widths.minimumWidth
-            ? widths.minimumWidth
-            : constraints.maxWidth;
-        final table = SizedBox(
-          width: width,
-          child: Table(
-            defaultVerticalAlignment: TableCellVerticalAlignment.middle,
-            columnWidths: {
-              0: const FlexColumnWidth(),
-              1: FixedColumnWidth(widths.ingredientGap),
-              2: FixedColumnWidth(widths.npc),
-              3: FixedColumnWidth(10 * scale),
-              4: FixedColumnWidth(widths.inventory),
-              5: FixedColumnWidth(14 * scale),
-              6: FixedColumnWidth(widths.market),
-            },
-            children: [
-              TableRow(
-                decoration: BoxDecoration(
-                  color: spec.palette.surfaceInset.withAlpha(90),
-                ),
-                children: [
-                  heading('Ingredients'),
-                  const SizedBox.shrink(),
-                  heading('NPC'),
-                  const SizedBox.shrink(),
-                  heading('Inventory'),
-                  const SizedBox.shrink(),
-                  // Preorders follow in their own optional slot. Keep the
-                  // heading over the stock badges, not over unused space.
-                  Align(
-                    alignment: Alignment.centerLeft,
-                    child: SizedBox(
-                      width: widths.stock,
-                      child: heading('Market'),
-                    ),
-                  ),
-                ],
-              ),
-              for (var index = 0; index < rows.length; index++)
-                TableRow(
-                  key: ValueKey(
-                    'recipe-ingredient:$parent:${rows[index].name}:$index',
-                  ),
-                  decoration: BoxDecoration(
-                    color: selectedName == rows[index].name
-                        ? spec.palette.trim.withAlpha(55)
-                        : index.isEven
-                        ? spec.palette.surfaceRaised.withAlpha(65)
-                        : spec.palette.surfaceInset.withAlpha(30),
-                    border: Border(
-                      top: BorderSide(color: spec.palette.trim.withAlpha(65)),
-                    ),
-                  ),
-                  children: [
-                    cell(_label(context, rows[index], index), left: true),
-                    const SizedBox.shrink(),
-                    cell(
-                      rows[index].npc
-                          ? const MarketCountBadges(
-                              density: MarketBadgeDensity.comfortable,
-                              stock: null,
-                              preorders: null,
-                              npc: true,
-                              showMarket: false,
-                              singleLine: true,
-                            )
-                          : const SizedBox.shrink(),
-                    ),
-                    const SizedBox.shrink(),
-                    cell(
-                      InventoryCountBadge(
-                        density: MarketBadgeDensity.comfortable,
-                        owned: rows[index].owned,
-                        showLabel: false,
-                      ),
-                    ),
-                    const SizedBox.shrink(),
-                    cell(
-                      rows[index].marketable
-                          ? MarketCountBadges(
-                              density: MarketBadgeDensity.comfortable,
-                              stock: marketFor(
-                                rows[index].name,
-                              )?.stockFor(now, sharedMarketFreshness),
-                              preorders:
-                                  marketFor(rows[index].name)?.bookIsFresh(
-                                        now,
-                                        sharedMarketFreshness,
-                                      ) ==
-                                      true
-                                  ? marketFor(rows[index].name)?.preorderCount
-                                  : null,
-                              compactNumbers: true,
-                              singleLine: true,
-                              stockColumnWidth: widths.stock,
-                              stockColumnAlignment: Alignment.center,
-                            )
-                          : const SizedBox.shrink(),
-                      left: true,
-                    ),
-                  ],
-                ),
-            ],
-          ),
-        );
-        if (width <= constraints.maxWidth) return table;
-        return SingleChildScrollView(
-          scrollDirection: Axis.horizontal,
-          child: table,
-        );
-      },
-    );
-  }
-
-  Widget _label(
-    BuildContext context,
-    RecipeBookIngredientChoice row,
-    int index,
-  ) {
-    final spec = context.visualTheme;
-    final label = Row(
-      children: [
-        RecipeBookItemIcon(
-          controller: controller,
-          name: row.name,
-          size:
-              42 *
-              (MediaQuery.textScalerOf(context).scale(14) / 14).clamp(1, 1.35),
-          anchorId:
-              'availability:$parent:${onChoose == null ? 'card' : 'choice'}:$index:${row.name}',
-        ),
-        const SizedBox(width: 10),
-        Expanded(
-          child: Text.rich(
-            TextSpan(
-              children: [
-                TextSpan(
-                  text: itemDisplayName(row.name),
-                  style: spec.typography.label.copyWith(
-                    fontSize: 15,
-                    fontWeight: FontWeight.w600,
-                    color: spec.palette.text,
-                    height: 1.3,
-                  ),
-                ),
-                TextSpan(
-                  text: '  ×${formatQuantity(row.quantity)}',
-                  style: spec.typography.meta.copyWith(
-                    fontSize: 14,
-                    color: spec.palette.textMuted,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-        if (onChoose == null && _hasAlternatives(row))
-          _RecipeIngredientSwitch(
-            controller: controller,
-            parent: parent,
-            row: row,
-          ),
-      ],
-    );
-    if (onChoose == null) return label;
-    return InkWell(
-      key: ValueKey('recipe-choose:$parent:${row.name}'),
-      onTap: () => onChoose!(row),
-      child: label,
-    );
-  }
-
-  bool _hasAlternatives(RecipeBookIngredientChoice row) =>
-      controller.hasIngredientAlternatives(parent, row);
-}
-
-/// Reserve real single-line badge widths, including the active font and scale.
-/// The same stock slot keeps preorder badges aligned even when stock is zero.
-class _RecipeAvailabilityWidths {
-  const _RecipeAvailabilityWidths(
-    this.npc,
-    this.inventory,
-    this.stock,
-    this.orders,
-    this.scale,
-  );
-  final double npc, inventory, stock, orders, scale;
-  double get ingredientGap => 32 * scale;
-  double get market => stock + 7 + orders;
-  double get minimumWidth =>
-      190 * scale + ingredientGap + 24 * scale + npc + inventory + market;
-
-  static _RecipeAvailabilityWidths measure(
-    BuildContext context, {
-    List<RecipeBookIngredientChoice> rows = const [],
-    OpportunityMarketItem? Function(String)? marketFor,
-    DateTime? now,
-  }) {
-    final scale = MediaQuery.textScalerOf(context).scale(14) / 14;
-    double headingWidth(String label) {
-      final painter = TextPainter(
-        text: TextSpan(
-          text: label,
-          style: DefaultTextStyle.of(context).style.merge(
-            context.visualTheme.typography.meta.copyWith(
-              fontSize: 13,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-        ),
-        textDirection: Directionality.of(context),
-        textScaler: MediaQuery.textScalerOf(context),
-        maxLines: 1,
-      )..layout();
-      final width = painter.width;
-      painter.dispose();
-      return width;
-    }
-
-    var npc = const MarketCountBadges(
-      density: MarketBadgeDensity.comfortable,
-      stock: null,
-      preorders: null,
-      npc: true,
-      showMarket: false,
-    ).preferredWidth(context);
-    var inventory = const InventoryCountBadge(
-      density: MarketBadgeDensity.comfortable,
-      owned: 999900,
-      showLabel: false,
-    ).preferredWidth(context);
-    double stockWidth(int? value) => MarketCountBadges(
-      density: MarketBadgeDensity.comfortable,
-      stock: value,
-      preorders: null,
-      compactNumbers: true,
-    ).preferredWidth(context);
-    double orderWidth(int value) =>
-        MarketCountBadges(
-          density: MarketBadgeDensity.comfortable,
-          stock: 0,
-          preorders: value,
-          compactNumbers: true,
-        ).preferredWidth(context) -
-        stockWidth(0) -
-        7;
-    var stock = stockWidth(999900);
-    var orders = orderWidth(999900);
-    if (headingWidth('Inventory') > inventory) {
-      inventory = headingWidth('Inventory');
-    }
-    if (headingWidth('NPC') > npc) npc = headingWidth('NPC');
-    if (headingWidth('Market') > stock) stock = headingWidth('Market');
-    for (final row in rows) {
-      final ownedWidth = InventoryCountBadge(
-        density: MarketBadgeDensity.comfortable,
-        owned: row.owned,
-        showLabel: false,
-      ).preferredWidth(context);
-      if (ownedWidth > inventory) inventory = ownedWidth;
-      final item = marketFor?.call(row.name);
-      final width = stockWidth(
-        item?.stockFor(now ?? DateTime.now(), sharedMarketFreshness),
-      );
-      if (width > stock) stock = width;
-      final preorder = item?.preorderCount;
-      if (preorder != null && preorder > 0) {
-        final width = orderWidth(preorder);
-        if (width > orders) orders = width;
-      }
-    }
-    return _RecipeAvailabilityWidths(
-      npc + 2,
-      inventory + 2,
-      stock + 2,
-      orders + 2,
-      scale,
-    );
-  }
-}
-
 class _RecipeIngredientSwitch extends StatelessWidget {
   const _RecipeIngredientSwitch({
     required this.controller,
@@ -596,12 +282,17 @@ class _RecipeIngredientSwitch extends StatelessWidget {
   @override
   Widget build(BuildContext context) => AnchoredPopover(
     overlayId: 'recipe-choices:$parent:${row.ingredient.name}',
-    preferredWidth: 860,
     preferredWidthBuilder: (context) =>
-        (880 * MediaQuery.textScalerOf(context).scale(14) / 14).clamp(
-          0,
-          (MediaQuery.sizeOf(context).width - 48).clamp(0, 1600),
-        ),
+        (RecipeIngredientTable.contentWidth(
+                  context,
+                  rows: controller.ingredientChoices(parent, row.ingredient),
+                  marketFor: controller.availabilityMarketFor,
+                ) +
+                32)
+            .clamp(
+              0,
+              (MediaQuery.sizeOf(context).width - 48).clamp(0, double.infinity),
+            ),
     maximumHeight: MediaQuery.sizeOf(context).height * .75,
     consumeOutsideTap: true,
     placement: AnchoredPopoverPlacement.beside,
@@ -634,7 +325,13 @@ class _RecipeIngredientSwitch extends StatelessWidget {
             body: Padding(
               padding: const EdgeInsets.all(14),
               child: SingleChildScrollView(
-                child: _RecipeAvailabilityTable(
+                child: RecipeIngredientTable(
+                  minimumContentWidth: RecipeIngredientTable.contentWidth(
+                    context,
+                    rows: choices,
+                    marketFor: marketFor,
+                    now: now,
+                  ),
                   controller: controller,
                   parent: parent,
                   rows: choices,

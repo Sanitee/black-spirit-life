@@ -7,6 +7,7 @@ import 'package:flutter/services.dart';
 
 import '../../domain/catalog/item_name_presentation.dart';
 import '../../domain/catalog/temporarily_archived_items.dart';
+import '../../domain/formatting/planner_formatters.dart';
 import '../../domain/market/shared_market_models.dart';
 import '../../domain/models/catalog_models.dart';
 import '../../domain/models/craft_mode.dart';
@@ -15,7 +16,9 @@ import '../../domain/planner/ingredient_quality.dart';
 import '../../shared/overlays/anchored_popover.dart';
 import '../../visual/visual.dart';
 import '../planner/planner_choice_market.dart';
+import '../shared/inventory_count_badge.dart';
 import '../shared/item_name_copy_scope.dart';
+import '../shared/market_count_badges.dart';
 import '../shared/mode_item_icon.dart';
 import '../shared/source_availability_badges.dart';
 import '../shared/workshop_presentation.dart';
@@ -28,6 +31,7 @@ part 'item_reference_ingredient_sources.dart';
 part 'item_reference_joined.dart';
 part 'item_reference_sources.dart';
 part 'item_reference_quality_choices.dart';
+part 'recipe_ingredient_table.dart';
 
 /// The Recipe Book's reference preview, without taking over its child's clicks.
 class RecipeBookItemInfoHover extends StatelessWidget {
@@ -174,22 +178,16 @@ double itemReferenceCardWidth(
         for (final use in info.craftUses)
           ..._matchingReferenceFormulas(use, info.title.trim().toLowerCase()),
     ]) {
-      for (final ingredient in formula.ingredients) {
-        final rows = _qualityChoiceRows(
-          controller,
-          formula,
-          ingredient,
-          mode ?? controller.modeController.mode,
-        );
-        if (rows.isEmpty) continue;
-        final sizes = _qualityColumnWidths(context, rows);
-        width = math.max(
-          width,
-          sizes.reduce((a, b) => a + b) +
-              (sizes.length - 1) * _qualitySeparatorWidth(context) +
-              82,
-        );
-      }
+      width = math.max(
+        width,
+        _referenceTableWidth(
+              context,
+              controller,
+              formula,
+              mode ?? controller.modeController.mode,
+            ) +
+            32,
+      );
     }
   }
   return math.min(width, itemReferenceCardMaxWidth(context));
@@ -784,22 +782,15 @@ class _FormulaCard extends StatelessWidget {
                       ),
                     ),
                     SizedBox(height: _itemInfoSpacing(context, 12)),
-                    for (
-                      var index = 0;
-                      index < formula.ingredients.length;
-                      index++
-                    )
-                      _FormulaMaterialRow(
-                        controller: controller,
-                        mode: formulaMode,
-                        formula: formula,
-                        ingredient: formula.ingredients[index],
-                        style: style,
-                        topSpacing: _itemInfoSpacing(
-                          context,
-                          index == 0 ? 0 : 12,
-                        ),
-                      ),
+                    _ReferenceIngredientsTable(
+                      book: controller,
+                      formula: formula,
+                      mode: formulaMode,
+                      marketFor: _ReferenceFormulaMarketData.of(
+                        context,
+                      ).marketFor,
+                      now: _ReferenceFormulaMarketData.of(context).now,
+                    ),
                     if (canActivate) ...<Widget>[
                       SizedBox(height: _itemInfoSpacing(context, 14)),
                       Align(
@@ -857,228 +848,7 @@ double _formulaContentWidth(
   TextStyle style,
   TextStyle meta, {
   required bool showUseRecipe,
-}) {
-  double textWidth(String value, TextStyle textStyle) {
-    final painter = TextPainter(
-      text: TextSpan(text: value, style: textStyle),
-      textDirection: Directionality.of(context),
-      textScaler: MediaQuery.textScalerOf(context),
-      locale: Localizations.maybeLocaleOf(context),
-    )..layout();
-    final width = painter.width;
-    painter.dispose();
-    return width;
-  }
-
-  final availability = _ReferenceFormulaMarketData.of(context);
-  final nameStyle = style.copyWith(fontSize: 15, fontWeight: FontWeight.w600);
-  final quantityStyle = style.copyWith(
-    fontSize: 13,
-    fontWeight: FontWeight.w500,
-  );
-  final alternativeStyle = style.copyWith(fontSize: 13, height: 1.35);
-  var width = math.max(
-    textWidth(
-      formula.method,
-      style.copyWith(fontSize: 15, fontWeight: FontWeight.w600),
-    ),
-    textWidth(_formulaOutputLabel(formula), meta),
-  );
-  if (showUseRecipe) {
-    width = math.max(
-      width,
-      textWidth('Use recipe', context.visualTheme.typography.label) + 20,
-    );
-  }
-  for (final ingredient in formula.ingredients) {
-    var labelWidth = textWidth(ingredient.name, nameStyle);
-    for (final alternative in _formulaAlternatives(
-      ingredient,
-      recipes: controller.modeController.owner.modes[mode]!.recipes,
-    )) {
-      labelWidth = math.max(
-        labelWidth,
-        textWidth(
-          'or ${_displayQuantity(alternative.quantity)} ${alternative.name}',
-          alternativeStyle,
-        ),
-      );
-    }
-    width = math.max(
-      width,
-      36 +
-          12 +
-          labelWidth +
-          12 +
-          textWidth('×${_displayQuantity(ingredient.quantity)}', quantityStyle),
-    );
-  }
-  for (final ingredient in formula.ingredients) {
-    for (final name in [
-      ingredient.name,
-      ..._formulaAlternatives(
-        ingredient,
-        recipes: controller.modeController.owner.modes[mode]!.recipes,
-      ).map((item) => item.name),
-    ]) {
-      final badge = _referenceIngredientBadge(
-        book: controller,
-        mode: mode,
-        name: name,
-        market: availability.marketFor(name),
-        now: availability.now,
-      );
-      if (badge != null) {
-        width = math.max(
-          width,
-          48 + badge.presentation(context).preferredWidth(context),
-        );
-      }
-    }
-  }
-  // Include the content insets and the leading rule. The width is
-  // independent of the outer description, while bounded layouts still wrap.
-  return (width + 28).ceilToDouble();
-}
-
-class _FormulaMaterialRow extends StatelessWidget {
-  const _FormulaMaterialRow({
-    required this.controller,
-    required this.mode,
-    required this.formula,
-    required this.ingredient,
-    required this.style,
-    required this.topSpacing,
-  });
-
-  final RecipeBookController controller;
-  final CraftMode mode;
-  final RecipeBookFormula formula;
-  final Ingredient ingredient;
-  final TextStyle style;
-  final double topSpacing;
-
-  @override
-  Widget build(BuildContext context) {
-    final spec = context.visualTheme;
-    final alternatives = _formulaAlternatives(
-      ingredient,
-      recipes: controller.modeController.owner.modes[mode]!.recipes,
-    );
-    final quantity = _displayQuantity(ingredient.quantity);
-    final semanticLabel = <String>[
-      '$quantity ${ingredient.name}',
-      for (final alternative in alternatives)
-        'or ${_displayQuantity(alternative.quantity)} ${alternative.name}',
-    ].join(', ');
-    final alternateStyle = style.copyWith(
-      color: spec.palette.textMuted,
-      fontSize: 13,
-      height: 1.35,
-    );
-    final availability = _ReferenceFormulaMarketData.of(context);
-    Widget sourceLine(String name, Widget label, {bool inline = false}) =>
-        _referenceIngredientSourceLine(
-          book: controller,
-          mode: mode,
-          name: name,
-          label: label,
-          market: availability.marketFor(name),
-          now: availability.now,
-          inline: inline,
-        );
-    return Padding(
-      padding: EdgeInsets.only(top: topSpacing),
-      child: Semantics(
-        container: true,
-        label: semanticLabel,
-        explicitChildNodes: true,
-        child: Row(
-          key: RecipeBookKeys.itemInfoMaterial(
-            formula.outputName,
-            formula.variantId,
-            ingredient.name,
-          ),
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: <Widget>[
-            ModeItemIcon(
-              controller: controller.modeController.owner.modes[mode]!,
-              catalogRepository: controller.catalogRepository,
-              name: ingredient.name,
-              size: ItemDetailStyle.ingredientIcon,
-              searchAcrossModes: true,
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: <Widget>[
-                  if (_qualityChoiceRows(
-                    controller,
-                    formula,
-                    ingredient,
-                    mode,
-                  ).isNotEmpty)
-                    _ReferenceQualityChoices(
-                      book: controller,
-                      formula: formula,
-                      ingredient: ingredient,
-                      mode: mode,
-                      marketFor: availability.marketFor,
-                      now: availability.now,
-                    )
-                  else ...[
-                    sourceLine(
-                      ingredient.name,
-                      Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Flexible(
-                            child: _ReferenceItemName(
-                              name: ingredient.name,
-                              style: style.copyWith(
-                                fontSize: 15,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                          ),
-                          const SizedBox(width: 8),
-                          Text(
-                            '×$quantity',
-                            style: style.copyWith(
-                              color: spec.palette.textMuted,
-                              fontSize: 13,
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    for (final alternative in alternatives)
-                      Padding(
-                        padding: const EdgeInsets.only(top: 4),
-                        child: sourceLine(
-                          alternative.name,
-                          _ReferenceItemName(
-                            name: alternative.name,
-                            label:
-                                'or ${_displayQuantity(alternative.quantity)} '
-                                '${alternative.name}',
-                            style: alternateStyle,
-                          ),
-                          inline: true,
-                        ),
-                      ),
-                  ],
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
+}) => _referenceTableWidth(context, controller, formula, mode) + 28;
 
 final class _FormulaAlternative {
   const _FormulaAlternative({required this.name, required this.quantity});

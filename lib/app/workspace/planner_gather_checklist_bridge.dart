@@ -227,6 +227,8 @@ class PlannerGatherChecklistBridge {
       if (materialKey(entry.key) == key) entry.key: entry.value,
   };
 
+  double ownedFor(String name) => _owned(materialKey(name));
+
   double _owned(String key) => _balances(key).values.fold<double>(
     0,
     (amount, value) => value.isFinite && value > amount ? value : amount,

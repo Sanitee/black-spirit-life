@@ -70,7 +70,7 @@ void main() {
   for (final spec in RetainedThemeRegistry.themes) {
     for (final scale in [1.0, 2.0]) {
       testWidgets(
-        'inline exchange uses real shared badges below names ${spec.id} $scale',
+        'inline exchange uses aligned shared availability columns ${spec.id} $scale',
         (tester) async {
           await viewport(tester, const Size(900, 1400));
           final app = projection.controller(
@@ -122,7 +122,14 @@ void main() {
             );
             await settle(tester, broker);
             await tester.pumpAndSettle();
-            expect(find.text('NPC'), findsOneWidget);
+            expect(
+              find.descendant(
+                of: k('reference-source:Leavening Agent'),
+                matching: find.text('NPC'),
+              ),
+              findsOneWidget,
+            );
+            expect(find.text('Inventory'), findsOneWidget);
             expect(stockBadgeText('0'), findsOneWidget);
             expect(find.text('Orders 84'), findsOneWidget);
             // Maehwa is also market-eligible in the current shared catalogue.
@@ -131,7 +138,7 @@ void main() {
               '9057',
               '820131',
             });
-            expect(stockBadgeText('12.594'), findsOneWidget);
+            expect(stockBadgeText('12,6k'), findsOneWidget);
             for (final name in [
               'Leavening Agent',
               'Essence of Liquor',
@@ -139,8 +146,8 @@ void main() {
             ]) {
               final label = tester.getRect(find.text(name));
               final badge = tester.getRect(k('reference-source:$name'));
-              expect(badge.top, greaterThan(label.bottom));
-              expect(badge.left, closeTo(label.left, 1));
+              expect(badge.center.dy, closeTo(label.center.dy, 1));
+              expect(badge.left, greaterThan(label.right));
             }
             await tester.tap(find.text('Leavening Agent'));
             expect(copies, ['Leavening Agent']);

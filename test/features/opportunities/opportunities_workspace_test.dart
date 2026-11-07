@@ -387,10 +387,7 @@ void main() {
           expect(tester.getSize(card).height, lessThanOrEqualTo(320));
         }
         expect(
-          find.descendant(
-            of: card,
-            matching: find.text('Orders 123.456.789'),
-          ),
+          find.descendant(of: card, matching: find.text('Orders 123.456.789')),
           findsOneWidget,
         );
         expect(tester.takeException(), isNull);
@@ -832,10 +829,7 @@ void main() {
                   matching: find.text(bestUse ? 'Profit' : 'Sell ingredients'),
                 ),
                 bestUse
-                    ? find.descendant(
-                        of: card,
-                        matching: stockBadgeText(),
-                      )
+                    ? find.descendant(of: card, matching: stockBadgeText())
                     : find.byKey(ValueKey('craft-market-counts:$name')),
                 if (bestUse) find.byKey(ValueKey('best-use-equation:$name')),
                 details,
@@ -912,10 +906,7 @@ void main() {
             ),
           ),
         );
-        final stock = find.descendant(
-          of: card,
-          matching: stockBadgeText(),
-        );
+        final stock = find.descendant(of: card, matching: stockBadgeText());
         await _expectIconOnlyCardHover(
           tester,
           fixture,
@@ -1173,7 +1164,7 @@ void main() {
             await tester.pump(const Duration(milliseconds: 220));
             expect(
               tester.widget<TextField>(input).controller!.text,
-              '1000000000',
+              '1.000.000.000',
             );
             expect(find.text('Use 0–1.000.000.000'), findsNothing);
             final focus = tester.widget<TextField>(input).focusNode;
@@ -1680,10 +1671,7 @@ void main() {
             await _settleCalculation(tester, controller);
             await _settleImages(tester);
             expect(
-              find.descendant(
-                of: summary,
-                matching: find.text('Orders 1.290'),
-              ),
+              find.descendant(of: summary, matching: find.text('Orders 1.290')),
               findsOneWidget,
             );
             expect(
@@ -3438,10 +3426,7 @@ void main() {
               secondaryLabels: [
                 if (hasTotal || hasValue) 'Per coin',
                 if (find
-                    .descendant(
-                      of: card,
-                      matching: stockBadgeText(),
-                    )
+                    .descendant(of: card, matching: stockBadgeText())
                     .evaluate()
                     .isNotEmpty)
                   'Stock',
@@ -5018,10 +5003,7 @@ void main() {
           findsOneWidget,
         );
         expect(
-          find.descendant(
-            of: purified,
-            matching: stockBadgeText(),
-          ),
+          find.descendant(of: purified, matching: stockBadgeText()),
           findsOneWidget,
         );
         expect(
@@ -5275,7 +5257,10 @@ void main() {
           findsOneWidget,
         );
         expect(
-          find.descendant(of: dialog, matching: find.byType(Table)),
+          find.descendant(
+            of: find.byKey(ValueKey('exchange-preorders-${scenario.item}')),
+            matching: find.byType(Table),
+          ),
           scenario.name == 'no_preorders' ? findsNothing : findsOneWidget,
         );
         if (scenario.name != 'no_preorders') {
@@ -8217,7 +8202,7 @@ void main() {
           expect(find.byType(Dialog), findsNothing);
           expect(find.text('Crafting mastery'), findsNothing);
           expect(tester.getRect(input).center.dy, closeTo(idle.center.dy, 1));
-          await tester.enterText(input, '2000');
+          await tester.enterText(input, '2.000');
           await tester.pump();
           expect(fixture.controller.state.cookingMastery, 0);
           expect(
@@ -8376,7 +8361,10 @@ void _expectMasteryValue(WidgetTester tester, int value) {
     findsOneWidget,
   );
   expect(
-    find.descendant(of: display, matching: find.text('$value')),
+    find.descendant(
+      of: display,
+      matching: find.text(formatQuantity(value.toDouble())),
+    ),
     findsOneWidget,
   );
 }
@@ -9165,10 +9153,7 @@ void _expectOverviewCardTypography(
   expectUnclipped(name);
   for (final label in [?primaryLabel, ...secondaryLabels]) {
     if (label == 'Stock') {
-      final stock = find.descendant(
-        of: card,
-        matching: stockBadgeText(),
-      );
+      final stock = find.descendant(of: card, matching: stockBadgeText());
       expect(stock, findsOneWidget);
       expect(tester.widget<Text>(stock).style?.fontSize, 16);
       expect(tester.widget<Text>(stock).style?.fontWeight, FontWeight.w700);

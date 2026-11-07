@@ -2334,7 +2334,15 @@ option { background: #25212a; }
 #page-journal .journal-row:hover { border-color: #c6a06b70; }
 #page-journal .journal-actions { justify-self: end; }
 #page-journal .fish-peek { min-width: 0; }
-#page-journal .journal-values { display: flex; justify-content: flex-end; gap: 20px; }
+#page-journal .journal-list { container-type: inline-size; container-name: journal-list; }
+#app #page-journal .journal-values { display: grid; grid-template-columns: repeat(2,minmax(0,150px)); width: 320px; max-width: 100%; justify-content: end; justify-items: start; gap: 20px; text-align: left; }
+#page-journal .journal-value { justify-items: start; text-align: left; }
+#page-journal .journal-silver { display: flex; align-items: center; gap: 6px; }
+#page-journal .journal-silver img { width: 20px; height: 20px; flex: none; object-fit: contain; }
+@container journal-list (max-width: 600px) {
+  #app #page-journal .journal-row { grid-template-columns: minmax(0,1fr); grid-template-areas: "journal-info" "journal-fish" "journal-values" "journal-actions"; }
+  #app #page-journal .journal-values { justify-self: start; }
+}
 .summary-card strong, .journal-value strong { font-variant-numeric: tabular-nums; }
 
 /* Statistics and dialogs use the same restrained reading hierarchy. */

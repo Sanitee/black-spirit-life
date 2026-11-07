@@ -6,6 +6,7 @@ import 'package:bdo_map_core/bdo_map_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import '../../domain/formatting/planner_formatters.dart';
 import 'recipe_worker_catalog.dart';
 import 'recipe_worker_controller.dart';
 
@@ -40,7 +41,7 @@ class RecipeWorkerPanel extends StatefulWidget {
 
 class _RecipeWorkerPanelState extends State<RecipeWorkerPanel> {
   late final _budget = TextEditingController(
-    text: '${widget.controller.budget}',
+    text: formatQuantity(widget.controller.budget.toDouble()),
   );
   Timer? _debounce;
   bool _pendingBudget = false;
@@ -353,8 +354,8 @@ class _RecipeWorkerPanelState extends State<RecipeWorkerPanel> {
                   textAlign: TextAlign.center,
                   keyboardType: TextInputType.number,
                   inputFormatters: [
-                    FilteringTextInputFormatter.digitsOnly,
-                    LengthLimitingTextInputFormatter(6),
+                    FilteringTextInputFormatter.allow(RegExp(r'[0-9., ]')),
+                    LengthLimitingTextInputFormatter(7),
                   ],
                   style: TextStyle(
                     fontSize: 18,
@@ -372,8 +373,8 @@ class _RecipeWorkerPanelState extends State<RecipeWorkerPanel> {
                   onChanged: (text) {
                     _debounce?.cancel();
                     setState(() => _pendingBudget = true);
-                    final value = int.tryParse(text);
-                    if (value != null) {
+                    final value = parseWholeQuantity(text);
+                    if (value != null && value >= 0 && value <= 999999) {
                       _debounce = Timer(const Duration(milliseconds: 300), () {
                         if (!mounted) return;
                         setState(() => _pendingBudget = false);
@@ -383,7 +384,7 @@ class _RecipeWorkerPanelState extends State<RecipeWorkerPanel> {
                   },
                   onTapOutside: (_) {
                     if (_budget.text.isEmpty) {
-                      _budget.text = '${c.budget}';
+                      _budget.text = formatQuantity(c.budget.toDouble());
                       setState(() => _pendingBudget = false);
                     }
                   },

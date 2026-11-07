@@ -1,3 +1,4 @@
+import 'package:bdo_number_format/bdo_number_format.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -134,7 +135,7 @@ class _GatheringSetupDialogState extends State<_GatheringSetupDialog> {
     _mastery = TextEditingController(
       text: widget.inline && !widget.statsConfirmed
           ? ''
-          : initial.mastery.toString(),
+          : _plainNumber(initial.mastery),
     );
     _dropRate = TextEditingController(
       text: widget.inline && !widget.statsConfirmed
@@ -242,7 +243,7 @@ class _GatheringSetupDialogState extends State<_GatheringSetupDialog> {
 
   void _resetFields() {
     final initial = widget.initial;
-    _mastery.text = widget.statsConfirmed ? initial.mastery.toString() : '';
+    _mastery.text = widget.statsConfirmed ? _plainNumber(initial.mastery) : '';
     _dropRate.text = widget.statsConfirmed
         ? _plainNumber(initial.gatheringDropRatePercent)
         : '';
@@ -323,7 +324,7 @@ class _GatheringSetupDialogState extends State<_GatheringSetupDialog> {
   BairogCalculatorSettings? get _validDraft {
     final mastery = _untouchedOptional
         ? widget.initial.mastery
-        : int.tryParse(_mastery.text.trim());
+        : parseWholeQuantity(_mastery.text.trim());
     final dropRate = _untouchedOptional
         ? widget.initial.gatheringDropRatePercent
         : _double(_dropRate.text);
@@ -905,11 +906,7 @@ class _GatheringSetupDialogState extends State<_GatheringSetupDialog> {
     keyboardType: TextInputType.numberWithOptions(decimal: !integer),
     inputFormatters: widget.inline
         ? null
-        : [
-            FilteringTextInputFormatter.allow(
-              integer ? RegExp(r'[0-9]') : RegExp(r'[0-9.,]'),
-            ),
-          ],
+        : [FilteringTextInputFormatter.allow(RegExp(r'[0-9., ]'))],
     style: Theme.of(context).textTheme.titleMedium?.copyWith(
       fontSize: 18,
       fontWeight: FontWeight.w600,
@@ -1162,13 +1159,13 @@ class _GatheringSetupDialogState extends State<_GatheringSetupDialog> {
   }
 
   void _apply() {
-    final mastery = int.tryParse(_mastery.text.trim());
+    final mastery = parseWholeQuantity(_mastery.text.trim());
     final dropRate = _double(_dropRate.text);
     final energy = _double(_energy.text);
     final recovery = _double(_energyRecovery.text);
     if (mastery == null || mastery < 0 || mastery > 3000) {
       setState(
-        () => _validationMessage = 'Mastery must be between 0 and 3,000.',
+        () => _validationMessage = 'Mastery must be between 0 and 3.000.',
       );
       return;
     }
@@ -1194,9 +1191,9 @@ class _GatheringSetupDialogState extends State<_GatheringSetupDialog> {
       return null;
     }
     if (controller == _mastery) {
-      final value = int.tryParse(controller.text.trim());
+      final value = parseWholeQuantity(controller.text.trim());
       return value == null || value < 0 || value > 3000
-          ? 'Enter a whole number from 0 to 3,000.'
+          ? 'Enter a whole number from 0 to 3.000.'
           : null;
     }
     final value = _double(controller.text);
@@ -1206,10 +1203,10 @@ class _GatheringSetupDialogState extends State<_GatheringSetupDialog> {
   }
 
   static double? _double(String value) {
-    final parsed = double.tryParse(value.trim().replaceAll(',', '.'));
+    final parsed = parsePlannerNumber(value);
     return parsed != null && parsed.isFinite ? parsed : null;
   }
 
   static String _plainNumber(num value) =>
-      value.toString().replaceFirst(RegExp(r'\.0$'), '');
+      formatGroupedEditableQuantity(value.toDouble(), fractionDigits: 12);
 }

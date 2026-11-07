@@ -11,7 +11,9 @@ class _OpportunityCraftAmount extends StatefulWidget {
 }
 
 class _OpportunityCraftAmountState extends State<_OpportunityCraftAmount> {
-  late final text = TextEditingController(text: '${widget.value}');
+  late final text = TextEditingController(
+    text: formatQuantity(widget.value.toDouble()),
+  );
   final focus = FocusNode();
   bool invalid = false;
   @override
@@ -23,7 +25,7 @@ class _OpportunityCraftAmountState extends State<_OpportunityCraftAmount> {
   void _focusChanged() {
     if (!focus.hasFocus && invalid) {
       setState(() {
-        text.text = '${widget.value}';
+        text.text = formatQuantity(widget.value.toDouble());
         invalid = false;
       });
     }
@@ -33,8 +35,8 @@ class _OpportunityCraftAmountState extends State<_OpportunityCraftAmount> {
   void didUpdateWidget(_OpportunityCraftAmount oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.value != widget.value &&
-        int.tryParse(text.text) != widget.value) {
-      text.text = '${widget.value}';
+        parseWholeQuantity(text.text) != widget.value) {
+      text.text = formatQuantity(widget.value.toDouble());
     }
   }
 
@@ -58,9 +60,11 @@ class _OpportunityCraftAmountState extends State<_OpportunityCraftAmount> {
           controller: text,
           focusNode: focus,
           label: 'Crafts',
-          inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+          inputFormatters: [
+            FilteringTextInputFormatter.allow(RegExp(r'[0-9., ]')),
+          ],
           onChanged: (value) {
-            final count = int.tryParse(value);
+            final count = parseWholeQuantity(value);
             setState(
               () => invalid = count == null || count <= 0 || count > 1000000000,
             );
@@ -223,8 +227,8 @@ class _OpportunitySubstituteChooserState
         allocated[name] = value;
       }
       final field = counts[name];
-      if (field != null && int.tryParse(field.text) != value) {
-        field.text = '$value';
+      if (field != null && parseWholeQuantity(field.text) != value) {
+        field.text = formatQuantity(value.toDouble());
       }
     });
   }
@@ -467,7 +471,9 @@ class _OpportunitySubstituteChooserState
                     controller: counts.putIfAbsent(
                       candidate.name,
                       () => TextEditingController(
-                        text: '${allocated[candidate.name] ?? 0}',
+                        text: formatQuantity(
+                          (allocated[candidate.name] ?? 0).toDouble(),
+                        ),
                       ),
                     ),
                     label: 'Crafts',
@@ -480,9 +486,13 @@ class _OpportunitySubstituteChooserState
                           ? spec.palette.danger
                           : null,
                     ),
-                    inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                    inputFormatters: [
+                      FilteringTextInputFormatter.allow(RegExp(r'[0-9., ]')),
+                    ],
                     onChanged: (value) {
-                      final count = int.tryParse(value.isEmpty ? '0' : value);
+                      final count = parseWholeQuantity(
+                        value.isEmpty ? '0' : value,
+                      );
                       if (count != null && count <= 1000000000) {
                         invalidCounts.remove(candidate.name);
                         setCount(candidate.name, count);
@@ -494,7 +504,9 @@ class _OpportunitySubstituteChooserState
                 ),
               if (capacity != null && capacity > 0)
                 OpportunityButton.label(
-                  split ? 'Fill remaining' : 'Check $capacity crafts',
+                  split
+                      ? 'Fill remaining'
+                      : 'Check ${formatQuantity(capacity.toDouble())} crafts',
                   key: ValueKey('use-substitute-stock:${candidate.name}'),
                   role: AppButtonRole.infoChip,
                   onPressed: () {

@@ -25,9 +25,9 @@ void main() {
         .trimRight();
     expect(
       hash(baseline),
-      // Reviewed correctness changes: contained zoomed dialogs and reachable
-      // actions. Browser capture checks cover normal/enlarged geometry.
-      'f72382c122416e3361e90e14ca94a659d29e971262c561f4cc8e472469450b9f',
+      // Approved Beta includes Journal silver icons and aligned values.
+      // Browser captures cover normal/enlarged geometry and retained actions.
+      '1cd95af10d1de3af346c792edd4bd4fc72824f5a4832bd0c314a9a49a455cc39',
     );
 
     // Presentation additions cannot move controls, change hit targets, clamp
@@ -94,13 +94,13 @@ void main() {
         hash(
           html.replaceAll('codex-depth-instruments-2', 'codex-field-desk-1'),
         ),
-        '53c8df318e9cccde0443cb062177b53d8629972758e88fed6d94df6945958c2f',
+        'f33f7fe08c420e4487338043c9af128b267050c5a2ac782a432bb52f135693f7',
       );
       expect(
         hash(script.replaceAll('\r\n', '\n')),
         // Real-JS sale/unknown-value tests independently check the revised
         // arithmetic; this pin prevents later presentation-only drift.
-        'b7d11e560c7f5a429c1428bfae8b021586cafe1bf359e924d1a6e6608eae3115',
+        'fb3c69c9d38eac382508d7eb5f35802ed7e7a36ab82f8278f7cd7b31601e40a4',
       );
       expect(html, contains('aria-label="Hide towns and cities"'));
       expect(html, contains('before freshness'));

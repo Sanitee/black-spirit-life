@@ -393,7 +393,7 @@ void main() {
           find.descendant(of: row, matching: find.byType(ModeItemIcon)),
         );
         expect(icon.name, ingredient.name);
-        expect(icon.size, 32);
+        expect(icon.size, 42);
         expect(icon.searchAcrossModes, isTrue);
       }
       for (final formula in info.acquisitionFormulas) {

@@ -10,7 +10,6 @@ import 'package:bdo_craft_planner_flutter/domain/models/craft_mode.dart';
 import 'package:bdo_craft_planner_flutter/domain/state/planner_state.dart';
 import 'package:bdo_craft_planner_flutter/features/planner/planner_contracts.dart';
 import 'package:bdo_craft_planner_flutter/features/recipe_book/recipe_book.dart';
-import 'package:bdo_craft_planner_flutter/features/recipe_book/recipe_ingredient_line.dart';
 import 'package:bdo_craft_planner_flutter/features/shared/recipe_variant_selector.dart';
 import 'package:bdo_craft_planner_flutter/shared/overlays/anchored_popover.dart';
 import 'package:bdo_craft_planner_flutter/visual/visual.dart';
@@ -92,7 +91,9 @@ void main() {
           matching: find.byType(Scrollable),
         );
         final position = tester.state<ScrollableState>(scrollable).position;
-        if (view.size.height == 940 && view.scale == 1) {
+        // The wider shared table also fits its actions beside the title,
+        // so this normal-text fixture now fits at both tested heights.
+        if (view.scale == 1) {
           expect(position.maxScrollExtent, 0);
         } else {
           expect(position.maxScrollExtent, greaterThan(0));
@@ -216,48 +217,41 @@ void main() {
                   .top,
             ),
           );
-          final rows = find.descendant(
+          final tableFinder = find.descendant(
             of: preview,
-            matching: find.byType(RecipeIngredientLine),
+            matching: find.byType(RecipeIngredientTable),
           );
-          expect(rows, findsNWidgets(5));
-          expect(
-            find.descendant(
-              of: rows,
-              matching: find.byWidgetPredicate(
-                (widget) =>
-                    widget is AppSurface && widget.role == AppSurfaceRole.row,
-              ),
-            ),
-            findsNothing,
+          final table = tester.widget<RecipeIngredientTable>(tableFinder);
+          expect(table.rows, hasLength(5));
+          final life = table.rows.firstWhere(
+            (row) => row.ingredient.name == 'Elixir of Life',
           );
-          final selectorKey = RecipeBookKeys.r15Substitute(
-            name,
-            'Elixir of Life',
+          expect(life.quantity, 30);
+          final selector = find.byKey(
+            ValueKey('recipe-substitutes:$name:Elixir of Life'),
           );
-          final selector = find.byKey(selectorKey);
-          expect(tester.widget<AppSelect<String>>(selector).inline, isTrue);
-          final quantity = find.byKey(
-            RecipeBookKeys.previewQuantity(name, 'Elixir of Life'),
-          );
-          expect(tester.widget<Text>(quantity).data, '×30');
-          expect(
-            tester.getRect(quantity).left - tester.getRect(selector).right,
-            closeTo(8, .5),
-          );
-          expect(
-            tester.getCenter(quantity).dy,
-            closeTo(tester.getCenter(selector).dy, .5),
-          );
+          expect(selector, findsOneWidget);
           await _capture(
             tester,
             'open-ingredients-adaptation-${theme.key}-$scale',
             panelOnly: true,
           );
+          await tester.tap(selector);
+          await tester.pumpAndSettle();
+          final chooserFinder = find.byWidgetPredicate(
+            (w) => w is RecipeIngredientTable && w.onChoose != null,
+          );
+          final choices = tester
+              .widget<RecipeIngredientTable>(chooserFinder)
+              .rows;
+          final blue = choices.firstWhere(
+            (row) => row.baseName == 'Elixir of Life' && row.grade == 'blue',
+          );
+          await tester.ensureVisible(
+            find.byKey(ValueKey('recipe-choose:$name:${blue.name}')),
+          );
           await tester.tap(
-            find.byKey(
-              RecipeBookKeys.r16Quality(name, 'Elixir of Life', 'blue'),
-            ),
+            find.byKey(ValueKey('recipe-choose:$name:${blue.name}')),
           );
           await tester.pumpAndSettle();
           expect(
@@ -269,15 +263,24 @@ void main() {
                 ),
             'blue',
           );
-          final current = tester.widget<AppSelect<String>>(selector);
-          final alternate = current.items.firstWhere(
-            (value) => value != current.value,
-          );
+          final alternate = choices.firstWhere((row) => row.name != blue.name);
           await tester.tap(selector);
           await tester.pumpAndSettle();
-          await tester.tap(find.text(alternate).last);
+          await tester.ensureVisible(
+            find.byKey(ValueKey('recipe-choose:$name:${alternate.name}')),
+          );
+          await tester.tap(
+            find.byKey(ValueKey('recipe-choose:$name:${alternate.name}')),
+          );
           await tester.pumpAndSettle();
-          expect(tester.widget<AppSelect<String>>(selector).value, alternate);
+          expect(
+            tester
+                .widget<RecipeIngredientTable>(tableFinder)
+                .rows
+                .firstWhere((row) => row.ingredient.name == 'Elixir of Life')
+                .name,
+            alternate.name,
+          );
           await tester.tap(
             find.byKey(RecipeVariantSelector.batchChoiceKey(name, 100)),
           );
@@ -337,7 +340,7 @@ void main() {
       expect(harness.application.activeMode.value, CraftMode.processing);
       expect(
         find.byKey(
-          RecipeBookKeys.r15Substitute(name, 'Elixir of Assassination'),
+          ValueKey('recipe-substitutes:$name:Elixir of Assassination'),
         ),
         findsOneWidget,
       );
@@ -814,7 +817,7 @@ Finder _method(CraftMode mode, String name) =>
 
 Finder _previewText(String value) => find.descendant(
   of: find.byKey(RecipeBookKeys.previewPanel),
-  matching: find.text(value),
+  matching: find.textContaining(value, findRichText: true),
 );
 
 void _expectPreviewFits(WidgetTester tester) {

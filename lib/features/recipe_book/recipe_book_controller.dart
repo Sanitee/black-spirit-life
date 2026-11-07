@@ -370,14 +370,10 @@ final class RecipeBookController extends ChangeNotifier {
           _marketSort != RecipeBookMarketSort.availability) {
         final compared = _compareOptionalNumber(
           _marketSort.sortsProfit
-              ? _marketSort.sortsAvailability
-                    ? a.profitability?.profitPerCraft
-                    : a.profitability?.profitPerPiece
+              ? a.profitability?.profitPerCraft
               : a.marketStock,
           _marketSort.sortsProfit
-              ? _marketSort.sortsAvailability
-                    ? b.profitability?.profitPerCraft
-                    : b.profitability?.profitPerPiece
+              ? b.profitability?.profitPerCraft
               : b.marketStock,
           ascending:
               _marketSort == RecipeBookMarketSort.stockLowToHigh ||
@@ -505,7 +501,8 @@ final class RecipeBookController extends ChangeNotifier {
             processingGroup:
                 processingGroups[name] ?? ProcessingRecipeGroup.other,
             usedInCount: usedInFor(name).recipeCount,
-            marketStock: !isHidden && marketControlsVisible
+            marketStock:
+                !isHidden && (marketControlsVisible || _marketSort.sortsStock)
                 ? marketStockFor(name)
                 : null,
             profitability:
@@ -1078,12 +1075,28 @@ final class RecipeBookController extends ChangeNotifier {
     _resetPageAndScroll();
   }
 
-  double? marketStockFor(String name) =>
-      _foldedValue(modeController.state.value.market.stock, name);
+  double? marketStockFor(String name) {
+    final item = availabilityMarketFor(name, dependent: name);
+    final now = DateTime.now();
+    if (item != null) {
+      return item.stockFor(now, sharedMarketFreshness)?.toDouble();
+    }
+    final market = modeController.state.value.market;
+    // Retain offline callers' saved-stock behaviour. Live cards must not turn
+    // expired or absent quotes into a known stock count (especially zero).
+    final age = now.millisecondsSinceEpoch - market.fetchedAt;
+    if (_availabilityMarket != null &&
+        (market.fetchedAt <= 0 ||
+            age < 0 ||
+            age > sharedMarketFreshness.inMilliseconds)) {
+      return null;
+    }
+    return _foldedValue(market.stock, name);
+  }
 
   bool showsMarketStockFor(String name) {
     final recipe = recipeDefinitionFor(name);
-    return marketControlsVisible &&
+    return (marketControlsVisible || _marketSort.sortsStock) &&
         recipe != null &&
         !isBrowsableRecipeBookReference(recipe) &&
         !modeController.state.value.market.isItemUnlisted(name) &&
@@ -2288,14 +2301,10 @@ final class RecipeBookController extends ChangeNotifier {
       final leftQuote = profitability[left];
       final rightQuote = profitability[right];
       final leftProfit = leftQuote?.isAvailable == true
-          ? _marketSort.sortsAvailability
-                ? leftQuote!.profitPerCraft!
-                : leftQuote!.profitPerPiece!
+          ? leftQuote!.profitPerCraft!
           : null;
       final rightProfit = rightQuote?.isAvailable == true
-          ? _marketSort.sortsAvailability
-                ? rightQuote!.profitPerCraft!
-                : rightQuote!.profitPerPiece!
+          ? rightQuote!.profitPerCraft!
           : null;
       final compared = _compareOptionalNumber(
         leftProfit,

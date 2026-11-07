@@ -249,7 +249,7 @@ void main() {
             expectSeparated();
             FocusManager.instance.primaryFocus?.unfocus();
             await _settle(tester);
-            expect(tester.widget<TextField>(fame).controller!.text, '1.5');
+            expect(tester.widget<TextField>(fame).controller!.text, '1,5');
             expect(find.text('Use 0–1,5'), findsNothing);
             expect(fixture.requests, 0);
             await mouse.removePointer();

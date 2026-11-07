@@ -572,7 +572,9 @@ void checkColumnAlignment(WidgetTester tester) {
         .getCenter(within(find.text('Inventory')).first)
         .dx;
     final heading = within(find.text('Inventory')).first;
-    final paragraph = tester.renderObject<RenderParagraph>(heading);
+    final paragraph = tester.renderObject<RenderParagraph>(
+      find.descendant(of: heading, matching: find.byType(RichText)).first,
+    );
     expect(
       paragraph.getBoxesForSelection(
         const TextSelection(baseOffset: 0, extentOffset: 9),

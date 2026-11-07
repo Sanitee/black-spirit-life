@@ -21,6 +21,8 @@ import 'package:bdo_craft_planner_flutter/features/planner/planner.dart';
 import 'package:bdo_craft_planner_flutter/features/resource_map/diagnostics/resource_map_frame_capture.dart';
 import 'package:bdo_craft_planner_flutter/features/resource_map/diagnostics/resource_map_redraw_diagnostic.dart';
 import 'package:bdo_craft_planner_flutter/features/resource_map/resource_map_workspace.dart';
+import 'package:bdo_craft_planner_flutter/features/shared/inventory_count_badge.dart';
+import 'package:bdo_craft_planner_flutter/features/shared/market_count_badges.dart';
 import 'package:bdo_craft_planner_flutter/features/shared/mode_item_icon.dart';
 import 'package:bdo_craft_planner_flutter/visual/illuminated_ledger/ledger_spec.dart';
 import 'package:bdo_craft_planner_flutter/visual/sakura_night_garden/sakura_spec.dart';
@@ -37,44 +39,41 @@ import '../../../packages/bdo_map_core/test/support/map_menu_capture.dart';
 import '../../support/application_test_harness.dart';
 
 void main() {
-  test(
-    'public identity uses the Stable state target',
-    () {
-      const acceptedStateDirectory = 'BDO Craft Planner Flutter';
-      const appDataRoot = r'C:\Users\Test\AppData\Roaming';
-      final policy = PlannerStatePathPolicy.fromEnvironment(const {
-        'APPDATA': appDataRoot,
-      });
+  test('public identity uses the Stable state target', () {
+    const acceptedStateDirectory = 'BDO Craft Planner Flutter';
+    const appDataRoot = r'C:\Users\Test\AppData\Roaming';
+    final policy = PlannerStatePathPolicy.fromEnvironment(const {
+      'APPDATA': appDataRoot,
+    });
 
-      expect(AppIdentity.displayName, 'Black Spirit Life');
-      expect(AppIdentity.releaseChannel, 'win-x64-stable');
-      expect(
-        AppIdentity.installerPackageId,
-        isNot(AppIdentity.localCacheDirectoryName),
-      );
-      expect(AppIdentity.stateDirectoryName, isNot(acceptedStateDirectory));
-      expect(
-        AppIdentity.stateDirectoryName,
-        isNot(AppIdentity.formerStateDirectoryName),
-      );
-      expect(
-        AppIdentity.stateDirectoryName,
-        AppIdentity.stableStateDirectoryName,
-      );
-      expect(
-        policy.applicationDirectory.path,
-        '$appDataRoot${Platform.pathSeparator}'
-        '${AppIdentity.stateDirectoryName}',
-      );
-      expect(
-        policy.applicationDirectory.path,
-        isNot('$appDataRoot${Platform.pathSeparator}$acceptedStateDirectory'),
-      );
-      expect(policy.formerNativeApplicationDirectory, isNull);
-      expect(policy.allowLegacyMigration, isFalse);
-      expect(AppIdentity.importFormerProfilesOnFirstLaunch, isFalse);
-    },
-  );
+    expect(AppIdentity.displayName, 'Black Spirit Life');
+    expect(AppIdentity.releaseChannel, 'win-x64-stable');
+    expect(
+      AppIdentity.installerPackageId,
+      isNot(AppIdentity.localCacheDirectoryName),
+    );
+    expect(AppIdentity.stateDirectoryName, isNot(acceptedStateDirectory));
+    expect(
+      AppIdentity.stateDirectoryName,
+      isNot(AppIdentity.formerStateDirectoryName),
+    );
+    expect(
+      AppIdentity.stateDirectoryName,
+      AppIdentity.stableStateDirectoryName,
+    );
+    expect(
+      policy.applicationDirectory.path,
+      '$appDataRoot${Platform.pathSeparator}'
+      '${AppIdentity.stateDirectoryName}',
+    );
+    expect(
+      policy.applicationDirectory.path,
+      isNot('$appDataRoot${Platform.pathSeparator}$acceptedStateDirectory'),
+    );
+    expect(policy.formerNativeApplicationDirectory, isNull);
+    expect(policy.allowLegacyMigration, isFalse);
+    expect(AppIdentity.importFormerProfilesOnFirstLaunch, isFalse);
+  });
 
   testWidgets(
     'deferred Fish diagnostic mounts no page during loading or startup failure',
@@ -1311,10 +1310,29 @@ void main() {
         find.descendant(of: rusalkaRow, matching: find.text("Rusalka's Coral")),
         findsOneWidget,
       );
-      final stockTooltip = tester.widget<Tooltip>(
+      expect(
         find.descendant(of: rusalkaRow, matching: find.byType(Tooltip)),
+        findsNothing,
       );
-      expect(stockTooltip.message, '0 stock at last EU check · 2026-07-28');
+      final market = tester.widget<MarketCountBadges>(
+        find.descendant(
+          of: rusalkaRow,
+          matching: find.byType(MarketCountBadges),
+        ),
+      );
+      expect(
+        market.stock,
+        isNull,
+        reason: 'Old quotes stay unknown, not zero.',
+      );
+      expect(market.preorders, isNull);
+      expect(
+        find.descendant(
+          of: rusalkaRow,
+          matching: find.byType(InventoryCountBadge),
+        ),
+        findsOneWidget,
+      );
       expect(
         find.descendant(
           of: rusalkaRow,

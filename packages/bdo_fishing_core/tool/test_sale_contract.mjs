@@ -17,6 +17,16 @@ function check(expression, expected) {
   checks++;
 }
 
+for (const [text, value] of [['0',0],['1.234',1234],['1.234.567',1234567],['1234',1234],['1 234',1234]]) {
+  check(`wholeAmount(${JSON.stringify(text)})`, value);
+}
+for (const text of ['', '1.23', '1,5', '-1', 'NaN', '1.23.456', '9007199254740992']) {
+  check(`Number.isNaN(wholeAmount(${JSON.stringify(text)}))`, true);
+}
+check('number(1234567)', '1.234.567');
+check('number(1234.5,1)', '1.234,5');
+check('silver(1234567)', '1,2M');
+
 for (const [rank, level, bonus] of [
   ['Beginner', 1, 5.5], ['Apprentice', 10, 15], ['Skilled', 10, 20],
   ['Professional', 1, 20.5], ['Artisan', 10, 30], ['Master', 30, 45],
@@ -58,8 +68,8 @@ run(`
 `);
 check("state.salePlanner.offers[0].destination", 'Old town & trader');
 check("state.salePlanner.offers[0].distance", 123);
-check("els.saleBargain.textContent", '12.5%');
-check("els.saleFinalAmount.value", '12345');
+check("els.saleBargain.textContent", '12,5%');
+check("els.saleFinalAmount.value", '12.345');
 run('renderSaleOffers=savedRender');
 run(`globalThis.synthetic = {
   id:'synthetic-sale', tradingRank:'Guru', tradingLevel:100,
@@ -80,7 +90,7 @@ run(`
   loadSessions=async()=>{}; closeSalePlanner=()=>{}; renderJournal=()=>{};
   showToast=message=>notices.push(message);
   Object.assign(els, {saleSoldAt:{value:'2026-11-02T12:00'},
-    saleFinalAmount:{value:'123456',focus(){}},saleSave:{disabled:false}});
+    saleFinalAmount:{value:'123.456',focus(){}},saleSave:{disabled:false}});
   state.sessions=[synthetic];
   state.salePlanner={sessionId:synthetic.id,selected:0,
     offers:[{destination:'Synthetic destination',distance:100,quotes:{1:130,2:80}}]};

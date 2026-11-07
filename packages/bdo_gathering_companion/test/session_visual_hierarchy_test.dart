@@ -687,8 +687,8 @@ void main() {
         expect(prepRect.right, lessThanOrEqualTo(scenario.size.width));
         expect(find.byKey(const ValueKey('preparation-stats')), findsOneWidget);
         for (final entry in {
-          'inline-stats-mastery': '1735',
-          'inline-stats-drop-rate': '47.25',
+          'inline-stats-mastery': '1.735',
+          'inline-stats-drop-rate': '47,25',
         }.entries) {
           final field = find.byKey(ValueKey(entry.key));
           final input = tester.widget<TextField>(field);
@@ -914,7 +914,7 @@ void main() {
                   'history-entry-total-',
                 ),
           );
-          expect(tester.widget<Text>(entryTotal).data, '1,200');
+          expect(tester.widget<Text>(entryTotal).data, '1.200');
           expect(
             tester.renderObject<RenderParagraph>(entryTotal).didExceedMaxLines,
             isFalse,

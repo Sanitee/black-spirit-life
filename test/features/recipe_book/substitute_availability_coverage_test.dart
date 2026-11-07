@@ -180,7 +180,7 @@ void main() {
               );
             }
             expect(
-              find.descendant(of: grade, matching: stockBadgeText('4.321')),
+              find.descendant(of: grade, matching: stockBadgeText('4,3k')),
               findsOneWidget,
             );
             expect(
@@ -199,7 +199,14 @@ void main() {
             final paprika = find.byKey(
               const ValueKey('reference-source:Paprika'),
             );
-            for (final text in ['NPC', '0', 'Orders 84']) {
+            expect(
+              find.descendant(
+                of: find.byKey(const ValueKey('reference-npc:Paprika')),
+                matching: find.text('NPC'),
+              ),
+              findsOneWidget,
+            );
+            for (final text in ['0', 'Orders 84']) {
               expect(
                 find.descendant(of: paprika, matching: find.text(text)),
                 findsOneWidget,

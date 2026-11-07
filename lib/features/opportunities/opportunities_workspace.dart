@@ -1848,13 +1848,13 @@ Widget _numberInput(
   child: _TextInput(
     key: ValueKey(label),
     label: label,
-    value: formatEditableQuantity(value),
+    value: formatGroupedEditableQuantity(value),
     numeric: true,
     integer: integer,
     minimum: minimum,
     maximum: maximum,
     onChanged: (text) {
-      final number = double.tryParse(text.replaceAll(',', '.'));
+      final number = parsePlannerNumber(text);
       if (number != null &&
           number.isFinite &&
           number >= minimum &&
@@ -1911,7 +1911,7 @@ class _TextInputState extends State<_TextInput> {
   }
 
   void _changed(String value) {
-    final number = double.tryParse(value.replaceAll(',', '.'));
+    final number = parsePlannerNumber(value);
     final valid =
         !widget.numeric ||
         (number != null &&

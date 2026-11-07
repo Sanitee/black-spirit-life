@@ -347,7 +347,14 @@ void main() {
       final card = find.byType(ItemReferenceCard);
       ScrollPosition position() => tester
           .state<ScrollableState>(
-            find.descendant(of: card, matching: find.byType(Scrollable)),
+            find.descendant(
+              of: card,
+              matching: find.byWidgetPredicate(
+                (widget) =>
+                    widget is Scrollable &&
+                    widget.axisDirection == AxisDirection.down,
+              ),
+            ),
           )
           .position;
       await _pump(tester, book, info([]), spec: spec);

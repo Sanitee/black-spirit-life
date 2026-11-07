@@ -16,12 +16,14 @@ const _batchHelp =
 
 int? _amount(String value, {bool positive = false}) {
   final trimmed = value.trim();
+  // Match the app's displayed whole counts while retaining legacy comma/space
+  // input. Require complete groups: never turn a fraction into extra items.
   if (!RegExp(
-    r'^(?:[0-9]+|[0-9]{1,3}(?:,[0-9]{3})+|[0-9]{1,3}(?: [0-9]{3})+)$',
+    r'^(?:[0-9]+|[0-9]{1,3}(?:\.[0-9]{3})+|[0-9]{1,3}(?:,[0-9]{3})+|[0-9]{1,3}(?: [0-9]{3})+)$',
   ).hasMatch(trimmed)) {
     return null;
   }
-  final result = int.tryParse(trimmed.replaceAll(RegExp(r'[, ]'), ''));
+  final result = int.tryParse(trimmed.replaceAll(RegExp(r'[., ]'), ''));
   if (result == null ||
       result < (positive ? 1 : 0) ||
       result > _maximumAmount) {
@@ -563,7 +565,7 @@ class _LootPanelState extends State<LootPanel> {
                   ),
                 ),
               );
-              final mode = Tooltip(
+              final mode = GatheringQuietTooltip(
                 message: _setTotal
                     ? 'Replace the whole amount gathered for this item.'
                     : _batchHelp,
@@ -603,7 +605,7 @@ class _LootPanelState extends State<LootPanel> {
                   ),
                 ),
               );
-              final add = Tooltip(
+              final add = GatheringQuietTooltip(
                 message: _setTotal
                     ? 'Set total · Enter'
                     : 'Add maid deposit · Enter',
@@ -701,6 +703,8 @@ class _LootPanelState extends State<LootPanel> {
   }
 
   Widget _quantityRow(GameItem item) {
+    // Scale the text area, keeping the padding fixed and every row aligned.
+    final quantityWidth = MediaQuery.textScalerOf(context).scale(86) + 20;
     final entry = widget.entries[item.id];
     final invalid = _invalidTotals.contains(item.id);
     final negative = entry != null && entry.rawTotal < 0;
@@ -717,7 +721,7 @@ class _LootPanelState extends State<LootPanel> {
         ),
         leadingWidth: 44,
         leadingHeight: 56,
-        trailingWidth: 138,
+        trailingWidth: quantityWidth + 32,
       ),
       child: Padding(
         padding: const EdgeInsets.symmetric(vertical: 4),
@@ -726,7 +730,7 @@ class _LootPanelState extends State<LootPanel> {
           children: [
             Row(
               children: [
-                Tooltip(
+                GatheringQuietTooltip(
                   message: item.name,
                   child: Padding(
                     padding: const EdgeInsets.only(left: 2),
@@ -737,7 +741,7 @@ class _LootPanelState extends State<LootPanel> {
                 ),
                 const SizedBox(width: 6),
                 Expanded(
-                  child: Tooltip(
+                  child: GatheringQuietTooltip(
                     message: item.name,
                     child: Text(
                       item.name,
@@ -748,10 +752,10 @@ class _LootPanelState extends State<LootPanel> {
                   ),
                 ),
                 const SizedBox(width: 8),
-                Tooltip(
+                GatheringQuietTooltip(
                   message: help,
                   child: SizedBox(
-                    width: 106,
+                    width: quantityWidth,
                     child: TextField(
                       key: ValueKey('loot-total-${item.id}'),
                       controller: _totals[item.id],
@@ -788,31 +792,35 @@ class _LootPanelState extends State<LootPanel> {
                 ),
                 SizedBox(
                   width: 30,
-                  child: PopupMenuButton<String>(
-                    key: ValueKey('loot-actions-${item.id}'),
-                    tooltip: 'Options for ${item.name}',
-                    enabled: !_busy,
-                    padding: EdgeInsets.zero,
-                    iconSize: 18,
-                    onSelected: (action) {
-                      if (action == 'maid') _maidDeposit(item);
-                      if (action == 'edit' && entry != null) _edit(entry);
-                    },
-                    itemBuilder: (_) => [
-                      PopupMenuItem(
-                        value: 'maid',
-                        enabled: !invalid,
-                        child: const Tooltip(
-                          message: _batchHelp,
-                          child: Text('Add maid deposit'),
+                  child: Semantics(
+                    button: true,
+                    label: 'Options for ${item.name}',
+                    child: PopupMenuButton<String>(
+                      key: ValueKey('loot-actions-${item.id}'),
+                      tooltip: '',
+                      enabled: !_busy,
+                      padding: EdgeInsets.zero,
+                      iconSize: 18,
+                      onSelected: (action) {
+                        if (action == 'maid') _maidDeposit(item);
+                        if (action == 'edit' && entry != null) _edit(entry);
+                      },
+                      itemBuilder: (_) => [
+                        PopupMenuItem(
+                          value: 'maid',
+                          enabled: !invalid,
+                          child: const GatheringQuietTooltip(
+                            message: _batchHelp,
+                            child: Text('Add maid deposit'),
+                          ),
                         ),
-                      ),
-                      if (entry != null)
-                        const PopupMenuItem(
-                          value: 'edit',
-                          child: Text('Inventory details'),
-                        ),
-                    ],
+                        if (entry != null)
+                          const PopupMenuItem(
+                            value: 'edit',
+                            child: Text('Inventory details'),
+                          ),
+                      ],
+                    ),
                   ),
                 ),
               ],
@@ -988,7 +996,10 @@ class _MaidDepositDialogState extends State<_MaidDepositDialog> {
     title: const Row(
       children: [
         Expanded(child: Text('Add maid deposit')),
-        Tooltip(message: _batchHelp, child: Icon(Icons.info_outline, size: 19)),
+        GatheringQuietTooltip(
+          message: _batchHelp,
+          child: Icon(Icons.info_outline, size: 19),
+        ),
       ],
     ),
     content: SizedBox(
@@ -1068,7 +1079,9 @@ class _ReviewedLoot {
 
 class _ReviewRow {
   _ReviewRow(LootScanRow source, Catalog catalog)
-    : quantity = TextEditingController(text: source.quantity?.toString() ?? ''),
+    : quantity = TextEditingController(
+        text: source.quantity == null ? '' : countText(source.quantity!),
+      ),
       needsReview = source.needsReview,
       checked = !source.needsReview,
       isApproximate = source.isApproximate,
@@ -1604,16 +1617,16 @@ class _EditDialog extends StatefulWidget {
 
 class _EditDialogState extends State<_EditDialog> {
   late final _start = TextEditingController(
-    text: widget.entry.start.toString(),
+    text: countText(widget.entry.start),
   );
   late final _remaining = TextEditingController(
-    text: widget.entry.remaining.toString(),
+    text: countText(widget.entry.remaining),
   );
   late final _sent = TextEditingController(
-    text: widget.entry.sentAway.toString(),
+    text: countText(widget.entry.sentAway),
   );
   late final _total = TextEditingController(
-    text: (widget.entry.overrideTotal ?? widget.entry.total).toString(),
+    text: countText(widget.entry.overrideTotal ?? widget.entry.total),
   );
   late bool _override = widget.entry.overrideTotal != null;
   bool get _valid =>

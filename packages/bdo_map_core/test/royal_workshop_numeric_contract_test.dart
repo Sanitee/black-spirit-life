@@ -106,6 +106,13 @@ void main() {
       const ValueKey('royal-workshop-hours-infirmary-0'),
     );
     await tester.ensureVisible(net);
+    expect(tester.widget<TextFormField>(net).initialValue, '-0,5');
+    await tester.enterText(net, '-1,234');
+    await tester.pump();
+    expect(plan.planFor('infirmary').activePlan.netSilverPerCycle, -1234000);
+    await tester.enterText(hours, '1,234');
+    await tester.pump();
+    expect(plan.planFor('infirmary').activePlan.taskHours, 1.234);
     await tester.enterText(net, '-1.5');
     await tester.pump();
     expect(plan.planFor('infirmary').activePlan.netSilverPerCycle, -1500000);

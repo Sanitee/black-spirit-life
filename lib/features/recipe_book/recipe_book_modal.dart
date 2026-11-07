@@ -24,8 +24,6 @@ import '../opportunities/opportunity_craft_card_material.dart';
 import '../planner/planner_choice_market.dart';
 import '../planner/planner_contracts.dart';
 import '../planner/planner_map_quick_lookup.dart';
-import '../shared/inventory_count_badge.dart';
-import '../shared/market_count_badges.dart';
 import '../shared/recipe_variant_selector.dart';
 import '../shared/source_availability_badges.dart';
 import '../shared/workshop_presentation.dart';
@@ -36,7 +34,6 @@ import 'recipe_book_keys.dart';
 import 'recipe_book_models.dart';
 import 'recipe_book_usage.dart';
 import 'recipe_book_used_in_panel.dart';
-import 'recipe_ingredient_line.dart';
 
 part 'recipe_book_availability_view.dart';
 
@@ -618,8 +615,11 @@ class _RecipeBookToolbar extends StatelessWidget {
               ExcludeSemantics(
                 child: Text('SEARCH BY', style: searchLabelStyle),
               ),
-              const SizedBox(height: 8),
-              _RecipeBookSearchScope(controller: controller),
+              const SizedBox(height: 4),
+              _RecipeBookSearchScope(
+                controller: controller,
+                minimumHeight: searchControlHeight,
+              ),
             ],
           ),
         );
@@ -813,9 +813,13 @@ class _RecipeBookToolbar extends StatelessWidget {
 }
 
 class _RecipeBookSearchScope extends StatelessWidget {
-  const _RecipeBookSearchScope({required this.controller});
+  const _RecipeBookSearchScope({
+    required this.controller,
+    required this.minimumHeight,
+  });
 
   final RecipeBookController controller;
+  final double minimumHeight;
 
   @override
   Widget build(BuildContext context) {
@@ -829,6 +833,7 @@ class _RecipeBookSearchScope extends StatelessWidget {
             flex: 11,
             child: _RecipeBookScopeOption(
               key: RecipeBookKeys.r05RecipeNameScope,
+              minimumHeight: minimumHeight,
               selected: !controller.searchByIngredient,
               label: 'Recipe name',
               semanticLabel: 'Search by recipe name',
@@ -840,6 +845,7 @@ class _RecipeBookSearchScope extends StatelessWidget {
             flex: 10,
             child: _RecipeBookScopeOption(
               key: RecipeBookKeys.r05SearchByIngredient,
+              minimumHeight: minimumHeight,
               selected: controller.searchByIngredient,
               label: 'Ingredient',
               semanticLabel: 'Search by ingredient',
@@ -858,6 +864,7 @@ class _RecipeBookScopeOption extends StatelessWidget {
     required this.label,
     required this.semanticLabel,
     required this.onPressed,
+    required this.minimumHeight,
     super.key,
   });
 
@@ -865,12 +872,13 @@ class _RecipeBookScopeOption extends StatelessWidget {
   final String label;
   final String semanticLabel;
   final VoidCallback onPressed;
+  final double minimumHeight;
 
   @override
   Widget build(BuildContext context) => AppButton(
     role: AppButtonRole.optionPill,
     selected: selected,
-    minimumSize: const Size(0, 38),
+    minimumSize: Size(0, minimumHeight),
     padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 6),
     semanticLabel: semanticLabel,
     onPressed: onPressed,
@@ -1258,7 +1266,7 @@ class _RecipeGrid extends StatelessWidget {
       final textScale = MediaQuery.textScalerOf(context).scale(16) / 16;
       final availabilityView = controller.marketSort.sortsAvailability;
       final preferredWidth = availabilityView
-          ? _RecipeAvailabilityTable.minimumWidth(context) + 52
+          ? RecipeIngredientTable.minimumWidth(context) + 52
           : switch (controller.density) {
               RecipeBookDensity.sixByFive => 360.0 * textScale,
               RecipeBookDensity.fiveByFour => 410.0 * textScale,
@@ -1605,7 +1613,8 @@ class _RecipeCard extends StatelessWidget {
                                   'recipe-output-stock:${entry.name}',
                                 ),
                                 child: _RecipeBookStockPill(
-                                  stock: entry.marketStock,
+                                  controller: controller,
+                                  name: entry.name,
                                 ),
                               ),
                             ],
@@ -1647,7 +1656,9 @@ class _RecipeCard extends StatelessWidget {
                                     AnchoredPopover(
                                       overlayId:
                                           'recipe-book-used-in:${entry.name}',
-                                      preferredWidth: 570,
+                                      contentSizedWidth: true,
+                                      preferredWidthBuilder: (context) =>
+                                          MediaQuery.sizeOf(context).width - 24,
                                       maximumHeight: itemReferenceCardHeight(
                                         context,
                                       ),
@@ -1843,12 +1854,27 @@ class _RecipeBookProfitabilityPill extends StatelessWidget {
 }
 
 class _RecipeBookStockPill extends StatelessWidget {
-  const _RecipeBookStockPill({required this.stock});
+  const _RecipeBookStockPill({required this.controller, required this.name});
 
-  final double? stock;
+  final RecipeBookController controller;
+  final String name;
   @override
   Widget build(BuildContext context) {
-    return SourceAvailabilityBadges(stock: stock?.toInt());
+    // Only mounted output badges subscribe. Compact sorts never load ingredient
+    // tables or their quotes, and all requests reuse the shared market broker.
+    return PlannerChoiceMarket(
+      controller: controller.modeController,
+      names: [name],
+      builder: (context, itemFor, now) {
+        final item = itemFor(name);
+        return SourceAvailabilityBadges(
+          stock: controller.marketStockFor(name)?.toInt(),
+          preorders: item?.bookIsFresh(now, sharedMarketFreshness) == true
+              ? item?.preorderCount
+              : null,
+        );
+      },
+    );
   }
 }
 
@@ -1988,281 +2014,335 @@ class _RecipePreviewOverlay extends StatelessWidget {
           );
     final ledger = spec.isIlluminatedLedger;
     final sakura = spec.isSakuraNightGarden;
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final modalWidth = (constraints.maxWidth - 92).clamp(760.0, 1220.0);
-        final modalHeight = (constraints.maxHeight - 86).clamp(560.0, 820.0);
-        final modalLeft = (constraints.maxWidth - modalWidth) / 2;
-        final modalTop = (constraints.maxHeight - modalHeight) / 2;
-        final contentLeft = modalLeft + 16;
-        final contentTop = modalTop + 16;
-        final contentWidth = modalWidth - 32;
-        final contentHeight = modalHeight - 32;
-        final panelWidth = _previewPanelWidth(context, recipe, contentWidth);
-        // Reading previews can outgrow the book beneath them. Keep their
-        // content-sized layout, but use the viewport before adding scrolling.
-        final availableHeight = (constraints.maxHeight - 32).clamp(
-          0.0,
-          double.infinity,
-        );
-        final panelHeight =
-            (123 +
-                    (methods.length > 1
-                        ? 48 *
-                              MediaQuery.textScalerOf(
-                                context,
-                              ).scale(1).clamp(1, 2)
-                        : 0) +
-                    (recipe.hasRecipeVariants ? 39 : 0) +
-                    (recipe.ingredients.isEmpty
-                            ? 1
-                            : recipe.ingredients.length) *
-                        72)
-                .clamp(0.0, availableHeight)
-                .toDouble();
-        final overlayBox = context.findRenderObject();
-        final anchor = anchorGlobal == null
-            ? Offset(
-                contentLeft + contentWidth / 2,
-                contentTop + contentHeight / 2,
+    final rows = controller.detailIngredientChoices(recipeName);
+    return PlannerChoiceMarket(
+      controller: controller.modeController,
+      resolveAcrossModes: true,
+      names: [
+        for (final row in rows) row.name,
+        if (controller.cardOutputCanBeSold(recipeName)) recipeName,
+      ],
+      builder: (context, marketFor, now) => LayoutBuilder(
+        builder: (context, constraints) {
+          final modalWidth = (constraints.maxWidth - 92).clamp(760.0, 1220.0);
+          final modalHeight = (constraints.maxHeight - 86).clamp(560.0, 820.0);
+          final modalLeft = (constraints.maxWidth - modalWidth) / 2;
+          final modalTop = (constraints.maxHeight - modalHeight) / 2;
+          final contentLeft = modalLeft + 16;
+          final contentTop = modalTop + 16;
+          final contentWidth = modalWidth - 32;
+          final contentHeight = modalHeight - 32;
+          final contentSize = RecipeIngredientTable.contentWidth(
+            context,
+            rows: rows,
+            marketFor: marketFor,
+            now: now,
+            hasSwitch: (row) =>
+                controller.hasIngredientAlternatives(recipeName, row),
+          );
+          final panelWidth = _previewPanelWidth(
+            context,
+            contentSize,
+            constraints.maxWidth - 24,
+            controller.cardOutputCanBeSold(recipeName)
+                ? SourceAvailabilityBadges(
+                    stock: controller.marketStockFor(recipeName)?.toInt(),
+                    preorders:
+                        marketFor(
+                              recipeName,
+                            )?.bookIsFresh(now, sharedMarketFreshness) ==
+                            true
+                        ? marketFor(recipeName)?.preorderCount
+                        : null,
+                  ).presentation(context).preferredWidth(context)
+                : 0,
+          );
+          // Reading previews can outgrow the book beneath them. Keep their
+          // content-sized layout, but use the viewport before adding scrolling.
+          final availableHeight = (constraints.maxHeight - 32).clamp(
+            0.0,
+            double.infinity,
+          );
+          final panelHeight =
+              (123 +
+                      (methods.length > 1
+                          ? 48 *
+                                MediaQuery.textScalerOf(
+                                  context,
+                                ).scale(1).clamp(1, 2)
+                          : 0) +
+                      (recipe.hasRecipeVariants ? 39 : 0) +
+                      (recipe.ingredients.isEmpty
+                              ? 1
+                              : recipe.ingredients.length) *
+                          72)
+                  .clamp(0.0, availableHeight)
+                  .toDouble();
+          final overlayBox = context.findRenderObject();
+          final anchor = anchorGlobal == null
+              ? Offset(
+                  contentLeft + contentWidth / 2,
+                  contentTop + contentHeight / 2,
+                )
+              : overlayBox is RenderBox
+              ? overlayBox.globalToLocal(anchorGlobal!)
+              : anchorGlobal!;
+          final localX = anchor.dx - contentLeft;
+          final localY = anchor.dy - contentTop;
+          var panelLeft = localX + 18;
+          if (panelLeft + panelWidth > contentWidth - 4) {
+            panelLeft = localX - panelWidth - 18;
+          }
+          panelLeft = panelLeft
+              .clamp(
+                4.0,
+                (contentWidth - panelWidth - 4).clamp(4.0, double.infinity),
               )
-            : overlayBox is RenderBox
-            ? overlayBox.globalToLocal(anchorGlobal!)
-            : anchorGlobal!;
-        final localX = anchor.dx - contentLeft;
-        final localY = anchor.dy - contentTop;
-        var panelLeft = localX + 18;
-        if (panelLeft + panelWidth > contentWidth - 4) {
-          panelLeft = localX - panelWidth - 18;
-        }
-        panelLeft = panelLeft
-            .clamp(
-              4.0,
-              (contentWidth - panelWidth - 4).clamp(4.0, double.infinity),
-            )
-            .toDouble();
-        final panelTop = (localY - panelHeight / 2)
-            .clamp(
-              4.0,
-              (contentHeight - panelHeight - 4).clamp(4.0, double.infinity),
-            )
-            .toDouble();
-        return Stack(
-          children: <Widget>[
-            Positioned.fill(
-              child: GestureDetector(
-                behavior: HitTestBehavior.opaque,
-                onTap: controller.closePreview,
-                child: ColoredBox(
-                  color: ledger
-                      ? const Color(0x3B0A2744)
-                      : sakura
-                      ? spec.materials.modalScrim.withAlpha(116)
-                      : const Color(0x01000000),
+              .toDouble();
+          final panelTop = (localY - panelHeight / 2)
+              .clamp(
+                4.0,
+                (contentHeight - panelHeight - 4).clamp(4.0, double.infinity),
+              )
+              .toDouble();
+          return Stack(
+            children: <Widget>[
+              Positioned.fill(
+                child: GestureDetector(
+                  behavior: HitTestBehavior.opaque,
+                  onTap: controller.closePreview,
+                  child: ColoredBox(
+                    color: ledger
+                        ? const Color(0x3B0A2744)
+                        : sakura
+                        ? spec.materials.modalScrim.withAlpha(116)
+                        : const Color(0x01000000),
+                  ),
                 ),
               ),
-            ),
-            DraggableOverlaySurface(
-              overlayId: 'recipe-preview:$recipeName',
-              initialPosition: (_, _) =>
-                  Offset(contentLeft + panelLeft, contentTop + panelTop),
-              margin: 12,
-              child: SizedBox(
-                width: panelWidth,
-                child: RepaintBoundary(
-                  key: const ValueKey('recipe-preview-render'),
-                  child: GestureDetector(
-                    key: RecipeBookKeys.previewPanel,
-                    behavior: HitTestBehavior.opaque,
-                    onTap: () => FocusScope.of(context).requestFocus(),
-                    child: AppSurface(
-                      role: AppSurfaceRole.modal,
-                      padding: const EdgeInsets.all(14),
-                      clipBehavior: Clip.antiAlias,
-                      semanticLabel: '$recipeName recipe preview',
-                      child: ConstrainedBox(
-                        constraints: BoxConstraints(
-                          maxHeight: (availableHeight - 28).clamp(
-                            0.0,
-                            double.infinity,
+              DraggableOverlaySurface(
+                overlayId: 'recipe-preview:$recipeName',
+                initialPosition: (_, _) =>
+                    Offset(contentLeft + panelLeft, contentTop + panelTop),
+                margin: 12,
+                child: SizedBox(
+                  width: panelWidth,
+                  child: RepaintBoundary(
+                    key: const ValueKey('recipe-preview-render'),
+                    child: GestureDetector(
+                      key: RecipeBookKeys.previewPanel,
+                      behavior: HitTestBehavior.opaque,
+                      onTap: () => FocusScope.of(context).requestFocus(),
+                      child: DecoratedBox(
+                        key: const ValueKey('recipe-preview-backing'),
+                        decoration: BoxDecoration(
+                          // Keep text on the cards behind from bleeding through Standard's glass.
+                          color: ledger || sakura
+                              ? Colors.transparent
+                              : spec.palette.canvasDeep.withAlpha(255),
+                          borderRadius: BorderRadius.circular(
+                            spec.geometry.panelRadius,
                           ),
                         ),
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                          children: <Widget>[
-                            Row(
-                              crossAxisAlignment: CrossAxisAlignment.start,
+                        child: AppSurface(
+                          role: AppSurfaceRole.modal,
+                          padding: const EdgeInsets.all(14),
+                          clipBehavior: Clip.antiAlias,
+                          semanticLabel: '$recipeName recipe preview',
+                          child: ConstrainedBox(
+                            constraints: BoxConstraints(
+                              maxHeight: (availableHeight - 28).clamp(
+                                0.0,
+                                double.infinity,
+                              ),
+                            ),
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              crossAxisAlignment: CrossAxisAlignment.stretch,
                               children: <Widget>[
-                                RecipeBookItemIcon(
-                                  controller: controller,
-                                  name: recipeName,
-                                  size: ItemDetailStyle.headerIcon,
-                                  anchorId: 'preview:$recipeName',
-                                ),
-                                const SizedBox(width: ItemDetailStyle.itemGap),
-                                Expanded(
-                                  child: DraggableOverlayDragRegion(
-                                    key: RecipeBookKeys.previewDragRegion,
-                                    child: Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: <Widget>[
-                                        Text(
-                                          itemDisplayName(recipeName),
-                                          style: ItemDetailStyle.title(spec),
-                                        ),
-                                        const SizedBox(height: 6),
-                                        Wrap(
-                                          spacing: 8,
-                                          runSpacing: 4,
+                                Row(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: <Widget>[
+                                    RecipeBookItemIcon(
+                                      controller: controller,
+                                      name: recipeName,
+                                      size: ItemDetailStyle.headerIcon,
+                                      anchorId: 'preview:$recipeName',
+                                    ),
+                                    const SizedBox(
+                                      width: ItemDetailStyle.itemGap,
+                                    ),
+                                    Expanded(
+                                      child: DraggableOverlayDragRegion(
+                                        key: RecipeBookKeys.previewDragRegion,
+                                        child: Column(
                                           crossAxisAlignment:
-                                              WrapCrossAlignment.center,
-                                          children: [
+                                              CrossAxisAlignment.start,
+                                          children: <Widget>[
                                             Text(
-                                              _recipeProductionMethodLabel(
-                                                recipe,
+                                              itemDisplayName(recipeName),
+                                              style: ItemDetailStyle.title(
+                                                spec,
                                               ),
-                                              style: ItemDetailStyle.meta(spec),
                                             ),
-                                            Text(
-                                              '${controller.isEstimatedOutput(recipe.name) ? 'Estimated output' : 'Output'} ${_previewOutput(recipe)}',
-                                              style: ItemDetailStyle.meta(spec)
-                                                  .copyWith(
-                                                    color:
-                                                        ItemDetailStyle.accent(
-                                                          spec,
-                                                        ),
+                                            const SizedBox(height: 6),
+                                            Wrap(
+                                              spacing: 8,
+                                              runSpacing: 4,
+                                              crossAxisAlignment:
+                                                  WrapCrossAlignment.center,
+                                              children: [
+                                                Text(
+                                                  _recipeProductionMethodLabel(
+                                                    recipe,
                                                   ),
+                                                  style: ItemDetailStyle.meta(
+                                                    spec,
+                                                  ),
+                                                ),
+                                                Text(
+                                                  '${controller.isEstimatedOutput(recipe.name) ? 'Estimated output' : 'Output'} ${_previewOutput(recipe)}',
+                                                  style:
+                                                      ItemDetailStyle.meta(
+                                                        spec,
+                                                      ).copyWith(
+                                                        color:
+                                                            ItemDetailStyle.accent(
+                                                              spec,
+                                                            ),
+                                                      ),
+                                                ),
+                                              ],
                                             ),
+                                            if (controller.cardOutputCanBeSold(
+                                              recipeName,
+                                            )) ...[
+                                              const SizedBox(height: 8),
+                                              _RecipeBookStockPill(
+                                                controller: controller,
+                                                name: recipeName,
+                                              ),
+                                            ],
                                           ],
                                         ),
+                                      ),
+                                    ),
+                                    if (hidden) ...<Widget>[
+                                      const _HiddenRecipePill(),
+                                      const SizedBox(width: 8),
+                                    ],
+                                    Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.end,
+                                      children: [
+                                        AppButton(
+                                          key: RecipeBookKeys.r14ClosePreview(
+                                            recipeName,
+                                          ),
+                                          focusNode: closeFocus,
+                                          role: ledger
+                                              ? AppButtonRole.primary
+                                              : AppButtonRole.optionPill,
+                                          minimumSize: const Size.square(30),
+                                          padding: EdgeInsets.zero,
+                                          semanticLabel:
+                                              'Close $recipeName preview',
+                                          tooltip: 'Close preview',
+                                          onPressed: controller.closePreview,
+                                          child: const AppVectorGlyph(
+                                            'close',
+                                            size: 11,
+                                          ),
+                                        ),
+                                        const SizedBox(height: 10),
+                                        previewAction,
                                       ],
                                     ),
-                                  ),
-                                ),
-                                if (hidden) ...<Widget>[
-                                  const _HiddenRecipePill(),
-                                  const SizedBox(width: 8),
-                                ],
-                                Column(
-                                  crossAxisAlignment: CrossAxisAlignment.end,
-                                  children: [
-                                    AppButton(
-                                      key: RecipeBookKeys.r14ClosePreview(
-                                        recipeName,
-                                      ),
-                                      focusNode: closeFocus,
-                                      role: ledger
-                                          ? AppButtonRole.primary
-                                          : AppButtonRole.optionPill,
-                                      minimumSize: const Size.square(30),
-                                      padding: EdgeInsets.zero,
-                                      semanticLabel:
-                                          'Close $recipeName preview',
-                                      tooltip: 'Close preview',
-                                      onPressed: controller.closePreview,
-                                      child: const AppVectorGlyph(
-                                        'close',
-                                        size: 11,
-                                      ),
-                                    ),
-                                    const SizedBox(height: 10),
-                                    previewAction,
                                   ],
+                                ),
+                                if (methods.length > 1) ...<Widget>[
+                                  const SizedBox(height: 10),
+                                  Wrap(
+                                    spacing: 6,
+                                    runSpacing: 6,
+                                    children: [
+                                      for (final entry in methods.entries)
+                                        AppFilterButton(
+                                          key: ValueKey(
+                                            'recipe-method:${entry.key.key}:$recipeName',
+                                          ),
+                                          label: entry.value,
+                                          selected:
+                                              entry.key ==
+                                              controller.modeController.mode,
+                                          onChanged: (_) =>
+                                              onMethodChanged(entry.key),
+                                        ),
+                                    ],
+                                  ),
+                                ],
+                                if (recipe.hasRecipeVariants) ...<Widget>[
+                                  const SizedBox(height: 10),
+                                  Align(
+                                    alignment: Alignment.centerLeft,
+                                    child: RecipeVariantSelector(
+                                      recipe: recipe,
+                                      selectedVariantId: controller
+                                          .selectedRecipeVariantId(recipeName),
+                                      compact: true,
+                                      onSelected: hidden
+                                          ? null
+                                          : (variantId) =>
+                                                controller.selectRecipeVariant(
+                                                  recipeName,
+                                                  variantId,
+                                                ),
+                                    ),
+                                  ),
+                                ],
+                                const SizedBox(height: 20),
+                                Flexible(
+                                  child: rows.isEmpty
+                                      ? Center(
+                                          child: Text(
+                                            'No recipe ingredients recorded.',
+                                            style: spec.typography.body,
+                                          ),
+                                        )
+                                      : SingleChildScrollView(
+                                          child: RecipeIngredientTable(
+                                            key: const ValueKey(
+                                              'recipe-preview-ingredients-heading',
+                                            ),
+                                            controller: controller,
+                                            parent: recipeName,
+                                            rows: rows,
+                                            marketFor: marketFor,
+                                            now: now,
+                                            minimumContentWidth: contentSize,
+                                            switchBuilder: (row) =>
+                                                _RecipeIngredientSwitch(
+                                                  controller: controller,
+                                                  parent: recipeName,
+                                                  row: row,
+                                                ),
+                                            labelWrapper: _lookupLabel,
+                                          ),
+                                        ),
                                 ),
                               ],
                             ),
-                            if (methods.length > 1) ...<Widget>[
-                              const SizedBox(height: 10),
-                              Wrap(
-                                spacing: 6,
-                                runSpacing: 6,
-                                children: [
-                                  for (final entry in methods.entries)
-                                    AppFilterButton(
-                                      key: ValueKey(
-                                        'recipe-method:${entry.key.key}:$recipeName',
-                                      ),
-                                      label: entry.value,
-                                      selected:
-                                          entry.key ==
-                                          controller.modeController.mode,
-                                      onChanged: (_) =>
-                                          onMethodChanged(entry.key),
-                                    ),
-                                ],
-                              ),
-                            ],
-                            if (recipe.hasRecipeVariants) ...<Widget>[
-                              const SizedBox(height: 10),
-                              Align(
-                                alignment: Alignment.centerLeft,
-                                child: RecipeVariantSelector(
-                                  recipe: recipe,
-                                  selectedVariantId: controller
-                                      .selectedRecipeVariantId(recipeName),
-                                  compact: true,
-                                  onSelected: hidden
-                                      ? null
-                                      : (variantId) =>
-                                            controller.selectRecipeVariant(
-                                              recipeName,
-                                              variantId,
-                                            ),
-                                ),
-                              ),
-                            ],
-                            const SizedBox(height: 24),
-                            Text(
-                              'Ingredients',
-                              key: const ValueKey(
-                                'recipe-preview-ingredients-heading',
-                              ),
-                              style: ItemDetailStyle.section(spec),
-                            ),
-                            const SizedBox(height: 12),
-                            Flexible(
-                              child: recipe.ingredients.isEmpty
-                                  ? Center(
-                                      child: Text(
-                                        'No recipe ingredients recorded.',
-                                        style: spec.typography.body,
-                                      ),
-                                    )
-                                  : ListView.separated(
-                                      shrinkWrap: true,
-                                      padding: const EdgeInsets.only(bottom: 4),
-                                      itemCount: recipe.ingredients.length,
-                                      separatorBuilder: (_, _) => Divider(
-                                        height: 12,
-                                        thickness: 1,
-                                        color: spec.palette.trim.withValues(
-                                          alpha: .2,
-                                        ),
-                                      ),
-                                      itemBuilder: (context, index) =>
-                                          _PreviewIngredientRow(
-                                            controller: controller,
-                                            externalActions: externalActions,
-                                            parentName: recipeName,
-                                            ingredient:
-                                                recipe.ingredients[index],
-                                            ingredientIndex: index,
-                                          ),
-                                    ),
-                            ),
-                          ],
+                          ),
                         ),
                       ),
                     ),
                   ),
                 ),
               ),
-            ),
-          ],
-        );
-      },
+            ],
+          );
+        },
+      ),
     );
   }
 
@@ -2280,258 +2360,49 @@ class _RecipePreviewOverlay extends StatelessWidget {
 
   double _previewPanelWidth(
     BuildContext context,
-    Recipe recipe,
-    double contentWidth,
+    double tableWidth,
+    double availableWidth,
+    double badgeWidth,
   ) {
-    final spec = context.visualTheme;
-    final measurementStyle = spec.typography.body.copyWith(
-      fontFamily: spec.isIlluminatedLedger
-          ? 'Georgia'
-          : spec.typography.body.fontFamily,
-      fontWeight: FontWeight.w700,
-    );
-    var longestSubstitute = 0.0;
-    for (final ingredient in recipe.ingredients) {
-      for (final option in controller.substituteOptions(ingredient)) {
-        final painter = TextPainter(
-          text: TextSpan(text: option, style: measurementStyle),
-          textDirection: Directionality.of(context),
-          textScaler: MediaQuery.textScalerOf(context),
-          maxLines: 1,
-        )..layout();
-        if (painter.width > longestSubstitute) {
-          longestSubstitute = painter.width;
-        }
-      }
-    }
-
-    // The remaining width accounts for the panel and row padding, item icon,
-    // selector affordance, scrollbar gutter, and up to three quality swatches.
-    const selectorChrome = 236.0;
-    final availableWidth = (contentWidth - 8).clamp(430.0, double.infinity);
-    return (longestSubstitute + selectorChrome)
-        .clamp(430.0, availableWidth)
+    final painter = TextPainter(
+      text: TextSpan(
+        text: itemDisplayName(recipeName),
+        style: ItemDetailStyle.title(context.visualTheme),
+      ),
+      textDirection: Directionality.of(context),
+      textScaler: MediaQuery.textScalerOf(context),
+      maxLines: 1,
+    )..layout();
+    final headerWidth =
+        painter.width.ceilToDouble().clamp(badgeWidth, double.infinity) +
+        ItemDetailStyle.headerIcon +
+        ItemDetailStyle.itemGap +
+        95 +
+        48;
+    painter.dispose();
+    final desired = (tableWidth + 32).clamp(headerWidth, double.infinity);
+    return desired
+        .clamp(0, availableWidth.clamp(0, double.infinity))
         .toDouble();
   }
-}
 
-class _PreviewIngredientRow extends StatelessWidget {
-  const _PreviewIngredientRow({
-    required this.controller,
-    required this.externalActions,
-    required this.parentName,
-    required this.ingredient,
-    required this.ingredientIndex,
-  });
-
-  final RecipeBookController controller;
-  final PlannerExternalActions? externalActions;
-  final String parentName;
-  final Ingredient ingredient;
-  final int ingredientIndex;
-
-  @override
-  Widget build(BuildContext context) {
-    final options = controller.substituteOptions(ingredient);
-    final selected = controller.selectedSubstitute(parentName, ingredient);
-    final ratio = controller.substituteRatio(ingredient, selected);
-    final grades = controller.qualityGrades(
-      parentName: parentName,
-      ingredient: ingredient,
-      selectedName: selected,
-    );
-    final selectedGrade = controller.selectedQuality(
-      parentName: parentName,
-      ingredient: ingredient,
-      selectedName: selected,
-    );
-    final row = RecipeIngredientLine(
-      semanticLabel: '$selected preview ingredient',
-      name: selected,
-      quantity: ingredient.quantity * ratio,
-      quantityKey: RecipeBookKeys.previewQuantity(parentName, ingredient.name),
-      icon: RecipeBookItemIcon(
-        controller: controller,
-        name: selected,
-        size: ItemDetailStyle.ingredientIcon,
-        anchorId: 'preview:$parentName:ingredient:$ingredientIndex:$selected',
-      ),
-      nameControl: options.length > 1
-          ? AppSelect<String>(
-              key: RecipeBookKeys.r15Substitute(parentName, ingredient.name),
-              inline: true,
-              value: selected,
-              items: options,
-              labelFor: (value) => value,
-              semanticLabel: 'Substitute for ${ingredient.name} in $parentName',
-              onChanged: (value) {
-                if (value == null) return;
-                controller.selectSubstitute(
-                  parentName: parentName,
-                  ingredient: ingredient,
-                  selection: value,
-                );
-              },
-            )
-          : null,
-      controls: [
-        for (final grade in grades) ...<Widget>[
-          _PreviewQualitySwatch(
-            key: RecipeBookKeys.r16Quality(parentName, ingredient.name, grade),
-            grade: grade,
-            normalIsBlueFamily: grades.contains('blue'),
-            selected: selectedGrade == grade,
-            onPressed: () => controller.selectQuality(
-              parentName: parentName,
-              ingredient: ingredient,
-              grade: grade,
-            ),
-          ),
-          if (grade != grades.last) const SizedBox(width: 4),
-        ],
-      ],
-    );
+  Widget _lookupLabel(RecipeBookIngredientChoice row, int index, Widget child) {
     final actions = externalActions;
-    if (actions == null) return row;
-    final stableId = 'recipe-preview:$parentName:$ingredientIndex:$selected';
+    if (actions == null) return child;
+    final stableId = 'recipe-preview:$recipeName:$index:${row.name}';
     return PlannerMapQuickLookupRegion(
-      key: RecipeBookKeys.mapLookupRegion(
-        parentName,
-        ingredientIndex,
-        selected,
-      ),
-      materialName: selected,
+      key: RecipeBookKeys.mapLookupRegion(recipeName, index, row.name),
+      materialName: row.name,
       stableId: stableId,
       externalActions: actions,
       resolveGatherDemand: () => PlannerGatherDemand(
         sourceId:
-            'recipe-book:${controller.modeController.mode.key}:$parentName:$ingredientIndex',
-        sourceLabel: parentName,
-        materialName: selected,
-        neededQuantity: ingredient.quantity * ratio,
+            'recipe-book:${controller.modeController.mode.key}:$recipeName:$index',
+        sourceLabel: recipeName,
+        materialName: row.name,
+        neededQuantity: row.quantity,
       ),
-      child: row,
-    );
-  }
-}
-
-class _PreviewQualitySwatch extends StatelessWidget {
-  const _PreviewQualitySwatch({
-    required this.grade,
-    required this.normalIsBlueFamily,
-    required this.selected,
-    required this.onPressed,
-    super.key,
-  });
-
-  final String grade;
-  final bool normalIsBlueFamily;
-  final bool selected;
-  final VoidCallback onPressed;
-
-  @override
-  Widget build(BuildContext context) {
-    final spec = context.visualTheme;
-    final ledger = spec.isIlluminatedLedger;
-    final sakura = spec.isSakuraNightGarden;
-    final denseLayout = spec.usesDenseSplitLayout;
-    final (fill, outline, label) = switch (grade.toLowerCase()) {
-      'high' => (
-        const Color(0xAA6FC17A),
-        const Color(0xB9A9E890),
-        'High quality',
-      ),
-      'special' => (
-        const Color(0xAA558FD5),
-        const Color(0xB9A8C8FF),
-        'Special quality',
-      ),
-      'blue' => (const Color(0xAA4D73D2), const Color(0xB9BBCDFF), 'Blue'),
-      _ when normalIsBlueFamily => (
-        const Color(0xAA4FAF72),
-        const Color(0xB9A9E890),
-        'Normal',
-      ),
-      _ => (const Color(0xAA909090), const Color(0xB9CBCBCB), 'Normal'),
-    };
-    return AppTooltip(
-      message: '$label grade',
-      child: Semantics(
-        button: true,
-        selected: selected,
-        label: '$label grade',
-        child: SizedBox.square(
-          dimension: denseLayout ? 26 : 22,
-          child: GestureDetector(
-            behavior: HitTestBehavior.opaque,
-            onTap: onPressed,
-            child: Center(
-              child: DecoratedBox(
-                decoration: ledger
-                    ? BoxDecoration(
-                        gradient: spec.materials.surfaceRaised,
-                        borderRadius: BorderRadius.circular(2),
-                        border: Border.all(
-                          color: selected
-                              ? const Color(0xFFD2B15A)
-                              : const Color(0x8A7A5B2A),
-                        ),
-                      )
-                    : sakura
-                    ? BoxDecoration(
-                        gradient: spec.materials.surfaceRaised,
-                        borderRadius: BorderRadius.circular(
-                          spec.geometry.buttonRadius,
-                        ),
-                        border: Border.all(
-                          color: selected
-                              ? spec.palette.primaryBright
-                              : spec.palette.trim.withAlpha(158),
-                        ),
-                      )
-                    : const BoxDecoration(),
-                child: SizedBox.square(
-                  dimension: denseLayout ? 26 : 22,
-                  child: Center(
-                    child: Container(
-                      width: ledger
-                          ? 11
-                          : sakura
-                          ? 13
-                          : 16,
-                      height: ledger
-                          ? 11
-                          : sakura
-                          ? 13
-                          : 16,
-                      decoration: BoxDecoration(
-                        color: fill,
-                        borderRadius: BorderRadius.circular(
-                          ledger
-                              ? 1
-                              : sakura
-                              ? 2
-                              : 3,
-                        ),
-                        border: Border.all(
-                          color: selected
-                              ? ledger
-                                    ? const Color(0xFF7C5B24)
-                                    : sakura
-                                    ? spec.palette.primaryBright
-                                    : const Color(0xFFFFF0B9)
-                              : outline,
-                          width: selected ? 2 : 1,
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          ),
-        ),
-      ),
+      child: child,
     );
   }
 }

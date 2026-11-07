@@ -6,6 +6,7 @@ import '../illuminated_ledger/ledger_ornament_painters.dart';
 import '../sakura_night_garden/sakura_spec.dart';
 import '../standard/standard_spec.dart';
 import 'app_button.dart';
+import 'app_number_fade.dart';
 import 'app_vector_glyph.dart';
 
 enum AppTextFieldEmphasis { normal, subdued }
@@ -241,7 +242,27 @@ class AppTextField extends StatelessWidget {
   final double? minimumHeight;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context) => _AppTextFieldScroll(
+    builder: (textScroll) =>
+        controller != null &&
+            keyboardType?.index == TextInputType.number.index &&
+            !obscureText &&
+            enabled
+        ? AppNumberFade(
+            controller: controller!,
+            focusNode: focusNode,
+            builder: (focus, opacity) =>
+                _buildField(context, textScroll, focus, opacity),
+          )
+        : _buildField(context, textScroll, focusNode, 1),
+  );
+
+  Widget _buildField(
+    BuildContext context,
+    ScrollController textScroll,
+    FocusNode? resolvedFocus,
+    double textOpacity,
+  ) {
     final spec = context.visualTheme;
     final ledger = spec.isIlluminatedLedger;
     final sakura = spec.isSakuraNightGarden;
@@ -284,7 +305,8 @@ class AppTextField extends StatelessWidget {
     );
     Widget field = TextField(
       controller: controller,
-      focusNode: focusNode,
+      scrollController: textScroll,
+      focusNode: resolvedFocus,
       onChanged: onChanged,
       onSubmitted: onSubmitted,
       onTap: onTap,
@@ -299,7 +321,15 @@ class AppTextField extends StatelessWidget {
       maxLines: maxLines,
       minLines: minLines,
       cursorColor: spec.palette.primaryBright,
-      style: controlTextStyle,
+      style: textOpacity == 1
+          ? controlTextStyle
+          : controlTextStyle.copyWith(
+              color: (controlTextStyle.color ?? spec.palette.text).withValues(
+                alpha:
+                    (controlTextStyle.color ?? spec.palette.text).a *
+                    textOpacity,
+              ),
+            ),
       decoration: InputDecoration(
         // Dense InputDecorator layouts shrink to the raw line height and sit
         // at the top of a taller desktop host. Full-workstation single-line
@@ -446,6 +476,28 @@ class AppTextField extends StatelessWidget {
     }
     return field;
   }
+}
+
+class _AppTextFieldScroll extends StatefulWidget {
+  const _AppTextFieldScroll({required this.builder});
+  final Widget Function(ScrollController) builder;
+
+  @override
+  State<_AppTextFieldScroll> createState() => _AppTextFieldScrollState();
+}
+
+class _AppTextFieldScrollState extends State<_AppTextFieldScroll> {
+  // Text scrolling belongs to this editor, not its containing PageStorage list.
+  final _textScroll = ScrollController(keepScrollOffset: false);
+
+  @override
+  void dispose() {
+    _textScroll.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) => widget.builder(_textScroll);
 }
 
 /// An app-authored searchable combo box for choosing an existing domain item.

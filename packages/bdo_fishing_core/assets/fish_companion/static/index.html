@@ -207,7 +207,7 @@
                   </button>
                 </div>
               </div>
-              <label class="form-field mastery-field"><span>Fishing mastery</span><input id="haulMastery" type="number" min="0" max="3000" step="1" inputmode="numeric" placeholder="e.g. 1500" required></label>
+              <label class="form-field mastery-field"><span>Fishing mastery</span><input id="haulMastery" type="text" min="0" max="3000" step="1" inputmode="numeric" placeholder="e.g. 1.500" required></label>
             </div>
 
             <div id="rodGear" class="gear-block">
@@ -292,7 +292,7 @@
               <div id="recognizedFish" class="recognized-fish"></div>
               <div class="review-footer">
                 <div class="manual-add"><label><span>Add or correct a fish</span><input id="manualFish" list="fishOptions" placeholder="Fish name"><datalist id="fishOptions"></datalist></label><button id="manualAddButton" type="button" class="quiet-button">Add fish</button></div>
-                <label id="haulSaleField" class="haul-sale-field is-hidden"><span>Sold for <small>optional</small></span><span class="haul-sale-input"><input id="haulSoldAmount" type="number" min="1" max="100000000000000" step="1" inputmode="numeric" placeholder="Not sold"><b>silver</b></span></label>
+                <label id="haulSaleField" class="haul-sale-field is-hidden"><span>Sold for <small>optional</small></span><span class="haul-sale-input"><input id="haulSoldAmount" type="text" min="1" max="100000000000000" step="1" inputmode="numeric" placeholder="Not sold"><b>silver</b></span></label>
                 <button id="saveHaulButton" type="button" class="primary-button save-button"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 3h12l2 2v16H5V3Zm2 2v14h10V7.8L16.2 5H7Zm2 0h6v5H9V5Zm0 8h6v4H9v-4Z"/></svg><span id="saveHaulLabel">Save</span></button>
               </div>
             </div>
@@ -410,7 +410,7 @@
                 <input id="profileEquipment" type="hidden" value="Balenos Rod">
                 <label><span>Tool / rod (optional)</span><input id="profileEquipmentText" type="text" maxlength="200" value="Balenos Rod" placeholder="No tool recorded"></label>
                 <div id="profileEquipmentOptions" class="profile-equipment-options" role="group" aria-label="Profile equipment"></div>
-                <label><span>Fishing mastery</span><input id="profileMastery" type="number" min="0" max="5000" step="1" required></label>
+                <label><span>Fishing mastery</span><input id="profileMastery" type="text" inputmode="numeric" min="0" max="5000" step="1" required></label>
                 <div class="profile-field-grid life-skill-fields">
                   <label><span>Fishing level</span><select id="profileFishingRank"><option value="">Not set</option><option>Beginner</option><option>Apprentice</option><option>Skilled</option><option>Professional</option><option>Artisan</option><option>Master</option><option>Guru</option></select></label>
                   <label class="level-number"><span>Level</span><input id="profileFishingLevel" type="number" min="1" max="100" step="1"></label>
@@ -459,7 +459,7 @@
           <aside class="sale-record-panel">
             <div class="sale-section-heading"><h3>Record actual sale</h3><span>optional</span></div>
             <label><span>Sold at</span><input id="saleSoldAt" type="datetime-local"></label>
-            <label><span>Final silver received</span><span class="sale-silver-input"><input id="saleFinalAmount" type="number" min="1" max="100000000000000" step="1" inputmode="numeric" placeholder="Amount shown in game"><b>silver</b></span></label>
+            <label><span>Final silver received</span><span class="sale-silver-input"><input id="saleFinalAmount" type="text" min="1" max="100000000000000" step="1" inputmode="numeric" placeholder="Amount shown in game"><b>silver</b></span></label>
             <div id="saleChosenSummary" class="sale-chosen-summary"></div>
           </aside>
         </div>

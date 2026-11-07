@@ -171,6 +171,7 @@ extension RecipeBookAvailabilityController on RecipeBookController {
     if (_disposed || !_marketRefreshPending || _scrollIdle != null) return;
     _marketRefreshPending = false;
     if (_marketSort.sortsAvailability ||
+        _marketSort.sortsStock ||
         _marketSort.sortsProfit ||
         _profitableOnly) {
       _availabilityChanged();
@@ -202,8 +203,12 @@ extension RecipeBookAvailabilityController on RecipeBookController {
     final now = DateTime.now();
     final item = availabilityMarketFor(name, dependent: dependent);
     if (item != null) {
-      return recipeMarketUnitPrice(item, now, sharedMarketFreshness);
+      if (item.unlisted) return null;
+      final price = recipeMarketUnitPrice(item, now, sharedMarketFreshness);
+      if (price != null) return price;
     }
+    // An incomplete live receipt must not hide a still-fresh Check Market
+    // price or highest preorder. The same age/region guards apply below.
     final market = modeController.state.value.market;
     final observed = _foldedValue(market.preorderObservedAt, name) ?? 0;
     bool fresh(int stamp) =>
@@ -283,6 +288,28 @@ extension RecipeBookAvailabilityController on RecipeBookController {
           ? market?.preorderCount
           : null,
     );
+  }
+
+  /// Details also displays reference-only formulas, which are not craft targets.
+  List<RecipeBookIngredientChoice> detailIngredientChoices(String name) {
+    final recipe = recipeFor(name);
+    if (recipe == null) return const [];
+    if (recipe.isCraftable) return availabilityFor(name).ingredients;
+    _prepareAvailability();
+    final state = modeController.owner.assembly.plannerState(
+      _cardStateFor(name),
+    );
+    return [
+      for (final ingredient in recipe.ingredients)
+        _choice(
+          ingredient,
+          _ingredientPreview!.preview(
+            state: state,
+            parentName: name,
+            ingredient: ingredient,
+          ),
+        ),
+    ];
   }
 
   RecipeBookAvailability availabilityFor(String name) {

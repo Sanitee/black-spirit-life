@@ -569,7 +569,7 @@ void main() {
   });
 
   testWidgets(
-    'constrained enlarged formula wraps long names without shrinking',
+    'constrained enlarged formula scrolls long names without shrinking',
     (tester) async {
       final fixture = await _fixture(
         tester,
@@ -603,7 +603,7 @@ void main() {
       final panel = _panel(_essence);
       await _selectUsed(tester, mouse);
       final formula = _essenceFormula(panel);
-      _expectCompactFormulaGeometry(tester, panel);
+      _expectCompactFormulaGeometry(tester, panel, horizontalOverflow: true);
       final row = find.descendant(
         of: formula,
         matching: find.byKey(
@@ -619,12 +619,21 @@ void main() {
         textDirection: paragraph.textDirection,
         textScaler: paragraph.textScaler,
       )..layout(maxWidth: paragraph.size.width);
-      expect(painter.computeLineMetrics().length, greaterThan(1));
+      expect(painter.computeLineMetrics().length, 1);
       painter.dispose();
       expect(paragraph.textScaler.scale(12.5), 25);
       expect(paragraph.maxLines, isNull);
       expect(paragraph.overflow, isNot(TextOverflow.ellipsis));
       final quantity = find.descendant(of: row, matching: find.text('×450'));
+      final horizontal = tester
+          .stateList<ScrollableState>(
+            find.descendant(of: formula, matching: find.byType(Scrollable)),
+          )
+          .where((state) => state.position.axis == Axis.horizontal)
+          .single;
+      expect(horizontal.position.maxScrollExtent, greaterThan(0));
+      await tester.ensureVisible(quantity);
+      await tester.pumpAndSettle();
       expect(
         tester.getRect(quantity).right,
         lessThanOrEqualTo(tester.getRect(formula).right),
@@ -642,7 +651,7 @@ void main() {
             .first,
       );
       expect(tester.getRect(row).bottom, lessThanOrEqualTo(viewport.bottom));
-      await _captureImage(tester, 'essence-formula-wrapped-200');
+      await _captureImage(tester, 'essence-formula-scrolled-200');
       expect(fixture.transport.requests, isEmpty);
       expect(tester.takeException(), isNull);
       await _leave(tester, mouse);
@@ -656,7 +665,11 @@ Finder _essenceFormula(Finder panel) => find.descendant(
   matching: find.byKey(RecipeBookKeys.itemInfoFormula(_crystal, null, 1)),
 );
 
-void _expectCompactFormulaGeometry(WidgetTester tester, Finder panel) {
+void _expectCompactFormulaGeometry(
+  WidgetTester tester,
+  Finder panel, {
+  bool horizontalOverflow = false,
+}) {
   final formula = _essenceFormula(panel);
   final formulaRect = tester.getRect(formula);
   final viewport = tester.getRect(
@@ -684,10 +697,12 @@ void _expectCompactFormulaGeometry(WidgetTester tester, Finder panel) {
       closeTo(8, .6),
       reason: 'Quantities stay beside names, including wrapped names.',
     );
-    expect(
-      tester.getRect(quantity).right,
-      lessThanOrEqualTo(formulaRect.right),
-    );
+    if (!horizontalOverflow) {
+      expect(
+        tester.getRect(quantity).right,
+        lessThanOrEqualTo(formulaRect.right),
+      );
+    }
   }
 }
 

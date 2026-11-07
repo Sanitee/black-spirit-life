@@ -45,12 +45,16 @@ enum RecipeBookMarketSort {
   availabilityProfit('Availability + profit'),
   stockLowToHigh('Stock ↑'),
   stockHighToLow('Stock ↓'),
-  profitLowToHigh('Profit/ea ↑'),
-  profitHighToLow('Profit/ea ↓');
+  profitLowToHigh('Profit/craft ↑'),
+  profitHighToLow('Profit/craft ↓');
 
   const RecipeBookMarketSort(this.label);
 
   final String label;
+
+  bool get sortsStock =>
+      this == RecipeBookMarketSort.stockLowToHigh ||
+      this == RecipeBookMarketSort.stockHighToLow;
 
   bool get sortsProfit =>
       this == RecipeBookMarketSort.availabilityProfit ||

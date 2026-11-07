@@ -5,6 +5,7 @@ import 'dart:io';
 import 'package:bdo_craft_planner_flutter/app/window/window_host_service.dart';
 import 'package:bdo_craft_planner_flutter/app/workspace/application_workspace.dart';
 import 'package:bdo_craft_planner_flutter/data/opportunities/opportunity_market_service.dart';
+import 'package:bdo_craft_planner_flutter/domain/formatting/planner_formatters.dart';
 import 'package:bdo_craft_planner_flutter/domain/models/craft_mode.dart';
 import 'package:bdo_craft_planner_flutter/domain/opportunities/exchange_models.dart';
 import 'package:bdo_craft_planner_flutter/domain/opportunities/opportunity_calculator.dart';
@@ -245,7 +246,7 @@ void main() {
       expect(_inputText(tester, 'exchange-search'), 'Sangpyeong');
       await tester.sendKeyEvent(LogicalKeyboardKey.escape);
       await tester.pumpAndSettle();
-      expect(_inputText(tester, 'You have'), '1234');
+      expect(_inputText(tester, 'You have'), '1.234');
       expect(controller.exchangeSaleMode, ExchangeSaleMode.listing);
       expect(planner.documentSnapshot, same(plannerBefore));
 
@@ -338,7 +339,9 @@ void main() {
           expect(
             find.descendant(
               of: find.byKey(const ValueKey('craft-mastery')),
-              matching: find.text('${record.$2}'),
+              matching: find.text(
+                formatGroupedEditableQuantity(record.$2.toDouble()),
+              ),
             ),
             findsOneWidget,
           );
@@ -355,7 +358,7 @@ void main() {
         expect(
           find.descendant(
             of: find.byKey(const ValueKey('craft-mastery')),
-            matching: find.text('2750'),
+            matching: find.text('2.750'),
           ),
           findsOneWidget,
         );

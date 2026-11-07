@@ -2,6 +2,25 @@ import 'package:bdo_craft_planner_flutter/domain/formatting/planner_formatters.d
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
+  test(
+    'whole quantities round trip dots and reject fractions and overflow',
+    () {
+      for (final value in [0, 999, 1234, 1234567, 999999999999]) {
+        expect(parseWholeQuantity(formatQuantity(value.toDouble())), value);
+      }
+      for (final value in [
+        '',
+        '1,25',
+        '1.5',
+        'NaN',
+        'Infinity',
+        '1.23.4',
+        '9007199254740992',
+      ]) {
+        expect(parseWholeQuantity(value), isNull, reason: value);
+      }
+    },
+  );
   group('formatQuantity', () {
     test('matches audited de-DE grouping and adaptive precision', () {
       expect(formatQuantity(1234), '1.234');

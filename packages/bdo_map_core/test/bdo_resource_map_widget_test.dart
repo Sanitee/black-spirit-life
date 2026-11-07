@@ -5261,7 +5261,7 @@ void main() {
         await tester.ensureVisible(settings);
         await tester.tap(settings);
         await tester.pumpAndSettle();
-        expect(tester.widget<TextField>(hours).controller!.text, '6.5');
+        expect(tester.widget<TextField>(hours).controller!.text, '6,5');
         expect(tester.widget<TextField>(availability).controller!.text, '75');
         expect(tester.widget<SwitchListTile>(slowSellers).value, isTrue);
         await tester.tap(find.widgetWithText(TextButton, 'Cancel'));

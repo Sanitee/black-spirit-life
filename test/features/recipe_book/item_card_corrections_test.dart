@@ -236,7 +236,7 @@ void main() {
             expect(
               find.descendant(
                 of: badge('High-Quality Hot Pepper'),
-                matching: stockBadgeText('1.234'),
+                matching: stockBadgeText('1,2k'),
               ),
               findsOneWidget,
             );
@@ -271,19 +271,19 @@ void main() {
             final special = find.text('or 1 Special Tomato');
             expect(
               tester.getRect(tomato).top,
-              closeTo(tester.getRect(high).top, 1),
+              lessThan(tester.getRect(high).top),
             );
             expect(
               tester.getRect(tomato).top,
-              closeTo(tester.getRect(special).top, 1),
+              lessThan(tester.getRect(special).top),
             );
             expect(
               tester.getRect(badge('High-Quality Tomato')).left,
-              closeTo(tester.getRect(high).left, 1),
+              greaterThan(tester.getRect(high).right),
             );
             expect(
-              tester.getRect(badge('High-Quality Tomato')).top,
-              greaterThan(tester.getRect(high).bottom),
+              tester.getRect(badge('High-Quality Tomato')).center.dy,
+              closeTo(tester.getRect(high).center.dy, 1),
             );
             if (scale == 1) {
               expect(

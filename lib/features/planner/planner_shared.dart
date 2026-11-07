@@ -22,6 +22,7 @@ import '../../domain/state/craft_completion.dart';
 import '../../domain/state/planner_state.dart';
 import '../../shared/overlays/anchored_popover.dart';
 import '../../visual/components/app_interaction_frame.dart';
+import '../../visual/components/app_number_fade.dart';
 import '../../visual/illuminated_ledger/ledger_ornament_painters.dart';
 import '../../visual/visual.dart';
 import '../opportunities/opportunity_silver_amount.dart';
@@ -522,7 +523,7 @@ class _PlannerNumberFieldState extends State<PlannerNumberField> {
   );
 }
 
-class PlannerTextField extends StatelessWidget {
+class PlannerTextField extends StatefulWidget {
   const PlannerTextField({
     required this.controller,
     required this.semanticLabel,
@@ -563,7 +564,14 @@ class PlannerTextField extends StatelessWidget {
   final FocusOnKeyEventCallback? onKeyEvent;
 
   @override
-  Widget build(BuildContext context) {
+  State<PlannerTextField> createState() => _PlannerTextFieldState();
+
+  Widget _buildField(
+    BuildContext context,
+    ScrollController textScroll,
+    FocusNode? resolvedFocus,
+    double textOpacity,
+  ) {
     final spec = context.visualTheme;
     final ledger = spec.isIlluminatedLedger;
     final sakura = spec.isSakuraNightGarden;
@@ -595,7 +603,8 @@ class PlannerTextField extends StatelessWidget {
         : suffix;
     final field = TextField(
       controller: controller,
-      focusNode: focusNode,
+      scrollController: textScroll,
+      focusNode: resolvedFocus,
       keyboardType: keyboardType,
       textAlign: textAlign,
       textAlignVertical: TextAlignVertical.center,
@@ -603,6 +612,13 @@ class PlannerTextField extends StatelessWidget {
       onTap: onTap,
       onSubmitted: onSubmitted,
       style: spec.typography.body.copyWith(
+        color: textOpacity == 1
+            ? null
+            : (spec.typography.body.color ?? spec.palette.text).withValues(
+                alpha:
+                    (spec.typography.body.color ?? spec.palette.text).a *
+                    textOpacity,
+              ),
         fontSize: fontSize,
         fontWeight: fontWeight,
         height: denseLayout ? 1.15 : spec.typography.body.height,
@@ -721,6 +737,29 @@ class PlannerTextField extends StatelessWidget {
       child: result,
     );
   }
+}
+
+class _PlannerTextFieldState extends State<PlannerTextField> {
+  // A numeric editor must not restore its containing list's vertical offset
+  // as horizontal text scroll when a lazy row first enters the viewport.
+  final _textScroll = ScrollController(keepScrollOffset: false);
+
+  @override
+  void dispose() {
+    _textScroll.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) =>
+      widget.keyboardType?.index == TextInputType.number.index
+      ? AppNumberFade(
+          controller: widget.controller,
+          focusNode: widget.focusNode,
+          builder: (focus, opacity) =>
+              widget._buildField(context, _textScroll, focus, opacity),
+        )
+      : widget._buildField(context, _textScroll, widget.focusNode, 1);
 }
 
 class PlannerToggle extends StatelessWidget {

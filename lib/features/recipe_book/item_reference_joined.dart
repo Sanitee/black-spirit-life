@@ -755,8 +755,13 @@ class _JoinedItemReferenceState extends State<_JoinedItemReference> {
                   ],
                 ),
               ),
-              for (var i = 0; i < formula.ingredients.length; i++)
-                _ingredient(formula, formula.ingredients[i], i, marketFor, now),
+              _ReferenceIngredientsTable(
+                book: book,
+                formula: formula,
+                mode: formula.mode ?? card.mode,
+                marketFor: marketFor,
+                now: now,
+              ),
               if (card.interactive &&
                   showAction &&
                   book.canActivateFormula(formula))
@@ -765,162 +770,6 @@ class _JoinedItemReferenceState extends State<_JoinedItemReference> {
           ),
         ),
       );
-
-  Widget _ingredient(
-    RecipeBookFormula formula,
-    Ingredient ingredient,
-    int index,
-    OpportunityMarketItem? Function(String) marketFor,
-    DateTime now,
-  ) {
-    final mode = formula.mode ?? card.mode;
-    final alternatives = _formulaAlternatives(
-      ingredient,
-      recipes: book.modeController.owner.modes[mode]!.recipes,
-    );
-    return Semantics(
-      container: true,
-      explicitChildNodes: true,
-      label: [
-        '${_displayQuantity(ingredient.quantity)} ${ingredient.name}',
-        for (final alternative in alternatives)
-          'or ${_displayQuantity(alternative.quantity)} ${alternative.name}',
-      ].join(', '),
-      child: DecoratedBox(
-        key: RecipeBookKeys.itemInfoMaterial(
-          formula.outputName,
-          formula.variantId,
-          ingredient.name,
-        ),
-        decoration: BoxDecoration(
-          color: index.isOdd
-              ? spec.palette.primary.withValues(alpha: refined ? .025 : .045)
-              : Colors.transparent,
-          border: Border(
-            bottom: BorderSide(color: seam.withValues(alpha: .16)),
-          ),
-        ),
-        child: LayoutBuilder(
-          builder: (context, constraints) => IntrinsicHeight(
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Container(
-                  width: 52,
-                  padding: const EdgeInsets.only(top: 9, bottom: 9),
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      colors: [
-                        copper.withValues(alpha: .34),
-                        copper.withValues(alpha: .16),
-                      ],
-                    ),
-                    border: Border(
-                      right: BorderSide(color: seam.withValues(alpha: .2)),
-                    ),
-                  ),
-                  child: Align(
-                    alignment: Alignment.topCenter,
-                    child: _art(ingredient.name, 32, mode),
-                  ),
-                ),
-                const SizedBox(width: 13),
-                Expanded(
-                  child: Padding(
-                    padding: const EdgeInsets.fromLTRB(0, 8, 18, 8),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        if (_qualityChoiceRows(
-                          book,
-                          formula,
-                          ingredient,
-                          mode,
-                        ).isNotEmpty)
-                          _ReferenceQualityChoices(
-                            book: book,
-                            formula: formula,
-                            ingredient: ingredient,
-                            mode: mode,
-                            marketFor: marketFor,
-                            now: now,
-                          )
-                        else ...[
-                          _sourceLine(
-                            ingredient.name,
-                            mode,
-                            marketFor(ingredient.name),
-                            now,
-                            Row(
-                              mainAxisSize: MainAxisSize.min,
-                              crossAxisAlignment: CrossAxisAlignment.baseline,
-                              textBaseline: TextBaseline.alphabetic,
-                              children: [
-                                Flexible(
-                                  child: _ReferenceItemName(
-                                    name: ingredient.name,
-                                    style: ItemDetailStyle.ingredient(spec),
-                                  ),
-                                ),
-                                const SizedBox(width: 8),
-                                Text(
-                                  '×${_displayQuantity(ingredient.quantity)}',
-                                  style: meta,
-                                ),
-                              ],
-                            ),
-                          ),
-                          for (final alternate in alternatives)
-                            Padding(
-                              padding: const EdgeInsets.only(top: 6),
-                              child: _sourceLine(
-                                alternate.name,
-                                mode,
-                                marketFor(alternate.name),
-                                now,
-                                _ReferenceItemName(
-                                  name: alternate.name,
-                                  label:
-                                      'or ${_displayQuantity(alternate.quantity)} ${alternate.name}',
-                                  style: meta.copyWith(
-                                    height: 1.45,
-                                    fontWeight: FontWeight.w400,
-                                  ),
-                                ),
-                                inline: true,
-                              ),
-                            ),
-                        ],
-                      ],
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _sourceLine(
-    String name,
-    CraftMode mode,
-    OpportunityMarketItem? market,
-    DateTime now,
-    Widget label, {
-    bool inline = false,
-  }) {
-    return _referenceIngredientSourceLine(
-      book: book,
-      mode: mode,
-      name: name,
-      market: market,
-      now: now,
-      label: label,
-      inline: inline,
-    );
-  }
 
   Widget _action(RecipeBookFormula formula) => Container(
     padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),

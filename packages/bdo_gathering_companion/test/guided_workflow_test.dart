@@ -230,7 +230,7 @@ void main() {
         confirmed.toJson(),
       );
       await tap('inline-stats-reset');
-      expect(tester.widget<TextField>(mastery).controller!.text, '1735');
+      expect(tester.widget<TextField>(mastery).controller!.text, '1.735');
       expect(tester.widget<TextField>(dropRate).controller!.text, '47');
       expectActionsEnabled(true);
 
@@ -241,7 +241,7 @@ void main() {
       final effective = buffed.effectiveSettings(catalog);
       expect(effective.mastery, greaterThan(1735));
       expect(effective.gatheringDropRatePercent, greaterThan(47));
-      expect(tester.widget<TextField>(mastery).controller!.text, '1735');
+      expect(tester.widget<TextField>(mastery).controller!.text, '1.735');
       expect(tester.widget<TextField>(dropRate).controller!.text, '47');
 
       await tap('record-results');

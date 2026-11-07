@@ -1,5 +1,6 @@
 import 'dart:math' as math;
 
+import 'package:bdo_number_format/bdo_number_format.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -1206,18 +1207,23 @@ class _RoyalEstimateEditor extends StatelessWidget {
                                 key: ValueKey<String>(
                                   'royal-workshop-hours-${area.id}-$workshopIndex',
                                 ),
-                                initialValue: plan.taskHours?.toString(),
+                                initialValue: plan.taskHours == null
+                                    ? null
+                                    : formatGroupedEditableQuantity(
+                                        plan.taskHours!,
+                                        fractionDigits: 12,
+                                      ),
                                 keyboardType:
                                     const TextInputType.numberWithOptions(
                                       decimal: true,
                                     ),
                                 inputFormatters: <TextInputFormatter>[
                                   FilteringTextInputFormatter.allow(
-                                    RegExp(r'[0-9.]'),
+                                    RegExp(r'[0-9., ]'),
                                   ),
                                 ],
                                 onChanged: (value) {
-                                  final hours = double.tryParse(value);
+                                  final hours = parsePlannerNumber(value);
                                   onChanged(
                                     plan.copyWith(
                                       taskHours: hours,
@@ -1242,8 +1248,10 @@ class _RoyalEstimateEditor extends StatelessWidget {
                                 ),
                                 initialValue: plan.netSilverPerCycle == null
                                     ? ''
-                                    : (plan.netSilverPerCycle! / 1000000)
-                                          .toString(),
+                                    : formatGroupedEditableQuantity(
+                                        plan.netSilverPerCycle! / 1000000,
+                                        fractionDigits: 12,
+                                      ),
                                 enabled: !excludedRare,
                                 keyboardType:
                                     const TextInputType.numberWithOptions(
@@ -1254,14 +1262,14 @@ class _RoyalEstimateEditor extends StatelessWidget {
                                   TextInputFormatter.withFunction(
                                     (oldValue, newValue) =>
                                         RegExp(
-                                          r'^-?\d*\.?\d*$',
+                                          r'^-?[0-9., ]*$',
                                         ).hasMatch(newValue.text)
                                         ? newValue
                                         : oldValue,
                                   ),
                                 ],
                                 onChanged: (value) {
-                                  final millions = double.tryParse(value);
+                                  final millions = parsePlannerNumber(value);
                                   final net = millions == null
                                       ? null
                                       : millions * 1000000;
