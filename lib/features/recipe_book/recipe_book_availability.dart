@@ -13,12 +13,15 @@ class RecipeBookIngredientChoice {
     required this.marketable,
     required this.stock,
     required this.preorders,
+    this.vendorHint,
   });
   final Ingredient ingredient;
   final String name, baseName, grade;
   final double quantity, owned;
   final bool npc, marketable;
   final int? stock, preorders;
+  final String? vendorHint;
+  bool get displaysNpc => vendorHint != null || npc;
 }
 
 class RecipeBookAvailability {
@@ -282,6 +285,7 @@ extension RecipeBookAvailabilityController on RecipeBookController {
       quantity: pick.need,
       owned: owned.isFinite ? math.max(0, owned) : 0,
       npc: identity.npc,
+      vendorHint: npcVendorHint(modeController, pick.name),
       marketable: identity.marketId != null,
       stock: market?.stockFor(now, sharedMarketFreshness),
       preorders: market?.bookIsFresh(now, sharedMarketFreshness) == true
@@ -351,6 +355,7 @@ extension RecipeBookAvailabilityController on RecipeBookController {
             quantity: row.quantity,
             owned: row.owned,
             npc: row.npc,
+            vendorHint: row.vendorHint,
             marketable: row.marketable,
             stock: availabilityMarketFor(
               row.name,

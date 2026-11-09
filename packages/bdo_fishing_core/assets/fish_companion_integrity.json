@@ -1,8 +1,8 @@
 {
   "source": "Black Spirit Life 0.1.12 Fish payload with local-only empty-on-first-run personal storage",
   "sourceFileCount": 3562,
-  "sourceByteCount": 554239435,
-  "sourceAggregateSha256": "d548e1e9129cc46842cd79885ebe36ccb8e83ffefc04003673a518a905c89b38",
+  "sourceByteCount": 554242722,
+  "sourceAggregateSha256": "7f17ef192610e5ee9d114289bf68e85652e4d987d339ed66451fc4f5847cdb3a",
   "serviceByteCount": 28782836,
   "serviceSha256": "b3d4b2617078af3cc2d4f0263a88450728806984d3022e40b1b83f2303750fb3"
 }

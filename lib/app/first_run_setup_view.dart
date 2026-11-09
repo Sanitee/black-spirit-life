@@ -1,3 +1,5 @@
+import 'package:bdo_number_format/bdo_number_format.dart';
+import 'package:bdo_number_input/bdo_number_input.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../domain/market/market_calculations.dart';
@@ -794,7 +796,7 @@ double _scale(BuildContext context, double size) =>
     MediaQuery.textScalerOf(context).scale(size) / size;
 int? _mastery(String text) {
   if (text.trim().isEmpty) return 0;
-  final v = int.tryParse(text);
+  final v = parseWholeQuantity(text);
   return v != null && v >= 0 && v <= 3000 ? v : null;
 }
 
@@ -807,7 +809,7 @@ double? _parseQuantity(String text) {
   final t = text.trim();
   if (t.isEmpty) return 0;
   if (!_NonNegativeNumberInputFormatter.allowed.hasMatch(t)) return null;
-  final v = double.tryParse(t.replaceAll(',', '.'));
+  final v = parsePlannerNumber(t);
   return v != null && v.isFinite && v >= 0 ? v : null;
 }
 
@@ -819,7 +821,12 @@ final class _MasteryInputFormatter extends TextInputFormatter {
     TextEditingValue newValue,
   ) {
     if (newValue.text.isEmpty) return newValue;
-    final v = BigInt.tryParse(newValue.text);
+    final grouped = const GroupedNumberInputFormatter().formatEditUpdate(
+      oldValue,
+      newValue,
+    );
+    if (grouped.text.contains(',')) return oldValue;
+    final v = BigInt.tryParse(grouped.text.replaceAll('.', ''));
     if (v == null) return oldValue;
     final max = BigInt.from(3000),
         bounded = v < BigInt.zero
@@ -827,8 +834,8 @@ final class _MasteryInputFormatter extends TextInputFormatter {
             : v > BigInt.from(3000)
             ? BigInt.from(3000)
             : v;
-    if (v >= BigInt.zero && v <= max) return newValue;
-    final text = '$bounded';
+    if (v >= BigInt.zero && v <= max) return grouped;
+    final text = formatGroupedEditableQuantity(bounded.toDouble());
     return TextEditingValue(
       text: text,
       selection: TextSelection.collapsed(offset: text.length),
@@ -838,7 +845,7 @@ final class _MasteryInputFormatter extends TextInputFormatter {
 
 final class _NonNegativeNumberInputFormatter extends TextInputFormatter {
   const _NonNegativeNumberInputFormatter();
-  static final allowed = RegExp(r'^\d*(?:[.,]\d*)?$');
+  static final allowed = RegExp(r'^[0-9.,]*$');
   @override
   TextEditingValue formatEditUpdate(
     TextEditingValue oldValue,

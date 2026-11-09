@@ -5,6 +5,7 @@ import 'package:bdo_craft_planner_flutter/features/opportunities/opportunity_cra
 import 'package:bdo_craft_planner_flutter/features/shared/availability_game_icon.dart';
 import 'package:bdo_craft_planner_flutter/features/shared/inventory_count_badge.dart';
 import 'package:bdo_craft_planner_flutter/features/shared/market_count_badges.dart';
+import 'package:bdo_craft_planner_flutter/features/shared/npc_source_marker.dart';
 import 'package:bdo_craft_planner_flutter/visual/components/app_tooltip.dart';
 import 'package:bdo_craft_planner_flutter/visual/visual.dart';
 import 'package:flutter/material.dart';
@@ -51,7 +52,12 @@ void main() {
       final tips = tester
           .widgetList<AppTooltip>(find.byType(AppTooltip))
           .toList();
-      expect(tips.every((tip) => !tip.approvedHover), isTrue);
+      expect(
+        tips
+            .where((tip) => tip.approvedHover)
+            .every((tip) => tip.message == 'NPC vendor'),
+        isTrue,
+      );
       expect(
         tips.map((tip) => tip.message),
         containsAll([
@@ -60,7 +66,7 @@ void main() {
           'Market stock: not checked',
           'Market stock: 0',
           'Preorders: 84 waiting to buy',
-          'Available from an NPC',
+          'NPC vendor',
           'Owned 69.200',
         ]),
       );
@@ -76,14 +82,13 @@ void main() {
         stockBadgeText('—'),
         find.text('Orders 5k'),
         find.text('Orders 84'),
-        find.text('NPC'),
         find.text('69,2k'),
       ]) {
         final before = tester.getRect(target);
         await mouse.moveTo(tester.getCenter(target));
         await tester.pump(const Duration(seconds: 2));
         await tester.pumpAndSettle();
-        for (final tip in tips) {
+        for (final tip in tips.where((tip) => !tip.approvedHover)) {
           expect(find.text(tip.message!), findsNothing);
         }
         expect(tester.getRect(target), before);
@@ -153,7 +158,10 @@ void main() {
             );
             final comfortable = density == MarketBadgeDensity.comfortable;
             final text = tester.widget<Text>(find.text(source.label));
-            expect(text.style!.fontSize, comfortable ? 14 : 12);
+            expect(
+              text.style!.fontSize,
+              source.npc ? 11.5 : (comfortable ? 14 : 12),
+            );
             expect(text.style!.fontFamily, spec.typography.meta.fontFamily);
             final material = OpportunityCraftCardMaterial.forSpec(
               spec,
@@ -161,7 +169,23 @@ void main() {
                   ? OpportunityStockTone.mixed
                   : marketStockTone(source.stock),
             );
-            expect(text.style!.color, material.badgeInk);
+            expect(
+              text.style!.color,
+              source.npc ? spec.palette.textMuted : material.badgeInk,
+            );
+            if (source.npc) {
+              expect(find.byType(NpcSourceMarker), findsOneWidget);
+              expect(
+                find.descendant(
+                  of: find.byType(NpcSourceMarker),
+                  matching: find.byWidgetPredicate(
+                    (widget) =>
+                        widget is Container && widget.decoration != null,
+                  ),
+                ),
+                findsNothing,
+              );
+            }
             expect(
               tester
                   .widget<AvailabilityGameIcon>(
@@ -171,7 +195,7 @@ void main() {
                     ),
                   )
                   .size,
-              comfortable ? 17 : 16,
+              source.npc ? 14 : (comfortable ? 17 : 16),
             );
             expect(
               find.byKey(const ValueKey('availability-game-icon:preorders')),
@@ -183,7 +207,9 @@ void main() {
             expect(
               tester
                   .widgetList<AppTooltip>(find.byType(AppTooltip))
-                  .every((tip) => !tip.approvedHover),
+                  .every(
+                    (tip) => !tip.approvedHover || tip.message == 'NPC vendor',
+                  ),
               isTrue,
             );
             expect(tester.takeException(), isNull);

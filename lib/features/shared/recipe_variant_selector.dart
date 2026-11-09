@@ -291,11 +291,13 @@ class RecipeRouteCostComparison extends StatelessWidget {
   const RecipeRouteCostComparison({
     required this.selection,
     required this.itemIconBuilder,
+    this.vendorHintFor,
     super.key,
   });
 
   final RecipeRouteSelection selection;
   final Widget Function(String name, double size) itemIconBuilder;
+  final String? Function(String name)? vendorHintFor;
 
   String get _summary {
     if (!selection.hasCompleteComparison) return 'Check Prices to compare';
@@ -366,6 +368,7 @@ class RecipeRouteCostComparison extends StatelessWidget {
       popoverBuilder: (context, close) => _RecipeRouteCostDetails(
         selection: selection,
         itemIconBuilder: itemIconBuilder,
+        vendorHintFor: vendorHintFor,
         onClose: close,
       ),
     );
@@ -379,10 +382,12 @@ class _RecipeRouteCostDetails extends StatelessWidget {
   const _RecipeRouteCostDetails({
     required this.selection,
     required this.itemIconBuilder,
+    this.vendorHintFor,
     required this.onClose,
   });
   final RecipeRouteSelection selection;
   final Widget Function(String name, double size) itemIconBuilder;
+  final String? Function(String name)? vendorHintFor;
   final VoidCallback onClose;
 
   @override
@@ -422,7 +427,13 @@ class _RecipeRouteCostDetails extends StatelessWidget {
                             style: style.copyWith(fontWeight: FontWeight.w700),
                           ),
                           badge: SourceAvailabilityBadges(
-                            npc: option.npcBuyable,
+                            npc:
+                                option.npcBuyable ||
+                                vendorHintFor?.call(option.ingredientName) !=
+                                    null,
+                            vendorHint: vendorHintFor?.call(
+                              option.ingredientName,
+                            ),
                             stock: option.stockKnown
                                 ? option.availableStock.round()
                                 : null,

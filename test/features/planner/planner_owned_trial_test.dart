@@ -112,11 +112,6 @@ void main() {
             expect(completed, findsNothing);
             expect(mode.plan.value, same(planBefore));
             expect(harness.bundle.controller.documentSnapshot, same(before));
-            await _showInList(
-              tester,
-              find.byKey(PlannerActionKeys.row('P08', _target)),
-              queue: true,
-            );
             expect(
               find.byKey(PlannerActionKeys.row('P08', _target)),
               findsOneWidget,
@@ -392,7 +387,10 @@ void main() {
             for (final name in ["Nev's Fragment", 'Reforge Stone - All AP']) {
               await _showInList(tester, _need(name));
               expect(
-                find.descendant(of: _need(name), matching: stockBadgeText('0')),
+                find.descendant(
+                  of: _need(name),
+                  matching: stockBadgeText('0'),
+                ),
                 findsOneWidget,
               );
               expect(

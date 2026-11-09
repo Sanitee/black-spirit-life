@@ -1,3 +1,4 @@
+import 'package:bdo_number_input/bdo_number_input.dart';
 import 'package:bdo_number_format/bdo_number_format.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -904,9 +905,11 @@ class _GatheringSetupDialogState extends State<_GatheringSetupDialog> {
     enabled: widget.enabled,
     onChanged: (_) => _numberChanged(controller),
     keyboardType: TextInputType.numberWithOptions(decimal: !integer),
-    inputFormatters: widget.inline
-        ? null
-        : [FilteringTextInputFormatter.allow(RegExp(r'[0-9., ]'))],
+    inputFormatters: groupedNumberFormatters(
+      widget.inline
+          ? null
+          : [FilteringTextInputFormatter.allow(RegExp(r'[0-9., ]'))],
+    ),
     style: Theme.of(context).textTheme.titleMedium?.copyWith(
       fontSize: 18,
       fontWeight: FontWeight.w600,

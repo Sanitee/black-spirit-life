@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'market_count_badges.dart';
+import 'npc_source_marker.dart';
 
 /// The same availability vocabulary and materials in every item surface.
 /// This displays supplied facts only; it never guesses stock or fetches data.
@@ -8,6 +9,7 @@ class SourceAvailabilityBadges extends StatelessWidget {
     required this.stock,
     this.preorders,
     this.npc = false,
+    this.vendorHint,
     this.showMarket,
     this.density = MarketBadgeDensity.compact,
     this.alignment = WrapAlignment.start,
@@ -16,16 +18,29 @@ class SourceAvailabilityBadges extends StatelessWidget {
   });
   final int? stock, preorders;
   final bool npc;
+  final String? vendorHint;
   final bool? showMarket;
   final MarketBadgeDensity density;
   final WrapAlignment alignment;
   final Key? stockKey;
+
+  bool get displaysMarket => showMarket ?? !npc;
+  SourceAvailabilityBadges get marketOnly => SourceAvailabilityBadges(
+    key: key,
+    stock: stock,
+    preorders: preorders,
+    showMarket: displaysMarket,
+    density: density,
+    alignment: alignment,
+    stockKey: stockKey,
+  );
 
   MarketCountBadges presentation(BuildContext context) {
     return MarketCountBadges(
       stock: stock,
       preorders: preorders,
       npc: npc,
+      vendorHint: vendorHint,
       showMarket: showMarket,
       density: density,
       alignment: alignment,
@@ -61,25 +76,32 @@ class SourceAvailabilityLine extends StatelessWidget {
         );
 
   Widget _line(BuildContext context, double width) {
-    final natural = badge.presentation(context).preferredWidth(context);
+    final identity = ItemNameWithNpc(
+      npc: badge.npc,
+      vendorHint: badge.vendorHint,
+      child: label,
+    );
+    if (!badge.displaysMarket) return identity;
+    final market = badge.marketOnly;
+    final natural = market.presentation(context).preferredWidth(context);
     final badgeWidth = natural.clamp(0.0, width * .52);
     final scale = MediaQuery.textScalerOf(context).scale(14) / 14;
     if (width - badgeWidth - 10 < 150 * scale) {
       return Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          label,
+          identity,
           const SizedBox(height: 6),
-          Align(alignment: Alignment.centerRight, child: badge),
+          Align(alignment: Alignment.centerRight, child: market),
         ],
       );
     }
     return Row(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        Expanded(child: label),
+        Expanded(child: identity),
         const SizedBox(width: 10),
-        SizedBox(width: badgeWidth, child: badge),
+        SizedBox(width: badgeWidth, child: market),
       ],
     );
   }
@@ -98,6 +120,16 @@ class SourceAvailabilityBelowLabel extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Column(
     crossAxisAlignment: CrossAxisAlignment.start,
-    children: [label, const SizedBox(height: 6), badge],
+    children: [
+      ItemNameWithNpc(
+        npc: badge.npc,
+        vendorHint: badge.vendorHint,
+        child: label,
+      ),
+      if (badge.displaysMarket) ...[
+        const SizedBox(height: 6),
+        badge.marketOnly,
+      ],
+    ],
   );
 }

@@ -38,6 +38,7 @@ import '../recipe_book/recipe_book_item_info.dart';
 import '../recipe_book/recipe_book_item_info_view.dart';
 import '../shared/market_count_badges.dart';
 import '../shared/mode_item_icon.dart';
+import '../shared/npc_source_marker.dart';
 import '../shared/profile_game_icon.dart';
 import '../shared/silver_amount_content.dart';
 import '../shared/source_availability_badges.dart';

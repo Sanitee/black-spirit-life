@@ -229,11 +229,12 @@ void main() {
       expect(findActionHint('New session'), findsOneWidget);
       await _openDetails(tester);
       expect(tester.widget<TextField>(_duration).enabled, isTrue);
-      await tester.enterText(_duration, '45');
+      await tester.enterText(_duration, '1234,5');
+      expect(tester.widget<TextField>(_duration).controller!.text, '1.234,5');
       await tester.enterText(_notes, 'Northern route');
       final date = await _pickFirstOfMonth(tester);
       await _finishDetails(tester);
-      expect(find.text('45:00'), findsOneWidget);
+      expect(find.text('20:34:30'), findsOneWidget);
       expect(
         tester.widget<Text>(_key('session-summary-notes')).data,
         'Northern route',
@@ -251,7 +252,7 @@ void main() {
       await tester.tap(find.text('Cancel'));
       await tester.pumpAndSettle();
       await _openDetails(tester);
-      expect(tester.widget<TextField>(_duration).controller!.text, '45');
+      expect(tester.widget<TextField>(_duration).controller!.text, '1.234,5');
       expect(
         tester.widget<TextField>(_notes).controller!.text,
         'Northern route',
@@ -262,7 +263,7 @@ void main() {
       await tester.pumpAndSettle();
       expect(store.sessions, hasLength(1));
       final saved = store.sessions.single;
-      expect(saved.durationSeconds, 2700);
+      expect(saved.durationSeconds, 74070);
       expect(saved.notes, 'Northern route');
       expect(saved.createdAt.year, date.year);
       expect(saved.createdAt.month, date.month);

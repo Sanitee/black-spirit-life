@@ -258,6 +258,7 @@ void main() {
       const approved = {
         'lib/features/recipe_book/recipe_book_item_info_view.dart': 1,
         'lib/features/resource_map/recipe_worker_panel.dart': 1,
+        'lib/features/shared/npc_source_marker.dart': 1,
       };
       final found = <String, int>{};
       final optIn = RegExp(r'approvedHover\s*:\s*true\b');

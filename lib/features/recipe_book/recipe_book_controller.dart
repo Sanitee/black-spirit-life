@@ -24,6 +24,7 @@ import '../../domain/state/state_copy.dart';
 import '../../domain/state/transactions/state_transactions.dart';
 import '../planner/planner_choice_market.dart';
 import '../planner/planner_contracts.dart';
+import '../shared/npc_vendor_hint.dart';
 import 'exchange_reference_information.dart';
 import 'plain_item_information.dart';
 import 'recipe_book_item_info.dart';

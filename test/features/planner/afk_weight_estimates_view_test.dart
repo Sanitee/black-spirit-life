@@ -110,6 +110,14 @@ void main() {
         final panel = tester.getRect(
           find.byKey(const ValueKey('planner-afk-split')),
         );
+        final maximum = find.byKey(const ValueKey('planner-afk-mode-maximum'));
+        final label = find.descendant(of: maximum, matching: find.text('Max'));
+        expect(label, findsOneWidget);
+        final buttonRect = tester.getRect(maximum);
+        final labelRect = tester.getRect(label);
+        expect(labelRect.center.dy, closeTo(buttonRect.center.dy, 1));
+        expect(buttonRect.contains(labelRect.topLeft), isTrue);
+        expect(buttonRect.contains(labelRect.bottomRight), isTrue);
         for (final key in [
           'planner-afk-total-weight',
           'planner-afk-expected-weight',

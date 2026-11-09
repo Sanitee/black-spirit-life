@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:bdo_craft_planner_flutter/visual/components/app_tooltip.dart';
+import 'package:bdo_number_input/bdo_number_input.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -8,6 +9,7 @@ import '../../app/state/planner_application_controller.dart';
 import '../../app/workspace/planner_gather_checklist_bridge.dart'
     show gatherNeededForPlan;
 import '../../data/catalog/catalog_repository.dart';
+import '../../data/market/shared_market_repository.dart';
 import '../../data/opportunities/market_eligibility.dart';
 import '../../domain/catalog/item_name_presentation.dart';
 import '../../domain/catalog/temporarily_archived_items.dart';
@@ -31,12 +33,14 @@ import '../recipe_book/recipe_book_item_info.dart';
 import '../recipe_book/recipe_book_item_info_view.dart';
 import '../shared/market_region_selector.dart';
 import '../shared/mode_item_icon.dart';
+import '../shared/npc_source_marker.dart';
 import '../shared/profile_game_icon.dart';
 import '../shared/quality_grade_button.dart';
 import '../shared/recipe_variant_selector.dart';
 import '../shared/source_availability_badges.dart';
 import '../shared/workshop_presentation.dart';
 import 'need_material_order.dart';
+import 'planner_choice_market.dart';
 import 'planner_completed_projection.dart';
 import 'planner_contracts.dart';
 import 'planner_inventory_input.dart';
@@ -607,6 +611,10 @@ class PlannerTextField extends StatefulWidget {
       scrollController: textScroll,
       focusNode: resolvedFocus,
       keyboardType: keyboardType,
+      inputFormatters: groupedNumberFormatters(
+        null,
+        enabled: keyboardType?.index == TextInputType.number.index,
+      ),
       textAlign: textAlign,
       textAlignVertical: TextAlignVertical.center,
       onChanged: onChanged,
@@ -2264,6 +2272,8 @@ class _QueueStepCard extends StatelessWidget {
                                   routeSelection.hasComparison) ...<Widget>[
                                 const SizedBox(height: 6),
                                 RecipeRouteCostComparison(
+                                  vendorHintFor: (name) =>
+                                      npcVendorHint(controller, name),
                                   selection: routeSelection,
                                   itemIconBuilder: (name, size) =>
                                       PlannerItemIcon(
@@ -3447,6 +3457,7 @@ class _AfkLoadCardState extends State<_AfkLoadCard> {
                     key: const ValueKey('planner-afk-actual-output'),
                     controller: _actualOutput,
                     keyboardType: TextInputType.number,
+                    inputFormatters: const [GroupedNumberInputFormatter()],
                     textAlign: TextAlign.right,
                     textAlignVertical: TextAlignVertical.center,
                     style: _batchQuantityStyle(context),
@@ -3672,7 +3683,7 @@ class _AfkLoadCardState extends State<_AfkLoadCard> {
         tooltip: 'Only the items still needed',
       ),
       _modeButton(
-        label: 'Load estimate',
+        label: 'Max',
         key: const ValueKey<String>('planner-afk-mode-maximum'),
         mode: _AfkLoadMode.maximum,
         tooltip: 'Estimated load with your Keep free reserve',
@@ -4702,7 +4713,7 @@ class _NeedPanel extends StatelessWidget {
     );
     final needListWithoutPlatformScrollbar = ScrollConfiguration(
       behavior: ScrollConfiguration.of(context).copyWith(scrollbars: false),
-      child: needList,
+      child: PlannerNeedBadgeColumns(rows: materials, child: needList),
     );
     final headerActions = action == null
         ? null
@@ -4858,6 +4869,7 @@ class _NeedRow extends StatelessWidget {
                 ) ==
                 null);
     final source = _sourceInfo(controller, row);
+    final vendorHint = npcVendorHint(controller, row.name);
     final confirmedMarketUnlisted =
         controller.state.value.market.isItemUnlisted(row.name) ||
         _isReviewedNonMarketItem(controller, row.name) ||
@@ -4941,6 +4953,8 @@ class _NeedRow extends StatelessWidget {
                                                 toggle,
                                                 showing,
                                               ) => _CopyAndSwapName(
+                                                npc: vendorHint != null,
+                                                vendorHint: vendorHint,
                                                 onCopy:
                                                     externalActions.copyName,
                                                 swapKey: PlannerActionKeys.row(
@@ -4963,6 +4977,8 @@ class _NeedRow extends StatelessWidget {
                                               ),
                                         )
                                       : _CopyAndSwapName(
+                                          npc: vendorHint != null,
+                                          vendorHint: vendorHint,
                                           onCopy: externalActions.copyName,
                                           swapKey: PlannerActionKeys.row(
                                             'P12',
@@ -4992,7 +5008,12 @@ class _NeedRow extends StatelessWidget {
                                     onCopy: externalActions.copyName,
                                   ),
                           ),
-                          if (source.hasDetails) ...<Widget>[
+                          if (!hasSubstitutes && vendorHint != null) ...[
+                            const SizedBox(width: 12),
+                            NpcSourceMarker(vendorHint: vendorHint),
+                          ],
+                          if (source.hasDetails &&
+                              vendorHint == null) ...<Widget>[
                             const SizedBox(width: 5),
                             _AnchoredSourceInfoButton(
                               key: PlannerActionKeys.row('P17', row.name),
@@ -5030,11 +5051,27 @@ class _NeedRow extends StatelessWidget {
                   ),
                   marketDetails:
                       showPrices &&
+                          !confirmedMarketUnlisted &&
+                          choiceMarketIdentity(
+                                controller,
+                                row.name,
+                                acrossModes: true,
+                              ).marketId !=
+                              null
+                      ? _MarketPills(
+                          controller: controller,
+                          row: row,
+                          suppressCentralMarket: confirmedMarketUnlisted,
+                        )
+                      : null,
+                  marketPrices:
+                      showPrices &&
                           _hasMarketPills(
                             row,
                             suppressCentralMarket: confirmedMarketUnlisted,
                           )
                       ? _MarketPills(
+                          pricesOnly: true,
                           controller: controller,
                           row: row,
                           suppressCentralMarket: confirmedMarketUnlisted,
@@ -5292,16 +5329,17 @@ class _OwnedDraftActionsState extends State<_OwnedDraftActions> {
         MediaQuery.textScalerOf(context).scale(bodyFontSize) / bodyFontSize;
     final referenceGeometry = textScale <= 1.25;
     final denseLayout = spec.usesDenseSplitLayout;
+    final inputWidth = 82 * textScale.clamp(1.0, 2.0);
     return Row(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
         SizedBox(
-          width: denseLayout ? 82 : 92,
+          width: inputWidth + (denseLayout ? 0 : 10),
           child: Align(
             alignment: Alignment.topCenter,
             child: SizedBox(
-              width: 82,
+              width: inputWidth,
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -5511,6 +5549,8 @@ class _CopyAndSwapName extends StatelessWidget {
     required this.onToggle,
     this.color,
     this.semanticLabel,
+    this.npc = false,
+    this.vendorHint,
   });
   final String name;
   final Key nameKey;
@@ -5521,6 +5561,8 @@ class _CopyAndSwapName extends StatelessWidget {
   final VoidCallback onToggle;
   final Color? color;
   final String? semanticLabel;
+  final bool npc;
+  final String? vendorHint;
 
   @override
   Widget build(BuildContext context) => Row(
@@ -5536,6 +5578,10 @@ class _CopyAndSwapName extends StatelessWidget {
           color: color,
         ),
       ),
+      if (npc) ...[
+        const SizedBox(width: 12),
+        NpcSourceMarker(vendorHint: vendorHint),
+      ],
       const SizedBox(width: 6),
       AppButton(
         key: swapKey,
@@ -6156,11 +6202,13 @@ class _MarketPills extends StatelessWidget {
     required this.controller,
     required this.row,
     required this.suppressCentralMarket,
+    this.pricesOnly = false,
   });
 
   final ModeFeatureController controller;
   final MissingMaterial row;
   final bool suppressCentralMarket;
+  final bool pricesOnly;
 
   @override
   Widget build(BuildContext context) {
@@ -6178,43 +6226,64 @@ class _MarketPills extends StatelessWidget {
         height: 1.25,
       ),
     );
-    final stock = SourceAvailabilityBadges(
-      npc: vendor,
-      stock: market.stockKnown ? market.stock.toInt() : null,
-    );
-    Widget amount(double? value, String label) => Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        if (label == 'Total') ...[text(label), const SizedBox(width: 5)],
-        PlannerItemIcon(
-          controller: controller,
-          name: 'Silver',
-          size: 18,
-          showFrame: false,
-        ),
-        const SizedBox(width: 5),
-        Flexible(
-          child: OpportunitySilverAmount(
+    if (!pricesOnly) {
+      return PlannerChoiceMarket(
+        controller: controller,
+        names: [row.name],
+        resolveAcrossModes: true,
+        builder: (context, marketFor, now) {
+          final live = marketFor(row.name);
+          return SourceAvailabilityBadges(
+            stock:
+                live?.stockFor(now, sharedMarketFreshness) ??
+                (!vendor && market.stockKnown ? market.stock.toInt() : null),
+            preorders: live?.bookIsFresh(now, sharedMarketFreshness) == true
+                ? live?.preorderCount
+                : null,
+          );
+        },
+      );
+    }
+    Widget amount(double? value, String label) => Container(
+      key: ValueKey('planner-need-price:${row.key}:$label'),
+      padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 4),
+      decoration: BoxDecoration(
+        color: spec.palette.surfaceInset.withAlpha(120),
+        border: Border.all(color: spec.palette.trim.withAlpha(120)),
+        borderRadius: BorderRadius.circular(3),
+      ),
+      child: Wrap(
+        spacing: 5,
+        runSpacing: 3,
+        crossAxisAlignment: WrapCrossAlignment.center,
+        children: [
+          if (label == 'Total') text(label),
+          PlannerItemIcon(
+            controller: controller,
+            name: 'Silver',
+            size: 18,
+            showFrame: false,
+          ),
+          OpportunitySilverAmount(
             value: value,
             wholeSilver: true,
             style: spec.typography.meta.copyWith(
               color: spec.palette.text,
-              fontSize: 16,
-              fontWeight: FontWeight.w600,
+              fontSize: 14,
+              fontWeight: label == 'Total' ? FontWeight.w600 : FontWeight.w400,
               fontStyle: FontStyle.normal,
             ),
           ),
-        ),
-        if (label == 'each') ...[const SizedBox(width: 5), text(label)],
-      ],
+          if (label == 'each') text(label),
+        ],
+      ),
     );
     return Wrap(
       alignment: WrapAlignment.start,
       crossAxisAlignment: WrapCrossAlignment.center,
       spacing: 14,
-      runSpacing: 6,
+      runSpacing: 4,
       children: [
-        stock,
         amount(market.price > 0 ? market.price : null, 'each'),
         amount(market.price > 0 ? market.total : null, 'Total'),
       ],

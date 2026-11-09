@@ -72,6 +72,9 @@ class RecipeIngredientTable extends StatelessWidget {
         42 * scale.clamp(1, 1.35) +
             10 +
             painter.width.ceilToDouble() +
+            (row.displaysNpc
+                ? 12 + const NpcSourceMarker().preferredWidth(context)
+                : 0) +
             (hasSwitch?.call(row) == true
                 ? (switchWidth?.call(row) ?? 44)
                 : 0) +
@@ -141,11 +144,9 @@ class RecipeIngredientTable extends StatelessWidget {
             columnWidths: {
               0: const FlexColumnWidth(),
               1: FixedColumnWidth(widths.ingredientGap),
-              2: FixedColumnWidth(widths.npc),
-              3: FixedColumnWidth(10 * scale),
-              4: FixedColumnWidth(widths.inventory),
-              5: FixedColumnWidth(14 * scale),
-              6: FixedColumnWidth(widths.market),
+              2: FixedColumnWidth(widths.inventory),
+              3: FixedColumnWidth(14 * scale),
+              4: FixedColumnWidth(widths.market),
             },
             children: [
               TableRow(
@@ -154,8 +155,6 @@ class RecipeIngredientTable extends StatelessWidget {
                 ),
                 children: [
                   heading('Ingredients'),
-                  const SizedBox.shrink(),
-                  heading('NPC'),
                   const SizedBox.shrink(),
                   heading('Inventory'),
                   const SizedBox.shrink(),
@@ -191,22 +190,6 @@ class RecipeIngredientTable extends StatelessWidget {
                     cell(
                       _wrappedLabel(context, rows[index], index),
                       left: true,
-                    ),
-                    const SizedBox.shrink(),
-                    cell(
-                      rows[index].npc
-                          ? MarketCountBadges(
-                              key: ValueKey(
-                                '${rows[index].marketable ? 'reference-npc' : 'reference-source'}:${rows[index].name}',
-                              ),
-                              density: MarketBadgeDensity.comfortable,
-                              stock: null,
-                              preorders: null,
-                              npc: true,
-                              showMarket: false,
-                              singleLine: true,
-                            )
-                          : const SizedBox.shrink(),
                     ),
                     const SizedBox.shrink(),
                     cell(
@@ -288,27 +271,36 @@ class RecipeIngredientTable extends StatelessWidget {
         ),
         const SizedBox(width: 10),
         Flexible(
-          child: Text.rich(
-            TextSpan(
-              children: [
-                TextSpan(
-                  text: itemDisplayName(row.name),
-                  style: spec.typography.label.copyWith(
-                    fontSize: 15,
-                    fontWeight: FontWeight.w600,
-                    color: spec.palette.text,
-                    height: 1.3,
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Flexible(
+                child: ItemNameWithNpc(
+                  npc: row.displaysNpc,
+                  vendorHint: row.vendorHint,
+                  markerKey: ValueKey(
+                    '${row.marketable ? 'reference-npc' : 'reference-source'}:${row.name}',
+                  ),
+                  child: Text(
+                    itemDisplayName(row.name),
+                    style: spec.typography.label.copyWith(
+                      fontSize: 15,
+                      fontWeight: FontWeight.w600,
+                      color: spec.palette.text,
+                      height: 1.3,
+                    ),
                   ),
                 ),
-                TextSpan(
-                  text: '  ×${formatQuantity(row.quantity)}',
-                  style: spec.typography.meta.copyWith(
-                    fontSize: 14,
-                    color: spec.palette.textMuted,
-                  ),
+              ),
+              const SizedBox(width: 8),
+              Text(
+                '×${formatQuantity(row.quantity)}',
+                style: spec.typography.meta.copyWith(
+                  fontSize: 14,
+                  color: spec.palette.textMuted,
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
         ),
         if (onChoose == null && _hasAlternatives(row) && switchBuilder != null)
@@ -331,17 +323,16 @@ class RecipeIngredientTable extends StatelessWidget {
 /// The same stock slot keeps preorder badges aligned even when stock is zero.
 class RecipeIngredientWidths {
   const RecipeIngredientWidths(
-    this.npc,
     this.inventory,
     this.stock,
     this.orders,
     this.scale,
   );
-  final double npc, inventory, stock, orders, scale;
+  final double inventory, stock, orders, scale;
   double get ingredientGap => 32 * scale;
   double get market => stock + (orders > 0 ? 7 + orders : 0);
   double get minimumWidth =>
-      190 * scale + ingredientGap + 24 * scale + npc + inventory + market;
+      190 * scale + ingredientGap + 14 * scale + inventory + market;
 
   static RecipeIngredientWidths measure(
     BuildContext context, {
@@ -371,13 +362,6 @@ class RecipeIngredientWidths {
       return width;
     }
 
-    var npc = const MarketCountBadges(
-      density: MarketBadgeDensity.comfortable,
-      stock: null,
-      preorders: null,
-      npc: true,
-      showMarket: false,
-    ).preferredWidth(context);
     var inventory = InventoryCountBadge(
       density: MarketBadgeDensity.comfortable,
       owned: fitBadges ? 0 : 999900,
@@ -403,7 +387,6 @@ class RecipeIngredientWidths {
     if (headingWidth('Inventory') > inventory) {
       inventory = headingWidth('Inventory');
     }
-    if (headingWidth('NPC') > npc) npc = headingWidth('NPC');
     if (headingWidth('Market') > stock) stock = headingWidth('Market');
     for (final row in rows) {
       final ownedWidth = InventoryCountBadge(
@@ -429,7 +412,6 @@ class RecipeIngredientWidths {
       }
     }
     return RecipeIngredientWidths(
-      npc + 2,
       inventory + 2,
       stock + 2,
       orders > 0 ? orders + 2 : 0,

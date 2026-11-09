@@ -503,17 +503,17 @@ void main() {
         formula.batchMultiplier,
       ),
     );
-    // The output name is shown once in the header, not repeated in the table.
-    expect(formulaRow, findsOneWidget);
-    expect(
-      find.descendant(
-        of: formulaRow,
-        matching: find.byKey(
-          ValueKey('item-reference-copy:${formula.outputName}'),
-        ),
+    final output = find.descendant(
+      of: formulaRow,
+      matching: find.byKey(
+        ValueKey('item-reference-copy:${formula.outputName}'),
       ),
-      findsNothing,
     );
+    expect(output, findsOneWidget);
+    await tester.ensureVisible(output);
+    await tester.tap(output);
+    await tester.pumpAndSettle();
+    expect(copied, ['Beer', formula.outputName]);
 
     for (final ingredient in formula.ingredients) {
       final row = find.byKey(
@@ -535,6 +535,7 @@ void main() {
     }
     expect(copied, [
       'Beer',
+      formula.outputName,
       for (final ingredient in formula.ingredients) ingredient.name,
     ]);
     expect(dialog, findsOneWidget);
@@ -638,11 +639,7 @@ void main() {
             await chooseSubstitute(tester, formula.outputName, name);
           }
           final action = find.descendant(
-            of: name == formula.outputName
-                ? find.byKey(
-                    const ValueKey('opportunity-item-info:Magical Shard'),
-                  )
-                : formulaRow,
+            of: formulaRow,
             matching: find.byKey(ValueKey('item-reference-copy:$name')),
           );
           expect(action, findsOneWidget);

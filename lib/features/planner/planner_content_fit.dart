@@ -5,6 +5,9 @@ import 'package:flutter/material.dart';
 import '../../app/state/planner_application_controller.dart';
 import '../../domain/formatting/planner_formatters.dart';
 import '../../visual/visual.dart';
+import '../shared/inventory_count_badge.dart';
+import '../shared/market_count_badges.dart';
+import '../shared/missing_count_badge.dart';
 import 'planner_inventory_input.dart';
 
 /// Content-dependent layout boundaries in unscaled Planner-body coordinates.
@@ -168,29 +171,6 @@ List<double> plannerQueueFitBreakpoints(
   final needInsets = dense ? 20 + 24 + 8 + 22.0 : 24 + 30.0;
   void addNeedBoundary(double width) =>
       thresholds.add(12 + (width + needInsets) / needFraction);
-  final needLabelStyle = inherited.merge(
-    spec.typography.meta.copyWith(
-      fontSize: 12.5,
-      fontWeight: FontWeight.w400,
-      fontStyle: FontStyle.normal,
-      height: 1.2,
-      color: spec.palette.textMuted,
-    ),
-  );
-  final needValueStyle = inherited.merge(
-    spec.typography.body.copyWith(
-      fontSize: 14,
-      fontWeight: FontWeight.w500,
-      fontStyle: FontStyle.normal,
-      height: 1.2,
-      color: spec.palette.text,
-      fontFeatures: const [FontFeature.tabularFigures()],
-    ),
-  );
-  final missingStyle = needValueStyle.copyWith(
-    fontSize: 16,
-    fontWeight: FontWeight.w700,
-  );
   // _OwnedDraftActions: fixed field, gap, and content-sized Add button. The
   // button replaces (does not merge) DefaultTextStyle; its child is a 13px
   // glyph, 4px gap and Add. Its default border is 1.15px for Sakura primary.
@@ -204,30 +184,38 @@ List<double> plannerQueueFitBreakpoints(
   );
   final actionsWidth = (dense ? 82 + 8 : 92 + 10) + addWidth;
   final sideBySide = 60 + scaler.scale(350);
-  for (final row in controller.plan.value.missing) {
-    final pairs = [
-      for (final field in [
-        ('Need', row.need),
-        ('Have', row.have),
-        ('Missing', row.missing),
-      ])
-        (
-          label: measure(field.$1, needLabelStyle),
-          value: measure(
-            formatQuantity(field.$2),
-            field.$1 == 'Missing' ? missingStyle : needValueStyle,
-          ),
-        ),
+  final rows = controller.plan.value.missing;
+  var needColumn = 0.0;
+  var inventoryColumn = 0.0;
+  for (final row in rows) {
+    needColumn = math.max(
+      needColumn,
+      NeedCountBadge(need: row.need).preferredWidth(context),
+    );
+    inventoryColumn = math.max(
+      inventoryColumn,
+      InventoryCountBadge(
+        owned: row.have,
+        density: MarketBadgeDensity.comfortable,
+      ).preferredWidth(context),
+    );
+  }
+  for (final row in rows) {
+    final widths = [
+      needColumn,
+      inventoryColumn,
+      MissingCountBadge(missing: row.missing).preferredWidth(context),
     ];
-    for (final boundary in _quantityWrapBoundaries(
-      pairs,
-      innerSpacing: 6,
-      outerSpacing: 16,
-    )) {
-      final belowActions = boundary + 60;
-      if (belowActions < sideBySide) addNeedBoundary(belowActions);
-      final besideActions = boundary + 60 + 16 + actionsWidth;
-      if (besideActions >= sideBySide) addNeedBoundary(besideActions);
+    // Whole shared pills wrap as units; they no longer have nested label/value wraps.
+    for (var start = 0; start < widths.length; start++) {
+      var boundary = 0.0;
+      for (var end = start; end < widths.length; end++) {
+        boundary += widths[end] + (end > start ? 16 : 0);
+        final belowActions = boundary + 60;
+        if (belowActions < sideBySide) addNeedBoundary(belowActions);
+        final besideActions = boundary + 60 + 16 + actionsWidth;
+        if (besideActions >= sideBySide) addNeedBoundary(besideActions);
+      }
     }
   }
   return thresholds.toList()..sort();

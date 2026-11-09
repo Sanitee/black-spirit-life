@@ -22,7 +22,6 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../../support/application_test_harness.dart';
-import '../../support/substitute_chooser_helpers.dart';
 
 void main() {
   setUpAll(_loadFonts);
@@ -660,17 +659,15 @@ void _supportedFactCaptures() {
                 name == 'Fiery Celerity Draught' ||
                 name == 'Sturdy Whale Tendon Elixir' ||
                 name == 'Sturdy Whale Tendon Potion') {
-              final choice = switch (name) {
-                "Khan's Heart: Life" => ("Khan's Dim Magic", 3),
-                'Fiery Celerity Draught' => ('Celerity Draught', 4),
-                'Sturdy Whale Tendon Elixir' => ('Whale Tendon Elixir', 3),
-                _ => ('Superior Whale Tendon Potion', 1),
+              final text = switch (name) {
+                "Khan's Heart: Life" => "or 3 Khan's Dim Magic",
+                'Fiery Celerity Draught' => 'or 4 Celerity Draught',
+                'Sturdy Whale Tendon Elixir' => 'or 3 Whale Tendon Elixir',
+                _ => 'or 1 Superior Whale Tendon Potion',
               };
-              final alternative = await _selectReferenceAlternative(
-                tester,
-                card,
-                choice.$1,
-                choice.$2,
+              final alternative = find.descendant(
+                of: card,
+                matching: find.text(text),
               );
               expect(alternative, findsOneWidget);
               await tester.ensureVisible(alternative);
@@ -720,11 +717,9 @@ void _supportedFactCaptures() {
               );
             }
             if (name == 'Deep Blue Tidal Draught') {
-              final alternate = await _selectReferenceAlternative(
-                tester,
-                card,
-                'Blue Tidal Draught',
-                2,
+              final alternate = find.descendant(
+                of: card,
+                matching: find.text('or 2 Blue Tidal Draught'),
               );
               expect(alternate, findsOneWidget);
               await tester.ensureVisible(alternate);
@@ -838,58 +833,6 @@ Future<void> _capture(WidgetTester tester, String name) async {
       image.dispose();
     }
   });
-}
-
-Future<Finder> _selectReferenceAlternative(
-  WidgetTester tester,
-  Finder card,
-  String name,
-  int quantity,
-) async {
-  final control = find
-      .descendant(
-        of: card,
-        matching: find.byWidgetPredicate(
-          (widget) =>
-              widget is RecipeIngredientChoiceButton &&
-              widget.choices().any((row) => row.name == name),
-        ),
-      )
-      .first;
-  expect(control, findsOneWidget);
-  final widget = tester.widget<RecipeIngredientChoiceButton>(control);
-  final choices = widget.choices();
-  expect(choices.singleWhere((row) => row.name == name).quantity, quantity);
-  final grades = RecipeIngredientChoiceButton.elixirGrades(
-    widget.controller,
-    choices,
-  );
-  if (grades == null) {
-    await openSubstitutes(tester, widget.parent, widget.ingredient.name);
-    expect(substituteLabel(name), findsOneWidget);
-    await chooseSubstitute(tester, widget.parent, name);
-  } else {
-    final grade = grades.green.name == name ? 'normal' : 'blue';
-    final button = find.descendant(
-      of: control,
-      matching: find.byKey(
-        ValueKey(
-          'recipe-grade:${widget.parent}:${widget.ingredient.name}:$grade',
-        ),
-      ),
-    );
-    await tester.ensureVisible(button);
-    await tester.tap(button);
-    await tester.pumpAndSettle();
-  }
-  final selected = find
-      .descendant(
-        of: card,
-        matching: find.byKey(ValueKey('item-reference-copy:$name')),
-      )
-      .first;
-  expect(selected, findsOneWidget);
-  return selected;
 }
 
 Future<void> _loadFonts() async {

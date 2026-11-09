@@ -181,7 +181,7 @@ void main() {
         );
         expect(
           find.descendant(of: panel, matching: find.text('NPC')),
-          findsNWidgets(2),
+          findsOneWidget,
         );
         checkColumnAlignment(tester);
         checkBadgeLines(tester);

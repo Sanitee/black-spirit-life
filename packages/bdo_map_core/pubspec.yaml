@@ -8,6 +8,8 @@ environment:
   flutter: ">=3.44.0"
 
 dependencies:
+  bdo_number_input:
+    path: ../bdo_number_input
   bdo_number_format:
     path: ../bdo_number_format
   flutter:

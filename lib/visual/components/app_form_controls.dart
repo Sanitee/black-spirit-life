@@ -1,3 +1,4 @@
+import 'package:bdo_number_input/bdo_number_input.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -311,7 +312,10 @@ class AppTextField extends StatelessWidget {
       onSubmitted: onSubmitted,
       onTap: onTap,
       keyboardType: keyboardType,
-      inputFormatters: inputFormatters,
+      inputFormatters: groupedNumberFormatters(
+        inputFormatters,
+        enabled: keyboardType?.index == TextInputType.number.index,
+      ),
       textAlign: textAlign,
       textAlignVertical:
           textAlignVertical ??

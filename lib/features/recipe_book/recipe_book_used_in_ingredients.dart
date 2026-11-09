@@ -1,6 +1,7 @@
 import 'dart:math' as math;
 
 import '../planner/planner_choice_market.dart';
+import '../shared/npc_vendor_hint.dart';
 import 'recipe_book_controller.dart';
 import 'recipe_book_preview_routes.dart';
 import 'recipe_book_usage.dart';
@@ -60,6 +61,7 @@ List<RecipeBookIngredientChoice> recipeBookUsedInIngredients({
         quantity: match?.sourceQuantity ?? ingredient.quantity,
         owned: owned.isFinite ? math.max(0, owned) : 0,
         npc: identity.npc,
+        vendorHint: npcVendorHint(controller.modeController, name),
         marketable: identity.marketId != null,
         stock: null,
         preorders: null,

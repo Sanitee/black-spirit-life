@@ -4,6 +4,7 @@ import 'dart:ui' as ui;
 
 import 'package:bdo_craft_planner_flutter/app/app.dart';
 import 'package:bdo_craft_planner_flutter/app/state/planner_application_controller.dart';
+import 'package:bdo_craft_planner_flutter/domain/formatting/compact_quantity.dart';
 import 'package:bdo_craft_planner_flutter/domain/formatting/planner_formatters.dart';
 import 'package:bdo_craft_planner_flutter/domain/models/craft_mode.dart';
 import 'package:bdo_craft_planner_flutter/domain/planner/planner_models.dart';
@@ -11,8 +12,11 @@ import 'package:bdo_craft_planner_flutter/domain/state/planner_state_json_codec.
 import 'package:bdo_craft_planner_flutter/domain/state/state_copy.dart';
 import 'package:bdo_craft_planner_flutter/features/planner/planner.dart';
 import 'package:bdo_craft_planner_flutter/features/planner/planner_quantity_layout.dart';
+import 'package:bdo_craft_planner_flutter/features/shared/inventory_count_badge.dart';
+import 'package:bdo_craft_planner_flutter/features/shared/market_count_badges.dart';
+import 'package:bdo_craft_planner_flutter/features/shared/missing_count_badge.dart';
+import 'package:bdo_craft_planner_flutter/features/shared/npc_source_marker.dart';
 import 'package:bdo_craft_planner_flutter/features/shared/recipe_variant_selector.dart';
-import 'package:bdo_craft_planner_flutter/features/shared/source_availability_badges.dart';
 import 'package:bdo_craft_planner_flutter/features/shared/workshop_presentation.dart';
 import 'package:bdo_craft_planner_flutter/shared/overlays/anchored_popover.dart';
 import 'package:bdo_craft_planner_flutter/visual/visual.dart';
@@ -836,26 +840,17 @@ void main() {
       final name = find
           .descendant(of: row, matching: find.text('Sunrise Herb'))
           .first;
-      final stock = find.descendant(
+      final marker = find.descendant(
         of: row,
-        matching: find.byType(SourceAvailabilityBadges),
+        matching: find.byType(NpcSourceMarker),
       );
-      Finder amountRow(String label) => find.descendant(
-        of: row,
-        matching: find.byWidgetPredicate(
-          (widget) =>
-              widget is Row &&
-              widget.children.any(
-                (child) => child is Text && child.data == label,
-              ),
-        ),
+      final price = find.byKey(
+        ValueKey('planner-need-price:Sunrise Herb:each'),
       );
-      final price = amountRow('each');
-      final total = amountRow('Total');
-      expect(
-        find.descendant(of: stock, matching: find.text('NPC')),
-        findsOneWidget,
+      final total = find.byKey(
+        ValueKey('planner-need-price:Sunrise Herb:Total'),
       );
+      expect(marker, findsOneWidget);
       expect(
         find.descendant(of: price, matching: find.text('500')),
         findsOneWidget,
@@ -865,19 +860,28 @@ void main() {
         tester.getRect(price).top,
         greaterThan(tester.getRect(missing).bottom),
       );
-      expect(tester.getRect(stock).left, closeTo(tester.getRect(name).left, 4));
       expect(
-        tester.getRect(price).left - tester.getRect(stock).right,
-        closeTo(14, .01),
+        tester.getRect(marker).left - tester.getRect(name).right,
+        closeTo(12, 2),
+      );
+      expect(
+        tester.getRect(marker).center.dy,
+        closeTo(tester.getRect(name).center.dy, 1),
       );
       final priceBounds = tester.getRect(price);
       final totalBounds = tester.getRect(total);
-      if ((totalBounds.top - priceBounds.top).abs() < 1) {
-        expect(totalBounds.left - priceBounds.right, closeTo(14, .01));
-      } else {
-        expect(totalBounds.top, greaterThan(priceBounds.bottom));
-        expect(totalBounds.left, closeTo(tester.getRect(stock).left, .01));
-      }
+      final market = find.descendant(
+        of: row,
+        matching: find.byType(MarketCountBadges),
+      );
+      expect(market, findsOneWidget);
+      expect(
+        tester.getRect(market).left,
+        closeTo(tester.getRect(name).left, 1),
+      );
+      expect(priceBounds.left, greaterThan(tester.getRect(market).right));
+      expect(totalBounds.center.dy, closeTo(priceBounds.center.dy, 1));
+      expect(totalBounds.left - priceBounds.right, closeTo(14, .01));
       expect(
         find.descendant(of: row, matching: find.byType(Divider)),
         findsNothing,
@@ -885,9 +889,13 @@ void main() {
       final pricedHeight = tester.getSize(row).height;
       fixture.controller.active.setPricesVisible(false);
       await tester.pumpAndSettle();
-      expect(stock, findsNothing);
+      expect(marker, findsOneWidget);
       expect(price, findsNothing);
       expect(tester.getSize(row).height, lessThan(pricedHeight));
+      expect(
+        pricedHeight - tester.getSize(row).height,
+        lessThanOrEqualTo(priceBounds.height + 11),
+      );
       expect(tester.takeException(), isNull);
     });
   }
@@ -1250,18 +1258,27 @@ void _expectNeedQuantities(
     'Missing': row.missing,
   }.entries) {
     final finder = _needQuantity(row.key, entry.key);
-    final text = tester.widget<Text>(finder);
-    expect(text.data, formatQuantity(entry.value));
-    expect(text.style?.fontSize, entry.key == 'Missing' ? 16 : 14);
+    final badge = tester.widget(finder);
+    if (entry.key == 'Have') {
+      expect((badge as InventoryCountBadge).owned, entry.value);
+      expect(
+        badge.semanticLabel,
+        'Inventory counted for this plan: ${formatQuantity(entry.value)}',
+      );
+    } else if (entry.key == 'Need') {
+      expect((badge as NeedCountBadge).value, entry.value);
+    } else {
+      expect((badge as MissingCountBadge).missing, entry.value);
+    }
+    final text = tester.widget<Text>(
+      find.descendant(of: finder, matching: find.byType(Text)).first,
+    );
     expect(
-      text.style?.fontWeight,
-      entry.key == 'Missing' ? FontWeight.w700 : FontWeight.w500,
+      text.data,
+      '${entry.key == 'Have' ? '' : '${entry.key} '}${formatCompactQuantity(entry.value)}',
     );
-    expect(text.style?.color, spec.palette.text);
-    final label = tester.widget<Text>(
-      find.descendant(of: root, matching: find.text(entry.key)),
-    );
-    expect(label.style?.fontSize, 12.5);
+    expect(text.style?.fontSize, 14);
+    expect(text.style?.fontWeight, FontWeight.w500);
     final valueBounds = tester.getRect(finder);
     expect(valueBounds.left, greaterThanOrEqualTo(rootBounds.left));
     expect(valueBounds.right, lessThanOrEqualTo(rootBounds.right + 0.01));

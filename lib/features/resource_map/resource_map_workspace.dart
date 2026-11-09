@@ -16,6 +16,7 @@ import '../../domain/planner/planner_models.dart'
     show ChoiceMeta, ItemAcquisitionRoute;
 import '../../domain/state/planner_state.dart' show MarketState;
 import '../shared/mode_item_icon.dart';
+import '../shared/npc_source_marker.dart';
 import 'recipe_worker_controller.dart';
 import 'recipe_worker_panel.dart';
 import 'resource_map_need_availability.dart';
@@ -279,6 +280,20 @@ class _ResourceMapWorkspaceState extends State<ResourceMapWorkspace> {
                             final target = plan.target.trim();
                             return BdoResourceMap(
                               dataset: dataset,
+                              plannerNeedLabelBuilder: (context, need, label) =>
+                                  ItemNameWithNpc(
+                                    npc:
+                                        npcVendorHint(
+                                          modeController,
+                                          need.name,
+                                        ) !=
+                                        null,
+                                    vendorHint: npcVendorHint(
+                                      modeController,
+                                      need.name,
+                                    ),
+                                    child: label,
+                                  ),
                               plannerNeedAvailabilityBuilder: (context, need) =>
                                   ResourceMapNeedAvailability(
                                     controller: modeController,

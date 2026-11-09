@@ -1,3 +1,4 @@
+import 'package:bdo_number_input/bdo_number_input.dart';
 import 'package:bdo_number_format/bdo_number_format.dart';
 import 'package:flutter/material.dart';
 
@@ -181,6 +182,9 @@ class _GatherChecklistQuantityRowState
                           keyboardType: const TextInputType.numberWithOptions(
                             decimal: true,
                           ),
+                          inputFormatters: const [
+                            GroupedNumberInputFormatter(),
+                          ],
                           style: TextStyle(
                             color: chrome.ink,
                             fontSize: ResourceMapPanelMetrics.primary,

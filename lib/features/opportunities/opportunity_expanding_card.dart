@@ -662,12 +662,7 @@ class _ExpandingCraftCardState extends State<_ExpandingCraftCard> {
 }
 
 class _CraftMarketCounts extends StatelessWidget {
-  const _CraftMarketCounts({
-    required this.stock,
-    required this.name,
-    this.npc = false,
-  });
-  final bool npc;
+  const _CraftMarketCounts({required this.stock, required this.name});
   final OpportunityCardStock stock;
   final String name;
 
@@ -675,7 +670,6 @@ class _CraftMarketCounts extends StatelessWidget {
   Widget build(BuildContext context) => MarketCountBadges(
     stock: stock.stock,
     preorders: stock.preorders,
-    npc: npc,
     wrapKey: ValueKey('craft-market-counts:$name'),
   );
 }
@@ -744,11 +738,23 @@ class _CraftIngredientInlay extends StatelessWidget {
                       children: [
                         Expanded(
                           flex: 3,
-                          child: OpportunityCopyName(
-                            name: ingredient.name,
-                            style: spec.typography.body.copyWith(
-                              fontSize: 13,
-                              fontWeight: FontWeight.w600,
+                          child: ItemNameWithNpc(
+                            npc:
+                                npcVendorHint(
+                                  controller.modeController,
+                                  ingredient.name,
+                                ) !=
+                                null,
+                            vendorHint: npcVendorHint(
+                              controller.modeController,
+                              ingredient.name,
+                            ),
+                            child: OpportunityCopyName(
+                              name: ingredient.name,
+                              style: spec.typography.body.copyWith(
+                                fontSize: 13,
+                                fontWeight: FontWeight.w600,
+                              ),
                             ),
                           ),
                         ),
@@ -767,12 +773,13 @@ class _CraftIngredientInlay extends StatelessWidget {
                         ),
                       ],
                     ),
-                    const SizedBox(height: 5),
-                    _CraftMarketCounts(
-                      stock: stock,
-                      npc: npc,
-                      name: '$recipeName:${ingredient.name}',
-                    ),
+                    if (!npc) ...[
+                      const SizedBox(height: 5),
+                      _CraftMarketCounts(
+                        stock: stock,
+                        name: '$recipeName:${ingredient.name}',
+                      ),
+                    ],
                   ],
                 ),
               ),

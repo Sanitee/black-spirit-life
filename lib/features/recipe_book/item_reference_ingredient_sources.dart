@@ -47,6 +47,7 @@ List<RecipeBookIngredientChoice> _referenceChoices(
           quantity: choice.quantity,
           owned: owned.isFinite ? math.max(0, owned) : 0,
           npc: identity.npc,
+          vendorHint: npcVendorHint(controller, choice.name),
           marketable: identity.marketId != null,
           stock: null,
           preorders: null,
@@ -181,10 +182,17 @@ class _ReferenceIngredientsTable extends StatelessWidget {
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       Flexible(
-                        child: _ReferenceItemName(
-                          name: row.name,
-                          style: ItemDetailStyle.ingredient(
-                            context.visualTheme,
+                        child: ItemNameWithNpc(
+                          npc: row.displaysNpc,
+                          vendorHint: row.vendorHint,
+                          markerKey: ValueKey(
+                            '${row.marketable ? 'reference-npc' : 'reference-source'}:${row.name}',
+                          ),
+                          child: _ReferenceItemName(
+                            name: row.name,
+                            style: ItemDetailStyle.ingredient(
+                              context.visualTheme,
+                            ),
                           ),
                         ),
                       ),

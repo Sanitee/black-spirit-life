@@ -143,7 +143,9 @@ void main() {
                   of: row,
                   matching: support.k('choice-${field.$1}:${preview.name}'),
                 );
-                final text = tester.widget<Text>(label);
+                final text = tester.widget<Text>(
+                  find.descendant(of: label, matching: find.byType(Text)).first,
+                );
                 expect(text.data, endsWith(formatCompactQuantity(field.$2)));
                 expect(text.maxLines, 1);
                 expect(text.softWrap, false);
@@ -168,11 +170,29 @@ void main() {
               }
             }
             expect(
-              tester.widget<Text>(support.k('choice-owned:Wheat')).data,
+              tester
+                  .widget<Text>(
+                    find
+                        .descendant(
+                          of: support.k('choice-owned:Wheat'),
+                          matching: find.byType(Text),
+                        )
+                        .first,
+                  )
+                  .data,
               endsWith('1,1m'),
             );
             expect(
-              tester.widget<Text>(support.k('choice-owned:Barley')).data,
+              tester
+                  .widget<Text>(
+                    find
+                        .descendant(
+                          of: support.k('choice-owned:Barley'),
+                          matching: find.byType(Text),
+                        )
+                        .first,
+                  )
+                  .data,
               endsWith('1,5m'),
             );
             expect(jsonEncode(mode.state.value.toJson()), before);

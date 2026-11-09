@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:math' as math;
 
+import 'package:bdo_number_input/bdo_number_input.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -221,9 +222,9 @@ class _OpportunityInventoryInputState extends State<OpportunityInventoryInput> {
                         keyboardType: const TextInputType.numberWithOptions(
                           decimal: true,
                         ),
-                        inputFormatters: const [
+                        inputFormatters: groupedNumberFormatters(const [
                           InventoryAmountInputFormatter(),
-                        ],
+                        ]),
                         textAlign: TextAlign.center,
                         textAlignVertical: TextAlignVertical.center,
                         strutStyle: const StrutStyle(

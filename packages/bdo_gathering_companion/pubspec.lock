@@ -16,6 +16,13 @@ packages:
       relative: true
     source: path
     version: "0.1.0"
+  bdo_number_input:
+    dependency: "direct main"
+    description:
+      path: "../bdo_number_input"
+      relative: true
+    source: path
+    version: "0.1.0"
   boolean_selector:
     dependency: transitive
     description:

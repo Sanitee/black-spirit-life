@@ -3,6 +3,7 @@ import 'dart:math' as math;
 
 import 'package:bdo_craft_planner_flutter/visual/components/app_tooltip.dart';
 import 'package:bdo_map_core/bdo_map_core.dart';
+import 'package:bdo_number_input/bdo_number_input.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -353,10 +354,10 @@ class _RecipeWorkerPanelState extends State<RecipeWorkerPanel> {
                   controller: _budget,
                   textAlign: TextAlign.center,
                   keyboardType: TextInputType.number,
-                  inputFormatters: [
+                  inputFormatters: groupedNumberFormatters([
                     FilteringTextInputFormatter.allow(RegExp(r'[0-9., ]')),
                     LengthLimitingTextInputFormatter(7),
-                  ],
+                  ]),
                   style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.w600,

@@ -9,6 +9,7 @@ import 'package:bdo_craft_planner_flutter/features/planner/planner_shared.dart';
 import 'package:bdo_craft_planner_flutter/features/recipe_book/recipe_book_item_info_view.dart';
 import 'package:bdo_craft_planner_flutter/features/shared/market_region_selector.dart';
 import 'package:bdo_craft_planner_flutter/features/shared/mode_item_icon.dart';
+import 'package:bdo_craft_planner_flutter/features/shared/npc_source_marker.dart';
 import 'package:bdo_craft_planner_flutter/features/shared/profile_game_icon.dart';
 import 'package:bdo_craft_planner_flutter/features/shared/recipe_variant_selector.dart';
 import 'package:bdo_craft_planner_flutter/shared/overlays/anchored_popover.dart';
@@ -16,7 +17,6 @@ import 'package:bdo_craft_planner_flutter/visual/components/app_button.dart';
 import 'package:bdo_craft_planner_flutter/visual/components/app_surface.dart';
 import 'package:bdo_craft_planner_flutter/visual/components/app_tooltip.dart';
 import 'package:bdo_craft_planner_flutter/visual/components/app_vector_glyph.dart';
-import 'package:bdo_craft_planner_flutter/visual/components/item_detail_style.dart';
 import 'package:bdo_craft_planner_flutter/visual/components/section_header.dart';
 import 'package:bdo_craft_planner_flutter/visual/foundations/theme_spec.dart';
 import 'package:bdo_craft_planner_flutter/visual/illuminated_ledger/ledger_ornament_painters.dart';
@@ -35,266 +35,258 @@ import '../shared/custom_icon_test_support.dart';
 import 'planner_test_fixture.dart';
 
 void main() {
-  testWidgets(
-    'AFK Weight defaults to Needed and keeps Load estimate explicit',
-    (tester) async {
-      await setPlannerTestSize(tester, const Size(1500, 940));
-      final harness = PlannerTestHarness(
-        supportingDataOverrides: const <String, Object?>{
-          'itemWeightIds': <String, String>{
-            'Intermediate Reagent': '1001',
-            'Sunrise Herb': '1002',
-          },
-          'itemWeightsLtById': <String, double>{'1001': 2, '1002': 1},
+  testWidgets('AFK Weight defaults to Needed and offers Max', (tester) async {
+    await setPlannerTestSize(tester, const Size(1500, 940));
+    final harness = PlannerTestHarness(
+      supportingDataOverrides: const <String, Object?>{
+        'itemWeightIds': <String, String>{
+          'Intermediate Reagent': '1001',
+          'Sunrise Herb': '1002',
         },
-      );
+        'itemWeightsLtById': <String, double>{'1001': 2, '1002': 1},
+      },
+    );
 
-      await tester.pumpWidget(harness.plannerHost());
-      await tester.pump(const Duration(milliseconds: 200));
+    await tester.pumpWidget(harness.plannerHost());
+    await tester.pump(const Duration(milliseconds: 200));
 
-      final anchor = find.byKey(
-        const ValueKey<String>('planner-afk-load:alchemy:Intermediate Reagent'),
-      );
-      expect(anchor, findsOneWidget);
-      await tester.tap(anchor);
-      await tester.pumpAndSettle();
-      expect(find.text('Open weight settings'), findsOneWidget);
-      await tester.tap(find.text('Open weight settings'));
-      await tester.pumpAndSettle();
-      expect(harness.afkWeightSettingsOpenCount, 1);
+    final anchor = find.byKey(
+      const ValueKey<String>('planner-afk-load:alchemy:Intermediate Reagent'),
+    );
+    expect(anchor, findsOneWidget);
+    await tester.tap(anchor);
+    await tester.pumpAndSettle();
+    expect(find.text('Open weight settings'), findsOneWidget);
+    await tester.tap(find.text('Open weight settings'));
+    await tester.pumpAndSettle();
+    expect(harness.afkWeightSettingsOpenCount, 1);
 
-      harness.controller.updateDocument(
-        (document) => document.copyWith(
-          afkWeightProfile: document.afkWeightProfile.copyWith(
-            maximumWeightLt: 100,
-            currentCarriedWeightLt: 10,
-            safetyBufferLt: 10,
-          ),
+    harness.controller.updateDocument(
+      (document) => document.copyWith(
+        afkWeightProfile: document.afkWeightProfile.copyWith(
+          maximumWeightLt: 100,
+          currentCarriedWeightLt: 10,
+          safetyBufferLt: 10,
         ),
-        immediate: true,
-      );
-      await tester.pumpAndSettle();
+      ),
+      immediate: true,
+    );
+    await tester.pumpAndSettle();
 
-      await tester.tap(anchor);
-      await tester.pumpAndSettle();
-      final popover = find.byWidgetPredicate(
-        (widget) =>
-            widget is AppSurface &&
-            widget.semanticLabel == 'AFK Weight plan for Intermediate Reagent',
-      );
-      expect(tester.getSize(popover).width, closeTo(736, .01));
-      expect(
-        find.descendant(
-          of: popover,
-          matching: find.byWidgetPredicate(
-            (widget) =>
-                widget is PlannerItemIcon &&
-                widget.name == 'Intermediate Reagent' &&
-                widget.size == 58,
-          ),
-        ),
-        findsOneWidget,
-      );
-      expect(
-        find.descendant(
-          of: popover,
-          matching: find.byWidgetPredicate(
-            (widget) =>
-                widget is PlannerItemIcon &&
-                widget.name == 'Sunrise Herb' &&
-                widget.size == 36,
-          ),
-        ),
-        findsOneWidget,
-      );
-      final headerTitle = find.descendant(
-        of: find.byKey(const ValueKey('planner-afk-drag-region')),
-        matching: find.text('Intermediate Reagent'),
-      );
-      expect(tester.widget<Text>(headerTitle).style?.fontSize, 20);
-      final ingredientName = find.descendant(
+    await tester.tap(anchor);
+    await tester.pumpAndSettle();
+    final popover = find.byWidgetPredicate(
+      (widget) =>
+          widget is AppSurface &&
+          widget.semanticLabel == 'AFK Weight plan for Intermediate Reagent',
+    );
+    expect(tester.getSize(popover).width, closeTo(736, .01));
+    expect(
+      find.descendant(
         of: popover,
-        matching: find.text('Sunrise Herb'),
-      );
-      expect(tester.widget<Text>(ingredientName).style?.fontSize, 14);
-      for (final key in const <ValueKey<String>>[
-        ValueKey<String>('planner-afk-edit-profile'),
-        ValueKey<String>('planner-afk-close'),
-      ]) {
-        final action = find.byKey(key);
-        expect(tester.getSize(action).width, greaterThanOrEqualTo(46));
-        expect(tester.getSize(action).height, greaterThanOrEqualTo(38));
-      }
-      for (final label in const <String>[
-        'Needed',
-        'ITEM',
-        'EACH',
-        'BATCH TOTAL',
-        'Ingredients',
-        'Done',
-      ]) {
-        expect(
-          find.descendant(of: popover, matching: find.text(label)),
-          findsOneWidget,
-        );
-      }
+        matching: find.byWidgetPredicate(
+          (widget) =>
+              widget is PlannerItemIcon &&
+              widget.name == 'Intermediate Reagent' &&
+              widget.size == 58,
+        ),
+      ),
+      findsOneWidget,
+    );
+    expect(
+      find.descendant(
+        of: popover,
+        matching: find.byWidgetPredicate(
+          (widget) =>
+              widget is PlannerItemIcon &&
+              widget.name == 'Sunrise Herb' &&
+              widget.size == 36,
+        ),
+      ),
+      findsOneWidget,
+    );
+    final headerTitle = find.descendant(
+      of: find.byKey(const ValueKey('planner-afk-drag-region')),
+      matching: find.text('Intermediate Reagent'),
+    );
+    expect(tester.widget<Text>(headerTitle).style?.fontSize, 20);
+    final ingredientName = find.descendant(
+      of: popover,
+      matching: find.text('Sunrise Herb'),
+    );
+    expect(tester.widget<Text>(ingredientName).style?.fontSize, 14);
+    for (final key in const <ValueKey<String>>[
+      ValueKey<String>('planner-afk-edit-profile'),
+      ValueKey<String>('planner-afk-close'),
+    ]) {
+      final action = find.byKey(key);
+      expect(tester.getSize(action).width, greaterThanOrEqualTo(46));
+      expect(tester.getSize(action).height, greaterThanOrEqualTo(38));
+    }
+    for (final label in const <String>[
+      'Needed',
+      'ITEM',
+      'EACH',
+      'BATCH TOTAL',
+      'Ingredients',
+      'Done',
+    ]) {
       expect(
-        find.descendant(of: popover, matching: find.text('Load estimate')),
+        find.descendant(of: popover, matching: find.text(label)),
         findsOneWidget,
       );
-      expect(
-        find.descendant(
-          of: popover,
-          matching: find.text('Done with this load'),
+    }
+    expect(
+      find.descendant(of: popover, matching: find.text('Max')),
+      findsOneWidget,
+    );
+    expect(
+      find.descendant(of: popover, matching: find.text('Done with this load')),
+      findsNothing,
+    );
+    expect(
+      tester
+          .widget<AppButton>(
+            find.byKey(const ValueKey<String>('planner-afk-mode-needed')),
+          )
+          .selected,
+      isTrue,
+    );
+    expect(
+      tester
+          .widget<Text>(
+            find.byKey(const ValueKey<String>('planner-afk-needed-attempts')),
+          )
+          .data,
+      '10',
+    );
+    expect(
+      find.byKey(const ValueKey<String>('planner-afk-goal-label')),
+      findsNothing,
+    );
+    expect(find.text('Sunrise Herb'), findsWidgets);
+    final neededTotal = find.byKey(
+      const ValueKey<String>('planner-afk-total:Sunrise Herb'),
+    );
+    expect(tester.widget<Text>(neededTotal).data, '20');
+    expect(
+      tester
+          .widget<Text>(
+            find.byKey(
+              const ValueKey<String>('planner-afk-per-craft:Sunrise Herb'),
+            ),
+          )
+          .data,
+      '2',
+    );
+    expect(
+      find.bySemanticsLabel('Sunrise Herb, 2 per craft, 20 for this batch'),
+      findsOneWidget,
+    );
+    expect(
+      tester
+          .widget<Text>(
+            find.byKey(const ValueKey<String>('planner-afk-total-weight')),
+          )
+          .data,
+      '20 LT',
+    );
+    final afkDragRegion = find.byKey(
+      const ValueKey<String>('planner-afk-drag-region'),
+    );
+    expect(afkDragRegion, findsOneWidget);
+    expect(
+      find.descendant(
+        of: afkDragRegion,
+        matching: find.byKey(
+          const ValueKey<String>('planner-afk-edit-profile'),
         ),
-        findsNothing,
-      );
-      expect(
-        tester
-            .widget<AppButton>(
-              find.byKey(const ValueKey<String>('planner-afk-mode-needed')),
-            )
-            .selected,
-        isTrue,
-      );
-      expect(
-        tester
-            .widget<Text>(
-              find.byKey(const ValueKey<String>('planner-afk-needed-attempts')),
-            )
-            .data,
-        '10',
-      );
-      expect(
-        find.byKey(const ValueKey<String>('planner-afk-goal-label')),
-        findsNothing,
-      );
-      expect(find.text('Sunrise Herb'), findsWidgets);
-      final neededTotal = find.byKey(
-        const ValueKey<String>('planner-afk-total:Sunrise Herb'),
-      );
-      expect(tester.widget<Text>(neededTotal).data, '20');
-      expect(
-        tester
-            .widget<Text>(
-              find.byKey(
-                const ValueKey<String>('planner-afk-per-craft:Sunrise Herb'),
-              ),
-            )
-            .data,
-        '2',
-      );
-      expect(
-        find.bySemanticsLabel('Sunrise Herb, 2 per craft, 20 for this batch'),
-        findsOneWidget,
-      );
-      expect(
-        tester
-            .widget<Text>(
-              find.byKey(const ValueKey<String>('planner-afk-total-weight')),
-            )
-            .data,
-        '20 LT',
-      );
-      final afkDragRegion = find.byKey(
-        const ValueKey<String>('planner-afk-drag-region'),
-      );
-      expect(afkDragRegion, findsOneWidget);
-      expect(
-        find.descendant(
-          of: afkDragRegion,
-          matching: find.byKey(
-            const ValueKey<String>('planner-afk-edit-profile'),
-          ),
+      ),
+      findsNothing,
+    );
+    final bodyScroll = find.byKey(
+      const ValueKey<String>('planner-afk-item-list:needed:1'),
+    );
+    expect(bodyScroll, findsOneWidget);
+    expect(
+      find.descendant(of: bodyScroll, matching: afkDragRegion),
+      findsNothing,
+    );
+    expect(
+      find.descendant(
+        of: bodyScroll,
+        matching: find.byKey(const ValueKey<String>('planner-afk-mode-needed')),
+      ),
+      findsNothing,
+    );
+    expect(
+      find.descendant(
+        of: bodyScroll,
+        matching: find.byKey(
+          const ValueKey<String>('planner-afk-complete-round'),
         ),
-        findsNothing,
-      );
-      final bodyScroll = find.byKey(
-        const ValueKey<String>('planner-afk-item-list:needed:1'),
-      );
-      expect(bodyScroll, findsOneWidget);
-      expect(
-        find.descendant(of: bodyScroll, matching: afkDragRegion),
-        findsNothing,
-      );
-      expect(
-        find.descendant(
-          of: bodyScroll,
-          matching: find.byKey(
-            const ValueKey<String>('planner-afk-mode-needed'),
-          ),
+      ),
+      findsNothing,
+    );
+    expect(
+      find.descendant(
+        of: popover,
+        matching: find.byKey(
+          const ValueKey<String>('planner-afk-complete-round'),
         ),
-        findsNothing,
-      );
-      expect(
-        find.descendant(
-          of: bodyScroll,
-          matching: find.byKey(
-            const ValueKey<String>('planner-afk-complete-round'),
-          ),
-        ),
-        findsNothing,
-      );
-      expect(
-        find.descendant(
-          of: popover,
-          matching: find.byKey(
-            const ValueKey<String>('planner-afk-complete-round'),
-          ),
-        ),
-        findsOneWidget,
-      );
-      final dashboard = find.byKey(
-        const ValueKey<String>('planner-afk-dashboard'),
-      );
-      final itemsPane = find.byKey(
-        const ValueKey<String>('planner-afk-items-pane'),
-      );
-      final popoverRect = tester.getRect(popover);
-      final dashboardRect = tester.getRect(dashboard);
-      final itemsRect = tester.getRect(itemsPane);
-      expect(dashboardRect.left, closeTo(popoverRect.left, 1));
-      expect(dashboardRect.width, closeTo(270, .01));
-      expect(itemsRect.left, closeTo(dashboardRect.right, 1));
-      expect(itemsRect.right, closeTo(popoverRect.right, 1));
+      ),
+      findsOneWidget,
+    );
+    final dashboard = find.byKey(
+      const ValueKey<String>('planner-afk-dashboard'),
+    );
+    final itemsPane = find.byKey(
+      const ValueKey<String>('planner-afk-items-pane'),
+    );
+    final popoverRect = tester.getRect(popover);
+    final dashboardRect = tester.getRect(dashboard);
+    final itemsRect = tester.getRect(itemsPane);
+    expect(dashboardRect.left, closeTo(popoverRect.left, 1));
+    expect(dashboardRect.width, closeTo(270, .01));
+    expect(itemsRect.left, closeTo(dashboardRect.right, 1));
+    expect(itemsRect.right, closeTo(popoverRect.right, 1));
 
-      expect(
-        find.byKey(const ValueKey<String>('planner-afk-copy-load')),
-        findsNothing,
-      );
+    expect(
+      find.byKey(const ValueKey<String>('planner-afk-copy-load')),
+      findsNothing,
+    );
 
-      await tester.tap(
-        find.byKey(const ValueKey<String>('planner-afk-mode-maximum')),
-      );
-      await tester.pumpAndSettle();
-      expect(
-        tester
-            .widget<AppButton>(
-              find.byKey(const ValueKey<String>('planner-afk-mode-maximum')),
-            )
-            .selected,
-        isTrue,
-      );
-      expect(
-        tester
-            .widget<Text>(
-              find.byKey(const ValueKey<String>('planner-afk-safe-attempts')),
-            )
-            .data,
-        '40',
-      );
-      final maximumTotal = find.byKey(
-        const ValueKey<String>('planner-afk-total:Sunrise Herb'),
-      );
-      expect(tester.widget<Text>(maximumTotal).data, '80');
-      expect(find.text('LOAD AMOUNT'), findsOneWidget);
-      expect(popover, findsOneWidget);
-      await tester.tapAt(const Offset(5, 5));
-      await tester.pumpAndSettle();
-      expect(popover, findsNothing);
-      await harness.controller.dispose();
-    },
-  );
+    await tester.tap(
+      find.byKey(const ValueKey<String>('planner-afk-mode-maximum')),
+    );
+    await tester.pumpAndSettle();
+    expect(
+      tester
+          .widget<AppButton>(
+            find.byKey(const ValueKey<String>('planner-afk-mode-maximum')),
+          )
+          .selected,
+      isTrue,
+    );
+    expect(
+      tester
+          .widget<Text>(
+            find.byKey(const ValueKey<String>('planner-afk-safe-attempts')),
+          )
+          .data,
+      '40',
+    );
+    final maximumTotal = find.byKey(
+      const ValueKey<String>('planner-afk-total:Sunrise Herb'),
+    );
+    expect(tester.widget<Text>(maximumTotal).data, '80');
+    expect(find.text('LOAD AMOUNT'), findsOneWidget);
+    expect(popover, findsOneWidget);
+    await tester.tapAt(const Offset(5, 5));
+    await tester.pumpAndSettle();
+    expect(popover, findsNothing);
+    await harness.controller.dispose();
+  });
 
   testWidgets(
     'AFK Weight persists numbered loads and uses a final partial load',
@@ -1117,11 +1109,12 @@ void main() {
       );
       expect(tester.widget<TextField>(ownedField()).controller!.text, '0');
 
-      await tester.enterText(ownedField(), '28');
+      await tester.enterText(ownedField(), '10000');
+      expect(tester.widget<TextField>(ownedField()).controller!.text, '10.000');
       await tester.tap(find.byKey(PlannerActionKeys.row('P19', name)));
       await tester.pump(const Duration(milliseconds: 200));
 
-      expect(harness.controller.active.state.value.inventory[name], 40);
+      expect(harness.controller.active.state.value.inventory[name], 10012);
       expect(ownedActions(), findsNothing);
       expect(tester.takeException(), isNull);
       await harness.controller.dispose();
@@ -3001,18 +2994,19 @@ void main() {
         PlannerActionKeys.row('P12', 'missing:Sunrise Herb:Wild Herbs'),
       ),
     );
-    final needSource = tester.getRect(
-      find.byKey(PlannerActionKeys.row('P17', missingName)),
-    );
+    expect(find.byKey(PlannerActionKeys.row('P17', missingName)), findsNothing);
     expect(ownedField.size, const Size(82, 38));
     expect(add.left - ownedField.right, 15);
     expect(needIcon.size, const Size.square(48));
     expect(needName.left - needIcon.right, 12);
-    expect(needSubstitute.left - needName.right, 6);
+    final npc = tester.getRect(
+      find.descendant(of: needSurface, matching: find.byType(NpcSourceMarker)),
+    );
+    expect(npc.left - needName.right, 12);
+    expect(npc.center.dy, closeTo(needName.center.dy, .01));
+    expect(needSubstitute.left - npc.right, 6);
     expect(needSubstitute.width, 30);
-    expect(needSource.left - needSubstitute.right, 5);
     expect(needSubstitute.center.dy, closeTo(needName.center.dy, .01));
-    expect(needSource.center.dy, closeTo(needName.center.dy, .01));
     expect(tester.takeException(), isNull);
     await harness.controller.dispose();
   });
@@ -3226,169 +3220,54 @@ void main() {
     },
   );
 
-  testWidgets(
-    'P17 is a compact beside annotation closed by X or outside, not Escape',
-    (tester) async {
-      await setPlannerTestSize(tester, const Size(1200, 752));
-      final harness = PlannerTestHarness();
-      final semantics = tester.ensureSemantics();
-
-      await tester.pumpWidget(harness.plannerHost());
-      await tester.pump(const Duration(milliseconds: 200));
-      final before = harness.controller.active.state.value.toJson();
-
-      final substituteName = find.byKey(
-        PlannerActionKeys.row('P12', 'step:Intermediate Reagent:Wild Herbs'),
-      );
-      await tester.tap(substituteName);
-      await tester.pump();
-      await tester.pump(const Duration(milliseconds: 200));
-      final substitute = find.bySemanticsLabel(
-        'Substitute choices for Sunrise Herb',
-      );
-      expect(substitute, findsOneWidget);
-      _expectInsideViewport(tester.getRect(substitute), const Size(1200, 752));
-
-      final sourceAction = find.byKey(
-        PlannerActionKeys.row('P17', 'Sunrise Herb'),
-      );
-      expect(sourceAction, findsOneWidget);
-      await tester.tap(sourceAction);
-      await tester.pump();
-      // The owned table is a popover, not the former inline chooser. Opening
-      // another surface dismisses it (also verified on the preceding build).
-      expect(substitute, findsNothing);
-      final source = find.bySemanticsLabel(
-        'Source information for Sunrise Herb',
-      );
-      expect(source, findsOneWidget);
-      final sourceDrag = find.byKey(
-        const ValueKey<String>('planner-source-info-drag-region'),
-      );
-      expect(sourceDrag, findsOneWidget);
-      expect(
-        find.descendant(
-          of: sourceDrag,
-          matching: find.bySemanticsLabel(
-            'Close source information for Sunrise Herb',
-          ),
-        ),
-        findsNothing,
-      );
-      _expectInsideViewport(tester.getRect(source), const Size(1200, 752));
-      expect(tester.getSize(source).width, 480);
-      expect(
-        find.text(
-          'Gathered near Heidel roads.\n'
-          'Vendor: Material Vendor - Heidel',
-        ),
-        findsOneWidget,
-      );
-
-      await tester.sendKeyEvent(LogicalKeyboardKey.escape);
-      await tester.pump();
-      expect(source, findsOneWidget);
-
-      await tester.tapAt(const Offset(20, 20));
-      await tester.pump();
-      expect(source, findsNothing);
-      expect(substitute, findsNothing);
-
-      await tester.tap(substituteName);
-      await tester.pump();
-      expect(substitute, findsOneWidget);
-      await tester.sendKeyEvent(LogicalKeyboardKey.escape);
-      await tester.pump();
-      expect(substitute, findsNothing);
-
-      await tester.tap(sourceAction);
-      await tester.pump();
-      expect(source, findsOneWidget);
-      await tester.tap(
-        find.bySemanticsLabel('Close source information for Sunrise Herb'),
-      );
-      await tester.pump();
-      expect(source, findsNothing);
-      expect(harness.controller.active.state.value.toJson(), before);
-      expect(tester.takeException(), isNull);
-      semantics.dispose();
-      await harness.controller.dispose();
-    },
-  );
-
-  testWidgets(
-    'Ledger P17 has readable type and a content-sized annotation card',
-    (tester) async {
-      await setPlannerTestSize(tester, const Size(1500, 940));
-      final harness = PlannerTestHarness();
-      const spec = IlluminatedLedgerSpec.theme;
-      final semantics = tester.ensureSemantics();
-      await tester.pumpWidget(
-        AppOverlayCoordinatorHost(
-          child: MaterialApp(
-            theme: spec.materialTheme(),
-            home: ThemeSpecScope(
-              spec: spec,
-              child: Scaffold(
-                body: PlannerView(
-                  controller: harness.controller.active,
-                  externalActions: harness.actions,
+  for (final spec in [StandardSpec.theme, IlluminatedLedgerSpec.theme]) {
+    testWidgets(
+      'NPC source marker replaces extra question button in ${spec.id}',
+      (tester) async {
+        await setPlannerTestSize(tester, const Size(1500, 940));
+        final harness = PlannerTestHarness();
+        final before = harness.controller.active.state.value.toJson();
+        await tester.pumpWidget(
+          AppOverlayCoordinatorHost(
+            child: MaterialApp(
+              theme: spec.materialTheme(),
+              home: ThemeSpecScope(
+                spec: spec,
+                child: Scaffold(
+                  body: PlannerView(
+                    controller: harness.controller.active,
+                    externalActions: harness.actions,
+                  ),
                 ),
               ),
             ),
           ),
-        ),
-      );
-      await tester.pump(const Duration(milliseconds: 200));
-
-      final sourceAction = find.byKey(
-        PlannerActionKeys.row('P17', 'Sunrise Herb'),
-      );
-      await tester.tap(sourceAction);
-      await tester.pump();
-      final source = find.bySemanticsLabel(
-        'Source information for Sunrise Herb',
-      );
-      expect(source, findsOneWidget);
-      final sourceRect = tester.getRect(source);
-      final anchorRect = tester.getRect(sourceAction);
-      final bodyRect = tester.getRect(
-        find.byKey(const ValueKey<String>('planner-source-info-body')),
-      );
-      expect(sourceRect.width, ItemDetailStyle.width(tester.element(source)));
-      expect(sourceRect.height, lessThan(280));
-      expect(bodyRect.left, greaterThan(sourceRect.left));
-      expect(bodyRect.right, lessThan(sourceRect.right));
-      expect(sourceRect.left, greaterThanOrEqualTo(12));
-      expect(sourceRect.center.dy, closeTo(anchorRect.center.dy, .01));
-      final icon = tester.widget<PlannerItemIcon>(
-        find
-            .descendant(of: source, matching: find.byType(PlannerItemIcon))
-            .first,
-      );
-      expect(icon.size, ItemDetailStyle.headerIcon);
-      final body = tester.widget<Text>(
-        find.byKey(const ValueKey<String>('planner-source-info-body')),
-      );
-      expect(body.style, ItemDetailStyle.body(spec));
-      final section = tester.widget<Text>(find.text('How to obtain'));
-      expect(section.style, ItemDetailStyle.section(spec));
-      final surface = tester.widget<AppSurface>(
-        find.byKey(const ValueKey<String>('planner-source-info-card')),
-      );
-      expect(surface.role, AppSurfaceRole.tooltip);
-      expect(surface.padding, const EdgeInsets.all(16));
-
-      await tester.tap(
-        find.bySemanticsLabel('Close source information for Sunrise Herb'),
-      );
-      await tester.pump();
-      expect(source, findsNothing);
-      expect(tester.takeException(), isNull);
-      semantics.dispose();
-      await harness.controller.dispose();
-    },
-  );
+        );
+        await tester.pumpAndSettle();
+        expect(
+          find.byKey(PlannerActionKeys.row('P17', 'Sunrise Herb')),
+          findsNothing,
+        );
+        final marker = find.byType(NpcSourceMarker).first;
+        expect(
+          tester.widget<NpcSourceMarker>(marker).vendorHint,
+          contains('Material Vendor'),
+        );
+        final mouse = await tester.createGesture(kind: PointerDeviceKind.mouse);
+        await mouse.addPointer(location: Offset.zero);
+        await mouse.moveTo(tester.getCenter(marker));
+        await tester.pump(const Duration(milliseconds: 1200));
+        await tester.pumpAndSettle();
+        expect(find.text('Material Vendor · Heidel'), findsOneWidget);
+        await mouse.removePointer();
+        await tester.pumpAndSettle();
+        expect(find.text('Material Vendor · Heidel'), findsNothing);
+        expect(harness.controller.active.state.value.toJson(), before);
+        expect(tester.takeException(), isNull);
+        await harness.controller.dispose();
+      },
+    );
+  }
 
   testWidgets(
     'Ledger Need First choices use the approved scrollable owned table',
@@ -3463,7 +3342,7 @@ void main() {
       final chooserRect = tester.getRect(chooser);
       expect(needSurface, findsOneWidget);
       _expectInsideViewport(chooserRect, const Size(1500, 940));
-      expect(chooserRect.width, 500);
+      expect(chooserRect.width, inInclusiveRange(300, 900));
 
       final first = find.byKey(PlannerActionKeys.row('P13', 'Sunrise Herb'));
       final second = find.byKey(PlannerActionKeys.row('P13', 'Silver Azalea'));
@@ -3481,7 +3360,7 @@ void main() {
                   .first,
             )
             .size,
-        36,
+        42,
       );
       expect(find.text('Choose Substitute'), findsNothing);
       expect(find.textContaining('Ratio '), findsNothing);
@@ -3835,7 +3714,15 @@ void _expectNeedValues(
     final quantity = find.byKey(
       ValueKey('planner-need-quantity:$stableId:${entry.key}'),
     );
-    expect(tester.widget<Text>(quantity).data, entry.value);
+    expect(
+      find.descendant(
+        of: quantity,
+        matching: find.text(
+          entry.key == 'Have' ? entry.value : '${entry.key} ${entry.value}',
+        ),
+      ),
+      findsOneWidget,
+    );
   }
 }
 

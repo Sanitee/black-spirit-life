@@ -22,6 +22,7 @@ import '../shared/inventory_count_badge.dart';
 import '../shared/item_name_copy_scope.dart';
 import '../shared/market_count_badges.dart';
 import '../shared/mode_item_icon.dart';
+import '../shared/npc_source_marker.dart';
 import '../shared/quality_grade_button.dart';
 import '../shared/source_availability_badges.dart';
 import '../shared/workshop_presentation.dart';

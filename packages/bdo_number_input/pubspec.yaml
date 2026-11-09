@@ -1,0 +1,9 @@
+name: bdo_number_input
+description: Shared live numeric input grouping for Black Spirit Life.
+version: 0.1.0
+publish_to: none
+environment:
+  sdk: ^3.12.2
+dependencies:
+  flutter:
+    sdk: flutter

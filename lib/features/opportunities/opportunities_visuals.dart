@@ -2,7 +2,7 @@ import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:bdo_craft_planner_flutter/visual/components/app_tooltip.dart';
-
+import 'package:bdo_number_input/bdo_number_input.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -1018,7 +1018,10 @@ class OpportunityTextField extends AppTextField {
       onSubmitted: onSubmitted,
       onTap: onTap,
       keyboardType: keyboardType,
-      inputFormatters: inputFormatters,
+      inputFormatters: groupedNumberFormatters(
+        inputFormatters,
+        enabled: keyboardType?.index == TextInputType.number.index,
+      ),
       textAlign: textAlign,
       textAlignVertical:
           textAlignVertical ??

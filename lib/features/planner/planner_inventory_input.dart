@@ -1,7 +1,7 @@
 import 'dart:math' as math;
 
 import 'package:bdo_craft_planner_flutter/visual/components/app_tooltip.dart';
-
+import 'package:bdo_number_input/bdo_number_input.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -241,9 +241,9 @@ class _PlannerInventoryInputState extends State<PlannerInventoryInput> {
                             decimal: true,
                           ),
                           textInputAction: TextInputAction.done,
-                          inputFormatters: const [
+                          inputFormatters: groupedNumberFormatters(const [
                             InventoryAmountInputFormatter(),
-                          ],
+                          ]),
                           textAlign: TextAlign.center,
                           style: amountStyle,
                           cursorColor: spec.palette.primaryBright,

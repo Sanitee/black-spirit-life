@@ -96,12 +96,12 @@ void main() {
       '9999999999999999999999999999999999999999999999999999999999999999'
           '9999999999999999999999999999999999999999999999999999999999999999',
     );
-    _expectMasteryValue(tester, 'setup-alchemy-mastery', '3000');
+    _expectMasteryValue(tester, 'setup-alchemy-mastery', '3.000');
     await _enterMastery(tester, 'setup-cooking-mastery', '-10');
     _expectMasteryValue(tester, 'setup-cooking-mastery', '0');
     await _enterMastery(tester, 'setup-cooking-mastery', '875');
     await _enterMastery(tester, 'setup-processing-mastery', '3000');
-    _expectMasteryValue(tester, 'setup-processing-mastery', '3000');
+    _expectMasteryValue(tester, 'setup-processing-mastery', '3.000');
     await _enterMastery(tester, 'setup-processing-mastery', '1450');
     await tester.tap(
       find.byKey(const ValueKey<String>('setup-mass-processing')),
@@ -126,6 +126,7 @@ void main() {
     await _enterField(tester, 'setup-current-carried-weight-lt', '-10');
     _expectFieldValue(tester, 'setup-current-carried-weight-lt', '0');
     await _enterField(tester, 'setup-maximum-weight-lt', '1850,5');
+    _expectFieldValue(tester, 'setup-maximum-weight-lt', '1.850,5');
     await _enterField(tester, 'setup-current-carried-weight-lt', '125.25');
     await _enterField(tester, 'setup-safety-buffer-lt', '30');
     await tester.tap(

@@ -296,13 +296,12 @@ void checkTable(WidgetTester tester, Finder host, double scale) {
   for (final row in table.children.skip(1).take(6)) {
     Rect rect(int i) => tester.getRect(find.byWidget(row.children[i]));
     expect(rect(2).left - rect(0).right, greaterThanOrEqualTo(32 * scale - .1));
-    expect(rect(4).left - rect(2).right, greaterThanOrEqualTo(10 * scale - .1));
-    expect(rect(6).left - rect(4).right, greaterThanOrEqualTo(14 * scale - .1));
-    expect(rect(0).center.dy, closeTo(rect(4).center.dy, .1));
+    expect(rect(4).left - rect(2).right, greaterThanOrEqualTo(14 * scale - .1));
+    expect(rect(0).center.dy, closeTo(rect(2).center.dy, .1));
     final badge = find.descendant(
-      of: find.byWidget(row.children[4]),
+      of: find.byWidget(row.children[2]),
       matching: find.byType(InventoryCountBadge),
     );
-    expect(tester.getCenter(badge).dx, closeTo(rect(4).center.dx, .1));
+    expect(tester.getCenter(badge).dx, closeTo(rect(2).center.dx, .1));
   }
 }

@@ -1,3 +1,4 @@
+import 'package:bdo_number_input/bdo_number_input.dart';
 import 'package:bdo_number_format/bdo_number_format.dart';
 import 'package:flutter/material.dart';
 
@@ -226,6 +227,7 @@ class _WorkerLodgingShopSetupDialogState
                         ),
                         controller: _otherController,
                         keyboardType: TextInputType.number,
+                        inputFormatters: const [GroupedNumberInputFormatter()],
                         textInputAction: TextInputAction.done,
                         textAlign: TextAlign.center,
                         style: TextStyle(

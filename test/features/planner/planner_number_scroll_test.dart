@@ -100,6 +100,10 @@ void main() {
             find.byType(EditableText).first,
           );
           expect(
+            editor.widget.controller.text,
+            '123.456.789.012.345.678.901.234.567.890',
+          );
+          expect(
             editor.renderEditable.offset.pixels,
             greaterThan(0),
             reason: 'Long values still scroll while editing',

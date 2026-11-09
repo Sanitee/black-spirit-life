@@ -1,11 +1,13 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../../app/state/planner_application_controller.dart';
 import '../../domain/catalog/item_name_presentation.dart';
-import '../../domain/formatting/compact_quantity.dart';
 import '../../domain/formatting/ingredient_group_labels.dart';
 import '../../domain/formatting/planner_formatters.dart';
+import '../../domain/market/recipe_craft_comparison.dart';
 import '../../domain/market/shared_market_models.dart';
 import '../../domain/models/catalog_models.dart';
 import '../../domain/opportunities/opportunity_card_reading.dart';
@@ -16,8 +18,11 @@ import '../../shared/overlays/anchored_popover.dart';
 import '../../visual/components/sculpted_panel.dart';
 import '../../visual/visual.dart';
 import '../opportunities/opportunity_silver_amount.dart';
+import '../shared/inventory_count_badge.dart';
 import '../shared/item_name_copy_scope.dart';
 import '../shared/market_count_badges.dart';
+import '../shared/missing_count_badge.dart';
+import '../shared/npc_source_marker.dart';
 import 'planner_choice_market.dart';
 import 'planner_shared.dart' show PlannerItemIcon;
 
@@ -47,7 +52,8 @@ class PlannerOwnedChoices extends StatelessWidget {
   Widget build(BuildContext context) => AnchoredPopover(
     overlayId:
         'planner-owned-choices:$overlayScope:$parentName:${ingredient.name}',
-    preferredWidth: 500,
+    preferredWidth: double.infinity,
+    contentSizedWidth: true,
     alignEnd: false,
     maximumHeight: 640,
     consumeOutsideTap: false,
@@ -102,88 +108,238 @@ class _OwnedChoicePanel extends StatelessWidget {
           ),
       ];
       final group = ingredientGroupLabel(ingredient);
-      final ownedWidth = _choiceQuantityWidth(
-        context,
-        values.map((value) => value.owned),
-        68,
-      );
-      final missingWidth = _choiceQuantityWidth(
-        context,
-        values.map((value) => value.missing),
-        76,
-      );
+
       final panel = PlannerChoiceMarket(
         controller: controller,
         resolveAcrossModes: true,
         names: values.map((value) => value.name).toList(),
-        builder: (context, marketFor, now) => SculptedPanel(
-          key: const ValueKey('planner-owned-choices-panel'),
-          title: group,
-          onClose: close,
-          body: LayoutBuilder(
-            builder: (context, constraints) {
-              final narrow =
-                  constraints.maxWidth -
-                          (ownedWidth - 68) -
-                          (missingWidth - 76) <
-                      360 ||
-                  MediaQuery.textScalerOf(context).scale(14) > 21;
-              return Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
+        builder: (context, marketFor, now) => DefaultTextStyle(
+          style: context.visualTheme.typography.body.copyWith(
+            color: context.visualTheme.palette.text,
+            fontSize: 15,
+            fontWeight: FontWeight.w600,
+          ),
+          child: Builder(
+            builder: (context) {
+              final entries = [
+                for (var i = 0; i < values.length; i++)
+                  _ChoiceEntry(
+                    controller,
+                    orderedOptions[i],
+                    values[i],
+                    marketFor(values[i].name),
+                    now,
+                  ),
+              ];
+              final widths = _ChoiceWidths.measure(context, entries);
+              final scale = MediaQuery.textScalerOf(context).scale(14) / 14;
+              Widget heading(
+                String label, {
+                bool left = false,
+                double? width,
+              }) => SizedBox(
+                width: width,
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 9),
+                  child: Text(
+                    label,
+                    textAlign: left ? TextAlign.left : TextAlign.center,
+                    style: _choiceHeading(context),
+                  ),
+                ),
+              );
+              Widget cells({
+                required Widget ingredient,
+                required Widget inventory,
+                required Widget market,
+              }) => Row(
                 children: [
-                  if (!narrow)
-                    Padding(
-                      padding: const EdgeInsets.fromLTRB(14, 9, 14, 9),
-                      child: Row(
+                  SizedBox(width: widths.ingredient, child: ingredient),
+                  SizedBox(width: 32 * scale),
+                  SizedBox(
+                    width: widths.inventory,
+                    child: Center(child: inventory),
+                  ),
+                  SizedBox(width: 14 * scale),
+                  SizedBox(width: widths.market, child: market),
+                ],
+              );
+              return SizedBox(
+                width: widths.total,
+                child: SculptedPanel(
+                  key: const ValueKey('planner-owned-choices-panel'),
+                  title: group,
+                  onClose: close,
+                  body: SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    child: SizedBox(
+                      width: widths.total - 2,
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
-                          Expanded(
-                            child: _meta(context, 'Ingredient', fontSize: 13),
-                          ),
-                          SizedBox(
-                            width: ownedWidth,
-                            child: _meta(
-                              context,
-                              'Owned',
-                              right: true,
-                              fontSize: 13,
+                          Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 14),
+                            child: cells(
+                              ingredient: heading('Ingredient', left: true),
+                              inventory: heading('Inventory'),
+                              market: Align(
+                                alignment: Alignment.centerLeft,
+                                child: heading('Market', width: widths.stock),
+                              ),
                             ),
                           ),
-                          SizedBox(
-                            width: missingWidth,
-                            child: _meta(
-                              context,
-                              'Missing',
-                              right: true,
-                              fontSize: 13,
+                          for (final (index, entry) in entries.indexed)
+                            Semantics(
+                              key: ValueKey('P13:${entry.option}'),
+                              selected:
+                                  entry.option.toLowerCase() ==
+                                  selected.toLowerCase(),
+                              button: true,
+                              label:
+                                  '${entry.value.name}, owned ${formatQuantity(entry.value.owned)}, missing ${formatQuantity(entry.value.missing)}',
+                              child: InkWell(
+                                key: ValueKey(
+                                  'planner-owned-option:${entry.option}',
+                                ),
+                                onTap: controller.owner.mutationsFrozen
+                                    ? null
+                                    : () {
+                                        beforeSelection?.call(entry.option);
+                                        close();
+                                        controller.selectSubstitute(
+                                          parentName: parentName,
+                                          ingredient: ingredient,
+                                          selection: entry.option,
+                                        );
+                                      },
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 14,
+                                    vertical: 12,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color:
+                                        entry.option.toLowerCase() ==
+                                            selected.toLowerCase()
+                                        ? context.visualTheme.palette.trim
+                                              .withAlpha(55)
+                                        : index.isEven
+                                        ? context
+                                              .visualTheme
+                                              .palette
+                                              .surfaceRaised
+                                              .withAlpha(65)
+                                        : context
+                                              .visualTheme
+                                              .palette
+                                              .surfaceInset
+                                              .withAlpha(30),
+                                    border: Border(
+                                      top: BorderSide(
+                                        color: context.visualTheme.palette.trim
+                                            .withAlpha(65),
+                                      ),
+                                    ),
+                                  ),
+                                  child: cells(
+                                    ingredient: Row(
+                                      children: [
+                                        PlannerItemIcon(
+                                          controller: controller,
+                                          name: entry.value.name,
+                                          size: widths.icon,
+                                        ),
+                                        const SizedBox(width: 12),
+                                        Expanded(
+                                          child: Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            children: [
+                                              Row(
+                                                children: [
+                                                  Text(
+                                                    itemDisplayName(
+                                                      entry.value.name,
+                                                    ),
+                                                    style: _choiceName(context),
+                                                    maxLines: 1,
+                                                    softWrap: false,
+                                                  ),
+                                                  if (entry.vendorHint !=
+                                                      null) ...[
+                                                    const SizedBox(width: 12),
+                                                    NpcSourceMarker(
+                                                      vendorHint:
+                                                          entry.vendorHint,
+                                                    ),
+                                                  ],
+                                                ],
+                                              ),
+                                              const SizedBox(height: 8),
+                                              Row(
+                                                children: [
+                                                  MissingCountBadge(
+                                                    key: ValueKey(
+                                                      'choice-missing:${entry.value.name}',
+                                                    ),
+                                                    missing:
+                                                        entry.value.missing,
+                                                  ),
+                                                  const SizedBox(width: 12),
+                                                  Flexible(
+                                                    child: Semantics(
+                                                      label:
+                                                          'Estimated cost to buy all ${formatQuantity(entry.value.needed)} ${entry.value.name}',
+                                                      child: OpportunitySilverAmount(
+                                                        value: entry.total,
+                                                        wholeSilver: true,
+                                                        showIcon: true,
+                                                        textKey: ValueKey(
+                                                          'choice-buy-all:${entry.value.name}',
+                                                        ),
+                                                        style: _choiceCost(
+                                                          context,
+                                                        ),
+                                                      ),
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                    inventory: InventoryCountBadge(
+                                      key: ValueKey(
+                                        'choice-owned:${entry.value.name}',
+                                      ),
+                                      owned: entry.value.owned,
+                                      density: MarketBadgeDensity.comfortable,
+                                    ),
+                                    market: MarketCountBadges(
+                                      stock: entry.stock.stock,
+                                      preorders: entry.stock.preorders,
+                                      showMarket: entry.showMarket,
+                                      density: MarketBadgeDensity.comfortable,
+                                      compactNumbers: true,
+                                      singleLine: true,
+                                      stockColumnWidth: widths.stock,
+                                      stockColumnAlignment: Alignment.center,
+                                      wrapKey: ValueKey(
+                                        'choice-market:${entry.value.name}',
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ),
                             ),
-                          ),
                         ],
                       ),
                     ),
-                  for (final (index, option) in orderedOptions.indexed)
-                    _ChoiceRow(
-                      controller: controller,
-                      option: option,
-                      value: values[index],
-                      market: marketFor(values[index].name),
-                      now: now,
-                      selected: option.toLowerCase() == selected.toLowerCase(),
-                      narrow: narrow,
-                      ownedWidth: ownedWidth,
-                      missingWidth: missingWidth,
-                      onTap: controller.owner.mutationsFrozen
-                          ? null
-                          : () {
-                              beforeSelection?.call(option);
-                              close();
-                              controller.selectSubstitute(
-                                parentName: parentName,
-                                ingredient: ingredient,
-                                selection: option,
-                              );
-                            },
-                    ),
-                ],
+                  ),
+                ),
               );
             },
           ),
@@ -197,6 +353,159 @@ class _OwnedChoicePanel extends StatelessWidget {
       );
     },
   );
+}
+
+TextStyle _choiceName(BuildContext context) =>
+    context.visualTheme.typography.body.copyWith(
+      fontSize: 16,
+      fontWeight: FontWeight.w600,
+      color: context.visualTheme.palette.text,
+    );
+TextStyle _choiceHeading(BuildContext context) =>
+    context.visualTheme.typography.meta.copyWith(
+      fontSize: 13,
+      fontWeight: FontWeight.w600,
+      fontStyle: FontStyle.normal,
+      color: context.visualTheme.palette.textMuted,
+    );
+TextStyle _choiceCost(BuildContext context) =>
+    context.visualTheme.typography.body.copyWith(
+      fontSize: 14,
+      fontWeight: FontWeight.w600,
+      fontFeatures: const [FontFeature.tabularFigures()],
+    );
+
+class _ChoiceEntry {
+  _ChoiceEntry(
+    ModeFeatureController controller,
+    this.option,
+    this.value,
+    OpportunityMarketItem? market,
+    DateTime now,
+  ) : vendorHint = npcVendorHint(controller, value.name),
+      npc = controller.resolveItemSource(value.name).npcPrice > 0,
+      showMarket =
+          choiceMarketIdentity(
+            controller,
+            value.name,
+            acrossModes: true,
+          ).marketId !=
+          null,
+      stock = OpportunityCardStock(market, now, sharedMarketFreshness) {
+    final price = npc
+        ? controller.resolveItemSource(value.name).npcPrice
+        : recipeMarketUnitPrice(market, now, sharedMarketFreshness);
+    total = value.needed == 0
+        ? 0.0
+        : price == null
+        ? null
+        : price * value.needed;
+  }
+  final String option;
+  final ({String name, double owned, double missing, double needed}) value;
+  final bool npc, showMarket;
+  final String? vendorHint;
+  final OpportunityCardStock stock;
+  late final double? total;
+}
+
+class _ChoiceWidths {
+  const _ChoiceWidths(
+    this.ingredient,
+    this.inventory,
+    this.stock,
+    this.orders,
+    this.scale,
+    this.icon,
+  );
+  final double ingredient, inventory, stock, orders, scale, icon;
+  double get market => stock + (orders > 0 ? 7 + orders : 0);
+  double get total =>
+      30 + ingredient + 32 * scale + inventory + 14 * scale + market;
+
+  static _ChoiceWidths measure(
+    BuildContext context,
+    List<_ChoiceEntry> entries,
+  ) {
+    double textWidth(String text, TextStyle style) {
+      final painter = TextPainter(
+        text: TextSpan(
+          text: text,
+          style: DefaultTextStyle.of(context).style.merge(style),
+        ),
+        textDirection: Directionality.of(context),
+        textScaler: MediaQuery.textScalerOf(context),
+        maxLines: 1,
+      )..layout();
+      final width = painter.width.ceilToDouble();
+      painter.dispose();
+      return width;
+    }
+
+    final scale = MediaQuery.textScalerOf(context).scale(14) / 14;
+    final icon = 42.0 * scale.clamp(1.0, 1.35);
+    double marketWidth(int? stock, int? orders) => MarketCountBadges(
+      stock: stock,
+      preorders: orders,
+      compactNumbers: true,
+      density: MarketBadgeDensity.comfortable,
+    ).preferredWidth(context);
+    var label = textWidth('Ingredient', _choiceHeading(context));
+    final npc = const NpcSourceMarker().preferredWidth(context);
+    var inventory = textWidth('Inventory', _choiceHeading(context));
+    var stock = textWidth('Market', _choiceHeading(context));
+    var orders = 0.0;
+    for (final entry in entries) {
+      final missing = MissingCountBadge(
+        missing: entry.value.missing,
+      ).preferredWidth(context);
+      final price =
+          textWidth(
+            entry.total == null
+                ? '—'
+                : formatCompactOpportunitySilver(entry.total!),
+            _choiceCost(context),
+          ) +
+          26;
+      label = math.max(
+        label,
+        icon +
+            12 +
+            math.max(
+              textWidth(
+                    itemDisplayName(entry.value.name),
+                    _choiceName(context),
+                  ) +
+                  (entry.vendorHint != null ? 12 + npc : 0),
+              missing + 12 + price,
+            ),
+      );
+      inventory = math.max(
+        inventory,
+        InventoryCountBadge(
+          owned: entry.value.owned,
+          density: MarketBadgeDensity.comfortable,
+        ).preferredWidth(context),
+      );
+      if (entry.showMarket) {
+        stock = math.max(stock, marketWidth(entry.stock.stock, null));
+        if ((entry.stock.preorders ?? 0) > 0) {
+          orders = math.max(
+            orders,
+            marketWidth(0, entry.stock.preorders) - marketWidth(0, null) - 7,
+          );
+        }
+      }
+    }
+    return _ChoiceWidths(
+      label + 4,
+      inventory + 2,
+      stock + 2,
+      orders,
+      scale,
+      icon,
+    );
+  }
 }
 
 Widget _meta(
@@ -213,254 +522,6 @@ Widget _meta(
     fontStyle: FontStyle.normal,
   ),
 );
-
-TextStyle _choiceQuantityStyle(BuildContext context) =>
-    context.visualTheme.typography.meta.copyWith(
-      fontSize: 16,
-      fontWeight: FontWeight.w600,
-      fontStyle: FontStyle.normal,
-      fontFeatures: const [FontFeature.tabularFigures()],
-      color: context.visualTheme.palette.text,
-    );
-
-double _choiceQuantityWidth(
-  BuildContext context,
-  Iterable<double> values,
-  double minimum,
-) {
-  var width = minimum;
-  final painter = TextPainter(
-    textDirection: Directionality.of(context),
-    textScaler: MediaQuery.textScalerOf(context),
-    maxLines: 1,
-  );
-  for (final value in values) {
-    painter.text = TextSpan(
-      text: formatCompactQuantity(value),
-      style: _choiceQuantityStyle(context),
-    );
-    painter.layout();
-    final needed = painter.width.ceilToDouble() + 12;
-    if (needed > width) width = needed;
-  }
-  painter.dispose();
-  return width;
-}
-
-class _ChoiceRow extends StatelessWidget {
-  const _ChoiceRow({
-    required this.controller,
-    required this.option,
-    required this.value,
-    required this.selected,
-    required this.narrow,
-    required this.ownedWidth,
-    required this.missingWidth,
-    required this.onTap,
-    required this.market,
-    required this.now,
-  });
-  final ModeFeatureController controller;
-  final String option;
-  final ({String name, double owned, double missing, double needed}) value;
-  final OpportunityMarketItem? market;
-  final DateTime now;
-  final bool selected;
-  final bool narrow;
-  final double ownedWidth, missingWidth;
-  final VoidCallback? onTap;
-  @override
-  Widget build(BuildContext context) {
-    final spec = context.visualTheme;
-    final p = spec.palette;
-    final nameStyle = spec.typography.body.copyWith(
-      fontSize: 16,
-      fontWeight: FontWeight.w600,
-      color: p.text,
-    );
-    // Retain the Planner's typography; only the displayed number is compact.
-    final quantityStyle = _choiceQuantityStyle(context);
-    final source = controller.resolveItemSource(value.name);
-    final npc = source.npcPrice > 0;
-    final stock = OpportunityCardStock(market, now, sharedMarketFreshness);
-    final price = npc
-        ? source.npcPrice
-        : market?.quoteIsFresh(now, sharedMarketFreshness) == true &&
-              market?.unlisted != true
-        ? market!.basePrice!.toDouble()
-        : null;
-    final total = value.needed == 0
-        ? 0.0
-        : price == null
-        ? null
-        : price * value.needed;
-    final marketLine = Padding(
-      padding: const EdgeInsets.only(top: 8),
-      child: Wrap(
-        alignment: WrapAlignment.spaceBetween,
-        crossAxisAlignment: WrapCrossAlignment.center,
-        spacing: 12,
-        runSpacing: 6,
-        children: [
-          MarketCountBadges(
-            stock: stock.stock,
-            preorders: stock.preorders,
-            npc: npc,
-            showMarket:
-                choiceMarketIdentity(
-                  controller,
-                  value.name,
-                  acrossModes: true,
-                ).marketId !=
-                null,
-            density: MarketBadgeDensity.comfortable,
-            wrapKey: ValueKey('choice-market:${value.name}'),
-          ),
-          Semantics(
-            label:
-                'Estimated cost to buy all ${formatQuantity(value.needed)} ${value.name}',
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                ExcludeSemantics(
-                  child: PlannerItemIcon(
-                    controller: controller,
-                    name: 'Silver',
-                    size: 21,
-                    showFrame: false,
-                  ),
-                ),
-                const SizedBox(width: 6),
-                Flexible(
-                  child: OpportunitySilverAmount(
-                    value: total,
-                    wholeSilver: true,
-                    textKey: ValueKey('choice-buy-all:${value.name}'),
-                    style: context.visualTheme.typography.body.copyWith(
-                      fontSize: 17,
-                      fontWeight: FontWeight.w600,
-                      fontFeatures: const [FontFeature.tabularFigures()],
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-    final name = Text(itemDisplayName(value.name), style: nameStyle);
-    final missing = Text(
-      formatCompactQuantity(value.missing),
-      key: ValueKey('choice-missing:${value.name}'),
-      maxLines: 1,
-      softWrap: false,
-      textAlign: TextAlign.right,
-      style: quantityStyle.copyWith(
-        color: value.missing == 0 ? Color.lerp(p.success, p.text, .55) : p.text,
-      ),
-    );
-    final owned = Text(
-      formatCompactQuantity(value.owned),
-      key: ValueKey('choice-owned:${value.name}'),
-      maxLines: 1,
-      softWrap: false,
-      textAlign: TextAlign.right,
-      style: quantityStyle,
-    );
-    return Semantics(
-      key: ValueKey('P13:$option'),
-      selected: selected,
-      button: true,
-      label:
-          '${value.name}, owned ${formatQuantity(value.owned)}, missing ${formatQuantity(value.missing)}',
-      child: InkWell(
-        key: ValueKey('planner-owned-option:$option'),
-        onTap: onTap,
-        child: Container(
-          constraints: const BoxConstraints(minHeight: 48),
-          decoration: BoxDecoration(
-            color: selected
-                ? Color.alphaBlend(p.primary.withValues(alpha: .24), p.surface)
-                : null,
-            border: Border(
-              left: BorderSide(
-                width: 2,
-                color: selected ? p.trimBright : Colors.transparent,
-              ),
-            ),
-          ),
-          padding: const EdgeInsets.only(left: 12, right: 14),
-          child: Row(
-            children: [
-              PlannerItemIcon(
-                controller: controller,
-                name: value.name,
-                size: 36,
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Container(
-                  padding: const EdgeInsets.symmetric(vertical: 12),
-                  decoration: BoxDecoration(
-                    border: Border(
-                      bottom: BorderSide(color: p.trim.withValues(alpha: .28)),
-                    ),
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      narrow
-                          ? Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                name,
-                                const SizedBox(height: 6),
-                                Wrap(
-                                  spacing: 16,
-                                  runSpacing: 4,
-                                  children: [
-                                    Text(
-                                      'Owned ${formatCompactQuantity(value.owned)}',
-                                      key: ValueKey(
-                                        'choice-owned:${value.name}',
-                                      ),
-                                      maxLines: 1,
-                                      softWrap: false,
-                                      style: quantityStyle,
-                                    ),
-                                    Text(
-                                      'Missing ${formatCompactQuantity(value.missing)}',
-                                      key: ValueKey(
-                                        'choice-missing:${value.name}',
-                                      ),
-                                      maxLines: 1,
-                                      softWrap: false,
-                                      style: quantityStyle,
-                                    ),
-                                  ],
-                                ),
-                              ],
-                            )
-                          : Row(
-                              children: [
-                                Expanded(child: name),
-                                SizedBox(width: ownedWidth, child: owned),
-                                SizedBox(width: missingWidth, child: missing),
-                              ],
-                            ),
-                      marketLine,
-                    ],
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
 
 class PlannerShoppingList extends StatelessWidget {
   const PlannerShoppingList({

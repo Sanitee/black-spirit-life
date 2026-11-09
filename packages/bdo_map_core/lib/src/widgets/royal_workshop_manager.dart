@@ -1,3 +1,4 @@
+import 'package:bdo_number_input/bdo_number_input.dart';
 import 'dart:math' as math;
 
 import 'package:bdo_number_format/bdo_number_format.dart';
@@ -1217,11 +1218,13 @@ class _RoyalEstimateEditor extends StatelessWidget {
                                     const TextInputType.numberWithOptions(
                                       decimal: true,
                                     ),
-                                inputFormatters: <TextInputFormatter>[
-                                  FilteringTextInputFormatter.allow(
-                                    RegExp(r'[0-9., ]'),
-                                  ),
-                                ],
+                                inputFormatters: groupedNumberFormatters(
+                                  <TextInputFormatter>[
+                                    FilteringTextInputFormatter.allow(
+                                      RegExp(r'[0-9., ]'),
+                                    ),
+                                  ],
+                                ),
                                 onChanged: (value) {
                                   final hours = parsePlannerNumber(value);
                                   onChanged(
@@ -1258,16 +1261,18 @@ class _RoyalEstimateEditor extends StatelessWidget {
                                       decimal: true,
                                       signed: true,
                                     ),
-                                inputFormatters: <TextInputFormatter>[
-                                  TextInputFormatter.withFunction(
-                                    (oldValue, newValue) =>
-                                        RegExp(
-                                          r'^-?[0-9., ]*$',
-                                        ).hasMatch(newValue.text)
-                                        ? newValue
-                                        : oldValue,
-                                  ),
-                                ],
+                                inputFormatters: groupedNumberFormatters(
+                                  <TextInputFormatter>[
+                                    TextInputFormatter.withFunction(
+                                      (oldValue, newValue) =>
+                                          RegExp(
+                                            r'^-?[0-9., ]*$',
+                                          ).hasMatch(newValue.text)
+                                          ? newValue
+                                          : oldValue,
+                                    ),
+                                  ],
+                                ),
                                 onChanged: (value) {
                                   final millions = parsePlannerNumber(value);
                                   final net = millions == null

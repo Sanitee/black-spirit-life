@@ -15,6 +15,7 @@ import 'package:bdo_craft_planner_flutter/features/planner/planner_contracts.dar
 import 'package:bdo_craft_planner_flutter/features/recipe_book/recipe_book.dart';
 import 'package:bdo_craft_planner_flutter/features/shared/inventory_count_badge.dart';
 import 'package:bdo_craft_planner_flutter/features/shared/market_count_badges.dart';
+import 'package:bdo_craft_planner_flutter/features/shared/npc_source_marker.dart';
 import 'package:bdo_craft_planner_flutter/shared/overlays/anchored_popover.dart';
 import 'package:bdo_craft_planner_flutter/visual/visual.dart';
 import 'package:flutter/material.dart';
@@ -582,7 +583,8 @@ void checkColumnAlignment(WidgetTester tester) {
       hasLength(1),
       reason: 'Inventory must not split mid-word at enlarged text sizes.',
     );
-    final npcCenter = tester.getCenter(within(find.text('NPC')).first).dx;
+    final header = (element.widget as Table).children.first;
+    expect(header.children, hasLength(5));
     final marketCenter = tester.getCenter(within(find.text('Market')).first).dx;
     for (final inventory in within(
       find.byType(InventoryCountBadge),
@@ -606,10 +608,11 @@ void checkColumnAlignment(WidgetTester tester) {
           (widget) => widget is Container && widget.decoration is BoxDecoration,
         ),
       );
+      expect(badge.npc, isFalse, reason: 'NPC is beside the ingredient name.');
       final stockRect = tester.getRect(boxes.first);
       expect(
         stockRect.center.dx,
-        closeTo(badge.npc ? npcCenter : marketCenter, .1),
+        closeTo(marketCenter, .1),
         reason:
             'Actual badge centers must match their heading, including unknown stock.',
       );
@@ -623,22 +626,39 @@ void checkColumnAlignment(WidgetTester tester) {
     }
     for (final row in (element.widget as Table).children.skip(1)) {
       final ingredient = tester.getRect(find.byWidget(row.children.first));
-      final npc = tester.getRect(find.byWidget(row.children[2]));
-      final inventory = tester.getRect(find.byWidget(row.children[4]));
-      final market = tester.getRect(find.byWidget(row.children[6]));
+      final inventory = tester.getRect(find.byWidget(row.children[2]));
+      final market = tester.getRect(find.byWidget(row.children[4]));
       final scale = MediaQuery.textScalerOf(element).scale(14) / 14;
       expect(
-        npc.left - ingredient.right,
+        inventory.left - ingredient.right,
         greaterThanOrEqualTo(32 * scale - .1),
         reason:
             'Keep a dedicated gap after the full ingredient/quantity/switch cell.',
       );
-      expect(inventory.left - npc.right, greaterThanOrEqualTo(10 * scale - .1));
       expect(
         market.left - inventory.right,
         greaterThanOrEqualTo(14 * scale - .1),
       );
       expect(ingredient.center.dy, closeTo(inventory.center.dy, .1));
+      for (final label
+          in find
+              .descendant(
+                of: find.byWidget(row.children.first),
+                matching: find.byType(ItemNameWithNpc),
+              )
+              .evaluate()) {
+        final identity = label.widget as ItemNameWithNpc;
+        if (!identity.npc) continue;
+        final marker = find.descendant(
+          of: find.byWidget(identity),
+          matching: find.byType(NpcSourceMarker),
+        );
+        final name = tester.getRect(find.byWidget(identity.child));
+        final npc = tester.getRect(marker);
+        expect(npc.left - name.right, closeTo(12, .1));
+        expect(npc.center.dy, closeTo(name.center.dy, .1));
+        expect(npc.right, lessThanOrEqualTo(ingredient.right));
+      }
     }
   }
 }

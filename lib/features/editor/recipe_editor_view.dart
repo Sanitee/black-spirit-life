@@ -3,6 +3,7 @@ import 'dart:collection';
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:bdo_number_input/bdo_number_input.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -2070,7 +2071,10 @@ class _EditorTextFieldState extends State<_EditorTextField> {
         onChanged: widget.onChanged,
         onSubmitted: widget.onSubmitted,
         keyboardType: widget.keyboardType,
-        inputFormatters: widget.inputFormatters,
+        inputFormatters: groupedNumberFormatters(
+          widget.inputFormatters,
+          enabled: widget.keyboardType?.index == TextInputType.number.index,
+        ),
         expands: widget.multiline,
         maxLines: widget.multiline ? null : 1,
         minLines: null,

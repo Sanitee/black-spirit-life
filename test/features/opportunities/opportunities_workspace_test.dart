@@ -6659,13 +6659,11 @@ void main() {
     await _openIngredient(tester, 'Black Gem');
     final standard = fixture.controller.inspectRecipe(recipe: recipe);
     _expectInspectionCalculation(tester, standard);
-    final hundred = find.byWidgetPredicate(
-      (widget) => widget is RecipeSwitchChoice && widget.label == '100×',
-    );
+    final hundred = _buttonWithText('100×');
     await tester.ensureVisible(hundred);
     await tester.tap(hundred);
     await _settleImages(tester);
-    expect(tester.widget<RecipeSwitchChoice>(hundred).selected, isTrue);
+    expect(tester.widget<AppButton>(hundred).selected, isTrue);
     final variant = recipe.variants.firstWhere(
       (variant) => variant.batchMultiplier == 100,
     );
@@ -6685,7 +6683,7 @@ void main() {
     await _openIngredient(tester, 'Pure Powder Reagent');
     await tester.tap(find.byKey(const ValueKey('ingredient-recipe-back')));
     await _settleImages(tester);
-    expect(tester.widget<RecipeSwitchChoice>(hundred).selected, isTrue);
+    expect(tester.widget<AppButton>(hundred).selected, isTrue);
     expect(find.text('Pure Powder Reagent'), findsOneWidget);
     _expectInspectionCalculation(tester, batch);
     await tester.tap(find.byKey(const ValueKey('ingredient-recipe-back')));
@@ -8326,6 +8324,11 @@ void main() {
     );
   }
 }
+
+Finder _buttonWithText(String label) => find.ancestor(
+  of: find.text(label),
+  matching: find.byWidgetPredicate((widget) => widget is AppButton),
+);
 
 Finder _menuFilter(String key) => find.byKey(ValueKey(key));
 

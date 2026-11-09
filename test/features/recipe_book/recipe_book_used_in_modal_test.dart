@@ -187,7 +187,7 @@ void main() {
           matching: find.byWidgetPredicate(
             (w) =>
                 w is Text &&
-                w.textSpan != null &&
+                !(w.data ?? '').startsWith('Output ') &&
                 (w.textSpan?.toPlainText() ?? w.data ?? '').trim().endsWith(
                   '×2',
                 ),
@@ -419,7 +419,7 @@ void main() {
           matching: find.byWidgetPredicate(
             (w) =>
                 w is Text &&
-                w.textSpan != null &&
+                !(w.data ?? '').startsWith('Output ') &&
                 (w.textSpan?.toPlainText() ?? w.data ?? '').trim().endsWith(
                   '×2',
                 ),
@@ -433,7 +433,7 @@ void main() {
           matching: find.byWidgetPredicate(
             (w) =>
                 w is Text &&
-                w.textSpan != null &&
+                !(w.data ?? '').startsWith('Output ') &&
                 (w.textSpan?.toPlainText() ?? w.data ?? '').trim().endsWith(
                   '×30',
                 ),
@@ -456,7 +456,7 @@ void main() {
           matching: find.byWidgetPredicate(
             (w) =>
                 w is Text &&
-                w.textSpan != null &&
+                !(w.data ?? '').startsWith('Output ') &&
                 (w.textSpan?.toPlainText() ?? w.data ?? '').trim().endsWith(
                   '×30',
                 ),
@@ -477,7 +477,7 @@ void main() {
           matching: find.byWidgetPredicate(
             (w) =>
                 w is Text &&
-                w.textSpan != null &&
+                !(w.data ?? '').startsWith('Output ') &&
                 (w.textSpan?.toPlainText() ?? w.data ?? '').trim().endsWith(
                   '×2',
                 ),
@@ -500,7 +500,7 @@ void main() {
           matching: find.byWidgetPredicate(
             (w) =>
                 w is Text &&
-                w.textSpan != null &&
+                !(w.data ?? '').startsWith('Output ') &&
                 (w.textSpan?.toPlainText() ?? w.data ?? '').trim().endsWith(
                   '×3',
                 ),
@@ -514,7 +514,7 @@ void main() {
           matching: find.byWidgetPredicate(
             (w) =>
                 w is Text &&
-                w.textSpan != null &&
+                !(w.data ?? '').startsWith('Output ') &&
                 (w.textSpan?.toPlainText() ?? w.data ?? '').trim().endsWith(
                   '×30',
                 ),
@@ -544,7 +544,7 @@ void main() {
           matching: find.byWidgetPredicate(
             (w) =>
                 w is Text &&
-                w.textSpan != null &&
+                !(w.data ?? '').startsWith('Output ') &&
                 (w.textSpan?.toPlainText() ?? w.data ?? '').trim().endsWith(
                   '×1',
                 ),

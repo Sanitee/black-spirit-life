@@ -44,14 +44,6 @@ class ResourceMapNeedAvailability extends StatelessWidget {
       );
       final inventory = InventoryCountBadge(owned: ownedFor(need.name));
       final showMarket = identity.marketId != null;
-      final npc = need.vendorPurchaseAvailable || identity.npc;
-      const vendor = MarketCountBadges(
-        stock: null,
-        preorders: null,
-        npc: true,
-        showMarket: false,
-        singleLine: true,
-      );
       final style = Theme.of(context).textTheme.bodySmall;
       String label(BdoPlannerMaterialNeed n) =>
           'Need ${formatGroupedEditableQuantity(n.missingQuantity, fractionDigits: 2)}';
@@ -77,13 +69,11 @@ class ResourceMapNeedAvailability extends StatelessWidget {
           InventoryCountBadge(owned: ownedFor(n.name)).preferredWidth(context),
         ),
       );
-      final reserveNpc = npc || needs.any((n) => n.vendorPurchaseAvailable);
       final scale = MediaQuery.textScalerOf(context).scale(12) / 12;
       final gap = 12 * scale;
       final badgesWidth =
           inventoryWidth +
-          (showMarket ? gap + market.preferredWidth(context) : 0) +
-          (reserveNpc ? vendor.preferredWidth(context) + gap : 0);
+          (showMarket ? gap + market.preferredWidth(context) : 0);
       // Keep every row on the same side of the responsive breakpoint while
       // quotes arrive. A row without Orders must not shift its inventory column.
       final stableBadgesWidth =
@@ -94,18 +84,10 @@ class ResourceMapNeedAvailability extends StatelessWidget {
             preorders: 999999,
             compactNumbers: true,
             singleLine: true,
-          ).preferredWidth(context) +
-          (reserveNpc ? vendor.preferredWidth(context) + gap : 0);
+          ).preferredWidth(context);
       final badges = Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          if (reserveNpc) ...[
-            SizedBox(
-              width: vendor.preferredWidth(context),
-              child: npc ? vendor : null,
-            ),
-            SizedBox(width: gap),
-          ],
           SizedBox(
             width: inventoryWidth,
             child: Align(alignment: Alignment.centerLeft, child: inventory),

@@ -1,3 +1,4 @@
+import 'package:bdo_number_input/bdo_number_input.dart';
 import 'dart:io';
 
 import 'package:crypto/crypto.dart';
@@ -545,6 +546,7 @@ class _LootPanelState extends State<LootPanel> {
                   enabled: !_busy,
                   style: const TextStyle(fontSize: 15),
                   keyboardType: TextInputType.number,
+                  inputFormatters: const [GroupedNumberInputFormatter()],
                   onChanged: (_) {
                     setState(() {});
                     _reportValidity();
@@ -761,6 +763,7 @@ class _LootPanelState extends State<LootPanel> {
                       controller: _totals[item.id],
                       enabled: !_busy,
                       keyboardType: TextInputType.number,
+                      inputFormatters: const [GroupedNumberInputFormatter()],
                       textInputAction: TextInputAction.next,
                       textAlign: TextAlign.end,
                       style: TextStyle(
@@ -1026,6 +1029,7 @@ class _MaidDepositDialogState extends State<_MaidDepositDialog> {
             controller: _quantity,
             autofocus: true,
             keyboardType: TextInputType.number,
+            inputFormatters: const [GroupedNumberInputFormatter()],
             onChanged: (_) => setState(() {}),
             onSubmitted: (_) => _apply(),
             decoration: InputDecoration(
@@ -1408,6 +1412,7 @@ class _ReviewDialogState extends State<_ReviewDialog> {
                   key: ValueKey('scan-quantity-$index'),
                   controller: row.quantity,
                   keyboardType: TextInputType.number,
+                  inputFormatters: const [GroupedNumberInputFormatter()],
                   onChanged: (_) => setState(() => row.isApproximate = false),
                   decoration: const InputDecoration(labelText: 'Amount'),
                 );
@@ -1653,6 +1658,7 @@ class _EditDialogState extends State<_EditDialog> {
     controller: controller,
     enabled: enabled,
     keyboardType: TextInputType.number,
+    inputFormatters: const [GroupedNumberInputFormatter()],
     onChanged: (_) => setState(() {}),
     decoration: InputDecoration(labelText: label),
   );

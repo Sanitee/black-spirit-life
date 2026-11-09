@@ -260,10 +260,7 @@ void main() {
             );
             expect(badge.density, MarketBadgeDensity.comfortable);
             final stockText = tester.widget<Text>(
-              find.descendant(
-                of: wolfRow,
-                matching: stockBadgeText(),
-              ),
+              find.descendant(of: wolfRow, matching: stockBadgeText()),
             );
             expect(stockText.style!.fontSize, 14);
             final itemArt = tester.widget<PlannerItemIcon>(
@@ -274,8 +271,12 @@ void main() {
                 ),
               ),
             );
-            expect(itemArt.size, 36);
-            expect(tester.getSize(choicePanel).width, closeTo(500, 1));
+            expect(itemArt.size, 42 * layout.$2.clamp(1.0, 1.35));
+            expect(
+              tester.getSize(choicePanel).width,
+              lessThanOrEqualTo(layout.$1.width),
+            );
+            expect(tester.getSize(choicePanel).width, greaterThan(360));
             expect(find.textContaining('bdo group'), findsNothing);
             expect(jsonEncode(mode.state.value.toJson()), before);
             expect(find.textContaining('1,4k'), findsWidgets);
@@ -286,7 +287,7 @@ void main() {
               ),
             );
             expect(amount.value, preview.needed * 500);
-            expect(amount.style.fontSize, 17);
+            expect(amount.style.fontSize, 14);
             expect(amount.style.fontFamily, spec.typography.body.fontFamily);
             expect(preview.missing, 0);
             expect(

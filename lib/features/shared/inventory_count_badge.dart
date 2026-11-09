@@ -15,11 +15,13 @@ class InventoryCountBadge extends StatelessWidget {
     required this.owned,
     this.showLabel = false,
     this.density = MarketBadgeDensity.compact,
+    this.semanticLabel,
     super.key,
   });
   final double owned;
   final bool showLabel;
   final MarketBadgeDensity density;
+  final String? semanticLabel;
   bool get _comfortable => density == MarketBadgeDensity.comfortable;
   TextStyle _textStyle(BuildContext context) =>
       context.visualTheme.typography.meta.copyWith(
@@ -57,7 +59,7 @@ class InventoryCountBadge extends StatelessWidget {
           : OpportunityStockTone.outOfStock,
     );
     return AppTooltip(
-      message: 'Owned ${formatQuantity(owned)}',
+      message: semanticLabel ?? 'Owned ${formatQuantity(owned)}',
       child: Container(
         padding: EdgeInsets.symmetric(
           horizontal: 6,

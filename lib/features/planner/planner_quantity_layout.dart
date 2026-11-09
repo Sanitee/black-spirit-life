@@ -4,6 +4,9 @@ import 'package:flutter/material.dart';
 import '../../domain/formatting/planner_formatters.dart';
 import '../../domain/planner/planner_models.dart';
 import '../../visual/visual.dart';
+import '../shared/inventory_count_badge.dart';
+import '../shared/market_count_badges.dart';
+import '../shared/missing_count_badge.dart';
 
 /// Main Planner quantities; shared Bonus rows retain their own presentation.
 class PlannerQuantityLayout extends InheritedWidget {
@@ -203,6 +206,45 @@ class PlannerIngredientRowLayout extends StatelessWidget {
   }
 }
 
+/// Keep the quantity slots aligned across the current Need First list.
+class PlannerNeedBadgeColumns extends StatelessWidget {
+  const PlannerNeedBadgeColumns({
+    required this.rows,
+    required this.child,
+    super.key,
+  });
+  final List<MissingMaterial> rows;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    var need = 0.0;
+    var inventory = 0.0;
+    for (final row in rows) {
+      final width = NeedCountBadge(need: row.need).preferredWidth(context);
+      if (width > need) need = width;
+      final owned = InventoryCountBadge(
+        owned: row.have,
+        density: MarketBadgeDensity.comfortable,
+      ).preferredWidth(context);
+      if (owned > inventory) inventory = owned;
+    }
+    return _NeedBadgeWidths(need: need, inventory: inventory, child: child);
+  }
+}
+
+class _NeedBadgeWidths extends InheritedWidget {
+  const _NeedBadgeWidths({
+    required this.need,
+    required this.inventory,
+    required super.child,
+  });
+  final double need, inventory;
+  @override
+  bool updateShouldNotify(_NeedBadgeWidths oldWidget) =>
+      need != oldWidget.need || inventory != oldWidget.inventory;
+}
+
 /// Displays existing plan values unchanged; Need is total demand, not Missing.
 class PlannerNeedQuantities extends StatelessWidget {
   const PlannerNeedQuantities({
@@ -214,6 +256,7 @@ class PlannerNeedQuantities extends StatelessWidget {
     required this.identity,
     required this.actions,
     this.marketDetails,
+    this.marketPrices,
     super.key,
   });
 
@@ -225,42 +268,11 @@ class PlannerNeedQuantities extends StatelessWidget {
   final Widget identity;
   final Widget actions;
   final Widget? marketDetails;
+  final Widget? marketPrices;
 
   Widget _emphasized(BuildContext context) {
-    final spec = context.visualTheme;
-    final labelStyle = spec.typography.meta.copyWith(
-      fontSize: 12.5,
-      fontWeight: FontWeight.w400,
-      fontStyle: FontStyle.normal,
-      height: 1.2,
-      color: spec.palette.textMuted,
-    );
-    final valueStyle = spec.typography.body.copyWith(
-      fontSize: 14,
-      fontWeight: FontWeight.w500,
-      fontStyle: FontStyle.normal,
-      height: 1.2,
-      color: spec.palette.text,
-      fontFeatures: const [FontFeature.tabularFigures()],
-    );
-    final missingStyle = valueStyle.copyWith(
-      fontSize: 16,
-      fontWeight: FontWeight.w700,
-    );
-    Widget value(String label, double amount, TextStyle style) => Text(
-      formatQuantity(amount),
-      key: ValueKey('planner-need-quantity:$stableId:$label'),
-      style: style,
-    );
-    Widget inline(String label, double amount) => Wrap(
-      crossAxisAlignment: WrapCrossAlignment.center,
-      spacing: 6,
-      runSpacing: 3,
-      children: [
-        Text(label, style: labelStyle),
-        value(label, amount, label == 'Missing' ? missingStyle : valueStyle),
-      ],
-    );
+    final widths = context
+        .dependOnInheritedWidgetOfExactType<_NeedBadgeWidths>();
     final item = Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -278,15 +290,35 @@ class PlannerNeedQuantities extends StatelessWidget {
                 spacing: 16,
                 runSpacing: 6,
                 children: [
-                  inline('Need', need),
-                  inline('Have', have),
-                  inline('Missing', missing),
+                  SizedBox(
+                    width: widths?.need,
+                    child: Align(
+                      alignment: Alignment.centerLeft,
+                      child: NeedCountBadge(
+                        key: ValueKey('planner-need-quantity:$stableId:Need'),
+                        need: need,
+                      ),
+                    ),
+                  ),
+                  SizedBox(
+                    width: widths?.inventory,
+                    child: Align(
+                      alignment: Alignment.centerLeft,
+                      child: InventoryCountBadge(
+                        key: ValueKey('planner-need-quantity:$stableId:Have'),
+                        owned: have,
+                        semanticLabel:
+                            'Inventory counted for this plan: ${formatQuantity(have)}',
+                        density: MarketBadgeDensity.comfortable,
+                      ),
+                    ),
+                  ),
+                  MissingCountBadge(
+                    key: ValueKey('planner-need-quantity:$stableId:Missing'),
+                    missing: missing,
+                  ),
                 ],
               ),
-              if (marketDetails case final market?) ...[
-                const SizedBox(height: 10),
-                market,
-              ],
             ],
           ),
         ),
@@ -296,25 +328,50 @@ class PlannerNeedQuantities extends StatelessWidget {
       builder: (context, constraints) {
         // Keep the item details together; move only the Add controls below
         // when the column or enlarged text needs the extra room.
+        final purchase = KeyedSubtree(
+          key: ValueKey('planner-need-purchase:$stableId'),
+          child: actions,
+        );
+        Widget withPrices(Widget header) => Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            header,
+            if (marketDetails != null || marketPrices != null)
+              Padding(
+                padding: const EdgeInsets.only(left: 60, top: 10),
+                child: Wrap(
+                  spacing: 16,
+                  runSpacing: 6,
+                  crossAxisAlignment: WrapCrossAlignment.center,
+                  children: [?marketDetails, ?marketPrices],
+                ),
+              ),
+          ],
+        );
         final sideBySideWidth =
             60 + MediaQuery.textScalerOf(context).scale(350);
         if (constraints.maxWidth < sideBySideWidth) {
-          return Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              item,
-              const SizedBox(height: 12),
-              Align(alignment: Alignment.centerRight, child: actions),
-            ],
+          return withPrices(
+            Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                item,
+                const SizedBox(height: 12),
+                Align(alignment: Alignment.centerRight, child: purchase),
+              ],
+            ),
           );
         }
-        return Row(
-          children: [
-            Expanded(child: item),
-            const SizedBox(width: 16),
-            actions,
-          ],
+        return withPrices(
+          Row(
+            children: [
+              Expanded(child: item),
+              const SizedBox(width: 16),
+              purchase,
+            ],
+          ),
         );
       },
     );

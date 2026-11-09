@@ -1,4 +1,6 @@
+import 'package:bdo_number_input/bdo_number_input.dart';
 import 'dart:async';
+import 'package:bdo_number_format/bdo_number_format.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'assets.dart';
@@ -179,8 +181,7 @@ class _CompanionHomeState extends State<CompanionHome> {
           : DateTime.now().difference(_timerStart!).inSeconds);
   int get seconds {
     if (_timerStart != null) return _elapsed;
-    final value =
-        (double.tryParse(_minutes.text.replaceAll(',', '.')) ?? 0) * 60;
+    final value = (parsePlannerNumber(_minutes.text) ?? 0) * 60;
     if (!value.isFinite || value > 604800) return 604801;
     return value.round();
   }
@@ -2608,9 +2609,9 @@ class _CompanionHomeState extends State<CompanionHome> {
                   keyboardType: const TextInputType.numberWithOptions(
                     decimal: true,
                   ),
-                  inputFormatters: [
+                  inputFormatters: groupedNumberFormatters([
                     FilteringTextInputFormatter.allow(RegExp(r'[0-9.,]')),
-                  ],
+                  ]),
                   decoration: const InputDecoration(
                     labelText: 'Duration',
                     suffixText: 'min',

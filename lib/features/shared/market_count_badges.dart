@@ -7,6 +7,7 @@ import '../../visual/components/app_tooltip.dart';
 import '../../visual/visual.dart';
 import '../opportunities/opportunity_craft_card_material.dart';
 import 'availability_game_icon.dart';
+import 'npc_source_marker.dart';
 
 enum MarketBadgeDensity { compact, comfortable }
 
@@ -16,6 +17,7 @@ class MarketCountBadges extends StatelessWidget {
     required this.stock,
     required this.preorders,
     this.npc = false,
+    this.vendorHint,
     this.showMarket,
     this.density = MarketBadgeDensity.compact,
     this.alignment = WrapAlignment.start,
@@ -29,6 +31,7 @@ class MarketCountBadges extends StatelessWidget {
   });
   final int? stock, preorders;
   final bool npc;
+  final String? vendorHint;
   final bool? showMarket;
   bool get _showMarket => showMarket ?? !npc;
   final MarketBadgeDensity density;
@@ -59,6 +62,10 @@ class MarketCountBadges extends StatelessWidget {
     );
     var width = 0.0;
     for (final label in labels) {
+      if (label == 'NPC') {
+        width += const NpcSourceMarker().preferredWidth(context);
+        continue;
+      }
       painter.text = TextSpan(
         text: label,
         style: DefaultTextStyle.of(context).style.merge(
@@ -116,6 +123,12 @@ class MarketCountBadges extends StatelessWidget {
           for (final entry in labels)
             Builder(
               builder: (context) {
+                if (entry.$1 == AvailabilityArtwork.npc) {
+                  return NpcSourceMarker(
+                    vendorHint: vendorHint,
+                    textKey: entry == labels.first ? stockKey : null,
+                  );
+                }
                 final material = OpportunityCraftCardMaterial.forSpec(
                   context.visualTheme,
                   entry.$3,

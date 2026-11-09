@@ -191,6 +191,7 @@ function cacheElements() {
     "manualAddButton", "haulSaleField", "haulSoldAmount", "saveHaulButton", "saveHaulLabel", "journalSummary", "journalList", "journalDateFrom", "journalDateTo", "journalStatusField", "journalStatus", "journalClearFilters", "statsProfile", "statsStyle", "statsEquipment", "statsEquipmentLabel", "statsEquipmentOptions", "statsMastery",
     "statsLocation", "statsLocationCombobox", "statsLocationClear", "statsLocationSuggestions", "statsLocationMap", "statsLocationMessage", "statsResource", "statsList", "statsDetail", "saleBackdrop", "saleModal", "saleTitle", "saleClose", "saleOrigin", "saleTankValue", "saleBargain", "saleOffers", "saleSoldAt", "saleFinalAmount", "saleChosenSummary", "saleDelete", "saleCancel", "saleSave", "toast", "fishOptions"
   ].forEach(id => { els[id] = document.getElementById(id); });
+  bindGroupedAmountInputs();
 }
 
 function normalizeUiOpacity(value) {
@@ -333,6 +334,76 @@ function wholeAmount(text) {
   if (!/^(?:\d+|[1-9]\d{0,2}(?:\.\d{3})+)$/.test(value)) return NaN;
   const n = Number(value.replace(/\./g, ""));
   return Number.isSafeInteger(n) ? n : NaN;
+}
+
+// Keep the edit as text; grouping must not round silver or change invalid input.
+function groupWholeEdit(text, start, end, previous = null, inputType = "") {
+  const unchanged = () => ({ text, start, end });
+  if (!text) return unchanged();
+  const valid = value => /^(?:\d+|[1-9]\d{0,2}(?:\.\d{3})+)$/.test(value);
+  let local = false;
+  if (previous && valid(previous.text)) {
+    const { text: old, start: a, end: b } = previous;
+    const prefix = old.slice(0, a), suffix = old.slice(b);
+    const insertedLength = text.length - prefix.length - suffix.length;
+    local = insertedLength >= 0 && text.startsWith(prefix) && text.endsWith(suffix)
+      && /^\d*$/.test(text.slice(prefix.length, prefix.length + insertedLength));
+    if (a === b && inputType === "deleteContentBackward" && a > 0
+        && old.slice(0, a - 1) + old.slice(a) === text) {
+      local = true;
+      if (old[a - 1] === "." && a >= 2) {
+        text = old.slice(0, a - 2) + old.slice(a); start = end = a - 2;
+      }
+    } else if (a === b && inputType === "deleteContentForward"
+        && old.slice(0, a) + old.slice(a + 1) === text) {
+      local = true;
+      if (old[a] === "." && a + 1 < old.length) {
+        text = old.slice(0, a) + old.slice(a + 2); start = end = a;
+      }
+    }
+  }
+  if (!local && !valid(text)) return unchanged();
+  const digits = text.replace(/\./g, "");
+  if (!/^\d*$/.test(digits)) return unchanged();
+  const significant = digits.replace(/^0+(?=\d)/, "");
+  const formatted = significant.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+  const removedZeros = digits.length - significant.length;
+  const offset = raw => {
+    const safe = Math.max(0, Math.min(raw ?? text.length, text.length));
+    const wanted = Math.max(0, text.slice(0, safe).replace(/\D/g, "").length - removedZeros);
+    if (!wanted) return 0;
+    let count = 0;
+    for (let i = 0; i < formatted.length; i++) {
+      if (/\d/.test(formatted[i])) count++;
+      if (count === wanted) return text[safe - 1] === "." && formatted[i + 1] === "." ? i + 2 : i + 1;
+    }
+    return formatted.length;
+  };
+  return { text: formatted, start: offset(start), end: offset(end) };
+}
+
+const groupedAmountInputs = new WeakSet();
+function bindGroupedAmountInputs() {
+  // Other numeric controls are bounded below 1,000 (levels, time and percent).
+  for (const id of ["haulMastery", "profileMastery", "haulSoldAmount", "saleFinalAmount"]) {
+    const input = els[id];
+    if (!input || groupedAmountInputs.has(input)) continue;
+    groupedAmountInputs.add(input);
+    let previous = null;
+    input.addEventListener("beforeinput", event => {
+      previous = { text: input.value, start: input.selectionStart, end: input.selectionEnd, inputType: event.inputType };
+    });
+    input.addEventListener("input", event => {
+      if (event.isComposing) return;
+      const result = groupWholeEdit(input.value, input.selectionStart, input.selectionEnd, previous, event.inputType || previous?.inputType);
+      const direction = input.selectionDirection;
+      if (result.text !== input.value) {
+        input.value = result.text;
+        input.setSelectionRange(result.start, result.end, direction);
+      }
+      previous = null;
+    }, true);
+  }
 }
 
 const LIFE_SKILL_RANK_OFFSETS = Object.freeze({ Beginner: 0, Apprentice: 10, Skilled: 20, Professional: 30, Artisan: 40, Master: 50, Guru: 80 });

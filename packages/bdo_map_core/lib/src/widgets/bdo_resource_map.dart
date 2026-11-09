@@ -1,3 +1,4 @@
+import 'package:bdo_number_input/bdo_number_input.dart';
 import 'dart:async';
 import 'dart:io';
 import 'dart:math' as math;
@@ -227,6 +228,7 @@ class BdoResourceMap extends StatefulWidget {
     this.tileHttpClient,
     this.plannerNeeds = const <BdoPlannerMaterialNeed>[],
     this.plannerNeedAvailabilityBuilder,
+    this.plannerNeedLabelBuilder,
     this.plannerNeedGroups = const <BdoPlannerNeedGroup>[],
     this.plannerContextLabel,
     this.resourceIconBuilder,
@@ -288,6 +290,8 @@ class BdoResourceMap extends StatefulWidget {
   final List<BdoPlannerMaterialNeed> plannerNeeds;
   final Widget Function(BuildContext, BdoPlannerMaterialNeed)?
   plannerNeedAvailabilityBuilder;
+  final Widget Function(BuildContext, BdoPlannerMaterialNeed, Widget)?
+  plannerNeedLabelBuilder;
   final List<BdoPlannerNeedGroup> plannerNeedGroups;
   final String? plannerContextLabel;
   final BdoResourceIconBuilder? resourceIconBuilder;
@@ -7930,7 +7934,9 @@ class _BdoResourceMapState extends State<BdoResourceMap> {
           : const ValueKey<String>('resource-map-node-cp-budget'),
       controller: _nodeBudgetController,
       keyboardType: TextInputType.number,
-      inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+      inputFormatters: groupedNumberFormatters([
+        FilteringTextInputFormatter.digitsOnly,
+      ]),
       onSubmitted: (_) => commitBudget(),
       onTapOutside: (_) {
         FocusScope.of(context).unfocus();
@@ -8471,9 +8477,11 @@ class _BdoResourceMapState extends State<BdoResourceMap> {
                                     ),
                               controller: _nodeBudgetController,
                               keyboardType: TextInputType.number,
-                              inputFormatters: <TextInputFormatter>[
-                                FilteringTextInputFormatter.digitsOnly,
-                              ],
+                              inputFormatters: groupedNumberFormatters(
+                                <TextInputFormatter>[
+                                  FilteringTextInputFormatter.digitsOnly,
+                                ],
+                              ),
                               onSubmitted: (_) {
                                 if (page ==
                                     _NodeNetworkPlannerPage.marketValue) {
@@ -8600,9 +8608,9 @@ class _BdoResourceMapState extends State<BdoResourceMap> {
         key: const ValueKey<String>('resource-map-market-value-cp-budget'),
         controller: _nodeBudgetController,
         keyboardType: TextInputType.number,
-        inputFormatters: <TextInputFormatter>[
+        inputFormatters: groupedNumberFormatters(<TextInputFormatter>[
           FilteringTextInputFormatter.digitsOnly,
-        ],
+        ]),
         onSubmitted: (_) => _commitMarketValueBudget(),
         onTapOutside: (_) {
           FocusScope.of(context).unfocus();
@@ -13118,14 +13126,24 @@ class _BdoResourceMapState extends State<BdoResourceMap> {
                     children: <Widget>[
                       MapQuietTooltip(
                         message: item.marketStatus,
-                        child: Text(
-                          item.resource.name,
-                          style: TextStyle(
-                            color: context.mapChrome.ink,
-                            fontSize: ResourceMapPanelMetrics.optionLabel,
-                            height: 1.12,
-                            fontWeight: FontWeight.w700,
-                          ),
+                        child: Builder(
+                          builder: (context) {
+                            final label = Text(
+                              item.resource.name,
+                              style: TextStyle(
+                                color: context.mapChrome.ink,
+                                fontSize: ResourceMapPanelMetrics.optionLabel,
+                                height: 1.12,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            );
+                            return widget.plannerNeedLabelBuilder?.call(
+                                  context,
+                                  item.need,
+                                  label,
+                                ) ??
+                                label;
+                          },
                         ),
                       ),
                       const SizedBox(height: 3),
@@ -13581,9 +13599,9 @@ class _BdoResourceMapState extends State<BdoResourceMap> {
             key: const ValueKey<String>('resource-map-node-cp-budget'),
             controller: _nodeBudgetController,
             keyboardType: TextInputType.number,
-            inputFormatters: <TextInputFormatter>[
+            inputFormatters: groupedNumberFormatters(<TextInputFormatter>[
               FilteringTextInputFormatter.digitsOnly,
-            ],
+            ]),
             style: const TextStyle(
               fontSize: ResourceMapPanelMetrics.primary,
               fontWeight: FontWeight.w600,
@@ -20700,6 +20718,7 @@ class _WorkerIncomeSettingsDialogState
             key: ValueKey<String>(inputKey),
             controller: controller,
             keyboardType: const TextInputType.numberWithOptions(decimal: true),
+            inputFormatters: const [GroupedNumberInputFormatter()],
             decoration: const InputDecoration(),
           ),
         ),
@@ -21127,6 +21146,9 @@ class _WorkerCapacityDialogState extends State<_WorkerCapacityDialog> {
                                   ),
                                   controller: entry.value.hiredWorkers,
                                   keyboardType: TextInputType.number,
+                                  inputFormatters: const [
+                                    GroupedNumberInputFormatter(),
+                                  ],
                                   decoration: const InputDecoration(
                                     labelText: 'Hired workers',
                                     prefixIcon: Icon(
@@ -21150,6 +21172,9 @@ class _WorkerCapacityDialogState extends State<_WorkerCapacityDialog> {
                                   ),
                                   controller: entry.value.bonusLodgingSlots,
                                   keyboardType: TextInputType.number,
+                                  inputFormatters: const [
+                                    GroupedNumberInputFormatter(),
+                                  ],
                                   decoration: const InputDecoration(
                                     labelText: 'Bonus lodging slots',
                                     prefixIcon: Icon(Icons.bed_outlined),

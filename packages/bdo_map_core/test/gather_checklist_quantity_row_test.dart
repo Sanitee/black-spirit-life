@@ -47,7 +47,7 @@ void main() {
         );
         expect(
           tester.widget<TextField>(find.byType(TextField)).controller!.text,
-          '4.5',
+          '4,5',
         );
         pending.complete(BdoGatherChecklistReceipt(undo: () async => undos++));
         await tester.pumpAndSettle();

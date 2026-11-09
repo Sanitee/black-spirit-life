@@ -4,6 +4,7 @@ import 'package:bdo_craft_planner_flutter/domain/models/craft_mode.dart';
 import 'package:bdo_craft_planner_flutter/features/resource_map/resource_map_need_availability.dart';
 import 'package:bdo_craft_planner_flutter/features/shared/inventory_count_badge.dart';
 import 'package:bdo_craft_planner_flutter/features/shared/market_count_badges.dart';
+import 'package:bdo_craft_planner_flutter/features/shared/npc_source_marker.dart';
 import 'package:bdo_craft_planner_flutter/visual/visual.dart';
 import 'package:bdo_map_core/bdo_map_core.dart';
 import 'package:flutter/material.dart';
@@ -49,6 +50,12 @@ void main() {
             tileHttpClient: client,
             showSourceNotice: false,
             plannerNeeds: needs,
+            plannerNeedLabelBuilder: (context, need, label) => ItemNameWithNpc(
+              // Synthetic presentation tests the host hook independently of
+              // the map's intentional exclusion of vendor-only gathering needs.
+              npc: need.name == 'Log',
+              child: label,
+            ),
             plannerNeedAvailabilityBuilder: (context, need) =>
                 ResourceMapNeedAvailability(
                   controller: app.active,
@@ -72,6 +79,25 @@ void main() {
     expect(find.byType(ResourceMapNeedAvailability), findsNWidgets(3));
     expect(find.byType(InventoryCountBadge), findsNWidgets(3));
     expect(find.byType(MarketCountBadges), findsNWidgets(3));
+    final identity = tester.widget<ItemNameWithNpc>(
+      find.byWidgetPredicate(
+        (widget) => widget is ItemNameWithNpc && widget.npc,
+      ),
+    );
+    final name = tester.getRect(find.byWidget(identity.child));
+    final marker = tester.getRect(find.byType(NpcSourceMarker));
+    expect(marker.left - name.right, closeTo(12, .1));
+    expect(marker.center.dy, closeTo(name.center.dy, .1));
+    for (final availability
+        in find.byType(ResourceMapNeedAvailability).evaluate()) {
+      expect(
+        find.descendant(
+          of: find.byWidget(availability.widget),
+          matching: find.byType(NpcSourceMarker),
+        ),
+        findsNothing,
+      );
+    }
     for (final name in ['Rough Stone', 'Log', 'Deer Meat']) {
       expect(find.text(name), findsWidgets);
     }

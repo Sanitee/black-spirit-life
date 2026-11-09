@@ -1,3 +1,4 @@
+import 'package:bdo_number_input/bdo_number_input.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -136,7 +137,9 @@ class NetworkCpReview extends StatelessWidget {
           controller: budgetController,
           keyboardType: TextInputType.number,
           textAlign: TextAlign.end,
-          inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+          inputFormatters: groupedNumberFormatters([
+            FilteringTextInputFormatter.digitsOnly,
+          ]),
           onSubmitted: (_) => onCommitBudget(),
           onTapOutside: (_) {
             FocusScope.of(context).unfocus();
