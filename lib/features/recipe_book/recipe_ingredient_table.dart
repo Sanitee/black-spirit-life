@@ -17,6 +17,7 @@ class RecipeIngredientTable extends StatelessWidget {
     this.iconMode,
     this.iconAnchorBuilder,
     this.minimumContentWidth = 0,
+    this.fitBadges = false,
     super.key,
   });
   static double minimumWidth(BuildContext context) =>
@@ -30,6 +31,8 @@ class RecipeIngredientTable extends StatelessWidget {
     OpportunityMarketItem? Function(String)? marketFor,
     DateTime? now,
     bool Function(RecipeBookIngredientChoice)? hasSwitch,
+    double Function(RecipeBookIngredientChoice)? switchWidth,
+    bool fitBadges = false,
   }) {
     final spec = context.visualTheme;
     final scale = MediaQuery.textScalerOf(context).scale(14) / 14;
@@ -38,6 +41,7 @@ class RecipeIngredientTable extends StatelessWidget {
       rows: rows,
       marketFor: marketFor,
       now: now,
+      fitBadges: fitBadges,
     );
     var labelWidth = 190 * scale;
     for (final row in rows) {
@@ -68,7 +72,9 @@ class RecipeIngredientTable extends StatelessWidget {
         42 * scale.clamp(1, 1.35) +
             10 +
             painter.width.ceilToDouble() +
-            (hasSwitch?.call(row) == true ? 44 : 0) +
+            (hasSwitch?.call(row) == true
+                ? (switchWidth?.call(row) ?? 44)
+                : 0) +
             4,
       );
       painter.dispose();
@@ -89,6 +95,7 @@ class RecipeIngredientTable extends StatelessWidget {
   final LocalKey Function(int)? rowKeyBuilder;
   final Widget Function(RecipeBookIngredientChoice, int, Widget)? labelWrapper;
   final double minimumContentWidth;
+  final bool fitBadges;
   final CraftMode? iconMode;
   final String Function(RecipeBookIngredientChoice, int)? iconAnchorBuilder;
 
@@ -121,6 +128,7 @@ class RecipeIngredientTable extends StatelessWidget {
           rows: rows,
           marketFor: marketFor,
           now: now,
+          fitBadges: fitBadges,
         );
         final width = math.max(
           constraints.maxWidth,
@@ -279,7 +287,7 @@ class RecipeIngredientTable extends StatelessWidget {
               'availability:$parent:${onChoose == null ? 'card' : 'choice'}:$index:${row.name}',
         ),
         const SizedBox(width: 10),
-        Expanded(
+        Flexible(
           child: Text.rich(
             TextSpan(
               children: [
@@ -331,7 +339,7 @@ class RecipeIngredientWidths {
   );
   final double npc, inventory, stock, orders, scale;
   double get ingredientGap => 32 * scale;
-  double get market => stock + 7 + orders;
+  double get market => stock + (orders > 0 ? 7 + orders : 0);
   double get minimumWidth =>
       190 * scale + ingredientGap + 24 * scale + npc + inventory + market;
 
@@ -340,6 +348,7 @@ class RecipeIngredientWidths {
     List<RecipeBookIngredientChoice> rows = const [],
     OpportunityMarketItem? Function(String)? marketFor,
     DateTime? now,
+    bool fitBadges = false,
   }) {
     final scale = MediaQuery.textScalerOf(context).scale(14) / 14;
     double headingWidth(String label) {
@@ -369,9 +378,9 @@ class RecipeIngredientWidths {
       npc: true,
       showMarket: false,
     ).preferredWidth(context);
-    var inventory = const InventoryCountBadge(
+    var inventory = InventoryCountBadge(
       density: MarketBadgeDensity.comfortable,
-      owned: 999900,
+      owned: fitBadges ? 0 : 999900,
       showLabel: false,
     ).preferredWidth(context);
     double stockWidth(int? value) => MarketCountBadges(
@@ -389,8 +398,8 @@ class RecipeIngredientWidths {
         ).preferredWidth(context) -
         stockWidth(0) -
         7;
-    var stock = stockWidth(999900);
-    var orders = orderWidth(999900);
+    var stock = stockWidth(fitBadges ? null : 999900);
+    var orders = fitBadges ? 0.0 : orderWidth(999900);
     if (headingWidth('Inventory') > inventory) {
       inventory = headingWidth('Inventory');
     }
@@ -408,7 +417,12 @@ class RecipeIngredientWidths {
         item?.stockFor(now ?? DateTime.now(), sharedMarketFreshness),
       );
       if (width > stock) stock = width;
-      final preorder = item?.preorderCount;
+      final preorder =
+          !fitBadges ||
+              item?.bookIsFresh(now ?? DateTime.now(), sharedMarketFreshness) ==
+                  true
+          ? item?.preorderCount
+          : null;
       if (preorder != null && preorder > 0) {
         final width = orderWidth(preorder);
         if (width > orders) orders = width;
@@ -418,7 +432,7 @@ class RecipeIngredientWidths {
       npc + 2,
       inventory + 2,
       stock + 2,
-      orders + 2,
+      orders > 0 ? orders + 2 : 0,
       scale,
     );
   }

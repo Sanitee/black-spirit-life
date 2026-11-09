@@ -8,13 +8,13 @@
     },
     {
       "path": "static/app.css",
-      "byteCount": 203810,
-      "sha256": "e6ef98d714aba16f70f3eae10e415bb27fcd24d6b66bc1865828fe58a3918677"
+      "byteCount": 204220,
+      "sha256": "cae7d91fcdffce67165ae188bf3002ba1935114cc67edaaa8ef8f4d89b662547"
     },
     {
       "path": "static/app.js",
-      "byteCount": 272078,
-      "sha256": "fb3c69c9d38eac382508d7eb5f35802ed7e7a36ab82f8278f7cd7b31601e40a4"
+      "byteCount": 271982,
+      "sha256": "43ab35379db783f63712cdd85ec8b0819dacf5ef347082cfe6f82729f13b4e22"
     },
     {
       "path": "static/index.html",

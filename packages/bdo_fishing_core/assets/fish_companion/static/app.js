@@ -4642,8 +4642,8 @@ function filteredJournalSessions() {
   });
 }
 
-function journalSilver(value, description = `${number(value)} silver`) {
-  return `<strong class="journal-silver" aria-label="${escapeHtml(description)}"><img src="/silver.webp" alt="" aria-hidden="true">${silver(value)}</strong>`;
+function journalSilver(value, description = `${number(value)} silver`, tag = "strong") {
+  return `<${tag} class="journal-silver" aria-label="${escapeHtml(description)}"><img src="/silver.webp" alt="" aria-hidden="true">${silver(value)}</${tag}>`;
 }
 
 function renderJournal() {
@@ -4662,10 +4662,10 @@ function renderJournal() {
   const legacyReceivedEntries = sessions.map(legacyReceivedSilver).filter(value => value != null);
   const legacyReceivedValue = legacyReceivedEntries.reduce((sum, value) => sum + value, 0);
   const legacyReceivedSummary = legacyReceivedEntries.length
-    ? `<small class="journal-legacy-summary" title="${number(legacyReceivedValue)} silver received in v0.1.7">Legacy received: ${silver(legacyReceivedValue)} silver &middot; ${number(legacyReceivedEntries.length)} imported ${legacyReceivedEntries.length === 1 ? "haul" : "hauls"}</small>`
+    ? `<small class="journal-legacy-summary">Legacy received: ${journalSilver(legacyReceivedValue, `${number(legacyReceivedValue)} silver received in v0.1.7`, "span")} &middot; ${number(legacyReceivedEntries.length)} imported ${legacyReceivedEntries.length === 1 ? "haul" : "hauls"}</small>`
     : "";
   els.journalStatusField.classList.toggle("is-hidden", state.journalFilters.mode === "sales");
-  els.journalSummary.innerHTML = `<div class="summary-card"><span>${state.journalFilters.mode === "sales" ? "Sold hauls" : "Catches"}</span><strong>${number(sessions.length)}</strong></div><div class="summary-card"><span>Retained fish</span><strong>${number(totalFish)}</strong></div><div class="summary-card value-summary"><span>Base fish value</span><strong title="${totalValueKnown ? `${number(totalValue)} silver` : unknownFish ? `${number(unknownFish)} fish without prices` : "Not recorded for aggregate-only imports"}">${totalValueKnown ? `${silver(totalValue)} <small>silver</small>` : "—"}</strong>${unknownFish ? `<small>${number(unknownFish)} fish without prices</small>` : ""}${legacyValueSummary}</div><div class="summary-card value-summary recorded-summary"><span>Recorded sales</span><strong title="${number(recordedValue)} silver">${sales.length ? silver(recordedValue) : "—"} ${sales.length ? "<small>silver</small>" : ""}</strong><small>${number(sales.length)} ${sales.length === 1 ? "sale" : "sales"}</small>${legacyReceivedSummary}</div>`;
+  els.journalSummary.innerHTML = `<div class="summary-card"><span>${state.journalFilters.mode === "sales" ? "Sold hauls" : "Catches"}</span><strong>${number(sessions.length)}</strong></div><div class="summary-card"><span>Retained fish</span><strong>${number(totalFish)}</strong></div><div class="summary-card value-summary"><span>Base fish value</span>${totalValueKnown ? journalSilver(totalValue) : `<strong aria-label="${unknownFish ? `${number(unknownFish)} fish without prices` : "Not recorded for aggregate-only imports"}">—</strong>`}${unknownFish ? `<small>${number(unknownFish)} fish without prices</small>` : ""}${legacyValueSummary}</div><div class="summary-card value-summary recorded-summary"><span>Recorded sales</span>${sales.length ? journalSilver(recordedValue) : '<strong aria-label="No recorded sales">—</strong>'}<small>${number(sales.length)} ${sales.length === 1 ? "sale" : "sales"}</small>${legacyReceivedSummary}</div>`;
   if (!sessions.length) {
     const hasFilters = Boolean(state.journalFilters.from || state.journalFilters.to || state.journalFilters.status !== "all" || state.journalFilters.mode === "sales");
     els.journalList.innerHTML = `<div class="surface empty-state"><div class="empty-stack"><span></span><span></span><span></span></div><strong>${hasFilters ? "No matching journal entries" : "No saved hauls yet"}</strong>${hasFilters ? "" : `<button class="primary-button small" data-empty-add style="margin-top:16px">Add your first haul</button>`}</div>`;

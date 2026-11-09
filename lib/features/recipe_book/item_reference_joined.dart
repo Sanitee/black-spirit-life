@@ -278,104 +278,129 @@ class _JoinedItemReferenceState extends State<_JoinedItemReference> {
     final single = activeFormulas.length == 1 ? activeFormulas.single : null;
     final footer =
         card.interactive && single != null && book.canActivateFormula(single);
-    return Container(
-      width: math.min(
-        card.maxWidth,
-        itemReferenceCardWidth(
-          context,
-          controller: book,
-          info: details,
-          mode: card.mode,
-          usedFor: _used,
-          includeAllSections: !card.interactive,
-        ),
-      ),
-      // Short references fit their contents; long recipes can use the available
-      // viewport before the body scrolls. Never reserve an empty reading area.
-      constraints: BoxConstraints(maxHeight: itemReferenceCardHeight(context)),
-      child: _ItemReferenceCopyScope(
-        onCopyItemName: card.onCopyItemName,
-        onRecipeActivated: card.onClose,
-        onUseFormula: card.onUseFormula,
-        child: DecoratedBox(
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(9),
-            border: Border.all(
-              color: refined ? seam : Color.lerp(seam, spec.palette.text, .20)!,
-            ),
-            boxShadow: [
-              BoxShadow(
-                color: spec.palette.shadow.withValues(alpha: .45),
-                offset: const Offset(0, 5),
-                blurRadius: 14,
-              ),
-            ],
+    final shownFormulas = [
+      if (!_used || !card.interactive) ...formulas,
+      if (_used || !card.interactive)
+        for (final use in details.craftUses)
+          ..._matchingReferenceFormulas(use, card.name.trim().toLowerCase()),
+    ];
+    return PlannerChoiceMarket(
+      controller: book.modeController.owner.modes[card.mode]!,
+      resolveAcrossModes: true,
+      names: {
+        for (final formula in shownFormulas)
+          ..._referenceFormulaNames(book, formula, formula.mode ?? card.mode),
+      }.toList(),
+      builder: (context, marketFor, now) => Container(
+        width: math.min(
+          card.maxWidth,
+          itemReferenceCardWidth(
+            context,
+            controller: book,
+            info: details,
+            mode: card.mode,
+            usedFor: _used,
+            includeAllSections: !card.interactive,
+            marketFor: marketFor,
+            now: now,
           ),
-          child: Padding(
-            padding: const EdgeInsets.all(1),
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(8),
-              child: _edgeDetail(
-                'frame',
-                Material(
-                  color: face,
-                  child: DefaultTextStyle(
-                    style: body,
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        _header(details, hasUsed && card.interactive),
-                        Flexible(
-                          child: DecoratedBox(
-                            decoration: BoxDecoration(gradient: bodyGradient),
-                            child: ScrollConfiguration(
-                              behavior:
-                                  const _RecipeBookItemInfoScrollBehavior(),
-                              child: SingleChildScrollView(
-                                key: const ValueKey(
-                                  'attached-reference-scroll',
-                                ),
-                                controller: _scroll,
-                                primary: false,
-                                physics: const ClampingScrollPhysics(),
-                                child: _ReferenceSelection(
-                                  enabled: card.onClose != null,
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.stretch,
-                                    children: !card.interactive
-                                        ? [
-                                            ..._recipeContent(
-                                              details,
-                                              formulas,
-                                              false,
-                                            ),
-                                            if (hasUsed) ...[
-                                              _inset(
-                                                _InfoSectionHeading(
-                                                  title: 'Used for',
-                                                  spec: spec,
+        ),
+        // Keep the introduction and one complete recipe in view. The reading
+        // viewport below measures their actual height, capped to the screen.
+        constraints: BoxConstraints(
+          maxHeight: itemReferenceCardHeight(context),
+        ),
+        child: _ItemReferenceCopyScope(
+          onCopyItemName: card.onCopyItemName,
+          onRecipeActivated: card.onClose,
+          onUseFormula: card.onUseFormula,
+          child: DecoratedBox(
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(9),
+              border: Border.all(
+                color: refined
+                    ? seam
+                    : Color.lerp(seam, spec.palette.text, .20)!,
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: spec.palette.shadow.withValues(alpha: .45),
+                  offset: const Offset(0, 5),
+                  blurRadius: 14,
+                ),
+              ],
+            ),
+            child: Padding(
+              padding: const EdgeInsets.all(1),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(8),
+                child: _edgeDetail(
+                  'frame',
+                  Material(
+                    color: face,
+                    child: DefaultTextStyle(
+                      style: body,
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          _header(details, hasUsed && card.interactive),
+                          Flexible(
+                            child: DecoratedBox(
+                              decoration: BoxDecoration(gradient: bodyGradient),
+                              child: ScrollConfiguration(
+                                behavior:
+                                    const _RecipeBookItemInfoScrollBehavior(),
+                                child: _ReferenceReadingViewport(
+                                  child: SingleChildScrollView(
+                                    key: const ValueKey(
+                                      'attached-reference-scroll',
+                                    ),
+                                    controller: _scroll,
+                                    primary: false,
+                                    physics: const ClampingScrollPhysics(),
+                                    child: _ReferenceSelection(
+                                      enabled: card.onClose != null,
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.stretch,
+                                        children: !card.interactive
+                                            ? [
+                                                ..._recipeContent(
+                                                  details,
+                                                  formulas,
+                                                  false,
                                                 ),
+                                                if (hasUsed) ...[
+                                                  _inset(
+                                                    _InfoSectionHeading(
+                                                      title: 'Used for',
+                                                      spec: spec,
+                                                    ),
+                                                  ),
+                                                  ..._usedContent(
+                                                    details,
+                                                    false,
+                                                  ),
+                                                ],
+                                              ]
+                                            : _used && hasUsed
+                                            ? _usedContent(details, footer)
+                                            : _recipeContent(
+                                                details,
+                                                formulas,
+                                                footer,
                                               ),
-                                              ..._usedContent(details, false),
-                                            ],
-                                          ]
-                                        : _used && hasUsed
-                                        ? _usedContent(details, footer)
-                                        : _recipeContent(
-                                            details,
-                                            formulas,
-                                            footer,
-                                          ),
+                                      ),
+                                    ),
                                   ),
                                 ),
                               ),
                             ),
                           ),
-                        ),
-                        if (footer) _action(single),
-                      ],
+                          if (footer) _action(single),
+                        ],
+                      ),
                     ),
                   ),
                 ),
@@ -604,32 +629,44 @@ class _JoinedItemReferenceState extends State<_JoinedItemReference> {
     List<RecipeBookFormula> formulas,
     bool footer,
   ) => [
-    if (details.summary.trim().isNotEmpty)
-      _inset(
-        Text(details.summary),
-        padding: const EdgeInsets.fromLTRB(18, 16, 18, 8),
+    _ReferenceReadingSection(
+      recipe: false,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          if (details.summary.trim().isNotEmpty)
+            _inset(
+              Text(details.summary),
+              padding: const EdgeInsets.fromLTRB(18, 16, 18, 8),
+            ),
+          if (details.effects.isNotEmpty)
+            _inset(
+              _InfoSection(
+                title: details.effectsTitle,
+                values: details.effects,
+                style: body,
+                leadingSpacing: 0,
+              ),
+            ),
+          if (details.acquisitionNotes.isNotEmpty)
+            _inset(
+              _AcquisitionSection(
+                controller: book,
+                mode: card.mode,
+                name: card.name,
+                info: details,
+                style: body,
+                leadingSpacing: 0,
+              ),
+            ),
+        ],
       ),
-    if (details.effects.isNotEmpty)
-      _inset(
-        _InfoSection(
-          title: details.effectsTitle,
-          values: details.effects,
-          style: body,
-          leadingSpacing: 0,
-        ),
+    ),
+    for (final formula in formulas)
+      _ReferenceReadingSection(
+        recipe: true,
+        child: _formula(formula, showAction: !footer),
       ),
-    if (details.acquisitionNotes.isNotEmpty)
-      _inset(
-        _AcquisitionSection(
-          controller: book,
-          mode: card.mode,
-          name: card.name,
-          info: details,
-          style: body,
-          leadingSpacing: 0,
-        ),
-      ),
-    for (final formula in formulas) _formula(formula, showAction: !footer),
     if (details.example?.trim().isNotEmpty ?? false)
       _inset(
         _InfoSection(
@@ -662,39 +699,74 @@ class _JoinedItemReferenceState extends State<_JoinedItemReference> {
   List<Widget> _usedContent(RecipeBookItemInfo details, bool footer) {
     final source = card.name.trim().toLowerCase();
     return [
-      for (final value in details.uses)
-        _inset(_InfoBullet(value: value, style: body)),
-      for (final use in details.craftUses) ...[
-        _inset(
-          Row(
-            children: [
-              _art(use.output, 38),
-              const SizedBox(width: 12),
-              Expanded(
-                child: _ReferenceItemName(
-                  name: use.output,
-                  style: ItemDetailStyle.recipe(spec),
-                ),
-              ),
-            ],
-          ),
-          padding: const EdgeInsets.fromLTRB(18, 10, 18, 8),
+      _ReferenceReadingSection(
+        recipe: false,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            for (final value in details.uses)
+              _inset(_InfoBullet(value: value, style: body)),
+          ],
         ),
-        if (book.itemInfoFor(use.output, mode: card.mode)
-            case final output?) ...[
-          if (recipeBookUseDescription(output).trim().isNotEmpty)
-            _inset(
-              Text(recipeBookUseDescription(output), style: meta),
-              padding: const EdgeInsets.fromLTRB(18, 0, 18, 8),
+      ),
+      for (final use in details.craftUses)
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            _ReferenceReadingSection(
+              recipe: false,
+              heading: true,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  _inset(
+                    Row(
+                      children: [
+                        _art(use.output, 38),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: _ReferenceItemName(
+                            name: use.output,
+                            style: ItemDetailStyle.recipe(spec),
+                          ),
+                        ),
+                      ],
+                    ),
+                    padding: const EdgeInsets.fromLTRB(18, 10, 18, 8),
+                  ),
+                  if (book.itemInfoFor(use.output, mode: card.mode)
+                      case final output?) ...[
+                    if (recipeBookUseDescription(output).trim().isNotEmpty &&
+                        !(output.effects.isNotEmpty &&
+                            recipeBookUseDescription(output).trim() ==
+                                'A temporary draught buff.'))
+                      _inset(
+                        Text(recipeBookUseDescription(output), style: meta),
+                        padding: const EdgeInsets.fromLTRB(18, 0, 18, 8),
+                      ),
+                    if (output.effects.isNotEmpty)
+                      _inset(
+                        _InfoSection(
+                          title: output.effectsTitle,
+                          values: output.effects,
+                          style: body,
+                          leadingSpacing: 0,
+                        ),
+                        padding: const EdgeInsets.fromLTRB(18, 6, 18, 16),
+                      ),
+                    if (output.example?.trim().isNotEmpty ?? false)
+                      _inset(Text('Example: ${output.example}', style: meta)),
+                  ],
+                ],
+              ),
             ),
-          for (final effect in output.effects)
-            _inset(_InfoBullet(value: effect, style: body)),
-          if (output.example?.trim().isNotEmpty ?? false)
-            _inset(Text('Example: ${output.example}', style: meta)),
-        ],
-        for (final formula in _matchingReferenceFormulas(use, source))
-          _formula(formula, showAction: !footer),
-      ],
+            for (final formula in _matchingReferenceFormulas(use, source))
+              _ReferenceReadingSection(
+                recipe: true,
+                child: _formula(formula, showAction: !footer),
+              ),
+          ],
+        ),
     ];
   }
 
@@ -731,29 +803,7 @@ class _JoinedItemReferenceState extends State<_JoinedItemReference> {
                     bottom: BorderSide(color: seam.withValues(alpha: .2)),
                   ),
                 ),
-                child: Wrap(
-                  alignment: WrapAlignment.spaceBetween,
-                  spacing: 14,
-                  runSpacing: 6,
-                  children: [
-                    Text(
-                      formula.method,
-                      style: meta.copyWith(
-                        color: spec.palette.text,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                    if (formula.routeLabel?.trim().isNotEmpty ?? false)
-                      Text(formula.routeLabel!, style: meta),
-                    if (formula.batchMultiplier != 1)
-                      Text('${formula.batchMultiplier}× batch', style: meta),
-                    _ReferenceItemName(
-                      name: formula.outputName,
-                      label: _formulaOutputLabel(formula),
-                      style: meta,
-                    ),
-                  ],
-                ),
+                child: _formulaHeading(formula),
               ),
               _ReferenceIngredientsTable(
                 book: book,
@@ -770,6 +820,52 @@ class _JoinedItemReferenceState extends State<_JoinedItemReference> {
           ),
         ),
       );
+
+  Widget _formulaHeading(RecipeBookFormula formula) {
+    final route = formula.routeLabel?.trim();
+    final label = _formulaOutputLabel(formula);
+    return Row(
+      key: ValueKey(
+        'formula-heading:${formula.outputName}:${formula.batchMultiplier}',
+      ),
+      children: [
+        _art(formula.outputName, 24, formula.mode),
+        const SizedBox(width: 8),
+        Text(
+          label.startsWith('Output ') ? label.substring(7) : label,
+          style: meta.copyWith(
+            color: spec.palette.text,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+        const SizedBox(width: 18),
+        Expanded(
+          child: Wrap(
+            spacing: 10,
+            runSpacing: 4,
+            children: [
+              Text(
+                formula.method,
+                style: meta.copyWith(
+                  color: spec.palette.text,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              if (formula.batchMultiplier != 1 &&
+                  !(formula.outputMinimum == formula.batchMultiplier &&
+                      formula.outputMaximum == formula.batchMultiplier &&
+                      !formula.outputEstimated))
+                Text('${formula.batchMultiplier}× batch', style: meta),
+              if (route != null &&
+                  route.isNotEmpty &&
+                  route.toLowerCase() != formula.method.trim().toLowerCase())
+                Text(route, style: meta),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
 
   Widget _action(RecipeBookFormula formula) => Container(
     padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -798,10 +894,12 @@ class _JoinedItemReferenceState extends State<_JoinedItemReference> {
               if (!book.canActivateFormula(formula)) return;
               Tooltip.dismissAllToolTips();
               if (card.onUseFormula case final use?) {
-                use(formula);
+                use(book.referenceFormulaForActivation(formula));
               } else {
                 card.onClose?.call();
-                book.activateFormula(formula);
+                book.activateFormula(
+                  book.referenceFormulaForActivation(formula),
+                );
               }
             },
             child: const Row(

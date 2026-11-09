@@ -89,20 +89,25 @@ class _ExpandingCraftCardState extends State<_ExpandingCraftCard> {
       if (_allOwned) 'Hypothetical: every required ingredient already owned.',
     ].join('\n');
 
-    Widget amount(double? value, {bool headline = false, Key? textKey}) =>
-        OpportunitySilverAmount(
-          value: value,
-          textKey: textKey,
-          initiallyExpanded: false,
-          wholeSilver: true,
-          unicodeMinus: true,
-          showPlus: headline,
-          style: spec.typography.body.copyWith(
-            fontSize: headline ? 20 : 15,
-            fontWeight: FontWeight.w600,
-            color: headline ? profitColor : spec.palette.text,
-          ),
-        );
+    Widget amount(
+      double? value, {
+      bool headline = false,
+      bool showIcon = false,
+      Key? textKey,
+    }) => OpportunitySilverAmount(
+      showIcon: showIcon,
+      value: value,
+      textKey: textKey,
+      initiallyExpanded: false,
+      wholeSilver: true,
+      unicodeMinus: true,
+      showPlus: headline,
+      style: spec.typography.body.copyWith(
+        fontSize: headline ? 20 : 15,
+        fontWeight: FontWeight.w600,
+        color: headline ? profitColor : spec.palette.text,
+      ),
+    );
 
     Widget silver(double size) => ExcludeSemantics(
       child: ModeItemIcon(
@@ -143,6 +148,7 @@ class _ExpandingCraftCardState extends State<_ExpandingCraftCard> {
                   if (withSilver) silver(17),
                   amount(
                     value,
+                    showIcon: !withSilver,
                     textKey: ValueKey(
                       'craft-per-item-$label:${quote.recipeName}',
                     ),

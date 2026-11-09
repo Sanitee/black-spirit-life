@@ -1309,11 +1309,13 @@ class _ApplicationWorkspaceState extends State<ApplicationWorkspace>
       _showToast('This recipe is no longer available.', error: true);
       return;
     }
-    final selected = request.variantId == null
+    final selected =
+        request.variantId == null && request.ingredientSelections.isEmpty
         ? destination.selectTarget(request.exactName)
         : destination.selectTargetVariant(
             request.exactName,
             variantId: request.variantId,
+            ingredientSelections: request.ingredientSelections,
           );
     if (!selected) return;
     destination.navigate('plan');

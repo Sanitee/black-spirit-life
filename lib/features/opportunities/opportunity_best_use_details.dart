@@ -175,6 +175,7 @@ class _BestUseDetailsSummaryState extends State<_BestUseDetailsSummary> {
         Text(label, style: spec.typography.meta),
         const SizedBox(height: 4),
         OpportunitySilverAmount(
+          showIcon: true,
           value: value,
           estimated: estimated,
           showPlus: prominent,

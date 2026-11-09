@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart' show listEquals;
 import 'package:flutter/gestures.dart' show DragStartBehavior;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -106,6 +107,45 @@ typedef AnchoredPopoverBuilder =
     Widget Function(BuildContext context, VoidCallback close);
 typedef AnchoredPopoverAnchorBuilder =
     Widget Function(BuildContext context, VoidCallback toggle, bool isShowing);
+
+/// Nested panels count as inside their owning panel for outside-click dismissal.
+class AppPopoverTapRegion extends StatelessWidget {
+  const AppPopoverTapRegion({
+    required this.groupId,
+    required this.child,
+    this.onTapOutside,
+    super.key,
+  });
+  final Object groupId;
+  final Widget child;
+  final TapRegionCallback? onTapOutside;
+
+  @override
+  Widget build(BuildContext context) {
+    final parents =
+        context
+            .dependOnInheritedWidgetOfExactType<_PopoverTapGroups>()
+            ?.groups ??
+        const <Object>[];
+    Widget result = TapRegion(
+      groupId: groupId,
+      onTapOutside: onTapOutside,
+      child: _PopoverTapGroups(groups: [...parents, groupId], child: child),
+    );
+    for (final parent in parents) {
+      result = TapRegion(groupId: parent, child: result);
+    }
+    return result;
+  }
+}
+
+class _PopoverTapGroups extends InheritedWidget {
+  const _PopoverTapGroups({required this.groups, required super.child});
+  final List<Object> groups;
+  @override
+  bool updateShouldNotify(_PopoverTapGroups oldWidget) =>
+      !listEquals(groups, oldWidget.groups);
+}
 
 /// Marks an intentional, non-interactive part of an [AnchoredPopover] as a
 /// desktop drag surface.
@@ -412,7 +452,7 @@ class _AnchoredPopoverState extends State<AnchoredPopover> {
               // is not its owning page scrolling (which may dismiss popovers).
               child: NotificationListener<ScrollNotification>(
                 onNotification: (_) => true,
-                child: TapRegion(
+                child: AppPopoverTapRegion(
                   groupId: this,
                   onTapOutside: widget.consumeOutsideTap
                       ? null

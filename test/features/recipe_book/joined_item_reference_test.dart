@@ -9,6 +9,7 @@ import 'package:bdo_craft_planner_flutter/visual/visual.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../../support/substitute_chooser_helpers.dart';
 import 'recipe_book_test_support.dart';
 
 const _used = ValueKey('attached-reference-tab:used');
@@ -186,9 +187,15 @@ void main() {
     expect(copied, ['Wild Grass']);
     await tester.tap(find.byKey(_used));
     await tester.pumpAndSettle();
-    expect(find.text('or 5 Weed'), findsOneWidget);
+    await openSubstitutes(tester, 'Clear Liquid Reagent', 'Wild Grass');
+    expect(substituteLabel('Weed'), findsOneWidget);
     expect(find.text('Trace of Earth'), findsNothing);
-    await tester.tap(find.text('or 5 Weed'));
+    await chooseSubstitute(tester, 'Clear Liquid Reagent', 'Weed');
+    await tester.ensureVisible(
+      find.byKey(const ValueKey('item-reference-copy:Weed')),
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const ValueKey('item-reference-copy:Weed')));
     expect(copied, ['Wild Grass', 'Weed']);
     await tester.tap(find.byKey(_recipe));
     await tester.pumpAndSettle();
@@ -396,7 +403,7 @@ void main() {
           ),
       ];
       await _pump(tester, book, info(routes), spec: spec);
-      expect(tester.getSize(card).height, closeTo(868, .1));
+      // More routes add scrolling, not a taller window.
       expect(position().maxScrollExtent, greaterThan(0));
       final firstRecipe = find.byKey(
         RecipeBookKeys.itemInfoFormula(
@@ -404,6 +411,10 @@ void main() {
           routes.first.variantId,
           1,
         ),
+      );
+      expect(
+        tester.getRect(card).bottom,
+        closeTo(tester.getRect(firstRecipe).bottom + 1, .1),
       );
       final viewport = tester.getRect(
         find.byKey(const ValueKey('attached-reference-scroll')),

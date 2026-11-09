@@ -501,6 +501,9 @@ Future<void> _showItemInfo(
                     exactName: formula.outputName,
                     mode: formula.mode!,
                     variantId: formula.variantId,
+                    ingredientSelections: book.ingredientSelectionsForFormula(
+                      formula,
+                    ),
                   ),
                 );
               },

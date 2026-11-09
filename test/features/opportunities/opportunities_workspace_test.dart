@@ -29,6 +29,8 @@ import 'package:bdo_craft_planner_flutter/features/planner/planner_contracts.dar
 import 'package:bdo_craft_planner_flutter/features/recipe_book/recipe_book_item_info_view.dart';
 import 'package:bdo_craft_planner_flutter/features/shared/mode_item_icon.dart';
 import 'package:bdo_craft_planner_flutter/features/shared/profile_game_icon.dart';
+import 'package:bdo_craft_planner_flutter/features/shared/recipe_switch_controls.dart';
+import 'package:bdo_craft_planner_flutter/features/shared/silver_amount_content.dart';
 import 'package:bdo_craft_planner_flutter/visual/components/app_button.dart';
 import 'package:bdo_craft_planner_flutter/visual/components/app_surface.dart';
 import 'package:bdo_craft_planner_flutter/visual/foundations/application_theme.dart';
@@ -60,6 +62,7 @@ void _glassTestWidgets(
 
 void main() {
   setUpAll(_loadFonts);
+  registerSilverIconChecks();
 
   for (final background in [
     'sakura-night-garden',
@@ -2919,7 +2922,7 @@ void main() {
         await tester.ensureVisible(difference);
         expect(
           tester.widget<Text>(difference).data,
-          '${after.hasEstimatedInputs ? '≈ ' : ''}+${formatCompactOpportunitySilver(after.profitFor(controller.craftSaleMode)!)} silver',
+          '${after.hasEstimatedInputs ? '≈ ' : ''}+${formatCompactOpportunitySilver(after.profitFor(controller.craftSaleMode)!)}',
         );
         final raw = tester
             .widget<Text>(
@@ -2928,7 +2931,7 @@ void main() {
             .data;
         expect(
           raw,
-          '≈ ${formatCompactOpportunitySilver(after.ownedIngredientSales!)} silver',
+          '≈ ${formatCompactOpportunitySilver(after.ownedIngredientSales!)}',
         );
         final scrollables = tester.stateList<ScrollableState>(
           find.descendant(
@@ -3509,7 +3512,7 @@ void main() {
         );
         expect(
           tester.widget<Text>(rawValue).data,
-          '≈ ${formatCompactOpportunitySilver(gross * taxRate)} silver',
+          '≈ ${formatCompactOpportunitySilver(gross * taxRate)}',
         );
         if (view.$1.width == 1200 && view.$2 == 1) {
           final raw = tester.getRect(
@@ -3632,7 +3635,7 @@ void main() {
         );
         expect(
           tester.widget<Text>(rawValue).data,
-          '≈ ${formatCompactOpportunitySilver(gross * taxRate)} silver',
+          '≈ ${formatCompactOpportunitySilver(gross * taxRate)}',
         );
         expect(
           fixture.controller
@@ -3665,7 +3668,7 @@ void main() {
         );
         expect(
           tester.widget<Text>(rawValue).data,
-          '≈ ${formatCompactOpportunitySilver(batchGross * taxRate)} silver',
+          '≈ ${formatCompactOpportunitySilver(batchGross * taxRate)}',
         );
         FocusManager.instance.primaryFocus?.unfocus();
         await tester.pump();
@@ -4618,7 +4621,7 @@ void main() {
           find.descendant(
             of: money,
             matching: find.text(
-              '${formatCompactOpportunitySilver(quote.listingRevenue!)} silver',
+              formatCompactOpportunitySilver(quote.listingRevenue!),
             ),
           ),
           findsOneWidget,
@@ -6656,11 +6659,13 @@ void main() {
     await _openIngredient(tester, 'Black Gem');
     final standard = fixture.controller.inspectRecipe(recipe: recipe);
     _expectInspectionCalculation(tester, standard);
-    final hundred = _buttonWithText('100×');
+    final hundred = find.byWidgetPredicate(
+      (widget) => widget is RecipeSwitchChoice && widget.label == '100×',
+    );
     await tester.ensureVisible(hundred);
     await tester.tap(hundred);
     await _settleImages(tester);
-    expect(tester.widget<AppButton>(hundred).selected, isTrue);
+    expect(tester.widget<RecipeSwitchChoice>(hundred).selected, isTrue);
     final variant = recipe.variants.firstWhere(
       (variant) => variant.batchMultiplier == 100,
     );
@@ -6680,7 +6685,7 @@ void main() {
     await _openIngredient(tester, 'Pure Powder Reagent');
     await tester.tap(find.byKey(const ValueKey('ingredient-recipe-back')));
     await _settleImages(tester);
-    expect(tester.widget<AppButton>(hundred).selected, isTrue);
+    expect(tester.widget<RecipeSwitchChoice>(hundred).selected, isTrue);
     expect(find.text('Pure Powder Reagent'), findsOneWidget);
     _expectInspectionCalculation(tester, batch);
     await tester.tap(find.byKey(const ValueKey('ingredient-recipe-back')));
@@ -6748,7 +6753,7 @@ void main() {
       final recipeB = find.byKey(const ValueKey('opportunity-recipe-route:1'));
       final ten = find.byKey(const ValueKey('opportunity-recipe-batch:10'));
       final one = find.byKey(const ValueKey('opportunity-recipe-batch:1'));
-      expect(tester.widget<AppButton>(recipeA).selected, isTrue);
+      expect(tester.widget<RecipeSwitchChoice>(recipeA).selected, isTrue);
       expect(
         tester.getSize(recipeA).height,
         closeTo(tester.getSize(ten).height, .01),
@@ -6762,7 +6767,7 @@ void main() {
       await tester.ensureVisible(ten);
       await tester.tap(ten);
       await _settleImages(tester);
-      expect(tester.widget<AppButton>(ten).selected, isTrue);
+      expect(tester.widget<RecipeSwitchChoice>(ten).selected, isTrue);
       expect(find.text("Ibellab's Essence"), findsOneWidget);
       await tester.tap(one);
       await _settleImages(tester);
@@ -6776,7 +6781,7 @@ void main() {
       await tester.tap(recipeB);
       await _settleDepth(tester, controller);
       await _settleImages(tester);
-      expect(tester.widget<AppButton>(recipeB).selected, isTrue);
+      expect(tester.widget<RecipeSwitchChoice>(recipeB).selected, isTrue);
       expect(find.text("Rusalka's Coral"), findsOneWidget);
       expect(find.text('Perfume of Deep Sea'), findsNothing);
       expect(ten, findsNothing);
@@ -6816,7 +6821,7 @@ void main() {
       await _openIngredient(tester, 'Pure Powder Reagent');
       await tester.tap(find.byKey(const ValueKey('ingredient-recipe-back')));
       await _settleImages(tester);
-      expect(tester.widget<AppButton>(recipeB).selected, isTrue);
+      expect(tester.widget<RecipeSwitchChoice>(recipeB).selected, isTrue);
       expect(
         tester.widget<TextField>(_detailCraftCount()).controller!.text,
         '3',
@@ -6905,7 +6910,7 @@ void main() {
       await _settleImages(tester);
       expect(
         tester
-            .widget<AppButton>(
+            .widget<RecipeSwitchChoice>(
               find.byKey(const ValueKey('opportunity-recipe-batch:1')),
             )
             .selected,
@@ -7764,7 +7769,7 @@ void main() {
           find.descendant(
             of: money,
             matching: find.text(
-              '${formatCompactOpportunitySilver(quote.listingRevenue!)} silver',
+              formatCompactOpportunitySilver(quote.listingRevenue!),
             ),
           ),
           findsOneWidget,
@@ -8322,11 +8327,6 @@ void main() {
   }
 }
 
-Finder _buttonWithText(String label) => find.ancestor(
-  of: find.text(label),
-  matching: find.byWidgetPredicate((widget) => widget is AppButton),
-);
-
 Finder _menuFilter(String key) => find.byKey(ValueKey(key));
 
 Future<void> _toggleCraftFilter(
@@ -8765,7 +8765,7 @@ void _expectInspectionCalculation(
       matching: find.text(
         quote.listingRevenue == null
             ? '—'
-            : '${formatCompactOpportunitySilver(quote.listingRevenue!)} silver',
+            : formatCompactOpportunitySilver(quote.listingRevenue!),
       ),
     ),
     findsWidgets,
@@ -8774,7 +8774,7 @@ void _expectInspectionCalculation(
     find.descendant(
       of: money,
       matching: find.text(
-        '${quote.hasEstimatedInputs ? '≈ ' : ''}${formatCompactOpportunitySilver(-quote.totalCost!)} silver',
+        '${quote.hasEstimatedInputs ? '≈ ' : ''}${formatCompactOpportunitySilver(-quote.totalCost!)}',
       ),
     ),
     findsOneWidget,
@@ -9753,3 +9753,107 @@ AppearanceSettings _appearanceSettings({
   buttonEffect: 'glow',
   buttonEffectHue: accentHue,
 );
+
+void registerSilverIconChecks() {
+  for (final theme in [
+    'sakura-night-garden',
+    'plain-cobalt',
+    'illuminated-ledger',
+  ]) {
+    for (final scale in [1.0, 2.0]) {
+      testWidgets('approved silver icons geometry $theme $scale', (
+        tester,
+      ) async {
+        configureApplicationTestSurface(
+          tester,
+          const Size(1500, 1100),
+          textScaleFactor: scale,
+        );
+        final fixture = (await tester.runAsync(
+          () => _Fixture.create(
+            exchange: false,
+            backgroundId: theme,
+            seedNonMarketPrices: false,
+          ),
+        ))!;
+        final controller = fixture.controller;
+        try {
+          controller.change((p) {
+            p.craftSearch = 'Beer';
+            p.useInventory = true;
+          });
+          controller.modeController.updateState(
+            (s) => s.copyWith(inventory: {'Wheat': 400, 'Sugar': 60}),
+            immediate: true,
+          );
+          await _settleCalculation(tester, controller);
+          await tester.pumpWidget(_host(controller));
+          await _settleImages(tester);
+          await _openCalculation(tester, 'Beer');
+          await _settleImages(tester);
+          final panel = find.byKey(const ValueKey('craft-money-summary'));
+          final amounts = find.descendant(
+            of: panel,
+            matching: find.byType(OpportunitySilverAmount),
+          );
+          expect(amounts, findsNWidgets(5));
+          for (final item in amounts.evaluate()) {
+            final amount = item.widget as OpportunitySilverAmount;
+            expect(amount.showIcon, isTrue);
+            final frame = find.descendant(
+              of: find.byWidget(amount),
+              matching: find.byType(SilverAmountContent),
+            );
+            expect(frame, findsOneWidget);
+            expect(
+              find.descendant(of: frame, matching: find.byType(Image)),
+              findsOneWidget,
+            );
+            final image = find.descendant(
+              of: frame,
+              matching: find.byType(Image),
+            );
+            final text = find.descendant(
+              of: frame,
+              matching: find.byType(Text),
+            );
+            expect(
+              tester.getRect(text).left - tester.getRect(image).right,
+              closeTo(5, .01),
+            );
+            expect(
+              tester.getRect(text).center.dy,
+              closeTo(tester.getRect(image).center.dy, .01),
+            );
+            expect(tester.widget<Text>(text).data!.contains('silver'), isFalse);
+          }
+          final profit = find.byKey(
+            const ValueKey('crafting-difference-value'),
+          );
+          // The user's preferred greener colour stays exactly unchanged.
+          expect(
+            tester.widget<Text>(profit).style!.color,
+            tester.element(profit).visualTheme.palette.success,
+          );
+          await _captureSubstitutes(
+            tester,
+            'silver-$theme-$scale',
+            region: panel,
+          );
+          await _captureSubstitutes(
+            tester,
+            'dialog-$theme-$scale',
+            region: find.byType(Dialog),
+          );
+          await tester.tap(profit);
+          await tester.pump();
+          expect(tester.widget<Text>(profit).data!.contains('silver'), isFalse);
+          expect(tester.takeException(), isNull);
+        } finally {
+          await tester.pumpWidget(const SizedBox.shrink());
+          await _settleWork(tester, fixture.dispose());
+        }
+      });
+    }
+  }
+}

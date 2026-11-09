@@ -2,6 +2,7 @@ import 'dart:math' as math;
 
 import '../planner/planner_choice_market.dart';
 import 'recipe_book_controller.dart';
+import 'recipe_book_preview_routes.dart';
 import 'recipe_book_usage.dart';
 
 /// Availability for this exact reverse-recipe route. Do not resolve it through
@@ -9,9 +10,27 @@ import 'recipe_book_usage.dart';
 List<RecipeBookIngredientChoice> recipeBookUsedInIngredients({
   required RecipeBookController controller,
   required RecipeBookUseRoute route,
+  String? outputName,
 }) => [
   for (final ingredient in route.ingredients)
     (() {
+      if (outputName != null) {
+        final selected = controller.referenceIngredientName(
+          recipeBookUseRouteFormula(
+            outputName,
+            controller.modeController.mode,
+            route,
+          ),
+          ingredient,
+        );
+        if (selected != null) {
+          final choice = controller
+              .ingredientChoices(outputName, ingredient)
+              .where((row) => _fold(row.name) == _fold(selected))
+              .firstOrNull;
+          if (choice != null) return choice;
+        }
+      }
       RecipeBookUseMatch? match;
       for (final candidate in route.matches) {
         if (_fold(candidate.ingredientName) == _fold(ingredient.name)) {

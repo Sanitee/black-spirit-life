@@ -120,6 +120,8 @@ class _ExchangeReferenceDetails extends StatelessWidget {
                       exactName: formula.outputName,
                       mode: formula.mode!,
                       variantId: formula.variantId,
+                      ingredientSelections: controller.itemInfoController
+                          .ingredientSelectionsForFormula(formula),
                     ),
                   );
                 },

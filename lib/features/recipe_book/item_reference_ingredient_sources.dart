@@ -3,8 +3,9 @@ part of 'recipe_book_item_info_view.dart';
 List<RecipeBookIngredientChoice> _referenceChoices(
   RecipeBookController book,
   RecipeBookFormula formula,
-  CraftMode mode,
-) {
+  CraftMode mode, {
+  bool includeAlternatives = false,
+}) {
   final controller = book.modeController.owner.modes[mode]!;
   final inventory = controller.state.value.inventory;
   final result = <RecipeBookIngredientChoice>[];
@@ -53,45 +54,60 @@ List<RecipeBookIngredientChoice> _referenceChoices(
       );
     }
   }
-  return result;
+  if (includeAlternatives) return result;
+  return [
+    for (final ingredient in formula.ingredients)
+      result
+              .where(
+                (row) =>
+                    identical(row.ingredient, ingredient) &&
+                    row.name.toLowerCase() ==
+                        book
+                            .referenceIngredientName(formula, ingredient)
+                            ?.toLowerCase(),
+              )
+              .firstOrNull ??
+          result.firstWhere((row) => identical(row.ingredient, ingredient)),
+  ];
 }
-
-String _referenceChoiceLabel(RecipeBookIngredientChoice row) =>
-    row.grade == 'alternative'
-    ? 'or ${_displayQuantity(row.quantity)} ${row.name}'
-    : '${row.name} ×${_displayQuantity(row.quantity)}';
 
 double _referenceTableWidth(
   BuildContext context,
   RecipeBookController book,
   RecipeBookFormula formula,
-  CraftMode mode,
-) {
+  CraftMode mode, {
+  OpportunityMarketItem? Function(String)? marketFor,
+  DateTime? now,
+}) {
   final rows = _referenceChoices(book, formula, mode);
-  if (rows.isEmpty) return 0;
-  final widths = RecipeIngredientWidths.measure(context, rows: rows);
-  final scale = MediaQuery.textScalerOf(context).scale(14) / 14;
-  var labelWidth = 190 * scale;
-  for (final row in rows) {
-    final painter = TextPainter(
-      text: TextSpan(
-        text: itemDisplayLabel(row.name, _referenceChoiceLabel(row)),
-        style: ItemDetailStyle.ingredient(context.visualTheme),
-      ),
-      textDirection: Directionality.of(context),
-      textScaler: MediaQuery.textScalerOf(context),
-    )..layout();
-    labelWidth = math.max(
-      labelWidth,
-      painter.width.ceilToDouble() + 54 * scale.clamp(1, 1.35),
-    );
-    painter.dispose();
-  }
-  return widths.minimumWidth - 190 * scale + labelWidth + 8;
+  final alternatives = _referenceChoices(
+    book,
+    formula,
+    mode,
+    includeAlternatives: true,
+  );
+  return RecipeIngredientTable.contentWidth(
+    context,
+    rows: rows,
+    marketFor: marketFor,
+    now: now,
+    fitBadges: true,
+    switchWidth: (row) => RecipeIngredientChoiceButton.widthFor(
+      context,
+      book,
+      alternatives
+          .where((other) => identical(other.ingredient, row.ingredient))
+          .toList(),
+    ),
+    hasSwitch: (row) =>
+        alternatives
+            .where((other) => identical(other.ingredient, row.ingredient))
+            .length >
+        1,
+  );
 }
 
-/// The same striped, aligned table as Recipe Book cards and substitute pickers.
-/// Owned is informational: it never changes the formula or selected substitute.
+/// One ingredient per row. Alternatives use the same chooser as Recipe Book cards.
 class _ReferenceIngredientsTable extends StatelessWidget {
   const _ReferenceIngredientsTable({
     required this.book,
@@ -108,19 +124,29 @@ class _ReferenceIngredientsTable extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => ListenableBuilder(
-    listenable: book.modeController.owner.modes[mode]!.state,
+    listenable: book,
     builder: (context, _) {
       final rows = _referenceChoices(book, formula, mode);
       if (rows.isEmpty) return const SizedBox.shrink();
+      List<RecipeBookIngredientChoice> choices(Ingredient ingredient) =>
+          _referenceChoices(
+            book,
+            formula,
+            mode,
+            includeAlternatives: true,
+          ).where((row) => identical(row.ingredient, ingredient)).toList();
       return Padding(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         child: RecipeIngredientTable(
           controller: book,
+          fitBadges: true,
           minimumContentWidth: _referenceTableWidth(
             context,
             book,
             formula,
             mode,
+            marketFor: marketFor,
+            now: now,
           ),
           parent: formula.outputName,
           rows: rows,
@@ -131,13 +157,11 @@ class _ReferenceIngredientsTable extends StatelessWidget {
             explicitChildNodes: true,
             label: '${_displayQuantity(row.quantity)} ${row.name}',
             child: Row(
-              key: row.grade == 'normal'
-                  ? RecipeBookKeys.itemInfoMaterial(
-                      formula.outputName,
-                      formula.variantId,
-                      row.name,
-                    )
-                  : null,
+              key: RecipeBookKeys.itemInfoMaterial(
+                formula.outputName,
+                formula.variantId,
+                row.name,
+              ),
               children: [
                 ModeItemIcon(
                   controller: book.modeController.owner.modes[mode]!,
@@ -152,34 +176,41 @@ class _ReferenceIngredientsTable extends StatelessWidget {
                   searchAcrossModes: true,
                 ),
                 const SizedBox(width: 10),
-                Expanded(
-                  child: row.grade == 'normal'
-                      ? Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Flexible(
-                              child: _ReferenceItemName(
-                                name: row.name,
-                                style: ItemDetailStyle.ingredient(
-                                  context.visualTheme,
-                                ),
-                              ),
-                            ),
-                            const SizedBox(width: 8),
-                            Text(
-                              '×${_displayQuantity(row.quantity)}',
-                              style: ItemDetailStyle.meta(context.visualTheme),
-                            ),
-                          ],
-                        )
-                      : _ReferenceItemName(
+                Flexible(
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Flexible(
+                        child: _ReferenceItemName(
                           name: row.name,
-                          label: _referenceChoiceLabel(row),
-                          style: ItemDetailStyle.meta(
+                          style: ItemDetailStyle.ingredient(
                             context.visualTheme,
-                          ).copyWith(fontSize: 14, height: 1.3),
+                          ),
                         ),
+                      ),
+                      const SizedBox(width: 8),
+                      Text(
+                        '×${_displayQuantity(row.quantity)}',
+                        style: ItemDetailStyle.meta(context.visualTheme),
+                      ),
+                    ],
+                  ),
                 ),
+                if (choices(row.ingredient).length > 1)
+                  RecipeIngredientChoiceButton(
+                    controller: book,
+                    parent: formula.outputName,
+                    mode: mode,
+                    ingredient: row.ingredient,
+                    identity:
+                        'reference-choices:${formula.mode?.key}:${formula.outputName}:${formula.variantId}:${formula.routeId}:${formula.batchMultiplier}:$index',
+                    choices: () => choices(row.ingredient),
+                    selectedName: () =>
+                        book.referenceIngredientName(formula, row.ingredient) ??
+                        row.name,
+                    onChoose: (choice) =>
+                        book.selectReferenceIngredient(formula, choice),
+                  ),
               ],
             ),
           ),

@@ -69,14 +69,7 @@ void main() {
           const ValueKey('opportunity-recipe-batch:100'),
         );
         expect(tester.getSize(recipeB).height, tester.getSize(batch).height);
-        for (final label in [
-          'Recipe A',
-          'Recipe B',
-          'Recipe C',
-          '1×',
-          '10×',
-          '100×',
-        ]) {
+        for (final label in ['A', 'B', 'C', '1×', '10×', '100×']) {
           final bounds = tester.getRect(find.text(label));
           expect(bounds.left, greaterThanOrEqualTo(0));
           expect(bounds.right, lessThanOrEqualTo(width));

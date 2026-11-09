@@ -39,6 +39,7 @@ import '../recipe_book/recipe_book_item_info_view.dart';
 import '../shared/market_count_badges.dart';
 import '../shared/mode_item_icon.dart';
 import '../shared/profile_game_icon.dart';
+import '../shared/silver_amount_content.dart';
 import '../shared/source_availability_badges.dart';
 import 'opportunities_content_viewport.dart';
 import 'opportunities_controller.dart';
@@ -1485,7 +1486,10 @@ class _MetricValue extends StatelessWidget {
       textScaler: MediaQuery.textScalerOf(context),
       textDirection: Directionality.of(context),
     )..layout();
-    final width = painter.width.ceilToDouble() + 2;
+    final width =
+        painter.width.ceilToDouble() +
+        2 +
+        (silverAmount == null ? 0 : SilverAmountContent.leadingWidth);
     painter.dispose();
     return width;
   }
@@ -1531,6 +1535,7 @@ class _MetricValue extends StatelessWidget {
         value == '—' ? null : estimateExplanation,
         silverAmount != null
             ? OpportunitySilverAmount(
+                showIcon: true,
                 value: silverAmount,
                 estimated: value.startsWith('≈ '),
                 style: valueStyle(context),
@@ -2574,8 +2579,8 @@ Widget _craftCalculationBody(
                                     key: ValueKey(
                                       'ingredient-substitutes:${ingredient.name}',
                                     ),
-                                    icon: const Icon(
-                                      Icons.swap_horiz,
+                                    icon: const AppVectorGlyph(
+                                      'swap',
                                       size: 19,
                                     ),
                                     semanticLabel:
@@ -2880,10 +2885,10 @@ List<Widget> _saleChoices(
             ),
             const SizedBox(height: 8),
             OpportunitySilverAmount(
+              showIcon: true,
               value: difference,
               estimated: quote.hasEstimatedInputs,
               showPlus: true,
-              silverSuffix: true,
               textKey: const ValueKey('crafting-difference-value'),
               style: spec.typography.body.copyWith(
                 fontSize: 18,
@@ -2948,9 +2953,9 @@ Widget _rawIngredientSalesSummary(
         Text('After tax', style: spec.typography.meta),
         const SizedBox(height: 4),
         OpportunitySilverAmount(
+          showIcon: true,
           value: sales.afterTax,
           estimated: true,
-          silverSuffix: true,
           textKey: const ValueKey('raw-ingredient-sales-value'),
           style: spec.typography.body.copyWith(
             fontSize: 18,
@@ -2990,6 +2995,7 @@ Widget _ingredientPrice(
       Text(label, style: style),
       if (silverAmount != null)
         OpportunitySilverAmount(
+          showIcon: true,
           value: silverAmount,
           estimated: value.startsWith('≈ '),
           style: style,
@@ -3412,9 +3418,9 @@ Widget _mathLine(
             _estimateHint(
               estimateExplanation,
               OpportunitySilverAmount(
+                showIcon: true,
                 value: value == null ? null : (minus ? -value : value),
                 estimated: estimateExplanation != null,
-                silverSuffix: true,
                 style: context.visualTheme.typography.body.copyWith(
                   fontSize: 18,
                   fontWeight: FontWeight.w600,
@@ -3446,9 +3452,9 @@ Widget _mathLine(
               child: _estimateHint(
                 estimateExplanation,
                 OpportunitySilverAmount(
+                  showIcon: true,
                   value: value == null ? null : (minus ? -value : value),
                   estimated: estimateExplanation != null,
-                  silverSuffix: true,
                   style: context.visualTheme.typography.body.copyWith(
                     fontSize: 18,
                     fontWeight: bold ? FontWeight.w700 : FontWeight.w500,

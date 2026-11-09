@@ -19,6 +19,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../../support/choice_market_transport.dart';
+import '../../support/substitute_chooser_helpers.dart';
 import '../planner/planner_choice_market_test.dart' show settle;
 import '../planner/planner_review_projection_test.dart' as fixture;
 import 'recipe_book_availability_test.dart'
@@ -158,8 +159,15 @@ void main() {
             broker: broker,
           );
           expect(tester.takeException(), isNull);
+          await openSubstitutes(
+            tester,
+            name,
+            name == 'Wheat Flour' ? 'Wheat' : 'Paprika',
+          );
+          await settle(tester, broker);
+          await tester.pumpAndSettle();
           final table = tester.widget<RecipeIngredientTable>(
-            find.byType(RecipeIngredientTable).first,
+            substituteChooser(),
           );
           expect(table.rows.length, greaterThan(2));
           if (name == 'Wheat Flour') {
@@ -180,7 +188,10 @@ void main() {
             );
           }
           expect(
-            find.byType(InventoryCountBadge),
+            find.descendant(
+              of: substituteChooser(),
+              matching: find.byType(InventoryCountBadge),
+            ),
             findsNWidgets(table.rows.length),
           );
           checkColumnAlignment(tester);
@@ -188,7 +199,7 @@ void main() {
           final rendered = tester.widget<Table>(
             find
                 .descendant(
-                  of: find.byType(RecipeIngredientTable),
+                  of: substituteChooser(),
                   matching: find.byType(Table),
                 )
                 .first,
@@ -206,9 +217,7 @@ void main() {
             await tester.pumpAndSettle();
             expect(
               tester
-                  .widget<RecipeIngredientTable>(
-                    find.byType(RecipeIngredientTable).first,
-                  )
+                  .widget<RecipeIngredientTable>(substituteChooser())
                   .rows
                   .first
                   .owned,

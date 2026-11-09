@@ -41,91 +41,78 @@ void main() {
       (size: const Size(1500, 940), scale: 1.0),
       (size: const Size(1200, 752), scale: 1.5),
     ]) {
-      testWidgets('${theme.key} Used In grows and shrinks with content '
-          'at ${view.size.height} height and ${view.scale} text', (
-        tester,
-      ) async {
-        final harness = await _openBook(
-          tester,
-          catalog,
-          theme.value,
-          viewport: view.size,
-          textScale: view.scale,
-        );
-        const name = 'Adaptation Draught';
-        await tester.enterText(_search(), name);
-        await tester.pumpAndSettle();
-        await tester.tap(
-          find.descendant(
-            of: find.byKey(RecipeBookKeys.card(name)),
-            matching: find.byKey(RecipeBookKeys.usedIn(name)),
-          ),
-        );
-        await tester.pumpAndSettle();
-        final panel = find.byKey(RecipeBookKeys.usedInPanel(name));
-        final collapsedHeight = tester.getSize(panel).height;
-        final expand = find.byKey(
-          RecipeBookKeys.expandUsedInResult(
-            name,
-            CraftMode.alchemy.key,
-            'Harmony Draught',
-          ),
-        );
-        await tester.tap(expand);
-        await tester.pumpAndSettle();
-        final bounds = tester.getRect(panel);
-        expect(bounds.height, greaterThan(610));
-        expect(bounds.height, greaterThan(collapsedHeight));
-        expect(bounds.top, greaterThanOrEqualTo(12));
-        expect(bounds.bottom, lessThanOrEqualTo(view.size.height - 12));
-        expect(bounds.left, greaterThanOrEqualTo(12));
-        expect(bounds.right, lessThanOrEqualTo(view.size.width - 12));
-        expect(tester.takeException(), isNull);
-        await _capture(
-          tester,
-          'taller-used-in-${theme.key}-${view.size.height}-${view.scale}',
-        );
+      testWidgets(
+        '${theme.key} Used In shows all recipe ingredients and scrolls with content '
+        'at ${view.size.height} height and ${view.scale} text',
+        (tester) async {
+          final harness = await _openBook(
+            tester,
+            catalog,
+            theme.value,
+            viewport: view.size,
+            textScale: view.scale,
+          );
+          const name = 'Adaptation Draught';
+          await tester.enterText(_search(), name);
+          await tester.pumpAndSettle();
+          await tester.tap(
+            find.descendant(
+              of: find.byKey(RecipeBookKeys.card(name)),
+              matching: find.byKey(RecipeBookKeys.usedIn(name)),
+            ),
+          );
+          await tester.pumpAndSettle();
+          final panel = find.byKey(RecipeBookKeys.usedInPanel(name));
+          expect(find.byType(RecipeIngredientTable), findsWidgets);
+          expect(
+            find.byKey(
+              RecipeBookKeys.expandUsedInResult(
+                name,
+                CraftMode.alchemy.key,
+                'Harmony Draught',
+              ),
+            ),
+            findsNothing,
+          );
+          final bounds = tester.getRect(panel);
+          expect(bounds.height, greaterThan(610));
+          expect(bounds.top, greaterThanOrEqualTo(12));
+          expect(bounds.bottom, lessThanOrEqualTo(view.size.height - 12));
+          expect(bounds.left, greaterThanOrEqualTo(12));
+          expect(bounds.right, lessThanOrEqualTo(view.size.width - 12));
+          expect(tester.takeException(), isNull);
+          await _capture(
+            tester,
+            'taller-used-in-${theme.key}-${view.size.height}-${view.scale}',
+          );
 
-        final scrollable = find.descendant(
-          of: find.byKey(RecipeBookKeys.usedInScroll(name)),
-          matching: find.byType(Scrollable),
-        );
-        final position = tester.state<ScrollableState>(scrollable).position;
-        // The wider shared table also fits its actions beside the title,
-        // so this normal-text fixture now fits at both tested heights.
-        if (view.scale == 1) {
-          expect(position.maxScrollExtent, 0);
-        } else {
+          final scrollable = find.descendant(
+            of: find.byKey(RecipeBookKeys.usedInScroll(name)),
+            matching: find.byType(Scrollable),
+          );
+          final position = tester.state<ScrollableState>(scrollable).position;
           expect(position.maxScrollExtent, greaterThan(0));
-        }
-        position.jumpTo(position.maxScrollExtent);
-        await tester.pumpAndSettle();
-        expect(
-          find
-              .byKey(
-                RecipeBookKeys.expandUsedInResult(
-                  name,
-                  CraftMode.processing.key,
-                  'Immortal: Adaptation Draught',
-                ),
-              )
-              .hitTestable(),
-          findsOneWidget,
-        );
-        position.jumpTo(0);
-        await tester.pumpAndSettle();
-        await tester.tap(expand);
-        await tester.pumpAndSettle();
-        expect(tester.getSize(panel).height, closeTo(collapsedHeight, .5));
-        if (view.scale == 1) {
-          expect(collapsedHeight, lessThan(500));
-        }
-        await tester.tap(find.byKey(RecipeBookKeys.closeUsedIn(name)));
-        await tester.pumpAndSettle();
-        expect(panel, findsNothing);
-        expect(harness.saved, isEmpty);
-        expect(tester.takeException(), isNull);
-      });
+          position.jumpTo(position.maxScrollExtent);
+          await tester.pumpAndSettle();
+          expect(
+            find
+                .byKey(
+                  RecipeBookKeys.targetUsedInResult(
+                    name,
+                    CraftMode.processing.key,
+                    'Immortal: Adaptation Draught',
+                  ),
+                )
+                .hitTestable(),
+            findsOneWidget,
+          );
+          await tester.tap(find.byKey(RecipeBookKeys.closeUsedIn(name)));
+          await tester.pumpAndSettle();
+          expect(panel, findsNothing);
+          expect(harness.saved, isEmpty);
+          expect(tester.takeException(), isNull);
+        },
+      );
     }
 
     testWidgets('${theme.key} recipe preview uses the viewport height', (
@@ -228,7 +215,7 @@ void main() {
           );
           expect(life.quantity, 30);
           final selector = find.byKey(
-            ValueKey('recipe-substitutes:$name:Elixir of Life'),
+            ValueKey('recipe-grade:$name:Elixir of Life:blue'),
           );
           expect(selector, findsOneWidget);
           await _capture(
@@ -237,22 +224,6 @@ void main() {
             panelOnly: true,
           );
           await tester.tap(selector);
-          await tester.pumpAndSettle();
-          final chooserFinder = find.byWidgetPredicate(
-            (w) => w is RecipeIngredientTable && w.onChoose != null,
-          );
-          final choices = tester
-              .widget<RecipeIngredientTable>(chooserFinder)
-              .rows;
-          final blue = choices.firstWhere(
-            (row) => row.baseName == 'Elixir of Life' && row.grade == 'blue',
-          );
-          await tester.ensureVisible(
-            find.byKey(ValueKey('recipe-choose:$name:${blue.name}')),
-          );
-          await tester.tap(
-            find.byKey(ValueKey('recipe-choose:$name:${blue.name}')),
-          );
           await tester.pumpAndSettle();
           expect(
             harness.application.modes[CraftMode.alchemy]!
@@ -263,14 +234,8 @@ void main() {
                 ),
             'blue',
           );
-          final alternate = choices.firstWhere((row) => row.name != blue.name);
-          await tester.tap(selector);
-          await tester.pumpAndSettle();
-          await tester.ensureVisible(
-            find.byKey(ValueKey('recipe-choose:$name:${alternate.name}')),
-          );
           await tester.tap(
-            find.byKey(ValueKey('recipe-choose:$name:${alternate.name}')),
+            find.byKey(ValueKey('recipe-grade:$name:Elixir of Life:normal')),
           );
           await tester.pumpAndSettle();
           expect(
@@ -279,7 +244,7 @@ void main() {
                 .rows
                 .firstWhere((row) => row.ingredient.name == 'Elixir of Life')
                 .name,
-            alternate.name,
+            'Elixir of Life',
           );
           await tester.tap(
             find.byKey(RecipeVariantSelector.batchChoiceKey(name, 100)),
@@ -339,9 +304,7 @@ void main() {
       expect(alchemy.selectedRecipeVariantId(name), originalAlchemyVariant);
       expect(harness.application.activeMode.value, CraftMode.processing);
       expect(
-        find.byKey(
-          ValueKey('recipe-substitutes:$name:Elixir of Assassination'),
-        ),
+        find.byKey(ValueKey('recipe-grade:$name:Elixir of Assassination:blue')),
         findsOneWidget,
       );
       expect(_previewText('Output 100'), findsOneWidget);

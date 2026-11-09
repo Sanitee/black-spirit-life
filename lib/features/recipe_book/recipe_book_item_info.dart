@@ -54,6 +54,7 @@ final class RecipeBookFormula {
     this.outputMinimum,
     this.outputMaximum,
     this.outputEstimated = false,
+    this.ingredientChoiceNames = const {},
   });
 
   final String outputName;
@@ -70,10 +71,14 @@ final class RecipeBookFormula {
   final bool outputEstimated;
   final List<Ingredient> ingredients;
 
+  /// Temporary reference choices, committed only by Use recipe.
+  final Map<String, String> ingredientChoiceNames;
+
   RecipeBookFormula copyWith({
     CraftMode? mode,
     bool? outputEstimated,
     List<Ingredient>? ingredients,
+    Map<String, String>? ingredientChoiceNames,
   }) => RecipeBookFormula(
     outputName: outputName,
     type: type,
@@ -88,6 +93,7 @@ final class RecipeBookFormula {
     outputMaximum: outputMaximum,
     outputEstimated: outputEstimated ?? this.outputEstimated,
     ingredients: ingredients ?? this.ingredients,
+    ingredientChoiceNames: ingredientChoiceNames ?? this.ingredientChoiceNames,
   );
 }
 

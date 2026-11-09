@@ -24,11 +24,13 @@ final class PlannerTargetRequest {
     required this.exactName,
     required this.mode,
     this.variantId,
+    this.ingredientSelections = const [],
   });
 
   final String exactName;
   final CraftMode mode;
   final String? variantId;
+  final List<RecipeTargetIngredientSelection> ingredientSelections;
 }
 
 typedef OpenPlannerTarget = void Function(PlannerTargetRequest request);

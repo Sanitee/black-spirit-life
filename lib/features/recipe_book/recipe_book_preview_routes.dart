@@ -1,5 +1,25 @@
 import '../../domain/models/craft_mode.dart';
 import 'recipe_book_item_info.dart';
+import 'recipe_book_usage.dart';
+
+RecipeBookFormula recipeBookUseRouteFormula(
+  String outputName,
+  CraftMode mode,
+  RecipeBookUseRoute route,
+) => RecipeBookFormula(
+  outputName: outputName,
+  mode: mode,
+  type: route.type,
+  method: route.method ?? route.type,
+  variantId: route.variantId,
+  routeId: route.routeId,
+  routeLabel: route.routeLabel,
+  batchMultiplier: route.batchMultiplier,
+  baseOutput: route.baseOutput,
+  outputMinimum: route.outputMinimum,
+  outputMaximum: route.outputMaximum,
+  ingredients: route.ingredients,
+);
 
 /// A real recipe family, independent of which catalogue also lists it.
 class RecipeBookPreviewRoute {

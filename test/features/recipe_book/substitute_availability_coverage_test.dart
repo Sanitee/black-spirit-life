@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'dart:ui' as ui;
@@ -19,6 +20,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 import '../../support/availability_badge_finders.dart';
 import '../../support/choice_market_transport.dart';
+import '../../support/substitute_chooser_helpers.dart';
 import '../planner/planner_choice_market_test.dart' show settle;
 import '../planner/planner_review_projection_test.dart' as fixture;
 
@@ -115,6 +117,7 @@ void main() {
           );
           final before = jsonEncode(app.documentSnapshot.toJson());
           final transport = ChoiceMarketTransport();
+          transport.hold = Completer<void>();
           transport.values[repository.bundledMarketId('High-Quality Wheat')!] =
               (price: 100, stock: 4321, preorders: 12);
           transport.values[repository.bundledMarketId('Paprika')!] = (
@@ -159,6 +162,10 @@ void main() {
             ),
           );
           await tester.pumpWidget(host());
+          await tester.pumpAndSettle();
+          if (name == 'Wheat Flour') {
+            await openSubstitutes(tester, name, 'Wheat');
+          }
           // Before fetching, the HQ badge is present, but does not claim zero.
           final grade = find.byKey(
             const ValueKey('reference-source:High-quality Wheat'),
@@ -170,14 +177,13 @@ void main() {
               findsOneWidget,
             );
           }
+          transport.hold!.complete();
+          transport.hold = null;
           await settle(tester, broker);
           await tester.pumpAndSettle();
           if (name == 'Wheat Flour') {
             for (final n in ['Wheat', 'High-quality Wheat', 'Special Wheat']) {
-              expect(
-                find.byKey(ValueKey('reference-source:$n')),
-                findsOneWidget,
-              );
+              expect(substituteBadge(n), findsOneWidget);
             }
             expect(
               find.descendant(of: grade, matching: stockBadgeText('4,3k')),
@@ -191,7 +197,7 @@ void main() {
               expect(
                 tester.getRect(grade).left,
                 greaterThan(
-                  tester.getRect(find.text('or 1 High-quality Wheat')).right,
+                  tester.getRect(substituteLabel('High-Quality Wheat')).right,
                 ),
               );
             }

@@ -468,9 +468,7 @@ void main() {
       await tester.pumpAndSettle();
 
       final selector = find.byKey(
-        ValueKey(
-          "recipe-substitutes:Clown's Blood:Cheetah Dragon Blood",
-        ),
+        ValueKey("recipe-substitutes:Clown's Blood:Cheetah Dragon Blood"),
       );
       expect(selector, findsOneWidget);
       final preview = find.byKey(RecipeBookKeys.previewPanel);
@@ -2731,8 +2729,14 @@ void main() {
             findsOneWidget,
           );
           expect(
-            find.descendant(of: formula, matching: find.text('$batch× batch')),
-            batch == 1 ? findsNothing : findsOneWidget,
+            find.descendant(
+              of: find.descendant(
+                of: formula,
+                matching: find.byKey(ValueKey('formula-heading:$name:$batch')),
+              ),
+              matching: find.text('\u00d7$batch'),
+            ),
+            findsOneWidget,
           );
         }
       }

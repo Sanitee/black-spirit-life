@@ -19,6 +19,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../../support/application_test_harness.dart';
+import '../../support/substitute_chooser_helpers.dart';
 
 void main() {
   setUpAll(() async {
@@ -306,10 +307,16 @@ void main() {
     await _rightClick(tester);
     await tester.tap(find.text('Item info'));
     await tester.pumpAndSettle();
-    expect(
-      find.textContaining('Black Magic Crystal - Precision'),
-      findsWidgets,
+    final formula = fixture.controller.itemInfoController
+        .itemInfoFor('Magical Shard')!
+        .acquisitionFormulas
+        .first;
+    await openSubstitutes(
+      tester,
+      formula.outputName,
+      formula.ingredients.first.name,
     );
+    expect(substituteLabel('Black Magic Crystal - Precision'), findsOneWidget);
     for (final suffix in [
       'Power',
       'Patience',
@@ -496,17 +503,17 @@ void main() {
         formula.batchMultiplier,
       ),
     );
-    final output = find.descendant(
-      of: formulaRow,
-      matching: find.byKey(
-        ValueKey('item-reference-copy:${formula.outputName}'),
+    // The output name is shown once in the header, not repeated in the table.
+    expect(formulaRow, findsOneWidget);
+    expect(
+      find.descendant(
+        of: formulaRow,
+        matching: find.byKey(
+          ValueKey('item-reference-copy:${formula.outputName}'),
+        ),
       ),
+      findsNothing,
     );
-    expect(output, findsOneWidget);
-    await tester.ensureVisible(output);
-    await tester.tap(output);
-    await tester.pumpAndSettle();
-    expect(copied, ['Beer', formula.outputName]);
 
     for (final ingredient in formula.ingredients) {
       final row = find.byKey(
@@ -528,7 +535,6 @@ void main() {
     }
     expect(copied, [
       'Beer',
-      formula.outputName,
       for (final ingredient in formula.ingredients) ingredient.name,
     ]);
     expect(dialog, findsOneWidget);
@@ -558,6 +564,12 @@ void main() {
         .itemInfoFor('Magical Shard')!
         .acquisitionFormulas
         .first;
+    await openSubstitutes(
+      tester,
+      formula.outputName,
+      formula.ingredients.first.name,
+    );
+    await chooseSubstitute(tester, formula.outputName, exactName);
     final name = find.descendant(
       of: find.byKey(
         RecipeBookKeys.itemInfoFormula(
@@ -617,8 +629,20 @@ void main() {
           'Black Magic Crystal - Precision',
         ];
         for (final name in exactNames) {
+          if (name == 'Black Magic Crystal - Precision') {
+            await openSubstitutes(
+              tester,
+              formula.outputName,
+              formula.ingredients.first.name,
+            );
+            await chooseSubstitute(tester, formula.outputName, name);
+          }
           final action = find.descendant(
-            of: formulaRow,
+            of: name == formula.outputName
+                ? find.byKey(
+                    const ValueKey('opportunity-item-info:Magical Shard'),
+                  )
+                : formulaRow,
             matching: find.byKey(ValueKey('item-reference-copy:$name')),
           );
           expect(action, findsOneWidget);

@@ -18,7 +18,6 @@ import '../../domain/opportunities/opportunity_card_reading.dart';
 import '../../shared/overlays/anchored_popover.dart';
 import '../../shared/overlays/draggable_overlay_surface.dart';
 import '../../visual/components/app_interaction_frame.dart';
-import '../../visual/components/sculpted_panel.dart';
 import '../../visual/visual.dart';
 import '../opportunities/opportunity_craft_card_material.dart';
 import '../planner/planner_choice_market.dart';
@@ -2037,6 +2036,11 @@ class _RecipePreviewOverlay extends StatelessWidget {
             rows: rows,
             marketFor: marketFor,
             now: now,
+            switchWidth: (row) => RecipeIngredientChoiceButton.widthFor(
+              context,
+              controller,
+              controller.ingredientChoices(recipeName, row.ingredient),
+            ),
             hasSwitch: (row) =>
                 controller.hasIngredientAlternatives(recipeName, row),
           );

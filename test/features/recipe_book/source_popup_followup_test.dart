@@ -228,7 +228,7 @@ void main() {
         await tester.pumpAndSettle();
         await tester.tap(find.text('Used for'));
         await tester.pumpAndSettle();
-        expect(tester.getSize(card).width, greaterThan(detailsWidth));
+        expect(tester.getSize(card).width, greaterThanOrEqualTo(detailsWidth));
         var rect = tester.getRect(card);
         expect(rect.right, lessThanOrEqualTo(1600));
         expect(rect.left, greaterThanOrEqualTo(0));

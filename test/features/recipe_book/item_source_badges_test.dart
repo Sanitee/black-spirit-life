@@ -19,6 +19,7 @@ import 'package:flutter_test/flutter_test.dart';
 import '../../support/application_test_harness.dart';
 import '../../support/availability_badge_finders.dart';
 import '../../support/choice_market_transport.dart';
+import '../../support/substitute_chooser_helpers.dart';
 import '../planner/planner_choice_market_test.dart' show settle;
 
 const _capture = ValueKey('source-badges-capture');
@@ -152,8 +153,6 @@ void main() {
             containsAll({
               '9355', // Citron Juice's own verified Central Market source.
               citron,
-              '7361', // High-Quality Citron, now visible beside regular Citron.
-              '7362', // Special Citron.
               honey,
             }),
           );
@@ -203,6 +202,18 @@ void main() {
             ),
             findsOneWidget,
           );
+          // Hidden alternatives load only when their chooser is opened.
+          expect(
+            transport.requests.expand((r) => r.ids),
+            isNot(contains('7361')),
+          );
+          await openSubstitutes(tester, 'Citron Juice', 'Citron');
+          await settle(tester, broker);
+          expect(
+            transport.requests.expand((r) => r.ids),
+            containsAll(['7361', '7362']),
+          );
+          await chooseSubstitute(tester, 'Citron Juice', 'Citron');
           final scroll = tester.state<ScrollableState>(
             find.descendant(
               of: card,

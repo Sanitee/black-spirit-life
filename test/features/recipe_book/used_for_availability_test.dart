@@ -17,6 +17,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import '../../support/choice_market_transport.dart';
+import '../../support/substitute_chooser_helpers.dart';
 import '../planner/planner_choice_market_test.dart' show settle;
 import '../planner/planner_review_projection_test.dart' as fixture;
 import 'recipe_book_availability_test.dart'
@@ -153,7 +154,9 @@ Future<void> verify(
                           entries: [entry],
                         ),
                         onClose: close,
-                        onActivate: (_, _) => false,
+                        onActivate: (selected, variant) =>
+                            book.activateUsedIn(selected, variantId: variant) !=
+                            null,
                       ),
                     ),
                   ),
@@ -169,12 +172,13 @@ Future<void> verify(
   await tester.tap(find.text('Used for'));
   await tester.pumpAndSettle();
   final panel = find.byKey(RecipeBookKeys.usedInPanel('Aloe'));
-  final collapsed = tester.getSize(panel).width;
-  expect(find.byType(RecipeIngredientTable), findsNothing);
-  final expand = find.byKey(
-    RecipeBookKeys.expandUsedInResult('Aloe', entry.mode.key, entry.name),
+  expect(find.byType(RecipeIngredientTable), findsOneWidget);
+  expect(
+    find.byKey(
+      RecipeBookKeys.expandUsedInResult('Aloe', entry.mode.key, entry.name),
+    ),
+    findsNothing,
   );
-  await tester.tap(expand);
   await settle(tester, broker);
   await tester.pumpAndSettle();
   final table = tester.widget<RecipeIngredientTable>(
@@ -202,7 +206,6 @@ Future<void> verify(
   expect(rect.right, lessThanOrEqualTo(width - 12));
   expect(rect.top, greaterThanOrEqualTo(12));
   expect(rect.bottom, lessThanOrEqualTo(988));
-  if (width == 1440) expect(rect.width, greaterThan(collapsed));
   if (scale == 1) expect(rect.width, lessThan(850));
   for (final element
       in find
@@ -250,15 +253,35 @@ Future<void> verify(
         .owned,
     777,
   );
-  await tester.ensureVisible(expand);
+  final unchanged = app.active.state.value;
+  await openSubstitutes(
+    tester,
+    entry.name,
+    entry.routes.first.ingredients[1].name,
+  );
+  checkColumnAlignment(tester);
+  checkBadgeLines(tester);
+  final chooser = tester.widget<RecipeIngredientTable>(substituteChooser());
+  expect(chooser.rows.any((r) => r.name == 'Potato Dough'), isTrue);
+  await chooseSubstitute(tester, entry.name, 'Potato Dough');
+  expect(identical(app.active.state.value, unchanged), isTrue);
+  expect(
+    tester
+        .widget<RecipeIngredientTable>(find.byType(RecipeIngredientTable))
+        .rows[1]
+        .name,
+    'Potato Dough',
+  );
+  final target = find.byKey(
+    RecipeBookKeys.targetUsedInResult('Aloe', entry.mode.key, entry.name),
+  );
+  await tester.ensureVisible(target);
   await tester.pumpAndSettle();
-  await tester.tap(expand);
-  await tester.pumpAndSettle();
-  expect(tester.getSize(panel).width, closeTo(collapsed, .1));
-  expect(find.byType(RecipeIngredientTable), findsNothing);
-  await tester.tap(find.byKey(RecipeBookKeys.closeUsedIn('Aloe')));
+  await tester.tap(target);
   await tester.pumpAndSettle();
   expect(panel, findsNothing);
+  expect(book.availabilityFor(entry.name).ingredients[1].name, 'Potato Dough');
+  expect(tester.takeException(), isNull);
   book.connectAvailabilityMarket(null);
   await tester.pumpWidget(const SizedBox());
   await tester.pumpAndSettle();

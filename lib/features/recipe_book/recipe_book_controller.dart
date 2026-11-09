@@ -91,6 +91,72 @@ final class RecipeBookController extends ChangeNotifier {
   final Map<String, RecipeProfitabilityQuote> _profitCache = {};
   final Map<String, List<RecipeBookIngredientChoice>> _selectionCache = {};
   final Map<(String, Ingredient, String), bool> _alternativesCache = {};
+  final Map<String, Map<String, String>> _referenceChoices = {};
+
+  Map<String, Map<String, String>> get _referenceSelectionStore =>
+      (_routeHost ?? this)._referenceChoices;
+
+  String _referenceChoiceKey(RecipeBookFormula formula) =>
+      '${formula.mode?.key}|${_fold(formula.outputName)}|${formula.variantId}|'
+      '${formula.routeId}|${recipeBookPreviewFormulaIdentity(formula)}';
+
+  String? referenceIngredientName(
+    RecipeBookFormula formula,
+    Ingredient ingredient,
+  ) =>
+      _referenceSelectionStore[_referenceChoiceKey(formula)]?[_fold(
+        ingredient.name,
+      )];
+
+  void selectReferenceIngredient(
+    RecipeBookFormula formula,
+    RecipeBookIngredientChoice choice,
+  ) {
+    _referenceSelectionStore.putIfAbsent(
+      _referenceChoiceKey(formula),
+      () => {},
+    )[_fold(choice.ingredient.name)] = choice.name;
+    notifyListeners();
+    _routeHost?.notifyListeners();
+  }
+
+  RecipeBookFormula referenceFormulaForActivation(RecipeBookFormula formula) {
+    final selected = _referenceSelectionStore[_referenceChoiceKey(formula)];
+    if (selected == null || selected.isEmpty) return formula;
+    return formula.copyWith(ingredientChoiceNames: Map.unmodifiable(selected));
+  }
+
+  List<RecipeTargetIngredientSelection> ingredientSelectionsForFormula(
+    RecipeBookFormula formula,
+  ) {
+    final result = <RecipeTargetIngredientSelection>[];
+    final mode = formula.mode;
+    if (mode == null) return result;
+    final book = controllerForMode(mode);
+    for (final ingredient in formula.ingredients) {
+      final name = formula.ingredientChoiceNames[_fold(ingredient.name)];
+      if (name == null) continue;
+      final choice = book
+          .ingredientChoices(formula.outputName, ingredient)
+          .where((choice) => _fold(choice.name) == _fold(name))
+          .firstOrNull;
+      if (choice == null) {
+        throw StateError('Unavailable reference ingredient: $name');
+      }
+      result.add(
+        RecipeTargetIngredientSelection(
+          ingredientName: ingredient.name,
+          selectedIngredientName: choice.baseName,
+          grade: choice.grade,
+        ),
+      );
+    }
+    if (result.length != formula.ingredientChoiceNames.length) {
+      throw StateError('Unknown reference ingredient');
+    }
+    return result;
+  }
+
   final Map<String, ({Recipe? recipe, bool npc, String? marketId})>
   _identityCache = {};
   final Map<SharedMarketKey, Set<String>> _marketDependents = {};
@@ -239,6 +305,13 @@ final class RecipeBookController extends ChangeNotifier {
         recipe.variantById(formula.variantId) == null) {
       return false;
     }
+    if (formula.ingredientChoiceNames.isNotEmpty) {
+      try {
+        ingredientSelectionsForFormula(formula);
+      } on StateError {
+        return false;
+      }
+    }
     final selected = recipe.resolveVariant(formula.variantId);
     return selected.ingredients.every(
       (ingredient) =>
@@ -263,6 +336,7 @@ final class RecipeBookController extends ChangeNotifier {
       formula.outputName,
       variantId: formula.variantId,
       bonus: callingContext == RecipeBookCallingContext.bonus,
+      ingredientSelections: ingredientSelectionsForFormula(formula),
     )) {
       return null;
     }
@@ -611,7 +685,24 @@ final class RecipeBookController extends ChangeNotifier {
             grade: match.grade,
           ),
         )
-        .toList(growable: false);
+        .toList(growable: true);
+    final chosenFormula = referenceFormulaForActivation(
+      recipeBookUseRouteFormula(entry.name, entry.mode, route),
+    );
+    if (chosenFormula.ingredientChoiceNames.isNotEmpty) {
+      List<RecipeTargetIngredientSelection> explicit;
+      try {
+        explicit = ingredientSelectionsForFormula(chosenFormula);
+      } on StateError {
+        return null;
+      }
+      for (final choice in explicit) {
+        ingredientSelections.removeWhere(
+          (old) => _fold(old.ingredientName) == _fold(choice.ingredientName),
+        );
+        ingredientSelections.add(choice);
+      }
+    }
 
     if (entry.mode == modeController.mode) {
       final exact = _poolExactName(entry.name);

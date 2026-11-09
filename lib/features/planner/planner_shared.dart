@@ -32,6 +32,7 @@ import '../recipe_book/recipe_book_item_info_view.dart';
 import '../shared/market_region_selector.dart';
 import '../shared/mode_item_icon.dart';
 import '../shared/profile_game_icon.dart';
+import '../shared/quality_grade_button.dart';
 import '../shared/recipe_variant_selector.dart';
 import '../shared/source_availability_badges.dart';
 import '../shared/workshop_presentation.dart';
@@ -2083,7 +2084,6 @@ class _QueueStepCard extends StatelessWidget {
             recipe: recipe!,
             selectedVariantId: controller.selectedRecipeVariantId(step.name),
             compact: denseLayout,
-            axisSpacing: denseLayout ? 13 : 16,
             isAutomatic:
                 hasAutomaticRoutes && (routeSelection?.isAutomatic ?? false),
             onAutomaticSelected: hasAutomaticRoutes
@@ -6129,7 +6129,7 @@ class _QualitySwatches extends StatelessWidget {
             child: const Text('Auto', style: TextStyle(fontSize: 12)),
           ),
           for (var index = 0; index < grades.length; index += 1) ...<Widget>[
-            _QualityButton(
+            QualityGradeButton(
               label: grades[index].$2,
               grade: grades[index].$1,
               normalIsBlueFamily:
@@ -6144,115 +6144,12 @@ class _QualitySwatches extends StatelessWidget {
   }
 }
 
-class _QualityButton extends StatelessWidget {
-  const _QualityButton({
-    required this.label,
-    required this.grade,
-    required this.normalIsBlueFamily,
-    required this.selected,
-    required this.onPressed,
-  });
-
-  final String label;
-  final String grade;
-  final bool normalIsBlueFamily;
-  final bool selected;
-  final VoidCallback onPressed;
-
-  @override
-  Widget build(BuildContext context) {
-    final spec = context.visualTheme;
-    final ledger = spec.isIlluminatedLedger;
-    final sakura = spec.isSakuraNightGarden;
-    final (fill, restingBorder) = _qualitySwatchColors(
-      grade,
-      normalIsBlueFamily: normalIsBlueFamily,
-    );
-    final outerRadius = BorderRadius.circular(ledger ? 2 : 5);
-    final innerRadius = BorderRadius.circular(ledger ? 1 : 3);
-
-    return AppTooltip(
-      message: label,
-      child: Semantics(
-        button: true,
-        selected: selected,
-        label: '$label quality',
-        child: InkWell(
-          onTap: onPressed,
-          borderRadius: outerRadius,
-          child: Container(
-            width: spec.usesDenseSplitLayout ? 26 : 24,
-            height: spec.usesDenseSplitLayout ? 26 : 24,
-            decoration: BoxDecoration(
-              gradient: ledger
-                  ? _ledgerRaisedVellumGradient
-                  : sakura
-                  ? SakuraNightGardenSpec.raisedSurfaceGradient
-                  : StandardSpec.glassGradient(
-                      topAlpha: selected ? 74 : 42,
-                      bottomAlpha: selected ? 28 : 12,
-                    ),
-              borderRadius: outerRadius,
-              border: Border.all(
-                color: ledger
-                    ? selected
-                          ? const Color(0xFFD2B15A)
-                          : const Color(0x8A7A5B2A)
-                    : sakura
-                    ? selected
-                          ? spec.palette.primaryBright
-                          : spec.palette.trim.withAlpha(154)
-                    : selected
-                    ? const Color(0xB8FFE7A3)
-                    : const Color(0x664E8A77),
-              ),
-            ),
-            alignment: Alignment.center,
-            child: Container(
-              width: spec.usesDenseSplitLayout ? 12 : 16,
-              height: spec.usesDenseSplitLayout ? 12 : 16,
-              decoration: BoxDecoration(
-                color: fill,
-                borderRadius: innerRadius,
-                border: Border.all(
-                  color: selected
-                      ? ledger
-                            ? const Color(0xFF7C5B24)
-                            : sakura
-                            ? spec.palette.text
-                            : const Color(0xFFFFF0B9)
-                      : restingBorder,
-                  width: selected ? 2 : 1,
-                ),
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
 const _ledgerRaisedVellumGradient = LinearGradient(
   begin: Alignment.topCenter,
   end: Alignment.bottomCenter,
   colors: <Color>[Color(0xFFF8EAC8), Color(0xFFEBD4A3), Color(0xFFD8BC83)],
   stops: <double>[0, .62, 1],
 );
-
-(Color, Color) _qualitySwatchColors(
-  String grade, {
-  required bool normalIsBlueFamily,
-}) => switch (grade) {
-  'high' => (const Color(0xAA6FC17A), const Color(0xB9A9E890)),
-  'special' => (const Color(0xAA558FD5), const Color(0xB9A8C8FF)),
-  'blue' => (const Color(0xAA4D73D2), const Color(0xB9BBCDFF)),
-  _ when normalIsBlueFamily => (
-    const Color(0xAA4FAF72),
-    const Color(0xB9A9E890),
-  ),
-  _ => (const Color(0xAA909090), const Color(0xB9CBCBCB)),
-};
 
 class _MarketPills extends StatelessWidget {
   const _MarketPills({

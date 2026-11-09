@@ -7,6 +7,7 @@ import 'package:bdo_craft_planner_flutter/features/planner/planner_contracts.dar
 import 'package:bdo_craft_planner_flutter/features/recipe_book/recipe_book.dart';
 import 'package:bdo_craft_planner_flutter/features/recipe_book/recipe_book_used_in_panel.dart';
 import 'package:bdo_craft_planner_flutter/features/shared/mode_item_icon.dart';
+import 'package:bdo_craft_planner_flutter/features/shared/recipe_switch_controls.dart';
 import 'package:bdo_craft_planner_flutter/features/shared/recipe_variant_selector.dart';
 import 'package:bdo_craft_planner_flutter/visual/visual.dart';
 import 'package:flutter/gestures.dart';
@@ -86,7 +87,7 @@ void main() {
   }
 
   testWidgets(
-    'Used In scrolls, expands exact ingredient cards, and every dismissal is layered',
+    'Used In shows ingredients immediately, scrolls, and every dismissal is layered',
     (tester) async {
       await _setSize(tester, const Size(1200, 752));
       final environment = _buildEnvironment();
@@ -142,13 +143,6 @@ void main() {
       expect(position.pixels, greaterThan(before));
 
       final expand = find.byKey(
-        RecipeBookKeys.expandUsedInResult(
-          _source,
-          CraftMode.cooking.key,
-          _crossModeResult,
-        ),
-      );
-      final target = find.byKey(
         RecipeBookKeys.targetUsedInResult(
           _source,
           CraftMode.cooking.key,
@@ -157,15 +151,7 @@ void main() {
       );
       await tester.scrollUntilVisible(expand, 180, scrollable: scrollable);
       await tester.pumpAndSettle();
-      final targetRect = tester.getRect(target);
-      final expandRect = tester.getRect(expand);
-      expect(expandRect.left, greaterThanOrEqualTo(targetRect.right));
-      expect(
-        (expandRect.center.dy - targetRect.center.dy).abs(),
-        lessThanOrEqualTo(1),
-      );
-      await tester.tap(expand);
-      await tester.pumpAndSettle();
+      expect(find.text('Ingredients').hitTestable(), findsWidgets);
       final expandedResult = find.byKey(
         RecipeBookKeys.usedInResult(
           _source,
@@ -322,7 +308,7 @@ void main() {
     expect(panel, findsOneWidget);
     final size = tester.getSize(panel);
     expect(size.width, 570);
-    expect(size.height, inInclusiveRange(190, 280));
+    expect(size.height, inInclusiveRange(330, 400));
     expect(find.text('Used in 1 recipe'), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
@@ -355,7 +341,7 @@ void main() {
         matching: find.byType(Scrollable),
       );
       final expand = find.byKey(
-        RecipeBookKeys.expandUsedInResult(
+        RecipeBookKeys.targetUsedInResult(
           _source,
           CraftMode.cooking.key,
           _crossModeResult,
@@ -364,8 +350,6 @@ void main() {
       await tester.scrollUntilVisible(expand, 180, scrollable: scrollable);
       await tester.pumpAndSettle();
       await tester.ensureVisible(expand);
-      await tester.pumpAndSettle();
-      await tester.tap(expand);
       await tester.pumpAndSettle();
 
       final result = find.byKey(
@@ -639,7 +623,7 @@ void main() {
         matching: find.byType(Scrollable),
       );
       final expand = find.byKey(
-        RecipeBookKeys.expandUsedInResult(
+        RecipeBookKeys.targetUsedInResult(
           _source,
           CraftMode.cooking.key,
           _crossModeResult,
@@ -648,8 +632,6 @@ void main() {
       await tester.scrollUntilVisible(expand, 180, scrollable: scrollable);
       await tester.pumpAndSettle();
       await tester.ensureVisible(expand);
-      await tester.pumpAndSettle();
-      await tester.tap(expand);
       await tester.pumpAndSettle();
 
       final result = find.byKey(
@@ -1085,9 +1067,9 @@ void _expectContained(Rect outer, Rect inner) {
   expect(inner.bottom, lessThanOrEqualTo(outer.bottom));
 }
 
-AppButton _appButton(WidgetTester tester, Finder owner) =>
-    tester.widget<AppButton>(
-      find.descendant(of: owner, matching: find.byType(AppButton)),
+RecipeSwitchChoice _appButton(WidgetTester tester, Finder owner) =>
+    tester.widget<RecipeSwitchChoice>(
+      find.descendant(of: owner, matching: find.byType(RecipeSwitchChoice)),
     );
 
 Future<void> _setSize(WidgetTester tester, Size size) async {

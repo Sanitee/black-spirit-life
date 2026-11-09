@@ -77,15 +77,6 @@ void main() {
 
         final panel = find.byKey(RecipeBookKeys.usedInPanel(_source));
         expect(panel, findsOneWidget);
-        final expand = find.byKey(
-          RecipeBookKeys.expandUsedInResult(
-            _source,
-            CraftMode.alchemy.key,
-            _expandedResult,
-          ),
-        );
-        expect(expand, findsOneWidget);
-        await tester.tap(expand);
         await _settleGoldenImages(tester, root: golden, spec: family.spec);
 
         expect(find.text('Used in 15 recipes'), findsOneWidget);

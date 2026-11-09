@@ -53,15 +53,8 @@ List<String> _referenceFormulaNames(
   RecipeBookController book,
   RecipeBookFormula formula,
   CraftMode mode,
-) => <String>{
-  for (final ingredient in formula.ingredients) ...[
-    ingredient.name,
-    for (final choice in _formulaAlternatives(
-      ingredient,
-      recipes: book.modeController.owner.modes[formula.mode ?? mode]!.recipes,
-    ))
-      choice.name,
-    for (final row in _qualityChoiceRows(book, formula, ingredient, mode))
-      for (final choice in row) choice.name,
-  ],
-}.toList();
+) => _referenceChoices(
+  book,
+  formula,
+  formula.mode ?? mode,
+).map((row) => row.name).toSet().toList();

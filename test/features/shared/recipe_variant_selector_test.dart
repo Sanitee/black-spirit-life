@@ -50,8 +50,8 @@ void main() {
             findsOneWidget,
           );
         }
-        expect(find.text('RECIPE'), findsOneWidget);
-        expect(find.text('BATCH'), findsOneWidget);
+        expect(find.text('Recipe'), findsOneWidget);
+        expect(find.text('Batch'), findsOneWidget);
 
         await tester.tap(
           find.byKey(
@@ -98,7 +98,6 @@ void main() {
           recipe: recipe,
           selectedVariantId: 'a-1x',
           compact: true,
-          axisSpacing: 13,
           onSelected: (_) {},
         ),
       ),
@@ -107,9 +106,9 @@ void main() {
     final lastRecipeChoice = tester.getRect(
       find.byKey(RecipeVariantSelector.routeChoiceKey(recipe.name, 'route-b')),
     );
-    final batchLabel = tester.getRect(find.text('BATCH'));
+    final batchLabel = tester.getRect(find.text('Batch'));
 
-    expect(batchLabel.left - lastRecipeChoice.right, greaterThanOrEqualTo(13));
+    expect(batchLabel.left - lastRecipeChoice.right, greaterThanOrEqualTo(24));
   });
 
   testWidgets(
@@ -151,8 +150,8 @@ void main() {
         findsOneWidget,
       );
       expect(batch, findsOneWidget);
-      expect(find.text('RECIPE'), findsOneWidget);
-      expect(find.text('BATCH'), findsOneWidget);
+      expect(find.text('Recipe'), findsOneWidget);
+      expect(find.text('Batch'), findsOneWidget);
       expect(
         find.byKey(
           RecipeVariantSelector.routeChoiceKey(
@@ -220,7 +219,7 @@ void main() {
     expect(selectedId, 'b-10x');
     expect(batch(1), findsNothing);
     expect(batch(10), findsNothing);
-    expect(find.text('BATCH'), findsNothing);
+    expect(find.text('Batch'), findsNothing);
   });
 
   testWidgets('batch-only recipes do not show a redundant route control', (
@@ -256,8 +255,8 @@ void main() {
       ),
     );
 
-    expect(find.text('RECIPE'), findsNothing);
-    expect(find.text('BATCH'), findsOneWidget);
+    expect(find.text('Recipe'), findsNothing);
+    expect(find.text('Batch'), findsOneWidget);
   });
 
   testWidgets(

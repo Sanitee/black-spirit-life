@@ -3,6 +3,7 @@ import 'dart:math' as math;
 
 import 'package:bdo_craft_planner_flutter/visual/components/app_tooltip.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 
 import '../../domain/catalog/item_name_presentation.dart';
@@ -14,12 +15,14 @@ import '../../domain/models/craft_mode.dart';
 import '../../domain/opportunities/opportunity_market_models.dart';
 import '../../domain/planner/ingredient_quality.dart';
 import '../../shared/overlays/anchored_popover.dart';
+import '../../visual/components/sculpted_panel.dart';
 import '../../visual/visual.dart';
 import '../planner/planner_choice_market.dart';
 import '../shared/inventory_count_badge.dart';
 import '../shared/item_name_copy_scope.dart';
 import '../shared/market_count_badges.dart';
 import '../shared/mode_item_icon.dart';
+import '../shared/quality_grade_button.dart';
 import '../shared/source_availability_badges.dart';
 import '../shared/workshop_presentation.dart';
 import 'recipe_book_controller.dart';
@@ -29,8 +32,11 @@ import 'recipe_book_preview_routes.dart';
 
 part 'item_reference_ingredient_sources.dart';
 part 'item_reference_joined.dart';
-part 'item_reference_sources.dart';
 part 'item_reference_quality_choices.dart';
+part 'item_reference_sources.dart';
+part 'item_reference_effects.dart';
+part 'item_reference_viewport.dart';
+part 'recipe_ingredient_choice_button.dart';
 part 'recipe_ingredient_table.dart';
 
 /// The Recipe Book's reference preview, without taking over its child's clicks.
@@ -121,7 +127,8 @@ class _RecipeBookItemInfoTooltip extends StatelessWidget {
           alignment: PlaceholderAlignment.middle,
           child: MediaQuery(
             data: media,
-            child: TapRegion(
+            child: AppPopoverTapRegion(
+              groupId: this,
               onTapOutside: interactivePreview
                   ? (_) => Tooltip.dismissAllToolTips()
                   : null,
@@ -169,6 +176,8 @@ double itemReferenceCardWidth(
   CraftMode? mode,
   bool usedFor = false,
   bool includeAllSections = false,
+  OpportunityMarketItem? Function(String)? marketFor,
+  DateTime? now,
 }) {
   var width = ItemDetailStyle.width(context);
   if (controller != null && info != null) {
@@ -185,6 +194,8 @@ double itemReferenceCardWidth(
               controller,
               formula,
               mode ?? controller.modeController.mode,
+              marketFor: marketFor,
+              now: now,
             ) +
             32,
       );
@@ -396,7 +407,15 @@ class ItemReferenceCard extends StatelessWidget {
         ignoring: !interactive,
         child: ExcludeFocus(
           excluding: !interactive,
-          child: _JoinedItemReference(card: this),
+          child: AppOverlayCoordinatorHost(
+            onEscapeUnhandled:
+                onClose ??
+                () => AppOverlayCoordinatorScope.maybeOf(context)?.dismissTop(),
+            child: ListenableBuilder(
+              listenable: controller,
+              builder: (context, _) => _JoinedItemReference(card: this),
+            ),
+          ),
         ),
       ),
     ),
@@ -434,7 +453,16 @@ class ItemReferenceSections extends StatelessWidget {
   final ValueChanged<RecipeBookFormula>? onUseFormula;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context) => AppOverlayCoordinatorHost(
+    onEscapeUnhandled: () =>
+        AppOverlayCoordinatorScope.maybeOf(context)?.dismissTop(),
+    child: ListenableBuilder(
+      listenable: controller,
+      builder: (context, _) => _buildSections(context),
+    ),
+  );
+
+  Widget _buildSections(BuildContext context) {
     final children = _itemReferenceSectionWidgets(
       context,
       controller: controller,
@@ -819,10 +847,18 @@ class _FormulaCard extends StatelessWidget {
                             Tooltip.dismissAllToolTips();
                             final onUseFormula = scope?.onUseFormula;
                             if (onUseFormula != null) {
-                              onUseFormula(formula);
+                              onUseFormula(
+                                controller.referenceFormulaForActivation(
+                                  formula,
+                                ),
+                              );
                             } else {
                               scope?.onRecipeActivated?.call();
-                              controller.activateFormula(formula);
+                              controller.activateFormula(
+                                controller.referenceFormulaForActivation(
+                                  formula,
+                                ),
+                              );
                             }
                           },
                           child: const Text('Use recipe'),
@@ -1057,15 +1093,25 @@ class _CraftUseEntry extends StatelessWidget {
               _InfoSectionHeading(title: effectHeading, spec: spec),
               SizedBox(height: _itemInfoSpacing(context, 4)),
             ],
-            for (final effect in effects)
-              _InfoBullet(
-                value: effect,
+            if (effectHeading == 'Effects')
+              _EffectColumns(
+                effects: effects,
                 style: style.copyWith(
                   color: spec.palette.textMuted,
                   fontWeight: FontWeight.w400,
                   height: 1.4,
                 ),
-              ),
+              )
+            else
+              for (final effect in effects)
+                _InfoBullet(
+                  value: effect,
+                  style: style.copyWith(
+                    color: spec.palette.textMuted,
+                    fontWeight: FontWeight.w400,
+                    height: 1.4,
+                  ),
+                ),
           ],
           if (example.isNotEmpty) ...<Widget>[
             const SizedBox(height: 3),
@@ -1129,7 +1175,11 @@ class _InfoSection extends StatelessWidget {
         children: <Widget>[
           _InfoSectionHeading(title: title, spec: spec),
           SizedBox(height: _itemInfoSpacing(context, 8)),
-          for (final value in readable) _InfoBullet(value: value, style: style),
+          if (title == 'Effects')
+            _EffectColumns(effects: readable, style: style)
+          else
+            for (final value in readable)
+              _InfoBullet(value: value, style: style),
         ],
       ),
     );

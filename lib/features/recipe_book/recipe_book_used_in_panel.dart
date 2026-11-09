@@ -43,7 +43,6 @@ class RecipeBookUsedInPanel extends StatefulWidget {
 class _RecipeBookUsedInPanelState extends State<RecipeBookUsedInPanel> {
   final ScrollController _scroll = ScrollController();
   final TextEditingController _search = TextEditingController();
-  final Set<String> _expanded = <String>{};
   final Map<String, String?> _selectedVariants = <String, String?>{};
 
   @override
@@ -56,6 +55,7 @@ class _RecipeBookUsedInPanelState extends State<RecipeBookUsedInPanel> {
   @override
   Widget build(BuildContext context) => ListenableBuilder(
     listenable: Listenable.merge([
+      widget.controller,
       for (final mode in widget.controller.modeController.owner.modes.values)
         mode.state,
     ]),
@@ -164,15 +164,9 @@ class _RecipeBookUsedInPanelState extends State<RecipeBookUsedInPanel> {
                                             )
                                             .length >
                                         1,
-                                    expanded: _expanded.contains(entryKey),
                                     selectedVariantId: _selectedVariantFor(
                                       entry,
                                     ),
-                                    onToggleExpanded: () => setState(() {
-                                      if (!_expanded.add(entryKey)) {
-                                        _expanded.remove(entryKey);
-                                      }
-                                    }),
                                     onSelectVariant: (variantId) => setState(
                                       () {
                                         _selectedVariants[entryKey] = variantId;
@@ -233,11 +227,7 @@ class _RecipeBookUsedInPanelState extends State<RecipeBookUsedInPanel> {
             entry.hidden ? 'Restore' : 'Target',
             ItemDetailStyle.body(spec),
           ) +
-          40 +
-          12 +
-          textWidth('Ingredients', ItemDetailStyle.meta(spec)) +
-          18 +
-          20;
+          40;
       width = math.max(
         width,
         32 +
@@ -251,16 +241,30 @@ class _RecipeBookUsedInPanelState extends State<RecipeBookUsedInPanel> {
               ),
             ),
       );
-      if (!_expanded.contains(_entryKey(entry))) continue;
       final route = entry.preferredRoute(_selectedVariantFor(entry));
       if (route == null) continue;
       final rows = recipeBookUsedInIngredients(
         controller: widget.controller.controllerForMode(entry.mode),
         route: route,
+        outputName: entry.name,
       );
       width = math.max(
         width,
-        RecipeIngredientTable.contentWidth(context, rows: rows) + 64,
+        RecipeIngredientTable.contentWidth(
+              context,
+              rows: rows,
+              switchWidth: (row) => RecipeIngredientChoiceButton.widthFor(
+                context,
+                widget.controller.controllerForMode(entry.mode),
+                widget.controller
+                    .controllerForMode(entry.mode)
+                    .ingredientChoices(entry.name, row.ingredient),
+              ),
+              hasSwitch: (row) => widget.controller
+                  .controllerForMode(entry.mode)
+                  .hasIngredientAlternatives(entry.name, row),
+            ) +
+            64,
       );
     }
     if (width - 32 >= 580 * scale) {
@@ -270,10 +274,7 @@ class _RecipeBookUsedInPanelState extends State<RecipeBookUsedInPanel> {
               entry.hidden ? 'Restore' : 'Target',
               ItemDetailStyle.body(spec),
             ) +
-            40 +
-            12 +
-            textWidth('Ingredients', ItemDetailStyle.meta(spec)) +
-            38;
+            40;
         width = math.max(
           width,
           32 +
@@ -405,9 +406,7 @@ class _UsedInResultCard extends StatelessWidget {
     required this.sourceName,
     required this.entry,
     required this.showWorkstation,
-    required this.expanded,
     required this.selectedVariantId,
-    required this.onToggleExpanded,
     required this.onSelectVariant,
     required this.onActivate,
     super.key,
@@ -417,9 +416,7 @@ class _UsedInResultCard extends StatelessWidget {
   final String sourceName;
   final RecipeBookUseEntry entry;
   final bool showWorkstation;
-  final bool expanded;
   final String? selectedVariantId;
-  final VoidCallback onToggleExpanded;
   final ValueChanged<String> onSelectVariant;
   final ValueChanged<String?> onActivate;
 
@@ -527,28 +524,6 @@ class _UsedInResultCard extends StatelessWidget {
             ],
           ),
         ),
-        AppTextAction(
-          key: RecipeBookKeys.expandUsedInResult(
-            sourceName,
-            entry.mode.key,
-            entry.name,
-          ),
-          semanticLabel:
-              '${expanded ? 'Hide' : 'Show'} ${entry.name} ingredients',
-          tooltip: expanded ? 'Hide ingredients' : 'Preview ingredients',
-          onPressed: onToggleExpanded,
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text('Ingredients', style: ItemDetailStyle.meta(spec)),
-              const SizedBox(width: 6),
-              AppVectorGlyph(
-                expanded ? 'chevron-up' : 'chevron-down',
-                size: 12,
-              ),
-            ],
-          ),
-        ),
       ],
     );
     return Semantics(
@@ -556,7 +531,7 @@ class _UsedInResultCard extends StatelessWidget {
       explicitChildNodes: true,
       label: '${entry.name}, ${entry.mode.label}, used in recipe result',
       child: AppInteractionFrame(
-        selected: expanded,
+        selected: true,
         radius: 6,
         child: Padding(
           padding: const EdgeInsets.symmetric(vertical: 4),
@@ -593,7 +568,7 @@ class _UsedInResultCard extends StatelessWidget {
                   );
                 },
               ),
-              if (expanded) ...[
+              ...[
                 const SizedBox(height: 16),
                 ItemDetailGroup(
                   child: Column(
@@ -675,6 +650,7 @@ class _FormulaRoute extends StatelessWidget {
             final rows = recipeBookUsedInIngredients(
               controller: destination,
               route: route,
+              outputName: outputName,
             );
             return PlannerChoiceMarket(
               controller: destination.modeController,
@@ -689,12 +665,40 @@ class _FormulaRoute extends StatelessWidget {
                 rows: recipeBookUsedInIngredients(
                   controller: destination,
                   route: route,
+                  outputName: outputName,
+                ),
+                switchBuilder: (row) => RecipeIngredientChoiceButton(
+                  controller: destination,
+                  parent: outputName,
+                  mode: mode,
+                  ingredient: row.ingredient,
+                  identity:
+                      'used-in-choices:$sourceName:${mode.key}:$outputName:${route.id}:${row.ingredient.name}',
+                  choices: () =>
+                      destination.ingredientChoices(outputName, row.ingredient),
+                  selectedName: () =>
+                      destination.referenceIngredientName(
+                        recipeBookUseRouteFormula(outputName, mode, route),
+                        row.ingredient,
+                      ) ??
+                      row.name,
+                  onChoose: (choice) => destination.selectReferenceIngredient(
+                    recipeBookUseRouteFormula(outputName, mode, route),
+                    choice,
+                  ),
                 ),
                 marketFor: marketFor,
                 now: now,
                 minimumContentWidth: RecipeIngredientTable.contentWidth(
                   context,
                   rows: rows,
+                  switchWidth: (row) => RecipeIngredientChoiceButton.widthFor(
+                    context,
+                    destination,
+                    destination.ingredientChoices(outputName, row.ingredient),
+                  ),
+                  hasSwitch: (row) =>
+                      destination.hasIngredientAlternatives(outputName, row),
                   marketFor: marketFor,
                   now: now,
                 ),

@@ -280,74 +280,17 @@ class _RecipeIngredientSwitch extends StatelessWidget {
   final String parent;
   final RecipeBookIngredientChoice row;
   @override
-  Widget build(BuildContext context) => AnchoredPopover(
-    overlayId: 'recipe-choices:$parent:${row.ingredient.name}',
-    preferredWidthBuilder: (context) =>
-        (RecipeIngredientTable.contentWidth(
-                  context,
-                  rows: controller.ingredientChoices(parent, row.ingredient),
-                  marketFor: controller.availabilityMarketFor,
-                ) +
-                32)
-            .clamp(
-              0,
-              (MediaQuery.sizeOf(context).width - 48).clamp(0, double.infinity),
-            ),
-    maximumHeight: MediaQuery.sizeOf(context).height * .75,
-    consumeOutsideTap: true,
-    placement: AnchoredPopoverPlacement.beside,
-    anchorBuilder: (context, toggle, showing) => AppTextAction(
-      key: ValueKey('recipe-substitutes:$parent:${row.ingredient.name}'),
-      semanticLabel:
-          'Substitutes for ${row.ingredient.substituteGroup ?? row.ingredient.name}',
-      tooltip: 'Substitutes',
-      selected: showing,
-      onPressed: toggle,
-      child: const AppVectorGlyph('swap', size: 20),
-    ),
-    popoverBuilder: (context, close) => ListenableBuilder(
-      listenable: controller,
-      builder: (context, _) {
-        final choices = controller.ingredientChoices(parent, row.ingredient);
-        final selected = controller
-            .availabilityFor(parent)
-            .ingredients
-            .where((entry) => entry.ingredient == row.ingredient)
-            .firstOrNull
-            ?.name;
-        return PlannerChoiceMarket(
-          controller: controller.modeController,
-          resolveAcrossModes: true,
-          names: choices.map((choice) => choice.name).toList(),
-          builder: (context, marketFor, now) => SculptedPanel(
-            title: row.ingredient.substituteGroup ?? row.ingredient.name,
-            onClose: close,
-            body: Padding(
-              padding: const EdgeInsets.all(14),
-              child: SingleChildScrollView(
-                child: RecipeIngredientTable(
-                  minimumContentWidth: RecipeIngredientTable.contentWidth(
-                    context,
-                    rows: choices,
-                    marketFor: marketFor,
-                    now: now,
-                  ),
-                  controller: controller,
-                  parent: parent,
-                  rows: choices,
-                  marketFor: marketFor,
-                  now: now,
-                  selectedName: selected,
-                  onChoose: (choice) {
-                    controller.selectIngredientChoice(parent, choice);
-                    close();
-                  },
-                ),
-              ),
-            ),
-          ),
-        );
-      },
-    ),
+  Widget build(BuildContext context) => RecipeIngredientChoiceButton(
+    controller: controller,
+    parent: parent,
+    ingredient: row.ingredient,
+    choices: () => controller.ingredientChoices(parent, row.ingredient),
+    selectedName: () => controller
+        .availabilityFor(parent)
+        .ingredients
+        .where((entry) => entry.ingredient == row.ingredient)
+        .firstOrNull
+        ?.name,
+    onChoose: (choice) => controller.selectIngredientChoice(parent, choice),
   );
 }

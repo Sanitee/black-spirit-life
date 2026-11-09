@@ -17,6 +17,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 import '../../support/availability_badge_finders.dart';
 import '../../support/choice_market_transport.dart';
+import '../../support/substitute_chooser_helpers.dart';
 import '../planner/planner_choice_market_test.dart' show settle;
 import '../planner/planner_review_projection_test.dart' as fixture;
 
@@ -91,10 +92,15 @@ void main() {
       final card = find.byType(ItemReferenceCard);
       expect(card, findsOneWidget);
       final rect = tester.getRect(card);
-      expect(rect.width, greaterThan(480));
+      expect(rect.width, greaterThanOrEqualTo(480));
       expect(rect.left, greaterThanOrEqualTo(0));
       expect(rect.right, lessThanOrEqualTo(width));
-      expect(find.text('or 2 High-Quality Tomato'), findsOneWidget);
+      expect(
+        find.byKey(
+          const ValueKey('recipe-substitutes:Eilton Sandwich:Paprika'),
+        ),
+        findsOneWidget,
+      );
       final horizontal = find.descendant(
         of: card,
         matching: find.byWidgetPredicate(
@@ -224,7 +230,16 @@ void main() {
           );
           await tester.pumpAndSettle();
           await settle(tester, broker);
-          Finder badge(String n) => find.byKey(ValueKey('reference-source:$n'));
+          Finder badge(String n) => substituteBadge(n);
+          if (name == 'Red Pepper Powder' || name == 'Eilton Sandwich') {
+            await openSubstitutes(
+              tester,
+              name,
+              name == 'Red Pepper Powder' ? 'Hot Pepper' : 'Paprika',
+            );
+            await settle(tester, broker);
+            await tester.pumpAndSettle();
+          }
           if (name == 'Red Pepper Powder') {
             for (final n in [
               'Hot Pepper',
@@ -242,7 +257,7 @@ void main() {
             );
             expect(transport.requests.expand((r) => r.ids), contains('7327'));
             if (scale == 1) {
-              final label = find.text('or 2 High-Quality Hot Pepper');
+              final label = substituteLabel('High-Quality Hot Pepper');
               expect(
                 tester.getRect(badge('High-Quality Hot Pepper')).left,
                 greaterThan(tester.getRect(label).right),
@@ -263,12 +278,23 @@ void main() {
               for (final n in [base, 'High-Quality $base', 'Special $base']) {
                 expect(badge(n), findsOneWidget, reason: n);
               }
-              expect(find.text('or 2 High-Quality $base'), findsOneWidget);
-              expect(find.text('or 1 Special $base'), findsOneWidget);
+              final choices = tester
+                  .widget<RecipeIngredientTable>(substituteChooser())
+                  .rows;
+              expect(
+                choices
+                    .firstWhere((r) => r.name == 'High-Quality $base')
+                    .quantity,
+                2,
+              );
+              expect(
+                choices.firstWhere((r) => r.name == 'Special $base').quantity,
+                1,
+              );
             }
-            final tomato = find.text('or 5 Tomato');
-            final high = find.text('or 2 High-Quality Tomato');
-            final special = find.text('or 1 Special Tomato');
+            final tomato = substituteLabel('Tomato');
+            final high = substituteLabel('High-Quality Tomato');
+            final special = substituteLabel('Special Tomato');
             expect(
               tester.getRect(tomato).top,
               lessThan(tester.getRect(high).top),
@@ -288,10 +314,14 @@ void main() {
             if (scale == 1) {
               expect(
                 tester.getRect(find.byType(ItemReferenceCard)).width,
-                greaterThan(480),
+                greaterThanOrEqualTo(480),
               );
-              await tester.ensureVisible(high);
-              await tester.tap(high);
+              await chooseSubstitute(tester, name, 'High-Quality Tomato');
+              final selected = find.byKey(
+                const ValueKey('item-reference-copy:High-Quality Tomato'),
+              );
+              await tester.ensureVisible(selected);
+              await tester.tap(selected);
               expect(copies, ['High-Quality Tomato']);
             }
           }

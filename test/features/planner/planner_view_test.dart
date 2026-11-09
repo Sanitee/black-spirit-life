@@ -1746,7 +1746,7 @@ void main() {
   );
 
   testWidgets(
-    'quality controls use Avalonia color chips without visible grade letters',
+    'quality controls use boxless squares without visible grade letters',
     (tester) async {
       await setPlannerTestSize(tester, const Size(1500, 940));
       final semantics = tester.ensureSemantics();
@@ -1812,28 +1812,23 @@ void main() {
           matching: find.byType(Container),
         );
         expect(normalContainers, findsNWidgets(2));
-        expect(
-          tester.getSize(normalContainers.last),
-          Size.square(ledger ? 12 : 16),
-        );
+        expect(tester.getSize(normalContainers.last), const Size.square(16));
         final normalOuter =
             tester.widget<Container>(normalContainers.first).decoration
                 as BoxDecoration;
         final normalInner =
             tester.widget<Container>(normalContainers.last).decoration
                 as BoxDecoration;
-        expect(normalOuter.gradient, isA<LinearGradient>());
+        expect(normalOuter.gradient, isNull);
+        expect(normalOuter.color, isNull);
         expect(
           (normalOuter.border as Border?)?.top.color,
-          ledger ? const Color(0xFFD2B15A) : const Color(0xB8FFE7A3),
+          ledger ? const Color(0xFF7C5B24) : spec.palette.text,
         );
         expect(normalInner.color, const Color(0xAA909090));
         expect(
           (normalInner.border! as Border).top,
-          BorderSide(
-            color: ledger ? const Color(0xFF7C5B24) : const Color(0xFFFFF0B9),
-            width: 2,
-          ),
+          const BorderSide(color: Color(0xB9CBCBCB)),
         );
 
         final specialContainers = find.descendant(
@@ -1846,11 +1841,9 @@ void main() {
         final specialInner =
             tester.widget<Container>(specialContainers.last).decoration
                 as BoxDecoration;
-        expect(specialOuter.gradient, isA<LinearGradient>());
-        expect(
-          (specialOuter.border as Border).top.color,
-          ledger ? const Color(0x8A7A5B2A) : const Color(0x664E8A77),
-        );
+        expect(specialOuter.gradient, isNull);
+        expect(specialOuter.color, isNull);
+        expect(specialOuter.border, isNull);
         expect(specialInner.color, const Color(0xAA558FD5));
         expect(
           (specialInner.border! as Border).top.color,
@@ -1875,14 +1868,11 @@ void main() {
                 as BoxDecoration;
         expect(
           (selectedSpecialOuter.border as Border?)?.top.color,
-          ledger ? const Color(0xFFD2B15A) : const Color(0xB8FFE7A3),
+          ledger ? const Color(0xFF7C5B24) : spec.palette.text,
         );
         expect(
           (selectedSpecialInner.border! as Border).top,
-          BorderSide(
-            color: ledger ? const Color(0xFF7C5B24) : const Color(0xFFFFF0B9),
-            width: 2,
-          ),
+          const BorderSide(color: Color(0xB9A8C8FF)),
         );
         expect(tester.takeException(), isNull);
 

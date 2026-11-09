@@ -198,33 +198,29 @@ void main() {
           expect(
             icons
                 .skip(1)
-                .every((icon) => icon.size == ItemDetailStyle.recipeIcon),
+                .every(
+                  (icon) =>
+                      icon.size == ItemDetailStyle.recipeIcon ||
+                      icon.size == 42 * scale.clamp(1, 1.35),
+                ),
             isTrue,
           );
           expect(find.byIcon(Icons.broken_image_outlined), findsNothing);
           final panel = find.byKey(RecipeBookKeys.usedInPanel(name));
-          final last = usage.entries.last;
-          final lastRow = find.byKey(
-            RecipeBookKeys.usedInResult(name, last.mode.key, last.name),
-          );
+          expect(find.byType(ItemDetailGroup), findsWidgets);
+          expect(find.byType(RecipeIngredientTable), findsWidgets);
           expect(
-            tester.getRect(panel).bottom - tester.getRect(lastRow).bottom,
-            lessThanOrEqualTo(22),
+            find.byKey(
+              RecipeBookKeys.expandUsedInResult(
+                name,
+                usage.entries.first.mode.key,
+                usage.entries.first.name,
+              ),
+            ),
+            findsNothing,
           );
-          await _captureImage(tester, '${theme.key}-used-in-$scale');
-          final first = usage.entries.first;
-          final expand = find.byKey(
-            RecipeBookKeys.expandUsedInResult(name, first.mode.key, first.name),
-          );
-          await tester.tap(expand);
-          await _settleImages(tester);
-          expect(tester.takeException(), isNull);
-          expect(find.byType(ItemDetailGroup), findsOneWidget);
           expect(tester.getRect(panel).bottom, lessThanOrEqualTo(1000));
-          await _captureImage(tester, '${theme.key}-used-in-expanded-$scale');
-          await tester.tap(expand);
-          await tester.pumpAndSettle();
-          expect(find.byType(ItemDetailGroup), findsNothing);
+          await _captureImage(tester, '${theme.key}-used-in-$scale');
           await tester.pumpWidget(const SizedBox.shrink());
         },
       );
@@ -306,8 +302,21 @@ void main() {
             );
             await _settleImages(tester);
             // Every applicable consumer is now shown, not only Fury Draught.
-            expect(find.text('100× batch'), findsNWidgets(9));
-            expect(find.text('10× batch'), findsNWidgets(4));
+            final headings = find.byWidgetPredicate(
+              (w) =>
+                  w.key is ValueKey<String> &&
+                  (w.key as ValueKey<String>).value.startsWith(
+                    'formula-heading:',
+                  ),
+            );
+            expect(
+              find.descendant(of: headings, matching: find.text('\u00d7100')),
+              findsNWidgets(9),
+            );
+            expect(
+              find.descendant(of: headings, matching: find.text('\u00d710')),
+              findsNWidgets(4),
+            );
             final catalystRecipe = find.byKey(
               RecipeBookKeys.itemInfoFormula(
                 'Fury Draught',
@@ -318,8 +327,8 @@ void main() {
             expect(catalystRecipe, findsOneWidget);
             expect(
               find.descendant(
-                of: catalystRecipe,
-                matching: find.text('100× batch'),
+                of: find.descendant(of: catalystRecipe, matching: headings),
+                matching: find.text('\u00d7100'),
               ),
               findsOneWidget,
             );

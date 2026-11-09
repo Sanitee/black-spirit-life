@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../domain/formatting/compact_silver.dart';
 import '../../domain/formatting/planner_formatters.dart';
+import '../shared/silver_amount_content.dart';
 
 /// Shared display-only formatting; the full amount remains available on click.
 String formatCompactOpportunitySilver(num value) => formatCompactSilver(value);
@@ -14,6 +15,7 @@ class OpportunitySilverAmount extends StatefulWidget {
     this.estimated = false,
     this.showPlus = false,
     this.silverSuffix = false,
+    this.showIcon = false,
     this.initiallyExpanded = false,
     this.wholeSilver = false,
     this.unicodeMinus = false,
@@ -24,6 +26,7 @@ class OpportunitySilverAmount extends StatefulWidget {
   final num? value;
   final TextStyle style;
   final bool estimated, showPlus, silverSuffix;
+  final bool showIcon;
   final bool initiallyExpanded, wholeSilver, unicodeMinus;
   final Key? textKey;
 
@@ -39,12 +42,18 @@ class _OpportunitySilverAmountState extends State<OpportunitySilverAmount> {
   Widget build(BuildContext context) {
     final rawValue = widget.value;
     if (rawValue == null || !rawValue.isFinite) {
-      return Text('—', key: widget.textKey, style: widget.style);
+      final text = Text('—', key: widget.textKey, style: widget.style);
+      return widget.showIcon
+          ? Semantics(
+              label: 'Silver amount unavailable',
+              child: SilverAmountContent(child: text),
+            )
+          : text;
     }
     final value = widget.wholeSilver ? rawValue.round().toDouble() : rawValue;
     final prefix =
         '${widget.estimated ? '≈ ' : ''}${widget.showPlus && value > 0 ? '+' : ''}';
-    final suffix = widget.silverSuffix ? ' silver' : '';
+    final suffix = widget.silverSuffix && !widget.showIcon ? ' silver' : '';
     String signed(String text) =>
         widget.unicodeMinus ? text.replaceFirst('-', '−') : text;
     final full = signed('$prefix${formatQuantity(value.toDouble())}$suffix');
@@ -54,15 +63,23 @@ class _OpportunitySilverAmountState extends State<OpportunitySilverAmount> {
     return Semantics(
       button: true,
       label: _expanded ? 'Shorten amount' : 'Show full amount',
-      value: full,
+      value: widget.showIcon ? '$full silver' : full,
       child: InkWell(
         onTap: () => setState(() => _expanded = !_expanded),
         borderRadius: BorderRadius.circular(3),
-        child: Text(
-          _expanded ? full : compact,
-          key: widget.textKey,
-          style: widget.style,
-        ),
+        child: widget.showIcon
+            ? SilverAmountContent(
+                child: Text(
+                  _expanded ? full : compact,
+                  key: widget.textKey,
+                  style: widget.style,
+                ),
+              )
+            : Text(
+                _expanded ? full : compact,
+                key: widget.textKey,
+                style: widget.style,
+              ),
       ),
     );
   }

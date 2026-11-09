@@ -8,6 +8,7 @@ import '../../domain/planner/planner_models.dart';
 import '../../shared/overlays/anchored_popover.dart';
 import '../../visual/components/sculpted_panel.dart';
 import '../../visual/visual.dart';
+import 'recipe_switch_controls.dart';
 import 'shared_silver_amount.dart';
 import 'source_availability_badges.dart';
 
@@ -25,7 +26,6 @@ class RecipeVariantSelector extends StatelessWidget {
     this.allowedVariantIds,
     this.showSingleAllowedIdentity = false,
     this.keyNamespace,
-    this.axisSpacing,
     this.isAutomatic = false,
     this.onAutomaticSelected,
     this.onBatchSelected,
@@ -41,9 +41,6 @@ class RecipeVariantSelector extends StatelessWidget {
 
   /// Changing a batch can retain automatic route selection in the planner.
   final ValueChanged<int>? onBatchSelected;
-
-  /// Optional extra separation between the Recipe and Batch groups.
-  final double? axisSpacing;
 
   /// Limits the selector to recorded formulas relevant to the calling surface.
   ///
@@ -167,47 +164,30 @@ class RecipeVariantSelector extends StatelessWidget {
     final axes = <Widget>[
       if (routes.length > 1 ||
           (showSingleAllowedIdentity && recipe.hasRecipeRouteChoices))
-        _VariantAxis(
-          label: 'RECIPE',
-          compact: compact,
+        RecipeSwitchAxis(
+          label: 'Recipe',
           child: routes.length <= 5
-              ? Row(
-                  mainAxisSize: MainAxisSize.min,
+              ? RecipeSwitchGroup(
                   children: <Widget>[
                     if (onAutomaticSelected != null) ...<Widget>[
                       AppTooltip(
                         message:
                             'Choose the cheapest available option for the materials you still need.',
-                        child: AppButton(
+                        child: RecipeSwitchChoice(
                           key: automaticChoiceKey(
                             recipe.name,
                             keyNamespace: keyNamespace,
                           ),
-                          role: AppButtonRole.optionPill,
+                          label: 'Auto',
                           selected: isAutomatic,
-                          minimumSize: Size(
-                            compact ? 41 : 45,
-                            compact ? 26 : 28,
-                          ),
-                          padding: const EdgeInsets.symmetric(horizontal: 6),
                           semanticLabel:
                               'Automatically choose the cheapest recipe for ${recipe.name}',
                           onPressed: onAutomaticSelected,
-                          child: Text(
-                            'Auto',
-                            style: TextStyle(
-                              fontSize: compact ? 11 : 12,
-                              fontWeight: FontWeight.w800,
-                              height: 1,
-                            ),
-                          ),
                         ),
                       ),
-                      SizedBox(width: compact ? 3 : 4),
                     ],
                     for (var index = 0; index < routes.length; index += 1) ...[
-                      if (index > 0) SizedBox(width: compact ? 3 : 4),
-                      _RouteSquare(
+                      _RouteSwitch(
                         key: routeChoiceKey(
                           recipe.name,
                           routes[index].id,
@@ -237,7 +217,7 @@ class RecipeVariantSelector extends StatelessWidget {
                 )
               : SizedBox(
                   width: routeSelectWidth,
-                  height: compact ? 28 : 30,
+
                   child: AppSelect<String>(
                     value: selected.routeId,
                     items: <String>[for (final route in routes) route.id],
@@ -264,15 +244,12 @@ class RecipeVariantSelector extends StatelessWidget {
         ),
       if (batches.length > 1 ||
           (showSingleAllowedIdentity && recipe.hasRecipeBatchChoices))
-        _VariantAxis(
-          label: 'BATCH',
-          compact: compact,
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
+        RecipeSwitchAxis(
+          label: 'Batch',
+          child: RecipeSwitchGroup(
             children: <Widget>[
               for (var index = 0; index < batches.length; index += 1) ...[
-                if (index > 0) SizedBox(width: compact ? 3 : 4),
-                _BatchSquare(
+                _BatchSwitch(
                   key: batchChoiceKey(
                     recipe.name,
                     batches[index],
@@ -303,12 +280,7 @@ class RecipeVariantSelector extends StatelessWidget {
     return Semantics(
       container: true,
       label: 'Recipe and batch variation for ${recipe.name}',
-      child: Wrap(
-        crossAxisAlignment: WrapCrossAlignment.center,
-        spacing: axisSpacing ?? (compact ? 10 : 14),
-        runSpacing: compact ? 6 : 8,
-        children: axes,
-      ),
+      child: RecipeSwitchAxes(children: axes),
     );
   }
 }
@@ -525,42 +497,8 @@ class _RecipeRouteCostDetails extends StatelessWidget {
   }
 }
 
-class _VariantAxis extends StatelessWidget {
-  const _VariantAxis({
-    required this.label,
-    required this.compact,
-    required this.child,
-  });
-
-  final String label;
-  final bool compact;
-  final Widget child;
-
-  @override
-  Widget build(BuildContext context) {
-    final spec = context.visualTheme;
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: <Widget>[
-        Text(
-          label,
-          style: spec.typography.meta.copyWith(
-            color: spec.palette.textMuted,
-            fontSize: compact ? 9 : 10,
-            fontWeight: FontWeight.w800,
-            letterSpacing: .45,
-            height: 1,
-          ),
-        ),
-        SizedBox(width: compact ? 5 : 7),
-        child,
-      ],
-    );
-  }
-}
-
-class _RouteSquare extends StatelessWidget {
-  const _RouteSquare({
+class _RouteSwitch extends StatelessWidget {
+  const _RouteSwitch({
     required this.letter,
     required this.recipeName,
     required this.route,
@@ -581,37 +519,23 @@ class _RouteSquare extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final size = compact ? 26.0 : 28.0;
     return AppTooltip(
       message:
           '$letter - ${route.label}\n'
           '${_batchSummary(targetVariant)}\n'
           '${_formulaSummary(targetVariant.ingredients)}',
-      child: SizedBox.square(
-        dimension: size,
-        child: AppButton(
-          role: AppButtonRole.optionPill,
-          selected: selected,
-          minimumSize: Size.square(size),
-          padding: EdgeInsets.zero,
-          semanticLabel: 'Use recipe $letter for $recipeName: ${route.label}',
-          onPressed: onPressed,
-          child: Text(
-            letter,
-            style: TextStyle(
-              fontSize: compact ? 11 : 12,
-              fontWeight: FontWeight.w800,
-              height: 1,
-            ),
-          ),
-        ),
+      child: RecipeSwitchChoice(
+        label: letter,
+        selected: selected,
+        semanticLabel: 'Use recipe $letter for $recipeName: ${route.label}',
+        onPressed: onPressed,
       ),
     );
   }
 }
 
-class _BatchSquare extends StatelessWidget {
-  const _BatchSquare({
+class _BatchSwitch extends StatelessWidget {
+  const _BatchSwitch({
     required this.recipeName,
     required this.route,
     required this.routeLetter,
@@ -639,12 +563,6 @@ class _BatchSquare extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final target = targetVariant;
-    final height = compact ? 26.0 : 28.0;
-    final width = switch (batchMultiplier) {
-      >= 100 => compact ? 41.0 : 45.0,
-      >= 10 => compact ? 35.0 : 39.0,
-      _ => compact ? 29.0 : 32.0,
-    };
     final enabled =
         target != null && (onSelected != null || onBatchSelected != null);
     final tooltip = target == null
@@ -661,37 +579,21 @@ class _BatchSquare extends StatelessWidget {
               'amount is unchanged.';
     return AppTooltip(
       message: tooltip,
-      child: SizedBox(
-        width: width,
-        height: height,
-        child: AppButton(
-          role: AppButtonRole.optionPill,
-          selected: selected,
-          minimumSize: Size(width, height),
-          padding: EdgeInsets.zero,
-          semanticLabel: target == null
-              ? '$batchMultiplier times batch is unavailable for recipe '
-                    '$routeLetter of $recipeName'
-              : 'Use recorded $batchMultiplier times batch formula for recipe '
-                    '$routeLetter of $recipeName',
-          onPressed: enabled
-              ? () {
-                  if (onBatchSelected != null) {
-                    onBatchSelected!(batchMultiplier);
-                  } else {
-                    onSelected!(target.id);
-                  }
+      child: RecipeSwitchChoice(
+        label: '$batchMultiplier×',
+        selected: selected,
+        semanticLabel: target == null
+            ? '$batchMultiplier times batch is unavailable for recipe $routeLetter of $recipeName'
+            : 'Use recorded $batchMultiplier times batch formula for recipe $routeLetter of $recipeName',
+        onPressed: enabled
+            ? () {
+                if (onBatchSelected != null) {
+                  onBatchSelected!(batchMultiplier);
+                } else {
+                  onSelected!(target.id);
                 }
-              : null,
-          child: Text(
-            '$batchMultiplier×',
-            style: TextStyle(
-              fontSize: compact ? 10 : 11,
-              fontWeight: FontWeight.w800,
-              height: 1,
-            ),
-          ),
-        ),
+              }
+            : null,
       ),
     );
   }
