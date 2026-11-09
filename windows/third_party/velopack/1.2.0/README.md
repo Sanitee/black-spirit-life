@@ -1,7 +1,6 @@
 # Velopack C/C++ runtime 1.2.0
 
-This directory contains the Windows x64 dynamic C API from the official
-`velopack_libc_1.2.0.zip` release archive.
+Windows x64 C API from the official `velopack_libc_1.2.0.zip` archive.
 
 - Upstream: <https://github.com/velopack/velopack/releases/tag/1.2.0>
 - Archive SHA-256:
@@ -15,6 +14,4 @@ This directory contains the Windows x64 dynamic C API from the official
 - `lib/x64/velopack_libc_win_x64_msvc.dll.lib` SHA-256:
   `063DEF3F77CCDD44FD719536B9CB464015CC34E3C10197ADD6643AEC02408D11`
 
-Only the files required by the Windows x64 runner are vendored. The
-matching `vpk` 1.2.0 tool is invoked locally through .NET when packaging; it
-is not installed globally and no release is uploaded by the local workflow.
+Only required x64 files are included. Packaging uses the matching local `vpk` 1.2.0 tool through .NET; it is not installed globally and does not upload a release.

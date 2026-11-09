@@ -4,52 +4,35 @@
 
 # Black Spirit Life
 
-A free Windows app for Black Desert life skills. Plan what to craft, see what you
-need, and find where to get it.
+A free Windows app for Black Desert life skills. Plan what to craft, see what you need, and find where to get it.
 
-[**Download the installer**](https://github.com/Sanitee/black-spirit-life/releases/latest/download/BlackSpiritLifeInstaller.exe)
-· [What's new](https://github.com/Sanitee/black-spirit-life/releases/latest)
+**[Download for Windows](https://github.com/Sanitee/black-spirit-life/releases/latest/download/BlackSpiritLifeInstaller.exe)** · [What's new](https://github.com/Sanitee/black-spirit-life/releases/latest)
 
-## Features
+## What it does
 
-- **Crafting:** recipes, substitutes, inventory, market stock and profit estimates.
+- **Crafting:** recipes, substitutes, inventory, market stock and profit.
 - **Resource Map:** gathering spots, vendors, worker nodes, housing and storage.
-- **Opportunities:** compare crafting and exchanges.
-- **Gathering and Fishing:** maps, tools, profiles and your saved runs or catches.
-- **Imports:** add inventory from screenshots or review Gathering session imports.
+- **Opportunities:** compare crafting and item exchanges.
+- **Gathering and Fishing:** maps, profiles and saved runs or catches.
+- **Imports:** read inventory screenshots and review Gathering sessions.
 
-## Install and update
+## Install or update
 
-Requires **64-bit Windows 10 or 11**.
+Requires **64-bit Windows 10 or 11**. Download and run **BlackSpiritLifeInstaller.exe**. The “Source code” downloads are for developers.
 
-1. Download and run **BlackSpiritLifeInstaller.exe**.
-2. Choose an install folder and finish setup.
+Already installed? Use the update button in the app. Your saves are kept.
 
-Already installed? Use the update button inside the app. Updates keep your saves.
-
-Windows may show an unknown-publisher warning because the app is not signed yet.
-Use the installer above; GitHub's “Source code” downloads are not the app.
-
-The optional **Session Import** window also needs **Microsoft .NET 8 Desktop
-Runtime (x64)**, installed separately.
+The installer is unsigned, so Windows may show an unfamiliar-publisher warning. Optional **Session Import** also needs the **Microsoft .NET 8 Desktop Runtime (x64)**, installed separately.
 
 ## Your saves
 
-Your saves stay on your PC, separate from the app. To see or change their folder,
-open **Craft Planner → Craft Profile**. A new installation starts empty unless
-an existing save is found. No creator's saves or accounts are included.
+Saves stay on your PC, outside the app folder. Change their location in **Craft Planner → Craft Profile**. A new install starts empty unless it finds your existing save. No creator saves or accounts are included.
 
 ## Help and credits
 
-[Report a problem](https://github.com/Sanitee/black-spirit-life/issues)
-· [Technical docs](docs/)
-· [Asset credits](ASSET_SOURCES.md)
-· [Third-party notices](THIRD_PARTY_NOTICES.md)
-
-Black Desert and its game content belong to Pearl Abyss.
+[Report a problem](https://github.com/Sanitee/black-spirit-life/issues) · [Developer notes](docs/) · [Asset credits](ASSET_SOURCES.md) · [Third-party notices](THIRD_PARTY_NOTICES.md)
 
 > This is unofficial content which contains copyrighted materials and IP from
 > Pearl Abyss, and is not official/endorsed content.
 
-Black Spirit Life is free and noncommercial. The [license](LICENSE) covers the
-original app code only.
+Free and noncommercial. The [license](LICENSE) covers original app code only.

@@ -1,59 +1,12 @@
-# Worker excavation unlock and manager provenance
+# Excavation managers
 
-## Purpose and safety boundary
+Reviewed July 30, 2026. A node marker is not necessarily its manager's location. Unlock requirements and Energy costs also vary.
 
-This file documents the small factual manager guide used by the compact
-production-node popup. It is intentionally separate from the worker-node
-snapshot because:
+The guidance is conditional: if an excavation is hidden, connect and invest in its parent, then speak to the manager and check Chat. It does not say every node is hidden or always costs 35 Energy.
 
-- an exploration-node marker is not necessarily the manager's actual
-  position;
-- excavation unlock requirements and Energy costs are not universal;
-- a manager name can be reliable even when their exact current spawn
-  coordinate is not.
+Sources: [official node guide](https://blackdesert.pearlabyss.com/ASIA/en-us/Game/Wiki?_masterWikiNo=18), [Foundry node guide](https://www.blackdesertfoundry.com/nodes-guide/) and [Glish Ruins example](https://bdocodex.com/seaen/node/480/).
 
-No third-party artwork, UI, map tile, or copied descriptive text is included.
-The implementation retains only factual NPC IDs, names, parent-node
-relationships, and a limited set of exact game-world X/Z coordinates for this
-free, noncommercial fan application.
-
-These are Pearl Abyss-origin NPC and node facts selected for Black Spirit
-Life's application-specific guidance. Community sources are credited as
-research references; no copied guide prose or site presentation is retained.
-
-## User-facing rule
-
-The popup uses conditional guidance:
-
-> If this excavation is hidden, connect and invest in its parent node first.
-> Then speak to the named manager and check Chat. The Energy cost can vary by
-> node.
-
-It does **not** claim that every excavation is currently hidden, or that every
-unlock costs 35 Energy.
-
-Pearl Abyss's official
-[Node Adventurer's Guide](https://blackdesert.pearlabyss.com/ASIA/en-us/Game/Wiki?_masterWikiNo=18)
-confirms that the point shown for a node is not necessarily the node manager's
-location, and that node investment is performed through node management. The
-community-maintained
-[Black Desert Foundry node guide](https://www.blackdesertfoundry.com/nodes-guide/)
-documents the common excavation-specific flow: speak to the parent node
-manager and spend an amount of Energy to unlock the production node. The
-[Glish Ruins excavation record](https://bdocodex.com/seaen/node/480/)
-provides a concrete, player-verified example involving Karu after investing in
-the parent.
-
-These sources justify the conditional workflow, not a universal numeric
-Energy cost.
-
-## Manager and marker records
-
-The bundled worker-node graph currently has 40 excavation production records
-under 36 unique parent nodes. Every parent has a reviewed manager identity.
-Only 18 managers have an exact current X/Z spawn coordinate in the referenced
-[Caphras Archives](https://caphrasarchives.com/llms.txt) NPC record. Those 18
-receive a **Mark on map** action; the other 18 deliberately do not.
+The reviewed snapshot has 40 excavations under 36 parents. All have manager identities; only 18 have exact sourced coordinates and enable **Mark on map**. The table retains those records:
 
 | Parent ID | Parent node | Manager record | Exact X/Z marker |
 |---:|---|---|---:|
@@ -94,30 +47,7 @@ receive a **Mark on map** action; the other 18 deliberately do not.
 | 2016 | Urnas Mountains | [Dener (47685)](https://caphrasarchives.com/npc/47685.md) | Not verified |
 | 2022 | Great Dark Spot | [Nadir (47700)](https://caphrasarchives.com/npc/47700.md) | Not verified |
 
-## Cross-check notes
 
-- Retrieved and reviewed: 2026-07-30.
-- Exact marker coordinates come only from a Caphras NPC page's World Presence
-  spawn table. A parent node's coordinate is never substituted.
-- Current BDO Codex node-detail manager relations are inconsistent for several
-  Pilgrim nodes. The five Pilgrim assignments above use the NPC title, named
-  region, and exact spawn coordinate together. For example, Siriya Min is the
-  Obedience manager and Saimar is the Sincerity manager.
-- The older `20600` Voraro identity is not used. Current manager record 50707
-  explicitly identifies Voraro as the Mirumok Ruins node manager and includes
-  an exact spawn point.
-- A missing marker is deliberate evidence handling, not missing UI. Add a
-  coordinate only when an exact current spawn source is available.
+Coordinates come from [Caphras Archives](https://caphrasarchives.com/llms.txt) NPC spawn tables, never parent-node positions. Conflicting Pilgrim records were checked against titles, regions and coordinates. Voraro uses current record 50707 rather than old ID 20600.
 
-## Maintenance checks
-
-`worker_node_unlock_guide_test.dart` requires:
-
-1. every bundled parent-linked excavation node to resolve a guide;
-2. all parent IDs to be unique;
-3. only exact-location records to enable a marker;
-4. conditional, non-numeric Energy wording;
-5. current Pilgrim manager assignments to remain explicit.
-
-Any worker-node refresh that adds or reparents an excavation must update this
-review before the focused test is changed.
+`worker_node_unlock_guide_test.dart` checks coverage, unique parents, exact-only markers and conditional Energy wording. Review new or changed excavation links before changing those tests. Add coordinates only with an exact source.

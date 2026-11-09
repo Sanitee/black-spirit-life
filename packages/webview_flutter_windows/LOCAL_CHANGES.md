@@ -1,21 +1,9 @@
-# Private video-only build
+# Black Spirit Life changes
 
-Runtime source copied from `webview_flutter_windows` 1.1.1 (BSD 3-Clause; see LICENSE).
-Upstream: https://github.com/omar-hanafy/webview_flutter_windows
+Based on `webview_flutter_windows` 1.1.1, under BSD 3-Clause; keep [LICENSE](LICENSE). [Upstream](https://github.com/omar-hanafy/webview_flutter_windows).
 
-This app uses the installed WebView2 runtime, never a bundled browser. Its only
-webview is the optional YouTube player. Native guards in `webview.cc` run before
-navigation/downloads: allow only this app's local player page at top level;
-reject non-HTTPS frame navigation and external schemes; cancel all downloads.
-These restrictions deliberately make this copy unsuitable as a general browser.
-They do not modify YouTube controls, media requests, ads, or embed restrictions.
+The app uses the installed WebView2 runtime, not a bundled browser. Native navigation rules allow the Gathering player page, `about:blank`, and the Fishing service at `http://127.0.0.1:8765–8795`. Frames allow HTTPS and `about:blank`. Downloads and external application schemes are blocked. See `windows/video_navigation_policy.h` for exact matching rules.
 
-Retain these guards when updating upstream. App-owned HTML/origin identity,
-temporary profile disposal, and playback lifecycle live in SpotVideoPlayer.
+Keep these restrictions when updating upstream. They preserve normal YouTube controls, consent, advertising and embed rules. App code owns page identity, browser storage and playback/service lifetime.
 
-Release builds also apply MSVC path mapping to the plugin so WIL diagnostics
-cannot embed the developer machine's source or build roots in the shipped DLL.
-
-The native bridge explicitly unregisters both its event and method channels
-before releasing its texture and WebView. This keeps Flutter's binary messenger
-callbacks bounded to the bridge lifetime during application shutdown.
+Release builds map compiler paths so developer folders do not enter WIL diagnostics in the DLL. The native bridge unregisters event and method channels before releasing its texture/WebView, preventing shutdown callbacks after disposal.

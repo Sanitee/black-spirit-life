@@ -1,55 +1,23 @@
-# Resource Map Release and Packaging Gate
+# Map sources and packaging
 
-## Controlling source decision
+This is the **0.1.7 source review**. Its counts and hashes are historical. Use the current release plan for versions, tags and artifact checks; do not reuse the old 0.1.7 publishing steps.
 
-The source review remains complete for Black Spirit Life `0.1.7+26`.
+## Credits and use
 
-- Pearl Abyss-origin icons, portraits, descriptions, recipes, NPC information,
-  prices, coordinates and node facts are treated as game content and factual
-  information under the project's noncommercial fan-content basis.
-- BDO Codex and BDOLytics are credited research, cross-checking and retrieval
-  references. Black Spirit Life retains no site HTML, design, guide prose,
-  commentary or annotation.
-- Six source-only private research inputs are excluded from the public tree.
-  The normalized runtime datasets remain.
-- The four Workerman/Shrddr groups below are approved for this release under
-  the project-owner community-use decision. They are not publication blockers.
+Pearl Abyss owns the game facts and artwork. BDO Codex and BDOLytics are credited research references. The app retains selected facts in its own format, not website design, HTML or guide prose.
 
-## Workerman/Shrddr community-use decision
+The owner approved credited Workerman/Shrddr use for tiles/cache, 64 node icons, the 812-house/31-town graph and economics inputs for 352 sites/30 towns. No separate written licence was found. This is the owner's risk decision, not permission from Shrddr. Keep attribution and respond to substantiated corrections/removal requests.
 
-The approved attributed use covers:
+- [Workerman source](https://github.com/shrddr/workermanjs)
+- [Workerman issues](https://github.com/shrddr/workermanjs/issues)
+- [Map tiles](https://github.com/shrddr/shrddr.github.io/tree/main/maptiles)
 
-1. the Workerman/Shrddr map tiles and bounded runtime cache;
-2. the 64 node icons;
-3. the Workerman-derived 812-house/31-town lodging graph; and
-4. the Workerman-derived inputs in the 352-site/30-town worker-economics table.
+## Reviewed data
 
-WorkermanJS and its related map repository are intentionally public, Workerman
-is publicly hosted for community use, and its documentation directs users to
-the public GitHub issue tracker when they encounter problems. Black Spirit
-Life is completely free and noncommercial, with no advertisements, donations,
-subscriptions or paid features.
-
-- Source project: <https://github.com/shrddr/workermanjs>
-- Public issue route: <https://github.com/shrddr/workermanjs/issues>
-- Tile repository: <https://github.com/shrddr/shrddr.github.io/tree/main/maptiles>
-
-No separate written licence file was found. The project owner explicitly
-accepts that residual risk and does not represent this decision as separate
-written permission from Shrddr. Complete attribution, the public correction
-and removal route, and prompt compliance with any future substantiated request
-from Shrddr are required.
-
-This decision is not to be reopened merely because there is no separate
-licence file or personal reply. Reopen it only if new concrete evidence appears
-that Shrddr prohibits this use.
-
-## Runtime data boundary
-
-The shipped `packages/bdo_map_core/assets/data/resource_map.json` is 7,544,577
+The reviewed `packages/bdo_map_core/assets/data/resource_map.json` is 7,544,577
 bytes with SHA-256
 `BE62E56A6B18F14C7A6439521A9CA9CA240974219DBD1E44D85CDEC136C94C15`.
-It contains Black Spirit Life's normalized application schema, including:
+That snapshot contains Black Spirit Life's normalized application schema, including:
 
 - 1,052 Pearl Abyss-origin worker-node records and 1,622 output relationships;
 - 13,315 exact gathering points: 12,582 historical SomethingLovely points,
@@ -59,68 +27,29 @@ It contains Black Spirit Life's normalized application schema, including:
   item-to-vendor listings; and
 - the retained Edania, Royal Workshop, hunting and resource-map relationships.
 
-It contains no raw response, HTML, page design or site-authored prose. The
+That snapshot contains no raw response, HTML, page design or site-authored prose. The
 worker-node, recipe, price, NPC and coordinate records are selected and
 normalized game facts used by Black Spirit Life's original interface,
 calculations, search, filtering and routing.
 
-The shipped `lodging_houses.json` is 789,050 bytes with SHA-256
+The reviewed `lodging_houses.json` is 789,050 bytes with SHA-256
 `096D1205BBB12FD0ED0AD0F9AE1A613C680AE0E037CDAA4AF91C7F4AD4EFA6F6`.
-The shipped `worker_economics.json` is 354,383 bytes with SHA-256
+The reviewed `worker_economics.json` is 354,383 bytes with SHA-256
 `64ABEDA209B82EA1CAF6FC8C5EB29DDC8F1007837FA4D13652ABE534697C29D7`.
 
-## Public source boundary
 
-The sanitized public repository is created from an explicit reviewed
-allow/exclude list rather than a plain copy of the development repository. It
-must omit all six private research inputs listed in
-`docs/public-release-source-matrix.md`, retain the generated runtime data and
-full application functionality, and keep the internal copies untouched.
+## Public files
 
-The public tree must also exclude personal planner data, local machine paths,
-private update feeds, credentials, caches, diagnostics, backups, screenshots,
-private release artifacts and internal-only release history. A fresh clone and
-all public refs/tags must pass the same scan.
+Follow the [source rules](../public-release-source-matrix.md). Exclude the six private research inputs and all personal saves, accounts, credentials, caches, browser state, machine paths and internal release files. Keep generated reference data and the approved features. Check public refs/history as well as current source.
 
-## Cache and network safeguards
+## Tile cache
 
-The map implementation:
+Limit disk tiles to 64 MiB per provider and decoded images to 48 MiB. Keep cache-only viewing, distinct missing-area status, cancellation and late-response rejection. Clearing tiles must not touch saves.
 
-- limits encoded disk tiles to 64 MiB per provider namespace;
-- limits decoded images to 48 MiB;
-- uses a revisioned provider cache namespace;
-- allows cache-only viewing and reports uncached offline areas distinctly;
-- cancels the app-owned HTTP client when downloads are disabled;
-- rejects late network results by request epoch; and
-- exposes cache size and a clear action without touching planner data.
+A revisioned cache name prevents mixing reviewed versions; it does not make the live upstream URL immutable. No tiles are bundled.
 
-The revisioned namespace is an invalidation label. The live upstream URL is not
-content-addressed and is not described as cryptographically pinned.
+## Release checks
 
-## Remaining technical release gate
+Use the exact approved source, current release plan and artifact hashes. Keep source/privacy, build, install/update, save-preservation and public-download checks separate. Record any unrun checks honestly. The installer is unsigned, so the download page must disclose the possible Windows warning.
 
-Before publication:
-
-1. create and scan a public source commit directly on top of the sanitized
-   `v0.1.6` release;
-2. tag that exact commit `v0.1.7`;
-3. build the Stable app and installer from that clean tagged commit with
-   package `BlackSpiritLife.App`, channel `win-x64-stable`, and GitHub update
-   source `https://github.com/Sanitee/black-spirit-life`;
-4. run analysis, automated tests, clean-install and installer lifecycle checks;
-5. verify the `0.1.6` to `0.1.7` in-app delta update, automatic apply/restart,
-   profile preservation, offline map/planner behavior, repair and both
-   uninstall choices;
-6. enumerate the exact release files with byte lengths and SHA-256 hashes; and
-7. confirm the project owner's 2026-09-15 publication authorization still
-   applies to the exact candidate after every preceding gate passes.
-
-The unsigned installer may trigger Windows SmartScreen or an
-unfamiliar-publisher warning; this must be disclosed on the release page.
-
-## Corrections and removal requests
-
-Use the repository's public issue route for source corrections or removal
-requests. If new concrete evidence or a substantiated request from Shrddr
-requires a change, address the exact affected provider, assets or dataset
-promptly without silently changing unrelated planner or map functionality.
+Source corrections or removal requests go through this repository's Issues tab. Replace only the affected material; preserve unrelated app behaviour and personal data.

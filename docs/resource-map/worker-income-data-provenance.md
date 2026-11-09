@@ -1,8 +1,6 @@
-# Worker income data provenance
+# Worker income data
 
-`packages/bdo_map_core/assets/data/worker_economics.json` is a separate,
-attributed dataset. It does not alter the accepted worker-node or exact
-gathering-location data in `resource_map.json`.
+The separate `worker_economics.json` stores inputs for rough income estimates. It does not replace map locations or node relationships.
 
 ## Pinned input
 
@@ -22,65 +20,24 @@ embedded in `generate_worker_economics.mjs`. The reviewed generated asset is
 It covers all 352 resource-producing worker sites in the map and 30 worker
 towns.
 
-### Identity correction — 2026-11-02
 
-All 88 town-worker profiles were compared by character ID to the English PC
-client names through October 31. The old generator reversed Goblin (species 0)
-and Human (species 1), and gave species 3–8 generic labels. The generator now
-uses the worker species and names Papu, Fadus, Dwarf, Dokkebi, Dolswe and Shellfolk.
-66 displayed labels changed across 30 towns; every numeric profile input, worker
-type, character ID and all 352 production records remain exactly unchanged.
+## November 2, 2026 name correction
 
-The 14 Inner Edania sites 2115–2128 remain explicitly unmodeled. Regeneration now
-recognizes that existing exclusion rather than failing on the newer map; it does
-not invent workload, yield or travel-distance records. Any other missing mapped
-site still fails generation. This is an identity correction, not a claim that
-the July economics snapshot is independently certified against all current
-server mechanics. The current official NA/EU Workers guide supports the species
-roles and one free worker slot, but does not provide full numeric yield tables:
-<https://www.naeu.playblackdesert.com/en-US/Wiki?wikiNo=40>.
+An exact-ID review corrected reversed Goblin/Human labels and added the proper Papu, Fadus, Dwarf, Dokkebi, Dolswe and Shellfolk names. It changed 66 labels across 30 towns, not numeric inputs or production records.
 
-## Transformation
+The 14 Inner Edania sites 2115–2128 remain unmodelled. Other missing mapped sites stop generation. The [official Workers guide](https://www.naeu.playblackdesert.com/en-US/Wiki?wikiNo=40) supports species roles and the free worker slot, but does not verify the full yield table.
 
-The generator retains only:
+## Calculation
 
-- production workload;
-- expected standard, giant-worker, and luck-bonus output quantities;
-- worker-town distance;
-- allowed worker types for each production site;
-- arithmetic level-40 median work speed, movement speed, and luck; and
-- the one base worker slot asserted by the pinned source.
-
-Level-40 medians reproduce the source package's documented arithmetic and do
-not include worker skill bonuses. The runtime uses the same transparent cycle
-formula as the pinned source:
+Inputs cover workload, standard/giant/luck yields, allowed worker types, town distance and level-40 median speed/luck. They exclude worker skill bonuses.
 
 1. `active workload = base workload × (2 - resource availability / 100)`
 2. `work minutes = 10 × ceil(active workload / work speed)`
 3. `travel minutes = 2 × distance / movement speed / 60`
 4. `cycle minutes = work minutes + travel minutes`
 
-Expected output and current market price after the application's configured
-tax determine the rough net-silver estimate.
+Output and current prices after tax give estimated silver. Listed stock is not demand. A sales-rate estimate needs two successful cumulative-trade readings and their elapsed time. Any market-volume ceiling is optimistic because other sellers share those sales.
 
-## Market activity
+## Licence
 
-Current listed stock is never called demand. The Arsha v2 response also
-provides a cumulative `totalTrades` count. The application can calculate an
-observed daily trade volume only after two successful snapshots. The elapsed
-observation interval is retained and shown as confidence context.
-
-An optional market-volume ceiling can cap expected sellable output when one
-worker would produce more than the entire observed market volume. This remains
-an optimistic ceiling because other sellers compete for the same sales.
-
-## Distribution status
-
-The package declares the Unlicense for its calculation code. Its bundled
-game-data files also record an upstream Workerman snapshot whose repository has
-no separate licence file. WorkermanJS is publicly shared and hosted for
-community use, and the project owner has approved this fully attributed use in
-the free, noncommercial Black Spirit Life fan project while accepting the
-residual risk. The Unlicense is not represented as a licence for the Workerman
-inputs. Corrections and substantiated removal requests from Shrddr will be
-handled promptly through the public issue route.
+The calculation code uses the Unlicense. That does not license its Workerman data inputs. No separate Workerman data licence was found; the project owner accepted credited use and the remaining risk. Keep attribution and the public correction/removal route.

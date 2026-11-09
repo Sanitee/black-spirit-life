@@ -1,6 +1,6 @@
-# Gathering crystal recommendation — September 5, 2026
+# Gathering crystals — September 5, 2026
 
-The setup reference row recommends up to 16 Crystal of Breathing Verdure, using only unlocked regular slots. This is a mastery/EXP recommendation, not a selected preset or a new input to the calculator. Existing entered Mastery and drop-rate totals are unchanged.
+The reference recommends up to 16 Crystal of Breathing Verdure in unlocked regular slots for Mastery/EXP. It does not select a preset or change the calculator's entered totals. Not every character has all 16 slots unlocked.
 
 ## Evidence
 
@@ -11,8 +11,7 @@ The setup reference row recommends up to 16 Crystal of Breathing Verdure, using 
 - [Current Vital Crystal game item description](https://bdocodex.com/us/item/15227/): +10 Life Skill Mastery. This is a replacement while upgrading, not an extra set to equip alongside 16 Verdure crystals. No fixed market savings are claimed.
 - [Official September 3, 2026 PC update](https://www.naeu.playblackdesert.com/en-US/News/Detail?groupContentNo=10550&countryType=en-US): all JIN/BON/WON Dawn Crystal - Life EXP items were removed and replaced by Evergreen Orb/Shard. They are intentionally absent from this recommendation.
 
-The full regular-slot allocation maximizes the two listed Life Skill stats; it does not claim to be a universal combat, movement, weight, or profit optimum. Bairog's bundled calculator takes total Mastery/drop rate and has no crystal selection to synchronize. The reference deliberately does not modify its source snapshot, formulas, preferences, preview callbacks, or Apply/Cancel behavior.
 
-## Artwork
+This is a Mastery/EXP choice, not a promise of best profit, weight, movement or combat stats. Bairog's calculator uses entered totals, not individual crystals.
 
-Item 15288 uses the existing embedded game icon, copied byte-for-byte by `tool/sync_gathering_crystal_icon.mjs`. Its local provenance record and regression test verify the original 1,624 bytes and SHA-256. No artwork was generated or altered.
+Item 15288 reuses the existing game icon through `tool/sync_gathering_crystal_icon.mjs`. The provenance record checks its original 1,624 bytes and SHA-256.

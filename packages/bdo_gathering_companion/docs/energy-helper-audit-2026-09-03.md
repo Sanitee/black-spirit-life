@@ -1,9 +1,6 @@
-# Gathering energy-helper audit — 3 September 2026
+# Energy helper review — September 3, 2026
 
-## Result
-
-The catalog now has 18 ordinary Energy entries and 17 optional event entries.
-The latter remain inside the collapsed **Event items you may own** section.
+Historical review: 18 ordinary entries and 17 optional event entries. This is not a list of currently obtainable event rewards.
 
 | Item | ID | Catalog section | Audited gathering-relevant behavior |
 | --- | ---: | --- | --- |
@@ -21,61 +18,16 @@ The latter remain inside the collapsed **Event items you may own** section.
 | [Event] Scroll - Life Skill II | 767990 | Event items you may own | Life EXP +100%; Life Mastery +100; Mount EXP +50%; Energy Recovery +1; 3 hours |
 | [Event] Divine Blessing of Life | 1000408 | Event items you may own | Life Mastery +150; Life EXP +50%; Weight Limit +200 LT; Energy Recovery +5; Movement Speed +5; Luck +5; 3 hours |
 
-Instant restorations are reference-only. They do not inflate the ongoing Energy
-Recovery total. Dragon King's Hyangon Wine also has normal Item Drop Rate +20%;
-that is monster-loot rate and is deliberately not counted as Gathering Item Drop
-Rate.
 
-The Bairog projection currently has no owned-quantity or cooldown schedule for
-untradeable event refills. Treating one Gourd Bottle, Marni potion, or FESTA Beer
-as permanent recovery would overstate the session. Those three therefore open
-their full information instead of becoming calculation toggles. A future
-consumable scheduler would need the user's quantity and intended use cadence
-before these can safely alter projected session length.
+Instant refills do not count as ongoing Energy Recovery. Gourd Bottle, Marni's potion and FESTA Beer open information only: session estimates lack owned quantities and a use schedule. Dragon King's wine's normal Item Drop Rate is monster loot, not Gathering drops.
 
-## Evidence checked
+The review compared August 28 and September 3 client effects and artwork with official notices. Herbal Tea was the only new qualifying item in that comparison.
 
-- Current installed-client export:
-  `Patch Research/client-2026-09-03-audit/items.json`.
-- Exact installed-client artwork from the matching 3 September icon export.
-- The 28 August and 3 September exports were compared for Energy Recovery and
-  Maximum Energy changes. Gatherer's Special Herbal Tea was the only new
-  qualifying item in that delta.
-- Official Pearl Abyss notices were checked for current sale/pass availability,
-  past event distribution, and continued Fairy Continuous Care support.
+## Inclusion rules used in this review
 
-The inclusion boundary is a user-facing consumable with a verified Energy effect
-and a credible reason it may still be usable or owned. The audit favors unique,
-useful effects over every historical low-tier duplicate.
+Keep verified inventory consumables that could still be owned. Exclude removed rewards, direct-apply rewards, internal/test items and redundant weak tiers. Individual furniture is represented by Blessing of Mystic Beasts; portable Life Skill Scrolls share its non-stacking furniture group.
 
-## Deliberate exclusions
-
-- Snowfall Ginger Cookie, Hot Apple Cider, Adventure Together Scroll (Life),
-  Breath of the Black Wings (Life), Global Banquet Platter (Life), and Fatebound
-  Resolve are marked for removal when their events end, so they are not presented
-  as items a player may still own.
-- Shai's Cheer and Rabbit's Blessing are direct-apply event rewards in the current
-  client, rather than inventory consumables a user can choose from this setup.
-- Divine Blessing of Life is retained: it is an inventory consumable without an
-  event-end removal notice and has a recent official distribution notice.
-- Bubble-bobblin' Budae Jjigae and Coming-of-Age Perfume are retained because the
-  current client still defines their effects and the May 2025 update explicitly
-  added them to Fairy Continuous Care.
-- Life Skill Scrolls I and II are retained because they are portable inventory
-  versions of furniture buffs. They share the existing `furniture` exclusion
-  group, so the calculator cannot add them to each other or to Blessing of Mystic
-  Beasts.
-- Individual residence furniture is not duplicated in this picker. The current,
-  tradable Blessing of Mystic Beasts already represents that non-stacking buff
-  family, while the two portable event scrolls cover the owned-event case.
-- Blessing of Fragrant Wind was explicitly deleted after its event.
-- Weaker Energy Potion and Energy Tonic sizes remain omitted to keep the setup
-  useful instead of listing redundant tiers.
-- Old low-value event foods and sweets that merely repeat small instant or +1
-  recovery effects remain omitted. They add no distinct setup calculation and
-  would bury the meaningful choices.
-- Internal, GM/test, quest-direct, and unnamed `Recover Energy` records are not
-  user-facing inventory items and remain excluded.
+Snowfall Ginger Cookie, Hot Apple Cider, Adventure Together Scroll (Life), Breath of the Black Wings (Life), Global Banquet Platter (Life), Fatebound Resolve and deleted Blessing of Fragrant Wind were excluded. Shai's Cheer and Rabbit's Blessing were direct rewards, not selectable consumables. Divine Blessing of Life had no removal notice; Budae Jjigae and Coming-of-Age Perfume had documented Fairy support.
 
 ## Primary notices
 

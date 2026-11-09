@@ -1,50 +1,15 @@
-# Installer location and missing-registration repair
+# Installer folder handling
 
-This installer-only change is based on the published 0.1.10 application. It does
-not change the Flutter app, update packages, reference assets or user-data
-storage. Public distribution remains the responsibility of the Live Release
-owner; preparing this fix does not replace an existing public release asset.
+Historical installer fix based on 0.1.10.
 
-## Behavior
+Setup defaults to `C:\Black Spirit Life` and lets the user choose another folder. Creating the protected default folder may need an admin prompt. The folder gets update access for the user; setup then runs as that user.
 
-- Fresh installation always suggests `C:\Black Spirit Life`. The user can type
-  a destination or use Browse. When that default is missing, setup asks Windows
-  for administrator approval to create only that folder, then grants the
-  signed-in user inheritable update access and continues the application setup
-  under the signed-in account. A denied request or unwritable custom
-  destination reports an error and remains editable. Existing fixed-drive
-  roots such as `C:\` are verified but are never passed to a directory-creation
-  API.
-- A verified existing installation keeps its registered location for update or
-  repair. It is not silently relocated to the new suggested destination.
-- A registered destination that is positively absent on a reachable fixed drive
-  offers a Reinstall screen. Confirmation names the missing folder and the chosen
-  new location. Discovery and cancellation never remove registration or saved
-  state. The existing setup engine registers the chosen installation.
-- Access failures, redirected paths, malformed registrations and conflicting
-  installations are not treated as proof that an installation has disappeared.
-- Fresh/recovery state is revalidated before setup launches. A changed
-  registration or incompatible reappearing installation stops the attempt.
-- Pre-launch failure may remove only the still-empty final directory created
-  by that attempt, using its verified handle. No recursive cleanup, existing
-  directory removal, or personal-data cleanup is introduced. After setup starts,
-  its output is preserved for normal failure diagnosis.
+An existing registered folder is kept. If it is confirmed missing, setup offers reinstall. Cancelling keeps the registration and saves. An inaccessible, malformed, conflicting or redirected path is not treated as missing.
 
-## Verification and limits
+Recheck the folder before launch. On an early failure, cleanup may remove only the new empty folder created by this attempt. Never use recursive cleanup for this case.
 
-The native regression suite uses injected read-only discovery dependencies,
-temporary filesystem fixtures and model assertions. It must not overwrite the
-real Windows uninstall registration to simulate a missing installation.
+## Checks
 
-Build the standalone installer and `BlackSpiritLifeInstallerNativeTests` target
-from `windows/installer`, run CTest, and verify `--verify-payload` against the
-sealed setup engine used for the application version. Capture fresh and recovery
-screens with `--capture-preview`; `--preview-missing-install` is a rendering-only
-fixture argument and cannot bypass real startup discovery.
+Run `NativeInstallerNativeTests`, CTest and `--verify-payload`. `--capture-preview` and `--preview-missing-install` check rendering only.
 
-Before a public installer release, the owner must also exercise the exact final
-installer against isolated fresh/stale-registration/existing-installation states
-and verify the installed payload, selected path and preserved personal data.
-Unit/model tests and preview captures alone are not an installed lifecycle pass.
-Use a separate Windows test account/VM for real setup registration tests rather
-than replacing the user's active HKCU installation entry.
+Registration tests need an isolated account or VM; never overwrite the user's installer registration. Unit and preview checks are not proof that installation succeeded.

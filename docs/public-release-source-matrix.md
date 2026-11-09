@@ -1,226 +1,26 @@
-# Public-release source matrix
+# Public source and credit rules
 
-Review result: **proportionate source review complete; project-owner credited
-third-party/reference-use decisions and accepted residual risk recorded; the
-approved Beta product is retained while personal player/publisher state, four
-privacy-bearing captures, and six source-only research inputs are excluded**
+This records the source review through **October 29, 2026 (0.1.15)**. Counts and hashes describe that review, not a fresh audit of every later release. See [release notes](releases/) for later changes.
 
-Release identity: Black Spirit Life `0.1.15+34`, tag `v0.1.15`, package
-`BlackSpiritLife.App`, channel `win-x64-stable`. The exact source commit and
-artifact hashes are recorded by the release-candidate manifest generated from
-the clean public history, which contains no internal Beta ancestry.
+Public repository: <https://github.com/Sanitee/black-spirit-life>. Package: `BlackSpiritLife.App`; update channel: `win-x64-stable`.
 
-Review date: 2026-10-29
+## What may be published
 
-Permanent public/update destination approved by the project owner:
-`https://github.com/Sanitee/black-spirit-life`
+Keep the complete approved application and its reviewed reference data. Exclude personal saves, accounts, credentials, browser state, private machine paths, caches and internal release evidence. Private Beta Git history must not enter the public repository.
 
-This is the controlling source-by-source gate for the full-feature public
-route. It replaces earlier blanket treatment of every fact or game asset seen
-through a community reference as separately blocked.
+Pearl Abyss owns the game content. The project uses its [Fan Content Guidelines](https://www.pearlabyss.com/en-US/legal/detail?_policyNo=42) for this free, unofficial, noncommercial fan app. Keep the exact notice and credits. The code licence grants no rights in third-party content.
 
-## 0.1.15 approved update boundary
+BDO Codex and BDOLytics are research/mirror references. The project owner confirms that their website design, HTML, guide prose, commentary, annotations and custom translations are not retained. Licensed material keeps its licence; copied creative material or complete organized datasets need their own recorded treatment. This is the project's release decision, not a legal opinion for every jurisdiction.
 
-Version 0.1.15 promotes the approved Joined copper item windows and the inherited
-item-popup scroll containment correction on top of public Stable 0.1.14. Opened
-item references keep Recipe and Used for in attached tabs with independent body
-scroll positions, joined artwork rows and fixed single-recipe actions. Long item
-content scrolls inside its popup instead of moving the Planner behind it.
+## Credited use without separate permission
 
-The complete 0.1.14 public product remains in force. Calculations, recipe and
-workstation identities, catalog/reference content, update channel and storage
-contracts are unchanged. No personal profile, mastery, inventory, journal,
-loadout, session, setting, credential, cookie, browser state or machine-specific
-path is included. Existing users continue to load and preserve their own selected
-personal-data folder.
+The owner accepted the remaining risk for the named Workerman/Shrddr, FishyStuff, Bairog/BDO Workshop, Garmoth and creator materials below. Public availability and attribution are **not** a licence or written permission. Do not describe the owner's decision as permission from those sources.
 
-## 0.1.14 approved update boundary
+Keep credits, source links and a correction/removal route. Workerman's recorded scope covers map tiles/cache, 64 node icons, the 812-house/31-town graph and economics inputs for 352 sites/30 towns. These groups remain replaceable if a substantiated request requires it. Do not reopen that decision solely because no separate licence was found; review new concrete evidence.
 
-Version 0.1.14 promotes the user-tested Fish Map startup correction, the
-approved Planner Open rows presentation and the quiet ordinary-hover cleanup on
-top of public Stable 0.1.13. Fish keeps the existing Stable service range and
-now uses the same range in native WebView navigation. Planner calculations,
-inventory and persistence are unchanged. Item, source, location and reference
-previews remain available while ordinary action names stay accessible without
-opening hover popups.
+## Reviewed source list
 
-The complete 0.1.13 public product remains in force, including the Tight glow
-update control and its Editor Settings preview. No personal profile, mastery,
-inventory, journal, loadout, session, setting, credential, cookie, browser state
-or machine-specific path is included. Existing users continue to load and
-preserve their own selected personal-data folder.
-
-## 0.1.13 current-Beta update boundary
-
-Version 0.1.13 promotes the user-approved Tight glow update control correction
-on top of public Stable 0.1.12. The title-bar control uses the slimmer tapered
-copper frame, open-tray download arrow, inset crest diamond and visible
-5.2-second breathing treatment already approved in Beta. The session-unlocked
-Editor Settings preview is restored and remains an in-memory demonstration that
-does not contact the feed, download, install or restart.
-
-The real Stable updater, channel, package and storage identities remain in
-force. No personal profile, mastery, inventory, journal, loadout, session,
-setting, credential, cookie, browser state or machine-specific path is promoted
-from Beta. Existing users retain their selected personal-data folder.
-
-## 0.1.12 current-Beta update boundary
-
-Version 0.1.12 promotes the complete current approved Beta snapshot on top of
-public Stable 0.1.11. It includes the approved Planner, Resource Map,
-Gathering, Fishing, Opportunities, profile/setup and presentation updates,
-including the compact crafted-item comparison, output strip and smaller
-download update control with its soft glow.
-
-The complete 0.1.11 product and public-release boundary below remain in force.
-No personal profile, mastery, inventory, choice, journal, loadout, session,
-setting, credential, cookie, browser state or machine-specific path is
-promoted from Beta. Existing Stable users continue to load and preserve their
-own selected personal-data folder during both delta and full-package updates.
-
-## 0.1.11 current-Beta update boundary
-
-Version 0.1.11 promotes the complete current approved Beta snapshot on top of
-public Stable 0.1.10. Its user-visible change is the approved Planner quantity
-layout becoming the unconditional normal layout for Alchemy, Cooking, and
-Processing in every theme. Bonus recipes, calculations, persistence, and the
-personal-data schema are unchanged.
-
-The complete 0.1.10 product and public-release boundary below remain in force.
-No personal profile, journal, session, loadout, setting, credential, cookie,
-browser state, or machine-specific path is promoted from Beta. The same four
-privacy-bearing Gathering captures and six source-only Resource Map research
-inputs remain excluded. Existing Stable users continue to load and preserve
-their own selected personal-data folder during the update.
-
-## 0.1.10 current-Beta update boundary
-
-Version 0.1.10 promotes the complete current approved Beta snapshot on top of
-public Stable 0.1.9. The user-visible changes since 0.1.9 are the approved
-Opportunities card typography and EXP sorting/unknown handling, the audited
-recipe EXP registry and effort ordering, corrected planner ingredient/weight
-coverage, and the 17 September Twilight recovery recipes with the obsolete
-base-Apeiron Heating formulas removed.
-
-The complete 0.1.9 product and public-release boundary below remain in force.
-No personal profile, journal, session, loadout, setting, credential, cookie,
-browser state, or machine-specific path is promoted from Beta. The same four
-privacy-bearing Gathering captures and six source-only Resource Map research
-inputs remain excluded. Existing Stable users continue to load and preserve
-their own selected personal-data folder during the update.
-
-## 0.1.9 exact-Beta public-promotion boundary
-
-Version 0.1.9 promotes the complete approved Beta product snapshot: Planner,
-Resource Map, Gathering, Fish Map, Opportunities, shared market/update work,
-Fishing reference/recognition data, Gathering guides/calculators, and Session
-Import with its app-managed Garmoth workflow. It is reconstructed as one clean
-source commit on public `v0.1.7`; it does not publish the Beta repository or
-its private history.
-
-The following are absent from public source and packages:
-
-- every generated per-user Fishing profile/journal SQLite database and sidecar
-  (not the immutable bundled Fishing reference databases/datasets);
-- every local user mastery, Fairy/ring choice, inventory, plan, favorite,
-  loadout, Gathering/Fishing journal or session, saved import/receipt/draft,
-  account credential, cookie, generated browser profile, and local path;
-- four full-frame Gathering guide captures that exposed real player/browser
-  context (the public guide links and credits remain); and
-- the six exact source-only Resource Map research inputs listed below.
-
-The reviewed FishyStuff-derived Fishing snapshot, including its immutable map,
-species, location, price, recognition, and related reference
-databases/datasets, remains bundled product/reference content. It is distinct
-from the per-user Fishing profile/journal database stored under the selected
-personal-data folder. The Fishing snapshot, recognition icons, Gathering
-reference data, eleven credited guide images, Bairog/BDO Workshop material,
-Garmoth integration/catalog material, and their source links are immutable
-product/reference inputs rather than saved player activity. They remain under
-the project owner's explicit credited-use decision. No third-party licence or
-written permission is claimed where none is documented.
-
-A fresh install therefore contains no personal profile values, loadouts,
-journals, sessions, imports, credentials, cookies, or browser state. The app
-loads an existing Stable profile only from the locally selected personal-data
-folder. All user-authored Planner, Resource Map, Gathering, Fishing,
-Opportunities, Session Import, and generated browser state is stored beneath
-that selected folder and read back from there. The folder is shown in the
-title bar and can be changed from the in-app Craft Profile page; ordinary
-updates keep it outside the installation directory and do not replace it.
-
-For an existing Stable 0.1.7 selected folder, the Fishing migration imports
-every valid user profile, including the old format's full limits, notes,
-timestamps, duplicate names, and blank/custom tool text. Its migrated journal
-entries show the original aggregate fish totals, notes, and legacy received
-silver read-only; no individual catches or sales are fabricated. The Gathering
-migration carries forward mastery as the active confirmed calculation input,
-shows the prior loadout notes read-only, and preserves the prior sessions as
-non-editable history (with deletion still available) with their timestamp,
-method, non-empty location, duration, mastery, and notes without inventing
-loot, buffs, pets, or item totals. Their item total is explicitly not recorded.
-A blank legacy location is labelled `Unspecified location` while its exact
-empty value remains preserved. Both migrations preserve the source bytes and
-an exact local archive, and neither overwrites an existing current-format
-destination.
-
-## Proportionate review standard
-
-1. Pearl Abyss's published
-   [Fan Content Guidelines](https://www.pearlabyss.com/en-US/legal/detail?_policyNo=42)
-   are the permission basis for this personal, free, unofficial,
-   noncommercial fan project. A personal reply from Pearl Abyss is not a
-   release prerequisite.
-2. The Pearl Abyss condition is satisfied for this project through the exact
-   required unofficial-content notice, clear attribution, noncommercial
-   distribution, a correction/takedown route, and a code license that grants
-   no rights in Pearl Abyss or third-party content.
-3. Verified Black Desert names, recipes, descriptions, prices, IDs, NPC
-   identities and locations, coordinates, item icons, NPC portraits and other
-   game artwork are treated as Pearl Abyss-origin content. A browser page or
-   mirror used to retrieve or verify them does not become the owner of those
-   individual game facts or assets.
-4. The project owner confirms that no BDO Codex- or BDOLytics-authored prose,
-   translation, commentary, annotation, page design, HTML or other original
-   site material is retained. BDO Codex and BDOLytics are credited research,
-   verification and mirror references.
-5. A genuine separate blocker exists only where the project retains another
-   site's own creative material, or a raw, wholesale or effectively
-   substantial copy of an unlicensed organized database. App-specific factual
-   schemas, selected records, normalization, cross-checks and project-authored
-   summaries are not blocked merely because a community reference was used.
-6. Licensed material remains subject to its recorded license. Each mixed file
-   is reviewed by subsection so one blocked source does not disable unrelated
-   planner or map functionality.
-
-This classification is a release-governance decision for this fan project,
-not a legal opinion about every possible jurisdiction.
-
-## Final project-owner Workerman community-use decision
-
-On 2026-08-16 the project owner directed that the full application remain
-intact and accepted the remaining practical risk for the credited
-Workerman/Shrddr groups in this small, completely free, noncommercial fan
-release. This is a project-owner decision with accepted residual risk, not
-written permission, and must never
-be described as permission from Workerman/Shrddr.
-
-The practical basis recorded by the owner is that Workerman is publicly hosted
-for community use and directs users to its public GitHub issue tracker; Black
-Spirit Life is free and noncommercial, gives full attribution, and will respond
-promptly to correction or removal requests. No separate written licence was
-found.
-
-The retained functionality includes the full current public map presentation,
-worker nodes and gathering locations, vendors, lodging and worker-economics
-tools, planner/recipes, complete Gathering and Fish Map companions, local
-journals, Session Import/Garmoth, Opportunities, PA artwork, Edania data,
-installer and in-app updating. Only the privacy and research inputs named in
-the 0.1.9 boundary above are excluded.
-Credits, source links, correction/takedown route and the ability to replace an
-individual group after a substantiated request remain mandatory.
-
-## Source matrix
+Exact scope and qualifications are retained here for attribution and future corrections:
 
 | ID | Material / exact scope | Classification | Result | Release treatment |
 |---|---|---|---|---|
@@ -261,40 +61,9 @@ individual group after a substantiated request remain mandatory.
 | OCR-02 | PaddleOCR PP-OCRv5 model and ONNX Runtime 1.29.0 | Licensed dependencies | **Cleared** | Preserve the PaddleOCR, model, ONNX Runtime, and complete third-party notices beside the helper payload |
 | OCR-03 | 3,897 sealed Recipe Book item icons and two generated recognition atlases | Pearl Abyss-origin game artwork used by the isolated OCR helper | **Satisfied** | Retain PA attribution and the helper asset notice; private contributor screenshot fixtures remain excluded from public source and packages |
 
-## Exact owner-approved Workerman/Shrddr groups
+## Private research files
 
-These groups are disclosed precisely so credits and any future correction or
-takedown can be source-specific. Under the final owner decision, they are not
-being used as generic blockers for unrelated functionality, and the project
-does not claim written permission.
-
-1. `packages/bdo_map_core/lib/src/model/tile_source.dart`, lines 66-80:
-   the Workerman/Shrddr tile URL and production hotlink/cache configuration.
-   No tile image is bundled.
-2. `packages/bdo_map_core/assets/images/node_icons/**`: 64 exact Workerman
-   PNG files, 1,625,566 bytes total.
-3. `packages/bdo_map_core/assets/data/lodging_houses.json`: 789,050 bytes,
-   SHA-256
-   `096D1205BBB12FD0ED0AD0F9AE1A613C680AE0E037CDAA4AF91C7F4AD4EFA6F6`;
-   complete 812-house/31-town Workerman-derived graph.
-4. `packages/bdo_map_core/assets/data/worker_economics.json`: 354,383 bytes,
-   SHA-256
-   `64ABEDA209B82EA1CAF6FC8C5EB29DDC8F1007837FA4D13652ABE534697C29D7`;
-   Workerman-derived inputs for 352 production sites and 30 towns. The
-   separately licensed calculation formulas are not blocked.
-
-The current `resource_map.json` is 7,544,577 bytes (SHA-256
-`BE62E56A6B18F14C7A6439521A9CA9CA240974219DBD1E44D85CDEC136C94C15`).
-It contains no raw response, HTML or copied website presentation. Its 1,052
-worker-node records are PA facts in the app's own schema and are not a content
-blocker. Its numeric icon/layer fields are internal map-model metadata, not
-site HTML, design or prose; no runtime schema change is required for this
-release.
-
-### Source-only files that must not enter the clean public snapshot
-
-These are not installer assets and are absent from the clean public Git tree.
-They must remain excluded:
+Keep these out of public source and packages, while preserving internal copies:
 
 - `packages/bdo_map_core/tool/seeds/bdocodex_worldmap_2026_07_29_private_seed.json`
   (619,297 bytes; 1,008 nodes; SHA-256
@@ -307,50 +76,16 @@ They must remain excluded:
 - `packages/bdo_map_core/tool/seeds/vendor_npcs_bdocodex_2026_08_15_private_seed.json`;
 - `packages/bdo_map_core/tool/seeds/vendor_npc_portraits_2026_08_16_private_manifest.json`.
 
-The last four are normalized project research/provenance records, not
-wholesale site exports. They are not content blockers under this standard;
-they are excluded to maintain a clean public/private research boundary.
+The runtime map is separate: it contains selected game facts in the app's own format, not raw responses or website presentation. Excluding research inputs must not remove the approved map features.
 
-## Authorized release treatment
+## Personal data
 
-The project owner authorized the exact current-Beta 0.1.13 update-button
-correction and publication on 2026-10-28, continuing the 0.1.12 authorization
-and boundary.
-The release work must:
+Bundle immutable Fishing reference data, never generated journals, profile databases or SQLite sidecars. Apply the same rule to Gathering, Planner, Opportunities, imports and browser/account state. Four guide captures exposing player/browser context are excluded; their links and credits remain.
 
-1. preserve the reviewed Planner, Resource Map, Gathering, Fish Map,
-   Opportunities, Session Import/Garmoth behavior, UI, calculations, themes,
-   reference data, and workflows;
-2. retain all credits, notices, source links and the correction/takedown route;
-3. exclude all generated personal data, the four privacy-bearing Gathering
-   captures and all six private research inputs listed above while keeping
-   internal copies untouched;
-4. keep the code licence separate from PA and other third-party material;
-5. describe the Workerman/Shrddr, FishyStuff, Bairog/BDO Workshop, Garmoth and
-   creator-material positions accurately as project-owner credited-use
-   decisions with accepted residual risk, never as separate written
-   permission or licences; and
-6. publish only after the exact clean commit, installer, full package, smaller
-   delta package and update manifest pass the release gates.
+Updates keep each user's selected save folder outside the installation. Older migrations preserve original files and backups. Fishing aggregate history stays read-only without invented catches/sales. Gathering history keeps its recorded fields without invented loot or missing inputs. See the migration documents for exact mappings.
 
-## Permission-request drafts
+## Release checks
 
-The Pearl Abyss, BDO Codex and BDOLytics drafts are retired and remain unsent
-archive material; they are not required for the PA-origin facts and artwork
-classified above. The Shrddr/Workerman draft remains an optional alternative
-to replacing that project's custom expression and substantial data extracts.
-No draft may be sent without a new explicit user instruction.
+Publish only the approved source and artifacts after their required privacy, package, install/update, save-preservation and public-route checks. Retain exact hashes and all failures or unrun checks in the audit. Source classification alone is not release acceptance.
 
-## Repository and publication gates unrelated to source classification
-
-The private Beta ancestry contains private-machine paths and a historical
-migration fixture with real-looking planner values, so it must never be added
-to this repository. The separate public branch contains the reviewed public
-history through the v0.1.12 release and adopted release-tooling optimization.
-Publication of `v0.1.13` must remain one reviewed release commit
-on that history, followed by a fresh-clone scan of every public ref and tag.
-
-Publication remains conditional on Stable install/update/uninstall
-verification, the exact clean source commit and tag, final release notes and
-artifact hashes. The project owner has authorized publication to the exact
-repository above when those technical and privacy gates pass.
+No permission-request draft may be sent without an explicit instruction. Credits and notices must not be removed to shorten documentation.

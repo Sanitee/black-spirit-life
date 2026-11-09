@@ -1,11 +1,6 @@
-# Lodging and house graph provenance
+# Housing data sources
 
-Status: **retained with attribution under the project-owner Workerman
-community-use decision**.
-
-The bundled `lodging_houses.json` is a reproducible extraction of the complete
-house graph in the locally pinned `shrddr/workermanjs` repository. It supports
-worker-lodging CP planning and town house diagrams.
+`lodging_houses.json` contains the reviewed Workerman house graph for lodging planning and town diagrams.
 
 ## Pinned source
 
@@ -21,13 +16,8 @@ worker-lodging CP planning and town house diagrams.
 | `data/loc.json` | `284338684c006d3f78d7da1c148a952ef09d519af5b39a9cf5c6eb3933487a81` |
 | `data/exploration.json` | `605a498d228b43478215766dbbccc17f833d1ab2c28f6399beb619db18349f7e` |
 
-The upstream repository contains no separate licence file for these data. The
-records contain Black Desert game facts owned by Pearl Abyss. WorkermanJS is
-publicly shared and hosted for community use, and the project owner has
-approved this fully attributed use in the free, noncommercial Black Spirit Life
-fan project while accepting the residual risk. Corrections and substantiated
-removal requests from Shrddr will be handled promptly through the public issue
-route.
+
+No separate data licence was found. The project owner accepted credited use in this free fan project; that is not written permission from Workerman. Keep credits and respond to substantiated removal requests.
 
 ## Generated asset
 
@@ -42,36 +32,11 @@ route.
 - Other houses: `587`
 - Total included houses: `812`
 
-The generator reads the four blobs directly from the pinned Git object, checks
-every source hash, and refuses newer working-copy data. It then verifies that:
 
-- every prerequisite exists;
-- every prerequisite stays inside its housing town;
-- the prerequisite graph is acyclic;
-- house CP, coordinates, parent node, town, and prerequisite values agree
-  between the two housing tables;
-- only houses explicitly listed by `lodging_per_town.json` add capacity.
+The generator reads the pinned Git files and checks their hashes. It validates same-town prerequisites, no cycles and matching CP, coordinates and town relationships. Only listed lodging houses add capacity.
 
-House coordinates are retained unchanged as game-world `x`, `y`, and `z`.
-Town node IDs come from each worker region's `waypoint` and must exist in the
-pinned exploration table. Muiquun's two housing records are also preserved;
-because it is not a worker town in `lodging_per_town.json`, its map node is
-derived from the houses' shared parent node and its base worker capacity is
-zero. The English house, town, and available usage labels come from the pinned
-localization table.
+World coordinates stay unchanged. Town IDs must match the exploration table. Muiquun's houses remain, with zero base worker capacity because it is not listed as a worker town. All house-use IDs, English names and maximum levels are retained.
 
-Every house retains all `CraftList` usage entries as a usage type ID, readable
-English label, and maximum level. This lets an owned residence, storage,
-stable, workshop, ranch, or other house satisfy a lodging path without
-misrepresenting that house as active lodging.
+## Planning rules
 
-## Solver interpretation
-
-The optimizer treats the caller's existing worker capacity as authoritative.
-That value must already include the town's free base slot and all active
-lodging. Owned-house IDs from the complete 812-house graph reduce incremental
-CP and satisfy a prerequisite, but their lodging slots are not counted again.
-A blocked house may still be required as a connection in a house chain, but
-cannot be selected to provide lodging capacity.
-
-This avoids claiming that owning a house proves its current in-game use.
+Entered worker capacity must already include the free base slot and active lodging. Owned houses reduce added CP and satisfy connections; their capacity is not counted twice. A blocked house can be a required connection but cannot supply new lodging. Ownership alone does not prove a house's active use.

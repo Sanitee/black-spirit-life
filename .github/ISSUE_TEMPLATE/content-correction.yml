@@ -1,51 +1,47 @@
-name: Content correction or takedown
-description: Report inaccurate content, attribution, provenance, or a rights concern.
-title: "[Content review] "
-labels:
-  - content-review
+name: Report a mistake or request removal
+description: Tell us about wrong information, missing credits, privacy or content rights.
+title: "[Content] "
+labels: [content-review]
 body:
   - type: markdown
     attributes:
-      value: |
-        Thank you for helping correct Black Spirit Life. Do not post private personal information or confidential rights evidence in this public form.
+      value: This report is public. Do not include private information or confidential proof.
   - type: input
     id: affected_material
     attributes:
-      label: Affected material
-      description: Identify the file, dataset record, source URL, or application screen.
-      placeholder: packages/.../file.json, item/NPC name, or screen name
+      label: What is affected?
+      description: Name the item, screen or file. Add a link if you have one.
     validations:
       required: true
   - type: dropdown
     id: request_type
     attributes:
-      label: Request type
+      label: What needs fixing?
       options:
-        - Factual correction
-        - Attribution or source correction
-        - Copyright or other rights concern
-        - Takedown request
-        - Privacy or personal-data concern
+        - Wrong information
+        - Missing or wrong source credits
+        - Copyright or other content rights
+        - Remove content
+        - Private or personal information
     validations:
       required: true
   - type: textarea
     id: basis
     attributes:
-      label: What should be reviewed?
-      description: Explain the issue and link non-confidential supporting material where possible.
+      label: What is wrong?
+      description: Explain briefly. Link to public evidence if possible.
     validations:
       required: true
   - type: textarea
     id: requested_outcome
     attributes:
-      label: Requested correction or outcome
-      description: State the change, replacement, attribution, or removal requested.
+      label: What should change?
     validations:
       required: true
   - type: checkboxes
     id: public_acknowledgement
     attributes:
-      label: Public issue acknowledgement
+      label: Before posting
       options:
-        - label: I have not included private personal information or confidential proof in this public issue.
+        - label: This report contains no private information or confidential proof.
           required: true

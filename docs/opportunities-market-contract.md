@@ -1,108 +1,41 @@
-# Opportunities market contract
+# Market data rules
 
-Verified against the EU official endpoints on 2026-09-08. This adapter is separate
-from the existing planner refresh and does not mutate planner caches or choices.
+The Opportunities adapter reads public market data without an account or trading actions. Its endpoint format was checked on EU on September 8, 2026. The price rules below also reflect the current calculator.
 
-## Data sources
+## Requests
 
-Read-only POST requests go directly from Dart HTTP to:
+Use read-only POST requests to:
 
 - `https://eu-trade.naeu.playblackdesert.com/Trademarket/GetWorldMarketSubList`
 - `https://eu-trade.naeu.playblackdesert.com/Trademarket/GetBiddingInfoList`
 
-NA uses the corresponding `na-trade` hostname. No account, cookies, credentials,
-browser process, scraper service, or trading action is involved.
+NA uses the `na-trade` host. A quote request is `{"keyType":0,"mainKey":4998}`; the order book adds `"subKey":0`.
 
-The quote request is `{"keyType":0,"mainKey":4998}`. For ordinary non-enhanced
-materials the successful compact row fields are ID, minimum enhancement, maximum
-enhancement, base price, stock, lifetime trades, minimum price, maximum price,
-last sale price, and last sale Unix seconds. The decoder selects only the
-requested ID at enhancement zero. Missing, malformed, or unsuccessful responses
-remain unavailable; they do not become zero stock or permanent NPC-only status.
+Quote fields are ID, minimum/maximum enhancement, base price, stock, lifetime trades, minimum/maximum price, last sale price and last sale Unix seconds. Select the requested ID at enhancement zero. Failed or malformed data stays unknown, not zero or NPC-only.
 
-The book adds `"subKey":0`. Its binary format contains a little-endian header,
-symbol frequencies, and a Huffman stream. Heap ties must follow the server's
-frequency-only ordering. Decoded rows are `price-sellers-buyers|`. The decoder
-checks header sizes, result code, symbol uniqueness, numeric alphabet, decoded
-length, actual symbol frequencies, and unique valid price levels. Input/output
-are bounded to 1 MiB. The existing captured book fixture is tested alongside
-truncated and malicious header cases.
+The book has a little-endian header, symbol frequencies and a Huffman stream. Frequency ties use the server's frequency-only heap order. Decoded rows are `price-sellers-buyers|`. Check headers, result codes, unique symbols, numeric alphabet, decoded length, actual frequencies and unique price levels. Limit input and output to 1 MiB.
 
-## Financial interpretation
+## Prices and availability
 
-- Snapshot keys are numeric item-ID strings, not display names.
-- Quote and book timestamps are independent and per item.
-- Null depth means unknown; an empty list means that side was checked and empty.
-- Stock and preorders can coexist at different prices. Zero stock never implies
-  preorders; lifetime trades never imply current demand.
-- Buy fills consume lowest asks first. Immediate sale estimates consume highest
-  bids first. Each fill is capped by its returned quantity.
-- Summary stock is not a substitute for the returned ask depth.
-- Fills do not apply tax, NPC rules, or profit policy. Domain calculators own those
-  choices. A fill is an estimate against the checked book, not a promised sale.
-- Callers must check freshness using an explicit time and maximum age before
-  interpreting depth as presently executable. Future timestamps are not fresh.
-- Merging a quote never refreshes an older book. A failed lookup contains no
-  replacement item and cannot falsely refresh cached values.
+- Key records by item ID. Quote and book timestamps are separate.
+- Missing depth is unknown; an empty list means checked and empty.
+- Stock and orders can coexist. Trade totals are not current demand.
+- Buy from the lowest asks; estimate immediate sales from the highest bids. Never exceed each level's quantity.
+- A summary stock count cannot replace ask depth. Domain calculators apply tax, NPC prices and profit rules.
+- Check each value's age. Future timestamps, failed requests or a new quote must not make an old book fresh.
 
-### Current-price estimates (user-approved, 2026-09-09)
+For ingredients that cannot be bought now, use the highest valid occupied preorder price from a fresh book. If none is available, use a fresh positive base price. Keep actual ask and NPC costs for quantities they cover. Unknown prices stay unknown, not free. A price estimate never creates stock or makes a recipe ready to buy.
 
-A confirmed input shortage may be valued at the fresh base market price. Any
-available quantity keeps its actual ask-level cost; only the missing quantity
-uses the base price. The ingredient and full-run estimate are explicitly marked.
-Actual purchased/available quantities, input capacity, and `marketReady` do not
-change. Unknown/stale books or quotes never qualify. Fully buyable formulas and
-substitutes take priority over cheaper unavailable estimates.
+Exchanges may show a separate after-tax listing estimate when checked buyers cannot cover the output. Keep immediate-sale quantities and proceeds separate, and retain account limits. Unpriced rewards are not invented income. Quote minimum/maximum fields are overall item limits, not verified current bid-band caps.
 
-For exchanges, checked insufficient buyers may attach a separate after-tax
-listing estimate. The original immediate-sale quote keeps its actual covered
-quantity, proceeds, and availability. Account limits and requirements still apply
-to the listing estimate. Unknown market data and unpriced utility rewards do not
-become valued income.
+## Refresh and storage
 
-These are **base-price estimates**, not maximum-price estimates. A live check on
-2026-09-09 showed that quote minimum/maximum fields are the overall item limits,
-while the anonymous book contains occupied levels and a base-price row rather
-than the complete allowed tier ladder. Neither is a verified current band cap.
+Allow at most four concurrent requests with 140 ms spacing per worker. Serialize calls on one service; support cancellation, progress and per-item errors. Do not assume a batch endpoint.
 
-## Scan and persistence
+Quotes and books are session-only. Successful trade counters can be saved through `OpportunityMarketObservationStore`, using the selected profile folder and `AtomicFileStore`. The versioned `opportunity-market-observations.json` keys by region/item/sub-ID with `pearl-abyss` provenance. Keep at most 10,000 items, 128 samples each and seven days. Failed writes preserve the old file and in-memory history.
 
-The service scans individual verified endpoints with at most four concurrent
-requests and 140 ms spacing per worker. Calls on one service are serialized,
-support cancellation/HTTP abort, and provide progress plus per-item callbacks.
-Timeouts and failures are returned per item. A batch endpoint was not assumed
-without a verified contract.
+Sales activity needs two comparable counters at least an hour apart; the default lookback is 24 hours. Use their real interval. A falling counter starts a new baseline; ignore future or out-of-order readings. No change over a valid interval means zero. A first reading means unknown.
 
-Quote/book snapshots are session-only. The caller explicitly records successful
-quote counters through `OpportunityMarketObservationStore` and enriches the
-merged snapshot with `withActivity`. The store uses the caller's resolved profile
-directory and `AtomicFileStore`; it never assumes a fixed AppData path.
+## Checks
 
-The separate `opportunity-market-observations.json` is versioned and keyed by
-region, item ID, and sub-ID, with `pearl-abyss` provenance. It retains at most
-10,000 items and 128 samples per item, coalesces frequent refreshes, and prunes
-history older than seven days. A successful write publishes the in-memory update;
-a failed write preserves the prior file and history.
-
-Visible activity is the difference between two observed cumulative counters over
-their actual interval. The first sample and intervals under one hour are unknown.
-The default lookback is 24 hours. A decreasing counter starts a new baseline;
-out-of-order/future samples are ignored. Zero change over a valid interval is a
-known zero. There is no fabricated daily-sales rate.
-
-## Verification
-
-Deterministic suite: `test/opportunities/opportunity_market_test.dart`.
-Optional live contract check: set `OPPORTUNITY_MARKET_LIVE_TEST=1` and run
-`test/opportunities/opportunity_market_live_test.dart`. It is skipped by default
-and does not persist observations.
-
-New-service live check, 2026-09-08 16:03:28 UTC:
-
-| ID | Base price | Stock | Buyers | Ask / bid levels | Lifetime trades |
-|---|---:|---:|---:|---:|---:|
-| 4998 | 5,450,000 | 21,821 | 5,760 | 9 / 3 | 278,512,887 |
-| 50804 | 1,640,000 | 7,027 | 300 | 11 / 1 | 62,459,271 |
-
-These are dated verification captures, not production defaults or example profit
-inputs. The implementation always requests current values.
+Run `test/opportunities/opportunity_market_test.dart`. The optional `test/opportunities/opportunity_market_live_test.dart` needs `OPPORTUNITY_MARKET_LIVE_TEST=1`; it is skipped by default and saves no observations. Historical live prices are not defaults.

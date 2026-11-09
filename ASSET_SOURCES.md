@@ -1,37 +1,16 @@
-# Asset and dataset sources
+# Asset and data credits
 
-Review snapshot: 2026-09-15
-Release candidate: Black Spirit Life `0.1.9+28`, promoting the approved Beta
-product snapshot on top of the clean public `0.1.7` history. Publisher/player
-state and four privacy-bearing Gathering captures are excluded; the remaining
-credited product and reference assets are retained.
+This source inventory began with the September 15, 2026 review and includes later recorded additions. Counts describe those reviews, not a live catalogue count. See the [source rules](docs/public-release-source-matrix.md) and [notices](THIRD_PARTY_NOTICES.md).
 
-This inventory separates ownership of underlying material from the websites
-used to find or verify it. The controlling release decision is
-`docs/public-release-source-matrix.md`.
+- **PA fan content:** Black Desert content owned by Pearl Abyss.
+- **Research reference:** a source used to find or check facts or game artwork.
+- **Project-authored:** Black Spirit Life's own code, summaries, calculations or artwork.
+- **Licensed:** covered by a recorded upstream licence.
+- **Owner-approved use:** retained with credit despite no separate licence or written permission; the project owner accepts the remaining risk.
 
-Status vocabulary:
+## Game content
 
-- **PA fan content**: Pearl Abyss-origin Black Desert game content or facts
-  used under the project's free, unofficial, noncommercial fan-content basis.
-- **Research reference**: a credited website helped locate or cross-check a
-  fact or PA asset but no website-authored expression is retained.
-- **Project-authored**: Black Spirit Life's code, selection, normalization,
-  calculations, relationships, summaries, artwork or presentation.
-- **Licensed**: a recorded upstream licence covers the retained material.
-- **Owner-approved community use**: the credited material is intentionally
-  public and community-hosted, no separate licence file was found, and the
-  project owner accepts the residual risk for this free noncommercial release.
-  This is not represented as separate written permission.
-
-## Pearl Abyss-origin game content and facts
-
-The project owner confirms that the retained icons, portraits, in-game text,
-translations and facts found through BDO Codex or BDOLytics originate directly
-from Black Desert. The application retains no website design, HTML, guide
-prose, commentary, annotation or other original site presentation. BDO Codex,
-BDOLytics and other sites are credited as research, cross-checking or mirror
-references; Pearl Abyss is credited as owner of the underlying game content.
+Pearl Abyss owns the underlying game art and facts. BDO Codex and BDOLytics are credited references, not the owners of those game assets. The project owner confirms that website design, HTML, guides, commentary and other site-authored presentation are not retained.
 
 | Shipped material | Research / retrieval references | Black Spirit Life treatment | Status |
 |---|---|---|---|
@@ -51,11 +30,10 @@ references; Pearl Abyss is credited as owner of the underlying game content.
 | Selected gathering coordinates | BDO Codex map records used as research | 501 Stone Cobra/Rock Scorpion, 34 Coral Stoneback Crab and 198 Stillcoral points transformed to game coordinates; no copied route, page or annotation | **PA facts in project-authored map records** |
 | Royal Workshop, Caphras and Edania node facts | Official PA pages, client verification and credited references | 124 goods/eight managers; 36 identities/18 coordinates; reduced Edania 28-node/37-resource seed | **PA facts in project-authored records** |
 
-The exact required notice remains prominent:
+> This is unofficial content which contains copyrighted materials and IP from
+> Pearl Abyss, and is not official/endorsed content.
 
-> This is unofficial content which contains copyrighted materials and IP from Pearl Abyss, and is not official/endorsed content.
-
-## Owner-approved Workerman/Shrddr community-use groups
+## Workerman / Shrddr
 
 | Exact component | Source | Retained form | Status / narrow replacement |
 |---|---|---|---|
@@ -64,30 +42,9 @@ The exact required notice remains prominent:
 | `packages/bdo_map_core/assets/data/lodging_houses.json` | Complete Workerman housing inputs | 812 houses / 31 towns and prerequisite graph | **Owner-approved community use; no separate licence file found**; keep the full credited lodging tool |
 | Workerman-derived inputs inside `packages/bdo_map_core/assets/data/worker_economics.json` | Workerman data snapshot processed with `bdo-empire` | Workload/yield/distance/worker inputs for 352 sites / 30 towns | **Owner-approved community use; no separate licence file found**; keep the full credited tool and the separate Unlicense notice |
 
-Workerman is publicly hosted for community use and directs users to a public
-GitHub issue tracker. Black Spirit Life is free and noncommercial, provides
-full attribution, and will respond promptly to correction or removal requests.
-No separate written licence was found, so this basis is recorded as an owner
-risk decision rather than permission.
+No separate written licence was found. Public hosting and credit are not permission. The project owner accepted this use for the free fan app; corrections and substantiated removal requests will be handled through Issues. Each group remains replaceable.
 
-No BDO Codex- or BDOLytics-referenced icon, portrait, recipe, description,
-price, NPC, coordinate or normalized worker-node record is a separate
-permission blocker.
-
-## Black Spirit Life map contribution
-
-Black Spirit Life independently created the complete map interface, rendering,
-interaction, search, filtering, routing, calculations and presentation. The
-runtime `workerNodes` array contains 1,052 Pearl Abyss-origin node facts and
-1,622 node-output relationships normalized into Black Spirit Life's own
-application schema. BDO Codex is credited as the retrieval/reference source,
-not as owner of the Black Desert map, nodes or game facts.
-
-The runtime JSON contains no raw response, HTML or copied page structure. Its
-numeric icon/layer fields are internal map-model metadata. The owner has
-directed that the full current map and presentation remain intact.
-
-## Licensed and project material
+## Other materials
 
 | Material | Source / licence | Status |
 |---|---|---|
@@ -106,61 +63,14 @@ directed that the full current map and presentation remain intact.
 | PaddleOCR PP-OCRv5 recognition model and ONNX Runtime 1.29.0 | Upstream licences and complete notices under `windows/storage_ocr/BlackSpiritStorageOcr/Assets/RecipeBook/ocr` | **Licensed**; notices remain in the helper payload |
 | Shared Black Spirit Hub v0.9.52 OCR implementation | Black Spirit Hub commit `6ccbad52d25b54d8b67065ce8a9eb1bcece87d9f`; the owner shared it with the Black Spirit Life owner for reuse | **Owner-authorized reuse** recorded in `SOURCE-NOTICE.txt`; not represented as a general third-party licence |
 
-Exact application-art hashes are recorded in
-`docs/public-release-asset-manifest.sha256`.
+Application artwork hashes are in `docs/public-release-asset-manifest.sha256`. Keep all bundled upstream licences and notices.
 
-## Private research inputs versus public app data
+## Excluded material
 
-The application-specific generated files contain normalized Black Desert facts
-and project provenance, not HTML or copied website presentation. A structured
-scan of the shipped JSON found zero HTML-like strings. Source-domain strings
-are URLs, reference IDs and project-authored research notes.
+The [source rules](docs/public-release-source-matrix.md#private-research-files) list six private research files that must stay out of public source. Their reviewed runtime data is separate and remains included.
 
-Six tracked source-only private research inputs are excluded from the clean
-public snapshot. Two contain an entire single-source world-map collection:
+Never bundle personal Planner, Gathering or Fishing records, import drafts/receipts, accounts, credentials, browser profiles, caches, debug symbols or local machine paths. Personal Fishing databases are created under the selected save folder, not shipped as reference data.
 
-- `packages/bdo_map_core/tool/seeds/bdocodex_worldmap_2026_07_29_private_seed.json`
-  — 1,008 nodes, 619,297 bytes;
-- `packages/bdo_map_core/tool/seeds/bdocodex_worldmap_2026_08_15_private_seed.json`
-  — 1,052 nodes, 644,544 bytes.
+## Online services
 
-The other four excluded private research inputs are:
-
-- `packages/bdo_map_core/tool/seeds/rusalka_coral_bdocodex_2026_07_28_private_seed.json`;
-- `packages/bdo_map_core/tool/seeds/stillcoral_coastal_gathering_bdocodex_2026_08_01_private_seed.json`;
-- `packages/bdo_map_core/tool/seeds/vendor_npcs_bdocodex_2026_08_15_private_seed.json`;
-- `packages/bdo_map_core/tool/seeds/vendor_npc_portraits_2026_08_16_private_manifest.json`.
-
-They are not installer assets. The four narrower coordinate/vendor/portrait
-records are app-specific research records rather than wholesale site exports;
-their exclusion is repository hygiene, not a content blocker. The internal
-copies remain untouched.
-
-The release also excludes every generated player record. In particular, the
-Fish service creates `fishing/fish-journal.sqlite3` (and SQLite sidecars) only
-inside the user's selected personal-data folder at runtime; no such database
-is present in source or packages. Generated browser/WebView profiles, Garmoth
-account state, Session Import drafts/receipts, Gathering loadouts/sessions,
-planner state, credentials, debug symbols, and machine-specific paths are
-likewise outside the immutable application payload.
-
-## Runtime services
-
-Market-price refresh can contact official Pearl Abyss endpoints and the
-community Arsha/Black Desert Market API. Fish Map ships its reviewed
-FishyStuff-derived reference snapshot and may refresh public reference data;
-that immutable/disposable reference material is not a player's Fishing
-profile or journal. Gathering can open credited creator videos, and Session
-Import can perform the user-directed Garmoth workflow. These services must
-respect live service limits, fail without blocking unrelated offline use, and
-must not include another user's profile, mastery, journal, loadout, session,
-credential, browser state, or local path in the release.
-
-## Replacement boundary
-
-The basemap provider, node glyphs, lodging graph and economics inputs remain
-independently replaceable for a future correction or substantiated takedown.
-The current release retains them under the explicit owner community-use decision; no
-replacement may alter worker-node facts, recipes, portraits, vendor facts,
-gathering overlays, inventory, profiles, custom personal-data locations,
-themes or the rest of the planner/map interface.
+Market refresh uses official Pearl Abyss and community market APIs. Fishing may refresh public reference data; Gathering can open credited videos; Session Import uses the user-directed Garmoth workflow. Respect service limits and keep unrelated offline features usable when a service fails. No publisher account or personal history belongs in a release.

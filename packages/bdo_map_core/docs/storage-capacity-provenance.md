@@ -1,24 +1,15 @@
-# Storage capacity provenance
+# Storage capacity
 
-The Storage investment planner uses the level-to-capacity table shown on the
-BDO Codex Storage house page:
+[BDO Codex source](https://bdocodex.com/us/npc/3107/), reviewed August 20, 2026:
 
-- Source: <https://bdocodex.com/us/npc/3107/>
-- Reviewed: 2026-08-20
-- Storage level 1: 3 slots
-- Storage level 2: 5 slots
-- Storage level 3: 8 slots
-- Storage level 4: 12 slots
-- Storage level 5: 16 slots
+| Storage level | Slots |
+|---|---:|
+| 1 | 3 |
+| 2 | 5 |
+| 3 | 8 |
+| 4 | 12 |
+| 5 | 16 |
 
-The production house graph records the maximum Storage level available for
-each house, not the player's active upgrade level. Until an active-level field
-is added, an owned house explicitly saved as Storage is counted at that mapped
-maximum level. Owned houses saved to another use, and owned houses with an
-unknown use, remain protected and are never silently converted by the solver.
+The house graph records maximum level, not the player's current upgrade. A house saved as Storage is counted at that maximum. Other or unknown house uses are protected.
 
-The optimizer is town-local and minimizes incremental contribution points for
-a requested number of extra slots. It includes prerequisite houses, reuses
-owned prerequisites at zero additional CP, and reports any unavoidable slot
-oversupply. It does not currently optimize the inverse “maximum slots for a CP
-budget” question.
+The planner finds the lowest added CP for requested extra slots in one town. It includes required houses, reuses owned connections at no added CP and reports excess slots. It does not solve maximum slots for a fixed CP budget.

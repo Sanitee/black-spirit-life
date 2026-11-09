@@ -1,46 +1,16 @@
-# Workflow, prepared inputs and measured scans
+# Release workflow
 
-Publisher tooling only. The approved Beta remains the application; nothing in
-this document authorizes publication or a change to user data. Read the standing
-release contract and playbook before use. Keep the full maintained helper set.
+This is publisher tooling. It does not authorize publication or changes to saves. Follow the standing release contract and keep the complete helper set.
 
-## Default improvements
+## Inputs and status
 
-- Prepare dependencies once per required package using
-  `tool/release/prepare_dependencies.ps1 -PackageRoot <candidate package>
-  -FlutterPath <approved flutter.bat> -ReceiptPath <new external receipt>`.
-  This runs lock-enforced resolution. The builder and lifecycle revalidate the
-  exact receipt and use `--no-pub`; a stale receipt stops early. This is not a
-  complete compilation-cache key or proof that tests passed.
-- Native prerequisite checks mirror the current helper producers: both selected
-  .NET SDKs, Visual C++/Windows SDK/C++ WinRT and installer artwork. Producer
-  changes invalidate the mirrored contract instead of silently using old rules.
-- Stage metrics persist atomically at stage start and completion. An exclusive
-  candidate lock prevents competing builds; no stale PID is killed and no old
-  evidence is deleted.
-- Streaming privacy scans preserve the previous marker and encoding rules,
-  including chunk boundaries and narrow reviewed exceptions. Checks still run
-  at their distinct bundle/installer boundaries.
-- Lifecycle performs exhaustive immutable installed-payload comparison before
-  its disposable installation is removed. Upgrade, fresh install and repair
-  remain distinct local cases; public-route verification still checks the actual
-  public update. Hash-bound nested reports preserve this evidence afterward.
+Prepare each package with `tool/release/prepare_dependencies.ps1`, using `PackageRoot`, the approved `FlutterPath` and a new external `ReceiptPath`. Consumers recheck the receipt and use `--no-pub`. A receipt proves matching dependencies, not a successful build or test.
 
-## One maintained release status and gate list
+Native checks cover both selected .NET SDKs, Visual C++/Windows SDK/C++ WinRT and installer artwork. Producer changes invalidate those checks. Stage records save atomically; an exclusive source lock prevents competing builds. No old process is killed or evidence deleted automatically.
 
-Use `tool/release/run_release_workflow.ps1`, starting from
-`docs/release-workflow.v1.example.json`. The example is deliberately not a
-release approval. Resolve the actual current source, source-promotion evidence,
-plan, tools, dependency receipts and complete application test roots/lists.
-Here "review/approve/pin" means the release owner's evidence checks within an
-already authorized release, not asking the user for permission at every step.
-Ask the user only when scope, authority or a material product difference changes.
-Pin every runtime/helper needed later in the initial context, not just the
-build tools. Include each package's required tests as its own complete gate.
+Use `run_release_workflow.ps1` with [the example schema](release-workflow.v1.example.json). Replace dummy values with reviewed source, promotion evidence, tools, plans, receipts and complete test lists. “Reviewed” means evidence checked within an authorized release, not another user permission request at every step. Ask only if scope, authority or product behaviour changes.
 
-The candidate builder derives its source root from its script location. Invoke
-the maintained builder copied into the actual promoted source, not a builder
-in a different tools checkout with only its working directory changed.
+Run the builder inside the actual promoted source; changing only its working directory is not enough.
 
 ```powershell
 $workflow = @{
@@ -53,92 +23,38 @@ $workflow = @{
 .\tool\release\run_release_workflow.ps1 @workflow -Mode Status
 ```
 
-`RunNext` runs only the first unmet reviewed gate. It saves a unique attempt,
-literal command, process identity, logs and validated evidence. A failed full
-test gate cannot be replaced by a later narrow success. Completed evidence and
-the complete source/context are rechecked before advancing. An interrupted
-command requires explicit safe recovery after its recorded process has stopped;
-it is never presumed successful or automatically killed.
+`RunNext` runs the first unfinished gate and saves its command, process, logs and proof. Before advancing it rechecks earlier evidence and the source/context. A narrow test pass cannot replace a failed full suite. Interrupted work requires safe recovery after its process stops; it is never assumed successful.
 
-The initial `prepare-build` manifest covers promotion, source privacy, complete
-application tests and build. It cannot claim release completion. After the
-builder seals actual artifacts, approve an `acceptance` manifest with those
-hashes, preserving the exact original gates and context. Use `ContinueManifest`
-with the new manifest/hash plus `PriorManifestPath` and
-`ApprovedPriorManifestSha256`. Append the distinct artifact privacy, package
-integrity, lifecycle, installed parity, UI, themed installer, upload,
-publication and public-verification obligations. This is the one artifact
-sealing boundary, not another investigation or full rebuild.
+## Build versus release acceptance
 
-Automatic gates validate actual reports, not exit code alone. Flutter machine
-results must match the complete resolved suite list, with no unreviewed failed
-or skipped tests. Builder reports rehash the sealed original manifest and each
-artifact. Lifecycle reports bind candidate, plan, harness and nested installed
-parity. UI/themed-installer and publication use explicitly reviewed evidence;
-the workflow never publishes automatically. Status distinguishes built, locally
-verified, uploaded, published and publicly verified.
+The initial `prepare-build` manifest covers promotion, privacy, complete application tests and build. Once artifacts are sealed, use `ContinueManifest` with a reviewed `acceptance` manifest and both old/new hashes. Preserve the original gates and context; add artifact, package, installed lifecycle, UI, upload, publication and public-route checks. Do not rebuild just to make this transition.
 
-Keep status/evidence outside the frozen source. A changed source, context,
-manifest or successful evidence file blocks reuse. Never edit hashes merely to
-make a stale pass look current. The workflow is a local acceptance index, not a
-security boundary against an operator deliberately fabricating evidence.
+Reports need actual proof, not exit code alone: complete Flutter suite results, unchanged artifact hashes, matching lifecycle inputs and installed files. Unreviewed failures/skips block acceptance. External UI and publication evidence must be explicitly reviewed. Status distinguishes built, locally checked, uploaded, published and publicly checked.
 
-## Optional same-candidate packaging retry
+Keep evidence outside frozen source. Changed inputs or evidence block reuse. Never edit a hash to make an old pass look current. This workflow is an acceptance record, not protection against deliberately forged evidence.
 
-The ordinary route still builds cleanly. No general incremental compilation or
-native-helper cache is enabled. A packaging-only failure can optionally reuse a
-verified retained bundle **only** when a complete reviewed input profile was
-supplied before the first build.
+## Optional packaging retry
 
-Profile schema 1 requires `purpose: "same-candidate-build-retry"`, a nonempty
-`approvalReference`, `completeExternalInputsReviewed: true`, `inputTrees` and
-`inputFiles` arrays. Every tree has an absolute `path` and `role`. Required roles
-are `flutter-sdk`, `native-toolchain`, `windows-sdk`, `dotnet-sdk` and
-`package-cache`; include all applicable roots, not a token empty directory.
-Selected complete SDK/tool roots and all external package roots must be covered.
-Trees have no exclusion option. Broad personal/drive roots, overlap and reparse
-paths fail. The owner must review any additional producer-specific inputs.
+Clean builds remain the default. A packaging failure may reuse its verified bundle only if a complete input profile was supplied **before** the first build.
 
-Supply `BuildRetryProfilePath` and `ApprovedBuildRetryProfileSha256` to the
-builder. It fingerprints production source (including new/untracked assets),
-prepared configuration, whole external input trees, tools, flags, release plan,
-OS/shell and a hash of the process environment. It verifies stability after
-compilation and payload checks, retaining a separately copied, verified bundle
-before packaging. Raw environment values are not written to its receipt.
+Schema 1 requires `purpose: "same-candidate-build-retry"`, `approvalReference`, `completeExternalInputsReviewed: true`, `inputTrees` and `inputFiles`. Each tree has an absolute path and role. Cover all selected `flutter-sdk`, `native-toolchain`, `windows-sdk`, `dotnet-sdk` and `package-cache` roots, plus producer-specific inputs. No exclusions, broad personal/drive roots, overlapping roots or reparse paths.
 
-For an unchanged retry, also supply `ResumeBundleReceiptPath` and
-`ApprovedResumeBundleReceiptSha256`. The exact inputs and every retained output
-are revalidated and copied into new staging; compilation alone is skipped.
-Payload, packaging, installer, installed-state and public checks are not waived.
-Changed/incomplete keys or tampered output stop before reuse. Retained bundle
-and failed staging are not deleted or overwritten.
+Pass `BuildRetryProfilePath` and its approved hash. The builder fingerprints source including untracked assets, prepared config, full tools/packages, flags, plan, OS/shell and a hash of the environment. It stores no raw environment values. After build and payload checks, it verifies stability and retains an independent bundle copy.
 
-This is opt-in because hashing entire external toolchains has a cost. Measure
-its first real failure/retry against a clean build before enabling it routinely.
-No real application compile/retry was performed during tooling development;
-synthetic fixtures test the actual builder branches and rejection paths.
+A retry also needs `ResumeBundleReceiptPath` and its approved hash. Recheck all inputs and outputs, then copy into new staging. Only compilation is skipped; payload, packaging, installer, installed and public checks remain. Invalid inputs stop reuse. Old bundles and failed staging remain intact.
 
-## Measured choices
+This is opt-in: measure the full-toolchain hashing cost and a real failure/retry before routine use. Development tests used synthetic compiler/package fixtures, not an actual app compile retry.
 
-On the same retained 729,668,096-byte published installer, serial fresh-process
-tests with before/after SHA-256 checks measured:
+## Scan measurements — September 18, 2026
+
+The same 729,668,096-byte installer was checked in fresh serial processes, with hashes before/after:
 
 | Shell | Previous scan | Streaming scan | Peak working set, previous → streaming |
 | --- | ---: | ---: | ---: |
 | PowerShell 7.6.5 | 79.334 s | 6.308 s | 12.24 GB → 207 MB |
 | Windows PowerShell 5.1 | 81.458 s | 24.565 s | 2.97 GB → 162 MB |
 
-The final scanner passes 1,332 independent reference-equivalence assertions per
-shell. These are single measured local scan runs, not a promised total release
-duration. A first PS5 streaming version regressed to 98.383 s; it was corrected
-and remeasured before adoption. The final candidate uses the unchanged regex
-on bounded candidate spans, preserving its culture-sensitive verdicts.
 
-Pinned Velopack extraction alone took 0.589 s into a new directory (446 files,
-347,155,526 output bytes, warm source). A second extraction cache was therefore
-not added. The previous 110 s tool stage included other work; new download,
-hash and extraction timings identify where any remaining delay actually lies.
+The scanner passed 1,332 equivalence assertions per shell. These are single local, filesystem-warm scans, not promised release times. An initially slower PS5 implementation was retained as evidence, corrected and remeasured.
 
-Retain earlier verified tooling for rollback. These optimizations do not require
-an app release merely to adopt them. Final real candidate lifecycle/workflow and
-end-to-end turnaround evidence belong to the next authorized release.
+Velopack extraction took 0.589 seconds, so a second extraction cache was not added. Keep separate download/hash/extraction timings. These tools do not require an app release merely to adopt them.

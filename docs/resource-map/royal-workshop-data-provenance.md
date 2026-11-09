@@ -1,144 +1,37 @@
-# Seoul Royal Workshop data provenance
+# Royal Workshop data
 
-Snapshot: 2026-07-30
+Snapshot: July 30, 2026. Component review: November 2, 2026.
 
-## Current application scope — reviewed 2026-11-02
+**Royal Workshop management is hidden** (`_royalWorkshopEnabled == false`). Its saved data and planner remain for later work. Hidden settings do not reserve CP or add worker income.
 
-Royal Workshop management is deliberately hidden in the current map
-(`_royalWorkshopEnabled == false`). Its data and planner are preserved for later
-work; hidden preferences do not reserve CP or add income to the current worker
-network. The behavior described below applies to that preserved component, not
-to a newly enabled public feature.
+## Preserved model
 
-All 124 goods now have a fresh exact-ID/name corroboration against the installed
-PC reference through October 31. That is not a fresh price or probability audit.
-The current NA/EU guide corroborates access/unlock/manager and worker restrictions:
-<https://www.naeu.playblackdesert.com/en-US/Wiki?wikiNo=424>.
+- Seoul access costs 5 CP. The palace has eight areas: production and processing.
+- Each area has one current workshop and one assigned Yukjo Street worker. Storage also comes from Yukjo Street.
+- Production goods are daily random choices; processing recipes are selected. One free refresh can be recorded. Movement speed does not affect task time.
+- Production areas start with one workshop and allow four unlocks costing 500, then 1,000 tokens each. Processing areas allow two extra unlocks at 1,000 each.
 
-The preserved component now retains signed net losses, treats incomplete numeric
-inputs as unknown, and shares guarded finite arithmetic between area and total
-estimates. Synthetic saved-plan and widget tests cover these corrections; no
-personal plans were opened or migrated. Full limits and evidence are recorded in
-`docs/worker-royal-correctness-20261102.json`.
+Older per-workshop running state is reduced to the first recorded running workshop in each area, preventing impossible parallel work while retaining notes.
 
-## Mechanics and interface
+Eight manager IDs and exact coordinates are in `royal_workshop_models.dart`. Their markers do not move the camera. The private client extract is not published.
 
-The Royal Workshop is modeled as a distinct Seoul system rather than ordinary
-worker production nodes. The implementation follows the official interface
-structure:
+## Goods and estimates
 
-- 5 CP to open the Royal Workshop from Seoul.
-- eight palace areas split into production (green) and processing (gold);
-- area details with manager, the area's unlocked workshop records, one assigned
-  Yukjo worker, one selected workshop/current in-game roll or recipe, task
-  time and start/stop state;
-- workers and storage come only from Yukjo Street;
-- production goods are random daily selections, while processing goods are
-  chosen by the player;
-- one free refresh can be recorded, and the selected production goods refresh
-  daily;
-- movement speed does not affect Royal Workshop tasks.
+`royal_workshop_goods.json` has 124 goods: 40 production and 84 processing. It keeps client reference prices, the 29-hour reference at 150 worker speed where present, and rare-roll flags. All names/IDs were checked through October 31; that did not verify prices or drop probabilities.
 
-The planner deliberately caps the palace at eight simultaneous assignments:
-one worker and one current workshop in each of the eight areas. Earlier private
-candidate data that stored workers and running state per sub-workshop is
-migrated conservatively to the area's first recorded running workshop so old
-notes are retained without double-counting impossible parallel work.
+The catalogue recognizes names, not a complete workshop eligibility list. Users must enter their actual roll or recipe, task time, cycles and net value per cycle. Reference prices are not guaranteed sale values.
 
-## Workshop unlock records and manager markers
+Ordinary estimates preserve losses and leave missing inputs unknown. Rare rolls are excluded from dependable income; no drop rates, processing costs, trade bonuses or jackpot averages are invented. If this component is enabled later, its access CP and ordinary subtotal must be kept separate and counted once. See `docs/worker-royal-correctness-20261102.json`.
 
-The four production areas start with one workshop and can record four further
-unlocks: the first costs 500 Morning's Gratitude Tokens and each of the next
-three costs 1,000. The four processing areas start with one workshop and can
-record two further unlocks at 1,000 tokens each. The current English client
-names are stored for every unlock.
+Community income reports are checks for plausibility, not promised rates. Higher market caps do not prove higher rare-roll chances.
 
-The eight manager NPC IDs and exact client world coordinates are recorded in
-`royal_workshop_models.dart`. Selecting a manager places a temporary marker on
-that exact point; it does not move the camera automatically. These Pearl
-Abyss-origin game facts were normalized from a private 2026-07-30 client
-research extract and are not inferred from the basemap. The raw extract is not
-part of the public repository.
+## Sources
 
-Primary references:
-
-- Pearl Abyss English Royal Workshop update:
-  https://blackdesert.pearlabyss.com/Asia/en-us/News/Notice/Detail?_boardNo=6551
-- Pearl Abyss Royal Workshop update history:
-  https://www.kr.playblackdesert.com/ko-KR/Adventure/History?_groupMasterNo=13110
-- Pearl Abyss Royal Workshop guide:
-  https://www.tw.playblackdesert.com/zh-TW/Wiki?wikiNo=851
-
-The English area labels and recognizable screen layout were cross-checked
-against:
-
-- https://www.blackdesertfoundry.com/royal-workshop-guide/
-- https://www.blackdesertfoundry.com/land-of-the-morning-light-seoul-patch-guide/
-
-## Goods catalog
-
-`royal_workshop_goods.json` contains 124 current English client item records:
-
-- 40 production goods;
-- 84 processing goods;
-- client reference prices;
-- the client-provided 29-hour reference at 150 worker speed where present;
-- an explicit rare-roll flag for rare meals, buffs and artisan materials.
-
-The 124 normalized records were selected from a private 2026-07-30 client
-research extract. The raw extract and its original structure are excluded from
-the public repository; only Black Spirit Life's application-specific catalog
-and the eight normalized manager records ship.
-
-Client reference prices are informational. They are not treated as guaranteed
-sale value or as a Royal Workshop drop rate.
-
-The catalog is used only to recognize an exact item name entered by the
-player. It is not presented as a per-workshop eligibility list. No sufficiently
-trustworthy source for the complete current slot-by-slot eligibility matrix was
-available at this snapshot, so the UI asks the player to copy the roll or
-recipe currently shown by the game.
-
-## Income policy
-
-The application only estimates a current ordinary task after the player enters:
-
-- the exact current in-game roll or recipe for that individual workshop;
-- the task time shown for their Yukjo worker;
-- the number of cycles in that task;
-- the net silver value of one completed cycle.
-
-Rare meals, buffs and artisan rolls are always excluded from the guaranteed
-income total. No selection probability, expected jackpot value, processing
-material cost, trade distance bonus or Trading level is invented.
-
-When Royal access is enabled, its 5 CP is reserved before the ordinary
-worker-node and lodging route is optimized. Configured ordinary Royal tasks
-are then added to the same hourly/day/week headline as the worker-node
-portfolio. The Royal Workshop card shows the included subtotal separately,
-and the management surface links directly to Yukjo worker and lodging setup.
-
-## Practical income envelope
-
-A community report recorded approximately 52 million clean silver per 24
-online hours for a permanent low-cost setup and approximately 58 million for a
-more actively managed setup:
-
-- https://www.reddit.com/r/blackdesertonline/comments/1n3jkpn/worker_empire/
-
-That is a useful reality check, not a guaranteed rate. It is roughly 2.2-2.4
-million silver per online hour, or approximately 17-19 million during eight
-online hours. Results still depend on the live rolls, worker speed, processing
-inputs, Trading level, sale location and distance bonus.
-
-The April 2, 2026 update raised Royal Workshop buff-item market caps to
-500 million, 900 million or 1 billion silver:
-
-- https://blackdesert.pearlabyss.com/Asia/en-US/News/Notice/Detail?_boardNo=13044
-
-Those changes make lucky rolls valuable, but do not turn them into dependable
-hourly income because the update did not publish higher selection rates.
-Recent player reports suggest that rare goods and accumulated token rewards
-can dominate long-run realized Royal income, but the reports do not expose a
-stable enough probability model to annualize safely. Rare rolls therefore
-remain visible and trackable while excluded from the ordinary income total.
+- <https://www.naeu.playblackdesert.com/en-US/Wiki?wikiNo=424>
+- <https://blackdesert.pearlabyss.com/Asia/en-us/News/Notice/Detail?_boardNo=6551>
+- <https://www.kr.playblackdesert.com/ko-KR/Adventure/History?_groupMasterNo=13110>
+- <https://www.tw.playblackdesert.com/zh-TW/Wiki?wikiNo=851>
+- <https://www.blackdesertfoundry.com/royal-workshop-guide/>
+- <https://www.blackdesertfoundry.com/land-of-the-morning-light-seoul-patch-guide/>
+- <https://www.reddit.com/r/blackdesertonline/comments/1n3jkpn/worker_empire/>
+- <https://blackdesert.pearlabyss.com/Asia/en-US/News/Notice/Detail?_boardNo=13044>
